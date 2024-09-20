@@ -1480,6 +1480,7 @@ void JsAccessibilityManager::UpdateAccessibilityVisible(
     }
     nodeInfo.SetAccessibilityVisible(node->GetAccessibilityVisible());
 }
+
 void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
