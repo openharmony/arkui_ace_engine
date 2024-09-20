@@ -1395,6 +1395,11 @@ export class ChipComponent extends ViewPU {
             Button.scale(ObservedObject.GetRawObject(this.chipScale));
             Button.focusable(true);
             Button.opacity(this.getChipNodeOpacity());
+            Button.focusBox({
+                margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+                strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+                strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+            });
             Button.onFocus(() => {
                 this.chipNodeOnFocus = true;
             });
@@ -1526,6 +1531,11 @@ export class ChipComponent extends ViewPU {
                         Image.flexShrink(0);
                         Image.visibility(this.getVisibility());
                         Image.draggable(false);
+                        Image.focusBox({
+                            margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+                            strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+                            strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+                        });
                         Image.onFocus(() => {
                             this.suffixIconOnFocus = true;
                         });
