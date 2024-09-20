@@ -1295,9 +1295,13 @@ void TextFieldPattern::HandleCrossPlatformInBlurEvent()
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
-    if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
-        isFocusedBeforeClick_ = false;
-        HandleOnSelectAll(false);
+    if (event.code == KeyCode::KEY_TAB && !contentController_->IsEmpty()) {
+        if (isFocusedBeforeClick_) {
+            isFocusedBeforeClick_ = false;
+            HandleOnSelectAll(false);
+        } else {
+            CloseSelectOverlay(true);
+        }
     }
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
