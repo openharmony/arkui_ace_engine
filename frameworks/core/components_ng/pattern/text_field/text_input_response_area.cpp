@@ -719,17 +719,6 @@ ImageSourceInfo CleanNodeResponseArea::CreateImageSourceInfo()
     } else {
         info.SetSrc(iconSrc_);
     }
-    if (info.IsSvg()) {
-        info.SetFillColor(iconColor_);
-        CHECK_NULL_RETURN(cleanNode_, info);
-        auto imageNode = cleanNode_->GetFirstChild();
-        CHECK_NULL_RETURN(imageNode, info);
-        auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
-        CHECK_NULL_RETURN(imageFrameNode, info);
-        auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_RETURN(imageRenderProperty, info);
-        imageRenderProperty->UpdateSvgFillColor(iconColor_);
-    }
     return info;
 }
 } // namespace OHOS::Ace::NG
