@@ -1015,4 +1015,54 @@ HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 22), -440.0f);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
 }
+
+/**
+ * @tc.name: Illegal001
+ * @tc.desc: Update Section with empty sections.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Illegal001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(45);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_10);
+    CreateDone();
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info_->startIndex_, 3);
+    EXPECT_EQ(info_->endIndex_, 12);
+
+    /**
+     * @tc.steps: step1. update [sections_] with empty section, without changing the dataSource.
+     * @tc.expected: currentOffset_ is set to 0.0f, cache information is reset.
+     */
+    auto sectionLength = secObj->GetSectionInfo().size();
+    secObj->ChangeData(0, sectionLength, {});
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_TRUE(info_->lanes_.empty());
+    EXPECT_TRUE(info_->idxToLane_.empty());
+    EXPECT_TRUE(info_->segmentTails_.empty());
+    EXPECT_TRUE(info_->segmentCache_.empty());
+    EXPECT_TRUE(info_->margins_.empty());
+
+    /**
+     * @tc.steps: step2. recover [sections_].
+     * @tc.expected: layout at start.
+     */
+    secObj->ChangeData(0, 0, SECTION_10);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 7);
+
+    EXPECT_EQ(info_->lanes_.size(), 7);
+    EXPECT_EQ(info_->idxToLane_.size(), 8);
+    EXPECT_EQ(info_->segmentTails_.size(), 7);
+    EXPECT_EQ(info_->segmentCache_.size(), 9);
+    EXPECT_EQ(info_->margins_.size(), 7);
+}
+
 } // namespace OHOS::Ace::NG
