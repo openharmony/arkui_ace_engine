@@ -278,13 +278,19 @@ void TabsPattern::OnModifyDone()
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     auto tabBarPaintProperty = tabBarPattern->GetPaintProperty<TabBarPaintProperty>();
-    if (tabBarPaintProperty->GetTabBarBlurStyle().has_value() &&
+    if (tabBarPaintProperty->GetTabBarBlurStyleOption().has_value() &&
         Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto tabBarRenderContext = tabBarNode->GetRenderContext();
         CHECK_NULL_VOID(tabBarRenderContext);
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = tabBarPaintProperty->GetTabBarBlurStyle().value();
+        BlurStyleOption styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value();
         tabBarRenderContext->UpdateBackBlurStyle(styleOption);
+    }
+    if (tabBarPaintProperty->GetTabBarEffectOption().has_value() &&
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        auto tabBarRenderContext = tabBarNode->GetRenderContext();
+        CHECK_NULL_VOID(tabBarRenderContext);
+        EffectOption effectOption = tabBarPaintProperty->GetTabBarEffectOption().value();
+        tabBarRenderContext->UpdateBackgroundEffect(effectOption);
     }
 
     UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);

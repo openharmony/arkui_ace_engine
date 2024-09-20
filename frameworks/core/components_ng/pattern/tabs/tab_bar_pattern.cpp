@@ -751,7 +751,9 @@ void TabBarPattern::OnModifyDone()
         CHECK_NULL_VOID(theme);
         auto defaultBlurStyle = static_cast<BlurStyle>(theme->GetBottomTabBackgroundBlurStyle());
         if (defaultBlurStyle != BlurStyle::NO_MATERIAL) {
-            tabBarPaintProperty->UpdateTabBarBlurStyle(defaultBlurStyle);
+            BlurStyleOption styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value();
+            styleOption.blurStyle = defaultBlurStyle;
+            tabBarPaintProperty->UpdateTabBarBlurStyleOption(styleOption);
         }
     }
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();

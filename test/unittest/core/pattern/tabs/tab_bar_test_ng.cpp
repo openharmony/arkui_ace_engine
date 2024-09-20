@@ -1411,7 +1411,9 @@ HWTEST_F(TabBarTestNg, TabBarBlurStyle001, TestSize.Level1)
 {
     PipelineContext::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     TabsModelNG model = CreateTabs();
-    model.SetBarBackgroundBlurStyle(BlurStyle::COMPONENT_THICK);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+    model.SetBarBackgroundBlurStyle(styleOption);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
@@ -1421,6 +1423,32 @@ HWTEST_F(TabBarTestNg, TabBarBlurStyle001, TestSize.Level1)
      */
     auto tabBarRenderContext = tabBarNode_->GetRenderContext();
     EXPECT_EQ(tabBarRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_THICK);
+}
+
+/**
+ * @tc.name: TabBarBlurStyle002
+ * @tc.desc: test BarBlurStyleOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarBlurStyle002, TestSize.Level1)
+{
+    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    TabsModelNG model = CreateTabs();
+    BlurStyleOption styleOption;
+    styleOption.colorMode = ThemeColorMode::LIGHT;
+    styleOption.scale = 0.5;
+    model.SetBarBackgroundBlurStyle(styleOption);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. update blurstyle
+     * @tc.expected: step2. expect The colorMode is LIGHT and the scale is 0.5.
+     */
+    auto tabBarRenderContext = tabBarNode_->GetRenderContext();
+    EXPECT_EQ(tabBarRenderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::LIGHT);
+    EXPECT_EQ(tabBarRenderContext->GetBackBlurStyle()->scale, 0.5);
 }
 
 /**

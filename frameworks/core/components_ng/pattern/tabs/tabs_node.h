@@ -146,13 +146,14 @@ private:
     Dimension GetBarHeight() const;
     bool GetBarAdaptiveHeight() const;
     Color GetBarBackgroundColor() const;
-    BlurStyle GetBarBackgroundBlurStyle() const;
+    std::unique_ptr<JsonValue> GetBarBackgroundBlurStyle() const;
     int32_t GetIndex() const;
     bool GetFadingEdge() const;
     BarGridColumnOptions GetBarGridAlign() const;
     ScrollableBarModeOptions GetScrollableBarModeOptions() const;
     std::string GetAnimationMode() const;
     std::string GetEdgeEffect() const;
+    std::unique_ptr<JsonValue> GetBarBackgroundEffect() const;
 
     std::optional<int32_t> swiperId_;
     std::optional<int32_t> tabBarId_;
