@@ -7503,7 +7503,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     bool hasFocus = HasFocus();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], hasFocus=%{public}d isEditing=%{public}d",
         start, end, hasFocus, isEditing_);
-    CHECK_NULL_VOID(hasFocus && isEditing_);
+    CHECK_NULL_VOID(hasFocus);
     if (IsPreviewTextInputting()) {
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "SetSelection failed for previewText inputting");
         return;
@@ -8986,7 +8986,6 @@ void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKey
     // When the Enter key is triggered, perform a line feed operation.
     if (action == TextInputAction::NEW_LINE) {
         InsertValue("\n", true);
-        return;
     }
     // Enter key type callback
     TextFieldCommonEvent event;
