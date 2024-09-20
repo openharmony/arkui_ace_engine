@@ -378,14 +378,11 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest003,
     TouchEvent point;
     point.type = TouchType::MOVE;
     recognizerTest.HandleBridgeModeEvent(point);
-    SUCCEED();
     point.type = TouchType::DOWN;
     recognizerTest.HandleBridgeModeEvent(point);
-    SUCCEED();
     point.sourceType = SourceType::MOUSE;
     point.id = 4;
     recognizerTest.HandleBridgeModeEvent(point);
-    SUCCEED();
 
     point.type = TouchType::UP;
     point.id = 2;
@@ -397,7 +394,7 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest003,
     longPressRecoginzer.fingersId_.insert(4);
     EXPECT_CALL(longPressRecoginzer, HandleTouchUpEvent(_)).WillRepeatedly(Return());
     longPressRecoginzer.HandleBridgeModeEvent(point);
-    SUCCEED();
+    EXPECT_EQ(point.id, 2);
 }
 
 /**
@@ -418,7 +415,6 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest004,
     longPressRecoginzer.fingersId_.insert(4);
     EXPECT_CALL(longPressRecoginzer, HandleTouchUpEvent(_)).WillRepeatedly(Return());
     longPressRecoginzer.HandleBridgeModeEvent(point);
-    SUCCEED();
 
     point.type = TouchType::CANCEL;
     longPressRecoginzer.fingersId_.clear();
@@ -429,7 +425,6 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest004,
     point.id = 2;
     EXPECT_CALL(longPressRecoginzer, HandleTouchCancelEvent(_)).WillRepeatedly(Return());
     longPressRecoginzer.HandleBridgeModeEvent(point);
-    SUCCEED();
 
     point.type = TouchType::CANCEL;
     longPressRecoginzer.fingersId_.clear();
@@ -440,11 +435,10 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest004,
     point.id = 5;
     EXPECT_CALL(longPressRecoginzer, HandleTouchCancelEvent(_)).WillRepeatedly(Return());
     longPressRecoginzer.HandleBridgeModeEvent(point);
-    SUCCEED();
     point.type = TouchType::PULL_UP;
     LongPressRecognizer recognizerTest(DURATION, FINGER_NUMBER);
     recognizerTest.HandleBridgeModeEvent(point);
-    SUCCEED();
+    EXPECT_EQ(point.id, 5);
 }
 
 /**
@@ -460,7 +454,7 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest005,
     WeakPtr<NGGestureRecognizer> bridgeObj = AceType::WeakClaim(&recognizerTest);
     recognizerTest.bridgeObjList_.push_back(bridgeObj);
     recognizerTest.OnRejectBridgeObj();
-    SUCCEED();
+    EXPECT_NE(recognizerTest.Dump(), nullptr);
 }
 
 /**
@@ -474,16 +468,13 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest006,
     MockLongPressRecognizer longPressRecoginzer;
     event.action = AxisAction::NONE;
     longPressRecoginzer.HandleBridgeModeEvent(event);
-    SUCCEED();
     event.action = AxisAction::BEGIN;
     longPressRecoginzer.HandleBridgeModeEvent(event);
-    SUCCEED();
     event.action = AxisAction::UPDATE;
     longPressRecoginzer.HandleBridgeModeEvent(event);
-    SUCCEED();
     event.action = AxisAction::END;
     longPressRecoginzer.HandleBridgeModeEvent(event);
-    SUCCEED();
+    EXPECT_EQ(event.action, AxisAction::END);
 }
 
 /**
@@ -494,9 +485,7 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest006,
 HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest007, TestSize.Level1)
 {
     LongPressRecognizer recognizerTest(DURATION, FINGER_NUMBER);
-    if (recognizerTest.Dump()) {
-        SUCCEED();
-    }
+    EXPECT_NE(recognizerTest.Dump(), nullptr);
 }
 
 /**
@@ -513,6 +502,6 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest008,
     responseLinkResult.push_back(targetPtr1);
     responseLinkResult.push_back(targetPtr2);
     recognizerTest.SetResponseLinkRecognizers(responseLinkResult);
-    SUCCEED();
+    EXPECT_NE(recognizerTest.Dump(), nullptr);
 }
 } // namespace OHOS::Ace::NG

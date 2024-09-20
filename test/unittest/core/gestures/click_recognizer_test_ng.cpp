@@ -1375,6 +1375,6 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEvent002, TestSize.L
     clickRecognizer.refereeState_ = RefereeState::SUCCEED_BLOCKED;
     clickRecognizer.currentFingers_ = 1;
     clickRecognizer.CleanRecognizerState();
-    SUCCEED();
+    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED_BLOCKED);
 }
 } // namespace OHOS::Ace::NG

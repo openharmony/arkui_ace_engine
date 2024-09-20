@@ -1383,14 +1383,13 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest003, T
     pinchRecognizerPtr->activeFingers_.push_back(2);
     pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     pinchRecognizerPtr->HandleTouchUpEvent(event);
-    SUCCEED();
     event.id = 3;
     pinchRecognizerPtr->fingersId_.insert(1);
     pinchRecognizerPtr->activeFingers_.push_back(1);
     pinchRecognizerPtr->activeFingers_.push_back(2);
     pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     pinchRecognizerPtr->HandleTouchUpEvent(event);
-    SUCCEED();
+    EXPECT_EQ(event.id, 3);
 }
 
 /**
@@ -1407,7 +1406,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest004, T
     recognizerTest.activeFingers_.push_back(2);
     recognizerTest.refereeState_ = RefereeState::SUCCEED;
     recognizerTest.HandleTouchCancelEvent(event);
-    SUCCEED();
+    EXPECT_EQ(event.id, 1);
 }
 
 /**
@@ -1425,6 +1424,6 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest005, T
     auto callback = std::make_unique<GestureEventFunc>(funtest);
     recognizerTest.inputEventType_ = InputEventType::AXIS;
     recognizerTest.SendCallbackMsg(callback);
-    SUCCEED();
+    EXPECT_EQ(recognizerTest.inputEventType_, InputEventType::AXIS);
 }
 } // namespace OHOS::Ace::NG

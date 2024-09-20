@@ -337,7 +337,7 @@ HWTEST_F(ContainerModelTestNg, Test003, TestSize.Level1)
     GetHovertEvent(0)(false);
     mouseInfo.SetAction(MouseAction::MOVE);
     GetMouseEvent(0)(mouseInfo);
-    SUCCEED();
+    EXPECT_EQ(mouseInfo.GetAction(), MouseAction::MOVE);
 }
 
 /**
