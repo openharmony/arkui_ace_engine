@@ -2771,13 +2771,7 @@ void WebPattern::OnModifyDone()
     }
 
     if (!GetBackgroundColor()) {
-        auto darkMode = GetDarkModeValue(webData_ ? (WebDarkMode::Auto) : (WebDarkMode::Off));
-        if (GetForceDarkAccessValue(false) &&
-            (darkMode == WebDarkMode::On || ((darkMode == WebDarkMode::Auto) && (GetSystemColor() == Color::BLACK)))) {
-            UpdateBackgroundColorRightNow((Color::BLACK).GetValue());
-        } else {
-            UpdateBackgroundColorRightNow((Color::WHITE).GetValue());
-        }
+        UpdateBackgroundColorRightNow(GetDefaultBackgroundColor().GetValue());
     }
 
     // Initialize events such as keyboard, focus, etc.
@@ -5266,6 +5260,17 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         if (isVisibleActiveEnable_) {
             OnActive();
         }
+    }
+}
+
+Color WebPattern::GetDefaultBackgroundColor()
+{
+    auto darkMode = GetDarkModeValue(webData_ ? (WebDarkMode::Auto) : (WebDarkMode::Off));
+    if (GetForceDarkAccessValue(false) &&
+        (darkMode == WebDarkMode::On || ((darkMode == WebDarkMode::Auto) && (GetSystemColor() == Color::BLACK)))) {
+        return Color::BLACK;
+    } else {
+        return Color::WHITE;
     }
 }
 

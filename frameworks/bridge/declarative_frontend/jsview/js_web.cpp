@@ -3568,7 +3568,7 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        return;
+        backgroundColor = WebModel::GetInstance()->GetDefaultBackgroundColor();
     }
     WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
