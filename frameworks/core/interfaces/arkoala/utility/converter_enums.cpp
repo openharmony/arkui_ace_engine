@@ -21,6 +21,7 @@
 #include "core/components/common/properties/shadow.h"
 
 #include "converter.h"
+#include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -183,6 +184,7 @@ void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src)
     }
 }
 
+// Convert Ark_TextDecorationStyle
 template<>
 void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_TextDecorationStyle& src)
 {
@@ -208,6 +210,7 @@ void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
     }
 }
 
+// Convert Ark_TextDecorationType
 template<>
 void AssignCast(std::optional<TextDecoration>& dst, const Ark_TextDecorationType& src)
 {
@@ -273,6 +276,30 @@ void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src)
 }
 
 template<>
+void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src)
+{
+    switch (src) {
+        case ARK_SEARCH_TYPE_NORMAL: dst = TextInputType::TEXT; break;
+        case ARK_SEARCH_TYPE_NUMBER: dst = TextInputType::NUMBER; break;
+        case ARK_SEARCH_TYPE_PHONE_NUMBER: dst = TextInputType::PHONE; break;
+        case ARK_SEARCH_TYPE_EMAIL: dst = TextInputType::EMAIL_ADDRESS; break;
+        case ARK_SEARCH_TYPE_NUMBER_DECIMAL: dst = TextInputType::NUMBER_DECIMAL; break;
+        case ARK_SEARCH_TYPE_URL: dst = TextInputType::JS_ENUM_URL; break;
+        default: LOGE("Unexpected enum value in Ark_TextAreaType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonStyle& src)
+{
+    switch (src) {
+        case ARK_CANCEL_BUTTON_STYLE_CONSTANT : dst = CancelButtonStyle::CONSTANT; break;
+        case ARK_CANCEL_BUTTON_STYLE_INVISIBLE: dst = CancelButtonStyle::INVISIBLE; break;
+        case ARK_CANCEL_BUTTON_STYLE_INPUT: dst = CancelButtonStyle::INPUT; break;
+        default: LOGE("Unexpected enum value in Ark_BarState: %{public}d", src);
+    }
+}
+template<>
 void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src)
 {
     switch (src) {
@@ -330,6 +357,16 @@ template<> void AssignCast(std::optional<TextCase>& dst, const Ark_TextCase& src
         case ARK_TEXT_CASE_LOWER_CASE: dst = TextCase::LOWERCASE; break;
         case ARK_TEXT_CASE_UPPER_CASE: dst = TextCase::UPPERCASE; break;
         default: LOGE("Unexpected enum value in Ark_TextAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src)
+{
+    switch (src) {
+        case ARK_FONT_STYLE_NORMAL: dst = OHOS::Ace::FontStyle::NORMAL; break;
+        case ARK_FONT_STYLE_ITALIC: dst = OHOS::Ace::FontStyle::ITALIC; break;
+        default: LOGE("Unexpected enum value in Ark_FontStyle: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

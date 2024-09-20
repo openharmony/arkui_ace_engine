@@ -101,11 +101,6 @@ namespace OHOS::Ace::NG::Converter {
         };
     }
 
-    inline void AssignArkValue(Ark_Int32& dst, const TextDeleteDirection& src)
-    {
-        dst = ArkValue<Ark_Int32>(static_cast<int32_t>(src));
-    }
-
     inline void AssignArkValue(Ark_Length& dst, const int& src)
     {
         dst.type = ARK_TAG_INT32;
@@ -282,14 +277,14 @@ namespace OHOS::Ace::NG::Converter {
         std::vector<Val> data_;
     public:
         template<typename P>
-        ArkArrayHolder(const std::vector<P>& data)
+        explicit ArkArrayHolder(const std::vector<P>& data)
         {
             std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
                 return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
             });
         }
         template<std::size_t N, typename P>
-        ArkArrayHolder(const std::array<P, N>& data)
+        explicit ArkArrayHolder(const std::array<P, N>& data)
         {
             std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
                 return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
@@ -303,7 +298,7 @@ namespace OHOS::Ace::NG::Converter {
             });
         }
         template<typename P>
-        ArkArrayHolder(std::initializer_list<P> data)
+        explicit ArkArrayHolder(std::initializer_list<P> data)
         {
             std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
                 return OHOS::Ace::NG::Converter::ArkValue<Val>(src);

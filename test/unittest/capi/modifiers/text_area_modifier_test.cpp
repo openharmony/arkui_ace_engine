@@ -156,7 +156,7 @@ typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTestStep;
 const std::vector<ArkFontStyleTestStep> FONT_STYLE_TEST_PLAN = {
     { { .tag = ARK_TAG_OBJECT, .value = ARK_FONT_STYLE_NORMAL }, "FontStyle.Normal" },
     { { .tag = ARK_TAG_OBJECT, .value = ARK_FONT_STYLE_ITALIC }, "FontStyle.Italic" },
-    { { .tag = ARK_TAG_OBJECT, .value = static_cast<Ark_FontStyle>(2) }, "FontStyle.Italic" },
+    { { .tag = ARK_TAG_OBJECT, .value = static_cast<Ark_FontStyle>(2) }, "FontStyle.Normal" },
 };
 
 typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
