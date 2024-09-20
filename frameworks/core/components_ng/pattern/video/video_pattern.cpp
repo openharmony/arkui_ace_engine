@@ -284,6 +284,7 @@ void VideoPattern::ResetMediaPlayer()
 {
     CHECK_NULL_VOID(mediaPlayer_);
     mediaPlayer_->ResetMediaPlayer();
+    SetIsPrepared(false);
     if (!SetSourceForMediaPlayer()) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "Video set source for mediaPlayer failed.");
 
@@ -512,7 +513,7 @@ void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
     }
 
     OnUpdateTime(currentPos, CURRENT_POS);
-    currentPos_ = currentPos;
+    currentPos_ = isSeeking_ ? currentPos_ : currentPos;
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
@@ -640,6 +641,8 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     currentPos_ = currentPos;
     isInitialState_ = currentPos != 0 ? false : isInitialState_;
     isPlaying_ = mediaPlayer_->IsPlaying();
+    SetIsSeeking(false);
+    SetIsPrepared(true);
     OnUpdateTime(duration_, DURATION_POS);
     OnUpdateTime(currentPos_, CURRENT_POS);
 
@@ -1534,6 +1537,7 @@ void VideoPattern::Stop()
     OnCurrentTimeChange(0);
     mediaPlayer_->Stop();
     isStop_ = true;
+    SetIsSeeking(false);
 }
 
 void VideoPattern::FireError()
@@ -1626,7 +1630,7 @@ void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode
 
 void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode)
 {
-    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid() || !isPrepared_) {
         return;
     }
     if (GreatOrEqual(currentPos, 0.0)) {
@@ -1792,6 +1796,8 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     isInitialState_ = videoPattern->GetInitialState();
     auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
     src_ = layoutProperty->GetVideoSourceValue("");
+    isPrepared_ = videoPattern->GetIsPrepared();
+    isSeeking_ = videoPattern->GetIsSeeking();
     isStop_ = videoPattern->GetIsStop();
     muted_ = videoPattern->GetMuted();
     autoPlay_ = videoPattern->GetAutoPlay();

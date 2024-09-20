@@ -248,6 +248,19 @@ public:
     {
         isSeeking_ = isSeeking;
     }
+    bool GetIsSeeking() const
+    {
+        return isSeeking_;
+    }
+
+    void SetIsPrepared(bool isPrepared)
+    {
+        isPrepared_ = isPrepared;
+    }
+    bool GetIsPrepared() const
+    {
+        return isPrepared_;
+    }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
@@ -361,6 +374,7 @@ private:
     std::string src_;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
     bool isPlaying_ = false;
+    bool isPrepared_ = false;
 
     bool isStop_ = false;
     bool isDrag_ = false;
