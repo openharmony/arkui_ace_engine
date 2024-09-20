@@ -5233,12 +5233,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
     if (host && host->GetChildren().empty()) {
         textForDisplay_.clear();
     }
-    if (previewLongPress_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, so RequestKeyboard");
-        RequestKeyboard(false, true, true);
-        HandleOnEditChanged(true);
-        previewLongPress_ = false;
-    }
+    RequestKeyboardToEdit();
     return deleteText;
 }
 
@@ -6866,12 +6861,7 @@ void RichEditorPattern::ResetAfterPaste()
     auto pasteStr = GetPasteStr();
     SetCaretSpanIndex(-1);
     StartTwinkling();
-    if (previewLongPress_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
-        RequestKeyboard(false, true, true);
-        HandleOnEditChanged(true);
-        previewLongPress_ = false;
-    }
+    RequestKeyboardToEdit();
     CloseSelectOverlay();
     InsertValueByPaste(pasteStr);
     ClearPasteStr();
@@ -6968,12 +6958,7 @@ void RichEditorPattern::HandleOnCut()
         CloseSelectOverlay();
         ResetSelection();
         StartTwinkling();
-        if (previewLongPress_) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
-            RequestKeyboard(false, true, true);
-            HandleOnEditChanged(true);
-            previewLongPress_ = false;
-        }
+        RequestKeyboardToEdit();
         return;
     }
 
@@ -10364,11 +10349,10 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
 
 void RichEditorPattern::RequestKeyboardToEdit()
 {
-    CHECK_NULL_VOID(previewLongPress_);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
+    CHECK_NULL_VOID(!isEditing_ && HasFocus());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "request keyboard and enter edit");
     RequestKeyboard(false, true, true);
     HandleOnEditChanged(true);
-    previewLongPress_ = false;
 }
 
 bool RichEditorPattern::IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
