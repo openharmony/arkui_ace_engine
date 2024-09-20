@@ -1726,7 +1726,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
         if (SelectOverlayIsOn() && !moveCaretState_.isTouchCaret) {
             return;
         }
-        if (!IsUsingMouse()) {
+        if (!IsUsingMouse() && HasFocus()) {
             HandleTouchMove(touchInfo.value());
         }
     } else if (touchType == TouchType::CANCEL) {
@@ -1764,7 +1764,11 @@ void TextFieldPattern::HandleTouchUp()
     if (moveCaretState_.isMoveCaret) {
         moveCaretState_.isMoveCaret = false;
         StopContentScroll();
-        StartTwinkling();
+        if (HasFocus()) {
+            StartTwinkling();
+        } else {
+            StopTwinkling();
+        }
     }
     if (isMousePressed_) {
         isMousePressed_ = false;
