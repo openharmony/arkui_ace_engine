@@ -37,8 +37,10 @@ class ACE_EXPORT RelativeContainerLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     RelativeContainerLayoutAlgorithm() = default;
-    ~RelativeContainerLayoutAlgorithm() override = default;
-
+    ~RelativeContainerLayoutAlgorithm()
+    {
+        std::lock_guard<std::mutex> lock(relativeContainerMutex_);
+    }
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
