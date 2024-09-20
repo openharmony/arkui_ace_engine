@@ -519,6 +519,11 @@ public:
 
     void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
+    bool GetIsRequestVsync()
+    {
+        return window_->GetIsRequestVsync();
+    }
+
     bool IsLayouting() const override
     {
         return taskScheduler_->IsLayouting();
