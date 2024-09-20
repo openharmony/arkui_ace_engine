@@ -208,13 +208,14 @@ std::optional<Color> SvgAttributesParser::GetSpecialColor(const std::string& val
     return std::nullopt;
 }
 
-bool SvgAttributesParser::ParseColor(const std::string& value, Color& color)
+bool SvgAttributesParser::ParseColor(std::string value, Color& color)
 {
     auto colorOpt = GetSpecialColor(value);
     if (colorOpt.has_value()) {
         color = colorOpt.value();
         return true;
     }
+    value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
     if (Color::MatchColorHexString(value)) {
         color = Color::FromString(value);
         return true;
