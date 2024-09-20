@@ -42,6 +42,27 @@ void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
 
 // Convert Ark_ButtonRole
 template<>
+void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
+{
+    switch (src) {
+        case ARK_BLUR_STYLE_THIN: dst = BlurStyle::THIN; break;
+        case ARK_BLUR_STYLE_REGULAR: dst = BlurStyle::REGULAR; break;
+        case ARK_BLUR_STYLE_THICK: dst = BlurStyle::THICK; break;
+        case ARK_BLUR_STYLE_BACKGROUND_THIN: dst = BlurStyle::BACKGROUND_THIN; break;
+        case ARK_BLUR_STYLE_BACKGROUND_REGULAR: dst = BlurStyle::BACKGROUND_REGULAR; break;
+        case ARK_BLUR_STYLE_BACKGROUND_THICK: dst = BlurStyle::BACKGROUND_THICK; break;
+        case ARK_BLUR_STYLE_BACKGROUND_ULTRA_THICK: dst = BlurStyle::BACKGROUND_ULTRA_THICK; break;
+        case ARK_BLUR_STYLE_NONE: dst = BlurStyle::NO_MATERIAL; break;
+        case ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN: dst = BlurStyle::COMPONENT_ULTRA_THIN; break;
+        case ARK_BLUR_STYLE_COMPONENT_THIN: dst = BlurStyle::COMPONENT_THIN; break;
+        case ARK_BLUR_STYLE_COMPONENT_REGULAR: dst = BlurStyle::COMPONENT_REGULAR; break;
+        case ARK_BLUR_STYLE_COMPONENT_THICK: dst = BlurStyle::COMPONENT_THICK; break;
+        case ARK_BLUR_STYLE_COMPONENT_ULTRA_THICK: dst = BlurStyle::COMPONENT_ULTRA_THICK; break;
+        default: LOGE("Unexpected enum value in Ark_BlurStyle: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src)
 {
     switch (src) {
