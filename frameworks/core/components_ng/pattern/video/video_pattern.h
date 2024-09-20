@@ -248,6 +248,10 @@ public:
     {
         isSeeking_ = isSeeking;
     }
+    void SetIsPrepared(bool isPrepared)
+    {
+        isPrepared_ = isPrepared;
+    }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
@@ -361,6 +365,7 @@ private:
     VideoSourceInfo videoSrcInfo_;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
     bool isPlaying_ = false;
+    bool isPrepared_ = false;
 
     bool isStop_ = false;
     bool isDrag_ = false;
