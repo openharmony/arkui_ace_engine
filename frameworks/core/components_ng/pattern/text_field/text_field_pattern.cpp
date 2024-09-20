@@ -2335,7 +2335,6 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
             break;
         }
         if (isRepeatClickCaret) {
-            StopTwinkling();
             ProcessOverlay({ .animation = true });
             needCloseOverlay = false;
         } else if (needSelectAll_) {
@@ -3193,8 +3192,8 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     if (CanChangeSelectState()) {
         selectController_->UpdateSelectWithBlank(localOffset);
+        StopTwinkling();
     }
-    StopTwinkling();
     SetIsSingleHandle(!IsSelected());
     auto start = selectController_->GetStartIndex();
     auto end = selectController_->GetEndIndex();
