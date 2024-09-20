@@ -2360,13 +2360,6 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     ACE_DCHECK(!params.empty());
     if (window_) {
         DumpLog::GetInstance().Print(1, "LastRequestVsyncTime: " + std::to_string(window_->GetLastRequestVsyncTime()));
-#ifdef ENABLE_ROSEN_BACKEND
-        auto rsUIDirector = window_->GetRSUIDirector();
-        if (rsUIDirector) {
-            DumpLog::GetInstance().Print(1, "transactionFlags: [" + std::to_string(getpid()) + "," +
-                std::to_string(rsUIDirector->GetIndex()) + "]");
-        }
-#endif
     }
     DumpLog::GetInstance().Print(1, "last vsyncId: " + std::to_string(GetFrameCount()));
     if (params[0] == "-element") {
