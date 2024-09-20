@@ -180,6 +180,11 @@ public:
     {
         return needAppearFromRecovery_;
     }
+
+    void UpdateTextNodeListAsRenderGroup(bool isPopPage);
+    void ReleaseTextNodeList();
+    void CollectTextNodeAsRenderGroup();
+
 private:
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
@@ -195,6 +200,7 @@ private:
     std::string navDestinationPathInfo_;
     std::string navDestinationModuleName_;
     bool needRemoveInPush_ = false;
+    std::list<WeakPtr<UINode>> textNodeList_;
 };
 
 } // namespace OHOS::Ace::NG
