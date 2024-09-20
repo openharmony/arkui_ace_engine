@@ -815,6 +815,7 @@ private:
     void WebOnMouseEvent(const MouseInfo& info);
     bool HandleDoubleClickEvent(const MouseInfo& info);
     void SendDoubleClickEvent(const MouseClickInfo& info);
+    int32_t HandleMouseClickEvent(const MouseInfo& info);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleFocusEvent();
     void HandleBlurEvent(const BlurReason& blurReason);
@@ -1024,7 +1025,7 @@ private:
     bool isQuickMenuMouseTrigger_ = false;
     RefPtr<DragEvent> dragEvent_;
     bool isUrlLoaded_ = false;
-    std::queue<MouseClickInfo> doubleClickQueue_;
+    std::queue<MouseClickInfo> mouseClickQueue_;
     bool isFullScreen_ = false;
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
