@@ -518,7 +518,8 @@ bool UIContentImpl::ProcessVsyncEvent(uint64_t timeStampNanos)
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     LOGI("ViewportConfig: %{public}s", config.ToString().c_str());
     auto container = AceContainer::GetContainerInstance(instanceId_);

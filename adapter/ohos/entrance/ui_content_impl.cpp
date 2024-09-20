@@ -278,6 +278,94 @@ void AddAlarmLogFunc()
     OHOS::Rosen::RSTransactionData::AddAlarmLog(logFunc);
 }
 
+
+void DeduplicateAvoidAreas(const RefPtr<NG::PipelineContext>& context,
+    std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+    const ViewportConfig& config)
+{
+    CHECK_NULL_VOID(context);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    for (auto& avoidArea : avoidAreas) {
+        if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
+            NG::SafeAreaInsets insets = ConvertAvoidArea(avoidArea.second);
+            if (safeAreaManager->CheckSystemSafeArea(insets)) {
+                updatingInsets[avoidArea.first] = insets;
+            }
+        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+            NG::SafeAreaInsets insets = ConvertAvoidArea(avoidArea.second);
+            if (safeAreaManager->CheckNavArea(insets)) {
+                updatingInsets[avoidArea.first] = insets;
+            }
+        } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT && context->GetUseCutout()) {
+            NG::SafeAreaInsets insets = ConvertAvoidArea(avoidArea.second);
+            if (safeAreaManager->CheckCutoutSafeArea(insets,
+                NG::OptionalSize<uint32_t>(config.Width(), config.Height()))) {
+                updatingInsets[avoidArea.first] = insets;
+            }
+        }
+    }
+}
+
+void ParseAvoidAreasUpdate(const RefPtr<NG::PipelineContext>& context,
+    const std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
+    const ViewportConfig& config)
+{
+    if (updatingInsets.empty()) {
+        return;
+    }
+    CHECK_NULL_VOID(context);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    for (auto& insets : updatingInsets) {
+        if (insets.first == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
+            safeAreaManager->UpdateSystemSafeArea(insets.second);
+        } else if (insets.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+            safeAreaManager->UpdateNavArea(insets.second);
+        } else if (insets.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT && context->GetUseCutout()) {
+            safeAreaManager->UpdateCutoutSafeArea(insets.second,
+                NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
+        }
+    }
+    context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_AVOID_AREA);
+}
+
+void AvoidAreasUpdateOnUIExtension(const RefPtr<NG::PipelineContext>& context,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    if (avoidAreas.empty()) {
+        return;
+    }
+    CHECK_NULL_VOID(context);
+    // for ui extension component
+    for (auto& avoidArea : avoidAreas) {
+        context->UpdateOriginAvoidArea(avoidArea.second, static_cast<uint32_t>(avoidArea.first));
+    }
+}
+
+void UpdateSafeArea(const RefPtr<PipelineBase>& pipelineContext,
+    const std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
+    const ViewportConfig& config,
+    const RefPtr<Platform::AceContainer>& container)
+{
+    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto safeAreaManager = context->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
+    if (updatingInsets.find(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT) == updatingInsets.end()) {
+        safeAreaManager->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT),
+            NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
+    }
+    ParseAvoidAreasUpdate(context, updatingInsets, config);
+    AvoidAreasUpdateOnUIExtension(context, avoidAreas);
+}
+
 class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
 public:
     explicit OccupiedAreaChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
@@ -403,6 +491,14 @@ private:
     NG::SafeAreaInsets navigationBar_;
     NG::SafeAreaInsets cutoutSafeArea_;
     int32_t instanceId_ = -1;
+};
+
+class PretendChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
+public:
+    explicit PretendChangedListener(int32_t instanceId) {}
+    ~PretendChangedListener() = default;
+
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override {}
 };
 
 class AvailableAreaChangedListener : public OHOS::Rosen::DisplayManager::IAvailableAreaListener {
@@ -1849,7 +1945,7 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
     auto pipeline = container->GetPipelineContext();
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN &&
         (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow())) {
-        avoidAreaChangedListener_ = new AvoidAreaChangedListener(instanceId_);
+        avoidAreaChangedListener_ = new PretendChangedListener(instanceId_);
         window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
         if (pipeline->GetUseCutout()) {
@@ -2199,7 +2295,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_, config.ToString().c_str());
@@ -2233,20 +2330,19 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> updatingInsets;
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
     }
-    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_, safeAreaManager]() {
+    if (safeAreaManager) {
+        DeduplicateAvoidAreas(context, updatingInsets, avoidAreas, config);
+    }
+    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
+                    updatingInsets, avoidAreas]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
-            if (safeAreaManager) {
-                uint32_t keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
-                safeAreaManager->UpdateKeyboardSafeArea(keyboardHeight, config.Height());
-                safeAreaManager->UpdateCutoutSafeArea(
-                    container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT),
-                    NG::OptionalSize<uint32_t>(config.Width(), config.Height()));
-            }
+            UpdateSafeArea(pipelineContext, updatingInsets, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
             TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect to : %{public}s",
@@ -2281,11 +2377,15 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     };
     taskExecutor->PostTask(std::move(changeBrightnessTask), TaskExecutor::TaskType::UI, "ArkUIUpdateBrightness");
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
-    if (container->IsUseStageModel() && (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
-        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC)) {
+    bool isReasonRotationOrDPI = (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
+        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC);
+    bool isAvoidAreaDoChanged = !updatingInsets.empty() ||
+        avoidAreas.find(OHOS::Rosen::AvoidAreaType::TYPE_KEYBOARD) != avoidAreas.end();
+    if (container->IsUseStageModel() && isReasonRotationOrDPI) {
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
-    } else if (rsTransaction != nullptr) {
+    } else if (rsTransaction != nullptr || isAvoidAreaDoChanged) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
+        // When avoidAreas need updating, the task shouldn't be cancelled.
         taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");

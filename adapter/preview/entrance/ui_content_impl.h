@@ -80,7 +80,8 @@ public:
     void SetIsFocusActive(bool isFocusActive) override {}
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override {}
     void UpdateDecorVisible(bool visible, bool hasDeco = true) override {};
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override {}
@@ -147,7 +148,7 @@ public:
     void SetContentNodeGrayScale(float grayscale) override {};
 
     void PreLayout() override {};
-    
+
     void SetStatusBarItemColor(uint32_t color) override;
 
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override {};
