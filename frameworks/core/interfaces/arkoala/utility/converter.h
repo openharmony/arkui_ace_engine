@@ -473,6 +473,12 @@ namespace Converter {
     }
 
     template<>
+    inline DimensionOffset Convert(const Ark_Offset& src)
+    {
+        return DimensionOffset(Convert<Dimension>(src.dx), Convert<Dimension>(src.dy));
+    }
+
+    template<>
     inline FontMetaData Convert(const Ark_Font& src)
     {
         return {
@@ -504,6 +510,7 @@ namespace Converter {
 
     // Enums specializations
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
+    template<> void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
     template<> void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src);
     template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);
     template<> void AssignCast(std::optional<ButtonType>& dst, const Ark_ButtonType& src);

@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SelectInterfaceModifier {
@@ -95,10 +99,21 @@ void MenuBackgroundColorImpl(Ark_NativePointer node,
 void MenuBackgroundBlurStyleImpl(Ark_NativePointer node,
                                  enum Ark_BlurStyle value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto blurStyle = Converter::OptConvert<BlurStyle>(value);
+    if (blurStyle) {
+        BlurStyleOption option;
+        option.blurStyle = blurStyle.value();
+        SelectModelNG::SetMenuBackgroundBlurStyle(frameNode, option);
+    }
 }
 void ControlSizeImpl(Ark_NativePointer node,
                      enum Ark_ControlSize value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(value));
 }
 void MenuItemContentModifierImpl(Ark_NativePointer node,
                                  const Ark_CustomObject* modifier)
