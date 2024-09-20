@@ -1339,6 +1339,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         } else if (textAlign == TextAlign::END) {
             textAlign = TextAlign::START;
         }
+        textProperty->UpdateTextAlign(textAlign);
     }
     UpdateTextOverflow(textProperty);
 
