@@ -44,7 +44,6 @@ public:
 
 private:
     RefPtr<FrameNode> GetSheetNode(PaintWrapper* paintWrapper);
-    Dimension GetSheetRadius(const SizeF& sheetSize, const Dimension& sheetRadius);
     void SetBorderPenStyle(RSPen& pen, const Dimension& borderWidth, const Color& borderColor);
     void GetBorderDrawPath(
         RSPath& path, const RefPtr<FrameNode> sheetNode, const RefPtr<SheetTheme>& sheetTheme, float borderWidth);

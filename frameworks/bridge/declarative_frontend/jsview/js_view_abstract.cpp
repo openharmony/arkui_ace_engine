@@ -8141,6 +8141,9 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.width = width;
     }
 
+    auto radiusValue = paramObj->GetProperty("radius");
+    ParseBindSheetBorderRadius(radiusValue, sheetStyle);
+
     CalcDimension sheetHeight;
     if (height->IsString()) {
         std::string heightStr = height->ToString();
@@ -8184,6 +8187,64 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
     }
+}
+
+void JSViewAbstract::ParseBindSheetBorderRadius(const JSRef<JSVal>& args, NG::SheetStyle& sheetStyle)
+{
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "radius is not correct type");
+        return;
+    }
+    CalcDimension radius;
+    NG::BorderRadiusProperty borderRadius;
+    if (ParseJsLengthMetrics(args, radius)) {
+        borderRadius.SetRadius(radius);
+        sheetStyle.radius = borderRadius;
+    } else if (ParseBindSheetBorderRadiusProps(args, borderRadius)) {
+        sheetStyle.radius = borderRadius;
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SHEET, "radius is not correct.");
+        return;
+    }
+}
+
+bool JSViewAbstract::ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
+{
+    if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (CheckLengthMetrics(object)) {
+            std::optional<CalcDimension> radiusTopStart = ParseBindSheetBorderRadiusProp(object, TOP_START_PROPERTY);
+            std::optional<CalcDimension> radiusTopEnd = ParseBindSheetBorderRadiusProp(object, TOP_END_PROPERTY);
+            std::optional<CalcDimension> radiusBottomStart = ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
+            std::optional<CalcDimension> radiusBottomEnd = ParseBindSheetBorderRadiusProp(object, BOTTOM_END_PROPERTY);
+            auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+            radius.radiusTopLeft = isRightToLeft ? radiusTopEnd : radiusTopStart;
+            radius.radiusTopRight = isRightToLeft ? radiusTopStart : radiusTopEnd;
+            radius.radiusBottomLeft = isRightToLeft ? radiusBottomEnd : radiusBottomStart;
+            radius.radiusBottomRight = isRightToLeft ? radiusBottomStart : radiusBottomEnd;
+            radius.multiValued = true;
+        } else {
+            ParseBorderRadiusProps(object, radius);
+        }
+        return true;
+    }
+    return false;
+}
+
+std::optional<CalcDimension> JSViewAbstract::ParseBindSheetBorderRadiusProp(
+    const JSRef<JSObject>& object, const char* prop)
+{
+    if (object->IsEmpty()) {
+        return std::nullopt;
+    }
+    if (object->HasProperty(prop) && object->GetProperty(prop)->IsObject()) {
+        JSRef<JSObject> propObj = JSRef<JSObject>::Cast(object->GetProperty(prop));
+        CalcDimension calcDimension;
+        if (ParseJsLengthMetrics(propObj, calcDimension)) {
+            return calcDimension;
+        }
+    }
+    return std::nullopt;
 }
 
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)

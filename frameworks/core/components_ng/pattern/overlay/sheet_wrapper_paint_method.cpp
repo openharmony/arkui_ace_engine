@@ -73,16 +73,6 @@ RefPtr<FrameNode> SheetWrapperPaintMethod::GetSheetNode(PaintWrapper* paintWrapp
     return sheetNode;
 }
 
-Dimension SheetWrapperPaintMethod::GetSheetRadius(const SizeF& sheetSize, const Dimension& radius)
-{
-    float half = 0.5f;
-    auto sheetRadius = radius;
-    if (GreatNotEqual(radius.ConvertToPx(), sheetSize.Width() * half)) {
-        sheetRadius = Dimension(sheetSize.Width() * half);
-    }
-    return sheetRadius;
-}
-
 void SheetWrapperPaintMethod::GetBorderDrawPath(
     RSPath& path, const RefPtr<FrameNode> sheetNode, const RefPtr<SheetTheme>& sheetTheme, float borderWidth)
 {
@@ -92,15 +82,19 @@ void SheetWrapperPaintMethod::GetBorderDrawPath(
     CHECK_NULL_VOID(geometryNode);
     auto sheetSize = geometryNode->GetFrameSize();
     auto targetOffset = sheetNode->GetPositionToParentWithTransform();
-    auto sheetRadius = GetSheetRadius(sheetSize, sheetTheme->GetSheetRadius()).ConvertToPx();
-    auto borderRadius = sheetRadius + borderWidth * 0.5f;
+    BorderRadiusProperty sheetRadius(sheetTheme->GetSheetRadius());
+    sheetPattern->CalculateSheetRadius(sheetRadius);
+    auto radiusTopLeft = sheetRadius.radiusTopLeft->ConvertToPx();
+    auto radiusTopRight = sheetRadius.radiusTopRight->ConvertToPx();
+    auto radiusBottomRight = sheetRadius.radiusBottomRight->ConvertToPx();
+    auto radiusBottomLeft = sheetRadius.radiusBottomLeft->ConvertToPx();
     auto borderOffset = borderWidth * 0.5f;
     auto arrowOffset = sheetPattern->GetSheetArrowOffset().GetX();
     path.Reset();
     path.MoveTo(
-        targetOffset.GetX() - borderOffset, SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius + targetOffset.GetY());
-    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION, sheetRadius + targetOffset.GetX(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset);
+        targetOffset.GetX() - borderOffset, SHEET_ARROW_HEIGHT.ConvertToPx() + radiusTopLeft + targetOffset.GetY());
+    path.ArcTo(radiusTopLeft + borderOffset, radiusTopRight + borderOffset, 0.0f, RSPathDirection::CW_DIRECTION,
+        radiusTopRight + targetOffset.GetX(), SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset);
     path.LineTo(arrowOffset - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx() + targetOffset.GetX(),
         SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset); // P1
     path.LineTo(arrowOffset - ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx() + targetOffset.GetX() - borderOffset,
@@ -111,20 +105,21 @@ void SheetWrapperPaintMethod::GetBorderDrawPath(
         SHEET_ARROW_HEIGHT.ConvertToPx() - ARROW_VERTICAL_P4_OFFSET_Y.ConvertToPx() + targetOffset.GetY()); // P4
     path.LineTo(arrowOffset + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx() + targetOffset.GetX(),
         SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset); // P5
-    path.LineTo(sheetSize.Width() - sheetRadius + targetOffset.GetX(),
+    path.LineTo(sheetSize.Width() - radiusTopRight + targetOffset.GetX(),
         SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset);
-    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION,
+    path.ArcTo(radiusTopRight + borderOffset, radiusBottomRight + borderOffset, 0.0f, RSPathDirection::CW_DIRECTION,
         sheetSize.Width() + targetOffset.GetX() + borderOffset,
-        SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius + targetOffset.GetY());
+        SHEET_ARROW_HEIGHT.ConvertToPx() + radiusBottomRight + targetOffset.GetY());
+    path.LineTo(sheetSize.Width() + targetOffset.GetX() + borderOffset,
+        sheetSize.Height() - radiusBottomRight + targetOffset.GetY());
+    path.ArcTo(radiusBottomRight + borderOffset, radiusBottomLeft + borderOffset, 0.0f, RSPathDirection::CW_DIRECTION,
+        sheetSize.Width() - radiusBottomLeft + targetOffset.GetX(),
+        sheetSize.Height() + targetOffset.GetY() + borderOffset);
+    path.LineTo(radiusBottomLeft + targetOffset.GetX(), sheetSize.Height() + targetOffset.GetY() + borderOffset);
+    path.ArcTo(radiusBottomLeft + borderOffset, radiusTopLeft + borderOffset, 0.0f, RSPathDirection::CW_DIRECTION,
+        targetOffset.GetX() - borderOffset, sheetSize.Height() - radiusTopLeft + targetOffset.GetY());
     path.LineTo(
-        sheetSize.Width() + targetOffset.GetX() + borderOffset, sheetSize.Height() - sheetRadius + targetOffset.GetY());
-    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION,
-        sheetSize.Width() - sheetRadius + targetOffset.GetX(), sheetSize.Height() + targetOffset.GetY() + borderOffset);
-    path.LineTo(sheetRadius + targetOffset.GetX(), sheetSize.Height() + targetOffset.GetY() + borderOffset);
-    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION, targetOffset.GetX() - borderOffset,
-        sheetSize.Height() - sheetRadius + targetOffset.GetY());
-    path.LineTo(
-        targetOffset.GetX() - borderOffset, SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius + targetOffset.GetY());
+        targetOffset.GetX() - borderOffset, SHEET_ARROW_HEIGHT.ConvertToPx() + radiusTopLeft + targetOffset.GetY());
 }
 
 void SheetWrapperPaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)
