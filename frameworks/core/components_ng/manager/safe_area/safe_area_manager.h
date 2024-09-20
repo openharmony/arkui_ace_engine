@@ -32,12 +32,28 @@ public:
     ~SafeAreaManager() override = default;
 
     /**
+     * @brief Check if the incoming safe area is identical to the system safe area
+     *
+     * @param safeArea The new system safe area.
+     * @return True if the incoming safe area is identical to the current one, false otherwise.
+     */
+    bool CheckSystemSafeArea(const SafeAreaInsets& safeArea);
+
+    /**
      * @brief Updates the system safe area.
      *
      * @param safeArea The new system safe area.
      * @return True if the system safe area was modified, false otherwise.
      */
     bool UpdateSystemSafeArea(const SafeAreaInsets& safeArea);
+
+    /**
+     * @brief Check if the incoming safe area is identical to the navigation indictor safe area.
+     *
+     * @param safeArea The new navigation indictor safe area.
+     * @return True if the incoming safe area is identical to the current one, false otherwise.
+     */
+    bool CheckNavArea(const SafeAreaInsets& safeArea);
 
     /**
      * @brief Updates the navigation indictor safe area.
@@ -56,6 +72,15 @@ public:
      * @return The system safe area insets.
      */
     SafeAreaInsets GetSystemSafeArea() const;
+
+    /**
+     * @brief Cut the incoming area with root size, then check if the result is identical to the cutout safe area.
+     *
+     * @param safeArea The SafeAreaInsets representing the new cutout safe area, which would be modified.
+     * @return True if the incoming safe area is identical to the current one, false otherwise.
+     */
+    bool CheckCutoutSafeArea(
+        const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize = NG::OptionalSize<uint32_t>());
 
     /**
      * @brief Updates the cutout safe area.
