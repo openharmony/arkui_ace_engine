@@ -274,6 +274,10 @@ void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue
     if (changeLength > 0) {
         DeleteForwardInStyledString(changeLength, false);
     }
+    if (textSelector_.IsValid()) {
+        CloseSelectOverlay();
+        ResetSelection();
+    }
     if (insertStyledString) {
         styledString_->InsertSpanString(changeStart, insertStyledString);
     } else {
@@ -9151,9 +9155,6 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
     }
     if (textSelector_.SelectNothing()) {
         textSelector_.Update(pos, pos);
-        if (!caretTwinkling_) {
-            StartTwinkling();
-        }
     } else {
         StopTwinkling();
     }
