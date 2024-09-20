@@ -78,10 +78,13 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
     if (info_->menuInfo.menuBuilder) {
         auto customMenuLayoutWrapper = layoutWrapper->GetChildByIndex(0);
         CHECK_NULL_VOID(customMenuLayoutWrapper);
-        auto customMenuLayoutConstraint = layoutConstraint;
-        CalculateCustomMenuLayoutConstraint(layoutWrapper, customMenuLayoutConstraint);
-        customMenuLayoutWrapper->Measure(customMenuLayoutConstraint);
-        isMouseCustomMenu = true;
+        auto customNode = customMenuLayoutWrapper->GetHostNode();
+        if (customNode && customNode->GetTag() != "SelectMenu") {
+            auto customMenuLayoutConstraint = layoutConstraint;
+            CalculateCustomMenuLayoutConstraint(layoutWrapper, customMenuLayoutConstraint);
+            customMenuLayoutWrapper->Measure(customMenuLayoutConstraint);
+            isMouseCustomMenu = true;
+        }
     }
     auto childIndex = -1;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
