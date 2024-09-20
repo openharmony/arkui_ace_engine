@@ -294,6 +294,8 @@ public:
 
     void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility) override;
 
+    void StartVibraFeedback(const std::string& vibratorType) override;
+
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

@@ -1308,4 +1308,14 @@ void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreate
 {
     // cross platform is not support now;
 }
+
+void WebPattern::OnEnabledHapticFeedbackUpdate(bool enable)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::StartVibraFeedback(const std::string& vibratorType)
+{
+    // cross platform is not support now;
+}
 } // namespace OHOS::Ace::NG

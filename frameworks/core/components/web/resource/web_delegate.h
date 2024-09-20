@@ -988,6 +988,7 @@ public:
 
     void OnAttachContext(const RefPtr<NG::PipelineContext> &context);
     void OnDetachContext();
+    void StartVibraFeedback(const std::string& vibratorType);
 
     int32_t GetInstanceId() const
     {

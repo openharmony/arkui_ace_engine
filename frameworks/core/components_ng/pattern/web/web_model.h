@@ -190,6 +190,7 @@ public:
     virtual void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) {}
     virtual void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+    virtual void SetEnabledHapticFeedback(bool isEnabled) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;
