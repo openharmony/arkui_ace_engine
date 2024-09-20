@@ -38,16 +38,17 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
 #include "ace_engine_types.h"
+#include "core/components/common/properties/shadow.h"
 
 namespace OHOS::Ace::NG {
-    template<typename T>
-    std::optional<int32_t> EnumToInt(const std::optional<T>& src)
-    {
-        return src ? std::optional(static_cast<int32_t>(src.value())) : std::nullopt;
-    }
-} // namespace OHOS::Ace::NG
+template<typename T>
+std::optional<int32_t> EnumToInt(const std::optional<T>& src)
+{
+    return src ? std::optional(static_cast<int32_t>(src.value())) : std::nullopt;
+}
 
-namespace OHOS::Ace::NG::Converter {
+using StringArray = std::vector<std::string>;
+namespace Converter {
      //Allow conversion for Ark_Xxx type to same Ark_Xxx type
     template<typename T>
     void AssignTo(T& dst, const T& src)
@@ -68,6 +69,33 @@ namespace OHOS::Ace::NG::Converter {
         AssignTo(result, src);
         return result;
     }
+
+    class ResourceConverter {
+        public:
+            ResourceConverter() = delete;
+            ~ResourceConverter() = default;
+            ResourceConverter(const ResourceConverter&) = delete;
+            ResourceConverter& operator=(const ResourceConverter&) = delete;
+
+            explicit ResourceConverter(const Ark_Resource& resource);
+
+            std::optional<std::string> ToString();
+            std::optional<StringArray> ToStringArray();
+            std::optional<Dimension> ToDimension();
+            std::optional<float> ToFloat();
+            std::optional<Color> ToColor();
+
+            inline const char* BundleName() { return bundleName_.c_str(); }
+            inline const char* ModuleName() { return moduleName_.c_str(); }
+
+        private:
+            RefPtr<ThemeConstants> themeConstants_;
+            NodeModifier::ResourceType type_;
+            std::string bundleName_;
+            std::string moduleName_;
+            int32_t id_;
+            StringArray params_;
+    };
 
     template<typename T, typename P>
     void AssignCast(std::optional<T>& dst, const P& src)
@@ -123,22 +151,13 @@ namespace OHOS::Ace::NG::Converter {
     template<>
     inline std::string Convert(const Ark_String& src)
     {
-        if (src.chars == nullptr) {
-            return "";
-        }
-        return src.chars;
+        return (src.chars != nullptr) ? src.chars : "";
     }
 
     template<>
     inline Ark_CharPtr Convert(const Ark_String& src)
     {
         return src.chars;
-    }
-
-    template<>
-    inline std::vector<std::string> Convert(const Ark_String& src)
-    {
-        return { Convert<std::string>(src) };
     }
 
     template<>
@@ -155,6 +174,85 @@ namespace OHOS::Ace::NG::Converter {
 
     // Implementation is in cpp
     Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo &info);
+
+    template<>
+    inline ImageSourceInfo Convert(const Ark_String& value)
+    {
+        return ImageSourceInfo(value.chars);
+    }
+
+    template<>
+    inline ImageSourceInfo Convert(const Ark_CustomObject& value)
+    {
+        LOGE("Ark_CustomObject is not implemented\n");
+        return ImageSourceInfo();
+    }
+
+    template<>
+    inline void AssignCast(std::optional<StringArray>& dst, const Ark_Resource& value)
+    {
+        ResourceConverter converter(value);
+        dst = converter.ToStringArray();
+    }
+
+    template<>
+    inline void AssignCast(std::optional<std::string>& dst, const Ark_Resource& value)
+    {
+        ResourceConverter converter(value);
+        dst = converter.ToString();
+    }
+
+    template<>
+    inline void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_Resource& value)
+    {
+        ResourceConverter converter(value);
+        auto resourceString = converter.ToString();
+        if (resourceString) {
+            dst = ImageSourceInfo(resourceString.value(), converter.BundleName(), converter.ModuleName());
+        } else {
+            LOGE("Not a string resource: %{public}s:%{public}s\n",
+                 converter.BundleName(), converter.ModuleName());
+        }
+    }
+
+    template<>
+    inline void AssignCast(std::optional<Dimension>& dst, const Ark_Resource& src)
+    {
+        ResourceConverter converter(src);
+        dst = converter.ToDimension();
+    }
+
+    template<>
+    inline void AssignCast(std::optional<Color>& dst, const Ark_Resource& src)
+    {
+        ResourceConverter converter(src);
+        dst = converter.ToColor();
+    }
+
+    template<>
+    inline void AssignCast(std::optional<Dimension>& dst, const Ark_CustomObject& src)
+    {
+        LOGE("ARKOALA Converter Ark_CustomObject -> Dimension is not implemented.");
+    }
+
+    template<>
+    inline void AssignCast(std::optional<Ark_CharPtr>& dst, const Ark_Resource& src)
+    {
+        LOGE("ARKOALA Converter -> Resource support (String) is not implemented.");
+    }
+
+    template<>
+    inline void AssignCast(std::optional<Color>& dst, const Ark_ColoringStrategy& src)
+    {
+        LOGE("ARKOALA Converter Ark_ColoringStrategy -> Color is not implemented.");
+    }
+
+    template<>
+    inline void AssignCast(std::optional<float>& dst, const Ark_Resource& src)
+    {
+        ResourceConverter converter(src);
+        dst = converter.ToFloat();
+    }
 
     // Converter implementations
     template<>
@@ -176,42 +274,9 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<>
-    inline FontWeight Convert(const Ark_String& src)
-    {
-        return Framework::ConvertStrToFontWeight(src.chars);
-    }
-
-    template<>
     inline Dimension Convert(const Ark_String& src)
     {
         return Dimension::FromString(src.chars);
-    }
-
-    template<>
-    inline void AssignTo(std::optional<FontWeight>& dst, const Ark_Number& src)
-    {
-        auto str = std::to_string(Convert<int>(src));
-        if (auto [parseOk, val] = StringUtils::ParseFontWeight(str); parseOk) {
-            dst = val;
-        } else {
-            dst.reset();
-        }
-    }
-
-    template<>
-    inline void AssignTo(std::optional<FontWeight>& dst, const Ark_String& src)
-    {
-        if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
-            dst = val;
-        } else {
-            dst.reset();
-        }
-    }
-
-    template<>
-    inline Dimension Convert(const Ark_Resource& src)
-    {
-        return Dimension();
     }
 
     template<>
@@ -237,6 +302,42 @@ namespace OHOS::Ace::NG::Converter {
     inline int Convert(const Ark_IlluminatedType& src)
     {
         return static_cast<int>(src);
+    }
+
+    template<>
+    inline ButtonRole Convert(const Ark_ButtonRole& src)
+    {
+        return static_cast<ButtonRole>(src);
+    }
+
+    template<>
+    inline TextDecoration Convert(const Ark_TextDecorationType& src)
+    {
+        return static_cast<TextDecoration>(src);
+    }
+
+    template<>
+    inline TextDecorationStyle Convert(const Ark_TextDecorationStyle& src)
+    {
+        return static_cast<TextDecorationStyle>(src);
+    }
+
+    template<>
+    inline ButtonType Convert(const Ark_ButtonType& src)
+    {
+        return static_cast<ButtonType>(src);
+    }
+
+    template<>
+    inline ButtonStyleMode Convert(const Ark_ButtonStyleMode& src)
+    {
+        return static_cast<ButtonStyleMode>(src);
+    }
+
+    template<>
+    inline ControlSize Convert(const Ark_ControlSize& src)
+    {
+        return static_cast<ControlSize>(src);
     }
 
     template<>
@@ -269,14 +370,19 @@ namespace OHOS::Ace::NG::Converter {
         return static_cast<ImageFit>(src);
     }
 
+
     template<>
-    inline std::vector<std::string> Convert(const Ark_Resource& src)
+    inline StringArray Convert(const Ark_String& src)
     {
-        return {};
+        if (src.chars != nullptr) {
+            return { src.chars };
+        } else {
+            return {};
+        }
     }
 
     template<>
-    inline std::vector<std::string> Convert(const Ark_CustomObject& src)
+    inline StringArray Convert(const Ark_CustomObject& src)
     {
         return {};
     }
@@ -297,37 +403,11 @@ namespace OHOS::Ace::NG::Converter {
         return Color::FromString(src.chars);
     }
 
-    bool ParseColorFromArkResource(const Ark_Resource &res, Color &result);
-
-    template<>
-    inline Color Convert(const Ark_Resource& src)
-    {
-        Color color;
-        if (!ParseColorFromArkResource(src, color)) {
-            LOGE("ARKOALA Converter -> Resource support (Color) failed.");
-        }
-        return color;
-    }
-
-    template<>
-    inline Ark_CharPtr Convert(const Ark_Resource& src)
-    {
-        LOGE("ARKOALA Converter -> Resource support (String) is not implemented.");
-        return "ResUns";
-    }
-
-    template<>
-    inline float Convert(const Ark_Resource& src)
-    {
-        LOGE("ARKOALA Converter -> Resource support (float) is not implemented.");
-        return 1.0f;
-    }
-
     template<>
     inline CalcLength Convert(const Ark_Length& src)
     {
         if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
-            LOGE("Convert [Ark_Length] to [CalcLength] is not supported.");
+            LOGE("Convert [Ark_Length] of type Resource to [CalcLength] is not supported.");
             return CalcLength();
         }
         auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
@@ -336,6 +416,13 @@ namespace OHOS::Ace::NG::Converter {
             value /= 100.0f; // percent is normalized [0..1]
         }
         return CalcLength(value, unit);
+    }
+
+    template<>
+    inline std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src)
+    {
+        auto dimension = Dimension::FromString(src.chars);
+        return std::make_tuple(dimension.Value(), static_cast<Ark_Int32>(dimension.Unit()));
     }
 
     template<>
@@ -368,20 +455,6 @@ namespace OHOS::Ace::NG::Converter {
         PaddingProperty padding;
         return padding;
     }
-
-    struct ImageResource {
-        uint32_t type;
-        std::string bundleName;
-        std::string moduleName;
-        int32_t id;
-        std::vector<std::string> params;
-    };
-
-    ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageInterface_setImageOptions_Arg0& value);
-    ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageAttribute_alt_Arg0& value);
-    template<> std::string Convert(const Ark_Resource& resource);
-    ImageResource Convert(const Ark_Resource& value);
-
     template<>
     inline RadioStyle Convert(const Ark_RadioStyle& src)
     {
@@ -451,6 +524,7 @@ namespace OHOS::Ace::NG::Converter {
     template<> void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src);
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src);
+    template<> void AssignCast(std::optional<TextCase>& dst, const Ark_TextCase& src);
 
     template<>
     inline ItemDragInfo Convert(const Ark_ItemDragInfo& src)
@@ -460,6 +534,53 @@ namespace OHOS::Ace::NG::Converter {
         itemDragInfo.SetY(Convert<float>(src.y));
         return itemDragInfo;
     }
+    
+    template<> void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src);
+
+    template<>
+    inline void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src)
+    {
+        auto intVal = src.tag == Ark_Tag::ARK_TAG_INT32 ? src.i32 : static_cast<int32_t>(src.f32);
+        if (intVal >= 0) {
+            auto strVal = std::to_string(intVal);
+            if (auto [parseOk, val] = StringUtils::ParseFontWeight(strVal); parseOk) {
+                dst = val;
+            }
+        }
+    }
+
+    template<>
+    inline void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
+    {
+        if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
+            dst = val;
+        }
+    }
+
+    Shadow ToShadow(const Ark_ShadowOptions& src);
+
+    template<>
+    inline ShadowType Convert(const Ark_ShadowType& src)
+    {
+        return static_cast<ShadowType>(src);
+    }
+
+    template<>
+    inline std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
+    {
+        return { ToShadow(src) };
+    }
+
+    template<>
+    inline std::vector<Shadow> Convert(const Array_ShadowOptions& src)
+    {
+        std::vector<Shadow> result(src.length);
+        for (int i = 0; i < src.length; i++) {
+            result[i] = ToShadow(src.array[i]);
+        }
+        return result;
+    }
 } // namespace OHOS::Ace::NG::Converter
+} // namespace OHOS::Ace::NG
 
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_CONVERTER_H

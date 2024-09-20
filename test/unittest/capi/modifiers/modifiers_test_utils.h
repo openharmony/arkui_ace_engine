@@ -22,32 +22,9 @@
 #include "frameworks/core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
-inline std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name)
-{
-    static const InspectorFilter inspector;
 
-    if (auto fnode = reinterpret_cast<FrameNode *>(node); fnode) {
-        if (auto jsonVal = JsonUtil::Create(true); jsonVal) {
-            fnode->ToJsonValue(jsonVal, inspector);
-            auto val = jsonVal->GetValue(name);
-            return (val && (val->IsObject() || val->IsArray())) ? val->ToString() : jsonVal->GetString(name);
-        }
-    }
-    return {};
-}
-
-inline std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node)
-{
-    static const InspectorFilter inspector;
-
-    if (auto fnode = reinterpret_cast<FrameNode *>(node); fnode) {
-        if (auto jsonVal = JsonUtil::Create(true); jsonVal) {
-            fnode->ToJsonValue(jsonVal, inspector);
-            return jsonVal;
-        }
-    }
-    return nullptr;
-}
+std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name);
+std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node);
 
 template <typename T>
 T GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey) = delete;

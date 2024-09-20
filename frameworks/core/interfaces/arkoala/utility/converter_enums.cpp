@@ -301,4 +301,14 @@ void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src)
         default: LOGE("Unexpected enum value in Ark_ContentType: %{public}d", src);
     }
 }
+
+template<> void AssignCast(std::optional<TextCase>& dst, const Ark_TextCase& src)
+{
+    switch (src) {
+        case ARK_TEXT_CASE_NORMAL: dst = TextCase::NORMAL; break;
+        case ARK_TEXT_CASE_LOWER_CASE: dst = TextCase::LOWERCASE; break;
+        case ARK_TEXT_CASE_UPPER_CASE: dst = TextCase::UPPERCASE; break;
+        default: LOGE("Unexpected enum value in Ark_TextAlign: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

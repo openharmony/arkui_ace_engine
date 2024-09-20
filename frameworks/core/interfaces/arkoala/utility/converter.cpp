@@ -17,11 +17,6 @@
 #include "converter.h"
 
 namespace OHOS::Ace::NG::Converter {
-
-constexpr int32_t OFFSET_0 = 0;
-constexpr int32_t OFFSET_1 = 1;
-constexpr int32_t OFFSET_2 = 2;
-
 Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
 {
     Ark_TouchObject touch;
@@ -77,149 +72,152 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
     return result;
 }
 
-bool ParseColorFromArkResource(const Ark_Resource &res, Color &result)
+ResourceConverter::ResourceConverter(const Ark_Resource& resource)
 {
-    constexpr int32_t ERROR_COLOR_ID = -1;
-
-    auto themeConstants = NodeModifier::GetThemeConstants(0, res.bundleName.chars, res.moduleName.chars);
-    CHECK_NULL_RETURN(themeConstants, false);
-
-    CHECK_NULL_RETURN(res.id.tag == ARK_TAG_INT32, false);
-    auto resId = res.id.i32;
-    if (resId == ERROR_COLOR_ID) {
-        CHECK_NULL_RETURN(res.params.value.array, false);
-        std::string colorName = res.params.value.array[0].chars;
-        result = themeConstants->GetColorByName(colorName);
-        return true;
-    }
-
-    CHECK_NULL_RETURN(res.type.tag == ARK_TAG_INT32, false);
-    auto type = res.type.i32;
-    if (type == static_cast<int32_t>(NodeModifier::ResourceType::STRING)) {
-        auto value = themeConstants->GetString(resId);
-        return Color::ParseColorString(value, result);
-    }
-    if (type == static_cast<int32_t>(NodeModifier::ResourceType::INTEGER)) {
-        auto value = themeConstants->GetInt(resId);
-        result = Color(ColorAlphaAdapt(value));
-        return true;
-    }
-    if (type == static_cast<int32_t>(NodeModifier::ResourceType::COLOR)) {
-        result = themeConstants->GetColor(resId);
-        return true;
-    }
-    return false;
-}
-
-static std::string ResourceToString(Ark_NativePointer node, const Ark_Resource& resource)
-{
-    std::string src;
-    ImageResource image = Convert(resource);
-
-    auto themeConstants = NodeModifier::GetThemeConstants(reinterpret_cast<Ark_NodeHandle>(node),
-                                                          image.bundleName.c_str(), image.moduleName.c_str());
-
-    if (themeConstants) {
-        if (image.type == static_cast<int32_t>(NodeModifier::ResourceType::RAWFILE)) {
-            if (image.params.size() > 0) {
-                src = themeConstants->GetRawfile(image.params.at(0));
+    if (resource.id.tag == ARK_TAG_INT32 && resource.type.tag == ARK_TAG_INT32) {
+        id_ = resource.id.i32;
+        type_ = static_cast<NodeModifier::ResourceType>(resource.type.i32);
+        bundleName_ = std::string(resource.bundleName.chars);
+        moduleName_ = std::string(resource.moduleName.chars);
+        if (resource.params.tag != ARK_TAG_UNDEFINED) {
+            for (int i = 0; i < resource.params.value.length; i++) {
+                params_.emplace_back(resource.params.value.array[i].chars);
             }
         }
-        if (image.type == static_cast<int32_t>(NodeModifier::ResourceType::MEDIA)) {
-            if (image.id == -1) {
-                if (image.params.size() > 0) {
-                    src = themeConstants->GetMediaPathByName(image.params.at(0));
-                }
-            } else {
-                src = themeConstants->GetMediaPath(image.id);
-            }
-        }
+
+        themeConstants_ = NodeModifier::GetThemeConstants(nullptr, bundleName_.c_str(), moduleName_.c_str());
+    } else {
+        LOGE("ResourceConverter illegal id/type tag: id.tag = %{public}d, type.tag = %{public}d",
+             resource.id.tag, resource.type.tag);
     }
-    return src;
 }
 
-template<>
-std::string Convert(const Ark_Resource& resource)
+std::optional<std::string> ResourceConverter::ToString()
 {
-    return ResourceToString(nullptr, resource);
-}
+    std::optional<std::string> result;
+    CHECK_NULL_RETURN(themeConstants_, result);
 
-ImageResource Convert(const Ark_Resource& value)
-{
-    ImageResource resource;
-    resource.id = value.id.i32;
-    resource.type = value.type.i32;
-    resource.bundleName = std::string(value.bundleName.chars);
-    resource.moduleName = std::string(value.moduleName.chars);
-    if (value.params.tag != ARK_TAG_UNDEFINED && value.params.value.length > 0) {
-        resource.params.reserve(value.params.value.length);
-        for (int i = 0; i < value.params.value.length; i++) {
-            resource.params.push_back(value.params.value.array[i].chars);
-        }
-    }
-    return resource;
-}
-
-ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageInterface_setImageOptions_Arg0& value)
-{
-    ImageSourceInfo info;
-
-    switch (value.selector) {
-        case OFFSET_0: { // CustomObject
-            break;
-        }
-        case OFFSET_1: {
-            switch (value.value1.selector) {
-                case OFFSET_0: { // String
-                    info = ImageSourceInfo(value.value1.value0.chars);
-                    break;
-                }
-                case OFFSET_1: { // ArkResource
-                    info = ImageSourceInfo(ResourceToString(node, value.value1.value1),
-                                           value.value1.value1.bundleName.chars,
-                                           value.value1.value1.moduleName.chars);
-                    break;
-                }
-                default:
-                    LOGE("Unexpected src->selector: %{public}d\n", value.value1.selector);
+    switch (type_) {
+        case NodeModifier::ResourceType::STRING:
+            if (id_ != -1) {
+                result = themeConstants_->GetString(id_);
             }
             break;
-        }
-        case OFFSET_2: { // CustomObject
+
+        case NodeModifier::ResourceType::RAWFILE:
+            if (params_.size() > 0) {
+                result = themeConstants_->GetRawfile(params_[0]);
+            }
             break;
-        }
+
+        case NodeModifier::ResourceType::MEDIA:
+            if (id_ != -1) {
+                result = themeConstants_->GetMediaPath(id_);
+            } else if (params_.size() > 0) {
+                result = themeConstants_->GetMediaPathByName(params_[0]);
+            }
+            break;
+
         default:
-            LOGE("Unexpected src->selector: %{public}d\n", value.selector);
             break;
     }
-
-    return info;
+    return result;
 }
 
-ImageSourceInfo Convert(Ark_NativePointer node, const Type_ImageAttribute_alt_Arg0& value)
+std::optional<StringArray> ResourceConverter::ToStringArray()
 {
-    ImageSourceInfo info;
+    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    if (type_ == NodeModifier::ResourceType::STRARRAY) {
+        return themeConstants_->GetStringArray(id_);
+    }
+    return std::nullopt;
+}
 
-    switch (value.selector) {
-        case OFFSET_0: { // String
-            info = ImageSourceInfo(value.value0.chars);
+std::optional<Dimension> ResourceConverter::ToDimension()
+{
+    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    if (type_ == NodeModifier::ResourceType::STRING) {
+        return themeConstants_->GetDimension(id_);
+    }
+    return std::nullopt;
+}
+
+std::optional<float> ResourceConverter::ToFloat()
+{
+    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    if (type_ == NodeModifier::ResourceType::FLOAT) {
+        return static_cast<float>(themeConstants_->GetDouble(id_));
+    }
+    return std::nullopt;
+}
+
+std::optional<Color> ResourceConverter::ToColor()
+{
+    std::optional<Color> result;
+    if (id_ == -1 && params_.size() > 0) {
+        CHECK_NULL_RETURN(themeConstants_, result);
+        result = themeConstants_->GetColorByName(params_[0]);
+    }
+
+    switch (type_) {
+        case NodeModifier::ResourceType::STRING: {
+            Color color;
+            if (Color::ParseColorString(themeConstants_->GetString(id_), color)) {
+                result = color;
+            }
             break;
         }
-        case OFFSET_1: { // Resource
-            info = ImageSourceInfo(ResourceToString(node, value.value1),
-                                   value.value1.bundleName.chars,
-                                   value.value1.moduleName.chars);
+
+        case NodeModifier::ResourceType::INTEGER:
+            result = Color(ColorAlphaAdapt(themeConstants_->GetInt(id_)));
             break;
-        }
-        case OFFSET_2: { // CustomObject
+
+        case NodeModifier::ResourceType::COLOR:
+            result = themeConstants_->GetColor(id_);
             break;
-        }
+
         default:
-            LOGE("Unexpected src->selector: %{public}d\n", value.selector);
             break;
     }
 
-    return info;
+    return result;
+}
+
+Shadow ToShadow(const Ark_ShadowOptions& src)
+{
+    Shadow shadow;
+
+    auto radius = Converter::OptConvert<float>(src.radius);
+    if (radius) {
+        shadow.SetBlurRadius(radius.value());
+    }
+
+    auto shadowType = Converter::OptConvert<ShadowType>(src.type);
+    if (shadowType) {
+        shadow.SetShadowType(shadowType.value());
+    }
+
+    auto color = Converter::OptConvert<Color>(src.color);
+    if (color) {
+        shadow.SetColor(color.value());
+    }
+
+    auto offsetX = Converter::OptConvert<float>(src.offsetX);
+    if (offsetX) {
+        shadow.SetOffsetX(offsetX.value());
+    }
+
+    auto offsetY = Converter::OptConvert<float>(src.offsetY);
+    if (offsetY) {
+        shadow.SetOffsetY(offsetY.value());
+    }
+
+    auto fill = Converter::OptConvert<bool>(src.fill);
+    if (fill) {
+        shadow.SetIsFilled(fill.value());
+    }
+
+    return shadow;
 }
 
 template<>

@@ -79,6 +79,9 @@
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
+#include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
+#include "core/interfaces/native/node/node_api.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG::ViewModel {
 
@@ -523,7 +526,7 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(customSpanNode);
 }
 
-void* createQRcodeNode(ArkUI_Int32 nodeId)
+void* createQRCodeNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = QRCodeModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -778,11 +781,6 @@ void* createPolylineNode(ArkUI_Int32 nodeId)
     return nullptr;
 }
 
-void* createQRCodeNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
 void* createRectNode(ArkUI_Int32 nodeId)
 {
     return nullptr;
@@ -956,7 +954,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createNavigationNode,
     createCustomSpanNode,
     createSymbolNode,
-    createQRcodeNode,
+    createQRCodeNode,
     createBadgeNode,
     createTextClockNode,
     createTextTimerNode,

@@ -20,8 +20,8 @@ namespace OHOS::Ace {
 namespace {
 constexpr InternalResource::ResourceId ERROR_VALUE_RESOURCE_ID = InternalResource::ResourceId::NO_ID;
 constexpr double BLEND_ALPHA_MAX = 1.0;
-constexpr double DIMENSION_DEFALUT = 10.0;
-constexpr int32_t INT_DEFALUT = 5;
+constexpr double DIMENSION_DEFAULT = 10.0;
+constexpr int32_t INT_DEFAULT = 5;
 const ResValueWrapper ERROR_VALUE = { .type = ThemeConstantsType::ERROR };
 } // namespace
 void ThemeConstants::InitDeviceType()
@@ -45,17 +45,17 @@ Color ThemeConstants::GetColorByName(const std::string& resName) const
 
 Dimension ThemeConstants::GetDimension(uint32_t key) const
 {
-    return Dimension(DIMENSION_DEFALUT);
+    return Dimension(DIMENSION_DEFAULT);
 }
 
 Dimension ThemeConstants::GetDimensionByName(const std::string& resName) const
 {
-    return Dimension(DIMENSION_DEFALUT);
+    return Dimension(DIMENSION_DEFAULT);
 }
 
 int32_t ThemeConstants::GetInt(uint32_t key) const
 {
-    return INT_DEFALUT;
+    return INT_DEFAULT;
 }
 
 int32_t ThemeConstants::GetIntByName(const std::string& resName) const
