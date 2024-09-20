@@ -693,13 +693,16 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
     CHECK_NULL_VOID(buffer);
     int32_t bufferLength = arrayBuffer->ByteLength();
-    imageData.data = std::vector<Color>();
+    imageData.data = std::vector<uint32_t>();
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
             uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
             if (bufferLength > static_cast<int32_t>(idx + ALPHA_INDEX)) {
-                imageData.data.emplace_back(
-                    Color::FromARGB(buffer[idx + 3], buffer[idx], buffer[idx + 1], buffer[idx + 2]));
+                uint8_t alpha = buffer[idx + 3]; // idx + 3: The 4th byte format: alpha
+                uint8_t red = buffer[idx]; // idx: the 1st byte format: red
+                uint8_t green = buffer[idx + 1]; // idx + 1: The 2nd byte format: green
+                uint8_t blue = buffer[idx + 2]; // idx + 2: The 3rd byte format: blue
+                imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
             }
         }
     }
