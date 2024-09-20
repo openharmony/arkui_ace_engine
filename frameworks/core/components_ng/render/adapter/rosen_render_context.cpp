@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include <memory>
 
 #include "include/utils/SkParsePath.h"
 #include "modifier/rs_property.h"
@@ -33,6 +34,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
@@ -5239,6 +5241,15 @@ void RosenRenderContext::ClearDrawCommands()
 {
     StartRecording();
     StopRecordingIfNeeded();
+}
+
+void RosenRenderContext::RemoveContentModifier(const RefPtr<ContentModifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+    auto modifierAdapter = std::static_pointer_cast<ContentModifierAdapter>(ConvertContentModifier(modifier));
+    CHECK_NULL_VOID(modifierAdapter);
+    rsNode_->RemoveModifier(modifierAdapter);
 }
 
 void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)

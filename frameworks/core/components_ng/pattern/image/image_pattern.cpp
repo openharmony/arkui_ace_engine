@@ -1026,7 +1026,7 @@ void ImagePattern::OnRecycle()
     CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
+    rsRenderContext->RemoveContentModifier(contentMod_);
     UnregisterWindowStateChangedCallback();
 }
 
@@ -2151,7 +2151,8 @@ void ImagePattern::ResetImage()
     if (!altImage_) {
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        rsRenderContext->ClearDrawCommands();
+        rsRenderContext->RemoveContentModifier(contentMod_);
+        contentMod_ = nullptr;
     }
 }
 
@@ -2164,7 +2165,8 @@ void ImagePattern::ResetAltImage()
         CHECK_NULL_VOID(host);
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        rsRenderContext->ClearDrawCommands();
+        rsRenderContext->RemoveContentModifier(contentMod_);
+        contentMod_ = nullptr;
     }
 }
 
@@ -2182,7 +2184,8 @@ void ImagePattern::ResetImageAndAlt()
     CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
     CloseSelectOverlay();
     DestroyAnalyzerOverlay();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
