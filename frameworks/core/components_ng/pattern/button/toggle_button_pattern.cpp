@@ -53,6 +53,7 @@ void ToggleButtonPattern::InitParameters()
 
 void ToggleButtonPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
