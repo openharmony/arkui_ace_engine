@@ -1563,8 +1563,7 @@ void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ResetPaintState()
 {
-    std::vector<PaintState> empty;
-    std::swap(empty, savePaintState_);
+    std::vector<PaintState>().swap(savePaintState_);
     paintState_ = PaintState();
     isInitializeShadow_ = false;
     isOffscreenInitializeShadow_ = false;

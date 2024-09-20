@@ -43,14 +43,14 @@ void CanvasPattern::DetachRenderContext()
     FireOnContext2DDetach();
 }
 
-void CanvasPattern::SetOnContext2DAttach(std::function<void()> callback)
+void CanvasPattern::SetOnContext2DAttach(std::function<void()>&& callback)
 {
-    onContext2DAttach_ = callback;
+    onContext2DAttach_ = std::move(callback);
 }
 
-void CanvasPattern::SetOnContext2DDetach(std::function<void()> callback)
+void CanvasPattern::SetOnContext2DDetach(std::function<void()>&& callback)
 {
-    onContext2DDetach_ = callback;
+    onContext2DDetach_ = std::move(callback);
 }
 
 void CanvasPattern::FireOnContext2DAttach()
@@ -1230,6 +1230,13 @@ void CanvasPattern::UpdateTextDefaultDirection()
 void CanvasPattern::SetDensity(double density)
 {
     paintMethod_->SetDensity(density);
+}
+
+int32_t CanvasPattern::GetId()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
 }
 
 void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)

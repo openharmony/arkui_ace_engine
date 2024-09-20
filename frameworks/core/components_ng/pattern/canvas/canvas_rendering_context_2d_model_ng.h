@@ -30,8 +30,8 @@ public:
     ~CanvasRenderingContext2DModelNG() override = default;
     int32_t GetId() override;
     void Release() override;
-    void SetOnAttach(std::function<void()> callback) override;
-    void SetOnDetach(std::function<void()> callback) override;
+    void SetOnAttach(std::function<void()>&& callback) override;
+    void SetOnDetach(std::function<void()>&& callback) override;
     void SetPattern(RefPtr<AceType> pattern) override;
     void SetFillText(const PaintState& state, const FillTextInfo& fillTextInfo) override;
     void SetStrokeText(const PaintState& state, const FillTextInfo& fillTextInfo) override;
@@ -118,7 +118,7 @@ public:
 #ifdef PIXEL_MAP_SUPPORTED
     void TransferFromImageBitmap(const RefPtr<AceType>& pixelMap) override;
 #else
-    void TransferFromImageBitmap( const std::shared_ptr<Ace::ImageData>& imageData) override;
+    void TransferFromImageBitmap(const std::shared_ptr<Ace::ImageData>& imageData) override;
 #endif
 
 private:

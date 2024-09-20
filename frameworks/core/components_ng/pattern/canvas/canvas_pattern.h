@@ -42,8 +42,8 @@ public:
     CanvasPattern() = default;
     ~CanvasPattern() override;
 
-    void SetOnContext2DAttach(std::function<void()> callback);
-    void SetOnContext2DDetach(std::function<void()> callback);
+    void SetOnContext2DAttach(std::function<void()>&& callback);
+    void SetOnContext2DDetach(std::function<void()>&& callback);
     void FireOnContext2DAttach();
     void FireOnContext2DDetach();
 
@@ -174,6 +174,7 @@ public:
     TransformParam GetTransform() const;
     void SetDensity(double density);
     void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform);
+    int32_t GetId();
 
     void SaveLayer();
     void RestoreLayer();

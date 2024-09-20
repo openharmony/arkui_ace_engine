@@ -142,8 +142,8 @@ public:
     virtual ~CanvasRenderingContext2DModel() = default;
     virtual int32_t GetId() { return -1; };
     virtual void Release() {};
-    virtual void SetOnAttach(std::function<void()> callback) {};
-    virtual void SetOnDetach(std::function<void()> callback) {};
+    virtual void SetOnAttach(std::function<void()>&& callback) {};
+    virtual void SetOnDetach(std::function<void()>&& callback) {};
     virtual void GetWidth(double& width) = 0;
     virtual void GetHeight(double& height) = 0;
     virtual void SetTransferFromImageBitmap(RefPtr<AceType> offscreenCPattern) {};

@@ -23,6 +23,13 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
+enum class CanvasCallbackType {
+    ON_ATTACH = 0,
+    ON_DETACH,
+    UNKNOWN
+};
+
+using CanvasCallbackFuncPairList = std::list<std::pair<napi_ref, std::function<void()>>>;
 
 class JSRenderingContext : public JSCanvasRenderer {
 public:
@@ -36,11 +43,7 @@ public:
     void OnAttachToCanvas();
     void OnDetachFromCanvas();
 
-    void JsOnAttach(const JSCallbackInfo& info);
-    void JsOnDetach(const JSCallbackInfo& info);
     void JsToDataUrl(const JSCallbackInfo& info);
-    void JsGetCanvas(const JSCallbackInfo& info);
-    void JsSetCanvas(const JSCallbackInfo& info);
     void JsGetWidth(const JSCallbackInfo& info);
     void JsGetHeight(const JSCallbackInfo& info);
     void JsSetHeight(const JSCallbackInfo& info);
@@ -48,13 +51,23 @@ public:
     void JsTransferFromImageBitmap(const JSCallbackInfo& info);
     void JsStartImageAnalyzer(const JSCallbackInfo& info);
     void JsStopImageAnalyzer(const JSCallbackInfo& info);
+    void JsGetCanvas(const JSCallbackInfo& info);
+    void JsSetCanvas(const JSCallbackInfo& info);
+    void JsOn(const JSCallbackInfo& info);
+    void JsOff(const JSCallbackInfo& info);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderingContext);
 
-    std::function<void()> onAttach_;
-    std::function<void()> onDetach_;
 private:
+    void DeleteCallbackFromList(int argc, napi_env env, napi_value cb, CanvasCallbackType type);
+    void AddCallbackToList(napi_env env, napi_value cb, CanvasCallbackType type, const std::function<void()>&& onFunc);
+    CanvasCallbackFuncPairList::const_iterator FindCbList(
+        napi_env env, napi_value cb, CanvasCallbackFuncPairList& callbackFuncPairList);
+    CanvasCallbackType GetCanvasCallbackType(const std::string& strType);
+
     bool isImageAnalyzing_ = false;
+    CanvasCallbackFuncPairList attachCallback_;
+    CanvasCallbackFuncPairList detachCallback_;
 };
 
 } // namespace OHOS::Ace::Framework

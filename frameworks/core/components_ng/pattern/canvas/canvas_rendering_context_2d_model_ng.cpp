@@ -23,14 +23,14 @@
 
 namespace OHOS::Ace::NG {
 
-void CanvasRenderingContext2DModelNG::SetOnAttach(std::function<void()> callback)
+void CanvasRenderingContext2DModelNG::SetOnAttach(std::function<void()>&& callback)
 {
-    onContext2DAttach_ = callback;
+    onContext2DAttach_ = std::move(callback);
 }
 
-void CanvasRenderingContext2DModelNG::SetOnDetach(std::function<void()> callback)
+void CanvasRenderingContext2DModelNG::SetOnDetach(std::function<void()>&& callback)
 {
-    onContext2DDetach_ = callback;
+    onContext2DDetach_ = std::move(callback);
 }
 
 int32_t CanvasRenderingContext2DModelNG::GetId()
