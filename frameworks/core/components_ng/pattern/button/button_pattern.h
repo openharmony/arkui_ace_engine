@@ -410,15 +410,6 @@ public:
         return false;
     }
 
-    bool IsDynamicSwitchButtonStyle(const Shadow& shadow)
-    {
-        ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme_->GetShadowNormal());
-        if (shadow == Shadow::CreateShadow(ShadowStyle::None) || shadow == Shadow::CreateShadow(shadowStyle)) {
-            return true;
-        }
-        return false;
-    }
-
 protected:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -449,6 +440,7 @@ private:
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     static bool NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProperty);
     bool IsNeedToHandleHoverOpacity();
+    Shadow shadow_;
     Color backgroundColor_;
     Color focusBorderColor_;
     Color themeBgColor_;

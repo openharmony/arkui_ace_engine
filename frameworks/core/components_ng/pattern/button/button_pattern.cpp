@@ -209,16 +209,7 @@ void ButtonPattern::InitButtonLabel()
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     isTextFadeOut_ = textTheme->GetIsTextFadeout();
-<<<<<<< HEAD
     UpdateTexOverflow(false);
-=======
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
-        textLayoutProperty->UpdateTextMarqueeFadeout(true);
-        textLayoutProperty->UpdateTextMarqueeStart(false);
-        textNode->MarkDirtyNode();
-    }
->>>>>>> 默认参数支持差异化配置--button功能代码
 }
 
 void ButtonPattern::AddIsFocusActiveUpdateEvent()
@@ -276,11 +267,7 @@ void ButtonPattern::SetBlurButtonStyle(RefPtr<TextLayoutProperty>& textLayoutPro
         scaleModify_ = false;
         renderContext_->SetScale(1.0f, 1.0f);
     }
-<<<<<<< HEAD
     if (bgColorModify_ && buttonStyle != ButtonStyleMode::EMPHASIZE) {
-=======
-    if (bgColorModify_) {
->>>>>>> 默认参数支持差异化配置--button功能代码
         bgColorModify_ = false;
         renderContext_->UpdateBackgroundColor(buttonTheme_->GetBgColor(buttonStyle, buttonRole));
     }
@@ -292,14 +279,7 @@ void ButtonPattern::SetBlurButtonStyle(RefPtr<TextLayoutProperty>& textLayoutPro
         textRenderContext->UpdateForegroundColor(buttonTheme_->GetTextColor(buttonStyle, buttonRole));
         textNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-<<<<<<< HEAD
     UpdateTexOverflow(isHover_);
-=======
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextMarqueeStart(isHover_);
-        textNode->MarkDirtyNode();
-    }
->>>>>>> 默认参数支持差异化配置--button功能代码
 }
 
 void ButtonPattern::SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<FrameNode>& textNode)
@@ -314,7 +294,6 @@ void ButtonPattern::SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutPr
     auto&& transform = renderContext_->GetOrCreateTransform();
     CHECK_NULL_VOID(transform);
 
-<<<<<<< HEAD
     ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme_->GetShadowFocus());
     if (shadowStyle != ShadowStyle::None && buttonStyle != ButtonStyleMode::TEXT && isApplyShadow_) {
         Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(buttonTheme_->GetShadowNormal()));
@@ -331,22 +310,6 @@ void ButtonPattern::SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutPr
         renderContext_->SetScale(scaleFocus, scaleFocus);
     }
 
-=======
-    if (buttonStyle != ButtonStyleMode::TEXT && isApplyShadow_) {
-        Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(buttonTheme_->GetShadowNormal()));
-        if (!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow) {
-            shadowModify_ = true;
-            ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme_->GetShadowFocus());
-            renderContext_->UpdateBackShadow(Shadow::CreateShadow(shadowStyle));
-        }
-    }
-    float scaleFocus = buttonTheme_->GetScaleFocus();
-    VectorF scale(scaleFocus, scaleFocus);
-    if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
-        scaleModify_ = true;
-        renderContext_->SetScale(scaleFocus, scaleFocus);
-    }
->>>>>>> 默认参数支持差异化配置--button功能代码
     bgColorModify_ = renderContext_->GetBackgroundColor() == buttonTheme_->GetBgColor(buttonStyle, buttonRole);
     if (bgColorModify_) {
         if (buttonStyle == ButtonStyleMode::TEXT) {
@@ -356,7 +319,6 @@ void ButtonPattern::SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutPr
         }
     }
 
-<<<<<<< HEAD
     focusTextColorModify_ =
             textLayoutProperty->GetTextColor() == buttonTheme_->GetTextColor(buttonStyle, buttonRole);
     if (focusTextColorModify_ && buttonStyle != ButtonStyleMode::EMPHASIZE) {
@@ -367,23 +329,6 @@ void ButtonPattern::SetFocusButtonStyle(RefPtr<TextLayoutProperty>& textLayoutPr
         textNode->MarkDirtyNode();
     }
     UpdateTexOverflow(true);
-=======
-    if (buttonStyle != ButtonStyleMode::EMPHASIZE) {
-        focusTextColorModify_ =
-            textLayoutProperty->GetTextColor() == buttonTheme_->GetTextColor(buttonStyle, buttonRole);
-        if (focusTextColorModify_) {
-            textLayoutProperty->UpdateTextColor(buttonTheme_->GetFocusTextColor(buttonStyle, buttonRole));
-            auto textRenderContext = textNode->GetRenderContext();
-            CHECK_NULL_VOID(textRenderContext);
-            textRenderContext->UpdateForegroundColor(buttonTheme_->GetFocusTextColor(buttonStyle, buttonRole));
-            textNode->MarkDirtyNode();
-        }
-    }
-    if (isTextFadeOut_) {
-        textLayoutProperty->UpdateTextMarqueeStart(true);
-        textNode->MarkDirtyNode();
-    }
->>>>>>> 默认参数支持差异化配置--button功能代码
 }
 
 void ButtonPattern::UpdateButtonStyle()
@@ -442,6 +387,7 @@ void ButtonPattern::OnModifyDone()
     renderContext_ = host->GetRenderContext();
     layoutProperty_ = GetLayoutProperty<ButtonLayoutProperty>();
     buttonTheme_ = pipeline_->GetTheme<ButtonTheme>();
+    shadow_ = Shadow::CreateShadow(static_cast<ShadowStyle>(buttonTheme_->GetShadowNormal()));
     HandleBorderAndShadow();
     HandleFocusStatusStyle();
     if (pipeline_->GetIsFocusActive()) {
@@ -626,25 +572,19 @@ void ButtonPattern::HandleBorderAndShadow()
     if (UseContentModifier()) {
         return;
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> 默认参数支持差异化配置--button功能代码
     CHECK_NULL_VOID(renderContext_);
     CHECK_NULL_VOID(layoutProperty_);
     CHECK_NULL_VOID(buttonTheme_);
 
-<<<<<<< HEAD
     ButtonStyleMode buttonStyle = layoutProperty_->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme_->GetShadowNormal());
     if (shadowStyle != ShadowStyle::None) {
         auto&& graphics = renderContext_->GetOrCreateGraphics();
         CHECK_NULL_VOID(graphics);
-        if ((!graphics->HasBackShadow() ||
-            IsDynamicSwitchButtonStyle(graphics->GetBackShadowValue())) && isApplyShadow_) {
-            Shadow shadow = Shadow::CreateShadow(
+        if ((!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow_) && isApplyShadow_) {
+            shadow_ = Shadow::CreateShadow(
                 buttonStyle == ButtonStyleMode::TEXT ? ShadowStyle::None : shadowStyle);
-            renderContext_->UpdateBackShadow(shadow);
+            renderContext_->UpdateBackShadow(shadow_);
         }
     }
 
@@ -677,33 +617,6 @@ void ButtonPattern::HandleBorderAndShadow()
         return;
     }
     isLayoutUpdate_ = false;
-=======
-    auto&& graphics = renderContext_->GetOrCreateGraphics();
-    CHECK_NULL_VOID(graphics);
-    ButtonStyleMode buttonStyle = layoutProperty_->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-    if (buttonStyle != ButtonStyleMode::TEXT && !graphics->HasBackShadow() && isApplyShadow_) {
-        ShadowStyle shadowStyle = static_cast<ShadowStyle>(buttonTheme_->GetShadowNormal());
-        Shadow shadow = Shadow::CreateShadow(shadowStyle);
-        renderContext_->UpdateBackShadow(shadow);
-    }
-
-    if (buttonStyle == ButtonStyleMode::NORMAL && !layoutProperty_->GetBorderWidthProperty()) {
-        ControlSize controlSize = layoutProperty_->GetControlSize().value_or(ControlSize::NORMAL);
-        if (!renderContext_->HasBorderWidth()) {
-            BorderWidthProperty borderWidth;
-            borderWidth.SetBorderWidth(controlSize == ControlSize::NORMAL ?
-                buttonTheme_->GetBorderWidth() : buttonTheme_->GetBorderWidthSmall());
-            layoutProperty_->UpdateBorderWidth(borderWidth);
-            renderContext_->UpdateBorderWidth(borderWidth);
-        }
-        if (!renderContext_->HasBorderColor()) {
-            BorderColorProperty borderColor;
-            borderColor.SetColor(controlSize == ControlSize::NORMAL ?
-                buttonTheme_->GetBorderColor() : buttonTheme_->GetBorderColorSmall());
-            renderContext_->UpdateBorderColor(borderColor);
-        }
-    }
->>>>>>> 默认参数支持差异化配置--button功能代码
 }
 
 void ButtonPattern::UpdateTexOverflow(bool isMarqueeStart)
@@ -718,10 +631,7 @@ void ButtonPattern::UpdateTexOverflow(bool isMarqueeStart)
         textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
         textLayoutProperty->UpdateTextMarqueeFadeout(true);
         textLayoutProperty->UpdateTextMarqueeStart(isMarqueeStart);
-<<<<<<< HEAD
         textLayoutProperty->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::DEFAULT);
-=======
->>>>>>> 默认参数支持差异化配置--button功能代码
         textNode->MarkDirtyNode();
     }
 }
