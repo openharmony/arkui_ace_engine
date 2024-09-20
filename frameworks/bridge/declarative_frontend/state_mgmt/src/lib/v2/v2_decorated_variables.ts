@@ -153,7 +153,7 @@ class VariableUtilV3 {
    * @param provideVarName - The name of the property in the provider view that the consumer will access.
    *
    */
-    public static connectConsumer2Provider(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): any {
+    public static connectConsumer2Provider<T>(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): T {
       const weakView = new WeakRef<ViewV2>(provideView);
       const provideViewName = provideView.constructor?.name;
       const view = weakView.deref();
@@ -191,7 +191,7 @@ class VariableUtilV3 {
       return view[provideVarName];
     }
 
-    public static defineConsumerWithoutProvider(consumeView: ViewV2, consumeVarName: string, consumerLocalVal: any): any {
+    public static defineConsumerWithoutProvider<T>(consumeView: ViewV2, consumeVarName: string, consumerLocalVal: T): T {
       stateMgmtConsole.debug(`defineConsumerWithoutProvider: ${consumeView.debugInfo__()} @Consumer ${consumeVarName} does not have @Provider counter part, will use local init value`);
 
       const storeProp = ObserveV2.OB_PREFIX + consumeVarName;
