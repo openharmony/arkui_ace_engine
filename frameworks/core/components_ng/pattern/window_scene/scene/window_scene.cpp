@@ -60,7 +60,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         if (self->startingWindow_) {
-            if (IsWindowSizeEqual()) {
+            if (self->IsWindowSizeEqual()) {
                 self->BufferAvailableCallback();
             }
             return;
