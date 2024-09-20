@@ -857,17 +857,16 @@ class f1 extends ViewPU {
     }
 
     getAccessibilityText() {
-        if (this.selectedIndexes.includes(this.index) && this.itemOptions.selectedIcon &&
-        this.itemOptions.c2) {
+        if (this.selectedIndexes.includes(this.index) && this.itemOptions.c2) {
             return (typeof this.itemOptions.c2 === 'string') ?
             this.itemOptions.c2 :
             getContext(this).resourceManager.getStringSync(this.itemOptions.c2.id);
-        } else if (this.itemOptions.selectedIcon && this.itemOptions.b2) {
+        } else if (this.itemOptions.b2) {
             return (typeof this.itemOptions.b2 === 'string') ?
             this.itemOptions.b2 :
             getContext(this).resourceManager.getStringSync(this.itemOptions.b2.id);
         }
-        return "";
+        return '';
     }
 
     initialRender() {
@@ -1445,7 +1444,7 @@ class i1 extends ViewPU {
         if (value) {
             return (typeof value === 'string') ? value : getContext(this).resourceManager.getStringSync(value.id);
         } else {
-            return "";
+            return '';
         }
     }
 
@@ -1615,7 +1614,7 @@ class i1 extends ViewPU {
                                                     }, undefined, elmtId, () => {
                                                     }, {
                                                         page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                        line: 798,
+                                                        line: 800,
                                                         u3: 15
                                                     });
                                                     ViewPU.create(componentCall);
@@ -2277,7 +2276,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1094,
+                                                line: 1096,
                                                 u3: 11
                                             });
                                             ViewPU.create(componentCall);
@@ -2349,7 +2348,7 @@ export class SegmentButton extends ViewPU {
                                                                             }, undefined, elmtId, () => {
                                                                             }, {
                                                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                                                line: 1105,
+                                                                                line: 1107,
                                                                                 u3: 23
                                                                             });
                                                                             ViewPU.create(componentCall);
@@ -2426,7 +2425,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1131,
+                                                line: 1133,
                                                 u3: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2459,7 +2458,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1137,
+                                                line: 1139,
                                                 u3: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2495,7 +2494,7 @@ export class SegmentButton extends ViewPU {
                                     options: this.options,
                                     selectedIndexes: this.u2,
                                 }, undefined, elmtId, () => {
-                                }, { page: "segmentbutton/src/main/ets/components/MainPage.ets", line: 1152, u3: 9 });
+                                }, { page: "segmentbutton/src/main/ets/components/MainPage.ets", line: 1154, u3: 9 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

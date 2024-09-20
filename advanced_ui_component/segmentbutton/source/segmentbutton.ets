@@ -62,27 +62,27 @@ function nearEqual(first: number, second: number): boolean {
 
 interface SegmentButtonTextItem {
   text: ResourceStr
-  accessibilityLevel?: string;
-  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string
+  accessibilityDescription?: ResourceStr
 }
 
 interface SegmentButtonIconItem {
   icon: ResourceStr,
-  iconAccessibilityText?: ResourceStr;
+  iconAccessibilityText?: ResourceStr
   selectedIcon: ResourceStr
-  selectedIconAccessibilityText?: ResourceStr;
-  accessibilityLevel?: string;
-  accessibilityDescription?: ResourceStr;
+  selectedIconAccessibilityText?: ResourceStr
+  accessibilityLevel?: string
+  accessibilityDescription?: ResourceStr
 }
 
 interface SegmentButtonIconTextItem {
   icon: ResourceStr,
-  iconAccessibilityText?: ResourceStr;
+  iconAccessibilityText?: ResourceStr
   selectedIcon: ResourceStr,
-  selectedIconAccessibilityText?: ResourceStr;
+  selectedIconAccessibilityText?: ResourceStr
   text: ResourceStr
-  accessibilityLevel?: string;
-  accessibilityDescription?: ResourceStr;
+  accessibilityLevel?: string
+  accessibilityDescription?: ResourceStr
 }
 
 type DimensionNoPercentage = PX | VP | FP | LPX | Resource
@@ -520,17 +520,16 @@ struct SegmentButtonItem {
   }
 
   private getAccessibilityText(): string {
-    if (this.selectedIndexes.includes(this.index) && this.itemOptions.selectedIcon &&
-    this.itemOptions.selectedIconAccessibilityText) {
+    if (this.selectedIndexes.includes(this.index) && this.itemOptions.selectedIconAccessibilityText) {
       return (typeof this.itemOptions.selectedIconAccessibilityText === 'string') ?
       this.itemOptions.selectedIconAccessibilityText :
       getContext(this).resourceManager.getStringSync((this.itemOptions.selectedIconAccessibilityText as Resource).id)
-    } else if (this.itemOptions.selectedIcon && this.itemOptions.iconAccessibilityText) {
+    } else if (this.itemOptions.iconAccessibilityText) {
       return (typeof this.itemOptions.iconAccessibilityText === 'string') ?
       this.itemOptions.iconAccessibilityText :
       getContext(this).resourceManager.getStringSync((this.itemOptions.iconAccessibilityText as Resource).id)
     }
-    return "";
+    return '';
   }
 
   build() {
@@ -784,9 +783,12 @@ struct SegmentButtonItemArrayComponent {
   }
 
   getAccessibilityDescription(value?: ResourceStr): string {
-    if(value)
-      return (typeof value === 'string') ? value : getContext(this).resourceManager.getStringSync((value as Resource).id)
-    else return "";
+    if (value) {
+      return (typeof value === 'string') ? value :
+      getContext(this).resourceManager.getStringSync((value as Resource).id)
+    } else {
+      return '';
+    }
   }
 
   build() {
