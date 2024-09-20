@@ -22,10 +22,10 @@ namespace OHOS::Ace::NG::Converter {
 template<>
 std::optional<int32_t> Convert(const std::optional<NavRouteMode>& src)
 {
-    if (!src.has_value()) {
-        return std::nullopt;
+    if (src.has_value()) {
+        return static_cast<int32_t>(*src);
     }
-    return static_cast<int32_t>(*src);
+    return std::nullopt;
 }
 }
 

@@ -31,11 +31,12 @@ namespace  {
     //const auto ATTRIBUTE_NAME_DEFAULT_VALUE = "!NOT-DEFINED!";
     //const auto ATTRIBUTE_PARAM_NAME = "param";
     //const auto ATTRIBUTE_PARAM_DEFAULT_VALUE = "!NOT-DEFINED!";
-    const auto ATTRIBUTE_MODE_MODE_NAME = "modeMode";
-    const auto ATTRIBUTE_MODE_MODE_DEFAULT_VALUE = "!NOT-DEFINED!";
+    const auto ATTRIBUTE_MODE_MODE_NAME = "mode";
+    const auto ATTRIBUTE_MODE_MODE_DEFAULT_VALUE = "PUSH_WITH_RECREATE";
 } // namespace
 
-class NavRouterModifierTest : public ModifierTestBase<GENERATED_ArkUINavRouterModifier, &GENERATED_ArkUINodeModifiers::getNavRouterModifier, GENERATED_ARKUI_NAV_ROUTER> {
+class NavRouterModifierTest : public ModifierTestBase<GENERATED_ArkUINavRouterModifier,
+    &GENERATED_ArkUINodeModifiers::getNavRouterModifier, GENERATED_ARKUI_NAV_ROUTER> {
     public:
     static void SetUpTestCase()
     {

@@ -24,6 +24,8 @@ public:
     void Create() override;
     void SetOnStateChange(std::function<void(bool isActivated)>&& onStateChange) override;
     void SetNavRouteMode(int32_t value) override;
+
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavRouteMode(FrameNode* frameNode, const std::optional<int32_t>& mode);
 };
 } // namespace OHOS::Ace::NG
