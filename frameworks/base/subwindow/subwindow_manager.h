@@ -154,7 +154,8 @@ private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
     RefPtr<Subwindow> GetOrCreateSystemSubWindow();
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
-    RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType);
+    RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,
+        uint32_t mainWindowId);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 

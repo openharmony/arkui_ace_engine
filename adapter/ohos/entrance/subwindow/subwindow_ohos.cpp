@@ -138,14 +138,14 @@ SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContain
         instanceId);
 }
 
-Rosen::WindowType SubwindowOhos::GetToastRosenType(bool isSceneBoardEnable)
+Rosen::WindowType SubwindowOhos::GetToastRosenType(bool IsSceneBoardEnabled)
 {
     auto toastType = GetToastWindowType();
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
-        "GetToastRosenType windowType: %{public}d, isSceneBoardEnable: %{public}d",
-        toastType, isSceneBoardEnable);
+        "GetToastRosenType windowType: %{public}d, IsSceneBoardEnabled: %{public}d",
+        toastType, IsSceneBoardEnabled);
     if (toastType == ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW) {
-        if (!isSceneBoardEnable) {
+        if (!IsSceneBoardEnabled) {
             return Rosen::WindowType::WINDOW_TYPE_TOAST;
         }
         return Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
@@ -158,7 +158,8 @@ Rosen::WindowType SubwindowOhos::GetToastRosenType(bool isSceneBoardEnable)
 }
 
 void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
-    OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption, const Rosen::WindowType& toastWindowType)
+    OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
+    const Rosen::WindowType& toastWindowType, uint32_t mainWindowId)
 {
     if (toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
@@ -169,11 +170,19 @@ void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
         auto parentPipeline = parentContainer->GetPipelineContext();
         CHECK_NULL_VOID(parentPipeline);
         auto hostWindowId = parentPipeline->GetFocusWindowId();
-        windowOption->SetExtensionTag(true);
+        windowOption->SetIsUIExtensionSubWindowFlag(true);
         windowOption->SetParentId(hostWindowId);
     } else {
-        auto parentWindowId = parentContainer->GetWindowId();
-        windowOption->SetParentId(parentWindowId);
+        windowOption->SetParentId(mainWindowId);
+    }
+}
+
+void SetUIExtensionSubwindowFlag(OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
+    bool isAppSubwindow, sptr<OHOS::Rosen::Window>& parentWindow)
+{
+    if (isAppSubwindow && (parentWindow->GetIsUIExtensionFlag() ||
+        parentWindow->GetIsUIExtensionSubWindowFlag())) {
+        windowOption->SetIsUIExtensionSubWindowFlag(true);
     }
 }
 
@@ -192,11 +201,14 @@ bool SubwindowOhos::InitContainer()
         parentWindow_ = parentWindow;
         auto windowType = parentWindow->GetType();
         std::string windowTag = "";
+        bool isAppSubwindow = false;
         if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
         } else if (GetAboveApps()) {
             auto toastWindowType = GetToastRosenType(parentContainer->IsSceneBoardEnabled());
-            SetToastWindowOption(parentContainer, windowOption, toastWindowType);
+            isAppSubwindow = toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+            auto mainWindowId = GetMainWindowId();
+            SetToastWindowOption(parentContainer, windowOption, toastWindowType, mainWindowId);
             windowTag = "TOPMOST_TOAST_";
         } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
@@ -213,12 +225,14 @@ bool SubwindowOhos::InitContainer()
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(hostWindowId);
             SetUIExtensionHostWindowId(hostWindowId);
+            isAppSubwindow = true;
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
         } else {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
+            isAppSubwindow = true;
         }
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         if (!defaultDisplay) {
@@ -227,6 +241,7 @@ bool SubwindowOhos::InitContainer()
         }
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+        SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
         window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
             std::to_string(windowId_), windowOption, parentWindow->GetContext());
         if (!window_) {
