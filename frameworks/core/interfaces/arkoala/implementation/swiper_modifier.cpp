@@ -20,6 +20,7 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/implementation/swiper_controller_modifier_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 using IndicatorVariantType = std::variant<SwiperParameters, SwiperDigitalParameters, bool>;
@@ -195,7 +196,21 @@ namespace SwiperInterfaceModifier {
 void SetSwiperOptionsImpl(Ark_NativePointer node,
                           const Opt_SwiperController* controller)
 {
-    LOGE("SwiperInterfaceModifier.SetSwiperOptionsImpl not implemented due to no SwiperController support");
+    CHECK_NULL_VOID(controller);
+
+    // obtain the internal SwiperController
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto internalSwiperController = SwiperModelNG::GetSwiperController(frameNode);
+
+    // obtain the external SwiperController peer
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(*controller);
+    CHECK_NULL_VOID(abstPeerPtrOpt);
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::SwiperControllerPeerImpl *>(*abstPeerPtrOpt);
+    CHECK_NULL_VOID(peerImplPtr);
+
+    // pass the internal controller to external management
+    peerImplPtr->AddTargetController(internalSwiperController);
 }
 } // SwiperInterfaceModifier
 

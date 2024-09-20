@@ -148,18 +148,6 @@ public:
 };
 
 /**
- * @tc.name: setSwiperOptionsTest
- * @tc.desc: Check the functionality of SwiperInterfaceModifier.SetSwiperOptionsImpl
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperModifierTest, DISABLED_setSwiperOptionsTest, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setSwiperOptions, nullptr);
-    modifier_->setSwiperOptions(node_, nullptr);
-    // the SwiperInterfaceModifier.SetSwiperOptionsImpl not implemented due to no SwiperController support,
-    // it consists from a stub only
-}
-/**
  * @tc.name: setIndexTest
  * @tc.desc: Check the functionality of SwiperModifier.IndexImpl
  * @tc.type: FUNC

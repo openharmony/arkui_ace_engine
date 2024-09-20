@@ -502,6 +502,12 @@ namespace Converter {
         return options;
     }
 
+    template<>
+    inline Ark_NativePointer Convert(const Ark_Materialized& src)
+    {
+        return src.ptr;
+    }
+
     // Enums specializations
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
     template<> void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src);
