@@ -18,6 +18,7 @@ import { TextPickerDialogBootcamp } from './TextPickerDialogBootcamp';
 import { TimePickerDialogBootcamp } from './TimePickerDialogBootcamp';
 import { DatePickerDialogBootcamp } from './DatePickerDialogBootcamp';
 import { CalendarPickerDialogBootcamp } from './CalendarPickerDialogBootcamp';
+import { ListItemGroupBootcamp } from './ListItemGroupBootcamp';
 
 export const containersRoute: RouteGroup = {
   name: 'containers',
@@ -26,7 +27,8 @@ export const containersRoute: RouteGroup = {
     { name: 'text-picker-dialog', label: '文本选择器弹窗/TextpickerDialog' },
     { name: 'time-picker-dialog', label: '时间选择器弹窗/TimepickerDialog' },
     { name: 'date-picker-dialog', label: '日期选择器弹窗/DatepickerDialog' },
-    { name: 'calendar-picker-dialog', label: '日历选择器弹窗/CalendarPickerDialog' }
+    { name: 'calendar-picker-dialog', label: '日历选择器弹窗/CalendarPickerDialog' },
+    { name: 'list-item-group', label: '分组列表/ListItemGroup'},
   ]
 };
 
@@ -40,5 +42,7 @@ export function ContainersDestination(name: string, route: Route) {
     DatePickerDialogBootcamp({ title: route.label })
   } else if (name === 'containers/calendar-picker-dialog') {
     CalendarPickerDialogBootcamp({ title: route.label })
+  } else if (name === 'containers/list-item-group') {
+    ListItemGroupBootcamp({ title: route.label })
   }
 }
