@@ -63,6 +63,7 @@ inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
 const std::string LINE_CUP_BUTT = "BUTT";
 const std::string LINE_CUP_ROUND = "ROUND";
 const std::string LINE_CUP_SQUARE = "SQUARE";
+const std::string DEFAULT_STROKE_WIDTH = "1.00px";
 } // namespace
 
 class DividerModifierTest : public ModifierTestBase<GENERATED_ArkUIDividerModifier,
@@ -81,6 +82,7 @@ public:
         EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
+        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     }
 
     static void TearDownTestCase()
@@ -236,7 +238,7 @@ HWTEST_F(DividerModifierTest, DividerModifierTest004, TestSize.Level1)
     ASSERT_NE(modifier_->setStrokeWidth, nullptr);
 
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal1, "1.00vp");
+    EXPECT_EQ(checkVal1, DEFAULT_STROKE_WIDTH);
 
     Type_DividerAttribute_strokeWidth_Arg0 intVal = { .selector = 0, .value0 = ArkNum(123) };
     modifier_->setStrokeWidth(node_, &intVal);
@@ -261,7 +263,7 @@ HWTEST_F(DividerModifierTest, DividerModifierTest004, TestSize.Level1)
     Type_DividerAttribute_strokeWidth_Arg0 percentVal = { .selector = 1, .value1 = ArkStr("10%") };
     modifier_->setStrokeWidth(node_, &percentVal);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal6, "10.00%");
+    EXPECT_EQ(checkVal6, DEFAULT_STROKE_WIDTH);
 }
 
 /**
@@ -275,7 +277,7 @@ HWTEST_F(DividerModifierTest, DividerModifierTest005, TestSize.Level1)
     ASSERT_NE(modifier_->setStrokeWidth, nullptr);
 
     auto checkVal1 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal1, "1.00vp");
+    EXPECT_EQ(checkVal1, DEFAULT_STROKE_WIDTH);
 
     Type_DividerAttribute_strokeWidth_Arg0 intNegVal = { .selector = 0, .value0 = ArkNum(-123) };
     modifier_->setStrokeWidth(node_, &intNegVal);
@@ -297,15 +299,15 @@ HWTEST_F(DividerModifierTest, DividerModifierTest005, TestSize.Level1)
     auto checkVal5 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, "-56.00vp");
 
-    Type_DividerAttribute_strokeWidth_Arg0 percentNegVal = { .selector = 1, .value1 = ArkStr("-10%") };
-    modifier_->setStrokeWidth(node_, &percentNegVal);
-    auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal6, "-10.00%");
-
     Type_DividerAttribute_strokeWidth_Arg0 undefVal = { .selector = 1, .value1 = ArkStr("undefVal") };
     modifier_->setStrokeWidth(node_, &undefVal);
+    auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
+    EXPECT_EQ(checkVal6, "0.00fp");
+
+    Type_DividerAttribute_strokeWidth_Arg0 percentNegVal = { .selector = 1, .value1 = ArkStr("-10%") };
+    modifier_->setStrokeWidth(node_, &percentNegVal);
     auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal7, "0.00fp");
+    EXPECT_EQ(checkVal7, DEFAULT_STROKE_WIDTH);
 
     Type_DividerAttribute_strokeWidth_Arg0 emptyVal = { .selector = 1, .value1 = ArkStr("") };
     modifier_->setStrokeWidth(node_, &emptyVal);

@@ -780,14 +780,22 @@ void TextFieldModelNG::SetCancelIconSize(const CalcDimension& iconSize)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSize, iconSize);
 }
 
-void TextFieldModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
+void TextFieldModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMinFontSize, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value)
+void TextFieldModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMaxFontSize, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMaxFontSize, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, AdaptMaxFontSize, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value)
@@ -887,9 +895,13 @@ void TextFieldModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow v
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextOverflow, value, frameNode);
 }
 
-void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
+void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetInputStyle(FrameNode* frameNode, InputStyle value)
@@ -946,14 +958,22 @@ void TextFieldModelNG::SetPasswordIcon(FrameNode* frameNode, const PasswordIcon&
     }
 }
 
-void TextFieldModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
+void TextFieldModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& colorOpt)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, value, frameNode);
+    if (colorOpt) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, colorOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetMaxViewLines(FrameNode* frameNode, uint32_t value)
+void TextFieldModelNG::SetMaxViewLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxViewLines, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetNormalMaxViewLines(FrameNode* frameNode, uint32_t value)
@@ -962,30 +982,45 @@ void TextFieldModelNG::SetNormalMaxViewLines(FrameNode* frameNode, uint32_t valu
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, NormalMaxViewLines, normalMaxViewLines, frameNode);
 }
 
-void TextFieldModelNG::SetType(FrameNode* frameNode, TextInputType value)
+void TextFieldModelNG::SetType(FrameNode* frameNode, const std::optional<TextInputType>& valueOpt)
 {
     CHECK_NULL_VOID(frameNode);
+    TextInputType value = valueOpt.value_or(TextInputType::UNSPECIFIED);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasTextInputType() && layoutProperty->GetTextInputTypeValue() != value) {
         layoutProperty->UpdateTypeChanged(true);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextInputType, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetContentType(const FrameNode* frameNode, const TextContentType& value)
+void TextFieldModelNG::SetContentType(const FrameNode* frameNode, const std::optional<TextContentType>& valueOpt)
 {
     CHECK_NULL_VOID(frameNode);
+    TextContentType value = valueOpt.value_or(TextContentType::UNSPECIFIED);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasTextContentType() && layoutProperty->GetTextContentTypeValue() != value) {
         layoutProperty->UpdateTextContentTypeChanged(true);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextContentType, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextContentType, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextContentType, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)
+void TextFieldModelNG::SetCopyOption(FrameNode* frameNode,  const std::optional<CopyOptions>& copyOptionOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CopyOptions, copyOption, frameNode);
+    if (copyOptionOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CopyOptions, copyOptionOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CopyOptions, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetShowPasswordIcon(FrameNode* frameNode, bool value)
@@ -1008,26 +1043,39 @@ void TextFieldModelNG::SetShowPassword(FrameNode* frameNode, bool value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowPasswordText, value, frameNode);
 }
 
-void TextFieldModelNG::SetTextAlign(FrameNode* frameNode, TextAlign value)
+void TextFieldModelNG::SetTextAlign(FrameNode* frameNode, const std::optional<TextAlign>& valueOpt)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    TextAlign newValue = value;
-    if (!pattern->IsTextArea() && newValue == TextAlign::JUSTIFY) {
-        newValue = TextAlign::START;
-    }
+    TextAlign newValue = TextAlign::START;
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    if (layoutProperty->GetTextAlignValue(TextAlign::START) != newValue) {
-        layoutProperty->UpdateTextAlignChanged(true);
+    if (valueOpt) {
+        newValue = valueOpt.value();
+        if (!pattern->IsTextArea() && newValue == TextAlign::JUSTIFY) {
+            newValue = TextAlign::START;
+        }
+        if (layoutProperty->GetTextAlignValue(TextAlign::START) != newValue) {
+            layoutProperty->UpdateTextAlignChanged(true);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, newValue, frameNode);
+    } else {
+        if (layoutProperty->GetTextAlignValue(TextAlign::START) != newValue) {
+            layoutProperty->UpdateTextAlignChanged(true);
+        }
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, newValue, frameNode);
 }
 
-void TextFieldModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
+void TextFieldModelNG::SetTextColor(FrameNode* frameNode, const std::optional<Color>& colorOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, value, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
+    if (colorOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, colorOpt.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor,  colorOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    }
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
@@ -1071,12 +1119,23 @@ void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const CaretStyle& val
 {
     if (value.caretWidth.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.caretWidth.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, frameNode);
     }
 }
 
-void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, const Color& value)
+void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, std::optional<Color> colorOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, value, frameNode);
+    if (colorOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, colorOpt.value(), frameNode);
+    } else {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        auto defaultColor = theme->GetPlaceholderColor();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, defaultColor, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
@@ -1104,12 +1163,15 @@ void TextFieldModelNG::SetNormalUnderlineColor(FrameNode* frameNode, const Color
     pattern->SetNormalUnderlineColor(normalColor);
 }
 
-void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, TextInputAction value)
+void TextFieldModelNG::SetEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& valueOpt)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
+    TextInputAction defaultInputAction = pattern->IsTextArea() ? TextInputAction::NEW_LINE : TextInputAction::DONE;
+    TextInputAction value = valueOpt.value_or(defaultInputAction);
     if (value == TextInputAction::UNSPECIFIED) {
-        value = pattern->IsTextArea() ? TextInputAction::NEW_LINE : TextInputAction::DONE;
+        value = defaultInputAction;
     }
     pattern->UpdateTextInputAction(value);
 }
@@ -1125,23 +1187,43 @@ void TextFieldModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLines, value, frameNode);
 }
 
-void TextFieldModelNG::SetPlaceholderFont(FrameNode* frameNode, const Font& value)
+void TextFieldModelNG::SetPlaceholderFont(FrameNode* frameNode, const std::optional<Font>& valueOpt)
 {
-    if (value.fontSize.has_value()) {
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (valueOpt && valueOpt.value().fontSize.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextFieldLayoutProperty, PlaceholderFontSize, value.fontSize.value(), frameNode);
+            TextFieldLayoutProperty, PlaceholderFontSize, valueOpt.value().fontSize.value(), frameNode);
+    } else {
+        if (textFieldLayoutProperty->GetPlaceholderFontStyle()) {
+            textFieldLayoutProperty->GetPlaceholderFontStyle()->ResetFontSize();
+        }
     }
-    if (value.fontStyle) {
+    if (valueOpt && valueOpt.value().fontStyle) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextFieldLayoutProperty, PlaceholderItalicFontStyle, value.fontStyle.value(), frameNode);
+            TextFieldLayoutProperty, PlaceholderItalicFontStyle, valueOpt.value().fontStyle.value(), frameNode);
+    } else {
+        if (textFieldLayoutProperty->GetPlaceholderFontStyle()) {
+            textFieldLayoutProperty->GetPlaceholderFontStyle()->ResetItalicFontStyle();
+        }
     }
-    if (value.fontWeight) {
+    if (valueOpt && valueOpt.value().fontWeight) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextFieldLayoutProperty, PlaceholderFontWeight, value.fontWeight.value(), frameNode);
+            TextFieldLayoutProperty, PlaceholderFontWeight, valueOpt.value().fontWeight.value(), frameNode);
+    } else {
+        if (textFieldLayoutProperty->GetPlaceholderFontStyle()) {
+            textFieldLayoutProperty->GetPlaceholderFontStyle()->ResetFontWeight();
+        }
     }
-    if (!value.fontFamilies.empty()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontFamily, value.fontFamilies, frameNode);
+    if (valueOpt && !valueOpt.value().fontFamilies.empty()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextFieldLayoutProperty, PlaceholderFontFamily, valueOpt.value().fontFamilies, frameNode);
+    } else {
+        if (textFieldLayoutProperty->GetPlaceholderFontStyle()) {
+            textFieldLayoutProperty->GetPlaceholderFontStyle()->ResetFontFamily();
+        }
     }
+    
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextFieldLayoutProperty, PreferredPlaceholderLineHeightNeedToUpdate, true, frameNode);
 }
@@ -1152,9 +1234,13 @@ void TextFieldModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true, frameNode);
 }
 
-void TextFieldModelNG::SetCaretColor(FrameNode* frameNode, const Color& value)
+void TextFieldModelNG::SetCaretColor(FrameNode* frameNode, const std::optional<Color>& colorOpt)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, value, frameNode);
+    if (colorOpt) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, colorOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selectionMenuHidden)
@@ -1545,29 +1631,49 @@ void TextFieldModelNG::ResetTextInputPadding(FrameNode* frameNode)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, Padding, paddings, frameNode);
 }
 
-void TextFieldModelNG::SetTextDecoration(FrameNode* frameNode, TextDecoration value)
+void TextFieldModelNG::SetTextDecoration(FrameNode* frameNode, const std::optional<TextDecoration>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetTextDecorationColor(FrameNode* frameNode, const Color& value)
+void TextFieldModelNG::SetTextDecorationColor(FrameNode* frameNode, const std::optional<Color>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationColor, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationColor, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationColor, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value)
+void TextFieldModelNG::SetTextDecorationStyle(FrameNode* frameNode, const std::optional<TextDecorationStyle>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
+void TextFieldModelNG::SetLetterSpacing(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
+void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)

@@ -5658,6 +5658,10 @@ std::string TextFieldPattern::TextInputActionToString() const
             return "EnterKeyType.Send";
         case TextInputAction::NEXT:
             return "EnterKeyType.Next";
+        case TextInputAction::PREVIOUS:
+            return "EnterKeyType.PREVIOUS";
+        case TextInputAction::NEW_LINE:
+            return "EnterKeyType.NEW_LINE";
         default:
             return "EnterKeyType.Done";
     }
@@ -5899,8 +5903,8 @@ std::string TextFieldPattern::GetCopyOptionString() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    std::string copyOptionString = "CopyOptions.None";
-    switch (layoutProperty->GetCopyOptionsValue(CopyOptions::None)) {
+    std::string copyOptionString = "CopyOptions.Local";
+    switch (layoutProperty->GetCopyOptionsValue(CopyOptions::Local)) {
         case CopyOptions::InApp:
             copyOptionString = "CopyOptions.InApp";
             break;
@@ -5911,6 +5915,8 @@ std::string TextFieldPattern::GetCopyOptionString() const
             copyOptionString = "CopyOptions.Distributed";
             break;
         case CopyOptions::None:
+            copyOptionString = "CopyOptions.None";
+            break;
         default:
             break;
     }
@@ -6476,6 +6482,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
+    json->PutExtAttr("enableKeyboardOnFocus", NeedToRequestKeyboardOnFocus(), filter);
     ToJsonValueForOption(json, filter);
     ToJsonValueSelectOverlay(json, filter);
 }

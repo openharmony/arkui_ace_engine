@@ -28,6 +28,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/gestures/drag_event.h"
 #include "generated/converter_generated.h"
+#include "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "frameworks/core/common/ime/text_input_action.h"
 
 namespace OHOS::Ace::NG::Converter {
     // Forward declaration for use in custom AssignArkValue() functions
@@ -88,6 +90,19 @@ namespace OHOS::Ace::NG::Converter {
     inline void AssignArkValue(Ark_Function& dst, const int& src)
     {
         dst.id = src;
+    }
+
+    inline void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src)
+    {
+        dst = {
+            .offset = ArkValue<Ark_Number>(src.offset),
+            .value = ArkValue<Ark_String>(src.value)
+        };
+    }
+
+    inline void AssignArkValue(Ark_Int32& dst, const TextDeleteDirection& src)
+    {
+        dst = ArkValue<Ark_Int32>(static_cast<int32_t>(src));
     }
 
     inline void AssignArkValue(Ark_Length& dst, const int& src)
@@ -154,6 +169,9 @@ namespace OHOS::Ace::NG::Converter {
         }
     }
 
+    void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
+    void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
+    
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 
     // Handle enum types

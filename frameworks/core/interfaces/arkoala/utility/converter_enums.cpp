@@ -163,6 +163,19 @@ void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src)
 }
 
 template<>
+void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_TextDecorationStyle& src)
+{
+    switch (src) {
+        case ARK_TEXT_DECORATION_STYLE_SOLID: dst = TextDecorationStyle::SOLID; break;
+        case ARK_TEXT_DECORATION_STYLE_DOUBLE: dst = TextDecorationStyle::DOUBLE; break;
+        case ARK_TEXT_DECORATION_STYLE_DOTTED: dst = TextDecorationStyle::DOTTED; break;
+        case ARK_TEXT_DECORATION_STYLE_DASHED: dst = TextDecorationStyle::DASHED; break;
+        case ARK_TEXT_DECORATION_STYLE_WAVY: dst = TextDecorationStyle::WAVY; break;
+        default: LOGE("Unexpected enum value in Ark_TextDecorationStyle: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
 {
     switch (src) {
@@ -175,6 +188,18 @@ void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
 }
 
 template<>
+void AssignCast(std::optional<TextDecoration>& dst, const Ark_TextDecorationType& src)
+{
+    switch (src) {
+        case ARK_TEXT_DECORATION_TYPE_NONE: dst = TextDecoration::NONE; break;
+        case ARK_TEXT_DECORATION_TYPE_UNDERLINE: dst = TextDecoration::UNDERLINE; break;
+        case ARK_TEXT_DECORATION_TYPE_OVERLINE: dst = TextDecoration::OVERLINE; break;
+        case ARK_TEXT_DECORATION_TYPE_LINE_THROUGH: dst = TextDecoration::LINE_THROUGH; break;
+        default: LOGE("Unexpected enum value in Ark_TextDecorationType: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
 {
     switch (src) {
@@ -182,6 +207,98 @@ void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
         case ARK_EDGE_EFFECT_FADE: dst = EdgeEffect::FADE; break;
         case ARK_EDGE_EFFECT_NONE: dst = EdgeEffect::NONE; break;
         default: LOGE("Unexpected enum value in Ark_EdgeEffect: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src)
+{
+    switch (src) {
+        case ARK_TEXT_ALIGN_CENTER: dst = TextAlign::CENTER; break;
+        case ARK_TEXT_ALIGN_START: dst = TextAlign::START; break;
+        case ARK_TEXT_ALIGN_END: dst = TextAlign::END; break;
+        case ARK_TEXT_ALIGN_JUSTIFY: dst = TextAlign::JUSTIFY; break;
+        default: LOGE("Unexpected enum value in Ark_TextAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src)
+{
+    switch (src) {
+        case ARK_ENTER_KEY_TYPE_GO: dst = TextInputAction::GO; break;
+        case ARK_ENTER_KEY_TYPE_SEARCH: dst = TextInputAction::SEARCH; break;
+        case ARK_ENTER_KEY_TYPE_SEND: dst = TextInputAction::SEND; break;
+        case ARK_ENTER_KEY_TYPE_NEXT: dst = TextInputAction::NEXT; break;
+        case ARK_ENTER_KEY_TYPE_DONE: dst = TextInputAction::DONE; break;
+        case ARK_ENTER_KEY_TYPE_PREVIOUS: dst = TextInputAction::PREVIOUS; break;
+        case ARK_ENTER_KEY_TYPE_NEW_LINE: dst = TextInputAction::NEW_LINE; break;
+        default: LOGE("Unexpected enum value in Ark_EnterKeyType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src)
+{
+    switch (src) {
+        case ARK_TEXT_AREA_TYPE_NORMAL: dst = TextInputType::TEXT; break;
+        case ARK_TEXT_AREA_TYPE_NUMBER: dst = TextInputType::NUMBER; break;
+        case ARK_TEXT_AREA_TYPE_PHONE_NUMBER: dst = TextInputType::PHONE; break;
+        case ARK_TEXT_AREA_TYPE_EMAIL: dst = TextInputType::EMAIL_ADDRESS; break;
+        case ARK_TEXT_AREA_TYPE_NUMBER_DECIMAL: dst = TextInputType::NUMBER_DECIMAL; break;
+        case ARK_TEXT_AREA_TYPE_URL: dst = TextInputType::URL; break;
+        default: LOGE("Unexpected enum value in Ark_TextAreaType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src)
+{
+    switch (src) {
+        case ARK_TEXT_DELETE_DIRECTION_BACKWARD: dst = TextDeleteDirection::BACKWARD; break;
+        case ARK_TEXT_DELETE_DIRECTION_FORWARD: dst = TextDeleteDirection::FORWARD; break;
+        default: LOGE("Unexpected enum value in Ark_TextDeleteDirection: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src)
+{
+    switch (src) {
+        case ARK_COPY_OPTIONS_NONE: dst = CopyOptions::None; break;
+        case ARK_COPY_OPTIONS_IN_APP: dst = CopyOptions::InApp; break;
+        case ARK_COPY_OPTIONS_LOCAL_DEVICE: dst = CopyOptions::Local; break;
+        case ARK_COPY_OPTIONS_CROSS_DEVICE: dst = CopyOptions::Distributed; break;
+        default: LOGE("Unexpected enum value in Ark_CopyOptions: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src)
+{
+    switch (src) {
+        case ARK_CONTENT_TYPE_USER_NAME: dst = TextContentType::USER_NAME; break;
+        case ARK_CONTENT_TYPE_PASSWORD: dst = TextContentType::VISIBLE_PASSWORD; break;
+        case ARK_CONTENT_TYPE_NEW_PASSWORD: dst = TextContentType::NEW_PASSWORD; break;
+        case ARK_CONTENT_TYPE_FULL_STREET_ADDRESS: dst = TextContentType::FULL_STREET_ADDRESS; break;
+        case ARK_CONTENT_TYPE_HOUSE_NUMBER: dst = TextContentType::HOUSE_NUMBER; break;
+        case ARK_CONTENT_TYPE_DISTRICT_ADDRESS: dst = TextContentType::DISTRICT_ADDRESS; break;
+        case ARK_CONTENT_TYPE_CITY_ADDRESS: dst = TextContentType::CITY_ADDRESS; break;
+        case ARK_CONTENT_TYPE_PROVINCE_ADDRESS: dst = TextContentType::PROVINCE_ADDRESS; break;
+        case ARK_CONTENT_TYPE_COUNTRY_ADDRESS: dst = TextContentType::COUNTRY_ADDRESS; break;
+        case ARK_CONTENT_TYPE_PERSON_FULL_NAME: dst = TextContentType::PERSON_FULL_NAME; break;
+        case ARK_CONTENT_TYPE_PERSON_LAST_NAME: dst = TextContentType::PERSON_LAST_NAME; break;
+        case ARK_CONTENT_TYPE_PERSON_FIRST_NAME: dst = TextContentType::PERSON_FIRST_NAME; break;
+        case ARK_CONTENT_TYPE_PHONE_NUMBER: dst = TextContentType::PHONE_NUMBER; break;
+        case ARK_CONTENT_TYPE_PHONE_COUNTRY_CODE: dst = TextContentType::PHONE_COUNTRY_CODE; break;
+        case ARK_CONTENT_TYPE_FULL_PHONE_NUMBER: dst = TextContentType::FULL_PHONE_NUMBER; break;
+        case ARK_CONTENT_TYPE_EMAIL_ADDRESS: dst = TextContentType::EMAIL_ADDRESS; break;
+        case ARK_CONTENT_TYPE_BANK_CARD_NUMBER: dst = TextContentType::BANK_CARD_NUMBER; break;
+        case ARK_CONTENT_TYPE_ID_CARD_NUMBER: dst = TextContentType::ID_CARD_NUMBER; break;
+        case ARK_CONTENT_TYPE_NICKNAME: dst = TextContentType::NICKNAME; break;
+        case ARK_CONTENT_TYPE_DETAIL_INFO_WITHOUT_STREET: dst = TextContentType::DETAIL_INFO_WITHOUT_STREET; break;
+        case ARK_CONTENT_TYPE_FORMAT_ADDRESS: dst = TextContentType::FORMAT_ADDRESS; break;
+        default: LOGE("Unexpected enum value in Ark_ContentType: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

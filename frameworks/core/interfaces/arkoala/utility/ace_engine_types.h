@@ -33,5 +33,15 @@ typedef std::tuple<
     // here it can be expanded by Family and Style data
 > FontMetaData;
 
+struct ArkCaretStyle {
+    std::optional<Dimension> width;
+    std::optional<Color> color;
+};
+
+struct TextDecorationOptions {
+    std::optional<TextDecoration> textDecoration;
+    std::optional<Color> color;
+    std::optional<TextDecorationStyle> textDecorationStyle;
+};
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H
