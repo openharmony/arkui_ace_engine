@@ -39,6 +39,7 @@ namespace {
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t REQUEST_SELECT_ALL = 1 << 1;
+constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 } // namespace
 
 bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -100,7 +101,11 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     if (latestReqeust_->hideHandle) {
         manager->HideHandle();
     }
-    pattern->StopTwinkling();
+    auto selectOverlayInfo = manager->GetSelectOverlayInfo();
+    CHECK_NULL_VOID(selectOverlayInfo);
+    if (!selectOverlayInfo->isUsingMouse) {
+        pattern->StopTwinkling();
+    }
     manager->MarkInfoChange(DIRTY_SELECT_TEXT);
     latestReqeust_.reset();
 }
@@ -589,5 +594,27 @@ void TextFieldSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool i
             pattern->StartTwinkling();
         }
     }
+}
+
+void TextFieldSelectOverlay::OnHandleMarkInfoChange(
+    std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    if ((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG) {
+        auto textFieldPattern = GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(textFieldPattern);
+        auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        info->handlerColor = paintProperty->GetCursorColor();
+        manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void TextFieldSelectOverlay::UpdateHandleColor()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
 }
 } // namespace OHOS::Ace::NG

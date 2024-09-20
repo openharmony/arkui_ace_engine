@@ -678,6 +678,7 @@ HWTEST_F(TextFieldPatternTestTwo, SetSelectionFlag001, TestSize.Level0)
     theme->textfieldShowHandle_ = true;
     pattern->SetSelectionFlag(start, end, options, true);
     EXPECT_EQ(pattern->IsShowHandle(), false);
+    theme->textfieldShowHandle_ = false;
 }
 
 /**

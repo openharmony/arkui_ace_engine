@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 129
+#define ARKUI_FULL_API_VERSION 130
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 129
+#define ARKUI_NODE_API_VERSION 130
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -1456,6 +1456,7 @@ struct ArkUINavigationTitlebarOptions {
     ArkUIOptionalInt barStyle;
     ArkUIOptionalDimensionType paddingStart;
     ArkUIOptionalDimensionType paddingEnd;
+    ArkUIOptionalBool enableHoverMode;
 };
 
 struct ArkUIBarItem {
@@ -3190,6 +3191,8 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaSelectionMenuOptions)(
         ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
     void (*resetTextAreaSelectionMenuOptions)(ArkUINodeHandle node);
+    void (*setTextAreaWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetTextAreaWidth)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3386,6 +3389,8 @@ struct ArkUITextInputModifier {
     void (*setTextInputSelectionMenuOptions)(
         ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
     void (*resetTextInputSelectionMenuOptions)(ArkUINodeHandle node);
+    void (*setTextInputWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetTextInputWidth)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -4631,6 +4636,8 @@ struct ArkUIXComponentModifier {
     void (*setXComponentLibraryname)(ArkUINodeHandle node, ArkUI_CharPtr libraryname);
     void (*setImageAIOptions)(ArkUINodeHandle node, void* options);
     void (*initXComponent)(ArkUINodeHandle node);
+    void (*setXComponentEnableSecure)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*resetXComponentEnableSecure)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {

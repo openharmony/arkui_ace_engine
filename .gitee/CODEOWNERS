@@ -2512,8 +2512,8 @@ frameworks/core/components_ng/render/adapter/matrix2d.cpp @arkuiframework
 frameworks/core/components_ng/render/adapter/matrix2d.h @arkuiframework
 frameworks/core/components_ng/render/adapter/media_player_impl.cpp @arkuilayout
 frameworks/core/components_ng/render/adapter/media_player_impl.h @arkuilayout
-frameworks/core/components_ng/render/adapter/moon_progress_modifier.cpp @arkui_image
-frameworks/core/components_ng/render/adapter/moon_progress_modifier.h @arkui_image
+frameworks/core/components_ng/render/adapter/moon_progress_modifier.cpp @arkuiframework
+frameworks/core/components_ng/render/adapter/moon_progress_modifier.h @arkuiframework
 frameworks/core/components_ng/render/adapter/mouse_select_modifier.h @arkuievent
 frameworks/core/components_ng/render/adapter/overlay_modifier.h @arkuievent
 frameworks/core/components_ng/render/adapter/path_painter.cpp @arkuiframework

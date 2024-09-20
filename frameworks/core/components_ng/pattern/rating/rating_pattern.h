@@ -119,6 +119,7 @@ private:
 
     // Init pan recognizer to update render when drag updates, fire change event when drag ends.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleEnabled();
 
     // Init touch event, show press effect when touch down, update render when touch up.
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);

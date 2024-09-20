@@ -423,6 +423,11 @@ public:
     std::unique_ptr<JsonValue> GetNavdestinationJsonArray();
     void RestoreJsStackIfNeeded();
 
+    RefPtr<FrameNode> GetNavBasePageNode() const
+    {
+        return pageNode_.Upgrade();
+    }
+    
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);

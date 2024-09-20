@@ -107,9 +107,11 @@ void SwiperPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
-    host->GetRenderContext()->SetClipToBounds(true);
-    host->GetRenderContext()->UpdateClipEdge(true);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(true);
+    renderContext->SetClipToBounds(true);
+    renderContext->UpdateClipEdge(true);
     InitSurfaceChangedCallback();
 }
 
@@ -179,7 +181,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     return algo;
 }
 
-void SwiperPattern::OnIndexChange()
+void SwiperPattern::OnIndexChange(bool isInLayout)
 {
     auto totalCount = TotalCount();
     if (NonPositive(totalCount)) {
@@ -194,7 +196,7 @@ void SwiperPattern::OnIndexChange()
 
     auto targetIndex = GetLoopIndex(CurrentIndex());
     if (oldIndex != targetIndex) {
-        FireChangeEvent(oldIndex, targetIndex);
+        FireChangeEvent(oldIndex, targetIndex, isInLayout);
         // lazyBuild feature.
         SetLazyLoadFeature(true);
     }
@@ -317,6 +319,7 @@ void SwiperPattern::ResetOnForceMeasure()
 
 void SwiperPattern::UpdateTabBarIndicatorCurve()
 {
+    CHECK_NULL_VOID(swiperController_);
     auto updateCubicCurveCallback = [weak = WeakClaim(this)]() {
         auto swiperPattern = weak.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
@@ -663,10 +666,11 @@ void SwiperPattern::InitSurfaceChangedCallback()
     }
 }
 
-bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode)
+bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub)
 {
     for (const auto& item : itemPosition_) {
-        if (item.second.node == focusNode) {
+        auto focusHub = item.second.node->GetFirstFocusHubChild();
+        if (focusHub == targetFocusHub) {
             return true;
         }
     }
@@ -700,12 +704,10 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
             ++iter;
             continue;
         }
-        if (!IsFocusNodeInItemPosition(child->GetFrameNode()) && !hasTabsAncestor_) {
-            child->SetParentFocusable(false);
-        } else if (child != showChildFocusHub) {
-            child->SetParentFocusable(false);
-        } else {
+        if (IsFocusNodeInItemPosition(child)) {
             child->SetParentFocusable(true);
+        } else {
+            child->SetParentFocusable(false);
         }
         ++iter;
     }
@@ -907,7 +909,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         SetLazyLoadFeature(true);
     }
     if (!isInit_) {
-        OnIndexChange();
+        OnIndexChange(true);
         oldIndex_ = currentIndex_;
     }
 
@@ -924,6 +926,17 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto algo = DynamicCast<SwiperLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(algo, false);
+
+    // set tabs invisible item freeze state.
+    if (hasTabsAncestor_) {
+        for (int32_t index = 0; index < RealTotalCount(); index++) {
+            auto childFrameNode = GetCurrentFrameNode(index);
+            if (childFrameNode) {
+                auto isActive = childFrameNode->IsActive();
+                childFrameNode->SetFreeze(!isActive);
+            }
+        }
+    }
 
     if (props->GetIsCustomAnimation().value_or(false)) {
         needUnmountIndexs_ = algo->GetNeedUnmountIndexs();
@@ -988,7 +1001,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         }
         currentIndexOffset_ = 0.0f;
         if (!isInit) {
-            OnIndexChange();
+            OnIndexChange(true);
         }
         jumpIndex_.reset();
         pauseTargetIndex_.reset();
@@ -1198,11 +1211,11 @@ void SwiperPattern::OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPla
     }
 }
 
-void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex) const
+void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout) const
 {
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
-    swiperEventHub->FireChangeEvent(preIndex, currentIndex);
+    swiperEventHub->FireChangeEvent(preIndex, currentIndex, isInLayout);
     swiperEventHub->FireIndicatorChangeEvent(currentIndex);
     swiperEventHub->FireChangeDoneEvent(moveDirection_);
 
@@ -1465,6 +1478,7 @@ void SwiperPattern::FireContentDidScrollEvent()
 
     CHECK_NULL_VOID(onContentDidScroll_);
     auto event = *onContentDidScroll_;
+    CHECK_NULL_VOID(event);
     auto selectedIndex = GetCurrentIndex();
     for (auto& item : itemPositionInAnimation_) {
         if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end()) {
@@ -3033,6 +3047,63 @@ bool SwiperPattern::CheckDragOutOfBoundary(double dragVelocity)
     return false;
 }
 
+void SwiperPattern::UpdateTranslateForCaptureNode(const OffsetF& offset, bool cancel)
+{
+    CHECK_NULL_VOID(hasCachedCapture_);
+    auto leftCaptureNode = GetLeftCaptureNode();
+    CHECK_NULL_VOID(leftCaptureNode);
+    auto rightCaptureNode = GetRightCaptureNode();
+    CHECK_NULL_VOID(rightCaptureNode);
+    auto leftRenderContext = leftCaptureNode->GetRenderContext();
+    CHECK_NULL_VOID(leftRenderContext);
+    auto rightRenderContext = rightCaptureNode->GetRenderContext();
+    CHECK_NULL_VOID(rightRenderContext);
+    if (cancel) {
+        leftRenderContext->CancelTranslateXYAnimation();
+        rightRenderContext->CancelTranslateXYAnimation();
+    } else {
+        leftRenderContext->UpdateTranslateInXY(offset);
+        rightRenderContext->UpdateTranslateInXY(offset);
+        captureFinalOffset_ = offset;
+    }
+}
+
+void SwiperPattern::UpdateFinalTranslateForSwiperItem(const SwiperLayoutAlgorithm::PositionMap& itemPosition)
+{
+    for (const auto& item : itemPosition) {
+        auto frameNode = item.second.node;
+        if (!frameNode) {
+            continue;
+        }
+        auto renderContext = frameNode->GetRenderContext();
+        if (!renderContext) {
+            continue;
+        }
+        renderContext->UpdateTranslateInXY(item.second.finalOffset);
+    }
+}
+
+void SwiperPattern::UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::PositionMap& itemPosition,
+    const OffsetF& offset, bool cancel)
+{
+    for (auto& item : itemPosition) {
+        auto frameNode = item.second.node;
+        if (!frameNode) {
+            continue;
+        }
+        auto renderContext = frameNode->GetRenderContext();
+        if (!renderContext) {
+            continue;
+        }
+        if (cancel) {
+            renderContext->CancelTranslateXYAnimation();
+        } else {
+            renderContext->UpdateTranslateInXY(offset);
+            item.second.finalOffset = offset;
+        }
+    }
+}
+
 void SwiperPattern::PlayPropertyTranslateAnimation(
     float translate, int32_t nextIndex, float velocity, bool stopAutoPlay)
 {
@@ -3104,17 +3175,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         }
         swiper->OnPropertyTranslateAnimationFinish(offset);
     };
-    // initial translate info.
-    for (auto& item : itemPosition_) {
-        auto frameNode = item.second.node;
-        if (frameNode) {
-            frameNode->GetRenderContext()->UpdateTranslateInXY(item.second.finalOffset);
-        }
-    }
-    if (IsCaptureNodeValid()) {
-        GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(captureFinalOffset_);
-        GetRightCaptureNode()->GetRenderContext()->UpdateTranslateInXY(captureFinalOffset_);
-    }
+    // initial translate info use final offset
+    UpdateFinalTranslateForSwiperItem(itemPosition_);
+    UpdateTranslateForCaptureNode(captureFinalOffset_);
     // property callback will call immediately.
     auto propertyUpdateCallback = [swiper = WeakClaim(this), offset]() {
         auto swiperPattern = swiper.Upgrade();
@@ -3133,19 +3196,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
             offset.GetX(), offset.GetY());
         ACE_SCOPED_TRACE_COMMERCIAL("%s start property animation, X: %f, Y: %f",
             swiperPattern->hasTabsAncestor_ ? V2::TABS_ETS_TAG : V2::SWIPER_ETS_TAG, offset.GetX(), offset.GetY());
-        for (auto& item : swiperPattern->itemPosition_) {
-            auto frameNode = item.second.node;
-            if (frameNode) {
-                frameNode->GetRenderContext()->UpdateTranslateInXY(offset);
-                item.second.finalOffset = offset;
-            }
-        }
+        swiperPattern->UpdateTranslateForSwiperItem(swiperPattern->itemPosition_, offset);
         swiperPattern->itemPositionInAnimation_ = swiperPattern->itemPosition_;
-        if (swiperPattern->IsCaptureNodeValid()) {
-            swiperPattern->GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(offset);
-            swiperPattern->GetRightCaptureNode()->GetRenderContext()->UpdateTranslateInXY(offset);
-            swiperPattern->captureFinalOffset_ = offset;
-        }
+        swiperPattern->UpdateTranslateForCaptureNode(offset);
     };
     usePropertyAnimation_ = true;
     propertyAnimationIndex_ = nextIndex;
@@ -3215,19 +3268,9 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
     syncCancelAniIsFailed_ = false;
     targetIndex_.reset();
     // reset translate.
-    for (auto& item : itemPositionInAnimation_) {
-        auto frameNode = item.second.node;
-        if (frameNode) {
-            frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
-        }
-        item.second.finalOffset = OffsetF();
-    }
+    UpdateTranslateForSwiperItem(itemPositionInAnimation_, OffsetF());
     itemPositionInAnimation_.clear();
-    if (IsCaptureNodeValid()) {
-        GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
-        GetRightCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
-        captureFinalOffset_ = OffsetF();
-    }
+    UpdateTranslateForCaptureNode(OffsetF());
     // update postion info.
     UpdateOffsetAfterPropertyAnimation(offset.GetMainOffset(GetDirection()));
     OnTranslateFinish(propertyAnimationIndex_, false, isFinishAnimation_);
@@ -3238,24 +3281,20 @@ void SwiperPattern::PropertyCancelAnimationFinish(
 {
     targetIndex_.reset();
     OffsetF currentOffset;
-    for (auto& item : itemPositionInAnimation_) {
-        auto frameNode = item.second.node;
-        if (!frameNode) {
-            continue;
+    for (auto iter = itemPositionInAnimation_.rbegin(); iter != itemPositionInAnimation_.rend(); ++iter) {
+        auto frameNode = iter->second.node;
+        auto renderContext = frameNode ? frameNode->GetRenderContext() : nullptr;
+        if (renderContext) {
+            currentOffset = renderContext->GetTranslateXYProperty();
+            break;
         }
-        currentOffset = frameNode->GetRenderContext()->GetTranslateXYProperty();
-        frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
-        item.second.finalOffset = OffsetF();
     }
     ACE_SCOPED_TRACE("Swiper stop propertyAni offset %f", currentOffset.GetMainOffset(GetDirection()));
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper stop propertyAni offset %{public}f",
         currentOffset.GetMainOffset(GetDirection()));
+    UpdateTranslateForSwiperItem(itemPositionInAnimation_, OffsetF());
     itemPositionInAnimation_.clear();
-    if (IsCaptureNodeValid()) {
-        GetLeftCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
-        GetRightCaptureNode()->GetRenderContext()->UpdateTranslateInXY(OffsetF());
-        captureFinalOffset_ = OffsetF();
-    }
+    UpdateTranslateForCaptureNode(OffsetF());
     if (!isBeforeCreateLayoutWrapper) {
         UpdateOffsetAfterPropertyAnimation(currentOffset.GetMainOffset(GetDirection()));
     }
@@ -3275,17 +3314,9 @@ void SwiperPattern::StopPropertyTranslateAnimation(
     auto propertyUpdateCallback = [weak = WeakClaim(this)]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
-        for (auto& item : swiper->itemPositionInAnimation_) {
-            auto frameNode = item.second.node;
-            if (!frameNode) {
-                continue;
-            }
-            frameNode->GetRenderContext()->CancelTranslateXYAnimation();
-        }
-        if (swiper->IsCaptureNodeValid()) {
-            swiper->GetLeftCaptureNode()->GetRenderContext()->CancelTranslateXYAnimation();
-            swiper->GetRightCaptureNode()->GetRenderContext()->CancelTranslateXYAnimation();
-        }
+        // cancel translate for swiper item and capture node
+        swiper->UpdateTranslateForSwiperItem(swiper->itemPositionInAnimation_, OffsetF(), true);
+        swiper->UpdateTranslateForCaptureNode(OffsetF(), true);
     };
     AnimationUtils::OpenImplicitAnimation(option, Curves::LINEAR, nullptr);
     propertyUpdateCallback();
@@ -3786,11 +3817,13 @@ float SwiperPattern::GetItemSpace() const
 {
     auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, 0.0f);
+    auto layoutConstraint = props->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, 0.0f);
     if (props->IgnoreItemSpace()) {
         return 0.0f;
     }
     auto itemSpace =
-        ConvertToPx(props->GetItemSpace().value_or(0.0_vp), props->GetLayoutConstraint()->scaleProperty, 0.0f)
+        ConvertToPx(props->GetItemSpace().value_or(0.0_vp), layoutConstraint->scaleProperty, 0.0f)
             .value_or(0.0f);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
@@ -4490,7 +4523,7 @@ void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                     continue;
                 }
                 auto childNode = wrapper->GetHostNode();
-                if (childNode) {
+                if (childNode && childNode->GetGeometryNode()) {
                     childNode->GetGeometryNode()->SetParentLayoutConstraint(pattern->GetLayoutConstraint());
                     FrameNode::ProcessOffscreenNode(childNode);
                 }
@@ -4684,6 +4717,7 @@ bool SwiperPattern::NeedStartAutoPlay() const
 std::string SwiperPattern::ProvideRestoreInfo()
 {
     auto jsonObj = JsonUtil::Create(true);
+    CHECK_NULL_RETURN(jsonObj, "");
     auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, "");
     jsonObj->Put("Index", props->GetIndex().value_or(0));
@@ -4695,7 +4729,7 @@ void SwiperPattern::OnRestoreInfo(const std::string& restoreInfo)
     auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(props);
     auto info = JsonUtil::ParseJsonString(restoreInfo);
-    if (!info->IsValid() || !info->IsObject()) {
+    if (!info || !info->IsValid() || !info->IsObject()) {
         return;
     }
     auto jsonIsOn = info->GetValue("Index");
@@ -5051,6 +5085,9 @@ ScrollResult SwiperPattern::HandleScrollParentFirst(float offset, int32_t source
 {
     // priority: parent scroll > self scroll > self overScroll > parent overScroll
     auto parent = GetNestedScrollParent();
+    if (!parent) {
+        return { 0.0f, true };
+    }
     // skip CHECK_NULL, already checked in HandleScroll
     auto result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, velocity);
     offset = result.remain;
@@ -5078,6 +5115,9 @@ ScrollResult SwiperPattern::HandleScrollSelfFirst(float offset, int32_t source, 
         CloseTheGap(offset);
         // skip CHECK_NULL, already checked in HandleScroll
         auto parent = GetNestedScrollParent();
+        if (!parent) {
+            return { 0.0f, true };
+        }
 
         // reached edge, pass offset to parent
         auto res = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, velocity);
@@ -5856,6 +5896,7 @@ void SwiperPattern::SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex)
 
 void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    CHECK_NULL_VOID(json);
     Pattern::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
@@ -5886,6 +5927,7 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 
 void SwiperPattern::FromJson(const std::unique_ptr<JsonValue>& json)
 {
+    CHECK_NULL_VOID(json);
     currentIndex_ = json->GetInt("currentIndex");
     auto currentOffset = json->GetDouble("currentOffset");
     auto jumpIndex = json->GetInt("uiCastJumpIndex");
@@ -5912,6 +5954,7 @@ GestureState SwiperPattern::GetGestureState()
 
 void SwiperPattern::SetSwiperController(const RefPtr<SwiperController>& controller)
 {
+    CHECK_NULL_VOID(controller);
     swiperController_ = controller;
     SwiperHelper::InitSwiperController(controller, WeakClaim(this));
 }

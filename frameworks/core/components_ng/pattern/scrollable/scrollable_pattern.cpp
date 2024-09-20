@@ -3080,7 +3080,8 @@ void ScrollablePattern::CheckRestartSpring(bool sizeDiminished, bool needNestedS
     }
     if (needNestedScrolling && !ScrollableIdle()) {
         return;
-    } else if (!needNestedScrolling && !IsScrollableAnimationNotRunning()) {
+    }
+    if (!needNestedScrolling && !IsScrollableAnimationNotRunning()) {
         return;
     }
     FireOnScrollStart();

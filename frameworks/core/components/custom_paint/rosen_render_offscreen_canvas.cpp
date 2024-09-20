@@ -441,7 +441,7 @@ void RosenRenderOffscreenCanvas::PutImageData(const ImageData& imageData)
     }
 
     for (uint32_t i = 0; i < imageData.data.size(); ++i) {
-        data[i] = imageData.data[i].GetValue();
+        data[i] = imageData.data[i];
     }
 #ifndef USE_ROSEN_DRAWING
     SkBitmap skBitmap;
@@ -946,7 +946,7 @@ std::unique_ptr<ImageData> RosenRenderOffscreenCanvas::GetImageData(
         auto green = pixels[i + 1];
         auto red = pixels[i + 2];
         auto alpha = pixels[i + 3];
-        imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue));
+        imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
     }
     return imageData;
 }

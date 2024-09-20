@@ -195,6 +195,11 @@ public:
         }
         return g_endSelectionHandle;
     }
+
+    bool GetIsLongPressActived() override
+    {
+        return false;
+    }
 };
 
 class NWebQuickMenuCallbackMock : public NWebQuickMenuCallback {

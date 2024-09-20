@@ -25,7 +25,7 @@ void GridItemPattern::OnAttachToFrameNode()
     if (gridItemStyle_ == GridItemStyle::PLAIN) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<GridItemTheme>();
         CHECK_NULL_VOID(theme);
@@ -129,7 +129,7 @@ void GridItemPattern::BeforeCreateLayoutWrapper()
 Color GridItemPattern::GetBlendGgColor()
 {
     Color color = Color::TRANSPARENT;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, color);
     auto theme = pipeline->GetTheme<GridItemTheme>();
     CHECK_NULL_RETURN(theme, color);
@@ -206,7 +206,7 @@ void GridItemPattern::HandlePressEvent(bool isPressed)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<GridItemTheme>();
     CHECK_NULL_VOID(theme);
@@ -224,7 +224,7 @@ void GridItemPattern::InitDisableStyle()
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<GridItemTheme>();
     CHECK_NULL_VOID(theme);
@@ -253,7 +253,7 @@ void GridItemPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto gridItemSize = geometryNode->GetFrameSize();
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<GridItemTheme>();
     CHECK_NULL_VOID(theme);

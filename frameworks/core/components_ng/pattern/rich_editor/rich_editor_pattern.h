@@ -809,6 +809,10 @@ public:
     void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
+        CHECK_NULL_VOID(!textSelector_.SelectNothing());
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 
     Color GetSelectedBackgroundColor();
@@ -968,8 +972,6 @@ protected:
         CHECK_NULL_RETURN(pipelineContext, {});
         return pipelineContext->GetTheme<T>();
     }
-
-    std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
 
 private:
     friend class RichEditorSelectOverlay;

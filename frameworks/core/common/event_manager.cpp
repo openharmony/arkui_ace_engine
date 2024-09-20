@@ -115,6 +115,7 @@ void EventManager::CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needA
     if (refereeNG_->CheckEventTypeChange(touchPoint.sourceType)) {
         AxisEvent axisEvent;
         FalsifyCancelEventAndDispatch(axisEvent);
+        responseCtrl_->Reset();
         refereeNG_->CleanAll(true);
         touchTestResults_.clear();
         axisTouchTestResults_.clear();
@@ -131,6 +132,7 @@ void EventManager::CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needA
     if (lastDownFingerNumber_ == 0 && refereeNG_->QueryAllDone()) {
         FalsifyCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
+        responseCtrl_->Reset();
         refereeNG_->CleanAll();
         CleanGestureEventHub();
     }
@@ -209,6 +211,7 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
         eventTree_.eventTreeList.clear();
         FalsifyCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
+        responseCtrl_->Reset();
         refereeNG_->CleanAll();
 
         TouchTestResult reHitTestResult;
@@ -365,6 +368,7 @@ void EventManager::TouchTest(
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
         TouchEvent touchEvent;
         FalsifyCancelEventAndDispatch(touchEvent, event.sourceTool != lastSourceTool_);
+        responseCtrl_->Reset();
         refereeNG_->CleanAll(true);
         if (event.sourceTool != lastSourceTool_) {
             touchTestResults_.clear();
@@ -1132,6 +1136,7 @@ void EventManager::AccessibilityHoverTest(
     CHECK_NULL_VOID(frameNode);
     if (downFingerIds_.empty()) {
         FalsifyCancelEventAndDispatch(event);
+        responseCtrl_->Reset();
         refereeNG_->CleanAll();
         touchTestResults_.clear();
         downFingerIds_.clear();

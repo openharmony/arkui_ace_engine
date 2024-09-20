@@ -56,6 +56,10 @@ public:
 
     RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<PixelMap>& pixelMap, const GestureEvent& info);
     RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<UINode>& customNode, const GestureEvent& info);
+    RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
+        const RefPtr<PixelMap>& pixelMap, const GestureEvent& info, const RefPtr<EventHub>& eventHub);
+    RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
+        const RefPtr<UINode>& customNode, const GestureEvent& info, const RefPtr<EventHub>& eventHub);
     RefPtr<DragDropProxy> CreateTextDragDropProxy();
 
     void AddDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
@@ -91,6 +95,7 @@ public:
     }
 
     void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
+    void UpdateItemDragPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo,
@@ -349,6 +354,7 @@ public:
         return isPullMoveReceivedForCurrentDrag_;
     }
 
+    static RectF GetMenuPreviewRect();
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager, const GatherAnimationInfo& info);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
         const RefPtr<FrameNode>& imageNode);
@@ -513,6 +519,8 @@ private:
     bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
     bool IsUIExtensionComponent(const RefPtr<NG::UINode>& node);
     int32_t GetWindowId();
+    void AddItemDrag(const RefPtr<FrameNode>& frameNode, const RefPtr<EventHub>& eventHub);
+    void RemoveItemDrag();
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -524,6 +532,7 @@ private:
     RefPtr<FrameNode> draggedGridFrameNode_;
     RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<FrameNode> dragWindowRootNode_;
+    RefPtr<FrameNode> itemDragOverlayNode_;
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
     uint64_t preTimeStamp_ = 0L;

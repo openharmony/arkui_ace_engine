@@ -131,6 +131,7 @@ void TimePickerRowPattern::ColumnPatternInitHapticController()
 
 void TimePickerRowPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     if (isFiredTimeChange_ && !isForceUpdate_ && !isDateTimeOptionUpdate_) {
         isFiredTimeChange_ = false;
         ColumnPatternInitHapticController();

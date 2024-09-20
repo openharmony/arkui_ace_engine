@@ -1376,10 +1376,8 @@ void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Conf
     }
 
     auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    bool useAppFontScale = !fontScale.empty();
-    context->SetUseAppFontScale(useAppFontScale);
-    if (useAppFontScale) {
-        context->SetAppFontScale(StringUtils::StringToFloat(fontScale));
+    if (!fontScale.empty()) {
+        context->SetFontScale(StringUtils::StringToFloat(fontScale));
     }
 }
 
@@ -1922,6 +1920,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         KeyboardAnimationConfig config = {curveIn, curveOut};
         pipeline->SetKeyboardAnimationConfig(config);
     }
+    // Use metadata to control whether dirty mark is blocked.
+    bool isOpenInvisibleFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "ArkUIInvisibleFreeze" && metaDataItem.value == "true";
+    });
+    pipeline->SetOpenInvisibleFreeze(isOpenInvisibleFreeze);
     // Set sdk version in module json mode
     if (isModelJson) {
         if (pipeline && appInfo) {
@@ -2399,6 +2402,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
+    PerfMonitor::GetPerfMonitor()->RecordWindowRectResize(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason),
+                                                          bundleName_);
     UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction, avoidAreas);
 }
 

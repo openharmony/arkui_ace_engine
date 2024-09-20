@@ -517,17 +517,6 @@ HWTEST_F(ContainerModelTestNg, Test007, TestSize.Level1)
     EXPECT_TRUE(bResult);
 }
 /**
- * @tc.name: Test008
- * @tc.desc: SetContainerModalPattern.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, Test008, TestSize.Level1)
-{
-    CreateContainerModal();
-    ContainerModalView::SetContainerModalPattern(pattern_);
-    EXPECT_EQ(ContainerModalView::containerModalPattern_, pattern_);
-}
-/**
  * @tc.name: Test009
  * @tc.desc: AddButtonStyleMouseEvent.
  * @tc.type: FUNC

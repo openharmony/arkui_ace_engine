@@ -2055,8 +2055,7 @@ const Dimension DatePickerDialogView::ConvertFontScaleValue(
     Dimension fontSizeValueResultVp(fontSizeLimit.Value(), DimensionUnit::VP);
 
     if (fontSizeValue.Unit() == DimensionUnit::VP) {
-        fontSizeValueResultVp = std::min(fontSizeValueResultVp, fontSizeValue);
-        return fontSizeValueResultVp;
+        return isUserSetFont ? std::min(fontSizeValueResultVp, fontSizeValue) : fontSizeValue;
     }
 
     if (NeedAdaptForAging()) {

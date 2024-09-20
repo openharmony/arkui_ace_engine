@@ -323,6 +323,7 @@ public:
         }
     }
     void OnSurfaceCallbackModeChange(SurfaceCallbackMode mode);
+    void EnableSecure(bool isSecure);
 
 private:
     void OnAttachToFrameNode() override;

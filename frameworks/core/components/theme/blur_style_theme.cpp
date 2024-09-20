@@ -92,7 +92,7 @@ std::optional<BlurParameter> BlurStyleTheme::GetBlurParameter(BlurStyle style, T
         return std::optional<BlurParameter>(iter->second);
     }
     auto blurIter = validBlurStyles_.find(style);
-    if (blurIter == validBlurStyles_.end()) {
+    if (blurIter == validBlurStyles_.end() || !themeStyle_) {
         return std::nullopt;
     }
     auto blur = ParseBlurParam(themeStyle_, blurIter->second, colorMode == ThemeColorMode::DARK);

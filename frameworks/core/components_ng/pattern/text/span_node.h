@@ -238,41 +238,11 @@ public:
     TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode = false);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
-
-    // The function is only used for urlspan
-    void HandeUrlHoverEvent(bool isHover, int32_t urlId, const RefPtr<SpanItem>& spanItem) const;
-    void HandeUrlOnPressEvent(const RefPtr<SpanItem>& spanItem, bool isPress) const;
-    void HandleUrlNormalStyle(const RefPtr<SpanItem>& spanItem) const;
-    std::function<void(const std::string& address)> urlOnClick;
-    std::function<void(const std::string& address)> urlOnRelease;
-    std::function<void(const RefPtr<SpanItem>& spanItem, bool isHover, int32_t urlId)> urlOnHover;
-    std::function<void(const RefPtr<SpanItem>& spanItem, bool isPress)> urlOnPress;
-    void SetUrlAddress(const std::string& address)
+    std::function<void()> urlOnRelease;
+    void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
     {
-        address_ = address;
+        urlOnRelease = std::move(onRelease);
     }
-    std::string GetUrlAddress()
-    {
-        return address_;
-    }
-    void SetUrlOnReleaseEvent(std::function<void(const std::string& address)>&& urlOnRelease_)
-    {
-        urlOnRelease = std::move(urlOnRelease_);
-    }
-    void SetUrlOnHoverEvent(std::function<void(const RefPtr<NG::SpanItem>& spanItem,
-        bool isHover, int32_t urlId)>&& urlOnHover_)
-    {
-        urlOnHover = std::move(urlOnHover_);
-    }
-    void SetUrlOnClickEvent(std::function<void(const std::string& address)>&& urlOnClick_)
-    {
-        urlOnClick = std::move(urlOnClick_);
-    }
-    void SetUrlOnPressEvent(std::function<void(const RefPtr<NG::SpanItem>& spanItem, bool isPress)>&& urlOnPress_)
-    {
-        urlOnPress = std::move(urlOnPress_);
-    }
-
     bool Contains(int32_t index)
     {
         return rangeStart < index && index < position;
@@ -336,11 +306,6 @@ public:
 
     bool UpdateSpanTextColor(Color color);
 
-    void SetDefaultMouseStyle(MouseFormat mouseStyle)
-    {
-        defaultMouseStyle_ = mouseStyle;
-    }
-
     void SetSymbolId(uint32_t symbolId)
     {
         symbolId_ = symbolId;
@@ -356,9 +321,6 @@ private:
     bool hasUserFontWeight_ = false;
     RefPtr<ResourceObject> resourceObject_;
     WeakPtr<Pattern> pattern_;
-    Dimension radius_ = 2.0_vp;
-    std::string address_;
-    MouseFormat defaultMouseStyle_ = MouseFormat::DEFAULT;
     uint32_t symbolId_ = 0;
 };
 
