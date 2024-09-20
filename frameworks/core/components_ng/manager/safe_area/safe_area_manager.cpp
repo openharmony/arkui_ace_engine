@@ -48,7 +48,7 @@ bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::O
     if (cutoutSafeArea_ == cutoutArea) {
         return false;
     }
-    ACE_SCOPED_TRACE("SafeAreaManager::UpdateCutoutSafeArea %s", safeArea.ToString().c_str());
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateCutoutSafeArea %s", cutoutArea.ToString().c_str());
     cutoutSafeArea_ = cutoutArea;
     return true;
 }
@@ -152,7 +152,7 @@ bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
         return false;
     }
     keyboardSafeAreaEnabled_ = value;
-    LOGI("SafeAreaManager::SetKeyBoardAvoidMode %{public}d", int(keyboardSafeAreaEnabled_));
+    LOGI("SafeAreaManager::SetKeyBoardAvoidMode %{public}d", keyboardSafeAreaEnabled_);
     return true;
 }
 
@@ -162,7 +162,7 @@ bool SafeAreaManager::SetIsAtomicService(bool value)
         return false;
     }
     isAtomicService_ = value;
-    LOGI("SafeAreaManager::SetIsAtomicService %{public}d", int(isAtomicService_));
+    LOGI("SafeAreaManager::SetIsAtomicService %{public}d", isAtomicService_);
     return true;
 }
 
