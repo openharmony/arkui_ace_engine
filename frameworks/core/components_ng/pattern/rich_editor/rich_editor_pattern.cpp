@@ -5465,6 +5465,9 @@ bool RichEditorPattern::CursorMoveDown()
             !NearEqual(caretOffsetEnd.GetY() - GetTextRect().GetY(), currentLineInfo.GetY(), 0.5f)) {
             caretPositionEnd += 1;
         }
+        if (caretPositionEnd == caretPosition_) {
+            caretPositionEnd = GetTextContentLength();
+        }
         SetCaretPosition(caretPositionEnd);
         if (cursorNotAtLineStart && caretPosition_ != 0 && !isEnter) {
             OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight, false, false);
