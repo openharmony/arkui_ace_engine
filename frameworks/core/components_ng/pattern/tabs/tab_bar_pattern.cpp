@@ -402,14 +402,18 @@ void TabBarPattern::AddIsFocusActiveUpdateEvent()
             pattern->UpdateFocusTabarPageState();
         };
     }
-    auto pipeline = GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
 }
 
 void TabBarPattern::RemoveIsFocusActiveUpdateEvent()
 {
-    auto pipeline = GetContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveIsFocusActiveUpdateEvent(GetHost());
 }
@@ -419,6 +423,15 @@ void TabBarPattern::UpdateFocusTabarPageState()
     if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
         UpdateSubTabBoard(indicator_);
         UpdateTextColorAndFontWeight(indicator_);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(tabTheme);
+        if (tabTheme->GetIsChangeFocusTextStyle()) {
+            indicatorStyles_[indicator_].color = Color::TRANSPARENT;
+        }
     }
 }
 
@@ -662,9 +675,27 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
     if (event.action != KeyAction::DOWN) {
         return false;
     }
-    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE || tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, false);
+    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE) {
         return OnKeyEventWithoutClick(event);
     }
+    if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
+        if (tabTheme->GetIsChangeFocusTextStyle()) {
+            OnKeyEventWithoutClick(event);
+        } else {
+            return OnKeyEventWithoutClick(event);
+        }
+    }
+    return HandleKeyEvent(event);
+}
+
+bool TabBarPattern::HandleKeyEvent(const KeyEvent& event)
+{
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     CHECK_NULL_RETURN(swiperController_, false);
