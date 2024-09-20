@@ -47,13 +47,15 @@ class NavigationTitleUtil {
 public:
     static RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId,
         const std::vector<NG::BarItem>& menuItems, const RefPtr<NavDestinationNodeBase>& navDestinationNodeBase,
-        bool isButtonEnabled, const std::string& field, const std::string& parentId);
+        bool isButtonEnabled, const std::string& field, const std::string& parentId,
+        bool isCreateLandscapeMenu = false);
     static void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
         const RefPtr<FrameNode>& barMenuNode);
 
     static bool BuildMoreButton(bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme,
         const RefPtr<NavDestinationNodeBase>& nodeBase, const RefPtr<FrameNode>& menuNode,
-        std::vector<OptionParam>&& params, const std::string& field, const std::string& parentId);
+        std::vector<OptionParam>&& params, const std::string& field, const std::string& parentId,
+        bool isCreateLandscapeMenu);
     static RefPtr<FrameNode> CreateMenuItemNode(
         const RefPtr<NavigationBarTheme>& theme, const BarItem& menuItem, bool isButtonEnabled);
     static RefPtr<FrameNode> CreateMenuItemButton(const RefPtr<NavigationBarTheme>& theme);

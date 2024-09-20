@@ -48,7 +48,8 @@ const RefPtr<CubicCurve> TITLEBAR_OPACITY_ANIMATION_CURVE = AceType::MakeRefPtr<
 
 bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme,
     const RefPtr<NavDestinationNodeBase>& nodeBase, const RefPtr<FrameNode>& menuNode,
-    std::vector<OptionParam>&& params, const std::string& field, const std::string& parentId)
+    std::vector<OptionParam>&& params, const std::string& field, const std::string& parentId,
+    bool isCreateLandscapeMenu)
 {
     auto barItemNode = CreateBarItemNode(isButtonEnabled);
     CHECK_NULL_RETURN(barItemNode, false);
@@ -76,13 +77,17 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     CHECK_NULL_RETURN(menuNode, false);
     menuNode->AddChild(menuItemNode);
     CHECK_NULL_RETURN(nodeBase, false);
-    nodeBase->SetMenuNode(barMenuNode);
+    if (isCreateLandscapeMenu) {
+        nodeBase->SetLandscapeMenuNode(barMenuNode);
+    } else {
+        nodeBase->SetMenuNode(barMenuNode);
+    }
     return true;
 }
 
 RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     const std::vector<NG::BarItem>& menuItems, const RefPtr<NavDestinationNodeBase>& navDestinationNodeBase,
-    bool isButtonEnabled, const std::string& field, const std::string& parentId)
+    bool isButtonEnabled, const std::string& field, const std::string& parentId, bool isCreateLandscapeMenu)
 {
     auto menuNode = FrameNode::GetOrCreateFrameNode(
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
@@ -122,8 +127,8 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
 
     // build more button
     if (needMoreButton) {
-        bool buildMoreButtonResult = BuildMoreButton(
-            isButtonEnabled, theme, navDestinationNodeBase, menuNode, std::move(params), field, parentId);
+        bool buildMoreButtonResult = BuildMoreButton(isButtonEnabled, theme, navDestinationNodeBase,
+            menuNode, std::move(params), field, parentId, isCreateLandscapeMenu);
         if (!buildMoreButtonResult) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "build more button node failed");
             return nullptr;
