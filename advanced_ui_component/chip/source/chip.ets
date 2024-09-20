@@ -988,6 +988,11 @@ export struct ChipComponent {
             .flexShrink(0)
             .visibility(this.getVisibility())
             .draggable(false)
+            .focusBox({
+              margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+              strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+              strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+            })
             .onFocus(() => {
               this.suffixIconOnFocus = true
             })
@@ -1048,6 +1053,11 @@ export struct ChipComponent {
     .scale(this.chipScale)
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
+    .focusBox({
+      margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+      strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+      strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+    })
     .onFocus(() => {
       this.chipNodeOnFocus = true
     })
