@@ -629,6 +629,14 @@ void TextFieldModelNG::SetShowCounter(bool value)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCounterState(false);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (value && !pattern->IsNormalInlineState() && !pattern->IsInPasswordMode() &&
+        layoutProperty->HasMaxLength()) {
+        pattern->AddCounterNode();
+    } else {
+        pattern->CleanCounterNode();
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
@@ -1213,7 +1221,15 @@ void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCounterState(false);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);
+    if (value && !pattern->IsNormalInlineState() && !pattern->IsInPasswordMode() &&
+        layoutProperty->HasMaxLength()) {
+        pattern->AddCounterNode();
+    } else {
+        pattern->CleanCounterNode();
+    }
 }
 
 void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible)
