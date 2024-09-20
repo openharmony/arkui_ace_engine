@@ -60,7 +60,9 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         if (self->startingWindow_) {
-            self->BufferAvailableCallback();
+            if (IsWindowSizeEqual()) {
+                self->BufferAvailableCallback();
+            }
             return;
         }
         CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
@@ -504,6 +506,10 @@ void WindowScene::OnLayoutFinished()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
+        if (self->startingWindow_) {
+            self->BufferAvailableCallback();
+        }
+        
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("WindowScene::OnLayoutFinished[id:%d][self:%d][enabled:%d]",

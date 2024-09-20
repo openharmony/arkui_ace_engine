@@ -176,7 +176,6 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
-    attachToFrameNodeFlag_ = true;
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
@@ -186,6 +185,7 @@ void WindowPattern::OnAttachToFrameNode()
         surfaceNode->SetBufferAvailableCallback(callback_);
         return;
     }
+    attachToFrameNodeFlag_ = true;
 }
 
 void WindowPattern::CreateBlankWindow(RefPtr<FrameNode>& window)
