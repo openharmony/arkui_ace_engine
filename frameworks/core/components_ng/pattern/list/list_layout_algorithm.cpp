@@ -1533,7 +1533,7 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
     if (!focusHub->IsCurrentFocus()) {
         return;
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
@@ -1824,7 +1824,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
         return;
     }
     pattern->SetPredictLayoutParam(param);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode))](int64_t deadline, bool canUseLongPredictTask) {
         ACE_SCOPED_TRACE("List predict");
@@ -2106,7 +2106,7 @@ void ListLayoutAlgorithm::PostIdleTaskV2(
         return;
     }
     pattern->SetPredictLayoutParamV2(param);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask(
         [weak = WeakClaim(RawPtr(frameNode)), value = listMainSizeValues](int64_t deadline,

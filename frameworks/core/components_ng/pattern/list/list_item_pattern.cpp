@@ -958,7 +958,7 @@ void ListItemPattern::UpdateListItemAlignToCenter()
 Color ListItemPattern::GetBlendGgColor()
 {
     Color color = Color::TRANSPARENT;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, color);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_RETURN(theme, color);
