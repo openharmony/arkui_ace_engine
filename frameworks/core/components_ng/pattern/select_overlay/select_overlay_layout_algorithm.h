@@ -94,6 +94,10 @@ private:
     OffsetF ComputeExtensionMenuPosition(LayoutWrapper* layoutWrapper, const OffsetF& offset);
     OffsetF AdjustSelectMenuOffset(
         LayoutWrapper* layoutWrapper, const RectF& menuRect, double spaceBetweenText, double spaceBetweenHandle);
+    OffsetF AdjustSelectMenuOffsetWhenHandlesUnshown(const RectF& menuRect, double spaceBetweenText);
+    void AdjustMenuOffsetAtSingleHandleBottom(const RectF handleRect, const RectF& menuRect, OffsetF& menuOffset,
+        double spaceBetweenText);
+    bool IsMenuAreaSmallerHandleArea(RectF handleRect, float menuHeight, float menuDistance);
     void AdjustMenuTooFarAway(OffsetF& menuOffset, const RectF& menuRect);
     void AdjustMenuInRootRect(OffsetF& menuOffset, const SizeF& menuSize, const SizeF& rootSize);
     OffsetF CalculateCustomMenuByMouseOffset(LayoutWrapper* layoutWrapper);
