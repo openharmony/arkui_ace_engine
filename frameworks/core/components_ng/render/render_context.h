@@ -25,6 +25,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/layout/constants.h"
@@ -401,6 +402,8 @@ public:
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
     virtual void ClearDrawCommands() {}
+
+    virtual void RemoveContentModifier(const RefPtr<ContentModifier>& ContentModifier) {}
 
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
