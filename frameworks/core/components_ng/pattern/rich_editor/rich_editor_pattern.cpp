@@ -4849,7 +4849,7 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     bool spanNodeBeforeCanInsert = spanNodeBefore && spanNodeBefore->GetTag() == V2::SPAN_ETS_TAG;
     bool needCreateNewSpan = host->GetChildren().empty();
     if (info.GetOffsetInSpan() == 0) {
-        if (spanNodeBeforeCanInsert && !IsLineSeparatorInLast(spanNodeBefore)) {
+        if (spanNodeBeforeCanInsert) {
             auto spanItem = spanNodeBefore->GetSpanItem();
             info.SetSpanIndex(info.GetSpanIndex() - 1);
             info.SetOffsetInSpan(spanItem->position - spanItem->rangeStart);
