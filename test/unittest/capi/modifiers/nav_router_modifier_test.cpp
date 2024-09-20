@@ -19,16 +19,18 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
-    const auto ATTRIBUTE_NAME_NAME = "name";
-    const auto ATTRIBUTE_NAME_DEFAULT_VALUE = "!NOT-DEFINED!";
-    const auto ATTRIBUTE_PARAM_NAME = "param";
-    const auto ATTRIBUTE_PARAM_DEFAULT_VALUE = "!NOT-DEFINED!";
+    //const auto ATTRIBUTE_NAME_NAME = "name";
+    //const auto ATTRIBUTE_NAME_DEFAULT_VALUE = "!NOT-DEFINED!";
+    //const auto ATTRIBUTE_PARAM_NAME = "param";
+    //const auto ATTRIBUTE_PARAM_DEFAULT_VALUE = "!NOT-DEFINED!";
     const auto ATTRIBUTE_MODE_MODE_NAME = "modeMode";
     const auto ATTRIBUTE_MODE_MODE_DEFAULT_VALUE = "!NOT-DEFINED!";
 } // namespace
@@ -38,42 +40,14 @@ class NavRouterModifierTest : public ModifierTestBase<GENERATED_ArkUINavRouterMo
     static void SetUpTestCase()
     {
         MockPipelineContext::SetUp();
-
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-
-        // set test values to Theme Pattern as data for the Theme building
-        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
-        MockThemeStyle::GetInstance()->SetAttr("swiper_pattern", { .value = themeStyle });
-        themeConstants->LoadTheme(0);
-
-        // build default SwiperTheme
-        SwiperIndicatorTheme::Builder builder;
-        auto swiperTheme = builder.Build(themeConstants);
-
-        // create Theme Manager and provide return of SwiperTheme
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_))
-            .WillRepeatedly(Return(themeConstants));
-        EXPECT_CALL(*themeManager, GetTheme(testing::_))
-            .WillRepeatedly(Return(swiperTheme));
-
-        // setup Context with Theme Manager and Container
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-
-        // setup the test event handler
-        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 
     static void TearDownTestCase()
     {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
         MockPipelineContext::TearDown();
         MockContainer::TearDown();
     }
-};
 };
 
 //     name: Ark_String [false]

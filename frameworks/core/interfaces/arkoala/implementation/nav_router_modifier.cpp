@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG::Converter {
 template<>
 std::optional<int32_t> Convert(const std::optional<NavRouteMode>& src)
 {
-    if (!src.hasValue()) {
+    if (!src.has_value()) {
         return std::nullopt;
     }
     return static_cast<int32_t>(*src);
@@ -50,7 +50,7 @@ void ModeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto enumMode = Converter::OptConvert<NavRouteMode>(mode);
-    auto value = Converter::Convert<std::optional<int32_t>(enumMode);
+    auto value = Converter::Convert<std::optional<int32_t>>(enumMode);
     NavRouterModelNG::SetNavRouteMode(frameNode, value);
 }
 } // NavRouterAttributeModifier
