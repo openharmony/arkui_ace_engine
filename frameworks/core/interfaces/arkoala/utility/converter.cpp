@@ -155,6 +155,15 @@ std::optional<float> ResourceConverter::ToFloat()
     return std::nullopt;
 }
 
+std::optional<int32_t> ResourceConverter::ToInt()
+{
+    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    if (type_ == NodeModifier::ResourceType::INTEGER) {
+        return themeConstants_->GetInt(id_);
+    }
+    return std::nullopt;
+}
+
 std::optional<Color> ResourceConverter::ToColor()
 {
     std::optional<Color> result;

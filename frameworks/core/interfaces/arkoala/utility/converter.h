@@ -93,6 +93,7 @@ namespace Converter {
             std::optional<StringArray> ToStringArray();
             std::optional<Dimension> ToDimension();
             std::optional<float> ToFloat();
+            std::optional<int32_t> ToInt();
             std::optional<Color> ToColor();
 
             inline const char* BundleName() { return bundleName_.c_str(); }
@@ -268,6 +269,13 @@ namespace Converter {
     {
         ResourceConverter converter(src);
         dst = converter.ToFloat();
+    }
+
+    template<>
+    inline void AssignCast(std::optional<int32_t>& dst, const Ark_Resource& src)
+    {
+        ResourceConverter converter(src);
+        dst = converter.ToInt();
     }
 
     // Converter implementations

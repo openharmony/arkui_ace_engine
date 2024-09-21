@@ -938,13 +938,22 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         ToJsonMenuBackgroundStyle(json, filter);
         return;
     }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+
     json->PutExtAttr("options", InspectorGetOptions().c_str(), filter);
     json->PutExtAttr("selected", std::to_string(selected_).c_str(), filter);
     ToJsonArrowAndText(json, filter);
-    json->PutExtAttr("selectedOptionBgColor", selectedBgColor_->ColorToString().c_str(), filter);
+    json->PutExtAttr("selectedOptionBgColor",
+        selectedBgColor_ ? selectedBgColor_->ColorToString().c_str() : "", filter);
     json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
     json->PutExtAttr("selectedOptionFontColor",
-        selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
+        selectedFont_.FontColor.value_or(theme->GetSelectedColorText()).ColorToString().c_str(), filter);
 
     if (options_.empty()) {
         json->PutExtAttr("optionBgColor", "", filter);
