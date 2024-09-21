@@ -85,7 +85,7 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
         auto iter = sharedImageMap_.find(name);
         if (iter != sharedImageMap_.end()) {
             iter->second = std::move(sharedImage);
-        } else if(sharedImage.size() <= MAX_SIZE_FOR_EACH_IMAGE) {
+        } else if (sharedImage.size() <= MAX_SIZE_FOR_EACH_IMAGE) {
             if (sharedImageMap_.size() >= MAX_NUM_OF_IMAGE) {
                 sharedImageMap_.erase(sharedImageMap_.begin());
             }
