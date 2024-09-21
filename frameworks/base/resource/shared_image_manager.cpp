@@ -23,6 +23,9 @@ namespace {
 constexpr uint32_t DELAY_TIME_FOR_IMAGE_DATA_CLEAN = 30000;
 constexpr char MEMORY_IMAGE_HEAD[] = "memory://";
 
+constexpr uint32_t MAX_SIZE_FOR_EACH_IMAGE = 2000000;
+constexpr uint32_t MAX_NUM_OF_IMAGE = 5;
+
 } // namespace
 
 std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const std::string& name, size_t dataSize)
@@ -79,16 +82,23 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
         }
         // step2: lock image map to add shared image and notify [LazyMemoryImageProvider]s to update data and reload
         // update image data when the name can be found in map
+        bool isClear = false;
         auto iter = sharedImageMap_.find(name);
         if (iter != sharedImageMap_.end()) {
             iter->second = std::move(sharedImage);
         } else {
             sharedImageMap_.emplace(name, std::move(sharedImage));
+            if (sharedImageMap_.size() >= MAX_NUM_OF_IMAGE) {
+                isClear = true;
+            }
+        }
+        if (sharedImage.size() > MAX_SIZE_FOR_EACH_IMAGE) {
+            isClear = true;
         }
         auto taskExecutor = taskExecutor_.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [providerWpSet, name, wp = AceType::WeakClaim(this)]() {
+            [isClear, providerWpSet, name, wp = AceType::WeakClaim(this)]() {
                 auto sharedImageManager = wp.Upgrade();
                 CHECK_NULL_VOID(sharedImageManager);
                 size_t dataSize = 0;
@@ -109,7 +119,9 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
                         provider->UpdateData(std::string(MEMORY_IMAGE_HEAD).append(name), imageDataIter->second);
                     }
                 }
-                sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
+                if (isClear) {
+                    sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
+                }
             },
             TaskExecutor::TaskType::UI, "ArkUIImageAddSharedImageData");
 }
