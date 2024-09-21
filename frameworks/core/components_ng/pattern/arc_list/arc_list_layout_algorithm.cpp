@@ -46,6 +46,7 @@ namespace {
 static constexpr float ARC_LIST_MAIN_POS_OFFSET = 200.f;
 static constexpr Dimension ARC_LIST_ITEM_SNAP_SIZE = 145.0_vp;
 static constexpr float FLOAT_TWO = 2.0f;
+static constexpr float TRANSPARENCY_DIST = 40;
 } // namespace
 
 // map data from UX, mark for scale ratio according to distance between item center and list center
@@ -450,14 +451,15 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
     UpdateZIndex(wrapper);
 
     auto chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(headerIndex_) : 0.0f;
+    float transparency = 0.0f;
     if (itemPosition_.count(0) != 0) {
         auto info = itemPosition_[0];
         float itemDeltaHeight = (info.endPos - info.startPos) * (info.scale - 1);
         float itemDispStartPos = info.startPos + info.offsetY - itemDeltaHeight / FLOAT_TWO;
-        if (LessOrEqual(itemDispStartPos, headerMainSize_)) {
-            startHeaderPos_ = itemDispStartPos - headerMainSize_;
-        } else {
-            startHeaderPos_ = -chainOffset;
+        startHeaderPos_ = itemDispStartPos - headerMainSize_;
+        if (GreatNotEqual(startHeaderPos_, -TRANSPARENCY_DIST)) {
+            transparency = (startHeaderPos_ + TRANSPARENCY_DIST) / (TRANSPARENCY_DIST * FLOAT_TWO);
+            transparency = GreatNotEqual(transparency, 1) ? 1 : transparency;
         }
     } else {
         startHeaderPos_ = -chainOffset - headerMainSize_;
@@ -480,6 +482,10 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
     auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
     if (frameNode) {
         frameNode->MarkAndCheckNewOpIncNode();
+        auto renderContext = frameNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->UpdateOpacity(transparency);
+        }
     }
 }
 
