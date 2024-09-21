@@ -1831,7 +1831,16 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
     } else {
         navigationStack_->ClearRecoveryList();
         navigationTransition.transition(proxy);
+        // enable render group for text node during custom animation to reduce
+        // unnecessary redrawing
+        if (isPopPage && preTopNavDestination) {
+            preTopNavDestination->UpdateTextNodeListAsRenderGroup(isPopPage);
+        }
+        if (!isPopPage && newTopNavDestination) {
+            newTopNavDestination->UpdateTextNodeListAsRenderGroup(isPopPage);
+        }
     }
+
     RefPtr<EventHub> eventHub;
     if (!preTopNavDestination && navigationMode_ == NavigationMode::STACK) {
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -2627,6 +2636,16 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
                                         weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
                                         weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
                                         isPopPage, proxy]() {
+        auto preDestination = weakPreNavDestination.Upgrade();
+        auto topDestination = weakNewNavDestination.Upgrade();
+        // disable render group for text node after the custom animation
+        if (isPopPage && preDestination) {
+            preDestination->ReleaseTextNodeList();
+        }
+        if (!isPopPage && topDestination) {
+            topDestination->ReleaseTextNodeList();
+        }
+
         // to avoid call finishTransition many times
         if (proxy == nullptr) {
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "custom animation proxy is empty or is finished");
@@ -2634,8 +2653,6 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
         }
         auto pattern = weakNavigation.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto preDestination = weakPreNavDestination.Upgrade();
-        auto topDestination = weakNewNavDestination.Upgrade();
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom animation finish end");
         proxy->SetIsFinished(true);
         // update pre navigation stack

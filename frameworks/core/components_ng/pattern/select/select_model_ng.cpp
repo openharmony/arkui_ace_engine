@@ -21,7 +21,7 @@ namespace OHOS::Ace::NG {
 namespace {
 void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = select->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -474,7 +474,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     auto pattern = select->GetPattern<SelectPattern>();
     
     CHECK_NULL_VOID(pattern);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         pattern->SetSelectDefaultTheme();
@@ -513,8 +513,8 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     }
 
     // delete menu when select node destroy
-    auto destructor = [id = select->GetId()]() {
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto destructor = [id = select->GetId(), frameNode]() {
+        auto* pipeline = frameNode->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);

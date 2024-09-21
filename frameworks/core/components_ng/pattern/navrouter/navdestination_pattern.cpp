@@ -56,14 +56,15 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         if (navDestinationPattern->HasMenuNodeId()) {
             auto menuNode = NavigationTitleUtil::CreateMenuItems(navDestinationPattern->GetMenuNodeId(),
                 titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD,
-                titleBarNode->GetInnerParentId());
+                titleBarNode->GetInnerParentId(), false);
             CHECK_NULL_VOID(menuNode);
             navDestinationGroupNode->SetMenu(menuNode);
         }
 
         titleBarMenuItems.insert(titleBarMenuItems.end(), toolBarMenuItems.begin(), toolBarMenuItems.end());
         auto landscapeMenuNode = NavigationTitleUtil::CreateMenuItems(navDestinationPattern->GetLandscapeMenuNodeId(),
-            titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD, titleBarNode->GetInnerParentId());
+            titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD, titleBarNode->GetInnerParentId(),
+            true);
         CHECK_NULL_VOID(landscapeMenuNode);
         navDestinationGroupNode->SetLandscapeMenu(landscapeMenuNode);
     }

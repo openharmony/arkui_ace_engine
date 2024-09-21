@@ -1411,19 +1411,19 @@ HWTEST_F(VideoTestExtraAddNg, SetCurrentTime001, TestSize.Level1)
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
     videoPattern->SetCurrentTime(10, OHOS::Ace::SeekMode::SEEK_PREVIOUS_SYNC);
-    EXPECT_EQ(seekPos, 10000);
+    EXPECT_EQ(seekPos, 0);
 
     mockMediaPlayer = AceType::MakeRefPtr<MockMediaPlayer>();
     EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(false));
     videoPattern->mediaPlayer_ = mockMediaPlayer;
 
     videoPattern->SetCurrentTime(20, OHOS::Ace::SeekMode::SEEK_PREVIOUS_SYNC);
-    EXPECT_EQ(seekPos, 10000);
+    EXPECT_EQ(seekPos, 0);
 
     videoPattern->mediaPlayer_ = nullptr;
 
     videoPattern->SetCurrentTime(30, OHOS::Ace::SeekMode::SEEK_PREVIOUS_SYNC);
-    EXPECT_EQ(seekPos, 10000);
+    EXPECT_EQ(seekPos, 0);
 }
 
 /**

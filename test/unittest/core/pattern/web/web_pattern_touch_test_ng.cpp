@@ -1151,7 +1151,7 @@ HWTEST_F(WebPatternTouchTestNg, HandleDoubleClickEvent_001, TestSize.Level1)
     info.SetButton(MouseButton::LEFT_BUTTON);
     info.SetAction(MouseAction::NONE);
     std::queue<MouseClickInfo> empty;
-    swap(empty, webPattern->doubleClickQueue_);
+    swap(empty, webPattern->mouseClickQueue_);
     webPattern->HandleDoubleClickEvent(info);
 #endif
 }
@@ -1183,7 +1183,7 @@ HWTEST_F(WebPatternTouchTestNg, HandleDoubleClickEvent_002, TestSize.Level1)
     mouseInfo.x = 1;
     mouseInfo.y = 1;
     clickInfos.push(mouseInfo);
-    swap(clickInfos, webPattern->doubleClickQueue_);
+    swap(clickInfos, webPattern->mouseClickQueue_);
     webPattern->HandleDoubleClickEvent(info);
 #endif
 }

@@ -138,8 +138,9 @@ constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
 constexpr float TIME_UNIT = 1000.0f;
 constexpr float MAX_DRAG_SCROLL_SPEED = 2400.0f;
-constexpr Dimension AUTO_SCROLL_DRAG_EDGE_DISTANCE = 58.0_vp;
-constexpr float AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION = 300;
+constexpr Dimension AUTO_SCROLL_HOT_ZONE_HEIGHT = 58.0_vp;
+constexpr Dimension AUTO_SCROLL_HOT_ZONE_WIDTH = 26.0_vp;
+constexpr float AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION = 0.0f;
 constexpr Dimension AUTO_SCROLL_HOT_AREA_LONGPRESS_DISTANCE = 5.0_vp;
 
 static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
@@ -1295,9 +1296,13 @@ void TextFieldPattern::HandleCrossPlatformInBlurEvent()
 
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
-    if (event.code == KeyCode::KEY_TAB && isFocusedBeforeClick_ && !contentController_->IsEmpty()) {
-        isFocusedBeforeClick_ = false;
-        HandleOnSelectAll(false);
+    if (event.code == KeyCode::KEY_TAB && !contentController_->IsEmpty()) {
+        if (isFocusedBeforeClick_) {
+            isFocusedBeforeClick_ = false;
+            HandleOnSelectAll(false);
+        } else {
+            CloseSelectOverlay(true);
+        }
     }
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -1725,6 +1730,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
             HandleTouchMove(touchInfo.value());
         }
     } else if (touchType == TouchType::CANCEL) {
+        StopContentScroll();
         if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
             magnifierController_->RemoveMagnifierFrameNode();
         }
@@ -1757,6 +1763,7 @@ void TextFieldPattern::HandleTouchUp()
     }
     if (moveCaretState_.isMoveCaret) {
         moveCaretState_.isMoveCaret = false;
+        StopContentScroll();
         StartTwinkling();
     }
     if (isMousePressed_) {
@@ -1824,7 +1831,8 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
             StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
         }
     } else {
-        selectController_->UpdateCaretInfoByOffset(touchOffset);
+        UpdateContentScroller(touchOffset);
+        selectController_->UpdateCaretInfoByOffset(touchOffset, false);
         if (magnifierController_ && IsOperation()) {
             magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
         }
@@ -4176,10 +4184,10 @@ void TextFieldPattern::UltralimitShake()
     CHECK_NULL_VOID(pipelineContext);
     AnimationUtils::Animate(
         option,
-        [context]() {
-            if (context) {
-                context->UpdateTranslateInXY({ 0.0f, 0.0f });
-            }
+        [weak = WeakClaim(context.GetRawPtr())]() {
+            auto context = weak.Upgrade();
+            CHECK_NULL_VOID(context);
+            context->UpdateTranslateInXY({ 0.0f, 0.0f });
         },
         option.GetOnFinishEvent());
 }
@@ -7346,9 +7354,12 @@ void TextFieldPattern::CheckPasswordAreaState()
 void TextFieldPattern::AfterLayoutProcessCleanResponse(
     const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea)
 {
+    CHECK_NULL_VOID(cleanNodeResponseArea);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([cleanNodeResponseArea]() {
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(cleanNodeResponseArea.GetRawPtr())]() {
+        auto cleanNodeResponseArea = weak.Upgrade();
+        CHECK_NULL_VOID(cleanNodeResponseArea);
         cleanNodeResponseArea->Refresh();
         cleanNodeResponseArea->UpdateCleanNode(cleanNodeResponseArea->IsShow());
     });
@@ -8502,7 +8513,7 @@ void TextFieldPattern::UpdateContentScroller(const Offset& localOffset)
 {
     auto scrollStep = CalcAutoScrollStepOffset(localOffset);
     // 在热区外移动
-    if (!scrollStep || !IsScrollable()) {
+    if (!scrollStep || (!GetScrollEnabled() && !moveCaretState_.isMoveCaret)) {
         contentScroller_.OnBeforeScrollingCallback(localOffset);
         PauseContentScroll();
         contentScroller_.hotAreaOffset.reset();
@@ -8513,7 +8524,6 @@ void TextFieldPattern::UpdateContentScroller(const Offset& localOffset)
     if (contentScroller_.isScrolling) {
         return;
     }
-    // 在热区内但未触发滚动，热区内手指停留300ms后触发滚动
     contentScroller_.OnBeforeScrollingCallback(localOffset);
     if (!contentScroller_.hotAreaOffset) {
         contentScroller_.hotAreaOffset = localOffset;
@@ -8533,7 +8543,7 @@ std::optional<float> TextFieldPattern::CalcAutoScrollStepOffset(const Offset& lo
     auto contentRect = GetContentRect();
     auto axis = GetAxis();
     auto isVertical = (axis == Axis::VERTICAL);
-    auto hotArea = AUTO_SCROLL_DRAG_EDGE_DISTANCE.ConvertToPx();
+    auto hotArea = isVertical ? AUTO_SCROLL_HOT_ZONE_HEIGHT.ConvertToPx() : AUTO_SCROLL_HOT_ZONE_WIDTH.ConvertToPx();
     if (isVertical) {
         if (LessOrEqual(contentRect.Height(), hotArea)) {
             hotArea = contentRect.Height() / 3.0f;

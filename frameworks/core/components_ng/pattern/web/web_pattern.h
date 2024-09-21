@@ -40,6 +40,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
@@ -814,6 +815,7 @@ private:
     void WebOnMouseEvent(const MouseInfo& info);
     bool HandleDoubleClickEvent(const MouseInfo& info);
     void SendDoubleClickEvent(const MouseClickInfo& info);
+    int32_t HandleMouseClickEvent(const MouseInfo& info);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleFocusEvent();
     void HandleBlurEvent(const BlurReason& blurReason);
@@ -863,6 +865,8 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleTouchClickEvent(const GestureEvent& info, bool fromOverlay);
     void OnSelectHandleStart(bool isFirst);
     void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
     void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
@@ -1021,7 +1025,7 @@ private:
     bool isQuickMenuMouseTrigger_ = false;
     RefPtr<DragEvent> dragEvent_;
     bool isUrlLoaded_ = false;
-    std::queue<MouseClickInfo> doubleClickQueue_;
+    std::queue<MouseClickInfo> mouseClickQueue_;
     bool isFullScreen_ = false;
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
@@ -1143,6 +1147,10 @@ private:
     };
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
     bool imageOverlayIsSelected_ = false;
+    bool clickEventInitialized_ = false;
+    bool clickedFromOverlay_ = false;
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;

@@ -114,7 +114,12 @@ std::optional<SizeF> ButtonLayoutAlgorithm::HandleLabelCircleButtonConstraint(La
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(buttonLayoutProperty, constraintSize);
     const auto& selfLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(selfLayoutConstraint, constraintSize);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, constraintSize);
+    auto* context = host->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, constraintSize);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, constraintSize);
     const auto& padding = buttonLayoutProperty->CreatePaddingAndBorder();
     auto defaultHeight = GetDefaultHeight(layoutWrapper);
@@ -150,7 +155,11 @@ void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, Lay
 {
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
-    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto* context = host->GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(childWrapper);
@@ -231,7 +240,11 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto padding = buttonLayoutProperty->CreatePaddingAndBorder();
         auto topPadding = padding.top.value_or(0.0);
         auto bottomPadding = padding.bottom.value_or(0.0);
-        auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto* context = host->GetContextWithCheck();
+        CHECK_NULL_VOID(context);
+        auto buttonTheme = context->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
 
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
@@ -321,7 +334,7 @@ float ButtonLayoutAlgorithm::GetDefaultHeight(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(layoutProperty, 0.0);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, 0.0);
-    auto context = frameNode->GetContext();
+    auto* context = frameNode->GetContext();
     CHECK_NULL_RETURN(context, 0.0);
     auto buttonTheme = context->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, 0.0);

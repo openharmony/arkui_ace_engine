@@ -659,12 +659,18 @@ void SubwindowManager::ShowToastNG(const NG::ToastInfo& toastInfo, std::function
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast ng enter");
     auto containerId = Container::CurrentId();
     auto windowType = GetToastWindowType(containerId);
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_VOID(container);
+    auto windowId = container->GetWindowId();
+    // Get the parent window ID before the asynchronous operation
+    auto mainWindowId = container->GetParentMainWindowId(windowId);
     // for ability
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [containerId, toastInfo, callbackParam = std::move(callback), windowType] {
-            auto subwindow = SubwindowManager::GetInstance()->GetOrCreateToastWindowNG(containerId, windowType);
+        [containerId, toastInfo, callbackParam = std::move(callback), windowType, mainWindowId] {
+            auto subwindow = SubwindowManager::GetInstance()->GetOrCreateToastWindowNG(
+                containerId, windowType, mainWindowId);
             CHECK_NULL_VOID(subwindow);
             TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
             subwindow->ShowToast(toastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
@@ -793,7 +799,8 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindow(int32_t containerId, 
     return subwindow;
 }
 
-RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType)
+RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId,
+    const ToastWindowType& windowType, uint32_t mainWindowId)
 {
     RefPtr<Subwindow> subwindow = GetToastSubwindow(containerId, windowType);
     if (!subwindow) {
@@ -803,6 +810,7 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId
             return nullptr;
         }
         subwindow->SetToastWindowType(windowType);
+        subwindow->SetMainWindowId(mainWindowId);
         AddToastSubwindow(containerId, subwindow, windowType);
     }
     return subwindow;

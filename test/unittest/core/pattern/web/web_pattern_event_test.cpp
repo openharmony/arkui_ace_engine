@@ -99,12 +99,12 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_001, TestSize.Level1)
     TimeStamp time(millisec);
     info.SetLocalLocation(localLocation);
     info.SetTimeStamp(time);
-    EXPECT_TRUE(g_webPattern->doubleClickQueue_.empty());
+    EXPECT_TRUE(g_webPattern->mouseClickQueue_.empty());
     g_webPattern->HandleDoubleClickEvent(info);
-    EXPECT_FALSE(g_webPattern->doubleClickQueue_.empty());
-    EXPECT_EQ(g_webPattern->doubleClickQueue_.size(), 1);
+    EXPECT_FALSE(g_webPattern->mouseClickQueue_.empty());
+    EXPECT_EQ(g_webPattern->mouseClickQueue_.size(), 1);
     g_webPattern->HandleDoubleClickEvent(info);
-    EXPECT_NE(g_webPattern->doubleClickQueue_.size(), 1);
+    EXPECT_NE(g_webPattern->mouseClickQueue_.size(), 1);
     g_webPattern->HandleDoubleClickEvent(info);
 #endif
 }

@@ -246,6 +246,7 @@ std::string GetWebDebugBackGroundColor()
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
+constexpr int32_t TRIPLE_CLICK_NUM = 3;
 constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5;
 constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
 constexpr double DEFAULT_AXIS_RATIO = -0.06;
@@ -558,6 +559,7 @@ void WebPattern::InitEvent()
     InitTouchEvent(gestureHub);
     InitDragEvent(gestureHub);
     InitPanEvent(gestureHub);
+    InitClickEvent(gestureHub);
     if (GetWebInfoType() == WebInfoType::TYPE_2IN1) {
         InitPinchEvent(gestureHub);
     }
@@ -1065,11 +1067,9 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         isHoverExit_ = true;
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
     }
-
-    if (!HandleDoubleClickEvent(info)) {
-        delegate_->OnMouseEvent(
-            localLocation.GetX(), localLocation.GetY(), info.GetButton(), info.GetAction(), SINGLE_CLICK_NUM);
-    }
+    int32_t clickNum = HandleMouseClickEvent(info);
+    delegate_->OnMouseEvent(
+        localLocation.GetX(), localLocation.GetY(), info.GetButton(), info.GetAction(), clickNum);
 
     if (info.GetAction() == MouseAction::MOVE) {
         mouseHoveredX_ = localLocation.GetX();
@@ -1132,6 +1132,45 @@ SizeF WebPattern::GetDragPixelMapSize() const
     return pixelMapSize;
 }
 
+int32_t WebPattern::HandleMouseClickEvent(const MouseInfo& info)
+{
+    if (info.GetButton() != MouseButton::LEFT_BUTTON || info.GetAction() != MouseAction::PRESS) {
+        return SINGLE_CLICK_NUM;
+    }
+    auto localLocation = info.GetLocalLocation();
+    MouseClickInfo clickInfo;
+    clickInfo.x = localLocation.GetX();
+    clickInfo.y = localLocation.GetY();
+    clickInfo.start = info.GetTimeStamp();
+    if (mouseClickQueue_.empty()) {
+        mouseClickQueue_.push(clickInfo);
+        return SINGLE_CLICK_NUM;
+    }
+    std::chrono::duration<float> timeout_ = clickInfo.start - mouseClickQueue_.back().start;
+    double offsetX = clickInfo.x - mouseClickQueue_.back().x;
+    double offsetY = clickInfo.y - mouseClickQueue_.back().y;
+    double offset = sqrt(offsetX * offsetX + offsetY * offsetY);
+    if (timeout_.count() < DEFAULT_DBCLICK_INTERVAL && offset < DEFAULT_DBCLICK_OFFSET) {
+        if (mouseClickQueue_.size() == SINGLE_CLICK_NUM) {
+            mouseClickQueue_.push(clickInfo);
+            return DOUBLE_CLICK_NUM;
+        } else if (mouseClickQueue_.size() == DOUBLE_CLICK_NUM) {
+            mouseClickQueue_.push(clickInfo);
+            return TRIPLE_CLICK_NUM;
+        } else if (mouseClickQueue_.size() == TRIPLE_CLICK_NUM) {
+            mouseClickQueue_.pop();
+            mouseClickQueue_.push(clickInfo);
+            return TRIPLE_CLICK_NUM;
+        }
+    }
+    if (mouseClickQueue_.size()) {
+        std::queue<MouseClickInfo> empty;
+        swap(empty, mouseClickQueue_);
+        mouseClickQueue_.push(clickInfo);
+    }
+    return SINGLE_CLICK_NUM;
+}
+
 bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
 {
     if (info.GetButton() != MouseButton::LEFT_BUTTON || info.GetAction() != MouseAction::PRESS) {
@@ -1142,26 +1181,26 @@ bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
     clickInfo.x = localLocation.GetX();
     clickInfo.y = localLocation.GetY();
     clickInfo.start = info.GetTimeStamp();
-    if (doubleClickQueue_.empty()) {
-        doubleClickQueue_.push(clickInfo);
+    if (mouseClickQueue_.empty()) {
+        mouseClickQueue_.push(clickInfo);
         return false;
     }
-    std::chrono::duration<float> timeout_ = clickInfo.start - doubleClickQueue_.back().start;
-    double offsetX = clickInfo.x - doubleClickQueue_.back().x;
-    double offsetY = clickInfo.y - doubleClickQueue_.back().y;
+    std::chrono::duration<float> timeout_ = clickInfo.start - mouseClickQueue_.back().start;
+    double offsetX = clickInfo.x - mouseClickQueue_.back().x;
+    double offsetY = clickInfo.y - mouseClickQueue_.back().y;
     double offset = sqrt(offsetX * offsetX + offsetY * offsetY);
     if (timeout_.count() < DEFAULT_DBCLICK_INTERVAL && offset < DEFAULT_DBCLICK_OFFSET) {
         SendDoubleClickEvent(clickInfo);
         std::queue<MouseClickInfo> empty;
-        swap(empty, doubleClickQueue_);
+        swap(empty, mouseClickQueue_);
         return true;
     }
-    if (doubleClickQueue_.size() == 1) {
-        doubleClickQueue_.push(clickInfo);
+    if (mouseClickQueue_.size() == 1) {
+        mouseClickQueue_.push(clickInfo);
         return false;
     }
-    doubleClickQueue_.pop();
-    doubleClickQueue_.push(clickInfo);
+    mouseClickQueue_.pop();
+    mouseClickQueue_.push(clickInfo);
     return false;
 }
 
@@ -3071,6 +3110,61 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
     }
 }
 
+void WebPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID(!clickEventInitialized_);
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTouchClickEvent(info, false);
+    };
+    auto clickListener = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickAfterEvent(clickListener);
+    clickEventInitialized_ = true;
+}
+
+void WebPattern::HandleTouchClickEvent(const GestureEvent& info, bool fromOverlay)
+{
+    CHECK_NULL_VOID(delegate_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsFocusable() || info.GetSourceDevice() == SourceType::MOUSE) {
+        return;
+    }
+    if (IsSelectOverlayDragging()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "HandleTouchClickEvent fail when handle dragging.");
+        return;
+    }
+    auto globalLocation = info.GetGlobalLocation();
+    TouchInfo touchPoint;
+    touchPoint.id = 0;
+    touchPoint.x = globalLocation.GetX() - webOffset_.GetX();
+    touchPoint.y = globalLocation.GetY() - webOffset_.GetY();
+    multipleClickRecognizer_->Start(info);
+    if (multipleClickRecognizer_->IsDoubleClick()) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "HandleTouchClickEvent double fromOverlay:%{public}d, clickedFromOverlay_:%{public}d.",
+            fromOverlay, clickedFromOverlay_);
+        if (fromOverlay) {
+            delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, false);
+            delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, false);
+        }
+        if (clickedFromOverlay_) {
+            delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, false);
+            delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, false);
+        }
+    } else {
+        TAG_LOGD(AceLogTag::ACE_WEB, "HandleTouchClickEvent single fromOverlay:%{public}d.", fromOverlay);
+        clickedFromOverlay_ = fromOverlay;
+        if (fromOverlay) {
+            delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, true);
+            delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, true);
+        }
+    }
+}
+
 void WebPattern::OnSelectHandleStart(bool isFirst)
 {
     CHECK_NULL_VOID(selectOverlayProxy_);
@@ -3556,6 +3650,11 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
     selectInfo.onTouchDown = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {};
     selectInfo.onTouchUp = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {};
     selectInfo.onTouchMove = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {};
+    selectInfo.onClick = [weak = AceType::WeakClaim(this)](const GestureEvent& info, bool isFirst) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->HandleTouchClickEvent(info, true);
+    };
     selectInfo.onHandleMove = [weak = AceType::WeakClaim(this)](const RectF& handleRect, bool isFirst) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);

@@ -1166,7 +1166,19 @@ void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, b
     if (forwardFeature_ || backwardFeature_) {
         return;
     }
-    if (forwardLayout) {
+    if (!forwardLayout) {
+        for (auto pos = itemPosition_.begin(); pos != itemPosition_.end(); pos++) {
+            float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
+            if (GreatOrEqual(pos->second.startPos + chainOffset, endMainPos_)) {
+                break;
+            } else if (!pos->second.isGroup) {
+                continue;
+            }
+            AdjustPostionForListItemGroup(layoutWrapper, axis_, pos->first, forwardLayout);
+        }
+        return;
+    }
+    if (isNeedCheckOffset_ && GreatNotEqual(std::abs(currentDelta_), contentMainSize_ * 2.0f)) {
         for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); pos++) {
             float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
             if (LessOrEqual(pos->second.endPos + chainOffset, startMainPos_)) {
@@ -1178,14 +1190,8 @@ void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, b
         }
         return;
     }
-    for (auto pos = itemPosition_.begin(); pos != itemPosition_.end(); pos++) {
-        float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (GreatOrEqual(pos->second.startPos + chainOffset, endMainPos_)) {
-            break;
-        } else if (!pos->second.isGroup) {
-            continue;
-        }
-        AdjustPostionForListItemGroup(layoutWrapper, axis_, pos->first, forwardLayout);
+    if (itemPosition_.begin()->second.isGroup) {
+        AdjustPostionForListItemGroup(layoutWrapper, axis_, GetStartIndex(), forwardLayout);
     }
 }
 

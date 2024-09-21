@@ -1952,11 +1952,11 @@ void DragDropManager::DragStartAnimation(
         option.GetOnFinishEvent());
 }
 
-void DragDropManager::NotifyEnterTextEditorArea(bool enable)
+void DragDropManager::NotifyEnterTextEditorArea()
 {
     auto ret = InteractionInterface::GetInstance()->EnterTextEditorArea(true);
     if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Fail to notify entering text editor erea.");
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Fail to notify entering text editor erea.");
         return;
     }
 
@@ -1973,9 +1973,10 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
         return;
     }
 
+    // When moving in an editable text component whithout animation, and has not notified msdp yet, notify msdp.
     if (type == DragEventType::MOVE && IsEditableTextComponent(frameTag) && isDragFwkShow_ &&
         !hasNotifiedTransformation_) {
-        NotifyEnterTextEditorArea(true);
+        NotifyEnterTextEditorArea();
         return;
     }
     if (type != DragEventType::ENTER && type != DragEventType::LEAVE) {
@@ -1994,7 +1995,7 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
         return;
     }
 
-    NotifyEnterTextEditorArea(true);
+    NotifyEnterTextEditorArea();
 }
 
 void DragDropManager::SetDragResult(

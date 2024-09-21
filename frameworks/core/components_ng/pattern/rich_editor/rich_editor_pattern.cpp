@@ -5239,12 +5239,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
     if (host && host->GetChildren().empty()) {
         textForDisplay_.clear();
     }
-    if (previewLongPress_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, so RequestKeyboard");
-        RequestKeyboard(false, true, true);
-        HandleOnEditChanged(true);
-        previewLongPress_ = false;
-    }
+    RequestKeyboardToEdit();
     return deleteText;
 }
 
@@ -5469,6 +5464,9 @@ bool RichEditorPattern::CursorMoveDown()
         if (caretPositionEnd <= caretPosition_ &&
             !NearEqual(caretOffsetEnd.GetY() - GetTextRect().GetY(), currentLineInfo.GetY(), 0.5f)) {
             caretPositionEnd += 1;
+        }
+        if (caretPositionEnd == caretPosition_) {
+            caretPositionEnd = GetTextContentLength();
         }
         SetCaretPosition(caretPositionEnd);
         if (cursorNotAtLineStart && caretPosition_ != 0 && !isEnter) {
@@ -6872,12 +6870,7 @@ void RichEditorPattern::ResetAfterPaste()
     auto pasteStr = GetPasteStr();
     SetCaretSpanIndex(-1);
     StartTwinkling();
-    if (previewLongPress_) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
-        RequestKeyboard(false, true, true);
-        HandleOnEditChanged(true);
-        previewLongPress_ = false;
-    }
+    RequestKeyboardToEdit();
     CloseSelectOverlay();
     InsertValueByPaste(pasteStr);
     ClearPasteStr();
@@ -6974,12 +6967,7 @@ void RichEditorPattern::HandleOnCut()
         CloseSelectOverlay();
         ResetSelection();
         StartTwinkling();
-        if (previewLongPress_) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
-            RequestKeyboard(false, true, true);
-            HandleOnEditChanged(true);
-            previewLongPress_ = false;
-        }
+        RequestKeyboardToEdit();
         return;
     }
 
@@ -7509,7 +7497,7 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
     bool hasFocus = HasFocus();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d], hasFocus=%{public}d isEditing=%{public}d",
         start, end, hasFocus, isEditing_);
-    CHECK_NULL_VOID(hasFocus && isEditing_);
+    CHECK_NULL_VOID(hasFocus);
     if (IsPreviewTextInputting()) {
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "SetSelection failed for previewText inputting");
         return;
@@ -8992,7 +8980,6 @@ void RichEditorPattern::PerformAction(TextInputAction action, bool forceCloseKey
     // When the Enter key is triggered, perform a line feed operation.
     if (action == TextInputAction::NEW_LINE) {
         InsertValue("\n", true);
-        return;
     }
     // Enter key type callback
     TextFieldCommonEvent event;
@@ -10370,11 +10357,10 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
 
 void RichEditorPattern::RequestKeyboardToEdit()
 {
-    CHECK_NULL_VOID(previewLongPress_);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
+    CHECK_NULL_VOID(!isEditing_ && HasFocus());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "request keyboard and enter edit");
     RequestKeyboard(false, true, true);
     HandleOnEditChanged(true);
-    previewLongPress_ = false;
 }
 
 bool RichEditorPattern::IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const

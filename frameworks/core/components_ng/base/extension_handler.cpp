@@ -143,14 +143,27 @@ void ExtensionHandler::InvalidateRender()
 {
     if (invalidateRender_) {
         invalidateRender_();
+    } else if (node_) {
+        node_->MarkNeedRenderOnly();
     }
+    needRender_ = true;
+}
+
+void ExtensionHandler::OverlayRender()
+{
     if (overlayRender_) {
         overlayRender_();
+    } else if (node_) {
+        node_->MarkNeedRenderOnly();
     }
+    needRender_ = true;
+}
+
+void ExtensionHandler::ForegroundRender()
+{
     if (foreGroundRender_) {
         foreGroundRender_();
-    }
-    if (node_ && !(invalidateRender_ && overlayRender_ && foreGroundRender_)) {
+    } else if (node_) {
         node_->MarkNeedRenderOnly();
     }
     needRender_ = true;
