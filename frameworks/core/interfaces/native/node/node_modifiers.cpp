@@ -237,8 +237,8 @@ const ArkUINodeModifiers impl = {
     nullptr, // RichEditorControllerModifier
     nullptr, // TextAreaControllerModifier
     NodeModifier::GetRelativeContainerModifier, // RelativeContainerModifier
-    NodeModifier::GetParticleModifier,
     NodeModifier::GetNodeContentModifier,
+    NodeModifier::GetParticleModifier,
     NodeModifier::GetSymbolGlyphModifier,
     NodeModifier::GetSymbolSpanModifier,
 

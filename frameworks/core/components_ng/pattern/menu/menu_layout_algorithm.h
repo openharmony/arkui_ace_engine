@@ -119,6 +119,8 @@ private:
     void InitializePaddingAPI11(LayoutWrapper* layoutWrapper);
     void InitializeParam(const RefPtr<MenuPattern>& menuPattern);
     void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
+    uint32_t GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
+        const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position);
     LayoutConstraintF CreateChildConstraint(LayoutWrapper* layoutWrapper);

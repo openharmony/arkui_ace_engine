@@ -301,6 +301,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     return;
                 }
                 if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
+                    gestureHub->SetIsTextDraggable(true);
                     if (textDragCallback_) {
                         textDragCallback_(info.GetGlobalLocation());
                     }
@@ -355,6 +356,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     panRecognizer_->SetOnActionUpdate(actionUpdate);
 
     auto actionEnd = [weak = WeakClaim(this)](GestureEvent& info) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action end.");
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto dragDropManager = pipelineContext->GetDragDropManager();
@@ -364,12 +366,17 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             dragDropManager->ResetDragging();
         }
         auto actuator = weak.Upgrade();
-        CHECK_NULL_VOID(actuator);
+        if (!actuator) {
+            auto overlayManager = pipelineContext->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->RemovePixelMap();
+            return;
+        }
         CHECK_NULL_VOID(actuator->userCallback_);
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
+        actuator->HideEventColumn();
         if (gestureHub->GetTextDraggable()) {
-            actuator->HideEventColumn();
             actuator->textPixelMap_ = nullptr;
             actuator->HideTextAnimation();
         } else {
@@ -918,13 +925,18 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     auto frameTag = frameNode->GetTag();
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable()) {
-        return;
-    }
     CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable()) {
+        if (dragPreviewOption.options.shadow.has_value()) {
+            auto shadow = dragPreviewOption.options.shadow.value();
+            shadow.SetIsFilled(true);
+            imageContext->UpdateBackShadow(shadow);
+        }
+        return;
+    }
     imageContext->UpdateOpacity(dragPreviewOption.options.opacity);
     if (dragPreviewOption.options.shadow.has_value()) {
         imageContext->UpdateBackShadow(dragPreviewOption.options.shadow.value());
@@ -1030,7 +1042,6 @@ RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMap(
 {
     // Attempt to retrieve the PixelMap using the inspector ID.
     auto previewPixelMap = GetPreviewPixelMapByInspectorId(inspectorId);
-
     // If a preview PixelMap was found, return it.
     if (previewPixelMap != nullptr) {
         return previewPixelMap;
@@ -2162,10 +2173,6 @@ void DragEventActuator::PrepareShadowParametersForDragData(const RefPtr<FrameNod
     CHECK_NULL_VOID(gestureHub);
     if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable() &&
         gestureHub->GetIsTextDraggable()) {
-        if (frameTag != V2::RICH_EDITOR_ETS_TAG) {
-            arkExtraInfoJson->Put("shadow_enable", false);
-            return;
-        }
         auto stringPath = dragPreviewOption.options.shadowPath;
         RSPath path;
         if (path.BuildFromSVGString(stringPath)) {
@@ -2251,7 +2258,7 @@ void DragEventActuator::ShowPreviewBadgeAnimation(
     auto dragPreviewOptions = frameNode->GetDragPreviewOption();
     auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
     int32_t childSize = badgeNumber.has_value() ? badgeNumber.value()
-                                             : static_cast<int32_t>(manager->GetGatherNodeChildrenInfo().size()) + 1;
+                                            : static_cast<int32_t>(manager->GetGatherNodeChildrenInfo().size()) + 1;
     auto textNode = CreateBadgeTextNode(frameNode, childSize, PIXELMAP_DRAG_SCALE_MULTIPLE, true);
     CHECK_NULL_VOID(textNode);
     auto column = manager->GetPixelMapNode();

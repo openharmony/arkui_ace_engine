@@ -573,6 +573,7 @@ NG::ProgressType ProgressModelNG::GetType(FrameNode* frameNode)
 
 void ProgressModelNG::SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));

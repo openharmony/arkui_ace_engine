@@ -65,7 +65,8 @@ public:
      * @param safeArea The SafeAreaInsets representing the new cutout safe area.
      * @return true if the cutout safe area was successfully updated, false otherwise.
      */
-    bool UpdateCutoutSafeArea(const SafeAreaInsets& safeArea);
+    bool UpdateCutoutSafeArea(
+        const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize = NG::OptionalSize<uint32_t>());
 
     /**
      * @brief Retrieves the safe area insets that account for any cutout areas on the screen.
@@ -96,7 +97,7 @@ public:
      * @param keyboardHeight The height of the keyboard in pixels.
      * @return true if the safe area was modified, false otherwise.
      */
-    bool UpdateKeyboardSafeArea(float keyboardHeight);
+    bool UpdateKeyboardSafeArea(float keyboardHeight, std::optional<uint32_t> rootHeight = std::nullopt);
 
     /**
      * @brief Retrieves the inset of the safe area caused by the keyboard.
@@ -197,6 +198,31 @@ public:
     // check if the page node needs to be avoid keyboard
     bool CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode);
     PaddingPropertyF SafeAreaToPadding(bool withoutProcess = false);
+
+    uint32_t GetkeyboardHeightConsideringUIExtension()
+    {
+        return keyboardHeightConsideringUIExtension_;
+    }
+    void SetkeyboardHeightConsideringUIExtension(uint32_t height)
+    {
+        if (keyboardHeightConsideringUIExtension_ != height) {
+            for (const auto& [nodeId, callback] : keyboardChangeCbsConsideringUIExt_) {
+                if (callback) {
+                    callback();
+                }
+            }
+            keyboardHeightConsideringUIExtension_ = height;
+        }
+    }
+    void AddKeyboardChangeCallbackConsideringUIExt(int32_t nodeId, const std::function<void()>& callback)
+    {
+        keyboardChangeCbsConsideringUIExt_[nodeId] = callback;
+    }
+    void RemoveKeyboardChangeCallbackConsideringUIExt(int32_t nodeId)
+    {
+        keyboardChangeCbsConsideringUIExt_.erase(nodeId);
+    }
+
 private:
     bool isAtomicService_ = false;
 
@@ -253,7 +279,6 @@ private:
     std::set<WeakPtr<FrameNode>, DepthCompare> needExpandNodes_;
     // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
-
     float lastKeyboardY_ = 0.0f;
 
     static constexpr float SAFE_AREA_VELOCITY = 0.0f;
@@ -262,6 +287,9 @@ private:
     static constexpr float SAFE_AREA_DAMPING = 30.0f;
     RefPtr<InterpolatingSpring> safeAreaCurve_ = AceType::MakeRefPtr<InterpolatingSpring>(
         SAFE_AREA_VELOCITY, SAFE_AREA_MASS, SAFE_AREA_STIFFNESS, SAFE_AREA_DAMPING);
+
+    uint32_t keyboardHeightConsideringUIExtension_ = 0;
+    std::unordered_map<int32_t, std::function<void()>> keyboardChangeCbsConsideringUIExt_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SafeAreaManager);
 };

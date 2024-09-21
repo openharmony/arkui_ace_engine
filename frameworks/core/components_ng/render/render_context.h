@@ -34,7 +34,6 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/attraction_effect.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/particle_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
@@ -295,7 +294,6 @@ public:
     virtual void ClipWithCircle(const Circle& circle) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
-    virtual void UpdateWindowFocusState(bool isFocused) {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
@@ -651,9 +649,6 @@ public:
     // renderFit
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(RenderFit, RenderFit);
 
-    // AttractionEffect
-    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
-
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
     virtual std::vector<double> GetTrans()
     {
@@ -697,10 +692,7 @@ public:
     // The additional opacity will be multiplied with the base opacity.
     virtual void SetOpacityMultiplier(float opacity) {}
 
-    void SetNeedAnimateFlag(bool isNeedAnimate)
-    {
-        isNeedAnimate_ = isNeedAnimate;
-    }
+    virtual void SetRenderFit(RenderFit renderFit) {}
 
 protected:
     RenderContext() = default;
@@ -710,7 +702,6 @@ protected:
     bool isSynced_ = false;
     bool isNeedRebuildRSTree_ = true;
     bool handleChildBounds_ = false;
-    bool isNeedAnimate_ = true;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
@@ -793,7 +784,6 @@ protected:
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}
-    virtual void OnAttractionEffectUpdate(const AttractionEffect& effect) {}
 
 private:
     friend class ViewAbstract;

@@ -407,7 +407,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
                                GetLanesFloor(startIndex) + headerMainSize_;
             }
         }
-        if (GreatNotEqual(referencePos_, endPos_)) {
+        if (!isNeedMeasureFormLastItem_) {
             endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
             endPos = itemPosition_.rbegin()->second.endPos;
         }
@@ -953,6 +953,7 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
     for (auto& pos : itemPosition_) {
         auto wrapper = GetListItem(layoutWrapper, pos.first);
         if (!wrapper) {
+            LOGI("wrapper is out of boundary");
             continue;
         }
 
@@ -1130,6 +1131,7 @@ float ListItemGroupLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, fl
         case OHOS::Ace::V2::ListItemAlign::END:
             return delta;
         default:
+            LOGW("Invalid ListItemAlign: %{public}d", itemAlign_);
             return 0.0f;
     }
 }

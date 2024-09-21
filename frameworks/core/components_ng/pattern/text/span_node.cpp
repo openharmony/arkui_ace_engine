@@ -226,6 +226,10 @@ void SpanNode::DumpInfo()
     dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle->GetTextIndent().ToString()));
     dumpLog.AddDesc(std::string("LetterSpacing: ").append(textStyle->GetLetterSpacing().ToString()));
     dumpLog.AddDesc(std::string("TextColor: ").append(textStyle->GetTextColor().ColorToString()));
+    if (spanItem_ && spanItem_->fontStyle) {
+        dumpLog.AddDesc(std::string("SpanTextColor: ")
+                            .append(spanItem_->fontStyle->GetTextColor().value_or(Color::FOREGROUND).ColorToString()));
+    }
     dumpLog.AddDesc(std::string("FontWeight: ").append(StringUtils::ToString(textStyle->GetFontWeight())));
     dumpLog.AddDesc(std::string("FontStyle: ").append(StringUtils::ToString(textStyle->GetFontStyle())));
     dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle->GetTextBaseline())));
@@ -937,6 +941,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     textStyle.SetTextDecoration(TextDecoration::NONE);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
     textStyle.SetFontSize(placeholderStyle.paragraphFontSize);
+    textStyle.SetTextColor(placeholderStyle.paragraphTextColor);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     run_ = run;

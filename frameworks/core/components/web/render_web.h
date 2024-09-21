@@ -219,6 +219,7 @@ private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
     void SetRootView(int32_t width, int32_t height, int32_t offset);
+    void UpdateDelegate();
     bool needUpdateWeb_ = true;
     bool isFocus_ = false;
     bool needOnFocus_ = false;

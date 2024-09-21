@@ -16,13 +16,13 @@
 #include "core/components/plugin/plugin_sub_container.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
-#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "core/common/ace_engine.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "core/components/plugin/hap_asset_provider_impl.h"
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/plugin_window.h"
@@ -304,7 +304,8 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
     frontend_->RunPage(source, data);
 }
 
-void PluginSubContainer::SetPluginComponentTheme(const std::string& path, const RefPtr<AssetManager>& assetManager)
+void PluginSubContainer::SetPluginComponentTheme(
+    const std::string& path, const RefPtr<AssetManager>& assetManager)
 {
     ResourceInfo pluginResourceInfo;
     ResourceConfiguration resConfig;

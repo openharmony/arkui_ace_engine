@@ -118,7 +118,7 @@ void UIObserverHandler::NotifyWillClick(
     };
     willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
-
+ 
 void UIObserverHandler::NotifyDidClick(
     const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo, const RefPtr<FrameNode>& frameNode)
 {
@@ -233,13 +233,7 @@ void UIObserverHandler::HandleDrawCommandSendCallBack()
 {
     CHECK_NULL_VOID(drawCommandSendHandleFunc_);
     ACE_LAYOUT_SCOPED_TRACE("drawCommandSend");
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [callback = drawCommandSendHandleFunc_] { callback(); },
-        TaskExecutor::TaskType::JS, "ArkUIObserverDrawCommandSend");
+    drawCommandSendHandleFunc_();
 }
 
 void UIObserverHandler::HandleLayoutDoneCallBack()
@@ -302,7 +296,7 @@ void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
 {
     willClickHandleFunc_ = func;
 }
-
+ 
 void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 {
     didClickHandleFunc_ = func;

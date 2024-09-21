@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-if (!('finalizeConstruction' in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
+if (!("finalizeConstruction" in ViewPU.prototype)) {
+  Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {});
 }
-const display = globalThis.requireNapi('display');
-const window = globalThis.requireNapi('window');
-const hilog = globalThis.requireNapi('hilog');
-const LengthMetrics = globalThis.requireNapi('arkui.node').LengthMetrics;
-const curves = globalThis.requireNativeModule('ohos.curves');
-const mediaQuery = requireNapi('mediaquery');
+const display = globalThis.requireNapi("display");
+const window = globalThis.requireNapi("window");
+const hilog = globalThis.requireNapi("hilog");
+const LengthMetrics = globalThis.requireNapi("arkui.node").LengthMetrics;
+const curves = globalThis.requireNativeModule("ohos.curves");
+const mediaQuery = requireNapi("mediaquery");
 export var ExtraRegionPosition;
 (function (k3) {
-  k3[(k3['TOP'] = 1)] = 'TOP';
-  k3[(k3['BOTTOM'] = 2)] = 'BOTTOM';
+  k3[(k3["TOP"] = 1)] = "TOP";
+  k3[(k3["BOTTOM"] = 2)] = "BOTTOM";
 })(ExtraRegionPosition || (ExtraRegionPosition = {}));
 export var PresetSplitRatio;
 (function (s4) {
-  s4[(s4['LAYOUT_1V1'] = 1)] = 'LAYOUT_1V1';
-  s4[(s4['LAYOUT_2V3'] = 0.6666666666666666)] = 'LAYOUT_2V3';
-  s4[(s4['LAYOUT_3V2'] = 1.5)] = 'LAYOUT_3V2';
+  s4[(s4["LAYOUT_1V1"] = 1)] = "LAYOUT_1V1";
+  s4[(s4["LAYOUT_2V3"] = 0.6666666666666666)] = "LAYOUT_2V3";
+  s4[(s4["LAYOUT_3V2"] = 1.5)] = "LAYOUT_3V2";
 })(PresetSplitRatio || (PresetSplitRatio = {}));
 function withDefaultValue(h3, i3) {
   if (h3 === void 0 || h3 === null) {
@@ -50,13 +50,13 @@ function getSplitRatio(f3, g3) {
 }
 class Logger {
   static debug(d3, ...e3) {
-    return hilog.debug(0x3900, 'FoldSplitContainer', d3, ...e3);
+    return hilog.debug(0x3900, "FoldSplitContainer", d3, ...e3);
   }
   static info(b3, ...c3) {
-    return hilog.info(0x3900, 'FoldSplitContainer', b3, ...c3);
+    return hilog.info(0x3900, "FoldSplitContainer", b3, ...c3);
   }
   static error(z2, ...a3) {
-    return hilog.error(0x3900, 'FoldSplitContainer', z2, ...a3);
+    return hilog.error(0x3900, "FoldSplitContainer", z2, ...a3);
   }
 }
 function initLayout() {
@@ -68,7 +68,7 @@ function initLayout() {
 export class FoldSplitContainer extends ViewPU {
   constructor(t2, u2, v2, w2 = -1, x2 = undefined, y2) {
     super(t2, v2, w2, y2);
-    if (typeof x2 === 'function') {
+    if (typeof x2 === "function") {
       this.paramsGenerator_ = x2;
     }
     this.primary = undefined;
@@ -77,40 +77,40 @@ export class FoldSplitContainer extends ViewPU {
     this.__expandedLayoutOptions = new SynchedPropertyObjectOneWayPU(
       u2.expandedLayoutOptions,
       this,
-      'expandedLayoutOptions'
+      "expandedLayoutOptions"
     );
     this.__hoverModeLayoutOptions = new SynchedPropertyObjectOneWayPU(
       u2.hoverModeLayoutOptions,
       this,
-      'hoverModeLayoutOptions'
+      "hoverModeLayoutOptions"
     );
     this.__foldedLayoutOptions = new SynchedPropertyObjectOneWayPU(
       u2.foldedLayoutOptions,
       this,
-      'foldedLayoutOptions'
+      "foldedLayoutOptions"
     );
     this.__animationOptions = new SynchedPropertyObjectOneWayPU(
       u2.animationOptions,
       this,
-      'animationOptions'
+      "animationOptions"
     );
     this.onHoverStatusChange = () => {};
     this.__primaryLayout = new ObservedPropertyObjectPU(
       initLayout(),
       this,
-      'primaryLayout'
+      "primaryLayout"
     );
     this.__secondaryLayout = new ObservedPropertyObjectPU(
       initLayout(),
       this,
-      'secondaryLayout'
+      "secondaryLayout"
     );
     this.__extraLayout = new ObservedPropertyObjectPU(
       initLayout(),
       this,
-      'extraLayout'
+      "extraLayout"
     );
-    this.__extraOpacity = new ObservedPropertySimplePU(1, this, 'extraOpacity');
+    this.__extraOpacity = new ObservedPropertySimplePU(1, this, "extraOpacity");
     this.windowStatusType = window.WindowStatusType.UNDEFINED;
     this.foldStatus = display.FoldStatus.FOLD_STATUS_UNKNOWN;
     this.windowInstance = undefined;
@@ -120,9 +120,9 @@ export class FoldSplitContainer extends ViewPU {
     this.isSmallScreen = false;
     this.isHoverMode = undefined;
     this.setInitiallyProvidedValue(u2);
-    this.declareWatch('expandedLayoutOptions', this.updateLayout);
-    this.declareWatch('hoverModeLayoutOptions', this.updateLayout);
-    this.declareWatch('foldedLayoutOptions', this.updateLayout);
+    this.declareWatch("expandedLayoutOptions", this.updateLayout);
+    this.declareWatch("hoverModeLayoutOptions", this.updateLayout);
+    this.declareWatch("foldedLayoutOptions", this.updateLayout);
     this.finalizeConstruction();
   }
   setInitiallyProvidedValue(s2) {
@@ -275,13 +275,13 @@ export class FoldSplitContainer extends ViewPU {
     this.__extraOpacity.set(l1);
   }
   aboutToAppear() {
-    this.listener = mediaQuery.matchMediaSync('(width<=600vp)');
+    this.listener = mediaQuery.matchMediaSync("(width<=600vp)");
     this.isSmallScreen = this.listener.matches;
-    this.listener.on('change', (m4) => {
+    this.listener.on("change", (m4) => {
       this.isSmallScreen = m4.matches;
     });
     this.foldStatus = display.getFoldStatus();
-    display.on('foldStatusChange', (j4) => {
+    display.on("foldStatusChange", (j4) => {
       if (this.foldStatus !== j4) {
         this.foldStatus = j4;
         this.updateLayout();
@@ -291,7 +291,7 @@ export class FoldSplitContainer extends ViewPU {
     window.getLastWindow(this.getUIContext().getHostContext(), (e4, f4) => {
       if (e4 && e4.code) {
         Logger.error(
-          'Failed to get window instance, error code: %{public}d',
+          "Failed to get window instance, error code: %{public}d",
           e4.code
         );
         return;
@@ -299,34 +299,34 @@ export class FoldSplitContainer extends ViewPU {
       const g4 = f4.getWindowProperties().id;
       if (g4 < 0) {
         Logger.error(
-          'Failed to get window instance because the window id is invalid. window id: %{public}d',
+          "Failed to get window instance because the window id is invalid. window id: %{public}d",
           g4
         );
         return;
       }
       this.windowInstance = f4;
       this.updatePreferredOrientation();
-      this.windowInstance.on('windowStatusChange', (i4) => {
+      this.windowInstance.on("windowStatusChange", (i4) => {
         this.windowStatusType = i4;
       });
     });
   }
   aboutToDisappear() {
     if (this.listener) {
-      this.listener.off('change');
+      this.listener.off("change");
       this.listener = undefined;
     }
-    display.off('foldStatusChange');
+    display.off("foldStatusChange");
     if (this.windowInstance) {
-      this.windowInstance.off('windowStatusChange');
+      this.windowInstance.off("windowStatusChange");
     }
   }
   initialRender() {
     this.observeComponentCreation2((y1, z1) => {
       Stack.create();
-      Stack.id('$$FoldSplitContainer$Stack$$');
-      Stack.width('100%');
-      Stack.height('100%');
+      Stack.id("$$FoldSplitContainer$Stack$$");
+      Stack.width("100%");
+      Stack.height("100%");
       Stack.onSizeChange((b2, d4) => {
         this.updateContainerSize(d4);
         this.updateContainerPosition();
@@ -427,7 +427,7 @@ export class FoldSplitContainer extends ViewPU {
           );
         }
       } catch (i1) {
-        Logger.error('Failed to update preferred orientation.');
+        Logger.error("Failed to update preferred orientation.");
       }
     }
   }
@@ -437,7 +437,7 @@ export class FoldSplitContainer extends ViewPU {
   }
   updateContainerPosition() {
     const y3 = this.getUIContext();
-    const z3 = y3.getFrameNodeById('$$FoldSplitContainer$Stack$$');
+    const z3 = y3.getFrameNodeById("$$FoldSplitContainer$Stack$$");
     if (z3) {
       this.containerGlobalPosition = z3.getPositionToWindow();
     }

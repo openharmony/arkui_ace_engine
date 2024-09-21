@@ -1792,7 +1792,7 @@ export class SegmentButton extends ViewPU {
         this.__zoomScaleArray.aboutToBeDeleted();
         this.__pressArray.aboutToBeDeleted();
         this.__hoverColorArray.aboutToBeDeleted();
-        this.__shouldMirror.aboutToBeDeleted();
+        this.__shouldMirror?.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -2344,10 +2344,8 @@ export class SegmentButton extends ViewPU {
                     If.pop();
                     this.observeComponentCreation2((u31, v31) => {
                         Stack.create();
-                        Context.animation({ duration: 0 });
                         Stack.direction(this.options.direction);
                         Stack.size(ObservedObject.GetRawObject(this.componentSize));
-                        Context.animation(null);
                         Stack.borderRadius((this.options.type === 'capsule' && (this.options.multiply ?? false) ?
                         this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
                             this.componentSize.height / 2);

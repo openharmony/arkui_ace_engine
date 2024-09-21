@@ -178,7 +178,7 @@ public:
         isOnAnimation_ = isOnAnimation;
     }
     RefPtr<FrameNode> GetTopDestination();
-    void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override;
+    void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
 
     void FireHideNodeChange(NavDestinationLifecycle lifecycle);
@@ -201,7 +201,11 @@ public:
     float CheckLanguageDirection();
 
     void RemoveDialogDestination();
-
+    void AddDestinationNode(const RefPtr<UINode>& parent);
+    WeakPtr<NavDestinationGroupNode> GetParentDestinationNode() const
+    {
+        return parentDestinationNode_;
+    }
     void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
         navigationPathInfo_ = pagePath;
@@ -243,6 +247,7 @@ private:
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    WeakPtr<NavDestinationGroupNode> parentDestinationNode_;
     // dialog hideNodes, if is true, nodes need remove
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;

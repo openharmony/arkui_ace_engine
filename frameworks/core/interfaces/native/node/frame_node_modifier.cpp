@@ -465,7 +465,7 @@ ArkUI_Int32 SetSystemColorModeChangeEvent(ArkUINodeHandle node, void* userData, 
         func(colorMode, userData);
     };
     ViewAbstract::SetSystemColorModeChangeEvent(frameNode, onColorChange);
-    return 1;
+    return 0;
 }
 
 void ResetSystemColorModeChangeEvent(ArkUINodeHandle node)
@@ -488,7 +488,7 @@ ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, 
         func(fontStyle, userData);
     };
     ViewAbstract::SetSystemFontChangeEvent(frameNode, onFontChange);
-    return 1;
+    return 0;
 }
 
 void ResetSystemFontStyleChangeEvent(ArkUINodeHandle node)
@@ -504,12 +504,12 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
     static const ArkUIFrameNodeModifier modifier = { IsModifiable, CreateFrameNode, InvalidateInFrameNode,
         AppendChildInFrameNode, InsertChildAfterInFrameNode, RemoveChildInFrameNode, ClearChildrenInFrameNode,
         GetChildrenCount, GetChild, GetFirst, GetNextSibling, GetPreviousSibling, GetParent, GetIdByNodePtr,
-        GetPositionToParent, GetPositionToScreen, GetPositionToWindow, GetPositionToParentWithTransform,
-        GetPositionToScreenWithTransform, GetPositionToWindowWithTransform, GetMeasuredSize, GetLayoutPosition,
-        GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId,
-        GetFrameNodeByKey, GetAttachedFrameNodeById, PropertyUpdate, GetLast, GetFirstUINode, GetLayoutSize,
-        GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
-        SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent};
+        PropertyUpdate, GetLast, GetPositionToParent, GetPositionToScreen, GetPositionToWindow,
+        GetPositionToParentWithTransform, GetPositionToScreenWithTransform, GetPositionToWindowWithTransform,
+        GetMeasuredSize, GetLayoutPosition, GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo,
+        GetFrameNodeById, GetFrameNodeByUniqueId, GetFrameNodeByKey, GetAttachedFrameNodeById, GetFirstUINode,
+        GetLayoutSize, GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
+        SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent };
     return &modifier;
 }
 

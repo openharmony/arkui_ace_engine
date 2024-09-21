@@ -115,7 +115,6 @@ private:
         LayoutWrapper* layoutWrapper);
     void UpdateSensitiveContent(std::string& content);
 
-    std::optional<TextStyle> textStyle_;
     RefPtr<PropertyBool> showSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };

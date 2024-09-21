@@ -628,6 +628,12 @@ void BaseTextSelectOverlay::UpdateTransformFlag()
 
 std::optional<RectF> BaseTextSelectOverlay::GetAncestorNodeViewPort()
 {
+    if (IsClipHandleWithViewPort()) {
+        RectF viewPort;
+        if (GetClipHandleViewPort(viewPort)) {
+            return viewPort;
+        }
+    }
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto host = pattern->GetHost();
@@ -816,7 +822,7 @@ void BaseTextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
     isSwitchToEmbed = isSwitchToEmbed && (!IsAncestorNodeEndScroll(flag) || HasUnsupportedTransform());
     if (isStartScroll || isStartAnimation || isTransformChanged || isStartTransition) {
         HideMenu(true);
-    } else if (IsAncestorNodeEndScroll(flag)) {
+    } else if (IsAncestorNodeEndScroll(flag) && !GetSelectArea().IsEmpty()) {
         ShowMenu();
     }
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -1079,5 +1085,53 @@ bool BaseTextSelectOverlay::CheckHasTransformMatrix(const RefPtr<RenderContext>&
     Vector4F perspectiveVector(transform.perspective[xIndex], transform.perspective[yIndex],
         transform.perspective[zIndex], transform.perspective[wIndex]);
     return !(perspectiveVector == perspectiveIdentity);
+}
+
+bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
+    if (HasUnsupportedTransform()) {
+        return false;
+    }
+    RectF contentRect;
+    if (!GetFrameNodeContentRect(host, contentRect)) {
+        return false;
+    }
+    contentRect.SetOffset(contentRect.GetOffset() + host->GetPaintRectWithTransform().GetOffset());
+    auto parent = host->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        RectF parentContentRect;
+        if (!GetFrameNodeContentRect(parent, parentContentRect)) {
+            return false;
+        }
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        if (renderContext->GetClipEdge().value_or(false)) {
+            contentRect = contentRect.IntersectRectT(parentContentRect);
+        }
+        contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
+    contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
+    UpdateClipHandleViewPort(contentRect);
+    rect = contentRect;
+    return true;
+}
+
+bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& contentRect)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto geometryNode = node->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (geometryNode->GetContent()) {
+        contentRect = geometryNode->GetContentRect();
+    } else {
+        contentRect = RectF(OffsetF(0.0f, 0.0f), geometryNode->GetFrameSize());
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

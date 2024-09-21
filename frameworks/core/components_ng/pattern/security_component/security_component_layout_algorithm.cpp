@@ -403,31 +403,6 @@ void SecurityComponentLayoutAlgorithm::FillBlank()
     MeasureIntegralSize();
 }
 
-bool SecurityComponentLayoutAlgorithm::HasCustomPadding(RefPtr<SecurityComponentLayoutProperty>& property)
-{
-    if (property && property->GetHasCustomPadding().has_value()) {
-        return property->GetHasCustomPadding().value();
-    }
-    return false;
-}
-
-void SecurityComponentLayoutAlgorithm::UpdatePadding(RefPtr<SecurityComponentLayoutProperty>& property,
-    LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_VOID(property);
-    CHECK_NULL_VOID(layoutWrapper);
-    if (!HasCustomPadding(property) && IsAging(layoutWrapper)) {
-        auto theme = PipelineContext::GetCurrentContext()->GetTheme<SecurityComponentTheme>();
-        CHECK_NULL_VOID(theme);
-        double borderWidth = property->GetBackgroundBorderWidth().value_or(Dimension(0.0)).ConvertToPx();
-        double size = theme->GetAgingPadding().ConvertToPx() + borderWidth;
-        top_.Init(true, true, size, borderWidth);
-        bottom_.Init(true, true, size, borderWidth);
-    } else {
-        InitPadding(property);
-    }
-}
-
 RefPtr<FrameNode> SecurityComponentLayoutAlgorithm::GetSecCompChildNode(RefPtr<FrameNode>& parent,
     const std::string& tag)
 {
@@ -768,7 +743,7 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     minHeight_ = constraint_->minSize.Height();
     maxWidth_ = constraint_->maxSize.Width();
     maxHeight_ = constraint_->maxSize.Height();
-    UpdatePadding(securityComponentLayoutProperty, layoutWrapper);
+    InitPadding(securityComponentLayoutProperty);
     if (GetTextDirection(layoutWrapper) == TextDirection::RTL) {
         PaddingLayoutElement temp = left_;
         left_ = right_;
@@ -830,40 +805,5 @@ TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* 
         }
     }
     return TextDirection::LTR;
-}
-
-bool SecurityComponentLayoutAlgorithm::IsAging(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_RETURN(constraint_, false);
-    CHECK_NULL_RETURN(layoutWrapper, false);
-    auto property = DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(property, false);
-
-    if (property->GetBackgroundType() == static_cast<int32_t>(ButtonType::CIRCLE)) {
-        return false;
-    }
-
-    if (!text_.IsExist()) {
-        return false;
-    }
-
-    if (property->HasFontSize() && property->GetFontSize()->Unit() != DimensionUnit::FP) {
-        return false;
-    }
-    if (constraint_->selfIdealSize.Height().has_value() &&
-        constraint_->selfIdealSize.Width().has_value()) {
-        return false;
-    }
-    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_RETURN(theme, false);
-    auto fontScale = pipeline->GetFontScale();
-    if (!(NearEqual(fontScale, theme->GetBigFontSizeScale()) ||
-        NearEqual(fontScale, theme->GetLargeFontSizeScale()) ||
-        NearEqual(fontScale, theme->GetMaxFontSizeScale()))) {
-        return false;
-    }
-    return true;
 }
 } // namespace OHOS::Ace::NG

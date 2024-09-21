@@ -984,7 +984,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged003, TestSize.Level1
      * @tc.steps: step1. get richEditor richEditorPattern
      */
     ASSERT_NE(richEditorNode_, nullptr);
-
+ 
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
  

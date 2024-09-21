@@ -198,7 +198,7 @@ void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
                 GetTag().c_str(), GetId());
         }
         OHOS::Ace::LogBacktrace();
-        
+
         if (withAbort) {
             abort();
         }
@@ -316,7 +316,6 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
         }
         ++index;
     }
-
     if (tag_ != V2::JS_IF_ELSE_ETS_TAG) {
         children_.clear();
     }
@@ -442,6 +441,14 @@ void UINode::DoAddChild(
         return;
     }
     children_.insert(it, child);
+
+    if (IsAccessibilityVirtualNode()) {
+        auto parentVirtualNode = GetVirtualNodeParent().Upgrade();
+        if (parentVirtualNode) {
+            child->SetAccessibilityNodeVirtual();
+            child->SetAccessibilityVirtualNodeParent(parentVirtualNode);
+        }
+    }
 
     child->SetParent(Claim(this));
     child->SetDepth(GetDepth() + 1);
@@ -651,9 +658,8 @@ void UINode::DetachFromMainTree(bool recursive)
         nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
     }
     isRemoving_ = true;
-    auto context = context_;
     DetachContext(false);
-    OnDetachFromMainTree(recursive, context);
+    OnDetachFromMainTree(recursive);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
@@ -763,7 +769,7 @@ void UINode::RebuildRenderContextTree()
         parent->RebuildRenderContextTree();
     }
 }
-void UINode::OnDetachFromMainTree(bool, PipelineContext*) {}
+void UINode::OnDetachFromMainTree(bool) {}
 
 void UINode::OnAttachToMainTree(bool)
 {
@@ -780,8 +786,7 @@ void UINode::UpdateGeometryTransition()
 
 bool UINode::IsAutoFillContainerNode()
 {
-    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG
-        || tag_ == V2::SHEET_PAGE_TAG || tag_ == V2::MODAL_PAGE_TAG;
+    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG;
 }
 
 void UINode::DumpViewDataPageNodes(
@@ -831,7 +836,6 @@ void UINode::DumpTree(int32_t depth)
     if (DumpLog::GetInstance().GetDumpFile()) {
         DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
         DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
-        DumpLog::GetInstance().AddDesc("InstanceId: " + std::to_string(instanceId_));
         DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
         if (IsDisappearing()) {
             DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
@@ -1225,12 +1229,6 @@ std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
     return { false, count };
 }
 
-// for Grid refresh GridItems
-void UINode::ChildrenUpdatedFrom(int32_t index)
-{
-    childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
-}
-
 bool UINode::MarkRemoving()
 {
     bool pendingRemove = false;
@@ -1542,7 +1540,6 @@ void UINode::PaintDebugBoundaryTreeAll(bool flag)
 
 void UINode::GetPageNodeCountAndDepth(int32_t* count, int32_t* depth)
 {
-    ACE_SCOPED_TRACE("GetPageNodeCountAndDepth");
     auto children = GetChildren();
     if (*depth < depth_) {
         *depth = depth_;
@@ -1558,6 +1555,7 @@ void UINode::GetPageNodeCountAndDepth(int32_t* count, int32_t* depth)
 
 void UINode::DFSAllChild(const RefPtr<UINode>& root, std::vector<RefPtr<UINode>>& res)
 {
+    CHECK_NULL_VOID(root);
     if (root->GetChildren().empty()) {
         res.emplace_back(root);
     }
@@ -1606,21 +1604,27 @@ void UINode::GetContainerComponentText(std::string& text)
     }
 }
 
-void UINode::NotifyDataChange(int32_t index, int32_t count, int64_t id) const
+int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
 {
     int32_t updateFrom = 0;
     for (const auto& child : GetChildren()) {
         if (child->GetAccessibilityId() == id) {
-            updateFrom += index;
+            updateFrom += changeIdx;
             break;
         }
         int32_t count = child->FrameCount();
         updateFrom += count;
     }
+    return updateFrom;
+}
+
+void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
+{
+    int32_t updateFrom = CalcAbsPosition(changeIdx, id);
     auto accessibilityId = GetAccessibilityId();
     auto parent = GetParent();
     if (parent) {
-        parent->NotifyDataChange(updateFrom, count, accessibilityId);
+        parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
     }
 }
 } // namespace OHOS::Ace::NG

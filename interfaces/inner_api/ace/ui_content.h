@@ -355,6 +355,12 @@ public:
      */
     virtual void SetFrameLayoutFinishCallback(std::function<void()>&& callback) {};
 
+    /**
+     * @description: Set UIContent callback after lastest layout finish.
+     * @param callback callback func.
+     */
+    virtual void SetLatestFrameLayoutFinishCallback(std::function<void()>&& callback) {};
+
     // Actually paint size of window
     virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
 
@@ -407,19 +413,18 @@ public:
     virtual void RegisterOverlayNodePositionsUpdateCallback(
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 
+    virtual void SetContentNodeGrayScale(float grayscale) {};
+
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
     virtual void PreLayout() {};
 
     virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};
 
-    virtual void SetContentNodeGrayScale(float grayscale) {};
-    
     virtual sptr<IRemoteObject> GetRemoteObj()
     {
         return {};
     }
-
 };
 
 } // namespace OHOS::Ace

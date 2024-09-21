@@ -19,13 +19,11 @@
 #include <typeinfo>
 
 #include "base/utils/macros.h"
-#include "core/components_ng/property/attraction_effect.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WindowSceneModel {
 public:
     static void Create(int32_t persistentId);
-    static void SetAttractionEffect(const AttractionEffect& effect);
 };
 } // namespace OHOS::Ace::NG
 

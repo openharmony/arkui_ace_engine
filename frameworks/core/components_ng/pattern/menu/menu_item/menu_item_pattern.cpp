@@ -18,7 +18,6 @@
 
 #include <memory>
 #include <optional>
-
 #include "menu_item_model.h"
 
 #include "base/geometry/ng/offset_t.h"
@@ -40,6 +39,8 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -165,6 +166,7 @@ void MenuItemPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
     RefPtr<FrameNode> leftRow =
         host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
@@ -338,9 +340,6 @@ void MenuItemPattern::ShowSubMenu()
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
     menuPattern->SetShowedSubMenu(subMenu);
-    host->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
-        static_cast<int32_t>(AccessibilityEventType::PAGE_CHANGE));
 }
 
 void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
@@ -910,11 +909,12 @@ void MenuItemPattern::AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode)
 }
 
 OffsetF MenuItemPattern::GetSubMenuPosition(const RefPtr<FrameNode>& targetNode)
-{ // show menu at left top point of targetNode
+{    // show menu at left top point of targetNode
     auto frameSize = targetNode->GetGeometryNode()->GetMarginFrameSize();
     OffsetF position = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
     return position;
 }
+
 
 void MenuItemPattern::AddHoverRegions(const OffsetF& topLeftPoint, const OffsetF& bottomRightPoint)
 {
@@ -1035,6 +1035,7 @@ void MenuItemPattern::UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>
             selectTheme->GetMenuIconColor(), userIcon.empty());
     }
 }
+
 
 void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
 {
@@ -1331,7 +1332,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     if (layoutDirection == TextDirection::RTL) {
         if (textAlign == TextAlign::LEFT) {
             textAlign = TextAlign::RIGHT;
-        } else if (textAlign == TextAlign::RIGHT) {
+        } else if (textAlign ==TextAlign::RIGHT) {
             textAlign = TextAlign::LEFT;
         } else if (textAlign == TextAlign::START) {
             textAlign = TextAlign::END;

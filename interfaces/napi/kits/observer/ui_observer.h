@@ -79,7 +79,7 @@ public:
         const std::optional<std::string>& navigationId, napi_value callback);
     static void HandleNavDestinationSwitch(
         const NG::AbilityContextInfo& info, NG::NavDestinationSwitchInfo& switchInfo);
-
+    
     static void RegisterWillClickCallback(
         napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener);
     static void RegisterWillClickCallback(

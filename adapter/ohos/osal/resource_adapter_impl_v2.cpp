@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -200,7 +200,6 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
-    
     constexpr char OHFlag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
     {
         auto manager = GetResourceManager();
@@ -225,7 +224,6 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 
     theme->ParseContent();
     theme->patternAttrs_.clear();
-
     return theme;
 }
 

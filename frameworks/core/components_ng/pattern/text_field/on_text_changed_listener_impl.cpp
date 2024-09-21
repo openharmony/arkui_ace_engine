@@ -145,6 +145,18 @@ void OnTextChangedListenerImpl::SendKeyboardStatus(const MiscServices::KeyboardS
     HandleKeyboardStatus(keyboardStatus);
 }
 
+void OnTextChangedListenerImpl::NotifyKeyboardHeight(uint32_t height)
+{
+    auto task = [textField = pattern_, height] {
+        ACE_SCOPED_TRACE("NotifyKeyboardHeight");
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->GetInstanceId());
+        client->NotifyKeyboardHeight(height);
+    };
+    PostTaskToUI(task, "ArkUITextFieldNotifyKeyboardHeight");
+}
+
 void OnTextChangedListenerImpl::SendFunctionKey(const MiscServices::FunctionKey& functionKey)
 {
     HandleFunctionKey(functionKey);
@@ -311,6 +323,7 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
                 client->NotifyKeyboardClosedByUser();
             }
             client->NotifyKeyboardClosed();
+            client->NotifyKeyboardHeight(0);
         };
         PostTaskToUI(task, "ArkUITextFieldKeyboardClosedByUser");
     }

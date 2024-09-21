@@ -44,8 +44,7 @@ InputMethodManager* InputMethodManager::GetInstance()
 void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocusNode)
 {
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    if (container->IsKeyboard()) {
+    if (container && container->IsKeyboard()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in input method.");
         return;
     }
@@ -78,6 +77,11 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
 
 void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode>& curFocusNode)
 {
+    if (curFocusNode && NG::WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(curFocusNode)) {
+        lastKeep_ = true;
+    } else {
+        lastKeep_ = false;
+    }
     // Frame other window to SCB window Or inSCB window changes,hide keyboard.
     if ((windowFocus_.has_value() && windowFocus_.value())) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB Window focus first, ready to hide keyboard.");
@@ -95,6 +99,11 @@ void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode
 
 void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNode)
 {
+    if (curFocusNode && curFocusNode->GetTag() == V2::SCREEN_ETS_TAG && lastKeep_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "node is screen and last node want to save keyboard Ignore");
+        lastKeep_ = false;
+        return;
+    }
     auto pipeline = curFocusNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (windowFocus_.has_value() && windowFocus_.value()) {
@@ -121,8 +130,7 @@ void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNo
     }
 
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto isUIExtension = container->IsUIExtensionWindow();
+    auto isUIExtension = container && container->IsUIExtensionWindow();
     auto pattern = curFocusNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (isUIExtension && !pattern->NeedSoftKeyboard()) {

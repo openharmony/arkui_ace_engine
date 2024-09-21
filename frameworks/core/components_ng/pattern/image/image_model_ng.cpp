@@ -62,7 +62,7 @@ ImageSourceInfo CreateSourceInfo(
 
 void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMap>& pixMap)
 {
-    auto* stack = ViewStackProcessor::GetInstance();
+    auto *stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     const std::string& src = imageInfoConfig.src ? *imageInfoConfig.src : "";
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d] [src:%s]", V2::IMAGE_ETS_TAG, nodeId, src.c_str());
@@ -82,17 +82,8 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
         return;
     }
 
-    // set draggable for framenode
-    if (!imageInfoConfig.isImageSpan) {
-        auto pipeline = frameNode->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto draggable = pipeline->GetDraggable<ImageTheme>();
-        if (draggable && !frameNode->IsDraggable()) {
-            auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-            CHECK_NULL_VOID(gestureHub);
-            gestureHub->InitDragDropEvent();
-        }
-        frameNode->SetDraggable(true);
+    if (frameNode->IsFirstBuilding() && !imageInfoConfig.isImageSpan) {
+        SetDraggableForFrameNode(frameNode);
     }
     auto srcInfo =
         CreateSourceInfo(imageInfoConfig.src, pixMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
@@ -114,6 +105,19 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
     pattern->SetImageType(ImagePattern::ImageType::BASE);
 
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
+}
+
+void ImageModelNG::SetDraggableForFrameNode(RefPtr<FrameNode> frameNode)
+{
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto draggable = pipeline->GetDraggable<ImageTheme>();
+    if (draggable && !frameNode->IsDraggable()) {
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->InitDragDropEvent();
+    }
+    frameNode->SetDraggable(draggable);
 }
 
 void ImageModelNG::ResetImage()
@@ -249,7 +253,7 @@ RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::strin
     return frameNode;
 }
 
-void ImageModelNG::SetAlt(const ImageSourceInfo &src)
+void ImageModelNG::SetAlt(const ImageSourceInfo& src)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src);
 }
@@ -329,7 +333,7 @@ void ImageModelNG::SetFitOriginSize(bool value)
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, FitOriginalSize, value);
 }
 
-void ImageModelNG::SetOnComplete(std::function<void(const LoadImageSuccessEvent &info)> &&callback)
+void ImageModelNG::SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -338,7 +342,7 @@ void ImageModelNG::SetOnComplete(std::function<void(const LoadImageSuccessEvent 
     eventHub->SetOnComplete(std::move(callback));
 }
 
-void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent &info)> &&callback)
+void ImageModelNG::SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -356,14 +360,14 @@ void ImageModelNG::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
     eventHub->SetOnFinish(std::move(callback));
 }
 
-void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension> &size)
+void ImageModelNG::SetImageSourceSize(const std::pair<Dimension, Dimension>& size)
 {
     SizeF sourceSize =
         SizeF(static_cast<float>(size.first.ConvertToPx()), static_cast<float>(size.second.ConvertToPx()));
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize);
 }
 
-void ImageModelNG::SetImageFill(const Color &color)
+void ImageModelNG::SetImageFill(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
@@ -401,7 +405,7 @@ void ImageModelNG::SetSyncMode(bool syncMode)
     pattern->SetSyncLoad(syncMode);
 }
 
-void ImageModelNG::SetColorFilterMatrix(const std::vector<float> &matrix)
+void ImageModelNG::SetColorFilterMatrix(const std::vector<float>& matrix)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, matrix);
     ACE_RESET_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter);
@@ -430,11 +434,11 @@ void ImageModelNG::SetDraggable(bool draggable)
     frameNode->SetCustomerDraggable(draggable);
 }
 
-void ImageModelNG::SetOnDragStart(OnDragStartFunc &&onDragStart)
+void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart)
 {
 #ifndef ACE_UNITTEST
-    auto dragStart = [dragStartFunc = std::move(onDragStart)](const RefPtr<OHOS::Ace::DragEvent> &event,
-        const std::string &extraParams) -> DragDropInfo {
+    auto dragStart = [dragStartFunc = std::move(onDragStart)](
+                         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
         auto dragInfo = dragStartFunc(event, extraParams);
         DragDropInfo info;
         info.extraInfo = dragInfo.extraInfo;
@@ -446,22 +450,22 @@ void ImageModelNG::SetOnDragStart(OnDragStartFunc &&onDragStart)
 #endif
 }
 
-void ImageModelNG::SetOnDragEnter(OnDragDropFunc &&onDragEnter) {}
+void ImageModelNG::SetOnDragEnter(OnDragDropFunc&& onDragEnter) {}
 
-void ImageModelNG::SetOnDragLeave(OnDragDropFunc &&onDragLeave) {}
+void ImageModelNG::SetOnDragLeave(OnDragDropFunc&& onDragLeave) {}
 
-void ImageModelNG::SetOnDragMove(OnDragDropFunc &&onDragMove) {}
+void ImageModelNG::SetOnDragMove(OnDragDropFunc&& onDragMove) {}
 
-void ImageModelNG::SetOnDrop(OnDragDropFunc &&onDrop) {}
+void ImageModelNG::SetOnDrop(OnDragDropFunc&& onDrop) {}
 
-void ImageModelNG::SetCopyOption(const CopyOptions &copyOption)
+void ImageModelNG::SetCopyOption(const CopyOptions& copyOption)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCopyOption(copyOption);
 }
 
-bool ImageModelNG::UpdateDragItemInfo(DragItemInfo &itemInfo)
+bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)
 {
     return false;
 }
@@ -472,7 +476,6 @@ void ImageModelNG::InitImage(FrameNode *frameNode, std::string& src)
     std::string moduleName;
     RefPtr<OHOS::Ace::PixelMap> pixMapPtr;
     auto srcInfo = CreateSourceInfo(src, pixMapPtr, bundleName, moduleName);
-    srcInfo.SetIsUriPureNumber(false);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
 }
 
@@ -731,11 +734,6 @@ void ImageModelNG::SetImageAIOptions(void* options)
     pattern->SetImageAIOptions(options);
 }
 
-bool ImageModelNG::IsSrcSvgImage(FrameNode* frameNode)
-{
-    return false;
-}
-
 void ImageModelNG::SetOnComplete(
     FrameNode* frameNode, std::function<void(const LoadImageSuccessEvent& info)>&& callback)
 {
@@ -847,6 +845,11 @@ ImageSourceInfo ImageModelNG::GetAlt(FrameNode* frameNode)
     return layoutProperty->GetAlt().value_or(defaultImageSourceInfo);
 }
 
+bool ImageModelNG::IsSrcSvgImage(FrameNode* frameNode)
+{
+    return false;
+}
+
 bool ImageModelNG::GetFitOriginalSize(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, false);
@@ -926,6 +929,7 @@ void ImageModelNG::ResetImageSrc(FrameNode* frameNode)
     ImageSourceInfo sourceInfo("");
     sourceInfo.SetIsFromReset(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, sourceInfo, frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetImage();
@@ -950,6 +954,7 @@ void ImageModelNG::ResetImageAlt(FrameNode* frameNode)
     ImageSourceInfo sourceInfo("");
     sourceInfo.SetIsFromReset(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, sourceInfo, frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetAltImage();

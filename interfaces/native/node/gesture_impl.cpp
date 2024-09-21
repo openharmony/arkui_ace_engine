@@ -378,9 +378,6 @@ constexpr int32_t DEFAULT_PAN_FINGERS = 1;
 constexpr int32_t MAX_PAN_FINGERS = 10;
 constexpr double DEFAULT_PINCH_DISTANCE = 5.0f;
 constexpr double DEFAULT_SWIPE_SPEED = 100.0f;
-constexpr int32_t DEFAULT_TAP_COUNT = 1;
-constexpr int32_t DEFAULT_TAP_FINGERS = 1;
-constexpr int32_t MAX_TAP_FINGERS = 10;
 
 struct GestureInnerData {
     void (*targetReceiver)(ArkUI_GestureEvent* event, void* extraParam);
@@ -396,7 +393,7 @@ ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirec
     } else {
         fingers = fingersNum;
     }
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ PAN_GESTURE, nullptr, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer{ PAN_GESTURE, nullptr, nullptr };
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPanGesture(
         fingers, mask, distanceNum, ndkGesture);
     ndkGesture->gesture = gesture;
@@ -405,8 +402,6 @@ ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirec
 
 ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
 {
-    count = std::max(count, DEFAULT_TAP_COUNT);
-    fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);
     auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createTapGesture(
         count, fingers, ndkGesture);
@@ -416,8 +411,6 @@ ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
 
 ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(int32_t count, int32_t fingers, double distanceThreshold)
 {
-    count = std::max(count, DEFAULT_TAP_COUNT);
-    fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);
     auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr, nullptr };
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->
         createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, ndkGesture);

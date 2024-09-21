@@ -29,8 +29,8 @@ namespace OHOS::Ace {
 using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
-constexpr int64_t RESPONSE_TIMEOUT = 60000000;
-constexpr int64_t STARTAPP_FRAME_TIMEOUT = 100000000;
+constexpr int64_t RESPONSE_TIMEOUT = 600000000;
+constexpr int64_t STARTAPP_FRAME_TIMEOUT = 1000000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
 const int32_t DEFAULT_JANK_REPORT_THRESHOLD = 3;
@@ -123,7 +123,7 @@ void ReportPerfEventToRS(DataBase& data)
             }
         case EVENT_COMPLETE:
             {
-                if (data.isDisplayAnimator) {
+                if (data.needReportRs) {
                     ACE_SCOPED_TRACE("EVENT_REPORT_COMPLETE_RS sceneId = %s, uniqueId = %lld",
                         dataRs.sceneId.c_str(), static_cast<long long> (dataRs.uniqueId));
                     Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);
@@ -625,8 +625,8 @@ bool PerfMonitor::IsSceneIdInSceneWhiteList(const std::string& sceneId)
         sceneId == PerfConstants::EXIT_RECENT_2_HOME_ANI ||
         sceneId == PerfConstants::APP_SWIPER_FLING ||
         sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
-            return true;
-        }
+        return true;
+    }
     return false;
 }
 

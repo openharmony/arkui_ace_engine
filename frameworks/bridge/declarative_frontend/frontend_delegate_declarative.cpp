@@ -49,6 +49,7 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "engine/jsi/jsi_types.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 #include "frameworks/core/common/ace_engine.h"
 #include "jsview/js_view_abstract.h"
 
@@ -807,7 +808,7 @@ void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&&
     NG::LoadPageByBufferCallback&& loadPageByBufferCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
     NG::UpdateRootComponentCallback&& updateRootComponentCallback)
 {
-    pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
+    pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
     pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
     pageRouterManager_->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
     pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
@@ -3323,6 +3324,28 @@ void FrontendDelegateDeclarative::CreateSnapshot(
 #endif
 }
 
+RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEffect(void* value)
+{
+    napi_value napiVal = reinterpret_cast<napi_value>(value);
+    JSRef<JSVal> transitionVal = JsConverter::ConvertNapiValueToJsVal(napiVal);
+    if (transitionVal.IsEmpty() || !transitionVal->IsObject()) {
+        LOGE("Convert TransitionEffect from napi value to JSVal failed.");
+        return nullptr;
+    }
+    JSRef<JSObject> transitionObj = JSRef<JSObject>::Cast(transitionVal);
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+    CHECK_NULL_RETURN(arkNativeEngine, nullptr);
+    auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
+    CHECK_NULL_RETURN(vm, nullptr);
+    JsiExecutionContext context = { vm };
+
+    return JSViewAbstract::ParseNapiChainedTransition(transitionObj, context);
+}
+
 void FrontendDelegateDeclarative::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
 {
     auto task = [node, index, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
@@ -3381,27 +3404,5 @@ void FrontendDelegateDeclarative::HideAllNodesOnOverlay()
         overlayManager->HideAllNodesOnOverlay();
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayHideAllNodes");
-}
-
-RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEffect(void* value)
-{
-    napi_value napiVal = reinterpret_cast<napi_value>(value);
-    JSRef<JSVal> transitionVal = JsConverter::ConvertNapiValueToJsVal(napiVal);
-    if (transitionVal.IsEmpty() || !transitionVal->IsObject()) {
-        LOGE("Convert TransitionEffect from napi value to JSVal failed.");
-        return nullptr;
-    }
-    JSRef<JSObject> transitionObj = JSRef<JSObject>::Cast(transitionVal);
-
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, nullptr);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
-    CHECK_NULL_RETURN(arkNativeEngine, nullptr);
-    auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
-    CHECK_NULL_RETURN(vm, nullptr);
-    JsiExecutionContext context = { vm };
-
-    return JSViewAbstract::ParseNapiChainedTransition(transitionObj, context);
 }
 } // namespace OHOS::Ace::Framework

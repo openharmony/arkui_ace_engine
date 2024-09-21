@@ -84,6 +84,11 @@ class FontManager;
 class ManagerInterface;
 class NavigationController;
 enum class FrontendType;
+enum class KeyboardAction {
+    NONE,
+    CLOSING,
+    OPENING,
+};
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
 using EtsCardTouchEventCallback = std::function<void(const TouchEvent&,
@@ -364,7 +369,7 @@ public:
 
     virtual void GetBoundingRectData(int32_t nodeId, Rect& rect) {}
 
-    virtual void CheckAndUpdateKeyboardInset() {}
+    virtual void CheckAndUpdateKeyboardInset(float keyboardHeight) {}
 
     virtual RefPtr<AccessibilityManager> GetAccessibilityManager() const;
 
@@ -877,7 +882,6 @@ public:
         bool supportAvoidance = false, bool forceChange = false);
     void OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
-
     void OnFoldStatusChanged(FoldStatus foldStatus);
 
     using foldStatusChangedCallback = std::function<bool(FoldStatus)>;
@@ -1191,22 +1195,6 @@ public:
         return onFocus_;
     }
 
-    void SetSurfaceChangeMsg(int32_t width, int32_t height,
-                                WindowSizeChangeReason type,
-                                const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
-    {
-        width_ = width;
-        height_ = height;
-        type_ = type;
-        rsTransaction_ = rsTransaction;
-        delaySurfaceChange_ = true;
-    }
-
-    void ResetSurfaceChangeMsg()
-    {
-        delaySurfaceChange_ = false;
-    }
-
     uint64_t GetVsyncTime() const
     {
         return vsyncTime_;
@@ -1220,6 +1208,7 @@ public:
     virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
 
     virtual std::string GetCurrentExtraInfo() { return ""; }
+
     virtual void UpdateTitleInTargetPos(bool isShow = true, int32_t height = 0) {}
 
     virtual void SetCursor(int32_t cursorValue) {}
@@ -1259,6 +1248,7 @@ public:
         return false;
     }
 
+
     virtual void StartWindowAnimation() {}
 
     virtual void StopWindowAnimation() {}
@@ -1278,6 +1268,17 @@ public:
     {
         return frameCount_;
     }
+
+    KeyboardAction GetKeyboardAction()
+    {
+        return keyboardAction_;
+    }
+
+    void SetKeyboardAction(KeyboardAction action)
+    {
+        keyboardAction_ = action;
+    }
+    void SetUiDvsyncSwitch(bool on);
 
     virtual void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type) {}
 
@@ -1303,7 +1304,6 @@ public:
 
     virtual bool IsDensityChanged() const = 0;
 
-    void SetUiDvsyncSwitch(bool on);
     virtual bool GetOnShow() const = 0;
     bool IsDestroyed();
 
@@ -1484,6 +1484,8 @@ private:
     PostRTTaskCallback postRTTaskCallback_;
     std::function<void(void)> gsVsyncCallback_;
     std::unordered_set<std::shared_ptr<std::function<void()>>, FunctionHash> finishFunctions_;
+    bool followSystem_ = false;
+    float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     bool isFormAnimationFinishCallback_ = false;
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
@@ -1492,18 +1494,11 @@ private:
     bool hasPreviewTextOption_ = false;
     bool useCutout_ = false;
     uint64_t vsyncTime_ = 0;
-
-    bool delaySurfaceChange_ = false;
     bool destroyed_ = false;
-    int32_t width_ = -1;
-    int32_t height_ = -1;
-    WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
-    std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
     uint32_t frameCount_ = 0;
-    bool followSystem_ = false;
-    float maxAppFontScale_ = static_cast<float>(INT32_MAX);
+    KeyboardAction keyboardAction_ = KeyboardAction::NONE;
     float dragNodeGrayscale_ = 0.0f;
-    
+
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;

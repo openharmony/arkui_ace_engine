@@ -167,12 +167,13 @@ public:
     void InitAllChilrenDragManager(bool init);
 
     /**
-     * @brief Notify the change of dataSource to component.
+     * @brief Notify the change of dataSource to parent.
      *
-     * @param index the last position of change.
+     * @param index the position of change.
      * @param count the count of change in [index].
+     * @param notificationType the type of notification.
      */
-    void NotifyCountChange(int32_t index, int32_t count);
+    void NotifyChangeWithCount(int32_t index, int32_t count, NotificationType notificationType) const;
 
     /**
      * @brief Parse OnDatasetChange for NotifyCountChange.
@@ -195,9 +196,9 @@ private:
         }
     }
 
-    void OnDetachFromMainTree(bool recursive, PipelineContext* context = nullptr) override
+    void OnDetachFromMainTree(bool recursive) override
     {
-        UINode::OnDetachFromMainTree(recursive, context);
+        UINode::OnDetachFromMainTree(recursive);
         if (builder_) {
             for (const auto& item : builder_->GetCachedUINodeMap()) {
                 if (item.second.second != nullptr) {
@@ -221,8 +222,6 @@ private:
         GetChildren();
         UINode::GenerateOneDepthVisibleFrameWithTransition(visibleList);
     }
-
-    void NotifyDataCountChanged(int32_t index);
 
     // The index values of the start and end of the current children nodes and the corresponding keys.
     std::list<std::optional<std::string>> ids_;

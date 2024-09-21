@@ -148,7 +148,6 @@ void NavigationPattern::OnAttachToFrameNode()
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
-
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_ALL, .edges = SAFE_AREA_EDGE_ALL };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
@@ -197,6 +196,7 @@ void NavigationPattern::OnModifyDone()
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
     isRightToLeft_ = AceApplicationInfo::GetInstance().IsRightToLeft();
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
@@ -297,7 +297,7 @@ void NavigationPattern::InitFoldState()
     CHECK_NULL_VOID(container);
     container->InitIsFoldable();
     if (container->IsFoldable()) {
-        currentFoldStatus_ = container->GetCurrentFoldStatus();
+        currentfoldStatus_ = container->GetCurrentFoldStatus();
     }
 }
 
@@ -335,10 +335,8 @@ bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto foldStatus = container->GetCurrentFoldStatus();
-    TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
-        static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
-    if (foldStatus != currentFoldStatus_) {
-        currentFoldStatus_ = foldStatus;
+    if (foldStatus != currentfoldStatus_) {
+        currentfoldStatus_ = foldStatus;
         return true;
     }
     return false;
@@ -546,6 +544,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "sync with js stack");
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
+
     preContext_ = nullptr;
     if (preTopNavPath_.has_value()) {
         auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -649,6 +648,7 @@ void NavigationPattern::UpdateNavPathList()
 
 void NavigationPattern::RefreshNavDestination()
 {
+    isChanged_ = false;
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -664,8 +664,10 @@ void NavigationPattern::RefreshNavDestination()
 
     // close keyboard
 #if defined(ENABLE_STANDARD_INPUT)
-    auto focusHub = hostNode->GetFocusHub();
-    if (isChanged_ && focusHub->IsFocusableWholePath()) {
+    RefPtr<FrameNode> targetNode = newTopNavPath.has_value() ? AceType::DynamicCast<FrameNode>(
+            NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second)) :
+            AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+    if (isChanged_ && GetIsFocusable(targetNode)) {
         InputMethodManager::GetInstance()->CloseKeyboard();
     }
 #endif
@@ -766,8 +768,7 @@ void NavigationPattern::CheckTopNavPathChange(
             if (!newTopNavDestination) {
                 break;
             }
-            auto focusHub = newTopNavDestination->GetFocusHub();
-            if (!focusHub || !focusHub->IsFocusableWholePath()) {
+            if (!GetIsFocusable(newTopNavDestination)) {
                 break;
             }
             auto navDestinationPattern = newTopNavDestination->GetPattern<NavDestinationPattern>();
@@ -797,8 +798,7 @@ void NavigationPattern::CheckTopNavPathChange(
             NotifyPageShow(pageInfo->GetPageUrl());
         }
         navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
-        auto focusHub = navBarNode->GetFocusHub();
-        if (focusHub && focusHub->IsFocusableWholePath()) {
+        if (GetIsFocusable(navBarNode)) {
             auto navBarFocusView = navBarNode->GetPattern<FocusView>();
             CHECK_NULL_VOID(navBarFocusView);
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -856,13 +856,18 @@ int32_t NavigationPattern::FireNavDestinationStateChange(NavDestinationLifecycle
     return hostNode->GetLastStandardIndex();
 }
 
-void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow)
+bool NavigationPattern::CheckParentDestinationIsOnhide(const RefPtr<NavDestinationGroupNode>& destinationNode)
 {
-    if (isShow) {
-        NavigationPattern::FireNavigationLifecycleChange(node, NavDestinationLifecycle::ON_SHOW);
-        return;
-    }
-    NavigationPattern::FireNavigationLifecycleChange(node, NavDestinationLifecycle::ON_HIDE);
+    CHECK_NULL_RETURN(destinationNode, false);
+    auto destinationNodePattern = destinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(destinationNodePattern, false);
+    return !destinationNodePattern->GetIsOnShow();
+}
+
+bool NavigationPattern::CheckDestinationIsPush(const RefPtr<NavDestinationGroupNode>& destinationNode)
+{
+    CHECK_NULL_RETURN(destinationNode, false);
+    return destinationNode->GetIndex() != -1 || destinationNode->GetNavDestinationCustomNode();
 }
 
 void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isOnShow)
@@ -881,7 +886,13 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
     int32_t standardIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
     int32_t start = standardIndex;
     int32_t end = navigationPattern->navigationStack_->Size();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
     if (isOnShow) {
+        if (overlayManager && overlayManager->HasModalPage()) {
+            return;
+        }
         for (int32_t index = start; index < end; index++) {
             const auto& curPath = navDestinationNodes[index];
             auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -907,7 +918,6 @@ void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isO
         }
         return;
     }
-    navigationPattern->SyncWithJsStackIfNeeded();
     for (int32_t index = end - 1; index >= 0 && index >= start; index--) {
         const auto& curPath = navDestinationNodes[index];
         auto curDestination = AceType::DynamicCast<NavDestinationGroupNode>(
@@ -944,6 +954,15 @@ void NavigationPattern::FireNavigationChange(const RefPtr<UINode>& node, bool is
     }
 }
 
+void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bool isShow)
+{
+    if (isShow) {
+        NavigationPattern::FireNavigationLifecycleChange(node, NavDestinationLifecycle::ON_SHOW);
+        return;
+    }
+    NavigationPattern::FireNavigationLifecycleChange(node, NavDestinationLifecycle::ON_HIDE);
+}
+
 void NavigationPattern::FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle)
 {
     CHECK_NULL_VOID(node);
@@ -952,20 +971,15 @@ void NavigationPattern::FireNavigationLifecycleChange(const RefPtr<UINode>& node
         auto& child = *iter;
         auto navigation = AceType::DynamicCast<NavigationGroupNode>(child);
         if (navigation) {
-            auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
-            CHECK_NULL_VOID(navigationPattern);
-            auto standardIndex = navigationPattern->FireNavDestinationStateChange(lifecycle);
-            const auto& navDestinationNodes = navigationPattern->navigationStack_->GetAllNavDestinationNodes();
-            if (standardIndex == static_cast<int32_t>(navDestinationNodes.size())) {
-                NavigationPattern::FireNavigationLifecycleChange(child, lifecycle);
+            auto destinationNode = navigation->GetParentDestinationNode().Upgrade();
+            if ((lifecycle == NavDestinationLifecycle::ON_SHOW) && CheckParentDestinationIsOnhide(destinationNode) &&
+                CheckDestinationIsPush(destinationNode)) {
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation parent is onhide");
                 continue;
             }
-            for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1;
-                 index >= 0 && index >= standardIndex; index--) {
-                const auto& curPath = navDestinationNodes[index];
-                // Ignore node from navigation to navdestination in node tree, start from navdestination node directly.
-                NavigationPattern::FireNavigationLifecycleChange(curPath.second, lifecycle);
-            }
+            auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
+            CHECK_NULL_VOID(navigationPattern);
+            navigationPattern->FireNavDestinationStateChange(lifecycle);
         } else {
             NavigationPattern::FireNavigationLifecycleChange(child, lifecycle);
         }
@@ -1013,9 +1027,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             navigationNode->DealNavigationExit(navBarNode, true, false);
         }
         navigationNode->RemoveDialogDestination();
-        auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
-        navigationNode->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
         navigationStack_->UpdateReplaceValue(0);
         return;
     }
@@ -1037,14 +1049,13 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             parent->RemoveChild(preTopNavDestination, true);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else {
+            preTopNavDestination->GetRenderContext()->RemoveClipWithRRect();
             preTopNavDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
             DealTransitionVisibility(preTopNavDestination, needVisible, false);
         }
         navigationNode->RemoveDialogDestination();
-        auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
-        navigationNode->OnAccessibilityEvent(
-            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
         return;
     }
 
@@ -1081,9 +1092,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     navigationNode->RemoveDialogDestination();
-    auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
-    navigationNode->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+    navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
 }
 
 void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -1515,7 +1524,6 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
     realNavBarWidth_ = std::min(realNavBarWidth_, frameWidth);
     realNavBarWidth_ = std::min(realNavBarWidth_, maxNavBarWidthPx);
     realNavBarWidth_ = std::max(realNavBarWidth_, minNavBarWidthPx);
-
     // MEASURE
     if (realNavBarWidth_ != currentNavBarWidth) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -1673,15 +1681,14 @@ void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bo
     int32_t standardIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
     int32_t start = isFromStandardIndex ? standardIndex : 0;
     int32_t end = isFromStandardIndex ? navigationStack_->Size() : standardIndex;
-    bool isShow = (lifecycle == NavDestinationLifecycle::ON_SHOW)
-        || (lifecycle == NavDestinationLifecycle::ON_WILL_SHOW);
+    bool isShow = lifecycle == NavDestinationLifecycle::ON_SHOW || (lifecycle == NavDestinationLifecycle::ON_WILL_SHOW);
     if (isShow) {
         for (int32_t index = start; index < end; index++) {
-            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle, true);
+            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle);
         }
     } else {
         for (int32_t index = end - 1; index >= 0 && index >= start; index--) {
-            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle, true);
+            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle);
         }
     }
 }
@@ -1692,6 +1699,15 @@ void NavigationPattern::DumpInfo()
         return;
     }
     DumpLog::GetInstance().AddDesc(std::string("size").append(std::to_string(navigationStack_->Size())));
+}
+
+void NavigationPattern::OnColorConfigurationUpdate()
+{
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
 }
 
 bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -1732,7 +1748,6 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             auto preDestination = weakPreNavDestination.Upgrade();
             auto topDestination = weakNewNavDestination.Upgrade();
             proxy->SetIsFinished(true);
-
             // this flag will be update in cancelTransition or finishTransition
             if (proxy->GetIsSuccess()) {
                 pattern->GetNavigationStack()->ClearRecoveryList();
@@ -1794,9 +1809,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
     if (newTopNavDestination) {
         newTopNavDestination->SetIsOnAnimation(false);
     }
-    auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
-    hostNode->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+    hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
     do {
         if (replaceValue != 0) {
             hostNode->DealNavigationExit(preTopNavDestination, preTopNavDestination == nullptr);
@@ -1919,15 +1932,6 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom animation start: operation: %{public}d", operation);
     return onTransition_(preInfo, topInfo, operation);
-}
-
-void NavigationPattern::OnColorConfigurationUpdate()
-{
-    auto dividerNode = GetDividerNode();
-    CHECK_NULL_VOID(dividerNode);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
 }
 
 void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
@@ -2236,7 +2240,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     }
     if (isPopPage || (preDestination &&
         (hostNode->GetLastStandardIndex() > preDestination->GetIndex() || preDestination->NeedRemoveInPush()))) {
-        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
+        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_HIDE);
     }
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_HIDE);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -2276,7 +2280,7 @@ void NavigationPattern::ProcessAutoSave(const RefPtr<FrameNode>& node)
 }
 
 void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
-    NavDestinationLifecycle lifecycle, bool isNavigationChanged)
+    NavDestinationLifecycle lifecycle)
 {
     auto curDestination =
         AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
@@ -2284,9 +2288,7 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
     auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (lifecycle == NavDestinationLifecycle::ON_WILL_DISAPPEAR) {
-        if (isNavigationChanged) {
-            NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
-        }
+        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
         eventHub->FireOnWillDisAppear();
         return;
     }
@@ -2297,20 +2299,27 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
             lifecycle == NavDestinationLifecycle::ON_WILL_HIDE))) {
         return;
     }
-    if (isNavigationChanged) {
-        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
-    }
     if (lifecycle == NavDestinationLifecycle::ON_WILL_SHOW) {
         eventHub->FireOnWillShow();
+        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
         return;
     }
     if (lifecycle == NavDestinationLifecycle::ON_SHOW) {
+        auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(navigationNode);
+        auto parentDestinationNode = navigationNode->GetParentDestinationNode().Upgrade();
+        if (CheckParentDestinationIsOnhide(parentDestinationNode) && CheckDestinationIsPush(parentDestinationNode)) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parentDestinationNode is onhide");
+            return;
+        }
         auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? navigationStack_->GetRouteParam() : "";
         eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
         NotifyPageShow(navDestinationPattern->GetName());
         navDestinationPattern->SetIsOnShow(true);
+        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
         return;
     }
+    NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
     if (lifecycle == NavDestinationLifecycle::ON_WILL_HIDE) {
         eventHub->FireOnWillHide();
         return;
@@ -2319,16 +2328,6 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
         eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
         NotifyPageHide(navDestinationPattern->GetName());
         navDestinationPattern->SetIsOnShow(false);
-    }
-}
-
-void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName)
-{
-    if (nodeCount >= PAGE_NODES) {
-        EventReport::ReportPageNodeOverflow(navDestinationName, nodeCount, PAGE_NODES);
-    }
-    if (depth >= PAGE_DEPTH) {
-        EventReport::ReportPageDepthOverflow(navDestinationName, depth, PAGE_DEPTH);
     }
 }
 
@@ -2341,14 +2340,14 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
         auto lastStandardIndex = hostNode->GetLastStandardIndex();
         if (isPopPage || lastStandardIndex > preDestination->GetIndex() || preDestination->NeedRemoveInPush()) {
             // fire preTop Destination lifecycle
-            NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_HIDE, true);
+            NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_HIDE);
         }
     }
     // fire remove navDestination and invisible navDestination lifecycle for pop or clear
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_HIDE);
     if (isPopPage || (preDestination && preDestination->NeedRemoveInPush())) {
         // fire removed preDestination lifecycle for pop many times or clear
-        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
+        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
     }
     // fire removed navDestination lifecycle
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_DISAPPEAR);
@@ -2375,6 +2374,25 @@ void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*heigh
     }
 }
 
+void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName)
+{
+    if (nodeCount >= PAGE_NODES) {
+        EventReport::ReportPageNodeOverflow(navDestinationName, nodeCount, PAGE_NODES);
+    }
+    if (depth >= PAGE_DEPTH) {
+        EventReport::ReportPageDepthOverflow(navDestinationName, depth, PAGE_DEPTH);
+    }
+}
+
+void NavigationPattern::OnWindowHide()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navigationPattern = hostNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->SyncWithJsStackIfNeeded();
+}
+
 void NavigationPattern::NotifyPerfMonitorPageMsg(const std::string& pageName)
 {
     auto container = Container::Current();
@@ -2390,12 +2408,19 @@ void NavigationPattern::RefreshFocusToDestination()
     if (!newTopNavPath.has_value()) {
         return;
     }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarFocus = navBarNode->GetFocusHub();
+    CHECK_NULL_VOID(navBarFocus);
+    if (!navBarFocus->IsCurrentFocus()) {
+        return;
+    }
     auto newTopNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(
         NavigationGroupNode::GetNavDestinationNode(newTopNavPath->second));
     CHECK_NULL_VOID(newTopNavDestination);
-    auto focusHub = newTopNavDestination->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusableWholePath()) {
+    if (!GetIsFocusable(newTopNavDestination)) {
         return;
     }
     auto navDestinationFocusView = newTopNavDestination->GetPattern<FocusView>();
@@ -2418,7 +2443,6 @@ void NavigationPattern::RecoveryToLastStack(
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    // clear last sync stack last nodes
     hostNode->CleanHideNodes();
     CHECK_NULL_VOID(navigationStack_);
     navigationStack_->SetNavPathList(navigationStack_->GetRecoveryList());
@@ -2446,6 +2470,7 @@ void NavigationPattern::RecoveryToLastStack(
     // recover lifecycle state before transition
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_HIDE);
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_DISAPPEAR);
+    NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true, true);
     hostNode->RemoveDialogDestination();
     hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 
@@ -2453,9 +2478,7 @@ void NavigationPattern::RecoveryToLastStack(
     navigationStack_->RecoveryNavigationStack();
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     hostNode->SetIsOnAnimation(false);
-    auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
-    hostNode->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+    hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
 }
 
 bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -2515,5 +2538,20 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
         },
         TaskExecutor::TaskType::UI, timeout, "ArkUINavigationTransitionProxyFinish");
     return true;
+}
+
+bool NavigationPattern::GetIsFocusable(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto hostNode = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto focusHub = hostNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusHub, false);
+    if (!focusHub->IsFocusableWholePath()) {
+        return false;
+    }
+    auto currentFocusHub = frameNode->GetFocusHub();
+    CHECK_NULL_RETURN(currentFocusHub, false);
+    return currentFocusHub->IsFocusableNode();
 }
 } // namespace OHOS::Ace::NG

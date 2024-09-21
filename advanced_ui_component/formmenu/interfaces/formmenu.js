@@ -22,19 +22,21 @@ const util = requireNapi('util');
 
 const tag = 'AddFormMenuItem::js::';
 
-async function querySnapshotAsync(want, componentId) {
-  let compInfo = componentUtils.getRectangleById(componentId);
+async function querySnapshotAsync(want, componentId, uiContext) {
+  let compInfo = uiContext.getComponentUtils().getRectangleById(componentId);  
   try {
     const imagePackageApi = image.createImagePacker();
     const packOpts = {
       format: 'image/jpeg',
       quality: 50,
     };
-    let packPixmap = await componentSnapshot.get(componentId);
+    hilog.info(0x3900, tag, 'componentId:' + componentId);
+    let packPixmap = await uiContext.getComponentSnapshot().get(componentId);
     let arrayBuffer = await imagePackageApi.packing(packPixmap, packOpts);
     let base64Helper = new util.Base64Helper();
     let uint8Arr = new Uint8Array(arrayBuffer);
     let pixelStr = base64Helper.encodeToStringSync(uint8Arr);
+
     !want.parameters && (want.parameters = {});
     want.parameters['ohos.extra.param.key.add_form_to_host_width'] = compInfo.size.width.toFixed(2);
     want.parameters['ohos.extra.param.key.add_form_to_host_height'] = compInfo.size.height.toFixed(2);
@@ -47,11 +49,6 @@ async function querySnapshotAsync(want, componentId) {
   }
 }
 
-function querySnapshot(want, componentId) {
-  querySnapshotAsync(want, componentId);
-  return true;
-}
-
 /**
  * Build function of AddFormMenuItem.
  *
@@ -62,18 +59,6 @@ function querySnapshot(want, componentId) {
  * @since 12
  */
 export function AddFormMenuItem(want, componentId, options, parent = null) {
-  this.observeComponentCreation2((elmtId, isInitialRender) => {
-    If.create();
-    if (querySnapshot(want, componentId)) {
-      this.ifElseBranchUpdateFunction(0, () => {
-      });
-    }
-    else {
-      this.ifElseBranchUpdateFunction(1, () => {
-      });
-    }
-  }, If);
-  If.pop();
   this.observeComponentCreation2((elmtId, isInitialRender) => {
     FormMenuItem.create(options?.style?.options ? options.style.options : {
       startIcon: {
@@ -91,7 +76,14 @@ export function AddFormMenuItem(want, componentId, options, parent = null) {
         'moduleName': ''
       }
     });
-    FormMenuItem.onRegClick(want, componentId, options?.formBindingData?.data, options?.callback);
+    let formBindingDataStr = JSON.stringify(options?.formBindingData);
+    let uiContext = this.getUIContext();
+    FormMenuItem.onClick(async () => {
+      await querySnapshotAsync(want, componentId, uiContext);
+      uiContext.runScopedTask(() => {
+        FormMenuItem.onRequestPublishFormWithSnapshot(want, formBindingDataStr, options?.callback);
+      });
+    });
   }, FormMenuItem);
   FormMenuItem.pop();
 }

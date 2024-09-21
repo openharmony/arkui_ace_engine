@@ -311,7 +311,7 @@ export struct SubHeader {
         })
         .padding({
           // 'sys.float.margin_left' id,value: 16vp
-          start: LengthMetrics.vp((this.contentMargin ? 
+          start: LengthMetrics.vp((this.contentMargin ?
           (this.contentMargin.start ? this.contentMargin.start.value : 0) :
           Util.getNumberByResource(125830936, LEFT_ICON_SIZE_NUMBER)) - this.paddingLeft),
           // 'sys.float.margin_right' id,value: 16vp

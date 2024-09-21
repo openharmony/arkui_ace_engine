@@ -61,12 +61,17 @@ public:
         Color foregroundColor;
         if (!ParseColor(env, argv[0], foregroundColor)) {
             LOGE("Parse foregroundColor failed");
+            napi_close_handle_scope(env, scope);
             return nullptr;
         }
 
         DragPreview* dragPreview = nullptr;
         napi_unwrap(env, result, (void**)&dragPreview);
-
+        if (dragPreview == nullptr) {
+            LOGE("dragPreview is nullptr");
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
         dragPreview->SetColor(foregroundColor);
         LOGI("foregroundColor is %{public}x", dragPreview->previewStyle_.foregroundColor);
         if (!dragPreview->hasAnimation_) {
@@ -103,6 +108,11 @@ public:
 
         DragPreview* dragPreview = nullptr;
         napi_unwrap(env, result, (void**)&dragPreview);
+        if (dragPreview == nullptr) {
+            LOGE("dragPreview is nullptr");
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
         dragPreview->hasAnimation_ = true;
         PreviewAnimation previewAnimation;
         ParseAnimationInfo(env, argv[0], previewAnimation);
@@ -123,6 +133,7 @@ public:
             TaskExecutor::TaskType::JS, "ArkUIDragUpdatePreviewAnimationStyle");
         dragPreview->hasAnimation_ = false;
         dragPreview->previewStyle_.types.clear();
+        napi_close_handle_scope(env, scope);
         return nullptr;
     }
 

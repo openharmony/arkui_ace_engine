@@ -156,10 +156,24 @@ public:
      */
     static float GetFontWeightScale();
 
+    static void SetFontWeightScale(const float fontWeightScale)
+    {
+        if (fontWeightScale_ != fontWeightScale) {
+            fontWeightScale_ = fontWeightScale;
+        }
+    }
+
     /*
      * Get size scale of device.
      */
     static float GetFontScale();
+
+    static void SetFontScale(const float fontScale)
+    {
+        if (fontScale != fontScale_) {
+            fontScale_ = fontScale;
+        }
+    }
 
     /*
      * Get density of default display.
@@ -477,7 +491,7 @@ public:
     }
 
     static bool GetTitleStyleEnabled();
-    
+
     static bool GetIsUseMemoryMonitor();
 
     static bool IsFormAnimationLimited();
@@ -504,7 +518,7 @@ public:
     static bool WaterFlowUseSegmentedLayout();
 
     static bool GetGridIrregularLayoutEnabled();
- 
+
     static bool GetSideBarContainerBlurEnable();
 
     static bool GetGridCacheEnabled();
@@ -514,7 +528,6 @@ public:
     static void AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
 
     static void RemoveWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback);
-
     static float GetDefaultResolution();
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
@@ -524,6 +537,8 @@ public:
     static void SetDebugBoundaryEnabled(bool debugBoundaryEnabled);
 
     static void SetInputEventTraceEnabled(bool inputEventTraceEnable);
+
+    static void SetPerformanceMonitorEnabled(bool performanceMonitorEnable);
 
     static bool GetAcePerformanceMonitorEnabled()
     {
@@ -615,6 +630,8 @@ private:
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
     static float dragStartPanDisThreshold_;
+    static float fontScale_;
+    static float fontWeightScale_;
 };
 
 } // namespace OHOS::Ace

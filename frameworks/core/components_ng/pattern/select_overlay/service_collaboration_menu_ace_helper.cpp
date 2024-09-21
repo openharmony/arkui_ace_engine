@@ -206,9 +206,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     menuItemProperty->UpdatePadding({ .right = CalcLength(2.0f), .top = CalcLength(0.0f) });
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    BorderRadiusProperty border;
-    border.SetRadius(menuTheme->GetInnerBorderRadius());
-    renderContext->UpdateBorderRadius(border);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(menuTheme->GetMenuDefaultInnerRadius()));
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(row, nullptr);
@@ -273,9 +271,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateDeviceMenuItem(
     CHECK_NULL_RETURN(menuItemNode, nullptr);
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    BorderRadiusProperty border;
-    border.SetRadius(menuTheme->GetInnerBorderRadius());
-    renderContext->UpdateBorderRadius(border);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(menuTheme->GetMenuDefaultInnerRadius()));
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(row, nullptr);
@@ -693,8 +689,7 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
     CHECK_NULL_RETURN(toastPipeline, -1);
     auto overlay = toastPipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, -1);
-    auto toastInfo = NG::ToastInfo { .message = category, .duration = 2000, .bottom = "", .isRightToLeft = true };
-    overlay->ShowToast(toastInfo);
+    overlay->ShowToast({ .message = category, .duration = 2000, .alignment = -1 });
     info_ = nullptr;
     return 0;
 }

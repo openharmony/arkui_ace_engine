@@ -71,6 +71,12 @@ enum class ScrollAutoType {
     END,
 };
 
+enum class LayoutDirection {
+    NONE = 0,
+    FORWARD,
+    BACKWARD,
+};
+
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ListLayoutAlgorithm, LayoutAlgorithm);
@@ -125,6 +131,11 @@ public:
     void SetTargetIndex(int32_t index)
     {
         targetIndex_ = index;
+    }
+
+    void SetTargetIndexInGroup(int32_t targetIndexInGroup)
+    {
+        targetIndexInGroup_ = targetIndexInGroup;
     }
 
     std::optional<int32_t> GetTargetIndex() const
@@ -350,7 +361,7 @@ public:
         return laneGutter_;
     }
 
-    void OffScreenLayoutDirection();
+    void OffScreenLayoutDirection(LayoutWrapper* layoutWrapper);
 
     ScrollAutoType GetScrollAutoType() const
     {
@@ -410,6 +421,8 @@ protected:
     virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     virtual void SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheStart, int32_t cacheEnd);
 
+    void SetListItemGroupJumpIndex(const RefPtr<ListItemGroupLayoutAlgorithm>& itemGroup,
+        bool forwardLayout, int32_t index);
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index, float referencePos,
         bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty, bool groupNeedAllLayout,
         bool needAdjustRefPos = false);
@@ -439,6 +452,7 @@ protected:
     std::optional<std::pair<int32_t, ListItemInfo>> firstItemInfo_;
 private:
     void MeasureList(LayoutWrapper* layoutWrapper);
+    LayoutDirection LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex);
     void RecycleGroupItem(LayoutWrapper* layoutWrapper) const;
     void CheckJumpToIndex();
     void CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper, int32_t startIndex,
@@ -487,6 +501,7 @@ private:
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> targetIndexInGroup_;
     std::optional<int32_t> targetIndexStaged_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
@@ -496,6 +511,7 @@ private:
 
     PositionMap itemPosition_;
     PositionMap recycledItemPosition_;
+    int32_t preStartIndex_ = 0;
     float currentOffset_ = 0.0f;
     float adjustOffset_ = 0.0f;
     float totalOffset_ = 0.0f;

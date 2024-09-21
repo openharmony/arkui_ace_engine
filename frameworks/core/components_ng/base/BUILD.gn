@@ -13,7 +13,8 @@
 
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
-
+import(
+    "//foundation/arkui/ace_engine/adapter/ohos/build/common.gni")
 build_component_ng("base_ng") {
   sources = [
     "distributed_ui.cpp",

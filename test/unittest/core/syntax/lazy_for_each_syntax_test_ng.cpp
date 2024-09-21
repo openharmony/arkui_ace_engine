@@ -1360,7 +1360,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxNotifyDataCountChangedTest001, Te
      * @tc.steps: step3. Invoke NotifyDataCountChanged.
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
-    lazyForEachNode->NotifyDataCountChanged(INDEX_0);
+    lazyForEachNode->NotifyChangeWithCount(INDEX_0, 0, UINode::NotificationType::START_CHANGE_POSITION);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 
@@ -1774,12 +1774,16 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxOnDataDeletedTest002, TestSiz
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
+    // init historicalTotalCount_
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
     std::list<V2::Operation> DataOperations;
     V2::Operation operation1 = {.type = "delete", .index = INDEX_0, .count = 1};
     DataOperations.push_back(operation1);
     lazyForEachBuilder->OnDatasetChange(DataOperations);
     EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 6);
     DataOperations.clear();
+    // update historicalTotalCount_
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
     V2::Operation operation2 = {.type = "delete", .index = INDEX_0, .count = 2};
     DataOperations.push_back(operation2);
     lazyForEachBuilder->OnDatasetChange(DataOperations);

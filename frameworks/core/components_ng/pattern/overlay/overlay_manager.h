@@ -165,8 +165,6 @@ public:
     void ClearToast();
     void ShowToast(const NG::ToastInfo& toastInfo);
 
-    void FireAutoSave(const RefPtr<FrameNode>& ContainerNode);
-
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
         return dialogMap_;
@@ -404,20 +402,22 @@ public:
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildTitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void(const int32_t info)>&& onWillDismiss,
-        std::function<void()>&& onWillAppear,  std::function<void()>&& onWillDisappear,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
         std::function<void(const float)>&& onHeightDidChange,
-        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
-        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
-        const RefPtr<FrameNode>& targetNode);
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode);
     void OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void(const int32_t info)>&& onWillDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
         std::function<void(const float)>&& onHeightDidChange,
-        std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
-        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack,
-        const RefPtr<FrameNode>& targetNode);
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange,
+        std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode);
     void CloseSheet(const SheetKey& sheetKey);
     void InitSheetMask(
         const RefPtr<FrameNode>& maskNode, const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle);
@@ -425,6 +425,7 @@ public:
     {
         return modalStack_.empty();
     }
+    bool HasModalPage();
     void DismissSheet();
     void DismissContentCover();
     void SheetSpringBack();
@@ -535,6 +536,20 @@ public:
     }
 
     void DismissPopup();
+    bool CheckPageNeedAvoidKeyboard() const;
+    void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
+
+    void CreateOverlayNode();
+    void AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt);
+    void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
+    void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
+    void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
+    void ShowAllNodesOnOverlay();
+    void HideAllNodesOnOverlay();
+    RefPtr<FrameNode> GetOverlayNode()
+    {
+        return overlayNode_;
+    }
 
     void MountGatherNodeToRootNode(const RefPtr<FrameNode>& frameNode,
         const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
@@ -554,20 +569,6 @@ public:
     }
     void RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode);
     void RemovePreviewBadgeNode();
-    void CreateOverlayNode();
-    void AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt);
-    void RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
-    void ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
-    void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node);
-    void ShowAllNodesOnOverlay();
-    void HideAllNodesOnOverlay();
-    RefPtr<FrameNode> GetOverlayNode()
-    {
-        return overlayNode_;
-    }
-    bool CheckPageNeedAvoidKeyboard() const;
-    void AvoidCustomKeyboard(int32_t targetId, float safeHeight);
-    void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
     void EraseMenuInfo(int32_t targetId)
     {
         if (menuMap_.find(targetId) != menuMap_.end()) {
@@ -577,6 +578,9 @@ public:
 
     bool IsRootExpansive() const;
     void DumpOverlayInfo() const;
+
+    void ShowFilterAnimation(const RefPtr<FrameNode>& columnNode);
+
     void ReloadBuilderNodeConfig();
 
     bool IsMenuShow() const
@@ -727,11 +731,11 @@ private:
     bool RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, const RefPtr<FrameNode>& overlay,
         const RefPtr<UINode>& rootNode);
     bool UpdatePopupMap(int32_t targetId, const PopupInfo& popupInfo);
+    void OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration);
     void PlayDefaultModalIn(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
         AnimationOption option, float showHeight);
     void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
         AnimationOption option, float showHeight);
-    void OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int32_t duration);
     void OnShowMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<OverlayManager> weak,
         int32_t instanceId);
     void OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK, const WeakPtr<UINode> rootWeak,
@@ -772,11 +776,13 @@ private:
     void DumpModalListInfo() const;
     void DumpEntry(const RefPtr<FrameNode>& targetNode, int32_t targetId, const RefPtr<FrameNode>& node) const;
     std::string GetMapNodeLog(const RefPtr<FrameNode>& node, bool hasTarget = true) const;
-    void SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node);
+    bool SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node);
     RefPtr<FrameNode> GetOverlayFrameNode();
     void MountToParentWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
+
+    void FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

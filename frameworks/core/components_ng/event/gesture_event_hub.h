@@ -691,7 +691,20 @@ public:
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+    void StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+        const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
+ 
 #endif
+
+    void SetMenuPreviewScale(float menuPreviewScale)
+    {
+        menuPreviewScale_ = menuPreviewScale;
+    }
+
+    float GetMenuPreviewScale() const
+    {
+        return menuPreviewScale_;
+    }
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -779,6 +792,7 @@ private:
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;
+    float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
 };
 
 } // namespace OHOS::Ace::NG

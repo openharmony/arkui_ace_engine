@@ -21,6 +21,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/event/key_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -102,6 +103,15 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::End); } },
 };
 
+void TextInputClient::NotifyKeyboardHeight(uint32_t height)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    manager->SetkeyboardHeightConsideringUIExtension(height);
+}
+
 bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     if (keyEvent.action != KeyAction::DOWN) {
@@ -128,10 +138,14 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
     }
     auto iterFunctionKeys = functionKeys_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterFunctionKeys != functionKeys_.end()) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "find a function key, key code: %{public}d, modKeyFlags: %{public}d",
+            static_cast<int32_t>(keyEvent.code), modKeyFlags);
         return iterFunctionKeys->second(this);
     }
     auto iterKeyboardShortCuts = keyboardShortCuts_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterKeyboardShortCuts != keyboardShortCuts_.end()) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "find a keyboard shortcut, key code: %{public}d, modKeyFlags: %{public}d",
+            static_cast<int32_t>(keyEvent.code), modKeyFlags);
         iterKeyboardShortCuts->second(this);
         return true;
     }

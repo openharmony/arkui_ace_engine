@@ -676,6 +676,10 @@ public:
 
     void UpdateFontColor(const Color& value);
     void BeforeCreatePaintWrapper() override;
+    void ChangeHandleHeight(const GestureEvent& event, bool isFirst);
+    void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    virtual void CalculateDefaultHandleHeight(float& height);
     uint64_t GetSystemTimestamp()
     {
         return static_cast<uint64_t>(

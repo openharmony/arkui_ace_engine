@@ -1087,18 +1087,6 @@ std::vector<int8_t> WebClientImpl::GetWordSelection(const std::string& text, int
     return delegate->GetWordSelection(text, offset);
 }
 
-bool WebClientImpl::OnOpenAppLink(
-    const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
-{
-    auto delegate = webDelegate_.Upgrade();
-    if (!delegate) {
-        return false;
-    }
-    ContainerScope scope(delegate->GetInstanceId());
-
-    return delegate->OnOpenAppLink(url, callback);
-}
-
 void WebClientImpl::OnRenderProcessNotResponding(
     const std::string& jsStack, int pid, OHOS::NWeb::RenderProcessNotRespondingReason reason)
 {
@@ -1118,6 +1106,18 @@ void WebClientImpl::OnRenderProcessResponding()
     }
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnRenderProcessResponding();
+}
+
+bool WebClientImpl::OnOpenAppLink(
+    const std::string& url, std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return false;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+
+    return delegate->OnOpenAppLink(url, callback);
 }
 
 void WebClientImpl::OnInterceptKeyboardAttach(
@@ -1224,11 +1224,11 @@ void WebClientImpl::OnCursorUpdate(double x, double y, double width, double heig
     delegate->OnCursorUpdate(x, y, width, height);
 }
 
-void WebClientImpl::ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart)
+void WebClientImpl::OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility)
 {
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
-    delegate->ReportDynamicFrameLossEvent(sceneId, isStart);
+    delegate->OnNativeEmbedVisibilityChange(embedId, visibility);
 }
 } // namespace OHOS::Ace

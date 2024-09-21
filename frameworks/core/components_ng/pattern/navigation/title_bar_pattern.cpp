@@ -449,7 +449,7 @@ void TitleBarPattern::UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& host
     titleLayoutProperty->UpdateMaxLines(maxLines);
     if (currentFontSize != titleLayoutProperty->GetFontSizeValue(Dimension(0)) ||
         currentMaxLine != titleLayoutProperty->GetMaxLinesValue(0)) {
-        titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        titleLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
     titleNode->MarkModifyDone();
     titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

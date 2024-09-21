@@ -33,6 +33,7 @@
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #endif
 #include "core/event/ace_event_helper.h"
 #include "core/image/image_file_cache.h"
@@ -619,7 +620,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(context, scaledImage);
         // card doesn't encode and cache image file.
-        if (needCacheResizedImageFile && !srcKey.empty() && context && !context->IsFormRender()) {
+        if (needCacheResizedImageFile && !srcKey.empty() && !context->IsFormRender()) {
             BackgroundTaskExecutor::GetInstance().PostTask(
                 [srcKey, scaledImage]() {
                     LOGI("write png cache file: %{private}s", srcKey.c_str());
@@ -668,7 +669,7 @@ std::shared_ptr<RSImage> ImageProvider::ApplySizeToDrawingImage(
             (1.0 * dstWidth * dstHeight) / (rawRSImage->GetWidth() * rawRSImage->GetHeight()) < RESIZE_MAX_PROPORTION;
         auto context = PipelineBase::GetCurrentContext();
         // card doesn't encode and cache image file.
-        if (needCacheResizedImageFile && !srcKey.empty() && context && !context->IsFormRender()) {
+        if (needCacheResizedImageFile && !srcKey.empty() && !context->IsFormRender()) {
             BackgroundTaskExecutor::GetInstance().PostTask(
                 [srcKey, scaledImage]() {
                     LOGI("write png cache file: %{private}s", srcKey.c_str());

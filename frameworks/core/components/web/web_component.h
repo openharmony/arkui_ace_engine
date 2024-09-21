@@ -643,6 +643,12 @@ public:
         isNativeEmbedMode_ = isEnabled;
     }
 
+    void RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
+    {
+        tag_ = tag;
+        tag_type_ = type;
+    }
+
     const std::tuple<bool, bool>& GetNativeVideoPlayerConfig() const
     {
         return native_video_player_config_;
@@ -651,17 +657,6 @@ public:
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
     {
         native_video_player_config_ = std::make_tuple(enable, shouldOverlay);
-    }
-
-    void RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
-    {
-        tag_ = tag;
-        tag_type_ = type;
-    }
-
-    void SetSmoothDragResizeEnabled(bool isEnabled)
-    {
-        isSmoothDragResizeEnabled_ = isEnabled;
     }
 
     using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
@@ -1059,6 +1054,17 @@ public:
         return declaration_->GetNativeEmbedLifecycleChangeId();
     }
 
+    void SetNativeEmbedVisibilityChangeId(const EventMarker& embedVisibilityChangeId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetNativeEmbedVisibilityChangeId(embedVisibilityChangeId);
+    }
+
+    const EventMarker& GetNativeEmbedVisibilityChangeId() const
+    {
+        return declaration_->GetNativeEmbedVisibilityChangeId();
+    }
+
     void SetNativeEmbedGestureEventId(const EventMarker& embedGestureEventId)
     {
         CHECK_NULL_VOID(declaration_);
@@ -1174,7 +1180,6 @@ private:
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
-    bool isSmoothDragResizeEnabled_ = false;
     std::string tag_;
     std::string tag_type_;
     OnDragFunc onDragStartId_;

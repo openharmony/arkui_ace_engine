@@ -157,6 +157,7 @@ struct PlaceholderStyle {
     VerticalAlign verticalAlign = VerticalAlign::BOTTOM;
     TextBaseline baseline = TextBaseline::ALPHABETIC;
     Dimension paragraphFontSize = Dimension(DEFAULT_FONT_SIZE_VALUE, DimensionUnit::FP);
+    Color paragraphTextColor = { Color::BLACK };
 };
 
 struct CustomSpanPlaceholderInfo {
@@ -490,6 +491,11 @@ public:
     void AddPropertyInfo(PropertyInfo value)
     {
         propertyInfo_.insert(value);
+    }
+
+    void ResetPropertyInfo(PropertyInfo value)
+    {
+        propertyInfo_.erase(value);
     }
 
     void CleanPropertyInfo()

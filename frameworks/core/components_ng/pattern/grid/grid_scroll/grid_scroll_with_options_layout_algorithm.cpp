@@ -166,7 +166,8 @@ static void JumpToLastIrregularItem(
         return;
     }
 
-    auto iter = irregularItemsPosition.lower_bound(targetIndex);
+    auto iter = std::find_if(irregularItemsPosition.begin(), irregularItemsPosition.end(),
+        [targetIndex](const std::pair<int32_t, int32_t>& item) { return item.first >= targetIndex; });
     if (iter == irregularItemsPosition.begin()) {
         return;
     }

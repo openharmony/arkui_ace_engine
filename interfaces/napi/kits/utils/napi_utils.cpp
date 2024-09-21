@@ -740,10 +740,6 @@ bool ParseString(const ResourceInfo& info, std::string& result)
         result = resourceWrapper->GetColor(info.resId).ColorToString();
         return true;
     }
-    if (info.type == static_cast<int>(ResourceType::INTEGER)) {
-        result = std::to_string(resourceWrapper->GetInt(info.resId));
-        return true;
-    }
     return true;
 }
 

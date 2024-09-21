@@ -26,6 +26,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/system_properties.h"
+#include "base/utils/utils.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
 
@@ -221,8 +222,8 @@ void ImageFileCache::EraseCacheFile(const std::string &url)
                 TAG_LOGW(AceLogTag::ACE_IMAGE, "remove file %{private}s failed.", removeFile.c_str());
                 return;
             }
-            cacheFileInfo_.erase(infoIter);
             cacheFileSize_ -= infoIter->fileSize;
+            cacheFileInfo_.erase(infoIter);
             fileNameToFileInfoPos_.erase(fileCacheKey);
         }
     }
@@ -321,7 +322,8 @@ void ImageFileCache::ConvertToAstcAndWriteToFile(const std::string& fileCacheKey
     }
     // remove the old file before convert
     ClearCacheFile(removeVector);
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "write image astc cache: %{public}s %{private}s", url.c_str(), astcFilePath.c_str());
+    TAG_LOGI(
+        AceLogTag::ACE_IMAGE, "write image astc cache: %{private}s %{private}s", url.c_str(), astcFilePath.c_str());
 }
 
 void ImageFileCache::ClearCacheFile(const std::vector<std::string>& removeFiles)

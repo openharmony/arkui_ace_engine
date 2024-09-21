@@ -143,6 +143,7 @@ public:
     static void EnableNativeEmbedMode(bool isEmbedModeEnabled);
     static void RegisterNativeEmbedRule(const std::string& tag, const std::string& type);
     static void OnNativeEmbedLifecycleChange(const JSCallbackInfo& args);
+    static void OnNativeEmbedVisibilityChange(const JSCallbackInfo& args);
     static void OnNativeEmbedGestureEvent(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
@@ -153,13 +154,12 @@ public:
     static void OnOverrideUrlLoading(const JSCallbackInfo& args);
     static void TextAutosizing(const JSCallbackInfo& args);
     static void EnableNativeVideoPlayer(const JSCallbackInfo& args);
-    static void EnableSmoothDragResize(bool isSmoothDragResizeEnabled);
     static void OnRenderProcessNotResponding(const JSCallbackInfo& args);
     static void OnRenderProcessResponding(const JSCallbackInfo& args);
-    static void SelectionMenuOptions(const JSCallbackInfo& args);
     static void OnViewportFitChanged(const JSCallbackInfo& args);
-    static void OnInterceptKeyboardAttach(const JSCallbackInfo& args);
+    static void SelectionMenuOptions(const JSCallbackInfo& args);
     static void OnAdsBlocked(const JSCallbackInfo& args);
+    static void OnInterceptKeyboardAttach(const JSCallbackInfo& args);
     static void ForceDisplayScrollBar(const JSCallbackInfo& args);
     static void KeyboardAvoidMode(int32_t mode);
     static void EditMenuOptions(const JSCallbackInfo& info);

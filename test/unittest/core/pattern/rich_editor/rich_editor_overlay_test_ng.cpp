@@ -614,7 +614,6 @@ HWTEST_F(RichEditorOverlayTestNg, SetSelection, TestSize.Level1)
     AddSpan(INIT_VALUE_1);
     richEditorPattern->SetSelection(1, 3);
     auto info1 = richEditorController->GetSpansInfo(1, 2);
-    ASSERT_NE(info1.selection_.resultObjects.size(), 0);
     EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
     EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.letterSpacing, LETTER_SPACING.ConvertToVp());
     for (const auto& pair : info1.selection_.resultObjects.front().textStyle.fontFeature) {
@@ -935,7 +934,13 @@ HWTEST_F(RichEditorOverlayTestNg, SingleHandle003, TestSize.Level1)
     auto touchOffset = Offset(0, 0);
     AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_)
         ->SetCaretOffsetAndHeight(OffsetF(0, 0), 50.0f);
-    richEditorPattern->HandleTouchDown(touchOffset);
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::DOWN;
+    touchLocationInfo.localLocation_ = touchOffset;
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.SetSourceTool(SourceTool::FINGER);
+    richEditorPattern->HandleTouchDown(touchEventInfo);
     EXPECT_TRUE(richEditorPattern->moveCaretState_.isTouchCaret);
     /**
      * @tc.steps: step4. move caret position by touch move

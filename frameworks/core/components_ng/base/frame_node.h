@@ -443,10 +443,6 @@ public:
 
     OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
 
-    bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
-
-    RectF GetPaintRectToWindowWithTransform();
-
     OffsetF GetPaintRectCenter(bool checkWindowBoundary = true) const;
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
@@ -480,12 +476,9 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
-    void OnAccessibilityEvent(
-        AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
-
     void MarkNeedRenderOnly();
 
-    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
+    void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
@@ -782,7 +775,6 @@ public:
     {
         return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
     }
-    void ProcessSafeAreaPadding();
 
     bool SkipMeasureContent() const override;
     float GetBaselineDistance() const override;
@@ -826,6 +818,7 @@ public:
     }
 
     virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType);
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     bool IsFirstBuilding() const
     {
@@ -878,10 +871,10 @@ public:
         int64_t elementId, int32_t direction, int64_t offset, Accessibility::AccessibilityElementInfo& output);
     bool TransferExecuteAction(
         int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset);
-    std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
-    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     bool GetMonopolizeEvents() const;
+
+    std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
 
     bool IsWindowBoundary() const
     {
@@ -902,10 +895,15 @@ public:
 
     OffsetF CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp);
 
-    void PaintDebugBoundary(bool flag) override;
     RectF GetRectWithRender();
+    RectF GetRectWithFrame();
     bool CheckAncestorPageShow();
+    void PaintDebugBoundary(bool flag) override;
+    static std::pair<float, float> ContextPositionConvertToPX(
+        const RefPtr<RenderContext>& context, const SizeF& percentReference);
 
+    void AttachContext(PipelineContext* context, bool recursive = false) override;
+    void DetachContext(bool recursive = false) override;
     void SetRemoveCustomProperties(std::function<void()> func)
     {
         if (!removeCustomProperties_) {
@@ -913,13 +911,10 @@ public:
         }
     }
 
+    void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
+
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
     void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
-
-    void AttachContext(PipelineContext* context, bool recursive = false) override;
-    void DetachContext(bool recursive = false) override;
-
-    void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
 
     bool GetIsGeometryTransitionIn() const
     {
@@ -936,15 +931,6 @@ public:
         SetIsGeometryTransitionIn(isGeometryTransitionIn);
         UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
     }
-    static std::pair<float, float> ContextPositionConvertToPX(
-        const RefPtr<RenderContext>& context, const SizeF& percentReference);
-
-    // Notified by render context when any transform attributes updated,
-    // this flag will be used to refresh the transform matrix cache if it's dirty
-    void NotifyTransformInfoChanged()
-    {
-        isLocalRevertMatrixAvailable_ = false;
-    }
 
     void AddPredictLayoutNode(const RefPtr<FrameNode>& node)
     {
@@ -954,13 +940,6 @@ public:
     bool CheckAccessibilityLevelNo() const {
         return false;
     }
-
-    void HasAccessibilityVirtualNode(bool hasAccessibilityVirtualNode)
-    {
-        hasAccessibilityVirtualNode_ = hasAccessibilityVirtualNode;
-    }
-
-    void ProcessAccessibilityVirtualNode();
 
     RectF GetVirtualNodeTransformRectRelativeToWindow()
     {
@@ -975,6 +954,11 @@ public:
         return currentRect;
     }
 
+    void HasAccessibilityVirtualNode(bool hasAccessibilityVirtualNode)
+    {
+        hasAccessibilityVirtualNode_ = hasAccessibilityVirtualNode;
+    }
+
     void SetIsUseTransitionAnimator(bool isUseTransitionAnimator)
     {
         isUseTransitionAnimator_ = isUseTransitionAnimator;
@@ -984,13 +968,8 @@ public:
     {
         return isUseTransitionAnimator_;
     }
-    
-    // this method will check the cache state and return the cached revert matrix preferentially,
-    // but the caller can pass in true to forcible refresh the cache
-    Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
 
-    // apply the matrix to the given point specified by dst
-    static void MapPointTo(PointF& dst, Matrix4& matrix);
+    void ProcessAccessibilityVirtualNode();
     void SetSuggestOpIncMarked(bool flag);
     bool GetSuggestOpIncMarked();
     void SetCanSuggestOpInc(bool flag);
@@ -1007,8 +986,19 @@ public:
     void MarkAndCheckNewOpIncNode();
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth);
-    void GetInspectorValue() override;
-    void NotifyWebPattern(bool isRegister) override;
+    // Notified by render context when any transform attributes updated,
+    // this flag will be used to refresh the transform matrix cache if it's dirty
+    void NotifyTransformInfoChanged()
+    {
+        isLocalRevertMatrixAvailable_ = false;
+    }
+
+    // this method will check the cache state and return the cached revert matrix preferentially,
+    // but the caller can pass in true to forcible refresh the cache
+    Matrix4& GetOrRefreshRevertMatrixFromCache(bool forceRefresh = false);
+
+    // apply the matrix to the given point specified by dst
+    static void MapPointTo(PointF& dst, Matrix4& matrix);
 
     FrameNodeChangeInfoFlag GetChangeInfoFlag()
     {
@@ -1042,8 +1032,16 @@ public:
     {
         dragHitTestBlock_ = dragHitTestBlock;
     }
+    void GetInspectorValue() override;
+    void NotifyWebPattern(bool isRegister) override;
 
-    void NotifyDataChange(int32_t index, int32_t count, int64_t id) const override;
+    void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
+
+    void ChildrenUpdatedFrom(int32_t index);
+    int32_t GetChildrenUpdated() const
+    {
+        return childrenUpdatedFrom_;
+    }
 
 protected:
     void DumpInfo() override;
@@ -1155,9 +1153,9 @@ private:
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
 
-    void NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange);
-
     bool AllowVisibleAreaCheck() const;
+
+    void ResetPredictNodes();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -1165,7 +1163,6 @@ private:
 
     std::list<std::function<void()>> destroyCallbacks_;
     std::function<void()> colorModeUpdateCallback_;
-
     std::function<void(int32_t)> ndkColorModeUpdateCallback_;
     std::function<void(float, float)> ndkFontUpdateCallback_;
     RefPtr<AccessibilityProperty> accessibilityProperty_;
@@ -1226,7 +1223,7 @@ private:
 
     std::string nodeName_;
 
-    ColorMode colorMode_;
+    ColorMode colorMode_ = ColorMode::LIGHT;
 
     bool draggable_ = false;
     bool userSet_ = false;
@@ -1258,8 +1255,6 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
-
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
@@ -1267,6 +1262,7 @@ private:
     std::pair<uint64_t, bool> cachedIsFrameDisappear_ = { 0, false };
     std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;
         RectF lastFrameRect;
@@ -1276,6 +1272,8 @@ private:
     std::list<WeakPtr<FrameNode>> predictLayoutNode_;
     FrameNodeChangeInfoFlag changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
     std::optional<RectF> syncedFramePaintRect_;
+
+    int32_t childrenUpdatedFrom_ = -1;
 
     friend class RosenRenderContext;
     friend class RenderContext;

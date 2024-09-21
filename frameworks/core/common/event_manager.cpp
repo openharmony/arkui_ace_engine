@@ -148,11 +148,13 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
     if (duration >= EVENT_CLEAR_DURATION && !refereeNG_->IsReady()) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee is not ready, force clean gestureReferee.");
+#ifndef IS_RELEASE_VERSION
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0);
         for (auto& item : dumpList) {
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
+#endif
         eventTree_.eventTreeList.clear();
         MockCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
@@ -614,7 +616,7 @@ void EventManager::CheckDownEvent(const TouchEvent& touchEvent)
             touchTestResults_.clear();
             downFingerIds_.clear();
         }
-        downFingerIds_.insert(touchEvent.id);
+        downFingerIds_[touchEvent.id] = touchEvent.originalId;
     }
 }
 
@@ -736,21 +738,25 @@ void EventManager::ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent)
     touchEvent.isMocked = true;
     touchEvent.type = TouchType::CANCEL;
     for (const auto& iter : downFingerIds_) {
-        touchEvent.id = iter;
+        touchEvent.id = iter.first;
         DispatchTouchEvent(touchEvent);
     }
 }
 
 void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
 {
-    downFingerIds_.erase(touchEvent.id);
     // send cancel to all recognizer
     for (const auto& iter : touchTestResults_) {
         touchEvent.id = iter.first;
+        touchEvent.isInterpolated = true;
+        if (downFingerIds_.find(iter.first) != downFingerIds_.end()) {
+            touchEvent.originalId = downFingerIds_[touchEvent.id];
+        }
         DispatchTouchEventToTouchTestResult(touchEvent, iter.second, true);
         refereeNG_->CleanGestureScope(touchEvent.id);
         referee_->CleanGestureScope(touchEvent.id);
     }
+    downFingerIds_.erase(touchEvent.id);
     touchTestResults_.clear();
     refereeNG_->CleanRedundanceScope();
 }
@@ -1406,14 +1412,17 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 {
     if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
-        event.isRotationEvent == false) {
+        !event.isRotationEvent) {
+        axisTestResults_.clear();
         return false;
     }
     for (const auto& axisTarget : axisTestResults_) {
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {
+            axisTestResults_.clear();
             return true;
         }
     }
+    axisTestResults_.clear();
     return true;
 }
 
@@ -2064,7 +2073,7 @@ void EventManager::MockCancelEventAndDispatch(const TouchEvent& touchPoint)
     mockedEvent.isMocked = true;
     mockedEvent.type = TouchType::CANCEL;
     for (const auto& iter : downFingerIds_) {
-        mockedEvent.id = iter;
+        mockedEvent.id = iter.first;
         DispatchTouchEvent(mockedEvent);
     }
 }

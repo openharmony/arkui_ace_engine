@@ -26,14 +26,7 @@ std::string SliderAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto sliderProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderProperty, "");
-    auto value = sliderProperty->GetValue().value_or(0);
-    if (sliderProperty->GetValidSlideRange().has_value()) {
-        auto range = sliderProperty->GetValidSlideRange().value();
-        auto rangeFromValue = range->GetFromValue();
-        auto rangeToValue = range->GetToValue();
-        value = std::clamp(value, rangeFromValue, rangeToValue);
-    }
-    return std::to_string(value);
+    return std::to_string(sliderProperty->GetValue().value_or(0));
 }
 
 AccessibilityValue SliderAccessibilityProperty::GetAccessibilityValue() const

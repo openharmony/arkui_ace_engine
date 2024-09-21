@@ -196,7 +196,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 
 void SwiperPattern::OnIndexChange()
 {
-    auto totalCount = RealTotalCount();
+    auto totalCount = TotalCount();
     if (NonPositive(totalCount)) {
         return;
     }
@@ -459,7 +459,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     auto userSetCurrentIndex = CurrentIndex();
     userSetCurrentIndex = CheckUserSetIndex(userSetCurrentIndex);
     auto oldIndex = GetLoopIndex(oldIndex_);
-    if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != RealTotalCount()) {
+    if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != TotalCount()) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
         if (HasIndicatorNode()) {
             StopIndicatorAnimation();
@@ -474,6 +474,9 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         }
         StartAutoPlay();
         InitArrow();
+        if (IsLoop() && oldIndex != GetLoopIndex(currentIndex_)) {
+            currentIndex_ = oldIndex >= TotalCount() ? 0 : oldIndex;
+        }
     }
     int32_t maxValidIndex = IsLoop() ? RealTotalCount() : TotalCount() - GetDisplayCount() + 1;
     if (userSetCurrentIndex < 0 || userSetCurrentIndex >= maxValidIndex || GetDisplayCount() >= RealTotalCount()) {
@@ -1048,7 +1051,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     contentMainSize_ = algo->GetContentMainSize();
     crossMatchChild_ = algo->IsCrossMatchChild();
     oldIndex_ = currentIndex_;
-    oldChildrenSize_ = RealTotalCount();
+    oldChildrenSize_ = TotalCount();
     needFireCustomAnimationEvent_ = true;
 
     if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
@@ -1204,6 +1207,9 @@ void SwiperPattern::FireAnimationEndEvent(
     CHECK_NULL_VOID(swiperEventHub);
     isInterrupt ? swiperEventHub->FireAnimationEndOnForceEvent(currentIndex, info)
                 : swiperEventHub->FireAnimationEndEvent(currentIndex, info);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
 }
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
@@ -1576,7 +1582,7 @@ void SwiperPattern::SwipeTo(int32_t index)
 
     targetIndex_ = targetIndex;
 
-    UpdateTabIndexAndTabBarAnimationDuration(index);
+    UpdateTabBarAnimationDuration(index);
     if (GetDuration() == 0 || !isVisible_) {
         SwipeToWithoutAnimation(index);
         return;
@@ -1589,17 +1595,12 @@ void SwiperPattern::SwipeTo(int32_t index)
     MarkDirtyNodeSelf();
 }
 
-void SwiperPattern::UpdateTabIndexAndTabBarAnimationDuration(int32_t index)
+void SwiperPattern::UpdateTabBarAnimationDuration(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
-    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
-    CHECK_NULL_VOID(tabsLayoutProperty);
-    tabsLayoutProperty->UpdateIndex(index);
-    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(tabsPattern);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
@@ -4524,7 +4525,6 @@ void SwiperPattern::OnTranslateFinish(
     if (NeedAutoPlay() && isUserFinish_ && !forceStop) {
         PostTranslateTask(delayTime);
     }
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     UpdateItemRenderGroup(false);
 }
 

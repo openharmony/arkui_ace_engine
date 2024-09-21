@@ -96,19 +96,19 @@ public:
         windowPattern->OnDisconnect();
     }
 
+    void OnLayoutFinished() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnLayoutFinished();
+    }
+
     void OnDrawingCompleted() override
     {
         auto windowPattern = windowPattern_.Upgrade();
         CHECK_NULL_VOID(windowPattern);
         windowPattern->OnDrawingCompleted();
     }
-
-    void OnExtensionDied() override {}
-
-    void OnExtensionTimeout(int32_t errorCode) override {}
-
-    void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int64_t uiExtensionIdLevelVec) override {}
 
 private:
     WeakPtr<WindowPattern> windowPattern_;
@@ -179,11 +179,9 @@ void WindowPattern::OnAttachToFrameNode()
     if (!surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
-        surfaceNode->SetBufferAvailableCallback(coldStartCallback_);
+        surfaceNode->SetBufferAvailableCallback(callback_);
         return;
     }
-    CreateSnapshotWindow();
-    AddChild(host, snapshotWindow_, snapshotWindowName_);
     attachToFrameNodeFlag_ = true;
 }
 
@@ -215,7 +213,7 @@ void WindowPattern::CreateAppWindow()
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(appWindow_->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
-        context->SetOpacity(1);
+        surfaceNode->SetVisible(true);
     }
 }
 

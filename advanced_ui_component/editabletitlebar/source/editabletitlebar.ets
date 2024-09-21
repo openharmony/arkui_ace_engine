@@ -50,11 +50,11 @@ enum ItemType {
   LeftIcon,
 }
 
-const PUBLIC_CANCEL = $r('sys.media.ohos_ic_public_cancel');
+const PUBLIC_CANCEL = $r('sys.symbol.xmark');
 
-const PUBLIC_OK = $r('sys.media.ohos_ic_public_ok');
+const PUBLIC_OK = $r('sys.symbol.checkmark');
 
-const PUBLIC_BACK = $r('sys.media.ohos_ic_compnent_titlebar_back');
+const PUBLIC_BACK = $r('sys.symbol.chevron_backward');
 
 const DEFAULT_TITLE_BAR_HEIGHT = 56;
 const DEFAULT_TITLE_PADDING = 2;
@@ -67,6 +67,8 @@ const TEXT_EDITABLE_DIALOG = '18.3fp';
 const IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
+const SYMBOL_SIZE = '25vp';
+const SYMBOL_TITLE_SIZE = '64vp';
 const TITLE_VP: number = 20;
 const SUBTITLE_VP: number = 14;
 
@@ -256,6 +258,7 @@ export struct EditableTitleBar {
         },
         fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
+        useSymbol: true,
       })
     } else {
       ImageMenuItem({
@@ -266,6 +269,7 @@ export struct EditableTitleBar {
         },
         fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
+        useSymbol: true,
       })
     }
   }
@@ -378,6 +382,7 @@ struct EditableTitleBarMenuSection {
             },
             fontSize: this.fontSize,
             attribute: ItemType.Icon,
+            useSymbol: true,
           })
         }
       }
@@ -398,6 +403,7 @@ struct ImageMenuItem {
   minFontSize: number = 1.75;
   maxFontSize: number = 3.2;
   longPressTime: number = 500;
+  useSymbol: boolean = false;
   @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
@@ -412,6 +418,7 @@ struct ImageMenuItem {
       itemEditableDialog: this.item,
       textEditableTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
       fontSize: this.fontSize,
+      useSymbol: this.useSymbol,
     }),
     maskColor: Color.Transparent,
     isModal: true,
@@ -562,15 +569,27 @@ struct ImageMenuItem {
   @Builder
   IconBuilder(): void {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
-      Image(this.item.value)
-        .fillColor(this.editableTitleBarTheme.iconColor)
-        .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
-        .width($r('sys.float.titlebar_icon_width'))
-        .height($r('sys.float.titlebar_icon_height'))
-        .focusable(this.item.isEnabled)
-        .enabled(this.item.isEnabled)
-        .draggable(false)
-        .accessibilityText(this.getAccessibilityReadText())
+      if (this.useSymbol) {
+        SymbolGlyph(this.item.value as Resource)
+          .fontColor([this.editableTitleBarTheme.iconColor])
+          .width($r('sys.float.titlebar_icon_width'))
+          .height($r('sys.float.titlebar_icon_height'))
+          .focusable(this.item.isEnabled)
+          .enabled(this.item.isEnabled)
+          .draggable(false)
+          .fontSize(SYMBOL_SIZE)
+          .accessibilityText(this.getAccessibilityReadText())
+      } else {
+        Image(this.item.value)
+          .fillColor(this.editableTitleBarTheme.iconColor)
+          .matchTextDirection(this.item.value === PUBLIC_BACK ? true : false)
+          .width($r('sys.float.titlebar_icon_width'))
+          .height($r('sys.float.titlebar_icon_height'))
+          .focusable(this.item.isEnabled)
+          .enabled(this.item.isEnabled)
+          .draggable(false)
+          .accessibilityText(this.getAccessibilityReadText())
+      }
     }
     .backgroundButtonStyle()
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))
@@ -589,13 +608,22 @@ struct ImageMenuItem {
   @Builder
   ImageBuilder() {
     Stack({ alignContent: Alignment.Center }) {
-      Image(this.item.value)
-        .width($r('sys.float.titlebar_icon_background_width'))
-        .height($r('sys.float.titlebar_icon_background_height'))
-        .borderRadius($r('sys.float.corner_radius_level10'))
-        .focusable(false)
-        .enabled(this.item.isEnabled)
-        .objectFit(ImageFit.Cover)
+      if (this.useSymbol) {
+        SymbolGlyph(this.item.value as Resource)
+          .width($r('sys.float.titlebar_icon_background_width'))
+          .height($r('sys.float.titlebar_icon_background_height'))
+          .borderRadius($r('sys.float.corner_radius_level10'))
+          .focusable(false)
+          .enabled(this.item.isEnabled)
+      } else {
+        Image(this.item.value)
+          .width($r('sys.float.titlebar_icon_background_width'))
+          .height($r('sys.float.titlebar_icon_background_height'))
+          .borderRadius($r('sys.float.corner_radius_level10'))
+          .focusable(false)
+          .enabled(this.item.isEnabled)
+          .objectFit(ImageFit.Cover)
+      }
 
       Button({ type: ButtonType.Circle })
         .backgroundButtonStyle()
@@ -639,6 +667,7 @@ struct EditableTitleBarDialog {
   screenWidth: number = 640;
   verticalScreenLines: number = 6;
   horizontalsScreenLines: number = 1;
+  useSymbol: boolean = false;
   cancel: () => void = () => {
   }
   confirm: () => void = () => {
@@ -651,14 +680,26 @@ struct EditableTitleBarDialog {
   build() {
     if (this.textEditableTitleBarDialog) {
       Column() {
-        Image(this.itemEditableDialog.value)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .margin({
-            top: $r('sys.float.padding_level24'),
-            bottom: $r('sys.float.padding_level8'),
-          })
-          .fillColor($r('sys.color.icon_primary'))
+        if (this.useSymbol) {
+          SymbolGlyph(this.itemEditableDialog.value as Resource)
+            .width(SYMBOL_TITLE_SIZE)
+            .height(SYMBOL_TITLE_SIZE)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            })
+            .fontSize(SYMBOL_TITLE_SIZE)
+            .fontColor([$r('sys.color.icon_primary')])
+        } else {
+          Image(this.itemEditableDialog.value)
+            .width(IMAGE_SIZE)
+            .height(IMAGE_SIZE)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            })
+            .fillColor($r('sys.color.icon_primary'))
+        }
         Column() {
           Text(this.textEditableTitleBarDialog)
             .fontSize(TEXT_EDITABLE_DIALOG)
@@ -682,10 +723,18 @@ struct EditableTitleBarDialog {
       .borderRadius(($r('sys.float.corner_radius_level10')))
     } else {
       Column() {
-        Image(this.itemEditableDialog.value)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .fillColor($r('sys.color.icon_primary'))
+        if (this.useSymbol) {
+          SymbolGlyph(this.itemEditableDialog.value as Resource)
+            .width(SYMBOL_TITLE_SIZE)
+            .height(SYMBOL_TITLE_SIZE)
+            .fontSize(SYMBOL_TITLE_SIZE)
+            .fontColor([$r('sys.color.icon_primary')])
+        } else {
+          Image(this.itemEditableDialog.value)
+            .width(IMAGE_SIZE)
+            .height(IMAGE_SIZE)
+            .fillColor($r('sys.color.icon_primary'))
+        }
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })

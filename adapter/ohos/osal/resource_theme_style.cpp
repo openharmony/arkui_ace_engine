@@ -75,6 +75,7 @@ static const std::set<std::string> stringAttrs = {
     "section_unfocus_effect_enable",
     "section_unfocus_color",
     "sheet_type",
+    "sheet_bottom",
     "multiple_dialog_display",
     "menu_expand_display",
     "popup_double_border_enable",
@@ -93,8 +94,7 @@ static const std::set<std::string> stringAttrs = {
     "textfield_accessibility_show_password",
     "textfield_accessibility_hide_password",
     "rich_editor_show_handle",
-    "text_show_handle",
-    "textfield_symbol_color"
+    "text_show_handle"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)

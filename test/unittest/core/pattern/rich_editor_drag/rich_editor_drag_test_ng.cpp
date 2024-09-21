@@ -15,8 +15,6 @@
 
 #include "rich_editor_drag_test_ng.h"
 
-#include "frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.h"
-#include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_canvas_image.h"

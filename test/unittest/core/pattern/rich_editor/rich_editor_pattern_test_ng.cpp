@@ -298,44 +298,6 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCloseCustomKeyboard001, T
 }
 
 /**
- * @tc.name: RichEditorPatternTestUpdatePreviewText001
- * @tc.desc: test UpdatePreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestUpdatePreviewText001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    std::string previewTextValue = INIT_VALUE_1;
-    PreviewRange previewRange;
-    previewRange.start = -1;
-    previewRange.end = -1;
-    richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
-
-    previewRange.start = -1;
-    previewRange.end = -1;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
-
-    previewRange.start = 0;
-    previewRange.end = -1;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), false);
-
-    previewRange.start = -1;
-    previewRange.end = 0;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), false);
-
-    previewRange.start = 0;
-    previewRange.end = 0;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
-
-    previewRange.start = richEditorPattern->previewTextRecord_.startOffset;
-    previewRange.end = richEditorPattern->previewTextRecord_.endOffset;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
-}
-
-/**
  * @tc.name: RichEditorPatternTestInsertDiffStyleValueInSpan001
  * @tc.desc: test InsertDiffStyleValueInSpan
  * @tc.type: FUNC

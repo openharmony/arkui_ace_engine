@@ -106,27 +106,6 @@ class VariableUtilV3 {
       meta[aliasProp] = { 'varName': varName, 'aliasName': aliasName, 'deco': deco };
     }
 
-    public static setupConsumeVarsV2(view: ViewV2): boolean {
-      const meta = view && view[ObserveV2.V2_DECO_META];
-      if (!meta) {
-        return;
-      }
-
-      for (const [key, value] of Object.entries(meta)) {
-        // check all entries of this format varName: { deco: '@Provider' | '@Consumer', aliasName: ..... }
-        // do not check alias entries
-        // 'varName' is only in alias entries, see addProvideConsumeVariableDecoMeta
-        if (typeof value === 'object' && value['deco'] === '@Consumer' && !('varName' in value)) {
-          let result = ProviderConsumerUtilV2.findProvider(view, value['aliasName']);
-          if (result && result[0] && result[1]) {
-            ProviderConsumerUtilV2.connectConsumer2Provider(view, key, result[0], result[1]);
-          } else {
-            ProviderConsumerUtilV2.defineConsumerWithoutProvider(view, key);
-          }
-        }
-      }
-    }
-
     /**
     * find a @Provider'ed variable from its nearest ancestor ViewV2.
     * @param searchingAliasName The key name to search for.
@@ -134,7 +113,7 @@ class VariableUtilV3 {
     * and the provider name
     * If root @Component reached without finding, returns undefined.
     */
-    private static findProvider(view: ViewV2, aliasName: string): [ViewV2, string] | undefined {
+    public static findProvider(view: ViewV2, aliasName: string): [ViewV2, string] | undefined {
       let checkView : IView | undefined = view?.getParent();
       const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, '@Provider');
       stateMgmtConsole.debug(`findProvider: Try to connect ${view.debugInfo__()} '@Consumer ${aliasName}' to @Provider counterpart....`);
@@ -155,14 +134,27 @@ class VariableUtilV3 {
       return undefined;
     }
 
-    private static connectConsumer2Provider(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): void {
+   /**
+   * Connects a consumer property of a view (`consumeView`) to a provider property of another view (`provideView`).
+   * This function establishes a link between the consumer and provider, allowing the consumer to access and update
+   * the provider's value directly. If the provider view is garbage collected, attempts to access the provider
+   * property will throw an error.
+   *
+   * @param consumeView - The view object that consumes data from the provider.
+   * @param consumeVarName - The name of the property in the consumer view that will be linked to the provider.
+   * @param provideView - The view object that provides the data to the consumer.
+   * @param provideVarName - The name of the property in the provider view that the consumer will access.
+   *
+   */
+    public static connectConsumer2Provider(consumeView: ViewV2, consumeVarName: string, provideView: ViewV2, provideVarName: string): any {
       const weakView = new WeakRef<ViewV2>(provideView);
       const provideViewName = provideView.constructor?.name;
+      const view = weakView.deref();
+
       Reflect.defineProperty(consumeView, consumeVarName, {
         get() {
           stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} get`);
           ObserveV2.getObserve().addRef(this, consumeVarName);
-          const view = weakView.deref();
           if (!view) {
             const error = `${this.debugInfo__()}: get() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
             stateMgmtConsole.error(error);
@@ -173,7 +165,6 @@ class VariableUtilV3 {
         set(val) {
           // If the object has not been observed, you can directly assign a value to it. This improves performance.
           stateMgmtConsole.propertyAccess(`@Consumer ${consumeVarName} set`);
-          const view = weakView.deref();
           if (!view) {
             const error = `${this.debugInfo__()}: set() on @Consumer ${consumeVarName}: providing @ComponentV2 with @Provider ${provideViewName} no longer exists. Application error.`;
             stateMgmtConsole.error(error);
@@ -190,13 +181,14 @@ class VariableUtilV3 {
         },
         enumerable: true
       });
+      return view[provideVarName];
     }
 
-    private static defineConsumerWithoutProvider(consumeView: ViewV2, consumeVarName: string): void {
+    public static defineConsumerWithoutProvider(consumeView: ViewV2, consumeVarName: string, consumerLocalVal: any): any {
       stateMgmtConsole.debug(`defineConsumerWithoutProvider: ${consumeView.debugInfo__()} @Consumer ${consumeVarName} does not have @Provider counter part, will use local init value`);
 
       const storeProp = ObserveV2.OB_PREFIX + consumeVarName;
-      consumeView[storeProp] = consumeView[consumeVarName]; // use local init value, also as backing store
+      consumeView[storeProp] = consumerLocalVal; // use local init value, also as backing store
       Reflect.defineProperty(consumeView, consumeVarName, {
         get() {
           ObserveV2.getObserve().addRef(this, consumeVarName);
@@ -212,6 +204,7 @@ class VariableUtilV3 {
         },
         enumerable: true
       });
+      return consumeView[storeProp];
     }
   }
 

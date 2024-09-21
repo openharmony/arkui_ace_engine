@@ -218,7 +218,7 @@ public:
     }
     virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag);
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
-    void OnHandleMoveStart(bool isFirst) override
+    void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override
     {
         isHandleDragging_ = true;
     }
@@ -280,6 +280,13 @@ protected:
     void OnHandleScrolling(const WeakPtr<FrameNode>& scrollingNode);
     virtual void UpdateTransformFlag();
     bool CheckHasTransformAttr();
+    bool GetClipHandleViewPort(RectF& rect);
+    virtual void UpdateClipHandleViewPort(RectF& rect) {};
+    bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
+    virtual bool IsClipHandleWithViewPort()
+    {
+        return false;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;

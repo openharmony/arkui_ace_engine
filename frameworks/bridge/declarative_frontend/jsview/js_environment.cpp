@@ -95,6 +95,7 @@ void JSEnvironment::GetFontScale(const JSCallbackInfo& args)
         return;
     }
     auto context = container->GetPipelineContext();
+    CHECK_NULL_VOID(context);
     auto returnValue = JSVal(ToJSValue(context->GetFontScale()));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     args.SetReturnValue(returnPtr);

@@ -39,6 +39,5 @@ ohos_unittest("rosen_test") {
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
-    "window_manager:libwm",
   ]
 }

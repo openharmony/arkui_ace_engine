@@ -60,6 +60,14 @@ void ForEachModelNG::SetNewIds(std::list<std::string>&& newIds)
     node->SetIds(std::move(newIds));
 }
 
+void ForEachModelNG::SetRemovedElmtIds(std::list<int32_t>& removedElmtId)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<ForEachNode>(stack->GetMainElementNode());
+    CHECK_NULL_VOID(node);
+    node->CollectRemovingIds(removedElmtId);
+}
+
 void ForEachModelNG::CreateNewChildStart(const std::string& id)
 {
     auto* stack = NG::ViewStackProcessor::GetInstance();

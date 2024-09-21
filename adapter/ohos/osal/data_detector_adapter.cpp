@@ -47,10 +47,12 @@ void DataDetectorAdapter::GetAIEntityMenu()
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     uiTaskExecutor.PostTask(
-        [&, instanceId = context->GetInstanceId()] {
+        [weak = AceType::WeakClaim(this), instanceId = context->GetInstanceId()] {
             ContainerScope scope(instanceId);
+            auto dataDetectorAdapter = weak.Upgrade();
+            CHECK_NULL_VOID(dataDetectorAdapter);
             TAG_LOGI(AceLogTag::ACE_TEXT, "Get AI entity menu from ai_engine");
-            DataDetectorMgr::GetInstance().GetAIEntityMenu(textDetectResult_);
+            DataDetectorMgr::GetInstance().GetAIEntityMenu(dataDetectorAdapter->textDetectResult_);
         },
         "ArkUITextInitDataDetect");
 }
@@ -106,7 +108,7 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     if (targetNode) {
-        overlayManager->CloseAIEntityMenu(targetNode);
+        overlayManager->CloseAIEntityMenu(targetNode->GetId());
     }
     Container::UpdateCurrent(mainContainerId_);
 

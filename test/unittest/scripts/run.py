@@ -73,7 +73,7 @@ def run_single_test(tests_path, test_suite_name):
     test_suite_path = None
     for root, _, files in os.walk(tests_path):
         for file in files:
-            if file.endswith(test_suite_name):
+            if test_suite_name in file and "." not in file :
                 test_suite_path =  os.path.join(root, test_suite_name)
     if test_suite_path is not None:
         run_command(test_suite_path)
@@ -89,8 +89,7 @@ def run_tests_parallel(test_directory):
     for root, _, files in os.walk(test_directory):
         for file in files:
             test_suite_path = os.path.join(root, file)
-            name, ext = os.path.splitext(file)
-            if ext == "":
+            if "." not in test_suite_path:
                 test_binaries.append(test_suite_path)
     start = time.time()
     with multiprocessing.Pool(processes=64) as pool:

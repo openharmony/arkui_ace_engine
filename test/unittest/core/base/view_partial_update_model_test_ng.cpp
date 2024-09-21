@@ -17,8 +17,9 @@
 #define protected public
 #define private public
 
-#include "base/log/ace_trace.h"
 #include "core/components_ng/base/view_partial_update_model_ng.h"
+
+#include "base/log/ace_trace.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
@@ -66,7 +67,9 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg002, TestSize
     std::string viewIdStr;
     ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
 
-    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") { viewIdStr = viewId; };
+    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") {
+        viewIdStr = viewId;
+    };
 
     NodeInfoPU info = {
         .updateViewIdFunc = std::move(updateViewNodeFunction),
@@ -92,7 +95,9 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg003, TestSize
 
     ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
 
-    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") { viewIdStr = viewId; };
+    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") {
+        viewIdStr = viewId;
+    };
 
     NodeInfoPU info = {
         .updateViewIdFunc = std::move(updateViewNodeFunction),
@@ -119,9 +124,12 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg004, TestSize
     NG::LayoutWrapper* testMeasureFun;
     ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
 
-    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") { viewIdStr = viewId; };
-    auto measureFuncation = [&testMeasureFun](
-                                NG::LayoutWrapper* layoutWrapper = nullptr) { testMeasureFun = layoutWrapper; };
+    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") {
+        viewIdStr = viewId;
+    };
+    auto measureFuncation = [&testMeasureFun](NG::LayoutWrapper* layoutWrapper = nullptr) {
+        testMeasureFun = layoutWrapper;
+    };
 
     NodeInfoPU info = {
         .updateViewIdFunc = std::move(updateViewNodeFunction),
@@ -151,11 +159,15 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg005, TestSize
 
     ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
 
-    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") { viewIdStr = viewId; };
-    auto measureFuncation = [&testMeasureFun](
-                                NG::LayoutWrapper* layoutWrapper = nullptr) { testMeasureFun = layoutWrapper; };
-    auto layoutFuncation = [&testLayoutFunc](
-                               NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
+    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") {
+        viewIdStr = viewId;
+    };
+    auto measureFuncation = [&testMeasureFun](NG::LayoutWrapper* layoutWrapper = nullptr) {
+        testMeasureFun = layoutWrapper;
+    };
+    auto layoutFuncation = [&testLayoutFunc](NG::LayoutWrapper* layoutWrapper = nullptr) {
+        testLayoutFunc = layoutWrapper;
+    };
 
     NodeInfoPU info = {
         .updateViewIdFunc = std::move(updateViewNodeFunction),
@@ -187,13 +199,18 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg006, TestSize
 
     ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
 
-    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") { viewIdStr = viewId; };
-    auto measureFuncation = [&testMeasureFun](
-                                NG::LayoutWrapper* layoutWrapper = nullptr) { testMeasureFun = layoutWrapper; };
-    auto layoutFuncation = [&testLayoutFunc](
-                               NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
-    auto updateNodeFuncation = [&testUpdateNodeFunc](
-                                   const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
+    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") {
+        viewIdStr = viewId;
+    };
+    auto measureFuncation = [&testMeasureFun](NG::LayoutWrapper* layoutWrapper = nullptr) {
+        testMeasureFun = layoutWrapper;
+    };
+    auto layoutFuncation = [&testLayoutFunc](NG::LayoutWrapper* layoutWrapper = nullptr) {
+        testLayoutFunc = layoutWrapper;
+    };
+    auto updateNodeFuncation = [&testUpdateNodeFunc](const RefPtr<AceType>& type = nullptr) {
+        testUpdateNodeFunc = type;
+    };
 
     NodeInfoPU info = {
         .updateNodeFunc = std::move(updateNodeFuncation),
@@ -227,14 +244,21 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg007, TestSize
 
     ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
 
-    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") { viewIdStr = viewId; };
-    auto measureFuncation = [&testMeasureFun](
-                                NG::LayoutWrapper* layoutWrapper = nullptr) { testMeasureFun = layoutWrapper; };
-    auto layoutFuncation = [&testLayoutFunc](
-                               NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
-    auto updateNodeFuncation = [&testUpdateNodeFunc](
-                                   const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
+    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") {
+        viewIdStr = viewId;
+    };
+    auto measureFuncation = [&testMeasureFun](NG::LayoutWrapper* layoutWrapper = nullptr) {
+        testMeasureFun = layoutWrapper;
+    };
+    auto layoutFuncation = [&testLayoutFunc](NG::LayoutWrapper* layoutWrapper = nullptr) {
+        testLayoutFunc = layoutWrapper;
+    };
+    auto updateNodeFuncation = [&testUpdateNodeFunc](const RefPtr<AceType>& type = nullptr) {
+        testUpdateNodeFunc = type;
+    };
+    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> {
+        return nullptr;
+    };
 
     NodeInfoPU info = {
         .renderFunc = renderFunction,
@@ -264,7 +288,7 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg008, TestSize
     const WeakPtr<AceType>& nullNode = nullptr;
     ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
 
-    bool testcustomNode = TestViewPartialUpdateModelNG.MarkNeedUpdate(nullNode);
+    bool testcustomNode =  TestViewPartialUpdateModelNG.MarkNeedUpdate(nullNode);
     EXPECT_FALSE(testcustomNode);
 
     /**
@@ -292,137 +316,8 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg009, TestSize
     const WeakPtr<AceType>& viewNode = nullptr;
     ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
 
-    TestViewPartialUpdateModelNG.FinishUpdate(viewNode, 1, [](const UpdateTask& task) {});
+    TestViewPartialUpdateModelNG.FinishUpdate(viewNode, 1, [] (const UpdateTask& task) {});
     auto stack = NG::ViewStackProcessor::GetInstance()->elementsStack_;
     EXPECT_TRUE(stack.empty());
-}
-
-/**
- * @tc.name: ViewPartialUpdateModelTestNg010
- * @tc.desc: Test the operation of view partial update model ng
- * @tc.type: FUNC
- */
-HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. call the CreateNode function and set info.updateNodeFunc.
-     * @tc.expected: step1. info.updateNodeFunc is not null and return expect value.
-     */
-    std::string viewIdStr;
-    NG::LayoutWrapper* testMeasureFun;
-    NG::LayoutWrapper* testLayoutFunc;
-    WeakPtr<AceType> testUpdateNodeFunc;
-    WeakPtr<AceType> testRenderfunc;
-
-    ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
-
-    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") { viewIdStr = viewId; };
-    auto measureFuncation = [&testMeasureFun](
-                                NG::LayoutWrapper* layoutWrapper = nullptr) { testMeasureFun = layoutWrapper; };
-    auto layoutFuncation = [&testLayoutFunc](
-                               NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
-    auto updateNodeFuncation = [&testUpdateNodeFunc](
-                                   const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
-
-    NodeInfoPU info = {
-        .renderFunc = renderFunction,
-        .updateNodeFunc = std::move(updateNodeFuncation),
-        .updateViewIdFunc = std::move(updateViewNodeFunction),
-        .measureFunc = std::move(measureFuncation),
-        .layoutFunc = std::move(layoutFuncation),
-        .hasMeasureOrLayout = false,
-        .isCustomTitle = true,
-    };
-
-    RefPtr<AceType> customNode = TestViewPartialUpdateModelNG.CreateNode(std::move(info));
-    EXPECT_NE(info.renderFunc, nullptr);
-    EXPECT_TRUE(customNode);
-}
-
-/**
- * @tc.name: ViewPartialUpdateModelTestNg011
- * @tc.desc: Test the operation of view partial update model ng
- * @tc.type: FUNC
- */
-HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg011, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. call the CreateNode function and set info.updateNodeFunc.
-     * @tc.expected: step1. info.updateNodeFunc is not null and return expect value.
-     */
-    std::string viewIdStr;
-    NG::LayoutWrapper* testLayoutFunc;
-    NG::LayoutWrapper* testMeasure;
-    WeakPtr<AceType> testUpdateNodeFunc;
-    WeakPtr<AceType> testRenderfunc;
-
-    ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
-
-    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") { viewIdStr = viewId; };
-    auto layoutFuncation = [&testLayoutFunc](
-                               NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
-    auto updateNodeFuncation = [&testUpdateNodeFunc](
-                                   const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
-    auto measureSizeFunction = [&testMeasure](NG::LayoutWrapper* testMeasureWrapper = nullptr) {
-        testMeasure = testMeasureWrapper;
-    };
-    NodeInfoPU info = {
-        .renderFunc = renderFunction,
-        .updateNodeFunc = std::move(updateNodeFuncation),
-        .updateViewIdFunc = std::move(updateViewNodeFunction),
-        .layoutFunc = std::move(layoutFuncation),
-        .measureSizeFunc = std::move(measureSizeFunction),
-        .hasMeasureOrLayout = true,
-        .isCustomTitle = false,
-    };
-
-    RefPtr<AceType> customNode = TestViewPartialUpdateModelNG.CreateNode(std::move(info));
-    EXPECT_NE(info.renderFunc, nullptr);
-    EXPECT_TRUE(customNode);
-}
-
-/**
- * @tc.name: ViewPartialUpdateModelTestNg012
- * @tc.desc: Test the operation of view partial update model ng
- * @tc.type: FUNC
- */
-HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg012, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. call the CreateNode function and set info.updateNodeFunc.
-     * @tc.expected: step1. info.updateNodeFunc is not null and return expect value.
-     */
-    std::string viewIdStr;
-    NG::LayoutWrapper* testLayoutFunc;
-    NG::LayoutWrapper* testPlaceChildrenFunc;
-    WeakPtr<AceType> testUpdateNodeFunc;
-    WeakPtr<AceType> testRenderfunc;
-
-    ViewPartialUpdateModelNG TestViewPartialUpdateModelNG;
-
-    auto updateViewNodeFunction = [&viewIdStr](std::string viewId = "testViewIdStr") { viewIdStr = viewId; };
-    auto layoutFuncation = [&testLayoutFunc](
-                               NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
-    auto updateNodeFuncation = [&testUpdateNodeFunc](
-                                   const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
-    auto placeChildrenFunction = [&testPlaceChildrenFunc](NG::LayoutWrapper* testPlaceChildrenFuncWrapper = nullptr) {
-        testPlaceChildrenFunc = testPlaceChildrenFuncWrapper;
-    };
-    NodeInfoPU info = {
-        .renderFunc = renderFunction,
-        .updateNodeFunc = std::move(updateNodeFuncation),
-        .updateViewIdFunc = std::move(updateViewNodeFunction),
-        .layoutFunc = std::move(layoutFuncation),
-        .placeChildrenFunc = std::move(placeChildrenFunction),
-        .hasMeasureOrLayout = true,
-        .isCustomTitle = false,
-    };
-
-    RefPtr<AceType> customNode = TestViewPartialUpdateModelNG.CreateNode(std::move(info));
-    EXPECT_NE(info.renderFunc, nullptr);
-    EXPECT_TRUE(customNode);
 }
 } // namespace OHOS::Ace::NG

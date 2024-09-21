@@ -64,9 +64,6 @@ class RichEditorOnIMEInputCompleteModifier extends ModifierWithKey<(value:RichEd
 }
 
 class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
-  constructor(value: CopyOptions) {
-    super(value);
-  }
   static identity: Symbol = Symbol('richEditorCopyOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

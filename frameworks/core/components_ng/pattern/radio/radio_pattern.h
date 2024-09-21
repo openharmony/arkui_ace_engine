@@ -245,6 +245,7 @@ private:
     bool showHoverEffect_ = true;
     bool enabled_ = true;
     std::optional<RadioMakeCallback> makeFunc_;
+
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

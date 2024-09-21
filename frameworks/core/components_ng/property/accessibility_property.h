@@ -49,8 +49,8 @@ using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
-using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
 using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
+using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
@@ -480,6 +480,16 @@ public:
         }
     }
 
+    bool GetAccessibilityFocusState() const
+    {
+        return isAccessibilityFocused_;
+    }
+
+    void SetAccessibilityFocusState(bool state)
+    {
+        isAccessibilityFocused_ = state;
+    }
+
     void SetAccessibilityGroup(bool accessibilityGroup)
     {
         accessibilityGroup_ = accessibilityGroup;
@@ -587,11 +597,9 @@ public:
         }
     }
 
-
     struct HoverTestDebugTraceInfo {
         std::vector<std::unique_ptr<JsonValue>> trace;
     };
-
 
     /*
     * Get path from root to node which hit the hoverPoint.
@@ -729,8 +737,9 @@ protected:
     ActionClickImpl actionClickImpl_;
     ActionLongClickImpl actionLongClickImpl_;
     ActionsImpl actionsImpl_;
-    GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
+    GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
+    bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;
     int32_t childWindowId_ = 0;

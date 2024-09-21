@@ -325,8 +325,7 @@ bool IsNavigationBlurEnabled()
 
 bool IsAcePerformanceMonitorEnabled()
 {
-    return system::GetParameter("const.logsystem.versiontype", "commercial") == "beta" ||
-           system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
+    return system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
 }
 
 bool IsAceCommercialLogEnable()
@@ -431,10 +430,13 @@ bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
 float SystemProperties::dragStartDampingRatio_ = ReadDragStartDampingRatio();
 float SystemProperties::dragStartPanDisThreshold_ = ReadDragStartPanDistanceThreshold();
 uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
+float SystemProperties::fontScale_ = 1.0;
+float SystemProperties::fontWeightScale_ = 1.0;
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
 }
+
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -603,17 +605,13 @@ ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
 ACE_WEAK_SYM float SystemProperties::GetFontWeightScale()
 {
     // Default value of font weight scale is 1.0.
-    std::string prop =
-        "persist.sys.font_wght_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
-    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
+    return fontWeightScale_;
 }
 
 ACE_WEAK_SYM float SystemProperties::GetFontScale()
 {
     // Default value of font size scale is 1.0.
-    std::string prop =
-        "persist.sys.font_scale_for_user" + std::to_string(AceApplicationInfo::GetInstance().GetUserId());
-    return StringUtils::StringToFloat(system::GetParameter(prop, "1.0"));
+    return fontScale_;
 }
 
 void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
@@ -752,7 +750,7 @@ bool SystemProperties::WaterFlowUseSegmentedLayout()
 
 bool SystemProperties::GetGridIrregularLayoutEnabled()
 {
-    return system::GetBoolParameter("persist.ace.grid.irregular.enabled", false);
+    return (system::GetParameter("persist.ace.grid.irregular.enabled", "0") == "1");
 }
 
 bool SystemProperties::GetGridCacheEnabled()
@@ -799,6 +797,11 @@ void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 void SystemProperties::SetInputEventTraceEnabled(bool inputEventTraceEnable)
 {
     traceInputEventEnable_ = inputEventTraceEnable && IsDeveloperModeOn();
+}
+
+void SystemProperties::SetPerformanceMonitorEnabled(bool performanceMonitorEnable)
+{
+    acePerformanceMonitorEnable_ = performanceMonitorEnable;
 }
 
 std::string SystemProperties::GetAtomicServiceBundleName()

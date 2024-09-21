@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,6 +107,7 @@ enum class RecordType { DEL_FORWARD = 0, DEL_BACKWARD = 1, INSERT = 2, UNDO = 3,
 enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
 enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING };
+enum class CaretAffinityPolicy { DEFAULT = 0, UPSTREAM_FIRST, DOWNSTREAM_FIRST };
 const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
     {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
     {{ HandleType::FIRST, SelectorAdjustPolicy::EXCLUDE }, MoveDirection::FORWARD },
@@ -200,6 +201,9 @@ public:
                 return;
             }
             pattern->isModifyingContent_ = false;
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     private:
         WeakPtr<RichEditorPattern> pattern_;
@@ -427,6 +431,7 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
+    void SetCaretPositionWithAffinity(PositionWithAffinity positionWithAffinity);
     bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength() override;
@@ -562,6 +567,7 @@ public:
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
@@ -924,7 +930,7 @@ private:
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown(const Offset& offset);
+    void HandleTouchDown(const TouchEventInfo& info);
     void HandleTouchUp();
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
@@ -1063,7 +1069,8 @@ private:
     void AdjustCursorPosition(int32_t& pos);
     void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
-    bool IsTouchBeforeCaret(int32_t caretPos, const Offset& touchPos);
+    bool IsTouchAtLineEnd(int32_t caretPos, const Offset& textOffset);
+    bool IsTouchBeforeCaret(int32_t caretPos, const Offset& textOffset);
     bool IsClickBoundary(const int32_t position);
 
     bool IsReachTop()
@@ -1177,6 +1184,7 @@ private:
     int32_t caretPosition_ = 0;
     int32_t caretSpanIndex_ = -1;
     long long timestamp_ = 0;
+    CaretAffinityPolicy caretAffinityPolicy_ = CaretAffinityPolicy::DEFAULT;
     OffsetF selectionMenuOffsetByMouse_;
     OffsetF selectionMenuOffsetClick_;
     OffsetF lastClickOffset_;

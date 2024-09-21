@@ -400,12 +400,6 @@ public:
         return nullptr;
     }
 
-    void ChildrenUpdatedFrom(int32_t index);
-    int32_t GetChildrenUpdated() const
-    {
-        return childrenUpdatedFrom_;
-    }
-
     // utility function for adding child to disappearingChildren_
     void AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index = UINT32_MAX, int32_t branchId = -1);
     // utility function for removing child from disappearingChildren_, return true if child is removed
@@ -597,7 +591,7 @@ public:
 
     virtual void SetNodeIndexOffset(int32_t start, int32_t count) {}
 
-    bool IsLayoutSeperately() const
+    bool IsLayoutSeperaely() const
     {
         return layoutSeperately_;
     }
@@ -747,10 +741,24 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
-    virtual void NotifyDataChange(int32_t index, int32_t count, int64_t id) const;
     virtual void GetInspectorValue();
     virtual void NotifyWebPattern(bool isRegister);
     void GetContainerComponentText(std::string& text);
+
+    enum class NotificationType : int32_t {
+        START_CHANGE_POSITION = 0,
+        END_CHANGE_POSITION = 1,
+        START_AND_END_CHANGE_POSITION = 2
+    };
+    /**
+     * @brief For a DataChange happened in child [id], notify the corresponding change position to parent.
+     *
+     * @param changeIdx change index in child [id].
+     * @param count change of item count.
+     * @param id the accessibilityId of child who call this function.
+     * @param notificationType the type of notification.
+     */
+    virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -788,7 +796,7 @@ protected:
     }
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
-    virtual void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr);
+    virtual void OnDetachFromMainTree(bool recursive = false);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
@@ -816,6 +824,14 @@ protected:
 
     PipelineContext* context_ = nullptr;
 
+    /**
+     * @brief Transform the [changeIdx] given by child [id] to corresponding position in [this] node.
+     *
+     * @param changeIdx change index in child [id].
+     * @param id the accessibilityId of child.
+     */
+    int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
+    
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -848,7 +864,6 @@ private:
 
     uint32_t nodeFlag_ { 0 };
 
-    int32_t childrenUpdatedFrom_ = -1;
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;
