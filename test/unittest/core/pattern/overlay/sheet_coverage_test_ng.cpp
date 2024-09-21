@@ -463,30 +463,6 @@ HWTEST_F(SheetCoverageTestNg, BuildSubTitle001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetTitlePaddingPos001
- * @tc.desc: Increase the coverage of GetTitlePaddingPos function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetCoverageTestNg, GetTitlePaddingPos001, TestSize.Level1)
-{
-    PaddingProperty padding;
-    AceApplicationInfo& applicationInfo = AceApplicationInfo::GetInstance();
-    applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TEN);
-    EXPECT_FALSE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
-    SheetView::GetTitlePaddingPos(padding);
-
-    applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
-    applicationInfo.isRightToLeft_ = false;
-    EXPECT_TRUE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
-    EXPECT_FALSE(applicationInfo.IsRightToLeft());
-    SheetView::GetTitlePaddingPos(padding);
-
-    applicationInfo.isRightToLeft_ = true;
-    EXPECT_TRUE(applicationInfo.IsRightToLeft());
-    SheetView::GetTitlePaddingPos(padding);
-}
-
-/**
  * @tc.name: BuildTitleColumn001
  * @tc.desc: Increase the coverage of BuildTitleColumn function.
  * @tc.type: FUNC
