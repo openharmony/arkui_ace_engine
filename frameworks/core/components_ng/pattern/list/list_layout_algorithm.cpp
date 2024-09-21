@@ -830,8 +830,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             startIndex = midIndex;
             endIndex = midIndex;
         }
-        if ((NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
-            (overScrollFeature_ && overScrollTop) || (canOverScroll_ &&
+        if ((NonNegative(currentOffset_) || overScrollFeature_ || (canOverScroll_ &&
             LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_))) &&
             !needLayoutBackward) {
             startIndex = GetLanesFloor(layoutWrapper, startIndex);
@@ -840,6 +839,9 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
                 startPos = midItemMidPos - midItemHeight / 2.0f;
+            }
+            if (overScrollFeature_ && !overScrollTop && GreatNotEqual(contentMainSize_, prevContentMainSize_)) {
+                startPos += contentMainSize_ - prevContentMainSize_;
             }
             if (childrenSize_) {
                 CheckAndMeasureStartItem(layoutWrapper, startIndex, startPos, startItemIsGroup, true);
@@ -851,7 +853,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             }
         } else {
             endIndex = GetLanesCeil(layoutWrapper, endIndex);
-            if (needLayoutBackward || (overScrollFeature_ && !overScrollTop && !NearZero(prevContentMainSize_))) {
+            if (needLayoutBackward) {
                 endPos += contentMainSize_ - prevContentMainSize_;
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
