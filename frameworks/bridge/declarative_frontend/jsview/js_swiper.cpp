@@ -554,7 +554,7 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
-            parseOk = ParseJsDimensionVp(arrowSizeValue, dimension);
+            parseOk = ParseJsDimensionVpNG(arrowSizeValue, dimension);
             swiperArrowParameters.arrowSize =
                 parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
                     ? dimension
@@ -574,7 +574,7 @@ bool JSSwiper::GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& s
         if (swiperArrowParameters.isShowBackground.value()) {
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
-            parseOk = ParseJsDimensionVp(arrowSizeValue, dimension);
+            parseOk = ParseJsDimensionVpNG(arrowSizeValue, dimension);
             swiperArrowParameters.arrowSize =
                 parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
                     ? dimension
