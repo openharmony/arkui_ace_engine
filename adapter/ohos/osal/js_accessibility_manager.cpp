@@ -1439,15 +1439,19 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
 }
 
 namespace {
-    NG::RectF GetFinalRealRect(const RefPtr<NG::FrameNode>& node) 
+    NG::RectF GetFinalRealRect(const RefPtr<NG::FrameNode>& node)
     {
         auto offset = node->GetPositionToWindowWithTransform(false);
         auto offseBottom = node->GetPositionToWindowWithTransform(true);
         return {
             offset.GetX() < offseBottom.GetX() ? offset.GetX() : offseBottom.GetX(),
             offset.GetY() < offseBottom.GetY() ? offset.GetY() : offseBottom.GetY(),
-            offset.GetX() < offseBottom.GetX() ? offseBottom.GetX() - offset.GetX() : offset.GetX() - offseBottom.GetX(),
-            offset.GetY() < offseBottom.GetY() ? offseBottom.GetY() - offset.GetY() : offset.GetY() - offseBottom.GetY()
+            offset.GetX() < offseBottom.GetX()
+                ? offseBottom.GetX() - offset.GetX()
+                : offset.GetX() - offseBottom.GetX(),
+            offset.GetY() < offseBottom.GetY()
+                ? offseBottom.GetY() - offset.GetY()
+                : offset.GetY() - offseBottom.GetY()
             };
     }
 }
@@ -2814,14 +2818,14 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
     }
 }
 
-bool JsAccessibilityManager::CheckDumpHandleEventParams(const std::vector<std::string>& params) 
+bool JsAccessibilityManager::CheckDumpHandleEventParams(const std::vector<std::string>& params)
 {
     if (params.size() > EVENT_DUMP_PARAM_LENGTH_UPPER + 1) {
         DumpLog::GetInstance().Print("Error: params length is illegal!");
         return false;
     }
     if (params[EVENT_DUMP_ORDER_INDEX] != DUMP_ORDER && params[EVENT_DUMP_ORDER_INDEX] != DUMP_INSPECTOR) {
-        DumpLog::GetInstance().Print("Error: Invalid accessibility dump order!");
+        DumpLog::GetInstance().Print("Error: Unrecognized dump command for accessibility!");
         return false;
     }
     return true;

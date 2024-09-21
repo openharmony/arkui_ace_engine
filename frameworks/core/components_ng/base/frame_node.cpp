@@ -3117,7 +3117,7 @@ OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
     CHECK_NULL_RETURN(context, OffsetF());
     auto rect = context->GetPaintRectWithoutTransform();
     OffsetF offset;
-    if (fromBottom == false) {
+    if (!fromBottom) {
         offset = rect.GetOffset();
     } else {
         OffsetF offsetBottom(rect.GetX() + rect.Width(), rect.GetY() + rect.Height());
