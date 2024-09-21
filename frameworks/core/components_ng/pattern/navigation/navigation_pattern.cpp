@@ -2752,6 +2752,10 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
         if (isPopPage) {
             navigationNode->StartDialogtransition(preTopNavDestination, newTopNavDestination, false);
         } else {
+            if (!preTopNavDestination && navigationMode_ == NavigationMode::SPLIT) {
+                // if split mode and push one dialog at the first time, no animation
+                return;
+            }
             navigationNode->StartDialogtransition(preTopNavDestination, newTopNavDestination, true);
         }
         return;
