@@ -1335,6 +1335,12 @@ void UpdateChildrenOfAccessibilityElementInfo(
         for (const auto& item : node->GetChildren(true)) {
             GetFrameNodeChildren(item, children, commonProperty.pageId);
         }
+
+        auto overlayNode = node->GetOverlayNode();
+        if (overlayNode != nullptr) {
+            GetFrameNodeChildren(overlayNode, children, commonProperty.pageId);
+        }
+
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
         if (uiVirtualNode != nullptr) {
@@ -1601,6 +1607,11 @@ void GetChildrenFromFrameNode(const RefPtr<NG::FrameNode>& node,
     } else {
         for (const auto& item : node->GetChildren(true)) {
             GetFrameNodeChildren(item, frameNodeChildren, pageId);
+        }
+
+        auto overlayNode = node->GetOverlayNode();
+        if (overlayNode != nullptr) {
+            GetFrameNodeChildren(overlayNode, frameNodeChildren, pageId);
         }
     }
     while (!frameNodeChildren.empty()) {
