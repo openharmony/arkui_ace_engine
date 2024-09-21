@@ -3657,16 +3657,29 @@ void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
     containerPattern->UpdateTitleInTargetPos(isShow, height);
 }
 
-void PipelineContext::SetContainerWindow(bool isShow)
+void PipelineContext::SetContainerWindow(bool isShow, Dimension contentBorderRadius)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {
         auto window = GetWindow();
         if (window) {
+            CHECK_NULL_VOID(rootNode_);
+            auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildAtIndex(0));
+            CHECK_NULL_VOID(containerNode);
+            auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+            CHECK_NULL_VOID(containerPattern);
+            auto windowRect = window_->GetCurrentWindowRect();
+            RectInt rect;
+            rect.SetRect(0, 0, windowRect.Width(), windowRect.Height());
+            auto isContainerModal = windowModal_ == WindowModal::CONTAINER_MODAL;
+            containerPattern->GetWindowPaintRectWithoutMeasureAndLayout(rect, isContainerModal);
+            OHOS::Rosen::RectF rosenRect = {rect.GetX(), rect.GetY(), rect.Width(), rect.Height()};
+            float value = contentBorderRadius.ConvertToPx();
+            auto rrect = OHOS::Rosen::RRect(rosenRect, value, value);
             auto rsUIDirector = window->GetRSUIDirector();
             if (rsUIDirector) {
                 // set container window show state to render service
-                rsUIDirector->SetContainerWindow(isShow, density_);
+                rsUIDirector->SetContainerWindow(isShow, rrect);
             }
         }
     }
