@@ -261,7 +261,8 @@ public:
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
     static void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
-    static void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
+    static void SetOnGestureRecognizerJudgeBegin(
+        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag);
     static void SetOnTouch(TouchEventFunc&& touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverFunc&& onHoverEventFunc);

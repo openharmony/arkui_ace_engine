@@ -181,7 +181,8 @@ public:
     void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) override
     {}
-    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override {}
+    void SetOnGestureRecognizerJudgeBegin(
+        NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override;
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;

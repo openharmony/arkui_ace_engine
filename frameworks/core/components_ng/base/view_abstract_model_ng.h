@@ -903,9 +903,10 @@ public:
         ViewAbstract::SetShouldBuiltInRecognizerParallelWith(std::move(shouldBuiltInRecognizerParallelWithFunc));
     }
 
-    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override
+    void SetOnGestureRecognizerJudgeBegin(
+        NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override
     {
-        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc), exposeInnerGestureFlag);
     }
 
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override
