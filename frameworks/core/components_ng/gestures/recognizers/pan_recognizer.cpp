@@ -669,9 +669,11 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetSourceTool(lastAxisEvent_.sourceTool);
         info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
         info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+        info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
     } else {
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetSourceTool(lastTouchEvent_.sourceTool);
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
     }
     info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
@@ -680,11 +682,8 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetTiltX(lastTouchEvent_.tiltX.value_or(0.0));
     info.SetTiltY(lastTouchEvent_.tiltY.value_or(0.0));
     info.SetPointerEvent(lastPointEvent_);
-    if (inputEventType_ == InputEventType::AXIS) {
-        info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
-    } else {
-        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
-    }
+    info.SetIsPostEventResult(isPostEventResult_);
+    info.SetPostEventNodeId(lastTouchEvent_.postEventNodeId);
     return info;
 }
 
