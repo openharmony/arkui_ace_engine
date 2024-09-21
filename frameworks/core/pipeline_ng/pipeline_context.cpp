@@ -326,6 +326,29 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     RequestFrame();
 }
 
+void PipelineContext::AddDirtyFreezeNode(FrameNode* node)
+{
+    dirtyFreezeNode_.emplace_back(WeakClaim(node));
+    hasIdleTasks_ = true;
+    RequestFrame();
+}
+
+void PipelineContext::FlushFreezeNode()
+{
+    std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyFreezeNodeSet;
+    auto dirtyFreezeNodes = std::move(dirtyFreezeNode_);
+    dirtyFreezeNode_.clear();
+    for (auto&& weakNode : dirtyFreezeNodes) {
+        auto node = weakNode.Upgrade();
+        if (node) {
+            dirtyFreezeNodeSet.emplace(node);
+        }
+    }
+    for (auto&& node : dirtyFreezeNodeSet) {
+        node->ProcessFreezeNode();
+    }
+}
+
 void PipelineContext::FlushDirtyNodeUpdate()
 {
     CHECK_RUN_ON(UI);
@@ -333,6 +356,9 @@ void PipelineContext::FlushDirtyNodeUpdate()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
     }
+
+    // freeze node unlock before build begin.
+    FlushFreezeNode();
 
     // node api property diff before ets update.
     CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);

@@ -760,6 +760,13 @@ public:
     virtual void NotifyWebPattern(bool isRegister);
     void GetContainerComponentText(std::string& text);
 
+    // Used to mark freeze and block dirty mark.
+    virtual void SetFreeze(bool isFreeze);
+    bool IsFreeze() const
+    {
+        return isFreeze_;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -798,6 +805,10 @@ protected:
     virtual void OnAttachToMainTree(bool recursive = false);
     virtual void OnDetachFromMainTree(bool recursive = false);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
+
+    virtual void onFreezeStateChange() {}
+    virtual void UpdateChildrenFreezeState(bool isFreeze);
+
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
 
@@ -885,6 +896,8 @@ private:
     bool isAccessibilityVirtualNode_ = false;
     WeakPtr<UINode> parentForAccessibilityVirtualNode_;
     bool isFirstAccessibilityVirtualNode_ = false;
+    // the flag to block dirty mark.
+    bool isFreeze_ = false;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
