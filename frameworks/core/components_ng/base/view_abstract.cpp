@@ -4984,4 +4984,17 @@ void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<
     CHECK_NULL_VOID(frameNode);
     frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
 }
+
+void ViewAbstract::AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddCustomProperty(key, value);
+}
+
+void ViewAbstract::RemoveCustomProperty(FrameNode* frameNode, const std::string& key)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->RemoveCustomProperty(key);
+}
+
 } // namespace OHOS::Ace::NG

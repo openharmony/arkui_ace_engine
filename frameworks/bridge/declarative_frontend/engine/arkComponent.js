@@ -4221,10 +4221,13 @@ class ArkComponent {
     return this;
   }
   customProperty(key, value) {
-    const property = new ArkCustomProperty();
-    property.key = key;
-    property.value = value;
-    modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+    let returnBool = getUINativeModule().frameNode.setCustomPropertyModiferByKey(this.nativePtr, key, value);
+    if (!returnBool) {
+      const property = new ArkCustomProperty();
+      property.key = key;
+      property.value = value;
+      modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+    }
     return this;
   }
   systemBarEffect() {
@@ -4829,6 +4832,18 @@ function __getCustomProperty__(nodeId, key) {
 
     if (customProperties) {
       return customProperties.get(key);
+    }
+  }
+
+  return undefined;
+}
+
+function __getCustomPropertyString__(nodeId, key) {
+  if (__elementIdToCustomProperties__.has(nodeId)) {
+    const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+    if (customProperties) {
+      return JSON.stringify(customProperties.get(key));
     }
   }
 

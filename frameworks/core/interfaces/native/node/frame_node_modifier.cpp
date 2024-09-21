@@ -492,6 +492,45 @@ void ResetSystemFontStyleChangeEvent(ArkUINodeHandle node)
     ViewAbstract::SetSystemFontChangeEvent(frameNode, nullptr);
 }
 
+ArkUI_CharPtr getCustomPropertyCapiByKey(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    static std::string capiCustomProperty;
+    capiCustomProperty = frameNode->GetCapiCustomProperty(key);
+    if (capiCustomProperty.empty()) {
+        return nullptr;
+    }
+    return capiCustomProperty.c_str();
+}
+
+void SetCustomPropertyModiferByKey(ArkUINodeHandle node, void* callback, void* getCallback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::function<bool()>* func = reinterpret_cast<std::function<bool()>*>(callback);
+    std::function<std::string(const std::string&)>* getFunc =
+        reinterpret_cast<std::function<std::string(const std::string&)>*>(getCallback);
+    frameNode->SetJSCustomProperty(*func, *getFunc);
+}
+
+void AddCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string keyStr = key;
+    std::string valueStr = value;
+    ViewAbstract::AddCustomProperty(frameNode, keyStr, valueStr);
+}
+
+void RemoveCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string keyStr = key;
+    ViewAbstract::RemoveCustomProperty(frameNode, keyStr);
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -503,7 +542,8 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId,
         GetFrameNodeByKey, GetAttachedFrameNodeById, PropertyUpdate, GetLast, GetFirstUINode, GetLayoutSize,
         GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
-        SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent };
+        SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent, getCustomPropertyCapiByKey,
+        SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty };
     return &modifier;
 }
 
