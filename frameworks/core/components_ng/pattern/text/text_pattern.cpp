@@ -374,6 +374,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
 
 bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)
 {
+    CHECK_NULL_RETURN(urlMouseEventInitialized_, false);
     CHECK_NULL_RETURN(!spans_.empty() && pManager_, false);
     int32_t start = 0;
     for (const auto& item : spans_) {
@@ -1035,6 +1036,9 @@ void TextPattern::URLOnHover(bool isHover)
 
 void TextPattern::HandleUrlMouseEvent(const MouseInfo& info)
 {
+    if (isMousePressed_) {
+        return;
+    }
     RectF textContentRect = contentRect_;
     textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
@@ -1375,6 +1379,7 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
 {
     isMousePressed_ = true;
     leftMousePressed_ = true;
+    ShowShadow({ textOffset.GetX(), textOffset.GetY() }, GetUrlPressColor());
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;
@@ -1392,6 +1397,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     }
     auto oldMouseStatus = mouseStatus_;
     mouseStatus_ = MouseStatus::RELEASED;
+    ShowShadow({ textOffset.GetX(), textOffset.GetY() }, GetUrlHoverColor());
     if (isDoubleClick_) {
         isDoubleClick_ = false;
         isMousePressed_ = false;
@@ -1935,6 +1941,7 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     CHECK_NULL_VOID(pattern);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    isMousePressed_ = false;
     if (status_ == Status::DRAGGING) {
         status_ = Status::NONE;
     }
@@ -1962,6 +1969,7 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    isMousePressed_ = false;
     if (pattern->status_ == Status::DRAGGING) {
         pattern->status_ = Status::NONE;
         pattern->MarkContentChange();
