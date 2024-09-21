@@ -181,10 +181,13 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
     return true;
 }
 
-bool GetTaskExecutor(const RefPtr<UINode>& uiNode, RefPtr<PipelineContext>& pipeline, RefPtr<TaskExecutor>& executor)
+bool GetTaskExecutor(const RefPtr<AceType>& customNode, RefPtr<PipelineContext>& pipeline,
+    RefPtr<TaskExecutor>& executor)
 {
+    auto uiNode = AceType::DynamicCast<UINode>(customNode);
     if (!uiNode) {
-        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! uiNode is nullptr");
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! uiNode is nullptr, "
+        "because customNode is type of %{public}s", AceType::TypeName(customNode));
         return false;
     }
     pipeline = uiNode->GetContextRefPtr();
@@ -268,15 +271,15 @@ void ComponentSnapshot::Create(
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
-    auto uiNode = AceType::DynamicCast<UINode>(customNode);
     RefPtr<PipelineContext> pipeline = nullptr;
     RefPtr<TaskExecutor> executor = nullptr;
-    if (!GetTaskExecutor(uiNode, pipeline, executor)) {
+    if (!GetTaskExecutor(customNode, pipeline, executor)) {
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
     }
     auto node = AceType::DynamicCast<FrameNode>(customNode);
     if (!node) {
+        RefPtr<UINode> uiNode = AceType::DynamicCast<UINode>(customNode);
         stackNode->AddChild(uiNode);
         node = stackNode;
     }
@@ -405,18 +408,22 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
 std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
     const RefPtr<AceType>& customNode, const SnapshotParam& param)
 {
+    if (!customNode) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "CreateSync Internal error! customNode is nullptr");
+        return nullptr;
+    }
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
-    auto uiNode = AceType::DynamicCast<UINode>(customNode);
     RefPtr<PipelineContext> pipeline = nullptr;
     RefPtr<TaskExecutor> executor = nullptr;
-    if (!GetTaskExecutor(uiNode, pipeline, executor)) {
+    if (!GetTaskExecutor(customNode, pipeline, executor)) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! Can't get TaskExecutor!");
         return nullptr;
     }
     auto node = AceType::DynamicCast<FrameNode>(customNode);
     if (!node) {
+        RefPtr<UINode> uiNode = AceType::DynamicCast<UINode>(customNode);
         stackNode->AddChild(uiNode);
         node = stackNode;
     }
