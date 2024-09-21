@@ -210,6 +210,7 @@ public:
     void SetLength(int32_t length);
     int32_t GetLength() const;
     void SetRichEditorDeleteSpans(const RichEditorAbstractSpanResult& deleteSpan);
+    void ResetRichEditorDeleteSpans();
     const std::list<RichEditorAbstractSpanResult>& GetRichEditorDeleteSpans() const;
 
 private:
