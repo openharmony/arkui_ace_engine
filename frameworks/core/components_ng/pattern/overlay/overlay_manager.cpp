@@ -1381,6 +1381,13 @@ void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::functi
         callback(callbackToastId);
     }
     OpenToastAnimation(toastNode, toastInfo.duration);
+    if (toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast DEFAULT");
+    } else if (toastInfo.showMode == NG::ToastShowMode::TOP_MOST) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast TOP_MOST");
+    } else if (toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast SYSTEM_TOP_MOST");
+    }
 }
 
 void OverlayManager::CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback)
