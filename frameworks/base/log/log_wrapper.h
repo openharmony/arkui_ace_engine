@@ -63,10 +63,7 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
         OHOS::Ace::LogDomain::JS_APP, OHOS::Ace::LogLevel::level, OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN,   \
         fmt, ##__VA_ARGS__)
 #endif
-#define PRINT_RELEASE_LOG(level, tag, fmt, ...) \
-    HILOG_IMPL(LOG_ONLY_PRERELEASE, LOG_##level, (tag + ACE_DOMAIN), (OHOS::Ace::g_DOMAIN_CONTENTS_MAP.at(tag)),         \
-            ACE_FMT_PREFIX fmt, OHOS::Ace::LogWrapper::GetBriefFileName(__FILE__),                            \
-            __LINE__ ACE_LOG_ID_WITH_REASON, ##__VA_ARGS__)
+
 #define LOGD(fmt, ...) TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, fmt, ##__VA_ARGS__)
 #define LOGI(fmt, ...) TAG_LOGI(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, fmt, ##__VA_ARGS__)
 #define LOGW(fmt, ...) TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, fmt, ##__VA_ARGS__)
@@ -78,12 +75,6 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define TAG_LOGW(tag, fmt, ...) PRINT_LOG(WARN, tag, fmt, ##__VA_ARGS__)
 #define TAG_LOGE(tag, fmt, ...) PRINT_LOG(ERROR, tag, fmt, ##__VA_ARGS__)
 #define TAG_LOGF(tag, fmt, ...) PRINT_LOG(FATAL, tag, fmt, ##__VA_ARGS__)
-
-#define RELEASE_LOGD(tag, fmt, ...) PRINT_RELEASE_LOG(DEBUG, tag, fmt, ##__VA_ARGS__)
-#define RELEASE_LOGI(tag, fmt, ...) PRINT_RELEASE_LOG(INFO, tag, fmt, ##__VA_ARGS__)
-#define RELEASE_LOGW(tag, fmt, ...) PRINT_RELEASE_LOG(WARN, tag, fmt, ##__VA_ARGS__)
-#define RELEASE_LOGE(tag, fmt, ...) PRINT_RELEASE_LOG(ERROR, tag, fmt, ##__VA_ARGS__)
-#define RELEASE_LOGF(tag, fmt, ...) PRINT_RELEASE_LOG(FATAL, tag, fmt, ##__VA_ARGS__)
 
 #define LOG_DESTROY() LOGI("destroyed")
 #define LOG_FUNCTION() LOGD("function track: %{public}s", __FUNCTION__)
