@@ -33,12 +33,16 @@ void NativeNavigationUtils::ParseBarItems(
         std::string value;
         auto itemValueObject = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
         if (ArkTSUtils::ParseJsString(vm, itemValueObject, value)) {
-            menuItem.text = { 1, value.c_str() };
+            menuItem.text.isSet = 1;
+            menuItem.text.value = new char[value.length() + 1];
+            DeepCopyStringValue(menuItem.text.value, value.length() + 1, value);
         }
         std::string icon;
         auto itemIconObject = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "icon"));
         if (ArkTSUtils::ParseJsMedia(vm, itemIconObject, icon)) {
-            menuItem.icon = { 1, icon.c_str() };
+            menuItem.icon.isSet = 1;
+            menuItem.icon.value = new char[icon.length() + 1];
+            DeepCopyStringValue(menuItem.icon.value, icon.length() + 1, icon);
         }
         auto itemEnabledObject = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "isEnabled"));
         if (itemEnabledObject->IsBoolean()) {
@@ -136,5 +140,22 @@ void NativeNavigationUtils::ParseAndSendFunctionParam(ArkUIRuntimeCallInfo* runt
             actionSendFunc(nativeNode, reinterpret_cast<void*>(&onItemClick), index);
         }
     }
+}
+
+void NativeNavigationUtils::DeepCopyStringValue(char* des, uint32_t desLength, const std::string& src)
+{
+    if (des == nullptr || desLength == 0) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "destination char space allocated failed");
+        return;
+    }
+    if (src.length() == 0) {
+        des[0] = '\0';
+        return;
+    }
+    auto copyedSize = src.copy(des, desLength - 1 < src.length() ? desLength - 1 : src.length());
+    if (copyedSize == 0) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "copy string to destination char failed");
+    }
+    des[copyedSize] = '\0';
 }
 } // namespace OHOS::Ace::NG
