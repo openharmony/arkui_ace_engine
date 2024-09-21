@@ -266,6 +266,8 @@ void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
     }
     DumpPanDirection(swiper.panDirection_);
     DumpDirection(swiper.direction_);
+    swiper.IsDisableSwipe() ? DumpLog::GetInstance().AddDesc("disableSwipe:true")
+                            : DumpLog::GetInstance().AddDesc("disableSwipe:false");
 }
 
 void SwiperHelper::DumpInfoAddPositionDesc(SwiperPattern& swiper)

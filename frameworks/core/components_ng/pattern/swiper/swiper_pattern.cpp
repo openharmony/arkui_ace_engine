@@ -5394,6 +5394,7 @@ void SwiperPattern::UpdateSwiperPanEvent(bool disableSwipe)
     if (!disableSwipe) {
         InitPanEvent(gestureHub);
     } else if (panEvent_) {
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Remove pan event when disable swipe.");
         gestureHub->RemovePanEvent(panEvent_);
         panEvent_.Reset();
         if (isDragging_) {
