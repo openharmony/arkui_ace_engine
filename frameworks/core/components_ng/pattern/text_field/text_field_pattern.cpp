@@ -4184,10 +4184,10 @@ void TextFieldPattern::UltralimitShake()
     CHECK_NULL_VOID(pipelineContext);
     AnimationUtils::Animate(
         option,
-        [context]() {
-            if (context) {
-                context->UpdateTranslateInXY({ 0.0f, 0.0f });
-            }
+        [weak = WeakClaim(context.GetRawPtr())]() {
+            auto context = weak.Upgrade();
+            CHECK_NULL_VOID(context);
+            context->UpdateTranslateInXY({ 0.0f, 0.0f });
         },
         option.GetOnFinishEvent());
 }
@@ -7354,9 +7354,12 @@ void TextFieldPattern::CheckPasswordAreaState()
 void TextFieldPattern::AfterLayoutProcessCleanResponse(
     const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea)
 {
+    CHECK_NULL_VOID(cleanNodeResponseArea);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([cleanNodeResponseArea]() {
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(cleanNodeResponseArea.GetRawPtr())]() {
+        auto cleanNodeResponseArea = weak.Upgrade();
+        CHECK_NULL_VOID(cleanNodeResponseArea);
         cleanNodeResponseArea->Refresh();
         cleanNodeResponseArea->UpdateCleanNode(cleanNodeResponseArea->IsShow());
     });
