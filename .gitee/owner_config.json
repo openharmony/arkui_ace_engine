@@ -24,6 +24,7 @@
             "https://gitee.com/piggyguy",
             "https://gitee.com/zhaojian2021",
             "https://gitee.com/benb365",
+            "https://gitee.com/zhou-chaobo",
         ],
         "https://gitee.com/arkui_architecture": [
             "https://gitee.com/sunfei2021",
@@ -139,6 +140,10 @@
         },
         "https://gitee.com/zhaojian2021": {
             "info": "[事件手势 zhaojian]",
+            "group": "https://gitee.com/arkuievent"
+        },
+        "https://gitee.com/zhou-chaobo": {
+            "info": "[事件手势 zhouchaobo]",
             "group": "https://gitee.com/arkuievent"
         },
         "https://gitee.com/benb365": {
