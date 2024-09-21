@@ -895,7 +895,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
         ACE_SCOPED_TRACE("drag: handling for custom builder");
-        TAG_LOGI(AceLogTag::ACE_DRAG, "CustomNode exist, get thumbnail.");
         StartDragForCustomBuilder(info, pipeline, frameNode, dragDropInfo, event);
         return;
     }
@@ -2134,6 +2133,7 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask(
             [pipeline, info, gestureEventHubPtr, frameNode, dragDropInfo, event]() {
+                TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail finished, start drag.");
                 CHECK_NULL_VOID(gestureEventHubPtr);
                 CHECK_NULL_VOID(frameNode);
                 gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);

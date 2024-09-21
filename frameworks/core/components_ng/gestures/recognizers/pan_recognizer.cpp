@@ -267,8 +267,9 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d up, state: %{public}d", event.touchEventId,
-        event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+        "Id:%{public}d, pan %{public}d up, state: %{public}d, currentFingers: %{public}d, fingers: %{public}d",
+        event.touchEventId, event.id, refereeState_, currentFingers_, fingers_);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
     }
