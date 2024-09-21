@@ -23,6 +23,9 @@ namespace {
 constexpr uint32_t DELAY_TIME_FOR_IMAGE_DATA_CLEAN = 30000;
 constexpr char MEMORY_IMAGE_HEAD[] = "memory://";
 
+constexpr uint32_t MAX_SIZE_FOR_EACH_IMAGE = 3000000;
+constexpr uint32_t MAX_NUM_OF_IMAGE = 8;
+
 } // namespace
 
 std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const std::string& name, size_t dataSize)
@@ -82,8 +85,14 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
         auto iter = sharedImageMap_.find(name);
         if (iter != sharedImageMap_.end()) {
             iter->second = std::move(sharedImage);
-        } else {
+        } else if(sharedImage.size() <= MAX_SIZE_FOR_EACH_IMAGE) {
+            if (sharedImageMap_.size() >= MAX_NUM_OF_IMAGE) {
+                sharedImageMap_.erase(sharedImageMap_.begin());
+            }
             sharedImageMap_.emplace(name, std::move(sharedImage));
+        } else {
+            LOGW("image size is too big");
+            return;
         }
         auto taskExecutor = taskExecutor_.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
@@ -109,7 +118,6 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
                         provider->UpdateData(std::string(MEMORY_IMAGE_HEAD).append(name), imageDataIter->second);
                     }
                 }
-                sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
             },
             TaskExecutor::TaskType::UI, "ArkUIImageAddSharedImageData");
 }
