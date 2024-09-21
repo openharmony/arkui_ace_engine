@@ -149,6 +149,11 @@ public:
 
     void UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
         const RefPtr<TabBarPattern>& tabBarPattern, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index);
+    
+    void SetOnInnerGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+    {
+        // todo
+    }
 
 private:
     void OnAttachToFrameNode() override;
