@@ -1278,7 +1278,7 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
 
 void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
-    if (config == nullptr) {
+    if (!config) {
         return;
     }
     TAG_LOGD(AceLogTag::ACE_WINDOW, "StoreConfiguration %{public}s", config->GetName().c_str());
@@ -1292,11 +1292,7 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     }
 
     auto string2float = [](const std::string& str) {
-        try {
-            return std::stof(str);
-        } catch (...) {
-            return (float)1.0;
-        }
+        return std::stof(str);
     };
     auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
     if (!fontScale.empty()) {
