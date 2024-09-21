@@ -570,6 +570,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     SetAccessibilityClearAction();
     SetAccessibilityPasswordIconAction();
+    SetAccessibilityUnitAction();
     return true;
 }
 
@@ -581,6 +582,7 @@ void TextFieldPattern::SetAccessibilityPasswordIconAction()
         auto node = passwordArea->GetFrameNode();
         CHECK_NULL_VOID(node);
         auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+        textAccessibilityProperty->SetAccessibilityLevel("yes");
         CHECK_NULL_VOID(textAccessibilityProperty);
         textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
     }
@@ -594,6 +596,7 @@ void TextFieldPattern::SetAccessibilityClearAction()
             auto stackNode = cleanNodeResponseArea->GetFrameNode();
             CHECK_NULL_VOID(stackNode);
             auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
+            textAccessibilityProperty->SetAccessibilityLevel("yes");
             CHECK_NULL_VOID(textAccessibilityProperty);
             auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
@@ -602,6 +605,17 @@ void TextFieldPattern::SetAccessibilityClearAction()
                               (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
             textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelImageText() : "");
         }
+    }
+}
+
+void TextFieldPattern::SetAccessibilityUnitAction()
+{
+    if (unitNode_ && responseArea_) {
+        auto unitNode = AceType::DynamicCast<FrameNode>(unitNode_);
+        CHECK_NULL_VOID(unitNode);
+        auto unitAccessibilityProperty = unitNode->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(unitAccessibilityProperty);
+        unitAccessibilityProperty->SetAccessibilityLevel("yes");
     }
 }
 
@@ -6608,6 +6622,11 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void TextFieldPattern::SetAccessibilityAction()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityGroup(true);
     SetAccessibilityActionOverlayAndSelection();
     SetAccessibilityActionGetAndSetCaretPosition();
     SetAccessibilityScrollAction();
