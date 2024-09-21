@@ -102,9 +102,9 @@ public:
     TextMetrics GetMeasureTextMetrics(const PaintState& state, const std::string& text) override;
 
     // All interfaces that only the 'CanvasRenderingContext2D' has.
-    void GetWidth(RefPtr<AceType>& canvasPattern, double& width) override;
-    void GetHeight(RefPtr<AceType>& canvasPattern, double& height) override;
-    void SetTransferFromImageBitmap(RefPtr<AceType>& canvasPattern, RefPtr<AceType> offscreenCPattern) override;
+    void GetWidth(double& width) override;
+    void GetHeight(double& height) override;
+    void SetTransferFromImageBitmap(RefPtr<AceType> offscreenCPattern) override;
 
 private:
     RefPtr<CanvasTaskPool> pattern_;

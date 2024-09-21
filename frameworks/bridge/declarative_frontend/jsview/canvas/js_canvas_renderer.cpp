@@ -889,7 +889,6 @@ void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
     }
 
     BitmapMeshInfo bitmapMeshInfo;
-    bitmapMeshInfo.pool = canvasPattern_;
     bitmapMeshInfo.offscreenPattern = OffscreenPattern;
     bitmapMeshInfo.mesh = mesh;
     bitmapMeshInfo.column = column;
@@ -1563,6 +1562,14 @@ void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
     isInitializeShadow_ = false;
     isOffscreenInitializeShadow_ = false;
     renderingContext2DModel_->Reset();
+}
+
+void JSCanvasRenderer::ResetPaintState()
+{
+    std::vector<PaintState>().swap(savePaintState_);
+    paintState_ = PaintState();
+    isInitializeShadow_ = false;
+    isOffscreenInitializeShadow_ = false;
 }
 
 Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
