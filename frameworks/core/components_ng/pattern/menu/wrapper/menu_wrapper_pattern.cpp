@@ -678,6 +678,7 @@ RefPtr<FrameNode> MenuWrapperPattern::GetMenuChild(const RefPtr<UINode>& node)
     while (child) {
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             auto customNode = DynamicCast<CustomNode>(child);
+            CHECK_NULL_RETURN(customNode, nullptr);
             customNode->Render();
         } else if (child->GetTag() == V2::MENU_ETS_TAG) {
             menuChild = DynamicCast<FrameNode>(child);
