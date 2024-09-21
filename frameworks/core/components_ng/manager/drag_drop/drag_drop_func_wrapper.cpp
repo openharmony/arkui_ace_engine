@@ -223,6 +223,7 @@ int32_t CheckStartAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> 
 
 int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction)
 {
+    CHECK_NULL_RETURN(dragAction, -1);
     auto pipelineContext = PipelineContext::GetContextByContainerId(dragAction->instanceId);
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto manager = pipelineContext->GetDragDropManager();
@@ -266,7 +267,6 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     if (dragAction->dragState == DragAdapterState::SENDING) {
         dragAction->dragState = DragAdapterState::SUCCESS;
         InteractionInterface::GetInstance()->SetDragWindowVisible(true);
-        auto pipelineContext = container->GetPipelineContext();
         pipelineContext->OnDragEvent(
             { dragAction->x, dragAction->y }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
         NG::DragDropFuncWrapper::DecideWhetherToStopDragging(

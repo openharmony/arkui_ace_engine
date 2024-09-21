@@ -160,7 +160,7 @@ void EventHub::SetCustomerOnDragFunc(DragFuncType dragFuncType, OnDragFunc&& onD
             customerOnDrop_ = std::move(onDragFunc);
             break;
         default:
-            LOGW("unsuport dragFuncType");
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Unsupported DragFuncType");
             break;
     }
 }
@@ -213,7 +213,7 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
             break;
         }
         default:
-            LOGW("unsuport DragFuncType");
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Unsupported DragFuncType");
             break;
     }
 }
@@ -276,6 +276,7 @@ bool EventHub::IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 
 void EventHub::HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
 {
+    CHECK_NULL_VOID(info);
     if (IsFireOnDrop(info)) {
         FireOnDrop(info, extraParams);
     } else {

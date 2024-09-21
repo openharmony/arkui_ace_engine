@@ -59,7 +59,7 @@ constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
 constexpr size_t STR_BUFFER_SIZE = 1024;
 constexpr int32_t PARAMETER_NUM = 2;
-constexpr int32_t argCount3 = 3;
+constexpr int32_t ARG_COUNT_3 = 3;
 constexpr int32_t SOURCE_TYPE_MOUSE = 1;
 constexpr int32_t MOUSE_POINTER_ID = 1001;
 constexpr int32_t SOURCE_TOOL_PEN = 1;
@@ -79,8 +79,8 @@ enum class ParameterType { CUSTOMBUILDER, DRAGITEMINFO, DRAGITEMINFO_ARRAY, MIX,
 // the context of drag controller
 struct DragControllerAsyncCtx {
     napi_env env = nullptr;
-    size_t argc = 3;
-    napi_value argv[3] { nullptr };
+    size_t argc = ARG_COUNT_3;
+    napi_value argv[ARG_COUNT_3] { nullptr };
     napi_ref callbackRef = nullptr;
     napi_deferred deferred = nullptr;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
@@ -194,16 +194,13 @@ public:
     static napi_value On(napi_env env, napi_callback_info info)
     {
         TAG_LOGI(AceLogTag::ACE_DRAG, "drag action On function called.");
-        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
-        CHECK_NULL_RETURN(jsEngine, nullptr);
-
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         CHECK_NULL_RETURN(scope, nullptr);
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
-        NAPI_ASSERT(env, (argc == 2 && thisVar != nullptr && cb != nullptr), "Invalid arguments");
+        NAPI_ASSERT(env, (argc == ARG_COUNT_2 && thisVar != nullptr && cb != nullptr), "Invalid arguments");
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, cb, &valueType);
         if (valueType != napi_function) {
@@ -233,6 +230,9 @@ public:
     static napi_value Off(napi_env env, napi_callback_info info)
     {
         TAG_LOGI(AceLogTag::ACE_DRAG, "drag action Off function called.");
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(env, &scope);
+        CHECK_NULL_RETURN(scope, nullptr);
         napi_value thisVar = nullptr;
         napi_value cb = nullptr;
         size_t argc = ParseArgs(env, info, thisVar, cb);
@@ -244,11 +244,12 @@ public:
             }
             dragAction->cbList_.clear();
         } else {
-            NAPI_ASSERT(env, (argc == 2 && dragAction != nullptr && cb != nullptr), "Invalid arguments");
+            NAPI_ASSERT(env, (argc == ARG_COUNT_2 && dragAction != nullptr && cb != nullptr), "Invalid arguments");
             napi_valuetype valueType = napi_undefined;
             napi_typeof(env, cb, &valueType);
             if (valueType != napi_function) {
                 NapiThrow(env, "Check param failed", ERROR_CODE_PARAM_INVALID);
+                napi_close_handle_scope(env, scope);
                 return nullptr;
             }
             auto iter = dragAction->FindCbList(cb);
@@ -257,15 +258,13 @@ public:
                 dragAction->cbList_.erase(iter);
             }
         }
+        napi_close_handle_scope(env, scope);
         return nullptr;
     }
 
     static napi_value StartDrag(napi_env env, napi_callback_info info)
     {
         TAG_LOGI(AceLogTag::ACE_DRAG, "drag action StartDrag function called.");
-        auto jsEngine = EngineHelper::GetCurrentEngineSafely();
-        CHECK_NULL_RETURN(jsEngine, nullptr);
-
         napi_escapable_handle_scope scope = nullptr;
         napi_open_escapable_handle_scope(env, &scope);
         CHECK_NULL_RETURN(scope, nullptr);
@@ -318,8 +317,8 @@ private:
 
     static size_t ParseArgs(napi_env& env, napi_callback_info& info, napi_value& thisVar, napi_value& cb)
     {
-        size_t argc = 2;
-        napi_value argv[argCount2] = { 0 };
+        size_t argc = ARG_COUNT_2;
+        napi_value argv[ARG_COUNT_2] = { 0 };
         void* data = nullptr;
         napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
         if (argc == 0) {
@@ -388,7 +387,7 @@ DragControllerAsyncCtx::~DragControllerAsyncCtx()
 bool IsExecutingWithDragAction(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 {
     CHECK_NULL_RETURN(asyncCtx, false);
-    return (asyncCtx->isArray && asyncCtx->argc == 2);
+    return (asyncCtx->isArray && asyncCtx->argc == ARG_COUNT_2);
 }
 
 napi_value CreateCallbackErrorValue(napi_env env, int32_t errCode, const std::string& errMsg = "")
@@ -496,13 +495,14 @@ void CallBackForJs(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, napi_value 
 }
 
 void GetCallBackDataForJs(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const DragNotifyMsg& dragNotifyMsg,
-    const DragStatus dragStatus, napi_value& result)
+    const DragStatus dragStatus)
 {
     CHECK_NULL_VOID(asyncCtx);
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(asyncCtx->env, &scope);
-    napi_get_undefined(asyncCtx->env, &result);
     auto resultCode = dragNotifyMsg.result;
+    napi_value result = nullptr;
+    napi_get_undefined(asyncCtx->env, &result);
     napi_create_object(asyncCtx->env, &result);
     napi_value eventNapi = nullptr;
     napi_value globalObj = nullptr;
@@ -601,8 +601,7 @@ void HandleSuccess(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const DragN
     taskExecutor->PostSyncTask(
         [asyncCtx, dragNotifyMsg, dragStatus]() {
             CHECK_NULL_VOID(asyncCtx);
-            napi_value dragAndDropInfoValue;
-            GetCallBackDataForJs(asyncCtx, dragNotifyMsg, dragStatus, dragAndDropInfoValue);
+            GetCallBackDataForJs(asyncCtx, dragNotifyMsg, dragStatus);
         },
         TaskExecutor::TaskType::JS, "ArkUIDragHandleSuccess");
 }
@@ -619,14 +618,14 @@ void HandleFail(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t errorC
     if (hasHandle) {
         return;
     }
-    napi_value result[2] = { nullptr };
+    napi_value result[PARAMETER_NUM] = { nullptr };
     result[0] = CreateCallbackErrorValue(asyncCtx->env, errorCode, errMsg);
     if (asyncCtx->callbackRef) {
         napi_value ret = nullptr;
         napi_value napiCallback = nullptr;
         napi_get_reference_value(asyncCtx->env, asyncCtx->callbackRef, &napiCallback);
         napi_create_object(asyncCtx->env, &result[1]);
-        napi_call_function(asyncCtx->env, nullptr, napiCallback, 2, result, &ret);
+        napi_call_function(asyncCtx->env, nullptr, napiCallback, PARAMETER_NUM, result, &ret);
         napi_delete_reference(asyncCtx->env, asyncCtx->callbackRef);
     } else {
         napi_reject_deferred(asyncCtx->env, asyncCtx->deferred, result[0]);
@@ -647,8 +646,7 @@ void HandleDragEnd(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const DragN
     taskExecutor->PostSyncTask(
         [asyncCtx, dragNotifyMsg]() {
             CHECK_NULL_VOID(asyncCtx);
-            napi_value dragAndDropInfoValue;
-            GetCallBackDataForJs(asyncCtx, dragNotifyMsg, DragStatus::ENDED, dragAndDropInfoValue);
+            GetCallBackDataForJs(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
         },
         TaskExecutor::TaskType::JS, "ArkUIDragHandleDragEnd");
 }
@@ -796,10 +794,7 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         napi_close_handle_scope(asyncCtx->env, scope);
         return;
     }
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(asyncCtx->env, &scope);
     HandleSuccess(asyncCtx, DragNotifyMsg {}, DragStatus::STARTED);
-    napi_close_handle_scope(asyncCtx->env, scope);
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     SetIsDragging(container, true);
     TAG_LOGI(AceLogTag::ACE_DRAG, "msdp start drag successfully");
@@ -1483,7 +1478,7 @@ bool CheckAndParseParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::
 {
     // Check the number of the argument
     CHECK_NULL_RETURN(asyncCtx, false);
-    if ((asyncCtx->argc != 2) && (asyncCtx->argc != argCount3)) {
+    if ((asyncCtx->argc != ARG_COUNT_2) && (asyncCtx->argc != ARG_COUNT_3)) {
         errMsg = "The number of parameters must be 2 or 3.";
         return false;
     }
@@ -1500,7 +1495,7 @@ bool CheckAndParseParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::
 void CreateCallback(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, napi_value* result)
 {
     CHECK_NULL_VOID(asyncCtx);
-    if (asyncCtx->argc == argCount3) {
+    if (asyncCtx->argc == ARG_COUNT_3) {
         // Create the JsCallback
         napi_create_reference(asyncCtx->env, asyncCtx->argv[2], 1, &asyncCtx->callbackRef);
     }
