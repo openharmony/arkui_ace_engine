@@ -17,7 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-
+#include "core/components/common/properties/text_style.h"
 #include "base/geometry/dimension.h"
 
 using namespace testing;
@@ -314,5 +314,21 @@ HWTEST_F(DimensionTest, DimensionTest008, TestSize.Level1)
     EXPECT_DOUBLE_EQ(dimension.ConvertToPxWithSize(5.0), DEFAULT_DOUBLE * 5.0);
     dimension.SetUnit(DimensionUnit::PX);
     EXPECT_DOUBLE_EQ(dimension.ConvertToPxWithSize(5.0), DEFAULT_DOUBLE);
+}
+
+/**
+ * @tc.name: DimensionTest009
+ * @tc.desc: ConvertToPxDistribute().
+ * @tc.type: FUNC
+ */
+HWTEST_F(DimensionTest, DimensionTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Test the function ConvertToPxDistribute of the class Dimension.
+     * @tc.expected: The return values are equal to DEFAULT_DOUBLE * size.
+     */
+    TextStyle textStyle;
+    auto defaultFp = DIMENSION_FP.ConvertToPxDistribute(textStyle.GetMaxFontScale(), textStyle.GetMinFontScale());
+    EXPECT_DOUBLE_EQ(defaultFp, DEFAULT_DOUBLE);
 }
 } // namespace OHOS::Ace

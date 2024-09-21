@@ -84,12 +84,16 @@ public:
         RefPtr<DotIndicatorPaintMethod>& paintMethod,
         RefPtr<SwiperLayoutProperty>& swiperLayoutProperty)
     {
+        CHECK_NULL_VOID(swiperPattern);
+        CHECK_NULL_VOID(paintMethod);
+        CHECK_NULL_VOID(swiperLayoutProperty);
         paintMethod->SetAxis(swiperPattern->GetDirection());
         paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
         paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
         paintMethod->SetHorizontalAndRightToLeft(swiperLayoutProperty->GetNonAutoLayoutDirection());
         paintMethod->SetItemCount(swiperPattern->DisplayIndicatorTotalCount());
+        paintMethod->SetTotalItemCount(swiperPattern->TotalCount());
         paintMethod->SetSwipeByGroup(swiperLayoutProperty->GetSwipeByGroup().value_or(false));
         paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
         gestureState_ = swiperPattern->GetGestureState();
@@ -165,6 +169,7 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetIndicatorInteractive(bool isInteractive);
 
 private:

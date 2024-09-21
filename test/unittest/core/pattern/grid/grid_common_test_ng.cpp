@@ -14,6 +14,8 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
@@ -1282,9 +1284,13 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone(frameNode_);
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentHeight_, 0.f);
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentHeight_, 0.f);
 
     /**
      * @tc.steps: step2. When grid is Scrollable
@@ -1293,12 +1299,16 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
     ClearOldNodes();
     model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    CreateFixedItems(20);
+    CreateFixedItems(40);
     CreateDone(frameNode_);
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -GRID_HEIGHT);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(-pattern_->GetGridLayoutInfo().currentHeight_, -GRID_HEIGHT);
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(-pattern_->GetGridLayoutInfo().currentHeight_, 0.f);
 }
 
 /**
@@ -1325,5 +1335,70 @@ HWTEST_F(GridCommonTestNg, GridDistributed001, TestSize.Level1)
      */
     pattern_->OnRestoreInfo(ret);
     EXPECT_EQ(pattern_->gridLayoutInfo_.jumpIndex_, 1);
+}
+
+/**
+ * @tc.name: GridModelNg001
+ * @tc.desc: Test Grid property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, GridModelNg001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. InitScroller.
+     * @tc.
+     */
+    auto scrollController = AceType::MakeRefPtr<ScrollControllerBase>();
+    ASSERT_NE(scrollController, nullptr);
+    auto proxy = AceType::MakeRefPtr<ScrollProxy>();
+    ASSERT_NE(proxy, nullptr);
+    auto frameNode = AceType::RawPtr(frameNode_);
+    ASSERT_NE(frameNode, nullptr);
+    GridModelNG::InitScroller(frameNode, scrollController, proxy);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->GetScrollBarProxy(), nullptr);
+    EXPECT_NE(pattern->GetOrCreatePositionController(), nullptr);
+
+    /**
+     * @tc.steps: step2. SetLayoutOptions.
+     * @tc.
+     */
+    GridLayoutOptions gridlayoutoptions;
+    GridModelNG::SetLayoutOptions(frameNode, gridlayoutoptions);
+    auto property = frameNode->GetLayoutPropertyPtr<GridLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetLayoutOptionsValue(), gridlayoutoptions);
+}
+
+/**
+ * @tc.name: GridItemModelNg001
+ * @tc.desc: Test GridItem property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, GridItemModelNg001, TestSize.Level1)
+{
+    auto node = GridItemModelNG::CreateFrameNode(-1);
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step1. SetGridItemStyle.
+     * @tc.
+     */
+    GridItemStyle griditemstyle = GridItemStyle::PLAIN;
+    GridItemModelNG::SetGridItemStyle(AceType::RawPtr(node), griditemstyle);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto radius = renderContext->GetBorderRadiusValue(BorderRadiusProperty());
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto theme = themeManager->GetTheme<GridItemTheme>();
+    ASSERT_NE(theme, nullptr);
+    EXPECT_EQ(theme->GetGridItemBorderRadius(), radius);
 }
 } // namespace OHOS::Ace::NG

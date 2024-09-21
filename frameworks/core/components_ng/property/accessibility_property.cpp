@@ -254,7 +254,7 @@ bool AccessibilityProperty::HoverTestRecursive(
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);
-    if (hitSelf && shouldSearchSelf) {
+    if (hitSelf && shouldSearchSelf && IsAccessibilityFocusable(node)) {
         hitTarget = true;
         path.push_back(node);
     }
@@ -371,6 +371,14 @@ static const std::set<std::string> TAGS_FOCUSABLE = {
     V2::EMBEDDED_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG
 };
+
+bool AccessibilityProperty::IsAccessibilityFocusableTag(const std::string &tag)
+{
+    if (TAGS_FOCUSABLE.find(tag) != TAGS_FOCUSABLE.end()) {
+        return true;
+    }
+    return false;
+}
 
 bool AccessibilityProperty::IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node,
     std::unique_ptr<JsonValue>& info)

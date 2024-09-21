@@ -13,20 +13,10 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_text_input_modifier.h"
-#include <functional>
 
-#include "base/geometry/dimension.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/pipeline/base/element_register.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "interfaces/native/node/node_model.h"
 
@@ -593,10 +583,10 @@ void SetTextInputPlaceholderFont(ArkUINodeHandle node, const struct ArkUIPlaceho
         } else {
             fontSize.SetValue(placeholderFont->size->number);
         }
+        fontSize.SetUnit(static_cast<DimensionUnit>(placeholderFont->size->unit));
     }
-    fontSize.SetUnit(static_cast<DimensionUnit>(placeholderFont->size->unit));
     font.fontSize = fontSize;
-    if (placeholderFont->weight != nullptr && std::string(placeholderFont->weight) != "") {
+    if (placeholderFont->weight != nullptr && !std::string(placeholderFont->weight).empty()) {
         font.fontWeight = Framework::ConvertStrToFontWeight(placeholderFont->weight);
     } else if (placeholderFont->weightEnum > -1) {
         font.fontWeight = static_cast<FontWeight>(placeholderFont->weightEnum);
@@ -1751,11 +1741,16 @@ void SetTextInputSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCa
     NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
         onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+        TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(*onCreateMenu));
+    } else {
+        TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
+        TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(*onMenuItemClick));
+    } else {
+        TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
-    TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
 }
 
 void ResetTextInputSelectionMenuOptions(ArkUINodeHandle node)
@@ -1764,7 +1759,23 @@ void ResetTextInputSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
+    TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
+}
+
+void SetTextInputWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto widthValue = std::string(value);
+    TextFieldModelNG::SetWidth(frameNode, widthValue);
+}
+
+void ResetTextInputWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ClearWidth(frameNode);
 }
 } // namespace
 namespace NodeModifier {
@@ -1819,7 +1830,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputShowKeyBoardOnFocus, ResetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines,
         GetTextInputNumberOfLines, ResetTextInputNumberOfLines, SetTextInputMargin, ResetTextInputMargin,
         SetTextInputCaret, GetTextInputController, GetTextInputMargin, SetTextInputEnablePreviewText,
-        ResetTextInputEnablePreviewText, SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions };
+        ResetTextInputEnablePreviewText, SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions,
+        SetTextInputWidth, ResetTextInputWidth };
     return &modifier;
 }
 

@@ -79,6 +79,14 @@ public:
     Scrollable(const ScrollPositionCallback& callback, Axis axis);
     ~Scrollable() override;
 
+    enum class AnimationState {
+        SPRING,
+        SNAP,
+        FRICTION,
+        TRANSITION, // in between two animations, i.e. from friction to spring
+        IDLE,
+    };
+
     static void SetVelocityScale(double sVelocityScale);
     static double GetVelocityScale();
     static void SetFriction(double sFriction);
@@ -89,17 +97,17 @@ public:
 
     bool IsMotionStop() const
     {
-        return isSpringAnimationStop_ && isFrictionAnimationStop_ && !moved_;
+        return state_ != AnimationState::SPRING && state_ != AnimationState::FRICTION && !moved_;
     }
 
     bool IsSpringMotionRunning() const
     {
-        return !isSpringAnimationStop_;
+        return state_ == AnimationState::SPRING;
     }
 
     bool IsDragging() const
     {
-        return isTouching_ && !isFrictionAnimationStop_;
+        return isTouching_ && state_ == AnimationState::FRICTION;
     }
 
     void SetAxis(Axis axis);
@@ -124,6 +132,14 @@ public:
         if (panRecognizerNG_) {
             panRecognizerNG_->SetCoordinateOffset(offset);
         }
+    }
+
+    /**
+     * @param useListSnap true if runnning SnapAnimation for ListPattern, false if for ScrollPattern
+     */
+    void SetSnapMode(bool useListSnap)
+    {
+        useListSnap_ = useListSnap;
     }
 
     void OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
@@ -395,7 +411,7 @@ public:
 
     void StopSnapController()
     {
-        if (!isSnapAnimationStop_) {
+        if (state_ == AnimationState::SNAP) {
             StopSnapAnimation();
         }
     }
@@ -465,11 +481,16 @@ public:
         nestedScrolling_ = nestedScrolling;
     }
 
+    bool GetNestedScrolling() const
+    {
+        return nestedScrolling_;
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
     void ProcessScrollMotion(double position);
-    void ProcessScrollSnapMotion(double position);
+    void ProcessListSnapMotion(double position);
     void FixScrollMotion(float position, float initVelocity);
     void ExecuteScrollBegin(double& mainDelta);
     double ComputeCap(int dragCount);
@@ -520,6 +541,7 @@ private:
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
+    bool useListSnap_ = false; // set to true to use Snap animation of ListPattern
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;
     // The tag of UINode
@@ -564,25 +586,21 @@ private:
     DragFRCSceneCallback dragFRCSceneCallback_;
 
     uint64_t lastVsyncTime_ = 0;
+    AnimationState state_ = AnimationState::IDLE;
     RefPtr<NodeAnimatablePropertyFloat> frictionOffsetProperty_;
     float finalPosition_ = 0.0f;
     float lastPosition_ = 0.0f;
     float initVelocity_ = 0.0f;
     float frictionVelocity_ = 0.0f;
-    bool isFrictionAnimationStop_ = true;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
-    bool isSpringAnimationStop_ = true;
     bool skipRestartSpring_ = false; // set to true when need to skip repeated spring animation
     uint32_t updateSnapAnimationCount_ = 0;
     uint32_t springAnimationCount_ = 0;
 
     RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
-    bool isSnapAnimationStop_ = true;
-    bool isSnapScrollAnimationStop_ = true;
     float snapVelocity_ = 0.0f;
     float endPos_ = 0.0;
-    bool isSnapAnimation_ = false;
     bool nestedScrolling_ = false;
 };
 

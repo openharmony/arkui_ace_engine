@@ -15,22 +15,13 @@
 
 #include "core/components_ng/pattern/select/select_model_ng.h"
 
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
-#include "core/components_ng/pattern/select/select_pattern.h"
-#include "core/components_ng/pattern/select/select_properties.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = select->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -483,7 +474,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     auto pattern = select->GetPattern<SelectPattern>();
     
     CHECK_NULL_VOID(pattern);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         pattern->SetSelectDefaultTheme();
@@ -522,8 +513,8 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     }
 
     // delete menu when select node destroy
-    auto destructor = [id = select->GetId()]() {
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto destructor = [id = select->GetId(), frameNode]() {
+        auto* pipeline = frameNode->GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);

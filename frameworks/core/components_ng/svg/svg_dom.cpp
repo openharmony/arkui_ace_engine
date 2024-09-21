@@ -15,14 +15,9 @@
 
 #include "frameworks/core/components_ng/svg/svg_dom.h"
 
-#include "include/core/SkClipOp.h"
-
-#include "base/utils/utils.h"
 #include "core/components_ng/svg/parse/svg_fe_blend.h"
 #include "core/components_ng/svg/parse/svg_fe_flood.h"
-#include "core/components_ng/svg/svg_context.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
-#include "frameworks/core/components_ng/render/drawing.h"
 #include "frameworks/core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
@@ -54,7 +49,6 @@ namespace {
 
 const char DOM_SVG_STYLE[] = "style";
 const char DOM_SVG_CLASS[] = "class";
-
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
@@ -113,6 +107,7 @@ RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const ImageSourceInfo& 
     if (ret) {
         return svgDom;
     }
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "CreateSvgDom Failed(Reason:Svg parse error).");
     return nullptr;
 }
 
@@ -131,7 +126,6 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
     svgSize_ = svg->GetSize();
     viewBox_ = svg->GetViewBox();
     svgContext_->SetRootViewBox(viewBox_);
-    root_->InitStyle(SvgBaseAttribute());
     return true;
 }
 
@@ -151,6 +145,9 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
     }
     RefPtr<SvgNode> node = TAG_FACTORIES[elementIter].value();
     CHECK_NULL_RETURN(node, nullptr);
+    if (AceType::InstanceOf<SvgAnimation>(node)) {
+        isStatic_.store(false);
+    }
     node->SetContext(svgContext_);
     node->SetImagePath(path_);
     ParseAttrs(dom, xmlNode, node);
@@ -271,37 +268,48 @@ void SvgDom::ControlAnimation(bool play)
 
 bool SvgDom::IsStatic()
 {
-    return svgContext_->GetAnimatorCount() == 0;
+    return isStatic_;
 }
 
 void SvgDom::SetAnimationOnFinishCallback(const std::function<void()>& onFinishCallback)
 {
-    if (IsStatic() || !root_) {
-        return;
-    }
-    svgContext_->InitAnimatorNeedFinishCnt();
-    onFinishCallback_ = std::move(onFinishCallback);
-    auto AnimatorOnFinishCallback = [weakSvgDom = AceType::WeakClaim(this)]() {
-        auto svgDom = weakSvgDom.Upgrade();
-        CHECK_NULL_VOID(svgDom);
-        auto svgContext = svgDom->svgContext_;
-        if (svgContext && !svgContext->ReleaseAndGetAnimatorNeedFinishCnt()) {
-            svgDom->onFinishCallback_();
-        }
-    };
+    CHECK_NULL_VOID(svgContext_);
+    svgContext_->SetOnAnimationFinished(onFinishCallback);
+}
 
-    root_->PushAnimatorOnFinishCallback(AnimatorOnFinishCallback);
+std::string SvgDom::GetDumpInfo()
+{
+    if (svgContext_) {
+        return svgContext_->GetDumpInfo().ToString();
+    }
+    return "";
+}
+
+void SvgDom::InitStyles()
+{
+    CHECK_NULL_VOID(root_);
+    if (!isStyleInited_) {
+        isStyleInited_ = true;
+        root_->InitStyle(SvgBaseAttribute());
+    }
 }
 
 void SvgDom::DrawImage(
     RSCanvas& canvas, const ImageFit& imageFit, const Size& layout)
 {
-    CHECK_NULL_VOID(root_);
+    if (!root_ || !svgContext_) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Svg DrawImage. root:%{public}d svgContext_:%{public}d",
+            !!root_, !!svgContext_);
+        return;
+    }
     root_->SetIsRootNode(true);
+    InitStyles();
     canvas.Save();
     // viewBox scale and imageFit scale
     FitImage(canvas, imageFit, layout);
     FitViewPort(layout);
+    svgContext_->CreateDumpInfo(SvgDumpInfo(svgContext_->GetContentSize(),
+        svgContext_->GetCurrentTimeString()));
     // draw svg tree
     if (GreatNotEqual(smoothEdge_, 0.0f)) {
         root_->SetSmoothEdge(smoothEdge_);
@@ -327,6 +335,9 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
         Size svgContentSize;
         SvgUtils::CalculateSvgConentSize(svgContentSize, layout_, svgSize_, viewBox_);
         SvgFitConvertor::ApplyFit(imageFit, canvas, layout_, svgContentSize);
+        if (svgContext_) {
+            svgContext_->SetContentSize(svgContentSize);
+        }
     }
 }
 

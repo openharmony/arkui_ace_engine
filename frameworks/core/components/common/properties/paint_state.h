@@ -90,7 +90,7 @@ struct ImageData {
     int32_t dirtyY = 0;
     int32_t dirtyWidth = 0;
     int32_t dirtyHeight = 0;
-    std::vector<Color> data;
+    std::vector<uint32_t> data;
 };
 
 struct CanvasImage {
@@ -176,6 +176,13 @@ enum class PaintStyle {
 
 class PaintState {
 public:
+    PaintState() = default;
+    PaintState(TextAlign textAlign, TextDirection textDirection, const Dimension& size)
+        : textAlign_(textAlign), textDirection_(textDirection)
+    {
+        textStyle_.SetFontSize(size);
+    }
+
     const Color& GetColor() const
     {
         return color_;

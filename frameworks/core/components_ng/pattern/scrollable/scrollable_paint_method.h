@@ -23,7 +23,9 @@ class ACE_EXPORT ScrollablePaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ScrollablePaintMethod, NodePaintMethod)
 public:
     ScrollablePaintMethod() = default;
-    ScrollablePaintMethod(bool vertical) : vertical_(vertical) {}
+    ScrollablePaintMethod(bool vertical, bool isReverse, bool isVerticalReverse = false)
+        : vertical_(vertical), isReverse_(isReverse), isVerticalReverse_(isVerticalReverse)
+    {}
     ~ScrollablePaintMethod() override = default;
 
 
@@ -32,23 +34,30 @@ public:
         overlayRenderContext_ = overlayRenderContext;
     }
 
-    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading = 0.0f)
+    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading = 0.0f, float startPercent = 0.0f,
+        float endPercent = 1.0f)
     {
         isFadingTop_ = isFadingTop;
         isFadingBottom_ = isFadingBottom;
         percentFading_ = percentFading;
+        startPercent_ = startPercent;
+        endPercent_ = endPercent;
     }
 
     void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext);
 
 protected:
     bool vertical_ = false;
+    bool isReverse_ = false;
+    bool isVerticalReverse_ = false;
 
 private:
     RefPtr<RenderContext> overlayRenderContext_;
     bool isFadingTop_ = false;
     bool isFadingBottom_ = false;
     float percentFading_ = 0.0f;
+    float startPercent_ = 0.0f;
+    float endPercent_ = 1.0f;
     
 };
 } // namespace OHOS::Ace::NG

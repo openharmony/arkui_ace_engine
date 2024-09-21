@@ -21,8 +21,6 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "base/log/ace_trace.h"
 
 namespace OHOS::Ace::NG {
 RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
@@ -192,8 +190,7 @@ void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
     canvas.AttachPen(pen);
     float midPosX = offset.GetX() + caretWidth / 2;
     float startPosY = offset.GetY();
-    float endPosY = LessOrEqual(offset.GetY() + caretHeight, contentRect_.value().Bottom())
-                        ? offset.GetY() + caretHeight : contentRect_.value().Bottom();
+    float endPosY = startPosY + caretHeight;
     float roundCapRadius = caretWidth / 2;
     canvas.DrawLine(RSPoint(midPosX, startPosY + roundCapRadius), RSPoint(midPosX, endPosY - roundCapRadius));
     canvas.DetachPen();
@@ -204,6 +201,8 @@ void RichEditorOverlayModifier::PaintScrollBar(DrawingContext& context)
 {
     auto scrollBarOverlayModifier = scrollBarOverlayModifier_.Upgrade();
     CHECK_NULL_VOID(scrollBarOverlayModifier);
+    auto pattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(!pattern || pattern->GetBarDisplayMode() != DisplayMode::OFF);
     scrollBarOverlayModifier->onDraw(context);
 }
 
@@ -221,22 +220,14 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
     auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(richEditorPattern);
     auto contentRect = richEditorPattern->GetTextContentRect();
-    if (!contentRect.IsEmpty()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
-        CHECK_NULL_VOID(richEditorTheme);
-        auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
-        if (contentRect.Height() < defaultCaretHeight) {
-            contentRect.SetHeight(defaultCaretHeight);
-        }
-        drawingContext.canvas.ClipRect(ToRSRect(contentRect), RSClipOp::INTERSECT);
-    }
+
+    drawingContext.canvas.ClipRect(ToRSRect(contentRect), RSClipOp::INTERSECT);
     PaintCaret(drawingContext);
     PaintPreviewTextDecoration(drawingContext);
     SetSelectedColor(selectedBackgroundColor_->Get());
     TextOverlayModifier::onDraw(drawingContext);
     drawingContext.canvas.Restore();
+
     PaintScrollBar(drawingContext);
     PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
 }

@@ -15,21 +15,7 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
 
-#include <algorithm>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -70,8 +56,6 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
     auto width = defaultWidth_ - 2 * horizontalPadding_;
     auto height = defaultHeight_ - 2 * verticalPadding_;
     auto size = SizeF(width, height);
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
     size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     if (!NearEqual(size.Width(), size.Height())) {
         auto length = std::min(size.Width(), size.Height());
@@ -151,7 +135,6 @@ void CheckBoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);

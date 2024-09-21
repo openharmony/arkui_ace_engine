@@ -83,6 +83,10 @@ public:
     }
 
     void InvalidateRender();
+
+    void OverlayRender();
+
+    void ForegroundRender();
     
     void SetInvalidateRenderImpl(std::function<void()>&& impl)
     {

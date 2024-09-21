@@ -18,12 +18,7 @@
 #ifdef FLUTTER_2_5
 #include "ace_shell/shell/common/window_manager.h"
 #endif
-#include "core/common/container.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/image/image_render_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

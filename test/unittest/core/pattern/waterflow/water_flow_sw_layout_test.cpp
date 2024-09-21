@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "water_flow_item_maps.h"
 #include "water_flow_test_ng.h"
 
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
-
-#define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#undef private
 
 namespace OHOS::Ace::NG {
 class WaterFlowSWTest : public WaterFlowTestNg {
@@ -233,10 +231,6 @@ HWTEST_F(WaterFlowSWTest, ChangeTemplate001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Calling the ScrollToIndex interface to set values to 20 and true.
-     * @tc.expected: pattern_->targetIndex_ is 20
-     */
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetFooter(GetDefaultHeaderBuilder());
@@ -253,18 +247,21 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info_->startIndex_, 45);
-    EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f);
     EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f);
+    EXPECT_EQ(info_->startIndex_, 45);
+    EXPECT_EQ(GetChildY(frameNode_, 45), -100.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f); // changed after refill
 
     child = GetChildFrameNode(frameNode_, 40);
     child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(10.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 45);
-    EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f);
-    EXPECT_FALSE(child->IsActive());
-    EXPECT_FALSE(info_->idxToLane_.count(40));
+    EXPECT_EQ(GetChildY(frameNode_, 45), -100.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 46), -50.0f); // doesn't affect current layout
+    UpdateCurrentOffset(500.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 40), 10.0f); // changed after refill
 
     // update footer
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
@@ -279,11 +276,10 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -150.000000 EndPos: 850.000000 Items [69 71 74 75 78 79 ] }");
-    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -50.000000 EndPos: 650.000000 Items [70 72 73 76 77 ] }");
-    EXPECT_EQ(GetChildY(frameNode_, 80), 650.0f);
-    EXPECT_EQ(info_->startIndex_, 69);
-    EXPECT_EQ(GetChildY(frameNode_, 70), -150.0f);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -101.000000 EndPos: 799.000000 Items [69 70 73 74 77 78 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -1.000000 EndPos: 799.000000 Items [71 72 75 76 79 ] }");
+    EXPECT_EQ(GetChildY(frameNode_, 0), 799.0f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
 }
 
 /**
@@ -326,7 +322,6 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
     }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_11);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
     EXPECT_EQ(GetChildY(frameNode_, 3), 325.0f);
 
@@ -338,7 +333,6 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
     section.itemsCount += 4;
     section.crossCount = 3;
     secObj->ChangeData(1, 1, { section });
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 5.0f);
@@ -352,7 +346,6 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
     section.itemsCount -= 4;
     section.crossCount = 2;
     secObj->ChangeData(1, 1, { section });
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     for (int i = 0; i < 4; ++i) {
         frameNode_->RemoveChildAtIndex(3);
     }
@@ -593,7 +586,6 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
     }
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_10);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
 
     EXPECT_FALSE(info_->IsMisaligned());
@@ -808,7 +800,6 @@ HWTEST_F(WaterFlowSWTest, ResetSections001, TestSize.Level1)
     CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
 
     UpdateCurrentOffset(-205.0f);
@@ -839,7 +830,6 @@ HWTEST_F(WaterFlowSWTest, ChangeLayoutMode001, TestSize.Level1)
     CreateWaterFlowItems(60);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_5);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
 
     UpdateCurrentOffset(-205.0f);
@@ -904,6 +894,32 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateLanesIndex001
+ * @tc.desc: Test the limit of UpdateLanesIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, UpdateLanesIndex001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_5);
+    CreateDone();
+
+    UpdateCurrentOffset(-1000.0f);
+    EXPECT_EQ(info_->startIndex_, 13);
+    EXPECT_EQ(info_->endIndex_, 17);
+    info_->newStartIndex_ = 15;
+    info_->BeginUpdate();
+    info_->UpdateLanesIndex(17);
+    EXPECT_EQ(info_->StartIndex(), 15);
+    EXPECT_EQ(info_->EndIndex(), 19);
+    EXPECT_FALSE(info_->idxToLane_.count(13));
+}
+
+/**
  * @tc.name: NotifyDataChange002
  * @tc.desc: Test the return value of NotifyDataChange when updating the section in segment layout.
  * @tc.type: FUNC
@@ -916,7 +932,6 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     CreateWaterFlowItems(45);
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, SECTION_10);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     CreateDone();
 
     UpdateCurrentOffset(-1000.0f);
@@ -933,7 +948,6 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     secObj->ChangeData(2, 2, newSections);
     AddItems(2);
     info_->NotifyDataChange(5, 2);
-    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
     EXPECT_EQ(info_->newStartIndex_, 13);
 
     /**
@@ -1017,6 +1031,68 @@ HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Refresh002
+ * @tc.desc: Test WaterFlow nested in refresh. Currently have different friction from TOP_DOWN mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Refresh002, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().SetTicks(1);
+    MockAnimationManager::GetInstance().Reset();
+    RefreshModelNG refreshModel;
+    refreshModel.Create();
+    auto refreshNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(3);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-100.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -19.849327);
+
+    EXPECT_TRUE(pattern_->OutBoundaryCallback());
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -38.809074);
+
+    MockAnimationManager::GetInstance().TickByVelocity(-100.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -138.80908);
+    // swipe in the opposite direction
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(100.f);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -91.843094);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.0f);
+    MockAnimationManager::GetInstance().TickByVelocity(1000.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 800);
+    MockAnimationManager::GetInstance().Tick();
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    // can't enter the refreshing status when refresh updates scroll offset by animation source
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+}
+
+/**
  * @tc.name: Illegal001
  * @tc.desc: Update Section with empty sections.
  * @tc.type: FUNC
@@ -1064,5 +1140,4 @@ HWTEST_F(WaterFlowSWTest, Illegal001, TestSize.Level1)
     EXPECT_EQ(info_->segmentCache_.size(), 9);
     EXPECT_EQ(info_->margins_.size(), 7);
 }
-
 } // namespace OHOS::Ace::NG

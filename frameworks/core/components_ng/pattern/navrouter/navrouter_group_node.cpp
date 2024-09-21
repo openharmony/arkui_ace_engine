@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -161,6 +159,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
     } else if (navDestination) {
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
+        navDestination->SetFromNavrouterAndNoRouteInfo(true);
         auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
         if (shallowBuilder && navRouteMode != NavRouteMode::PUSH) {
             shallowBuilder->MarkIsExecuteDeepRenderDone(false);

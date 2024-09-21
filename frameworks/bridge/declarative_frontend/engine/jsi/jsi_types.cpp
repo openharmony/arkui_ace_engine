@@ -370,6 +370,7 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
 {
     JS_CALLBACK_DURATION();
     auto vm = GetEcmaVM();
+    panda::JsiFastNativeScope fastNativeScope(vm);
     LocalScope scope(vm);
     panda::TryCatch trycatch(vm);
     bool traceEnabled = false;
@@ -439,7 +440,7 @@ JsiRef<JsiValue> JsiCallbackInfo::operator[](size_t index) const
 
 JsiRef<JsiObject> JsiCallbackInfo::This() const
 {
-    auto obj = JsiObject { info_->GetThisRef() };
+    auto obj = JsiObject { info_->GetVM(), info_->GetThisRef() };
     auto ref = JsiRef<JsiObject>(obj);
     return ref;
 }

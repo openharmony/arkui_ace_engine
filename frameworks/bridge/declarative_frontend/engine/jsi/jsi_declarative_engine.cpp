@@ -84,6 +84,10 @@ extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
 extern const char _binary_arkTheme_abc_start[];
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+extern const char _binary_jsPreload_abc_start[];
+extern const char _binary_jsPreload_abc_end[];
+#endif
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
@@ -106,9 +110,9 @@ const std::string OHMURL_START_TAG = "@bundle:";
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.z.so";
 #endif
 const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
@@ -199,8 +203,13 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
 {
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
     int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
+#else
+    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsPreload_abc_start));
+    int32_t codeLength = _binary_jsPreload_abc_end - _binary_jsPreload_abc_start;
+#endif
     return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
@@ -594,6 +603,18 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     // preload requireNative
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     JSMock::PreloadWorkerRequireNative(arkRuntime, global);
+}
+
+void JsiDeclarativeEngineInstance::ResetModulePreLoadFlag()
+{
+    isModulePreloaded_ = false;
+    isModuleInitialized_ = false;
+}
+
+void JsiDeclarativeEngineInstance::PrepareForResetModulePreLoadFlag()
+{
+    ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(nullptr);
+    JsiDeclarativeEngine::ResetNamedRouterRegisterMap();
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
@@ -2488,6 +2509,11 @@ std::string JsiDeclarativeEngine::GetPagePath(const std::string& url)
     return "";
 }
 
+void JsiDeclarativeEngine::ResetNamedRouterRegisterMap()
+{
+    namedRouterRegisterMap_.clear();
+}
+
 std::string JsiDeclarativeEngine::GetFullPathInfo(const std::string& url)
 {
     auto iter = routerPathInfoMap_.find(url);
@@ -2520,6 +2546,7 @@ void JsiDeclarativeEngine::SetContext(int32_t instanceId, NativeReference* nativ
     }
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!arkRuntime || !arkRuntime->GetEcmaVm()) {
+        napi_close_handle_scope(reinterpret_cast<napi_env>(GetNativeEngine()), scope);
         return;
     }
     JAVASCRIPT_EXECUTION_SCOPE_STATIC;

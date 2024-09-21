@@ -62,6 +62,11 @@ class ComputedV2 {
         ObserveV2.getObserve().addRef(this, propertyKey);
         return ObserveV2.autoProxyObject(this, cachedProp);
       },
+      set(_) {
+        const error = `@Computed ${propertyKey} is readonly, cannot set value for it`;
+        stateMgmtConsole.applicationError(error);
+        throw new Error(error);
+      },
       enumerable: true
     });
 
@@ -118,7 +123,7 @@ class AsyncAddComputedV2 {
       .then(AsyncAddComputedV2.run)
       .catch(error => {
         stateMgmtConsole.applicationError(`Exception caught in @Computed ${name}`, error);
-        throw error;
+        _arkUIUncaughtPromiseError(error);
       });
     }
     AsyncAddComputedV2.computedVars.push({target: target, name: name});

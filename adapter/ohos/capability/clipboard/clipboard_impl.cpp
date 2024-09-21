@@ -347,7 +347,9 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
             }
             std::string resText;
             for (const auto& pasteDataRecord : pasteData.AllRecords()) {
-                clip->ProcessPasteDataRecord(pasteDataRecord, resText);
+                if (clip->ProcessPasteDataRecord(pasteDataRecord, resText)) {
+                    break;
+                }
             }
             if (resText.empty()) {
                 TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardTextData fail from MiscServices");
@@ -364,11 +366,11 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
         TaskExecutor::TaskType::BACKGROUND, "ArkUIClipboardGetTextDataAsync");
 }
 
-void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
+bool ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::PasteDataRecord>& pasteDataRecord,
     std::string& resText)
 {
     if (pasteDataRecord == nullptr) {
-        return;
+        return false;
     }
     TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "mimeType:%{public}s", pasteDataRecord->GetMimeType().c_str());
     if (pasteDataRecord->GetHtmlText() != nullptr) {
@@ -377,7 +379,7 @@ void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
         auto spanStr = toSpan.ToSpanString(*htmlText);
         if (spanStr) {
             resText = spanStr->GetString();
-            return;
+            return true;
         }
     }
     if (pasteDataRecord->GetCustomData() != nullptr) {
@@ -386,7 +388,7 @@ void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
             auto spanStr = SpanString::DecodeTlv(itemData[SPAN_STRING_TAG]);
             if (spanStr) {
                 resText = spanStr->GetString();
-                return;
+                return true;
             }
         }
     }
@@ -394,6 +396,7 @@ void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
         auto textData = pasteDataRecord->GetPlainText();
         resText.append(*textData);
     }
+    return false;
 }
 
 void ClipboardImpl::GetDataSync(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,

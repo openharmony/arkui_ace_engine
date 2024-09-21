@@ -271,13 +271,13 @@ void RefreshPattern::InitProgressColumn()
     loadingTextLayoutProperty->UpdateMaxLines(1);
     loadingTextLayoutProperty->UpdateMaxFontScale(2.0f);
     loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<RefreshTheme>();
     CHECK_NULL_VOID(theme);
     loadingTextLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
     loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
-    
+
     PaddingProperty textpadding;
     textpadding.top = CalcLength(TRIGGER_LOADING_DISTANCE.ConvertToPx() + LOADING_TEXT_TOP_MARGIN.ConvertToPx());
     auto prop = columnNode_->GetLayoutProperty<LinearLayoutProperty>();
@@ -294,11 +294,9 @@ void RefreshPattern::OnColorConfigurationUpdate()
         return;
     }
     CHECK_NULL_VOID(progressChild_);
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<RefreshTheme>();
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<RefreshTheme>();
     CHECK_NULL_VOID(theme);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -442,11 +440,11 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
         }
         auto pullDownRatio = CalculatePullDownRatio();
         scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, MAX_OFFSET);
+        UpdateFirstChildPlacement();
+        FireOnOffsetChange(scrollOffset_);
         if (!isSourceFromAnimation_) {
-            FireOnOffsetChange(scrollOffset_);
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
-                UpdateFirstChildPlacement();
                 return { 0.f, true };
             }
             UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
@@ -456,7 +454,6 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
                 UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
             }
         }
-        UpdateFirstChildPlacement();
     } else {
         HandleDragUpdateLowVersion(delta);
     }
@@ -652,7 +649,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
 
 void RefreshPattern::SwitchToFinish()
 {
-    if (refreshStatus_ != RefreshStatus::REFRESH && refreshStatus_ != RefreshStatus::DONE) {
+    if (isSourceFromAnimation_ || (refreshStatus_ != RefreshStatus::REFRESH && refreshStatus_ != RefreshStatus::DONE)) {
         UpdateRefreshStatus(RefreshStatus::INACTIVE);
     } else {
         UpdateRefreshStatus(RefreshStatus::DONE);
@@ -835,7 +832,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
                 pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, pattern->GetFollowRatio());
             }
         });
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->RequestFrame();
 }
@@ -1153,6 +1150,7 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
     if (NearZero(offset)) {
         return result;
     }
+    isSourceFromAnimation_ = (source == SCROLL_FROM_ANIMATION);
     auto parent = GetNestedScrollParent();
     if (state == NestedState::CHILD_SCROLL) {
         if (Negative(offset) && Positive(scrollOffset_)) {
@@ -1243,5 +1241,10 @@ void RefreshPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("RefreshStatus: ").append(std::to_string(static_cast<int32_t>(refreshStatus_))));
+}
+
+void RefreshPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    json->Put("RefreshStatus", static_cast<int32_t>(refreshStatus_));
 }
 } // namespace OHOS::Ace::NG

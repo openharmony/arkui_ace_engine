@@ -50,6 +50,7 @@ private:
     void TextFieldMeasure(LayoutWrapper* layoutWrapper);
     void ImageMeasure(LayoutWrapper* layoutWrapper);
     void SearchButtonMeasure(LayoutWrapper* layoutWrapper);
+    void DividerMeasure(LayoutWrapper* layoutWrapper);
     void SelfMeasure(LayoutWrapper* layoutWrapper);
     bool IsFixedHeightMode(LayoutWrapper* layoutWrapper);
     double CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper);
@@ -66,8 +67,10 @@ private:
     SizeF searchButtonSizeMeasure_;
     SizeF cancelBtnSizeMeasure_;
     SizeF textFieldSizeMeasure_;
+    SizeF dividerSizeMeasure_;
     void LayoutSearchIcon(const LayoutSearchParams& params);
     void LayoutSearchButton(const LayoutSearchParams& params);
+    void LayoutDivider(const LayoutSearchParams& params);
     void LayoutCancelButton(const LayoutSearchParams& params);
     void LayoutCancelImage(const LayoutSearchParams& params);
     void LayoutTextField(const LayoutSearchParams& params);

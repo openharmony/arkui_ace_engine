@@ -167,10 +167,12 @@ foreach(item, ace_platforms) {
 
     if (platform == "ohos") {
       external_deps = [
+        "ability_runtime:abilitykit_native",
         "hilog:libhilog",
         "i18n:intl_util",
         "init:libbeget_proxy",
         "init:libbegetutil",
+        "napi:ace_napi",
         "window_manager:libdm",
       ]
 

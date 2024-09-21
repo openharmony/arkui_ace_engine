@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -449,6 +448,10 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     }
 
     properties.maskRect = pickerDialog.maskRect;
+    properties.enableHoverMode = pickerDialog.enableHoverMode;
+    if (pickerDialog.hoverModeArea.has_value()) {
+        properties.hoverModeArea = pickerDialog.hoverModeArea.value();
+    }
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (pickerDialog.isSelectedTime == true) {
@@ -744,4 +747,14 @@ const Dimension TimePickerModelNG::ConvertFontScaleValue(const Dimension& fontSi
     return fontSizeValue;
 }
 
+void TimePickerModelNG::HasUserDefinedOpacity()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    timePickerRowPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
+}
 } // namespace OHOS::Ace::NG

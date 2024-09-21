@@ -17,8 +17,6 @@
 
 #include "base/log/dump_log.h"
 #include "core/common/recorder/node_data_cache.h"
-#include "core/common/thread_checker.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 
 namespace OHOS::Ace {

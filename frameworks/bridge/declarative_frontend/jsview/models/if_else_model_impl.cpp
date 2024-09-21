@@ -15,11 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/models/if_else_model_impl.h"
 
-#include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/ifelse/if_else_component.h"
 #include "core/components/ifelse/if_else_element.h"
-#include "core/components_v2/common/element_proxy.h"
 
 namespace OHOS::Ace::Framework {
 

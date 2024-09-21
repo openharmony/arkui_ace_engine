@@ -70,6 +70,7 @@ public:
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
 
     void SetTextNode(RefPtr<FrameNode> textNode)
     {
@@ -140,6 +141,7 @@ private:
     ToastInfo toastInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
     double toastBottom_;
+    Dimension defaultBottom_;
     Rect wrapperRect_;
     bool isHoverMode_ = false;
 };

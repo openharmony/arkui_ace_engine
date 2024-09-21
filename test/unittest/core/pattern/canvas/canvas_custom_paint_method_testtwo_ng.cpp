@@ -708,14 +708,14 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo023, Te
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, true);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
 
     EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, false);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
 
     maxWidth = 10.0;
     EXPECT_CALL(typography, Layout(_)).WillRepeatedly(Return());
@@ -723,7 +723,7 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo023, Te
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(typography, Paint(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true, false);
+    paintMethod->PaintText(width, 1.0, 1.0, maxWidth, true);
 }
 
 /**

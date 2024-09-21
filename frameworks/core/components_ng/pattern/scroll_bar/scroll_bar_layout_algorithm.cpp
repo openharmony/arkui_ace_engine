@@ -15,19 +15,7 @@
 
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 
-#include <algorithm>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -130,19 +118,17 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetMarginFrameSize();
-    scrollableDistance_ = std::abs(GetMainAxisSize(size, axis) - GetMainAxisSize(childSize, axis));
+    scrollableDistance_ = GetMainAxisSize(size, axis) - GetMainAxisSize(childSize, axis);
     auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(layoutWrapper->GetHostNode()->GetPattern());
     auto controlDistance = scrollBarPattern->GetControlDistance();
     auto scrollableNodeOffset = scrollBarPattern->GetScrollableNodeOffset();
     scrollBarPattern->SetChildOffset(GetMainAxisSize(childSize, axis));
     float currentOffset = 0.0f;
-    if (!NearZero(controlDistance)) {
+    if (!NearZero(controlDistance) && GreatNotEqual(scrollableDistance_, 0.0f)) {
         currentOffset = scrollableNodeOffset * scrollableDistance_ / controlDistance;
+        currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
     }
-    currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
-    if (scrollableDistance_ > 0.0f) {
-        currentOffset_ = currentOffset;
-    }
+    currentOffset_ = currentOffset;
     scrollBarPattern->SetCurrentPosition(currentOffset_);
     auto scrollBarAlignment = Alignment::TOP_LEFT;
     if (layoutProperty->GetPositionProperty()) {

@@ -15,14 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/toggle_model_impl.h"
 
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/checkable/checkable_theme.h"
-#include "core/components/split_container/column_split_component.h"
-#include "core/components/split_container/row_split_component.h"
 #include "core/components/toggle/toggle_component.h"
 #include "core/components/toggle/toggle_theme.h"
 

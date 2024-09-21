@@ -16,12 +16,8 @@
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 
 #include "include/codec/SkCodec.h"
-#include "include/core/SkGraphics.h"
-
-#include "drawing/engine_adapter/skia_adapter/skia_data.h"
 
 #include "base/image/image_source.h"
-#include "base/utils/system_properties.h"
 #include "core/components_ng/image_provider/adapter/skia_svg_dom.h"
 #include "core/components_ng/svg/svg_dom.h"
 
@@ -111,7 +107,10 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
     svgDom_->SetFuncNormalizeToPx(
         [pipeline = WeakPtr(PipelineContext::GetCurrentContext())](const Dimension& value) -> double {
             auto context = pipeline.Upgrade();
-            CHECK_NULL_RETURN(context, 0.0);
+            if (!context) {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "Svg Get Value Failed.(Reason: pipline is null).");
+                return 0.0;
+            }
             return context->NormalizeToPx(value);
         });
     return svgDom_;

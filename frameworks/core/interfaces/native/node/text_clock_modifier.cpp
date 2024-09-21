@@ -16,10 +16,7 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
@@ -183,6 +180,13 @@ void ResetDateTimeOptions(ArkUINodeHandle node)
     ZeroPrefixType hourType = ZeroPrefixType::AUTO;
     TextClockModelNG::SetDateTimeOptions(frameNode, hourType);
 }
+
+void SetTextClockTimeZoneOffset(ArkUINodeHandle node, ArkUI_Float32 timeZoneOffset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextClockModelNG::SetHoursWest(frameNode, timeZoneOffset);
+}
 } // namespace TextClockModifier
 
 namespace NodeModifier {
@@ -206,7 +210,8 @@ const ArkUITextClockModifier* GetTextClockModifier()
         TextClockModifier::SetFontFeature,
         TextClockModifier::ResetFontFeature,
         TextClockModifier::SetDateTimeOptions,
-        TextClockModifier::ResetDateTimeOptions
+        TextClockModifier::ResetDateTimeOptions,
+        TextClockModifier::SetTextClockTimeZoneOffset
     };
 
     return &modifier;

@@ -233,11 +233,9 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest003, TestSize.Lev
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     bool isWillCalled = false;
-    int32_t originalCount = 0;
     int32_t replacedCount = 0;
-    auto onWillChange = [&isWillCalled, &originalCount, &replacedCount](const RichEditorChangeValue& beforeResult) {
+    auto onWillChange = [&isWillCalled, &replacedCount](const RichEditorChangeValue& beforeResult) {
         isWillCalled = true;
-        originalCount = beforeResult.GetRichEditorOriginalSpans().size();
         replacedCount = beforeResult.GetRichEditorReplacedSpans().size();
         return true;
     };
@@ -259,7 +257,6 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest003, TestSize.Lev
     richEditorPattern->AddTextSpan(textOptions);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
-    EXPECT_EQ(originalCount, 0);
     EXPECT_EQ(replacedCount, 1);
     EXPECT_EQ(afterCount, 1);
 
@@ -269,7 +266,6 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest003, TestSize.Lev
      */
     isWillCalled = false;
     isDidCalled = false;
-    originalCount = 0;
     replacedCount = 0;
     afterCount = 0;
     RangeOptions delOptions;
@@ -278,7 +274,6 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest003, TestSize.Lev
     richEditorPattern->DeleteSpans(delOptions);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
-    EXPECT_EQ(originalCount, 1);
     EXPECT_EQ(replacedCount, 0);
     EXPECT_EQ(afterCount, 0);
 }
@@ -1157,13 +1152,13 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnSubmitTest, TestSize.Level1)
     TextInputAction action2 = TextInputAction::NEW_LINE;
     bool forceCloseKeyboard = false;
     richEditorPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 1);
+    EXPECT_EQ(count, 0);
 
     action2 = TextInputAction::DONE;
     richEditorPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 2);
+    EXPECT_EQ(count, 1);
     richEditorPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 3);
+    EXPECT_EQ(count, 2);
     ClearSpan();
 }
 

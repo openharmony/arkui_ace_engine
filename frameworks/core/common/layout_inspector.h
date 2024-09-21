@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H
 
 #include "core/common/container.h"
+#include "core/components_ng/base/inspector.h"
 
 namespace OHOS::Ace {
-
 typedef struct {
     uint64_t rsNodeId = 0;
     int32_t frameNodeId = 0;
@@ -50,13 +50,17 @@ public:
     // rs profiler
     static RsProfilerNodeMountCallback GetRsProfilerNodeMountCallback();
     static void SetRsProfilerNodeMountCallback(RsProfilerNodeMountCallback&& callback);
+    static void HandleStartRecord();
+    static void HandleStopRecord();
+    static void HandleInnerCallback(FrameNodeInfo node);
 
 private:
     static bool stateProfilerStatus_;
     static bool layoutInspectorStatus_;
+    static NG::InspectorTreeMap recNodeInfos_;
+    static std::mutex recMutex_;
     static ProfilerStatusCallback jsStateProfilerStatusCallback_;
     static RsProfilerNodeMountCallback rsProfilerNodeMountCallback_;
 };
-
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H

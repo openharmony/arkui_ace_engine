@@ -15,8 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_clip_path.h"
 
-#include "include/pathops/SkPathOps.h"
-
 namespace OHOS::Ace::NG {
 
 RefPtr<SvgNode> SvgClipPath::Create()

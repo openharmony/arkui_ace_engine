@@ -15,16 +15,7 @@
 
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/group_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
-#include "core/components_ng/pattern/navrouter/navrouter_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 void NavRouterModelNG::Create()

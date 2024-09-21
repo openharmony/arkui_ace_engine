@@ -15,10 +15,6 @@
 
 #include "core/components_v2/list/rosen_render_list_item_group.h"
 
-#include "render_service_client/core/ui/rs_node.h"
-
-#include "base/utils/utils.h"
-#include "core/components/common/painter/rosen_scroll_bar_painter.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
 #endif

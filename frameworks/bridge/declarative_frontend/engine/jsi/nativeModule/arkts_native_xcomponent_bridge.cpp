@@ -20,7 +20,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent.h"
-#include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -45,11 +44,6 @@ XComponentType XComponentBridge::ConvertToXComponentType(const std::string& type
     if (type == "node") {
         return XComponentType::NODE;
     }
-#ifdef PLATFORM_VIEW_SUPPORTED
-    if (type == "platform_view") {
-        return XComponentType::PLATFORM_VIEW;
-    }
-#endif
     return XComponentType::SURFACE;
 }
 
@@ -74,7 +68,9 @@ void XComponentBridge::ParseParams(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_
     auto imageAIOptionsArg = obj->Get(vm, imageAIOptionsStr);
 
     xcParams->id = idArg->IsString(vm) ? idArg->ToString(vm)->ToString(vm) : "";
-    xcParams->libraryName = libraryNameArg->IsString(vm) ? libraryNameArg->ToString(vm)->ToString(vm) : "";
+    if (libraryNameArg->IsString(vm)) {
+        xcParams->libraryName = libraryNameArg->ToString(vm)->ToString(vm);
+    }
     if (typeArg->IsString(vm)) {
         xcParams->type = ConvertToXComponentType(typeArg->ToString(vm)->ToString(vm));
     } else if (typeArg->IsNumber()) {
@@ -277,12 +273,14 @@ ArkUINativeModuleValue XComponentBridge::SetXComponentInitialize(ArkUIRuntimeCal
     } else if (typeArg->IsNumber()) {
         xcomponentType = static_cast<XComponentType>(typeArg->Int32Value(vm));
     }
-    std::string libraryName = librarynameArg->IsString(vm) ? librarynameArg->ToString(vm)->ToString(vm) : "";
     GetArkUINodeModifiers()->getXComponentModifier()->setXComponentId(
         nativeNode, idArg->ToString(vm)->ToString(vm).c_str());
     GetArkUINodeModifiers()->getXComponentModifier()->setXComponentType(
         nativeNode, static_cast<int32_t>(xcomponentType));
-    GetArkUINodeModifiers()->getXComponentModifier()->setXComponentLibraryname(nativeNode, libraryName.c_str());
+    if (librarynameArg->IsString(vm)) {
+        auto libraryName = librarynameArg->ToString(vm)->ToString(vm);
+        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentLibraryname(nativeNode, libraryName.c_str());
+    }
     if ((librarynameArg->IsNull() || librarynameArg->IsUndefined()) && xcomponentController &&
         !controllerObj->IsUndefined()) {
         SetControllerCallback(runtimeCallInfo);
@@ -668,6 +666,32 @@ ArkUINativeModuleValue XComponentBridge::ResetEnableAnalyzer(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableAnalyzer(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::SetEnableSecure(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        bool boolValue = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentEnableSecure(nativeNode, boolValue);
+    } else {
+        GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableSecure(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::ResetEnableSecure(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableSecure(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

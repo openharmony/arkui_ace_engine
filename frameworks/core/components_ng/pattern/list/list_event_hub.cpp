@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/list/list_event_hub.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -66,9 +62,9 @@ void ListEventHub::OnItemDragStart(const GestureEvent& info, const DragDropInfo&
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     if (dragDropInfo.pixelMap) {
-        dragDropProxy_ = manager->CreateAndShowDragWindow(dragDropInfo.pixelMap, info);
+        dragDropProxy_ = manager->CreateAndShowItemDragOverlay(dragDropInfo.pixelMap, info, AceType::Claim(this));
     } else if (dragDropInfo.customNode) {
-        dragDropProxy_ = manager->CreateAndShowDragWindow(dragDropInfo.customNode, info);
+        dragDropProxy_ = manager->CreateAndShowItemDragOverlay(dragDropInfo.customNode, info, AceType::Claim(this));
     }
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info, GetFrameNode());
@@ -79,7 +75,9 @@ void ListEventHub::OnItemDragStart(const GestureEvent& info, const DragDropInfo&
 
 void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
 
     auto globalX = static_cast<float>(info.GetGlobalPoint().GetX());
@@ -90,11 +88,9 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
         return;
     }
 
-    auto host = GetFrameNode();
-    CHECK_NULL_VOID(host);
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(globalX);
+    itemDragInfo.SetY(globalY);
     auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
     CHECK_NULL_VOID(customNode);
     auto dragDropManager = pipeline->GetDragDropManager();

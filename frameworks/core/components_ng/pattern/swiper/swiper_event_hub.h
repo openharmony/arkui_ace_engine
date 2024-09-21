@@ -94,20 +94,28 @@ public:
         }
     }
 
-    void FireChangeEvent(int32_t preIndex, int32_t currentIndex) const
+    void FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout)
     {
-        ACE_SCOPED_TRACE("Swiper FireChangeEvent, preIndex: %d currentIndex: %d eventSize: %zu",
-            preIndex, currentIndex, changeEvents_.size() + changeEventsWithPreIndex_.size());
-        if (!changeEvents_.empty()) {
-            std::for_each(
-                changeEvents_.begin(), changeEvents_.end(), [currentIndex](const ChangeEventPtr& changeEvent) {
-                    auto event = *changeEvent;
-                    event(currentIndex);
-                });
+        if (isInLayout) {
+            auto frameNode = GetFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto pipeline = frameNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->AddAfterLayoutTask([weak = WeakClaim(this), currentIndex]() {
+                auto eventHub = weak.Upgrade();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->FireJSChangeEvent(currentIndex);
+            });
+        } else {
+            FireJSChangeEvent(currentIndex);
         }
+
         if (!changeEventsWithPreIndex_.empty()) {
             std::for_each(changeEventsWithPreIndex_.begin(), changeEventsWithPreIndex_.end(),
                 [preIndex, currentIndex](const ChangeEventWithPreIndexPtr& changeEventWithPreIndex) {
+                    if (!changeEventWithPreIndex || !(*changeEventWithPreIndex)) {
+                        return;
+                    }
                     auto event = *changeEventWithPreIndex;
                     event(preIndex, currentIndex);
                 });
@@ -145,6 +153,9 @@ public:
         if (!animationStartEvents_.empty()) {
             std::for_each(animationStartEvents_.begin(), animationStartEvents_.end(),
                 [index, targetIndex, info](const AnimationStartEventPtr& animationStartEvent) {
+                    if (!animationStartEvent || !(*animationStartEvent)) {
+                        return;
+                    }
                     auto event = *animationStartEvent;
                     event(index, targetIndex, info);
                 });
@@ -156,6 +167,9 @@ public:
         if (!animationEndEvents_.empty()) {
             std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
                 [index, info](const AnimationEndEventPtr& animationEndEvent) {
+                    if (!animationEndEvent || !(*animationEndEvent)) {
+                        return;
+                    }
                     auto event = *animationEndEvent;
                     event(index, info);
                 });
@@ -164,17 +178,21 @@ public:
 
     void FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info) const
     {
-        if (!animationEndEvents_.empty()) {
-            auto context = GetFrameNode()->GetContext();
-            CHECK_NULL_VOID(context);
-            context->AddBuildFinishCallBack([this, index, info]() {
-                std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
-                    [index, info](const AnimationEndEventPtr& animationEndEvent) {
-                        auto event = *animationEndEvent;
-                        event(index, info);
-                    });
-            });
+        if (animationEndEvents_.empty()) {
+            return;
         }
+        auto context = GetFrameNode()->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddBuildFinishCallBack([this, index, info]() {
+            std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
+                [index, info](const AnimationEndEventPtr& animationEndEvent) {
+                    if (!animationEndEvent || !(*animationEndEvent)) {
+                        return;
+                    }
+                    auto event = *animationEndEvent;
+                    event(index, info);
+                });
+        });
     }
 
     void FireGestureSwipeEvent(int32_t index, const AnimationCallbackInfo& info) const
@@ -187,6 +205,21 @@ public:
     }
 
 private:
+    void FireJSChangeEvent(int32_t index)
+    {
+        ACE_SCOPED_TRACE("Swiper FireChangeEvent, index: %d", index);
+        if (changeEvents_.empty()) {
+            return;
+        }
+        std::for_each(changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
+            if (!changeEvent || !(*changeEvent)) {
+                return;
+            }
+            auto event = *changeEvent;
+            event(index);
+        });
+    }
+
     Direction direction_;
     std::list<ChangeEventPtr> changeEvents_;
     std::list<ChangeEventWithPreIndexPtr> changeEventsWithPreIndex_;

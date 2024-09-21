@@ -191,7 +191,8 @@ void JSListItem::SetSelected(const JSCallbackInfo& info)
     }
 }
 
-void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue, bool isStartArea)
+void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue,
+    bool isStartArea, NG::FrameNode* node)
 {
     auto deleteAreaObj = JSRef<JSObject>::Cast(jsValue);
 
@@ -248,7 +249,7 @@ void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSR
 
     ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), std::move(onActionCallback),
         std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback), std::move(onStateChangeCallback),
-        length, isStartArea);
+        length, isStartArea, node);
 }
 
 void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
@@ -260,7 +261,7 @@ void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
     ParseSwiperAction(obj, args.GetExecutionContext());
 }
 
-void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutionContext& context)
+void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutionContext& context, NG::FrameNode* node)
 {
     std::function<void()> startAction;
     auto startObject = obj->GetProperty("start");
@@ -269,13 +270,14 @@ void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutio
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(startObject));
             startAction = [builderFunc]() { builderFunc->Execute(); };
             ListItemModel::GetInstance()->SetDeleteArea(
-                std::move(startAction), nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), true);
+                std::move(startAction), nullptr, nullptr, nullptr, nullptr,
+                Dimension(0, DimensionUnit::VP), true, node);
         } else {
-            JsParseDeleteArea(context, startObject, true);
+            JsParseDeleteArea(context, startObject, true, node);
         }
     } else {
         ListItemModel::GetInstance()->SetDeleteArea(
-            nullptr, nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), true);
+            nullptr, nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), true, node);
     }
 
     std::function<void()> endAction;
@@ -285,13 +287,14 @@ void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutio
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(endObject));
             endAction = [builderFunc]() { builderFunc->Execute(); };
             ListItemModel::GetInstance()->SetDeleteArea(
-                std::move(endAction), nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), false);
+                std::move(endAction), nullptr, nullptr, nullptr, nullptr,
+                Dimension(0, DimensionUnit::VP), false, node);
         } else {
-            JsParseDeleteArea(context, endObject, false);
+            JsParseDeleteArea(context, endObject, false, node);
         }
     } else {
         ListItemModel::GetInstance()->SetDeleteArea(
-            nullptr, nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), false);
+            nullptr, nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), false, node);
     }
 
     auto edgeEffect = obj->GetProperty("edgeEffect");
@@ -313,7 +316,8 @@ void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutio
     }
 
     // use SetDeleteArea to update builder function
-    ListItemModel::GetInstance()->SetSwiperAction(nullptr, nullptr, std::move(onOffsetChangeCallback), swipeEdgeEffect);
+    ListItemModel::GetInstance()->SetSwiperAction(
+        nullptr, nullptr, std::move(onOffsetChangeCallback), swipeEdgeEffect, node);
 }
 
 void JSListItem::SelectCallback(const JSCallbackInfo& args)

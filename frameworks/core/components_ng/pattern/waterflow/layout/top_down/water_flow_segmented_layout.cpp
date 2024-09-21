@@ -25,16 +25,13 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
 bool WaterFlowSegmentLayoutBase::IsDataValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt)
 {
     if (info->segmentTails_.empty()) {
-        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Sections are not initialized.");
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Section is empty.");
         return false;
     }
     if (childrenCnt - 1 != info->segmentTails_.back()) {
@@ -49,14 +46,17 @@ bool WaterFlowSegmentLayoutBase::IsDataValid(const RefPtr<WaterFlowLayoutInfoBas
 void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 {
     wrapper_ = wrapper;
+    info_->childrenCount_ = wrapper_->GetTotalChildCount();
+    sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
+    if (sections_ && !IsDataValid(info_, info_->childrenCount_)) {
+        return;
+    }
+
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper->GetLayoutProperty());
     info_->axis_ = axis_ = props->GetAxis();
     auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
 
     Init(idealSize);
-    if (!IsDataValid(info_, info_->childrenCount_)) {
-        return;
-    }
 
     mainSize_ = GetMainAxisSize(idealSize, axis_);
 
@@ -80,7 +80,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
 void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 {
-    if (!IsDataValid(info_, info_->childrenCount_)) {
+    if (sections_ && !IsDataValid(info_, info_->childrenCount_)) {
         return;
     }
 
@@ -110,8 +110,8 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     for (int32_t i = std::max(0, info_->startIndex_ - cacheCount); i <= maxIdx; ++i) {
         LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
     }
-    wrapper_->SetActiveChildRange(
-        info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount, cacheCount);
+    wrapper_->SetActiveChildRange(info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount,
+        cacheCount, props->GetShowCachedItemsValue(false));
 
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;
@@ -148,13 +148,8 @@ float PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info)
 
 void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 {
-    info_->childrenCount_ = wrapper_->GetTotalChildCount();
-    sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();
-        if (info_->segmentTails_.empty()) {
-            info_->InitSegments(sections, 0);
-        }
         if (info_->margins_.empty()) {
             // empty margins_ implies a segment change
             auto constraint = wrapper_->GetLayoutProperty()->GetLayoutConstraint();
@@ -181,10 +176,6 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize)
 
     if (!wrapper_->IsConstraintNoChanged()) {
         postJumpOffset_ = PrepareJump(info_);
-    }
-
-    if (info_->extraOffset_) {
-        postJumpOffset_ += *info_->extraOffset_;
     }
 }
 
@@ -328,6 +319,9 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
 
 void WaterFlowSegmentedLayout::MeasureOnJump(int32_t jumpIdx)
 {
+    if (info_->extraOffset_) {
+        postJumpOffset_ += *info_->extraOffset_;
+    }
     if (jumpIdx >= info_->childrenCount_) {
         return;
     }
@@ -413,11 +407,9 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx, std::optional<
         int32_t seg = info_->GetSegment(i);
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[seg]);
         float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i);
-        if (cacheDeadline || Negative(itemHeight)) {
-            auto item = MeasureItem(props, i, position.crossIndex, itemHeight, cacheDeadline.has_value());
-            if (item) {
-                itemHeight = GetMeasuredHeight(item, axis_);
-            }
+        auto item = MeasureItem(props, i, position.crossIndex, itemHeight, cacheDeadline.has_value());
+        if (item) {
+            itemHeight = GetMeasuredHeight(item, axis_);
         }
         info_->RecordItem(i, position, itemHeight);
         if (cacheDeadline && GetSysTimestamp() > *cacheDeadline) {

@@ -30,6 +30,8 @@ constexpr int32_t BUFFER_NODE_NUMBER = 2;
 constexpr int32_t HIDENODE = 3;
 constexpr double PERCENT_100 = 100.0;
 constexpr double PERCENT_120 = 1.2f;
+constexpr double SPACE_CALC_TIME = 2.0;
+constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 
 GradientColor CreatePercentGradientColor(float percent, Color color)
 {
@@ -73,16 +75,15 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = blendNode->GetLayoutProperty()->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
     auto width = layoutConstraint->parentIdealSize.Width();
-    float pickerWidth = 0.0f;
+    auto pickerMaxHeight = GetPickerMaxHeight(layoutConstraint, pickerNode);
+    float pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
     if (width.has_value()) {
         pickerWidth = width.value();
-    } else {
-        pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
     }
 
-    pickerItemHeight_ = std::min(height, layoutConstraint->maxSize.Height());
+    pickerItemHeight_ = std::min(height, pickerMaxHeight);
     frameSize.SetWidth(pickerWidth);
-    frameSize.SetHeight(std::min(height, layoutConstraint->maxSize.Height()));
+    frameSize.SetHeight(std::min(height, pickerMaxHeight));
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     auto layoutChildConstraint = blendNode->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -92,6 +93,34 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx() *
         gradientFontScale_) / frameSize.Height();
     InitGradient(gradientPercent, blendNode, columnNode);
+}
+
+float TimePickerColumnLayoutAlgorithm::GetPickerMaxHeight(
+    const std::optional<LayoutConstraintF>& layoutConstraint, const RefPtr<FrameNode>& pickerNode)
+{
+    auto pickerMaxHeight = layoutConstraint->maxSize.Height();
+    
+    auto pipeline = pickerNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, pickerMaxHeight);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, pickerMaxHeight);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, pickerMaxHeight);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, pickerMaxHeight);
+
+    auto timePickerPattern = pickerNode->GetPattern<TimePickerRowPattern>();
+    if (timePickerPattern->GetIsShowInDialog()) {
+        float dialogTitleHeight = static_cast<float>(
+            (buttonTheme->GetHeight() + dialogTheme->GetButtonSpacingVertical() * SPACE_CALC_TIME).ConvertToPx());
+        float dialogButtonHeight = static_cast<float>(
+            (buttonTheme->GetHeight() + dialogTheme->GetButtonPaddingBottom() * SPACE_CALC_TIME).ConvertToPx());
+        pickerMaxHeight -= (dialogTitleHeight + dialogButtonHeight);
+        if (timePickerPattern->GetShowLunarSwitch()) {
+            pickerMaxHeight -= static_cast<float>(LUNARSWITCH_HEIGHT.ConvertToPx());
+        }
+    }
+    return pickerMaxHeight;
 }
 
 void TimePickerColumnLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> blendNode,
@@ -221,13 +250,10 @@ float TimePickerColumnLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& us
     auto userSetHeightValue = AdjustFontSizeScale(userSetHeight, systemFontScale).ConvertToPx();
     double adjustedScale =
         std::clamp(systemFontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetMaxTwoFontScale());
-    if (!NearZero(adjustedScale)) {
-        userSetHeightValue =
-            userSetHeightValue / adjustedScale * PERCENT_120 + (themePadding.ConvertToPx() * DIVIDER_SIZE);
-    } else {
+    if (NearZero(adjustedScale)) {
         return fontScale;
     }
-
+    userSetHeightValue = userSetHeightValue / adjustedScale * PERCENT_120 + (themePadding.ConvertToPx() * DIVIDER_SIZE);
     auto themeHeightLimit =
         isDividerSpacing ? pickerTheme->GetDividerSpacingLimit() : pickerTheme->GetGradientHeightLimit();
     auto themeHeight = isDividerSpacing ? pickerTheme->GetDividerSpacing() : pickerTheme->GetGradientHeight();
@@ -236,6 +262,11 @@ float TimePickerColumnLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& us
     } else {
         userSetHeightValue = std::max(userSetHeightValue, themeHeight.ConvertToPx());
     }
+
+    if (NearZero(themeHeight.ConvertToPx())) {
+        return fontScale;
+    }
+
     fontScale = std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), fontScale);
     return fontScale;
 }

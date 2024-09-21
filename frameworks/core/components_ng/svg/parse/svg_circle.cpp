@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 
-#include "base/utils/utils.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 

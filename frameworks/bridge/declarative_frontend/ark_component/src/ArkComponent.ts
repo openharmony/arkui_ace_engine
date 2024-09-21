@@ -1396,7 +1396,7 @@ class BackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle
     } else {
       getUINativeModule().common.setBackgroundBlurStyle(node,
         this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
-          this.value.blurOptions?.grayscale);
+          this.value.blurOptions?.grayscale, this.value.policy, this.value.inactiveColor, this.value.type);
     }
   }
 }
@@ -1504,6 +1504,20 @@ class GeometryTransitionModifier extends ModifierWithKey<ArkGeometryTransition> 
       getUINativeModule().common.setGeometryTransition(node, this.value.id,
         (this.value.options as GeometryTransitionOptions)?.follow,
         (this.value.options as GeometryTransitionOptions)?.hierarchyStrategy);
+    }
+  }
+}
+
+class AdvancedBlendModeModifier extends ModifierWithKey<ArkBlendMode> {
+  constructor(value: ArkBlendMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('advancedBlendMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAdvancedBlendMode(node);
+    } else {
+      getUINativeModule().common.setAdvancedBlendMode(node, this.value.blendMode, this.value.blendApplyType);
     }
   }
 }
@@ -2498,7 +2512,8 @@ class BackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOptions> 
       getUINativeModule().common.resetBackgroundEffect(node);
     } else {
       getUINativeModule().common.setBackgroundEffect(node, this.value.radius, this.value.saturation,
-        this.value.brightness, this.value.color, this.value.adaptiveColor, this.value.blurOptions?.grayscale);
+        this.value.brightness, this.value.color, this.value.adaptiveColor, this.value.blurOptions?.grayscale,
+        this.value.policy, this.value.inactiveColor, this.value.type);
     }
   }
 
@@ -2507,6 +2522,9 @@ class BackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOptions> 
       this.value.brightness === this.stageValue.brightness &&
       isBaseOrResourceEqual(this.stageValue.color, this.value.color) &&
       this.value.adaptiveColor === this.stageValue.adaptiveColor &&
+      this.value.policy === this.stageValue.policy &&
+      this.value.inactiveColor === this.stageValue.inactiveColor &&
+      this.value.type === this.stageValue.type &&
       this.value.blurOptions?.grayscale === this.stageValue.blurOptions?.grayscale);
   }
 }
@@ -3500,6 +3518,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
       arkBackgroundBlurStyle.scale = options.scale;
       arkBackgroundBlurStyle.blurOptions = options.blurOptions;
+      arkBackgroundBlurStyle.policy = options.policy;
+      arkBackgroundBlurStyle.inactiveColor = options.inactiveColor;
+      arkBackgroundBlurStyle.type = options.type;
     }
     modifierWithKey(this._modifiersWithKeys, BackgroundBlurStyleModifier.identity,
       BackgroundBlurStyleModifier, arkBackgroundBlurStyle);
@@ -4304,6 +4325,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  advancedBlendMode(blendMode: BlendMode, blendApplyType?: BlendApplyType): this {
+    let arkBlendMode = new ArkBlendMode();
+    arkBlendMode.blendMode = blendMode;
+    arkBlendMode.blendApplyType = blendApplyType;
+    modifierWithKey(this._modifiersWithKeys, AdvancedBlendModeModifier.identity,
+      AdvancedBlendModeModifier, arkBlendMode);
+    return this;
+  }
+
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, ClipModifier.identity, ClipModifier, value);
     return this;
@@ -4550,6 +4580,7 @@ function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
 {
   if (modifier === undefined || modifier === null) {
+    ArkLogConsole.info("custom modifier is undefined");
     return;
   }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -4585,6 +4616,10 @@ function attributeModifierFuncWithoutStateStyles<T>(modifier: AttributeModifier<
   componentBuilder: (nativePtr: KNode) => ArkComponent,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
 {
+  if (modifier === undefined || modifier === null) {
+    ArkLogConsole.info("custom modifier is undefined");
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {

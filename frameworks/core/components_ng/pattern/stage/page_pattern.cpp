@@ -16,15 +16,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/log/jank_frame_report.h"
-#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/animation/animator.h"
-#include "core/common/container.h"
-#include "core/common/recorder/event_recorder.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "bridge/common/utils/engine_helper.h"
 
@@ -225,13 +217,11 @@ void PagePattern::OnShow()
         return;
     }
     std::string bundleName = container->GetBundleName();
-    NotifyPerfMonitorPageMsg(pageInfo_->GetPageUrl(), bundleName);
+    NotifyPerfMonitorPageMsg(pageInfo_->GetFullPath(), bundleName);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->SetJSViewActive(true);
+    UpdatePageParam();
     isOnShow_ = true;
 #if defined(ENABLE_SPLIT_MODE)
     if (needFireObserver_) {
@@ -242,7 +232,7 @@ void PagePattern::OnShow()
     state_ = RouterPageState::ON_PAGE_SHOW;
     UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 #endif
-    JankFrameReport::GetInstance().StartRecord(pageInfo_->GetPageUrl());
+    JankFrameReport::GetInstance().StartRecord(pageInfo_->GetFullPath());
     auto pageUrlChecker = container->GetPageUrlChecker();
     if (pageUrlChecker != nullptr) {
         pageUrlChecker->NotifyPageShow(pageInfo_->GetPageUrl());
@@ -260,7 +250,7 @@ void PagePattern::OnShow()
         std::string param;
         auto entryPageInfo = DynamicCast<EntryPageInfo>(pageInfo_);
         if (entryPageInfo) {
-            param = entryPageInfo->GetPageParams();
+            param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? entryPageInfo->GetPageParams() : "";
             entryPageInfo->SetShowTime(GetCurrentTimestamp());
         }
         Recorder::EventRecorder::Get().OnPageShow(pageInfo_->GetPageUrl(), param);
@@ -280,6 +270,7 @@ void PagePattern::OnHide()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);
     isOnShow_ = false;
+    host->SetAccessibilityVisible(false);
 #if defined(ENABLE_SPLIT_MODE)
     if (needFireObserver_) {
         state_ = RouterPageState::ON_PAGE_HIDE;
@@ -448,9 +439,23 @@ void PagePattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(pipeline);
     // SafeArea already applied to AppBar (AtomicServicePattern)
     if (pipeline->GetInstallationFree()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        ACE_SCOPED_TRACE("[%s][self:%d] SafeArea already applied to AppBar", host->GetTag().c_str(), host->GetId());
         return;
     }
     ContentRootPattern::BeforeCreateLayoutWrapper();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto&& insets = host->GetLayoutProperty()->GetSafeAreaInsets();
+    CHECK_NULL_VOID(insets);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    ACE_SCOPED_TRACE("[%s][self:%d] safeAreaInsets: AvoidKeyboard %d, AvoidTop %d, AvoidCutout "
+                     "%d, AvoidBottom %d insets %s isIgnore: %d, isNeedAvoidWindow %d, "
+                     "isFullScreen %d",
+        host->GetTag().c_str(), host->GetId(), AvoidKeyboard(), AvoidTop(), AvoidCutout(), AvoidBottom(),
+        insets->ToString().c_str(), manager->IsIgnoreAsfeArea(), manager->IsNeedAvoidWindow(), manager->IsFullScreen());
 }
 
 bool PagePattern::AvoidKeyboard() const

@@ -15,14 +15,6 @@
 
 #include "core/components_ng/pattern/patternlock/patternlock_paint_method.h"
 
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
-#include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_v2/pattern_lock/pattern_lock_theme.h"
-
 namespace OHOS::Ace::NG {
 void PatternLockPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {

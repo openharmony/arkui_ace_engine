@@ -14,13 +14,9 @@
  */
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 
-#include "core/components/common/layout/constants.h"
 #include "core/components/image/image_component.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
-#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -142,6 +138,13 @@ void ResetImageSpanBaselineOffset(ArkUINodeHandle node)
     ImageSpanView::SetBaselineOffset(frameNode, DEFAULT_BASELINE_OFFSET);
 }
 
+float GetImageSpanBaselineOffset(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    return ImageSpanView::GetBaselineOffset(frameNode, unit);
+}
+
 void SetImageSpanOnComplete(ArkUINodeHandle node, void *callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -231,7 +234,7 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
         SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
         SetImageSpanOnError, ResetImageSpanOnError, SetImageSpanColorFilter, ResetImageSpanColorFilter,
-        SetImageSpanBorderRadius, ResetImageSpanBorderRadius };
+        SetImageSpanBorderRadius, ResetImageSpanBorderRadius, GetImageSpanBaselineOffset };
     return &modifier;
 }
 

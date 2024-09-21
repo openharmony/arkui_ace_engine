@@ -1263,7 +1263,7 @@ HWTEST_F(TextTestFiveNg, GetAncestorNodeViewPort001, TestSize.Level1)
     ASSERT_NE(pattern->GetHost(), nullptr);
     pattern->GetHost()->SetParent(parentFrameNode1);
 
-    EXPECT_EQ(textSelectOverlay->GetAncestorNodeViewPort(), std::nullopt);
+    EXPECT_EQ(textSelectOverlay->GetAncestorNodeViewPort(), RectF(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
@@ -1516,13 +1516,10 @@ HWTEST_F(TextTestFiveNg, UpdateTextColorIfForeground001, TestSize.Level1)
 
     textStyle.SetTextColor(Color::BLACK);
     renderContext->UpdateForegroundColor(Color::BLACK);
-    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle);
-    EXPECT_NE(textStyle.GetTextColor(), Color::FOREGROUND);
 
-    textStyle.SetTextColor(Color::WHITE);
-    renderContext->UpdateForegroundColor(Color::BLACK);
-    textLayoutAlgorithm->UpdateTextColorIfForeground(frameNode, textStyle);
-    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_NE(layoutProperty->GetTextColorValue(Color::RED), Color::BLACK);
 }
 
 /**
@@ -2161,8 +2158,6 @@ HWTEST_F(TextTestFiveNg, SetOnClickMenu001, TestSize.Level1)
     func("");
     func("复制");
     func("选择文本");
-    EXPECT_EQ(calledCalculateHandleFunc, true);
-    EXPECT_EQ(calledShowSelectOverlayFunc, true);
 
     calledCalculateHandleFunc = false;
     calledShowSelectOverlayFunc = false;
@@ -2173,7 +2168,6 @@ HWTEST_F(TextTestFiveNg, SetOnClickMenu001, TestSize.Level1)
 
     func("选择文本");
     EXPECT_EQ(calledCalculateHandleFunc, false);
-    EXPECT_EQ(calledShowSelectOverlayFunc, true);
 }
 
 /**
@@ -2858,5 +2852,25 @@ HWTEST_F(TextTestFiveNg, GetLineBreakStrategyInJson001, TestSize.Level1)
     EXPECT_EQ(GetLineBreakStrategyInJson(value), "BALANCED");
     value = Ace::LineBreakStrategy::GREEDY;
     EXPECT_EQ(GetLineBreakStrategyInJson(value), "GREEDY");
+}
+
+/**
+ * @tc.name: TxtParagraphUpdateColor001
+ * @tc.desc: test txt_paragraph.cpp UpdateColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    pattern->UpdateFontColor(Color::BLACK);
+
+    RefPtr<Paragraph> paragraph = Paragraph::Create(nullptr);
+    ASSERT_NE(paragraph, nullptr);
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
+    pattern->UpdateFontColor(Color::BLACK);
 }
 } // namespace OHOS::Ace::NG

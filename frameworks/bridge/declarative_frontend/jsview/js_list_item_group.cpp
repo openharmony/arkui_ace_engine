@@ -162,6 +162,8 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
     auto listItemGroupStyle = GetListItemGroupStyle(args);
     ListItemGroupModel::GetInstance()->Create(listItemGroupStyle);
     if (args.Length() < 1 || !args[0]->IsObject()) {
+        NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
+        NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
         args.ReturnSelf();
         return;
     }
@@ -172,37 +174,28 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
         ListItemGroupModel::GetInstance()->SetSpace(space);
     }
 
-    auto headerComponentObject = obj->GetProperty("headerComponent");
-    if (headerComponentObject->IsObject()) {
+    if (obj->HasProperty("headerComponent")) {
+        auto headerComponentObject = obj->GetProperty("headerComponent");
         if (!ParseHeaderAndFooterContent(headerComponentObject, true)) {
             NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
         }
     } else {
-        auto headerObject = obj->GetProperty("header");
-        if (headerObject->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(headerObject));
-            auto headerAction = [builderFunc]() { builderFunc->Execute(); };
-            ListItemGroupModel::GetInstance()->SetHeader(headerAction);
-        } else {
+        if (!SetHeaderBuilder(obj)) {
             NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
         }
     }
 
-    auto footerComponentObject = obj->GetProperty("footerComponent");
-    if (footerComponentObject->IsObject()) {
+    if (obj->HasProperty("footerComponent")) {
+        auto footerComponentObject = obj->GetProperty("footerComponent");
         if (!ParseHeaderAndFooterContent(footerComponentObject, false)) {
             NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
         }
     } else {
-        auto footerObject = obj->GetProperty("footer");
-        if (footerObject->IsFunction()) {
-            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
-            auto footerAction = [builderFunc]() { builderFunc->Execute(); };
-            ListItemGroupModel::GetInstance()->SetFooter(footerAction);
-        } else {
+        if (!SetFooterBuilder(obj)) {
             NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
         }
     }
+
     args.ReturnSelf();
 }
 
@@ -257,6 +250,30 @@ bool JSListItemGroup::ParseHeaderAndFooterContent(const JSRef<JSVal>& contentPar
         NG::ListItemGroupModelNG::GetInstance()->SetFooterComponent(refPtrFrameNode);
     }
     return true;
+}
+
+bool JSListItemGroup::SetHeaderBuilder(const JSRef<JSObject>& obj)
+{
+    auto headerObject = obj->GetProperty("header");
+    if (headerObject->IsFunction()) {
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(headerObject));
+        auto headerAction = [builderFunc]() { builderFunc->Execute(); };
+        ListItemGroupModel::GetInstance()->SetHeader(headerAction);
+        return true;
+    }
+    return false;
+}
+
+bool JSListItemGroup::SetFooterBuilder(const JSRef<JSObject>& obj)
+{
+    auto footerObject = obj->GetProperty("footer");
+    if (footerObject->IsFunction()) {
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
+        auto footerAction = [builderFunc]() { builderFunc->Execute(); };
+        ListItemGroupModel::GetInstance()->SetFooter(footerAction);
+        return true;
+    }
+    return false;
 }
 
 V2::ListItemGroupStyle JSListItemGroup::GetListItemGroupStyle(const JSCallbackInfo& args)

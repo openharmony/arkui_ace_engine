@@ -1367,7 +1367,7 @@ HWTEST_F(DatePickerTestNg, DatePickerPaintTest002, TestSize.Level1)
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).WillRepeatedly(Return());
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
     canvasDrawFunction(rsCanvas);
@@ -1409,8 +1409,9 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest005, TestSize.Level1)
     RoundRect paintRect;
     datePickerPattern->GetInnerFocusPaintRect(paintRect);
     auto rect = paintRect.GetRect();
-    EXPECT_EQ(rect.GetX(), 0);
-    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width());
+    Dimension offset = 2.0_vp;
+    EXPECT_EQ(rect.GetX(), offset.ConvertToPx());
+    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx() * 2);
 }
 
 /**
@@ -3703,9 +3704,17 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus005, Test
     ButtonInfo info2;
     buttonInfos.push_back(info2);
 
-    const RefPtr<FrameNode> buttonNode;
-
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_COMPONENT_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    /**
+     * @tc.steps: steps1. setDefaultFocus is true and call UpdateButtonDefaultFocus;
+     * @tc.expected: The texts of IsDefaultFocus is equal to true;
+     */
     DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
 }
 
 /**

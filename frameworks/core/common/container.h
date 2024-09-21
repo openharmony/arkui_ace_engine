@@ -29,6 +29,7 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -250,19 +251,20 @@ public:
         return moduleName_;
     }
 
-    virtual bool IsMainWindow() const
+    virtual bool IsMainWindow() const { return false; }
+    virtual bool IsSubWindow() const { return false; }
+    virtual bool IsDialogWindow() const { return false; }
+    virtual bool IsSystemWindow() const { return false; }
+    virtual bool IsHostMainWindow() const { return false; }
+    virtual bool IsHostSubWindow() const { return false; }
+    virtual bool IsHostDialogWindow() const { return false; }
+    virtual bool IsHostSystemWindow() const { return false; }
+    virtual bool IsHostSceneBoardWindow() const { return false; }
+    virtual bool IsSubContainer() const { return false; }
+    virtual bool IsFormRender() const { return false; }
+    virtual uint32_t GetParentMainWindowId(uint32_t currentWindowId) const
     {
-        return false;
-    }
-
-    virtual bool IsSubContainer() const
-    {
-        return false;
-    }
-
-    virtual bool IsFormRender() const
-    {
-        return false;
+        return 0;
     }
 
     virtual void SetIsFormRender(bool isFormRender) {};
@@ -596,6 +598,15 @@ public:
     {
         uIContentType_ = uIContentType;
     }
+
+    void DestroyToastSubwindow(int32_t instanceId);
+
+    virtual void CheckAndSetFontFamily() {};
+
+protected:
+    bool IsFontFileExistInPath(const std::string& path);
+    std::string GetFontFamilyName(std::string path);
+    bool endsWith(std::string str, std::string suffix);
 
 private:
     static bool IsIdAvailable(int32_t id);

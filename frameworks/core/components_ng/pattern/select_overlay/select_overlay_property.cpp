@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

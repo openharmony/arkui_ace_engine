@@ -379,6 +379,10 @@ HWTEST_F(RichEditorPatternTestOneNg, ResetAfterPaste001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->previewLongPress_ = true;
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = false;
     richEditorPattern->ResetAfterPaste();
     ASSERT_NE(richEditorPattern->previewLongPress_, true);
 }
@@ -484,13 +488,12 @@ HWTEST_F(RichEditorPatternTestOneNg, JudgeSelectType001, TestSize.Level1)
     richEditorPattern->previewLongPress_ = true;
     auto offset = Offset(50.0, -80.0);
     AddSpan("hello1");
-    PositionWithAffinity position = richEditorPattern->paragraphs_.GetGlyphPositionAtCoordinate(offset);
-    SelectType type = richEditorPattern->JudgeSelectType(position);
-    EXPECT_NE(type, SelectType::SELECT_FORWARD);
+    auto selectType = richEditorPattern->JudgeSelectType(offset).second;
+    EXPECT_NE(selectType, SelectType::SELECT_FORWARD);
     richEditorPattern->previewLongPress_ = false;
     richEditorPattern->editingLongPress_ = true;
-    type = richEditorPattern->JudgeSelectType(position);
-    EXPECT_NE(type, SelectType::SELECT_FORWARD);
+    selectType = richEditorPattern->JudgeSelectType(offset).second;
+    EXPECT_NE(selectType, SelectType::SELECT_FORWARD);
 }
 
 /**
@@ -1015,19 +1018,19 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleOnlyImageSelected001, TestSize.Level1
     auto selectInfoSecHandle = selectOverlayInfo->secondHandle;
     selectInfoFirstHandle.isShow = true;
     selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, true);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
 
     selectInfoFirstHandle.isShow = false;
     selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, true);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
 
     selectInfoFirstHandle.isShow = true;
     selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, false);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
 
     selectInfoFirstHandle.isShow = false;
     selectInfoSecHandle.isShow = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, false);
+    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
 
     EXPECT_EQ(richEditorPattern->selectOverlay_->IsBothHandlesShow(), false);
 }

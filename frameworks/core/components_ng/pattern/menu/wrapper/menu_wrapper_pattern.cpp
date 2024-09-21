@@ -15,31 +15,20 @@
 
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
-#include <cstddef>
-
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components/common/properties/shadow_config.h"
-#include "core/components/select/select_theme.h"
-#include "core/components_ng/event/click_event.h"
-#include "core/components_ng/event/gesture_event_hub.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t FOCUS_MENU_NUM = 2;
 void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 {
     if (GetHost()->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
         return;
     }
-
+    SetIsStopHoverImageAnimation(true);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->HideMenu();
-    SetIsStopHoverImageAnimation(true);
     CallMenuStateChangeCallback("false");
 }
 
@@ -155,9 +144,7 @@ void MenuWrapperPattern::ChangeCurMenuItemBgColor()
     if (curMenuItemPattern->IsDisabled() || curMenuItemPattern->IsStackSubmenuHeader()) {
         return;
     }
-    curMenuItemPattern->SetBgBlendColor(
-        curMenuItemPattern->GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
-    curMenuItemPattern->PlayBgColorAnimation(false);
+    curMenuItemPattern->NotifyPressStatus(true);
 }
 
 void MenuWrapperPattern::ClearLastMenuItem()
@@ -165,8 +152,7 @@ void MenuWrapperPattern::ClearLastMenuItem()
     if (lastTouchItem_) {
         auto lastMenuItemPattern = lastTouchItem_->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(lastMenuItemPattern);
-        lastMenuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
-        lastMenuItemPattern->PlayBgColorAnimation(false);
+        lastMenuItemPattern->NotifyPressStatus(false);
         lastTouchItem_ = nullptr;
     }
 }
@@ -295,7 +281,13 @@ bool MenuWrapperPattern::HasStackSubMenu()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    return host->GetChildren().size() > 1;
+    auto menuCount = 0;
+    for (const auto& child : host->GetChildren()) {
+        if (child && child->GetTag() == V2::MENU_ETS_TAG) {
+            menuCount++;
+        }
+    }
+    return menuCount > 1;
 }
 
 bool MenuWrapperPattern::HasEmbeddedSubMenu()
@@ -317,7 +309,8 @@ RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto iter = host->GetChildren().begin();
-    int32_t focusNodeId = host->GetChildren().size() - 2;
+    int32_t focusNodeId = static_cast<int32_t>(host->GetChildren().size()) - FOCUS_MENU_NUM;
+    CHECK_NULL_RETURN(focusNodeId >= 0, nullptr);
     std::advance(iter, focusNodeId);
     auto focusMenu = DynamicCast<FrameNode>(*iter);
     CHECK_NULL_RETURN(focusMenu, nullptr);
@@ -556,6 +549,11 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto frameRect = child->GetGeometryNode()->GetFrameRect();
         // rect is relative to window
+        auto childNode = child->GetHostNode();
+        if (childNode &&
+            (childNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || childNode->GetTag() == V2::IMAGE_ETS_TAG)) {
+            frameRect = childNode->GetPaintRectWithTransform(); // get preview area with scale transform
+        }
         auto rect = Rect(frameRect.GetX() + safeAreaInsetsLeft, frameRect.GetY() + safeAreaInsetsTop, frameRect.Width(),
             frameRect.Height());
 
@@ -692,6 +690,7 @@ RefPtr<FrameNode> MenuWrapperPattern::GetMenuChild(const RefPtr<UINode>& node)
     while (child) {
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             auto customNode = DynamicCast<CustomNode>(child);
+            CHECK_NULL_RETURN(customNode, nullptr);
             customNode->Render();
         } else if (child->GetTag() == V2::MENU_ETS_TAG) {
             menuChild = DynamicCast<FrameNode>(child);
@@ -715,8 +714,53 @@ void MenuWrapperPattern::ClearAllSubMenu()
         auto pattern = frameNode->GetPattern<MenuPattern>();
         if (pattern && pattern->IsSubMenu()) {
             host->RemoveChild(frameNode);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         }
     }
+}
+
+void MenuWrapperPattern::StopHoverImageToPreviewAnimation()
+{
+    auto menuWrapperNode = GetHost();
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
+    CHECK_NULL_VOID(flexNode);
+    auto flexContext = flexNode->GetRenderContext();
+    CHECK_NULL_VOID(flexContext);
+
+    auto stackNode = menuWrapperPattern->GetHoverImageStackNode();
+    CHECK_NULL_VOID(stackNode);
+    auto stackContext = stackNode->GetRenderContext();
+    CHECK_NULL_VOID(stackContext);
+
+    auto menuChild = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menuChild);
+    auto menuPattern = menuChild->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto originPosition = menuPattern->GetPreviewOriginOffset();
+
+    auto geometryNode = flexNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto position = geometryNode->GetFrameOffset();
+
+    auto flexPosition = originPosition;
+    if (Positive(hoverImageToPreviewRate_)) {
+        flexPosition += (position - originPosition) * hoverImageToPreviewRate_;
+    }
+
+    AnimationUtils::Animate(AnimationOption(Curves::LINEAR, 0),
+        [stackContext, flexContext, flexPosition, scale = hoverImageToPreviewScale_]() {
+            if (flexContext) {
+                flexContext->UpdatePosition(
+                    OffsetT<Dimension>(Dimension(flexPosition.GetX()), Dimension(flexPosition.GetY())));
+            }
+
+            CHECK_NULL_VOID(stackContext && Positive(scale));
+            stackContext->UpdateTransformScale(VectorF(scale, scale));
+        });
 }
 
 void MenuWrapperPattern::DumpInfo()
@@ -724,6 +768,7 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("MenuPreviewMode: " + std::to_string(dumpInfo_.menuPreviewMode));
     DumpLog::GetInstance().AddDesc("MenuType: " + std::to_string(dumpInfo_.menuType));
     DumpLog::GetInstance().AddDesc("EnableArrow: " + std::to_string(dumpInfo_.enableArrow));
+    DumpLog::GetInstance().AddDesc("Offset: " + dumpInfo_.offset.ToString());
     DumpLog::GetInstance().AddDesc("TargetNode: " + dumpInfo_.targetNode);
     DumpLog::GetInstance().AddDesc("TargetOffset: " + dumpInfo_.targetOffset.ToString());
     DumpLog::GetInstance().AddDesc("TargetSize: " + dumpInfo_.targetSize.ToString());

@@ -201,7 +201,7 @@ HWTEST_F(RichEditorOverlayTestNg, InitSelection002, TestSize.Level1)
     richEditorPattern->textForDisplay_ = "test";
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->spans_.front()->position = 3;
-    richEditorPattern->InitSelection(Offset(0, 1));
+    richEditorPattern->InitSelection(Offset(0, 0));
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
@@ -229,6 +229,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection001, TestSize.Level1)
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
     richEditorPattern->SetSelection(0, 1);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
@@ -271,6 +272,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection101, TestSize.Level1)
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     richEditorPattern->SetSelection(0, 10);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
@@ -327,6 +329,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection002, TestSize.Level1)
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
     richEditorPattern->SetSelection(0, 1);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
@@ -382,6 +385,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection003, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Call SetSelection with no menu
@@ -433,6 +437,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection004, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Create a scene where the text menu has popped up.
@@ -493,6 +498,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection005, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Call SetSelection with no menu
@@ -529,6 +535,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection006, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Create a scene where the text menu has popped up.
@@ -574,6 +581,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection007, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Call SetSelection with no menu
@@ -672,6 +680,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection008, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
 
     /**
      * @tc.step: step3. Create a scene where the text menu has popped up.
@@ -941,7 +950,13 @@ HWTEST_F(RichEditorOverlayTestNg, SingleHandle003, TestSize.Level1)
     auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
     textOverlayTheme->handleDiameter_ = 14.0_vp;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
-    richEditorPattern->HandleTouchDown(touchOffset);
+    TouchEventInfo touchEventInfo("");
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::DOWN;
+    touchLocationInfo.localLocation_ = touchOffset;
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.SetSourceTool(SourceTool::FINGER);
+    richEditorPattern->HandleTouchDown(touchEventInfo);
     EXPECT_TRUE(richEditorPattern->moveCaretState_.isTouchCaret);
     /**
      * @tc.steps: step4. move caret position by touch move
@@ -1253,7 +1268,8 @@ HWTEST_F(RichEditorOverlayTestNg, OnMenuItemAction003, TestSize.Level1)
      */
     auto focusHub = richEditorNode_->GetOrCreateFocusHub();
     focusHub->RequestFocusImmediately();
-	
+    richEditorPattern->isEditing_ = true;
+
     /**
      * @tc.step: step3. call SetSelection
      */
@@ -1394,7 +1410,7 @@ HWTEST_F(RichEditorOverlayTestNg, HandleLevel001, TestSize.Level1)
      */
     richEditorNode_->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_START_SCROLL);
     richEditorNode_->ProcessFrameNodeChangeFlag();
-    EXPECT_EQ(richEditorPattern->selectOverlay_->handleLevelMode_, HandleLevelMode::EMBED);
+    EXPECT_EQ(richEditorPattern->selectOverlay_->handleLevelMode_, HandleLevelMode::OVERLAY);
 }
 
 /**
@@ -1724,7 +1740,7 @@ HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg005, TestSize.Level1)
 
     richEditorPattern->selectOverlay_->isSingleHandle_ = false;
     richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(OffsetF(50.0f, 50.0f), false);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
 
 /**

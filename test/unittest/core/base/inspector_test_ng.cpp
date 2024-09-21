@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 iSoftStone Information Technology (Group) Co.,Ltd.
+ * Copyright (c) 2023-2024 iSoftStone Information Technology (Group) Co.,Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -187,7 +187,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg003, TestSize.Level1)
     MockPipelineContext::pipeline_ = pipeline_bak;
 
     InspectorFilter filter;
-    filter.SetFilterID("test");
+    std::string testId = "test";
+    filter.SetFilterID(testId);
     bool needThrow = false;
     auto test6 = Inspector::GetInspector(false, filter, needThrow);
     auto rootNode = context1->GetStageManager()->GetLastPage();
@@ -501,7 +502,8 @@ HWTEST_F(InspectorTestNg, InspectorTestNg013, TestSize.Level1)
     InspectorFilter testFilter;
     EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), true);
     testFilter.SetFilterDepth(1);
-    testFilter.SetFilterID("id");
+    std::string id = "id";
+    testFilter.SetFilterID(id);
     testFilter.filterExt.emplace_back("abc");
     testFilter.AddFilterAttr("focusable");
     testFilter.AddFilterAttr("abc");
@@ -537,6 +539,43 @@ HWTEST_F(InspectorTestNg, InspectorTestNg015, TestSize.Level1)
     testFilter.filterExt.emplace_back("abc");
     testFilter.AddFilterAttr("focusable");
     EXPECT_EQ(testFilter.CheckFilterAttr(FixedAttrBit::FIXED_ATTR_CONTENT, hello), true);
+}
+
+/**
+ * @tc.name: InspectorTestNg016
+ * @tc.desc: Test the operation of GetInspectorTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg016, TestSize.Level1)
+{
+    // tc.steps: step1. callback GetInspectorTree
+    // tc.expected: expect the function is run ok
+    auto context1 = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context1, nullptr);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("stage", id, AceType::MakeRefPtr<Pattern>(), true);
+    context1->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+
+    // tc.steps: step2 add lastPage and create a frame node tree to lastPage
+    auto id2 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> lastPage = FrameNode::CreateFrameNode("two", id2, AceType::MakeRefPtr<Pattern>());
+    stageNode->children_.clear();
+    stageNode->AddChild(lastPage);
+    auto stageParent = FrameNode::CreateFrameNode("stageParent", 5, AceType::MakeRefPtr<Pattern>(), true);
+    stageParent->AddChild(stageNode);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 6, AceType::MakeRefPtr<Pattern>(), true);
+    lastPage->AddChild(frameNode);
+    frameNode->isActive_ = true;
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 62, AceType::MakeRefPtr<Pattern>(), true);
+    lastPage->AddChild(frameNode2);
+    frameNode2->isActive_ = false;
+    auto frameNode3 = FrameNode::CreateFrameNode("frameNode3", 63, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode2->AddChild(frameNode3);
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetInspectorTree(treesInfos);
+    EXPECT_TRUE(!treesInfos.empty());
+    context1->stageManager_ = nullptr;
 }
 
 /**
@@ -585,6 +624,26 @@ HWTEST_F(InspectorTestNg, RemoveOffscreenNode_001, TestSize.Level1)
 
     Inspector::RemoveOffscreenNode(one);
     EXPECT_EQ(Inspector::offscreenNodes.size(), num - 1);
+    context->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: GetOffScreenTreeNodes_001
+ * @tc.desc: Test the operation of GetOffScreenTreeNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetOffScreenTreeNodes_001, TestSize.Level1)
+{
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> one = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(one);
+    Inspector::AddOffscreenNode(one);
+    int32_t num = Inspector::offscreenNodes.size();
+    NG::InspectorTreeMap offNodes;
+    Inspector::GetOffScreenTreeNodes(offNodes);
+    EXPECT_EQ(offNodes.size(), num);
     context->stageManager_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

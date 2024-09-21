@@ -15,17 +15,6 @@
 
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/marquee/marquee_layout_property.h"
-#include "core/components_ng/pattern/marquee/marquee_pattern.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double MULTIPLE = 2.0;
@@ -74,9 +63,14 @@ void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto child = layoutWrapper->GetAllChildrenWithBuild().front();
-    // init align center left, and get user defined alignment
-    auto align = Alignment::CENTER_LEFT;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
+    // init align, and get user defined alignment
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto direction = layoutProperty->GetNonAutoLayoutDirection();
+    auto align = (direction == TextDirection::RTL ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT);
+
+    if (layoutProperty->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     OffsetF translate;

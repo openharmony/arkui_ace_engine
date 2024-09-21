@@ -130,23 +130,6 @@ public:
         return JSRef<JSVal>::Cast(jsElmtIdArray);
     }
 
-    std::set<std::string> GetCacheKeys(std::set<int32_t>& idleIndexes) override
-    {
-        std::set<std::string> res;
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, res);
-        if (getDataFunc_.IsEmpty()) {
-            return res;
-        }
-
-        JSRef<JSVal> params[paramType::MAX_PARAMS_SIZE];
-        for (const auto& index : idleIndexes) {
-            params[paramType::Data] = CallJSFunction(getDataFunc_, dataSourceObj_, index);
-            params[paramType::Index] = JSRef<JSVal>::Make(ToJSValue(index));
-            res.insert(keyGenFunc_(params[paramType::Data], index));
-        }
-        return res;
-    }
-
     std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
         int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) override
     {
@@ -228,7 +211,10 @@ public:
             info.first = key;
             info.second = expiringIter->second.second;
             expiringItems.erase(expiringIter);
-            return info;
+            // if info.second is null, the following ui node creation process is needed to fill info.second
+            if (info.second != nullptr) {
+                return info;
+            }
         }
 
         NG::ScopedViewStackProcessor scopedViewStackProcessor;

@@ -14,13 +14,9 @@
  */
 #include "core/interfaces/native/node/node_xcomponent_modifier.h"
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
-#include "core/pipeline/base/element_register.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -166,6 +162,20 @@ void InitXComponent(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     XComponentModelNG::InitXComponent(frameNode);
 }
+
+void SetXComponentEnableSecure(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableSecure(frameNode, enable);
+}
+
+void ResetXComponentEnableSecure(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableSecure(frameNode, false);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -193,6 +203,8 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         SetXComponentLibraryname,
         SetImageAIOptions,
         InitXComponent,
+        SetXComponentEnableSecure,
+        ResetXComponentEnableSecure,
     };
 
     return &modifier;

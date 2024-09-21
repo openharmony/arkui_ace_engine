@@ -1255,6 +1255,7 @@ HWTEST_F(OverlayTestNg, ToastShowModeTest001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto toastContext = toastNode->GetRenderContext();
     ASSERT_NE(toastContext, nullptr);
+    toastContext->UpdateOffset(OffsetT<Dimension>{0.0_vp, 0.0_vp});
     EXPECT_FALSE(pattern->IsDefaultToast());
     EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(toastNode->CreateLayoutWrapper(), DirtySwapConfig()));
     EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 0.0);
@@ -1566,7 +1567,7 @@ HWTEST_F(OverlayTestNg, ToastTest009, TestSize.Level1)
     ASSERT_NE(toastPattern, nullptr);
     EXPECT_TRUE(toastPattern->IsDefaultToast());
     EXPECT_FALSE(toastPattern->toastInfo_.enableHoverMode);
-    EXPECT_EQ(toastPattern->toastInfo_.hoverModeArea, NG::HoverModeAreaType::BOTTOM_SCREEN);
+    EXPECT_EQ(toastPattern->toastInfo_.hoverModeArea, HoverModeAreaType::BOTTOM_SCREEN);
 }
 
 /**
@@ -1584,7 +1585,7 @@ HWTEST_F(OverlayTestNg, ToastTest010, TestSize.Level1)
         .bottom = BOTTOMSTRING,
         .isRightToLeft = true };
     toastInfo.enableHoverMode = true;
-    toastInfo.hoverModeArea = NG::HoverModeAreaType::TOP_SCREEN;
+    toastInfo.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
     /**
      * @tc.steps: step2. create ToastNode toastPattern.
      */
@@ -1597,7 +1598,7 @@ HWTEST_F(OverlayTestNg, ToastTest010, TestSize.Level1)
      */
     EXPECT_TRUE(toastPattern->IsDefaultToast());
     EXPECT_TRUE(toastPattern->toastInfo_.enableHoverMode);
-    EXPECT_EQ(toastPattern->toastInfo_.hoverModeArea, NG::HoverModeAreaType::TOP_SCREEN);
+    EXPECT_EQ(toastPattern->toastInfo_.hoverModeArea, HoverModeAreaType::TOP_SCREEN);
 }
 
 /**

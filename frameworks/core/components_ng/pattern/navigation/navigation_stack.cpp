@@ -15,11 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 
-#include <utility>
-
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -120,8 +116,8 @@ void NavigationStack::Add(
     // for the old page: keep the UINode, and keep in the stack
     auto index = FindIndex(name, navDestinationNode, true);
     if (index != NOT_EXIST) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "This navigation destination node already exists");
         RemoveIndex(index);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "This navigation destination node already exists");
     }
     navPathList_.emplace_back(std::make_pair(name, navDestinationNode));
     if (index != NOT_EXIST) {

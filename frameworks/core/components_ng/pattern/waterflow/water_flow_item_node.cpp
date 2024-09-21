@@ -33,6 +33,15 @@ RefPtr<FrameNode> WaterFlowItemNode::GetOrCreateFlowItem(
     return node;
 }
 
+RefPtr<FrameNode> WaterFlowItemNode::CreateFlowItem(
+    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+{
+    auto frameNode = MakeRefPtr<WaterFlowItemNode>(tag, nodeId, pattern);
+    ElementRegister::GetInstance()->AddUINode(frameNode);
+    frameNode->InitializePatternAndContext();
+    return frameNode;
+}
+
 bool WaterFlowItemNode::RequestParentDirty()
 {
     auto parent = GetAncestorNodeOfFrame();
@@ -40,8 +49,9 @@ bool WaterFlowItemNode::RequestParentDirty()
     parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     auto pattern = parent->GetPattern<WaterFlowPattern>();
     CHECK_NULL_RETURN(pattern, true);
-    // record index of dirty child, but only when using new layout
-    if (pattern->GetSections() || SystemProperties::WaterFlowUseSegmentedLayout()) {
+    // record index of dirty child, but only when using TOP_DOWN layout with sections
+    if ((pattern->GetLayoutMode() == WaterFlowLayoutMode::TOP_DOWN && pattern->GetSections()) ||
+        SystemProperties::WaterFlowUseSegmentedLayout()) {
         auto idx = parent->GetChildTrueIndex(Claim(this));
         if (idx > -1) {
             parent->ChildrenUpdatedFrom(idx);

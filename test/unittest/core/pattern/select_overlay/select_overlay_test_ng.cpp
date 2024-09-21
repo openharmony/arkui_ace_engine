@@ -536,7 +536,7 @@ HWTEST_F(SelectOverlayTestNg, HandleOperator002, TestSize.Level1)
     info4.localLocation_ = Offset(1, 1);
     pattern->info_->isSingleHandle = false;
     callBackFlag = 0;
-    pattern->info_->onHandleMoveStart = [&](bool isFirst) {
+    pattern->info_->onHandleMoveStart = [&](const GestureEvent& event, bool isFirst) {
         callBackFlag = 1;
     };
     pattern->isFirstHandleTouchDown_ = true;
@@ -1511,7 +1511,9 @@ HWTEST_F(SelectOverlayTestNg, ContentModifierOnDraw004, TestSize.Level1)
     */
     contentModifier->isPaintHandleUsePoints_ = true;
     contentModifier->SetIsSingleHandle(true);
+    contentModifier->firstHandlePaintInfo_.width = 6.0f;
     contentModifier->firstHandleIsShow_->Set(true);
+    contentModifier->secondHandlePaintInfo_.width = 6.0f;
     contentModifier->secondHandleIsShow_->Set(true);
     contentModifier->PaintSingleHandle(canvas);
     EXPECT_EQ(contentModifier->isPaintHandleUsePoints_, true);
@@ -1590,7 +1592,7 @@ HWTEST_F(SelectOverlayTestNg, OverlayModifierOnDraw001, TestSize.Level1)
      * @tc.expected: the menuOptionOffset_ value is correct.
      */
     overlayModifier->onDraw(context);
-    EXPECT_EQ(overlayModifier->hasExtensionMenu_, false);
+    EXPECT_EQ(overlayModifier->hasExtensionMenu_->Get(), false);
 }
 
 /**
@@ -2595,7 +2597,7 @@ HWTEST_F(SelectOverlayTestNg, NewMenuAvoidStrategy001, TestSize.Level1)
     auto menuHeight = 100;
     auto ret1 = newNode->NewMenuAvoidStrategy(AccessibilityManager::RawPtr(layoutWrapper), menuWidth, menuHeight);
     std::cout << ret1.ToString();
-    OffsetF expectRet1(100, 0);
+    OffsetF expectRet1(100, 398);
     bool equal1 = (ret1 == expectRet1);
     EXPECT_TRUE(equal1);
 
@@ -2849,13 +2851,14 @@ HWTEST_F(SelectOverlayTestNg, AddMenuResponseRegion001, TestSize.Level1)
     auto layoutProperty = pattern->CreateLayoutProperty();
     frameNode->SetLayoutProperty(layoutProperty);
     pattern->AddMenuResponseRegion(tmp);
-    EXPECT_EQ(tmp.size(), 1);
+    EXPECT_EQ(tmp.size(), 2);
 
     tmp.clear();
     auto layoutProps = pattern->GetLayoutProperty<LayoutProperty>();
     layoutProps->UpdateSafeAreaInsets(SafeAreaInsets());
     pattern->AddMenuResponseRegion(tmp);
-    EXPECT_EQ(tmp.size(), 1);
+    EXPECT_EQ(tmp.size(), 2);
+    // if TextOverlayTheme is NULL, SelectOverlayNode::CreateToolBar() still continue, result in 2 children.
 }
 
 /**
@@ -4122,7 +4125,7 @@ HWTEST_F(SelectOverlayTestNg, OverlayModifierOnDraw002, TestSize.Level1)
      * @tc.expected: cover branch isNewAvoid_, firstHandleIsShow_ and secondHandleIsShow_ are true.
      */
     overlayModifier->onDraw(context);
-    EXPECT_EQ(overlayModifier->hasExtensionMenu_, false);
+    EXPECT_EQ(overlayModifier->hasExtensionMenu_->Get(), false);
 }
 
 /**

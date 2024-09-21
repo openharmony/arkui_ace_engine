@@ -15,16 +15,8 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
-#include <memory>
-#include <optional>
-
 #include "menu_item_model.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
@@ -690,7 +682,19 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
     // change menu item paint props on press
     auto touchType = info.GetTouches().front().GetTouchType();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    if (touchType == TouchType::DOWN) {
+        // change background color, update press status
+        NotifyPressStatus(true);
+    } else if (touchType == TouchType::UP) {
+        NotifyPressStatus(false);
+    }
+}
+
+void MenuItemPattern::NotifyPressStatus(bool isPress)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -700,8 +704,6 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto parent = AceType::DynamicCast<UINode>(host->GetParent());
     auto menuWrapper = GetMenuWrapper();
     auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
@@ -711,7 +713,7 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
         && menuWrapperPattern && menuWrapperPattern->HasStackSubMenu() && !IsSubMenu());
     if (!canChangeColor) return;
 
-    if (touchType == TouchType::DOWN) {
+    if (isPress) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
         if (menuWrapperPattern) {
@@ -719,12 +721,10 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
         }
         props->UpdatePress(true);
         menuPattern->OnItemPressed(parent, index_, true);
-    } else if (touchType == TouchType::UP) {
+    } else {
         SetBgBlendColor(isHovered_ ? theme->GetHoverColor() : Color::TRANSPARENT);
         props->UpdatePress(false);
         menuPattern->OnItemPressed(parent, index_, false);
-    } else {
-        return;
     }
     PlayBgColorAnimation(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1349,7 +1349,6 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto context = PipelineBase::GetCurrentContext();
     auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
     CHECK_NULL_VOID(theme);
-    UpdateTextOverflow(textProperty);
     auto layoutDirection = itemProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());
     if (layoutDirection == TextDirection::RTL) {
@@ -1362,8 +1361,42 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         } else if (textAlign == TextAlign::END) {
             textAlign = TextAlign::START;
         }
+        textProperty->UpdateTextAlign(textAlign);
+    } else {
+        textProperty->UpdateTextAlign(isLabel ? TextAlign::CENTER : textAlign);
     }
-    textProperty->UpdateTextAlign(isLabel ? TextAlign::CENTER : textAlign);
+    UpdateFont(menuProperty, theme, isLabel);
+    textProperty->UpdateContent(content);
+    UpdateTextOverflow(textProperty, theme);
+    node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
+    node->MarkModifyDone();
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty,
+    RefPtr<SelectTheme>& theme)
+{
+    if (theme && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (theme->GetExpandDisplay()) {
+            textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+            textProperty->UpdateMaxLines(1);
+        } else {
+            textProperty->UpdateMaxLines(std::numeric_limits<int32_t>::max());
+        }
+    } else {
+        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        textProperty->UpdateMaxLines(1);
+    }
+    UpdateMaxLinesFromTheme(textProperty);
+}
+
+void MenuItemPattern::UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel)
+{
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto& node = isLabel ? label_ : content_;
+    auto textProperty = node ? node->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(textProperty);
 
     auto fontSize = isLabel ? itemProperty->GetLabelFontSize() : itemProperty->GetFontSize();
     UpdateFontSize(textProperty, menuProperty, fontSize, theme->GetMenuFontSize());
@@ -1386,16 +1419,10 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     }
     auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
     UpdateFontFamily(textProperty, menuProperty, fontFamily);
-    textProperty->UpdateContent(content);
-    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
-    node->MarkModifyDone();
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty)
+void MenuItemPattern::UpdateMaxLinesFromTheme(RefPtr<TextLayoutProperty>& textProperty)
 {
-    textProperty->UpdateMaxLines(1);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();

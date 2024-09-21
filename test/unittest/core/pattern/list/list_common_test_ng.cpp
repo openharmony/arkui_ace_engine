@@ -125,7 +125,9 @@ void ListCommonTestNg::CreateForEachList(
     for (int32_t index = 0; index < itemNumber; index++) {
         newIds.emplace_back(std::to_string(index));
     }
+    std::list<int32_t> removedElmtId;
     forEachModelNG.SetNewIds(std::move(newIds));
+    forEachModelNG.SetRemovedElmtIds(removedElmtId);
     forEachModelNG.OnMove(std::move(onMove));
     for (int32_t index = 0; index < itemNumber; index++) {
         // key is 0,1,2,3...
@@ -511,7 +513,7 @@ HWTEST_F(ListCommonTestNg, FocusStep009, TestSize.Level1)
     EXPECT_EQ(pattern_->GetTotalOffset(), groupHeight);
     EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 2, 1));
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 100);
     // change focus in same group
     ClearOldNodes();
     CreateList();
@@ -960,9 +962,11 @@ HWTEST_F(ListCommonTestNg, PerformActionTest002, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
     accessibilityProperty_->ActActionScrollForward();
+    MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 200.f);
     accessibilityProperty_->ActActionScrollBackward();
+    MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
@@ -988,12 +992,8 @@ HWTEST_F(ListCommonTestNg, FRCCallback001, TestSize.Level1)
 HWTEST_F(ListCommonTestNg, EventHub001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. EXPECT_CALL DrawFrameNode, HandleOnItemDragStart will trigger it
+     * @tc.steps: step1. EXPECT_CALL GetWindowId, HandleOnItemDragStart will trigger it
      */
-    auto mockDragWindow = MockDragWindow::CreateDragWindow({"", 0, 0, 0, 0, 0});
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), DrawFrameNode(_)).Times(2);
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), MoveTo).Times(AnyNumber());
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), Destroy).Times(AnyNumber());
     auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
     EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
 

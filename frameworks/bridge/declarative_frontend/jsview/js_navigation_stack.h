@@ -101,7 +101,7 @@ public:
     std::string GetRouteParam() const override;
     void OnAttachToParent(RefPtr<NG::NavigationStack> parent) override;
     void OnDetachFromParent() override;
-    int32_t CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo, uint32_t& navDestinationId);
+    int32_t CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo);
     void ClearPreBuildNodeList() override;
     std::vector<std::string> DumpStackInfo() const override;
     void FireNavigationInterception(bool isBefore, const RefPtr<NG::NavDestinationContext>& from,
@@ -115,6 +115,12 @@ public:
     bool NeedBuildNewInstance(int32_t index) override;
     void SetNeedBuildNewInstance(int32_t index, bool need) override;
     void SetIsEntryByIndex(int32_t index, bool isEntry) override;
+
+    std::string GetStringifyParamByIndex(int32_t index) const override;
+    void SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo) override;
+    bool IsFromRecovery(int32_t index) override;
+    void SetFromRecovery(int32_t index, bool fromRecovery) override;
+    int32_t GetRecoveredDestinationMode(int32_t index) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -132,24 +138,29 @@ private:
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const;
     void SetJSParentStack(JSRef<JSVal> parent);
-    std::string ConvertParamToString(const JSRef<JSVal>& param) const;
-    void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit) const;
+    std::string ConvertParamToString(const JSRef<JSVal>& param, bool needLimit = false) const;
+    void ParseJsObject(
+        std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit, bool needLimit) const;
     static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
     static void UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
-        std::function<int32_t(JSRef<JSObject>, uint32_t&)> checkFunc);
+        std::function<int32_t(JSRef<JSObject>)> checkFunc);
 
     int LoadDestination(const std::string& name, const JSRef<JSVal>& param, const WeakPtr<NG::UINode>& customNode,
         RefPtr<NG::UINode>& node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool LoadDestinationByBuilder(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node,
         RefPtr<NG::NavDestinationGroupNode>& desNode);
     bool GetFlagByIndex(int32_t index) const;
+    bool CallByPushDestination(int32_t index);
     void SaveNodeToPreBuildList(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
-    bool GetNodeFromPreBuildList(int32_t index, RefPtr<NG::UINode>& node);
+    bool GetNodeFromPreBuildList(int32_t index, const std::string& name,
+        const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
     bool CheckAndGetInterceptionFunc(const std::string& name, JSRef<JSFunc>& func);
 
     bool GetNeedUpdatePathInfo(int32_t index);
     void SetNeedUpdatePathInfo(int32_t index, bool need);
 
+    JSRef<JSArray> GetPathArray();
+    JSRef<JSObject> GetPathInfo(int32_t index);
 private:
     std::vector<NavPathInfoUINode> preBuildNodeList_;
     JSRef<JSObject> thisObj_;

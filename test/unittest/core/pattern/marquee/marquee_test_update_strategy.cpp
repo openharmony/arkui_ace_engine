@@ -1154,7 +1154,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy015, TestSize.Lev
     marqueeModel.SetAllowScale(true);
     EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
     marqueeModel.SetAllowScale(std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasAllowScale());
+    EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
 
     marqueeModel.SetMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
     EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
@@ -1217,7 +1217,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy016, TestSize.Lev
     marqueeModel.SetAllowScale(&frameNode, true);
     EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
     marqueeModel.SetAllowScale(&frameNode, false);
-    EXPECT_FALSE(marqueeLayoutProperty->HasAllowScale());
+    EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), false);
 
     marqueeModel.SetMarqueeUpdateStrategy(&frameNode, Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
     EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::PRESERVE_POSITION);
@@ -1701,7 +1701,7 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy026, TestSize.Lev
     marqueeModel.SetAllowScale(true);
     EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
     marqueeModel.SetAllowScale(std::nullopt);
-    EXPECT_FALSE(marqueeLayoutProperty->HasAllowScale());
+    EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
 
     marqueeModel.SetMarqueeUpdateStrategy(Ace::MarqueeUpdateStrategy::DEFAULT);
     EXPECT_EQ(marqueeLayoutProperty->GetMarqueeUpdateStrategy(), Ace::MarqueeUpdateStrategy::DEFAULT);
@@ -1715,5 +1715,52 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy026, TestSize.Lev
     marqueeModel.SetValue(std::nullopt);
     EXPECT_FALSE(marqueeLayoutProperty->HasSrc());
     ViewStackProcessor::instance = nullptr;
+}
+
+/**
+ * @tc.name: MarqueeTestUpdateStrategy027
+ * @tc.desc: Test MarqueeModelNG setFun of MarqueeLayoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNod.
+     */
+    auto frameNode = MarqueeModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    auto layoutProperty = frameNode->GetLayoutPropertyPtr<MarqueeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<MarqueePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set init value.
+     */
+    MarqueeModelNG::SetValue(node, MARQUEE_SRC);
+    EXPECT_EQ(layoutProperty->GetSrcValue(), MARQUEE_SRC);
+    MarqueeModelNG::ResetValue(node);
+    EXPECT_FALSE(layoutProperty->HasSrc());
+
+    MarqueeModelNG::SetPlayerStatus(node, true);
+    EXPECT_EQ(paintProperty->GetPlayerStatusValue(), true);
+    MarqueeModelNG::ResetPlayerStatus(node);
+    EXPECT_FALSE(paintProperty->HasPlayerStatus());
+
+    MarqueeModelNG::SetScrollAmount(node, MARQUEE_SCROLL_AMOUNT);
+    EXPECT_EQ(paintProperty->GetScrollAmountValue(), MARQUEE_SCROLL_AMOUNT);
+    MarqueeModelNG::ResetScrollAmount(node);
+    EXPECT_FALSE(paintProperty->HasScrollAmount());
+
+    MarqueeModelNG::SetLoop(node, MARQUEE_LOOP);
+    EXPECT_EQ(paintProperty->GetLoop(), MARQUEE_LOOP);
+    MarqueeModelNG::ResetLoop(node);
+    EXPECT_FALSE(paintProperty->HasLoop());
+
+    MarqueeModelNG::SetDirection(node, MarqueeDirection::LEFT);
+    EXPECT_EQ(paintProperty->GetDirectionValue(), MarqueeDirection::LEFT);
+    MarqueeModelNG::ResetDirection(node);
+    EXPECT_FALSE(paintProperty->HasDirection());
 }
 } // namespace OHOS::Ace::NG

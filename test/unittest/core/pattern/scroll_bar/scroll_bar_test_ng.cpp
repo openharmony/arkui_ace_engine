@@ -214,32 +214,170 @@ HWTEST_F(ScrollBarTestNg, ScrollBarProxy001, TestSize.Level1)
 {
     ScrollBarModelNG scrollBarModel;
     auto proxy = scrollBarModel.GetScrollBarProxy(nullptr);
+    CHECK_NULL_VOID(proxy);
     auto scrollBarProxy = AceType::DynamicCast<NG::ScrollBarProxy>(proxy);
+    CHECK_NULL_VOID(scrollBarProxy);
     ScrollableNodeInfo nodeInfo;
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
-    scrollBarProxy->RegisterScrollableNode(nodeInfo);
-    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 1);
+    ASSERT_NE(scrollBarProxy, nullptr);
     scrollBarProxy->RegisterScrollBar(nullptr);
     scrollBarProxy->RegisterScrollBar(nullptr);
-    EXPECT_EQ(scrollBarProxy->scrollBars_.size(), 1);
-    scrollBarProxy->UnRegisterScrollableNode(nullptr);
-    scrollBarProxy->UnRegisterScrollableNode(nullptr);
-    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 0);
+    scrollBarProxy->RegisterNestScrollableNode(nodeInfo);
+    ASSERT_EQ(scrollBarProxy->scrollBars_.size(), 1);
     scrollBarProxy->UnRegisterScrollBar(nullptr);
     scrollBarProxy->UnRegisterScrollBar(nullptr);
-    EXPECT_EQ(scrollBarProxy->scrollBars_.size(), 0);
+    ASSERT_EQ(scrollBarProxy->scrollBars_.size(), 0);
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy->RegisterScrollBar(nullptr);
     scrollBarProxy->NotifyScrollableNode(0, 1, nullptr);
     scrollBarProxy->NotifyScrollBarNode(0, 1);
     scrollBarProxy->NotifyScrollStart();
     scrollBarProxy->NotifyScrollStop();
-    scrollBarProxy->NotifyScrollBar(nullptr);
+    scrollBarProxy->NotifyScrollBar();
     scrollBarProxy->StartScrollBarAnimator();
     scrollBarProxy->StopScrollBarAnimator();
     scrollBarProxy->NotifySnapScroll(0, 0, 0, 0);
     scrollBarProxy->CalcPatternOffset(0, 0, 0);
     scrollBarProxy->ScrollPage(true, true);
     scrollBarProxy->SetScrollEnabled(true, nullptr);
+}
+
+/**
+ * @tc.name: IsNestScroller001
+ * @tc.desc: ScrollBarProxy IsNestScroller
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, IsNestScroller001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+    pattern_->SetEnableNestedSorll(true);
+    ASSERT_EQ(pattern_->scrollBarProxy_->IsNestScroller(), true);
+    pattern_->SetEnableNestedSorll(false);
+    ASSERT_EQ(pattern_->scrollBarProxy_->IsNestScroller(), false);
+}
+
+/**
+ * @tc.name: GetScrollableNodeInfo001
+ * @tc.desc: ScrollBarProxy GetScrollableNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetScrollableNodeInfo001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+    pattern_->SetEnableNestedSorll(true);
+    auto nestScroller = pattern_->scrollBarProxy_->GetScrollableNodeInfo();
+    ASSERT_NE(nestScroller.scrollableNode.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: setNestedScroll001
+ * @tc.desc: ScrollBarProxy SetNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, SetNestedScroll001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    CreateScrollBarChild();
+    CreateDone();
+    pattern_->SetEnableNestedSorll(true);
+    auto scrollPnTest = scrollNode_->GetPattern<ScrollablePattern>();
+    scrollBarModel.SetNestedScroll(scrollNode_, scrollPnTest);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+}
+
+/**
+ * @tc.name: setNestedScroll001
+ * @tc.desc: ScrollBarProxy SetNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, UnSetNestedScroll001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+    CreateScrollBarChild();
+    CreateDone();
+    pattern_->SetEnableNestedSorll(true);
+    auto scrollPnTest = scrollNode_->GetPattern<ScrollablePattern>();
+    scrollBarModel.SetNestedScroll(scrollNode_, scrollPnTest);
+    ASSERT_NE(pattern_->GetScrollBarProxy(), nullptr);
+    scrollBarModel.UnSetNestedScroll(scrollNode_, scrollPnTest);
+    ASSERT_EQ(scrollPnTest->nestScrollBarProxy_.size(), 0);
+}
+
+/**
+ * @tc.name: HandleDragUpdate001
+ * @tc.desc: Test HandleDragUpdate when child height less than scrollbar height
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleDragUpdate001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainDelta(10.f);
+    pattern_->HandleDragUpdate(info);
+    FlushLayoutTask(stackNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 10.f);
+    auto scrollDelta = pattern_->scrollBarProxy_->CalcPatternOffset(scrollPattern_->scrollableDistance_,
+        pattern_->scrollableDistance_, -pattern_->currentOffset_);
+    EXPECT_EQ(scrollPattern_->currentOffset_, scrollDelta);
+
+    info.SetMainDelta(10.f);
+    auto scrollable = scrollPattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(stackNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+    EXPECT_EQ(scrollPattern_->currentOffset_, 0.f);
+}
+
+/**
+ * @tc.name: HandleDragUpdate002
+ * @tc.desc: Test HandleDragUpdate when child height greater than scrollbar height
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleDragUpdate002, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild(2000.f);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainDelta(10.f);
+    pattern_->HandleDragUpdate(info);
+    FlushLayoutTask(stackNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+    EXPECT_EQ(scrollPattern_->currentOffset_, 0.f);
+
+    info.SetMainDelta(-10.f);
+    auto scrollable = scrollPattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(stackNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+    EXPECT_EQ(scrollPattern_->currentOffset_, -10.f);
 }
 } // namespace OHOS::Ace::NG

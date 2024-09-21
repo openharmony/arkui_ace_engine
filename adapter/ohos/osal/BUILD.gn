@@ -75,6 +75,7 @@ template("ace_osal_ohos_source_set") {
       "stylus_detector_loader.cpp",
       "stylus_detector_mgr.cpp",
       "system_properties.cpp",
+      "thp_extra_manager_impl.cpp",
       "trace_id_impl.cpp",
       "view_data_wrap_ohos.cpp",
       "want_wrap_ohos.cpp",
@@ -125,7 +126,11 @@ template("ace_osal_ohos_source_set") {
       ]
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
-        sources += [ "js_accessibility_manager.cpp" ]
+        sources += [
+          "js_accessibility_manager.cpp",
+          "js_third_accessibility_hover_ng.cpp",
+          "js_third_provider_interaction_operation.cpp",
+        ]
         deps += [ "$ace_root/frameworks/bridge/common/accessibility:bridge_accessibility_$platform" ]
         external_deps += [
           "accessibility:accessibility_common",
@@ -185,10 +190,14 @@ template("ace_osal_ohos_source_set") {
     }
     deps += [
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
+      "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     ]
 
     if (ability_runtime_graphics) {
       external_deps += [ "image_framework:image_native" ]
+    }
+    if (os_account_exists) {
+      external_deps += [ "os_account:os_account_innerkits" ]
     }
   }
 }

@@ -267,11 +267,13 @@ public:
     void RemoveChild(const RefPtr<RenderContext>& renderContext) override;
     void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
+    void SetSecurityLayer(bool isSecure) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
     bool StopTextureExport() override;
     void SetSurfaceRotation(bool isLock) override;
+    void SetRenderFit(RenderFit renderFit) override;
     PipelineContext* GetPipelineContext() const;
 
     RectF GetPaintRectWithTransform() override;
@@ -303,6 +305,8 @@ public:
 
     void ClearDrawCommands() override;
 
+    void RemoveContentModifier(const RefPtr<ContentModifier>& modifier) override;
+
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
     void ScaleAnimation(const AnimationOption& option, double begin, double end) override;
 
@@ -324,7 +328,13 @@ public:
     void RecalculatePosition() override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo() override;
+    void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void SetAdvanceInfo(std::unique_ptr<JsonValue>& json);
+    void BuildStagingInfo(std::unique_ptr<JsonValue>& json);
+    void BuildPositionInfo(std::unique_ptr<JsonValue>& json);
+    void BuildShadowInfo(std::unique_ptr<JsonValue>& json);
     void SetClipBoundsWithCommands(const std::string& commands) override;
     void SetNeedDebugBoundary(bool flag) override
     {
@@ -408,6 +418,10 @@ public:
     Matrix4 GetRevertMatrix() override;
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
     void SetOpacityMultiplier(float opacity) override;
+    bool IsDisappearing() const override
+    {
+        return isDisappearing_;
+    }
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -648,7 +662,7 @@ protected:
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
-    static constexpr uint32_t DRAW_REGION_RECT_COUNT = 6;
+    static constexpr uint32_t DRAW_REGION_RECT_COUNT = 7;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
     std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
     Color blendColor_ = Color::TRANSPARENT;

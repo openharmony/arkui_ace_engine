@@ -25,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/scrollable_event.h"
@@ -41,61 +42,11 @@ struct DragNotifyMsg;
 class UnifiedData;
 }
 
-enum class MenuPreviewMode {
-    NONE,
-    IMAGE,
-    CUSTOM,
-};
-
-enum class MenuBindingType {
-    LONG_PRESS,
-    RIGHT_CLICK,
-};
 namespace OHOS::Ace::NG {
-
-enum class HitTestMode {
-    /**
-     *  Both self and children respond to the hit test for touch events,
-     *  but block hit test of the other nodes which is masked by this node.
-     */
-    HTMDEFAULT = 0,
-
-    /**
-     * Self respond to the hit test for touch events,
-     * but block hit test of children and other nodes which is masked by this node.
-     */
-    HTMBLOCK,
-
-    /**
-     * Self and child respond to the hit test for touch events,
-     * and allow hit test of other nodes which is masked by this node.
-     */
-    HTMTRANSPARENT,
-
-    /**
-     * Self not respond to the hit test for touch events,
-     * but children respond to the hit test for touch events.
-     */
-    HTMNONE,
-
-    /**
-     * Self and child respond to the hit test for touch events,
-     * when self consumed allow hit test of other nodes which is masked by this node,
-     * when child consumed block hit test of other nodes.
-     */
-    HTMTRANSPARENT_SELF,
-};
-
 using TouchInterceptFunc = std::function<NG::HitTestMode(TouchEventInfo&)>;
 
 using ShouldBuiltInRecognizerParallelWithFunc = std::function<RefPtr<NGGestureRecognizer>(
     const RefPtr<NGGestureRecognizer>&, const std::vector<RefPtr<NGGestureRecognizer>>&)>;
-
-enum class TouchTestStrategy {
-    DEFAULT = 0,
-    FORWARD_COMPETITION,
-    FORWARD
-};
 
 struct TouchTestInfo {
     PointF windowPoint;
@@ -110,21 +61,23 @@ struct TouchResult {
     std::string id;
 };
 
-enum class HitTestResult {
-    // The touch point is located outside the current component area;
-    OUT_OF_REGION,
-    // node consumption events and prevent bubbling;
-    STOP_BUBBLING,
-    // node process events and bubble;
-    BUBBLING,
-    // node process events and bubble;
-    SELF_TRANSPARENT,
-};
-
 struct DragDropBaseInfo {
     RefPtr<AceType> node;
     RefPtr<PixelMap> pixelMap;
     std::string extraInfo;
+};
+
+struct BindMenuStatus {
+    bool isBindCustomMenu = false;
+    bool isBindLongPressMenu = false;
+    bool isShow = false;
+    MenuPreviewMode isShowPreviewMode = MenuPreviewMode::NONE;
+    MenuPreviewMode longPressPreviewMode = MenuPreviewMode::NONE;
+    bool IsNotNeedShowPreview() const
+    {
+        return (isBindCustomMenu && isShow && isShowPreviewMode!= MenuPreviewMode::NONE) ||
+            (isBindLongPressMenu && longPressPreviewMode != MenuPreviewMode::NONE);
+    }
 };
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -174,16 +127,14 @@ public:
     {
         modifierGestures_.emplace_back(gesture);
         backupModifierGestures_.emplace_back(gesture);
-        recreateGesture_ = true;
-        OnModifyDone();
+        UpdateModifierGestureHierarchy();
     }
 
     void RemoveGesture(const RefPtr<NG::Gesture>& gesture)
     {
         modifierGestures_.remove(gesture);
         backupModifierGestures_.remove(gesture);
-        recreateGesture_ = true;
-        OnModifyDone();
+        UpdateModifierGestureHierarchy();
     }
 
     void RemoveGesturesByTag(const std::string& gestureTag);
@@ -327,7 +278,8 @@ public:
     void ClearJSFrameNodeOnClick();
     void ClearJSFrameNodeOnTouch();
 
-    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
+    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
     void AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -439,6 +391,14 @@ public:
 
     // the return value means prevents event bubbling.
     bool ProcessTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+
+    bool ProcessEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
+        TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
+        const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
+    
+    bool ProcessDragEventTouchTestHit(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
 
@@ -622,8 +582,8 @@ public:
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void GenerateMousePixelMap(const GestureEvent& info);
-    OffsetF GetPixelMapOffset(
-        const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
+    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f,
+        bool isCalculateInSubwindow = false) const;
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
@@ -705,7 +665,28 @@ public:
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+    bool StartDragForCustomBuilderSync(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+        const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
+    void StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+        const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
 #endif
+    static bool IsAllowedDrag(const RefPtr<FrameNode>& frameNode);
+
+    void SetMenuPreviewScale(float menuPreviewScale)
+    {
+        menuPreviewScale_ = menuPreviewScale;
+    }
+
+    float GetMenuPreviewScale() const
+    {
+        return menuPreviewScale_;
+    }
+    
+    void SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode);
+    const BindMenuStatus& GetBindMenuStatus()
+    {
+        return bindMenuStatus_;
+    }
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -713,8 +694,9 @@ private:
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
 
     void UpdateGestureHierarchy();
+    void UpdateModifierGestureHierarchy();
 
-    void AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture);
+    void AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture, bool isModifier);
 
     // old path.
     void UpdateExternalNGGestureRecognizer();
@@ -731,6 +713,16 @@ private:
 
     template<typename T>
     const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
+
+    void ProcessParallelPriorityGesture(const Offset& offset, int32_t touchId,
+        const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
+        RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
+        int32_t& parallelIndex);
+
+    void ProcessExternalExclusiveRecognizer(const Offset& offset, int32_t touchId,
+        const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority,
+        RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
+        int32_t& exclusiveIndex);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
@@ -754,6 +746,7 @@ private:
     std::list<RefPtr<NG::Gesture>> backupGestures_;
     std::list<RefPtr<NG::Gesture>> backupModifierGestures_;
     std::list<RefPtr<NGGestureRecognizer>> gestureHierarchy_;
+    std::list<RefPtr<NGGestureRecognizer>> modifierGestureHierarchy_;
 
     // used in bindMenu, need to delete the old callback when bindMenu runs again
     RefPtr<ClickEvent> showMenu_;
@@ -790,10 +783,12 @@ private:
     // the value from show parameter of context menu, which is controlled by caller manually
     bool contextMenuShowStatus_  = false;
     MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
+    BindMenuStatus bindMenuStatus_;
     bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;
+    float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
 };
 
 } // namespace OHOS::Ace::NG

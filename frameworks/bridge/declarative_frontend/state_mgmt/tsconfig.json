@@ -39,6 +39,7 @@
     "src/lib/common/state_mgmt_configure.ts",
     "src/lib/common/observed_object.ts",
     "src/lib/common/observed_property_abstract.ts",
+    "src/lib/common/custom_span_native.d.ts",
     "src/lib/common/custom_dialog_controller_native.d.ts",
     "src/lib/common/custom_dialog_controller.ts",
     "src/lib/common/utils.ts",
@@ -78,6 +79,7 @@
     "src/lib/partial_update/pu_builder_proxy.ts",
 
     // 'new' stateMgmt vers 2
+    "src/lib/v2/v2_observed_proxy.ts",
     "src/lib/v2/v2_change_observation.ts",
     "src/lib/v2/v2_decorated_variables.ts",
     "src/lib/v2/v2_monitor.ts",
@@ -96,6 +98,10 @@
     // sdk
     "src/lib/sdk/v2_persistence.ts",
     "src/lib/sdk/ui_utils.ts",
+
+    // common
+    "src/lib/common/gesture_span.ts",
+    "src/lib/common/gesture_span_native.d.ts",
 
     // init
     "src/index.ts",

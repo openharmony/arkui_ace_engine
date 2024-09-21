@@ -24,14 +24,34 @@
 namespace OHOS::Ace {
 namespace {
 constexpr uint32_t FILE_SUFFIX_LEN = 4;
+constexpr uint32_t URL_LENGTH = 12;
+
+bool CheckSvgExtension(const std::string& src)
+{
+    if (src.size() <= FILE_SUFFIX_LEN) {
+        return false;
+    }
+    auto srcSuffix = src.substr(src.size() - FILE_SUFFIX_LEN);
+    StringUtils::TransformStrCase(srcSuffix, StringUtils::TEXT_CASE_LOWERCASE);
+    return srcSuffix == ".svg";
+}
+
 } // namespace
 
-bool ImageSourceInfo::IsSVGSource(const std::string& src, InternalResource::ResourceId resourceId)
+bool ImageSourceInfo::IsSVGSource(const std::string& src, SrcType srcType, InternalResource::ResourceId resourceId)
 {
     // 4 is the length of ".svg".
-    return (src.size() > FILE_SUFFIX_LEN && src.substr(src.size() - FILE_SUFFIX_LEN) == ".svg") ||
-           (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
-               resourceId < InternalResource::ResourceId::SVG_END);
+    if (CheckSvgExtension(src)) {
+        return true;
+    } else if (srcType == SrcType::NETWORK) {
+        size_t queryPos = src.find('?');
+        std::string cleanUrl = (queryPos != std::string::npos) ? src.substr(0, queryPos) : src;
+        if (CheckSvgExtension(cleanUrl)) {
+            return true;
+        }
+    }
+    return (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
+            resourceId < InternalResource::ResourceId::SVG_END);
 }
 
 bool ImageSourceInfo::IsPngSource(const std::string& src, InternalResource::ResourceId resourceId)
@@ -41,7 +61,7 @@ bool ImageSourceInfo::IsPngSource(const std::string& src, InternalResource::Reso
 
 bool ImageSourceInfo::IsValidBase64Head(const std::string& uri, const std::string& pattern)
 {
-    return true;
+    return uri.size() > URL_LENGTH ? true : false;
 }
 
 bool ImageSourceInfo::IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern)
@@ -98,16 +118,20 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
     Dimension height, InternalResource::ResourceId resourceId, const RefPtr<PixelMap>& pixmap)
     : src_(std::move(imageSrc)), bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)),
       sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
-      isSvg_(IsSVGSource(src_, resourceId_)), isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
-{}
+      isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
+{
+    isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
+}
 
 ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, std::string bundleName,
     std::string moduleName, Dimension width, Dimension height, InternalResource::ResourceId resourceId,
     const RefPtr<PixelMap>& pixmap)
     : bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)), sourceWidth_(width),
-      sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap), isSvg_(IsSVGSource(src_, resourceId_)),
+      sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
       isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
-{}
+{
+    isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
+}
 
 SrcType ImageSourceInfo::ResolveSrcType() const
 {
@@ -148,7 +172,7 @@ void ImageSourceInfo::SetSrc(const std::string& src, std::optional<Color> fillCo
     src_ = src;
     srcType_ = ResolveURIType(src_);
     resourceId_ = InternalResource::ResourceId::NO_ID;
-    isSvg_ = IsSVGSource(src_, resourceId_);
+    isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
     fillColor_ = fillColor;
     pixmap_ = nullptr;
 }
@@ -163,7 +187,7 @@ void ImageSourceInfo::SetResourceId(InternalResource::ResourceId id, std::option
     resourceId_ = id;
     srcType_ = SrcType::RESOURCE_ID;
     src_.clear();
-    isSvg_ = IsSVGSource(src_, resourceId_);
+    isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
     fillColor_ = fillColor;
     pixmap_ = nullptr;
 }
@@ -209,7 +233,7 @@ SrcType ImageSourceInfo::GetSrcType() const
     return srcType_;
 }
 
-std::string ImageSourceInfo::ToString() const
+std::string ImageSourceInfo::ToString(bool isNeedTruncated) const
 {
     return std::string("empty source");
 }

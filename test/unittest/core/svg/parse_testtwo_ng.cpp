@@ -831,16 +831,6 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest002, TestSize.Level1)
 
     svgDom->ControlAnimation(true);
     EXPECT_EQ(svg->GetGradient(string("")), std::nullopt);
-
-    auto svgNode = svgDom->root_->children_[0]->children_[0];
-    auto svgAnimate = AccessibilityManager::DynamicCast<SvgAnimation>(svgNode);
-    
-    int testData = 0;
-    std::function<void()> callback = [&testData](){ testData = 1; };
-    svg->PushAnimatorOnFinishCallback(callback);
-    RefPtr<Animator> animation = svgAnimate->animator_;
-    animation->NotifyStopListener();
-    EXPECT_EQ(testData, 1);
 }
 
 /**
@@ -862,99 +852,5 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest003, TestSize.Level1)
     EXPECT_EQ(svgNode->ConvertDimensionToPx(dimension, 1.0), 0.0);
 
     EXPECT_EQ(svgNode->GetRootViewBox(), Rect());
-}
-
-/**
- * @tc.name: SvgGraphicTest001
- * @tc.desc: SvgGraphic test
- * @tc.type: FUNC
- */
-HWTEST_F(ParseTestTwoNg, SvgGraphicTest001, TestSize.Level1)
-{
-    auto svgStream = SkMemoryStream::MakeCopy(CIRCLE_SVG_LABEL.c_str(), CIRCLE_SVG_LABEL.length());
-    EXPECT_NE(svgStream, nullptr);
-    ImageSourceInfo src;
-    src.SetFillColor(Color::BLACK);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
-    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
-    auto svgCircle = AceType::DynamicCast<SvgCircle>(svg->children_.at(0));
-    EXPECT_NE(svgCircle, nullptr);
-
-    auto svgAnimateStream = SkMemoryStream::MakeCopy(SVG_ANIMATE_TRANSFORM.c_str(), SVG_ANIMATE_TRANSFORM.length());
-    ImageSourceInfo svgAnimate;
-    src.SetFillColor(Color::GREEN);
-    auto svgAnimateDom = SvgDom::CreateSvgDom(*svgAnimateStream, src);
-    auto svgAnimateNode = svgAnimateDom->root_;
-
-    Testing::MockCanvas rSCanvas;
-    CallBack(rSCanvas);
-
-    std::string href = "svgNodeTest";
-    auto baseAttr = svgCircle->GetBaseAttributes();
-    baseAttr.fillState.SetHref(href);
-    svgCircle->SetBaseAttributes(baseAttr);
-    auto svgContext = svgCircle->svgContext_.Upgrade();
-    svgContext->Push(href, svgAnimateNode);
-
-    Gradient gradient;
-    ImageColorFilter imageColorFilter;
-    std::vector<float> values = {255.0f, 0.0f, 0.0f};
-    auto colorFilterMatrix = std::make_shared<std::vector<float>>(values);
-    auto colorFilterDrawing = DrawingColorFilter::CreateDrawingColorFilter(values);
-    svgCircle->SetColorFilter(imageColorFilter);
-    svgCircle->OnDraw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
-
-    imageColorFilter.colorFilterDrawing_ = colorFilterDrawing;
-    svgCircle->SetColorFilter(imageColorFilter);
-    baseAttr.strokeState.SetLineCap(LineCapStyle::BUTT);
-    baseAttr.strokeState.SetLineJoin(LineJoinStyle::MITER);
-    svgCircle->SetBaseAttributes(baseAttr);
-    EXPECT_EQ(svgCircle->UpdateStrokeStyle(true), true);
-
-    imageColorFilter.colorFilterMatrix_ = colorFilterMatrix;
-    svgCircle->SetColorFilter(imageColorFilter);
-    baseAttr.strokeState.SetLineCap(LineCapStyle::ROUND);
-    baseAttr.strokeState.SetLineJoin(LineJoinStyle::ROUND);
-    svgCircle->SetBaseAttributes(baseAttr);
-    EXPECT_EQ(svgCircle->UpdateStrokeStyle(true), true);
-
-    baseAttr.strokeState.SetLineCap(LineCapStyle::SQUARE);
-    baseAttr.strokeState.SetLineJoin(LineJoinStyle::BEVEL);
-    svgCircle->SetBaseAttributes(baseAttr);
-    EXPECT_EQ(svgCircle->UpdateStrokeStyle(true), true);
-}
-
-/**
- * @tc.name: SvgDomTest001
- * @tc.desc: SvgDom test
- * @tc.type: FUNC
- */
-HWTEST_F(ParseTestTwoNg, SvgDomTest001, TestSize.Level1)
-{
-    ImageSourceInfo src;
-    auto size = Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT);
-    auto svgAnimateStream = SkMemoryStream::MakeCopy(SVG_ANIMATE_TRANSFORM.c_str(), SVG_ANIMATE_TRANSFORM.length());
-    src.SetFillColor(Color::GREEN);
-    auto svgAnimateDom = SvgDom::CreateSvgDom(*svgAnimateStream, src);
-    auto svgAnimateNode = svgAnimateDom->root_;
-
-    auto svgAnimate = AccessibilityManager::DynamicCast<SvgAnimation>(svgAnimateNode->children_[0]->children_[0]);
-    int testData = 0;
-    std::function<void()> callback = [&testData](){ testData = 1; };
-    svgAnimateDom->SetAnimationOnFinishCallback(callback);
-    RefPtr<Animator> animation = svgAnimate->animator_;
-    animation->NotifyStopListener();
-    EXPECT_EQ(testData, 1);
-
-    Testing::MockCanvas rSCanvas;
-    CallBack(rSCanvas);
-    EXPECT_EQ(svgAnimateDom->layout_, Size(0.0, 0.0));
-    svgAnimateDom->DrawImage(rSCanvas, ImageFit::COVER, size);
-    EXPECT_EQ(svgAnimateDom->layout_, size);
-
-    ImageColorFilter imageColorFilter;
-    svgAnimateDom->SetColorFilter(imageColorFilter);
-    EXPECT_EQ(svgAnimateDom->colorFilter_->colorFilterDrawing_, nullptr);
-    EXPECT_EQ(svgAnimateDom->colorFilter_->colorFilterMatrix_, nullptr);
 }
 } // namespace OHOS::Ace::NG

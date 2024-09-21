@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/list/list_layout_property.h"
 
-#include "base/utils/string_utils.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_v2/list/list_properties.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 V2::ItemDivider ItemDividerFromJson(const std::unique_ptr<JsonValue>& json)

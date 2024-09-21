@@ -15,14 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/models/canvas/offscreen_canvas_rendering_context_2d_model_impl.h"
 
-#include <type_traits>
-
-#include "base/image/pixel_map.h"
 #include "core/common/container.h"
-#include "core/components/common/properties/paint_state.h"
 #include "core/components/custom_paint/custom_paint_component.h"
-#include "core/components/custom_paint/offscreen_canvas.h"
-#include "core/pipeline/pipeline_context.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -467,8 +461,7 @@ RefPtr<Ace::PixelMap> OffscreenCanvasRenderingContext2DModelImpl::GetPixelMap(co
     for (uint32_t i = 0; i < finalHeight; i++) {
         for (uint32_t j = 0; j < finalWidth; j++) {
             uint32_t idx = i * finalWidth + j;
-            Color pixel = canvasData->data[idx];
-            data[idx] = pixel.GetValue();
+            data[idx] = canvasData->data[idx];
         }
     }
 
@@ -496,10 +489,11 @@ void OffscreenCanvasRenderingContext2DModelImpl::GetImageDataModel(const ImageSi
 
     if (data != nullptr) {
         for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
-            buffer[4 * idx] = data->data[idx].GetRed();
-            buffer[4 * idx + 1] = data->data[idx].GetGreen();
-            buffer[4 * idx + 2] = data->data[idx].GetBlue();
-            buffer[4 * idx + 3] = data->data[idx].GetAlpha();
+            Color color = Color(data->data[idx]);
+            buffer[4 * idx] = color.GetRed(); // 4 * idx: the 1st byte format: red.
+            buffer[4 * idx + 1] = color.GetGreen(); // 4 * idx + 1: the 2nd byte format: green.
+            buffer[4 * idx + 2] = color.GetBlue(); // 4 * idx + 2: the 3rd byte format: blue.
+            buffer[4 * idx + 3] = color.GetAlpha(); // 4 * idx + 3: the 4th byte format: alpha.
         }
     }
 }

@@ -25,6 +25,7 @@
 #include "core/components/theme/theme_attributes.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_style.h"
+#include "core/components_ng/pattern/security_component/security_component_log.h"
 
 namespace OHOS::Ace::NG {
 class SecurityComponentTheme : public virtual Theme {
@@ -41,7 +42,7 @@ public:
         {
             RefPtr<SecurityComponentTheme> theme = AceType::Claim(new SecurityComponentTheme());
             if (!themeConstants) {
-                LOGE("Build SecurityComponentTheme error, themeConstants is null!");
+                SC_LOG_ERROR("Build SecurityComponentTheme error, themeConstants is null!");
                 return theme;
             }
             ParsePattern(themeConstants, theme);
@@ -225,6 +226,12 @@ private:
             securityComponentPattern->GetAttr<std::string>("description_continue_to_receive", ""));
         theme->saveDescriptions_.emplace_back(
             securityComponentPattern->GetAttr<std::string>("description_save_to_gallery", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_export_to_gallery", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_quick_save_to_gallery", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_quick_resave_to_gallery", ""));
     }
 
     static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SecurityComponentTheme>& theme)

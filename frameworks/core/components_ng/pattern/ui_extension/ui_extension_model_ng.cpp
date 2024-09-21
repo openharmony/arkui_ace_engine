@@ -15,17 +15,9 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
-#include "interfaces/inner_api/ace/modal_ui_extension_config.h"
-#include "want.h"
-
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_hub.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -73,7 +65,8 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     return frameNode;
 }
 
-void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, const RefPtr<FrameNode>& placeholderNode,
+void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
+    const std::map<PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
     bool transferringCaller, bool densityDpi)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -82,7 +75,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, con
         [transferringCaller]() { return AceType::MakeRefPtr<UIExtensionPattern>(transferringCaller); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetPlaceholderNode(placeholderNode);
+    pattern->SetPlaceholderMap(placeholderMap);
     pattern->SetDensityDpi(densityDpi);
     pattern->UpdateWant(wantWrap);
     stack->Push(frameNode);

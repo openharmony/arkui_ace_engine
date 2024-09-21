@@ -132,6 +132,10 @@ void RosenWindow::RequestFrame()
     auto taskExecutor = taskExecutor_.Upgrade();
     if (rsWindow_) {
         isRequestVsync_ = true;
+        if (isFirstRequestVsync_) {
+            isFirstRequestVsync_ = false;
+            LOGI("ArkUI requests first Vsync.");
+        }
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifdef VSYNC_TIMEOUT_CHECK
@@ -263,12 +267,6 @@ void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
 }
 
-void RosenWindow::NotifyExtensionTimeout(int32_t errorCode)
-{
-    CHECK_NULL_VOID(rsWindow_);
-    rsWindow_->NotifyExtensionTimeout(errorCode);
-}
-
 uint32_t RosenWindow::GetStatusBarHeight() const
 {
 #ifndef PREVIEW
@@ -282,4 +280,9 @@ uint32_t RosenWindow::GetStatusBarHeight() const
 #endif
 }
 
+void RosenWindow::NotifyExtensionTimeout(int32_t errorCode)
+{
+    CHECK_NULL_VOID(rsWindow_);
+    rsWindow_->NotifyExtensionTimeout(errorCode);
+}
 } // namespace OHOS::Ace::NG

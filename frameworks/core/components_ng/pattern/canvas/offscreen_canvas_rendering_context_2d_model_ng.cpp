@@ -15,19 +15,10 @@
 
 #include "core/components_ng/pattern/canvas/offscreen_canvas_rendering_context_2d_model_ng.h"
 
-#include <cstring>
-
 #include "securec.h"
-
-#include "core/components/common/properties/paint_state.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
-#else
-constexpr int BUFFER_SIZE = 4;
-constexpr int STEP_1 = 1;
-constexpr int STEP_2 = 2;
-constexpr int STEP_3 = 3;
 #endif
 
 namespace OHOS::Ace::NG {
@@ -501,10 +492,11 @@ void OffscreenCanvasRenderingContext2DModelNG::GetImageDataModel(const ImageSize
     std::unique_ptr<Ace::ImageData> data = GetImageData(imageSize);
     CHECK_NULL_VOID(data);
     for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
-        buffer[BUFFER_SIZE * idx] = data->data[idx].GetRed();
-        buffer[BUFFER_SIZE * idx + STEP_1] = data->data[idx].GetGreen();
-        buffer[BUFFER_SIZE * idx + STEP_2] = data->data[idx].GetBlue();
-        buffer[BUFFER_SIZE * idx + STEP_3] = data->data[idx].GetAlpha();
+        Color color = Color(data->data[idx]);
+        buffer[4 * idx] = color.GetRed(); // 4 * idx: the 1st byte format: red.
+        buffer[4 * idx + 1] = color.GetGreen(); // 4 * idx + 1: the 2nd byte format: green.
+        buffer[4 * idx + 2] = color.GetBlue(); // 4 * idx + 2: the 3rd byte format: blue.
+        buffer[4 * idx + 3] = color.GetAlpha(); // 4 * idx + 3: the 4th byte format: alpha.
     }
 #endif
 }
@@ -543,6 +535,13 @@ void OffscreenCanvasRenderingContext2DModelNG::SetDensity(double density)
 {
     CHECK_NULL_VOID(pattern_);
     pattern_->SetDensity(density);
+}
+
+void OffscreenCanvasRenderingContext2DModelNG::SetTransform(
+    std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetTransform(pattern, transform);
 }
 
 // All interfaces that only the 'OffscreenCanvasRenderingContext2D' has.

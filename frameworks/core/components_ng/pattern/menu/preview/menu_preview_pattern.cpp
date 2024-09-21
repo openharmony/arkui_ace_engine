@@ -15,12 +15,9 @@
 
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 
-#include "core/animation/animation_pub.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -73,35 +70,6 @@ void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuT
             context->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
         },
         scaleOption.GetOnFinishEvent());
-}
-
-void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
-{
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_VOID(mainPipeline);
-    auto manager = mainPipeline->GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    manager->UpdateGatherNodeToTop();
-    auto gatherNode = manager->GetGatherNode();
-    CHECK_NULL_VOID(gatherNode);
-    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto textNode = menuWrapperPattern->GetBadgeNode();
-    CHECK_NULL_VOID(textNode);
-    auto menuPattern = GetMenuPattern(menuNode);
-    CHECK_NULL_VOID(menuPattern);
-    mainPipeline->AddAfterRenderTask([weakImageNode = AceType::WeakClaim(AceType::RawPtr(imageNode)),
-        weakManager = AceType::WeakClaim(AceType::RawPtr(manager)),
-        weakTextNode = AceType::WeakClaim(AceType::RawPtr(textNode)),
-        weakMenuPattern = AceType::WeakClaim(AceType::RawPtr(menuPattern))]() {
-        auto imageNode = weakImageNode.Upgrade();
-        auto manager = weakManager.Upgrade();
-        auto textNode = weakTextNode.Upgrade();
-        auto menuPattern = weakMenuPattern.Upgrade();
-        DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
-        DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
-        DragAnimationHelper::ShowBadgeAnimation(textNode);
-    });
 }
 
 } // namespace
@@ -159,14 +127,32 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
             context->UpdateBorderRadius(borderRadius);
         },
         option.GetOnFinishEvent());
-    if (!hasPreviewTransitionEffect_) {
-        auto menuWrapper = GetMenuWrapper();
-        auto menuPattern = GetMenuPattern(menuWrapper);
-        ShowGatherAnimation(host, menuWrapper);
-        ShowScaleAnimation(context, menuTheme, menuPattern);
-    }
+    auto menuWrapper = GetMenuWrapper();
+    auto menuPattern = GetMenuPattern(menuWrapper);
+    DragAnimationHelper::UpdateGatherNodeToTop();
+    UpdateShowScale(context, menuTheme, menuPattern);
+
     isFirstShow_ = false;
     return false;
+}
+
+void MenuPreviewPattern::UpdateShowScale(const RefPtr<RenderContext>& context, const RefPtr<MenuTheme>& menuTheme,
+    const RefPtr<MenuPattern>& menuPattern)
+{
+    if (hasPreviewTransitionEffect_) {
+        CHECK_NULL_VOID(context);
+        CHECK_NULL_VOID(menuTheme);
+        auto scaleAfter { -1.0f };
+        if (menuPattern != nullptr) {
+            scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
+        }
+        auto previewAfterAnimationScale =
+            LessOrEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
+
+        context->UpdateTransformScale(VectorF(previewAfterAnimationScale, previewAfterAnimationScale));
+    } else {
+        ShowScaleAnimation(context, menuTheme, menuPattern);
+    }
 }
 
 RefPtr<FrameNode> MenuPreviewPattern::GetMenuWrapper() const

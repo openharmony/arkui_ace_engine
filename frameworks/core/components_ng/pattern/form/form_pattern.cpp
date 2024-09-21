@@ -25,29 +25,15 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
+#include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
 #include "core/common/form_manager.h"
-#include "core/common/frontend.h"
-#include "core/common/resource/resource_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
-#include "core/components/form/sub_container.h"
-#include "core/components_ng/pattern/form/form_event_hub.h"
-#include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/form/form_node.h"
-#include "core/components_ng/pattern/form/form_theme.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
-#include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 #if OHOS_STANDARD_SYSTEM
 #include "form_info.h"
@@ -64,6 +50,7 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
 constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
 constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
+constexpr uint32_t DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
 constexpr double TRANSPARENT_VAL = 0;
@@ -263,13 +250,26 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
     }
 }
 
-void FormPattern::HandleSnapshot(uint32_t delayTime)
+void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
     snapshotTimestamp_ = GetCurrentTimestamp();
+    if (isDynamic_) {
+        if (formChildrenNodeMap_.find(FormChildNodeType::FORM_STATIC_IMAGE_NODE) != formChildrenNodeMap_.end()) {
+            executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormSetNonTransparentAfterRecover_" + nodeIdStr);
+            executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormDeleteImageNodeAfterRecover_" + nodeIdStr);
+            RemoveFrsNode();
+            ReleaseRenderer();
+            UnregisterAccessibility();
+            isSnapshot_ = true;
+            needSnapshotAgain_ = false;
+            return;
+        }
+    }
+
     executor->PostDelayedTask(
         [weak = WeakClaim(this), delayTime]() mutable {
             auto form = weak.Upgrade();
@@ -619,6 +619,10 @@ void FormPattern::OnModifyDone()
     info.obscuredMode = isFormObscured_;
     info.obscuredMode |= CheckFormBundleForbidden(info.bundleName);
     HandleFormComponent(info);
+
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
 
 bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -662,12 +666,7 @@ void FormPattern::HandleFormComponent(const RequestFormInfo& info)
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension || info.renderingMode != cardInfo_.renderingMode) {
-        PostBgTask(
-            [weak = WeakClaim(this), info] {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->AddFormComponent(info);
-            }, "ArkUIHandleFormComponent");
+        AddFormComponent(info);
     } else {
         UpdateFormComponent(info);
     }
@@ -695,6 +694,16 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);
     }
     isJsCard_ = true;
+    RefPtr<PipelineContext> pipeline = host->GetContextRefPtr();
+    PostBgTask([weak = WeakClaim(this), info, pipeline] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->AddFormComponentTask(info, pipeline);
+        }, "ArkUIAddFormComponent");
+}
+
+void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<PipelineContext> pipeline)
+{
 #if OHOS_STANDARD_SYSTEM
     AppExecFwk::FormInfo formInfo;
     if (FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo) &&
@@ -710,9 +719,9 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
         return;
     }
 #if OHOS_STANDARD_SYSTEM
-    formManagerBridge_->AddForm(host->GetContextRefPtr(), info, formInfo);
+    formManagerBridge_->AddForm(pipeline, info, formInfo);
 #else
-    formManagerBridge_->AddForm(host->GetContextRefPtr(), info);
+    formManagerBridge_->AddForm(pipeline, info);
 #endif
 
     if (!formInfo.transparencyEnabled && CheckFormBundleForbidden(info.bundleName)) {
@@ -727,12 +736,12 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
 
 void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    PostUITask([weak = WeakClaim(this), host, isTransparencyEnabled, info, isJsCard = isJsCard_] {
+    PostUITask([weak = WeakClaim(this), isTransparencyEnabled, info, isJsCard = isJsCard_] {
         ACE_SCOPED_TRACE("ArkUIAddFormComponentUI");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
         pattern->CreateCardContainer();
         if (host->IsDraggable()) {
             pattern->EnableDrag();
@@ -777,10 +786,11 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
             auto renderContext = host->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
             auto opacity = renderContext->GetOpacityValue(NON_TRANSPARENT_VAL);
-            TAG_LOGI(AceLogTag::ACE_FORM, "Static-form, current opacity: %{public}f, visible: %{public}d",
-                opacity, static_cast<int>(visible));
+            std::string nodeIdStr = std::to_string(host->GetId());
+            TAG_LOGI(AceLogTag::ACE_FORM, "Static-form, current opacity: %{public}f, visible: %{public}d, nodeId: %{public}s.",
+                opacity, static_cast<int>(visible), nodeIdStr.c_str());
             if (visible == VisibleType::VISIBLE && opacity == NON_TRANSPARENT_VAL) {
-                HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_3S);
+                HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_3S, nodeIdStr);
             }
         }
     }
@@ -795,6 +805,12 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
     cardInfo_.width = info.width;
     cardInfo_.height = info.height;
     cardInfo_.borderWidth = info.borderWidth;
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+
+    externalRenderContext->SetBounds(round(cardInfo_.borderWidth), round(cardInfo_.borderWidth),
+        round(cardInfo_.width.Value() - cardInfo_.borderWidth * DOUBLE),
+        round(cardInfo_.height.Value() - cardInfo_.borderWidth * DOUBLE));
 
     if (formManagerBridge_) {
         formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value(), info.borderWidth);
@@ -1341,7 +1357,10 @@ void FormPattern::InitFormManagerDelegate()
         ContainerScope scope(instanceID);
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
-        formPattern->HandleSnapshot(delayTime);
+        auto host = formPattern->GetHost();
+        CHECK_NULL_VOID(host);
+        std::string nodeIdStr = std::to_string(host->GetId());
+        formPattern->HandleSnapshot(delayTime, nodeIdStr);
     });
 
     formManagerBridge_->AddFormLinkInfoUpdateCallback(
@@ -1384,6 +1403,13 @@ void FormPattern::InitFormManagerDelegate()
             formPattern->HandleEnableForm(enable);
             }, "ArkUIFormHandleEnableForm");
         });
+
+    const std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback = [this](bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
+        FormManager::GetInstance().NotifyIsSizeChangeByRotate(isRotate, rsTransaction);
+    };
+    context->SetSizeChangeByRotateCallback(callback);
 }
 
 void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)
@@ -1488,7 +1514,7 @@ void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-
+    std::string nodeIdStr = std::to_string(host->GetId());
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostDelayedTask(
         [weak = WeakClaim(this)] {
@@ -1496,14 +1522,14 @@ void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
             CHECK_NULL_VOID(pattern);
             pattern->SetNonTransparentAfterRecover();
         },
-        DELAY_TIME_FOR_SET_NON_TRANSPARENT, "ArkUIFormSetNonTransparentAfterRecover");
+        DELAY_TIME_FOR_SET_NON_TRANSPARENT, "ArkUIFormSetNonTransparentAfterRecover_" + nodeIdStr);
     uiTaskExecutor.PostDelayedTask(
         [weak = WeakClaim(this), needHandleCachedClick] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->DeleteImageNodeAfterRecover(needHandleCachedClick);
         },
-        DELAY_TIME_FOR_DELETE_IMAGE_NODE, "ArkUIFormDeleteImageNodeAfterRecover");
+        DELAY_TIME_FOR_DELETE_IMAGE_NODE, "ArkUIFormDeleteImageNodeAfterRecover_" + nodeIdStr);
 }
 
 void FormPattern::FireFormSurfaceChangeCallback(float width, float height, float borderWidth)
@@ -1742,6 +1768,14 @@ void FormPattern::OnActionEvent(const std::string& action)
         return;
     }
 
+    RemoveDelayResetManuallyClickFlagTask();
+    if (!isManuallyClick_) {
+        EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
+            cardInfo_.moduleName, cardInfo_.dimension);
+    } else {
+        isManuallyClick_ = false;
+    }
+
     if ("router" == type) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -1787,6 +1821,10 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
     CHECK_NULL_VOID(pointerEvent);
     CHECK_NULL_VOID(formManagerBridge_);
 
+    if (OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN == pointerEvent->GetPointerAction()) {
+        isManuallyClick_ = true;
+        DelayResetManuallyClickFlag();
+    }
     if (!isVisible_) {
         auto pointerAction = pointerEvent->GetPointerAction();
         if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
@@ -1998,5 +2036,36 @@ bool FormPattern::CheckFormBundleForbidden(const std::string &bundleName)
 {
     CHECK_NULL_RETURN(formManagerBridge_, false);
     return formManagerBridge_->CheckFormBundleForbidden(bundleName);
+}
+
+void FormPattern::DelayResetManuallyClickFlag()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    std::string nodeIdStr = std::to_string(host->GetId());
+    executor->PostDelayedTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->isManuallyClick_ = false;
+        },
+        TaskExecutor::TaskType::UI, DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG,
+        std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
+}
+
+void FormPattern::RemoveDelayResetManuallyClickFlagTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    std::string nodeIdStr = std::to_string(host->GetId());
+    executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
 }
 } // namespace OHOS::Ace::NG

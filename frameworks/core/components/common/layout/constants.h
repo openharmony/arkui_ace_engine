@@ -54,6 +54,12 @@ enum class RectHeightStyle {
     STRUT,
 };
 
+// Type of hover mode area.
+enum class HoverModeAreaType {
+    TOP_SCREEN = 0,
+    BOTTOM_SCREEN = 1,
+};
+
 enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
 
 enum class ControlSize { SMALL, NORMAL };
@@ -617,6 +623,10 @@ enum class SwiperDynamicSyncSceneType {
     ANIMATE,
 };
 
+enum class MarqueeDynamicSyncSceneType {
+    ANIMATE = 1,
+};
+
 namespace StringUtils {
 inline std::string ToString(const VerticalAlign& verticalAlign)
 {
@@ -743,9 +753,6 @@ enum class XComponentType {
     COMPONENT,
     TEXTURE,
     NODE,
-#ifdef PLATFORM_VIEW_SUPPORTED
-    PLATFORM_VIEW = 999,
-#endif
 };
 
 enum class RenderMode { ASYNC_RENDER = 0, SYNC_RENDER };

@@ -1036,7 +1036,7 @@ class TabContentItem extends ViewPU {
               if (j4.type === TouchType.Down) {
                 this.isOnClick = true;
               }
-              if (j4.type === TouchType.Up) {
+              if (j4.type === TouchType.Up || j4.type === TouchType.Cancel) {
                 this.isOnClick = false;
               }
             });
@@ -1076,7 +1076,7 @@ class TabContentItem extends ViewPU {
               if (w3.type === TouchType.Down) {
                 this.isOnClick = true;
               }
-              if (w3.type === TouchType.Up) {
+              if (w3.type === TouchType.Up || w3.type === TouchType.Cancel) {
                 this.isOnClick = false;
               }
             });
@@ -1308,7 +1308,7 @@ class ImageMenuItem extends ViewPU {
         if (c2.type === TouchType.Down) {
           this.isOnClick = true;
         }
-        if (c2.type === TouchType.Up) {
+        if (c2.type === TouchType.Up || c2.type === TouchType.Cancel) {
           this.isOnClick = false;
         }
       });

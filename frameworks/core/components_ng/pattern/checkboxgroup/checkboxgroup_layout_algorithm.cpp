@@ -15,19 +15,7 @@
 
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_layout_algorithm.h"
 
-#include <algorithm>
-
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
 #include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -61,8 +49,6 @@ std::optional<SizeF> CheckBoxGroupLayoutAlgorithm::MeasureContent(
     auto height = defaultHeight_ - 2 * verticalPadding_;
     auto size = SizeF(width, height);
     size.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
     if (!NearEqual(size.Width(), size.Height())) {
         auto length = std::min(size.Width(), size.Height());
         size.SetWidth(length);

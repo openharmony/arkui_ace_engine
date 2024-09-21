@@ -44,11 +44,6 @@ XComponentType ConvertToXComponentType(const std::string& type)
     if (type == "node") {
         return XComponentType::NODE;
     }
-#ifdef PLATFORM_VIEW_SUPPORTED
-    if (type == "platform_view") {
-        return XComponentType::PLATFORM_VIEW;
-    }
-#endif
     return XComponentType::SURFACE;
 }
 } // namespace
@@ -181,6 +176,8 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("pixelStretchEffect", &JSXComponent::JsPixelStretchEffect);
     JSClass<JSXComponent>::StaticMethod("linearGradientBlur", &JSXComponent::JsLinearGradientBlur);
     JSClass<JSXComponent>::StaticMethod("enableAnalyzer", &JSXComponent::JsEnableAnalyzer);
+    JSClass<JSXComponent>::StaticMethod("renderFit", &JSXComponent::JsRenderFit);
+    JSClass<JSXComponent>::StaticMethod("enableSecure", &JSXComponent::JsEnableSecure);
 
     JSClass<JSXComponent>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -670,4 +667,39 @@ void JSXComponent::JsEnableAnalyzer(bool enable)
     XComponentModel::GetInstance()->EnableAnalyzer(enable);
 }
 
+void JSXComponent::JsRenderFit(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE || args.Length() != 1) {
+        return;
+    }
+    if (type == XComponentType::TEXTURE) {
+        JSViewAbstract::JSRenderFit(args);
+        return;
+    }
+
+    // set RenderFit on SurfaceNode when type is SURFACE
+    RenderFit renderFit = RenderFit::RESIZE_FILL;
+    if (args[0]->IsNumber()) {
+        int32_t fitNumber = args[0]->ToNumber<int32_t>();
+        if (fitNumber >= static_cast<int32_t>(RenderFit::CENTER) &&
+            fitNumber <= static_cast<int32_t>(RenderFit::RESIZE_COVER_BOTTOM_RIGHT)) {
+            renderFit = static_cast<RenderFit>(fitNumber);
+        }
+    }
+    XComponentModel::GetInstance()->SetRenderFit(renderFit);
+}
+
+void JSXComponent::JsEnableSecure(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::SURFACE || args.Length() != 1) {
+        return;
+    }
+    // set isSecure on SurfaceNode when type is SURFACE
+    if (args[0]->IsBoolean()) {
+        bool isSecure = args[0]->ToBoolean();
+        XComponentModel::GetInstance()->EnableSecure(isSecure);
+    }
+}
 } // namespace OHOS::Ace::Framework

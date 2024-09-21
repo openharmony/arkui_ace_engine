@@ -73,6 +73,7 @@ public:
     void FireDialogChangeEvent(const std::string& info) const
     {
         if (dialogChangeEvent_) {
+            TAG_LOGD(AceLogTag::ACE_DIALOG, "start calendar dialog change event");
             dialogChangeEvent_(info);
         }
     }

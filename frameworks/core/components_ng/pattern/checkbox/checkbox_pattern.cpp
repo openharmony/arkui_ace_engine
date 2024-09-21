@@ -15,20 +15,8 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/checkable/checkable_component.h"
-#include "core/components/checkable/checkable_theme.h"
-#include "core/components_ng/pattern/checkbox/checkbox_layout_algorithm.h"
-#include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline/base/constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -669,7 +657,9 @@ void CheckBoxPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 void CheckBoxPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipelineContext = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
@@ -688,7 +678,9 @@ void CheckBoxPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 FocusPattern CheckBoxPattern::GetFocusPattern() const
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, FocusPattern());
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_RETURN(checkBoxTheme, FocusPattern());
@@ -813,7 +805,7 @@ void CheckBoxPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);

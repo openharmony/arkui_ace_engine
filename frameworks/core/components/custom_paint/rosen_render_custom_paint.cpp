@@ -357,7 +357,9 @@ std::string RosenRenderCustomPaint::ToDataURL(const std::string& args)
             LOGE("Bitmap is invalid");
             return UNSUPPORTED;
         }
-        auto& skBitmap = canvasCache_.GetImpl<Rosen::Drawing::SkiaBitmap>()->ExportSkiaBitmap();
+        auto skiaBitmap = canvasCache_.GetImpl<Rosen::Drawing::SkiaBitmap>();
+        CHECK_NULL_RETURN(skiaBitmap, UNSUPPORTED);
+        auto& skBitmap = skiaBitmap->ExportSkiaBitmap();
         success = skBitmap.pixmap().scalePixels(
             tempCache.pixmap(), SkSamplingOptions(SkCubicResampler { 1 / 3.0f, 1 / 3.0f }));
 #endif
@@ -712,6 +714,7 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
         LOGW("fontCollection is null");
         return Size(0.0, 0.0);
     }
+    ACE_TEXT_SCOPED_TRACE("MeasureTextSizeInner");
 #ifndef USE_GRAPHIC_TEXT_GINE
     txt::ParagraphStyle style;
     style.text_align = ConvertTxtTextAlign(context.textAlign);
@@ -2712,7 +2715,7 @@ void RosenRenderCustomPaint::PutImageData(const Offset& offset, const ImageData&
     }
 
     for (uint32_t i = 0; i < imageData.data.size(); ++i) {
-        data[i] = imageData.data[i].GetValue();
+        data[i] = imageData.data[i];
     }
 #ifndef USE_ROSEN_DRAWING
     SkBitmap skBitmap;
@@ -2796,7 +2799,7 @@ std::unique_ptr<ImageData> RosenRenderCustomPaint::GetImageData(double left, dou
         auto green = pixels[i + 1];
         auto red = pixels[i + 2];
         auto alpha = pixels[i + 3];
-        imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue));
+        imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
     }
     return imageData;
 }
@@ -2880,7 +2883,7 @@ void RosenRenderCustomPaint::DrawBitmapMesh(
         }
 
         for (uint32_t i = 0; i < imageData->data.size(); ++i) {
-            data[i] = imageData->data[i].GetValue();
+            data[i] = imageData->data[i];
         }
 #ifndef USE_ROSEN_DRAWING
         SkBitmap skBitmap;

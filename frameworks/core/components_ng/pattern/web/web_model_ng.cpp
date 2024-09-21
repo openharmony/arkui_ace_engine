@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
-#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/node_flag.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -587,6 +586,13 @@ void WebModelNG::SetScreenCaptureRequestEventId(std::function<void(const BaseEve
     webEventHub->SetOnScreenCaptureRequestEvent(std::move(uiCallback));
 }
 
+Color WebModelNG::GetDefaultBackgroundColor()
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_RETURN(webPattern, Color::WHITE);
+    return webPattern->GetDefaultBackgroundColor();
+}
+
 void WebModelNG::SetBackgroundColor(Color backgroundColor)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -995,6 +1001,15 @@ void WebModelNG::SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEv
     webEventHub->SetOnNativeEmbedLifecycleChangeEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedVisibilityChangeEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -1173,5 +1188,12 @@ void WebModelNG::SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateKeyboardAvoidMode(mode);
+}
+
+void WebModelNG::SetEnabledHapticFeedback(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnabledHapticFeedback(isEnabled);
 }
 } // namespace OHOS::Ace::NG

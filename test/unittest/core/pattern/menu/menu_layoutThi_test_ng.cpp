@@ -69,6 +69,15 @@ namespace {
 constexpr int32_t DEFAULT_CHILD_COUNT = 5;
 constexpr int32_t TARGET_ID = 3;
 constexpr int32_t TARGET = 0;
+constexpr int32_t CREASE_X = 0;
+constexpr int32_t CREASE_Y = 1064;
+constexpr int32_t CREASE_WIDTH = 2294;
+constexpr int32_t CREASE_HEIGHT = 171;
+constexpr int32_t CREASE_BOTTOM = 1235;
+constexpr int32_t MENU_X = 100;
+constexpr int32_t MENU_Y_TOP = 100;
+constexpr int32_t MENU_Y_BOTTOM = 1400;
+constexpr int32_t MENU_Y_MIDDLE = 1100;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float TARGET_SIZE_WIDTH = 50.0f;
@@ -81,6 +90,8 @@ constexpr float KEYBOARD_HEIGHT = 600.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const Dimension CONTAINER_BORDER_WIDTH = 1.0_vp;
 const Dimension CONTENT_PADDING = 4.0_vp;
+constexpr float OFFSET_FIRST = 50.0f;
+constexpr float OFFSET_SECOND = 100.0f;
 } // namespace
 
 class MenuLayout3TestNg : public testing::Test {
@@ -89,6 +100,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    void MockPipelineContextGetTheme();
     RefPtr<FrameNode> GetOrCreateMenu(MenuType type = MenuType::MENU);
     RefPtr<FrameNode> GetTargetNode()
     {
@@ -96,6 +108,8 @@ public:
     }
     RefPtr<MenuLayoutAlgorithm> CreateMenuLayoutAlgorithm(MenuType type = MenuType::MENU);
     void MountMenuItemToParent(const RefPtr<FrameNode>& parent, int32_t childCount, bool isNeedGroup = false);
+    RefPtr<FrameNode> GetPreviewMenuWrapper(
+        SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
 private:
     RefPtr<FrameNode> CreateMenuWrapperElement(MenuType type);
     RefPtr<FrameNode> CreateTargetNodeWithMainTree();
@@ -127,6 +141,23 @@ void MenuLayout3TestNg::TearDown()
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     ScreenSystemManager::GetInstance().dipScale_ = 1.0;
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
+}
+
+void MenuLayout3TestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
 }
 
 RefPtr<FrameNode> MenuLayout3TestNg::CreateTargetNodeWithMainTree()
@@ -210,6 +241,41 @@ void MenuLayout3TestNg::MountMenuItemToParent(const RefPtr<FrameNode>& parent, i
     if (isNeedGroup && itemGroupNode) {
         itemGroupNode->MountToParent(parent);
     }
+}
+
+RefPtr<FrameNode> MenuLayout3TestNg::GetPreviewMenuWrapper(
+    SizeF itemSize, std::optional<MenuPreviewAnimationOptions> scaleOptions)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    if (!(LessOrEqual(itemSize.Width(), 0.0) || LessOrEqual(itemSize.Height(), 0.0))) {
+        auto itemGeometryNode = textNode->GetGeometryNode();
+        CHECK_NULL_RETURN(itemGeometryNode, nullptr);
+        itemGeometryNode->SetFrameSize(itemSize);
+    }
+    targetNode->MountToParent(rootNode);
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    if (scaleOptions != std::nullopt) {
+        menuParam.previewAnimationOptions = scaleOptions.value();
+    }
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(customNode, nullptr);
+    auto customGeometryNode = customNode->GetGeometryNode();
+    CHECK_NULL_RETURN(customGeometryNode, nullptr);
+    customGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    auto menuWrapperNode =
+        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    return menuWrapperNode;
 }
 
 /**
@@ -475,5 +541,255 @@ HWTEST_F(MenuLayout3TestNg, Measure001, TestSize.Level1)
     }
     menuAlgorithm->Measure(AceType::RawPtr(wrapper));
     EXPECT_EQ(geometryNode->GetFrameSize().Width(), MENU_ITEM_SIZE_WIDTH);
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg049
+ * @tc.desc: Verify menu component is in the upper area of the screen in the hover state.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    std::vector<OptionParam> optionParams;
+    MenuParam menuParam;
+
+    // create menuWrapperNode to get main menu
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    // get menuPattern and property
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->enableFold_ = true;
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    ASSERT_TRUE(property->GetPositionOffset().has_value());
+    EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
+
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    layoutAlgorithm->isHalfFoldHover_ = true;
+    
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    std::vector<Rect> rects;
+    Rect rect;
+    rect.SetRect(CREASE_X, CREASE_Y, CREASE_WIDTH, CREASE_HEIGHT);
+    rects.insert(rects.end(), rect);
+    displayInfo->SetCurrentFoldCreaseRegion(rects);
+    auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
+    
+    int32_t creaseYTop = CREASE_Y;
+    layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_TOP);
+    layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_TOP);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern);
+
+    auto top = layoutAlgorithm->top_;
+    auto left = layoutAlgorithm->left_;
+    auto right = layoutAlgorithm->right_;
+    auto width = layoutAlgorithm->width_;
+
+    /**
+     * @tc.steps: menu component is located in the upper half of the screen.
+     * @tc.expected: menu wrapperRect is equal to the size of the security box on the upper half screen.
+     */
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, top, width - left - right, creaseYTop - top));
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg050
+ * @tc.desc: Verify menu component is in the lower area of the screen in the hover state.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg050, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    std::vector<OptionParam> optionParams;
+    MenuParam menuParam;
+
+    // create menuWrapperNode to get main menu
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->enableFold_ = true;
+
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    ASSERT_TRUE(property->GetPositionOffset().has_value());
+    EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
+
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    layoutAlgorithm->isHalfFoldHover_ = true;
+    
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    std::vector<Rect> rects;
+    Rect rect;
+    rect.SetRect(CREASE_X, CREASE_Y, CREASE_WIDTH, CREASE_HEIGHT);
+    rects.insert(rects.end(), rect);
+    displayInfo->SetCurrentFoldCreaseRegion(rects);
+    auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
+
+    int32_t creaseYBottom = CREASE_BOTTOM;
+
+    layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
+    layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_BOTTOM);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern);
+
+    auto bottom = layoutAlgorithm->bottom_;
+    auto left = layoutAlgorithm->left_;
+    auto right = layoutAlgorithm->right_;
+    auto width = layoutAlgorithm->width_;
+    auto height = layoutAlgorithm->height_;
+
+    /**
+     * @tc.steps: menu component is located in the lowwer half of the screen.
+     * @tc.expected: menu wrapperRect is equal to the size of the security box on the lowwer half screen.
+     */
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, creaseYBottom, width - left - right,
+        height - creaseYBottom - bottom));
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg051
+ * @tc.desc: Verify Initialize and Measure when DeviceOrientation is not PORTRAIT.
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg051, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    std::vector<OptionParam> optionParams;
+    MenuParam menuParam;
+
+    // create menuWrapperNode to get main menu
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    // get menuPattern and property
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->enableFold_ = true;
+
+    auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    ASSERT_TRUE(property->GetPositionOffset().has_value());
+    EXPECT_EQ(property->GetPositionOffset().value(), OffsetF());
+
+    RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    layoutAlgorithm->isHalfFoldHover_ = true;
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto displayInfo = container->GetDisplayInfo();
+    ASSERT_NE(displayInfo, nullptr);
+    std::vector<Rect> rects;
+    Rect rect;
+    rect.SetRect(CREASE_X, CREASE_Y, CREASE_WIDTH, CREASE_HEIGHT);
+    rects.insert(rects.end(), rect);
+    displayInfo->SetCurrentFoldCreaseRegion(rects);
+    auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
+
+    layoutAlgorithm->targetOffset_ = OffsetF(MENU_X, MENU_Y_MIDDLE);
+    layoutAlgorithm->position_ = OffsetF(MENU_X, MENU_Y_MIDDLE);
+    layoutAlgorithm->UpdateWrapperRectForHoverMode(property, menuPattern);
+
+    auto top = layoutAlgorithm->top_;
+    auto bottom = layoutAlgorithm->bottom_;
+    auto left = layoutAlgorithm->left_;
+    auto right = layoutAlgorithm->right_;
+    auto width = layoutAlgorithm->width_;
+    auto height = layoutAlgorithm->height_;
+
+    /**
+     * @tc.steps: menu component is located in the crease area of the screen.
+     * @tc.expected: menu wrapperRect is equal to the size of the security box on whole screen.
+     */
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, top, width - left - right, height - top - bottom));
+}
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg052
+ * @tc.desc: Verify Initialize and Measure when layoutRegion is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg052, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    MarginProperty margin = {
+        .top = CalcLength(OFFSET_SECOND),
+        .bottom = CalcLength(0.0),
+        .start = CalcLength(OFFSET_SECOND),
+        .end = CalcLength(0.0),
+    };
+    menuWrapperPattern->menuParam_.layoutRegionMargin = margin;
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeometryNode, nullptr);
+    menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+
+    auto previewNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(1));
+    auto previewGeometryNode = previewNode->GetGeometryNode();
+    ASSERT_NE(previewGeometryNode, nullptr);
+    previewGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(menuAlgorithm, nullptr);
+
+    SizeF windowSizeF = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    Rect windowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    menuAlgorithm->wrapperRect_ = windowRect;
+    menuAlgorithm->param_.windowGlobalSizeF = windowSizeF;
+    menuAlgorithm->wrapperSize_ = windowSizeF;
+    menuAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FIRST, OFFSET_FIRST);
+    menuAlgorithm->param_.previewMenuGap = TARGET_SECURITY.ConvertToPx();
+    menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
+    menuAlgorithm->previewScale_ = 1.0f;
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuAlgorithm->InitializeLayoutRegionMargin(menuPattern);
+    MarginPropertyF marginProperty = { OFFSET_SECOND, 0.0f, OFFSET_SECOND, 0.0f };
+    EXPECT_EQ(menuAlgorithm->layoutRegionMargin_, marginProperty);
+
+    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo(windowRect);
+
+    auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
+    menuAlgorithm->placement_ = Placement::TOP_LEFT;
+    layoutProperty->UpdateMenuPlacement(Placement::TOP_LEFT);
+    menuAlgorithm->Layout(AceType::RawPtr(menuNode));
+
+    auto previewOffset = OffsetF(OFFSET_SECOND, OFFSET_SECOND + TARGET_SIZE_HEIGHT + TARGET_SECURITY.ConvertToPx());
+    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), previewOffset);
+    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(OFFSET_SECOND, OFFSET_SECOND));
 }
 } // namespace OHOS::Ace::NG

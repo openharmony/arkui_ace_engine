@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/slider/slider_layout_algorithm.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/slider/slider_layout_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

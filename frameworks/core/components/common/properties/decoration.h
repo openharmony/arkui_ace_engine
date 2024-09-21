@@ -91,6 +91,11 @@ enum class SpreadMethod {
     REPEAT,
 };
 
+enum class GradientSpreadMethodNG {
+    PAD,
+    REPEAT,
+    REFLECT,
+};
 
 enum class ThemeColorMode {
     SYSTEM = 0,
@@ -195,34 +200,8 @@ struct BrightnessOption {
                NearEqual(saturation, other.saturation) && posRGB == other.posRGB && negRGB == other.negRGB &&
                NearEqual(fraction, other.fraction);
     }
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter) const
-    {
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        auto jsonBrightnessOption = JsonUtil::Create(true);
-        jsonBrightnessOption->Put("rate", rate);
-        jsonBrightnessOption->Put("lightUpDegree", lightUpDegree);
-        jsonBrightnessOption->Put("cubicCoeff", cubicCoeff);
-        jsonBrightnessOption->Put("quadCoeff", quadCoeff);
-        auto posRGBstr = "[0.0,0.0,0.0]";
-        if (posRGB.size() > 1) {
-            posRGBstr =
-                ("[" + std::to_string(posRGB[0]) + "," + std::to_string(posRGB[1]) + "," +
-                std::to_string(posRGB[2]) + "]").c_str();
-        }
-        jsonBrightnessOption->Put("posRGB", posRGBstr);
-        auto negRGBstr = "[0.0,0.0,0.0]";
-        if (negRGB.size() > 1) {
-            negRGBstr =
-                ("[" + std::to_string(negRGB[0]) + "," + std::to_string(negRGB[1]) + "," +
-                std::to_string(negRGB[2]) + "]").c_str();
-        }
-        jsonBrightnessOption->Put("negRGB", negRGBstr);
-        jsonBrightnessOption->Put("fraction", fraction);
-        json->PutExtAttr("brightnessEffect", jsonBrightnessOption, filter);
-    }
+    std::unique_ptr<JsonValue> GetJsonObject() const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const NG::InspectorFilter& filter, std::string key) const;
 };
 
 struct PixStretchEffectOption {
@@ -587,7 +566,7 @@ public:
         }
     }
 
-    void SetSpreadMethod(SpreadMethod spreadMethod)
+    void SetSpreadMethod(GradientSpreadMethodNG spreadMethod)
     {
         spreadMethod_ = spreadMethod;
     }
@@ -597,7 +576,7 @@ public:
         gradientTransform_ = gradientTransform;
     }
 
-    SpreadMethod GetSpreadMethod() const
+    GradientSpreadMethodNG GetSpreadMethod() const
     {
         return spreadMethod_;
     }
@@ -645,7 +624,7 @@ private:
     // used for CanvasRadialGradient
     double innerRadius_ = 0.0;
     double outerRadius_ = 0.0;
-    SpreadMethod spreadMethod_ = SpreadMethod::PAD;
+    GradientSpreadMethodNG spreadMethod_ = GradientSpreadMethodNG::PAD;
     std::string gradientTransform_;
     LinearGradientInfo linearGradientInfo_;
     RadialGradientInfo radialGradientInfo_;

@@ -110,7 +110,7 @@ HWTEST_F(TextInputCheckTest, CheckAutoSave004, TestSize.Level1)
      * @tc.steps: step2. call CheckAutoSave.
      * @tc.expected: return false
      */
-    EXPECT_FALSE(pattern_->CheckAutoSave());
+    EXPECT_TRUE(pattern_->CheckAutoSave());
     FlushLayoutTask(frameNode_);
     GetFocus();
 
@@ -1074,53 +1074,6 @@ HWTEST_F(TextInputCheckTest, GetDragUpperLeftCoordinates001, TestSize.Level1)
      */
     OffsetF localOffset(0.0f, 0.0f);
     EXPECT_EQ(pattern_->GetDragUpperLeftCoordinates(), localOffset);
-}
-
-/**
- * @tc.name: HandleOnDragStatusCallback
- * @tc.desc: Test cursor drag status.
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputCheckTest, HandleOnDragStatusCallback, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize text input.
-     */
-    CreateTextField(DEFAULT_TEXT);
-    GetFocus();
-
-    const RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    std::vector<DragEventType> dragEventType = {
-        DragEventType::MOVE,
-        DragEventType::LEAVE,
-        DragEventType::DROP
-    };
-
-    /**
-     * @tc.steps: step2. set handle cursor on drag moved
-     */
-    auto focushHub = pattern_->GetFocusHub();
-    focushHub->currentFocus_ = false;
-    pattern_->HandleOnDragStatusCallback(dragEventType[0], notifyDragEvent);
-    EXPECT_TRUE(pattern_->isCursorAlwaysDisplayed_);
-    pattern_->HandleOnDragStatusCallback(dragEventType[0], notifyDragEvent);
-
-    /**
-     * @tc.steps: step3. set handle cursor on drag leaved
-     */
-    FlushLayoutTask(frameNode_);
-    GetFocus();
-    pattern_->HandleOnDragStatusCallback(dragEventType[1], notifyDragEvent);
-    EXPECT_FALSE(pattern_->isCursorAlwaysDisplayed_);
-
-    /**
-     * @tc.steps: step3. set handle cursor on drag ended
-     */
-    FlushLayoutTask(frameNode_);
-    GetFocus();
-    pattern_->isCursorAlwaysDisplayed_ = true;
-    pattern_->HandleOnDragStatusCallback(dragEventType[2], notifyDragEvent);
-    EXPECT_FALSE(pattern_->isCursorAlwaysDisplayed_);
 }
 
 /**

@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1173,13 +1172,20 @@ void CalendarDialogPattern::HandleEntryLayoutChange()
     CHECK_NULL_VOID(wrapperNode);
     auto dialogNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetParent());
     CHECK_NULL_VOID(dialogNode);
-    auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
-    CHECK_NULL_VOID(dialogLayoutProp);
-    auto pattern = entryNode->GetPattern<CalendarPickerPattern>();
-    CHECK_NULL_VOID(pattern);
-    dialogLayoutProp->UpdateDialogOffset(DimensionOffset(pattern->CalculateDialogOffset()));
-    dialogOffset_ = pattern->CalculateDialogOffset();
-    dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto pipeline = GetContext();
+    if (pipeline) {
+        pipeline->AddAfterRenderTask([weak = WeakClaim(this), entryNode, dialogNode]() {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = entryNode->GetPattern<CalendarPickerPattern>();
+            CHECK_NULL_VOID(pattern);
+            node->dialogOffset_ = pattern->CalculateDialogOffset();
+            auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
+            CHECK_NULL_VOID(dialogLayoutProp);
+            dialogLayoutProp->UpdateDialogOffset(DimensionOffset(node->dialogOffset_));
+            dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        });
+    }
     isFirstAddhotZoneRect_ = false;
 }
 

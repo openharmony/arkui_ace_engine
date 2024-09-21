@@ -91,6 +91,7 @@ public:
     bool DidExceedMaxLines(const SizeF& maxSize) override;
     bool IsAdaptExceedLimit(const SizeF& maxSize) override;
 
+
 protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
     void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText,
@@ -153,6 +154,7 @@ protected:
 
     float unitWidth_ = 0.0f;
     bool autoWidth_ = false;
+    bool isFontSizeNonPositive_ = false;
     Dimension textIndent_ = 0.0_px;
     float indent_ = 0.0f;
 private:

@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
-#include "base/utils/string_utils.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/inspector_filter.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float MINFONTSCALE = 0.85f;
@@ -82,7 +78,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         return;
     }
     json->PutExtAttr("fontColor",
-        GetForegroundColor().value_or(GetTextColor().value_or(Color::BLACK)).ColorToString().c_str(), filter);
+        GetTextColor().value_or(Color::BLACK).ColorToString().c_str(), filter);
     json->PutExtAttr("fontStyle", GetFontStyleInJson(GetItalicFontStyle()).c_str(), filter);
     json->PutExtAttr("fontWeight", GetFontWeightInJson(GetFontWeight()).c_str(), filter);
     json->PutExtAttr("fontFamily", GetFontFamilyInJson(GetFontFamily()).c_str(), filter);
@@ -141,8 +137,8 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);
-    json->PutExtAttr("minFontSacle", std::to_string(GetMinFontScale().value_or(MINFONTSCALE)).c_str(), filter);
-    json->PutExtAttr("maxFontSacle", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
+    json->PutExtAttr("minFontScale", std::to_string(GetMinFontScale().value_or(MINFONTSCALE)).c_str(), filter);
+    json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

@@ -15,12 +15,7 @@
 
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 
-#include "base/i18n/localization.h"
-#include "base/log/ace_scoring_log.h"
-#include "base/utils/utils.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -28,6 +23,7 @@
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #endif
+#include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -300,7 +296,7 @@ void SecurityComponentModelNG::SetFontColor(const Color& value)
 void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("background is not exist");
+        SC_LOG_WARN("background is not exist");
         return;
     }
 
@@ -318,7 +314,7 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
 void SecurityComponentModelNG::SetBackgroundBorderWidth(const Dimension& value)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("background is not exist");
+        SC_LOG_WARN("background is not exist");
         return;
     }
 
@@ -328,7 +324,7 @@ void SecurityComponentModelNG::SetBackgroundBorderWidth(const Dimension& value)
 void SecurityComponentModelNG::SetBackgroundBorderColor(const Color& value)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("background is not exist");
+        SC_LOG_WARN("background is not exist");
         return;
     }
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundBorderColor, value);
@@ -337,7 +333,7 @@ void SecurityComponentModelNG::SetBackgroundBorderColor(const Color& value)
 void SecurityComponentModelNG::SetBackgroundBorderStyle(const BorderStyle& value)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("background is not exist");
+        SC_LOG_WARN("background is not exist");
         return;
     }
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundBorderStyle, value);
@@ -346,7 +342,7 @@ void SecurityComponentModelNG::SetBackgroundBorderStyle(const BorderStyle& value
 void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("background is not exist");
+        SC_LOG_WARN("background is not exist");
         return;
     }
 
@@ -358,7 +354,7 @@ void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimensio
     const std::optional<Dimension>& bottom)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("Can not set background padding without background");
+        SC_LOG_WARN("Can not set background padding without background");
         return;
     }
 
@@ -393,7 +389,7 @@ void SecurityComponentModelNG::SetTextIconSpace(const Dimension& value)
 {
     if ((GetCurSecCompChildNode(V2::TEXT_ETS_TAG) == nullptr) ||
         (GetCurSecCompChildNode(V2::IMAGE_ETS_TAG) == nullptr)) {
-        LOGW("Can not set text icon padding without text and icon");
+        SC_LOG_WARN("Can not set text icon padding without text and icon");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconSpace, value);

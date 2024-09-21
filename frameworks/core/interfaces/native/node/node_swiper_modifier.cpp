@@ -14,26 +14,12 @@
  */
 #include "core/interfaces/native/node/node_swiper_modifier.h"
 
-#include <vector>
 #include "node_model.h"
 
-#include "base/error/error_code.h"
-#include "base/geometry/axis.h"
-#include "base/log/log_wrapper.h"
-#include "base/memory/type_info_base.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/animation/curve.h"
 #include "core/components/swiper/swiper_component.h"
-#include "core/components/swiper/swiper_indicator_theme.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {

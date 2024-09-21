@@ -137,10 +137,10 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
 
     auto pipeline = PipelineContext::GetCurrentContext();
     onHoverEvent(true);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_, frameNode->GetId());
+    EXPECT_EQ(pipeline->mouseStyleNodeId_.value(), frameNode->GetId());
 
     onHoverEvent(false);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_, -1);
+    EXPECT_FALSE(pipeline->mouseStyleNodeId_.has_value());
 
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
@@ -149,7 +149,7 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest001, TestSize.Level1)
 
     MouseInfo mouseInfo;
     onMouseEvent(mouseInfo);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_, -1);
+    EXPECT_FALSE(pipeline->mouseStyleNodeId_.has_value());
 }
 
 /**
@@ -492,6 +492,94 @@ HWTEST_F(HyperlinkTestNg, EnableDrag001, TestSize.Level1)
     auto hyperlinkPattern = frameNode->GetPattern<HyperlinkPattern>();
     ASSERT_NE(hyperlinkPattern, nullptr);
     hyperlinkPattern->EnableDrag();
+}
+
+/**
+ * @tc.name: PreventDefault001
+ * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, PreventDefault001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Hyperlink node
+     */
+    HyperlinkModelNG hyperlinkModelNG;
+    hyperlinkModelNG.Create(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Mock TouchEventInfo info and set preventDefault to true
+     * @tc.expected: Check the param value
+     */
+    pattern->InitTouchEvent(gestureHub);
+    TouchEventInfo touchInfo("onTouch");
+    TouchLocationInfo touchDownInfo(1);
+    touchDownInfo.SetTouchType(TouchType::DOWN);
+    touchInfo.SetPreventDefault(true);
+    touchInfo.SetSourceDevice(SourceType::TOUCH);
+    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    pattern->onTouchEvent_->callback_(touchInfo);
+    EXPECT_TRUE(pattern->isTouchPreventDefault_);
+    /**
+     * @tc.steps: step3.Mock GestureEvent info and set preventDefault to true
+     * @tc.expected: Check the param value
+     */
+    pattern->InitClickEvent(gestureHub);
+    GestureEvent clickInfo;
+    clickInfo.SetPreventDefault(true);
+    clickInfo.SetSourceDevice(SourceType::TOUCH);
+    pattern->clickListener_->operator()(clickInfo);
+    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+}
+
+/**
+ * @tc.name: PreventDefault002
+ * @tc.desc: test InitTouchEvent and InitClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, PreventDefault002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Hyperlink node
+     */
+    HyperlinkModelNG hyperlinkModelNG;
+    hyperlinkModelNG.Create(HYPERLINK_ADDRESS, HYPERLINK_CONTENT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<HyperlinkPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Mock TouchEvent info and set preventDefault to false
+     * @tc.expected: Check the param value
+     */
+    pattern->InitTouchEvent(gestureHub);
+    TouchEventInfo touchInfo("onTouch");
+    TouchLocationInfo touchDownInfo(1);
+    touchDownInfo.SetTouchType(TouchType::DOWN);
+    touchInfo.SetPreventDefault(false);
+    touchInfo.SetSourceDevice(SourceType::TOUCH);
+    touchInfo.AddTouchLocationInfo(std::move(touchDownInfo));
+    pattern->onTouchEvent_->callback_(touchInfo);
+    EXPECT_FALSE(pattern->isTouchPreventDefault_);
+    /**
+     * @tc.steps: step3. Mock GestureEvent info and set preventDefault to false
+     * @tc.expected: Check the param value
+     */
+    pattern->InitClickEvent(gestureHub);
+    GestureEvent clickInfo;
+    clickInfo.SetPreventDefault(false);
+    clickInfo.SetSourceDevice(SourceType::TOUCH);
+    pattern->clickListener_->operator()(clickInfo);
+    EXPECT_FALSE(pattern->isTouchPreventDefault_);
 }
 
 } // namespace OHOS::Ace::NG

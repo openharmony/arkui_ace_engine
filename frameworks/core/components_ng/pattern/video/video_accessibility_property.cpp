@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/video/video_accessibility_property.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/video/video_layout_property.h"
-#include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 
@@ -28,7 +25,7 @@ std::string VideoAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(videoLayoutProperty, "");
-    return videoLayoutProperty->GetVideoSource().value_or("");
+    return videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo()).GetSrc();
 }
 
 AccessibilityValue VideoAccessibilityProperty::GetAccessibilityValue() const

@@ -142,6 +142,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("onWillDelete", &JSSearch::OnWillDelete);
     JSClass<JSSearch>::StaticMethod("onDidDelete", &JSSearch::OnDidDelete);
     JSClass<JSSearch>::StaticMethod("enablePreviewText", &JSSearch::SetEnablePreviewText);
+    JSClass<JSSearch>::StaticMethod("enableHapticFeedback", &JSSearch::SetEnableHapticFeedback);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -434,21 +435,18 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     if (srcPathProp->IsUndefined() || srcPathProp->IsNull() || !ParseJsMedia(srcPathProp, src)) {
         src = "";
     }
-    std::string bundleName;
-    std::string moduleName;
-    GetJsMediaBundleInfo(srcPathProp, bundleName, moduleName);
-
     // set icon color
     Color colorVal = theme->GetSearchIconColor();
     auto colorProp = param->GetProperty("color");
     if (!colorProp->IsUndefined() && !colorProp->IsNull()) {
         ParseJsColor(colorProp, colorVal);
-        NG::IconOptions searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
-        SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
-    } else {
-        NG::IconOptions searchIconOptions = NG::IconOptions(size, src, bundleName, moduleName);
-        SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
     }
+
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(srcPathProp, bundleName, moduleName);
+    NG::IconOptions searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
+    SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
 }
 
 static CancelButtonStyle ConvertStrToCancelButtonStyle(const std::string& value)
@@ -1038,6 +1036,9 @@ void JSSearch::SetMaxLength(const JSCallbackInfo& info)
         return;
     }
     maxLength = info[0]->ToNumber<int32_t>();
+    if (std::isinf(info[0]->ToNumber<float>())) {
+        maxLength = INT32_MAX; // Infinity
+    }
     if (GreatOrEqual(maxLength, 0)) {
         SearchModel::GetInstance()->SetMaxLength(maxLength);
     } else {
@@ -1162,5 +1163,14 @@ void JSSearch::SetEnablePreviewText(const JSCallbackInfo& info)
         return;
     }
     SearchModel::GetInstance()->SetEnablePreviewText(jsValue->ToBoolean());
+}
+
+void JSSearch::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool state = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetEnableHapticFeedback(state);
 }
 } // namespace OHOS::Ace::Framework

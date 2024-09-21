@@ -30,6 +30,7 @@ class FocusHub;
 class EventHub;
 class FocusView;
 class FocusManager;
+class PipelineContext;
 
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
@@ -472,7 +473,7 @@ public:
     void SetPaintRect(const RoundRect& rect)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintRect(rect);
@@ -480,7 +481,7 @@ public:
     void SetPaintColor(const Color& color)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintColor(color);
@@ -488,7 +489,7 @@ public:
     void SetPaintWidth(const Dimension& width)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintWidth(width);
@@ -496,7 +497,7 @@ public:
     void SetFocusPadding(const Dimension& padding)
     {
         if (!focusPaintParamsPtr_) {
-            focusPaintParamsPtr_ = std::unique_ptr<FocusPaintParam>();
+            focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
         CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetFocusPadding(padding);
@@ -562,6 +563,12 @@ public:
     void SetParentFocusable(bool parentFocusable);
 
     void SetFocusable(bool focusable, bool isExplicit = true);
+
+    bool GetFocusable() const
+    {
+        return focusable_;
+    }
+
     void SetShow(bool show);
     void SetEnabled(bool enabled);
 
@@ -912,6 +919,10 @@ public:
     std::optional<std::string> GetInspectorKey() const;
 
     bool PaintFocusState(bool isNeedStateStyles = true);
+    bool PaintFocusStateToRenderContext();
+    void GetPaintColorFromBox(Color& paintColor);
+    void GetPaintWidthFromBox(Dimension& paintWidth);
+    void GetPaintPaddingVp(Dimension& focusPaddingVp);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
     void ClearFocusState(bool isNeedStateStyles = true);
@@ -1031,6 +1042,10 @@ public:
         const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter);
 
     bool FocusToHeadOrTailChild(bool isHead);
+
+    WeakPtr<FocusHub> GetUnfocusableParentFocusNode();
+
+    bool IsNeedPaintFocusStateSelf();
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -1061,6 +1076,10 @@ protected:
     }
 
 private:
+    friend class FocusView;
+
+    friend class FocusManager;
+
     bool CalculatePosition();
 
     void SetScopeFocusAlgorithm();
@@ -1091,9 +1110,18 @@ private:
     void RaiseZIndex(); // Recover z-index in ClearFocusState
 
     bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
+    bool OnKeyEventNodeInternal(const KeyEvent& keyEvent);
+    bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
+    bool RequestNextFocusByKey(const KeyEvent& keyEvent);
+    RefPtr<PipelineContext> GetPipelineContext() const;
 
     void DumpFocusNodeTreeInJson(int32_t depth);
     void DumpFocusScopeTreeInJson(int32_t depth);
+
+    bool IsComponentDirectionRtl();
+
+    bool SkipFocusMoveBeforeRemove();
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;

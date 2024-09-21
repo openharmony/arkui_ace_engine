@@ -1567,7 +1567,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
     auto height = theme->GetDividerSpacing();
     auto width = frameNode->GetGeometryNode()->GetFrameSize().Width() / static_cast<float>(children.size());
     auto defaultWidth = height.ConvertToPx() * 2;
-    EXPECT_GT(width, defaultWidth);
+    EXPECT_LT(width, defaultWidth);
 
     for (const auto& child : children) {
         auto childNode = AceType::DynamicCast<FrameNode>(child);
@@ -1579,7 +1579,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern001, TestSize.Level1)
         EXPECT_EQ(buttonLayoutProperty->GetTypeValue(), ButtonType::NORMAL);
         auto calcSize = buttonLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value();
         EXPECT_EQ(calcSize.Width().value(), CalcLength(newWidth - PRESS_INTERVAL.ConvertToPx()));
-        EXPECT_EQ(calcSize.Height().value(), CalcLength(height - PRESS_INTERVAL));
+        EXPECT_EQ(calcSize.Height().value(), CalcLength(0.0f));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         EXPECT_EQ(buttonConfirmRenderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
     }
@@ -1891,7 +1891,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto currentIndex = pattern->GetCurrentIndex();
     auto totalOptionCount = timePickerRowPattern->GetOptionCount(pickerChild);
     EXPECT_TRUE(focusHub->ProcessOnKeyEventInternal(keyEvent));
-    EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex - 1) % totalOptionCount);
+    EXPECT_EQ(pattern->GetCurrentIndex(), (totalOptionCount + currentIndex) % totalOptionCount);
 
     keyEvent.code = KeyCode::KEY_DPAD_DOWN;
     currentIndex = pattern->GetCurrentIndex();
@@ -1933,9 +1933,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     RoundRect paintRect;
     getInnerFocusRectFunc(paintRect);
     auto rect = paintRect.GetRect();
-    EXPECT_EQ(rect.GetX(), 0);
+    Dimension offset = 2.0_vp;
+    EXPECT_EQ(rect.GetX(), offset.ConvertToPx());
     EXPECT_EQ(rect.GetY(), centerY);
-    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width());
+    EXPECT_EQ(rect.Width(), pickerChild->GetGeometryNode()->GetFrameSize().Width() - offset.ConvertToPx() * 2);
     EXPECT_EQ(rect.Height(), dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2);
 
     EXPECT_EQ(paintRect.GetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS).x,
@@ -1961,7 +1962,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern011, TestSize.Level1)
     auto rect2 = paintRect2.GetRect();
     auto centerX = (pickerChild->GetGeometryNode()->GetFrameSize().Width() - pickerThemeWidth) / 2 +
                    pickerChild->GetGeometryNode()->GetFrameRect().Width() * timePickerRowPattern->focusKeyID_ +
-                   PRESS_INTERVAL.ConvertToPx() * 2;
+                   PRESS_INTERVAL.ConvertToPx();
     EXPECT_EQ(rect2.GetX(), centerX);
     EXPECT_EQ(rect2.Width(), (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2);
 }

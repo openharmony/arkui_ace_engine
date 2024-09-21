@@ -14,16 +14,9 @@
  */
 #include "core/components_ng/pattern/menu/menu_paint_method.h"
 
-#include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
-#include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

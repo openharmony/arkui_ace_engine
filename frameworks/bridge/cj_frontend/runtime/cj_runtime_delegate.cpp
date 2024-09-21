@@ -15,11 +15,6 @@
 
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 
-#include <string>
-#include <utility>
-
-#include "base/log/log.h"
-#include "ffi_remote_data.h"
 #include "cj_environment.h"
 
 using namespace OHOS::Ace::Framework;

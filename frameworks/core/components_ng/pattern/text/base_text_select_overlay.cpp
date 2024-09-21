@@ -15,12 +15,7 @@
 
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -56,7 +51,7 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
 void BaseTextSelectOverlay::ShowSelectOverlay(const OverlayRequest& request, bool hasClipboardData)
 {
     SetShowPaste(hasClipboardData);
-    SetMenuIsShow(request.menuIsShow);
+    SetMenuIsShow(request.menuIsShow && !GetSelectArea().IsEmpty());
     SetIsShowHandleLine(!request.hideHandleLine);
     latestReqeust_ = request;
     if (!SelectOverlayIsOn() && enableHandleLevel_) {
@@ -204,7 +199,7 @@ RefPtr<FrameNode> BaseTextSelectOverlay::GetOwner()
     return pattern->GetHost();
 }
 
-void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     if (IsMouseClickDown(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
@@ -636,6 +631,12 @@ void BaseTextSelectOverlay::UpdateTransformFlag()
 
 std::optional<RectF> BaseTextSelectOverlay::GetAncestorNodeViewPort()
 {
+    if (IsClipHandleWithViewPort()) {
+        RectF viewPort;
+        if (GetClipHandleViewPort(viewPort)) {
+            return viewPort;
+        }
+    }
     auto pattern = GetPattern<Pattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto host = pattern->GetHost();
@@ -849,7 +850,7 @@ void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(bool shouldHideMe
         manager->HideOptionMenu(true);
         return;
     }
-    if (shouldShowMenu && originalMenuIsShow_ && !GetIsHandleDragging()) {
+    if (shouldShowMenu && originalMenuIsShow_ && !GetIsHandleDragging() && !GetSelectArea().IsEmpty()) {
         manager->ShowOptionMenu();
     }
 }
@@ -1108,5 +1109,53 @@ bool BaseTextSelectOverlay::CheckHasTransformMatrix(const RefPtr<RenderContext>&
     Vector4F perspectiveVector(transform.perspective[xIndex], transform.perspective[yIndex],
         transform.perspective[zIndex], transform.perspective[wIndex]);
     return !(perspectiveVector == perspectiveIdentity);
+}
+
+bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
+    if (HasUnsupportedTransform()) {
+        return false;
+    }
+    RectF contentRect;
+    if (!GetFrameNodeContentRect(host, contentRect)) {
+        return false;
+    }
+    contentRect.SetOffset(contentRect.GetOffset() + host->GetPaintRectWithTransform().GetOffset());
+    auto parent = host->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        RectF parentContentRect;
+        if (!GetFrameNodeContentRect(parent, parentContentRect)) {
+            return false;
+        }
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        if (renderContext->GetClipEdge().value_or(false)) {
+            contentRect = contentRect.IntersectRectT(parentContentRect);
+        }
+        contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
+    contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
+    UpdateClipHandleViewPort(contentRect);
+    rect = contentRect;
+    return true;
+}
+
+bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& contentRect)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto geometryNode = node->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (geometryNode->GetContent()) {
+        contentRect = geometryNode->GetContentRect();
+    } else {
+        contentRect = RectF(OffsetF(0.0f, 0.0f), geometryNode->GetFrameSize());
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

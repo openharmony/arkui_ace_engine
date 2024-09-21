@@ -42,6 +42,7 @@ public:
     MOCK_METHOD0(GetMaxWidth, float());
     MOCK_METHOD0(GetAlphabeticBaseline, float());
     MOCK_METHOD0(GetParagraphText, std::u16string());
+    MOCK_METHOD0(GetEllipsisTextRange, std::pair<size_t, size_t>());
     MOCK_CONST_METHOD0(GetParagraphStyle, const ParagraphStyle&());
     MOCK_METHOD1(PushStyle, void(const TextStyle& style));
     MOCK_METHOD1(AddText, void(const std::u16string& text));
@@ -67,10 +68,9 @@ public:
     MOCK_METHOD3(Paint, void(SkCanvas* skCanvas, float x, float y));
 #endif
     MOCK_METHOD3(GetWordBoundary, bool(int32_t offset, int32_t& start, int32_t& end));
-
-    void TxtGetRectsForRange(int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle,
-        std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override {}
-
+    MOCK_METHOD6(TxtGetRectsForRange, void(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle,
+        std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections));
     bool CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity, bool needLineHighest) override
     {

@@ -2047,9 +2047,9 @@ HWTEST_F(RichEditorTestNg, OnHover001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     richEditorPattern->OnHover(true);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_, id);
+    EXPECT_EQ(pipeline->mouseStyleNodeId_.value(), id);
     richEditorPattern->OnHover(false);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_, -1);
+    EXPECT_FALSE(pipeline->mouseStyleNodeId_.has_value());
 }
 
 /**
@@ -3888,7 +3888,6 @@ HWTEST_F(RichEditorTestNg, RichEditorController012, TestSize.Level1)
     updateSpanStyle.updateSymbolColor = SYMBOL_COLOR_LIST_2;
     updateSpanStyle.updateSymbolRenderingStrategy = RENDER_STRATEGY_MULTI_COLOR;
     updateSpanStyle.updateSymbolEffectStrategy = EFFECT_STRATEGY_SCALE;
-    updateSpanStyle.isSymbolStyle = true;
     richEditorController->SetUpdateSpanStyle(updateSpanStyle);
 
     ImageSpanAttribute imageStyle;

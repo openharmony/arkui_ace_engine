@@ -366,4 +366,49 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest009
     EXPECT_EQ(layoutAlgorithm->verticalPadding_, theme->GetDefaultPaddingSize().ConvertToPx());
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
+
+/**
+ * @tc.name: CheckBoxGroupLayoutAlgorithmTest0010
+ * @tc.desc: Test CheckBoxGroupLayoutAlgorithm MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest0010, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step1. Create contentConstraint and layoutWrapper
+     */
+    std::optional<float> nullLength;
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize = OptionalSizeF(nullLength, nullLength);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(nullptr, nullptr, AccessibilityManager::MakeRefPtr<LayoutProperty>());
+
+    /**
+     * @tc.steps: step2. Create mock theme manager
+     * @tc.expected: create successfully.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<CheckboxTheme>();
+    theme->defaultWidth_ = Dimension(CHECKBOXGROUP_COMPONENT_WIDTH);
+    theme->defaultHeight_ = Dimension(CHECKBOXGROUP_COMPONENT_WIDTH / 2);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto layoutAlgorithm = AceType::MakeRefPtr<CheckBoxGroupLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step3. Call MeasureContent
+     * @tc.expected: Return sizeF and check the param value.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_FLOAT_EQ(size->Width(), CHECKBOXGROUP_COMPONENT_WIDTH / 2);
+    EXPECT_FLOAT_EQ(size->Height(), CHECKBOXGROUP_COMPONENT_WIDTH / 2);
+    EXPECT_EQ(layoutAlgorithm->horizontalPadding_, theme->GetDefaultPaddingSize().ConvertToPx());
+    EXPECT_EQ(layoutAlgorithm->verticalPadding_, theme->GetDefaultPaddingSize().ConvertToPx());
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
 } // namespace OHOS::Ace::NG

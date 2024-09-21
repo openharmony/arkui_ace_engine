@@ -15,14 +15,11 @@
 
 #include "core/components_ng/pattern/ability_component/ability_component_pattern.h"
 
-#include "session/host/include/extension_session.h"
 #include "session_manager/include/extension_session_manager.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -40,6 +37,15 @@ AbilityComponentPattern::AbilityComponentPattern(const std::string& bundleName, 
         };
         session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     }
+}
+
+void AbilityComponentPattern::OnAttachToFrameNode()
+{
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+    if (!container || !container->IsSceneBoardEnabled()) {
+        return;
+    }
+    WindowPattern::OnAttachToFrameNode();
 }
 
 void AbilityComponentPattern::OnModifyDone()

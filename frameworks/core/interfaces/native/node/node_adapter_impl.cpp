@@ -15,19 +15,7 @@
 
 #include "core/interfaces/native/node/node_adapter_impl.h"
 
-#include <cstdint>
-#include <string>
-#include <vector>
-
-#include "base/error/error_code.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/pipeline/base/element_register.h"
 
 struct _ArkUINodeAdapter {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::NativeLazyForEachBuilder> builder;
@@ -100,6 +88,7 @@ LazyForEachChild NativeLazyForEachBuilder::OnGetChildByIndex(
             }
             receiver_(&getIdevent);
         }
+        FlushDirtyPropertyNodes(child.second);
         return child;
     }
     ArkUINodeAdapterEvent getChildEvent {
@@ -110,7 +99,16 @@ LazyForEachChild NativeLazyForEachBuilder::OnGetChildByIndex(
     if (getChildEvent.nodeSet) {
         child.second = Claim(reinterpret_cast<UINode*>(getChildEvent.handle));
     }
+    FlushDirtyPropertyNodes(child.second);
     return child;
+}
+
+void NativeLazyForEachBuilder::FlushDirtyPropertyNodes(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto context = node->GetContext();
+    CHECK_NULL_VOID(context);
+    context->FlushDirtyPropertyNodes();
 }
 
 void NativeLazyForEachBuilder::OnItemDeleted(UINode* node, const std::string& key)

@@ -128,6 +128,8 @@ template("ace_ohos_standard_source_set") {
       "relational_store:native_dataability",
       "relational_store:native_rdb",
       "resource_management:global_resmgr",
+      "safwk:system_ability_fwk",
+      "samgr:samgr_proxy",
       "window_manager:libdm",
       "window_manager:libwm",
       "window_manager:libwsutils",
@@ -163,6 +165,12 @@ template("ace_ohos_standard_source_set") {
     if (enable_graphic_text_gine) {
       external_deps += [ "graphic_2d:rosen_text" ]
     }
+
+    if (os_account_exists) {
+      external_deps += [ "os_account:os_account_innerkits" ]
+    }
+    deps +=
+        [ "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr" ]
   }
 }
 

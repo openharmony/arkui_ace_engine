@@ -48,6 +48,8 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
+    HoverModeAreaType::BOTTOM_SCREEN };
 const char TIMEPICKER_OPTIONS_HOUR[] = "hour";
 const char TIMEPICKER_OPTIONS_MINUTE[] = "minute";
 const char TIMEPICKER_OPTIONS_SECOND[] = "second";
@@ -264,6 +266,22 @@ std::vector<ButtonInfo> ParseButtonStyles(const JSRef<JSObject>& paramObject)
 
     return buttonInfos;
 }
+
+void ParseDatePickerHoverMode(PickerDialogInfo& pickerDialog, const JSRef<JSObject>& paramObject)
+{
+    auto enableHoverModeValue = paramObject->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        pickerDialog.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+
+    auto hoverModeAreaValue = paramObject->GetProperty("hoverModeArea");
+    if (hoverModeAreaValue->IsNumber()) {
+        auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
+        if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
+            pickerDialog.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
+        }
+    }
+}
 } // namespace
 
 void JSDatePicker::JSBind(BindingTarget globalObj)
@@ -275,6 +293,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("onChange", &JSDatePicker::OnChange);
     JSClass<JSDatePicker>::StaticMethod("onDateChange", &JSDatePicker::OnDateChange);
     JSClass<JSDatePicker>::StaticMethod("backgroundColor", &JSDatePicker::PickerBackgroundColor);
+    JSClass<JSDatePicker>::StaticMethod("opacity", &JSDatePicker::JsOpacity);
     // keep compatible, need remove after
     JSClass<JSDatePicker>::StaticMethod("useMilitaryTime", &JSDatePicker::UseMilitaryTime);
     JSClass<JSDatePicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -459,6 +478,12 @@ void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
     DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
+void JSDatePicker::JsOpacity(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOpacity(info);
+    DatePickerModel::GetInstance()->HasUserDefinedOpacity();
+}
+
 void JSDatePicker::OnChange(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -596,8 +621,8 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                           const BaseEventInfo* info) {
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                           node = targetNode, isDatePicker](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("DatePicker.SelectedDateTimeChangeEvent");
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
@@ -608,7 +633,7 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
             return;
         }
 
-        auto dateObj = JSDatePickerDialog::GetDateObj(sourceJson);
+        auto dateObj = JSDatePickerDialog::GetDateObj(sourceJson, isDatePicker);
         PipelineContext::SetCallBackNode(node);
         func->ExecuteJS(1, &dateObj);
     };
@@ -832,7 +857,7 @@ std::function<void(const std::string&)> JSDatePickerDialog::GetDateAcceptEvent(c
     return dateAcceptEvent;
 }
 
-JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>& selectedJson)
+JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>& selectedJson, bool isDatePicker)
 {
     std::tm dateTime = { 0 };
     auto year = selectedJson->GetValue("year");
@@ -854,6 +879,11 @@ JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>
     auto minute = selectedJson->GetValue("minute");
     if (minute && minute->IsNumber()) {
         dateTime.tm_min = minute->GetInt();
+    }
+    if (!isDatePicker) {
+        auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
+        auto dateObj = JSDate::New(milliseconds);
+        return dateObj;
     }
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
     auto duration = timestamp.time_since_epoch();
@@ -918,6 +948,26 @@ std::function<void()> JSDatePickerDialog::GetCancelEvent(
     return cancelEvent;
 }
 
+void JSDatePickerDialog::UpdateLunarSwitchSettingData(
+    const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData)
+{
+    auto selectedColorValue = paramObject->GetProperty("selectedColor");
+    auto unselectedColorValue = paramObject->GetProperty("unselectedColor");
+    auto strokeColorValue = paramObject->GetProperty("strokeColor");
+    Color selectedColor;
+    if (JSViewAbstract::ParseJsColor(selectedColorValue, selectedColor)) {
+        settingData.checkboxSettingData.selectedColor = selectedColor;
+    }
+    Color unselectedColor;
+    if (JSViewAbstract::ParseJsColor(unselectedColorValue, unselectedColor)) {
+        settingData.checkboxSettingData.unselectedColor = unselectedColor;
+    }
+    Color strokeColor;
+    if (JSViewAbstract::ParseJsColor(strokeColorValue, strokeColor)) {
+        settingData.checkboxSettingData.strokeColor = strokeColor;
+    }
+}
+
 void JSDatePickerDialog::UpdateDatePickerSettingData(
     const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData)
 {
@@ -927,6 +977,13 @@ void JSDatePickerDialog::UpdateDatePickerSettingData(
     auto useMilitary = paramObject->GetProperty("useMilitaryTime");
     settingData.isLunar = lunar->ToBoolean();
     settingData.lunarswitch = lunarSwitch->ToBoolean();
+    if (settingData.lunarswitch) {
+        auto lunarSwitchStyle = paramObject->GetProperty("lunarSwitchStyle");
+        if ((!lunarSwitchStyle->IsUndefined()) && lunarSwitchStyle->IsObject()) {
+            auto style = JSRef<JSObject>::Cast(lunarSwitchStyle);
+            UpdateLunarSwitchSettingData(style, settingData);
+        }
+    }
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
     auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
@@ -1038,6 +1095,8 @@ void JSDatePickerDialog::UpdatePickerDialogInfo(const JSRef<JSObject>& paramObje
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
         pickerDialog.shadow = shadow;
     }
+
+    ParseDatePickerHoverMode(pickerDialog, paramObject);
 }
 
 void JSDatePickerDialog::Show(const JSCallbackInfo& info)
@@ -1301,6 +1360,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
     JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
     JSClass<JSTimePicker>::StaticMethod("dateTimeOptions", &JSTimePicker::DateTimeOptions);
+    JSClass<JSTimePicker>::StaticMethod("opacity", &JSTimePicker::JsOpacity);
     JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1311,6 +1371,12 @@ void JSTimePicker::Create(const JSCallbackInfo& info)
         paramObject = JSRef<JSObject>::Cast(info[0]);
     }
     CreateTimePicker(info, paramObject);
+}
+
+void JSTimePicker::JsOpacity(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsOpacity(info);
+    TimePickerModel::GetInstance()->HasUserDefinedOpacity();
 }
 
 void JSTimePicker::Loop(const JSCallbackInfo& info)
@@ -1706,6 +1772,8 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
             pickerDialog.backgroundBlurStyle = blurStyle;
         }
     }
+
+    ParseDatePickerHoverMode(pickerDialog, paramObject);
 
     auto buttonInfos = ParseButtonStyles(paramObject);
 

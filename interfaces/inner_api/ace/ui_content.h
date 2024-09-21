@@ -56,6 +56,8 @@ enum class MaximizeMode : uint32_t;
 class RSSurfaceNode;
 class RSTransaction;
 class Transform;
+enum class AvoidAreaType : uint32_t;
+class AvoidArea;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -82,6 +84,10 @@ class Parcelable;
 class IRemoteObject;
 
 } // namespace OHOS
+
+namespace OHOS::Ace {
+struct AccessibilityParentRectInfo;
+} // namespace OHOS::Ace
 
 class NativeEngine;
 typedef struct napi_value__* napi_value;
@@ -134,9 +140,10 @@ public:
     virtual void SetIsFocusActive(bool isFocusActive) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) = 0;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) {};
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
-    virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
+    virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
     virtual void ProcessFormVisibleChange(bool isVisible) {};
@@ -149,6 +156,7 @@ public:
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;
     virtual void SetUIContentType(UIContentType uIContentType) {};
+    virtual void SetWindowContainerColor(uint32_t activeColor, uint32_t inactiveColor) = 0;
 
     // Judge whether window need soft keyboard or not
     virtual bool NeedSoftKeyboard()
@@ -184,7 +192,10 @@ public:
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
     virtual void ReloadForm(const std::string& url) {};
-    virtual void OnFormSurfaceChange(float width, float height) {}
+    virtual void OnFormSurfaceChange(float width, float height,
+        OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0),
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) {}
+
     virtual void SetFormBackgroundColor(const std::string& color) {};
     virtual void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) {};
     virtual void SetFormRenderingMode(int8_t renderMode) {};
@@ -195,6 +206,7 @@ public:
     virtual void RegisterAccessibilityChildTree(
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) {};
     virtual void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) {};
+    virtual void SetAccessibilityGetParentRectHandler(std::function<void(AccessibilityParentRectInfo&)>&& callback) {};
     virtual void DeregisterAccessibilityChildTree() {};
     virtual void AccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) {};
 
@@ -362,8 +374,11 @@ public:
      */
     virtual void SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback) {};
 
-    // Actually paint size of window
+    // Current paintSize of window
     virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
+
+    // Get paintSize of window by calculating
+    virtual void GetWindowPaintSize(OHOS::Rosen::Rect& paintrect) {};
 
     /**
      * @description: Create a custom popup with UIExtensionComponent.
@@ -384,13 +399,13 @@ public:
      * @param config Indicates the ID of the UI node which bind the pupop
      */
     virtual void DestroyCustomPopupUIExtension(int32_t nodeId) {}
-    
+
     /**
      * @description: Update the custom popup.
      * @param config Indicates the custom popup configs.
       */
     virtual void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) {}
-    
+
     virtual SerializedGesture GetFormSerializedGesture()
     {
         return SerializedGesture();
@@ -415,14 +430,14 @@ public:
         const std::function<void(std::vector<Ace::RectF>)>& callback) const {};
 
     virtual void SetContentNodeGrayScale(float grayscale) {};
-    
+
     virtual sptr<IRemoteObject> GetRemoteObj()
     {
         return {};
     }
 
     virtual void PreLayout() {};
-    
+
     virtual void SetStatusBarItemColor(uint32_t color) {};
 
     virtual void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) {};

@@ -39,15 +39,20 @@ public:
 
     void Draw(RSDrawingContext& context) const override
     {
+        CHECK_NULL_VOID(animationRect_);
+        RSRoundRect roundRect = roundRect_;
+        auto realRect = animationRect_->Get();
+        roundRect.SetRect(
+            RSRect(realRect.Left(), realRect.Top(), realRect.Right(), realRect.Bottom()));
 #ifndef USE_ROSEN_DRAWING
         std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /*unused*/) {} };
         RSCanvas rsCanvas(&skCanvas);
         CHECK_NULL_VOID(&rsCanvas);
-        paintTask_(roundRect_, rsCanvas);
+        paintTask_(roundRect, rsCanvas);
 #else
         CHECK_NULL_VOID(context.canvas);
         CHECK_NULL_VOID(paintTask_);
-        paintTask_(roundRect_, *context.canvas);
+        paintTask_(roundRect, *context.canvas);
 #endif
     }
 
@@ -113,6 +118,13 @@ public:
         }
         AttachProperty(rect_);
 
+        if (!animationRect_) {
+            animationRect_ = std::make_shared<Rosen::RSAnimatableProperty<RectF>>(rect.GetRect());
+            AttachProperty(animationRect_);
+        } else {
+            animationRect_->Set(rect.GetRect());
+        }
+
         overlayRect_ = std::make_shared<Rosen::RectF>(
             rect.GetRect().Left() - borderWidth / 2, rect.GetRect().Top() - borderWidth / 2,
             rect.GetRect().Width() + borderWidth, rect.GetRect().Height() + borderWidth);
@@ -129,6 +141,8 @@ private:
     std::shared_ptr<Rosen::RectF> overlayRect_;
     std::function<void(const RSRoundRect&, RSCanvas&)> paintTask_;
 
+    // Animation Properties
+    std::shared_ptr<Rosen::RSAnimatableProperty<RectF>> animationRect_;
     ACE_DISALLOW_COPY_AND_MOVE(FocusStateModifier);
 };
 } // namespace OHOS::Ace::NG

@@ -16,10 +16,6 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
-#include "core/components_ng/pattern/grid/grid_item_theme.h"
-#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
@@ -29,7 +25,7 @@ void GridItemPattern::OnAttachToFrameNode()
     if (gridItemStyle_ == GridItemStyle::PLAIN) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<GridItemTheme>();
         CHECK_NULL_VOID(theme);
@@ -133,7 +129,7 @@ void GridItemPattern::BeforeCreateLayoutWrapper()
 Color GridItemPattern::GetBlendGgColor()
 {
     Color color = Color::TRANSPARENT;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, color);
     auto theme = pipeline->GetTheme<GridItemTheme>();
     CHECK_NULL_RETURN(theme, color);
@@ -210,7 +206,7 @@ void GridItemPattern::HandlePressEvent(bool isPressed)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<GridItemTheme>();
     CHECK_NULL_VOID(theme);
@@ -228,7 +224,7 @@ void GridItemPattern::InitDisableStyle()
     CHECK_NULL_VOID(eventHub);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<GridItemTheme>();
     CHECK_NULL_VOID(theme);
@@ -257,7 +253,7 @@ void GridItemPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto gridItemSize = geometryNode->GetFrameSize();
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<GridItemTheme>();
     CHECK_NULL_VOID(theme);
@@ -342,6 +338,43 @@ void GridItemPattern::UpdateGridItemStyle(GridItemStyle gridItemStyle)
         renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
     } else if (gridItemStyle_ == GridItemStyle::NONE) {
         renderContext->UpdateBorderRadius(BorderRadiusProperty());
+    }
+}
+
+void GridItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
+{
+    auto property = GetLayoutProperty<GridItemLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    json->Put("MainIndex",
+        property->GetMainIndex().has_value() ? std::to_string(property->GetMainIndex().value()).c_str() : "null");
+    json->Put("CrossIndex",
+        property->GetCrossIndex().has_value() ? std::to_string(property->GetCrossIndex().value()).c_str() : "null");
+    json->Put("RowStart",
+        property->GetRowStart().has_value() ? std::to_string(property->GetRowStart().value()).c_str() : "null");
+    json->Put(
+        "RowEnd", property->GetRowEnd().has_value() ? std::to_string(property->GetRowEnd().value()).c_str() : "null");
+    json->Put("ColumnStart",
+        property->GetColumnStart().has_value() ? std::to_string(property->GetColumnStart().value()).c_str() : "null");
+    json->Put("ColumnEnd",
+        property->GetColumnEnd().has_value() ? std::to_string(property->GetColumnEnd().value()).c_str() : "null");
+
+    json->Put("needStretch", property->GetNeedStretch());
+    json->Put("selectable", selectable_);
+    json->Put("isSelected", isSelected_);
+    json->Put("isHover", isHover_);
+    json->Put("isPressed", isPressed_);
+    switch (gridItemStyle_) {
+        case GridItemStyle::NONE: {
+            json->Put("GridItemStyle", "NONE");
+            break;
+        }
+        case GridItemStyle::PLAIN: {
+            json->Put("GridItemStyle", "PLAIN");
+            break;
+        }
+        default: {
+            break;
+        }
     }
 }
 } // namespace OHOS::Ace::NG

@@ -17,13 +17,8 @@
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/node/waterflow_section_option.h"
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
-#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
 
 namespace OHOS::Ace::NG {

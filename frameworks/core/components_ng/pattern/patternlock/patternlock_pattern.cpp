@@ -16,7 +16,6 @@
 #include "base/i18n/localization.h"
 #include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
 
-#include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -453,13 +452,8 @@ bool PatternLockPattern::CheckAutoReset() const
 
 void PatternLockPattern::OnTouchDown(const TouchLocationInfo& info)
 {
-#ifdef PREVIEW
-    auto locationX = static_cast<float>(info.GetGlobalLocation().GetX());
-    auto locationY = static_cast<float>(info.GetGlobalLocation().GetY());
-#else
-    auto locationX = static_cast<float>(info.GetScreenLocation().GetX());
-    auto locationY = static_cast<float>(info.GetScreenLocation().GetY());
-#endif
+    auto locationX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto locationY = static_cast<float>(info.GetLocalLocation().GetY());
     screenTouchPoint_.SetX(locationX);
     screenTouchPoint_.SetY(locationY);
 
@@ -486,13 +480,8 @@ void PatternLockPattern::OnTouchDown(const TouchLocationInfo& info)
 
 void PatternLockPattern::OnTouchMove(const TouchLocationInfo& info)
 {
-#ifdef PREVIEW
-    auto locationX = static_cast<float>(info.GetGlobalLocation().GetX());
-    auto locationY = static_cast<float>(info.GetGlobalLocation().GetY());
-#else
-    auto locationX = static_cast<float>(info.GetScreenLocation().GetX());
-    auto locationY = static_cast<float>(info.GetScreenLocation().GetY());
-#endif
+    auto locationX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto locationY = static_cast<float>(info.GetLocalLocation().GetY());
     screenTouchPoint_.SetX(locationX);
     screenTouchPoint_.SetY(locationY);
     if (!isMoveEventValid_) {
@@ -848,9 +837,26 @@ void PatternLockPattern::CalculateCellCenter()
         }
         cellCenter_ = GetLastChoosePointOffset();
     } else {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        cellCenter_ = screenTouchPoint_ - host->GetPositionToScreenWithTransform();
+        cellCenter_ = screenTouchPoint_;
     }
+}
+
+OffsetF PatternLockPattern::GetTouchOffsetToNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF());
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    OffsetF nodeOffset = host->GetPositionToWindowWithTransform();
+    auto container = Container::CurrentSafely();
+    auto windowScale = container->GetWindowScale();
+    nodeOffset = nodeOffset * windowScale;
+    OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
+    offset = screenTouchPoint_ - offset;
+    if (windowScale != 0) {
+        offset = offset / windowScale;
+    }
+    return offset;
 }
 } // namespace OHOS::Ace::NG

@@ -15,18 +15,7 @@
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
 
-#include <utility>
-
-#include "base/geometry/ng/offset_t.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/components/common/properties/placement.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -39,9 +28,6 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/mouse_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -217,6 +203,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
     const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
     auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "bind context menu with type %{public}hhd", menuParam.contextMenuRegisterType);
     BindContextMenu(targetNode, type, buildFunc, menuParam, previewBuildFunc);
 }
 
@@ -240,7 +227,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
             auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
             CHECK_NULL_VOID(menuWrapperPattern);
             menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
-            menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
+            menuWrapperPattern->RegisterMenuStateChangeCallback(menuParam.onStateChange);
         }
     }
     if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
@@ -348,17 +335,32 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
 void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    BindDragWithContextMenuParams(targetNode, menuParam);
+}
+
+void ViewAbstractModelNG::BindDragWithContextMenuParams(FrameNode* targetNode, const NG::MenuParam& menuParam)
+{
     CHECK_NULL_VOID(targetNode);
 
     auto gestureHub = targetNode->GetOrCreateGestureEventHub();
     if (gestureHub) {
+        if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
+            gestureHub->SetBindMenuStatus(true, menuParam.isShow, menuParam.previewMode);
+        } else if (menuParam.menuBindType == MenuBindingType::LONG_PRESS) {
+            gestureHub->SetBindMenuStatus(false, false, menuParam.previewMode);
+        }
         gestureHub->SetPreviewMode(menuParam.previewMode);
         gestureHub->SetContextMenuShowStatus(menuParam.isShow);
         gestureHub->SetMenuBindingType(menuParam.menuBindType);
+        auto menuPreviewScale = menuParam.previewAnimationOptions.scaleTo;
+        // set menu preview scale to drag.
+        gestureHub->SetMenuPreviewScale(
+            LessOrEqual(menuPreviewScale, 0.0) ? DEFALUT_DRAG_PPIXELMAP_SCALE : menuPreviewScale);
     } else {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
     }
 }
+
 void ViewAbstractModelNG::BindBackground(std::function<void()>&& buildFunc, const Alignment& align)
 {
     auto buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {
@@ -368,6 +370,7 @@ void ViewAbstractModelNG::BindBackground(std::function<void()>&& buildFunc, cons
         return customNode;
     };
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
     targetNode->SetBackgroundFunction(std::move(buildNodeFunc));
     NG::ViewAbstract::SetBackgroundAlign(align);
 }
@@ -413,7 +416,7 @@ void ViewAbstractModelNG::BindContentCover(bool isShow, std::function<void(const
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteModal(id);
     };
-    targetNode->PushDestroyCallback(destructor);
+    targetNode->PushDestroyCallbackWithTag(destructor, V2::MODAL_PAGE_TAG);
 
     overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), modalStyle,
         std::move(onAppear), std::move(onDisappear), std::move(onWillAppear), std::move(onWillDisappear),
@@ -509,7 +512,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteModal(id);
     };
-    targetNode->PushDestroyCallback(destructor);
+    targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
 
     overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), std::move(buildTitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),

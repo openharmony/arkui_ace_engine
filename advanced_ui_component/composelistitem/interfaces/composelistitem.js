@@ -85,6 +85,7 @@ const ICON_SIZE_MAP = new Map([
     [IconType.LONGITUDINAL, LONGITUDINAL_SIZE],
     [IconType.VERTICAL, VERTICAL_SIZE]
 ]);
+
 class ContentItemStruct extends ViewPU {
     constructor(a11, b11, c11, d11 = -1, e11 = undefined, f11) {
         super(a11, c11, d11, f11);
@@ -437,6 +438,7 @@ class ContentItemStruct extends ViewPU {
 }
 class CreateIconParam {
 }
+
 class OperateItemStruct extends ViewPU {
     constructor(p8, q8, r8, s8 = -1, t8 = undefined, u8) {
         super(p8, r8, s8, u8);
@@ -1119,7 +1121,7 @@ class OperateItemStruct extends ViewPU {
                     this.observeComponentCreation2((l11, m11) => {
                         Text.create(this.text);
                         Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.focusable(true);
                         Text.draggable(false);
                         Text.constraintSize({
@@ -1134,6 +1136,7 @@ class OperateItemStruct extends ViewPU {
                         Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Image.focusable(false);
                         Image.draggable(false);
+                        Image.matchTextDirection(true);
                     }, Image);
                     Flex.pop();
                 });
@@ -1150,7 +1153,7 @@ class OperateItemStruct extends ViewPU {
                     this.observeComponentCreation2((v6, a7) => {
                         Text.create(this.text);
                         Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.focusable(true);
                         Text.draggable(false);
                         Text.constraintSize({
@@ -1165,6 +1168,7 @@ class OperateItemStruct extends ViewPU {
                         Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Image.focusable(false);
                         Image.draggable(false);
+                        Image.matchTextDirection(true);
                     }, Image);
                     Row.pop();
                 });
@@ -1715,7 +1719,13 @@ export class ComposeListItem extends ViewPU {
                 minHeight: this.itemHeight
             });
             Flex.focusable(true);
-            Flex.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Flex.borderRadius({
+                "id": -1,
+                "type": 10002,
+                params: ['sys.float.ohos_id_corner_radius_default_m'],
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
+            });
             Flex.backgroundColor(ObservedObject.GetRawObject(this.frontColor));
             Flex.onFocus(() => {
                 this.canFocus = true;
@@ -1740,14 +1750,26 @@ export class ComposeListItem extends ViewPU {
             });
             ViewStackProcessor.visualState("focused");
             Flex.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: {
+                    "id": -1,
+                    "type": 10002,
+                    params: ['sys.float.ohos_id_corner_radius_default_m'],
+                    "bundleName": "__harDefaultBundleName__",
+                    "moduleName": "__harDefaultModuleName__"
+                },
                 width: ITEM_BORDER_SHOWN,
                 color: this.focusOutlineColor,
                 style: BorderStyle.Solid
             });
             ViewStackProcessor.visualState("normal");
             Flex.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: {
+                    "id": -1,
+                    "type": 10002,
+                    params: ['sys.float.ohos_id_corner_radius_default_m'],
+                    "bundleName": "__harDefaultBundleName__",
+                    "moduleName": "__harDefaultModuleName__"
+                },
                 width: ITEM_BORDER_SHOWN,
                 color: Color.Transparent
             });
@@ -1786,10 +1808,14 @@ export class ComposeListItem extends ViewPU {
             If.create();
             if (this.contentItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((o1, p1) => {
+                        __Common__.create();
+                        __Common__.flexShrink(0);
+                    }, __Common__);
                     {
-                        this.observeComponentCreation2((z, f1) => {
-                            if (f1) {
-                                let t1 = new ContentItemStruct(this, {
+                        this.observeComponentCreation2((d, o) => {
+                            if (o) {
+                                let p = new ContentItemStruct(this, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
@@ -1799,9 +1825,10 @@ export class ComposeListItem extends ViewPU {
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection,
-                                }, undefined, z, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 942, col: 11 });
-                                ViewPU.create(t1);
-                                let a4 = () => {
+                                }, undefined, d, () => { },
+                                    { page: 'library/src/main/ets/components/composelistitem.ets', line: 942, col: 11 });
+                                ViewPU.create(p);
+                                let t = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
@@ -1814,10 +1841,10 @@ export class ComposeListItem extends ViewPU {
                                         itemDirection: this.contentItemDirection
                                     };
                                 };
-                                t1.paramsGenerator_ = a4;
+                                p.paramsGenerator_ = t;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(z, {
+                                this.updateStateVarsOfChildByElmtId(d, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
@@ -1831,6 +1858,7 @@ export class ComposeListItem extends ViewPU {
                             }
                         }, { name: "ContentItemStruct" });
                     }
+                    __Common__.pop();
                 });
             }
             else {

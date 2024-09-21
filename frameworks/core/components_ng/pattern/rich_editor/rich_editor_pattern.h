@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/text/text_emoji_processor.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -108,7 +109,7 @@ struct AutoScrollParam {
 enum class RecordType { DEL_FORWARD = 0, DEL_BACKWARD = 1, INSERT = 2, UNDO = 3, REDO = 4, DRAG = 5 };
 enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
-enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING, SELECT_ABOVE_LINE };
+enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING };
 enum class CaretAffinityPolicy { DEFAULT = 0, UPSTREAM_FIRST, DOWNSTREAM_FIRST };
 enum class OperationType { DEFAULT = 0, DRAG, IME };
 const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
@@ -154,6 +155,7 @@ public:
         std::string newPreviewContent;
         bool hasDiff = false;
         PreviewRange replacedRange;
+        bool isSpanSplit = false;
 
         std::string ToString() const
         {
@@ -162,6 +164,7 @@ public:
             JSON_STRING_PUT_BOOL(jsonValue, isPreviewTextInputting);
             JSON_STRING_PUT_INT(jsonValue, startOffset);
             JSON_STRING_PUT_INT(jsonValue, endOffset);
+            JSON_STRING_PUT_BOOL(jsonValue, isSpanSplit);
 
             return jsonValue->ToString();
         }
@@ -174,6 +177,7 @@ public:
             isPreviewTextInputting = false;
             hasDiff = false;
             replacedRange.Set(INVALID_VALUE, INVALID_VALUE);
+            isSpanSplit = false;
         }
 
         bool IsValid() const
@@ -214,9 +218,21 @@ public:
                 return;
             }
             pattern->isModifyingContent_ = false;
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     private:
         WeakPtr<RichEditorPattern> pattern_;
+    };
+
+    struct OneStepDragParam {
+        std::function<void()> menuBuilder = nullptr;
+        std::function<void()> previewBuilder = nullptr;
+        std::function<void(int32_t, int32_t)> onAppear = nullptr;
+        MenuParam menuParam;
+        OneStepDragParam(const std::function<void()>& builder, const SelectMenuParam& selectMenuParam);
+        MenuParam GetMenuParam(const RefPtr<ImageSpanNode>& imageNode);
     };
 
     int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
@@ -326,6 +342,11 @@ public:
         }
     }
 
+    void OnAttachToMainTree() override
+    {
+        TextPattern::OnAttachToMainTree();
+    }
+
     void RegisterCaretChangeListener(std::function<void(int32_t)>&& listener)
     {
         caretChangeListener_ = listener;
@@ -407,13 +428,16 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
         CHECK_NULL_VOID(HasFocus());
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipelineContext);
         auto windowManager = pipelineContext->GetWindowManager();
         CHECK_NULL_VOID(windowManager);
 
         // lost focus in floating window mode
-        if (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowMode = windowManager->GetWindowMode();
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed windowMode = %{public}d", windowMode);
+        if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             FocusHub::LostFocusToViewRoot();
         }
     }
@@ -437,12 +461,12 @@ public:
     bool CursorMoveEnd();
     void CalcLineSidesIndexByPosition(int32_t& startIndex, int32_t& endIndex);
     RectF CalcLineInfoByPosition();
-    CaretOffsetInfo GetCaretOffsetInfoByPosition();
+    CaretOffsetInfo GetCaretOffsetInfoByPosition(int32_t position = -1);
     int32_t CalcMoveUpPos(float& leadingMarginOffset);
     int32_t CalcMoveDownPos(float& leadingMarginOffset);
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
-    int32_t CalcLineEndPosition();
+    int32_t CalcLineEndPosition(int32_t index = -1);
     int32_t CalcSingleLineBeginPosition(int32_t fixedPos);
     int32_t CalcSingleLineEndPosition(int32_t fixedPos);
     bool CursorMoveLineBegin();
@@ -461,6 +485,7 @@ public:
     int32_t GetParagraphEndPosition(int32_t caretPosition);
     int32_t CaretPositionSelectEmoji(CaretMoveIntent direction);
     void HandleSelect(CaretMoveIntent direction) override;
+    void SetCaretPositionWithAffinity(PositionWithAffinity positionWithAffinity);
     bool SetCaretPosition(int32_t pos, bool needNotifyImf = true);
     int32_t GetCaretPosition();
     int32_t GetTextContentLength() override;
@@ -481,7 +506,7 @@ public:
     void DeleteSpansByRange(int32_t start, int32_t end, SpanPositionInfo startInfo, SpanPositionInfo endInfo);
     void ClearContent(const RefPtr<UINode>& child);
     void CloseSelectionMenu();
-    bool SetCaretOffset(int32_t caretPosition);
+    bool SetCaretOffset(int32_t caretPosition) override;
     void ResetFirstNodeStyle();
     void DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
 
@@ -497,6 +522,7 @@ public:
     std::list<SpanPosition> GetSelectSpanSplit(
         SpanPositionInfo& startPositionSpanInfo, SpanPositionInfo& endPositionSpanInfo);
     std::list<SpanPosition> GetSelectSpanInfo(int32_t start, int32_t end);
+    bool IsTextSpanFromResult(int32_t& start, int32_t& end, KeyCode code);
     void UpdateSelectSpanStyle(int32_t start, int32_t end, KeyCode code);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle);
@@ -508,8 +534,6 @@ public:
     std::optional<struct UpdateSpanStyle> GetTypingStyle();
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool updateCaret = true);
-    void DisableDrag(RefPtr<ImageSpanNode> imageNode);
-    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     int32_t AddTextSpan(TextSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
@@ -519,7 +543,7 @@ public:
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     void HandleSelectOverlayWithOptions(const SelectionOptions& options);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
-        bool isForward = false);
+        bool isForward = false) override;
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
     void RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange);
     bool IsShowHandle();
@@ -609,6 +633,7 @@ public:
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
@@ -664,6 +689,7 @@ public:
     }
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void MouseDoubleClickParagraphEnd(int32_t& index);
     void AdjustSelectionExcludeSymbol(int32_t& start, int32_t& end);
     void InitSelection(const Offset& pos);
@@ -742,10 +768,17 @@ public:
 
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
+    std::string GetPlaceHolder() const;
+
     void HandleOnCameraInput() override;
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
     void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
+    void InsertSpanByBackData(RefPtr<SpanString>& spanString);
+    void AddSpansAndReplacePlaceholder(RefPtr<SpanString>& spanString);
+    void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
+    void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
+    SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
     bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
     void ResetDragOption() override;
@@ -766,19 +799,23 @@ public:
 
     void OnVirtualKeyboardAreaChanged() override;
 
-    void SetCaretColor(const DynamicColor& caretColor)
+    void SetCaretColor(const Color& caretColor)
     {
         caretColor_ = caretColor;
     }
 
-    DynamicColor GetCaretColor();
+    Color GetCaretColor();
 
-    void SetSelectedBackgroundColor(const DynamicColor& selectedBackgroundColor)
+    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
+        CHECK_NULL_VOID(!textSelector_.SelectNothing());
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 
-    DynamicColor GetSelectedBackgroundColor();
+    Color GetSelectedBackgroundColor();
 
     void SetCustomKeyboardOption(bool supportAvoidance);
     void StopEditing();
@@ -845,6 +882,7 @@ public:
     void AdjustSelector(int32_t& start, int32_t& end, SelectorAdjustPolicy policy = SelectorAdjustPolicy::INCLUDE);
     bool AdjustSelectorForSymbol(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
     bool AdjustSelectorForEmoji(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
+    EmojiRelation GetEmojiRelation(int index);
     void UpdateSelector(int32_t start, int32_t end);
     void UpdateSelectionType(const SelectionInfo& textSelectInfo);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
@@ -897,12 +935,32 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    bool InsertOrDeleteSpace(int32_t index) override;
+
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {
         needToRequestKeyboardOnFocus_ = needToRequest;
     }
 
-    bool IsTextEditableForStylus() override;
+    bool IsTextEditableForStylus() const override;
+
+    NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
+
+    void SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam);
+    void RequestFocusWhenSelected()
+    {
+        CHECK_NULL_VOID(!HasFocus());
+        CHECK_NULL_VOID(IsSelected());
+        auto focusHub = GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocusImmediately();
+        isOnlyRequestFocus_ = true;
+    }
+
+    DisplayMode GetBarDisplayMode()
+    {
+        return barDisplayMode_.value_or(DisplayMode::AUTO);
+    }
 
 protected:
     bool CanStartAITask() override;
@@ -921,6 +979,7 @@ private:
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
+    void PasteStr(const RefPtr<RichEditorPattern>& richEditor, const std::string& text);
     void HandleOnCut() override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub) override;
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
@@ -941,10 +1000,11 @@ private:
     bool HandleUserLongPressEvent(GestureEvent& info);
     bool HandleUserGestureEvent(
         GestureEvent& info, std::function<bool(RefPtr<SpanItem> item, GestureEvent& info)>&& gestureFunc);
-    void HandleOnlyImageSelected(const Offset& globalOffset, const bool isFingerSelected);
+    void HandleOnlyImageSelected(const Offset& globalOffset, const SourceTool sourceTool);
     void CalcCaretInfoByClick(const Offset& touchOffset);
     std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
+    void HandleAISpanHoverEvent(const MouseInfo& info) override;
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
     void OnCaretTwinkling();
@@ -979,7 +1039,7 @@ private:
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown(const Offset& offset);
+    void HandleTouchDown(const TouchEventInfo& info);
     void HandleTouchUp();
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
@@ -1003,10 +1063,14 @@ private:
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
     SelectionInfo GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo);
     void ResetAfterTextChange() override {};
+    void AddOprationWhenAddImage(int32_t beforeCaretPos);
+    void UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpanOptions& options);
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -1015,7 +1079,9 @@ private:
 
     void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -1095,6 +1161,7 @@ private:
     bool IsReachedBoundary(float offset);
     void UpdateScrollBarOffset() override;
     void CheckScrollable();
+    void UpdateMagnifierStateAfterLayout(bool frameSizeChange);
     void UpdateScrollStateAfterLayout(bool shouldDisappear);
     void ScheduleAutoScroll(AutoScrollParam param);
     void OnAutoScroll(AutoScrollParam param);
@@ -1128,9 +1195,9 @@ private:
     void AdjustCursorPosition(int32_t& pos);
     void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
-    bool IsTouchBeforeCaret(int32_t caretPos, const Offset& touchPos);
+    bool IsTouchAtLineEnd(int32_t caretPos, const Offset& textOffset);
+    bool IsTouchBeforeCaret(int32_t caretPos, const Offset& textOffset);
     bool IsClickBoundary(const int32_t position);
-    void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
     void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode);
 
     RectF GetSelectArea();
@@ -1158,15 +1225,6 @@ private:
     ImageStyleResult GetImageStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
     void SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     void SetSubMap(RefPtr<SpanString>& spanString);
-    RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<ImageSpan> ToImageSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<TextShadowSpan> ToTextShadowSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<GestureSpan> ToGestureSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<LetterSpacingSpan> ToLetterSpacingSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<BaselineOffsetSpan> ToBaselineOffsetSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<DecorationSpan> ToDecorationSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<FontSpan> ToFontSpan(const RefPtr<SpanItem>& spanItem);
     void OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData);
     void AddSpanByPasteData(const RefPtr<SpanString>& spanString);
     void CompleteStyledString(RefPtr<SpanString>& spanString);
@@ -1181,7 +1239,9 @@ private:
         bool calledbyImf = false);
     void FinishTextPreviewInner();
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
-    SelectType JudgeSelectType(const PositionWithAffinity& positionWithAffinity);
+    std::pair<int32_t, SelectType> JudgeSelectType(const Offset& pos);
+    bool IsSelectEmpty(int32_t start, int32_t end);
+    bool AdjustIndexSkipLineSeparator(int32_t& currentPosition);
     void RequestKeyboardToEdit();
     void HandleTasksOnLayoutSwap()
     {
@@ -1199,6 +1259,14 @@ private:
     }
 
     OffsetF GetGlobalOffset() const;
+    void MergeAdjacentSpans(int32_t caretPosition);
+    void EnableImageDrag(const RefPtr<ImageSpanNode>& imageNode, bool isEnable);
+    void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
+    void EnableOneStepDrag(const RefPtr<ImageSpanNode>& imageNode);
+    void SetImageSelfResponseEvent(bool isEnable);
+    void CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub);
+    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
+    void UpdateImagePreviewParam();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1226,6 +1294,7 @@ private:
     bool usingMouseRightButton_ = false;
     bool isCursorAlwaysDisplayed_ = false;
     bool isClickOnAISpan_ = false;
+    bool isOnlyRequestFocus_ = false;
 
     int32_t moveLength_ = 0;
     int32_t caretPosition_ = 0;
@@ -1254,8 +1323,8 @@ private:
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
     std::list<ResultObject> dragResultObjects_;
-    std::optional<DynamicColor> caretColor_;
-    std::optional<DynamicColor> selectedBackgroundColor_;
+    std::optional<Color> caretColor_;
+    std::optional<Color> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
@@ -1310,6 +1379,11 @@ private:
     bool isModifyingContent_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
+    std::unordered_map<std::string, RefPtr<SpanItem>> placeholderSpansMap_;
+    std::shared_ptr<OneStepDragParam> oneStepDragParam_ = nullptr;
+    std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
+    bool isImageSelfResponseEvent_ = true;
+    std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
 };
 } // namespace OHOS::Ace::NG
 

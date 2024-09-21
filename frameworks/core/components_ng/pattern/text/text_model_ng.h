@@ -73,7 +73,6 @@ public:
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
-    void SetDraggable(bool draggable) override;
     void BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType, std::function<void()>& buildFunc,
         SelectMenuParam& menuParam) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
@@ -84,6 +83,7 @@ public:
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetResponseRegion(bool isUserSetResponseRegion) override;
     void SetHalfLeading(bool halfLeading) override;
+    void SetEnableHapticFeedback(bool state) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
     static void InitText(FrameNode* frameNode, std::string& value);
@@ -107,7 +107,6 @@ public:
     static void SetTextCase(FrameNode* frameNode, TextCase value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
-    static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
@@ -170,8 +169,9 @@ public:
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
-    static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
+    static void OnMenuItemClickCallbackUpdate(
+        FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
     static bool GetHalfLeading(FrameNode* frameNode);
 };

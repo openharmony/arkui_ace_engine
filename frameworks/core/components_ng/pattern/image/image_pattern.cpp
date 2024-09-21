@@ -13,40 +13,20 @@
  * limitations under the License.
  */
 
-#include "third_party/libphonenumber/cpp/src/phonenumbers/base/logging.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
-#include "core/components_ng/pattern/image/image_event_hub.h"
-#include "core/components_ng/pattern/image/image_overlay_modifier.h"
-#include "core/image/image_source_info.h"
+#include "core/components_ng/property/border_property.h"
 #define NAPI_VERSION 8
 
-#include <array>
-#include <cstdint>
-#include <memory>
-
-#include "base/geometry/dimension_offset.h"
-#include "base/geometry/matrix4.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/ng/vector.h"
 #include "base/log/dump_log.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/ai/image_analyzer_manager.h"
-#include "core/common/container.h"
-#include "core/common/frontend.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -54,6 +34,7 @@ constexpr int32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t CRITICAL_TIME = 50;      // ms. If show time of image is less than this, use more cacheImages.
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL_STATUS = 2;
 std::string ImageDfxConfigToString(const ImageDfxConfig& imageDfxConfig)
 {
     return "src = " + imageDfxConfig.imageSrc_ + ", nodeInfo = [" + std::to_string(imageDfxConfig.nodeId_) + "-" +
@@ -365,6 +346,31 @@ void ImagePattern::ClearAltData()
     altSrcRect_.reset();
 }
 
+void ImagePattern::ApplyAIModificationsToImage()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (IsSupportImageAnalyzerFeature()) {
+        if (isPixelMapChanged_) {
+            UpdateAnalyzerOverlay();
+        }
+        UpdateAnalyzerUIConfig(geometryNode);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [weak = WeakClaim(this)] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->GetHostInstanceId());
+                pattern->CreateAnalyzerOverlay();
+            },
+            "ArkUIImageCreateAnalyzerOverlay");
+    }
+}
+
 void ImagePattern::OnImageLoadSuccess()
 {
     CHECK_NULL_VOID(loadingCtx_);
@@ -374,7 +380,11 @@ void ImagePattern::OnImageLoadSuccess()
     CHECK_NULL_VOID(geometryNode);
 
     image_ = loadingCtx_->MoveCanvasImage();
-    CHECK_NULL_VOID(image_);
+    if (!image_) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "nodeId = %{public}d OnImageLoadSuccess but Canvas image is null.",
+            imageDfxConfig_.nodeId_);
+        return;
+    }
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
     auto srcInfo = loadingCtx_->GetSourceInfo();
@@ -387,7 +397,9 @@ void ImagePattern::OnImageLoadSuccess()
         paintRect.Height(), paintRect.GetX(), paintRect.GetY());
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, srcInfo, frameCount);
-    UpdateSvgSmoothEdgeValue();
+    if (srcInfo.IsSvg()) {
+        UpdateSvgSmoothEdgeValue();
+    }
     PrepareAnimation(image_);
     if (host->IsDraggable()) {
         EnableDrag();
@@ -398,21 +410,8 @@ void ImagePattern::OnImageLoadSuccess()
         eventHub->FireCompleteEvent(event);
     }
 
-    if (IsSupportImageAnalyzerFeature()) {
-        if (isPixelMapChanged_) {
-            UpdateAnalyzerOverlay();
-        }
-        UpdateAnalyzerUIConfig(geometryNode);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            ContainerScope scope(pattern->GetHostInstanceId());
-            pattern->CreateAnalyzerOverlay();
-        }, "ArkUIImageCreateAnalyzerOverlay");
-    }
+    ApplyAIModificationsToImage();
+
     ACE_SCOPED_TRACE("OnImageLoadSuccess [%d]-[%lld], srr: [%s]", imageDfxConfig_.nodeId_,
         static_cast<long long>(imageDfxConfig_.accessibilityId_), imageDfxConfig_.imageSrc_.c_str());
     if (SystemProperties::GetDebugEnabled()) {
@@ -508,15 +507,9 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
 
 void ImagePattern::UpdateSvgSmoothEdgeValue()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ImageTheme>();
-    CHECK_NULL_VOID(theme);
     auto renderProp = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(renderProp);
-    renderProp->UpdateSmoothEdge(std::max(theme->GetMinEdgeAntialiasing(), renderProp->GetSmoothEdge().value_or(0.0f)));
+    renderProp->UpdateSmoothEdge(std::max(smoothEdge_, renderProp->GetSmoothEdge().value_or(0.0f)));
 }
 
 void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
@@ -532,49 +525,46 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
-    config.sourceInfo_ = sourceInfo;
-    auto host = GetHost();
-    if (!host) {
-        canvasImage->SetPaintConfig(config);
-        return;
-    }
-    auto renderContext = host->GetRenderContext();
-    if (!renderContext || !renderContext->HasBorderRadius()) {
-        canvasImage->SetPaintConfig(config);
-        return;
-    }
-
     canvasImage->SetPaintConfig(config);
 }
 
 RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
 {
+    CreateModifier();
     bool sensitive = false;
     if (isSensitive_) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         sensitive = host->IsPrivacySensitive();
     }
-    if (!overlayMod_) {
-        overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
-    }
     ImagePaintMethodConfig imagePaintMethodConfig {
         .selected = isSelected_,
-        .imageOverlayModifier = overlayMod_,
         .sensitive = sensitive,
-        .interpolation = interpolationDefault_
+        .interpolation = interpolationDefault_,
+        .imageOverlayModifier = overlayMod_,
+        .imageContentModifier = contentMod_
     };
     if (image_) {
-        return MakeRefPtr<ImagePaintMethod>(image_, imagePaintMethodConfig, imageDfxConfig_);
+        return MakeRefPtr<ImagePaintMethod>(image_, imagePaintMethodConfig);
     }
     if (altImage_ && altDstRect_ && altSrcRect_) {
-        return MakeRefPtr<ImagePaintMethod>(altImage_, imagePaintMethodConfig, imageDfxConfig_);
+        return MakeRefPtr<ImagePaintMethod>(altImage_, imagePaintMethodConfig);
     }
     CreateObscuredImage();
     if (obscuredImage_) {
-        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, imagePaintMethodConfig, imageDfxConfig_);
+        return MakeRefPtr<ImagePaintMethod>(obscuredImage_, imagePaintMethodConfig);
     }
-    return MakeRefPtr<ImagePaintMethod>(nullptr, imagePaintMethodConfig, imageDfxConfig_);
+    return MakeRefPtr<ImagePaintMethod>(nullptr, imagePaintMethodConfig);
+}
+
+void ImagePattern::CreateModifier()
+{
+    if (!contentMod_) {
+        contentMod_ = MakeRefPtr<ImageContentModifier>();
+    }
+    if (!overlayMod_) {
+        overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
+    }
 }
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -767,7 +757,9 @@ void ImagePattern::OnModifyDone()
             break;
     }
 
-    InitOnKeyEvent();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        InitOnKeyEvent();
+    }
 }
 
 void ImagePattern::InitOnKeyEvent()
@@ -1011,30 +1003,20 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
     // when image component is [onShow], do not clean image data
-    if (isShow_) {
+    if (isShow_ || level < MEMORY_LEVEL_CRITICAL_STATUS) {
         return;
     }
-
     // clean image data
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-
-    // clean rs node to release the sk_sp<SkImage> held by it
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto rsRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushMessages();
 }
 
 // when recycle image component, release the pixelmap resource
 void ImagePattern::OnRecycle()
 {
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "OnRecycle. nodeId = %{public}d", imageDfxConfig_.nodeId_);
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
@@ -1044,7 +1026,7 @@ void ImagePattern::OnRecycle()
     CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
+    rsRenderContext->RemoveContentModifier(contentMod_);
     UnregisterWindowStateChangedCallback();
 }
 
@@ -1085,6 +1067,8 @@ void ImagePattern::OnWindowHide()
 
 void ImagePattern::OnWindowShow()
 {
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. nodeId = %{public}d isImageQualityChange_ = %{public}d",
+        imageDfxConfig_.nodeId_, isImageQualityChange_);
     isShow_ = true;
     LoadImageDataIfNeed();
 }
@@ -1092,6 +1076,7 @@ void ImagePattern::OnWindowShow()
 void ImagePattern::OnVisibleChange(bool visible)
 {
     if (!visible) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "OnInVisible. nodeId = %{public}d", imageDfxConfig_.nodeId_);
         CloseSelectOverlay();
     }
 }
@@ -1108,7 +1093,7 @@ void ImagePattern::OnVisibleAreaChange(bool visible, double ratio)
         CloseSelectOverlay();
     }
     // control pixelMap List
-    if (GetIsAnimation() && !animator_->IsStopped()) {
+    if (GetIsAnimation() && !animator_->IsStopped() && animator_->HasScheduler()) {
         if (visible) {
             animator_->Forward();
         } else {
@@ -1151,9 +1136,12 @@ void ImagePattern::OnAttachToFrameNode()
         pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
         pipeline->AddWindowStateChangedCallback(host->GetId());
     }
-    auto theme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    selectedColor_ = theme->GetSelectedColor();
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    selectedColor_ = textTheme->GetSelectedColor();
+    auto imageTheme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(imageTheme);
+    smoothEdge_ = imageTheme->GetMinEdgeAntialiasing();
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1392,6 +1380,10 @@ void ImagePattern::DumpLayoutInfo()
     if (sourceSize.has_value()) {
         DumpLog::GetInstance().AddDesc(std::string("sourceSize: ").append(sourceSize.value().ToString()));
     }
+
+    bool autoResize = layoutProp->GetAutoResize().value_or(autoResizeDefault_);
+    autoResize ? DumpLog::GetInstance().AddDesc("autoResize:true")
+                       : DumpLog::GetInstance().AddDesc("autoResize:false");
 }
 
 void ImagePattern::DumpRenderInfo()
@@ -1437,10 +1429,38 @@ void ImagePattern::DumpRenderInfo()
     needBorderRadius ? DumpLog::GetInstance().AddDesc("needBorderRadius:true")
                      : DumpLog::GetInstance().AddDesc("needBorderRadius:false");
 
+    auto borderRadius = renderProp->GetBorderRadius().value_or(BorderRadiusProperty());
+    DumpLog::GetInstance().AddDesc(borderRadius.ToString());
+
     if (renderProp && renderProp->HasImageResizableSlice() && renderProp->GetImageResizableSliceValue({}).Valid()) {
         DumpLog::GetInstance().AddDesc(
             std::string("resizable slice: ").append(renderProp->GetImageResizableSliceValue({}).ToString()));
     }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasBorderRadius()) {
+        DumpLog::GetInstance().AddDesc(
+            "borderRadius:" + renderContext->GetBorderRadiusValue(BorderRadiusProperty()).ToString());
+    } else {
+        DumpLog::GetInstance().AddDesc("borderRadius: null");
+    }
+}
+void ImagePattern::DumpSvgInfo()
+{
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    CHECK_NULL_VOID(imageSourceInfo);
+    if (!imageSourceInfo->IsSvg()|| !loadingCtx_) {
+        return;
+    }
+    auto imageObject = loadingCtx_->GetImageObject();
+    CHECK_NULL_VOID(imageObject);
+    DumpLog::GetInstance().AddDesc(
+        std::string("Svg:").append(imageObject->GetDumpInfo()));
 }
 
 void ImagePattern::DumpInfo()
@@ -1449,10 +1469,6 @@ void ImagePattern::DumpInfo()
     DumpRenderInfo();
 
     syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
-
-    autoResizeDefault_ ? DumpLog::GetInstance().AddDesc("autoResize:true")
-                       : DumpLog::GetInstance().AddDesc("autoResize:false");
-
 
     DumpLog::GetInstance().AddDesc("imageInterpolation:" + GetImageInterpolation());
     if (loadingCtx_) {
@@ -1471,6 +1487,7 @@ void ImagePattern::DumpInfo()
     }
 
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
+    DumpSvgInfo();
 }
 
 void ImagePattern::DumpAdvanceInfo()
@@ -2134,7 +2151,8 @@ void ImagePattern::ResetImage()
     if (!altImage_) {
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        rsRenderContext->ClearDrawCommands();
+        rsRenderContext->RemoveContentModifier(contentMod_);
+        contentMod_ = nullptr;
     }
 }
 
@@ -2147,7 +2165,8 @@ void ImagePattern::ResetAltImage()
         CHECK_NULL_VOID(host);
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        rsRenderContext->ClearDrawCommands();
+        rsRenderContext->RemoveContentModifier(contentMod_);
+        contentMod_ = nullptr;
     }
 }
 
@@ -2165,7 +2184,8 @@ void ImagePattern::ResetImageAndAlt()
     CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
     CloseSelectOverlay();
     DestroyAnalyzerOverlay();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

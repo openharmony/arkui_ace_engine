@@ -25,6 +25,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/layout/constants.h"
@@ -280,6 +281,7 @@ public:
     virtual void ClearChildren() {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
     virtual void SetContentRectToFrame(RectF rect) {}
+    virtual void SetSecurityLayer(bool isSecure) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
@@ -401,9 +403,12 @@ public:
 
     virtual void ClearDrawCommands() {}
 
-    virtual void DumpInfo() {}
+    virtual void RemoveContentModifier(const RefPtr<ContentModifier>& ContentModifier) {}
 
+    virtual void DumpInfo() {}
+    virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
+    virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
 
     void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
@@ -627,6 +632,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LinearGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, RadialGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LastGradientType, NG::GradientType);
 
     // Overlay
     ACE_DEFINE_PROPERTY_GROUP(Overlay, OverlayProperty);
@@ -712,6 +718,13 @@ public:
         return 0;
     }
 
+    virtual bool IsDisappearing() const
+    {
+        return false;
+    }
+
+    virtual void SetRenderFit(RenderFit renderFit) {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -777,6 +790,7 @@ protected:
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}
     virtual void OnRadialGradientUpdate(const NG::Gradient& value) {}
+    virtual void OnLastGradientTypeUpdate(const NG::GradientType& value) {}
 
     virtual void OnFrontBrightnessUpdate(const Dimension& value) {}
     virtual void OnFrontGrayScaleUpdate(const Dimension& value) {}

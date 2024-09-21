@@ -15,14 +15,8 @@
 
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
-#include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -290,5 +284,16 @@ std::string RadioModelNG::GetRadioGroup(FrameNode* frameNode)
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     return eventHub->GetGroup();
+}
+
+void RadioModelNG::SetRadioOptions(FrameNode* frameNode, const std::string& value,
+    const std::string& group, int32_t indicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetValue(value);
+    eventHub->SetGroup(group);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator, frameNode);
 }
 } // namespace OHOS::Ace::NG

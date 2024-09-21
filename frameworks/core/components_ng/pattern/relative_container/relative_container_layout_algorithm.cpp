@@ -15,19 +15,7 @@
 
 #include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components_ng/layout/layout_algorithm.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
-#include "core/components_ng/property/flex_property.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -47,6 +35,15 @@ std::string GetOrCreateNodeInspectorId(const RefPtr<FrameNode>& node)
         inspectorId = CONCAT_ID_PREFIX + node->GetTag() + std::to_string(node->GetId());
     }
     return inspectorId;
+}
+
+void ResetChildAlignRulesChanged(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<RelativeContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetChildAlignRulesChanged(false);
 }
 } // namespace
 
@@ -69,7 +66,29 @@ void RelativeContainerLayoutAlgorithm::UpdateTwoAlignValues(
     }
 }
 
-void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* layoutWrapper)
+bool RelativeContainerLayoutAlgorithm::TopologicalResultHit(LayoutWrapper* layoutWrapper)
+{
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(node, false);
+    auto pattern = node->GetPattern<RelativeContainerPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    if (pattern->GetChildAlignRulesChanged()) {
+        return false;
+    }
+    auto cache = std::move(pattern->GetTopologicalResultCache());
+    if (!cache.has_value()) {
+        return false;
+    }
+    renderList_ = std::move(cache.value());
+    for (const auto& childId : renderList_) {
+        if (idNodeMap_.find(childId) == idNodeMap_.end()) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void RelativeContainerLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 {
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
@@ -102,10 +121,19 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
         padding_ = relativeContainerLayoutProperty->CreatePaddingAndBorder();
         MinusPaddingToSize(padding_, containerSizeWithoutPaddingBorder_);
     }
+}
+
+void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* layoutWrapper)
+{
     CollectNodesById(layoutWrapper);
     CheckChain(layoutWrapper);
+    if (TopologicalResultHit(layoutWrapper)) {
+        return;
+    }
     GetDependencyRelationship();
     if (!PreTopologicalLoopDetection()) {
+        auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+        CHECK_NULL_VOID(relativeContainerLayoutProperty);
         const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
         auto constraint = relativeContainerLayoutProperty->CreateChildConstraint();
         for (const auto& childrenWrapper : childrenWrappers) {
@@ -132,6 +160,7 @@ void RelativeContainerLayoutAlgorithm::UpdateSizeWhenChildrenEmpty(LayoutWrapper
     const auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
     CHECK_NULL_VOID(calcLayoutConstraint);
     auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
+    CHECK_NULL_VOID(selfIdealSize.has_value());
     padding_ = relativeContainerLayoutProperty->CreatePaddingAndBorder();
     if (selfIdealSize->IsWidthDimensionUnitAuto()) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(
@@ -779,32 +808,31 @@ bool RelativeContainerLayoutAlgorithm::CalcOffsetInChain(const std::string& chai
 
 void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    std::lock_guard<std::mutex> lock(relativeContainerMutex_);
     CHECK_NULL_VOID(layoutWrapper);
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<RelativeContainerPattern>();
+    CHECK_NULL_VOID(pattern);
     versionGreatorOrEqualToEleven_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
     if (layoutWrapper->GetAllChildrenWithBuild().empty()) {
         UpdateSizeWhenChildrenEmpty(layoutWrapper);
+        ResetChildAlignRulesChanged(layoutWrapper);
         return;
     }
+    Initialize(layoutWrapper);
     DetermineTopologicalOrder(layoutWrapper);
     if (SystemProperties::GetDebugEnabled()) {
-        std::string result = "[";
-        for (const auto& nodeName : renderList_) {
-            result += nodeName + ",";
-        }
-        if (!renderList_.empty()) {
-            result = result.substr(0, result.length() - 1);
-        }
-        result += "]";
-        auto pattern = layoutWrapper->GetHostNode()->GetPattern<RelativeContainerPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetTopologicalResult(result);
+        pattern->SetTopologicalResult(RelativeContainerPattern::TopoListToString(renderList_));
     }
 
     MeasureChild(layoutWrapper);
     MeasureSelf(layoutWrapper);
     AdjustOffsetRtl(layoutWrapper);
+    pattern->SetTopologicalResultCache(std::move(renderList_));
+    ResetChildAlignRulesChanged(layoutWrapper);
 }
 
 void RelativeContainerLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)

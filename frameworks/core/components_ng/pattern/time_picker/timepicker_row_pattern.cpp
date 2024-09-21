@@ -45,6 +45,9 @@ const int32_t CHILD_INDEX_FIRST = 0;
 const int32_t CHILD_INDEX_SECOND = 1;
 const int32_t CHILD_INDEX_THIRD = 2;
 const int32_t CHILD_INDEX_FOURTH = 3;
+constexpr float DISABLE_ALPHA = 0.6f;
+const Dimension FOCUS_OFFSET = 2.0_vp;
+const int32_t RATE = 2;
 } // namespace
 
 void TimePickerRowPattern::OnAttachToFrameNode()
@@ -80,17 +83,29 @@ void TimePickerRowPattern::SetButtonIdeaSize()
         if (width > defaultWidth) {
             width = static_cast<float>(defaultWidth);
         }
+        auto timePickerColumnNode = DynamicCast<FrameNode>(childNode->GetLastChild());
+        CHECK_NULL_VOID(timePickerColumnNode);
+        auto columnNodeHeight = timePickerColumnNode->GetGeometryNode()->GetFrameSize().Height();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
         buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
+        auto standardButtonHeight = static_cast<float>((height - PRESS_INTERVAL).ConvertToPx());
+        auto maxButtonHeight = static_cast<float>(columnNodeHeight);
+        auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
         buttonLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(height - PRESS_INTERVAL)));
+            CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode();
+        if (GetIsShowInDialog() && GreatNotEqual(standardButtonHeight, maxButtonHeight) &&
+            GreatNotEqual(maxButtonHeight, 0.0f)) {
+            auto parentNode = DynamicCast<FrameNode>(host->GetParent());
+            CHECK_NULL_VOID(parentNode);
+            parentNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        }
     }
 }
 
@@ -116,6 +131,7 @@ void TimePickerRowPattern::ColumnPatternInitHapticController()
 
 void TimePickerRowPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     if (isFiredTimeChange_ && !isForceUpdate_ && !isDateTimeOptionUpdate_) {
         isFiredTimeChange_ = false;
         ColumnPatternInitHapticController();
@@ -168,8 +184,12 @@ void TimePickerRowPattern::InitDisabled()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto renderContext = host->GetRenderContext();
     enabled_ = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!enabled_) {
+        renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -442,9 +462,9 @@ void TimePickerRowPattern::UpdateConfirmButtonMargin(
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
     } else {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
     }
     buttonConfirmNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -455,9 +475,9 @@ void TimePickerRowPattern::UpdateCancelButtonMargin(
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
     } else {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, false,
+        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, false,
             ModuleDialogType::TIMEPICKER_DIALOG);
     }
     buttonCancelNode->GetLayoutProperty()->UpdateMargin(margin);
@@ -1084,17 +1104,36 @@ void TimePickerRowPattern::PaintFocusState()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void TimePickerRowPattern::CalcLeftTotalColumnWidth(
+    const RefPtr<FrameNode>& host, float& leftTotalColumnWidth, float childSize)
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtl) {
+        for (int32_t index = childSize - 1; index > focusKeyID_; --index) {
+            auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+            CHECK_NULL_VOID(stackChild);
+            auto geometryNode = stackChild->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            leftTotalColumnWidth += geometryNode->GetFrameSize().Width();
+        }
+    } else {
+        for (int32_t index = 0; index < focusKeyID_; ++index) {
+            auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+            CHECK_NULL_VOID(stackChild);
+            auto geometryNode = stackChild->GetGeometryNode();
+            CHECK_NULL_VOID(geometryNode);
+            leftTotalColumnWidth += geometryNode->GetFrameSize().Width();
+        }
+    }
+}
+
 void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto leftTotalColumnWith = 0.0f;
-    for (int32_t index = 0; index < focusKeyID_; ++index) {
-        auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(index));
-        CHECK_NULL_VOID(stackChild);
-        leftTotalColumnWith += stackChild->GetGeometryNode()->GetFrameSize().Width();
-    }
-    auto childSize = host->GetChildren().size();
+    auto childSize = static_cast<float>(host->GetChildren().size());
+    auto leftTotalColumnWidth = 0.0f;
+    CalcLeftTotalColumnWidth(host, leftTotalColumnWidth, childSize);
     auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
     CHECK_NULL_VOID(stackChild);
     auto columnBlendChild = DynamicCast<FrameNode>(stackChild->GetLastChild());
@@ -1107,17 +1146,17 @@ void TimePickerRowPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     auto dividerSpacing = pipeline->NormalizeToPx(pickerTheme->GetDividerSpacing());
-    auto pickerThemeWidth = dividerSpacing * 2;
+    auto pickerThemeWidth = dividerSpacing * RATE;
 
     CHECK_EQUAL_VOID(childSize, 0);
-    auto centerX = (columnWidth - pickerThemeWidth) / 2 + leftTotalColumnWith + PRESS_INTERVAL.ConvertToPx() * 2;
+    auto centerX = (columnWidth - pickerThemeWidth) / RATE + leftTotalColumnWidth + PRESS_INTERVAL.ConvertToPx();
     auto centerY =
-        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / 2 + PRESS_INTERVAL.ConvertToPx();
-    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * 2;
-    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * 2;
+        (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE + PRESS_INTERVAL.ConvertToPx();
+    float piantRectWidth = (dividerSpacing - PRESS_INTERVAL.ConvertToPx()) * RATE;
+    float piantRectHeight = dividerSpacing - PRESS_INTERVAL.ConvertToPx() * RATE;
     if (piantRectWidth > columnWidth) {
-        piantRectWidth = columnWidth;
-        centerX = leftTotalColumnWith;
+        piantRectWidth = columnWidth - FOCUS_OFFSET.ConvertToPx() * RATE;
+        centerX = leftTotalColumnWidth + FOCUS_OFFSET.ConvertToPx();
     }
     paintRect.SetRect(RectF(centerX, centerY, piantRectWidth, piantRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
@@ -1165,21 +1204,24 @@ void TimePickerRowPattern::SetFocusEnable()
     focusHub->SetFocusable(true);
 }
 
-bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
+bool TimePickerRowPattern::CheckFocusID(int32_t childSize)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
-    auto childSize = host->GetChildren().size();
-    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild()->GetLastChild());
-    auto pattern = pickerChild->GetPattern<TimePickerColumnPattern>();
-    auto currentIndex = pattern->GetCurrentIndex();
-    auto totalOptionCount = GetOptionCount(pickerChild);
-    if (totalOptionCount == 0) {
+    if (focusKeyID_ > childSize - 1) {
+        focusKeyID_ = childSize - 1;
+        return false;
+    } else if (focusKeyID_ < 0) {
+        focusKeyID_ = 0;
         return false;
     }
+    return true;
+}
+
+bool TimePickerRowPattern::ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<TimePickerColumnPattern>& pattern,
+    KeyCode& code, int32_t currentIndex, uint32_t totalOptionCount, int32_t childSize)
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (code == KeyCode::KEY_DPAD_UP || code == KeyCode::KEY_DPAD_DOWN) {
-        auto index = (code == KeyCode::KEY_DPAD_UP) ? -1 : 1;
+        auto index = (code == KeyCode::KEY_DPAD_UP) ? 0 : 1;
         pattern->SetCurrentIndex((totalOptionCount + currentIndex + index) % totalOptionCount);
         pattern->FlushCurrentOptions();
         pattern->HandleChangeCallback((code == KeyCode::KEY_DPAD_UP) ? false : true, true);
@@ -1198,24 +1240,41 @@ bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
         return true;
     }
     if (code == KeyCode::KEY_DPAD_LEFT) {
-        focusKeyID_ -= 1;
-        if (focusKeyID_ < 0) {
-            focusKeyID_ = 0;
+        focusKeyID_ = isRtl ? (focusKeyID_ + 1) : (focusKeyID_ - 1);
+        if (!CheckFocusID(childSize)) {
             return false;
         }
         PaintFocusState();
         return true;
     }
     if (code == KeyCode::KEY_DPAD_RIGHT) {
-        focusKeyID_ += 1;
-        if (focusKeyID_ > static_cast<int32_t>(childSize) - 1) {
-            focusKeyID_ = static_cast<int32_t>(childSize) - 1;
+        focusKeyID_ = isRtl ? (focusKeyID_ - 1) : (focusKeyID_ + 1);
+        if (!CheckFocusID(childSize)) {
             return false;
         }
         PaintFocusState();
         return true;
     }
     return false;
+}
+
+bool TimePickerRowPattern::HandleDirectionKey(KeyCode code)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto stackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+    CHECK_NULL_RETURN(stackChild, false);
+    auto childSize = host->GetChildren().size();
+    auto pickerChild = DynamicCast<FrameNode>(stackChild->GetLastChild()->GetLastChild());
+    CHECK_NULL_RETURN(pickerChild, false);
+    auto pattern = pickerChild->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    auto currentIndex = pattern->GetCurrentIndex();
+    auto totalOptionCount = GetOptionCount(pickerChild);
+    if (totalOptionCount == 0) {
+        return false;
+    }
+    return ParseDirectionKey(host, pattern, code, currentIndex, totalOptionCount, static_cast<int32_t>(childSize));
 }
 
 void TimePickerRowPattern::OnColorConfigurationUpdate()

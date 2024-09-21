@@ -15,14 +15,8 @@
 
 #include "core/components_ng/manager/shared_overlay/shared_transition_effect.h"
 
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/motion_path_evaluator.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
 SharedTransitionEffect::SharedTransitionEffect(

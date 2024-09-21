@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_indicator_controller.h"
 
-#include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_theme.h"

@@ -15,17 +15,7 @@
 
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components/button/button_theme.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/toggle/toggle_theme.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/button/toggle_button_paint_property.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -63,6 +53,7 @@ void ToggleButtonPattern::InitParameters()
 
 void ToggleButtonPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -170,38 +161,6 @@ void ToggleButtonPattern::OnAfterModifyDone()
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
         Recorder::NodeDataCache::Get().PutBool(host, inspectorId, isOn_.value_or(false));
-    }
-}
-
-void ToggleButtonPattern::HandleEnabled()
-{
-    if (UseContentModifier()) {
-        return;
-    }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto enabled = eventHub->IsEnabled();
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<ToggleTheme>();
-    CHECK_NULL_VOID(theme);
-    auto backgroundColor = renderContext->GetBackgroundColor().value_or(theme->GetCheckedColor());
-    if (!enabled) {
-        if (host->GetFirstChild()) {
-            auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
-            CHECK_NULL_VOID(textNode);
-            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_VOID(textLayoutProperty);
-            auto color = textLayoutProperty->GetTextColorValue(textColor_);
-            textLayoutProperty->UpdateTextColor(color.BlendOpacity(disabledAlpha_));
-        }
-        renderContext->OnBackgroundColorUpdate(backgroundColor.BlendOpacity(disabledAlpha_));
-    } else {
-        renderContext->OnBackgroundColorUpdate(backgroundColor);
     }
 }
 

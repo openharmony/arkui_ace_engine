@@ -15,20 +15,14 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
-#include <stack>
-
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/animation/animation_pub.h"
-#include "core/animation/spring_curve.h"
-#include "core/common/container.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
@@ -42,14 +36,13 @@
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/theme/shadow_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -57,6 +50,7 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr Dimension MIN_SELECT_MENU_WIDTH = 64.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
 constexpr int32_t STACK_EXPAND_DISAPPEAR_DURATION = 300;
+constexpr int32_t HALF_FOLD_HOVER_DURATION = 1000;
 constexpr double MENU_ORIGINAL_SCALE = 0.6f;
 constexpr double MOUNT_MENU_OPACITY = 0.4f;
 
@@ -78,7 +72,6 @@ const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
-
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -198,6 +191,7 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
+    halfFoldHoverCallbackId_ = RegisterHalfFoldHover(targetNode);
     OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
                                               const OffsetF& oldOrigin, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -205,7 +199,6 @@ void MenuPattern::OnAttachToFrameNode()
         if (oldRect.IsEmpty() && oldOrigin.NonOffset()) {
             return;
         }
-
         auto pipelineContext = PipelineContext::GetCurrentContext();
         AnimationOption option;
         option.SetCurve(pipelineContext->GetSafeAreaManager()->GetSafeAreaCurve());
@@ -230,6 +223,40 @@ void MenuPattern::OnAttachToFrameNode()
         pipelineContext->FlushPipelineImmediately();
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
+}
+
+int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
+{
+    // register when hoverMode enabled
+    auto pipelineContext = menuNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    int32_t callbackId = pipelineContext->RegisterHalfFoldHoverChangedCallback(
+        [weak = WeakClaim(this), pipelineContext](bool isHalfFoldHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        AnimationOption optionPosition;
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+        optionPosition.SetDuration(HALF_FOLD_HOVER_DURATION);
+        optionPosition.SetCurve(motion);
+        pipelineContext->FlushUITasks();
+        pipelineContext->Animate(optionPosition, motion, [host, pipelineContext]() {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            pipelineContext->FlushUITasks();
+        });
+    });
+    return callbackId;
+}
+
+void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
 }
 
 void MenuPattern::OnModifyDone()
@@ -515,7 +542,8 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<UINode>& host)
                 DynamicCast<FrameNode>(child)->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(accessibilityProperty);
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG) {
+        } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
+            ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
             auto nodesSet = AceType::DynamicCast<UINode>(child);
             CHECK_NULL_VOID(nodesSet);
             UpdateMenuItemChildren(nodesSet);
@@ -1244,17 +1272,18 @@ std::pair<OffsetF, OffsetF> MenuPattern::GetMenuOffset(const RefPtr<FrameNode>& 
 MenuItemInfo MenuPattern::GetInnerMenuOffset(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const
 {
     MenuItemInfo menuItemInfo;
-    auto menuItem = AceType::DynamicCast<FrameNode>(child);
-    CHECK_NULL_RETURN(menuItem, menuItemInfo);
-    if (menuItem->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+    CHECK_NULL_RETURN(child, menuItemInfo);
+    if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
         menuItemInfo = GetMenuItemInfo(child, isNeedRestoreNodeId);
         if (menuItemInfo.isFindTargetId) {
             return menuItemInfo;
         }
-    } else if (menuItem->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-        auto groupChildren = menuItem->GetChildren();
+    } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG
+        || child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
+        ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
+        const auto& groupChildren = child->GetChildren();
         for (auto child : groupChildren) {
-            menuItemInfo = GetMenuItemInfo(child, isNeedRestoreNodeId);
+            menuItemInfo = GetInnerMenuOffset(child, isNeedRestoreNodeId);
             if (menuItemInfo.isFindTargetId) {
                 return menuItemInfo;
             }
@@ -1342,12 +1371,11 @@ void MenuPattern::ShowStackExpandDisappearAnimation(const RefPtr<FrameNode>& men
 
     option.SetCurve(MENU_ANIMATION_CURVE);
     auto subImageNode = GetImageNode(subMenuNode);
-    CHECK_NULL_VOID(subImageNode);
-    auto subImageContext = subImageNode->GetRenderContext();
-    AnimationUtils::Animate(option, [subImageContext]() {
-        if (subImageContext) {
-            subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
-        }
+    AnimationUtils::Animate(option, [subImageNode]() {
+        CHECK_NULL_VOID(subImageNode);
+        auto subImageContext = subImageNode->GetRenderContext();
+        CHECK_NULL_VOID(subImageContext);
+        subImageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
     });
 
     option.SetCurve(Curves::FRICTION);
@@ -1420,6 +1448,8 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         radius = CalcIdealBorderRadius(borderRadius, idealSize);
         UpdateBorderRadius(dirty->GetHostNode(), radius);
     }
+    auto menuWrapper = GetMenuWrapper();
+    DragAnimationHelper::ShowGatherAnimationWithMenu(menuWrapper);
     return true;
 }
 

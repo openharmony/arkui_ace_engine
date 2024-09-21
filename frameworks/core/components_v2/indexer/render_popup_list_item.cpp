@@ -15,9 +15,6 @@
 
 #include "core/components_v2/indexer/render_popup_list_item.h"
 
-#include "core/components/button/button_component.h"
-#include "core/components/image/image_component.h"
-
 namespace OHOS::Ace::V2 {
 RefPtr<RenderNode> RenderPopupListItem::Create()
 {

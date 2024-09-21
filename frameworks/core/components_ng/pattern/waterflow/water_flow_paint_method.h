@@ -27,7 +27,9 @@ class ACE_EXPORT WaterFlowPaintMethod : public ScrollablePaintMethod {
     DECLARE_ACE_TYPE(WaterFlowPaintMethod, ScrollablePaintMethod)
 public:
     WaterFlowPaintMethod() = default;
-    WaterFlowPaintMethod(bool vertical) : ScrollablePaintMethod(vertical) {}
+    WaterFlowPaintMethod(bool vertical, bool isReverse, bool isVerticalReverse)
+        : ScrollablePaintMethod(vertical, isReverse, isVerticalReverse)
+    {}
     ~WaterFlowPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;

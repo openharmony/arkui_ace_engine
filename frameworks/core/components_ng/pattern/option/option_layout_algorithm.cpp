@@ -15,17 +15,8 @@
 
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 
-#include <optional>
-#include <string>
-
-#include "base/utils/utils.h"
-#include "core/components/select/select_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 
 namespace OHOS::Ace::NG {
 void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -54,6 +45,12 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto minOptionHeight = static_cast<float>(selectTheme->GetOptionMinHeight().ConvertToPx());
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
+    auto rowChild = child->GetOrCreateChildByIndex(0);
+    if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
+        auto securityLayoutProperty = DynamicCast<SecurityComponentLayoutProperty>(rowChild->GetLayoutProperty());
+        CHECK_NULL_VOID(securityLayoutProperty);
+        securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval_));
+    }
     UpdateIconMargin(layoutWrapper);
     MeasureRow(child, childConstraint);
 
@@ -63,23 +60,23 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto idealWidth = GetIdealWidth(layoutWrapper);
     if (idealWidth.has_value()) {
-        idealSize.SetWidth(idealWidth.value());
+        auto optionPaintProperty = optionNode->GetPaintProperty<OptionPaintProperty>();
+        if (optionPaintProperty && (optionPaintProperty->GetIdealWidthForWeb() > 0) &&
+            (idealWidth.value() < optionPaintProperty->GetIdealWidthForWeb())) {
+            idealSize.SetWidth(optionPaintProperty->GetIdealWidthForWeb());
+        } else {
+            idealSize.SetWidth(idealWidth.value());
+        }
     }
     idealSize.SetHeight(std::max(minOptionHeight, idealSize.Height()));
-    
     if (optionPattern->IsSelectOption() && optionPattern->GetHasOptionWidth()) {
         auto selectOptionWidth = optionPattern->GetSelectOptionWidth();
         idealSize.SetWidth(selectOptionWidth);
     }
-    auto rowChild = child->GetOrCreateChildByIndex(0);
     if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
         float dividerWidth = static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx());
         SizeF idealSizePaste(idealSize.Width() - dividerWidth, idealSize.Height() - dividerWidth);
         childConstraint.selfIdealSize.SetSize(idealSizePaste);
-        auto securityLayoutProperty = DynamicCast<SecurityComponentLayoutProperty>(rowChild->GetLayoutProperty());
-        CHECK_NULL_VOID(securityLayoutProperty);
-        securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval_));
-        rowChild->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         rowChild->Measure(childConstraint);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);

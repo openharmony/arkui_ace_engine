@@ -14,11 +14,13 @@
  */
 
 #include "grid_test_ng.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -871,5 +873,175 @@ HWTEST_F(GridOptionLayoutTestNg, ScrollTo001, TestSize.Level1)
     pattern_->ScrollTo(ITEM_HEIGHT * 20);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 20);
+}
+
+/**
+ * @tc.name: ShowCache001
+ * @tc.desc: Test Grid showCache items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ShowCache001, TestSize.Level1)
+{
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    model.SetCachedCount(1, true);
+    CreateDone(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.startIndex_, 0);
+    EXPECT_EQ(info.endIndex_, 7);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 8)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 9)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 8), 840.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
+
+    UpdateCurrentOffset(-400.0f);
+    EXPECT_EQ(info.startIndex_, 2);
+    EXPECT_EQ(info.endIndex_, 11);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 12)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 13)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 10), 650.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 11), 650.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 12), 860.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 13), 860.0f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 0), -400.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -400.0f);
+}
+
+/**
+ * @tc.name: Refresh001
+ * @tc.desc: Test Grid nested in refresh.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, Refresh001, TestSize.Level1)
+{
+    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(12);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(12);
+    RefreshModelNG refreshModel;
+    refreshModel.Create();
+    auto refreshNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetLayoutOptions({});
+    CreateGridItems(3); // 0-height items
+    CreateDone();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startMainLineIndex_, 0);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(100.f);
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startMainLineIndex_, 0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 100);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startMainLineIndex_, 0);
+    scrollable->HandleDragUpdate(info);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
+    EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "179.37px"); // friction
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_FALSE(pattern_->OutBoundaryCallback());
+
+    scrollable->HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+
+    MockAnimationManager::GetInstance().TickByVelocity(200.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "445.45px");
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
+    EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+}
+
+/**
+ * @tc.name: OnScrollStart001
+ * @tc.desc: Test Grid onScrollStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, OnScrollStart001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetLayoutOptions({});
+
+    int32_t count = 0;
+    model.SetOnScrollStart([&count]() { ++count; });
+    int32_t stopCount = 0;
+    model.SetOnScrollStop([&stopCount]() { ++stopCount; });
+    CreateGridItems(20, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateDone();
+
+    pattern_->ScrollToIndex(10, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(count, 0);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(100.f);
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    (*scrollable->panRecognizerNG_->onActionStart_)(info);
+    (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(count, 1);
+    (*scrollable->panRecognizerNG_->onActionEnd_)(info);
+    FlushLayoutTask(frameNode_);
+
+    MockAnimationManager::GetInstance().TickByVelocity(2000.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(stopCount, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
+
+    MockAnimationManager::GetInstance().TickByVelocity(100.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(stopCount, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 100.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(stopCount, 1);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
 }
 } // namespace OHOS::Ace::NG

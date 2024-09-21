@@ -90,6 +90,7 @@ public:
             theme->textStyle_.SetTextDecorationColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("rich_editor_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("rich_editor_writting_ability_name", "");
+            theme->aiWriteIsSupport_ = pattern->GetAttr<std::string>("rich_editor_writting_is_support", "");
         }
     };
 
@@ -197,6 +198,11 @@ public:
     {
         return aiWriteAbilityName_;
     }
+
+    const std::string& GetAIWriteIsSupport() const
+    {
+        return aiWriteIsSupport_;
+    }
 protected:
     RichEditorTheme() = default;
 
@@ -207,8 +213,8 @@ private:
     Dimension scrollbarMinHeight_ = 4.0_vp;
     Edge padding_;
 
-    // UX::insert cursor offset up by 8vp
-    Dimension insertCursorOffset_ = 8.0_vp;
+    // UX::insert cursor offset up by 32vp
+    Dimension insertCursorOffset_ = 32.0_vp;
     TextStyle textStyle_;
     Color placeholderColor_ = Color(0x99000000);
     Color caretColor_ = Color(0xff007dff);
@@ -224,6 +230,7 @@ private:
     bool richeditorShowHandle_ = false;
     std::string aiWriteBundleName_;
     std::string aiWriteAbilityName_;
+    std::string aiWriteIsSupport_;
 };
 } // namespace OHOS::Ace::NG
 

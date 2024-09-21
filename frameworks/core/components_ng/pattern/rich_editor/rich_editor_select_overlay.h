@@ -44,18 +44,19 @@ public:
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
+    void OnOverlayTouchDown(const TouchEventInfo& event) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void GetLocalPointWithTransform(OffsetF& localPoint);
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
-    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType) override;
+    void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
     bool IsSingleHandleShow();
     void UpdateMenuOffset();
     bool IsBothHandlesShow();
     bool IsHandleShow();
-    void OnHandleMoveStart(bool isFirst) override;
+    void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void UpdateHandleOffset();
     void UpdateSelectOverlayOnAreaChanged();
     void ToggleMenu();
@@ -65,6 +66,7 @@ public:
     }
     void OnHandleIsHidden() override;
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+    void OnHandleMouseEvent(const MouseInfo& event) override;
     void OnAfterSelectOverlayShow(bool isCreate) override;
     bool IsRegisterTouchCallback() override
     {
@@ -83,6 +85,7 @@ private:
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
     bool needRefreshMenu_ = false;
     bool handleIsHidden_ = true;
+    std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
 };

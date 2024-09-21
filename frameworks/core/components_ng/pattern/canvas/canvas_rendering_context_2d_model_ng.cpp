@@ -15,12 +15,7 @@
 
 #include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
 
-#include <cstring>
-
 #include "securec.h"
-
-#include "core/components/common/properties/paint_state.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -500,10 +495,11 @@ void CanvasRenderingContext2DModelNG::GetImageDataModel(const ImageSize& imageSi
     std::unique_ptr<Ace::ImageData> data = GetImageData(imageSize);
     CHECK_NULL_VOID(data);
     for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
-        buffer[4 * idx] = data->data[idx].GetRed();
-        buffer[4 * idx + 1] = data->data[idx].GetGreen();
-        buffer[4 * idx + 2] = data->data[idx].GetBlue();
-        buffer[4 * idx + 3] = data->data[idx].GetAlpha();
+        Color color = Color(data->data[idx]);
+        buffer[4 * idx] = color.GetRed(); // 4 * idx: the 1st byte format: red.
+        buffer[4 * idx + 1] = color.GetGreen(); // 4 * idx + 1: the 2nd byte format: green.
+        buffer[4 * idx + 2] = color.GetBlue(); // 4 * idx + 2: the 3rd byte format: blue.
+        buffer[4 * idx + 3] = color.GetAlpha(); // 4 * idx + 3: the 4th byte format: alpha.
     }
 #endif
 }
@@ -535,6 +531,13 @@ void CanvasRenderingContext2DModelNG::Reset()
 {
     CHECK_NULL_VOID(pattern_);
     pattern_->Reset();
+}
+
+void CanvasRenderingContext2DModelNG::SetTransform(
+    std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetTransform(pattern, transform);
 }
 
 // All interfaces that only the 'CanvasRenderingContext2D' has.

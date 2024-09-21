@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,37 +27,19 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/common/ace_view.h"
 #include "core/common/ai/image_analyzer_manager.h"
-#include "core/common/container.h"
 #include "core/common/udmf/udmf_client.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/declaration/button/button_declaration.h"
 #include "core/components/video/video_theme.h"
-#include "core/components/video/video_utils.h"
-#include "core/components_ng/pattern/button/button_event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/slider/slider_event_hub.h"
-#include "core/components_ng/pattern/slider/slider_layout_property.h"
-#include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/video/video_event_hub.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
-#include "core/components_ng/pattern/video/video_layout_property.h"
-#include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/property/gradient_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+#include "core/common/ace_view.h"
+#endif
+
 namespace OHOS::Ace::NG {
 namespace {
 using HiddenChangeEvent = std::function<void(bool)>;
@@ -75,6 +57,7 @@ constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 const Dimension LIFT_HEIGHT = 28.0_vp;
 const std::string PNG_FILE_EXTENSION = "png";
+constexpr int32_t MEDIA_TYPE_AUD = 0;
 
 // Default error, empty string.
 const std::string ERROR = "";
@@ -282,6 +265,7 @@ void VideoPattern::ResetMediaPlayer()
 {
     CHECK_NULL_VOID(mediaPlayer_);
     mediaPlayer_->ResetMediaPlayer();
+    SetIsPrepared(false);
     if (!SetSourceForMediaPlayer()) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "Video set source for mediaPlayer failed.");
 
@@ -314,11 +298,14 @@ void VideoPattern::PrepareMediaPlayer()
     auto videoLayoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(videoLayoutProperty);
     // src has not set/changed
-    if (!videoLayoutProperty->HasVideoSource() || videoLayoutProperty->GetVideoSource().value() == src_) {
+    if (!videoLayoutProperty->HasVideoSource() || videoLayoutProperty->GetVideoSource() == videoSrcInfo_) {
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video source is null or the source has not changed.");
         return;
     }
-    src_ = videoLayoutProperty->GetVideoSource().value();
+    auto videoSrcInfo = videoLayoutProperty->GetVideoSource();
+    videoSrcInfo_.src = videoSrcInfo->GetSrc();
+    videoSrcInfo_.bundleName = videoSrcInfo->GetBundleName();
+    videoSrcInfo_.moduleName = videoSrcInfo->GetModuleName();
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         mediaPlayer_->CreateMediaPlayer();
     }
@@ -345,14 +332,15 @@ void VideoPattern::PrepareMediaPlayer()
 
 bool VideoPattern::SetSourceForMediaPlayer()
 {
-    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video Set src for media, it is : %{public}s", src_.c_str());
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video Set src for media, it is : %{private}s", videoSrcInfo_.GetSrc().c_str());
     CHECK_NULL_RETURN(mediaPlayer_, false);
-    return mediaPlayer_->SetSource(src_);
+    return mediaPlayer_->SetSource(videoSrcInfo_.GetSrc(), videoSrcInfo_.GetBundleName(),
+        videoSrcInfo_.GetModuleName());
 }
 
 void VideoPattern::RegisterMediaPlayerEvent()
 {
-    if (src_.empty() || !mediaPlayer_) {
+    if (videoSrcInfo_.GetSrc().empty() || !mediaPlayer_) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "Video src is empty or mediaPlayer is null, register mediaPlayerEvent fail");
         return;
     }
@@ -436,7 +424,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
                 return;
             }
             video->OnTextureRefresh(nativeWindow);
-        }, "ArkUIVideoTextureRefresh");
+            }, "ArkUIVideoTextureRefresh");
     };
     mediaPlayer_->RegisterTextureEvent(textureRefreshEvent);
 #endif
@@ -510,7 +498,7 @@ void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
     }
 
     OnUpdateTime(currentPos, CURRENT_POS);
-    currentPos_ = currentPos;
+    currentPos_ = isSeeking_ ? currentPos_ : currentPos;
     auto eventHub = GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto json = JsonUtil::Create(true);
@@ -638,6 +626,8 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     currentPos_ = currentPos;
     isInitialState_ = currentPos != 0 ? false : isInitialState_;
     isPlaying_ = mediaPlayer_->IsPlaying();
+    SetIsSeeking(false);
+    SetIsPrepared(true);
     OnUpdateTime(duration_, DURATION_POS);
     OnUpdateTime(currentPos_, CURRENT_POS);
 
@@ -768,7 +758,12 @@ void VideoPattern::UpdateMuted()
         platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_)), videoVolume = volume] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
-            mediaPlayer->SetVolume(videoVolume, videoVolume);
+            if (NearZero(videoVolume)) {
+                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, true);
+            } else {
+                mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, false);
+                mediaPlayer->SetVolume(videoVolume, videoVolume);
+            }
         }, "ArkUIVideoUpdateMuted");
     }
 }
@@ -882,33 +877,7 @@ void VideoPattern::OnDetachFromMainTree()
 
 void VideoPattern::RegisterRenderContextCallBack()
 {
-#ifndef RENDER_EXTRACT_SUPPORTED
-    auto isFullScreen = IsFullScreen();
-    if (!isFullScreen) {
-        auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
-            auto videoPattern = weak.Upgrade();
-            CHECK_NULL_VOID(videoPattern);
-            auto host = videoPattern->GetHost();
-            CHECK_NULL_VOID(host);
-            auto geometryNode = host->GetGeometryNode();
-            CHECK_NULL_VOID(geometryNode);
-            auto videoNodeSize = geometryNode->GetContentSize();
-            auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
-            Rect rect = Rect(x + (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
-                y + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
-                videoFrameSize.Height());
-            if (videoPattern->renderSurface_) {
-                if (videoPattern->renderSurface_->SetExtSurfaceBoundsSync(
-                        rect.Left(), rect.Top(), rect.Width(), rect.Height())) {
-                    videoPattern->lastBoundsRect_ = rect;
-                }
-            }
-        };
-        renderContextForMediaPlayer_->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
-    }
-#else
+#ifdef RENDER_EXTRACT_SUPPORTED
     renderSurfaceWeakPtr_ = renderSurface_;
     renderContextForMediaPlayerWeakPtr_ = renderContextForMediaPlayer_;
     auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
@@ -941,10 +910,10 @@ void VideoPattern::OnModifyDone()
     // src has changed
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
 #ifdef RENDER_EXTRACT_SUPPORTED
-    if ((layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
+    if ((layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource() != videoSrcInfo_)) {
 #else
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
-        (layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
+        (layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource() != videoSrcInfo_)) {
 #endif
         ResetStatus();
     }
@@ -1186,12 +1155,7 @@ bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
 
 void VideoPattern::OnAreaChangedInner()
 {
-#ifndef RENDER_EXTRACT_SUPPORTED
-    auto isFullScreen = IsFullScreen();
-    if (SystemProperties::GetExtSurfaceEnabled() && isFullScreen) {
-#else
     if (SystemProperties::GetExtSurfaceEnabled()) {
-#endif
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto geometryNode = host->GetGeometryNode();
@@ -1558,6 +1522,7 @@ void VideoPattern::Stop()
     OnCurrentTimeChange(0);
     mediaPlayer_->Stop();
     isStop_ = true;
+    SetIsSeeking(false);
 }
 
 void VideoPattern::FireError()
@@ -1650,7 +1615,7 @@ void VideoPattern::ChangeFullScreenButtonTag(bool isFullScreen, RefPtr<FrameNode
 
 void VideoPattern::SetCurrentTime(float currentPos, OHOS::Ace::SeekMode seekMode)
 {
-    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
+    if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid() || !isPrepared_) {
         return;
     }
     if (GreatOrEqual(currentPos, 0.0)) {
@@ -1774,7 +1739,8 @@ void VideoPattern::EnableDrag()
         }
 
         videoPattern->SetIsDragEndAutoPlay(true);
-        videoLayoutProperty->UpdateVideoSource(videoSrc);
+        VideoSourceInfo videoSrcInfo = {videoSrc, "", ""};
+        videoLayoutProperty->UpdateVideoSource(videoSrcInfo);
         auto frameNode = videoPattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->MarkModifyDone();
@@ -1786,9 +1752,11 @@ void VideoPattern::EnableDrag()
 
 VideoPattern::~VideoPattern()
 {
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (renderContextForMediaPlayer_) {
         renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
     }
+#endif
     if (IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     }
@@ -1813,7 +1781,10 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     }
     isInitialState_ = videoPattern->GetInitialState();
     auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-    src_ = layoutProperty->GetVideoSourceValue("");
+    auto videoSrcInfo = layoutProperty->GetVideoSource();
+    videoSrcInfo_.src = videoSrcInfo->GetSrc();
+    videoSrcInfo_.bundleName = videoSrcInfo->GetBundleName();
+    videoSrcInfo_.moduleName = videoSrcInfo->GetModuleName();
     isStop_ = videoPattern->GetIsStop();
     muted_ = videoPattern->GetMuted();
     autoPlay_ = videoPattern->GetAutoPlay();
@@ -1859,6 +1830,7 @@ RefPtr<VideoPattern> VideoPattern::GetTargetVideoPattern()
     if (patternIsFullScreen) {
         // current is full screen,need to be released
         auto fullScreenPattern = AceType::DynamicCast<VideoFullScreenPattern>(this);
+        CHECK_NULL_RETURN(fullScreenPattern, nullptr);
         return fullScreenPattern->GetVideoPattern();
     }
     // current node is origin video node, need to operate full screen node

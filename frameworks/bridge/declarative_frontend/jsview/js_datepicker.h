@@ -44,6 +44,7 @@ public:
     // keep compatible, need remove after
     static void UseMilitaryTime(bool isUseMilitaryTime);
     static void IsUserDefinedFontFamily(const std::string& pos);
+    static void JsOpacity(const JSCallbackInfo& info);
 
 private:
     static void CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
@@ -63,7 +64,7 @@ public:
         const std::map<std::string, NG::DialogEvent>& dialogEvent,
         const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent);
     static void ParseDateTimeOptions(const JSRef<JSObject>& paramObj, DateTimeType& dateTimeOptions);
-    static JsiRef<JsiValue> GetDateObj(const std::unique_ptr<JsonValue>& selectedJson);
+    static JsiRef<JsiValue> GetDateObj(const std::unique_ptr<JsonValue>& selectedJson, bool isDatePicker = true);
 
 private:
     static std::function<void(const std::string&)> GetDateChangeEvent(const JSRef<JSObject>& paramObject,
@@ -77,6 +78,8 @@ private:
     static std::function<void()> GetCancelEvent(
         const JSRef<JSObject>& paramObject, const JSCallbackInfo& info, const WeakPtr<NG::FrameNode>& frameNode);
     static void UpdateDatePickerSettingData(const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData);
+    static void UpdateLunarSwitchSettingData(
+        const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData);
     static void UpdatePickerDialogTimeInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
     static void UpdatePickerDialogPositionInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
     static void UpdatePickerDialogInfo(const JSRef<JSObject>& paramObject, PickerDialogInfo& pickerDialog);
@@ -104,6 +107,7 @@ public:
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
     static void DateTimeOptions(const JSCallbackInfo& info);
+    static void JsOpacity(const JSCallbackInfo& info);
 
 private:
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);

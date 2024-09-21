@@ -819,6 +819,61 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
         return new ArkGridItemComponent(node, type);
       })
     }],
+    ['TextClock', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkTextClockComponent => {
+        return new ArkTextClockComponent(node, type);
+      })
+    }],
+    ['TextTimer', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextTimer', (node: NodePtr, type: ModifierType): ArkTextTimerComponent => {
+        return new ArkTextTimerComponent(node, type);
+      })
+    }],
+    ['Marquee', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Marquee', (node: NodePtr, type: ModifierType): ArkMarqueeComponent => {
+        return new ArkMarqueeComponent(node, type);
+      })
+    }],
+    ['TextArea', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextArea', (node: NodePtr, type: ModifierType): ArkTextAreaComponent => {
+        return new ArkTextAreaComponent(node, type);
+      })
+    }],
+    ['Checkbox', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Checkbox', (node: NodePtr, type: ModifierType): ArkCheckboxComponent => {
+        return new ArkCheckboxComponent(node, type);
+      })
+    }],
+    ['CheckboxGroup', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'CheckboxGroup', (node: NodePtr, type: ModifierType): ArkCheckboxGroupComponent => {
+        return new ArkCheckboxGroupComponent(node, type);
+      })
+    }],
+    ['Radio', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Radio', (node: NodePtr, type: ModifierType): ArkRadioComponent => {
+        return new ArkRadioComponent(node, type);
+      })
+    }],
+    ['Rating', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Rating', (node: NodePtr, type: ModifierType): ArkRatingComponent => {
+        return new ArkRatingComponent(node, type);
+      })
+    }],
+    ['Slider', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Slider', (node: NodePtr, type: ModifierType): ArkSliderComponent => {
+        return new ArkSliderComponent(node, type);
+      })
+    }],
+    ['Select', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Select', (node: NodePtr, type: ModifierType): ArkSelectComponent => {
+        return new ArkSelectComponent(node, type);
+      })
+    }],
+    ['Toggle', (context: UIContext, options?: object): FrameNode=> {
+      return new TypedFrameNode(context, 'Toggle', (node: NodePtr, type: ModifierType): ArkToggleComponent => {
+        return new ArkToggleComponent(node, type);
+      }, options)
+    }],
   ]
 )
 

@@ -17,8 +17,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -132,6 +130,37 @@ void TextClockModelNG::SetDateTimeOptions(const ZeroPrefixType& hourType)
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, PrefixHour, hourType);
 }
 
+RefPtr<FrameNode> TextClockModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto textClockNode =
+        FrameNode::CreateFrameNode(V2::TEXTCLOCK_ETS_TAG, nodeId, AceType::MakeRefPtr<TextClockPattern>());
+    CHECK_NULL_RETURN(textClockNode, nullptr);
+    auto pattern = textClockNode->GetPattern<TextClockPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    if (textClockNode->GetChildren().empty()) {
+        auto textId = pattern->GetTextId();
+        auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_RETURN(textNode, nullptr);
+        textNode->MarkModifyDone();
+        textNode->MountToParent(textClockNode);
+    }
+    auto pipeline = textClockNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    if (textTheme) {
+        InitFontDefault(AceType::RawPtr(textClockNode), textTheme->GetTextStyle());
+    }
+    return textClockNode;
+}
+
+RefPtr<TextClockController> TextClockModelNG::InitTextController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPatternPtr<TextClockPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetTextClockController();
+}
+
 void TextClockModelNG::SetFormat(FrameNode* frameNode, const std::string& format)
 {
     if (format.empty()) {
@@ -139,6 +168,11 @@ void TextClockModelNG::SetFormat(FrameNode* frameNode, const std::string& format
     } else {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format, frameNode);
     }
+}
+
+void TextClockModelNG::SetHoursWest(FrameNode* frameNode, float hoursWest)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, HoursWest, hoursWest, frameNode);
 }
 
 void TextClockModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
@@ -181,14 +215,53 @@ void TextClockModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std
 
 void TextClockModelNG::SetBuilderFunc(FrameNode* frameNode, TextClockMakeCallback&& makeFunc)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetBuilderFunc(std::move(makeFunc));
+}
+
+void TextClockModelNG::InitFontDefault(FrameNode* frameNode, const TextStyle& textStyle)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textClockLayoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(textClockLayoutProperty);
+    if (!textClockLayoutProperty->GetFontSize().has_value()) {
+        SetFontSize(frameNode, textStyle.GetFontSize());
+    }
+    if (!textClockLayoutProperty->GetFontWeight().has_value()) {
+        SetFontWeight(frameNode, textStyle.GetFontWeight());
+    }
+    if (!textClockLayoutProperty->GetTextColor().has_value()) {
+        SetFontColor(frameNode, textStyle.GetTextColor());
+    }
+    if (!textClockLayoutProperty->GetFontFamily().has_value()) {
+        SetFontFamily(frameNode, textStyle.GetFontFamilies());
+    }
+    if (!textClockLayoutProperty->GetItalicFontStyle().has_value()) {
+        SetFontStyle(frameNode, textStyle.GetFontStyle());
+    }
 }
 
 void TextClockModelNG::SetDateTimeOptions(FrameNode* frameNode, const ZeroPrefixType& hourType)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, PrefixHour, hourType, frameNode);
+}
+
+void TextClockModelNG::SetJSTextClockController(FrameNode* frameNode, const RefPtr<Referenced>& controller)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetJSTextClockController(controller);
+}
+
+RefPtr<Referenced> TextClockModelNG::GetJSTextClockController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetJSTextClockController();
 }
 } // namespace OHOS::Ace::NG

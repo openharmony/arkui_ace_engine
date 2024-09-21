@@ -15,7 +15,6 @@
 
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
-#include "base/memory/ace_type.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {

@@ -48,8 +48,6 @@ public:
         defaultPickerItemHeight_ = defaultPickerItemHeight;
     }
 
-    void PaintDisable(RSCanvas& canvas, double X, double Y);
-
     void SetEnabled(bool enabled)
     {
         enabled_ = enabled;

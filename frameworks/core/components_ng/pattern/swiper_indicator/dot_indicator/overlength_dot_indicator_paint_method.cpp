@@ -15,11 +15,6 @@
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.h"
 
-#include <valarray>
-
-#include "core/components_ng/render/paint_property.h"
-#include "core/pipeline/pipeline_base.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 // for indicator
@@ -50,6 +45,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     CHECK_NULL_VOID(geometryNode);
 
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
@@ -83,6 +79,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
 void OverlengthDotIndicatorPaintMethod::UpdateNormalIndicator(
     LinearVector<float>& itemHalfSizes, const PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     dotIndicatorModifier_->SetTurnPageRate(turnPageRate_);
     dotIndicatorModifier_->SetGestureState(gestureState_);
     dotIndicatorModifier_->SetIsCustomSizeValue(IsCustomSizeValue_);
@@ -103,6 +100,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateNormalIndicator(
 
 void OverlengthDotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     auto [longPointCenterX, itemHalfSizes] = CalculateLongPointCenterX(paintWrapper);
     longPointCenterX_ = longPointCenterX;
     if (dotIndicatorModifier_->GetIsHover()) {

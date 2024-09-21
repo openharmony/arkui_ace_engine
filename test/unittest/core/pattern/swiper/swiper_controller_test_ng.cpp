@@ -238,8 +238,8 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex004, TestSize.Le
     EXPECT_TRUE(VerifyChangeIndex(0, false, 0)); // same index
     EXPECT_TRUE(VerifyChangeIndex(1, false, 1));
     EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
-    EXPECT_TRUE(VerifyChangeIndex(-1, false, 3)); // invalid index
-    EXPECT_TRUE(VerifyChangeIndex(100, false, 3)); // invalid index
+    EXPECT_TRUE(VerifyChangeIndex(-1, false, 0)); // invalid index
+    EXPECT_TRUE(VerifyChangeIndex(100, false, 0)); // invalid index
     // with animation
     EXPECT_TRUE(VerifyChangeIndex(1, true, 1));
     EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
@@ -417,14 +417,59 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex008, TestSize.Le
      */
     EXPECT_TRUE(VerifyChangeIndex(0, false, 0));
     // expect 0
-    EXPECT_TRUE(VerifyChangeIndex(2, false, 2));
+    EXPECT_TRUE(VerifyChangeIndex(2, false, 1));
     // expect 0
-    EXPECT_TRUE(VerifyChangeIndex(3, false, 0));
+    EXPECT_TRUE(VerifyChangeIndex(3, false, 1));
     EXPECT_TRUE(VerifyChangeIndex(0, true, 0));
     // expect 0
     EXPECT_TRUE(VerifyChangeIndex(2, true, 1));
     // expect 0
     EXPECT_TRUE(VerifyChangeIndex(3, true, 1));
+}
+
+/**
+ * @tc.name: ShowNextShowPreviousChangeIndex009
+ * @tc.desc: Test ShowNext/ShowPrevious/ChangeIndex with next/pre margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set DisplayCount:10 over itemCount
+     */
+    const float preMargin = 10.f;
+    const float nextMargin = 20.f;
+    CreateWithItem([=](SwiperModelNG model) {
+        model.SetLoop(false);
+        model.SetDisplayCount(10);
+        model.SetPreviousMargin(Dimension(preMargin), true);
+        model.SetNextMargin(Dimension(nextMargin), true);
+    });
+
+    /**
+     * @tc.steps: step2. Call ShowNext
+     * @tc.expected: Show next page
+     */
+    EXPECT_TRUE(VerifyShowNext(0));
+
+    /**
+     * @tc.steps: step3. Call ShowPrevious
+     * @tc.expected: Show ShowPrevious page
+     */
+    EXPECT_TRUE(VerifyShowPrevious(0));
+
+    /**
+     * @tc.steps: step4. Call ChangeIndex
+     * @tc.expected: Show ChangeIndex page
+     */
+    // expect 0
+    EXPECT_TRUE(VerifyChangeIndex(0, false, 0));
+    // expect 0
+    EXPECT_TRUE(VerifyChangeIndex(2, false, 0));
+    // expect 0
+    EXPECT_TRUE(VerifyChangeIndex(0, true, 0));
+    // expect 0
+    EXPECT_TRUE(VerifyChangeIndex(3, true, 0));
 }
 
 /**

@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,8 +20,8 @@ group("core_unittest") {
     "common:core_common_unittest",
     "event:core_event_unittest",
     "gestures:gestures_test_ng",
-    "image_file_cache:image_file_cache_test_ng",
-    "image_provider:image_provider_test_ng",
+    "image:image_file_cache_test_ng",
+    "image:image_provider_test_ng",
     "layout:core_layout_unittest",
     "manager:core_manager_unittest",
     "pattern:core_pattern_unittest",
@@ -29,6 +29,7 @@ group("core_unittest") {
     "property:core_property_unittest",
     "render:core_render_unittest",
     "rosen:arkui_rosen_render_context_test",
+    "rosen:gradient_style_modifier_test",
     "svg:core_svg_unittest",
     "syntax:core_syntax_unittest",
   ]
@@ -37,7 +38,7 @@ group("core_unittest") {
 group("linux_core_unittest") {
   testonly = true
   deps = [
-    "accessibility:core_accessibility_unittest",
+    "accessibility:core_accessibility_unittest_linux",
     "animation:core_animation_unittest",
     "base:core_base_unittest",
     "common:common_test",
@@ -86,6 +87,7 @@ group("linux_core_unittest") {
     "pattern/image:image_test_ng",
     "pattern/image_animator:image_animator_test_ng",
     "pattern/indexer:indexer_test_ng",
+    "pattern/linear_indicator:linear_indicator_test_ng",
     "pattern/linear_layout:linear_layout_test_ng",
     "pattern/linear_split:linear_split_test_ng",
     "pattern/list:list_test_ng",

@@ -219,7 +219,7 @@ void JankFrameReport::ResetFrameJankClock()
 void JankFrameReport::StartRecord(const std::string& pageUrl)
 {
     ResetFrameJankClock();
-    pageUrl_ = pageUrl;
+    pageUrl_ = ParsePageUrl(pageUrl);
 }
 
 void JankFrameReport::FlushRecord()

@@ -23,6 +23,8 @@ namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+constexpr int SLIDER_MIN = 0;
+constexpr int SLIDER_MAX = 100;
 const char* SLIDER_NODEPTR_OF_UINODE = "nodePtr_";
 panda::Local<panda::JSValueRef> JsSliderChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
@@ -633,6 +635,104 @@ ArkUINativeModuleValue SliderBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             CHECK_NULL_RETURN(frameNode, nullptr);
             return AceType::Claim(frameNode);
         });
+    return panda::JSValueRef::Undefined(vm);
+}
+
+struct SliderOptions {
+    double value = 0;
+    double min = 0;
+    double max = 100;
+    double step = 1;
+    bool reverse = false;
+    int32_t style = 0;
+    int32_t direction = 1;
+};
+
+static void GetStep(SliderOptions& options)
+{
+    if (LessOrEqual(options.step, 0.0) || options.step > options.max - options.min) {
+        options.step = 1;
+    }
+}
+
+static void GetValue(SliderOptions& options)
+{
+    if (options.value < options.min) {
+        options.value = options.min;
+    }
+
+    if (options.value > options.max) {
+        options.value = options.max;
+    }
+}
+
+static void ParseOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, SliderOptions& options)
+{
+    static const double valueMin = -1000000.0f;
+    options.value = valueMin;
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> minArg = runtimeCallInfo->GetCallArgRef(2);
+    Local<JSValueRef> maxArg = runtimeCallInfo->GetCallArgRef(3);
+    Local<JSValueRef> stepArg = runtimeCallInfo->GetCallArgRef(4);
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(5);
+    Local<JSValueRef> directionArg = runtimeCallInfo->GetCallArgRef(6);
+    Local<JSValueRef> reverseArg = runtimeCallInfo->GetCallArgRef(7);
+    if (!valueArg.IsNull() && valueArg->IsNumber()) {
+        options.value = valueArg->ToNumber(vm)->Value();
+    }
+    if (!minArg.IsNull() && minArg->IsNumber()) {
+        options.min = minArg->ToNumber(vm)->Value();
+    }
+    if (!maxArg.IsNull() && maxArg->IsNumber()) {
+        options.max = maxArg->ToNumber(vm)->Value();
+    }
+    if (!stepArg.IsNull() && stepArg->IsNumber()) {
+        options.step = stepArg->ToNumber(vm)->Value();
+    }
+    if (!reverseArg.IsNull() && reverseArg->IsBoolean()) {
+        options.reverse = reverseArg->ToBoolean(vm)->Value();
+    }
+    if (GreatOrEqual(options.min, options.max)) {
+        options.min = SLIDER_MIN;
+        options.max = SLIDER_MAX;
+    }
+
+    GetStep(options);
+    GetValue(options);
+
+    if (!styleArg.IsNull() && styleArg->IsNumber()) {
+        auto tempStyle = styleArg->Int32Value(vm);
+        if (tempStyle >= static_cast<int32_t>(SliderMode::OUTSET) &&
+                tempStyle <= static_cast<int32_t>(SliderMode::CAPSULE)) {
+            options.style = tempStyle;
+        }
+    }
+    if (!directionArg.IsNull() && directionArg->IsNumber()) {
+        auto tempDirection = directionArg->Int32Value(vm);
+        if (tempDirection >= static_cast<int32_t>(Axis::VERTICAL) &&
+                tempDirection <= static_cast<int32_t>(Axis::HORIZONTAL)) {
+            options.direction = tempDirection;
+        }
+    }
+}
+
+ArkUINativeModuleValue SliderBridge::SetSliderOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    auto sliderModifier = GetArkUINodeModifiers()->getSliderModifier();
+    SliderOptions options;
+    ParseOptions(runtimeCallInfo, options);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(runtimeCallInfo->GetCallArgRef(0)->ToNativePointer(vm)->Value());
+    sliderModifier->setStep(nativeNode, options.step);
+    sliderModifier->setMinLabel(nativeNode, options.min);
+    sliderModifier->setMaxLabel(nativeNode, options.max);
+    sliderModifier->setSliderValue(nativeNode, options.value);
+    sliderModifier->setSliderStyle(nativeNode, options.style);
+    sliderModifier->setDirection(nativeNode, options.direction);
+    sliderModifier->setReverse(nativeNode, options.reverse);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

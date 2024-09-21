@@ -24,7 +24,7 @@
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
-using ChangeEvent = std::function<void(const std::string&)>;
+using RatingChangeEvent = std::function<void(const std::string&)>;
 class ACE_FORCE_EXPORT RatingModel {
 public:
     static RatingModel* GetInstance();
@@ -38,8 +38,8 @@ public:
     virtual void SetForegroundSrc(const std::string& value, bool flag) = 0;
     virtual void SetSecondarySrc(const std::string& value, bool flag) = 0;
     virtual void SetBackgroundSrc(const std::string& value, bool flag) = 0;
-    virtual void SetOnChange(ChangeEvent&& onChange) = 0;
-    virtual void SetOnChangeEvent(ChangeEvent&& onChangeEvent) = 0;
+    virtual void SetOnChange(RatingChangeEvent&& onChange) = 0;
+    virtual void SetOnChangeEvent(RatingChangeEvent&& onChangeEvent) = 0;
 
 private:
     static std::unique_ptr<RatingModel> instance_;

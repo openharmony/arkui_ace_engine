@@ -23,6 +23,10 @@ import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
 
+const RESOURCE_TYPE_STRING = 10003;
+const RESOURCE_TYPE_FLOAT = 10002;
+const RESOURCE_TYPE_INTEGER = 10007;
+
 export enum ChipSize {
   NORMAL = "NORMAL",
   SMALL = "SMALL"
@@ -128,6 +132,7 @@ interface ChipNodeTheme {
   backgroundColor: ResourceColor;
   activatedBackgroundColor: ResourceColor;
   focusOutlineColor: ResourceColor;
+  focusOutlineMargin: number;
   normalBorderRadius: Dimension;
   smallBorderRadius: Dimension;
   borderWidth: number;
@@ -198,6 +203,7 @@ export const defaultTheme: ChipTheme = {
     backgroundColor: $r('sys.color.ohos_id_color_button_normal'),
     activatedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
     focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
+    focusOutlineMargin: 2,
     normalBorderRadius: $r('sys.float.ohos_id_corner_radius_tips_instant_tip'),
     smallBorderRadius: $r('sys.float.ohos_id_corner_radius_piece'),
     borderWidth: 2,
@@ -265,6 +271,19 @@ export function Chip(options: ChipOptions) {
     onClose: options.onClose,
     onClicked: options.onClicked,
   })
+}
+
+function isValidString(dimension: string, regex: RegExp): boolean {
+  const matches = dimension.match(regex);
+  if (!matches || matches.length < 3) {
+    return false;
+  }
+  const value = Number.parseFloat(matches[1]);
+  return value >= 0;
+}
+
+function isValidDimensionString(dimension: string): boolean {
+  return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
 }
 
 @Component
@@ -389,7 +408,16 @@ export struct ChipComponent {
         return value as number
       case 'object':
         try {
-          return this.lengthMetricsToVp(LengthMetrics.resource(value))
+          let returnValue = this.lengthMetricsToVp(LengthMetrics.resource(value));
+          if (returnValue === 0) {
+            if ((value.type === RESOURCE_TYPE_STRING &&
+              !isValidDimensionString(getContext(this).resourceManager.getStringSync(value.id))) ||
+              (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
+                value.type !== RESOURCE_TYPE_FLOAT)) {
+              return Number.NEGATIVE_INFINITY;
+            }
+          }
+          return returnValue;
         } catch (error) {
           return Number.NEGATIVE_INFINITY
         }
@@ -960,6 +988,11 @@ export struct ChipComponent {
             .flexShrink(0)
             .visibility(this.getVisibility())
             .draggable(false)
+            .focusBox({
+              margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+              strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+              strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+            })
             .onFocus(() => {
               this.suffixIconOnFocus = true
             })
@@ -985,6 +1018,11 @@ export struct ChipComponent {
           SymbolGlyph($r('sys.symbol.xmark'))
             .fontSize(this.theme.defaultSymbol.fontSize)
             .fontColor(this.getDefaultSymbolColor())
+            .focusBox({
+              margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+              strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+              strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+            })
             .onSizeChange((oldValue, newValue) => {
               this.allowCloseSymbolWidth = newValue?.width
             })
@@ -1015,6 +1053,11 @@ export struct ChipComponent {
     .scale(this.chipScale)
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
+    .focusBox({
+      margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+      strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+      strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+    })
     .onFocus(() => {
       this.chipNodeOnFocus = true
     })

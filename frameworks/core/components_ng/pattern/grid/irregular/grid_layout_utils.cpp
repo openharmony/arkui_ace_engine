@@ -14,8 +14,6 @@
  */
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -66,7 +64,7 @@ void GridLayoutUtils::PreloadGridItems(
 
 void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern, const BuildGridItemCallback& buildCb)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = pattern->GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = AceType::WeakClaim(AceType::RawPtr(pattern)), buildCb](int64_t deadline, bool _) {
         ACE_SCOPED_TRACE("Grid preload items");

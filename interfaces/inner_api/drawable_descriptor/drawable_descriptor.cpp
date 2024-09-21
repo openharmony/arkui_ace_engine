@@ -456,18 +456,23 @@ Rosen::Drawing::ImageInfo LayeredDrawableDescriptor::CreateRSImageInfo(
     OptionalPixelMap pixelmap, int32_t width, int32_t height)
 {
     Rosen::Drawing::ColorType colorType =
-        pixelmap.has_value() ? colorType = ImageConverter::PixelFormatToColorType(pixelmap.value()->GetPixelFormat())
-                             : colorType = ImageConverter::PixelFormatToColorType(Media::PixelFormat::RGBA_8888);
+        pixelmap.has_value() && pixelmap.value()
+            ? colorType = ImageConverter::PixelFormatToColorType(pixelmap.value()->GetPixelFormat())
+            : colorType = ImageConverter::PixelFormatToColorType(Media::PixelFormat::RGBA_8888);
     Rosen::Drawing::AlphaType alphaType =
-        pixelmap.has_value()
+        pixelmap.has_value() && pixelmap.value()
             ? alphaType = ImageConverter::AlphaTypeToAlphaType(pixelmap.value()->GetAlphaType())
             : alphaType = ImageConverter::AlphaTypeToAlphaType(Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL);
     return Rosen::Drawing::ImageInfo(width, height, colorType, alphaType);
 }
 
-void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+bool LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
     std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask)
 {
+    if (!background) {
+        HILOGW("The background is null when adaptive composite icons are used.");
+        return false;
+    }
     Rosen::Drawing::Brush brush;
     brush.SetAntiAlias(true);
     Rosen::Drawing::ImageInfo imageInfo =
@@ -484,13 +489,14 @@ void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Dra
         bitmapCanvas.DetachBrush();
     }
 
-    Rosen::Drawing::Rect srcRect(0.0, 0.0, static_cast<float>(mask->GetWidth()), static_cast<float>(mask->GetHeight()));
     Rosen::Drawing::Rect dstRect(
         0.0, 0.0, static_cast<float>(background->GetWidth()), static_cast<float>(background->GetHeight()));
     Rosen::Drawing::Image image;
     if (mask) {
+        Rosen::Drawing::Rect srcRect(
+            0.0, 0.0, static_cast<float>(mask->GetWidth()), static_cast<float>(mask->GetHeight()));
         image.BuildFromBitmap(*mask);
-        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_IN);
         bitmapCanvas.AttachBrush(brush);
         bitmapCanvas.DrawImageRect(image, srcRect, dstRect, Rosen::Drawing::SamplingOptions(),
             Rosen::Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
@@ -502,6 +508,8 @@ void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Dra
     // convert bitmap back to pixelMap
     bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
     TransformToPixelMap(tempCache, imageInfo);
+
+    return true;
 }
 
 void LayeredDrawableDescriptor::BlendForeground(Rosen::Drawing::Canvas& bitmapCanvas, Rosen::Drawing::Brush& brush,
@@ -551,7 +559,7 @@ void LayeredDrawableDescriptor::CompositeIconNotAdaptive(std::shared_ptr<Rosen::
         bitmapCanvas.DetachBrush();
     }
     if (mask) {
-        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_ATOP);
+        brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_IN);
         bitmapCanvas.AttachBrush(brush);
         DrawOntoCanvas(mask, SIDE, SIDE, bitmapCanvas);
         bitmapCanvas.DetachBrush();
@@ -610,11 +618,12 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
         NearEqual(NOT_ADAPTIVE_SIZE, foreground->GetHeight())) {
         HILOGD("foreground size is 288 x 288, we don't scale the foreground.");
         CompositeIconNotAdaptive(foreground, background, mask);
-    } else {
+        return true;
+    } else if (CompositeIconAdaptive(foreground, background, mask)) {
         HILOGD("foreground size is not 288 x 288, we'll scale the foreground.");
-        CompositeIconAdaptive(foreground, background, mask);
+        return true;
     }
-    return true;
+    return false;
 }
 
 bool LayeredDrawableDescriptor::GetCompositePixelMapWithBadge(

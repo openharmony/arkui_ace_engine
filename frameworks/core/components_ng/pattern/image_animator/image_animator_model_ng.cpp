@@ -15,10 +15,7 @@
 
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -14,18 +14,12 @@
  */
 
 #include "core/components_ng/pattern/text/image_span_view.h"
+#include <cstdint>
 
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/image/image_source_info.h"
 #include "core/components_ng/base/view_abstract.h"
+
 namespace OHOS::Ace::NG {
 void ImageSpanView::SetObjectFit(ImageFit value)
 {
@@ -50,6 +44,14 @@ void ImageSpanView::SetBaselineOffset(const Dimension& value)
 void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value, frameNode);
+}
+
+float ImageSpanView::GetBaselineOffset(FrameNode* frameNode, int32_t unit)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ImageLayoutProperty, BaselineOffset,
+        value, frameNode, value);
+    return value.GetNativeValue(static_cast<DimensionUnit>(unit));
 }
 
 void ImageSpanView::SetAlt(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)

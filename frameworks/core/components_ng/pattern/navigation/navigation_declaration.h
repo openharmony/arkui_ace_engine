@@ -30,8 +30,7 @@ inline RefPtr<NavigationBarTheme> NavigationGetTheme()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<NavigationBarTheme>();
-    return theme;
+    return pipeline->GetTheme<NavigationBarTheme>();
 }
 
 // TODO：move some items to theme
@@ -52,6 +51,7 @@ constexpr float SINGLE_PAGE_MAXIMUM_WIDTH = 720.0f;
 constexpr Dimension MAX_TITLE_FONT_SIZE = 30.0_vp;
 constexpr Dimension MIN_TITLE_FONT_SIZE = 20.0_vp;
 constexpr Dimension MIN_ADAPT_TITLE_FONT_SIZE = 14.0_vp;
+constexpr Dimension DISTANCE_FROM_SIDE_BAR_BUTTON = 8.0_vp;
 constexpr const char* TITLE_MAIN = "MainOnly";
 constexpr const char* TITLE_MAIN_WITH_SUB = "MainWithSub";
 
@@ -151,6 +151,13 @@ struct BarItem {
     }
 };
 
+struct NavigationTitleInfo {
+    bool hasSubTitle;
+    bool hasMainTitle;
+    std::string subtitle;
+    std::string title;
+};
+
 enum class ToolbarIconStatus {
     INITIAL = 0,
     ACTIVE,
@@ -195,6 +202,7 @@ enum class ChildNodeOperation {
 enum class BarStyle {
     STANDARD = 0,
     STACK,
+    SAFE_AREA_PADDING,
 };
 
 enum class TitleBarParentType { NAVBAR, NAV_DESTINATION };

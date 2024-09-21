@@ -514,6 +514,19 @@ inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
     return index < 0 ? "break-word" : wordBreakTable[index].value;
 }
 
+inline std::string ConvertTextDirectionToString(TextDirection direction)
+{
+    static const LinearEnumMapNode<TextDirection, std::string> textDirectionTable[] = {
+        { TextDirection::AUTO, "AUTO" },
+        { TextDirection::INHERIT, "INHERIT" },
+        { TextDirection::LTR, "LTR" },
+        { TextDirection::RTL, "RTL" },
+    };
+
+    auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), direction);
+    return index < 0 ? "AUTO" : textDirectionTable[index].value;
+}
+
 inline std::string ConvertEllipsisModeToString(EllipsisMode value)
 {
     static const LinearEnumMapNode<EllipsisMode, std::string> modalTable[] = {

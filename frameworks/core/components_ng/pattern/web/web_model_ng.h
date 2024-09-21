@@ -39,6 +39,7 @@ public:
         std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
         RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
         const std::string& sharedRenderProcessToken = "") override;
+    Color GetDefaultBackgroundColor() override;
     void SetCustomScheme(const std::string& cmdLine) override;
     void SetOnCommonDialog(std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType) override;
     void SetOnConsoleLog(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
@@ -163,6 +164,7 @@ public:
     void SetNativeEmbedModeEnabled(bool isEmbedModeEnabled) override;
     void RegisterNativeEmbedRule(const std::string& tag, const std::string& type) override;
     void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetLayoutMode(WebLayoutMode mode) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
@@ -192,6 +194,7 @@ public:
     void SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode) override;
     void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+    void SetEnabledHapticFeedback(bool isEnabled) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

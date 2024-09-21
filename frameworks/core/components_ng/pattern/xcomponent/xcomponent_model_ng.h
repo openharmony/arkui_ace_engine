@@ -28,10 +28,10 @@ class FrameNode;
 class ArkUI_XComponent_Params final : public ArkUI_Params {
 public:
     std::string id;
-    XComponentType type;
-    std::string libraryName;
-    std::shared_ptr<InnerXComponentController> controller;
-    void* aiOptions;
+    XComponentType type = XComponentType::SURFACE;
+    std::optional<std::string> libraryName = std::nullopt;
+    std::shared_ptr<InnerXComponentController> controller = nullptr;
+    void* aiOptions = nullptr;
 };
 
 class ACE_EXPORT XComponentModelNG : public OHOS::Ace::XComponentModel {
@@ -56,11 +56,13 @@ public:
     void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) override;
     void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) override;
     void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) override;
+    void SetRenderFit(RenderFit renderFit) override;
+    void EnableSecure(bool isSecure) override;
 
     static bool IsTexture(FrameNode* frameNode);
     static XComponentType GetType(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(
-        int32_t nodeId, const std::string& id, XComponentType type, const std::string& libraryname);
+        int32_t nodeId, const std::string& id, XComponentType type, const std::optional<std::string>& libraryname);
     static RefPtr<FrameNode> CreateTypeNode(int32_t nodeId, ArkUI_XComponent_Params* params);
     static void InitXComponent(FrameNode* frameNode);
     static void SetXComponentId(FrameNode* frameNode, const std::string& id);
@@ -79,6 +81,7 @@ public:
     static void SetOnLoad(FrameNode* frameNode, LoadEvent&& onLoad);
     static void SetOnDestroy(FrameNode* frameNode, DestroyEvent&& onDestroy);
     static void EnableAnalyzer(FrameNode* frameNode, bool enable);
+    static void EnableSecure(FrameNode* frameNode, bool enable);
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);

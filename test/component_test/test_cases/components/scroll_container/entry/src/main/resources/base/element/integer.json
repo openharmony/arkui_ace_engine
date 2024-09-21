@@ -1,0 +1,16 @@
+{
+  "integer": [
+    {
+      "name": "listItemGroup_endMargin",
+      "value": 50
+    },
+    {
+      "name": "listItemGroup_startMargin",
+      "value": 100
+    },
+    {
+      "name": "listItemGroup_strokeWidth",
+      "value": 50
+    }
+  ]
+}

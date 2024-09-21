@@ -16,14 +16,10 @@
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/gestures/rotation_gesture.h"
-#include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
 #include "core/components_ng/gestures/swipe_gesture.h"
-#include "core/components_ng/gestures/tap_gesture.h"
-#include "core/gestures/gesture_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -31,6 +27,28 @@ bool IsTapClick(const RefPtr<NG::Gesture>& gesture)
 {
     auto tap = AceType::DynamicCast<NG::TapGesture>(gesture);
     return tap && (tap->GetTapCount() == 1) && (tap->GetFingers() == 1);
+}
+
+GestureEventFunc GetTapGestureEventFunc(const RefPtr<NG::Gesture>& gesture)
+{
+    if (IsTapClick(gesture)) {
+        auto tapGesture = AceType::DynamicCast<NG::TapGesture>(gesture);
+        auto onActionId = tapGesture->GetOnActionId();
+        return onActionId ? *onActionId : nullptr;
+    }
+    auto group = AceType::DynamicCast<NG::GestureGroup>(gesture);
+    if (!group) {
+        return nullptr;
+    }
+    auto list = group->GetGestures();
+    for (const auto& tap : list) {
+        if (IsTapClick(tap)) {
+            auto tapGesture = AceType::DynamicCast<NG::TapGesture>(tap);
+            auto onActionId = tapGesture->GetOnActionId();
+            return onActionId ? *onActionId : nullptr;
+        }
+    }
+    return nullptr;
 }
 } // namespace
 
@@ -70,10 +88,12 @@ void GestureModelNG::Finish()
     CHECK_NULL_VOID(gestureEventHub);
     gestureEventHub->AddGesture(gesture);
 
-    if (IsTapClick(gesture)) {
+    GestureEventFunc clickEvent = GetTapGestureEventFunc(gesture);
+    if (clickEvent) {
         auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetFocusable(true, false);
+        focusHub->SetOnClickCallback(std::move(clickEvent));
     }
 }
 

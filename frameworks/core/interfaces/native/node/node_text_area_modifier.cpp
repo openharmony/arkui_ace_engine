@@ -13,19 +13,10 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_text_area_modifier.h"
-#include <cstdint>
+
 #include "bridge/common/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "interfaces/native/node/node_model.h"
 
@@ -1613,11 +1604,16 @@ void SetTextAreaSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCal
     NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
         onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+        TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(*onCreateMenu));
+    } else {
+        TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
+        TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(*onMenuItemClick));
+    } else {
+        TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
-    TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
 }
 
 void ResetTextAreaSelectionMenuOptions(ArkUINodeHandle node)
@@ -1626,7 +1622,23 @@ void ResetTextAreaSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
+    TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
+}
+
+void SetTextAreaWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto widthValue = std::string(value);
+    TextFieldModelNG::SetWidth(frameNode, widthValue);
+}
+
+void ResetTextAreaWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ClearWidth(frameNode);
 }
 } // namespace
 
@@ -1669,7 +1681,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         ResetTextAreaMargin, SetTextAreaCaret, GetTextAreaMargin, SetTextAreaOnWillInsert, ResetTextAreaOnWillInsert,
         SetTextAreaOnDidInsert, ResetTextAreaOnDidInsert, SetTextAreaOnWillDelete, ResetTextAreaOnWillDelete,
         SetTextAreaOnDidDelete, ResetTextAreaOnDidDelete, SetTextAreaEnablePreviewText, ResetTextAreaEnablePreviewText,
-        GetTextAreaPadding, SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions };
+        GetTextAreaPadding, SetTextAreaSelectionMenuOptions, ResetTextAreaSelectionMenuOptions,
+        SetTextAreaWidth, ResetTextAreaWidth };
     return &modifier;
 }
 

@@ -15,12 +15,8 @@
 
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 

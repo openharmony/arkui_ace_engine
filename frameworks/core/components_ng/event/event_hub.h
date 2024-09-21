@@ -48,14 +48,6 @@ struct KeyboardShortcut {
     }
 };
 
-enum class DragFuncType {
-    DRAG_ENTER,
-    DRAG_LEAVE,
-    DRAG_MOVE,
-    DRAG_DROP,
-    DRAG_END,
-};
-
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class ACE_FORCE_EXPORT EventHub : public virtual AceType {
     DECLARE_ACE_TYPE(EventHub, AceType)
@@ -67,258 +59,84 @@ public:
         keyboardShortcut_.clear();
     };
 
-    const RefPtr<GestureEventHub>& GetOrCreateGestureEventHub()
-    {
-        if (!gestureEventHub_) {
-            gestureEventHub_ = CreateGestureEventHub();
-        }
-        return gestureEventHub_;
-    }
+    const RefPtr<GestureEventHub>& GetOrCreateGestureEventHub();
 
     virtual RefPtr<GestureEventHub> CreateGestureEventHub()
     {
         return MakeRefPtr<GestureEventHub>(WeakClaim(this));
     }
 
-    const RefPtr<GestureEventHub>& GetGestureEventHub() const
-    {
-        return gestureEventHub_;
-    }
-
-    void SetGestureEventHub(const RefPtr<GestureEventHub>& gestureEventHub)
-    {
-        gestureEventHub_ = gestureEventHub;
-    }
-
-    const RefPtr<InputEventHub>& GetOrCreateInputEventHub()
-    {
-        if (!inputEventHub_) {
-            inputEventHub_ = MakeRefPtr<InputEventHub>(WeakClaim(this));
-        }
-        return inputEventHub_;
-    }
-
-    const RefPtr<InputEventHub>& GetInputEventHub() const
-    {
-        return inputEventHub_;
-    }
-
+    const RefPtr<GestureEventHub>& GetGestureEventHub() const;
+    void SetGestureEventHub(const RefPtr<GestureEventHub>& gestureEventHub);
+    const RefPtr<InputEventHub>& GetOrCreateInputEventHub();
+    const RefPtr<InputEventHub>& GetInputEventHub() const;
     const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type = FocusType::DISABLE, bool focusable = false,
         FocusStyleType focusStyleType = FocusStyleType::NONE,
-        const std::unique_ptr<FocusPaintParam>& paintParamsPtr = nullptr)
-    {
-        if (!focusHub_) {
-            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), type, focusable);
-            focusHub_->SetFocusStyleType(focusStyleType);
-            if (paintParamsPtr) {
-                focusHub_->SetFocusPaintParamsPtr(paintParamsPtr);
-            }
-        }
-        return focusHub_;
-    }
-
-    const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern)
-    {
-        if (!focusHub_) {
-            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), focusPattern);
-        }
-        return focusHub_;
-    }
-
-    const RefPtr<FocusHub>& GetFocusHub() const
-    {
-        return focusHub_;
-    }
-
+        const std::unique_ptr<FocusPaintParam>& paintParamsPtr = nullptr);
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern);
+    const RefPtr<FocusHub>& GetFocusHub() const;
     void AttachHost(const WeakPtr<FrameNode>& host);
     void OnAttachContext(PipelineContext* context);
     void OnDetachContext(PipelineContext* context);
-
     RefPtr<FrameNode> GetFrameNode() const;
-
     GetEventTargetImpl CreateGetEventTargetImpl() const;
-
-    void OnContextAttached()
-    {
-        if (gestureEventHub_) {
-            gestureEventHub_->OnContextAttached();
-        }
-    }
-
-    void ClearUserOnAppear()
-    {
-        if (onAppear_) {
-            onAppear_ = nullptr;
-        }
-    }
-
-    void SetOnAppear(std::function<void()>&& onAppear)
-    {
-        onAppear_ = std::move(onAppear);
-    }
-
+    void OnContextAttached();
+    void ClearUserOnAppear();
+    void SetOnAppear(std::function<void()>&& onAppear);
     void SetJSFrameNodeOnAppear(std::function<void()>&& onAppear);
-
     void ClearJSFrameNodeOnAppear();
-
     virtual void FireOnAppear();
-
-    void ClearUserOnDisAppear()
-    {
-        if (onDisappear_) {
-            onDisappear_ = nullptr;
-        }
-    }
-
-    void SetOnDisappear(std::function<void()>&& onDisappear)
-    {
-        onDisappear_ = std::move(onDisappear);
-    }
-
+    void ClearUserOnDisAppear();
+    void SetOnDisappear(std::function<void()>&& onDisappear);
     void SetJSFrameNodeOnDisappear(std::function<void()>&& onDisappear);
-
     void ClearJSFrameNodeOnDisappear();
-
     virtual void FireOnDisappear();
-
-    void ClearUserOnAreaChanged()
-    {
-        if (onAreaChanged_) {
-            onAreaChanged_ = nullptr;
-        }
-    }
-
-    void SetOnAreaChanged(OnAreaChangedFunc&& onAreaChanged)
-    {
-        onAreaChanged_ = std::move(onAreaChanged);
-    }
-
-    void FireOnAreaChanged(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
-    {
-        if (onAreaChanged_) {
-            // callback may be overwritten in its invoke so we copy it first
-            auto onAreaChanged = onAreaChanged_;
-            onAreaChanged(oldRect, oldOrigin, rect, origin);
-        }
-    }
-
+    void ClearUserOnAreaChanged();
+    void SetOnAreaChanged(OnAreaChangedFunc&& onAreaChanged);
+    void FireOnAreaChanged(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin);
     void FireInnerOnAreaChanged(
-        const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
-    {
-        for (auto& innerCallbackInfo : onAreaChangedInnerCallbacks_) {
-            if (innerCallbackInfo.second) {
-                auto innerOnAreaCallback = innerCallbackInfo.second;
-                innerOnAreaCallback(oldRect, oldOrigin, rect, origin);
-            }
-        }
-    }
-
-    bool HasOnAreaChanged() const
-    {
-        return static_cast<bool>(onAreaChanged_);
-    }
-
-    bool HasInnerOnAreaChanged() const
-    {
-        return !onAreaChangedInnerCallbacks_.empty();
-    }
-
+        const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin);
+    bool HasOnAreaChanged() const;
+    bool HasInnerOnAreaChanged() const;
     void SetOnSizeChanged(OnSizeChangedFunc&& onSizeChanged);
     void FireOnSizeChanged(const RectF& oldRect, const RectF& rect);
     bool HasOnSizeChanged() const;
-
     void AddInnerOnSizeChanged(int32_t id, OnSizeChangedFunc&& onSizeChanged);
     void FireInnerOnSizeChanged(const RectF& oldRect, const RectF& rect);
     bool HasInnerOnSizeChanged() const;
     void ClearInnerOnSizeChanged();
-
     void SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& onSizeChanged);
     void FireJSFrameNodeOnSizeChanged(const RectF& oldRect, const RectF& rect);
     void ClearJSFrameNodeOnSizeChange();
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
     using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
     using OnDragStartFunc = std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
-
-    void SetOnPreDrag(OnPreDragFunc&& onPreDragFunc)
-    {
-        onPreDragFunc_ = std::move(onPreDragFunc);
-    }
-
-    const OnPreDragFunc& GetOnPreDrag() const
-    {
-        return onPreDragFunc_;
-    }
-
-    void SetOnDragStart(OnDragStartFunc&& onDragStart)
-    {
-        onDragStart_ = std::move(onDragStart);
-    }
+    void SetOnPreDrag(OnPreDragFunc&& onPreDragFunc);
+    const OnPreDragFunc& GetOnPreDrag() const;
+    void SetOnDragStart(OnDragStartFunc&& onDragStart);
 
     const OnDragStartFunc& GetOnDragStart() const
     {
         return onDragStart_;
     }
 
-    bool HasOnDragStart() const
-    {
-        return static_cast<bool>(onDragStart_) || static_cast<bool>(defaultOnDragStart_);
-    }
-
-    void SetOnDragEnter(OnDragFunc&& onDragEnter)
-    {
-        onDragEnter_ = std::move(onDragEnter);
-    }
-
+    bool HasOnDragStart() const;
+    void SetOnDragEnter(OnDragFunc&& onDragEnter);
     void FireOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
-
-    void SetOnDragLeave(OnDragFunc&& onDragLeave)
-    {
-        onDragLeave_ = std::move(onDragLeave);
-    }
-
+    void SetOnDragLeave(OnDragFunc&& onDragLeave);
     void FireOnDragLeave(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
-
-    void SetOnDragMove(OnDragFunc&& onDragMove)
-    {
-        onDragMove_ = std::move(onDragMove);
-    }
-
+    void SetOnDragMove(OnDragFunc&& onDragMove);
     void FireOnDragMove(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
-
-    bool HasOnDragMove() const
-    {
-        return static_cast<bool>(onDragMove_);
-    }
-
-    void SetOnDrop(OnDragFunc&& onDrop)
-    {
-        onDrop_ = std::move(onDrop);
-    }
-
-    void SetOnDragEnd(OnNewDragFunc&& onDragEnd)
-    {
-        onDragEnd_ = std::move(onDragEnd);
-    }
-
+    bool HasOnDragMove() const;
+    void SetOnDrop(OnDragFunc&& onDrop);
+    void SetOnDragEnd(OnNewDragFunc&& onDragEnd);
     const OnNewDragFunc& GetOnDragEnd() const
     {
         return onDragEnd_;
     }
-
-    bool HasOnDragEnter() const
-    {
-        return static_cast<bool>(onDragEnter_);
-    }
-
-    bool HasOnDragLeave() const
-    {
-        return static_cast<bool>(onDragLeave_);
-    }
-
-    bool HasOnDragEnd() const
-    {
-        return static_cast<bool>(onDragEnd_);
-    }
+    bool HasOnDragEnter() const;
+    bool HasOnDragLeave() const;
+    bool HasOnDragEnd() const;
 
     virtual bool HasOnItemDragMove()
     {
@@ -331,36 +149,12 @@ public:
     }
 
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
-
-    bool HasOnDrop() const
-    {
-        return onDrop_ != nullptr;
-    }
-
-    bool HasCustomerOnDragEnter() const
-    {
-        return customerOnDragEnter_ != nullptr;
-    }
-
-    bool HasCustomerOnDragLeave() const
-    {
-        return customerOnDragLeave_ != nullptr;
-    }
-
-    bool HasCustomerOnDragMove() const
-    {
-        return customerOnDragMove_ != nullptr;
-    }
-
-    bool HasCustomerOnDragEnd() const
-    {
-        return customerOnDragEnd_ != nullptr;
-    }
-
-    bool HasCustomerOnDrop() const
-    {
-        return customerOnDrop_ != nullptr;
-    }
+    bool HasOnDrop() const;
+    bool HasCustomerOnDragEnter() const;
+    bool HasCustomerOnDragLeave() const;
+    bool HasCustomerOnDragMove() const;
+    bool HasCustomerOnDragEnd() const;
+    bool HasCustomerOnDrop() const;
 
     virtual std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType isStart)
     {
@@ -371,108 +165,29 @@ public:
         return json->ToString();
     }
 
-    bool IsEnabled() const
-    {
-        return enabled_;
-    }
-
-    bool IsDeveloperEnabled() const
-    {
-        return developerEnabled_;
-    }
-
-    void SetEnabled(bool enabled)
-    {
-        enabled_ = enabled;
-        developerEnabled_ = enabled;
-    }
-
-    void SetEnabledInternal(bool enabled)
-    {
-        enabled_ = enabled;
-    }
-
+    bool IsEnabled() const;
+    bool IsDeveloperEnabled() const;
+    void SetEnabled(bool enabled);
+    void SetEnabledInternal(bool enabled);
     // restore enabled value to what developer sets
-    void RestoreEnabled()
-    {
-        enabled_ = developerEnabled_;
-    }
-
+    void RestoreEnabled();
     // get XTS inspector value
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
-
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
-
     void MarkModifyDone();
-
     void SetCurrentUIState(UIState state, bool flag);
-
-    void UpdateCurrentUIState(UIState state)
-    {
-        if (stateStyleMgr_) {
-            stateStyleMgr_->UpdateCurrentUIState(state);
-        }
-    }
-
-    void ResetCurrentUIState(UIState state)
-    {
-        if (stateStyleMgr_) {
-            stateStyleMgr_->ResetCurrentUIState(state);
-        }
-    }
-
-    UIState GetCurrentUIState() const
-    {
-        return stateStyleMgr_ ? stateStyleMgr_->GetCurrentUIState() : UI_STATE_NORMAL;
-    }
-
-    bool HasStateStyle(UIState state) const
-    {
-        if (stateStyleMgr_) {
-            return stateStyleMgr_->HasStateStyle(state);
-        }
-        return false;
-    }
-
+    void UpdateCurrentUIState(UIState state);
+    void ResetCurrentUIState(UIState state);
+    UIState GetCurrentUIState() const;
+    bool HasStateStyle(UIState state) const;
     void AddSupportedState(UIState state);
-
     void SetSupportedStates(UIState state);
-
     bool IsCurrentStateOn(UIState state);
-
     void SetKeyboardShortcut(
-        const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction)
-    {
-        KeyboardShortcut keyboardShortcut;
-        for (auto&& ch : value) {
-            keyboardShortcut.value.push_back(static_cast<char>(std::toupper(ch)));
-        }
-        keyboardShortcut.keys = keys;
-        keyboardShortcut.onKeyboardShortcutAction = onKeyboardShortcutAction;
-
-        for (auto& shortCut : keyboardShortcut_) {
-            if (shortCut.IsEqualTrigger(keyboardShortcut)) {
-                shortCut.onKeyboardShortcutAction = onKeyboardShortcutAction;
-                return;
-            }
-        }
-        keyboardShortcut_.emplace_back(keyboardShortcut);
-    }
-
-    void ClearSingleKeyboardShortcut()
-    {
-        if (keyboardShortcut_.size() == 1) {
-            keyboardShortcut_.clear();
-        }
-    }
-
-    std::vector<KeyboardShortcut>& GetKeyboardShortcut()
-    {
-        return keyboardShortcut_;
-    }
-
+        const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction);
+    void ClearSingleKeyboardShortcut();
+    std::vector<KeyboardShortcut>& GetKeyboardShortcut();
     void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnDragFunc&& onDragFunc);
-
     void SetCustomerOnDragFunc(DragFuncType dragFuncType, OnNewDragFunc&& onDragEnd);
 
     const OnDragFunc GetCustomerOnDragFunc(DragFuncType dragFuncType) const
@@ -499,120 +214,42 @@ public:
     }
 
     const OnNewDragFunc& GetCustomerOnDragEndFunc() const
-    {
+        {
         return customerOnDragEnd_;
     }
 
     void ClearCustomerOnDragFunc();
-
     void FireCustomerOnDragFunc(
         DragFuncType dragFuncType, const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams = "");
-
     bool IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
-
     void HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
-
     void PostEnabledTask();
-
     void AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback);
-
+    void RemoveInnerOnAreaChangedCallback(int32_t id);
     void ClearOnAreaChangedInnerCallbacks();
-
     bool HasImmediatelyVisibleCallback();
-
-    void SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart)
-    {
-        defaultOnDragStart_ = std::move(defaultOnDragStart);
-    }
+    void SetDefaultOnDragStart(OnDragStartFunc&& defaultOnDragStart);
 
     const OnDragStartFunc& GetDefaultOnDragStart() const
     {
         return defaultOnDragStart_;
     }
 
-    bool HasDefaultOnDragStart() const
-    {
-        return static_cast<bool>(defaultOnDragStart_);
-    }
-
-    std::vector<double>& GetThrottledVisibleAreaRatios()
-    {
-        return throttledVisibleAreaRatios_;
-    }
-
-    VisibleCallbackInfo& GetThrottledVisibleAreaCallback()
-    {
-        return throttledVisibleAreaCallback_;
-    }
-
-    std::vector<double>& GetVisibleAreaRatios(bool isUser)
-    {
-        if (isUser) {
-            return visibleAreaUserRatios_;
-        } else {
-            return visibleAreaInnerRatios_;
-        }
-    }
-
-    VisibleCallbackInfo& GetVisibleAreaCallback(bool isUser)
-    {
-        if (isUser) {
-            return visibleAreaUserCallback_;
-        } else {
-            return visibleAreaInnerCallback_;
-        }
-    }
-
+    bool HasDefaultOnDragStart() const;
+    std::vector<double>& GetThrottledVisibleAreaRatios();
+    VisibleCallbackInfo& GetThrottledVisibleAreaCallback();
+    std::vector<double>& GetVisibleAreaRatios(bool isUser);
+    VisibleCallbackInfo& GetVisibleAreaCallback(bool isUser);
     void SetVisibleAreaRatiosAndCallback(
-        const VisibleCallbackInfo& callback, const std::vector<double>& radios, bool isUser)
-    {
-        if (isUser) {
-            VisibleCallbackInfo* cbInfo =
-                (callback.period == 0) ? &visibleAreaUserCallback_ : &throttledVisibleAreaCallback_;
-            auto ratioInfo = (callback.period == 0) ? &visibleAreaUserRatios_ : &throttledVisibleAreaRatios_;
-            *cbInfo = callback;
-            *ratioInfo = radios;
-        } else {
-            visibleAreaInnerCallback_ = callback;
-            visibleAreaInnerRatios_ = radios;
-        }
-    }
-
-    void CleanVisibleAreaCallback(bool isUser, bool isThrottled = false)
-    {
-        if (!isUser) {
-            visibleAreaInnerRatios_.clear();
-            visibleAreaInnerCallback_.callback = nullptr;
-        } else if (isThrottled) {
-            throttledVisibleAreaRatios_.clear();
-            throttledVisibleAreaCallback_.callback = nullptr;
-        } else {
-            visibleAreaUserRatios_.clear();
-            visibleAreaUserCallback_.callback = nullptr;
-        }
-    }
-
-    bool HasVisibleAreaCallback(bool isUser)
-    {
-        if (isUser) {
-            return static_cast<bool>(visibleAreaUserCallback_.callback);
-        } else {
-            return static_cast<bool>(visibleAreaInnerCallback_.callback);
-        }
-    }
-
+        const VisibleCallbackInfo& callback, const std::vector<double>& radios, bool isUser);
+    void CleanVisibleAreaCallback(bool isUser, bool isThrottled = false);
+    bool HasVisibleAreaCallback(bool isUser);
     void SetOnAttach(std::function<void()>&& onAttach);
     void ClearOnAttach();
     void FireOnAttach();
     void SetOnDetach(std::function<void()>&& onDetach);
     void ClearOnDetach();
     void FireOnDetach();
-    void SetOnLoad(std::function<void(const std::string& xcomponentId)>&& onLoad);
-    void ClearOnLoad();
-    void FireOnLoad(const std::string& xcomponentId);
-    void SetOnDestroy(std::function<void()>&& onDestroy);
-    void ClearOnDestroy();
-    void FireOnDestroy();
     void ClearStateStyle();
     void OnDetachClear();
 
@@ -638,9 +275,6 @@ private:
 
     std::function<void()> onAttach_;
     std::function<void()> onDetach_;
-
-    std::function<void(const std::string& xcomponentId)> onLoad_;
-    std::function<void()> onDestroy_;
 
     OnPreDragFunc onPreDragFunc_;
     OnDragStartFunc onDragStart_;

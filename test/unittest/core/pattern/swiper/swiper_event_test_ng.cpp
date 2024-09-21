@@ -872,6 +872,33 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleTouchBottomLoop004
+ * @tc.desc: test Swiper indicator touch left bottom in loop when SwipeByGroup is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(3);
+        model.SetSwipeByGroup(true);
+        model.SetLoop(true);
+    }, 6);
+    EXPECT_EQ(pattern_->TotalCount(), 6);
+
+    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 2;
+    pattern_->currentIndex_ = 0;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+
+    pattern_->currentIndex_ = pattern_->TotalCount() - 3;
+    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    pattern_->HandleTouchBottomLoop();
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+}
+
+/**
  * @tc.name: SwiperFunc002
  * @tc.desc: OnVisibleChange
  * @tc.type: FUNC

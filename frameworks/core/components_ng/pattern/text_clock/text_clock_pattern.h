@@ -72,6 +72,16 @@ public:
         return textClockController_;
     }
 
+    void SetJSTextClockController(const RefPtr<Referenced>& jsController)
+    {
+        jsTextClockController_ = jsController;
+    }
+
+    RefPtr<Referenced> GetJSTextClockController()
+    {
+        return jsTextClockController_.Upgrade();
+    }
+
     int32_t GetTextId()
     {
         if (!textId_.has_value()) {
@@ -118,6 +128,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnLanguageConfigurationUpdate() override;
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void InitTextClockController();
 
     void InitUpdateTimeTextCallBack();
@@ -153,6 +164,7 @@ private:
     RefPtr<FrameNode> contentModifierNode_ = nullptr;
     int32_t nodeId_ = -1;
     RefPtr<TextClockController> textClockController_;
+    WeakPtr<Referenced> jsTextClockController_;
     float hourWest_ = 0.0f;
     long timeValue_ = 0.0f;
     std::optional<int32_t> textId_;

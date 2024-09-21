@@ -154,6 +154,8 @@ public:
     static void JsForegroundEffect(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);
+    static bool InitPixStretchEffect(
+        CalcDimension& left, CalcDimension& right, CalcDimension& top, CalcDimension bottom);
     static void JsLightUpEffect(const JSCallbackInfo& info);
     static void JsBackground(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
@@ -161,6 +163,8 @@ public:
     static void JsBindContentCover(const JSCallbackInfo& info);
     static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
     static void JsBindSheet(const JSCallbackInfo& info);
+    static bool CheckJSCallbackInfo(
+        const std::string& callerName, const JSRef<JSVal>& tmpInfo, std::vector<JSCallbackInfoType>& infoTypes);
     static void ParseSheetIsShow(
         const JSCallbackInfo& info, bool& isShow, std::function<void(const std::string&)>& callback);
     static void ParseSheetStyle(
@@ -227,6 +231,7 @@ public:
         const JSRef<JSVal>& args, BorderImage::BorderImageOption& borderImageDimension);
     static void ParseBorderImageLengthMetrics(
         const JSRef<JSObject>& object, LocalizedCalcDimension& localizedCalcDimension);
+    static void UpdateGradientWithDirection(NG::Gradient& lineGradient, NG::GradientDirection direction);
     static void ParseBorderImageLinearGradient(const JSRef<JSVal>& args, uint8_t& bitset);
     static void JsUseEffect(const JSCallbackInfo& info);
     static void JsUseShadowBatching(const JSCallbackInfo& info);
@@ -380,6 +385,7 @@ public:
     static void JsRadialGradient(const JSCallbackInfo& info);
     static void JsSweepGradient(const JSCallbackInfo& info);
     static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
+    static void SetGradientDirection(NG::Gradient& newGradient, const GradientDirection& direction);
     static void NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void ParseSweepGradientPartly(const JSRef<JSObject>& obj, NG::Gradient& newGradient);
@@ -387,6 +393,7 @@ public:
     static void JsMotionBlur(const JSCallbackInfo& info);
     static void JsShadow(const JSCallbackInfo& info);
     static void JsBlendMode(const JSCallbackInfo& info);
+    static void JsAdvancedBlendMode(const JSCallbackInfo& info);
     static void JsGrayScale(const JSCallbackInfo& info);
     static void JsBrightness(const JSCallbackInfo& info);
     static void JsContrast(const JSCallbackInfo& info);
@@ -527,6 +534,7 @@ public:
             return false;
         }
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+        CompleteResourceObject(jsObj);
         int32_t resType = jsObj->GetPropertyValue<int32_t>("type", -1);
         if (resType == -1) {
             return false;
@@ -604,6 +612,7 @@ public:
     static bool ParseEditMenuOptions(const JSCallbackInfo& info, NG::OnCreateMenuCallback& onCreateMenuCallback,
         NG::OnMenuItemClickCallback& onMenuItemClick);
     static void SetDialogProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
+    static void SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties);
     static std::function<void(NG::DrawingContext& context)> GetDrawCallback(
         const RefPtr<JsFunction>& jsDraw, const JSExecutionContext& execCtx);
 
@@ -636,6 +645,8 @@ private:
     static JSRef<JSObject> CreateJsTextMenuId(const std::string& id);
     static JSRef<JSArray> CreateJsOnMenuItemClick(const NG::MenuItemParam& menuItemParam);
     static JSRef<JSVal> CreateJsSystemMenuItems(const std::vector<NG::MenuItemParam>& systemMenuItems);
+    static void CompleteResourceObjectInner(
+        JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue);
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H

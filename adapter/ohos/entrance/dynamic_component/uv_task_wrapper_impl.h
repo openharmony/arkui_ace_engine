@@ -34,25 +34,18 @@ private:
     pthread_t threadId_ = 0;
 };
 
-class UVWorkWrapper {
+class UVWorkWrapper : public uv_work_t {
 public:
-    explicit UVWorkWrapper(TaskExecutor::Task task) : work_({ 0 }), task_(task)
+    explicit UVWorkWrapper(const TaskExecutor::Task& task) : uv_work_t(), task_(task)
     {
-        work_.data = this;
     }
 
-    uv_work_t* GetWorkPtr()
+    void operator()() const
     {
-        return &work_;
-    }
-
-    TaskExecutor::Task GetTask()
-    {
-        return task_;
+        task_();
     }
 
 private:
-    uv_work_t work_;
     TaskExecutor::Task task_;
 };
 } // namespace OHOS::Ace::NG

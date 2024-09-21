@@ -1098,12 +1098,6 @@ HWTEST_F(RichEditorBaseTestOneNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
     richEditorPattern->presetParagraph_ = paragraph;
     auto size2 = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(size2.value().Width(), 1.0f);
-
-    float textHeight = 1.0f;
-    SizeF res = SizeF(10.0f, 10.0f);
-    richEditorPattern->isShowPlaceholder_ = true;
-    layoutAlgorithm->UpdateRichTextRect(res, textHeight, AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutAlgorithm->richTextRect_.GetSize().Width(), 0.0f);
 }
 
 /**

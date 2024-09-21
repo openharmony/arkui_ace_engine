@@ -187,6 +187,7 @@ private:
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
+    void HandleEnabled();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandlingGestureStart(const GestureEvent& info);
     void HandlingGestureEvent(const GestureEvent& info);
@@ -324,7 +325,7 @@ private:
     std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
     std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;
     bool isInitAccessibilityVirtualNode_ = false;
-    int64_t lastAccessibilityValueTime_ = 0;
+    uint64_t lastAccessibilityValueTime_ = 0;
     float accessibilityValue_ = 0.0f;
     
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);

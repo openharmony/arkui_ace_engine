@@ -14,9 +14,6 @@
  */
 
 #include "interaction_impl.h"
-#include "drag_data.h"
-#include "core/common/interaction/interaction_data.h"
-#include "core/gestures/gesture_info.h"
 
 #include "interaction_manager.h"
 #include "start_drag_listener_impl.h"
@@ -71,9 +68,9 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
         }
     };
     Msdp::DeviceStatus::DragData msdpDragData { {}, dragData.buffer, dragData.udKey, dragData.extraInfo,
-    dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX,
-    dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
-    dragData.hasCoordinateCorrected, dragData.summarys };
+    dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.toolType,
+    dragData.displayX, dragData.displayY, dragData.displayId, dragData.mainWindow,
+    dragData.hasCanceledAnimation, dragData.hasCoordinateCorrected, dragData.summarys };
     for (auto& shadowInfo: dragData.shadowInfos) {
         if (shadowInfo.pixelMap) {
             msdpDragData.shadowInfos.push_back({ shadowInfo.pixelMap->GetPixelMapSharedPtr(),

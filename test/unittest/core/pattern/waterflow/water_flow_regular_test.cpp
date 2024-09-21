@@ -16,6 +16,14 @@
 #include "water_flow_test_ng.h"
 
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/syntax/if_else_node.h"
+
+#define protected public
+#define private public
+#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
+#include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
+#undef protected
+#undef private
 
 namespace OHOS::Ace::NG {
 // TEST non-segmented layout
@@ -80,6 +88,58 @@ HWTEST_F(WaterFlowTestNg, ScrollToEdge001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToEdge006
+ * @tc.desc: Test ScrollToEdge with footer and OffsetEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToEdge006, TestSize.Level1)
+{
+    bool isReachEndCalled = false;
+    auto reachEnd = [&isReachEndCalled]() { isReachEndCalled = true; };
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetOnReachEnd(reachEnd);
+    CreateWaterFlowItems(100);
+    CreateDone();
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->endIndex_, 99);
+    EXPECT_EQ(GetChildY(frameNode_, 100), 550.0f);
+    EXPECT_EQ(GetChildOffset(frameNode_, info->footerIndex_), OffsetF(0.0f, 750.0f));
+    EXPECT_TRUE(info->offsetEnd_);
+    EXPECT_TRUE(isReachEndCalled);
+}
+
+/**
+ * @tc.name: ScrollToEdge007
+ * @tc.desc: Test ScrollToEdge with footer and OffsetEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToEdge007, TestSize.Level1)
+{
+    bool isReachEndCalled = false;
+    auto reachEnd = [&isReachEndCalled]() { isReachEndCalled = true; };
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetOnReachEnd(reachEnd);
+    CreateWaterFlowItems(3);
+    CreateDone();
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->endIndex_, 2);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 0.0f);
+    EXPECT_TRUE(info->itemStart_);
+    EXPECT_TRUE(info->offsetEnd_);
+    EXPECT_FALSE(isReachEndCalled);
+}
+
+/**
  * @tc.name: Constraint001
  * @tc.desc: Test Layout when the layoutConstraint changes.
  * @tc.type: FUNC
@@ -118,6 +178,39 @@ HWTEST_F(WaterFlowTestNg, Constraint001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeFooter001
+ * @tc.desc: Test changing the footer of the WaterFlow layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ChangeFooter001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(60);
+    CreateDone();
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->footerIndex_, 0);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 61);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 750.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 60), 550.0f);
+    EXPECT_EQ(info->endIndex_, 59);
+
+    auto ifNode = IfElseNode::GetOrCreateIfElseNode(-1);
+
+    pattern_->AddFooter(ifNode);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->footerIndex_, -1);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 60);
+    EXPECT_EQ(GetChildY(frameNode_, 59), 600.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
+}
+
+/**
  * @tc.name: IllegalItemCnt
  * @tc.desc: Layout WaterFlow without items.
  * @tc.type: FUNC
@@ -144,6 +237,73 @@ HWTEST_F(WaterFlowTestNg, IllegalItemCnt, TestSize.Level1)
     EXPECT_EQ(info->jumpIndex_, LAST_ITEM);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(info->startIndex_ >= info->endIndex_);
+}
+
+/**
+ * @tc.name: ZeroHeightItem001
+ * @tc.desc: Layout WaterFlow with 0-height item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ZeroHeightItem001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(5.0f));
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    CreateItemWithHeight(0.0f);
+    CreateItemWithHeight(100.0f);
+    CreateItemWithHeight(100.0f);
+    CreateDone();
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 2);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+
+    pattern_->SetAnimateCanOverScroll(true);
+    UpdateCurrentOffset(100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+
+    UpdateCurrentOffset(-100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 5.0f);
+}
+
+/**
+ * @tc.name: ZeroHeightItem002
+ * @tc.desc: Layout WaterFlow with 0-height item at the bottom.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ZeroHeightItem002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, false);
+    for (int i = 0; i < 5; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateItemWithHeight(0.0f);
+    CreateDone();
+    const auto& info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 5);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
+
+    pattern_->SetAnimateCanOverScroll(true);
+    UpdateCurrentOffset(100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
+
+    UpdateCurrentOffset(-100.0f); // shouldn't move
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 5), 500.0f);
 }
 
 /**
@@ -252,5 +412,51 @@ HWTEST_F(WaterFlowTestNg, Cache003, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 36), -140.0f);
     EXPECT_EQ(GetChildY(frameNode_, 35), -250.0f);
     EXPECT_EQ(GetChildY(frameNode_, 34), -250.0f);
+}
+
+/**
+ * @tc.name: Remeasure001
+ * @tc.desc: Test triggering measure multiple times on the same Algo object
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Remeasure001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(3);
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+    CreateDone();
+
+    auto algo = pattern_->GetCacheLayoutAlgo();
+    ASSERT_TRUE(algo);
+    algo->Measure(AceType::RawPtr(frameNode_));
+    if (auto swAlgo = AceType::DynamicCast<WaterFlowLayoutSW>(algo); swAlgo) {
+        EXPECT_EQ(swAlgo->itemsCrossSize_[0].size(), 2);
+    } else {
+        EXPECT_EQ(AceType::DynamicCast<WaterFlowLayoutAlgorithm>(algo)->itemsCrossSize_.size(), 2);
+    }
+}
+
+/**
+ * @tc.name: ShowCachedItems001
+ * @tc.desc: Test show cached items
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ShowCachedItems001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetCachedCount(3, true);
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 10);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 12));
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 12)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 12), 800.0f);
 }
 } // namespace OHOS::Ace::NG

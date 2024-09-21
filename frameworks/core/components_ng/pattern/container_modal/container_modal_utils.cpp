@@ -16,10 +16,6 @@
 
 #include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 
-#include <iostream>
-
-#include "base/log/log_wrapper.h"
-#include "base/utils/system_properties.h"
 #include "bridge/common/utils/engine_helper.h"
 
 extern const char _binary_customtitle_abc_start[];
@@ -37,7 +33,7 @@ bool ExecuteCustomTitleAbc()
         // read abc file
         std::ifstream readFile(filePath, std::ifstream::binary);
         if (!readFile.is_open()) {
-            LOGE("open abc file failed!");
+            TAG_LOGE(AceLogTag::ACE_APPBAR, "open abc file failed!");
             return false;
         }
         readFile.seekg(0, std::ios::end);
@@ -45,7 +41,7 @@ bool ExecuteCustomTitleAbc()
         readFile.seekg(0, std::ios::beg);
         buffer.resize(binarySize);
         if (!readFile.read((char*)buffer.data(), binarySize)) {
-            LOGE("read abc file failed!");
+            TAG_LOGE(AceLogTag::ACE_APPBAR, "read abc file failed!");
             readFile.close();
             return false;
         }
@@ -61,7 +57,7 @@ bool ExecuteCustomTitleAbc()
     auto jsEngine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(jsEngine, false);
     if (!jsEngine->ExecuteJs(binaryBuff, binarySize)) {
-        LOGE("execute abc file failed!");
+        TAG_LOGE(AceLogTag::ACE_APPBAR, "execute abc file failed!");
         return false;
     }
     return true;

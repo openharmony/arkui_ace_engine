@@ -23,10 +23,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -84,11 +81,14 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
     info_->EndCacheUpdate();
 
     wrapper->SetCacheCount(cacheCount);
-    wrapper->SetActiveChildRange(nodeIdx(info_->startIndex_), nodeIdx(info_->endIndex_), cacheCount, cacheCount);
+    wrapper->SetActiveChildRange(nodeIdx(info_->startIndex_), nodeIdx(info_->endIndex_), cacheCount, cacheCount,
+        props->GetShowCachedItemsValue(false));
     PreloadItems(wrapper_, info_, cacheCount);
 
     if (info_->itemEnd_) {
         LayoutFooter(paddingOffset, reverse);
+    } else if (info_->footerIndex_ == 0) {
+        wrapper_->GetChildByIndex(0)->SetActive(false);
     }
 }
 
@@ -143,19 +143,31 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize)
     }
     crossGaps_[0] = cross.second;
 
-    itemsCrossSize_.resize(1);
+    itemsCrossSize_ = std::vector<std::vector<float>>(1);
     for (const auto& len : cross.first) {
         itemsCrossSize_[0].push_back(static_cast<float>(len));
-    }
-    if (itemsCrossSize_.empty()) {
-        itemsCrossSize_[0].push_back(crossSize);
     }
     info_->lanes_[0].resize(itemsCrossSize_[0].size());
 }
 
+bool WaterFlowLayoutSW::ItemHeightChanged() const
+{
+    auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
+    for (const auto& section : info_->lanes_) {
+        for (size_t i = 0; i < section.size(); ++i) {
+            for (const auto& item : section[i].items_) {
+                if (!NearEqual(MeasureChild(props, item.idx, i), item.mainSize)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 void WaterFlowLayoutSW::CheckReset()
 {
-    int32_t updateIdx = wrapper_->GetHostNode()->GetChildrenUpdated();
+    int32_t updateIdx = GetUpdateIdx(wrapper_, info_->footerIndex_);
     if (info_->newStartIndex_ >= 0) {
         info_->UpdateLanesIndex(updateIdx);
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
@@ -172,7 +184,8 @@ void WaterFlowLayoutSW::CheckReset()
         return;
     }
 
-    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+    const bool childDirty = wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
+    if (childDirty && ItemHeightChanged()) {
         info_->ResetWithLaneOffset(std::nullopt);
         FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
         return;
@@ -245,7 +258,7 @@ void PrepareStartPosQueue(StartPosQ& q, const Lanes& lanes, float mainGap, float
     for (size_t i = 0; i < lanes.size(); ++i) {
         const float nextPos = lanes[i].startPos - (lanes[i].items_.empty() ? 0.0f : mainGap);
         if (GreatNotEqual(nextPos, viewportBound)) {
-            q.push({ lanes[i].startPos, i });
+            q.push({ nextPos, i });
         }
     }
 }
@@ -255,7 +268,7 @@ void PrepareEndPosQueue(EndPosQ& q, const Lanes& lanes, float mainGap, float vie
     for (size_t i = 0; i < lanes.size(); ++i) {
         const float nextPos = lanes[i].endPos + (lanes[i].items_.empty() ? 0.0f : mainGap);
         if (LessNotEqual(nextPos, viewportBound)) {
-            q.push({ lanes[i].endPos, i });
+            q.push({ nextPos, i });
         }
     }
 }
@@ -341,7 +354,7 @@ bool WaterFlowLayoutSW::FillFrontSection(float viewportBound, int32_t& idx, int3
         info_->idxToLane_[idx] = laneIdx;
         const float mainLen = MeasureChild(props, idx, laneIdx);
         float startPos = FillFrontHelper(mainLen, idx--, laneIdx);
-        if (GreatNotEqual(startPos - mainGaps_[secIdx], viewportBound)) {
+        if (GreatNotEqual(startPos, viewportBound)) {
             q.push({ startPos, laneIdx });
         }
     }
@@ -357,7 +370,7 @@ float WaterFlowLayoutSW::FillBackHelper(float itemLen, int32_t idx, size_t laneI
         lane.endPos -= mainGaps_[secIdx];
     }
     lane.items_.push_back({ idx, itemLen });
-    return lane.endPos;
+    return lane.endPos + mainGaps_[secIdx];
 }
 
 float WaterFlowLayoutSW::FillFrontHelper(float itemLen, int32_t idx, size_t laneIdx)
@@ -369,7 +382,7 @@ float WaterFlowLayoutSW::FillFrontHelper(float itemLen, int32_t idx, size_t lane
         lane.startPos += mainGaps_[secIdx];
     }
     lane.items_.push_front({ idx, itemLen });
-    return lane.startPos;
+    return lane.startPos - mainGaps_[secIdx];
 }
 
 void WaterFlowLayoutSW::RecoverBack(float viewportBound, int32_t& idx, int32_t maxChildIdx)
@@ -389,7 +402,7 @@ void WaterFlowLayoutSW::RecoverBack(float viewportBound, int32_t& idx, int32_t m
         size_t laneIdx = info_->idxToLane_.at(idx);
         const float mainLen = MeasureChild(props, idx, laneIdx);
         float endPos = FillBackHelper(mainLen, idx++, laneIdx);
-        if (GreatOrEqual(endPos + mainGaps_[secIdx], viewportBound)) {
+        if (GreatOrEqual(endPos, viewportBound)) {
             lanes.erase(laneIdx);
         }
         if (OverDue(cacheDeadline_)) {
@@ -457,7 +470,11 @@ void WaterFlowLayoutSW::ClearFront()
         }
         size_t laneIdx = info_->idxToLane_.at(i);
         auto& lane = info_->lanes_[info_->GetSegment(i)][laneIdx];
-        float itemEndPos = lane.startPos + lane.items_.front().mainSize;
+        const float& itemLen = lane.items_.front().mainSize;
+        if (NearZero(itemLen) && NearZero(lane.startPos)) {
+            break;
+        }
+        const float itemEndPos = lane.startPos + itemLen;
         if (Positive(itemEndPos)) {
             break;
         }
@@ -604,7 +621,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
     }
 }
 
-float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane)
+float WaterFlowLayoutSW::MeasureChild(const RefPtr<WaterFlowLayoutProperty>& props, int32_t idx, size_t lane) const
 {
     auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx), !cacheDeadline_, cacheDeadline_.has_value());
     CHECK_NULL_RETURN(child, 0.0f);
@@ -636,7 +653,7 @@ void WaterFlowLayoutSW::LayoutSection(
     size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl)
 {
     const auto& margin = info_->margins_[idx];
-    float crossPos = rtl ? selfCrossLen + mainGaps_[idx] - MarginEnd(axis_, margin) : MarginStart(axis_, margin);
+    float crossPos = rtl ? selfCrossLen + crossGaps_[idx] - MarginEnd(axis_, margin) : MarginStart(axis_, margin);
     for (size_t i = 0; i < info_->lanes_[idx].size(); ++i) {
         if (rtl) {
             crossPos -= itemsCrossSize_[idx][i] + crossGaps_[idx];
@@ -671,14 +688,14 @@ void WaterFlowLayoutSW::LayoutSection(
 
 void WaterFlowLayoutSW::LayoutFooter(const OffsetF& paddingOffset, bool reverse)
 {
-    float mainPos = info_->EndPos();
-    if (info_->footerIndex_ != 0 || GreatOrEqual(mainPos, mainLen_)) {
+    if (info_->footerIndex_ != 0) {
         return;
     }
-    auto footer = wrapper_->GetChildByIndex(0);
+    float mainPos = info_->EndPos();
     if (reverse) {
         mainPos = mainLen_ - info_->footerHeight_ - mainPos;
     }
+    auto footer = wrapper_->GetOrCreateChildByIndex(0);
     footer->GetGeometryNode()->SetMarginFrameOffset(
         (axis_ == Axis::VERTICAL) ? OffsetF(0.0f, mainPos) + paddingOffset : OffsetF(mainPos, 0.0f) + paddingOffset);
     footer->Layout();
@@ -743,6 +760,11 @@ bool WaterFlowLayoutSW::RecoverCachedHelper(int32_t idx, bool front)
 {
     auto it = info_->idxToLane_.find(idx);
     if (it == info_->idxToLane_.end()) {
+        return false;
+    }
+    if (it->second >= info_->lanes_[info_->GetSegment(idx)].size()) {
+        TAG_LOGW(ACE_WATERFLOW, "Invalid lane index in map: %{public}zu for section: %{public}d", it->second,
+            info_->GetSegment(idx));
         return false;
     }
     auto child = wrapper_->GetChildByIndex(nodeIdx(idx), true);

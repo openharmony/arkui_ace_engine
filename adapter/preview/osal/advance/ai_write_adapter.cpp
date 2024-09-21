@@ -17,9 +17,14 @@
 
 namespace OHOS::Ace {
 bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value) { return false; }
+uint32_t AIWriteAdapter::GetSelectLengthOnlyText(const std::wstring& content) { return 0; }
 void AIWriteAdapter::CloseModalUIExtension() {}
 void AIWriteAdapter::ShowModalUIExtension(const AIWriteInfo& info,
     std::function<void(std::vector<uint8_t>&)> resultCallback) {}
 std::vector<uint8_t> GetBufferParam(const std::string& key, const AAFwk::WantParams& wantParams) { return {}; }
 bool AIWriteAdapter::GetBoolParam(const std::string& key, const AAFwk::WantParams& wantParams) { return false; }
+bool AIWriteAdapter::GetAISupportFromMetadata(const std::string& bundleName, const std::string& abilityName)
+{
+    return false;
+}
 } // namespace OHOS::Ace

@@ -49,6 +49,7 @@ const std::set<std::string> FONT_WEIGHTS = { "normal", "bold", "lighter", "bolde
 const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
 const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
@@ -108,6 +109,11 @@ JSCanvasRenderer::JSCanvasRenderer()
 {
     SetInstanceId(Container::CurrentIdSafely());
     density_ = PipelineBase::GetCurrentDensity();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
+        // The default value of the font size in canvas is 14px.
+        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
+    }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     if (pipeline) {
         densityCallbackId_ = pipeline->RegisterDensityChangedCallback([self = WeakClaim(this)](double density) {
@@ -257,7 +263,7 @@ void JSCanvasRenderer::SetAntiAlias()
 
 void JSCanvasRenderer::SetDensity()
 {
-    double density = GetDensity();
+    double density = GetDensity(true);
     renderingContext2DModel_->SetDensity(density);
 }
 
@@ -557,7 +563,9 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
             info.GetDoubleArg(6, image.dy);
             info.GetDoubleArg(7, image.dWidth);
             info.GetDoubleArg(8, image.dHeight);
-            if (isImage) {
+            // In higher versions, sx, sy, sWidth, sHeight are parsed in VP units
+            // In lower versions, sx, sy, sWidth, sHeight are parsed in PX units
+            if (isImage || Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
                 image.sx *= density;
                 image.sy *= density;
                 image.sWidth *= density;
@@ -611,6 +619,8 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
     double density = GetDensity();
     double fWidth = 0.0;
     double fHeight = 0.0;
+    auto retObj = JSRef<JSObject>::New();
+    info.SetReturnValue(retObj);
     if (info.Length() == 2) {
         info.GetDoubleArg(0, fWidth);
         info.GetDoubleArg(1, fHeight);
@@ -628,18 +638,25 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(finalWidth * finalHeight * PIXEL_SIZE);
     // return the black image
     auto* buffer = static_cast<uint32_t*>(arrayBuffer->GetBuffer());
+    // Height or Width is ZERO or Overflow.
+    if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
+        JSRef<JSArrayBuffer> zeroArrayBuffer = JSRef<JSArrayBuffer>::New(0);
+        auto zeroColorArray =
+            JSRef<JSUint8ClampedArray>::New(zeroArrayBuffer->GetLocalHandle(), 0, zeroArrayBuffer->ByteLength());
+        retObj->SetProperty("width", 0);
+        retObj->SetProperty("height", 0);
+        retObj->SetPropertyObject("data", zeroColorArray);
+        return;
+    }
     for (uint32_t idx = 0; idx < finalWidth * finalHeight; ++idx) {
         buffer[idx] = 0xffffffff;
     }
 
     JSRef<JSUint8ClampedArray> colorArray =
         JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
-
-    auto retObj = JSRef<JSObject>::New();
     retObj->SetProperty("width", finalWidth);
     retObj->SetProperty("height", finalHeight);
     retObj->SetPropertyObject("data", colorArray);
-    info.SetReturnValue(retObj);
 }
 
 // putImageData(imageData: ImageData, dx: number | string, dy: number | string): void
@@ -674,14 +691,18 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
     JSRef<JSUint8ClampedArray> colorArray = JSRef<JSUint8ClampedArray>::Cast(jsImgData);
     auto arrayBuffer = colorArray->GetArrayBuffer();
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
+    CHECK_NULL_VOID(buffer);
     int32_t bufferLength = arrayBuffer->ByteLength();
-    imageData.data = std::vector<Color>();
+    imageData.data = std::vector<uint32_t>();
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
             uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
             if (bufferLength > static_cast<int32_t>(idx + ALPHA_INDEX)) {
-                imageData.data.emplace_back(
-                    Color::FromARGB(buffer[idx + 3], buffer[idx], buffer[idx + 1], buffer[idx + 2]));
+                uint8_t alpha = buffer[idx + 3]; // idx + 3: The 4th byte format: alpha
+                uint8_t red = buffer[idx]; // idx: the 1st byte format: red
+                uint8_t green = buffer[idx + 1]; // idx + 1: The 2nd byte format: green
+                uint8_t blue = buffer[idx + 2]; // idx + 2: The 3rd byte format: blue
+                imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
             }
         }
     }
@@ -743,6 +764,8 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
 {
     double density = GetDensity();
     ImageSize imageSize;
+    auto retObj = JSRef<JSObject>::New();
+    info.SetReturnValue(retObj);
     info.GetDoubleArg(0, imageSize.left);
     info.GetDoubleArg(1, imageSize.top);
     info.GetDoubleArg(2, imageSize.width);
@@ -757,17 +780,21 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     int32_t length = finalHeight * finalWidth * 4;
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(length);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
-    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+    // Height or Width is ZERO or Overflow.
+    if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
+        JSRef<JSArrayBuffer> zeroArrayBuffer = JSRef<JSArrayBuffer>::New(0);
+        auto zeroColorArray =
+            JSRef<JSUint8ClampedArray>::New(zeroArrayBuffer->GetLocalHandle(), 0, zeroArrayBuffer->ByteLength());
+        retObj->SetProperty("width", 0);
+        retObj->SetProperty("height", 0);
+        retObj->SetPropertyObject("data", zeroColorArray);
         return;
     }
     renderingContext2DModel_->GetImageDataModel(imageSize, buffer);
     auto colorArray = JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
-
-    auto retObj = JSRef<JSObject>::New();
     retObj->SetProperty("width", finalWidth);
     retObj->SetProperty("height", finalHeight);
     retObj->SetPropertyObject("data", colorArray);
-    info.SetReturnValue(retObj);
 }
 
 // getPixelMap(sx: number, sy: number, sw: number, sh: number): PixelMap
@@ -888,6 +915,7 @@ void JSCanvasRenderer::JsSetDirection(const JSCallbackInfo& info)
         renderingContext2DModel_->SetTextDirection(direction);
     }
 }
+
 // getJsonData(path: string): string
 void JSCanvasRenderer::JsGetJsonData(const JSCallbackInfo& info)
 {
@@ -1302,6 +1330,9 @@ void JSCanvasRenderer::JsGetTransform(const JSCallbackInfo& info)
 // setTransform(transform?: Matrix2D): void
 void JSCanvasRenderer::JsSetTransform(const JSCallbackInfo& info)
 {
+    if (info.GetSize() == 0) {
+        renderingContext2DModel_->ResetTransform();
+    }
     double density = GetDensity();
     TransformParam param;
     // setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void
@@ -1408,12 +1439,7 @@ std::shared_ptr<Pattern> JSCanvasRenderer::GetPatternPtr(int32_t id)
 void JSCanvasRenderer::SetTransform(unsigned int id, const TransformParam& transform)
 {
     if (id >= 0 && id <= patternCount_) {
-        pattern_[id]->SetScaleX(transform.scaleX);
-        pattern_[id]->SetScaleY(transform.scaleY);
-        pattern_[id]->SetSkewX(transform.skewX);
-        pattern_[id]->SetSkewY(transform.skewY);
-        pattern_[id]->SetTranslateX(transform.translateX);
-        pattern_[id]->SetTranslateY(transform.translateY);
+        renderingContext2DModel_->SetTransform(pattern_[id], transform);
     }
 }
 
@@ -1526,7 +1552,13 @@ void JSCanvasRenderer::JsRestoreLayer(const JSCallbackInfo& info)
 // reset(): void
 void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
 {
-    paintState_ = PaintState();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
+        // The default value of the font size in canvas is 14px.
+        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
+    } else {
+        paintState_ = PaintState();
+    }
     anti_ = false;
     isInitializeShadow_ = false;
     isOffscreenInitializeShadow_ = false;
@@ -1540,7 +1572,7 @@ Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
         return Dimension(dimension.Value());
     }
     if (dimension.Unit() == DimensionUnit::VP) {
-        return Dimension(dimension.Value() * GetDensity());
+        return Dimension(dimension.Value() * GetDensity(true));
     }
     return Dimension(0.0);
 }

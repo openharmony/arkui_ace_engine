@@ -92,6 +92,10 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
 
     JSRef<JSVal> params[3] = { selfLayoutInfo, childArray, constraint };
     JSRef<JSObject> result = jsMeasureSizeFunc_.Lock()->Call(jsObject_.Lock(), 3, params); /* 3:params number */
+    if (result->IsUndefined()) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return val of onMeasureSize API is empty or undefined");
+        return;
+    }
 
     CalcDimension measureWidth;
     CalcDimension measureHeight;
@@ -166,6 +170,7 @@ void ViewFunctions::ExecuteSetActive(bool active)
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     auto func = jsSetActive_.Lock();
     if (!func->IsEmpty()) {
+        JSFastNativeScope scope(func->GetEcmaVM());
         auto isActive = JSRef<JSVal>::Make(ToJSValue(active));
         func->Call(jsObject_.Lock(), 1, &isActive);
     } else {

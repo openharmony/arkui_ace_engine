@@ -14,19 +14,15 @@
  */
 #include "safe_area_manager.h"
 
-#include "base/utils/utils.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
+SafeAreaInsets GenerateCutOutAreaWithRoot(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    CHECK_NULL_RETURN(pipeline->GetUseCutout(), false);
+    CHECK_NULL_RETURN(pipeline, {});
+    CHECK_NULL_RETURN(pipeline->GetUseCutout(), {});
     // cutout regions adjacent to edges.
     auto cutoutArea = safeArea;
 
@@ -44,12 +40,29 @@ bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::O
         cutoutArea.right_.end = rootSize.Width().has_value() ? rootSize.Width().value()
                                                              : PipelineContext::GetCurrentRootWidth();
     }
+    return cutoutArea;
+}
 
-    if (cutoutSafeArea_ == cutoutArea) {
+bool SafeAreaManager::CheckCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
+{
+    return cutoutSafeArea_ != GenerateCutOutAreaWithRoot(safeArea, rootSize);
+}
+
+bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
+{
+    auto safeAreaWithRoot = GenerateCutOutAreaWithRoot(safeArea, rootSize);
+    if (cutoutSafeArea_ == safeAreaWithRoot) {
         return false;
     }
-    cutoutSafeArea_ = cutoutArea;
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateCutoutSafeArea %s, safeAreaWithRoot %s", safeArea.ToString().c_str(),
+        safeAreaWithRoot.ToString().c_str());
+    cutoutSafeArea_ = safeAreaWithRoot;
     return true;
+}
+
+bool SafeAreaManager::CheckSystemSafeArea(const SafeAreaInsets& safeArea)
+{
+    return systemSafeArea_ != safeArea;
 }
 
 bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
@@ -57,8 +70,14 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
     if (systemSafeArea_ == safeArea) {
         return false;
     }
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateSystemSafeArea %s", safeArea.ToString().c_str());
     systemSafeArea_ = safeArea;
     return true;
+}
+
+bool SafeAreaManager::CheckNavArea(const SafeAreaInsets& safeArea)
+{
+    return navSafeArea_ != safeArea;
 }
 
 bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
@@ -66,6 +85,7 @@ bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
     if (navSafeArea_ == safeArea) {
         return false;
     }
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateNavArea %s", safeArea.ToString().c_str());
     navSafeArea_ = safeArea;
     return true;
 }
@@ -119,6 +139,7 @@ bool SafeAreaManager::SetIsFullScreen(bool value)
         return false;
     }
     isFullScreen_ = value;
+    TAG_LOGI(ACE_LAYOUT, "SetIsFullScreen %{public}d", isFullScreen_);
     return true;
 }
 
@@ -128,6 +149,7 @@ bool SafeAreaManager::SetIsNeedAvoidWindow(bool value)
         return false;
     }
     isNeedAvoidWindow_ = value;
+    TAG_LOGI(ACE_LAYOUT, "SetIsNeedAvoidWindow %{public}d", isNeedAvoidWindow_);
     return true;
 }
 
@@ -137,6 +159,7 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
         return false;
     }
     ignoreSafeArea_ = value;
+    TAG_LOGI(ACE_LAYOUT, "SetIgnoreSafeArea %{public}d", ignoreSafeArea_);
     return true;
 }
 
@@ -146,6 +169,7 @@ bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
         return false;
     }
     keyboardSafeAreaEnabled_ = value;
+    TAG_LOGI(ACE_LAYOUT, "SetKeyBoardAvoidMode %{public}d", keyboardSafeAreaEnabled_);
     return true;
 }
 
@@ -155,6 +179,7 @@ bool SafeAreaManager::SetIsAtomicService(bool value)
         return false;
     }
     isAtomicService_ = value;
+    TAG_LOGI(ACE_LAYOUT, "SetIsAtomicService %{public}d", isAtomicService_);
     return true;
 }
 
@@ -252,7 +277,9 @@ OffsetF SafeAreaManager::GetWindowWrapperOffset()
 
 void SafeAreaManager::ExpandSafeArea()
 {
-    ACE_LAYOUT_SCOPED_TRACE("ExpandSafeArea node count %zu", needExpandNodes_.size());
+    ACE_SCOPED_TRACE("ExpandSafeArea node count %zu, IsSafeAreaValid: %d, ignoreSafeArea: %d, isFullScreen: %d, "
+                     "isNeedAvoidWindow %d",
+        needExpandNodes_.size(), IsSafeAreaValid(), ignoreSafeArea_, isFullScreen_, isNeedAvoidWindow_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
@@ -275,6 +302,14 @@ bool SafeAreaManager::AddNodeToExpandListIfNeeded(const WeakPtr<FrameNode>& node
         return true;
     }
     return false;
+}
+
+std::vector<WeakPtr<FrameNode>> SafeAreaManager::GetExpandNodeSet()
+{
+    // To isolate set comparator, use vector to collect a copy of nodes
+    std::vector<WeakPtr<FrameNode>> result;
+    std::copy(needExpandNodes_.begin(), needExpandNodes_.end(), std::back_inserter(result));
+    return result;
 }
 
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)
