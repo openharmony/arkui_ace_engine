@@ -985,28 +985,31 @@ void SearchPattern::HandleFocusChoiceSearch(const RefPtr<TextFieldPattern>& text
     textFieldPattern->HandleFocusEvent();
 }
 
-void SearchPattern::GetSearchFocusPaintRadius(
-    float& radiusTopLeft, float& radiusTopRight, float& radiusBottomLeft, float& radiusBottomRight)
+void SearchPattern::GetSearchFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto searchSize = geometryNode->GetFrameSize();
+    float width = searchSize.Width() + 2 * searchFocusPadding_;
+    float height = searchSize.Height() + 2 * searchFocusPadding_;
+    paintRect.SetRect({ -searchFocusPadding_, -searchFocusPadding_, width, height });
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto radius = renderContext->GetBorderRadius();
-    if (radius.has_value()) {
-        if (radius->radiusTopLeft.has_value()) {
-            radiusTopLeft = static_cast<float>(radius->radiusTopLeft->ConvertToPx());
-        }
-        if (radius->radiusTopRight.has_value()) {
-            radiusTopRight = static_cast<float>(radius->radiusTopRight->ConvertToPx());
-        }
-        if (radius->radiusBottomLeft.has_value()) {
-            radiusBottomLeft = static_cast<float>(radius->radiusBottomLeft->ConvertToPx());
-        }
-        if (radius->radiusBottomRight.has_value()) {
-            radiusBottomRight = static_cast<float>(radius->radiusBottomRight->ConvertToPx());
-        }
-    }
+    auto radius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + searchFocusPadding_),
+        static_cast<float>(radius.radiusTopLeft->ConvertToPx() + searchFocusPadding_));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + searchFocusPadding_),
+        static_cast<float>(radius.radiusTopRight->ConvertToPx() + searchFocusPadding_));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + searchFocusPadding_),
+        static_cast<float>(radius.radiusBottomLeft->ConvertToPx() + searchFocusPadding_));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + searchFocusPadding_),
+        static_cast<float>(radius.radiusBottomRight->ConvertToPx() + searchFocusPadding_));
 }
 
 void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -1021,14 +1024,10 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     float radiusBottomRight = 0.0f;
     float focusOffset = FOCUS_OFFSET.ConvertToPx();
     if (focusChoice_ == FocusChoice::SEARCH) {
-        if (!needFocusBox_) {
+        if (needFocusBox_) {
+            GetSearchFocusPaintRect(paintRect);
             return;
         }
-        originX = searchOffset_.GetX() - DOUBLE * focusOffset;
-        originY = searchOffset_.GetY() - DOUBLE * focusOffset;
-        endX = searchSize_.Width() + searchOffset_.GetX() + DOUBLE * focusOffset;
-        endY = searchSize_.Height() + searchOffset_.GetY() + DOUBLE * focusOffset;
-        GetSearchFocusPaintRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
     }
     if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
         originX = cancelButtonOffset_.GetX() + focusOffset;
@@ -1264,6 +1263,7 @@ void SearchPattern::InitSearchTheme()
     normalPlaceholderColor_ = searchTheme->GetPlaceholderColor();
     focusPlaceholderColor_ = searchTheme->GetFocusPlaceholderColor();
     normalIconColor_ = searchTheme->GetSymbolIconColor();
+    searchFocusPadding_ = searchTheme->GetSearchFocusPadding().ConvertToPx();
 }
 
 void SearchPattern::InitHoverEvent()
@@ -1812,7 +1812,7 @@ void SearchPattern::InitSearchIconColorSize()
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
     GetSearchNode()->SetSearchSymbolIconColor(Color(searchTheme->GetSymbolIconColor()));
-    GetSearchNode()->SetSearchSymbolIconSize(SYMBOL_ICON_HEIGHT);
+    GetSearchNode()->SetSearchSymbolIconSize(searchTheme->GetIconSize());
     GetSearchNode()->SetSearchImageIconColor(Color(searchTheme->GetSearchIconColor()));
     GetSearchNode()->SetSearchImageIconSize(searchTheme->GetIconHeight());
 }

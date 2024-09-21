@@ -241,8 +241,7 @@ private:
     void PaintFocusState(bool recoverFlag = false);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintSearchFocusState();
-    void GetSearchFocusPaintRadius(float& radiusTopLeft, float& radiusTopRight,
-        float& radiusBottomLeft, float& radiusBottomRight);
+    void GetSearchFocusPaintRect(RoundRect& paintRect);
     void RequestKeyboard();
     // Init touch and hover event
     void InitTextFieldValueChangeEvent();
@@ -351,6 +350,7 @@ private:
     bool isFocusIconColorSet_ = false;
     bool isFocusTextColorSet_ = false;
     bool directionKeysMoveFocusOut_ = false;
+    float searchFocusPadding_ = 0.0;
     Color searchHoverColor_;
     Color searchTouchColor_;
     Color searchNormalColor_;
