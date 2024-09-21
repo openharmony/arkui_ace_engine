@@ -1328,6 +1328,16 @@ public:
     {
         return dragNodeGrayscale_;
     }
+
+    void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
+    {
+        isOpenInvisibleFreeze_ = isOpenInvisibleFreeze;
+    }
+
+    bool IsOpenInvisibleFreeze()
+    {
+        return isOpenInvisibleFreeze_;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1379,6 +1389,7 @@ protected:
     bool isReloading_ = false;
 
     bool isJsPlugin_ = false;
+    bool isOpenInvisibleFreeze_ = false;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     std::unordered_map<int32_t, AceVsyncCallback> jsFormVsyncCallbacks_;

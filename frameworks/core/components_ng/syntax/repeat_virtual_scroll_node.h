@@ -154,6 +154,8 @@ public:
         }
     }
 
+protected:
+    void UpdateChildrenFreezeState(bool isFreeze) override;
 private:
     void PostIdleTask();
 
