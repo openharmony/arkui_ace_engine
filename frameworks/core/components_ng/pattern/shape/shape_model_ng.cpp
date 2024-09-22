@@ -120,9 +120,6 @@ void ShapeModelNG::SetStroke(FrameNode* frameNode, const std::optional<Color>& c
 
 void ShapeModelNG::SetFill(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    // ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, color, frameNode);
-    // ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
-    // ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
     if (color) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, *color, frameNode);
         ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *color, frameNode);
