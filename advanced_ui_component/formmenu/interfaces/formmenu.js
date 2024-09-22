@@ -27,7 +27,7 @@ async function querySnapshotAsync(want, componentId, uiContext) {
   try {
     const imagePackageApi = image.createImagePacker();
     const packOpts = {
-      format: 'image/jpeg',
+      format: 'image/webp',
       quality: 50,
     };
     hilog.info(0x3900, tag, 'componentId:' + componentId);

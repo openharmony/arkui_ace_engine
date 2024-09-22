@@ -80,20 +80,22 @@ void JSFormMenuItem::RequestPublishFormWithSnapshot(JSRef<JSVal> wantValue,
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto numCallBack = [jsCBFunc, taskExecutor](int32_t errCode, int64_t& formId, std::string &errMsg) {
-        if (!jsCBFunc) {
+    jsCBFunc_ = jsCBFunc;
+    auto numCallBack = [taskExecutor](int32_t errCode, int64_t& formId, std::string &errMsg) {
+        if (!jsCBFunc_) {
             TAG_LOGE(AceLogTag::ACE_FORM, "jsCBFunc is null");
             return;
         }
         taskExecutor->PostTask(
-            [jsCBFunc, errCode, formId, errMsg]() {
+            [errCode, formId, errMsg]() {
                 JSRef<JSVal> params[NUM_CALLBACKNUM];
                 JSRef<JSObject> errObj = JSRef<JSObject>::New();
                 errObj->SetProperty<int32_t>("code", errCode);
                 errObj->SetProperty<std::string>("message", errMsg);
                 params[0] = errObj;
                 params[1] = JSRef<JSVal>::Make(ToJSValue(formId));
-                jsCBFunc->ExecuteJS(NUM_CALLBACKNUM, params);
+                jsCBFunc_->ExecuteJS(NUM_CALLBACKNUM, params);
+                jsCBFunc_ = nullptr;
             },
             TaskExecutor::TaskType::UI, "RequestPublishFormWithSnapshot");
     };
