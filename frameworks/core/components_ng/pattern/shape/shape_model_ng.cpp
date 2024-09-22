@@ -109,16 +109,29 @@ void ShapeModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ac
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashArray, segments, frameNode);
 }
 
-void ShapeModelNG::SetStroke(FrameNode* frameNode, const Color& color)
+void ShapeModelNG::SetStroke(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Stroke, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Stroke, *color, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, Stroke, frameNode);
+    }
 }
 
-void ShapeModelNG::SetFill(FrameNode* frameNode, const Color& color)
+void ShapeModelNG::SetFill(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, color, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    // ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, color, frameNode);
+    // ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
+    // ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, *color, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *color, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, false, frameNode);
+    }
 }
 
 void ShapeModelNG::SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset)
