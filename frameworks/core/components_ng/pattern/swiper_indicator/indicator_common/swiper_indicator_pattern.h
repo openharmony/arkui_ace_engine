@@ -208,6 +208,8 @@ private:
     void UpdateOverlongPaintMethod(
         const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod);
     int32_t GetDisplayCurrentIndex() const;
+    void UpdateDigitalIndicator();
+    void RegisterIndicatorChangeEvent();
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
