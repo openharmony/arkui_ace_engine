@@ -292,7 +292,10 @@ bool ListItemGroupLayoutAlgorithm::NeedMeasureItem(LayoutWrapper* layoutWrapper)
             return false;
         }
         if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
-            if (totalItemCount_ > 0 &&
+            auto listPadding = listLayoutProperty_->CreatePaddingAndBorder().Offset();
+            auto offset = layoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+            bool atStart = GreatNotEqual(GetMainAxisOffset(offset, axis_), GetMainAxisOffset(listPadding, axis_));
+            if (atStart && totalItemCount_ > 0 &&
                 (!layoutedItemInfo_ || layoutedItemInfo_.value().endIndex < totalItemCount_ - 1)) {
                 return true;
             } else {
