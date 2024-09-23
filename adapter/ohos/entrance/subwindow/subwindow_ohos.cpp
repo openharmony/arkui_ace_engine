@@ -1254,9 +1254,13 @@ bool SubwindowOhos::InitToastServiceConfig()
         if (configuration != nullptr) {
             auto followSystem = configuration->GetValue(FONTSIZE_SCALE_KEY);
             auto fontSizeMaxScale = configuration->GetValue(FONTSIZE_MAXSCALE_KEY);
-            isFollowSystem = followSystem->IsString() ? followSystem->GetString() == FOLLOW_SYSTEM : false;
-            maxScale = fontSizeMaxScale->IsString() ?
-                StringUtils::StringToFloat(fontSizeMaxScale->GetString()) : FONTSIZE_MAXSCALE;
+            if (followSystem != nullptr) {
+                isFollowSystem = followSystem->IsString() ? followSystem->GetString() == FOLLOW_SYSTEM : false;
+            }
+            if (fontSizeMaxScale != nullptr) {
+                maxScale = fontSizeMaxScale->IsString() ?
+                    StringUtils::StringToFloat(fontSizeMaxScale->GetString()) : FONTSIZE_MAXSCALE;
+            }
             maxScale = maxScale == 0.0f ? FONTSIZE_MAXSCALE : maxScale;
         }
     }
