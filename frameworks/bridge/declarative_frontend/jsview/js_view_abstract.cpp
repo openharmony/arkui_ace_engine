@@ -7874,6 +7874,7 @@ void JSViewAbstract::ParseSheetStyle(
     auto type = paramObj->GetProperty("preferType");
     auto interactive = paramObj->GetProperty("enableOutsideInteractive");
     auto showMode = paramObj->GetProperty("mode");
+    auto offsetVal = paramObj->GetProperty("offset");
     auto scrollSizeMode = paramObj->GetProperty("scrollSizeMode");
     auto keyboardAvoidMode = paramObj->GetProperty("keyboardAvoidMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
@@ -7884,6 +7885,23 @@ void JSViewAbstract::ParseSheetStyle(
             sheetStyle.instanceId = prop->ToNumber<int32_t>();
         }
     }
+
+    if (offsetVal->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
+        auto xVal = offsetObj->GetProperty("x");
+        auto yVal = offsetObj->GetProperty("y");
+        NG::OffsetF bottomOffset;
+        CalcDimension dx;
+        CalcDimension dy;
+        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx)) {
+            bottomOffset.SetX(dx.ConvertToPx());
+        }
+        if (JSViewAbstract::ParseJsDimensionVp(yVal, dy) && dy.IsNegative()) {
+            bottomOffset.SetY(dy.ConvertToPx());
+        }
+        sheetStyle.bottomOffset = bottomOffset;
+    }
+
     NG::SheetLevel sheetLevel = NG::SheetLevel::OVERLAY;
     if (ParseSheetLevel(showMode, sheetLevel) || !isPartialUpdate) {
         sheetStyle.showInPage = (sheetLevel == NG::SheetLevel::EMBEDDED);
