@@ -565,18 +565,17 @@ RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
         centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
         centerX = centerX + FOUCS_WIDTH.ConvertToPx();
     }
-
-    if (piantRectWidth > columnWidth) {
-        if (!GetIsShowInDialog()) {
+    if (!GetIsShowInDialog()) {
+        if (piantRectWidth > columnWidth) {
             piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_INTERVAL.ConvertToPx();
             centerX = currentFocusIndex * (piantRectWidth + FOUCS_WIDTH.ConvertToPx() + PRESS_INTERVAL.ConvertToPx()) +
                       FOUCS_WIDTH.ConvertToPx();
         } else {
-            piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx();
-            centerX = currentFocusIndex * piantRectWidth + FOUCS_WIDTH.ConvertToPx() / HALF;
+            centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
         }
     } else {
-        centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
+        piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+        centerX = (columnWidth - piantRectWidth) / HALF;
     }
     return RectF(centerX, centerY, piantRectWidth, piantRectHeight);
 }
