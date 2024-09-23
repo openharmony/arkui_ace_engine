@@ -1038,8 +1038,8 @@ private:
 
     std::tuple<float, float, uint64_t> GetAvgPoint(const std::vector<TouchEvent>& events, const bool isScreen);
 
-    TouchEvent GetResampleTouchEvent(
-        const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+    bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
+        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
 
     TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
     
