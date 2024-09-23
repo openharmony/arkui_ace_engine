@@ -616,6 +616,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     }
     paintProperty->CleanDirty();
     CHECK_NULL_VOID(pipeline);
+    pipeline->FlushModifier();
     pipeline->FlushMessages();
     node->SetActive(false);
 }
