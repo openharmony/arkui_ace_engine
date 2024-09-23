@@ -8402,6 +8402,11 @@ bool TextFieldPattern::InsertOrDeleteSpace(int32_t index)
 
 bool TextFieldPattern::IsShowAIWrite()
 {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
+
     auto textFieldTheme = GetTheme();
     CHECK_NULL_RETURN(textFieldTheme, false);
     auto bundleName = textFieldTheme->GetAIWriteBundleName();
