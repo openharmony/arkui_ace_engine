@@ -42,6 +42,10 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
         gradient.AddColor(CreatePercentGradientColor(1 - percentFading_, Color::WHITE));
         gradient.AddColor(CreatePercentGradientColor(1, Color::TRANSPARENT));
     }
+    if (!isFadingTop_ && !isFadingBottom_) {
+        gradient.AddColor(CreatePercentGradientColor(0, Color::WHITE));
+        gradient.AddColor(CreatePercentGradientColor(1, Color::WHITE));
+    }
     if (vertical_) {
         gradient.GetLinearGradient()->angle = CalcDimension(LINEAR_GRADIENT_ANGLE, DimensionUnit::PX);
     }
@@ -50,11 +54,7 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
 
     overlayRenderContext_->UpdateZIndex(INT32_MAX);
     overlayRenderContext_->UpdateLinearGradient(gradient);
-    if (!isFadingTop_ && !isFadingBottom_) {
-        overlayRenderContext_->UpdateBackBlendMode(BlendMode::SRC_OVER);
-    } else {
-        overlayRenderContext_->UpdateBackBlendMode(BlendMode::DST_IN);
-    }
+    overlayRenderContext_->UpdateBackBlendMode(BlendMode::DST_IN);
     overlayRenderContext_->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 } // namespace OHOS::Ace::NG

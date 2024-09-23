@@ -46,6 +46,7 @@ constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
 constexpr float SPRING_ACCURACY = 0.1f;
+constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -136,7 +137,7 @@ void ScrollablePattern::UpdateFadeInfo(
     float percentFading = 0.0f;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto fadingEdgeLength = paintProperty->GetFadingEdgeLength().value();
+    auto fadingEdgeLength = paintProperty->GetFadingEdgeLength().value_or(LIST_FADINGEDGE);
     if (fadingEdgeLength.Unit() == DimensionUnit::PERCENT) {
         percentFading = fadingEdgeLength.Value() / 100.0f; // One hundred percent
     } else {
