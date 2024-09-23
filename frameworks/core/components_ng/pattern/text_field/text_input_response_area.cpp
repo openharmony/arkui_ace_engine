@@ -699,7 +699,9 @@ void CleanNodeResponseArea::LoadingCancelButtonColor()
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (textFieldLayoutProperty->GetIsDisabledValue(false)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);

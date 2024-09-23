@@ -141,7 +141,7 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textOverlayModifier_->SetContentRect(contentRect);
     textOverlayModifier_->SetShowSelect(textPattern->GetShowSelect());
     textOverlayModifier_->SetSelectedRects(selectedRects);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);

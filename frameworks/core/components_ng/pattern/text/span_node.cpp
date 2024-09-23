@@ -308,7 +308,7 @@ void SpanItem::UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, con
     std::optional<TextStyle> textStyle;
     auto symbolUnicode = GetSymbolUnicode();
     if (fontStyle || textLineStyle) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipelineContext);
         TextStyle themeTextStyle =
             CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
@@ -471,7 +471,7 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
             finalSelEnd = contentLength;
         }
         if (finalSelStart < contentLength) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
+            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             TextStyle selectedTextStyle = textStyle;
             Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextColor(color);
@@ -587,7 +587,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
 TextStyle SpanItem::InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode)
 {
     TextStyle textStyle;
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, textStyle);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, textStyle);

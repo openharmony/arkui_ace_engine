@@ -143,7 +143,7 @@ bool SelectContentOverlayPattern::UpdateHandleHotZoneWithPoint()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, false);

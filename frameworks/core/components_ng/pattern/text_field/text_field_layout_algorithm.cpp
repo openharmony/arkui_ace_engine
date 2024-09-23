@@ -215,7 +215,7 @@ void TextFieldLayoutAlgorithm::ApplyIndent(double width)
     }
     // first line indent
     CHECK_NULL_VOID(paragraph_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     double indentValue = 0.0;
     if (textIndent_.Unit() != DimensionUnit::PERCENT) {
@@ -428,12 +428,12 @@ TextAlign TextFieldLayoutAlgorithm::GetCounterNodeAlignment(LayoutWrapper* layou
 void TextFieldLayoutAlgorithm::UpdateCounterNode(
     uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto counterNode = pattern->GetCounterNode().Upgrade();
@@ -779,7 +779,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     CHECK_NULL_VOID(paragraph_);
     paragraph_->PushStyle(textStyle);
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
@@ -844,7 +844,7 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     CHECK_NULL_VOID(paragraph_);
     inlineParagraph_->PushStyle(textStyle);
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
@@ -896,7 +896,7 @@ void TextFieldLayoutAlgorithm::GetSuitableSize(SizeF& maxSize, LayoutWrapper* la
 
 float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);

@@ -20,7 +20,7 @@ namespace OHOS::Ace::NG {
 
 void TextBase::SetSelectionNode(const SelectedByMouseInfo& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto selectOverlayManager = pipeline->GetSelectOverlayManager();
     selectOverlayManager->SetSelectedNodeByMouse(info);
