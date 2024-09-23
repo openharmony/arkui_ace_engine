@@ -1089,7 +1089,7 @@ public:
 
     void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
     std::string GetJSCustomProperty(const std::string& key);
-    std::string GetCapiCustomProperty(const std::string& key);
+    bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
     void AddCustomProperty(const std::string& key, const std::string& value);
     void RemoveCustomProperty(const std::string& key);

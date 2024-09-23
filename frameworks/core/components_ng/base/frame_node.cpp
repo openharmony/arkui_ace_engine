@@ -5711,17 +5711,18 @@ std::string FrameNode::GetJSCustomProperty(const std::string& key)
     return nullptr;
 }
 
-std::string FrameNode::GetCapiCustomProperty(const std::string& key)
+bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)
 {
     if (!isCNode_) {
-        return std::string();
+        return false;
     }
     std::lock_guard<std::mutex> lock(mutex_);
     auto iter = customPropertyMap_.find(key);
     if (iter != customPropertyMap_.end()) {
-        return customPropertyMap_[key];
+        value = customPropertyMap_[key];
+        return true;
     }
-    return std::string();
+    return false;
 }
 
 void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)

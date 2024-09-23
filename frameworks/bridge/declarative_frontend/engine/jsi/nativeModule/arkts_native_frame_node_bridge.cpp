@@ -1298,10 +1298,17 @@ ArkUINativeModuleValue FrameNodeBridge::GetCustomPropertyCapiByKey(ArkUIRuntimeC
         return defaultReturnValue;
     }
     auto key = secondArg->ToString(vm)->ToString(vm);
-    auto valueInfo =
-        GetArkUINodeModifiers()->getFrameNodeModifier()->getCustomPropertyCapiByKey(nativeNode, key.c_str());
-    CHECK_NULL_RETURN(valueInfo, defaultReturnValue);
-    return panda::StringRef::NewFromUtf8(vm, valueInfo);
+    uint32_t size = 0;
+    char* valuePtr = nullptr;
+    if (GetArkUINodeModifiers()->getFrameNodeModifier()->getCustomPropertyCapiByKey(
+        nativeNode, key.c_str(), &valuePtr, &size)) {
+        CHECK_NULL_RETURN(valuePtr, defaultReturnValue);
+        auto returnValue = panda::StringRef::NewFromUtf8(vm, valuePtr);
+        GetArkUINodeModifiers()->getFrameNodeModifier()->freeCustomPropertyCharPtr(valuePtr, size);
+        return returnValue;
+    }
+    GetArkUINodeModifiers()->getFrameNodeModifier()->freeCustomPropertyCharPtr(valuePtr, size);
+    return defaultReturnValue;
 }
 
 std::function<std::string(const std::string&)> ParseGetFunc(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t nodeId)
