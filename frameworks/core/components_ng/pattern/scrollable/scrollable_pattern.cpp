@@ -1266,7 +1266,11 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
     isAnimationStop_ = false;
     useTotalOffset_ = useTotalOffset;
-    AnimationUtils::ExecuteWithoutAnimation([this]() { springOffsetProperty_->Set(GetTotalOffset()); });
+    AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->springOffsetProperty_->Set(pattern->GetTotalOffset());
+    });
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), position]() {
