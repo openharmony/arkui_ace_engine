@@ -36,28 +36,17 @@ namespace  {
     const auto ATTRIBUTE_PARAM_NAME = "param";
     const auto ATTRIBUTE_PARAM_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_MODE_MODE_NAME = "mode";
-    const auto ATTRIBUTE_MODE_MODE_DEFAULT_VALUE = "PUSH_WITH_RECREATE";
+    const auto ATTRIBUTE_MODE_MODE_DEFAULT_VALUE = "NavRouteMode.PUSH_WITH_RECREATE";
 
-    bool g_isActivatedTest;
+    struct EventsTracker {
+        static inline GENERATED_ArkUINavRouterEventsReceiver navRouterEventReceiver {};
 
-    GENERATED_ArkUINavRouterEventsReceiver recv {
-        .onStateChange = [] (Ark_Int32 nodeId, const Ark_Boolean isActivated) {
-            auto testBool = Convert<bool>(isActivated);
-            g_isActivatedTest = testBool;
-        }
-    };
-
-const GENERATED_ArkUINavRouterEventsReceiver* getNavRouterEventsReceiverTest()
-{
-    return &recv;
-};
-const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
-{
-    static const GENERATED_ArkUIEventsAPI eventsImpl = {
-        .getNavRouterEventsReceiver = getNavRouterEventsReceiverTest
-    };
-    return &eventsImpl;
-};
+        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
+            .getNavRouterEventsReceiver = [] () -> const GENERATED_ArkUINavRouterEventsReceiver* {
+                return &navRouterEventReceiver;
+            }
+        };
+    }; // EventsTracker
 } // namespace
 
 class NavRouterModifierTest : public ModifierTestBase<GENERATED_ArkUINavRouterModifier,
@@ -67,7 +56,7 @@ class NavRouterModifierTest : public ModifierTestBase<GENERATED_ArkUINavRouterMo
     {
         MockPipelineContext::SetUp();
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(GetArkUiEventsAPITest());
+        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 
     static void TearDownTestCase()
@@ -166,18 +155,43 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestInvalidValues, 
  */
 HWTEST_F(NavRouterModifierTest, setOnStateChangeTest, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setOnStateChange, nullptr);
-    g_isActivatedTest = false;
+    Ark_Function func = {};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto navRouterEventHub = frameNode->GetEventHub<NavRouterEventHub>();
     ASSERT_NE(navRouterEventHub, nullptr);
-    navRouterEventHub->FireChangeEvent(true);
-    EXPECT_FALSE(g_isActivatedTest);
-    Ark_Function func = {};
+    struct CheckEvent {
+        int32_t nodeId;
+        bool isActivated;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::navRouterEventReceiver.onStateChange = [](Ark_Int32 nodeId, 
+        const Ark_Boolean isActivated)
+    {
+        checkEvent = {
+            .nodeId = nodeId,
+            .isActivated = Convert<bool>(isActivated)
+        };
+    };
+    // check before call setOnStateChange
+    ASSERT_NE(modifier_->setOnStateChange, nullptr);
+    navRouterEventHub->FireChangeEvent(true);    
+    EXPECT_FALSE(checkEvent.has_value());
+
+    // set event in modifier
     modifier_->setOnStateChange(node_, func);
+
+    // check true value
     navRouterEventHub->FireChangeEvent(true);
-    EXPECT_TRUE(g_isActivatedTest);
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_TRUE(checkEvent->isActivated);
+
+    // check false value
+    navRouterEventHub->FireChangeEvent(false);
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_FALSE(checkEvent->isActivated);
 }
 
 /*
@@ -211,20 +225,20 @@ HWTEST_F(NavRouterModifierTest, setModeTestValidValues, TestSize.Level1)
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
-    EXPECT_EQ(resultStr, "PUSH_WITH_RECREATE");
+    EXPECT_EQ(resultStr, "NavRouteMode.PUSH_WITH_RECREATE");
 
     // Verifying attribute's other values
     inputValueModeMode = ARK_NAV_ROUTE_MODE_PUSH;
     modifier_->setMode(node_, inputValueModeMode);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
-    EXPECT_EQ(resultStr, "PUSH");
+    EXPECT_EQ(resultStr, "NavRouteMode.PUSH");
 
     inputValueModeMode = ARK_NAV_ROUTE_MODE_REPLACE;
     modifier_->setMode(node_, inputValueModeMode);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
-    EXPECT_EQ(resultStr, "REPLACE");
+    EXPECT_EQ(resultStr, "NavRouteMode.REPLACE");
 }
 
 /*
@@ -245,6 +259,6 @@ HWTEST_F(NavRouterModifierTest, setModeTestInvalidValues, TestSize.Level1)
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
-    EXPECT_EQ(resultStr, "PUSH_WITH_RECREATE");
+    EXPECT_EQ(resultStr, "NavRouteMode.PUSH_WITH_RECREATE");
 }
 } // namespace OHOS::Ace::NG

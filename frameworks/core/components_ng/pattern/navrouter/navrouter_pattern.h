@@ -83,11 +83,11 @@ private:
     const std::string NavRouteModeToString(const NavRouteMode& mode) const {
         switch (mode) {
             case NavRouteMode::PUSH_WITH_RECREATE:
-                return "PUSH_WITH_RECREATE";
+                return "NavRouteMode.PUSH_WITH_RECREATE";
             case NavRouteMode::PUSH:
-                return "PUSH";
+                return "NavRouteMode.PUSH";
             case NavRouteMode::REPLACE:
-                return "REPLACE";
+                return "NavRouteMode.REPLACE";
             default:
                 return "";
         }
