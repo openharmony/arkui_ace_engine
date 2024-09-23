@@ -99,6 +99,7 @@ public:
             theme->needFocusBox_ = static_cast<bool>(pattern->GetAttr<double>("search_need_focus_box", 0.0));
             theme->cancelButtonStyle_ = static_cast<CancelButtonStyle>(
                 static_cast<int32_t>(pattern->GetAttr<double>("search_cancel_button_style", 2.0f)));
+            theme->searchFocusPadding_ = pattern->GetAttr<Dimension>("search_focus_glow_padding", 0.0_vp);
         }
     };
 
@@ -289,6 +290,11 @@ public:
         return needFocusBox_;
     }
 
+    const Dimension& GetSearchFocusPadding() const
+    {
+        return searchFocusPadding_;
+    }
+
 protected:
     SearchTheme() = default;
 
@@ -330,6 +336,7 @@ private:
     Color focusBgColor_;
     Color focusIconColor_;
     bool needFocusBox_ = false;
+    Dimension searchFocusPadding_;
 };
 
 } // namespace OHOS::Ace
