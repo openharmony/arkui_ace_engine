@@ -630,6 +630,26 @@ void HandleFail(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t errorC
     }
 }
 
+void HandleDragEnd(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const DragNotifyMsg& dragNotifyMsg)
+{
+    TAG_LOGI(AceLogTag::ACE_DRAG, "handleDragEnd notify message result is %{public}d.", dragNotifyMsg.result);
+    CHECK_NULL_VOID(asyncCtx);
+    auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->ResetDragging();
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [asyncCtx, dragNotifyMsg]() {
+            CHECK_NULL_VOID(asyncCtx);
+            napi_value dragAndDropInfoValue;
+            GetCallBackDataForJs(asyncCtx, dragNotifyMsg, DragStatus::ENDED, dragAndDropInfoValue);
+        },
+        TaskExecutor::TaskType::JS, "ArkUIDragHandleDragEnd");
+}
+
 void HandleOnDragStart(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 {
     ContainerScope scope(asyncCtx->instanceId);
@@ -760,7 +780,7 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
         return;
     }
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
-        HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
+        HandleDragEnd(asyncCtx, dragNotifyMsg);
     };
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(asyncCtx->pointerId, asyncCtx->instanceId);
     NG::DragDropFuncWrapper::SetExtraInfo(asyncCtx->instanceId, asyncCtx->extraParams);
