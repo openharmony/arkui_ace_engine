@@ -151,6 +151,11 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     if (style != CancelButtonStyle::INVISIBLE) {
         textFieldWidth = textFieldWidth - cancelButtonWidth;
     }
+    if (style == CancelButtonStyle::INVISIBLE && !searchButtonEvent->IsEnabled()) {
+        // right padding without cancel button and search button
+        auto rightPadding = searchTheme->GetRightPaddingWithoutButton();
+        textFieldWidth = textFieldWidth - rightPadding.ConvertToPx();
+    }
     auto textFieldHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
