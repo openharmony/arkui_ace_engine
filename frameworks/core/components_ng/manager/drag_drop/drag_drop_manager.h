@@ -365,6 +365,7 @@ public:
         return preDragStatus_;
     }
 
+    static RectF GetMenuPreviewRect();
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
         const OffsetF& gatherNodeCenter, float scale, float previewWidth, float previewHeight);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
