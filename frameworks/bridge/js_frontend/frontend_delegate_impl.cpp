@@ -86,7 +86,7 @@ FrontendDelegateImpl::FrontendDelegateImpl(const FrontendDelegateImplBuilder& bu
 FrontendDelegateImpl::~FrontendDelegateImpl()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("DelegateImpl destroyed");
 }
 
 void FrontendDelegateImpl::ParseManifest()

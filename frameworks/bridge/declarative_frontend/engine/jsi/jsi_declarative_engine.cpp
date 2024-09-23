@@ -404,7 +404,7 @@ thread_local bool isDynamicModulePreloaded_ = false;
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("Declarative instance destroyed");
 
     if (runningPage_) {
         runningPage_->OnJsEngineDestroy();
@@ -1166,7 +1166,7 @@ thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("Declarative engine destroyed");
 }
 
 void JsiDeclarativeEngine::Destroy()

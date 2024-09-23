@@ -23,7 +23,7 @@ namespace OHOS::Ace {
 
 DeclarativeFrontendNG::~DeclarativeFrontendNG() noexcept
 {
-    LOG_DESTROY();
+    LOGI("DeclarativeFrontend destroyed");
 }
 
 void DeclarativeFrontendNG::Destroy()

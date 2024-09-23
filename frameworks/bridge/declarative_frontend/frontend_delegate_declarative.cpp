@@ -126,7 +126,7 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
 FrontendDelegateDeclarative::~FrontendDelegateDeclarative()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("DelegateDeclarative destroyed");
 }
 
 int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()

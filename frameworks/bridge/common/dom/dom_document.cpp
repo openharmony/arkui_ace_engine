@@ -124,7 +124,6 @@ RefPtr<DOMNode> DOMListItemCreator(NodeId nodeId, const std::string& tag, int32_
 DOMDocument::~DOMDocument()
 {
     CHECK_RUN_ON(UI);
-    LOG_DESTROY();
 }
 
 RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nodeId, int32_t itemIndex)

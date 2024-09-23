@@ -154,7 +154,7 @@ void SwipeInfoToString(const BaseEventInfo& info, std::string& eventParam)
 PluginFrontend::~PluginFrontend() noexcept
 {
     Destroy();
-    LOG_DESTROY();
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "Plugin frontend destroyed");
 }
 
 void PluginFrontend::Destroy()
