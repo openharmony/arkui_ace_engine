@@ -140,6 +140,7 @@ private:
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
 
     void GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex);
+    TextStyle InheritParentTextStyle();
 
     int32_t preParagraphsPlaceholderCount_ = 0;
     int32_t currentParagraphPlaceholderCount_ = 0;

@@ -2953,7 +2953,6 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         auto tag = current.node->GetTag();
         if (spanNode && tag == V2::SYMBOL_SPAN_ETS_TAG && spanNode->GetSpanItem()->GetSymbolUnicode() != 0) {
             spanNode->CleanSpanItemChildren();
-            UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
             textForDisplay_.append("    ");
             dataDetectorAdapter_->textForAI_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
@@ -2997,7 +2996,6 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
 void TextPattern::CollectTextSpanNodes(const RefPtr<SpanNode>& spanNode, bool& isSpanHasClick)
 {
     spanNode->CleanSpanItemChildren();
-    UpdateChildProperty(spanNode);
     spanNode->MountToParagraph();
     textForDisplay_.append(spanNode->GetSpanItem()->content);
     dataDetectorAdapter_->textForAI_.append(spanNode->GetSpanItem()->content);
@@ -3331,117 +3329,6 @@ void TextPattern::DumpParagraphsInfo()
             auto textStyle = paragraph->GetParagraphStyle();
             auto direction = V2::ConvertTextDirectionToString(textStyle.direction);
             dumpLog.AddDesc(std::string("paragraph: ").append(text).append("; direction:").append(direction));
-        }
-    }
-}
-
-void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
-{
-    CHECK_NULL_VOID(child);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textLayoutProp = host->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProp);
-
-    auto inheritPropertyInfo = child->GetInheritPropertyInfo();
-    for (const PropertyInfo& info : inheritPropertyInfo) {
-        switch (info) {
-            case PropertyInfo::FONTSIZE:
-                if (textLayoutProp->HasFontSize()) {
-                    child->UpdateFontSizeWithoutFlushDirty(textLayoutProp->GetFontSize().value());
-                }
-                break;
-            case PropertyInfo::FONTCOLOR:
-                if (textLayoutProp->HasTextColor()) {
-                    child->UpdateTextColorWithoutFlushDirty(textLayoutProp->GetTextColor().value());
-                }
-                break;
-            case PropertyInfo::FONTSTYLE:
-                if (textLayoutProp->HasItalicFontStyle()) {
-                    child->UpdateItalicFontStyleWithoutFlushDirty(textLayoutProp->GetItalicFontStyle().value());
-                }
-                break;
-            case PropertyInfo::FONTWEIGHT:
-                if (textLayoutProp->HasFontWeight()) {
-                    child->UpdateFontWeightWithoutFlushDirty(textLayoutProp->GetFontWeight().value());
-                }
-                break;
-            case PropertyInfo::FONTFAMILY:
-                if (textLayoutProp->HasFontFamily()) {
-                    child->UpdateFontFamilyWithoutFlushDirty(textLayoutProp->GetFontFamily().value());
-                }
-                break;
-            case PropertyInfo::FONTFEATURE:
-                if (textLayoutProp->HasFontFeature()) {
-                    child->UpdateFontFeatureWithoutFlushDirty(textLayoutProp->GetFontFeature().value());
-                }
-                break;
-            case PropertyInfo::TEXTDECORATION:
-                if (textLayoutProp->HasTextDecoration()) {
-                    child->UpdateTextDecorationWithoutFlushDirty(textLayoutProp->GetTextDecoration().value());
-                    if (textLayoutProp->HasTextDecorationColor()) {
-                        child->UpdateTextDecorationColorWithoutFlushDirty(
-                            textLayoutProp->GetTextDecorationColor().value());
-                    }
-                    if (textLayoutProp->HasTextDecorationStyle()) {
-                        child->UpdateTextDecorationStyleWithoutFlushDirty(
-                            textLayoutProp->GetTextDecorationStyle().value());
-                    }
-                }
-                break;
-            case PropertyInfo::TEXTCASE:
-                if (textLayoutProp->HasTextCase()) {
-                    child->UpdateTextCaseWithoutFlushDirty(textLayoutProp->GetTextCase().value());
-                }
-                break;
-            case PropertyInfo::LETTERSPACE:
-                if (textLayoutProp->HasLetterSpacing()) {
-                    child->UpdateLetterSpacingWithoutFlushDirty(textLayoutProp->GetLetterSpacing().value());
-                }
-                break;
-            case PropertyInfo::LINEHEIGHT:
-                if (textLayoutProp->HasLineHeight()) {
-                    child->UpdateLineHeightWithoutFlushDirty(textLayoutProp->GetLineHeight().value());
-                }
-                break;
-            case PropertyInfo::LINESPACING:
-                if (textLayoutProp->HasLineSpacing()) {
-                    child->UpdateLineSpacingWithoutFlushDirty(textLayoutProp->GetLineSpacing().value());
-                }
-                break;
-            case PropertyInfo::TEXTSHADOW:
-                if (textLayoutProp->HasTextShadow()) {
-                    child->UpdateTextShadowWithoutFlushDirty(textLayoutProp->GetTextShadow().value());
-                }
-                break;
-            case PropertyInfo::HALFLEADING:
-                if (textLayoutProp->HasHalfLeading()) {
-                    child->UpdateHalfLeadingWithoutFlushDirty(textLayoutProp->GetHalfLeading().value());
-                }
-                break;
-            case PropertyInfo::MIN_FONT_SCALE:
-                if (textLayoutProp->HasMinFontScale()) {
-                    child->UpdateMinFontScaleWithoutFlushDirty(textLayoutProp->GetMinFontScale().value());
-                }
-                break;
-            case PropertyInfo::MAX_FONT_SCALE:
-                if (textLayoutProp->HasMaxFontScale()) {
-                    child->UpdateMaxFontScaleWithoutFlushDirty(textLayoutProp->GetMaxFontScale().value());
-                }
-                break;
-            case PropertyInfo::VARIABLE_FONT_WEIGHT:
-                if (textLayoutProp->HasVariableFontWeight() && !child->GetHasUserFontWeight()) {
-                    child->UpdateVariableFontWeightWithoutFlushDirty(textLayoutProp->GetVariableFontWeight().value());
-                }
-                break;
-            case PropertyInfo::ENABLE_VARIABLE_FONT_WEIGHT:
-                if (textLayoutProp->HasEnableVariableFontWeight() && !child->GetHasUserFontWeight()) {
-                    child->UpdateEnableVariableFontWeightWithoutFlushDirty(
-                        textLayoutProp->GetEnableVariableFontWeight().value());
-                }
-                break;
-            default:
-                break;
         }
     }
 }
