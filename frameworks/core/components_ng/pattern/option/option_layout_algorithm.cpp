@@ -93,8 +93,13 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     child->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     auto rowChild = child->GetOrCreateChildByIndex(0);
     if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
+        float horInterval = 0.0f;
+        if (layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+            SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
+            horInterval = optionSize.Width() - childSize.Width();
+        }
         child->GetGeometryNode()->SetMarginFrameOffset(
-            OffsetF(0.0, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
+            OffsetF(horInterval, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
         child->Layout();
         return;
     }
