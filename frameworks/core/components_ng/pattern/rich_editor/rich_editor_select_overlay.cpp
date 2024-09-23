@@ -569,4 +569,15 @@ void RichEditorSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     }
 }
 
+float RichEditorSelectOverlay::GetHandleHotZoneRadius()
+{
+    auto hotZoneRadius = 0.0f;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, hotZoneRadius);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, hotZoneRadius);
+    hotZoneRadius = theme->GetHandleHotZoneRadius().ConvertToPx();
+    return hotZoneRadius;
+}
+
 } // namespace OHOS::Ace::NG

@@ -2298,9 +2298,10 @@ bool RichEditorPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaret
 bool RichEditorPattern::RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect)
 {
     auto lastCaretHeight = lastCaretRect.Height();
-    auto caretRect =
-        RectF(lastCaretRect.GetX() - lastCaretHeight / 2.0f, lastCaretRect.GetY(), lastCaretHeight, lastCaretHeight);
-    return caretRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));
+    auto handleHotZone = selectOverlay_->GetHandleHotZoneRadius();
+    auto caretHotZoneRect =
+        RectF(lastCaretRect.GetX() - handleHotZone, lastCaretRect.GetY(), handleHotZone * 2, lastCaretHeight);
+    return caretHotZoneRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));
 }
 
 void RichEditorPattern::CreateAndShowSingleHandle()
