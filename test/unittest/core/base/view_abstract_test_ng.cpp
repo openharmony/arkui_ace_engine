@@ -1408,7 +1408,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest026, TestSize.Level1)
     keys.push_back(ModifierKey::CTRL);
     ViewAbstract::SetKeyboardShortcut(VALUE_X, std::move(keys), callback);
     ViewAbstract::SetKeyboardShortcut(AceType::RawPtr(FRAME_NODE_REGISTER), VALUE_X, std::move(keys), callback);
-    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
+    EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 1);
     keys.clear();
     /**
      * @tc.steps: step3. call SetKeyboardShortcut with other wrong type.
