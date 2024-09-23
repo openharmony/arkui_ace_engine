@@ -381,7 +381,6 @@ std::function<void()> SubwindowOhos::GetInitToastDelayTask(const NG::ToastInfo& 
             ret = subwindowOhos->InitToastServiceConfig();
             if (!ret) {
                 TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "init toast service conf failed");
-                return;
             }
             subwindowOhos->SetIsToastWindow(true);
         }
