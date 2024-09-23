@@ -3956,15 +3956,28 @@ void TextPattern::BeforeCreatePaintWrapper()
     }
 }
 
+void TextPattern::StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset)
+{
+    scrollableParent_ = selectOverlay_->FindScrollableParent();
+    TextGestureSelector::StartGestureSelection(start, end, startOffset);
+}
+
 int32_t TextPattern::GetTouchIndex(const OffsetF& offset)
 {
+    OffsetF deltaOffset;
+    if (scrollableParent_.Upgrade()) {
+        auto parentGlobalOffset = GetParentGlobalOffset();
+        deltaOffset = parentGlobalOffset - parentGlobalOffset_;
+    }
     auto paragraphOffset =
-        offset - GetTextContentRect().GetOffset() + OffsetF(0.0f, std::min(GetBaselineOffset(), 0.0f));
+        offset - deltaOffset - GetTextContentRect().GetOffset() + OffsetF(0.0f, std::min(GetBaselineOffset(), 0.0f));
     return GetHandleIndex({ paragraphOffset.GetX(), paragraphOffset.GetY() });
 }
 
 void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
 {
+    selectOverlay_->TriggerScrollableParentToScroll(
+        scrollableParent_.Upgrade(), info.GetTouches().front().GetGlobalLocation(), false);
     auto localOffset = info.GetTouches().front().GetLocalLocation();
     if (magnifierController_) {
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
@@ -3977,6 +3990,7 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
 
 void TextPattern::OnTextGenstureSelectionEnd()
 {
+    selectOverlay_->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), Offset(), true);
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
