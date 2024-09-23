@@ -659,6 +659,9 @@ void SwiperPattern::InitSurfaceChangedCallback()
 bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub)
 {
     for (const auto& item : itemPosition_) {
+        if (!item.second.node) {
+            continue;
+        }
         auto focusHub = item.second.node->GetFirstFocusHubChild();
         if (focusHub == targetFocusHub) {
             return true;
