@@ -632,6 +632,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "web_pattern_focus_test_ng.cpp",
     "web_pattern_keyboard_test_ng.cpp",
     "web_pattern_nbranch_test.cpp",
+    "web_pattern_new_branch_test.cpp",
     "web_pattern_select_test_ng.cpp",
     "web_pattern_test.cpp",
     "web_pattern_test_ng.cpp",
