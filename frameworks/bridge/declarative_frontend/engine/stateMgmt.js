@@ -4893,9 +4893,16 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
       FIXME this expects the Map, Set patch to go in
      */
     checkIsSupportedValue(value) {
-        let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV2(value) &&
-            !ObserveV2.IsMakeObserved(value)) || typeof value === 'number' || typeof value === 'string' ||
-            typeof value === 'boolean' || value === undefined || value === null);
+        let res = ((typeof value === 'object' && typeof value !== 'function'
+            && !ObserveV2.IsObservedObjectV2(value)
+            && !ObserveV2.IsMakeObserved(value))
+            // FIXME enable the check when V1-V2 interoperability is forbidden
+            // && !ObserveV2.IsProxiedObservedV2(value)) 
+            || typeof value === 'number'
+            || typeof value === 'string'
+            || typeof value === 'boolean'
+            || value === undefined
+            || value === null);
         if (!res) {
             errorReport.varValueCheckFailed({
                 customComponent: this.debugInfoOwningView(),
@@ -5378,6 +5385,7 @@ class ObservedPropertySimplePU extends ObservedPropertyPU {
 class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
     constructor(source, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
+        this.setDecoratorInfo("@Prop");
         if (source && (typeof (source) === 'object') && ('subscribeMe' in source)) {
             // code path for @(Local)StorageProp, the source is a ObservedPropertyObject<C> in a LocalStorage)
             this.source_ = source;
@@ -5400,7 +5408,6 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         if (this.source_ !== undefined) {
             this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
         }
-        this.setDecoratorInfo("@Prop");
         
     }
     /*
@@ -7631,9 +7638,8 @@ class SetMapProxyHandler {
                     }
                     return receiver;
                 } : (typeof ret === 'function') ?
-                // SendableSet can't be bound -> functions not observed
-                ret.bind(SendableType.isSet(target) ? target : receiver) :
-                ret;
+                // Bind to target ==> functions not observed
+                ret.bind(target) : ret;
         }
         if (target instanceof Map || (this.isMakeObserved_ && SendableType.isMap(target))) {
             if (key === 'get') {
@@ -7663,9 +7669,8 @@ class SetMapProxyHandler {
             }
         }
         return (typeof ret === 'function') ?
-            // SendableMap can't be bound -> functions not observed
-            ret.bind(SendableType.isMap(target) ? target : receiver) :
-            ret;
+            // Bind to target ==> functions not observed
+            ret.bind(target) : ret;
     }
     set(target, key, value) {
         if (typeof key === 'symbol') {
@@ -7775,6 +7780,10 @@ class ObserveV2 {
     // return true given value is @observed object
     static IsObservedObjectV2(value) {
         return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
+    }
+    // return true if given value is proxied observed object, either makeObserved or autoProxyObject
+    static IsProxiedObservedV2(value) {
+        return (value && typeof value === 'object' && value[ObserveV2.SYMBOL_PROXY_GET_TARGET]);
     }
     // return true given value is the return value of makeObserved
     static IsMakeObserved(value) {
