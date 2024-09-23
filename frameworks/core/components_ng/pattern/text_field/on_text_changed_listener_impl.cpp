@@ -84,6 +84,9 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         client->SetInputMethodStatus(status);
+        if (!status) {
+            client->NotifyKeyboardHeight(0);
+        }
     };
     PostTaskToUI(task, "ArkUITextFieldSetKeyboardStatus");
 }
@@ -318,7 +321,6 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
                 client->NotifyKeyboardClosedByUser();
             }
             client->NotifyKeyboardClosed();
-            client->NotifyKeyboardHeight(0);
         };
         PostTaskToUI(task, "ArkUITextFieldKeyboardClosedByUser");
     }
