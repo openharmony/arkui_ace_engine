@@ -700,6 +700,10 @@ bool OverlayManager::GetMenuPreviewCenter(NG::OffsetF& offset)
             CHECK_NULL_RETURN(menuWarpperPattern, false);
             auto previewChild = menuWarpperPattern->GetPreview();
             CHECK_NULL_RETURN(previewChild, false);
+            auto geometryNode = previewChild->GetGeometryNode();
+            if (geometryNode && geometryNode->GetFrameRect().IsEmpty()) {
+                return false;
+            }
             auto previewOffset = previewChild->GetPaintRectCenter();
             offset.SetX(previewOffset.GetX());
             offset.SetY(previewOffset.GetY());
