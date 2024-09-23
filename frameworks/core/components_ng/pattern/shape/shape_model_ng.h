@@ -49,8 +49,8 @@ public:
     static void SetStrokeOpacity(FrameNode* frameNode, double strokeOpacity);
     static void SetStrokeWidth(FrameNode* frameNode, const Ace::Dimension& strokeWidth);
     static void SetAntiAlias(FrameNode* frameNode, bool antiAlias);
-    static void SetStroke(FrameNode* frameNode, const Color& color);
-    static void SetFill(FrameNode* frameNode, const Color& color);
+    static void SetStroke(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetFill(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset);
     static void SetStrokeLineCap(FrameNode* frameNode, int lineCapStyle);
     static void SetStrokeLineJoin(FrameNode* frameNode, int lineJoinStyle);

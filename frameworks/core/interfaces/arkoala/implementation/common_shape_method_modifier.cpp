@@ -13,17 +13,27 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/shape/shape_model_ng.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonShapeMethodModifier {
 void StrokeImpl(Ark_NativePointer node,
                 const ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    ShapeModelNG::SetStroke(frameNode, Converter::OptConvert<Color>(*value));
 }
 void FillImpl(Ark_NativePointer node,
               const ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    ShapeModelNG::SetFill(frameNode, Converter::OptConvert<Color>(*value));
 }
 void StrokeDashOffsetImpl(Ark_NativePointer node,
                           const Type_CommonShapeMethod_strokeDashOffset_Arg0* value)

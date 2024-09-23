@@ -32,6 +32,13 @@ RefPtr<NG::FrameNode> NG::CircleModelNG::CreateFrameNode(int32_t nodeId)
         V2::CIRCLE_ETS_TAG, nodeId, AceType::MakeRefPtr<CirclePattern>());
 }
 
+std::optional<NG::SizeF> NG::ShapeContainerLayoutAlgorithm::MeasureContent(
+    const LayoutConstraintF& contentConstraint,
+    LayoutWrapper* layoutWrapper)
+{
+    return {};
+}
+
 void AnimationUtils::AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve,
     const PropertyCallback& callback) {}
 } // namespace OHOS::Ace
