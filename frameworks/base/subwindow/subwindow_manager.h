@@ -19,6 +19,7 @@
 #include <mutex>
 #include <set>
 #include <unordered_map>
+#include <array>
 
 #include "base/memory/referenced.h"
 #include "base/subwindow/subwindow.h"
@@ -116,6 +117,11 @@ public:
 
     void ClearToastInSubwindow();
     void ShowToast(const NG::ToastInfo& toastInfo);
+    void ShowToastNG(const NG::ToastInfo& toastInfo);
+    const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId);
+    void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
+    void HideToastSubWindowNG();
+    ToastWindowType GetToastWindowType(int32_t instanceId);
     void ShowDialog(const std::string& title, const std::string& message, const std::vector<ButtonInfo>& buttons,
         bool autoCancel, std::function<void(int32_t, int32_t)>&& napiCallback,
         const std::set<std::string>& dialogCallbacks);
@@ -151,6 +157,8 @@ private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
     RefPtr<Subwindow> GetOrCreateSystemSubWindow();
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
+    RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,
+        uint32_t mainWindowId);
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
@@ -169,6 +177,8 @@ private:
 
     RefPtr<Subwindow> currentSubwindow_;
 
+    std::mutex toastMutex_;
+    SubwindowMap toastWindowMap_;
     // Used to save the relationship between container and dialog subwindow, it is 1:1
     std::mutex dialogSubwindowMutex_;
     SubwindowMap dialogSubwindowMap_;

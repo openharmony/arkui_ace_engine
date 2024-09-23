@@ -28,6 +28,13 @@
 #include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
+enum class ToastWindowType {
+    TOAST_IN_TYPE_APP_SUB_WINDOW = 0,
+    TOAST_IN_TYPE_SYSTEM_SUB_WINDOW,
+    TOAST_IN_TYPE_TOAST,
+    TOAST_IN_TYPE_SYSTEM_FLOAT,
+    TOAST_WINDOW_COUNT
+};
 
 class ACE_EXPORT Subwindow : public AceType {
     DECLARE_ACE_TYPE(Subwindow, AceType)
@@ -117,6 +124,27 @@ public:
         return isAboveApps_;
     }
 
+    void SetToastWindowType(const ToastWindowType& type)
+    {
+        toastWindowType_ = type;
+        SetAboveApps(true);
+    }
+
+    void SetMainWindowId(uint32_t mainWindowId)
+    {
+        mainWindowId_ = mainWindowId;
+    }
+
+    uint32_t GetMainWindowId() const
+    {
+        return mainWindowId_;
+    }
+
+    ToastWindowType GetToastWindowType() const
+    {
+        return toastWindowType_;
+    }
+
     void SetIsSystemTopMost(bool isSystemTopMost)
     {
         isSystemTopMost_ = isSystemTopMost;
@@ -162,6 +190,9 @@ private:
     int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
+    ToastWindowType toastWindowType_ = ToastWindowType::TOAST_IN_TYPE_TOAST;
+    // toast main window ID
+    uint32_t mainWindowId_ = 0;
     bool isRosenWindowCreate_ = false;
 };
 
