@@ -148,7 +148,9 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetCurrentIndex(currentIndex_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     algo->SetContentMainSize(contentMainSize_);
-    algo->SetCurrentDelta(currentDelta_);
+    if (!usePropertyAnimation_) {
+        algo->SetCurrentDelta(currentDelta_);
+    }
     algo->SetItemsPosition(itemPosition_);
     if (IsOutOfBoundary() && !IsLoop()) {
         algo->SetOverScrollFeature();
