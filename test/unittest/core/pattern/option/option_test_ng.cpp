@@ -28,6 +28,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -802,4 +803,371 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg005, TestSize.Level1)
     delete paintWrapper;
     paintWrapper = nullptr;
 }
+
+/**
+ * @tc.name: InitFocusEvent001
+ * @tc.desc: Test OptionPattern InitFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, InitFocusEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call InitFocusEvent().
+     */
+    EXPECT_EQ(optionPattern_->focusEventInitialized_, false);
+    optionPattern_->InitFocusEvent();
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_EQ(optionPattern_->focusEventInitialized_, true);
+}
+
+/**
+ * @tc.name: HandleFocusEvent001
+ * @tc.desc: Test OptionPattern HandleFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, HandleFocusEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call HandleFocusEvent().
+     */
+    optionPattern_->HandleFocusEvent();
+    /**
+     * @tc.steps: step3. EXPECT_NE().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_NE(optionPattern_->isFocusActiveUpdateEvent_, nullptr);
+}
+
+/**
+ * @tc.name: HandleBlurEvent001
+ * @tc.desc: Test OptionPattern HandleBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, HandleBlurEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call HandleBlurEvent().
+     */
+    optionPattern_->HandleBlurEvent();
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_EQ(optionPattern_->isFocusActiveUpdateEvent_, nullptr);
+}
+
+/**
+ * @tc.name: SetFocusStyle001
+ * @tc.desc: Test OptionPattern SetFocusStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, SetFocusStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_EQ(optionPattern_->selectTheme_->GetoptionApplyFocusedStyle(), 0);
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call SetFocusStyle().
+     */
+    optionPattern_->SetFocusStyle();
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_EQ(optionPattern_->isFocusShadowSet_, false);
+}
+
+/**
+ * @tc.name: SetFocusStyle002
+ * @tc.desc: Test OptionPattern SetFocusStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, SetFocusStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_EQ(optionPattern_->selectTheme_->GetoptionApplyFocusedStyle(), 0);
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call SetFocusStyle().
+     */
+    optionPattern_->selectTheme_->optionApplyFocusedStyle_ = true;
+    optionPattern_->SetFocusStyle();
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_EQ(optionPattern_->isFocusShadowSet_, true);
+}
+
+/**
+ * @tc.name: ClearFocusStyle001
+ * @tc.desc: Test OptionPattern ClearFocusStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, ClearFocusStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_EQ(optionPattern_->selectTheme_->GetoptionApplyFocusedStyle(), 0);
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call ClearFocusStyle().
+     */
+    optionPattern_->ClearFocusStyle();
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_EQ(optionPattern_->isFocusShadowSet_, false);
+}
+
+/**
+ * @tc.name: ClearFocusStyle002
+ * @tc.desc: Test OptionPattern ClearFocusStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, ClearFocusStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_EQ(optionPattern_->selectTheme_->GetoptionApplyFocusedStyle(), 0);
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call ClearFocusStyle().
+     */
+    optionPattern_->selectTheme_->optionApplyFocusedStyle_ = true;
+    optionPattern_->ClearFocusStyle();
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_EQ(optionPattern_->isFocusShadowSet_, false);
+}
+
+/**
+ * @tc.name: GetFocusPattern001
+ * @tc.desc: Test OptionPattern GetFocusPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, GetFocusPattern001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+
+    auto theme = AceType::MakeRefPtr<AppTheme>();
+
+    /**
+     * @tc.steps: step2. call GetFocusPattern().
+     */
+    FocusPattern focusPattern = optionPattern_->GetFocusPattern();
+    /**
+     * @tc.steps: step3. ASSERT_NE().
+     * @tc.expected: the function runs normally
+     */
+    ASSERT_NE(optionPattern_, nullptr);
+}
+
+/**
+ * @tc.name: GetFocusPattern002
+ * @tc.desc: Test OptionPattern GetFocusPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, GetFocusPattern002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+
+    auto theme = AceType::MakeRefPtr<AppTheme>();
+
+    /**
+     * @tc.steps: step2. call GetFocusPattern().
+     */
+    FocusPattern focusPattern = optionPattern_->GetFocusPattern();
+    /**
+     * @tc.steps: step3. ASSERT_NE().
+     * @tc.expected: the function runs normally
+     */
+    ASSERT_NE(optionPattern_, nullptr);
+}
+
+/**
+ * @tc.name: SetBorderColor001
+ * @tc.desc: Test OptionPattern SetBorderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, SetBorderColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call SetBorderColor().
+     */
+    Color boderColor = Color(0xFFFF0000);
+    optionPattern_->SetBorderColor(boderColor);
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_NE(optionPattern_->GetBorderColor(), boderColor);
+}
+
+/**
+ * @tc.name: SetBorderColor002
+ * @tc.desc: Test OptionPattern SetBorderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, SetBorderColor002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call SetBorderColor().
+     */
+    Color boderColor = Color(0x00000000);
+    optionPattern_->SetBorderColor(boderColor);
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_EQ(optionPattern_->GetBorderColor(), boderColor);
+}
+
+/**
+ * @tc.name: SetBorderWidth001
+ * @tc.desc: Test OptionPattern SetBorderWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, SetBorderWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call SetBorderWidth().
+     */
+    Dimension value = 0.0_vp;
+    optionPattern_->SetBorderWidth(value);
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_EQ(optionPattern_->GetBorderWidth(), value);
+}
+
+/**
+ * @tc.name: SetBorderWidth002
+ * @tc.desc: Test OptionPattern SetBorderWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, SetBorderWidth002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call SetBorderWidth().
+     */
+    Dimension value = 16.0_vp;
+    optionPattern_->SetBorderWidth(value);
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_NE(optionPattern_->GetBorderWidth(), value);
+}
+
+/**
+ * @tc.name: GetBorderColor001
+ * @tc.desc: Test OptionPattern GetBorderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, GetBorderColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call GetBorderColor().
+     */
+    Color value = optionPattern_->GetBorderColor();
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_EQ(value, Color::TRANSPARENT);
+}
+
+/**
+ * @tc.name: GetBorderWidth001
+ * @tc.desc: Test OptionPattern GetBorderWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(OptionTestNg, GetBorderWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create option.
+     */
+    optionPattern_->selectTheme_ = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(optionPattern_, nullptr);
+    /**
+     * @tc.steps: step2. call GetBorderWidth().
+     */
+    Dimension value = optionPattern_->GetBorderWidth();
+    /**
+     * @tc.steps: step3. EXPECT_EQ().
+     * @tc.expected: the function runs normally
+     */
+    EXPECT_EQ(value, 0.0_vp);
+}
+
 } // namespace OHOS::Ace::NG

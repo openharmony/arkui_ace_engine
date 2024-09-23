@@ -1691,4 +1691,1144 @@ HWTEST_F(SelectPatternTestNg, SetControlSize001, TestSize.Level1)
     auto controlSize = selectPattern->GetControlSize();
     EXPECT_EQ(ControlSize::SMALL, controlSize);
 }
+
+/**
+ * @tc.name: SetSelected001
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(0);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, 0);
+}
+
+/**
+ * @tc.name: SetSelected002
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(0);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, 0);
+}
+
+/**
+ * @tc.name: SetSelected003
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected003, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(0);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, 0);
+}
+
+/**
+ * @tc.name: SetSelected004
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected004, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+    { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(0);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, 0);
+}
+
+/**
+ * @tc.name: SetSelected005
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected005, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(1);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, -1);
+}
+
+/**
+ * @tc.name: SetSelected006
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected006, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(1);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, -1);
+}
+
+/**
+ * @tc.name: SetSelected007
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected007, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(1);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, -1);
+}
+
+/**
+ * @tc.name: SetSelected008
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected008, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+    { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(1);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, 1);
+}
+
+/**
+ * @tc.name: SetSelected009
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected009, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(2);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, -1);
+}
+
+/**
+ * @tc.name: SetSelected010
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected010, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(2);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, -1);
+}
+
+/**
+ * @tc.name: SetSelected011
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected011, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(2);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, -1);
+}
+
+/**
+ * @tc.name: SetSelected012
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected012, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+    { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(2);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, 2);
+}
+
+/**
+ * @tc.name: SetSelected013
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected013, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(3);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, -1);
+}
+
+/**
+ * @tc.name: SetSelected014
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected014, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(3);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, -1);
+}
+
+/**
+ * @tc.name: SetSelected015
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected015, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(3);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, -1);
+}
+
+/**
+ * @tc.name: SetSelected016
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected016, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+    { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(3);
+    auto val = selectPattern->GetSelected();
+
+    EXPECT_EQ(val, -1);
+}
+
+/**
+ * @tc.name: SetSelected017
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected017, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(0);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected018
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected018, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(0);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected019
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected019, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(0);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected020
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected020, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+    { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(0);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected021
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected021, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(1);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected022
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected022, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(1);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected023
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected023, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(1);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected024
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected024, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+    { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(1);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected025
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected025, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(2);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected026
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected026, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(2);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected027
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected027, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(2);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected028
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected028, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+    { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(2);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected029
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected029, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(3);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected030
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected030, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(3);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected031
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected031, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(3);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: SetSelected032
+ * @tc.desc: Test SelectPattern SetSelected
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetSelected032, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+    { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call SetSelected.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->SetSelected(3);
+    auto val = selectPattern->isSelected_;
+
+    EXPECT_EQ(val, false);
+}
+
+/**
+ * @tc.name: InitSpinner001
+ * @tc.desc: Test SelectPattern InitSpinner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, InitSpinner001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto menuNode = selectPattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call InitSpinner.
+     * @tc.expected: the function runs normally
+     */
+    // get theme from SelectThemeManager
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto spinnerId = selectPattern->GetSpinnerId();
+    auto spinner = FrameNode::GetOrCreateFrameNode(
+            V2::IMAGE_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_VOID(spinner);
+    spinner->SetInternal();
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    selectPattern->InitSpinner(spinner, iconTheme, theme);
+    EXPECT_EQ(1, 1);
+}
+
 } // namespace OHOS::Ace::NG
