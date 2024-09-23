@@ -24,7 +24,7 @@ public:
     void Create() override;
     void SetOnStateChange(std::function<void(bool isActivated)>&& onStateChange) override;
     void SetNavRouteMode(int32_t value) override;
-    static void SetNavRouteMode(FrameNode* frameNode, int32_t value);
+    static void SetNavRouteMode(FrameNode* frameNode, const std::optional<int32_t>& mode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_NAVROUTER_NAVROUTER_MODEL_NG_H

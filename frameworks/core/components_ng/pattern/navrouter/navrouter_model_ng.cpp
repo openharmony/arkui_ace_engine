@@ -48,13 +48,15 @@ void NavRouterModelNG::SetNavRouteMode(int32_t mode)
     navRouterPattern->SetNavRouteMode(static_cast<NG::NavRouteMode>(mode));
 }
 
-void NavRouterModelNG::SetNavRouteMode(FrameNode* frameNode, int32_t mode)
+void NavRouterModelNG::SetNavRouteMode(FrameNode* frameNode, const std::optional<int32_t>& mode)
 {
     CHECK_NULL_VOID(frameNode);
     auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
     CHECK_NULL_VOID(navRouterGroupNode);
     auto navRouterPattern = navRouterGroupNode->GetPattern<NavRouterPattern>();
     CHECK_NULL_VOID(navRouterPattern);
-    navRouterPattern->SetNavRouteMode(static_cast<NG::NavRouteMode>(mode));
+    auto defaultValue = static_cast<int32_T>(NavRouteMode::PUSH_WITH_RECREATE)
+    navRouterPattern->SetNavRouteMode(static_cast<NG::NavRouteMode>(
+        mode.valueOr(defaultValue)));
 }
 } // namespace OHOS::Ace::NG
