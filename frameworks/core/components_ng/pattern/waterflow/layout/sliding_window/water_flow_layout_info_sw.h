@@ -238,6 +238,8 @@ private:
     bool AdjustLanes(const std::vector<WaterFlowSections::Section>& sections,
         const WaterFlowSections::Section& prevSection, int32_t start, int32_t prevSegIdx);
 
+    void ClearData();
+    
     /* cache */
     float startPos_ = 0.0f;
     float endPos_ = 0.0f;
