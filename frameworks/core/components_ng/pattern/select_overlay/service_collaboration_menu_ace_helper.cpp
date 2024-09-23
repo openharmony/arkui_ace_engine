@@ -225,7 +225,8 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     rowContext->UpdateBorderColor(borderColorProperty);
     rowProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(MENUITEM_WIDTH)), CalcLength(static_cast<float>(MENUITEM_HEIGHT))));
-    rowProperty->UpdatePadding({.right = CalcLength(0.0f)});
+    PaddingProperty rowpadding { .right = CalcLength(static_cast<float>(PANDDING_ZERO)) };
+    rowProperty->UpdatePadding(rowpadding);
     MarginProperty margin;
     margin.bottom = CalcLength(static_cast<float>(ROW_PADDING));
     rowProperty->UpdateMargin(margin);
@@ -499,6 +500,56 @@ void ServiceCollaborationAceCallback::CreateText(const std::string& value, const
     textNode->MarkModifyDone();
 }
 
+void ServiceCollaborationAceCallback::AddMouseEventToEndIcon(const RefPtr<FrameNode>& iconNode)
+{
+    auto inputHub = iconNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto gestureHub = iconNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto mouseTask = [weakHelper = WeakClaim(this), node = WeakClaim(RawPtr(iconNode))](bool isHover) {
+        auto helper = weakHelper.Upgrade();
+        auto iconNode = node.Upgrade();
+        CHECK_NULL_VOID(helper && iconNode);
+        auto iconContext = iconNode->GetRenderContext();
+        CHECK_NULL_VOID(iconContext);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        if (isHover) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "hover");
+            helper->endIconIsHover_ = isHover;
+            iconContext->UpdateBackgroundColor(theme->GetHoverColor());
+        } else {
+            TAG_LOGI(AceLogTag::ACE_MENU, "leave");
+            helper->endIconIsHover_ = isHover;
+            iconContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
+    };
+    auto touchCallback = [weakHelper = WeakClaim(this), node = WeakClaim(RawPtr(iconNode))]
+        (const TouchEventInfo& info) {
+        auto helper = weakHelper.Upgrade();
+        auto iconNode = node.Upgrade();
+        CHECK_NULL_VOID(helper && iconNode);
+        auto iconContext = iconNode->GetRenderContext();
+        CHECK_NULL_VOID(iconContext);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        auto touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN) {
+            iconContext->UpdateBackgroundColor(theme->GetClickedColor());
+        }
+        if (touchType == TouchType::UP) {
+            iconContext->UpdateBackgroundColor(helper->endIconIsHover_ ? theme->GetHoverColor() : Color::TRANSPARENT);
+        }
+    };
+    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    inputHub->AddOnHoverEvent(mouseEvent);
+    gestureHub->AddTouchEvent(touchEvent);
+}
+
 void ServiceCollaborationAceCallback::CreateEndIcon(const std::string& icon, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, icon is %{public}s", icon.c_str());
@@ -520,6 +571,10 @@ void ServiceCollaborationAceCallback::CreateEndIcon(const std::string& icon, con
             CalcLength(static_cast<float>(ENDICON_SIZE), DimensionUnit::VP)
         )
     );
+    iconProperty->UpdatePadding({ .right = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP),
+        .top = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP),
+        .left = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP),
+        .bottom = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP)});
     iconProperty->UpdateAlignment(Alignment::CENTER_LEFT);
     MarginProperty margin;
     margin.right = CalcLength(static_cast<float>(ENDICON_MARGIN));
@@ -537,6 +592,11 @@ void ServiceCollaborationAceCallback::CreateEndIcon(const std::string& icon, con
     gestureHub->AddClickEvent(clickEvent);
     iconNode->MountToParent(parent);
     iconNode->MarkModifyDone();
+    auto iconContext = iconNode->GetRenderContext();
+    CHECK_NULL_VOID(iconContext);
+    BorderRadiusProperty border(Dimension(static_cast<float>(ICON_BORDER_RADIUS), DimensionUnit::VP));
+    iconContext->UpdateBorderRadius(border);
+    AddMouseEventToEndIcon(iconNode);
 }
 
 void ServiceCollaborationAceCallback::CreateStartIcon(const std::string& icon, const RefPtr<FrameNode>& parent)
