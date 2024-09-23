@@ -1414,6 +1414,20 @@ void MenuPattern::ShowMenuDisappearAnimation()
     });
 }
 
+void MenuPattern::UpdateClipPath(const RefPtr<LayoutWrapper>& dirty)
+{
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto menuLayoutAlgorithm = DynamicCast<MenuLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(menuLayoutAlgorithm);
+    auto clipPath = menuLayoutAlgorithm->GetClipPath();
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<MenuPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateClipPath(clipPath);
+}
+
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     ShowPreviewMenuAnimation();
@@ -1427,6 +1441,7 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
 
+    UpdateClipPath(dirty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();

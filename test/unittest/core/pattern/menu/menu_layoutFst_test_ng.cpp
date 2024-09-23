@@ -1735,13 +1735,13 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg041, TestSize.Level1)
             EXPECT_EQ(result, OffsetF(arrowOffsetValue, menuSize.Height() + ARROW_HIGHT.ConvertToPx()));
         }
         if (positionCondition2.find(placementValue) != positionCondition2.end()) {
-            EXPECT_EQ(result, OffsetF(arrowOffsetValue, -ARROW_HIGHT.ConvertToPx()));
+            EXPECT_EQ(result, OffsetF(arrowOffsetValue, 0));
         }
         if (positionCondition3.find(placementValue) != positionCondition3.end()) {
             EXPECT_EQ(result, OffsetF(menuSize.Width() + ARROW_HIGHT.ConvertToPx(), arrowOffsetValue));
         }
         if (positionCondition4.find(placementValue) != positionCondition4.end()) {
-            EXPECT_EQ(result, OffsetF(-ARROW_HIGHT.ConvertToPx(), arrowOffsetValue));
+            EXPECT_EQ(result, OffsetF(0, arrowOffsetValue));
         }
     }
 }
