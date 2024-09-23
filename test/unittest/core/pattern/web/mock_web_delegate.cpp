@@ -1323,7 +1323,7 @@ void WebDelegate::SetVirtualKeyBoardArg(int32_t width, int32_t height, double ke
 }
 bool WebDelegate::ShouldVirtualKeyboardOverlay()
 {
-return false;
+return true;
 }
 void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type)
 {

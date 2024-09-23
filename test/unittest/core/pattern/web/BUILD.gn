@@ -634,6 +634,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "web_pattern_test.cpp",
     "web_pattern_test_ng.cpp",
     "web_pattern_touch_test_ng.cpp",
+    "web_pattern_web_test_ng.cpp",
     "web_pattern_window_test_ng.cpp",
   ]
 
