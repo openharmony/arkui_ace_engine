@@ -251,4 +251,13 @@ void ScrollableModelNG::SetMaxFlingSpeed(FrameNode* frameNode, double max)
     pattern->SetMaxFlingVelocity(max);
 }
 
+void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<BasicShape>& shape)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, shape));
+}
+
+void ScrollableModelNG::SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<BasicShape>& shape)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, shape), frameNode);
+}
 } // namespace OHOS::Ace::NG

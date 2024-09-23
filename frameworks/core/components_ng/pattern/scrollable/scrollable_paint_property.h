@@ -36,6 +36,14 @@ struct FadingEdgeProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FadingEdgeLength, Dimension);
 };
 
+enum class ContentClipMode {
+    CONTENT_ONLY,
+    BOUNDARY,
+    SAFE_AREA,
+    CUSTOM, // inner enum, not present in JS
+};
+using ContentClip = std::pair<ContentClipMode, RefPtr<BasicShape>>;
+
 class ScrollablePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ScrollablePaintProperty, PaintProperty)
 
@@ -49,6 +57,7 @@ public:
         paintProperty->UpdatePaintProperty(this);
         paintProperty->propScrollBarProperty_ = CloneScrollBarProperty();
         paintProperty->propFadingEdgeProperty_ = CloneFadingEdgeProperty();
+        paintProperty->propContentClip_ = CloneContentClip();
         return paintProperty;
     }
 
@@ -68,6 +77,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(FadingEdgeProperty, FadingEdgeProperty);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, FadingEdge, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, FadingEdgeLength, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentClip, ContentClip, PROPERTY_UPDATE_RENDER);
     Dimension GetBarWidth() const;
     Color GetBarColor() const;
 
