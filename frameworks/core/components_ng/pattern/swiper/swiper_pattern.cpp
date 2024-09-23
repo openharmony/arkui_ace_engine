@@ -2774,7 +2774,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
     PointF dragPoint(
         static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
-    NGGestureRecognizer::Transform(dragPoint, GetHost(), true);
+    NGGestureRecognizer::Transform(dragPoint, GetHost(), true, info.GetIsPostEventResult(), info.GetPostEventNodeId());
     if (IsOutOfHotRegion(dragPoint)) {
         isTouchPad_ = false;
         return;
