@@ -71,12 +71,11 @@ HWTEST_F(LinearLayoutNewTestNG, Example, TestSize.Level1)
     ASSERT_EQ(frameNode->GetChildren().size(), 2);
     CreateLayoutTask(frameNode);
 
-    // error
-    // expect: first column offset (x, y) = (0, 0), actual x = 150?
-    EXPECT_EQ(frameNode->GetChildByIndex(FIRST_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 150.0f);
+    // expect: first column offset (x, y) = (0, 0)
+    EXPECT_EQ(frameNode->GetChildByIndex(FIRST_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 0.0f);
     EXPECT_EQ(frameNode->GetChildByIndex(FIRST_CHILD)->GetGeometryNode()->GetFrameOffset().GetY(), 0.0f);
-    // expect: second column offset (x, y) = (0, 30), actual x = 150?
-    EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 150.0f);
+    // expect: second column offset (x, y) = (0, 30)
+    EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 0.0f);
     EXPECT_EQ(frameNode->GetChildByIndex(SECOND_CHILD)->GetGeometryNode()->GetFrameOffset().GetY(), 30.0f);
 }
 } // namespace OHOS::Ace::NG
