@@ -148,10 +148,10 @@ template<>
 void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src)
 {
     switch (src) {
-    case ARK_NAV_ROUTE_MODE_PUSH_WITH_RECREATE: dst = NavRouteMode::PUSH_WITH_RECREATE; break;
-    case ARK_NAV_ROUTE_MODE_PUSH: dst = NavRouteMode::PUSH; break;
-    case ARK_NAV_ROUTE_MODE_REPLACE: dst = NavRouteMode::REPLACE; break;
-    default: LOGE("Unexpected enum value in Ark_NavRouteMode: %{public}d", src);
+        case ARK_NAV_ROUTE_MODE_PUSH_WITH_RECREATE: dst = NavRouteMode::PUSH_WITH_RECREATE; break;
+        case ARK_NAV_ROUTE_MODE_PUSH: dst = NavRouteMode::PUSH; break;
+        case ARK_NAV_ROUTE_MODE_REPLACE: dst = NavRouteMode::REPLACE; break;
+        default: LOGE("Unexpected enum value in Ark_NavRouteMode: %{public}d", src);
     }
 }
 

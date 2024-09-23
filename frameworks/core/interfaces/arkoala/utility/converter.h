@@ -589,7 +589,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<ChainEdgeEffect>& dst, const Ark_ChainEdgeEffect& src);
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<ListItemGroupArea>& dst, const Ark_ListItemGroupArea& src);
-    template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);    
+    template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
+    
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

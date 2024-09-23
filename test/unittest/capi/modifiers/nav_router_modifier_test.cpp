@@ -53,7 +53,7 @@ const GENERATED_ArkUINavRouterEventsReceiver* getNavRouterEventsReceiverTest()
 };
 const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
 {
-    static const GENERATED_ArkUIEventsAPI eventsImpl = { 
+    static const GENERATED_ArkUIEventsAPI eventsImpl = {
         .getNavRouterEventsReceiver = getNavRouterEventsReceiverTest
     };
     return &eventsImpl;
@@ -204,7 +204,7 @@ HWTEST_F(NavRouterModifierTest, setModeTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     auto inputValueModeMode = ARK_NAV_ROUTE_MODE_PUSH_WITH_RECREATE;
-    
+
     // Test
     modifier_->setMode(node_, inputValueModeMode);
 
@@ -246,6 +246,5 @@ HWTEST_F(NavRouterModifierTest, setModeTestInvalidValues, TestSize.Level1)
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
     EXPECT_EQ(resultStr, "PUSH_WITH_RECREATE");
-
 }
 } // namespace OHOS::Ace::NG
