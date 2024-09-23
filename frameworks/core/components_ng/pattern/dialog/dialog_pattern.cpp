@@ -1065,19 +1065,19 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         RefPtr<FrameNode> button;
         uint32_t val = size > 0 ? size - 1 : 0;
         if (i != val) {
-            button = CreateButton(buttons[i], i);
+            button = CreateButton(buttons[i], i, false, true, size);
         } else {
-            button = CreateButton(buttons[i], i, true);
+            button = CreateButton(buttons[i], i, true, true, size);
         }
         CHECK_NULL_RETURN(button, nullptr);
         auto props = DynamicCast<FrameNode>(button)->GetLayoutProperty();
         auto buttonRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(false));
+            AceType::MakeRefPtr<LinearLayoutPattern>(isSuitableForElderly_));
         CHECK_NULL_RETURN(buttonRow, nullptr);
         auto buttonRowProps = buttonRow->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_RETURN(buttonRowProps, nullptr);
-        buttonRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-        buttonRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        buttonRowProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
+        buttonRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
 
         button->MountToParent(buttonRow);
         button->MarkModifyDone();
