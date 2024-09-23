@@ -48,4 +48,15 @@ void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src)
             dst = static_cast<Ark_EnterKeyType>(-1);
     }
 }
+
+void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src)
+{
+    switch (src) {
+        case SharedTransitionEffectType::SHARED_EFFECT_STATIC:
+            dst = ARK_SHARED_TRANSITION_EFFECT_TYPE_STATIC; break;
+        case SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE:
+            dst = ARK_SHARED_TRANSITION_EFFECT_TYPE_EXCHANGE; break;
+        default: dst = static_cast<Ark_SharedTransitionEffectType>(-1);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

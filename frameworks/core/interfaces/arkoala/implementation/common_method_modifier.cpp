@@ -57,7 +57,49 @@ void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_ColoringStrategy&
 {
     dst = OptConvert<ForegroundColorStrategy>(src);
 }
+
+template<>
+MotionPathOption Convert(const Ark_MotionPathOptions& src)
+{
+    MotionPathOption p;
+    p.SetPath(Converter::Convert<std::string>(src.path));
+    if (auto opt = Converter::OptConvert<float>(src.from); opt) {
+        p.SetBegin(*opt);
+    }
+    if (auto opt = Converter::OptConvert<float>(src.to); opt) {
+        p.SetEnd(*opt);
+    }
+    if (auto opt = Converter::OptConvert<bool>(src.rotatable); opt) {
+        p.SetRotate(*opt);
+    }
+    return p;
 }
+
+template<>
+OHOS::Ace::SharedTransitionOption Convert(const Ark_sharedTransitionOptions& src)
+{
+    OHOS::Ace::SharedTransitionOption o = { .duration = INT_MIN };
+    if (auto opt = Converter::OptConvert<RefPtr<Curve>>(src.curve); opt) {
+        o.curve = *opt;
+    }
+    if (auto opt = Converter::OptConvert<int32_t>(src.duration); opt) {
+        o.duration = *opt;
+    }
+    if (auto opt = Converter::OptConvert<int32_t>(src.delay); opt) {
+        o.delay = *opt;
+    }
+    if (auto opt = Converter::OptConvert<MotionPathOption>(src.motionPath); opt) {
+        o.motionPathOption = *opt;
+    }
+    if (auto opt = Converter::OptConvert<int32_t>(src.zIndex); opt) {
+        o.zIndex = *opt;
+    }
+    if (auto opt = Converter::OptConvert<SharedTransitionEffectType>(src.type); opt) {
+        o.type = *opt;
+    }
+    return o;
+}
+} // namespace Converter
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -218,12 +260,9 @@ void BackgroundColorImpl(Ark_NativePointer node,
                          const ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    auto color = Converter::OptConvert<Color>(*value);
-    if (color) {
-        ViewAbstract::SetBackgroundColor(frameNode, color.value());
-    } else {
-        LOGI("#### CommonMethod::BackgroundColorImpl: color is empty");
-    }
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    ViewAbstract::SetBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PixelRoundImpl(Ark_NativePointer node,
                     const Ark_PixelRoundPolicy* value)
@@ -733,6 +772,17 @@ void SharedTransitionImpl(Ark_NativePointer node,
                           const Ark_String* id,
                           const Opt_sharedTransitionOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(id);
+    auto modelId = Converter::Convert<std::string>(*id);
+    auto modelOptions = std::make_shared<SharedTransitionOption>();
+    if (options) {
+        if (auto transOpt = Converter::OptConvert<SharedTransitionOption>(*options); transOpt) {
+            *modelOptions = std::move(*transOpt);
+        }
+    }
+    ViewAbstract::SetSharedTransition(frameNode, modelId, modelOptions);
 }
 void DirectionImpl(Ark_NativePointer node,
                    enum Ark_Direction value)

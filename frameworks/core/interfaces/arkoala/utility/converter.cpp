@@ -339,4 +339,24 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
         dst = val;
     }
 }
+
+template<>
+RefPtr<Curve> Convert(const Ark_String& src)
+{
+    return Framework::CreateCurve(Converter::Convert<std::string>(src), false);
+}
+
+template<>
+RefPtr<Curve> Convert(const Ark_Curve& src)
+{
+    return Framework::CreateCurve(src, false);
+}
+
+template<>
+RefPtr<Curve> Convert(const Ark_ICurve& src)
+{
+    LOGE("Convert [Ark_ICurve] to [RefPtr<Curve>] is not supported");
+    return nullptr;
+}
+
 } // namespace OHOS::Ace::NG::Converter

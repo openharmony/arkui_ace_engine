@@ -701,11 +701,15 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, backgroundColor);
 }
 
-void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBackgroundColor(frameNode, color);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, *color, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetHeight(const Dimension& value) {}

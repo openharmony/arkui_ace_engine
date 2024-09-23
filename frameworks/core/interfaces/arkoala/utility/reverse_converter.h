@@ -289,6 +289,7 @@ namespace OHOS::Ace::NG::Converter {
 
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
+    void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
 
     inline void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src)
     {

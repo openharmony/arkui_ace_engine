@@ -189,7 +189,7 @@ public:
     static void SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize);
     static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);
-    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static std::string GetPlaceholderText(FrameNode* frameNode);
     static std::string GetTextFieldText(FrameNode* frameNode);
     static Color GetCaretColor(FrameNode* frameNode);
