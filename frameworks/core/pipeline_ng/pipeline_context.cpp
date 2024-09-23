@@ -3814,11 +3814,17 @@ void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)
 
 void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId)
 {
+    if (!CheckThreadSafe()) {
+        LOGW("AddWindowStateChangedCallback doesn't run on UI thread!");
+    }
     onWindowStateChangedCallbacks_.emplace(nodeId);
 }
 
 void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId)
 {
+    if (!CheckThreadSafe()) {
+        LOGW("RemoveWindowStateChangedCallback doesn't run on UI thread!");
+    }
     onWindowStateChangedCallbacks_.erase(nodeId);
 }
 
@@ -3828,6 +3834,9 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
     while (iter != onWindowStateChangedCallbacks_.end()) {
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
         if (!node) {
+            if (!CheckThreadSafe()) {
+                LOGW("FlushWindowStateChangedCallback doesn't run on UI thread!");
+            }
             iter = onWindowStateChangedCallbacks_.erase(iter);
         } else {
             if (isShow) {
