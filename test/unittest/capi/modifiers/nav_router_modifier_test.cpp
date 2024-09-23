@@ -17,13 +17,17 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "node_api.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
 namespace  {
@@ -33,6 +37,27 @@ namespace  {
     //const auto ATTRIBUTE_PARAM_DEFAULT_VALUE = "!NOT-DEFINED!";
     const auto ATTRIBUTE_MODE_MODE_NAME = "mode";
     const auto ATTRIBUTE_MODE_MODE_DEFAULT_VALUE = "PUSH_WITH_RECREATE";
+
+    bool g_isActivatedTest;
+
+    GENERATED_ArkUINavRouterEventsReceiver recv {
+        .onStateChange = [] (Ark_Int32 nodeId, const Ark_Boolean isActivated) {
+            auto testBool = Convert<bool>(isActivated);
+            g_isActivatedTest = testBool;
+        }
+    };
+
+const GENERATED_ArkUINavRouterEventsReceiver* getNavRouterEventsReceiverTest()
+{
+    return &recv;
+};
+const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
+{
+    static const GENERATED_ArkUIEventsAPI eventsImpl = { 
+        .getNavRouterEventsReceiver = getNavRouterEventsReceiverTest
+    };
+    return &eventsImpl;
+};
 } // namespace
 
 class NavRouterModifierTest : public ModifierTestBase<GENERATED_ArkUINavRouterModifier,
@@ -42,6 +67,7 @@ class NavRouterModifierTest : public ModifierTestBase<GENERATED_ArkUINavRouterMo
     {
         MockPipelineContext::SetUp();
         MockContainer::SetUp(MockPipelineContext::GetCurrent());
+        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 
     static void TearDownTestCase()
@@ -115,13 +141,24 @@ HWTEST_F(NavRouterModifierTest, setNavRouterOptionsTestInvalidValues, TestSize.L
 }
 
 /*
- * @tc.name: DISABLED_setOnStateChangeTest
+ * @tc.name: setOnStateChangeTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavRouterModifierTest, DISABLED_setOnStateChangeTest, TestSize.Level1)
+HWTEST_F(NavRouterModifierTest, setOnStateChangeTest, TestSize.Level1)
 {
-    // TODO: Implement callback tests!
+    ASSERT_NE(modifier_->setOnStateChange, nullptr);
+    g_isActivatedTest = false;
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto navRouterEventHub = frameNode->GetEventHub<NavRouterEventHub>();
+    ASSERT_NE(navRouterEventHub, nullptr);
+    navRouterEventHub->FireChangeEvent(true);
+    EXPECT_FALSE(g_isActivatedTest);
+    Ark_Function func = {};
+    modifier_->setOnStateChange(node_, func);
+    navRouterEventHub->FireChangeEvent(true);
+    EXPECT_TRUE(g_isActivatedTest);
 }
 
 /*
@@ -150,7 +187,7 @@ HWTEST_F(NavRouterModifierTest, setModeTestValidValues, TestSize.Level1)
     enum Ark_NavRouteMode inputValueModeMode;
 
     // Inital setup
-    inputValueModeMode = Converter::ArkValue<Ark_NavRouteMode>(ARK_NAV_ROUTE_MODE_PUSH_WITH_RECREATE);
+    inputValueModeMode = ArkValue<Ark_NavRouteMode>(ARK_NAV_ROUTE_MODE_PUSH_WITH_RECREATE);
 
     // Test
     modifier_->setMode(node_, inputValueModeMode);
@@ -161,13 +198,13 @@ HWTEST_F(NavRouterModifierTest, setModeTestValidValues, TestSize.Level1)
     EXPECT_EQ(resultStr, "PUSH_WITH_RECREATE");
 
     // Verifying attribute's other values
-    inputValueModeMode = Converter::ArkValue<Ark_NavRouteMode>(ARK_NAV_ROUTE_MODE_PUSH);
+    inputValueModeMode = ArkValue<Ark_NavRouteMode>(ARK_NAV_ROUTE_MODE_PUSH);
     modifier_->setMode(node_, inputValueModeMode);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);
     EXPECT_EQ(resultStr, "PUSH");
 
-    inputValueModeMode = Converter::ArkValue<Ark_NavRouteMode>(ARK_NAV_ROUTE_MODE_REPLACE);
+    inputValueModeMode = ArkValue<Ark_NavRouteMode>(ARK_NAV_ROUTE_MODE_REPLACE);
     modifier_->setMode(node_, inputValueModeMode);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MODE_MODE_NAME);

@@ -16,7 +16,8 @@
 #include "core/interfaces/native/node/nav_router_modifier.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
-
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -43,6 +44,13 @@ namespace NavRouterAttributeModifier {
 void OnStateChangeImpl(Ark_NativePointer node,
                        Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onStateChangeCallback = [frameNode](const bool isActivated) {
+        auto arkIsActiveted = Converter::ArkValue<Ark_Boolean>(isActivated);
+        GetFullAPI()->getEventsAPI()->getNavRouterEventsReceiver()->onStateChange(frameNode->GetId(), arkIsActiveted);
+    };
+    NavRouterModelNG::SetOnStateChange(frameNode, onStateChangeCallback);
 }
 void ModeImpl(Ark_NativePointer node,
               enum Ark_NavRouteMode mode)

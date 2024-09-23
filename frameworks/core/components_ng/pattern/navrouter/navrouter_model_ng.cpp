@@ -67,4 +67,12 @@ void NavRouterModelNG::SetNavRouteMode(FrameNode* frameNode, const std::optional
     navRouterPattern->SetNavRouteMode(static_cast<NG::NavRouteMode>(
         mode.value_or(defaultValue)));
 }
+
+void NavRouterModelNG::SetOnStateChange(FrameNode* frameNode, std::function<void(bool isActivated)>&& onStateChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navRouterEventHub = AceType::DynamicCast<NavRouterEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navRouterEventHub);
+    navRouterEventHub->SetOnStateChange(std::move(onStateChange));
+}
 } // namespace OHOS::Ace::NG
