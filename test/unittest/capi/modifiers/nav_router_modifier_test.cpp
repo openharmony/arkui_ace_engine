@@ -165,7 +165,7 @@ HWTEST_F(NavRouterModifierTest, setOnStateChangeTest, TestSize.Level1)
         bool isActivated;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::navRouterEventReceiver.onStateChange = [](Ark_Int32 nodeId, 
+    EventsTracker::navRouterEventReceiver.onStateChange = [] (Ark_Int32 nodeId,
         const Ark_Boolean isActivated)
     {
         checkEvent = {
@@ -175,7 +175,7 @@ HWTEST_F(NavRouterModifierTest, setOnStateChangeTest, TestSize.Level1)
     };
     // check before call setOnStateChange
     ASSERT_NE(modifier_->setOnStateChange, nullptr);
-    navRouterEventHub->FireChangeEvent(true);    
+    navRouterEventHub->FireChangeEvent(true);
     EXPECT_FALSE(checkEvent.has_value());
 
     // set event in modifier
