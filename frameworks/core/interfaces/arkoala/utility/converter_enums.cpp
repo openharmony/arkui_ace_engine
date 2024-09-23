@@ -199,6 +199,17 @@ void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_TextDecoratio
 }
 
 template<>
+void AssignCast(std::optional<V2::ListItemAlign>& dst, const Ark_ListItemAlign& src)
+{
+    switch (src) {
+        case ARK_LIST_ITEM_ALIGN_START: dst = V2::ListItemAlign::START; break;
+        case ARK_LIST_ITEM_ALIGN_CENTER: dst = V2::ListItemAlign::CENTER; break;
+        case ARK_LIST_ITEM_ALIGN_END: dst = V2::ListItemAlign::END; break;
+        default: LOGE("Unexpected enum value in Ark_ListItemAlign: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
 {
     switch (src) {
@@ -207,6 +218,26 @@ void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
         case ARK_GRID_DIRECTION_ROW_REVERSE: dst = FlexDirection::ROW_REVERSE; break;
         case ARK_GRID_DIRECTION_COLUMN_REVERSE: dst = FlexDirection::COLUMN_REVERSE; break;
         default: LOGE("Unexpected enum value in Ark_GridDirection: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src)
+{
+    switch (src) {
+        case ARK_AXIS_VERTICAL: dst = Axis::VERTICAL; break;
+        case ARK_AXIS_HORIZONTAL: dst = Axis::HORIZONTAL; break;
+        default: LOGE("Unexpected enum value in Ark_Axis: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src)
+{
+    switch (src) {
+        case ARK_BAR_STATE_OFF: dst = DisplayMode::OFF; break;
+        case ARK_BAR_STATE_AUTO: dst = DisplayMode::AUTO; break;
+        case ARK_BAR_STATE_ON: dst = DisplayMode::ON; break;
+        default: LOGE("Unexpected enum value in Ark_BarState: %{public}d", src);
     }
 }
 
@@ -350,7 +381,8 @@ void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src)
     }
 }
 
-template<> void AssignCast(std::optional<TextCase>& dst, const Ark_TextCase& src)
+template<>
+void AssignCast(std::optional<TextCase>& dst, const Ark_TextCase& src)
 {
     switch (src) {
         case ARK_TEXT_CASE_NORMAL: dst = TextCase::NORMAL; break;
@@ -361,12 +393,69 @@ template<> void AssignCast(std::optional<TextCase>& dst, const Ark_TextCase& src
 }
 
 template<>
+void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src)
+{
+    switch (src) {
+        case ARK_STICKY_STYLE_NONE: dst = V2::StickyStyle::NONE; break;
+        case ARK_STICKY_STYLE_HEADER: dst = V2::StickyStyle::HEADER; break;
+        case ARK_STICKY_STYLE_FOOTER: dst = V2::StickyStyle::FOOTER; break;
+        default: LOGE("Unexpected enum value in Ark_StickyStyle: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src)
 {
     switch (src) {
         case ARK_FONT_STYLE_NORMAL: dst = OHOS::Ace::FontStyle::NORMAL; break;
         case ARK_FONT_STYLE_ITALIC: dst = OHOS::Ace::FontStyle::ITALIC; break;
         default: LOGE("Unexpected enum value in Ark_FontStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<V2::ScrollSnapAlign>& dst, const Ark_ScrollSnapAlign& src)
+{
+    switch (src) {
+        case ARK_SCROLL_SNAP_ALIGN_NONE: dst = V2::ScrollSnapAlign::NONE; break;
+        case ARK_SCROLL_SNAP_ALIGN_START: dst = V2::ScrollSnapAlign::START; break;
+        case ARK_SCROLL_SNAP_ALIGN_CENTER: dst = V2::ScrollSnapAlign::CENTER; break;
+        case ARK_SCROLL_SNAP_ALIGN_END: dst = V2::ScrollSnapAlign::END; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollSnapAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ChainEdgeEffect>& dst, const Ark_ChainEdgeEffect& src)
+{
+    switch (src) {
+        case ARK_CHAIN_EDGE_EFFECT_DEFAULT: dst = ChainEdgeEffect::DEFAULT; break;
+        case ARK_CHAIN_EDGE_EFFECT_STRETCH: dst = ChainEdgeEffect::STRETCH; break;
+        default: LOGE("Unexpected enum value in Ark_ChainEdgeEffect: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src)
+{
+    switch (src) {
+        case ARK_NESTED_SCROLL_MODE_SELF_ONLY: dst = NestedScrollMode::SELF_ONLY; break;
+        case ARK_NESTED_SCROLL_MODE_SELF_FIRST: dst = NestedScrollMode::SELF_FIRST; break;
+        case ARK_NESTED_SCROLL_MODE_PARENT_FIRST: dst = NestedScrollMode::PARENT_FIRST; break;
+        case ARK_NESTED_SCROLL_MODE_PARALLEL: dst = NestedScrollMode::PARALLEL; break;
+        default: LOGE("Unexpected enum value in Ark_NestedScrollMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ListItemGroupArea>& dst, const Ark_ListItemGroupArea& src)
+{
+    switch (src) {
+        case ARK_LIST_ITEM_GROUP_AREA_NONE: dst = ListItemGroupArea::NONE_AREA; break;
+        case ARK_LIST_ITEM_GROUP_AREA_IN_LIST_ITEM_AREA: dst = ListItemGroupArea::IN_LIST_ITEM_AREA; break;
+        case ARK_LIST_ITEM_GROUP_AREA_IN_HEADER_AREA: dst = ListItemGroupArea::IN_HEADER_AREA; break;
+        case ARK_LIST_ITEM_GROUP_AREA_IN_FOOTER_AREA: dst = ListItemGroupArea::IN_FOOTER_AREA; break;
+        default: LOGE("Unexpected enum value in Ark_ListItemGroupArea: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

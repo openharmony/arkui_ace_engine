@@ -31,6 +31,8 @@
 #include "generated/converter_generated.h"
 #include "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "frameworks/core/common/ime/text_input_action.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
 
 namespace OHOS::Ace::NG::Converter {
     // Forward declaration for use in custom AssignArkValue() functions
@@ -134,6 +136,84 @@ namespace OHOS::Ace::NG::Converter {
         dst.y = ArkValue<Ark_Number>(static_cast<float>(src.GetY()));
     }
 
+    inline void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src)
+    {
+        switch (src) {
+            case ListItemGroupArea::NONE_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_NONE; break;
+            case ListItemGroupArea::IN_LIST_ITEM_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_IN_LIST_ITEM_AREA; break;
+            case ListItemGroupArea::IN_HEADER_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_IN_HEADER_AREA; break;
+            case ListItemGroupArea::IN_FOOTER_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_IN_FOOTER_AREA; break;
+            default: dst = static_cast<Ark_ListItemGroupArea>(-1);
+                LOGE("Unexpected enum value in ListItemGroupArea: %{public}d", src);
+        }
+    }
+
+    inline void AssignArkValue(Ark_Axis& dst, const Axis& src)
+    {
+        switch (src) {
+            case Axis::VERTICAL: dst = ARK_AXIS_VERTICAL; break;
+            case Axis::HORIZONTAL: dst = ARK_AXIS_HORIZONTAL; break;
+            default: dst = static_cast<Ark_Axis>(-1);
+                LOGE("Unexpected enum value in Axis: %{public}d", src);
+        }
+    }
+
+    inline void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src)
+    {
+        switch (src) {
+            case static_cast<int32_t>(ListItemGroupArea::NONE_AREA): dst = ARK_LIST_ITEM_GROUP_AREA_NONE; break;
+            case static_cast<int32_t>(ListItemGroupArea::IN_LIST_ITEM_AREA):
+                dst = ARK_LIST_ITEM_GROUP_AREA_IN_LIST_ITEM_AREA; break;
+            case static_cast<int32_t>(ListItemGroupArea::IN_HEADER_AREA):
+                dst = ARK_LIST_ITEM_GROUP_AREA_IN_HEADER_AREA; break;
+            case static_cast<int32_t>(ListItemGroupArea::IN_FOOTER_AREA):
+                dst = ARK_LIST_ITEM_GROUP_AREA_IN_FOOTER_AREA; break;
+            default: dst = static_cast<Ark_ListItemGroupArea>(-1); LOGE("Unexpected enum value: %{public}d", src);
+        }
+    }
+
+    inline void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
+    {
+        dst.index = ArkValue<Ark_Number>(src.index);
+        dst.itemGroupArea = src.area < 0 ?
+            ArkValue<Opt_ListItemGroupArea>(Ark_Empty{}) : ArkValue<Opt_ListItemGroupArea>(src.area);
+        dst.itemIndexInGroup = src.indexInGroup < 0 ?
+            ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
+    }
+
+    inline void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src)
+    {
+        switch (src) {
+            case ScrollState::IDLE: dst = ARK_SCROLL_STATE_IDLE; break;
+            case ScrollState::SCROLL: dst = ARK_SCROLL_STATE_SCROLL; break;
+            case ScrollState::FLING: dst = ARK_SCROLL_STATE_FLING; break;
+            default: dst = static_cast<Ark_ScrollState>(-1);
+                LOGE("Unexpected enum value in ScrollState: %{public}d", src);
+        }
+    }
+
+    inline void AssignArkValue(Ark_BarState& dst, const DisplayMode& src)
+    {
+        switch (src) {
+            case DisplayMode::OFF: dst = ARK_BAR_STATE_OFF; break;
+            case DisplayMode::AUTO: dst = ARK_BAR_STATE_AUTO; break;
+            case DisplayMode::ON: dst = ARK_BAR_STATE_ON; break;
+            default: dst = static_cast<Ark_BarState>(-1);
+                LOGE("Unexpected enum value in DisplayMode: %{public}d", src);
+        }
+    }
+
+    inline void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src)
+    {
+        switch (src) {
+            case EdgeEffect::SPRING: dst = ARK_EDGE_EFFECT_SPRING; break;
+            case EdgeEffect::FADE: dst = ARK_EDGE_EFFECT_FADE; break;
+            case EdgeEffect::NONE: dst = ARK_EDGE_EFFECT_NONE; break;
+            default: dst = static_cast<Ark_EdgeEffect>(-1);
+                LOGE("Unexpected enum value in EdgeEffect: %{public}d", src);
+        }
+    }
+
     inline void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src)
     {
         switch (src) {
@@ -159,16 +239,37 @@ namespace OHOS::Ace::NG::Converter {
         dst.alwaysEnabled = src;
     }
 
-    inline void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src)
+    inline void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src)
     {
         switch (src) {
-            case ScrollState::IDLE: dst = ARK_SCROLL_STATE_IDLE; break;
-            case ScrollState::SCROLL: dst = ARK_SCROLL_STATE_SCROLL; break;
-            case ScrollState::FLING: dst = ARK_SCROLL_STATE_FLING; break;
-            default: {
-                dst = static_cast<Ark_ScrollState>(-1);
-                LOGE("Unexpected enum value in ScrollState: %{public}d", src);
-            }
+            case V2::StickyStyle::NONE: dst = ARK_STICKY_STYLE_NONE; break;
+            case V2::StickyStyle::HEADER: dst = ARK_STICKY_STYLE_HEADER; break;
+            case V2::StickyStyle::FOOTER: dst = ARK_STICKY_STYLE_FOOTER; break;
+            default: dst = static_cast<Ark_StickyStyle>(-1);
+                LOGE("Unexpected enum value in V2::StickyStyle: %{public}d", src);
+        }
+    }
+
+    inline void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src)
+    {
+        switch (src) {
+            case V2::ListItemAlign::START: dst = ARK_LIST_ITEM_ALIGN_START; break;
+            case V2::ListItemAlign::CENTER: dst = ARK_LIST_ITEM_ALIGN_CENTER; break;
+            case V2::ListItemAlign::END: dst = ARK_LIST_ITEM_ALIGN_END; break;
+            default: dst = static_cast<Ark_ListItemAlign>(-1);
+                LOGE("Unexpected enum value in V2::ListItemAlign: %{public}d", src);
+        }
+    }
+
+    inline void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src)
+    {
+        switch (src) {
+            case V2::ScrollSnapAlign::NONE: dst = ARK_SCROLL_SNAP_ALIGN_NONE; break;
+            case V2::ScrollSnapAlign::START: dst = ARK_SCROLL_SNAP_ALIGN_START; break;
+            case V2::ScrollSnapAlign::CENTER: dst = ARK_SCROLL_SNAP_ALIGN_CENTER; break;
+            case V2::ScrollSnapAlign::END: dst = ARK_SCROLL_SNAP_ALIGN_END; break;
+            default: dst = static_cast<Ark_ScrollSnapAlign>(-1);
+                LOGE("Unexpected enum value in V2::ScrollSnapAlign: %{public}d", src);
         }
     }
 

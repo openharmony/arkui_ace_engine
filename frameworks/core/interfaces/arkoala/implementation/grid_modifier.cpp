@@ -22,17 +22,6 @@
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-inline void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src)
-{
-    switch (src) {
-        case ARK_BAR_STATE_OFF: dst = DisplayMode::OFF; break;
-        case ARK_BAR_STATE_AUTO: dst = DisplayMode::AUTO; break;
-        case ARK_BAR_STATE_ON: dst = DisplayMode::ON; break;
-        default: LOGE("Unexpected enum value in Ark_BarState: %{public}d", src);
-    }
-}
-
-template<>
 inline void AssignCast(std::optional<bool>& dst, const Ark_EdgeEffectOptions& src)
 {
     dst = Converter::OptConvert<bool>(src.alwaysEnabled);
@@ -61,18 +50,6 @@ template<>
 inline void AssignCast(std::optional<std::set<int32_t>>& dst, const Ark_GridLayoutOptions& src)
 {
     dst = Converter::OptConvert<std::set<int32_t>>(src.irregularIndexes);
-}
-
-template<>
-inline void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src)
-{
-    switch (src) {
-        case ARK_NESTED_SCROLL_MODE_SELF_ONLY: dst = NestedScrollMode::SELF_ONLY; break;
-        case ARK_NESTED_SCROLL_MODE_SELF_FIRST: dst = NestedScrollMode::SELF_FIRST; break;
-        case ARK_NESTED_SCROLL_MODE_PARENT_FIRST: dst = NestedScrollMode::PARENT_FIRST; break;
-        case ARK_NESTED_SCROLL_MODE_PARALLEL: dst = NestedScrollMode::PARALLEL; break;
-        default: LOGE("Unexpected enum value in Ark_NestedScrollMode: %{public}d", src);
-    }
 }
 
 template<>

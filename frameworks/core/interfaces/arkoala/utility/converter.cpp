@@ -255,4 +255,55 @@ Font Convert(const Ark_Font& src)
         font.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.style);
         return font;
 }
+
+template<>
+CaretStyle Convert(const Ark_CaretStyle& src)
+{
+    CaretStyle caretStyle;
+    caretStyle.color = OptConvert<Color> (src.color);
+    caretStyle.width = OptConvert<Dimension> (src.width);
+    return caretStyle;
+}
+
+template<>
+TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
+{
+    TextDecorationOptions options;
+    options.textDecoration = OptConvert<TextDecoration>(src.type);
+    options.color = OptConvert<Color>(src.color);
+    options.textDecorationStyle = OptConvert<TextDecorationStyle>(src.style);
+    return options;
+}
+
+template<>
+ListItemIndex Convert(const Ark_VisibleListContentInfo& src)
+{
+    auto itemIndex = ListItemIndex{.index = Convert<int32_t>(src.index)}; // a struct is initialized by default
+    auto itemGroupArea = OptConvert<ListItemGroupArea>(src.itemGroupArea);
+    if (itemGroupArea.has_value()) {
+        itemIndex.area = static_cast<int32_t>(itemGroupArea.value());
+    }
+    auto indexInGroup = OptConvert<int32_t>(src.itemIndexInGroup);
+    if (indexInGroup.has_value()) {
+        itemIndex.indexInGroup = indexInGroup.value();
+    }
+    return itemIndex;
+}
+
+template<>
+std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src)
+{
+    auto minLength = Convert<Dimension>(src.minLength);
+    auto maxLength = Convert<Dimension>(src.maxLength);
+    return {minLength, maxLength};
+}
+
+template<>
+ItemDragInfo Convert(const Ark_ItemDragInfo& src)
+{
+    ItemDragInfo itemDragInfo;
+    itemDragInfo.SetX(Convert<float>(src.x));
+    itemDragInfo.SetY(Convert<float>(src.y));
+    return itemDragInfo;
+}
 } // namespace OHOS::Ace::NG::Converter
