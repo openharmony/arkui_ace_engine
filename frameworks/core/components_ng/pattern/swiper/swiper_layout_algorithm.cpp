@@ -479,10 +479,6 @@ void SwiperLayoutAlgorithm::MeasureSwiper(LayoutWrapper* layoutWrapper, const La
         itemPosition_.clear();
     }
 
-    if (!placeItemWidth_ && !prevItemPosition_.empty()) {
-        placeItemWidth_ = prevItemPosition_.begin()->second.endPos - prevItemPosition_.begin()->second.startPos;
-    }
-
     if (jumpIndex_.has_value()) {
         MeasureSwiperOnJump(layoutWrapper, layoutConstraint, jumpIndex_.value());
     } else if (hasCachedCapture_) {
