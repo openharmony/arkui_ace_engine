@@ -174,7 +174,7 @@ public:
 
     void ProcessFreezeNode();
 
-    void onFreezeStateChange() override;
+    void OnFreezeStateChange() override;
 
     void ProcessPropertyDiff()
     {

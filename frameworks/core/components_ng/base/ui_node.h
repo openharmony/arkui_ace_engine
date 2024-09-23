@@ -813,7 +813,7 @@ protected:
     virtual void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
 
-    virtual void onFreezeStateChange() {}
+    virtual void OnFreezeStateChange() {}
     virtual void UpdateChildrenFreezeState(bool isFreeze);
 
     // run offscreen process.

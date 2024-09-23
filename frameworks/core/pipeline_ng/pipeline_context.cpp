@@ -304,6 +304,7 @@ void PipelineContext::FlushFreezeNode()
             dirtyFreezeNodeSet.emplace(node);
         }
     }
+    //Process parentNode before childNode
     for (auto&& node : dirtyFreezeNodeSet) {
         node->ProcessFreezeNode();
     }

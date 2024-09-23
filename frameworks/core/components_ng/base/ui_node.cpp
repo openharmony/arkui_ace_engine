@@ -604,6 +604,7 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     if (onMainTree_) {
         return;
     }
+    // the context should not be nullptr.
     AttachContext(context, false);
     onMainTree_ = true;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
@@ -616,8 +617,10 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     for (const auto& child : GetChildren()) {
         child->AttachToMainTree(isRecursive, context);
     }
-    if (isFreeze_) {
+    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
+    if (isOpenInvisibleFreeze) {
         auto parent = GetParent();
+        // if it does not has parent, reset the flag.
         SetFreeze(parent ? parent->isFreeze_ : false);
     }
 }
@@ -670,7 +673,7 @@ void UINode::SetFreeze(bool isFreeze)
     auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
     if (isOpenInvisibleFreeze && isFreeze_ != isFreeze) {
         isFreeze_ = isFreeze;
-        onFreezeStateChange();
+        OnFreezeStateChange();
         UpdateChildrenFreezeState(isFreeze_);
     }
 }
