@@ -17,13 +17,10 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
+
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 #include "core/components/text/text_theme.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 
 using namespace testing;
@@ -92,34 +89,12 @@ class TextModifierTest : public ModifierTestBase<GENERATED_ArkUITextModifier,
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
+        ModifierTestBase::SetUpTestCase();
 
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-
-        // build default SwiperTheme
-        TextTheme::Builder builder;
-        auto textTheme = builder.Build(themeConstants);
-
-        // create Theme Manager and provide return of SwiperTheme
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
-        EXPECT_CALL(*themeManager, GetTheme(testing::_)).WillRepeatedly(Return(textTheme));
-
-        // setup Context with Theme Manager and Container
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+        SetupTheme<TextTheme>();
 
         // setup the test event handler
-        GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -502,7 +477,7 @@ HWTEST_F(TextModifierTest, setTextShadow, TestSize.Level1)
         .offsetY = { .tag = ARK_TAG_OBJECT,
                      .value = { .selector = 0, .value0 = Converter::ArkValue<Ark_Number>(3.5f) }}
     };
-    
+
     Union_ShadowOptions_Array_ShadowOptions v1 = {
         .selector = 0,
         .value0 = shadow

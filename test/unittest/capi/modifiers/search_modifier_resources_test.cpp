@@ -15,16 +15,12 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
+
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
@@ -182,7 +178,7 @@ const std::string CHECK_DEFAULT_PX("0.00px");
 const std::string CHECK_DEFAULT_VP("0.00vp");
 
 // check length
-const std::string CHECK_POSTIVE_VALUE_INT("1234.00px");
+const std::string CHECK_POSITIVE_VALUE_INT("1234.00px");
 const std::string CHECK_NEGATIVE_VALUE_INT("-2147483648.00px");
 const std::string CHECK_POSITIVE_VALUE_FLOAT("1.23vp");
 const std::string CHECK_POSITIVE_VALUE_FLOAT_PX("1.23px");
@@ -198,8 +194,8 @@ const Ark_String STR_NAME = ArkValue<Ark_String>("min_font_size");
 const std::string CHECK_RESOURCE_STR("aa.bb.cc");
 
 // test types
-typedef std::pair<Ark_Length, std::string> LenghtTest;
-typedef std::pair<Opt_Length, std::string> OptLenghtTest;
+typedef std::pair<Ark_Length, std::string> LengthTest;
+typedef std::pair<Opt_Length, std::string> OptLengthTest;
 typedef std::pair<Opt_ResourceColor, std::string> ColorTest;
 typedef std::pair<std::string, std::string> CheckSearchButtonOptions;
 typedef std::pair<Opt_SearchButtonOptions, CheckSearchButtonOptions> TestSearchButtonOption;
@@ -208,27 +204,27 @@ typedef std::pair<Opt_ResourceStr, std::string> ResourceSRC;
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionResourceString;
 typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTest;
 typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
-typedef std::pair<Type_SearchAttribute_searchIcon_Arg0, TripleCheckValues> SeachIconTest;
+typedef std::pair<Type_SearchAttribute_searchIcon_Arg0, TripleCheckValues> SearchIconTest;
 typedef std::pair<Opt_Type_SearchInterface_setSearchOptions_Arg0, TripleCheckValues> OptionsTest;
 typedef std::pair<Union_Number_String_Resource, std::string> OneUnionNumStrResStep;
 typedef std::pair<Ark_TextDecorationType, std::string> DecorationTypeTest;
 typedef std::pair<Ark_TextDecorationStyle, std::string> DecorationStyleTest;
 
 // common testPlans
-const std::vector<OptLenghtTest> OPT_LENGTH_TEST_PLAN = {
-    { OPT_LEN_PX_POS, CHECK_POSTIVE_VALUE_INT },
+const std::vector<OptLengthTest> OPT_LENGTH_TEST_PLAN = {
+    { OPT_LEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
     { OPT_LEN_PX_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT }
 };
-const std::vector<OptLenghtTest> TEST_PLAN_OPT_LENGTH_PX = {
-    { OPT_LEN_PX_POS, CHECK_POSTIVE_VALUE_INT },
+const std::vector<OptLengthTest> TEST_PLAN_OPT_LENGTH_PX = {
+    { OPT_LEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
     { OPT_LEN_PX_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT_PX }
 };
-const std::vector<LenghtTest> INDENT_LENGHT_TEST_PLAN = {
-    { ALEN_PX_POS, CHECK_POSTIVE_VALUE_INT },
+const std::vector<LengthTest> INDENT_LENGTH_TEST_PLAN = {
+    { ALEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
     { ALEN_PX_NEG, CHECK_NEGATIVE_VALUE_INT },
     { ALEN_VP_NEG, CHECK_NEGATIVE_VALUE_FLOAT },
     { ALEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT }
@@ -242,7 +238,7 @@ const std::vector<ColorTest> COLOR_TEST_PLAN = {
 const std::vector<ColorTest> COLOR_RESOURCE_TEST_PLAN = {
     { OPT_COLOR_RESOURCE, CHECK_RESOURCE_COLOR }
 };
-    
+
 const std::vector<ResourceSRC> RESOURCE_TEST_PLAN = {
     { OPT_RESOURCE_STR, CHECK_RESOURCE_STR },
     { OPT_RESOURCE_RESOURCE, CHECK_RESOURCE_STR }
@@ -342,34 +338,11 @@ class SearchModifierResourcesTest : public ModifierTestBase<GENERATED_ArkUISearc
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+        ModifierTestBase::SetUpTestCase();
 
-        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
-        themeConstants->LoadTheme(0);
-
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([themeConstants](ThemeType type) -> RefPtr<Theme> {
-            if (SearchTheme::TypeId() == type) {
-                return std::make_unique<SearchTheme::Builder>()->Build(themeConstants);
-            } else if (TextFieldTheme::TypeId() == type) {
-                return std::make_unique<TextFieldTheme::Builder>()->Build(themeConstants);
-            } else {
-                return std::make_unique<IconTheme::Builder>()->Build(themeConstants);
-            }
-        });
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        SetupTheme<SearchTheme>();
+        SetupTheme<TextFieldTheme>();
+        SetupTheme<IconTheme>();
     }
 };
 
@@ -457,7 +430,7 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setSearchIconTestResources, TestS
     EXPECT_EQ(defaultSearchIconColor, CHECK_DEFAULT_BLACK_COLOR);
     EXPECT_EQ(defaultSearchIconSize, CHECK_DEFAULT_PX);
     // custom
-    std::vector<SeachIconTest> testSearchIcon;
+    std::vector<SearchIconTest> testSearchIcon;
     for (auto testLength : TEST_PLAN_OPT_LENGTH_PX) {
         for (auto ColorTest : COLOR_RESOURCE_TEST_PLAN) {
             for (auto testSrc : RESOURCE_TEST_PLAN) {
@@ -474,10 +447,10 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setSearchIconTestResources, TestS
                     ColorTest.second,
                     testLength.second
                 };
-                SeachIconTest seachIconTest = {
+                SearchIconTest searchIconTest = {
                     attrs, checkIconValues
                 };
-                testSearchIcon.push_back(seachIconTest);
+                testSearchIcon.push_back(searchIconTest);
             }
         }
     }
@@ -501,7 +474,7 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setSearchIconTestResources, TestS
 
 /**
  * @tc.name: setFontColorTestResources
- * @tc.desc: Check the functionality of setFontColor with Resouces
+ * @tc.desc: Check the functionality of setFontColor with Resources
  * @tc.type: FUNC
  */
 HWTEST_F(SearchModifierResourcesTest, DISABLED_setFontColorTestResources, TestSize.Level1)
@@ -635,11 +608,11 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setMinFontSizeTestResource, TestS
 }
 
 /**
- * @tc.name: setLetterSpacingTestResurce
+ * @tc.name: setLetterSpacingTestResource
  * @tc.desc: Check the functionality of setLetterSpacing
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setLetterSpacingTestResurce, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, DISABLED_setLetterSpacingTestResource, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLetterSpacing, nullptr);
 

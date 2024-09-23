@@ -14,13 +14,10 @@
  */
 
 #include <gtest/gtest.h>
+
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "arkoala_api_generated.h"
+
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 using namespace testing;

@@ -17,12 +17,8 @@
 
 #include "core/components/counter/counter_theme.h"
 #include "core/components_ng/pattern/counter/counter_pattern.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
 
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -51,22 +47,11 @@ public:
 
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
-            return counterTheme;
-        });
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp();
-        GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
-    }
+        ModifierTestBase::SetUpTestCase();
 
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        SetupTheme<CounterTheme>();
+
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 

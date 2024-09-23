@@ -30,10 +30,10 @@ namespace  {
     const auto PATH_CMD = "M150 0 L300 300 L0 300 Z";
 
     const auto ATTRIBUTE_WIDTH_NAME = "width";
-    const auto ATTRIBUTE_WIDTH_DEFAULT_VALUE = "0.00vp";
+    const auto ATTRIBUTE_WIDTH_DEFAULT_VALUE = "-";
 
     const auto ATTRIBUTE_HEIGHT_NAME = "height";
-    const auto ATTRIBUTE_HEIGHT_DEFAULT_VALUE = "0.00vp";
+    const auto ATTRIBUTE_HEIGHT_DEFAULT_VALUE = "-";
 } // namespace
 
 class PathModifierTest : public ModifierTestBase<GENERATED_ArkUIPathModifier,

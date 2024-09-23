@@ -15,16 +15,12 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
+
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
@@ -175,7 +171,7 @@ const std::string CHECK_DEFAULT_PX("0.00px");
 const std::string CHECK_DEFAULT_VP("0.00vp");
 
 // check length
-const std::string CHECK_POSTIVE_VALUE_INT("1234.00px");
+const std::string CHECK_POSITIVE_VALUE_INT("1234.00px");
 const std::string CHECK_ICON_MAX_VALUE_INT("32.00px");
 const std::string CHECK_NEGATIVE_VALUE_INT("-2147483648.00px");
 const std::string CHECK_POSITIVE_VALUE_FLOAT("1.23vp");
@@ -196,8 +192,8 @@ const std::string CHECK_RESOURCE_STR("aa.bb.cc");
 const std::string BUTTON_STYLE_INPUT("CancelButtonStyle.INPUT");
 
 // test types
-typedef std::pair<Ark_Length, std::string> LenghtTest;
-typedef std::pair<Opt_Length, std::string> OptLenghtTest;
+typedef std::pair<Ark_Length, std::string> LengthTest;
+typedef std::pair<Opt_Length, std::string> OptLengthTest;
 typedef std::pair<Ark_Number, std::string> ArkNumberTest;
 typedef std::pair<Opt_ResourceColor, std::string> ColorTest;
 typedef std::pair<std::string, std::string> CheckCaretValue;
@@ -213,7 +209,7 @@ typedef std::pair<Ark_CopyOptions, std::string> ArkCopyOptionsTest;
 typedef std::pair<Ark_Int32, Ark_Int32> ArkNumberIntTest;
 typedef std::pair<float, float> ArkNumberFloatTest;
 typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
-typedef std::pair<Type_SearchAttribute_searchIcon_Arg0, TripleCheckValues> SeachIconTest;
+typedef std::pair<Type_SearchAttribute_searchIcon_Arg0, TripleCheckValues> SearchIconTest;
 typedef std::tuple<Ark_Boolean, bool> OneBoolStep;
 typedef std::pair<Opt_Type_SearchInterface_setSearchOptions_Arg0, TripleCheckValues> OptionsTest;
 typedef std::pair<Union_Number_String_Resource, std::string> OneUnionNumStrResStep;
@@ -225,26 +221,26 @@ typedef std::pair<Ark_String, std::string> FontFeatureTest;
 typedef std::pair<Ark_EnterKeyType, std::string> EnterKeyTypeTest;
 
 // common testPlans
-const std::vector<OptLenghtTest> OPT_LENGTH_TEST_PLAN = {
-    { OPT_LEN_PX_POS, CHECK_POSTIVE_VALUE_INT },
+const std::vector<OptLengthTest> OPT_LENGTH_TEST_PLAN = {
+    { OPT_LEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
     { OPT_LEN_PX_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT }
 };
-const std::vector<OptLenghtTest> TEST_PLAN_OPT_LENGTH_PX = {
-    { OPT_LEN_PX_POS, CHECK_POSTIVE_VALUE_INT },
+const std::vector<OptLengthTest> TEST_PLAN_OPT_LENGTH_PX = {
+    { OPT_LEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
     { OPT_LEN_PX_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT_PX }
 };
-const std::vector<OptLenghtTest> ICON_SIZE_TEST_PLAN = {
+const std::vector<OptLengthTest> ICON_SIZE_TEST_PLAN = {
     { OPT_LEN_PX_POS, CHECK_ICON_MAX_VALUE_INT },
     { OPT_LEN_PX_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT_PX }
 };
-const std::vector<LenghtTest> INDENT_LENGHT_TEST_PLAN = {
-    { ALEN_PX_POS, CHECK_POSTIVE_VALUE_INT },
+const std::vector<LengthTest> INDENT_LENGTH_TEST_PLAN = {
+    { ALEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
     { ALEN_PX_NEG, CHECK_NEGATIVE_VALUE_INT },
     { ALEN_VP_NEG, CHECK_NEGATIVE_VALUE_FLOAT },
     { ALEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT }
@@ -271,7 +267,7 @@ const std::vector<ColorTest> COLOR_TEST_PLAN = {
     { OPT_COLOR_FLOAT, CHECK_FLOAT_COLOR },
     { OPT_COLOR_STRING, CUSTOM_COLOR_STRING },
 };
-    
+
 const std::vector<ResourceSRC> RESOURCE_TEST_PLAN = {
     { OPT_RESOURCE_STR, CHECK_RESOURCE_STR },
     { OPT_RESOURCE_RESOURCE, CHECK_RESOURCE_STR }
@@ -453,7 +449,7 @@ const std::vector<FontFeatureTest> FONT_FEATURE_TEST_PLAN = {
     {ArkValue<Ark_String>("\"ss01\" on, ss02 off"), "\"ss01\" 1"},
     {ArkValue<Ark_String>("ss01 on, ss02 off"), EMPTY_TEXT},
     {ArkValue<Ark_String>("\"ss01\" on"), "\"ss01\" 1"},
-    {ArkValue<Ark_String>("\"incorect\" on"), EMPTY_TEXT},
+    {ArkValue<Ark_String>("\"incorrect\" on"), EMPTY_TEXT},
     {ArkValue<Ark_String>("\"ss01\" on"), "\"ss01\" 1"},
     {ArkValue<Ark_String>("invalid"), EMPTY_TEXT},
 };
@@ -564,35 +560,13 @@ class SearchModifierTest : public ModifierTestBase<GENERATED_ArkUISearchModifier
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+        ModifierTestBase::SetUpTestCase();
 
-        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
-        themeConstants->LoadTheme(0);
+        SetupTheme<SearchTheme>();
+        SetupTheme<TextFieldTheme>();
+        SetupTheme<IconTheme>();
 
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([themeConstants](ThemeType type) -> RefPtr<Theme> {
-            if (SearchTheme::TypeId() == type) {
-                return std::make_unique<SearchTheme::Builder>()->Build(themeConstants);
-            } else if (TextFieldTheme::TypeId() == type) {
-                return std::make_unique<TextFieldTheme::Builder>()->Build(themeConstants);
-            } else {
-                return std::make_unique<IconTheme::Builder>()->Build(themeConstants);
-            }
-        });
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(GetArkUiEventsAPITest());
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 };
 
@@ -663,7 +637,7 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestStyle, TestSize.Level1)
 /**
  * @tc.name: setCopyOptionTest
  * @tc.desc: Check the functionality of setCopyOption
- * In the documentation default value is Local, but in return value is Distibuted
+ * In the documentation default value is Local, but in return value is Distributed
  * @tc.type: FUNC
  */
 HWTEST_F(SearchModifierTest, DISABLED_setCopyOptionTest, TestSize.Level1)
@@ -700,7 +674,7 @@ HWTEST_F(SearchModifierTest, DISABLED_setSearchIconTest, TestSize.Level1)
     EXPECT_EQ(defaultSearchIconColor, CHECK_DEFAULT_BLACK_COLOR);
     EXPECT_EQ(defaultSearchIconSize, CHECK_DEFAULT_PX);
     // custom
-    std::vector<SeachIconTest> testSearchIcon;
+    std::vector<SearchIconTest> testSearchIcon;
     for (auto testLength : TEST_PLAN_OPT_LENGTH_PX) {
         for (auto ColorTest : COLOR_TEST_PLAN) {
             for (auto testSrc : RESOURCE_TEST_PLAN) {
@@ -717,10 +691,10 @@ HWTEST_F(SearchModifierTest, DISABLED_setSearchIconTest, TestSize.Level1)
                     ColorTest.second,
                     testLength.second
                 };
-                SeachIconTest seachIconTest = {
+                SearchIconTest searchIconTest = {
                     attrs, checkIconValues
                 };
-                testSearchIcon.push_back(seachIconTest);
+                testSearchIcon.push_back(searchIconTest);
             }
         }
     }
@@ -821,7 +795,7 @@ HWTEST_F(SearchModifierTest, setTextIndentTest, TestSize.Level1)
     auto indentValueDefault = GetStringAttribute(node_, TEXT_INDENT_ATTR);
     EXPECT_EQ(indentValueDefault, CHECK_DEFAULT_VP);
     // custom
-    for (auto length : INDENT_LENGHT_TEST_PLAN) {
+    for (auto length : INDENT_LENGTH_TEST_PLAN) {
         modifier_->setTextIndent(node_, &length.first);
         auto indentValue = GetStringAttribute(node_, TEXT_INDENT_ATTR);
         EXPECT_EQ(indentValue, length.second);

@@ -17,16 +17,14 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+
 #include "base/geometry/dimension.h"
-#include "node_api.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/components_v2/list/list_properties.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/list/list_item_event_hub.h"
+#include "core/components_v2/list/list_properties.h"
+
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "core/components_ng/pattern/list/list_item_event_hub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,7 +47,9 @@ class ListItemModifierTest : public ModifierTestBase<GENERATED_ArkUIListItemModi
 public:
     static void SetUpTestCase()
     {
-        GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
+        ModifierTestBase::SetUpTestCase();
+
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -145,13 +145,13 @@ HWTEST_F(ListItemModifierTest, setEditableTest, TestSize.Level1)
 {
     bool editable = GetAttrValue<bool>(node_, "editable");
     EXPECT_FALSE(editable);
-    
+
     auto argEditMode = Converter::ArkUnion<Type_ListItemAttribute_editable_Arg0, Ark_EditMode>
         (Ark_EditMode::ARK_EDIT_MODE_NONE);
     modifier_->setEditable(node_, &argEditMode);
     auto editableStr = GetAttrValue<std::string>(node_, "editable");
     EXPECT_EQ(editableStr, "EditMode.None");
-    
+
     argEditMode = Converter::ArkUnion<Type_ListItemAttribute_editable_Arg0, Ark_EditMode>
         (Ark_EditMode::ARK_EDIT_MODE_DELETABLE);
     modifier_->setEditable(node_, &argEditMode);

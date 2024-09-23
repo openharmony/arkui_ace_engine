@@ -15,10 +15,6 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/divider/divider_theme.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
@@ -71,25 +67,11 @@ class DividerModifierTest : public ModifierTestBase<GENERATED_ArkUIDividerModifi
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            auto builder = DividerTheme::Builder();
-            auto dividerTheme = builder.Build(nullptr);
-            return dividerTheme;
-        });
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    }
+        ModifierTestBase::SetUpTestCase();
 
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        SetupTheme<DividerTheme>();
+
+        MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     }
 };
 

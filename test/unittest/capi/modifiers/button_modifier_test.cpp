@@ -15,13 +15,8 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/components/button/button_theme.h"
 
+#include "core/components/button/button_theme.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
@@ -100,42 +95,15 @@ class ButtonModifierTest : public ModifierTestBase<GENERATED_ArkUIButtonModifier
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
+        ModifierTestBase::SetUpTestCase();
 
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-
-        // set test values to Theme Pattern as data for the Theme building
-        themeConstants->LoadTheme(0);
-
-        // build default ButtonTheme
-        ButtonTheme::Builder builder;
-        auto buttonTheme = builder.Build(themeConstants);
-
-        // create Theme Manager and provide return of ButtonTheme
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_))
-            .WillRepeatedly(Return(themeConstants));
-        EXPECT_CALL(*themeManager, GetTheme(testing::_))
-            .WillRepeatedly(Return(buttonTheme));
-
-        // setup Context with Theme Manager and Container
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        SetupTheme<ButtonTheme>();
     }
 };
 
 /*
  * @tc.name: setButtonOptionsTestDefaultValues
- * @tc.desc: Check dafault options values
+ * @tc.desc: Check default options values
  * @tc.type: FUNC
  */
 HWTEST_F(ButtonModifierTest, setButtonOptionsTestDefaultValues, TestSize.Level1)
