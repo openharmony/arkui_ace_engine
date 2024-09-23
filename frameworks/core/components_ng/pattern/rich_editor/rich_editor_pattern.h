@@ -802,6 +802,7 @@ public:
     void SetCaretColor(const Color& caretColor)
     {
         caretColor_ = caretColor;
+        IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }
 
     Color GetCaretColor();
