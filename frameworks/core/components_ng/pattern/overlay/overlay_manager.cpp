@@ -3826,7 +3826,9 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     const NG::ContentCoverParam& contentCoverParam, int32_t targetId, std::optional<ModalTransition> modalTransition)
 {
     // builder content
-    auto builder = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+    auto buildNode = buildNodeFunc();
+    CHECK_NULL_VOID(buildNode);
+    auto builder = AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
     CHECK_NULL_VOID(builder);
     builder->GetRenderContext()->SetIsModalRootNode(true);
 
