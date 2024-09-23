@@ -31,6 +31,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/property/calc_length.h"
@@ -588,6 +589,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ChainEdgeEffect>& dst, const Ark_ChainEdgeEffect& src);
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<ListItemGroupArea>& dst, const Ark_ListItemGroupArea& src);
+    template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
     
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
