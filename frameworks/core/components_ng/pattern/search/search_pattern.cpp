@@ -2120,27 +2120,11 @@ const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSi
     if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
         return ICON_MAX_SIZE;
     }
-    return ConvertImageIconScaleLimit(iconSizeValue);
-}
-
-const Dimension SearchPattern::ConvertImageIconScaleLimit(const Dimension& iconSizeValue)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, iconSizeValue);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(pipeline, iconSizeValue);
-
-    float fontScale = pipeline->GetFontScale();
-    if (fontScale == 0) {
+    if (iconSizeValue.Unit() != DimensionUnit::VP) {
+        return Dimension(iconSizeValue.ConvertToPxDistribute(0.0f, MAX_FONT_SCALE));
+    } else {
         return iconSizeValue;
     }
-
-    if (iconSizeValue.Unit() != DimensionUnit::VP) {
-        float maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
-        fontScale = std::clamp(fontScale, 0.0f, maxFontScale);
-        return iconSizeValue * fontScale;
-    }
-    return iconSizeValue;
 }
 
 } // namespace OHOS::Ace::NG

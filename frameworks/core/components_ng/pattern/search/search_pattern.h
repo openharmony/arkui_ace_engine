@@ -282,7 +282,6 @@ private:
     void UpdateIconSrc(int32_t index, const std::string& src);
     void UpdateIconColor(int32_t index, const Color& color);
     void UpdateIconSize(int32_t index, const Dimension& value);
-    const Dimension ConvertImageIconScaleLimit(const Dimension& fontSizeValue);
     void UpdateDivider();
     void UpdateCancelButton();
     void UpdateDividerColorMode();
