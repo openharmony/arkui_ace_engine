@@ -140,6 +140,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("onWillDelete", &JSSearch::OnWillDelete);
     JSClass<JSSearch>::StaticMethod("onDidDelete", &JSSearch::OnDidDelete);
     JSClass<JSSearch>::StaticMethod("enablePreviewText", &JSSearch::SetEnablePreviewText);
+    JSClass<JSSearch>::StaticMethod("enableHapticFeedback", &JSSearch::SetEnableHapticFeedback);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -1145,5 +1146,14 @@ void JSSearch::SetEnablePreviewText(const JSCallbackInfo& info)
         return;
     }
     SearchModel::GetInstance()->SetEnablePreviewText(jsValue->ToBoolean());
+}
+
+void JSSearch::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool state = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetEnableHapticFeedback(state);
 }
 } // namespace OHOS::Ace::Framework

@@ -428,6 +428,9 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         localOffset = localOffset - GetPaintOffsetWithoutTransform();
     }
     auto selectController = pattern->GetTextSelectController();
+    CHECK_NULL_VOID(selectController);
+    int32_t startIndex = selectController->GetFirstHandleIndex();
+    int32_t endIndex = selectController->GetSecondHandleIndex();
     if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
         auto magnifierLocalOffsetY = localOffset.GetY() + handleRect.Height() / 2.0f;
         auto magnifierLocalOffset = OffsetF(localOffset.GetX(), magnifierLocalOffsetY);
@@ -437,14 +440,18 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
     }
     if (IsSingleHandle()) {
+        int32_t preIndex = selectController->GetCaretIndex();
         selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+        pattern->StartVibratorByIndexChange(selectController->GetCaretIndex(), preIndex);
         pattern->ShowCaretAndStopTwinkling();
     } else {
         auto position = GetCaretPositionOnHandleMove(localOffset);
         if (isFirst) {
+            pattern->StartVibratorByIndexChange(position, startIndex);
             selectController->MoveFirstHandleToContentRect(position, false);
             UpdateSecondHandleOffset();
         } else {
+            pattern->StartVibratorByIndexChange(position, endIndex);
             selectController->MoveSecondHandleToContentRect(position, false);
             UpdateFirstHandleOffset();
         }

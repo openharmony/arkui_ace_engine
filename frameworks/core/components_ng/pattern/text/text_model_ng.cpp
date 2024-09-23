@@ -1106,4 +1106,11 @@ void TextModelNG::SetHalfLeading(FrameNode* frameNode, bool halfLeading)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, HalfLeading, halfLeading, frameNode);
 }
+
+void TextModelNG::SetEnableHapticFeedback(bool state)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetEnableHapticFeedback(state);
+}
 } // namespace OHOS::Ace::NG

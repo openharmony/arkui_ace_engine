@@ -36,6 +36,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/udmf/udmf_client.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -318,6 +319,12 @@ int32_t TextPattern::GetTextContentLength()
     return 0;
 }
 
+void TextPattern::StartVibratorByLongPress()
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_);
+    VibratorUtils::StartVibraFeedback("longPress.light");
+}
+
 void TextPattern::HandleLongPress(GestureEvent& info)
 {
     HandleSpanLongPressEvent(info);
@@ -334,6 +341,12 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (selectOverlay_->HasRenderTransform()) {
         localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     }
+
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    if ((textLayoutProperty && textLayoutProperty->GetMaxLines() != 0) && GetWideText().length() != 0) {
+        StartVibratorByLongPress();
+    }
+
     if (IsDraggable(localOffset)) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
@@ -3111,6 +3124,12 @@ void TextPattern::OnSelectionMenuOptionsUpdate(
     const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
     selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+void TextPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex)
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_ && (currentIndex != preIndex));
+    VibratorUtils::StartVibraFeedback("slide");
 }
 
 void TextPattern::HandleSelectionChange(int32_t start, int32_t end)

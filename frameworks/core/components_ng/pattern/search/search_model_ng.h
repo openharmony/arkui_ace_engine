@@ -154,6 +154,7 @@ public:
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    void SetEnableHapticFeedback(bool state) override;
 
 private:
     static void CreateTextField(const RefPtr<SearchNode>& parentNode,
