@@ -953,7 +953,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
                 imageGestureHub->SetMenuPreviewScale(scale);
             }
         }
-        auto originPoint = imageNode->GetPositionToScreen();
+        auto originPoint = imageNode->GetPositionToWindowWithTransform();
         if (hasContextMenu || isMenuShow) {
             auto previewDragMovePosition = dragDropManager->GetUpdateDragMovePosition();
             OffsetF previewOffset;
