@@ -4144,7 +4144,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest051, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_DATE_PICKER);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     float negativeFloat = -1.0f;
     int32_t negativeInt = -1;
     ArkUI_NumberValue value0[] = {};
