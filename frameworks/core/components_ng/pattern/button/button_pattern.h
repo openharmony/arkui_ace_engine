@@ -399,6 +399,7 @@ private:
     bool IsNeedToHandleHoverOpacity();
     static void UpdateTextFontScale(
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    void OnFontScaleConfigurationUpdate() override;
     Color backgroundColor_;
     Color focusBorderColor_;
     Color themeBgColor_;
