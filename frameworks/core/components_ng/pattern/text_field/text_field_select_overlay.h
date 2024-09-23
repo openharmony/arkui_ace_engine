@@ -47,6 +47,9 @@ public:
     RectF GetFirstHandleLocalPaintRect() override;
     RectF GetSecondHandleLocalPaintRect() override;
     void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    void UpdateAllHandlesOffset() override;
+    void UpdateFirstHandleOffset() override;
+    void UpdateSecondHandleOffset() override;
 
     // override SelectOverlayHolder
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
@@ -55,6 +58,7 @@ public:
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     RectF GetSelectArea() override;
     std::string GetSelectedText() override;
+    void OnHandleMarkInfoChange(std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
@@ -92,6 +96,7 @@ public:
     {
         return !HasRenderTransform();
     }
+    void UpdateHandleColor();
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
@@ -99,6 +104,7 @@ private:
     int32_t GetTextAreaCaretPosition(const OffsetF& localOffset);
     int32_t GetTextInputCaretPosition(const OffsetF& localOffset, bool isFirst);
     void CloseMagnifier();
+    void TriggerContentToScroll(const OffsetF& localOffset, bool isEnd);
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html" };
 };

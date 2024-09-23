@@ -779,30 +779,24 @@ HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest013, TestSize.Level1)
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     sequencedRecognizer.CleanRecognizerState();
-    SUCCEED();
     sequencedRecognizer.refereeState_ = RefereeState::SUCCEED;
     sequencedRecognizer.currentFingers_ = 0;
     sequencedRecognizer.CleanRecognizerState();
-    SUCCEED();
     sequencedRecognizer.refereeState_ = RefereeState::FAIL;
     sequencedRecognizer.currentFingers_ = 0;
     sequencedRecognizer.CleanRecognizerState();
-    SUCCEED();
     sequencedRecognizer.refereeState_ = RefereeState::DETECTING;
     sequencedRecognizer.currentFingers_ = 0;
     sequencedRecognizer.CleanRecognizerState();
-    SUCCEED();
     sequencedRecognizer.refereeState_ = RefereeState::SUCCEED_BLOCKED;
     sequencedRecognizer.currentFingers_ = 0;
     sequencedRecognizer.CleanRecognizerState();
-    SUCCEED();
     sequencedRecognizer.refereeState_ = RefereeState::FAIL;
     sequencedRecognizer.currentFingers_ = 1;
     sequencedRecognizer.CleanRecognizerState();
-    SUCCEED();
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.CleanRecognizerState();
-    SUCCEED();
+    EXPECT_EQ(sequencedRecognizerPtr->currentIndex_, 0);
 }
 
 /**
@@ -821,7 +815,7 @@ HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest014, TestSize.Level1)
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     sequencedRecognizer.ForceCleanRecognizer();
-    SUCCEED();
+    EXPECT_EQ(sequencedRecognizerPtr->currentIndex_, 0);
 }
 
 /**
@@ -839,6 +833,6 @@ HWTEST_F(SequencedRecognizerTestNg, SequencedRecognizerTest015, TestSize.Level1)
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.ForceCleanRecognizer();
-    SUCCEED();
+    EXPECT_EQ(sequencedRecognizerPtr->currentIndex_, 0);
 }
 } // namespace OHOS::Ace::NG

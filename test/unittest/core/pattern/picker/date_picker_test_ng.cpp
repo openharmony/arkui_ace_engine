@@ -3704,9 +3704,17 @@ HWTEST_F(DatePickerTestNg, DatePickerDialogViewUpdateButtonDefaultFocus005, Test
     ButtonInfo info2;
     buttonInfos.push_back(info2);
 
-    const RefPtr<FrameNode> buttonNode;
-
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_COMPONENT_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(buttonNode, nullptr);
+    /**
+     * @tc.steps: steps1. setDefaultFocus is true and call UpdateButtonDefaultFocus;
+     * @tc.expected: The texts of IsDefaultFocus is equal to true;
+     */
     DatePickerDialogView::UpdateButtonDefaultFocus(buttonInfos, buttonNode, true);
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->IsDefaultFocus(), true);
 }
 
 /**

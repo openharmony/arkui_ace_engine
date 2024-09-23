@@ -17,6 +17,8 @@
 
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_layout_util.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
@@ -211,45 +213,6 @@ NavSafeArea CheckIgnoreLayoutSafeArea(LayoutWrapper* layoutWrapper, const RefPtr
     return safeArea;
 }
 
-bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const SizeF& navigationSize)
-{
-    // if current menu or toolBar is custom, no need to hide.
-    if (hostNode->GetPrevMenuIsCustomValue(false) || hostNode->GetPrevToolBarIsCustom().value_or(false)) {
-        return false;
-    }
-
-    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
-    CHECK_NULL_RETURN(toolbarNode, false);
-    if (!toolbarNode->HasValidContent()) {
-        return true;
-    }
-
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, false);
-    auto rotationLimitCount = theme->GetToolbarRotationLimitGridCount();
-
-    RefPtr<GridColumnInfo> columnInfo;
-    columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::NAVIGATION_TOOLBAR);
-    columnInfo->GetParent()->BuildColumnWidth();
-
-    auto currentColumns = columnInfo->GetParent()->GetColumns();
-    float gridWidth = static_cast<float>(columnInfo->GetWidth(rotationLimitCount));
-    float gutterWidth = columnInfo->GetParent()->GetGutterWidth().ConvertToPx();
-    float hideLimitWidth = gridWidth + gutterWidth * 2;
-    if (SystemProperties::GetDeviceType() == DeviceType::PHONE) {
-        if (currentColumns >= static_cast<int32_t>(rotationLimitCount) &&
-            GreatOrEqual(navigationSize.Width(), gridWidth)) {
-            return true;
-        }
-    } else if (SystemProperties::GetDeviceType() == DeviceType::TABLET) {
-        if (currentColumns > static_cast<int32_t>(rotationLimitCount) &&
-            GreatNotEqual(navigationSize.Width(), hideLimitWidth)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize)
 {
@@ -261,7 +224,7 @@ float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     auto constraint = navBarLayoutProperty->CreateChildConstraint();
 
     if (navBarLayoutProperty->GetHideToolBar().value_or(false) || toolBarNode->GetChildren().empty() ||
-        CheckWhetherNeedToHideToolbar(hostNode, navigationSize)) {
+        NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(hostNode, navigationSize)) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
         toolBarWrapper->Measure(constraint);
         return 0.0f;
@@ -279,7 +242,7 @@ float MeasureToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
 float MeasureToolBarDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize, float toolBarHeight)
 {
-    if (hostNode->GetPrevToolBarIsCustom().value_or(false) || !hostNode->IsNavbarUseToolbarConfiguration()) {
+    if (hostNode->GetPrevToolBarIsCustom().value_or(false) || !hostNode->IsUseToolbarConfiguration()) {
         return 0.0f;
     }
 
@@ -340,7 +303,9 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
-    auto titleBarOffset = OffsetF(0.0f, 0.0f);
+    float offsetY = 0.0f;
+    offsetY = NavigationTitleUtil::CalculateTitlebarOffset(titleBarNode);
+    auto titleBarOffset = OffsetF(0.0f, offsetY);
     geometryNode->SetMarginFrameOffset(titleBarOffset);
     titleBarWrapper->Layout();
     return geometryNode->GetFrameSize().Height();
@@ -401,7 +366,7 @@ void LayoutToolBarDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, float toolbarHeight)
 {
     if (navBarLayoutProperty->GetHideToolBar().value_or(false) || hostNode->GetPrevToolBarIsCustom().value_or(false) ||
-        !hostNode->IsNavbarUseToolbarConfiguration() || NearZero(toolbarHeight)) {
+        !hostNode->IsUseToolbarConfiguration() || NearZero(toolbarHeight)) {
         return;
     }
     auto dividerNode = hostNode->GetToolBarDividerNode();
@@ -437,7 +402,8 @@ void UpdateTitleBarMenuNode(const RefPtr<NavBarNode>& navBarNode, const SizeF& n
     auto isHideToolbar = navBarPattern->GetToolbarHideStatus();
     auto preMenuNode = titleBarNode->GetMenu();
 
-    bool isNeedLandscapeMenu = CheckWhetherNeedToHideToolbar(navBarNode, navigationSize) && !isHideToolbar;
+    bool isNeedLandscapeMenu =
+        NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(navBarNode, navigationSize) && !isHideToolbar;
     RefPtr<UINode> newMenuNode = isNeedLandscapeMenu ? navBarNode->GetLandscapeMenu() : navBarNode->GetMenu();
     if (preMenuNode == newMenuNode) {
         return;

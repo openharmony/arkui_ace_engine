@@ -370,6 +370,7 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
 {
     JS_CALLBACK_DURATION();
     auto vm = GetEcmaVM();
+    panda::JsiFastNativeScope fastNativeScope(vm);
     LocalScope scope(vm);
     panda::TryCatch trycatch(vm);
     bool traceEnabled = false;

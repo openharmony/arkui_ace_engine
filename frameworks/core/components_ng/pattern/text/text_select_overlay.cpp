@@ -181,7 +181,9 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         localHandleOffset -= GetPaintOffsetWithoutTransform();
     }
     localHandleOffset.SetY(localHandleOffset.GetY() + handleRect.Height() / 2.0f);
-    textPattern->GetMagnifierController()->SetLocalOffset(localHandleOffset);
+    if (textPattern->HasContent() && textPattern->GetMagnifierController()) {
+        textPattern->GetMagnifierController()->SetLocalOffset(localHandleOffset);
+    }
     auto handleOffset = handleRect.GetOffset();
     handleOffset.SetY(handleOffset.GetY() + handleRect.Height() / 2.0f);
 

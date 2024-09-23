@@ -2086,4 +2086,31 @@ ArkUINativeModuleValue TextAreaBridge::SetTextAreaInitialize(ArkUIRuntimeCallInf
     }
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TextAreaBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto value = widthArg->ToString(vm)->ToString(vm);
+    if (value.empty()) {
+        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaWidth(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaWidth(
+        nativeNode, value.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextAreaBridge::ResetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaWidth(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

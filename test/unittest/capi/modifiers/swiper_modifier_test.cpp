@@ -1361,7 +1361,7 @@ HWTEST_F(SwiperModifierTest, setOnChangeTest, TestSize.Level1)
     modifier_->setOnChange(node_, {});
 
     EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireChangeEvent(0, 123);
+    eventHub->FireChangeEvent(0, 123, false);
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->index, 123);

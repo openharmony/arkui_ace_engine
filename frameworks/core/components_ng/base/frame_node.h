@@ -172,8 +172,9 @@ public:
 
     void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
-    void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+    void ProcessFreezeNode();
+
+    void onFreezeStateChange() override;
 
     void ProcessPropertyDiff()
     {
@@ -499,19 +500,10 @@ public:
     bool RenderCustomChild(int64_t deadline) override;
     void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
     void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
-    void PushDestroyCallback(std::function<void()>&& callback)
-    {
-        destroyCallbacks_.emplace_back(callback);
-    }
 
     void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
     {
         destroyCallbacksMap_[tag] = callback;
-    }
-
-    std::list<std::function<void()>> GetDestroyCallback() const
-    {
-        return destroyCallbacks_;
     }
 
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
@@ -793,6 +785,16 @@ public:
     }
 
     void SetActive(bool active = true, bool needRebuildRenderContext = false) override;
+
+    bool GetAccessibilityVisible() const
+    {
+        return accessibilityVisible_;
+    }
+
+    void SetAccessibilityVisible(const bool accessibilityVisible)
+    {
+        accessibilityVisible_ = accessibilityVisible;
+    }
 
     bool IsOutOfLayout() const override
     {
@@ -1084,14 +1086,27 @@ public:
 
     void OnForegroundColorUpdate(const Color& value);
 
+    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
+    std::string GetJSCustomProperty(const std::string& key);
+    std::string GetCapiCustomProperty(const std::string& key);
+
+    void AddCustomProperty(const std::string& key, const std::string& value);
+    void RemoveCustomProperty(const std::string& key);
+
+    void setIsCNode(bool createByCapi)
+    {
+        isCNode_ = createByCapi;
+    }
+
 protected:
     void DumpInfo() override;
-    std::list<std::function<void()>> destroyCallbacks_;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
     OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
     static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);
@@ -1251,6 +1266,7 @@ private:
     std::set<std::string> allowDrop_;
     const static std::set<std::string> layoutTags_;
     std::function<void()> removeCustomProperties_;
+    std::function<std::string(const std::string& key)> getCustomProperty_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -1272,6 +1288,7 @@ private:
     // for container, this flag controls only the last child in touch area is consuming event.
     bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
+    bool accessibilityVisible_ = true;
     bool isResponseRegion_ = false;
     bool isLayoutComplete_ = false;
     bool isFirstBuilding_ = true;
@@ -1319,11 +1336,16 @@ private:
 
     bool isUseTransitionAnimator_ = false;
 
+    bool isCNode_ = false;
+
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
     DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
+
+    std::unordered_map<std::string, std::string> customPropertyMap_;
+    std::mutex mutex_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

@@ -65,7 +65,7 @@ void MoonProgressModifier::onDraw(DrawingContext& context)
     frameSize_.SetWidth(contentSize.Width());
     frameSize_.SetHeight(contentSize.Height());
     SetBigRadius();
-    if (GreatOrEqual(ratio_->Get(), bigRadius_ / smallRadius_) || hideMask_) {
+    if (GreatOrEqual(ratio_->Get(), bigRadius_ / smallRadius_)) {
         hideMask_ = true;
         return;
     }
@@ -231,13 +231,13 @@ void MoonProgressModifier::PaintSquareMoon(RSCanvas& canvas)
     canvas.AttachBrush(brush);
     path.SetFillStyle(RSPathFillType::EVENTODD);
     path.AddCircle(centerPt.GetX(), centerPt.GetY(), bigRadius_, RSPathDirection::CW_DIRECTION);
-    if (NearZero(angle, EPSLION)) {
-        canvas.DrawPath(path);
-        canvas.DetachBrush();
-        canvas.Restore();
-        return;
-    }
     if (NearZero(std::abs(ratio_->Get() - INITIAL_RATIO), EPSLION)) {
+        if (NearZero(angle, EPSLION)) {
+            canvas.DrawPath(path);
+            canvas.DetachBrush();
+            canvas.Restore();
+            return;
+        }
         if (LessOrEqual(angle, FLOAT_ONE_ZERO)) {
             CalculateSquareMoonPath(path, centerPt, angle);
         } else {

@@ -80,6 +80,7 @@ public:
     virtual void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) {}
     virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}
     virtual void SetRenderFit(RenderFit renderFit) {}
+    virtual void EnableSecure(bool isSecure) {}
 
 private:
     static std::unique_ptr<XComponentModel> instance_;

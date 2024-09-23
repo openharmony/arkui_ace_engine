@@ -195,6 +195,11 @@ public:
         }
         return g_endSelectionHandle;
     }
+
+    bool GetIsLongPressActived() override
+    {
+        return false;
+    }
 };
 
 class NWebQuickMenuCallbackMock : public NWebQuickMenuCallback {
@@ -485,7 +490,7 @@ HWTEST_F(WebPatternTest, HandleDoubleClickEventTest009, TestSize.Level1)
     info.SetButton(MouseButton::LEFT_BUTTON);
     info.SetAction(MouseAction::NONE);
     std::queue<MouseClickInfo> empty;
-    swap(empty, g_webPattern->doubleClickQueue_);
+    swap(empty, g_webPattern->mouseClickQueue_);
     g_webPattern->HandleDoubleClickEvent(info);
     g_webPattern->HandleDoubleClickEvent(info);
 #endif

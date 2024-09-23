@@ -268,10 +268,12 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
      */
     auto formRendererDispatcher = formRenderer->formRendererDispatcherImpl_;
     EXPECT_TRUE(formRendererDispatcher);
+    OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0);
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr;
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2))
-        .WillOnce(Return());
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
+        type, rsTransaction)).WillOnce(Return());
     formRendererDispatcher->DispatchSurfaceChangeEvent(FORM_WIDTH_2, FORM_HEIGHT_2);
     std::this_thread::sleep_for(std::chrono::seconds(1));
     EXPECT_EQ(onSurfaceChangeEventKey, CHECK_KEY);
@@ -279,8 +281,8 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     formRendererDispatcher->formRenderer_.reset();
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormWidth(FORM_WIDTH_2)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetFormHeight(FORM_HEIGHT_2)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2))
-        .WillOnce(Return());
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), OnFormSurfaceChange(FORM_WIDTH_2, FORM_HEIGHT_2,
+        type, rsTransaction)).WillOnce(Return());
     onSurfaceChangeEventKey = "";
     formRendererDispatcher->DispatchSurfaceChangeEvent(FORM_WIDTH_2, FORM_HEIGHT_2);
     std::this_thread::sleep_for(std::chrono::seconds(1));

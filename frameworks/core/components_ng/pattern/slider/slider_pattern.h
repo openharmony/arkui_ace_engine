@@ -131,7 +131,6 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     OffsetF CalculateGlobalSafeOffset();
     void UpdateValue(float value);
-    void OnVisibleChange(bool isVisible) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void SetBuilderFunc(SliderMakeCallback&& makeFunc)
@@ -187,6 +186,7 @@ private:
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
+    void HandleEnabled();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandlingGestureStart(const GestureEvent& info);
     void HandlingGestureEvent(const GestureEvent& info);
@@ -286,7 +286,6 @@ private:
     bool panMoveFlag_ = false;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisibleArea_ = true;
-    bool isVisible_ = true;
     bool isShow_ = true;
     SliderModelNG::SliderInteraction sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_AND_CLICK;
     bool allowDragEvents_ = true;

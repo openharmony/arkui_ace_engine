@@ -234,7 +234,7 @@ public:
                 auto nextChar = value.substr(i, 1);
                 auto mapTuple = escapeMap.find(nextChar);
                 if (mapTuple == escapeMap.end()) {
-                    LOGE("Find escape \\%{public}s failed", nextChar.c_str());
+                    TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Find escape \\%{public}s failed", nextChar.c_str());
                     return false;
                 }
                 ch = mapTuple->second;

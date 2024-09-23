@@ -78,6 +78,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         contentModifier->SetFontReady(false);
     }
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
+    textStyle.SetAdaptFontSizeStep(textLayoutProperty->GetAdaptFontSizeStep()
+        .value_or(Dimension(1.0, DimensionUnit::PX)));
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
 

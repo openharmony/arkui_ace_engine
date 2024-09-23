@@ -154,8 +154,8 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest001
     auto stageNode =
         FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), stagePattern);
     RefPtr<AppBarView> appBar = AceType::MakeRefPtr<AppBarView>();
-    viewEnhance_->Create(stageNode);
-    SUCCEED();
+    auto containerModalNode = viewEnhance_->Create(stageNode);
+    EXPECT_NE(containerModalNode, nullptr);
 }
 
 /**
@@ -166,8 +166,8 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest001
 HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest002, TestSize.Level1)
 {
     CreateContainerModal();
-    viewEnhance_->BuildTitle(frameNode_, false);
-    SUCCEED();
+    auto titleRow = viewEnhance_->BuildTitle(frameNode_, false);
+    EXPECT_NE(titleRow, nullptr);
 }
 
 /**
@@ -178,8 +178,8 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest002
 HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest003, TestSize.Level1)
 {
     CreateContainerModal();
-    viewEnhance_->BuildTitle(frameNode_, false);
-    SUCCEED();
+    auto titleRow = viewEnhance_->BuildTitle(frameNode_, false);
+    EXPECT_NE(titleRow, nullptr);
 }
 
 class MockWindowManager : public WindowManager {
@@ -200,7 +200,6 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest004
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPatternEnhance>());
     auto titleRow = viewEnhance_->BuildTitleContainer(containerModalNode, true);
     viewEnhance_->SetTapGestureEvent(containerModalNode, titleRow);
-    SUCCEED();
     auto eventhub = titleRow->GetOrCreateGestureEventHub();
     auto pipeline = PipelineContext::GetCurrentContext();
     auto WindownMode = []() -> WindowMode { return WindowMode::WINDOW_MODE_FULLSCREEN; };
@@ -241,6 +240,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest004
         GestureEvent info;
         (*(it->onActionId_))(info);
     }
+    EXPECT_EQ(windowManager->GetCurrentWindowMaximizeMode(), MaximizeMode ::MODE_RECOVER);
 }
 
 /**
@@ -255,9 +255,8 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest005
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPatternEnhance>());
     auto titleRow = viewEnhance_->BuildTitleContainer(containerModalNode, true);
     viewEnhance_->SetTapGestureEvent(containerModalNode, titleRow);
-    SUCCEED();
     viewEnhance_->SetTapGestureEvent(containerModalNode, titleRow);
-    SUCCEED();
+    EXPECT_EQ(titleRow->GetOrCreateGestureEventHub()->recreateGesture_, false);
 }
 
 /**
@@ -273,9 +272,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest006
     auto controlButtonsRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto fameNode = viewEnhance_->AddControlButtons(containerModalNode, controlButtonsRow);
-    if (fameNode) {
-        SUCCEED();
-    }
+    EXPECT_NE(fameNode, nullptr);
 }
 
 /**
@@ -305,7 +302,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest007
             (*(item->onActionId_))(info);
         }
     }
-    SUCCEED();
+    EXPECT_EQ(windowManager->GetCurrentWindowMaximizeMode(), MaximizeMode ::MODE_AVOID_SYSTEM_BAR);
 }
 
 /**
@@ -335,7 +332,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest008
             (*(item->onActionId_))(info);
         }
     }
-    SUCCEED();
+    EXPECT_EQ(windowManager->GetCurrentWindowMaximizeMode(), MaximizeMode ::MODE_RECOVER);
 }
 
 /**
@@ -366,7 +363,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest009
             (*(item->onActionId_))(info);
         }
     }
-    SUCCEED();
+    EXPECT_EQ(windowManager->GetCurrentWindowMaximizeMode(), MaximizeMode ::MODE_RECOVER);
 }
 
 /**
@@ -397,7 +394,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest010
             (*(item->onActionId_))(info);
         }
     }
-    SUCCEED();
+    EXPECT_EQ(windowManager->GetCurrentWindowMaximizeMode(), MaximizeMode ::MODE_RECOVER);
 }
 
 /**
@@ -427,7 +424,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest011
             (*(item->onActionId_))(info);
         }
     }
-    SUCCEED();
+    EXPECT_EQ(windowManager->GetCurrentWindowMaximizeMode(), MaximizeMode ::MODE_RECOVER);
 }
 
 /**
@@ -443,9 +440,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest012
     auto controlButtonsRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto fameNode = viewEnhance_->AddControlButtons(containerModalNode, controlButtonsRow);
-    if (fameNode) {
-        SUCCEED();
-    }
+    EXPECT_NE(fameNode, nullptr);
 }
 
 /**
@@ -461,9 +456,6 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest013
     auto controlButtonsRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto fameNode = viewEnhance_->AddControlButtons(containerModalNode, controlButtonsRow);
-    if (fameNode) {
-        SUCCEED();
-    }
     auto pipeline = PipelineContext::GetCurrentContext();
     auto WindownMode = []() -> WindowMode { return WindowMode::WINDOW_MODE_PIP; };
     auto windowManager = pipeline->GetWindowManager();
@@ -482,6 +474,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest013
             (*item)(info);
         }
     }
+    EXPECT_NE(fameNode, nullptr);
 }
 
 /**
@@ -498,9 +491,6 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest014
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     viewEnhance_->ResetHoverTimer();
     auto fameNode = viewEnhance_->AddControlButtons(containerModalNode, controlButtonsRow);
-    if (fameNode) {
-        SUCCEED();
-    }
     auto pipeline = PipelineContext::GetCurrentContext();
     auto WindownMode = []() -> WindowMode { return WindowMode::WINDOW_MODE_PIP; };
     auto windowManager = pipeline->GetWindowManager();
@@ -519,6 +509,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest014
             (*item)(info);
         }
     }
+    EXPECT_NE(fameNode, nullptr);
 }
 
 /**
@@ -534,9 +525,6 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest015
     auto controlButtonsRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto fameNode = viewEnhance_->AddControlButtons(containerModalNode, controlButtonsRow);
-    if (fameNode) {
-        SUCCEED();
-    }
     auto pipeline = PipelineContext::GetCurrentContext();
     auto WindownMode = []() -> WindowMode { return WindowMode::WINDOW_MODE_PIP; };
     auto windowManager = pipeline->GetWindowManager();
@@ -555,6 +543,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest015
             (*item)(info);
         }
     }
+    EXPECT_NE(fameNode, nullptr);
 }
 
 /**
@@ -588,7 +577,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest016
             (*item)(info);
         }
     }
-    SUCCEED();
+    EXPECT_NE(fameNode, nullptr);
 }
 
 /**
@@ -617,37 +606,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest017
             (*item)(hover);
         }
     }
-    SUCCEED();
-}
-
-/**
- * @tc.name: ContainerModalViewEnhanceTestNgTest018
- * @tc.desc: Test BuildLeftSplitMenuItem
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest018, TestSize.Level1)
-{
-    CreateContainerModal();
-    auto frameNode = viewEnhance_->BuildLeftSplitMenuItem();
-    if (frameNode) {
-        SUCCEED();
-    }
-}
-
-/**
- * @tc.name: ContainerModalViewEnhanceTestNgTest019
- * @tc.desc: Test BuildLeftSplitMenuItem
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest019, TestSize.Level1)
-{
-    CreateContainerModal();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->windowManager_ = nullptr;
-    auto frameNode = viewEnhance_->BuildLeftSplitMenuItem();
-    if (frameNode) {
-        SUCCEED();
-    }
+    EXPECT_NE(fameNode, nullptr);
 }
 
 /**
@@ -662,12 +621,10 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest020
     auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() - MENU_FLOAT_X.ConvertToPx();
     auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() + MENU_FLOAT_Y.ConvertToPx();
     OffsetF menuPosition { menuPosX, menuPosY };
-    viewEnhance_->CalculateMenuOffset(menuPosition);
     viewEnhance_->SetEnableSplit(false);
     auto menuList = FrameNode::CreateFrameNode(
         V2::LIST_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
-    auto fameNode = viewEnhance_->ShowMaxMenu(menuList, menuPosition);
-    EXPECT_EQ(fameNode, nullptr);
+    EXPECT_EQ(viewEnhance_->enableSplit_, false);
 }
 
 /**
@@ -682,39 +639,10 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest021
     auto menuPosX = info.GetScreenLocation().GetX() - info.GetLocalLocation().GetX() - MENU_FLOAT_X.ConvertToPx();
     auto menuPosY = info.GetScreenLocation().GetY() - info.GetLocalLocation().GetY() + MENU_FLOAT_Y.ConvertToPx();
     OffsetF menuPosition { menuPosX, menuPosY };
-    viewEnhance_->CalculateMenuOffset(menuPosition);
     viewEnhance_->SetEnableSplit(true);
     auto menuList = FrameNode::CreateFrameNode(
         V2::LIST_COMPONENT_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
-    auto fameNode = viewEnhance_->ShowMaxMenu(menuList, menuPosition);
-}
-
-/**
- * @tc.name: ContainerModalViewEnhanceTestNgTest022
- * @tc.desc: Test BuildRightSplitMenuItem
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest022, TestSize.Level1)
-{
-    CreateContainerModal();
-    auto frameNode = viewEnhance_->BuildRightSplitMenuItem();
-    if (frameNode) {
-        SUCCEED();
-    }
-}
-
-/**
- * @tc.name: ContainerModalViewEnhanceTestNgTest023
- * @tc.desc: Test BuildRightSplitMenuItem
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest023, TestSize.Level1)
-{
-    CreateContainerModal();
-    auto frameNode = viewEnhance_->BuildRightSplitMenuItem();
-    if (frameNode) {
-        SUCCEED();
-    }
+    EXPECT_EQ(viewEnhance_->enableSplit_, true);
 }
 
 /**
@@ -737,8 +665,6 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest024
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     PaddingProperty padding;
     padding.left = CalcLength(MENU_ITEM_TEXT_PADDING);
-    auto text = viewEnhance_->BuildMenuItemPadding(padding, titleLabel);
-    containerTitleRow->AddChild(text);
     viewEnhance_->BondingMenuItemEvent(containerTitleRow);
     auto events = containerTitleRow->GetOrCreateInputEventHub()->hoverEventActuator_->inputEvents_;
     auto mouse = containerTitleRow->GetOrCreateInputEventHub()->mouseEventActuator_->inputEvents_;
@@ -759,7 +685,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest024
     for (auto item : mouse) {
         (*item)(info);
     }
-    SUCCEED();
+    EXPECT_EQ(ishover, false);
 }
 
 /**
@@ -782,10 +708,8 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest025
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     PaddingProperty padding;
     padding.left = CalcLength(MENU_ITEM_TEXT_PADDING);
-    auto text = viewEnhance_->BuildMenuItemPadding(padding, titleLabel);
-    containerTitleRow->AddChild(text);
     viewEnhance_->BondingMenuItemEvent(containerTitleRow);
-    SUCCEED();
+    EXPECT_EQ(padding.left, CalcLength(MENU_ITEM_TEXT_PADDING));
 }
 
 /**
@@ -800,9 +724,8 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest026
     auto theme = AceType::MakeRefPtr<AdvancedPatternTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     CreateContainerModal();
-    if (viewEnhance_->BuildMenuItemIcon(InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N)) {
-        SUCCEED();
-    }
+    auto icon = viewEnhance_->BuildMenuItemIcon(InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N);
+    EXPECT_NE(icon, nullptr);
 }
 
 /**
@@ -817,26 +740,8 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest027
     auto theme = AceType::MakeRefPtr<AdvancedPatternTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     CreateContainerModal();
-    if (viewEnhance_->BuildMenuItemIcon(InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N)) {
-        SUCCEED();
-    }
-}
-
-/**
- * @tc.name: ContainerModalViewEnhanceTestNgTest028
- * @tc.desc: Test BondingMenuItemEvent
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest028, TestSize.Level1)
-{
-    CreateContainerModal();
-    auto titleLabel = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    PaddingProperty padding;
-    padding.left = CalcLength(MENU_ITEM_TEXT_PADDING);
-    if (viewEnhance_->BuildMenuItemPadding(padding, titleLabel)) {
-        SUCCEED();
-    }
+    auto icon = viewEnhance_->BuildMenuItemIcon(InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N);
+    EXPECT_NE(icon, nullptr);
 }
 
 /**
@@ -848,30 +753,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest029
 {
     CreateContainerModal();
     viewEnhance_->ResetHoverTimer();
-    SUCCEED();
-}
-
-/**
- * @tc.name: ContainerModalViewEnhanceTestNgTest030
- * @tc.desc: Test ResetHoverTimer
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest030, TestSize.Level1)
-{
-    CreateContainerModal();
-    OffsetF currentOffset;
-    currentOffset.SetX(0.0);
-    currentOffset.SetY(0.0);
-    viewEnhance_->CalculateMenuOffset(currentOffset);
-    SUCCEED();
-    currentOffset.SetX(100.0);
-    currentOffset.SetY(100.0);
-    viewEnhance_->CalculateMenuOffset(currentOffset);
-    SUCCEED();
-    currentOffset.SetX(-2000.0);
-    currentOffset.SetY(-200.0);
-    viewEnhance_->CalculateMenuOffset(currentOffset);
-    SUCCEED();
+    EXPECT_EQ(viewEnhance_->sIsMenuPending_, false);
 }
 
 /**
@@ -884,8 +766,7 @@ HWTEST_F(ContainerModalViewEnhanceTestNg, ContainerModalViewEnhanceTestNgTest031
     CreateContainerModal();
     auto containerModalNode = FrameNode::CreateFrameNode("ContainerModal",
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPatternEnhance>());
-    if (viewEnhance_->BuildGestureRow(containerModalNode)) {
-        SUCCEED();
-    }
+    auto gestureRow = viewEnhance_->BuildGestureRow(containerModalNode);
+    EXPECT_NE(gestureRow, nullptr);
 }
 } // namespace OHOS::Ace::NG

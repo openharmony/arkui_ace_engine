@@ -24,6 +24,7 @@
             "https://gitee.com/piggyguy",
             "https://gitee.com/zhaojian2021",
             "https://gitee.com/benb365",
+            "https://gitee.com/zhou-chaobo",
         ],
         "https://gitee.com/arkui_architecture": [
             "https://gitee.com/sunfei2021",
@@ -55,7 +56,7 @@
         ],
         "https://gitee.com/arkuipopupwindow": [
             "https://gitee.com/zhangfanfan2",
-            "https://gitee.com/niulihua",
+            "https://gitee.com/liyi0309",
             "https://gitee.com/zhanghaibo0",
             "https://gitee.com/youzhi92",
             "https://gitee.com/Armstrong15",
@@ -139,6 +140,10 @@
         },
         "https://gitee.com/zhaojian2021": {
             "info": "[事件手势 zhaojian]",
+            "group": "https://gitee.com/arkuievent"
+        },
+        "https://gitee.com/zhou-chaobo": {
+            "info": "[事件手势 zhouchaobo]",
             "group": "https://gitee.com/arkuievent"
         },
         "https://gitee.com/benb365": {
@@ -229,8 +234,8 @@
             "info": "[弹出/表单类公共 zhangfanfan]",
             "group": "https://gitee.com/arkuipopupwindow"
         },
-        "https://gitee.com/niulihua": {
-            "info": "[弹窗类 niulihua]",
+        "https://gitee.com/liyi0309": {
+            "info": "[弹窗类 liyi]",
             "group": "https://gitee.com/arkuipopupwindow"
         },
         "https://gitee.com/zhanghaibo0": {

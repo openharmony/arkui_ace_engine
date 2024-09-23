@@ -94,16 +94,16 @@ HWTEST_F(ScrolleEffectTestNg, SpringEffect002, TestSize.Level1)
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     springEffect->SetScrollable(scrollable);
     springEffect->ProcessSpringUpdate();
-    EXPECT_TRUE(springEffect->scrollable_->isSpringAnimationStop_);
+    EXPECT_EQ(springEffect->scrollable_->state_, Scrollable::AnimationState::IDLE);
 
     scrollable->MarkAvailable(false);
     springEffect->ProcessSpringUpdate();
-    EXPECT_TRUE(springEffect->scrollable_->isSpringAnimationStop_);
+    EXPECT_EQ(springEffect->scrollable_->state_, Scrollable::AnimationState::IDLE);
 
     pattern_->SetDirection(FlexDirection::ROW_REVERSE);
     pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     springEffect->ProcessSpringUpdate();
-    EXPECT_TRUE(springEffect->scrollable_->isSpringAnimationStop_);
+    EXPECT_EQ(springEffect->scrollable_->state_, Scrollable::AnimationState::IDLE);
 
     springEffect->SetScrollable(nullptr);
     springEffect->ProcessSpringUpdate();

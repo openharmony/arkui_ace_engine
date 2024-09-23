@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controller, const WeakPtr<SwiperPattern>& weak)
 {
+    CHECK_NULL_VOID(controller);
     controller->SetSwipeToImpl([weak](int32_t index, bool reverse) {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
@@ -265,6 +266,8 @@ void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
     }
     DumpPanDirection(swiper.panDirection_);
     DumpDirection(swiper.direction_);
+    swiper.IsDisableSwipe() ? DumpLog::GetInstance().AddDesc("disableSwipe:true")
+                            : DumpLog::GetInstance().AddDesc("disableSwipe:false");
 }
 
 void SwiperHelper::DumpInfoAddPositionDesc(SwiperPattern& swiper)
@@ -376,6 +379,7 @@ std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParam
 {
     CHECK_NULL_RETURN(params, "");
     auto jsonValue = JsonUtil::Create(true);
+    CHECK_NULL_RETURN(jsonValue, "");
     jsonValue->Put("left", params->dimLeft.value_or(0.0_vp).ToString().c_str());
     jsonValue->Put("top", params->dimTop.value_or(0.0_vp).ToString().c_str());
     jsonValue->Put("right", params->dimRight.value_or(0.0_vp).ToString().c_str());
@@ -397,6 +401,7 @@ std::string SwiperHelper::GetDigitIndicatorStyle(const std::shared_ptr<SwiperDig
 {
     CHECK_NULL_RETURN(params, "");
     auto jsonValue = JsonUtil::Create(true);
+    CHECK_NULL_RETURN(jsonValue, "");
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, "");
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
@@ -420,5 +425,19 @@ std::string SwiperHelper::GetDigitIndicatorStyle(const std::shared_ptr<SwiperDig
     jsonValue->Put("selectedFontWeight",
         V2::ConvertWrapFontWeightToStirng(params->selectedFontWeight.value_or(FontWeight::NORMAL)).c_str());
     return jsonValue->ToString();
+}
+
+float SwiperHelper::CalculateFriction(float gamma)
+{
+    if (LessOrEqual(gamma, 0.0f)) {
+        return 1.0f;
+    }
+    if (GreatOrEqual(gamma, 1.0f)) {
+        gamma = 1.0f;
+    }
+    constexpr float scrollRatio = 0.72f;
+    constexpr float coefficient = M_E / (1.0f -  M_E);
+    auto fx = (gamma + coefficient) * (log(M_E - (M_E - 1.0f) * gamma) - 1.0f);
+    return scrollRatio * fx / gamma;
 }
 } // namespace OHOS::Ace::NG

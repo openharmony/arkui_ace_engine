@@ -337,7 +337,7 @@ HWTEST_F(ContainerModelTestNg, Test003, TestSize.Level1)
     GetHovertEvent(0)(false);
     mouseInfo.SetAction(MouseAction::MOVE);
     GetMouseEvent(0)(mouseInfo);
-    SUCCEED();
+    EXPECT_EQ(mouseInfo.GetAction(), MouseAction::MOVE);
 }
 
 /**
@@ -515,17 +515,6 @@ HWTEST_F(ContainerModelTestNg, Test007, TestSize.Level1)
     pattern_->SetIsHoveredMenu(true);
     bool bResult = pattern_->GetIsHoveredMenu();
     EXPECT_TRUE(bResult);
-}
-/**
- * @tc.name: Test008
- * @tc.desc: SetContainerModalPattern.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, Test008, TestSize.Level1)
-{
-    CreateContainerModal();
-    ContainerModalView::SetContainerModalPattern(pattern_);
-    EXPECT_EQ(ContainerModalView::containerModalPattern_, pattern_);
 }
 /**
  * @tc.name: Test009

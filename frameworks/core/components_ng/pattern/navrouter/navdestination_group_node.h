@@ -36,7 +36,10 @@ class ACE_EXPORT NavDestinationGroupNode : public NavDestinationNodeBase {
     DECLARE_ACE_TYPE(NavDestinationGroupNode, NavDestinationNodeBase)
 public:
     NavDestinationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
-        : NavDestinationNodeBase(tag, nodeId, pattern) {}
+        : NavDestinationNodeBase(tag, nodeId, pattern)
+    {
+        isNewToolbar_ = true;
+    }
     ~NavDestinationGroupNode() override;
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
     void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;
@@ -180,6 +183,11 @@ public:
     {
         return needAppearFromRecovery_;
     }
+
+    void UpdateTextNodeListAsRenderGroup(bool isPopPage);
+    void ReleaseTextNodeList();
+    void CollectTextNodeAsRenderGroup();
+
 private:
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
@@ -195,6 +203,7 @@ private:
     std::string navDestinationPathInfo_;
     std::string navDestinationModuleName_;
     bool needRemoveInPush_ = false;
+    std::list<WeakPtr<UINode>> textNodeList_;
 };
 
 } // namespace OHOS::Ace::NG
