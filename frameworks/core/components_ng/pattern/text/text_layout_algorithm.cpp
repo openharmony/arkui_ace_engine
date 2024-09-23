@@ -403,7 +403,7 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::AdaptMinTextSize[Length:%d]", static_cast<int32_t>(content.length()));
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     auto maxFontSizeDimension = textStyle.GetAdaptMaxFontSize();
     maxFontSize = maxFontSizeDimension.ConvertToPxDistribute(
@@ -601,7 +601,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     paragraphWidth = std::ceil(paragraphWidth);
     paragraph->Layout(paragraphWidth);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     // calculate the content size
     auto height = static_cast<float>(paragraph->GetHeight());
     baselineOffset_ = static_cast<float>(

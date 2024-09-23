@@ -168,7 +168,7 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto firstHandle = info_->GetFirstHandlePaintRect();
     auto secondHandle = info_->GetSecondHandlePaintRect();
@@ -361,7 +361,7 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
     } else {
         LOGW("the move point is not in drag area");
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     if (host->IsLayoutDirtyMarked()) {
         context->AddDirtyLayoutNode(host);
