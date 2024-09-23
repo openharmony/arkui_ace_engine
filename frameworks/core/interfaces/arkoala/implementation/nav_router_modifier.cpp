@@ -34,10 +34,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavRouterInterfaceModifier {
 void SetNavRouterOptions0Impl(Ark_NativePointer node)
 {
+    // still it empty for save default values
 }
 void SetNavRouterOptions1Impl(Ark_NativePointer node,
                               const Ark_RouteInfo* value)
 {
+    LOGE("ARKOALA SetNavRouterOptions1 -> Method is not implemented.");
 }
 } // NavRouterInterfaceModifier
 namespace NavRouterAttributeModifier {
