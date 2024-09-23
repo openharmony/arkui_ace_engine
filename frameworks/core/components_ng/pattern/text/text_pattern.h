@@ -797,6 +797,7 @@ protected:
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
     void OnForegroundColorUpdate(const Color& value) override;
+    void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
     bool enabled_ = true;
     Status status_ = Status::NONE;
@@ -961,6 +962,7 @@ private:
     std::optional<ParagraphStyle> externalParagraphStyle_;
     bool isUserSetResponseRegion_ = false;
     WeakPtr<PipelineContext> pipeline_;
+    WeakPtr<ScrollablePattern> scrollableParent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG
