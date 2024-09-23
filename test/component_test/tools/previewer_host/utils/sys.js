@@ -74,7 +74,6 @@ async function deleteNodePIDs(PIDs) {
 
             deleteProcess.stdout.on('data', data => {
                 stdout += data.toString();
-                console.log(data.toString());
             });
 
             deleteProcess.stderr.on('data', data => {
@@ -87,7 +86,6 @@ async function deleteNodePIDs(PIDs) {
                     console.error(`delete process error exited with code ${code}`);
                     reject(code);
                 } else {
-                    console.log(`process exited with code ${code}`);
                     resolve(code);
                 }
             });
