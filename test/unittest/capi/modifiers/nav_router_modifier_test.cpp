@@ -203,11 +203,8 @@ HWTEST_F(NavRouterModifierTest, setModeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    enum Ark_NavRouteMode inputValueModeMode;
-
-    // Inital setup
-    inputValueModeMode = ARK_NAV_ROUTE_MODE_PUSH_WITH_RECREATE;
-
+    auto inputValueModeMode = ARK_NAV_ROUTE_MODE_PUSH_WITH_RECREATE;
+    
     // Test
     modifier_->setMode(node_, inputValueModeMode);
 
