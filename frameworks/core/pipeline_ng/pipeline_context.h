@@ -468,7 +468,7 @@ public:
     }
     bool Activate(bool isActive, bool autoInactive = true) override;
 
-    void SetContainerWindow(bool isShow) override;
+    void SetContainerWindow(bool isShow, Dimension contentBorderRadius);
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetCloseButtonStatus(bool isEnabled);
 
