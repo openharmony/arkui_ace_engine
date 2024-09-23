@@ -215,7 +215,7 @@ public:
             theme->hasHiddenPassword_ = pattern->GetAttr<std::string>("textfield_has_hidden_password", "");
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("textfield_writting_ability_name", "");
-            
+            theme->aiWriteIsSupport_ = pattern->GetAttr<std::string>("textfield_writting_is_support", "");
         }
     };
 
@@ -655,6 +655,11 @@ public:
     {
         return aiWriteAbilityName_;
     }
+
+    const std::string& GetAIWriteIsSupport() const
+    {
+        return aiWriteIsSupport_;
+    }
 protected:
     TextFieldTheme() = default;
 
@@ -765,6 +770,7 @@ private:
     std::string hidePassword_;
     std::string aiWriteBundleName_;
     std::string aiWriteAbilityName_;
+    std::string aiWriteIsSupport_;
     std::string cancelImageText_;
 };
 

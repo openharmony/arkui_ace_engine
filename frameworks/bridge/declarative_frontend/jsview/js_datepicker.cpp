@@ -621,8 +621,8 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                           const BaseEventInfo* info) {
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                           node = targetNode, isDatePicker](const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("DatePicker.SelectedDateTimeChangeEvent");
         const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
@@ -633,7 +633,7 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
             return;
         }
 
-        auto dateObj = JSDatePickerDialog::GetDateObj(sourceJson);
+        auto dateObj = JSDatePickerDialog::GetDateObj(sourceJson, isDatePicker);
         PipelineContext::SetCallBackNode(node);
         func->ExecuteJS(1, &dateObj);
     };
@@ -857,7 +857,7 @@ std::function<void(const std::string&)> JSDatePickerDialog::GetDateAcceptEvent(c
     return dateAcceptEvent;
 }
 
-JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>& selectedJson)
+JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>& selectedJson, bool isDatePicker)
 {
     std::tm dateTime = { 0 };
     auto year = selectedJson->GetValue("year");
@@ -879,6 +879,11 @@ JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>
     auto minute = selectedJson->GetValue("minute");
     if (minute && minute->IsNumber()) {
         dateTime.tm_min = minute->GetInt();
+    }
+    if (!isDatePicker) {
+        auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
+        auto dateObj = JSDate::New(milliseconds);
+        return dateObj;
     }
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
     auto duration = timestamp.time_since_epoch();
@@ -943,6 +948,26 @@ std::function<void()> JSDatePickerDialog::GetCancelEvent(
     return cancelEvent;
 }
 
+void JSDatePickerDialog::UpdateLunarSwitchSettingData(
+    const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData)
+{
+    auto selectedColorValue = paramObject->GetProperty("selectedColor");
+    auto unselectedColorValue = paramObject->GetProperty("unselectedColor");
+    auto strokeColorValue = paramObject->GetProperty("strokeColor");
+    Color selectedColor;
+    if (JSViewAbstract::ParseJsColor(selectedColorValue, selectedColor)) {
+        settingData.checkboxSettingData.selectedColor = selectedColor;
+    }
+    Color unselectedColor;
+    if (JSViewAbstract::ParseJsColor(unselectedColorValue, unselectedColor)) {
+        settingData.checkboxSettingData.unselectedColor = unselectedColor;
+    }
+    Color strokeColor;
+    if (JSViewAbstract::ParseJsColor(strokeColorValue, strokeColor)) {
+        settingData.checkboxSettingData.strokeColor = strokeColor;
+    }
+}
+
 void JSDatePickerDialog::UpdateDatePickerSettingData(
     const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData)
 {
@@ -952,6 +977,13 @@ void JSDatePickerDialog::UpdateDatePickerSettingData(
     auto useMilitary = paramObject->GetProperty("useMilitaryTime");
     settingData.isLunar = lunar->ToBoolean();
     settingData.lunarswitch = lunarSwitch->ToBoolean();
+    if (settingData.lunarswitch) {
+        auto lunarSwitchStyle = paramObject->GetProperty("lunarSwitchStyle");
+        if ((!lunarSwitchStyle->IsUndefined()) && lunarSwitchStyle->IsObject()) {
+            auto style = JSRef<JSObject>::Cast(lunarSwitchStyle);
+            UpdateLunarSwitchSettingData(style, settingData);
+        }
+    }
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
     auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");

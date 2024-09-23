@@ -186,7 +186,7 @@ public:
     void ResetHandles();
     void UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex);
     void UpdateCaretIndex(int32_t index);
-    void UpdateCaretInfoByOffset(const Offset& localOffset);
+    void UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent = true);
     OffsetF CalcCaretOffsetByOffset(const Offset& localOffset);
     void UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset);
     void MoveSecondHandleByKeyBoard(int32_t index);

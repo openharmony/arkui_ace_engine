@@ -71,7 +71,7 @@ constexpr int32_t INDEX_X_SLOPE = 2;
 constexpr int32_t INDEX_Y_SLOPE = 3;
 constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
-constexpr int32_t USED_ID_FIND_FLAG = 3;                 // if args >3 , it means use id to find
+constexpr uint32_t USED_ID_FIND_FLAG = 3; // if args >3 , it means use id to find
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
 constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 constexpr int32_t VSYNC_PERIOD_COUNT = 5;
@@ -79,18 +79,8 @@ constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 constexpr int32_t DELAY_TIME = 500;
-constexpr int32_t USED_JSON_PARAM = 4;
+constexpr uint32_t USED_JSON_PARAM = 4;
 constexpr int32_t PARAM_NUM = 2;
-
-#define CHECK_THREAD_SAFE(isFormRender, taskExecutor) CheckThreadSafe(isFormRender, taskExecutor, __func__, __LINE__)
-void CheckThreadSafe(
-    bool isFormRender, OHOS::Ace::RefPtr<OHOS::Ace::TaskExecutor>& taskExecutor, const char* func, int line)
-{
-    if (!isFormRender && !taskExecutor->WillRunOnCurrentThread(OHOS::Ace::TaskExecutor::TaskType::UI)) {
-        LOGW("[%{public}s:%{public}d] doesn't run on UI thread!", func, line);
-        OHOS::Ace::LogBacktrace();
-    }
-}
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -186,7 +176,9 @@ float PipelineContext::GetCurrentRootHeight()
 
 void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
 {
-    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
+    if (!CheckThreadSafe()) {
+        LOGW("AddDirtyPropertyNode doesn't run on UI thread!");
+    }
     dirtyPropertyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     RequestFrame();
@@ -294,6 +286,42 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     RequestFrame();
 }
 
+void PipelineContext::AddDirtyFreezeNode(FrameNode* node)
+{
+    dirtyFreezeNode_.emplace_back(WeakClaim(node));
+    hasIdleTasks_ = true;
+    RequestFrame();
+}
+
+void PipelineContext::FlushFreezeNode()
+{
+    std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyFreezeNodeSet;
+    auto dirtyFreezeNodes = std::move(dirtyFreezeNode_);
+    dirtyFreezeNode_.clear();
+    for (auto&& weakNode : dirtyFreezeNodes) {
+        auto node = weakNode.Upgrade();
+        if (node) {
+            dirtyFreezeNodeSet.emplace(node);
+        }
+    }
+    for (auto&& node : dirtyFreezeNodeSet) {
+        node->ProcessFreezeNode();
+    }
+}
+
+void PipelineContext::FlushDirtyPropertyNodes()
+{
+    // node api property diff before ets update.
+    if (!CheckThreadSafe()) {
+        LOGW("FlushDirtyNodeUpdate doesn't run on UI thread!");
+    }
+    decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
+    dirtyPropertyNodes_.clear();
+    for (const auto& node : dirtyPropertyNodes) {
+        node->ProcessPropertyDiff();
+    }
+}
+
 void PipelineContext::FlushDirtyNodeUpdate()
 {
     CHECK_RUN_ON(UI);
@@ -302,13 +330,10 @@ void PipelineContext::FlushDirtyNodeUpdate()
         FrameReport::GetInstance().BeginFlushBuild();
     }
 
-    // node api property diff before ets update.
-    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
-    decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
-    dirtyPropertyNodes_.clear();
-    for (const auto& node : dirtyPropertyNodes) {
-        node->ProcessPropertyDiff();
-    }
+    // freeze node unlock before build begin.
+    FlushFreezeNode();
+
+    FlushDirtyPropertyNodes();
 
     if (!ViewStackProcessor::GetInstance()->IsEmpty() && !dirtyNodes_.empty()) {
         ACE_SCOPED_TRACE("Error update, node stack non-empty");
@@ -956,23 +981,30 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
 
-    GetOrCreateUIDisplaySyncManager()->SetRefreshRateMode(window_->GetCurrentRefreshRateMode());
-    GetOrCreateUIDisplaySyncManager()->SetVsyncPeriod(window_->GetVSyncPeriod());
+    const auto& displaySyncManager = GetOrCreateUIDisplaySyncManager();
+    if (!displaySyncManager) {
+        TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[DispatchDisplaySync] displaySyncManager is nullptr.");
+        return;
+    }
+
+    displaySyncManager->SetRefreshRateMode(window_->GetCurrentRefreshRateMode());
+    displaySyncManager->SetVsyncPeriod(window_->GetVSyncPeriod());
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushAnimation();
     }
 
     scheduleTasks_.clear();
-    GetOrCreateUIDisplaySyncManager()->DispatchFunc(nanoTimestamp);
+    displaySyncManager->DispatchFunc(nanoTimestamp);
 
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushAnimation();
     }
 
-    int32_t displaySyncRate = GetOrCreateUIDisplaySyncManager()->GetDisplaySyncRate();
+    int32_t displaySyncRate = displaySyncManager->GetDisplaySyncRate();
     frameRateManager_->SetDisplaySyncRate(displaySyncRate);
-    ArkUIPerfMonitor::GetInstance().RecordDisplaySyncRate(displaySyncRate);
+    auto monitorVsyncRate = displaySyncManager->GetMonitorVsyncRate();
+    ArkUIPerfMonitor::GetInstance().RecordDisplaySyncRate(monitorVsyncRate);
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -1003,7 +1035,9 @@ void PipelineContext::FlushMessages()
 void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     window_->Lock();
-    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
+    if (!CheckThreadSafe()) {
+        LOGW("FlushUITasks doesn't run on UI thread!");
+    }
     decltype(dirtyPropertyNodes_) dirtyPropertyNodes(std::move(dirtyPropertyNodes_));
     dirtyPropertyNodes_.clear();
     for (const auto& dirtyNode : dirtyPropertyNodes) {
@@ -1458,7 +1492,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     }
 
     FlushWindowSizeChangeCallback(width, height, type);
-    UpdateHalfFoldHoverStatus(width, height);
+    UpdateHalfFoldHoverProperty(width, height);
     UpdateSizeChangeReason(type, rsTransaction);
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1466,6 +1500,16 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 #else
     SetRootRect(width, height, 0.0);
 #endif
+}
+
+void PipelineContext::UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight)
+{
+    isHoverModeChanged_ = false;
+    preIsHalfFoldHoverStatus_ = isHalfFoldHoverStatus_;
+    UpdateHalfFoldHoverStatus(windowWidth, windowHeight);
+    if (preIsHalfFoldHoverStatus_ != isHalfFoldHoverStatus_) {
+        isHoverModeChanged_ = true;
+    }
 }
 
 void PipelineContext::OnLayoutCompleted(const std::string& componentId)
@@ -1827,7 +1871,9 @@ void PipelineContext::DetachNode(RefPtr<UINode> uiNode)
         privacyManager->RemoveNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
     }
 
-    CHECK_THREAD_SAFE(isFormRender_, taskExecutor_);
+    if (!CheckThreadSafe()) {
+        LOGW("DetachNode doesn't run on UI thread!");
+    }
     dirtyPropertyNodes_.erase(frameNode);
     needRenderNode_.erase(WeakPtr<FrameNode>(frameNode));
 
@@ -2711,7 +2757,7 @@ void PipelineContext::DumpData(
     const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const
 {
     CHECK_NULL_VOID(node);
-    int32_t used_id_flag = hasJson ? USED_JSON_PARAM : USED_ID_FIND_FLAG;
+    uint32_t used_id_flag = hasJson ? USED_JSON_PARAM : USED_ID_FIND_FLAG;
     if (params.size() < used_id_flag) {
         node->DumpTree(0, hasJson);
         if (hasJson) {
@@ -3623,16 +3669,29 @@ void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
     containerPattern->UpdateTitleInTargetPos(isShow, height);
 }
 
-void PipelineContext::SetContainerWindow(bool isShow)
+void PipelineContext::SetContainerWindow(bool isShow, Dimension contentBorderRadius)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {
         auto window = GetWindow();
         if (window) {
+            CHECK_NULL_VOID(rootNode_);
+            auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildAtIndex(0));
+            CHECK_NULL_VOID(containerNode);
+            auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+            CHECK_NULL_VOID(containerPattern);
+            auto windowRect = window_->GetCurrentWindowRect();
+            RectInt rect;
+            rect.SetRect(0, 0, windowRect.Width(), windowRect.Height());
+            auto isContainerModal = windowModal_ == WindowModal::CONTAINER_MODAL;
+            containerPattern->GetWindowPaintRectWithoutMeasureAndLayout(rect, isContainerModal);
+            OHOS::Rosen::RectF rosenRect = {rect.GetX(), rect.GetY(), rect.Width(), rect.Height()};
+            float value = contentBorderRadius.ConvertToPx();
+            auto rrect = OHOS::Rosen::RRect(rosenRect, value, value);
             auto rsUIDirector = window->GetRSUIDirector();
             if (rsUIDirector) {
                 // set container window show state to render service
-                rsUIDirector->SetContainerWindow(isShow, density_);
+                rsUIDirector->SetContainerWindow(isShow, rrect);
             }
         }
     }
@@ -4481,6 +4540,19 @@ void PipelineContext::SubscribeContainerModalButtonsRectChange(
     containerPattern->SubscribeContainerModalButtonsRectChange(std::move(callback));
 }
 
+void PipelineContext::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->GetWindowPaintRectWithoutMeasureAndLayout(rect);
+}
+
 const RefPtr<PostEventManager>& PipelineContext::GetPostEventManager()
 {
     return postEventManager_;
@@ -4817,7 +4889,7 @@ void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
     foldStatusDelayTask_.Reset([weak = WeakClaim(this)]() {
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
-        context->UpdateHalfFoldHoverStatus(context->GetRootWidth(), context->GetRootHeight());
+        context->UpdateHalfFoldHoverProperty(context->GetRootWidth(), context->GetRootHeight());
         context->OnHalfFoldHoverChangedCallback();
     });
     taskExecutor_->PostDelayedTask(
@@ -4832,14 +4904,17 @@ std::string PipelineContext::GetResponseRegion(const RefPtr<FrameNode>& rootNode
     std::string responseRegionStrOrigin;
     std::string responseRegionStrFilter;
     for (const auto& rect : responseRegionList) {
-        int32_t x = static_cast<int32_t>(rect.GetX());
-        int32_t y = static_cast<int32_t>(rect.GetY());
+        int32_t left = static_cast<int32_t>(rect.Left());
+        int32_t top = static_cast<int32_t>(rect.Top());
         int32_t width = static_cast<int32_t>(rect.Width());
         int32_t height = static_cast<int32_t>(rect.Height());
-        std::string rectStr = std::to_string(x) + "," +
-                              std::to_string(y) + "," +
-                              std::to_string(x + width) + "," +
-                              std::to_string(y + height);
+        int32_t right = static_cast<int32_t>(rect.Right());
+        int32_t bottom = static_cast<int32_t>(rect.Bottom());
+        std::string rectStr = std::to_string(left) + "," +
+                              std::to_string(top) + "," +
+                              std::to_string(right) + "," +
+                              std::to_string(bottom);
+
         responseRegionStrOrigin += rectStr + "#";
         if (thpExtraMgr_ && width <= thpExtraMgr_->GetWidth() && height <= thpExtraMgr_->GetHeight()) {
             responseRegionStrFilter += rectStr + "#";
@@ -4887,5 +4962,15 @@ bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& an
         return navigationMgr_->AddInteractiveAnimation(animationCallback);
     }
     return false;
+}
+
+bool PipelineContext::CheckThreadSafe()
+{
+    CHECK_NULL_RETURN(taskExecutor_, true);
+    if (!isFormRender_ && !taskExecutor_->WillRunOnCurrentThread(OHOS::Ace::TaskExecutor::TaskType::UI)) {
+        OHOS::Ace::LogBacktrace();
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

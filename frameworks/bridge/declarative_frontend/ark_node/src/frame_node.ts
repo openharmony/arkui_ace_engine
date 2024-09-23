@@ -470,7 +470,15 @@ class FrameNode {
   }
 
   getCustomProperty(key: string): Object | undefined {
-    return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
+    if (key === undefined) {
+      return undefined;
+    }
+    let value = __getCustomProperty__(this._nodeId, key);
+    if (value === undefined) {
+      const valueStr = getUINativeModule().frameNode.getCustomPropertyCapiByKey(this.getNodePtr(), key);
+      value = valueStr === undefined ? undefined : valueStr;
+    }
+    return value;
   }
 
   setMeasuredSize(size: Size): void {
@@ -868,6 +876,11 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
       return new TypedFrameNode(context, 'Select', (node: NodePtr, type: ModifierType): ArkSelectComponent => {
         return new ArkSelectComponent(node, type);
       })
+    }],
+    ['Toggle', (context: UIContext, options?: object): FrameNode=> {
+      return new TypedFrameNode(context, 'Toggle', (node: NodePtr, type: ModifierType): ArkToggleComponent => {
+        return new ArkToggleComponent(node, type);
+      }, options)
     }],
   ]
 )

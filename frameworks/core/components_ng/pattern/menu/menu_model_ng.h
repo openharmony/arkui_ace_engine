@@ -47,8 +47,9 @@ public:
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
-    void SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
-    void SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
+    static void SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
+    static void SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
+    static void SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingMode& expandingMode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_MODEL_NG_H

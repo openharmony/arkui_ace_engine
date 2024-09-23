@@ -267,8 +267,9 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d up, state: %{public}d", event.touchEventId,
-        event.id, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+        "Id:%{public}d, pan %{public}d up, state: %{public}d, currentFingers: %{public}d, fingers: %{public}d",
+        event.touchEventId, event.id, refereeState_, currentFingers_, fingers_);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
     }
@@ -287,9 +288,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if ((currentFingers_ <= fingers_) &&
         (refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
-            (*onActionCancel_)();
-        }
         return;
     }
 
@@ -309,11 +307,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         }
     }
 
-    if (refereeState_ == RefereeState::FAIL) {
-        if (isForDrag_ && onActionCancel_ && *onActionCancel_) {
-            (*onActionCancel_)();
-        }
-    }
     // Clear All fingers' velocity when fingersId is empty.
     if (fingersId_.empty()) {
         panVelocity_.ResetAll();
@@ -545,36 +538,35 @@ bool PanRecognizer::CalculateTruthFingers(bool isDirectionUp) const
     return GreatNotEqual(totalDistance, judgeDistance) && static_cast<int32_t>(touchPointsDistance_.size()) >= fingers_;
 }
 
-PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
+PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInAllDirection(double judgeDistance) const
 {
-    auto judgeDistance = distance_;
-    if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
-        judgeDistance = mouseDistance_;
+    double offset = averageDistance_.GetDistance();
+    if (fabs(offset) < judgeDistance) {
+        return GestureAcceptResult::DETECTING;
     }
-    if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
-        double offset = averageDistance_.GetDistance();
+    return GestureAcceptResult::ACCEPT;
+}
+
+PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInHorizontalDirection(double judgeDistance) const
+{
+    if ((direction_.type & PanDirection::HORIZONTAL) != 0) {
+        double offset = averageDistance_.GetX();
         if (fabs(offset) < judgeDistance) {
             return GestureAcceptResult::DETECTING;
         }
+        if ((direction_.type & PanDirection::LEFT) == 0 && offset < 0) {
+            return GestureAcceptResult::REJECT;
+        }
+        if ((direction_.type & PanDirection::RIGHT) == 0 && offset > 0) {
+            return GestureAcceptResult::REJECT;
+        }
         return GestureAcceptResult::ACCEPT;
     }
+    return GestureAcceptResult::DETECTING;
+}
 
-    if (fabs(averageDistance_.GetX()) > fabs(averageDistance_.GetY())) {
-        if ((direction_.type & PanDirection::HORIZONTAL) != 0) {
-            double offset = averageDistance_.GetX();
-            if (fabs(offset) < judgeDistance) {
-                return GestureAcceptResult::DETECTING;
-            }
-            if ((direction_.type & PanDirection::LEFT) == 0 && offset < 0) {
-                return GestureAcceptResult::REJECT;
-            }
-            if ((direction_.type & PanDirection::RIGHT) == 0 && offset > 0) {
-                return GestureAcceptResult::REJECT;
-            }
-            return GestureAcceptResult::ACCEPT;
-        }
-        return GestureAcceptResult::DETECTING;
-    }
+PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInVerticalDirection(double judgeDistance) const
+{
     if ((direction_.type & PanDirection::VERTICAL) != 0) {
         double offset = averageDistance_.GetY();
         if (fabs(offset) < judgeDistance) {
@@ -598,6 +590,22 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
         return GestureAcceptResult::ACCEPT;
     }
     return GestureAcceptResult::DETECTING;
+}
+
+PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
+{
+    auto judgeDistance = distance_;
+    if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
+        judgeDistance = mouseDistance_;
+    }
+    if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
+        return IsPanGestureAcceptInAllDirection(judgeDistance);
+    }
+
+    if (fabs(averageDistance_.GetX()) > fabs(averageDistance_.GetY())) {
+        return IsPanGestureAcceptInHorizontalDirection(judgeDistance);
+    }
+    return IsPanGestureAcceptInVerticalDirection(judgeDistance);
 }
 
 Offset PanRecognizer::GetRawGlobalLocation(int32_t postEventNodeId)
@@ -661,9 +669,11 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetSourceTool(lastAxisEvent_.sourceTool);
         info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
         info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
+        info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
     } else {
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetSourceTool(lastTouchEvent_.sourceTool);
+        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
     }
     info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
@@ -672,11 +682,8 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetTiltX(lastTouchEvent_.tiltX.value_or(0.0));
     info.SetTiltY(lastTouchEvent_.tiltY.value_or(0.0));
     info.SetPointerEvent(lastPointEvent_);
-    if (inputEventType_ == InputEventType::AXIS) {
-        info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
-    } else {
-        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
-    }
+    info.SetIsPostEventResult(isPostEventResult_);
+    info.SetPostEventNodeId(lastTouchEvent_.postEventNodeId);
     return info;
 }
 

@@ -327,15 +327,6 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     }
 }
 
-void PipelineContext::SetContainerWindow(bool isShow)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SetContainerWindow(isShow, density_); // set container window show state to render service
-    }
-#endif
-}
-
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
@@ -1578,11 +1569,13 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 
     std::optional<TouchEvent> lastMoveEvent;
     if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
-        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
+        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
             auto movePoint = (*iter).CreateScalePoint(GetViewScale());
             if (scalePoint.id == movePoint.id) {
                 lastMoveEvent = movePoint;
                 iter = touchEvents_.erase(iter);
+            } else {
+                ++iter;
             }
         }
         if (lastMoveEvent.has_value()) {

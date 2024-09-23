@@ -141,6 +141,7 @@ private:
     ToastInfo toastInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
     double toastBottom_;
+    Dimension defaultBottom_;
     Rect wrapperRect_;
     bool isHoverMode_ = false;
 };

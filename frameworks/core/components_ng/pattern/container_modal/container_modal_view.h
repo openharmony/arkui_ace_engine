@@ -36,10 +36,6 @@ protected:
     static void AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode);
     static void AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode);
     static void AddButtonStyleMouseEvent(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn);
-    static void SetContainerModalPattern(RefPtr<ContainerModalPattern> containerModalPattern)
-    {
-        containerModalPattern_ = containerModalPattern;
-    }
     static void AddButtonHoverEvent(
         RefPtr<InputEventHub>& inputHub, RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn);
     static void AddButtonOnEvent(
@@ -47,7 +43,6 @@ protected:
 
 private:
     static float baseScale;
-    static RefPtr<ContainerModalPattern> containerModalPattern_;
 };
 
 } // namespace OHOS::Ace::NG

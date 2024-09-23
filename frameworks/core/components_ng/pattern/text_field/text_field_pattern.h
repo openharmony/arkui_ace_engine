@@ -189,6 +189,7 @@ struct TouchAndMoveCaretState {
     bool isMoveCaret = false;
     Offset touchDownOffset;
     Dimension minDinstance = 5.0_vp;
+    int32_t touchFingerId = -1;
 };
 
 struct ContentScroller {
@@ -1299,6 +1300,9 @@ public:
 
     void CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction);
 
+    void HandleOnDragStatusCallback(
+        const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
     OffsetF GetTextPaintOffset() const override;
@@ -1533,6 +1537,8 @@ public:
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
+    void StopContentScroll();
+    void UpdateContentScroller(const Offset& localOffset);
 
 protected:
     virtual void InitDragEvent();
@@ -1579,8 +1585,8 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
-    void HandleTouchMove(const TouchEventInfo& info);
-    void UpdateCaretByTouchMove(const TouchEventInfo& info);
+    void HandleTouchMove(const TouchLocationInfo& info);
+    void UpdateCaretByTouchMove(const TouchLocationInfo& info);
     void InitDisableColor();
     void InitFocusEvent();
     void InitTouchEvent();
@@ -1679,6 +1685,7 @@ private:
     void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
+    void SetAccessibilityUnitAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();
@@ -1789,20 +1796,18 @@ private:
     bool HasAutoFillPasswordNode();
     bool IsTriggerAutoFillPassword();
 
-    void UpdateContentScroller(const Offset& localOffset);
-    void StopContentScroll();
     void PauseContentScroll();
     void ScheduleContentScroll(float delay);
     void UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset);
     std::optional<float> CalcAutoScrollStepOffset(const Offset& localOffset);
     void SetDragMovingScrollback();
     float CalcScrollSpeed(float hotAreaStart, float hotAreaEnd, float point);
+    std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
 
     RectF frameRect_;
     RectF textRect_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> errorParagraph_;
-    RefPtr<Paragraph> dragParagraph_;
     InlineMeasureItem inlineMeasureItem_;
     TextStyle nextLineUtilTextStyle_;
 

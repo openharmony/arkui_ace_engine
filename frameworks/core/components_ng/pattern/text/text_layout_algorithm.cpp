@@ -118,8 +118,10 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         if (spanStringHasMaxLines_) {
             textStyle.SetMaxLines(UINT32_MAX);
         }
+        textStyle_ = textStyle;
         BuildParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
+        textStyle_ = textStyle;
         if (!AddPropertiesAndAnimations(textStyle, textLayoutProperty, contentConstraint, layoutWrapper)) {
             return std::nullopt;
         }
@@ -402,43 +404,99 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
         return true;
     }
     // Get suitableSize and set
-    double suitableSize = 0.0;
-    if (!GetSuitableSize(textStyle, content, contentConstraint, layoutWrapper, suitableSize)) {
-        return false;
+    auto ret = GetSuitableSize(textStyle, content, contentConstraint, layoutWrapper);
+    if (!ret.first) {
+        textStyle.SetFontSize(Dimension(minFontSize));
+        return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
+    } else if (ret.first && NearEqual(textStyle.GetFontSize().Value(), ret.second)) {
+        return true; // The font is already set, no need to call CreateParagraphAndLayout again.
+    } else {
+        textStyle.SetFontSize(Dimension(ret.second));
+        return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
     }
-    textStyle.SetFontSize(Dimension(suitableSize));
-    return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
 }
 
-// Find the optimal size within [minFontSize, maxFontSize].
-bool TextLayoutAlgorithm::GetSuitableSize(TextStyle& textStyle, const std::string& content,
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double& suitableSize)
+/**
+ * brief: Find the optimal font size within the range [minFontSize, maxFontSize].
+ * return: std::pair<bool, double>
+ *         - first: A boolean indicating whether a suitable size was found (true if found, false otherwise).
+ *         - second: The optimal font size if found, valid only when first is true.
+ */
+std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSize(TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
+    auto step = Dimension(1.0, DimensionUnit::PX);
+
+    if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
+        step = textStyle.GetAdaptFontSizeStep();
+    }
+    double stepSize = step.ConvertToPxDistribute(textStyle.GetMinFontScale(),
+        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    if (NearEqual(stepSize, 0.0)) {
+        return {false, 0.0};
+    }
+    int32_t stepCount = (maxFontSize - minFontSize) / stepSize;
+
+    // Compare time complexity: stepCount/2 < log(stepCount)+1, exp2 is fast.
+    if (step.GetAdaptDimensionUnit(step) != DimensionUnit::PX && exp2(stepCount / 2 - 1) < stepCount) {
+        return GetSuitableSizeLD(textStyle, content, contentConstraint, layoutWrapper, stepSize);
+    } else {
+        return GetSuitableSizeBS(textStyle, content, contentConstraint, layoutWrapper, stepSize);
+    }
+}
+
+std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeLD(TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize)
 {
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
     GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
-    Dimension step(1.0f, DimensionUnit::PX);
-    if (GreatNotEqual(textStyle.GetAdaptFontSizeStep().Value(), 0.0)) {
-        step = textStyle.GetAdaptFontSizeStep();
+
+    if (NearEqual(stepSize, 0.0)) {
+        return {false, 0.0};
     }
-    double stepSize =
-        step.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    double suitableSize = maxFontSize;
+    while (suitableSize >= maxFontSize) {
+        textStyle.SetFontSize(Dimension(suitableSize));
+        if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
+            return {false, 0.0};
+        }
+        if (!DidExceedMaxLines(maxSize)) {
+            return {true, suitableSize};
+        }
+        suitableSize -= stepSize;
+    }
+    return {false, 0.0};
+}
+
+std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeBS(TextStyle& textStyle, const std::string& content,
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize)
+{
+    double maxFontSize = 0.0;
+    double minFontSize = 0.0;
+    GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
+    auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
+
     // Boundary check: for efficiency and to ensure the optimal size is within [minFontSize, maxFontSize].
     textStyle.SetFontSize(Dimension(maxFontSize));
     if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
         TAG_LOGE(AceLogTag::ACE_TEXT, "create paragraph error");
-        return false;
+        return {false, 0.0};
     }
     if (!DidExceedMaxLines(maxSize)) {
-        suitableSize = maxFontSize;
-        return true;
+        return {true, maxFontSize};
     }
-    // Binary search: to find the optimal size within [minFontSize, maxFontSize].
+
     if (NearEqual(stepSize, 0.0)) {
-        return false;
+        return {false, 0.0};
     }
     int32_t stepCount = (maxFontSize - minFontSize) / stepSize;
+    
+    // Binary search: to find the optimal size within [minFontSize, maxFontSize].
     int32_t leftBound = 0;
     int32_t rightBound = stepCount;
     int32_t mid = (leftBound + rightBound) / 2;
@@ -446,7 +504,7 @@ bool TextLayoutAlgorithm::GetSuitableSize(TextStyle& textStyle, const std::strin
         double suitSz = minFontSize + mid * stepSize;
         textStyle.SetFontSize(Dimension(suitSz));
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
-            return false;
+            return {false, 0.0};
         }
         if (!DidExceedMaxLines(maxSize)) {
             leftBound = mid;
@@ -455,8 +513,7 @@ bool TextLayoutAlgorithm::GetSuitableSize(TextStyle& textStyle, const std::strin
         }
         mid = (leftBound + rightBound + 1) / 2;
     }
-    suitableSize = minFontSize + leftBound * stepSize;
-    return true;
+    return {true, minFontSize + leftBound * stepSize};
 }
 
 float TextLayoutAlgorithm::GetBaselineOffset() const

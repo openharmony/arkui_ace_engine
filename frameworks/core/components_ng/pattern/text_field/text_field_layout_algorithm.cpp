@@ -860,7 +860,8 @@ TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& cont
         return direction;
     }
 
-    TextDirection textDirection = TextDirection::LTR;
+    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
         if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
@@ -1151,7 +1152,7 @@ bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textSty
         CHECK_NULL_RETURN(paragraph_, false);
         auto maxSize = GetMaxMeasureSize(contentConstraint);
         ApplyIndent(maxSize.Width());
-        paragraph_->Layout(maxSize.Width());
+        paragraph_->Layout(std::max(0.0f, maxSize.Width()));
     }
     return true;
 }

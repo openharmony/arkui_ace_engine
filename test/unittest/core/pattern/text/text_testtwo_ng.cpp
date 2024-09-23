@@ -1470,6 +1470,9 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent005, TestSize.Level1)
     auto host = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto pattern = host->GetPattern<TextPattern>();
     auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    inputHub->mouseEventActuator_->inputEvents_.clear();
+    pattern->mouseEventInitialized_ = false;
+    pattern->InitMouseEvent();
     auto mouseEvent = inputHub->mouseEventActuator_->inputEvents_.back();
 
     AISpan aiSpan1;
@@ -1482,10 +1485,8 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent005, TestSize.Level1)
     aiSpan2.end = AI_SPAN_END_II;
     aiSpan2.content = SPAN_URL;
     aiSpan2.type = TextDataDetectType::URL;
-    std::map<int32_t, AISpan> aiSpanMap;
-    aiSpanMap[AI_SPAN_START] = aiSpan1;
-    aiSpanMap[AI_SPAN_START_II] = aiSpan2;
-    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    pattern->dataDetectorAdapter_->aiSpanMap_[AI_SPAN_START] = aiSpan1;
+    pattern->dataDetectorAdapter_->aiSpanMap_[AI_SPAN_START_II] = aiSpan2;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> rects { RectF(0, 0, 40, 40) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
@@ -1563,6 +1564,9 @@ HWTEST_F(TextTestTwoNg, HandleMouseEvent006, TestSize.Level1)
      */
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 30 });
     auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    inputHub->mouseEventActuator_->inputEvents_.clear();
+    pattern->mouseEventInitialized_ = false;
+    pattern->InitMouseEvent();
     auto mouseEvent = inputHub->mouseEventActuator_->inputEvents_.back();
     MouseInfo info;
     info.button_ = MouseButton::LEFT_BUTTON;

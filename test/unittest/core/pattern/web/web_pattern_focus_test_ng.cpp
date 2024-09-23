@@ -17,15 +17,13 @@
 
 #include "gtest/gtest.h"
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/components/web/resource/web_delegate.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/event/touch_event.h"
+#undef private
+
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/utils/system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -378,7 +376,7 @@ HWTEST_F(WebPatternFocusTestNg, InitializeAccessibility, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     webPattern->InitializeAccessibility();
-    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_, nullptr);
+    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_[webPattern->instanceId_], nullptr);
 #endif
 }
 
@@ -402,7 +400,7 @@ HWTEST_F(WebPatternFocusTestNg, UninitializeAccessibility, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     webPattern->UninitializeAccessibility();
-    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_, nullptr);
+    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_[webPattern->instanceId_], nullptr);
 #endif
 }
 

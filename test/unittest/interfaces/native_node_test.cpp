@@ -1628,13 +1628,18 @@ HWTEST_F(NativeNodeTest, NativeNodeTest010, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT, &item);
     item.string = "test";
     nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_SRC, &item);
+    value[0].f32 = 10.0f;
+    nodeAPI->setAttribute(rootNode, NODE_IMAGE_SPAN_BASELINE_OFFSET, &item);
+
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_SRC), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_ALT), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_IMAGE_SPAN_BASELINE_OFFSET), ARKUI_ERROR_CODE_NO_ERROR);
 
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_SRC), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_ALT), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMAGE_SPAN_BASELINE_OFFSET), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 
@@ -4145,7 +4150,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest051, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto rootNode = nodeAPI->createNode(ARKUI_NODE_DATE_PICKER);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     float negativeFloat = -1.0f;
     int32_t negativeInt = -1;
     ArkUI_NumberValue value0[] = {};

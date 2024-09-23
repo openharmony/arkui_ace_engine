@@ -655,6 +655,9 @@ HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop001, TestSize.Level1)
     RefPtr<NavigationGroupNode> navigationNode =
         AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navigationNode, nullptr);
+    auto navigationContentNode =
+        FrameNode::CreateFrameNode("navigationContent", 123, AceType::MakeRefPtr<Pattern>());
+    navigationNode->contentNode_ = navigationContentNode;
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     EXPECT_NE(navigationPattern, nullptr);
     auto navBarNode =
@@ -668,10 +671,12 @@ HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop001, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(stdNavdestination, nullptr);
     stdNavdestination->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    stdNavdestination->SetParent(WeakPtr<UINode>(navigationContentNode));
     auto dialogDestination = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dialogDestination, nullptr);
     dialogDestination->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    dialogDestination->SetParent(WeakPtr<UINode>(navigationContentNode));
     std::vector<std::pair<std::string, WeakPtr<UINode>>> preNodes;
     preNodes.emplace_back(std::make_pair("pageOne", WeakPtr<UINode>(stdNavdestination)));
     preNodes.emplace_back(std::make_pair("pageTwo", WeakPtr<UINode>(dialogDestination)));
@@ -689,9 +694,9 @@ HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop001, TestSize.Level1)
     navigationNode->TransitionWithDialogPop(dialogDestination, navBarNode, isNavBar);
     EXPECT_FALSE(navigationNode->GetNeedSetInvisible());
     EXPECT_EQ(stdNavdestination->GetTransitionType(), PageTransitionType::EXIT_POP);
-    EXPECT_EQ(stdNavdestination->GetTransitionType(), PageTransitionType::EXIT_POP);
     EXPECT_FALSE(stdNavdestination->IsOnAnimation());
-    EXPECT_FALSE(stdNavdestination->IsOnAnimation());
+    EXPECT_EQ(dialogDestination->GetTransitionType(), PageTransitionType::EXIT_POP);
+    EXPECT_FALSE(dialogDestination->IsOnAnimation());
 }
 
 /**
@@ -713,6 +718,9 @@ HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop002, TestSize.Level1)
     RefPtr<NavigationGroupNode> navigationNode =
         AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navigationNode, nullptr);
+    auto navigationContentNode =
+        FrameNode::CreateFrameNode("navigationContent", 123, AceType::MakeRefPtr<Pattern>());
+    navigationNode->contentNode_ = navigationContentNode;
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     EXPECT_NE(navigationPattern, nullptr);
 
@@ -731,12 +739,12 @@ HWTEST_F(NavigationAnimationTest, TransitionWithDialogPop002, TestSize.Level1)
     navigationStack->Add("dialogA", dialogDestinationA);
     auto stdNavdestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_NE(stdNavdestinationB, nullptr);
     stdNavdestinationB->SetNavDestinationMode(NavDestinationMode::STANDARD);
+    stdNavdestinationB->SetParent(WeakPtr<UINode>(navigationContentNode));
     auto dialogDestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_NE(dialogDestinationB, nullptr);
     dialogDestinationB->SetNavDestinationMode(NavDestinationMode::DIALOG);
+    dialogDestinationB->SetParent(WeakPtr<UINode>(navigationContentNode));
 
     /**
      * @tc.steps: step3. add navdestination nodes into stack
@@ -987,11 +995,166 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation003, TestSize.Level1)
     navdestination->InitSystemTransitionPop(false);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::EXIT_POP);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->SystemTransitionPopCallback(false);
+    navdestination->SystemTransitionPopCallback();
     EXPECT_FALSE(navdestination->IsOnAnimation());
     auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(backButton, nullptr);
     titleBarNode->SetBackButton(backButton);
     auto titleBarNodeRender = titleBarNode->GetRenderContext();
+}
+
+/**
+ * @tc.name: BackButtonOpacityAnimation
+ * @tc.desc: Test NavDestinationGroupNode::BackButtonAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, OpacityAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBar = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    navDestinationNode->titleBarNode_ = titleBar;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto backButtonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    titleBarNode->backButton_ = backButtonNode;
+    ASSERT_NE(titleBarNode->GetBackButton(), nullptr);
+    navDestinationNode->BackButtonAnimation(false);
+    navDestinationNode->BackButtonAnimation(true);
+}
+
+/**
+ * @tc.name: TitleOpacityAnimation
+ * @tc.desc: Test NavDestinationGroupNode::TitleOpacityAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, OpacityAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBar = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    navDestinationNode->titleBarNode_ = titleBar;
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    navDestinationNode->TitleOpacityAnimation(false);
+    navDestinationNode->TitleOpacityAnimation(true);
+}
+
+/**
+ * @tc.name: UpdateTextNodeListAsRenderGroup
+ * @tc.desc: Test NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, UpdateTextNodeListAsRenderGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    /**
+     * @tc.steps: step2. call the target function.
+     */
+    navDestinationNode->UpdateTextNodeListAsRenderGroup(true);
+}
+
+/**
+ * @tc.name: UpdateTextNodeListAsRenderGroup
+ * @tc.desc: Test NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, UpdateTextNodeListAsRenderGroup002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    /**
+     * @tc.steps: step2. call the target function.
+     */
+    navDestinationNode->UpdateTextNodeListAsRenderGroup(false);
+}
+
+/**
+ * @tc.name: CollectTextNodeAsRenderGroup
+ * @tc.desc: Test NavDestinationGroupNode::CollectTextNodeAsRenderGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, CollectTextNodeAsRenderGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 55, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    /**
+     * @tc.steps: step2. create contentNode for navDestination and add text node to content node.
+     */
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 1,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navDestinationNode->AddChild(navDestinationContentNode);
+    navDestinationNode->SetContentNode(navDestinationContentNode);
+    auto textNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 66, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    navDestinationContentNode->AddChild(textNode);
+    /**
+     * @tc.steps: step3. call the target function.
+     */
+    navDestinationNode->CollectTextNodeAsRenderGroup();
+    ASSERT_NE(navDestinationNode->textNodeList_.size(), 0);
+}
+
+/**
+ * @tc.name: ReleaseTextNodeList
+ * @tc.desc: Test NavDestinationGroupNode::ReleaseTextNodeList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, ReleaseTextNodeList001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 77, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    /**
+     * @tc.steps: step2. create contentNode for navDestination and add text node to content node.
+     */
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 1,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navDestinationNode->AddChild(navDestinationContentNode);
+    navDestinationNode->SetContentNode(navDestinationContentNode);
+    auto textNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 88, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    navDestinationContentNode->AddChild(textNode);
+    /**
+     * @tc.steps: step3. collect text nodes before release.
+     */
+    navDestinationNode->CollectTextNodeAsRenderGroup();
+    ASSERT_NE(navDestinationNode->textNodeList_.size(), 0);
+    /**
+     * @tc.steps: step4. call the target function.
+     */
+    navDestinationNode->ReleaseTextNodeList();
+    ASSERT_EQ(navDestinationNode->textNodeList_.size(), 0);
 }
 }; // namespace OHOS::Ace::NG

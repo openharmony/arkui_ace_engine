@@ -398,9 +398,6 @@ void ResetSubTitleProperty(const RefPtr<FrameNode>& textNode, NavigationTitleMod
     titleLayoutProperty->UpdateFontSize(subTitleSize);
     titleLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     SetTextColor(textNode, color);
-
-    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    textNode->MarkModifyDone();
 }
 } // namespace
 
@@ -426,6 +423,9 @@ void TitleBarPattern::MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
         ResetSubTitleProperty(subtitleNode, titleMode, parentType == TitleBarParentType::NAV_DESTINATION);
         shouldResetSubTitleProperty_ = false;
     }
+
+    subtitleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    subtitleNode->MarkModifyDone();
 }
 
 void TitleBarPattern::InitTitleParam()
@@ -482,6 +482,9 @@ void TitleBarPattern::UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& host
         ResetMainTitleProperty(titleNode, titleBarLayoutProperty, titleMode, hostNode->GetSubtitle() != nullptr, false);
         shouldResetMainTitleProperty_ = false;
     }
+
+    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    titleNode->MarkModifyDone();
 }
 
 void TitleBarPattern::UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode)
@@ -508,6 +511,9 @@ void TitleBarPattern::UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& host
         ResetMainTitleProperty(titleNode, titleBarLayoutProperty, titleMode, hostNode->GetSubtitle() != nullptr, true);
         shouldResetMainTitleProperty_ = false;
     }
+
+    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    titleNode->MarkModifyDone();
 }
 
 void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
@@ -588,9 +594,6 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
             UpdateSubTitleOpacity(1.0);
         }
     }
-
-    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    textNode->MarkModifyDone();
 }
 
 
@@ -599,47 +602,6 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(hostNode);
     UpdateNavDesTitleProperty(hostNode);
     UpdateNavBarTitleProperty(hostNode);
-}
-
-void TitleBarPattern::MountMenu(const RefPtr<TitleBarNode>& hostNode, bool isWindowSizeChange)
-{
-    auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) !=
-        TitleBarParentType::NAV_DESTINATION) {
-        return;
-    }
-    if (hostNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        hostNode->RemoveChild(hostNode->GetPrevMenu());
-        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
-    if (hostNode->GetPrevMenuIsCustomValue(false)) {
-        if (hostNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
-            return;
-        }
-        hostNode->SetPrevMenu(hostNode->GetMenu());
-        hostNode->AddChild(hostNode->GetMenu());
-        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    } else {
-        auto titleBarMenuItems = GetTitleBarMenuItems();
-        if (HasMenuNodeId()) {
-            if (hostNode->GetChildIndexById(GetMenuNodeId()) > -1 && !isWindowSizeChange) {
-                return;
-            }
-            auto navDesNode = AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetParent());
-            CHECK_NULL_VOID(navDesNode);
-            auto hub = navDesNode->GetEventHub<EventHub>();
-            CHECK_NULL_VOID(hub);
-            auto isButtonEnabled = hub->IsEnabled();
-            auto menuNode =
-                NavigationTitleUtil::CreateMenuItems(GetMenuNodeId(), titleBarMenuItems, hostNode, isButtonEnabled);
-            CHECK_NULL_VOID(menuNode);
-            hostNode->SetMenu(menuNode);
-            hostNode->SetPrevMenu(menuNode);
-            hostNode->AddChild(hostNode->GetMenu());
-            hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-    }
 }
 
 void TitleBarPattern::OnModifyDone()
@@ -654,7 +616,6 @@ void TitleBarPattern::OnModifyDone()
     MountTitle(hostNode);
     MountSubTitle(hostNode);
     ApplyTitleModifierIfNeeded(hostNode);
-    MountMenu(hostNode);
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
@@ -735,56 +696,6 @@ void TitleBarPattern::ApplyTitleModifier(const RefPtr<FrameNode>& textNode,
     textNode->MarkModifyDone();
 }
 
-void TitleBarPattern::ProcessTitleDragStart(float offset)
-{
-    if (Positive(overDragOffset_)) {
-        return;
-    }
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
-        IsHidden()) {
-        return;
-    }
-    if (springAnimation_) {
-        AnimationUtils::StopAnimation(springAnimation_);
-        springAnimation_.reset();
-    }
-    if (animation_) {
-        AnimationUtils::StopAnimation(animation_);
-        animation_.reset();
-    }
-
-    defaultTitleBarHeight_ = currentTitleBarHeight_;
-    SetMaxTitleBarHeight();
-    SetTempTitleBarHeight(offset);
-    minTitleOffsetY_ = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - minTitleHeight_) / 2.0f;
-    maxTitleOffsetY_ = initialTitleOffsetY_;
-    moveRatio_ = (maxTitleOffsetY_ - minTitleOffsetY_) /
-                 (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    titleMoveDistance_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatio_;
-    defaultTitleOffsetY_ = currentTitleOffsetY_;
-    SetTempTitleOffsetY();
-    defaultSubtitleOffsetY_ = GetSubTitleOffsetY();
-    SetTempSubTitleOffsetY();
-    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-
-    // title font size
-    SetDefaultTitleFontSize();
-    auto mappedOffset = GetMappedOffset(offset);
-    auto tempFontSize = GetFontSize(mappedOffset);
-    UpdateTitleFontSize(tempFontSize);
-
-    // subTitle Opacity
-    SetDefaultSubtitleOpacity();
-    auto tempOpacity = GetSubtitleOpacity();
-    UpdateSubTitleOpacity(tempOpacity);
-
-    isFreeTitleUpdated_ = true;
-}
-
 void TitleBarPattern::ProcessTitleDragUpdate(float offset)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
@@ -812,37 +723,6 @@ void TitleBarPattern::ProcessTitleDragUpdate(float offset)
     // subTitle Opacity
     opacity_ = GetSubtitleOpacity();
     UpdateSubTitleOpacity(opacity_.value());
-}
-
-void TitleBarPattern::ProcessTitleDragEnd()
-{
-    if (Positive(overDragOffset_)) {
-        return;
-    }
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
-        IsHidden()) {
-        return;
-    }
-
-    if (Positive(overDragOffset_)) {
-        SpringAnimation(overDragOffset_, 0);
-    }
-    if (CanOverDrag_ || isTitleScaleChange_) {
-        auto titleMiddleValue =
-            (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / TITLE_RATIO;
-        if (LessNotEqual(GetTempTitleBarHeight(), titleMiddleValue) ||
-            NearEqual(GetTempTitleBarHeight(), titleMiddleValue)) {
-            AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
-            return;
-        } else if (GreatNotEqual(GetTempTitleBarHeight(), titleMiddleValue)) {
-            AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
-            return;
-        }
-    }
 }
 
 float TitleBarPattern::GetSubtitleOpacity()
@@ -928,6 +808,8 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
             pattern->SetOverDragOffset(0.0f);
             pattern->SetTempTitleBarHeightVp(pattern->GetMaxTitleBarHeight());
             pattern->UpdateScaleByDragOverDragOffset(0.0f);
+            pattern->tempTitleOffsetY_ = 0.0f;
+            pattern->isFreeTitleUpdated_ = false;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
@@ -982,7 +864,7 @@ void TitleBarPattern::TransformScale(float overDragOffset, const RefPtr<FrameNod
     renderCtx->UpdateTransformScale(scaleValue);
 }
 
-void TitleBarPattern::AnimateTo(float offset)
+void TitleBarPattern::AnimateTo(float offset, bool isFullTitleMode)
 {
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -990,12 +872,16 @@ void TitleBarPattern::AnimateTo(float offset)
 
     animation_ = AnimationUtils::StartAnimation(
         option,
-        [weakPattern = AceType::WeakClaim(this), offset]() {
+        [weakPattern = AceType::WeakClaim(this), offset, isFullTitleMode]() {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             pattern->ProcessTitleDragUpdate(offset);
+            if (isFullTitleMode) {
+                pattern->tempTitleOffsetY_ = 0.0f;
+                pattern->isFreeTitleUpdated_ = false;
+            }
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
@@ -1219,7 +1105,23 @@ void TitleBarPattern::OnAttachToFrameNode()
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+
+    auto halfFoldHoverCallbackId = pipelineContext->RegisterHalfFoldHoverChangedCallback(
+        [weakHost = WeakPtr<FrameNode>(host)](bool isHalfFoldHover) {
+            auto host = weakHost.Upgrade();
+            CHECK_NULL_VOID(host);
+            NavigationTitleUtil::FoldStatusChangedAnimation(host);
+        });
+    UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);
+}
+
+void TitleBarPattern::InitFoldCreaseRegion()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    currentFoldCreaseRegion_ = displayInfo->GetCurrentFoldCreaseRegion();
 }
 
 void TitleBarPattern::OnCoordScrollStart()
@@ -1287,6 +1189,9 @@ void TitleBarPattern::OnCoordScrollEnd()
         isScrolling_ = false;
         return;
     }
+    // update current offsetX after drag finish
+    currentTitleOffsetX_ = tempTitleOffsetX_;
+    isScrolling_ = false;
     float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     float middleHeight =
         (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / TITLE_RATIO;
@@ -1294,17 +1199,17 @@ void TitleBarPattern::OnCoordScrollEnd()
     if (GreatNotEqual(finalHeight, minHeight) && LessOrEqual(finalHeight, middleHeight)) {
         // The finalHeight is between the minHeight and the middleHeight, so animate to min title.
         AnimateTo(static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - defaultTitleBarHeight_);
-    } else if (GreatNotEqual(finalHeight, middleHeight) && LessNotEqual(finalHeight, maxTitleBarHeight_)) {
+        return;
+    }
+    if (GreatNotEqual(finalHeight, middleHeight) && LessNotEqual(finalHeight, maxTitleBarHeight_)) {
         // The finalHeight is between the middleHeight and the maxTitleBarHeight_, so animate to max title.
-        AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_);
-    } else if (GreatNotEqual(finalHeight, maxTitleBarHeight_)) {
+        AnimateTo(maxTitleBarHeight_ - defaultTitleBarHeight_, true);
+        return;
+    }
+    if (GreatNotEqual(finalHeight, maxTitleBarHeight_)) {
         // The finalHeight is bigger than the maxTitleBarHeight_, so animate to max title.
         SpringAnimation(finalHeight - maxTitleBarHeight_, 0);
     }
-
-    // update current offsetX after drag finish
-    currentTitleOffsetX_ = tempTitleOffsetX_;
-    isScrolling_ = false;
 }
 
 void TitleBarPattern::UpdateTitleBarByCoordScroll(float offset)
@@ -1497,33 +1402,10 @@ void TitleBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
-}
 
-void TitleBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
-{
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) !=
-        TitleBarParentType::NAV_DESTINATION) {
-        return;
+    if (HasHalfFoldHoverChangedCallbackId()) {
+        pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverChangedCallbackId_.value());
     }
-    // change menu num in landscape and orientation
-    do {
-        if (titleBarNode->GetPrevMenuIsCustomValue(false)) {
-            break;
-        }
-        auto targetNum = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE ? MAX_MENU_NUM_LARGE
-                                                                                                  : MAX_MENU_NUM_SMALL;
-        if (targetNum == maxMenuNums_) {
-            break;
-        }
-        maxMenuNums_ = targetNum;
-        MountMenu(titleBarNode, true);
-        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    } while (0);
 }
 
 void TitleBarPattern::DumpInfo()
@@ -1721,5 +1603,26 @@ void TitleBarPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(backButtonNode);
     std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+}
+
+void TitleBarPattern::SetCurrentTitleBarHeight(float currentTitleBarHeight)
+{
+    currentTitleBarHeight_ = currentTitleBarHeight;
+    auto navBarNode = DynamicCast<NavBarNode>(GetHost()->GetParent());
+    if (!navBarNode || options_.brOptions.barStyle.value_or(BarStyle::STANDARD) != BarStyle::SAFE_AREA_PADDING) {
+        return;
+    }
+    auto navBarContentNode = DynamicCast<FrameNode>(navBarNode->GetContentNode());
+    CHECK_NULL_VOID(navBarContentNode);
+    auto contentLayoutProperty = navBarContentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProperty);
+    auto safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
+    PaddingProperty paddingProperty;
+    paddingProperty.left = CalcLength(0.0f);
+    paddingProperty.right = CalcLength(0.0f);
+    paddingProperty.top = CalcLength(currentTitleBarHeight);
+    paddingProperty.bottom = CalcLength(safeAreaPaddingF.bottom.value_or(0.0f));
+
+    contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
 }
 } // namespace OHOS::Ace::NG

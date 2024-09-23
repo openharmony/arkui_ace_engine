@@ -22,11 +22,13 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/syntax/node_content.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -287,7 +289,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
         { "GridItem", ARKUI_GRID_ITEM }, { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "TextClock", ARKUI_TEXT_CLOCK },
         { "TextTimer", ARKUI_TEXT_TIMER }, { "Marquee", ARKUI_MARQUEE }, { "TextArea", ARKUI_TEXTAREA },
         { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP }, { "Rating", ARKUI_RATING},
-        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Select", ARKUI_SELECT }};
+        { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Select", ARKUI_SELECT }, { "Toggle", ARKUI_TOGGLE } };
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     RefPtr<FrameNode> node;
     ArkUINodeHandle nodePtr = nullptr;
@@ -305,6 +307,11 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
 #else
                 nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
 #endif
+            } else if (nodeType == ARKUI_TOGGLE) {
+                ArkUI_Params params;
+                ToggleBridge::ParseParams(runtimeCallInfo, params);
+                params.nodeType = ARKUI_TOGGLE;
+                nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
             } else {
                 nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
             }
@@ -1277,6 +1284,121 @@ ArkUINativeModuleValue FrameNodeBridge::GetInspectorInfo(ArkUIRuntimeCallInfo* r
     auto inspectorInfo = GetArkUINodeModifiers()->getFrameNodeModifier()->getInspectorInfo(nativeNode);
     return panda::StringRef::NewFromUtf8(vm, inspectorInfo);
 }
+ArkUINativeModuleValue FrameNodeBridge::GetCustomPropertyCapiByKey(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto defaultReturnValue = panda::JSValueRef::Undefined(vm);
+    CHECK_NULL_RETURN(vm, defaultReturnValue);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), defaultReturnValue);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(!secondArg.IsNull(), defaultReturnValue);
+    if (!secondArg->IsString(vm)) {
+        return defaultReturnValue;
+    }
+    auto key = secondArg->ToString(vm)->ToString(vm);
+    auto valueInfo =
+        GetArkUINodeModifiers()->getFrameNodeModifier()->getCustomPropertyCapiByKey(nativeNode, key.c_str());
+    CHECK_NULL_RETURN(valueInfo, defaultReturnValue);
+    return panda::StringRef::NewFromUtf8(vm, valueInfo);
+}
+
+std::function<std::string(const std::string&)> ParseGetFunc(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t nodeId)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    return [vm, nodeId](const std::string& key) -> std::string {
+        std::string resultString = std::string();
+        CHECK_NULL_RETURN(vm, resultString);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        auto getCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getCustomPropertyString__"));
+        if (getCustomProperty->IsUndefined() || !getCustomProperty->IsFunction(vm)) {
+            return resultString;
+        }
+        auto obj = getCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        panda::Local<panda::JSValueRef> params2[2] = { panda::NumberRef::New(vm, nodeId), // 2 number of parameters
+            panda::StringRef::NewFromUtf8(vm, key.c_str()) };
+        auto function = panda::CopyableGlobal(vm, func);
+        auto callValue = function->Call(vm, function.ToLocal(), params2, 2);
+        if (callValue.IsNull() || callValue->IsUndefined() || !callValue->IsString(vm)) {
+            return resultString;
+        }
+        auto value = callValue->ToString(vm)->ToString(vm);
+        return value.c_str();
+    };
+}
+
+std::function<bool()> ParseFunc(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> keyArg = runtimeCallInfo->GetCallArgRef(1); // 1 key
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(2); // 2 value
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    auto nodeId = frameNode->GetId();
+    panda::Local<panda::JSValueRef> params3[3] = { panda::NumberRef::New(vm, nodeId), keyArg, // 3 number of parameters
+        valueArg };
+    return [vm, frameNode, params3]() -> bool {
+        CHECK_NULL_RETURN(vm, false);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        auto setCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__setCustomProperty__"));
+        if (setCustomProperty->IsUndefined() || !setCustomProperty->IsFunction(vm)) {
+            return false;
+        }
+        auto obj = setCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        auto nodeId = frameNode->GetId();
+        auto function = panda::CopyableGlobal(vm, func);
+        auto customPropertyExisted = function->Call(vm, function.ToLocal(), params3, 3)->ToBoolean(vm)->Value();
+        if (customPropertyExisted) {
+            frameNode->SetRemoveCustomProperties([vm, nodeId]() -> void {
+                CHECK_NULL_VOID(vm);
+                panda::LocalScope scope(vm);
+                auto global = JSNApi::GetGlobalObject(vm);
+                auto removeCustomProperty =
+                    global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__removeCustomProperties__"));
+                if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction(vm)) {
+                    return;
+                }
+                auto obj = removeCustomProperty->ToObject(vm);
+                panda::Local<panda::FunctionRef> func = obj;
+                panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+                auto function = panda::CopyableGlobal(vm, func);
+                function->Call(vm, function.ToLocal(), params, 1);
+            });
+        }
+        return true;
+    };
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetCustomPropertyModiferByKey(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::BooleanRef::New(vm, false));
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        return panda::BooleanRef::New(vm, false);
+    }
+    auto defaultReturnValue = panda::BooleanRef::New(vm, true);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> keyArg = runtimeCallInfo->GetCallArgRef(1); // 1 key
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, defaultReturnValue);
+    if (keyArg->IsUndefined() || keyArg->IsNull() || !keyArg->IsString(vm)) {
+        return defaultReturnValue;
+    }
+    auto nodeId = frameNode->GetId();
+    std::function<bool()> funcCallback = ParseFunc(runtimeCallInfo);
+    std::function<std::string(const std::string&)> getFuncCallback = ParseGetFunc(runtimeCallInfo, nodeId);
+    GetArkUINodeModifiers()->getFrameNodeModifier()->setCustomPropertyModiferByKey(
+        nativeNode, reinterpret_cast<void*>(&funcCallback), reinterpret_cast<void*>(&getFuncCallback));
+    return defaultReturnValue;
+}
+
 ArkUINativeModuleValue FrameNodeBridge::SetMeasuredSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

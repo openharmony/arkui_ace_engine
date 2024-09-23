@@ -20,6 +20,7 @@
 namespace OHOS::Ace::NG {
 namespace {
     constexpr uint32_t NORMAL_VALUE_ARRAY_STEP = 2;
+    constexpr DisplayMode DEFAULT_BAR_STATE_VALUE = DisplayMode::AUTO;
 }
 
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
@@ -542,6 +543,21 @@ void ResetRichEditorAboutToDelete(ArkUINodeHandle node)
     RichEditorModelNG::SetAboutToDelete(frameNode, nullptr);
 }
 
+void SetRichEditorBarState(ArkUINodeHandle node, ArkUI_Uint32 barStateValue)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DisplayMode displayMode = static_cast<DisplayMode>(barStateValue);
+    RichEditorModelNG::SetBarState(frameNode, displayMode);
+}
+
+void ResetRichEditorBarState(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetBarState(frameNode, DEFAULT_BAR_STATE_VALUE);
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -562,7 +578,7 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         SetRichEditorEditMenuOptions, ResetRichEditorEditMenuOptions,
         SetRichEditorOnWillChange, ResetRichEditorOnWillChange, SetRichEditorOnDidChange, ResetRichEditorOnDidChange,
         SetRichEditorPlaceholder, ResetRichEditorPlaceholder,
-        SetRichEditorAboutToDelete, ResetRichEditorAboutToDelete };
+        SetRichEditorAboutToDelete, ResetRichEditorAboutToDelete, SetRichEditorBarState, ResetRichEditorBarState };
     return &modifier;
 }
 
@@ -573,7 +589,7 @@ const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
         SetRichEditorOnReady, ResetRichEditorOnReady, SetRichEditorOnDeleteComplete, ResetRichEditorOnDeleteComplete,
         SetRichEditorOnEditingChange, ResetRichEditorOnEditingChange,
         SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorEnterKeyType,
-        ResetRichEditorEnterKeyType };
+        ResetRichEditorEnterKeyType, SetRichEditorBarState, ResetRichEditorBarState };
     return &modifier;
 }
 }

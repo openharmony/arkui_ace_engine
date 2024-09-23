@@ -56,6 +56,7 @@ struct MenuParam {
     ContextMenuRegisterType contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
     std::function<void(const std::string&)> onStateChange;
     std::optional<Placement> placement;
+    bool enableHoverMode = false;
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
     std::function<void()> aboutToAppear;
@@ -78,7 +79,7 @@ struct MenuParam {
     std::optional<NG::BorderRadiusProperty> borderRadius;
     std::optional<NG::BorderRadiusProperty> previewBorderRadius;
     bool isSetPreviewNone = false; // user set MenuPreviewMode::NONE
-    std::optional<NG::PaddingProperty> safeAreaPadding;
+    std::optional<NG::MarginProperty> layoutRegionMargin;
 };
 
 } // namespace OHOS::Ace::NG

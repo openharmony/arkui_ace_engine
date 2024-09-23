@@ -135,13 +135,6 @@ public:
         animatePointColor_->Set(LinearColor(color));
     }
 
-    void SetEnabled(bool enabled)
-    {
-        if (enabled_) {
-            enabled_->Set(enabled);
-        }
-    }
-
     void SetIsHover(bool isHover)
     {
         if (isHover_) {
@@ -291,7 +284,6 @@ private:
     RefPtr<PropertyBool> isHover_;
     RefPtr<AnimatablePropertyOffsetF> offset_;
     RefPtr<AnimatablePropertySizeF> size_;
-    RefPtr<PropertyBool> enabled_;
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyFloat> animatePointRadius_;
     RefPtr<PropertyFloat> animateTrackRadius_;

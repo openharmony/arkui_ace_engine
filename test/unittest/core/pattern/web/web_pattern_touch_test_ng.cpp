@@ -16,23 +16,24 @@
 
 #include <gmock/gmock.h>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
-#define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_udmf.h"
+#include "base/memory/ace_type.h"
 
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
-#include "core/common/udmf/unified_data.h"
+#define private public
 #include "core/components/web/resource/web_delegate.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#undef private
+
+#include "core/common/udmf/unified_data.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/utils/system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS::NWeb {
+namespace OHOS::Ace::NG {
 class UnifiedDataMock : public Ace::UnifiedData {
 public:
     int64_t GetSize() override
@@ -40,9 +41,7 @@ public:
         return 0;
     }
 };
-} // namespace OHOS::NWeb
 
-namespace OHOS::Ace::NG {
 class MockNWebAccessibilityNodeInfo : public NWeb::NWebAccessibilityNodeInfo {
 public:
     MOCK_METHOD(std::string, GetHint, (), (override));
@@ -1014,7 +1013,7 @@ HWTEST_F(WebPatternTouchTestNg, HandleOnDragDropLink001, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern->delegate_, nullptr);
-    RefPtr<NWeb::UnifiedDataMock> gestureHub = AceType::MakeRefPtr<NWeb::UnifiedDataMock>();
+    RefPtr<UnifiedDataMock> gestureHub = AceType::MakeRefPtr<UnifiedDataMock>();
     webPattern->HandleOnDragDropLink(gestureHub);
 #endif
 }
@@ -1037,7 +1036,7 @@ HWTEST_F(WebPatternTouchTestNg, HandleOnDragDropFile011, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
-    RefPtr<NWeb::UnifiedDataMock> unifiedData = AceType::MakeRefPtr<NWeb::UnifiedDataMock>();
+    RefPtr<UnifiedDataMock> unifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
     webPattern->HandleOnDragDropFile(unifiedData);
 #endif
 }
@@ -1061,7 +1060,7 @@ HWTEST_F(WebPatternTouchTestNg, HandleOnDragDrop012, TestSize.Level1)
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
     RefPtr<OHOS::Ace::DragEvent> info = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    RefPtr<NWeb::UnifiedDataMock> gestureHub = AceType::MakeRefPtr<NWeb::UnifiedDataMock>();
+    RefPtr<UnifiedDataMock> gestureHub = AceType::MakeRefPtr<UnifiedDataMock>();
     info->SetData(gestureHub);
     info->GetData();
     webPattern->HandleOnDragDrop(info);
@@ -1152,7 +1151,7 @@ HWTEST_F(WebPatternTouchTestNg, HandleDoubleClickEvent_001, TestSize.Level1)
     info.SetButton(MouseButton::LEFT_BUTTON);
     info.SetAction(MouseAction::NONE);
     std::queue<MouseClickInfo> empty;
-    swap(empty, webPattern->doubleClickQueue_);
+    swap(empty, webPattern->mouseClickQueue_);
     webPattern->HandleDoubleClickEvent(info);
 #endif
 }
@@ -1184,7 +1183,7 @@ HWTEST_F(WebPatternTouchTestNg, HandleDoubleClickEvent_002, TestSize.Level1)
     mouseInfo.x = 1;
     mouseInfo.y = 1;
     clickInfos.push(mouseInfo);
-    swap(clickInfos, webPattern->doubleClickQueue_);
+    swap(clickInfos, webPattern->mouseClickQueue_);
     webPattern->HandleDoubleClickEvent(info);
 #endif
 }
@@ -1256,7 +1255,14 @@ HWTEST_F(WebPatternTouchTestNg, OnDragFileNameStart_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    RefPtr<NWeb::UnifiedDataMock> aceUnifiedData = AceType::MakeRefPtr<NWeb::UnifiedDataMock>();
+    RefPtr<UnifiedDataMock> aceUnifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
+    EXPECT_NE(aceUnifiedData, nullptr);
+    auto mockUdmfClient = AceType::DynamicCast<MockUdmfClient>(UdmfClient::GetInstance());
+    EXPECT_NE(mockUdmfClient, nullptr);
+    EXPECT_CALL(
+        *mockUdmfClient, AddFileUriRecord(AceType::DynamicCast<UnifiedData>(aceUnifiedData),
+                             ElementsAreArray({ "file:///data/storage/el2/base/haps/entry/temp/dragdrop/test.txt" })))
+        .WillOnce(Return(false));
     webPattern->OnDragFileNameStart(aceUnifiedData, "test.txt");
 #endif
 }

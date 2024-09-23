@@ -1055,7 +1055,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationModelNG001, TestSize.Level1)
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
 
     navBarNode->titleBarNode_ = titleBarNode;
-    navBarNode->navBarContentNode_ = navBarContentNode;
+    navBarNode->contentNode_ = navBarContentNode;
     navBarNode->toolBarNode_ = toolBarNode;
 
     stack->reservedNodeId_ = navigationUniqueId;
@@ -1874,7 +1874,7 @@ HWTEST_F(NavigationPatternTestNg, NavDestinationDialogTest002, TestSize.Level1)
     config.skipMeasure = true;
     config.skipLayout = true;
     navigationPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true, true);
+    navigationPattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true);
     auto navDestinationPatternA = AceType::DynamicCast<NavDestinationPattern>(navDestinationA->GetPattern());
     EXPECT_NE(navDestinationPatternA, nullptr);
     auto navDestinationPatternB = AceType::DynamicCast<NavDestinationPattern>(navDestinationB->GetPattern());

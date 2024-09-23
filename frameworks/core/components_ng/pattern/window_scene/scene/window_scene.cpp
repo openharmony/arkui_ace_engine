@@ -60,7 +60,9 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         if (self->startingWindow_) {
-            self->BufferAvailableCallback();
+            if (self->IsWindowSizeEqual()) {
+                self->BufferAvailableCallback();
+            }
             return;
         }
         CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
@@ -306,12 +308,7 @@ void WindowScene::BufferAvailableCallbackForBlank(bool fromMainThread)
             surfaceNode->SetVisible(true);
         }
 
-        RefPtr<Curve> curve = Curves::LINEAR;
-        auto effect = AceType::MakeRefPtr<ChainedOpacityEffect>(0);
-        effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, ANIMATION_DURATION));
-        auto blankWindowContext = self->blankWindow_->GetRenderContext();
-        CHECK_NULL_VOID(blankWindowContext);
-        blankWindowContext->UpdateChainedTransition(effect);
+        self->SetOpacityAnimation(self->blankWindow_);
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
@@ -336,6 +333,11 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
         CHECK_NULL_VOID(self);
 
         CHECK_NULL_VOID(self->snapshotWindow_);
+        if (self->isBlankForSnapshot_) {
+            self->SetOpacityAnimation(self->snapshotWindow_);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "blank animation id %{public}d, name %{public}s",
+                self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());
+        }
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         self->RemoveChild(host, self->snapshotWindow_, self->snapshotWindowName_);
@@ -421,7 +423,7 @@ void WindowScene::DisposeSnapshotAndBlankWindow()
     snapshotWindow_.Reset();
     session_->SetNeedSnapshot(true);
     if (!blankWindow_) {
-        CreateBlankWindow();
+        CreateBlankWindow(blankWindow_);
         AddChild(host, blankWindow_, blankWindowName_);
         CleanBlankWindow();
     }
@@ -504,6 +506,10 @@ void WindowScene::OnLayoutFinished()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
+        if (self->startingWindow_) {
+            self->BufferAvailableCallback();
+        }
+        
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("WindowScene::OnLayoutFinished[id:%d][self:%d][enabled:%d]",
@@ -572,7 +578,6 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 {
     CHECK_EQUAL_RETURN(IsMainWindow(), false, false);
     CHECK_EQUAL_RETURN(attachToFrameNodeFlag_ || session_->GetBlankFlag(), false, false);
-    ACE_SCOPED_TRACE("WindowScene::OnDirtyLayoutWrapperSwap");
     attachToFrameNodeFlag_ = false;
     CHECK_EQUAL_RETURN(session_->GetShowRecent() && !session_->GetBlankFlag(), true, false);
     auto surfaceNode = session_->GetSurfaceNode();
@@ -585,6 +590,9 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto size = geometryNode->GetFrameSize();
+    ACE_SCOPED_TRACE("WindowSCENE::OnDirtyLayoutWrapperSwap[id:%d][%f %f][%d %d][blank:%d]",
+        session_->GetPersistentId(), size.Width(), size.Height(),
+        session_->GetLayoutRect().width_, session_->GetLayoutRect().height_, session_->GetBlankFlag());
     if (NearEqual(size.Width(), session_->GetLayoutRect().width_, 1.0f) &&
         NearEqual(size.Height(), session_->GetLayoutRect().height_, 1.0f) && !session_->GetBlankFlag()) {
         return false;
@@ -602,7 +610,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         surfaceNode->SetVisible(false);
     }
     if (!blankWindow_) {
-        CreateBlankWindow();
+        CreateBlankWindow(blankWindow_);
         AddChild(host, blankWindow_, blankWindowName_);
         auto blankWindowContext = blankWindow_->GetRenderContext();
         CHECK_NULL_RETURN(blankWindowContext, false);
@@ -662,5 +670,15 @@ void WindowScene::SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rose
         session->SetBufferAvailable(true);
     };
     surfaceNode->SetBufferAvailableCallback(subWindowCallback);
+}
+
+void WindowScene::SetOpacityAnimation(RefPtr<FrameNode>& window)
+{
+    RefPtr<Curve> curve = Curves::LINEAR;
+    auto effect = AceType::MakeRefPtr<ChainedOpacityEffect>(0);
+    effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, ANIMATION_DURATION));
+    auto context = window->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateChainedTransition(effect);
 }
 } // namespace OHOS::Ace::NG

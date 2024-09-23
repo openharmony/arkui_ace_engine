@@ -171,6 +171,7 @@ private:
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
     bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
+    bool InitToastServiceConfig();
     void ShowToastForAbility(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     void ShowToastForService(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     void ShowDialogForAbility(const std::string& title, const std::string& message,
@@ -189,13 +190,15 @@ private:
         std::function<void(int32_t, int32_t)>&& callback);
     void ShowActionMenuForService(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
-    
     RefPtr<PipelineBase> GetChildPipelineContext() const;
+    std::function<void()> GetInitToastDelayTask(const NG::ToastInfo& toastInfo,
+        std::function<void(int32_t)>&& callback);
     void ContainerModalUnFocus();
 
     void HideFilter(bool isInSubWindow);
     void HidePixelMap(bool startDrag = false, double x = 0, double y = 0, bool showAnimation = true);
     void HideEventColumn();
+    Rosen::WindowType GetToastRosenType(bool IsSceneBoardEnabled);
 
     static int32_t id_;
     int32_t windowId_ = 0;

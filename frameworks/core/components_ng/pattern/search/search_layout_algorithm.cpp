@@ -723,6 +723,7 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
     auto cancelButtonVerticalOffset = (params.searchFrameHeight - cancelButtonFrameHeight) / 2;
     auto searchButtonNode = searchButtonWrapper->GetHostNode();
     auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
+    auto buttonSpace = params.searchTheme->GetSearchButtonSpace().ConvertToPx();
     if (params.isRTL) {
         if (searchButtonEvent->IsEnabled()) {
             cancelButtonHorizontalOffset =
@@ -736,7 +737,7 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
             cancelButtonHorizontalOffset =
                 std::max(searchButtonHorizontalOffset - cancelButtonOffsetToSearchButton, 0.0);
         } else {
-            cancelButtonHorizontalOffset = params.searchFrameWidth - cancelButtonFrameWidth;
+            cancelButtonHorizontalOffset = params.searchFrameWidth - cancelButtonFrameWidth - buttonSpace;
         }
     }
     auto cancelButtonOffset = OffsetF(cancelButtonHorizontalOffset, cancelButtonVerticalOffset);
@@ -853,9 +854,8 @@ double SearchLayoutAlgorithm::CalcSymbolIconHeight(
         (index == IMAGE_INDEX ? searchNode->GetSearchSymbolIconSize() : searchNode->GetCancelSymbolIconSize());
     auto iconSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
     if (iconSize.Unit() == DimensionUnit::FP) {
-        if (GreatOrEqualCustomPrecision(pipeline->GetFontScale(), MAX_FONT_SCALE)) {
-            return iconSize.ConvertToPx() / pipeline->GetFontScale() * MAX_FONT_SCALE;
-        }
+        float maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
+        return iconSize.ConvertToPxDistribute(0, maxFontScale);
     }
     return iconSize.ConvertToPx();
 }

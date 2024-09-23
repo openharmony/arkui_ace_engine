@@ -16,18 +16,20 @@
 
 #include <gmock/gmock.h>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/components/web/resource/web_delegate.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
+#undef private
+
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
-#include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/utils/system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -207,6 +209,11 @@ public:
             return g_startSelectionHandle;
         }
         return g_endSelectionHandle;
+    }
+
+    bool GetIsLongPressActived() override
+    {
+        return false;
     }
 };
 
@@ -745,6 +752,11 @@ HWTEST_F(WebPatternSelectTestNg, OnPopupSize_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     int32_t x = 1, y = 2, width = 1, height = 1;
     webPattern->renderContextForPopupSurface_ = RenderContext::Create();
+    auto surface = AceType::DynamicCast<MockRenderContext>(webPattern->renderContextForPopupSurface_);
+    ASSERT_NE(surface, nullptr);
+    EXPECT_CALL(
+        *AceType::DynamicCast<MockRenderContext>(webPattern->renderContextForPopupSurface_), SetBounds(1, 2, 1, 1))
+        .WillOnce(Return());
     ASSERT_NE(webPattern->renderContextForPopupSurface_, nullptr);
     webPattern->OnPopupSize(x, y, width, height);
 #endif
@@ -795,6 +807,11 @@ HWTEST_F(WebPatternSelectTestNg, OnPopupShow_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     bool show = false;
     webPattern->renderContextForPopupSurface_ = RenderContext::Create();
+    auto surface = AceType::DynamicCast<MockRenderContext>(webPattern->renderContextForPopupSurface_);
+    ASSERT_NE(surface, nullptr);
+    EXPECT_CALL(
+        *AceType::DynamicCast<MockRenderContext>(webPattern->renderContextForPopupSurface_), SetBounds(0, 0, 0, 0))
+        .WillOnce(Return());
     ASSERT_NE(webPattern->renderContextForPopupSurface_, nullptr);
     webPattern->OnPopupShow(show);
 #endif

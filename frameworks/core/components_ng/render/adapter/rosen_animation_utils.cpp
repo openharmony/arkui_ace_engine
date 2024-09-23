@@ -48,7 +48,6 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
     if (rateRange) {
         timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_ });
     }
-    timingProtocol.SetInstanceId(Container::CurrentIdSafelyWithCheck());
     return timingProtocol;
 }
 std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
@@ -56,7 +55,7 @@ std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
     if (!callback) {
         return nullptr;
     }
-    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentIdSafelyWithCheck()]() {
+    auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentId()]() {
         ContainerScope scope(instanceId);
         auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -100,6 +99,11 @@ bool AnimationUtils::CloseImplicitAnimation()
         pipeline->FlushMessages();
     }
     return !animations.empty();
+}
+
+bool AnimationUtils::CloseImplicitCancelAnimation()
+{
+    return Rosen::RSNode::CloseImplicitCancelAnimation();
 }
 
 bool AnimationUtils::IsImplicitAnimationOpen()

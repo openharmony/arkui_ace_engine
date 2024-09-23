@@ -99,6 +99,7 @@ struct DragControllerAsyncCtx {
     int32_t globalY = -1;
     uint64_t displayId = 0;
     int32_t sourceType = 0;
+    int32_t toolType = -1;
     float windowScale = 1.0f;
     float dipScale = 0.0;
     int parseBuilderCount = 0;
@@ -743,7 +744,7 @@ void EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     arkExtraInfoJson->Put("dip_scale", asyncCtx->dipScale);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, asyncCtx->dragPreviewOption);
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(), asyncCtx->sourceType,
-        recordSize, pointerId, asyncCtx->globalX, asyncCtx->globalY,
+        recordSize, pointerId, asyncCtx->toolType, asyncCtx->globalX, asyncCtx->globalY,
         asyncCtx->displayId, windowId, true, false, summary };
 }
 
@@ -949,8 +950,8 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& r
     auto windowId = container->GetWindowId();
     Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y };
     Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, asyncCtx->extraParams,
-        arkExtraInfoJson->ToString(), asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX,
-        asyncCtx->globalY, asyncCtx->displayId, windowId, true, false, summary };
+        arkExtraInfoJson->ToString(), asyncCtx->sourceType, dataSize, pointerId, asyncCtx->toolType,
+        asyncCtx->globalX, asyncCtx->globalY, asyncCtx->displayId, windowId, true, false, summary };
     OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
         HandleSuccess(asyncCtx, dragNotifyMsg, DragStatus::ENDED);
     };
@@ -1044,11 +1045,18 @@ bool GetPixelMapByCustom(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     }
     auto callback = [asyncCtx](std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode,
         std::function<void()> finishCallback) {
-        if (finishCallback) {
-            finishCallback();
-        }
-        CHECK_NULL_VOID(pixelMap);
         CHECK_NULL_VOID(asyncCtx);
+        auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [finishCallback]() {
+                CHECK_NULL_VOID(finishCallback);
+                finishCallback();
+            },
+            TaskExecutor::TaskType::JS, "ArkUIGetPixelMapByCustom");
+        CHECK_NULL_VOID(pixelMap);
         asyncCtx->errCode = errCode;
         asyncCtx->pixelMap = std::move(pixelMap);
         OnComplete(asyncCtx);
@@ -1077,11 +1085,18 @@ bool GetPixelMapArrayByCustom(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     }
     auto callback = [asyncCtx, arrayLength](
         std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode, std::function<void()> finishCallback) {
-        if (finishCallback) {
-            finishCallback();
-        }
-        CHECK_NULL_VOID(pixelMap);
         CHECK_NULL_VOID(asyncCtx);
+        auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [finishCallback]() {
+                CHECK_NULL_VOID(finishCallback);
+                finishCallback();
+            },
+            TaskExecutor::TaskType::JS, "ArkUIGetPixelMapArrayByCustom");
+        CHECK_NULL_VOID(pixelMap);
         asyncCtx->errCode = errCode;
         asyncCtx->pixelMapList.push_back(std::move(pixelMap));
         asyncCtx->parseBuilderCount++;
@@ -1553,6 +1568,7 @@ bool ConfirmCurPointerEventInfo(std::shared_ptr<DragControllerAsyncCtx> asyncCtx
     } else if (asyncCtx->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
         asyncCtx->pointerId = PEN_POINTER_ID;
     }
+    asyncCtx->toolType = sourceTool;
     return getPointSuccess;
 }
 

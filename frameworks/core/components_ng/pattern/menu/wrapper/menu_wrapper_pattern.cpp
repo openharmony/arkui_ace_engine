@@ -144,9 +144,7 @@ void MenuWrapperPattern::ChangeCurMenuItemBgColor()
     if (curMenuItemPattern->IsDisabled() || curMenuItemPattern->IsStackSubmenuHeader()) {
         return;
     }
-    curMenuItemPattern->SetBgBlendColor(
-        curMenuItemPattern->GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
-    curMenuItemPattern->PlayBgColorAnimation(false);
+    curMenuItemPattern->NotifyPressStatus(true);
 }
 
 void MenuWrapperPattern::ClearLastMenuItem()
@@ -154,8 +152,7 @@ void MenuWrapperPattern::ClearLastMenuItem()
     if (lastTouchItem_) {
         auto lastMenuItemPattern = lastTouchItem_->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(lastMenuItemPattern);
-        lastMenuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
-        lastMenuItemPattern->PlayBgColorAnimation(false);
+        lastMenuItemPattern->NotifyPressStatus(false);
         lastTouchItem_ = nullptr;
     }
 }

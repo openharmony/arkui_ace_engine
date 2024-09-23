@@ -198,21 +198,6 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg002, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg003
- * @tc.desc: Test Initialize Func.
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg003, TestSize.Level1)
-{
-    bool extSurfaceEnabled = SystemProperties::extSurfaceEnabled_;
-    SystemProperties::extSurfaceEnabled_ = true;
-    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-    SystemProperties::extSurfaceEnabled_ = extSurfaceEnabled;
-}
-
-/**
  * @tc.name: XComponentTestTwoNg004
  * @tc.desc: Test OnModifyDone Func.
  * @tc.type: FUNC
@@ -238,24 +223,6 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg004, TestSize.Level1)
     renderContext->propBackgroundColor_ = Color::BLACK;
     pattern->OnModifyDone();
     EXPECT_EQ(pattern->handlingSurfaceRenderContext_->GetBackgroundColor(), Color::BLACK);
-}
-
-/**
- * @tc.name: XComponentTestTwoNg005
- * @tc.desc: Test OnAreaChangedInner Func.
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg005, TestSize.Level1)
-{
-    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
-
-    pattern->OnAreaChangedInner();
-    EXPECT_EQ(SystemProperties::GetExtSurfaceEnabled(), false);
 }
 
 /**
@@ -291,28 +258,6 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg006, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg007
- * @tc.desc: Test OnAreaChangedInner Func.
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg007, TestSize.Level1)
-{
-    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
-
-    pattern->DumpAdvanceInfo();
-    EXPECT_TRUE(pattern->renderSurface_);
-
-    pattern->renderSurface_ = nullptr;
-    pattern->DumpAdvanceInfo();
-    EXPECT_FALSE(pattern->renderSurface_);
-}
-
-/**
  * @tc.name: XComponentTestTwoNg008
  * @tc.desc: Test SetHandlingRenderContextForSurface Func.
  * @tc.type: FUNC
@@ -326,10 +271,16 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg008, TestSize.Level1)
     xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
     xComponent.SetSoPath(XCOMPONENT_SO_PATH);
 
+    auto extXComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG extXComponent;
+    extXComponent.Create(
+        XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, extXComponentController);
+    extXComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
 
-    auto result = xComponentController->SetExtController(xComponentController);
+    auto result = xComponentController->SetExtController(extXComponentController);
     EXPECT_EQ(result, XCOMPONENT_CONTROLLER_NO_ERROR);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 }
@@ -351,8 +302,13 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg009, TestSize.Level1)
     auto result = pattern->SetExtController(nullptr);
     EXPECT_EQ(result, XCOMPONENT_CONTROLLER_BAD_PARAMETER);
 
-    pattern->extPattern_ = AceType::WeakClaim(AceType::RawPtr(pattern));
-    result = pattern->SetExtController(pattern);
+    auto extFrameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(extFrameNode);
+    auto extPattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(extPattern);
+
+    pattern->extPattern_ = AceType::WeakClaim(AceType::RawPtr(extPattern));
+    result = pattern->SetExtController(extPattern);
     EXPECT_EQ(result, XCOMPONENT_CONTROLLER_REPEAT_SET);
 }
 
@@ -373,7 +329,13 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg010, TestSize.Level1)
     auto result = pattern->ResetExtController(nullptr);
     EXPECT_EQ(result, XCOMPONENT_CONTROLLER_BAD_PARAMETER);
 
-    result = pattern->ResetExtController(pattern);
+    auto extFrameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(extFrameNode);
+
+    auto extPattern = extFrameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(extPattern);
+
+    result = pattern->ResetExtController(extPattern);
     EXPECT_EQ(result, XCOMPONENT_CONTROLLER_RESET_ERROR);
 
     g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
@@ -384,32 +346,6 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg010, TestSize.Level1)
     ASSERT_TRUE(patternTmp);
     result = pattern->ResetExtController(patternTmp);
     EXPECT_EQ(result, XCOMPONENT_CONTROLLER_RESET_ERROR);
-}
-
-/**
- * @tc.name: XComponentTestTwoNg011
- * @tc.desc: Test HandleSurfaceChangeEvent Func.
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg011, TestSize.Level1)
-{
-    g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
-
-    pattern->drawSize_ = SizeF(0.0f, 0.0f);
-    pattern->HandleSurfaceChangeEvent(true, true, true, true, true);
-    ASSERT_FALSE(pattern->drawSize_.IsPositive());
-
-    auto renderSurface = pattern->renderSurface_;
-    pattern->renderSurface_ = nullptr;
-    pattern->drawSize_ = MAX_SIZE;
-    pattern->HandleSurfaceChangeEvent(false, false, false, false, false);
-    ASSERT_FALSE(pattern->renderSurface_);
-    pattern->renderSurface_ = renderSurface;
 }
 
 /**
@@ -473,27 +409,6 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg013, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg014
- * @tc.desc: Test SetImageAIOptions Func.
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg014, TestSize.Level1)
-{
-    g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
-    auto frameNode = CreateXComponentNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
-
-    auto imageAnalyzerManager =
-        std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::XCOMPONENT);
-    pattern->imageAnalyzerManager_ = imageAnalyzerManager;
-    pattern->SetImageAIOptions(nullptr);
-    ASSERT_TRUE(pattern->imageAnalyzerManager_);
-}
-
-/**
  * @tc.name: XComponentTestTwoNg015
  * @tc.desc: Test StartImageAnalyzer Func.
  * @tc.type: FUNC
@@ -524,5 +439,85 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg015, TestSize.Level1)
     pattern->StartImageAnalyzer(nullptr, callback);
     ASSERT_FALSE(pattern->IsSupportImageAnalyzerFeature());
     SystemProperties::extSurfaceEnabled_ = extSurfaceEnabled;
+}
+
+/**
+ * @tc.name: XComponentTestTwoNg016
+ * @tc.desc: Test ChangeSurfaceCallbackMode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set surface life cycle callback, set id&libraryname to null and create XComponent
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.xcId = std::nullopt;
+    g_testProperty.libraryName = std::nullopt;
+    int32_t onSurfaceCreatedSurfaceCount = 0;
+    int32_t onSurfaceDestroyedSurfaceCount = 0;
+    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceCount](
+                                const std::string& surfaceId) { ++onSurfaceCreatedSurfaceCount; };
+    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceCount](
+                                  const std::string& surfaceId) { ++onSurfaceDestroyedSurfaceCount; };
+    g_testProperty.surfaceCreatedEvent = std::move(onSurfaceCreated);
+    g_testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = true;
+    pattern->RegisterSurfaceCallbackModeEvent();
+    EXPECT_EQ(pattern->surfaceCallbackMode_, SurfaceCallbackMode::DEFAULT);
+
+    /**
+     * @tc.steps: step2. attachTo&detachFrom main tree in DEFAULT mode
+     * @tc.expected: DEFAULT mode attach to(detach from) main tree will call onSurfaceCreated(onSurfaceDestroyed) once
+     */
+    frameNode->AttachToMainTree(false);
+    EXPECT_EQ(onSurfaceCreatedSurfaceCount, 1);
+    frameNode->DetachFromMainTree();
+    EXPECT_EQ(onSurfaceDestroyedSurfaceCount, 1);
+
+    /**
+     * @tc.steps: step3. detachFromFrameNode(in frameNode's destructor) in DEFAULT mode
+     * @tc.expected: will not call onSurfaceDestroyed
+     */
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    EXPECT_EQ(onSurfaceDestroyedSurfaceCount, 1);
+
+    /**
+     * @tc.steps: step4. ChangeSurfaceCallbackMode to PIP not in main tree
+     * @tc.expected: not in main tree change to pip will call onSurfaceCreated once
+     */
+    pattern->ChangeSurfaceCallbackMode(SurfaceCallbackMode::PIP);
+    EXPECT_EQ(onSurfaceCreatedSurfaceCount, 2);
+
+    /**
+     * @tc.steps: step5. attachTo&detachFrom main tree in PIP mode
+     * @tc.expected: PIP mode attach to(detach from) main tree will not call onSurfaceCreated(onSurfaceDestroyed)
+     */
+    frameNode->AttachToMainTree(false);
+    EXPECT_EQ(onSurfaceCreatedSurfaceCount, 2);
+    frameNode->DetachFromMainTree();
+    EXPECT_EQ(onSurfaceDestroyedSurfaceCount, 1);
+
+    /**
+     * @tc.steps: step6. detachFromFrameNode(in frameNode's destructor) in PIP mode
+     * @tc.expected: call onSurfaceDestroyed once
+     */
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    EXPECT_EQ(onSurfaceDestroyedSurfaceCount, 2);
+
+    /**
+     * @tc.steps: step7. ChangeSurfaceCallbackMode in main tree
+     * @tc.expected: will not call onSurfaceCreated(onSurfaceDestroyed)
+     */
+    frameNode->AttachToMainTree(false);
+    pattern->ChangeSurfaceCallbackMode(SurfaceCallbackMode::DEFAULT);
+    EXPECT_EQ(onSurfaceDestroyedSurfaceCount, 2);
+    pattern->ChangeSurfaceCallbackMode(SurfaceCallbackMode::PIP);
+    EXPECT_EQ(onSurfaceCreatedSurfaceCount, 2);
 }
 } // namespace OHOS::Ace::NG

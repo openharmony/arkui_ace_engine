@@ -34,7 +34,7 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo001, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -71,7 +71,7 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo002, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -113,7 +113,7 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo003, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -155,7 +155,7 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo004, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -186,7 +186,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollBy001, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -231,7 +231,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollToEdge001, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -260,7 +260,7 @@ HWTEST_F(ScrollControllerTestNg, Fling001, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -294,7 +294,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollPage001, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -323,7 +323,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollPage002, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
     /**
@@ -356,7 +356,7 @@ HWTEST_F(ScrollControllerTestNg, GetInfo001, TestSize.Level1)
 {
     CreateScroll();
     CreateContent();
-    CreateDone();
+    CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
     EXPECT_EQ(positionController_->GetScrollDirection(), Axis::VERTICAL);
     EXPECT_TRUE(IsEqual(positionController_->GetCurrentOffset(), Offset()));

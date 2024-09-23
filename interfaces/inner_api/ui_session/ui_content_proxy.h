@@ -38,11 +38,13 @@ public:
     virtual int32_t UnregisterRouterChangeEventCallback() override;
     virtual int32_t UnregisterComponentChangeEventCallback() override;
     virtual int32_t UnregisterWebUnfocusEventCallback() override;
+    virtual bool IsConnect() override;
 
 private:
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
     sptr<UiReportStub> report_ = nullptr;
     int32_t processId_;
+    bool isConnected = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H

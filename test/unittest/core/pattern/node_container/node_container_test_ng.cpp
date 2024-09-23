@@ -394,7 +394,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerNodeOnRecycle001, TestSize.Level1)
     nodeContainerNode->OnRecycle();
     nodeContainerNode->OnReuse();
     EXPECT_EQ(flag, false);
-    nodeContainerNode->PushDestroyCallback([&flag]() { flag = !flag; });
+    nodeContainerNode->PushDestroyCallbackWithTag([&flag]() { flag = !flag; }, "");
     nodeContainerNode->OnRecycle();
     SystemProperties::developerModeOn_ = true;
     auto pattern = nodeContainerNode->pattern_;

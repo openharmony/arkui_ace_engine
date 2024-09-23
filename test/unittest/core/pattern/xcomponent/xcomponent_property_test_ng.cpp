@@ -87,6 +87,7 @@ const float SURFACE_OFFSETX = 10.0f;
 const float SURFACE_OFFSETY = 20.0f;
 const uint32_t TRANSFORM_HINT = 90;
 const uint64_t SURFACE_ID_UINT = 2430951489577;
+const RenderFit RENDER_FIT = RenderFit::BOTTOM_RIGHT;
 TestProperty testProperty;
 } // namespace
 
@@ -1930,5 +1931,68 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest048, TestSize.Level1)
     ASSERT_TRUE(pattern);
     XComponentModelNG::SetImageAIOptions(Referenced::RawPtr(frameNode), nullptr);
     EXPECT_EQ(pattern->imageAnalyzerManager_, nullptr);
+}
+
+/**
+ * @tc.name: XComponentModelNGTest049
+ * @tc.desc: Test XComponentModelNG SetRenderFit, type = XComponentType::SURFACE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest049, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ComponentController.
+     *            case: type = XComponentType::SURFACE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG xComponent;
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_SURFACE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call SetRenderFit
+     *            case: renderFit == RenderFit::BOTTOM_RIGHT
+     * @tc.expected: handlingSurfaceRenderContext_->SetRenderFit(renderFit) is called
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->handlingSurfaceRenderContext_), SetRenderFit(_))
+        .WillOnce(Return());
+    xComponent.SetRenderFit(RENDER_FIT);
+}
+
+/**
+ * @tc.name: XComponentModelNGTest050
+ * @tc.desc: Test XComponentModelNG SetRenderFit, type != XComponentType::SURFACE
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest050, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ComponentController.
+     *            case: type = XComponentType::TEXTURE
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    XComponentModelNG xComponent;
+    xComponent.Create(XCOMPONENT_ID, XCOMPONENT_TEXTURE_TYPE_VALUE, XCOMPONENT_LIBRARY_NAME, xComponentController);
+    xComponent.SetSoPath(XCOMPONENT_SO_PATH);
+
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. call SetRenderFit
+     *            case: renderFit == RenderFit::BOTTOM_RIGHT
+     * @tc.expected: handlingSurfaceRenderContext_->SetRenderFit(renderFit) is not called
+     */
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    xComponent.SetRenderFit(RENDER_FIT);
+    EXPECT_EQ(pattern->handlingSurfaceRenderContext_, nullptr);
 }
 } // namespace OHOS::Ace::NG

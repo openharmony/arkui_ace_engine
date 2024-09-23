@@ -437,14 +437,16 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         MeasureAuto(layoutWrapper, layoutConstraint, startIndex);
     } else if (forwardLayout_) {
         startIndex = GetLanesFloor(startIndex);
-        CheckJumpForwardForBigOffset(startIndex, startPos);
-        startPos = childrenSize_ ? posMap_->GetPos(startIndex) : startPos;
-        MeasureForward(layoutWrapper, layoutConstraint, startIndex, startPos);
+        if (!CheckJumpForwardForBigOffset(startIndex, startPos)) {
+            startPos = childrenSize_ ? posMap_->GetPos(startIndex) : startPos;
+            MeasureForward(layoutWrapper, layoutConstraint, startIndex, startPos);
+        }
     } else {
         endIndex = GetLanesCeil(endIndex);
-        CheckJumpBackwardForBigOffset(endIndex, endPos);
-        endPos = childrenSize_ ? posMap_->GetPos(endIndex) + posMap_->GetRowHeight(endIndex) : endPos;
-        MeasureBackward(layoutWrapper, layoutConstraint, endIndex, endPos);
+        if (!CheckJumpBackwardForBigOffset(endIndex, endPos)) {
+            endPos = childrenSize_ ? posMap_->GetPos(endIndex) + posMap_->GetRowHeight(endIndex) : endPos;
+            MeasureBackward(layoutWrapper, layoutConstraint, endIndex, endPos);
+        }
     }
 }
 
@@ -731,42 +733,65 @@ void ListItemGroupLayoutAlgorithm::MeasureEnd(LayoutWrapper* layoutWrapper,
     }
 }
 
-void ListItemGroupLayoutAlgorithm::CheckJumpForwardForBigOffset(int32_t& startIndex, float& startPos)
+bool ListItemGroupLayoutAlgorithm::CheckJumpForwardForBigOffset(int32_t& startIndex, float& startPos)
 {
-    if (!isNeedCheckOffset_ || childrenSize_ || !layoutedItemInfo_.has_value()) {
-        return;
+    if (!isNeedCheckOffset_ || childrenSize_) {
+        return false;
     }
     float th = startPos_ - (endPos_ - startPos_) - referencePos_;
-    if (LessOrEqual(startPos, th)) {
+    if (GreatNotEqual(startPos, th)) {
+        return false;
+    }
+    float averageHeight = groupItemAverageHeight_;
+    if (layoutedItemInfo_.has_value()) {
         const auto& itemInfo = layoutedItemInfo_.value();
         auto totalHeight = (itemInfo.endPos - itemInfo.startPos + spaceWidth_);
         auto itemCount = itemInfo.endIndex - itemInfo.startIndex + 1;
-        float averageHeight = totalHeight / itemCount;
+        averageHeight = totalHeight / itemCount;
+    }
+    if (Positive(averageHeight)) {
         float distance = startPos_ - referencePos_ - startPos;
         int32_t jumpCount = distance / averageHeight;
-        jumpCount = std::min(jumpCount, totalItemCount_ - 1 - startIndex);
+        int32_t maxCount = totalItemCount_ - 1 - startIndex;
+        if (jumpCount > maxCount) {
+            float pos = startPos + maxCount * averageHeight;
+            itemPosition_[totalItemCount_ - 1] = { -1, pos, pos + averageHeight - spaceWidth_ };
+            return true;
+        }
         startPos += jumpCount * averageHeight;
         startIndex += jumpCount;
     }
+    return false;
 }
 
-void ListItemGroupLayoutAlgorithm::CheckJumpBackwardForBigOffset(int32_t& endIndex, float& endPos)
+bool ListItemGroupLayoutAlgorithm::CheckJumpBackwardForBigOffset(int32_t& endIndex, float& endPos)
 {
-    if (!isNeedCheckOffset_ || childrenSize_ || !layoutedItemInfo_.has_value()) {
-        return;
+    if (!isNeedCheckOffset_ || childrenSize_) {
+        return false;
     }
     float th = endPos_ + (endPos_ - startPos_) - (referencePos_ - totalMainSize_);
-    if (GreatOrEqual(endPos, th)) {
+    if (LessNotEqual(endPos, th)) {
+        return false;
+    }
+    float averageHeight = groupItemAverageHeight_;
+    if (layoutedItemInfo_.has_value()) {
         const auto& itemInfo = layoutedItemInfo_.value();
         auto totalHeight = (itemInfo.endPos - itemInfo.startPos + spaceWidth_);
         auto itemCount = itemInfo.endIndex - itemInfo.startIndex + 1;
-        float averageHeight = totalHeight / itemCount;
+        averageHeight = totalHeight / itemCount;
+    }
+    if (Positive(averageHeight)) {
         float distance = endPos - (endPos_ - (referencePos_ - totalMainSize_));
         int32_t jumpCount = distance / averageHeight;
-        jumpCount = std::min(jumpCount, endIndex);
+        if (jumpCount > endIndex) {
+            float pos = endPos - endIndex * averageHeight;
+            itemPosition_[0] = { -1, pos - averageHeight + spaceWidth_, pos };
+            return true;
+        }
         endPos -= jumpCount * averageHeight;
         endIndex -= jumpCount;
     }
+    return false;
 }
 
 void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,

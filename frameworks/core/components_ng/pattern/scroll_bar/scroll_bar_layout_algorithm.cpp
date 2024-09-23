@@ -118,19 +118,17 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetMarginFrameSize();
-    scrollableDistance_ = std::abs(GetMainAxisSize(size, axis) - GetMainAxisSize(childSize, axis));
+    scrollableDistance_ = GetMainAxisSize(size, axis) - GetMainAxisSize(childSize, axis);
     auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(layoutWrapper->GetHostNode()->GetPattern());
     auto controlDistance = scrollBarPattern->GetControlDistance();
     auto scrollableNodeOffset = scrollBarPattern->GetScrollableNodeOffset();
     scrollBarPattern->SetChildOffset(GetMainAxisSize(childSize, axis));
     float currentOffset = 0.0f;
-    if (!NearZero(controlDistance)) {
+    if (!NearZero(controlDistance) && GreatNotEqual(scrollableDistance_, 0.0f)) {
         currentOffset = scrollableNodeOffset * scrollableDistance_ / controlDistance;
+        currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
     }
-    currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
-    if (scrollableDistance_ > 0.0f) {
-        currentOffset_ = currentOffset;
-    }
+    currentOffset_ = currentOffset;
     scrollBarPattern->SetCurrentPosition(currentOffset_);
     auto scrollBarAlignment = Alignment::TOP_LEFT;
     if (layoutProperty->GetPositionProperty()) {

@@ -126,10 +126,8 @@ public:
     {
         isInitialSubtitle_ = isInitialSubtitle;
     }
-    void ProcessTitleDragStart(float offset);
-    void ProcessTitleDragUpdate(float offset);
 
-    void ProcessTitleDragEnd();
+    void ProcessTitleDragUpdate(float offset);
 
     void OnColorConfigurationUpdate() override;
 
@@ -221,50 +219,13 @@ public:
         currentTitleOffsetX_ = currentTitleOffsetX;
     }
 
-    void SetCurrentTitleBarHeight(float currentTitleBarHeight)
-    {
-        currentTitleBarHeight_ = currentTitleBarHeight;
-    }
+    void SetCurrentTitleBarHeight(float currentTitleBarHeight);
 
     void SetIsTitleChanged(bool isTitleChanged)
     {
         isTitleChanged_ = isTitleChanged;
     }
 
-    void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
-    {
-        titleBarMenuItems_ = menuItems;
-    }
-
-    const std::vector<NG::BarItem>& GetTitleBarMenuItems() const
-    {
-        return titleBarMenuItems_;
-    }
-
-    int32_t GetMenuNodeId() const
-    {
-        return menuNodeId_.value();
-    }
-
-    void SetMenuNodeId(const int32_t menuNodeId)
-    {
-        menuNodeId_ = menuNodeId;
-    }
-
-    bool HasMenuNodeId() const
-    {
-        return menuNodeId_.has_value();
-    }
-
-    int32_t GetMaxMenuNum() const
-    {
-        return maxMenuNums_;
-    }
-
-    void SetMaxMenuNum(int32_t maxMenu)
-    {
-        maxMenuNums_ = maxMenu;
-    }
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
@@ -331,6 +292,30 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
 
+    void UpdateHalfFoldHoverChangedCallbackId(std::optional<int32_t> id)
+    {
+        halfFoldHoverChangedCallbackId_ = id;
+    }
+
+    bool HasHalfFoldHoverChangedCallbackId()
+    {
+        return halfFoldHoverChangedCallbackId_.has_value();
+    }
+
+    void InitFoldCreaseRegion();
+
+    std::vector<Rect> GetFoldCreaseRects()
+    {
+        return currentFoldCreaseRegion_;
+    }
+
+    void OnAttachToMainTree() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        InitFoldCreaseRegion();
+    }
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -340,11 +325,10 @@ private:
     float GetMappedOffset(float offset);
     void SpringAnimation(float startPos, float endPos);
     void UpdateScaleByDragOverDragOffset(float overDragOffset);
-    void AnimateTo(float offset);
+    void AnimateTo(float offset, bool isFullTitleMode = false);
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
@@ -365,7 +349,6 @@ private:
     void UpdateSubTitleOpacity(const double &value);
     void UpdateTitleModeChange();
     void MountTitle(const RefPtr<TitleBarNode>& hostNode);
-    void MountMenu(const RefPtr<TitleBarNode>& hostNode, bool isWindowSizeChange = false);
 
     void UpdateTitleBarByCoordScroll(float offset);
     void SetTitleStyleByCoordScrollOffset(float offset);
@@ -445,10 +428,6 @@ private:
 
     NavigationTitlebarOptions options_;
 
-    std::vector<NG::BarItem> titleBarMenuItems_;
-    std::optional<int32_t> menuNodeId_;
-    int32_t maxMenuNums_ = -1;
-
     WeakPtr<FrameNode> largeFontPopUpDialogNode_;
     std::optional<int32_t> moveIndex_;
 
@@ -466,6 +445,8 @@ private:
     bool needToAvoidSideBar_ = false;
     RectF controlButtonRect_;
     bool isScrolling_ = false;
+    std::optional<int32_t> halfFoldHoverChangedCallbackId_;
+    std::vector<Rect> currentFoldCreaseRegion_;
 };
 
 } // namespace OHOS::Ace::NG

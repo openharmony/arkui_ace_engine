@@ -717,10 +717,10 @@ var FormDimension;
   FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
 
-var FormShape;
+let FormShape;
 (function (FormShape) {
-  FormShape["RECT"] = 1;
-  FormShape["CIRCLE"] = 2;
+  FormShape.RECT = 1;
+  FormShape.CIRCLE = 2;
 })(FormShape || (FormShape = {}));
 
 let FormRenderingMode;
@@ -1011,6 +1011,7 @@ let BarStyle;
 (function (BarStyle) {
   BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
   BarStyle[BarStyle.STACK = 1] = "STACK";
+  BarStyle[BarStyle.SAFE_AREA_PADDING = 2] = "SAFE_AREA_PADDING";
 })(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
@@ -2954,7 +2955,6 @@ var XComponentType;
   XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
   XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
   XComponentType[XComponentType["NODE"] = 3] = "NODE";
-  XComponentType[XComponentType["PLATFORM_VIEW"] = 999] = "PLATFORM_VIEW";
 })(XComponentType || (XComponentType = {}));
 
 var NestedScrollMode;
@@ -3295,27 +3295,27 @@ let DataOperationType;
 
 var StyledStringKey;
 (function (StyledStringKey) {
-  StyledStringKey[StyledStringKey['FONT'] = 0] = 'FONT';
-  StyledStringKey[StyledStringKey['DECORATION'] = 1] = 'DECORATION';
-  StyledStringKey[StyledStringKey['BASELINE_OFFSET'] = 2] = 'BASELINE_OFFSET';
-  StyledStringKey[StyledStringKey['LETTER_SPACING'] = 3] = 'LETTER_SPACING';
-  StyledStringKey[StyledStringKey['TEXT_SHADOW'] = 4] = 'TEXT_SHADOW';
-  StyledStringKey[StyledStringKey['LINE_HEIGHT'] = 5] = 'LINE_HEIGHT';
-  StyledStringKey[StyledStringKey['PARAGRAPH_STYLE'] = 200] = 'PARAGRAPH_STYLE';
-  StyledStringKey[StyledStringKey['BACKGROUND_COLOR'] = 6] = 'BACKGROUND_COLOR';
-  StyledStringKey[StyledStringKey['URL'] = 7] = 'URL';
-  StyledStringKey[StyledStringKey['GESTURE'] = 100] = 'GESTURE';
-  StyledStringKey[StyledStringKey['IMAGE'] = 300] = 'IMAGE';
-  StyledStringKey[StyledStringKey['CUSTOM_SPAN'] = 400] = 'CUSTOM_SPAN';
-  StyledStringKey[StyledStringKey['USER_DATA'] = 500] = 'USER_DATA';
+  StyledStringKey[StyledStringKey["FONT"] = 0] = "FONT";
+  StyledStringKey[StyledStringKey["DECORATION"] = 1] = "DECORATION";
+  StyledStringKey[StyledStringKey["BASELINE_OFFSET"] = 2] = "BASELINE_OFFSET";
+  StyledStringKey[StyledStringKey["LETTER_SPACING"] = 3] = "LETTER_SPACING";
+  StyledStringKey[StyledStringKey["TEXT_SHADOW"] = 4] = "TEXT_SHADOW";
+  StyledStringKey[StyledStringKey["LINE_HEIGHT"] = 5] = "LINE_HEIGHT";
+  StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
+  StyledStringKey[StyledStringKey["URL"] = 7] = "URL";
+  StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
+  StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
+  StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
+  StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
+  StyledStringKey[StyledStringKey["USER_DATA"] = 500] = "USER_DATA";
 })(StyledStringKey || (StyledStringKey = {}));
 
 class CustomSpan extends NativeCustomSpan {
-  type_ = "CustomSpan";
+  type_ = 'CustomSpan';
 }
 
 class UserDataSpan {
-  type_ = "ExtSpan";
+  type_ = 'ExtSpan';
 }
 
 let FocusPriority;

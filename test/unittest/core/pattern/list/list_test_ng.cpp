@@ -53,6 +53,7 @@ void ListTestNg::SetUpTestSuite()
     listItemTheme->defaultPadding_ = Edge(0.0_vp);
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
+    MockAnimationManager::Enable(true);
 }
 
 void ListTestNg::TearDownTestSuite()
@@ -60,7 +61,10 @@ void ListTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
 }
 
-void ListTestNg::SetUp() {}
+void ListTestNg::SetUp()
+{
+    MockAnimationManager::GetInstance().Reset();
+}
 
 void ListTestNg::TearDown()
 {
@@ -402,10 +406,10 @@ void ListTestNg::ScrollSnap(double offset, double endVelocity)
         scrollable->ProcessSpringMotion(endValue);
         scrollable->StopSpringAnimation();
         FlushLayoutTask(frameNode_);
-    } else if (!(scrollable->isSnapScrollAnimationStop_)) {
+    } else if (scrollable->state_ == Scrollable::AnimationState::SNAP) {
         // StartScrollSnapMotion, for condition that equal item height.
         float endValue = scrollable->GetSnapFinalPosition();
-        scrollable->ProcessScrollSnapMotion(endValue);
+        scrollable->ProcessListSnapMotion(endValue);
         scrollable->ProcessScrollSnapStop();
         FlushLayoutTask(frameNode_);
     }

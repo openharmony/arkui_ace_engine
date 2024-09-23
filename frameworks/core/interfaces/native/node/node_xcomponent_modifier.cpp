@@ -162,6 +162,20 @@ void InitXComponent(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     XComponentModelNG::InitXComponent(frameNode);
 }
+
+void SetXComponentEnableSecure(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableSecure(frameNode, enable);
+}
+
+void ResetXComponentEnableSecure(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableSecure(frameNode, false);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -189,6 +203,8 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         SetXComponentLibraryname,
         SetImageAIOptions,
         InitXComponent,
+        SetXComponentEnableSecure,
+        ResetXComponentEnableSecure,
     };
 
     return &modifier;

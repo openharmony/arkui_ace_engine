@@ -212,17 +212,27 @@ TaskExecutor::Task CustomDialogControllerModelNG::ParseCloseDialogTask(const Wea
 void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
 {
     CHECK_NULL_VOID(dialogNode);
-    ContainerScope scope(Container::CurrentIdSafely());
-    auto container = Container::Current();
     dialogNode->SetIsUseTransitionAnimator(true);
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
     auto dialogRef = AceType::Claim(dialogNode);
-    overlayManager->CloseDialog(dialogRef);
+    if (!Container::Current()) {
+        // close dialog when current container is null, so we should get container through current safelyId
+        ContainerScope scope(Container::CurrentIdSafely());
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+        CHECK_NULL_VOID(context);
+        auto overlayManager = context->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->CloseDialog(dialogRef);
+    } else {
+        // close dialog when current container is not null, so we should get pipelineContext through dialogNode
+        auto nodeContext = dialogNode->GetContextWithCheck();
+        CHECK_NULL_VOID(nodeContext);
+        auto overlay = nodeContext->GetOverlayManager();
+        CHECK_NULL_VOID(overlay);
+        overlay->CloseDialog(dialogRef);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ public:
     bool IsMediaPlayerValid() override;
     void SetVolume(float leftVolume, float rightVolume) override;
     void SetMediaMuted(int32_t type, bool isMuted) override;
-    bool SetSource(const std::string& src) override;
+    bool SetSource(const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
     bool SetSourceByFd(int32_t fd) override;
     void SetRenderSurface(const RefPtr<RenderSurface>& renderSurface) override;
     void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent, StateChangedEvent&& stateChangedEvent,
@@ -60,11 +60,15 @@ public:
 
 private:
     // Interim programme
-    bool SetMediaSource(std::string& filePath, int32_t& fd, bool& useFd);
+    bool SetMediaSource(std::string& filePath, int32_t& fd, bool& useFd, const std::string& bundleName = "",
+        const std::string& moduleName = "");
     bool MediaPlay(const std::string& filePath);
     bool RawFilePlay(const std::string& filePath);
     bool RelativePathPlay(const std::string& filePath);
+    bool RawFileWithModuleInfoPlay(const std::string& src, const std::string& bundleName,
+        const std::string& moduleName);
     bool GetResourceId(const std::string& path, uint32_t& resId);
+    bool GetResourceId(const std::string& uri, std::string& path) const;
 
     std::shared_ptr<OHOS::Media::Player> mediaPlayer_ = nullptr;
     std::shared_ptr<MediaPlayerCallback> mediaPlayerCallback_ = nullptr;

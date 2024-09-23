@@ -63,6 +63,8 @@ const MAX_DIALOG_WIDTH: number = getNumberByResourceId(125831042, 400);
 const BUTTON_HORIZONTAL_MARGIN: number = getNumberByResourceId(125831054, 16);
 // 'sys.float.padding_level8'
 const BUTTON_HORIZONTAL_PADDING: number = getNumberByResourceId(125830927, 16);
+// 'sys.float.padding_level4'
+const CHECK_BOX_MARGIN_END: number = getNumberByResourceId(125830923, 8);
 // 'sys.float.alert_button_horizontal_space'
 const BUTTON_HORIZONTAL_SPACE: number = getNumberByResourceId(125831051, 8);
 // 'sys.float.Body_L'
@@ -173,7 +175,7 @@ export struct TipsDialog {
             }
           })
           .accessibilityLevel('yes')
-          .margin({ right: $r('sys.float.padding_level4') })
+          .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) })
         Text(this.checkTips)
           .fontSize(`${BODY_L}fp`)
           .fontWeight(FontWeight.Regular)
@@ -694,7 +696,7 @@ export struct ConfirmDialog {
         })
         .hitTestBehavior(HitTestMode.Block)
         .accessibilityLevel('yes')
-        .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(8) })
+        .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) })
 
       Text(this.checkTips)
         .fontSize(`${BODY_M}fp`)
@@ -1647,7 +1649,17 @@ export struct PopoverDialog {
   @Link visible: boolean;
   @Prop popover: PopoverOptions;
   @BuilderParam targetBuilder: Callback<void>;
-  @State dialogWidth: Dimension | undefined = this.popover.width;
+  @State dialogWidth: Dimension | undefined = this.popover?.width;
+
+  @Builder
+  emptyBuilder() {
+  }
+
+  aboutToAppear(): void {
+    if (this.targetBuilder === undefined || this.targetBuilder === null) {
+      this.targetBuilder = this.emptyBuilder;
+    }
+  }
 
   build() {
     Column() {

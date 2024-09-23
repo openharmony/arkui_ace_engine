@@ -1859,6 +1859,8 @@ HWTEST_F(OverlayTestUpdate, ToastTest032, TestSize.Level1)
     EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
     EXPECT_EQ(pattern->wrapperRect_.Height(), foldCreaseTop - safeAreaTop);
     EXPECT_EQ(pattern->wrapperRect_.Top(), safeAreaTop);
+    auto reset = safeAreaManager->UpdateKeyboardSafeArea(0.0f);
+    EXPECT_EQ(reset, true);
 }
 
 /**
@@ -1869,10 +1871,11 @@ HWTEST_F(OverlayTestUpdate, ToastTest032, TestSize.Level1)
 HWTEST_F(OverlayTestUpdate, ToastTest033, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. CreateToastNode, enable hover mode, hover mode area is default.
+     * @tc.steps: step1. CreateToastNode, enable hover mode, hover mode area is TOP_SCREEN.
      */
     ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0 };
     toastInfo.enableHoverMode = true;
+    toastInfo.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
     auto toastNode = ToastView::CreateToastNode(toastInfo);
     ASSERT_NE(toastNode, nullptr);
     auto pattern = toastNode->GetPattern<ToastPattern>();
@@ -1920,11 +1923,11 @@ HWTEST_F(OverlayTestUpdate, ToastTest033, TestSize.Level1)
 }
 
 /**
- * @tc.name: ToastTest035
+ * @tc.name: ToastTest034
  * @tc.desc: Test Toast offset.
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayTestUpdate, ToastTest035, TestSize.Level1)
+HWTEST_F(OverlayTestUpdate, ToastTest034, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. CreateToastNode.

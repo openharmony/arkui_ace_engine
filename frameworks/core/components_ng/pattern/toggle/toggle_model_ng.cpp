@@ -552,6 +552,22 @@ void ToggleModelNG::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEf
     NG::ViewAbstract::SetHoverEffect(frameNode, hoverEffect);
 }
 
+void ToggleModelNG::SetToggleState(FrameNode* frameNode, bool isOn)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto refNode = AceType::Claim(frameNode);
+    CHECK_NULL_VOID(refNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (AceType::InstanceOf<SwitchPattern>(pattern)) {
+        UpdateSwitchIsOn(refNode, isOn);
+    } else if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
+        UpdateCheckboxIsOn(refNode, isOn);
+    } else if (AceType::InstanceOf<ButtonPattern>(pattern)) {
+        UpdateToggleButtonIsOn(refNode, isOn);
+    }
+}
+
 Color ToggleModelNG::GetSelectedColor(FrameNode* frameNode)
 {
     Color value;

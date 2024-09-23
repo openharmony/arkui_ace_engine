@@ -103,7 +103,7 @@ void RadioPattern::OnModifyDone()
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
@@ -168,7 +168,7 @@ void RadioPattern::ImageNodeCreate()
     imageProperty->UpdateUserDefinedIdealSize(GetChildContentSize());
     auto imageSourceInfo = GetImageSourceInfoFromTheme(radioPaintProperty->GetRadioIndicator().value_or(0));
     UpdateInternalResource(imageSourceInfo);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
@@ -568,8 +568,10 @@ void RadioPattern::startExitAnimation()
 
 ImageSourceInfo RadioPattern::GetImageSourceInfoFromTheme(int32_t RadioIndicator)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
     ImageSourceInfo imageSourceInfo;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, imageSourceInfo);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, imageSourceInfo);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_RETURN(radioTheme, imageSourceInfo);
@@ -590,7 +592,9 @@ ImageSourceInfo RadioPattern::GetImageSourceInfoFromTheme(int32_t RadioIndicator
 void RadioPattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 {
     CHECK_NULL_VOID(sourceInfo.IsInternalResource());
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -632,7 +636,9 @@ void RadioPattern::LoadBuilder()
 void RadioPattern::InitializeParam(
     Dimension& defaultWidth, Dimension& defaultHeight, Dimension& horizontalPadding, Dimension& verticalPadding)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
@@ -725,7 +731,9 @@ void RadioPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 void RadioPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);

@@ -1127,7 +1127,15 @@ class FrameNode {
         return inspectorInfo;
     }
     getCustomProperty(key) {
-        return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
+        if (key === undefined) {
+            return undefined;
+        }
+        let value = __getCustomProperty__(this._nodeId, key);
+        if (value === undefined) {
+            const valueStr = getUINativeModule().frameNode.getCustomPropertyCapiByKey(this.getNodePtr(), key);
+            value = valueStr === undefined ? undefined : valueStr;
+        }
+        return value;
     }
     setMeasuredSize(size) {
         getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), Math.max(size.width, 0), Math.max(size.height, 0));
@@ -1494,10 +1502,15 @@ const __creatorMap__ = new Map([
             });
         }],
     ['Select', (context) => {
-        return new TypedFrameNode(context, 'Select', (node, type) => {
-            return new ArkSelectComponent(node, type);
-        });
-    }],
+            return new TypedFrameNode(context, 'Select', (node, type) => {
+                return new ArkSelectComponent(node, type);
+            });
+        }],
+    ['Toggle', (context, options) => {
+            return new TypedFrameNode(context, 'Toggle', (node, type) => {
+                return new ArkToggleComponent(node, type);
+            }, options);
+        }],
 ]);
 class typeNode {
     static createNode(context, type, options) {

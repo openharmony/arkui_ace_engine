@@ -130,6 +130,15 @@ void* createToggleNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createToggleNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
+{
+    auto toggleParams = static_cast<const ArkUI_Toggle_Params*>(&params);
+    CHECK_NULL_RETURN(toggleParams, nullptr);
+    auto frameNode = ToggleModelNG::CreateFrameNode(nodeId, toggleParams->toggleType, toggleParams->isOn);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createLoadingProgress(ArkUI_Int32 nodeId)
 {
     auto frameNode = LoadingProgressModelNG::CreateFrameNode(nodeId);
@@ -660,6 +669,9 @@ void* CreateNodeWithParams(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Pa
         return createXComponentNodeWithParams(nodeId, params);
     }
 #endif
+    if (tag == ArkUINodeType::ARKUI_TOGGLE) {
+        return createToggleNodeWithParams(nodeId, params);
+    }
     return createArkUIFrameNodes[tag](nodeId);
 }
 
@@ -769,7 +781,7 @@ void InsertChildBefore(void* parentNode, void* childNode, void* siblingNode)
 
 void RegisterCompanion(void* node, int peerId, ArkUI_Int32 flags)
 {
-    if (flags == ArkUIAPINodeFlags::NONE) {
+    if (flags == ArkUIAPINodeFlags::CUSTOM_NONE) {
         return;
     }
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));

@@ -23,9 +23,76 @@
 
 namespace OHOS::Ace::NG {
 
+void CanvasRenderingContext2DModelNG::SetOnAttach(std::function<void()>&& callback)
+{
+    onContext2DAttach_ = std::move(callback);
+}
+
+void CanvasRenderingContext2DModelNG::SetOnDetach(std::function<void()>&& callback)
+{
+    onContext2DDetach_ = std::move(callback);
+}
+
+int32_t CanvasRenderingContext2DModelNG::GetId()
+{
+    CHECK_NULL_RETURN(pattern_, -1);
+    return pattern_->GetId();
+}
+
+void CanvasRenderingContext2DModelNG::OnAttachToCanvas()
+{
+    if (isAttached_) {
+        return;
+    }
+    isAttached_ = true;
+    if (onContext2DAttach_) {
+        onContext2DAttach_();
+    }
+}
+
+void CanvasRenderingContext2DModelNG::OnDetachFromCanvas()
+{
+    if (!isAttached_) {
+        return;
+    }
+    isAttached_ = false;
+    if (onContext2DDetach_) {
+        onContext2DDetach_();
+    }
+    pattern_ = nullptr;
+}
+
 void CanvasRenderingContext2DModelNG::SetPattern(RefPtr<AceType> pattern)
 {
-    pattern_ = AceType::DynamicCast<CanvasPattern>(pattern);
+    auto canvasPattern = AceType::DynamicCast<CanvasPattern>(pattern);
+    CHECK_NULL_VOID(canvasPattern);
+    if (pattern_ == canvasPattern) {
+        return;
+    }
+
+    if (isAttached_ && pattern_) {
+        pattern_->DetachRenderContext();
+    }
+
+    pattern_ = canvasPattern;
+    auto OnAttach = [weakCtx = WeakClaim(this)]() {
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        ctx->OnAttachToCanvas();
+    };
+    auto OnDetach = [weakCtx = WeakClaim(this)]() {
+        auto ctx = weakCtx.Upgrade();
+        CHECK_NULL_VOID(ctx);
+        ctx->OnDetachFromCanvas();
+    };
+    pattern_->SetOnContext2DAttach(OnAttach);
+    pattern_->SetOnContext2DDetach(OnDetach);
+    pattern_->AttachRenderContext();
+}
+
+void CanvasRenderingContext2DModelNG::Release()
+{
+    pattern_ = nullptr;
 }
 
 void CanvasRenderingContext2DModelNG::SetFillText(const PaintState& state, const FillTextInfo& fillTextInfo)
@@ -495,10 +562,11 @@ void CanvasRenderingContext2DModelNG::GetImageDataModel(const ImageSize& imageSi
     std::unique_ptr<Ace::ImageData> data = GetImageData(imageSize);
     CHECK_NULL_VOID(data);
     for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
-        buffer[4 * idx] = data->data[idx].GetRed();
-        buffer[4 * idx + 1] = data->data[idx].GetGreen();
-        buffer[4 * idx + 2] = data->data[idx].GetBlue();
-        buffer[4 * idx + 3] = data->data[idx].GetAlpha();
+        Color color = Color(data->data[idx]);
+        buffer[4 * idx] = color.GetRed(); // 4 * idx: the 1st byte format: red.
+        buffer[4 * idx + 1] = color.GetGreen(); // 4 * idx + 1: the 2nd byte format: green.
+        buffer[4 * idx + 2] = color.GetBlue(); // 4 * idx + 2: the 3rd byte format: blue.
+        buffer[4 * idx + 3] = color.GetAlpha(); // 4 * idx + 3: the 4th byte format: alpha.
     }
 #endif
 }
@@ -540,13 +608,13 @@ void CanvasRenderingContext2DModelNG::SetTransform(
 }
 
 // All interfaces that only the 'CanvasRenderingContext2D' has.
-void CanvasRenderingContext2DModelNG::GetWidth(RefPtr<AceType>& canvasPattern, double& width)
+void CanvasRenderingContext2DModelNG::GetWidth(double& width)
 {
     CHECK_NULL_VOID(pattern_);
     width = pattern_->GetWidth();
 }
 
-void CanvasRenderingContext2DModelNG::GetHeight(RefPtr<AceType>& canvasPattern, double& height)
+void CanvasRenderingContext2DModelNG::GetHeight(double& height)
 {
     CHECK_NULL_VOID(pattern_);
     height = pattern_->GetHeight();
@@ -559,38 +627,31 @@ void CanvasRenderingContext2DModelNG::SetDensity(double density)
 }
 
 #ifdef PIXEL_MAP_SUPPORTED
-void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
-    RefPtr<AceType>& canvasPattern, const RefPtr<AceType>& pixelMap)
+void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(const RefPtr<AceType>& pixelMap)
 {
-    auto customPaintPattern = AceType::DynamicCast<CanvasPattern>(canvasPattern);
-    CHECK_NULL_VOID(customPaintPattern);
+    CHECK_NULL_VOID(pattern_);
     auto imagePixelMap = AceType::DynamicCast<PixelMap>(pixelMap);
     CHECK_NULL_VOID(imagePixelMap);
-    customPaintPattern->TransferFromImageBitmap(imagePixelMap);
+    pattern_->TransferFromImageBitmap(imagePixelMap);
 }
 #else
-void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(
-    RefPtr<AceType>& canvasPattern, const std::shared_ptr<Ace::ImageData>& imageData)
+void CanvasRenderingContext2DModelNG::TransferFromImageBitmap(const std::shared_ptr<Ace::ImageData>& imageData)
 {
-    auto customPaintPattern = AceType::DynamicCast<CanvasPattern>(canvasPattern);
-    CHECK_NULL_VOID(customPaintPattern);
+    CHECK_NULL_VOID(pattern_);
     CHECK_NULL_VOID(imageData);
-    customPaintPattern->TransferFromImageBitmap(*imageData);
+    pattern_->TransferFromImageBitmap(*imageData);
 }
 #endif
 
-void CanvasRenderingContext2DModelNG::StartImageAnalyzer(
-    RefPtr<AceType>& canvasPattern, void* config, OnAnalyzedCallback& onAnalyzed)
+void CanvasRenderingContext2DModelNG::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
-    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
-    CHECK_NULL_VOID(customPaintPattern);
-    customPaintPattern->StartImageAnalyzer(config, onAnalyzed);
+    CHECK_NULL_VOID(pattern_);
+    pattern_->StartImageAnalyzer(config, onAnalyzed);
 }
 
-void CanvasRenderingContext2DModelNG::StopImageAnalyzer(RefPtr<AceType>& canvasPattern)
+void CanvasRenderingContext2DModelNG::StopImageAnalyzer()
 {
-    auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern);
-    CHECK_NULL_VOID(customPaintPattern);
-    customPaintPattern->StopImageAnalyzer();
+    CHECK_NULL_VOID(pattern_);
+    pattern_->StopImageAnalyzer();
 }
 } // namespace OHOS::Ace::NG

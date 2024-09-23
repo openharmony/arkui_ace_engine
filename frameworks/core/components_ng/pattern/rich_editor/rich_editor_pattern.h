@@ -218,6 +218,9 @@ public:
                 return;
             }
             pattern->isModifyingContent_ = false;
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     private:
         WeakPtr<RichEditorPattern> pattern_;
@@ -458,12 +461,12 @@ public:
     bool CursorMoveEnd();
     void CalcLineSidesIndexByPosition(int32_t& startIndex, int32_t& endIndex);
     RectF CalcLineInfoByPosition();
-    CaretOffsetInfo GetCaretOffsetInfoByPosition();
+    CaretOffsetInfo GetCaretOffsetInfoByPosition(int32_t position = -1);
     int32_t CalcMoveUpPos(float& leadingMarginOffset);
     int32_t CalcMoveDownPos(float& leadingMarginOffset);
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
-    int32_t CalcLineEndPosition();
+    int32_t CalcLineEndPosition(int32_t index = -1);
     int32_t CalcSingleLineBeginPosition(int32_t fixedPos);
     int32_t CalcSingleLineEndPosition(int32_t fixedPos);
     bool CursorMoveLineBegin();
@@ -765,6 +768,8 @@ public:
 
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
+    std::string GetPlaceHolder() const;
+
     void HandleOnCameraInput() override;
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
@@ -804,6 +809,10 @@ public:
     void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
+        CHECK_NULL_VOID(!textSelector_.SelectNothing());
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 
     Color GetSelectedBackgroundColor();
@@ -948,9 +957,9 @@ public:
         isOnlyRequestFocus_ = true;
     }
 
-    void SetBarState(DisplayMode mode)
+    DisplayMode GetBarDisplayMode()
     {
-        barDisplayMode_ = mode;
+        return barDisplayMode_.value_or(DisplayMode::AUTO);
     }
 
 protected:
@@ -963,8 +972,6 @@ protected:
         CHECK_NULL_RETURN(pipelineContext, {});
         return pipelineContext->GetTheme<T>();
     }
-
-    std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
 
 private:
     friend class RichEditorSelectOverlay;
@@ -997,6 +1004,7 @@ private:
     void CalcCaretInfoByClick(const Offset& touchOffset);
     std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
+    void HandleAISpanHoverEvent(const MouseInfo& info) override;
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
     void OnCaretTwinkling();
@@ -1055,10 +1063,14 @@ private:
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
     SelectionInfo GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo);
     void ResetAfterTextChange() override {};
+    void AddOprationWhenAddImage(int32_t beforeCaretPos);
+    void UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpanOptions& options);
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContextSafely();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -1067,7 +1079,9 @@ private:
 
     void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContextSafely();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -1369,7 +1383,7 @@ private:
     std::shared_ptr<OneStepDragParam> oneStepDragParam_ = nullptr;
     std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
     bool isImageSelfResponseEvent_ = true;
-    DisplayMode barDisplayMode_ = DisplayMode::AUTO;
+    std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
 };
 } // namespace OHOS::Ace::NG
 

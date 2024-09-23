@@ -732,7 +732,7 @@ void NavigationPattern::CheckTopNavPathChange(
             currentProxy_->SetIsSuccess(false);
         }
         hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_HIDE);
-        NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true, true);
+        NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterLayoutTask([weakPattern = WeakClaim(this)]() {
@@ -742,7 +742,7 @@ void NavigationPattern::CheckTopNavPathChange(
             CHECK_NULL_VOID(hostNode);
             hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_HIDE);
             hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_DISAPPEAR);
-            pattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true, true);
+            pattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true);
             hostNode->RemoveDialogDestination();
         });
         navigationStack_->ClearRecoveryList();
@@ -756,8 +756,6 @@ void NavigationPattern::CheckTopNavPathChange(
         const int32_t replaceAnimation = 2;
         navigationStack_->UpdateReplaceValue(replaceAnimation);
     }
-    auto contentNode = hostNode->GetContentNode();
-    CHECK_NULL_VOID(contentNode);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     // close the text selection menu before transition.
@@ -871,7 +869,7 @@ int32_t NavigationPattern::FireNavDestinationStateChange(NavDestinationLifecycle
     auto errIndex = static_cast<int32_t>(navDestinationNodes.size());
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, errIndex);
-    NotifyDialogChange(lifecycle, false, true);
+    NotifyDialogChange(lifecycle, true);
     return hostNode->GetLastStandardIndex();
 }
 
@@ -882,6 +880,20 @@ void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bo
         return;
     }
     NavigationPattern::FireNavigationLifecycleChange(node, NavDestinationLifecycle::ON_HIDE);
+}
+
+bool NavigationPattern::CheckParentDestinationIsOnhide(const RefPtr<NavDestinationGroupNode>& destinationNode)
+{
+    CHECK_NULL_RETURN(destinationNode, false);
+    auto destinationNodePattern = destinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_RETURN(destinationNodePattern, false);
+    return !destinationNodePattern->GetIsOnShow();
+}
+
+bool NavigationPattern::CheckDestinationIsPush(const RefPtr<NavDestinationGroupNode>& destinationNode)
+{
+    CHECK_NULL_RETURN(destinationNode, false);
+    return destinationNode->GetIndex() != -1 || destinationNode->GetNavDestinationCustomNode();
 }
 
 void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isOnShow)
@@ -976,20 +988,15 @@ void NavigationPattern::FireNavigationLifecycleChange(const RefPtr<UINode>& node
         auto& child = *iter;
         auto navigation = AceType::DynamicCast<NavigationGroupNode>(child);
         if (navigation) {
-            auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
-            CHECK_NULL_VOID(navigationPattern);
-            auto standardIndex = navigationPattern->FireNavDestinationStateChange(lifecycle);
-            const auto& navDestinationNodes = navigationPattern->navigationStack_->GetAllNavDestinationNodes();
-            if (standardIndex == static_cast<int32_t>(navDestinationNodes.size())) {
-                NavigationPattern::FireNavigationLifecycleChange(child, lifecycle);
+            auto destinationNode = navigation->GetParentDestinationNode().Upgrade();
+            if ((lifecycle == NavDestinationLifecycle::ON_SHOW) && CheckParentDestinationIsOnhide(destinationNode) &&
+                CheckDestinationIsPush(destinationNode)) {
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation parent is onhide");
                 continue;
             }
-            for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1;
-                 index >= 0 && index >= standardIndex; index--) {
-                const auto& curPath = navDestinationNodes[index];
-                // Ignore node from navigation to navdestination in node tree, start from navdestination node directly.
-                NavigationPattern::FireNavigationLifecycleChange(curPath.second, lifecycle);
-            }
+            auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
+            CHECK_NULL_VOID(navigationPattern);
+            navigationPattern->FireNavDestinationStateChange(lifecycle);
         } else {
             NavigationPattern::FireNavigationLifecycleChange(child, lifecycle);
         }
@@ -1044,8 +1051,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
 
     // replace
     auto replaceVal = navigationStack_->GetReplaceValue();
@@ -1084,14 +1089,15 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     }
 
     // navBar push navDestination
-    if (newTopNavDestination && newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD &&
-        navigationMode_ == NavigationMode::STACK) {
-        auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
-        if (navBar) {
-            navBar->SetTransitionType(PageTransitionType::EXIT_PUSH);
-        }
+    if (newTopNavDestination && newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD) {
         newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
-        DealTransitionVisibility(navBarNode, false, true);
+        auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
+        // current mode is stack, set navBar invisible
+        if (navigationMode_ == NavigationMode::STACK && navBar) {
+            navBar->SetTransitionType(PageTransitionType::EXIT_PUSH);
+            DealTransitionVisibility(navBarNode, false, true);
+        }
+        // if current mode is auto, need set navBar need set invisible true
         navigationNode->SetNeedSetInvisible(true);
     }
 
@@ -1126,8 +1132,6 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(navigationNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetHideNavBarValue(false) && (!newTopNavDestination || !preTopNavDestination)) {
@@ -1140,8 +1144,6 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
                 preTopNavDestination->GetContentNode()->Clean();
             }
             parent->RemoveChild(preTopNavDestination);
-            auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
-            CHECK_NULL_VOID(preTopNavDestinationPattern);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         navigationNode->RemoveDialogDestination();
@@ -1726,8 +1728,7 @@ void NavigationPattern::AddDividerHotZoneRect()
     dividerGestureHub->SetResponseRegion(responseRegion);
 }
 
-void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged,
-    bool isFromStandardIndex)
+void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isFromStandardIndex)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     const auto& navDestinationNodes = navigationStack_->GetAllNavDestinationNodes();
@@ -1739,11 +1740,11 @@ void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bo
         || (lifecycle == NavDestinationLifecycle::ON_WILL_SHOW);
     if (isShow) {
         for (int32_t index = start; index < end; index++) {
-            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle, true);
+            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle);
         }
     } else {
         for (int32_t index = end - 1; index >= 0 && index >= start; index--) {
-            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle, true);
+            NotifyDestinationLifecycle(navDestinationNodes[index].second, lifecycle);
         }
     }
 }
@@ -1821,7 +1822,16 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
     } else {
         navigationStack_->ClearRecoveryList();
         navigationTransition.transition(proxy);
+        // enable render group for text node during custom animation to reduce
+        // unnecessary redrawing
+        if (isPopPage && preTopNavDestination) {
+            preTopNavDestination->UpdateTextNodeListAsRenderGroup(isPopPage);
+        }
+        if (!isPopPage && newTopNavDestination) {
+            newTopNavDestination->UpdateTextNodeListAsRenderGroup(isPopPage);
+        }
     }
+
     RefPtr<EventHub> eventHub;
     if (!preTopNavDestination && navigationMode_ == NavigationMode::STACK) {
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -2299,7 +2309,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     }
     if (isPopPage || (preDestination &&
         (hostNode->GetLastStandardIndex() > preDestination->GetIndex() || preDestination->NeedRemoveInPush()))) {
-        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_HIDE, true);
+        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_HIDE);
     }
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_HIDE);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -2307,7 +2317,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     auto navigationManager = pipeline->GetNavigationManager();
     navigationManager->FireNavigationUpdateCallback();
     if (topDestination) {
-        NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, false, true);
+        NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true);
     }
     bool isNotNeedAnimation = !isAnimated;
 #if defined(ENABLE_NAV_SPLIT_MODE)
@@ -2346,7 +2356,7 @@ void NavigationPattern::ProcessAutoSave(const RefPtr<FrameNode>& node)
 }
 
 void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
-    NavDestinationLifecycle lifecycle, bool isNavigationChanged)
+    NavDestinationLifecycle lifecycle)
 {
     auto curDestination =
         AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
@@ -2354,9 +2364,7 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
     auto eventHub = curDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     if (lifecycle == NavDestinationLifecycle::ON_WILL_DISAPPEAR) {
-        if (isNavigationChanged) {
-            NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
-        }
+        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
         eventHub->FireOnWillDisAppear();
         return;
     }
@@ -2367,20 +2375,27 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
             lifecycle == NavDestinationLifecycle::ON_WILL_HIDE))) {
         return;
     }
-    if (isNavigationChanged) {
-        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
-    }
     if (lifecycle == NavDestinationLifecycle::ON_WILL_SHOW) {
         eventHub->FireOnWillShow();
+        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
         return;
     }
     if (lifecycle == NavDestinationLifecycle::ON_SHOW) {
+        auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(navigationNode);
+        auto parentDestinationNode = navigationNode->GetParentDestinationNode().Upgrade();
+        if (CheckParentDestinationIsOnhide(parentDestinationNode) && CheckDestinationIsPush(parentDestinationNode)) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parentDestinationNode is onhide");
+            return;
+        }
         auto param = Recorder::EventRecorder::Get().IsPageParamRecordEnable() ? navigationStack_->GetRouteParam() : "";
         eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
         NotifyPageShow(navDestinationPattern->GetName());
         navDestinationPattern->SetIsOnShow(true);
+        NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
         return;
     }
+    NavigationPattern::FireNavigationLifecycleChange(curDestination, lifecycle);
     if (lifecycle == NavDestinationLifecycle::ON_WILL_HIDE) {
         eventHub->FireOnWillHide();
         return;
@@ -2455,14 +2470,14 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
         auto lastStandardIndex = hostNode->GetLastStandardIndex();
         if (isPopPage || lastStandardIndex > preDestination->GetIndex() || preDestination->NeedRemoveInPush()) {
             // fire preTop Destination lifecycle
-            NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_HIDE, true);
+            NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_HIDE);
         }
     }
     // fire remove navDestination and invisible navDestination lifecycle for pop or clear
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_HIDE);
     if (isPopPage || (preDestination && preDestination->NeedRemoveInPush())) {
         // fire removed preDestination lifecycle for pop many times or clear
-        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR, true);
+        NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
     }
     // fire removed navDestination lifecycle
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_DISAPPEAR);
@@ -2472,10 +2487,10 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
         pipelineContext->AddAfterLayoutTask([weakNavigation = WeakClaim(this)]() {
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
-            navigation->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, false, true);
+            navigation->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true);
         });
     } else {
-        NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, false, true);
+        NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true);
     }
     FireInterceptionEvent(false, navigationStack_->GetTopNavPath());
 }
@@ -2612,6 +2627,16 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
                                         weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
                                         weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
                                         isPopPage, proxy]() {
+        auto preDestination = weakPreNavDestination.Upgrade();
+        auto topDestination = weakNewNavDestination.Upgrade();
+        // disable render group for text node after the custom animation
+        if (isPopPage && preDestination) {
+            preDestination->ReleaseTextNodeList();
+        }
+        if (!isPopPage && topDestination) {
+            topDestination->ReleaseTextNodeList();
+        }
+
         // to avoid call finishTransition many times
         if (proxy == nullptr) {
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "custom animation proxy is empty or is finished");
@@ -2619,8 +2644,6 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
         }
         auto pattern = weakNavigation.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto preDestination = weakPreNavDestination.Upgrade();
-        auto topDestination = weakNewNavDestination.Upgrade();
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom animation finish end");
         proxy->SetIsFinished(true);
         // update pre navigation stack
@@ -2737,6 +2760,10 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
         if (isPopPage) {
             navigationNode->StartDialogtransition(preTopNavDestination, newTopNavDestination, false);
         } else {
+            if (!preTopNavDestination && navigationMode_ == NavigationMode::SPLIT) {
+                // if split mode and push one dialog at the first time, no animation
+                return;
+            }
             navigationNode->StartDialogtransition(preTopNavDestination, newTopNavDestination, true);
         }
         return;

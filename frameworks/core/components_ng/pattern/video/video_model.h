@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ public:
     virtual ~VideoModel() = default;
 
     virtual void Create(const RefPtr<VideoControllerV2>& videoController) = 0;
-    virtual void SetSrc(const std::string& src) = 0;
+    virtual void SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetProgressRate(double progressRate) = 0;
     virtual void SetPosterSourceInfo(const std::string& posterUrl, const std::string &bundleName,
         const std::string &moduleName) = 0;

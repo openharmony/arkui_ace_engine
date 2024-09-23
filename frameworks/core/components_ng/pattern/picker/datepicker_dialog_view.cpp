@@ -45,11 +45,13 @@ constexpr double MONTHDAYS_WIDTH_PERCENT_ONE = 0.4285;
 constexpr double TIME_WIDTH_PERCENT_ONE = 0.5714;
 constexpr double MONTHDAYS_WIDTH_PERCENT_TWO = 0.3636;
 constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
+constexpr Dimension BUTTON_BOTTOM_TOP_MARGIN = 10.0_vp;
 constexpr Dimension LUNARSWITCH_HEIGHT = 48.0_vp;
 constexpr Dimension CHECKBOX_SIZE = 24.0_vp;
 constexpr Dimension PICKER_DIALOG_MARGIN_FORM_EDGE = 24.0_vp;
 constexpr Dimension TITLE_HEIGHT = 40.0_vp;
 constexpr Dimension TITLE_BUTTON_HEIGHT = 32.0_vp;
+constexpr Dimension TITLE_PADDING_HORIZONTAL = 16.0_vp;
 constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
@@ -134,7 +136,8 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     pickerStack->MountToParent(contentColumn);
     // build lunarswitch Node
     if (settingData.lunarswitch) {
-        CreateLunarswitchNode(contentColumn, dateNode, std::move(lunarChangeEvent), settingData.isLunar);
+        CreateLunarswitchNode(contentColumn, dateNode, std::move(lunarChangeEvent), settingData.isLunar,
+            settingData.checkboxSettingData);
     }
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
@@ -820,9 +823,9 @@ void DatePickerDialogView::UpdateConfirmButtonMargin(
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
     } else {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, false, ModuleDialogType::DATEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::DATEPICKER_DIALOG);
     }
     buttonConfirmLayoutProperty->UpdateMargin(margin);
 }
@@ -833,9 +836,9 @@ void DatePickerDialogView::UpdateCancelButtonMargin(
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
     } else {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, false,
+        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, false,
             ModuleDialogType::DATEPICKER_DIALOG);
     }
     buttonCancelLayoutProperty->UpdateMargin(margin);
@@ -1188,8 +1191,24 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     return buttonCancelNode;
 }
 
+void DatePickerDialogView::UpdateCheckboxPaintProperty(const RefPtr<CheckBoxPaintProperty>& checkboxPaintProps,
+    bool isLunar, const CheckboxSettingData& checkboxSettingData)
+{
+    checkboxPaintProps->UpdateCheckBoxSelect(isLunar);
+    if (checkboxSettingData.selectedColor.has_value()) {
+        checkboxPaintProps->UpdateCheckBoxSelectedColor(checkboxSettingData.selectedColor.value());
+    }
+    if (checkboxSettingData.unselectedColor.has_value()) {
+        checkboxPaintProps->UpdateCheckBoxUnSelectedColor(checkboxSettingData.unselectedColor.value());
+    }
+    if (checkboxSettingData.strokeColor.has_value()) {
+        checkboxPaintProps->UpdateCheckBoxCheckMarkColor(checkboxSettingData.strokeColor.value());
+    }
+}
+
 void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& contentColumn,
-    const RefPtr<FrameNode>& dateNode, std::function<void(const bool)>&& changeEvent, bool isLunar)
+    const RefPtr<FrameNode>& dateNode, std::function<void(const bool)>&& changeEvent, bool isLunar,
+    const CheckboxSettingData& checkboxSettingData)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1216,7 +1235,7 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
     eventHub->SetOnChange(std::move(changeEvent));
     auto checkboxPaintProps = checkbox->GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_VOID(checkboxPaintProps);
-    checkboxPaintProps->UpdateCheckBoxSelect(isLunar);
+    UpdateCheckboxPaintProperty(checkboxPaintProps, isLunar, checkboxSettingData);
     auto checkboxLayoutProps = checkbox->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(checkboxLayoutProps);
     MarginProperty marginCheckbox;
@@ -2036,8 +2055,7 @@ const Dimension DatePickerDialogView::ConvertFontScaleValue(
     Dimension fontSizeValueResultVp(fontSizeLimit.Value(), DimensionUnit::VP);
 
     if (fontSizeValue.Unit() == DimensionUnit::VP) {
-        fontSizeValueResultVp = std::min(fontSizeValueResultVp, fontSizeValue);
-        return fontSizeValueResultVp;
+        return isUserSetFont ? std::min(fontSizeValueResultVp, fontSizeValue) : fontSizeValue;
     }
 
     if (NeedAdaptForAging()) {

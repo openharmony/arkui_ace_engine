@@ -42,4 +42,5 @@ namespace OHOS::Ace::NG {
     void RosenRenderSurface::UnregisterSurface() const {}
     void RosenRenderSurface::Connect() const {}
     void RosenRenderSurface::Disconnect() const {}
+    void RosenRenderSurface::RegisterBufferCallback() {}
 }

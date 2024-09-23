@@ -320,6 +320,16 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     NotifyForeground();
 }
 
+bool UIExtensionPattern::IsModalUec()
+{
+    return usage_ == UIExtensionUsage::MODAL;
+}
+
+bool UIExtensionPattern::IsForeground()
+{
+    return state_ == AbilityState::FOREGROUND;
+}
+
 UIExtensionUsage UIExtensionPattern::GetUIExtensionUsage(const AAFwk::Want& want)
 {
     if (sessionType_ == SessionType::EMBEDDED_UI_EXTENSION) {
@@ -506,7 +516,7 @@ void UIExtensionPattern::NotifyDestroy()
         state_ != AbilityState::NONE) {
         UIEXT_LOGI("The state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
         state_ = AbilityState::DESTRUCTION;
-        sessionWrapper_->NotifyDestroy(false);
+        sessionWrapper_->NotifyDestroy();
         sessionWrapper_->DestroySession();
     }
 }
@@ -709,6 +719,7 @@ void UIExtensionPattern::HandleBlurEvent()
 void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     if (info.GetSourceDevice() != SourceType::TOUCH) {
+        UIEXT_LOGE("The source type is not TOUCH, type %{public}d.", info.GetSourceDevice());
         return;
     }
     const auto pointerEvent = info.GetPointerEvent();
@@ -821,8 +832,14 @@ void UIExtensionPattern::DispatchFocusState(bool focusState)
 
 void UIExtensionPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    CHECK_NULL_VOID(pointerEvent);
-    CHECK_NULL_VOID(sessionWrapper_);
+    if (!pointerEvent) {
+        UIEXT_LOGE("DispatchPointerEvent pointerEvent is null.");
+        return;
+    }
+    if (!sessionWrapper_) {
+        UIEXT_LOGE("DispatchPointerEvent sessionWrapper is null.");
+        return;
+    }
     sessionWrapper_->NotifyPointerEventAsync(pointerEvent);
 }
 
@@ -957,8 +974,10 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
             host->RemoveChildAtIndex(0);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
-        sessionWrapper_->NotifyDestroy();
-        sessionWrapper_->DestroySession();
+        if (name.compare("extension_node_transparent") != 0) {
+            sessionWrapper_->NotifyDestroy(false);
+            sessionWrapper_->DestroySession();
+        }
     }
     if (onErrorCallback_) {
         ContainerScope scope(instanceId_);

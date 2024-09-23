@@ -920,9 +920,9 @@ public:
 
     bool PaintFocusState(bool isNeedStateStyles = true);
     bool PaintFocusStateToRenderContext();
-    Color GetPaintColor();
-    Dimension GetPaintWidth();
-    Dimension GetPaintPaddingVp();
+    void GetPaintColorFromBox(Color& paintColor);
+    void GetPaintWidthFromBox(Dimension& paintWidth);
+    void GetPaintPaddingVp(Dimension& focusPaddingVp);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
     void ClearFocusState(bool isNeedStateStyles = true);
@@ -1082,6 +1082,8 @@ protected:
 
 private:
     friend class FocusView;
+
+    friend class FocusManager;
 
     bool CalculatePosition();
 

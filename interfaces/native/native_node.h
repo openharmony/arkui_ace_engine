@@ -2098,6 +2098,18 @@ typedef enum {
     NODE_IMAGE_SPAN_VERTICAL_ALIGNMENT,
     NODE_IMAGE_SPAN_ALT,
     /**
+     * @brief Defines the image span baseline offset attribute
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: baseline offset, in fp.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: baseline offset, in fp. \n
+     *
+     */
+    NODE_IMAGE_SPAN_BASELINE_OFFSET = 3003,
+    /**
      * @brief Defines the image source of the <Image> component.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -7369,6 +7381,25 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle nod
  * @since 12
  */
 int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset);
+
+/**
+ * @brief Set the custom property of the component.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param name The name of the custom property.
+ * @param value The value of the custom property.
+ * @since 14
+ */
+void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* name, const char* value);
+
+/**
+ * @brief Remove  the custom property of the component.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param name The name of the custom property.
+ * @since 14
+ */
+void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* name);
 
 /**
  * @brief The event called when the sliding operation offset changes.

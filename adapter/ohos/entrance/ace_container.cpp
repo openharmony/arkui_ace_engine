@@ -2852,6 +2852,72 @@ bool AceContainer::IsMainWindow() const
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 }
 
+bool AceContainer::IsSubWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+}
+
+bool AceContainer::IsDialogWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_DIALOG;
+}
+
+bool AceContainer::IsSystemWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
+        uiWindow_->GetType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+bool AceContainer::IsHostMainWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
+
+bool AceContainer::IsHostSubWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+}
+
+bool AceContainer::IsHostDialogWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_DIALOG;
+}
+
+bool AceContainer::IsHostSystemWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
+        uiWindow_->GetParentWindowType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+bool AceContainer::IsHostSceneBoardWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
+}
+
+uint32_t AceContainer::GetParentMainWindowId(uint32_t currentWindowId) const
+{
+    uint32_t parentMainWindowId = 0;
+    if (uiWindow_) {
+        parentMainWindowId = uiWindow_->GetParentMainWindowId(currentWindowId);
+        if (parentMainWindowId == 0) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW,
+                "GetParentMainWindowId, current windowId: %{public}d, main windowId: %{public}d",
+                currentWindowId, parentMainWindowId);
+        }
+    } else {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Window in container is nullptr when getting main windowId");
+    }
+    return parentMainWindowId;
+}
+
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);

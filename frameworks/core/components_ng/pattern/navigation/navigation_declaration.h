@@ -30,8 +30,7 @@ inline RefPtr<NavigationBarTheme> NavigationGetTheme()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<NavigationBarTheme>();
-    return theme;
+    return pipeline->GetTheme<NavigationBarTheme>();
 }
 
 // TODO：move some items to theme
@@ -203,6 +202,7 @@ enum class ChildNodeOperation {
 enum class BarStyle {
     STANDARD = 0,
     STACK,
+    SAFE_AREA_PADDING,
 };
 
 enum class TitleBarParentType { NAVBAR, NAV_DESTINATION };

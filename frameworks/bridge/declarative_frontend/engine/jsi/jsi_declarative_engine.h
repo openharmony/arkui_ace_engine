@@ -83,6 +83,10 @@ public:
     static RefPtr<PipelineBase> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
     static void PreloadAceModule(void* runtime);
     static void PreloadAceModuleWorker(void* runtime);
+    // crossPlatform Resets the module pre-load flag
+    static void ResetModulePreLoadFlag();
+    // crossPlatform Prepares for resetting the module pre-load flag
+    static void PrepareForResetModulePreLoadFlag();
 
     WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const
     {
@@ -468,6 +472,8 @@ public:
 
     panda::Global<panda::ObjectRef> GetNavigationBuilder(std::string name);
 
+    // crossPlatform Clears the 'namedRouterRegisterMap_'
+    static void ResetNamedRouterRegisterMap();
 private:
     bool CallAppFunc(const std::string& appFuncName);
 

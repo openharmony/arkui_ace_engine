@@ -24,6 +24,8 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace {
+std::unique_ptr<CanvasModel> CanvasModel::instance_ = nullptr;
+std::mutex CanvasModel::mutex_;
 CanvasModel* CanvasModel::GetInstanceNG()
 {
     if (!instance_) {
@@ -46,6 +48,15 @@ RefPtr<AceType> CanvasModelNG::Create()
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
     stack->Push(frameNode);
     return frameNode->GetPattern<CanvasPattern>();
+}
+
+void CanvasModelNG::DetachRenderContext()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->DetachRenderContext();
 }
 
 void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)

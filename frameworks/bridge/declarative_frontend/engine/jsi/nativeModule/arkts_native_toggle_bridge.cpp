@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 
+#include "base/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -385,6 +386,49 @@ ArkUINativeModuleValue ToggleBridge::ResetHoverEffect(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getToggleModifier()->resetToggleHoverEffect(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ToggleBridge::SetToggleOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
+    CHECK_EQUAL_RETURN(nodeArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> isOnArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_1);
+    CHECK_EQUAL_RETURN(isOnArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+    bool isOn = false;
+    if (!isOnArg->IsUndefined() && isOnArg->IsBoolean()) {
+        isOn = isOnArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getToggleModifier()->setToggleState(nativeNode, isOn);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ToggleBridge::ParseParams(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Params& params)
+{
+    ArkUI_Toggle_Params* toggleParams = (ArkUI_Toggle_Params*)(&params);
+    toggleParams->toggleType = ToggleType::SWITCH;
+    toggleParams->isOn = false;
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> paramsArg = runtimeCallInfo->GetCallArgRef(2);
+    if (!paramsArg->IsNull() && paramsArg->IsObject(vm)) {
+        auto obj = Local<panda::ObjectRef>(paramsArg);
+        auto typeStr = panda::StringRef::NewFromUtf8(vm, "type");
+        auto isOnStr = panda::StringRef::NewFromUtf8(vm, "isOn");
+        auto typeArg = obj->Get(vm, typeStr);
+        auto isOnArg = obj->Get(vm, isOnStr);
+        CHECK_EQUAL_RETURN(typeArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+        CHECK_EQUAL_RETURN(isOnArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+        if (!typeArg->IsNull() && typeArg->IsNumber()) {
+            toggleParams->toggleType = static_cast<ToggleType>(typeArg->Int32Value(vm));
+        }
+        if (!isOnArg->IsNull() && isOnArg->IsBoolean()) {
+            toggleParams->isOn = isOnArg->ToBoolean(vm)->Value();
+        }
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

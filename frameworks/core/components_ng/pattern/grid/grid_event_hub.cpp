@@ -147,21 +147,21 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
 
     auto globalX = static_cast<float>(info.GetGlobalPoint().GetX());
     auto globalY = static_cast<float>(info.GetGlobalPoint().GetY());
 
-    auto host = GetFrameNode();
-    CHECK_NULL_VOID(host);
     auto gridItem = host->FindChildByPosition(globalX, globalY);
     CHECK_NULL_VOID(gridItem);
     draggedIndex_ = GetGridItemIndex(gridItem);
 
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(globalX);
+    itemDragInfo.SetY(globalY);
     auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
     CHECK_NULL_VOID(customNode);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -187,7 +187,7 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
                 CHECK_NULL_VOID(eventHub);
                 auto manager = pipeline->GetDragDropManager();
                 CHECK_NULL_VOID(manager);
-                eventHub->dragDropProxy_ = manager->CreateAndShowDragWindow(pixelMap, info);
+                eventHub->dragDropProxy_ = manager->CreateAndShowItemDragOverlay(pixelMap, info, eventHub);
                 CHECK_NULL_VOID(eventHub->dragDropProxy_);
                 eventHub->dragDropProxy_->OnItemDragStart(info, host);
                 gridItem->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
@@ -199,12 +199,16 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
             TaskExecutor::TaskType::UI, "ArkUIGridItemDragStart");
     };
     SnapshotParam param;
+    if (auto pixmap = ComponentSnapshot::CreateSync(customNode, param); pixmap) {
+        callback(pixmap, 0, nullptr);
+        return;
+    }
     param.delay = CREATE_PIXELMAP_TIME;
     NG::ComponentSnapshot::Create(customNode, std::move(callback), true, param);
 #else
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
+    dragDropProxy_ = manager->CreateAndShowItemDragOverlay(customNode, info, AceType::Claim(this));
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info, host);
     gridItem->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);

@@ -69,11 +69,15 @@ namespace NG {
 class FrameNode;
 } // namespace NG
 
-struct KeyboardAnimationConfig {
+struct KeyboardAnimationCurve {
     std::string curveType_;
     std::vector<float> curveParams_;
-    uint32_t durationIn_ = 0;
-    uint32_t durationOut_ = 0;
+    uint32_t duration_ = 0;
+};
+
+struct KeyboardAnimationConfig {
+    KeyboardAnimationCurve curveIn_;
+    KeyboardAnimationCurve curveOut_;
 };
 
 struct FontInfo;
@@ -1030,7 +1034,6 @@ public:
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
-    virtual void SetContainerWindow(bool isShow) = 0;
 
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
@@ -1412,6 +1415,15 @@ public:
         }
     }
 
+    void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
+    {
+        isOpenInvisibleFreeze_ = isOpenInvisibleFreeze;
+    }
+
+    bool IsOpenInvisibleFreeze()
+    {
+        return isOpenInvisibleFreeze_;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1464,6 +1476,7 @@ protected:
     bool isReloading_ = false;
 
     bool isJsPlugin_ = false;
+    bool isOpenInvisibleFreeze_ = false;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     std::unordered_map<int32_t, AceVsyncCallback> jsFormVsyncCallbacks_;
@@ -1590,7 +1603,7 @@ private:
     bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
-    
+
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;

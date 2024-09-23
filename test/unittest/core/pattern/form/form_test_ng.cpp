@@ -899,10 +899,12 @@ HWTEST_F(FormTestNg, formModelNG, TestSize.Level1)
      * @tc.steps: step5. Test RequestPublishFormWithSnapshot in form_model_ng
      */
     AAFwk::Want want;
-    int64_t formId;
     std::string formBindingDataStr;
-    std::string errMsg;
-    ASSERT_EQ(formModelNG.RequestPublishFormWithSnapshot(want, formBindingDataStr, formId, errMsg), 1);
+    auto numCallBack = [](int32_t errCode, int64_t& formId, std::string &errMsg) {
+        GTEST_LOG_(INFO) << "RequestPublishFormWithSnapshot callback";
+        return;
+    };
+    ASSERT_EQ(formModelNG.RequestPublishFormWithSnapshot(want, formBindingDataStr, numCallBack), 1);
 }
 
 /**
@@ -1181,7 +1183,7 @@ HWTEST_F(FormTestNg, FormPatternTest003, TestSize.Level1)
     ASSERT_NE(host, nullptr);
 
     int32_t delayTime = 0;
-    pattern->HandleSnapshot(delayTime);
+    pattern->HandleSnapshot(delayTime, "1");
     ASSERT_EQ(delayTime, 0);
 }
 

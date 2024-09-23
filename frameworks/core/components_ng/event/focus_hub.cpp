@@ -414,7 +414,7 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
     if (focusNode->IsCurrentFocus()) {
         FocusManager::FocusGuard guard(Claim(this), SwitchingStartReason::REMOVE_CHILD);
         // Try to goto next focus, otherwise goto previous focus.
-        if (!SkipFocusMoveBeforeRemove() && !GoToNextFocusLinear(FocusStep::TAB) &&
+        if (!focusNode->SkipFocusMoveBeforeRemove() && !GoToNextFocusLinear(FocusStep::TAB) &&
             !GoToNextFocusLinear(FocusStep::SHIFT_TAB)) {
             lastWeakFocusNode_ = nullptr;
             auto focusView = FocusView::GetCurrentFocusView();
@@ -1215,6 +1215,11 @@ void FocusHub::OnFocus()
     } else if (focusType_ == FocusType::SCOPE) {
         OnFocusScope();
     }
+    // if root focused, it has no focus view to update.
+    auto node = GetFrameNode();
+    if (!node || node->IsRootNode()) {
+        return;
+    }
     UpdateFocusView();
 }
 
@@ -1422,15 +1427,14 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     return PaintFocusStateToRenderContext();
 }
 
-Color FocusHub::GetPaintColor()
+void FocusHub::GetPaintColorFromBox(Color& paintColor)
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, Color());
+    CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(context, Color());
+    CHECK_NULL_VOID(context);
     auto appTheme = context->GetTheme<AppTheme>();
-    CHECK_NULL_RETURN(appTheme, Color());
-    Color paintColor;
+    CHECK_NULL_VOID(appTheme);
     if (box_.paintStyle_ && box_.paintStyle_->strokeColor) {
         paintColor = box_.paintStyle_->strokeColor.value();
     } else if (HasPaintColor()) {
@@ -1438,18 +1442,16 @@ Color FocusHub::GetPaintColor()
     } else {
         paintColor = appTheme->GetFocusColor();
     }
-    return paintColor;
 }
 
-Dimension FocusHub::GetPaintWidth()
+void FocusHub::GetPaintWidthFromBox(Dimension& paintWidth)
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, Dimension());
+    CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(context, Dimension());
+    CHECK_NULL_VOID(context);
     auto appTheme = context->GetTheme<AppTheme>();
-    CHECK_NULL_RETURN(appTheme, Dimension());
-    Dimension paintWidth;
+    CHECK_NULL_VOID(appTheme);
     if (box_.paintStyle_ && box_.paintStyle_->strokeWidth) {
         paintWidth = box_.paintStyle_->strokeWidth.value();
     } else if (HasPaintWidth()) {
@@ -1457,18 +1459,17 @@ Dimension FocusHub::GetPaintWidth()
     } else {
         paintWidth = appTheme->GetFocusWidthVp();
     }
-    return paintWidth;
 }
 
-Dimension FocusHub::GetPaintPaddingVp()
+void FocusHub::GetPaintPaddingVp(Dimension& focusPaddingVp)
 {
     auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, Dimension());
+    CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(context, Dimension());
+    CHECK_NULL_VOID(context);
     auto appTheme = context->GetTheme<AppTheme>();
-    CHECK_NULL_RETURN(appTheme, Dimension());
-    Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
+    CHECK_NULL_VOID(appTheme);
+    focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
     if (box_.paintStyle_ && box_.paintStyle_->margin) {
         focusPaddingVp = box_.paintStyle_->margin.value();
     } else if (HasFocusPadding()) {
@@ -1478,7 +1479,6 @@ Dimension FocusHub::GetPaintPaddingVp()
     } else if (focusStyleType_ == FocusStyleType::OUTER_BORDER || focusStyleType_ == FocusStyleType::FORCE_BORDER) {
         focusPaddingVp = appTheme->GetFocusOutPaddingVp();
     }
-    return focusPaddingVp;
 }
 
 bool FocusHub::PaintFocusStateToRenderContext()
@@ -1491,8 +1491,10 @@ bool FocusHub::PaintFocusStateToRenderContext()
     CHECK_NULL_RETURN(renderContext, false);
     auto appTheme = context->GetTheme<AppTheme>();
     CHECK_NULL_RETURN(appTheme, false);
-    Color paintColor = GetPaintColor();
-    Dimension paintWidth = GetPaintWidth();
+    Color paintColor;
+    GetPaintColorFromBox(paintColor);
+    Dimension paintWidth;
+    GetPaintWidthFromBox(paintWidth);
     if (NEAR_ZERO(paintWidth.Value())) {
         return true;
     }
@@ -1505,7 +1507,8 @@ bool FocusHub::PaintFocusStateToRenderContext()
         return true;
     }
 
-    Dimension focusPaddingVp = GetPaintPaddingVp();
+    Dimension focusPaddingVp;
+    GetPaintPaddingVp(focusPaddingVp);
     if (HasPaintRect()) {
         renderContext->PaintFocusState(GetPaintRect(), focusPaddingVp, paintColor, paintWidth);
     } else {
@@ -1793,16 +1796,11 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     rect = frameNode->GetPaintRectWithTransform();
 
     //  Calculate currentNode -> childNode offset
-    auto uiNode = frameNode->GetParent();
-    CHECK_NULL_RETURN(uiNode, false);
-    while (uiNode != GetFrameNode()) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-        if (!frameNode) {
-            uiNode = uiNode -> GetParent();
-            continue;
-        }
-        rect += frameNode->GetPaintRectWithTransform().GetOffset();
-        uiNode = frameNode->GetParent();
+    auto parent = frameNode->GetAncestorNodeOfFrame();
+    CHECK_NULL_RETURN(parent, false);
+    while (parent && parent != GetFrameNode()) {
+        rect += parent->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
     }
     return true;
 }

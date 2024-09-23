@@ -1007,6 +1007,44 @@ HWTEST_F(RadioNodeTestNg, RadioNodeTest017, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RadioNodeTest018
+ * @tc.desc: Test SetChangeValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioNodeTestNg, RadioNodeTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Radio node.
+     */
+    auto frameNode = RadioModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. SetRadioIndicatorType.
+     */
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    std::string testName = "testName";
+    std::string testGroup = "testGroup";
+    int32_t indicator = 2;
+    RadioModelNG::SetRadioOptions(node, testName, testGroup, indicator);
+
+    /**
+     * @tc.steps: step3. Get RadioEventHub and assert the name and group.
+     */
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    EXPECT_EQ(eventHub->GetValue(), testName);
+    EXPECT_EQ(eventHub->GetGroup(), testGroup);
+
+    /**
+     * @tc.steps: step4. Get paintProperty and assert the indicator.
+     */
+    auto paintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetRadioIndicatorValue(), indicator);
+}
+
+/**
  * @tc.name: PreventDefault001
  * @tc.desc: test InitTouchEvent and InitClickEvent
  * @tc.type: FUNC

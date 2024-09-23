@@ -719,7 +719,7 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
     }
 
     // navBar content node
-    if (!navBarNode->GetNavBarContentNode()) {
+    if (!navBarNode->GetContentNode()) {
         int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId);
         auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
@@ -728,7 +728,7 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         CHECK_NULL_RETURN(navBarContentRenderContext, false);
         navBarContentRenderContext->UpdateClipEdge(true);
         navBarNode->AddChild(navBarContentNode);
-        navBarNode->SetNavBarContentNode(navBarContentNode);
+        navBarNode->SetContentNode(navBarContentNode);
 
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
@@ -1347,7 +1347,7 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
     navBarNode->SetToolBarNode(toolBarNode);
     navBarNode->SetPreToolBarNode(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(false);
-    navBarNode->SetNarBarUseToolbarConfiguration(true);
+    navBarNode->SetIsUseToolbarConfiguration(true);
 
     auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
     CHECK_NULL_VOID(navBarPattern);
@@ -1933,6 +1933,9 @@ void NavigationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    navBarPattern->SetTitleBarStyle(opt.brOptions.barStyle);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -1947,6 +1950,9 @@ void NavigationModelNG::SetToolbarOptions(NavigationToolbarOptions&& opt)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    navBarPattern->SetToolBarStyle(opt.brOptions.barStyle);
     auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
     auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
@@ -2012,7 +2018,7 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
         }
 
         // navBar content node
-        if (!navBarNode->GetNavBarContentNode()) {
+        if (!navBarNode->GetContentNode()) {
             int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
             auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -2020,7 +2026,7 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
             CHECK_NULL_RETURN(navBarContentRenderContext, nullptr);
             navBarContentRenderContext->UpdateClipEdge(true);
             navBarNode->AddChild(navBarContentNode);
-            navBarNode->SetNavBarContentNode(navBarContentNode);
+            navBarNode->SetContentNode(navBarContentNode);
         }
 
         // toolBar node

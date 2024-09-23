@@ -1056,6 +1056,7 @@ public:
     {
         JSClass<JSWebResourceResponse>::Declare("WebResourceResponse");
         JSClass<JSWebResourceResponse>::CustomMethod("getResponseData", &JSWebResourceResponse::GetResponseData);
+        JSClass<JSWebResourceResponse>::CustomMethod("getResponseDataEx", &JSWebResourceResponse::GetResponseDataEx);
         JSClass<JSWebResourceResponse>::CustomMethod(
             "getResponseEncoding", &JSWebResourceResponse::GetResponseEncoding);
         JSClass<JSWebResourceResponse>::CustomMethod(
@@ -1072,6 +1073,7 @@ public:
         JSClass<JSWebResourceResponse>::CustomMethod("setResponseCode", &JSWebResourceResponse::SetResponseCode);
         JSClass<JSWebResourceResponse>::CustomMethod("setResponseHeader", &JSWebResourceResponse::SetResponseHeader);
         JSClass<JSWebResourceResponse>::CustomMethod("setResponseIsReady", &JSWebResourceResponse::SetResponseIsReady);
+        JSClass<JSWebResourceResponse>::CustomMethod("getResponseIsReady", &JSWebResourceResponse::GetResponseIsReady);
         JSClass<JSWebResourceResponse>::Bind(
             globalObj, &JSWebResourceResponse::Constructor, &JSWebResourceResponse::Destructor);
     }
@@ -1087,6 +1089,18 @@ public:
     {
         auto data = JSVal(ToJSValue(response_->GetData()));
         auto descriptionRef = JSRef<JSVal>::Make(data);
+        args.SetReturnValue(descriptionRef);
+    }
+
+    void GetResponseDataEx(const JSCallbackInfo& args)
+    {
+        args.SetReturnValue(responseData_);
+    }
+
+    void GetResponseIsReady(const JSCallbackInfo& args)
+    {
+        auto status = JSVal(ToJSValue(response_->GetResponseStatus()));
+        auto descriptionRef = JSRef<JSVal>::Make(status);
         args.SetReturnValue(descriptionRef);
     }
 
@@ -1143,6 +1157,8 @@ public:
         if (args.Length() <= 0) {
             return;
         }
+
+        responseData_ = args[0];
         if (args[0]->IsNumber()) {
             auto fd = args[0]->ToNumber<int32_t>();
             response_->SetFileHandle(fd);
@@ -1262,6 +1278,7 @@ private:
     }
 
     RefPtr<WebResponse> response_;
+    JSRef<JSVal> responseData_;
 };
 
 class JSWebResourceRequest : public Referenced {
@@ -3551,7 +3568,7 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        return;
+        backgroundColor = WebModel::GetInstance()->GetDefaultBackgroundColor();
     }
     WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
@@ -4674,34 +4691,34 @@ void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    int32_t froward = 0;
+    int32_t froward = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
     if (CheckNestedScrollMode(froward)) {
         nestedOpt.scrollDown = static_cast<NestedScrollMode>(froward);
         nestedOpt.scrollRight = static_cast<NestedScrollMode>(froward);
     }
-    int32_t backward = 0;
+    int32_t backward = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
     if (CheckNestedScrollMode(backward)) {
         nestedOpt.scrollUp = static_cast<NestedScrollMode>(backward);
         nestedOpt.scrollLeft = static_cast<NestedScrollMode>(backward);
     }
-    int32_t scrollUp = 0;
+    int32_t scrollUp = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollUp"), scrollUp);
     if (CheckNestedScrollMode(scrollUp)) {
         nestedOpt.scrollUp = static_cast<NestedScrollMode>(scrollUp);
     }
-    int32_t scrollDown = 0;
+    int32_t scrollDown = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollDown"), scrollDown);
     if (CheckNestedScrollMode(scrollDown)) {
         nestedOpt.scrollDown = static_cast<NestedScrollMode>(scrollDown);
     }
-    int32_t scrollLeft = 0;
+    int32_t scrollLeft = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollLeft"), scrollLeft);
     if (CheckNestedScrollMode(scrollLeft)) {
         nestedOpt.scrollLeft = static_cast<NestedScrollMode>(scrollLeft);
     }
-    int32_t scrollRight = 0;
+    int32_t scrollRight = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollRight"), scrollRight);
     if (CheckNestedScrollMode(scrollRight)) {
         nestedOpt.scrollRight = static_cast<NestedScrollMode>(scrollRight);
@@ -4712,7 +4729,7 @@ void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
 
 bool JSWeb::CheckNestedScrollMode(const int32_t& modeValue)
 {
-    return modeValue > static_cast<int32_t>(NestedScrollMode::SELF_ONLY) &&
+    return modeValue >= static_cast<int32_t>(NestedScrollMode::SELF_ONLY) &&
            modeValue <= static_cast<int32_t>(NestedScrollMode::PARALLEL);
 }
 

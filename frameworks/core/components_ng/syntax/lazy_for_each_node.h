@@ -181,7 +181,8 @@ public:
      * @param dataOperations bulk change operations.
      */
     void ParseOperations(const std::list<V2::Operation>& dataOperations);
-
+protected:
+    void UpdateChildrenFreezeState(bool isFreeze) override;
 private:
     void OnAttachToMainTree(bool recursive) override
     {

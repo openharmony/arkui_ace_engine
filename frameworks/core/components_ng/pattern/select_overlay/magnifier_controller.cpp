@@ -119,6 +119,7 @@ bool MagnifierController::UpdateMagnifierOffset()
     params_.offsetX_ = magnifierOffset.x;
     params_.offsetY_ = magnifierOffset.y;
     params_.factor_ = MAGNIFIER_FACTOR;
+    params_.changed_ = !params_.changed_;
     ViewAbstract::SetMagnifier(AceType::RawPtr(magnifierFrameNode_), params_);
     magnifierFrameNode_->ForceSyncGeometryNode();
     magnifierFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

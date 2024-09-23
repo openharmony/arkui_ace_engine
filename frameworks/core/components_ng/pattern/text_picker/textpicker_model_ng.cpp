@@ -70,6 +70,7 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     if (textPickerDialog.hoverModeArea.has_value()) {
         properties.hoverModeArea = textPickerDialog.hoverModeArea.value();
     }
+    properties.onLanguageChange = [](DialogProperties&) {};
 }
 }
 
