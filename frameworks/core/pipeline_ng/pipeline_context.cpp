@@ -472,12 +472,13 @@ std::tuple<float, float, float, float> PipelineContext::GetResampleCoord(const s
     return LinearInterpolation(historyPoint, currentPoint, nanoTimeStamp);
 }
 
-TouchEvent PipelineContext::GetResampleTouchEvent(
-    const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp)
+bool PipelineContext::GetResampleTouchEvent(const std::vector<TouchEvent>& history,
+    const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, TouchEvent& newTouchEvent)
 {
     auto newXy = GetResampleCoord(history, current, nanoTimeStamp, false);
     auto newScreenXy = GetResampleCoord(history, current, nanoTimeStamp, true);
-    TouchEvent newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
+    newTouchEvent = GetLatestPoint(current, nanoTimeStamp);
+    bool ret = false;
     if (std::get<INDEX_X>(newXy) != 0 && std::get<INDEX_Y>(newXy) != 0) {
         newTouchEvent.x = std::get<INDEX_X>(newXy);
         newTouchEvent.y = std::get<INDEX_Y>(newXy);
@@ -489,6 +490,7 @@ TouchEvent PipelineContext::GetResampleTouchEvent(
         newTouchEvent.isInterpolated = true;
         newTouchEvent.inputXDeltaSlope = std::get<INDEX_X_SLOPE>(newXy);
         newTouchEvent.inputYDeltaSlope = std::get<INDEX_Y_SLOPE>(newXy);
+        ret = true;
     }
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT,
@@ -496,7 +498,7 @@ TouchEvent PipelineContext::GetResampleTouchEvent(
             newTouchEvent.id, newTouchEvent.x, newTouchEvent.y, newTouchEvent.screenX, newTouchEvent.screenY,
             static_cast<uint64_t>(newTouchEvent.time.time_since_epoch().count()));
     }
-    return newTouchEvent;
+    return ret;
 }
 
 TouchEvent PipelineContext::GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp)
@@ -2205,12 +2207,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
 bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event)
 {
-    std::optional<TouchEvent> lastMoveEvent;
+    std::vector<TouchEvent> history;
     if (!touchEvents_.empty()) {
         for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
             auto movePoint = (*iter).CreateScalePoint(GetViewScale());
             if (event.id == movePoint.id) {
-                lastMoveEvent = movePoint;
+                history.emplace_back(movePoint);
                 iter = touchEvents_.erase(iter);
             } else {
                 auto& pointers = iter->pointers;
@@ -2224,9 +2226,11 @@ bool PipelineContext::CompensateTouchMoveEventFromUnhandledEvents(const TouchEve
                 ++iter;
             }
         }
-        if (lastMoveEvent.has_value()) {
+        if (!history.empty()) {
+            TouchEvent lastMoveEvent(history.back());
+            lastMoveEvent.history.swap(history);
             eventManager_->SetLastMoveBeforeUp(event.sourceType == SourceType::MOUSE);
-            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
+            eventManager_->DispatchTouchEvent(lastMoveEvent);
             eventManager_->SetLastMoveBeforeUp(false);
         } else {
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
@@ -2563,9 +2567,9 @@ void PipelineContext::FlushTouchEvents()
                 if (targetTimeStamp > static_cast<uint64_t>(stamp)) {
                     continue;
                 }
-                TouchEvent newTouchEvent =
-                    GetResampleTouchEvent(historyPointsById_[idIter.first], idIter.second.history, targetTimeStamp);
-                if (newTouchEvent.x != 0 && newTouchEvent.y != 0) {
+                TouchEvent newTouchEvent;
+                if (GetResampleTouchEvent(
+                        historyPointsById_[idIter.first], idIter.second.history, targetTimeStamp, newTouchEvent)) {
                     newIdTouchPoints[idIter.first] = newTouchEvent;
                 }
                 historyPointsById_[idIter.first] = idIter.second.history;
