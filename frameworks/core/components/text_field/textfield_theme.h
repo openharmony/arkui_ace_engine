@@ -52,6 +52,7 @@ public:
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             theme->showSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye");
             theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
+            theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
             return theme;
         }
 
@@ -396,6 +397,11 @@ public:
         return hideSymbolId_;
     }
 
+    uint32_t GetCancelSymbolId() const
+    {
+        return cancelSymbolId_;
+    }
+
     bool ShowEllipsis() const
     {
         return showEllipsis_;
@@ -736,6 +742,7 @@ private:
     Color symbolColor_;
     uint32_t showSymbolId_ = 0;
     uint32_t hideSymbolId_ = 0;
+    uint32_t cancelSymbolId_ = 0;
 
     // UX::insert cursor offset up by 32vp
     Dimension insertCursorOffset_ = 32.0_vp;
