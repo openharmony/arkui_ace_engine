@@ -154,7 +154,6 @@ void ProgressPattern::InitFocusEvent()
 
 void ProgressPattern::HandleFocusEvent()
 {
-    SetFocusStyle();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
