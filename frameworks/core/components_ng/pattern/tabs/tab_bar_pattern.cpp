@@ -1949,8 +1949,6 @@ void TabBarPattern::UpdateSubTabBoard(int32_t index)
     }
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
-    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
     auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(columnNode);
     auto selectedColumnId = columnNode->GetId();
@@ -1967,11 +1965,13 @@ void TabBarPattern::UpdateSubTabBoard(int32_t index)
         CHECK_NULL_VOID(columnFrameNode);
         auto renderContext = columnFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        if (tabBarStyles_[iter.first] == TabBarStyle::SUBTABBATSTYLE) {
-            auto textNode = AceType::DynamicCast<FrameNode>(columnFrameNode->GetChildren().back());
-            CHECK_NULL_VOID(textNode);
-            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_VOID(textLayoutProperty);
+        if (tabBarStyles_[iter.first] != TabBarStyle::SUBTABBATSTYLE) {
+            continue;
+        }
+        auto textNode = AceType::DynamicCast<FrameNode>(columnFrameNode->GetChildren().back());
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        if (textLayoutProperty) {
             if (GreatOrEqual(fontscale, bigScale_) && LessOrEqual(fontscale, largeScale_)) {
                 textLayoutProperty->UpdateMargin(marginLeftOrRight_);
             } else if (GreatOrEqual(fontscale, largeScale_) && LessOrEqual(fontscale, maxScale_)) {
@@ -1979,14 +1979,14 @@ void TabBarPattern::UpdateSubTabBoard(int32_t index)
             } else {
                 textLayoutProperty->UpdateMargin(marginTopOrBottom_);
             }
-            if (selectedModes_[index] == SelectedMode::BOARD && columnFrameNode->GetId() == selectedColumnId &&
-                axis == Axis::HORIZONTAL) {
-                renderContext->UpdateBackgroundColor(indicatorStyles_[index].color);
-            } else {
-                renderContext->UpdateBackgroundColor(Color::BLACK.BlendOpacity(0.0f));
-            }
-            columnFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
+        if (selectedModes_[index] == SelectedMode::BOARD && columnFrameNode->GetId() == selectedColumnId &&
+            axis == Axis::HORIZONTAL) {
+            renderContext->UpdateBackgroundColor(indicatorStyles_[index].color);
+        } else {
+            renderContext->UpdateBackgroundColor(Color::BLACK.BlendOpacity(0.0f));
+        }
+        columnFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
