@@ -60,6 +60,7 @@ constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
+constexpr char PID_FLAG[] = "pidflag";
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -1307,6 +1308,7 @@ const char* UIExtensionPattern::ToString(AbilityState state)
 void UIExtensionPattern::DumpInfo()
 {
     CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("Dump UIE Info In String Format");
     DumpLog::GetInstance().AddDesc(std::string("focusWindowId: ").append(std::to_string(focusWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("realHostWindowId: ").append(std::to_string(realHostWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("want: ").append(want_));
@@ -1318,10 +1320,40 @@ void UIExtensionPattern::DumpInfo()
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     std::vector<std::string> params = container->GetUieParams();
+    if (!container->IsUIExtensionWindow()) {
+        params.push_back(PID_FLAG);
+    }
+    params.push_back(std::to_string(getpid()));
     std::vector<std::string> dumpInfo;
     sessionWrapper_->NotifyUieDump(params, dumpInfo);
     for (std::string info : dumpInfo) {
         DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
+    }
+}
+
+void UIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("Dump UIE Info In Json Format");
+    json->Put("focusWindowId: ", std::to_string(focusWindowId_).c_str());
+    json->Put("realHostWindowId: ", std::to_string(realHostWindowId_).c_str());
+    json->Put("want: ", want_.c_str());
+    json->Put("displayArea: ", displayArea_.ToString().c_str());
+    json->Put("reason: ", std::to_string(sessionWrapper_->GetReasonDump()).c_str());
+    json->Put("focusStatus: ", std::to_string(focusState_).c_str());
+    json->Put("abilityState: ", ToString(state_));
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    if (!container->IsUIExtensionWindow()) {
+        params.push_back(PID_FLAG);
+    }
+    params.push_back(std::to_string(getpid()));
+    std::vector<std::string> dumpInfo;
+    sessionWrapper_->NotifyUieDump(params, dumpInfo);
+    for (std::string info : dumpInfo) {
+        json->Put("UI Extension info: ", info.c_str());
     }
 }
 } // namespace OHOS::Ace::NG

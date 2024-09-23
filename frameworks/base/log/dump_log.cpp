@@ -136,7 +136,7 @@ bool DumpLog::OutPutBySize()
 
 void DumpLog::OutPutDefault()
 {
-    if (!ostream_->good()) {
+    if (!ostream_ || !ostream_->good()) {
         result_.clear();
         return;
     }
