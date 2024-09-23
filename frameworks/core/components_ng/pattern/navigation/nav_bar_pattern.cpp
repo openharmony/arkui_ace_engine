@@ -216,6 +216,7 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
     if (navBarNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
         titleBarNode->RemoveChild(titleBarNode->GetMenu());
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
     }
     if (navBarNode->GetPrevMenuIsCustomValue(false)) {
         if (navBarNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {

@@ -34,6 +34,7 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
     if (navDestinationGroupNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
         titleBarNode->RemoveChild(titleBarNode->GetMenu());
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
     }
     if (navDestinationGroupNode->GetPrevMenuIsCustomValue(false)) {
         if (navDestinationGroupNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
@@ -325,6 +326,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(id);
+    pipeline->AddWindowSizeChangeCallback(id);
 }
 
 void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -334,6 +336,7 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    pipeline->RemoveWindowSizeChangeCallback(id);
 }
 
 void NavDestinationPattern::DumpInfo()
