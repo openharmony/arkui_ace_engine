@@ -74,7 +74,7 @@ private:
     std::vector<Dimension> colorStops_;
 };
 
-class [[deprecated]] GradientStyleModifier : public Rosen::RSBackgroundStyleModifier {
+class GradientStyleModifier : public Rosen::RSBackgroundStyleModifier {
 public:
     explicit GradientStyleModifier(const WeakPtr<RosenRenderContext>& context) : renderContext_(context) {}
     ~GradientStyleModifier() override = default;
