@@ -608,8 +608,8 @@ public:
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
 
     void GenerateMousePixelMap(const GestureEvent& info);
-    OffsetF GetPixelMapOffset(
-        const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
+    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const float scale = 1.0f,
+        bool isCalculateInSubwindow = false) const;
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
