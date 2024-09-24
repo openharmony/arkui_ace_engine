@@ -374,9 +374,9 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent000, TestSize.Level1)
      */
     EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(0), true);
     EXPECT_EQ(richEditorPattern->ExecSubComponent(0), true);
-    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(1), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(1), false);
     EXPECT_EQ(richEditorPattern->ExecSubComponent(1), false);
-    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(-1), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(-1), false);
     EXPECT_EQ(richEditorPattern->ExecSubComponent(-1), false);
 }
 
@@ -453,9 +453,9 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent001, TestSize.Level1)
      */
     EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(0), true);
     EXPECT_EQ(richEditorPattern->ExecSubComponent(0), true);
-    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(1), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(1), false);
     EXPECT_EQ(richEditorPattern->ExecSubComponent(1), false);
-    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(-1), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(-1), false);
     EXPECT_EQ(richEditorPattern->ExecSubComponent(-1), false);
 }
 } // namespace OHOS::Ace::NG

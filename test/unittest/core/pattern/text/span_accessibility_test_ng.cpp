@@ -247,9 +247,9 @@ HWTEST_F(SpanAccessibilityTestNg, ExecSubComponent001, TestSize.Level1)
      */
     EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(0), true);
     EXPECT_EQ(pattern->ExecSubComponent(0), true);
-    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(1), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(1), false);
     EXPECT_EQ(pattern->ExecSubComponent(1), false);
-    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(-1), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(-1), false);
     EXPECT_EQ(pattern->ExecSubComponent(-1), false);
 }
 
@@ -289,9 +289,9 @@ HWTEST_F(SpanAccessibilityTestNg, ExecSubComponent002, TestSize.Level1)
      */
     EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(0), true);
     EXPECT_EQ(pattern->ExecSubComponent(0), true);
-    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(1), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(1), false);
     EXPECT_EQ(pattern->ExecSubComponent(1), false);
-    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(-1), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(-1), false);
     EXPECT_EQ(pattern->ExecSubComponent(-1), false);
 }
 
@@ -322,11 +322,11 @@ HWTEST_F(SpanAccessibilityTestNg, ExecSubComponent003, TestSize.Level1)
     /**
      * @tc.steps: step3. test pattern ExecSubComponent
      */
-    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(0), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(0), false);
     EXPECT_EQ(pattern->ExecSubComponent(0), false);
-    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(1), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(1), false);
     EXPECT_EQ(pattern->ExecSubComponent(1), false);
-    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(-1), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(-1), false);
     EXPECT_EQ(pattern->ExecSubComponent(-1), false);
 }
 
