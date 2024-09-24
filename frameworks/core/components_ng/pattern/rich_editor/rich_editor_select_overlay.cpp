@@ -226,7 +226,6 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     overlayManager->SetHandleCircleIsShow(isFirstHandle, true);
     if (!isFirstHandle && IsSingleHandle()) {
         overlayManager->SetIsHandleLineShow(true);
-        SwitchCaretState();
     }
     overlayManager->MarkInfoChange((isFirstHandle ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
                             DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM);
@@ -524,17 +523,15 @@ void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
     CHECK_NULL_VOID(pattern);
     pattern->CalculateHandleOffsetAndShowOverlay();
     UpdateHandleOffset();
-    SwitchCaretState();
 }
 
-void RichEditorSelectOverlay::SwitchCaretState()
+void RichEditorSelectOverlay::SwitchCaretState(std::shared_ptr<SelectOverlayInfo> info)
 {
-    CHECK_NULL_VOID(IsSingleHandle() && !isHandleMoving_);
+    CHECK_NULL_VOID(info && IsSingleHandle() && !isHandleMoving_);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    auto singleHandlePaintRect = pattern->textSelector_.secondHandle;
-    bool isSingleHandleShow = !handleIsHidden_ && CheckHandleVisible(singleHandlePaintRect);
-    bool isCaretTwinkling = pattern->caretTwinkling_;
+    bool isSingleHandleShow = !handleIsHidden_ && info->secondHandle.isShow;
+    bool isCaretTwinkling = pattern->caretTwinkling_ && !pattern->isCursorAlwaysDisplayed_;
     CHECK_NULL_VOID(isSingleHandleShow == isCaretTwinkling);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Switch caret state singleHandleShow=%{public}d", isSingleHandleShow);
     if (isSingleHandleShow) {
@@ -612,6 +609,7 @@ float RichEditorSelectOverlay::GetHandleHotZoneRadius()
 void RichEditorSelectOverlay::OnHandleMarkInfoChange(
     std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
 {
+    IF_TRUE((flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE, SwitchCaretState(info));
     CHECK_NULL_VOID((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG);
     CHECK_NULL_VOID(info);
 
