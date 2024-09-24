@@ -905,7 +905,7 @@ public:
 
     void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
 
-    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList);
 
     bool GetMonopolizeEvents() const;
 
