@@ -1216,7 +1216,7 @@ void MenuPattern::ShowStackExpandMenu()
     auto outterMenu = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(outterMenu);
 
-    auto [originOffset, endOffset] = GetMenuOffset(outterMenu);
+    auto [originOffset, endOffset] = GetMenuOffset(outterMenu, true);
     auto outterMenuContext = outterMenu->GetRenderContext();
     CHECK_NULL_VOID(outterMenuContext);
 
@@ -1278,9 +1278,7 @@ MenuItemInfo MenuPattern::GetInnerMenuOffset(const RefPtr<UINode>& child, bool i
         if (menuItemInfo.isFindTargetId) {
             return menuItemInfo;
         }
-    } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG
-        || child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
-        ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
+    } else {
         const auto& groupChildren = child->GetChildren();
         for (auto child : groupChildren) {
             menuItemInfo = GetInnerMenuOffset(child, isNeedRestoreNodeId);
