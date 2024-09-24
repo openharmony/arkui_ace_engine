@@ -662,7 +662,7 @@ void SwiperLayoutAlgorithm::SetInactiveOnForward(LayoutWrapper* layoutWrapper)
         }
 
         ResetOffscreenItemPosition(layoutWrapper, GetLoopIndex(pos->first), true);
-        itemPosition_.erase(pos++);
+        pos = itemPosition_.erase(pos);
     }
 }
 
