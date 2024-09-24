@@ -602,9 +602,11 @@ void RosenRenderContext::SyncGeometryFrame(const RectF& paintRect)
 
 void RosenRenderContext::SetChildBounds(const RectF& paintRect) const
 {
+    CHECK_NULL_VOID(rsNode_);
     auto childRsNodeId = rsNode_->GetChildIdByIndex(0);
     if (childRsNodeId.has_value()) {
         auto childRsNode = Rosen::RSNodeMap::Instance().GetNode(childRsNodeId.value());
+        CHECK_NULL_VOID(childRsNode);
         childRsNode->SetBounds(0.0f, 0.0f, paintRect.Width(), paintRect.Height());
     }
 }
