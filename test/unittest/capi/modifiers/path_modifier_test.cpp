@@ -112,17 +112,18 @@ HWTEST_F(PathModifierTest, setPathOptionsTestSizeInvalidValues, TestSize.Level1)
     using OneTestStep = std::pair<Opt_Union_Number_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-1), "0.00vp" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-3.56f), "0.00vp" },
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("invalid value"), "0.00fp" },
+        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-3.56f), "0.00vp" },
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-8px"), "0.00px" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-15.6px"), "0.00px" },
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-21vp"), "0.00vp" },
+        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-15.6px"), "0.00px" },
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-8.6vp"), "0.00vp" },
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-32fp"), "0.00fp" },
-        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-9.99fp"), "0.00fp" },
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-22lpx"), "0.00lpx" },
+        { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-9.99fp"), "0.00fp" },
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-1.23lpx"), "0.00lpx" },
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-6"), "0.00fp" },
+        { Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(INT_MIN), "0.00vp" },
         { Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("-16.2"), "0.00fp" },
     };
 
