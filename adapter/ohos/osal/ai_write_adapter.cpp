@@ -220,13 +220,19 @@ void AIWriteAdapter::BindModalUIExtensionCallback(
     callbacks.onResult = [](int32_t code, const AAFwk::Want& want) {
         TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension onResult, code: %{public}d", code);
     };
-    callbacks.onDestroy = []() {
+    callbacks.onDestroy = [weak = WeakClaim(this)]() {
         TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension onDestroy.");
+        auto aiWriteAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(aiWriteAdapter);
+        aiWriteAdapter->CloseModalUIExtension();
     };
-    callbacks.onError = [](int32_t code, const std::string& name, const std::string& message) {
+    callbacks.onError = [weak = WeakClaim(this)](int32_t code, const std::string& name, const std::string& message) {
         TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
             "UIExtension onError, code: %{public}d, name: %{public}s, message: %{public}s",
             code, name.c_str(), message.c_str());
+        auto aiWriteAdapter = weak.Upgrade();
+        CHECK_NULL_VOID(aiWriteAdapter);
+        aiWriteAdapter->CloseModalUIExtension();
     };
     callbacks.onRelease = [](int32_t code) {
         TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension onRelease, code: %{public}d", code);

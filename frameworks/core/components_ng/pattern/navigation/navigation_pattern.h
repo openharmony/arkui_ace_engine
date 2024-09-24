@@ -324,8 +324,7 @@ public:
     static void NotifyPerfMonitorPageMsg(const std::string& pageName);
 
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
-    void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged, bool isFromStandard);
-    void NotifyDialogChange(bool isShow, bool isNavigationChanged);
+    void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
@@ -423,6 +422,11 @@ public:
     std::unique_ptr<JsonValue> GetNavdestinationJsonArray();
     void RestoreJsStackIfNeeded();
 
+    RefPtr<FrameNode> GetNavBasePageNode() const
+    {
+        return pageNode_.Upgrade();
+    }
+    
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);

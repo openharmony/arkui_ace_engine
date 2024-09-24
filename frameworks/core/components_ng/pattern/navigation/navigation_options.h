@@ -71,10 +71,12 @@ struct NavigationTitlebarOptions {
     NavigationBackgroundOptions bgOptions;
     NavigationBarOptions brOptions;
     NavigationTextOptions textOptions;
+    bool enableHoverMode = false;
 
     bool operator== (const NavigationTitlebarOptions& other) const
     {
-        return bgOptions == other.bgOptions &&  brOptions == other.brOptions;
+        return bgOptions == other.bgOptions && brOptions == other.brOptions
+            && enableHoverMode == other.enableHoverMode;
     }
 
     bool operator!= (const NavigationTitlebarOptions& other) const

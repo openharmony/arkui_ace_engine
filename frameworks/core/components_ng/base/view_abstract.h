@@ -765,6 +765,8 @@ public:
     static void SetLocalizedMarkAnchor(FrameNode* frameNode, bool needLocalized);
     static void SetOffsetLocalizedEdges(bool needLocalized);
     static void SetOffsetLocalizedEdges(FrameNode* frameNode, bool needLocalized);
+    static void AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value);
+    static void RemoveCustomProperty(FrameNode* frameNode, const std::string& key);
 
 private:
     static void AddDragFrameNodeToManager();

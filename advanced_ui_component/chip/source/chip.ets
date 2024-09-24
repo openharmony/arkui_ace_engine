@@ -23,6 +23,10 @@ import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
 
+const RESOURCE_TYPE_STRING = 10003;
+const RESOURCE_TYPE_FLOAT = 10002;
+const RESOURCE_TYPE_INTEGER = 10007;
+
 export enum ChipSize {
   NORMAL = "NORMAL",
   SMALL = "SMALL"
@@ -269,6 +273,19 @@ export function Chip(options: ChipOptions) {
   })
 }
 
+function isValidString(dimension: string, regex: RegExp): boolean {
+  const matches = dimension.match(regex);
+  if (!matches || matches.length < 3) {
+    return false;
+  }
+  const value = Number.parseFloat(matches[1]);
+  return value >= 0;
+}
+
+function isValidDimensionString(dimension: string): boolean {
+  return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
+}
+
 @Component
 export struct ChipComponent {
   private theme: ChipTheme = defaultTheme;
@@ -391,7 +408,16 @@ export struct ChipComponent {
         return value as number
       case 'object':
         try {
-          return this.lengthMetricsToVp(LengthMetrics.resource(value))
+          let returnValue = this.lengthMetricsToVp(LengthMetrics.resource(value));
+          if (returnValue === 0) {
+            if ((value.type === RESOURCE_TYPE_STRING &&
+              !isValidDimensionString(getContext(this).resourceManager.getStringSync(value.id))) ||
+              (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
+                value.type !== RESOURCE_TYPE_FLOAT)) {
+              return Number.NEGATIVE_INFINITY;
+            }
+          }
+          return returnValue;
         } catch (error) {
           return Number.NEGATIVE_INFINITY
         }
@@ -962,6 +988,11 @@ export struct ChipComponent {
             .flexShrink(0)
             .visibility(this.getVisibility())
             .draggable(false)
+            .focusBox({
+              margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+              strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+              strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+            })
             .onFocus(() => {
               this.suffixIconOnFocus = true
             })
@@ -1022,6 +1053,11 @@ export struct ChipComponent {
     .scale(this.chipScale)
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
+    .focusBox({
+      margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+      strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+      strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+    })
     .onFocus(() => {
       this.chipNodeOnFocus = true
     })

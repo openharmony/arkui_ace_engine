@@ -30,6 +30,7 @@ void GradientStyleModifier::Draw(RSDrawingContext& context) const
 {
     CHECK_NULL_VOID(colors_);
     CHECK_NULL_VOID(colorStops_);
+    CHECK_NULL_VOID(sizeF_);
 #ifndef USE_ROSEN_DRAWING
     std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
     SizeF contentSize(sizeF_->Get()[0], sizeF_->Get()[1]);

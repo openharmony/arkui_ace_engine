@@ -555,7 +555,7 @@ HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_TRUE(scrollable->isSpringAnimationStop_);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
 
     MockAnimationManager::GetInstance().TickByVelocity(200.0f);
     FlushLayoutTask(frameNode_);

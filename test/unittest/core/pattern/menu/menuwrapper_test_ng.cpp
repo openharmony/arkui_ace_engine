@@ -983,6 +983,7 @@ HWTEST_F(MenuWrapperTestNg, MenuViewTestNg001, TestSize.Level1)
      */
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto menuWrapperNode = GetPreviewMenuWrapper2();
+    ASSERT_NE(menuWrapperNode, nullptr);
 }
 
 /**

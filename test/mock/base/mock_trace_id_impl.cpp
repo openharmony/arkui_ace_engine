@@ -27,8 +27,8 @@ public:
     void ClearTraceId() override {}
 };
 
-TraceId* TraceId::CreateTraceId()
+std::shared_ptr<TraceId> TraceId::CreateTraceId()
 {
-    return new MockTraceIdImpl();
+    return std::make_shared<MockTraceIdImpl>();
 }
 } // namespace OHOS::Ace

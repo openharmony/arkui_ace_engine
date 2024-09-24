@@ -4221,10 +4221,13 @@ class ArkComponent {
     return this;
   }
   customProperty(key, value) {
-    const property = new ArkCustomProperty();
-    property.key = key;
-    property.value = value;
-    modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+    let returnBool = getUINativeModule().frameNode.setCustomPropertyModiferByKey(this.nativePtr, key, value);
+    if (!returnBool) {
+      const property = new ArkCustomProperty();
+      property.key = key;
+      property.value = value;
+      modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+    }
     return this;
   }
   systemBarEffect() {
@@ -4829,6 +4832,18 @@ function __getCustomProperty__(nodeId, key) {
 
     if (customProperties) {
       return customProperties.get(key);
+    }
+  }
+
+  return undefined;
+}
+
+function __getCustomPropertyString__(nodeId, key) {
+  if (__elementIdToCustomProperties__.has(nodeId)) {
+    const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+    if (customProperties) {
+      return JSON.stringify(customProperties.get(key));
     }
   }
 
@@ -12881,6 +12896,21 @@ class TextAreaInitializeModifier extends ModifierWithKey {
   }
 }
 TextAreaInitializeModifier.identity = Symbol('textAreaInitialize');
+
+class TextAreaWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetWidth(node);
+    } else {
+      getUINativeModule().textArea.setWidth(node, this.value);
+    }
+  }
+}
+TextAreaWidthModifier.identity = Symbol('textAreaWidth');
+
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -13175,6 +13205,10 @@ class ArkTextAreaComponent extends ArkComponent {
   editMenuOptions(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEditMenuOptionsModifier.identity,
       TextAreaEditMenuOptionsModifier, value);
+    return this;
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaWidthModifier.identity, TextAreaWidthModifier, value);
     return this;
   }
 }
@@ -14462,6 +14496,21 @@ class TextInputEditMenuOptionsModifier extends ModifierWithKey {
   }
 }
 TextInputEditMenuOptionsModifier.identity = Symbol('textInputEditMenuOptions');
+
+class TextInputWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetWidth(node);
+    } else {
+      getUINativeModule().textInput.setWidth(node, this.value);
+    }
+  }
+}
+TextInputWidthModifier.identity = Symbol('textInputWidth');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -14812,6 +14861,10 @@ class ArkTextInputComponent extends ArkComponent {
   editMenuOptions(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEditMenuOptionsModifier.identity,
       TextInputEditMenuOptionsModifier, value);
+    return this;
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputWidthModifier.identity, TextInputWidthModifier, value);
     return this;
   }
 }
@@ -25673,6 +25726,10 @@ class ArkXComponentComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, XComponentEnableAnalyzerModifier.identity, XComponentEnableAnalyzerModifier, value);
     return this;
   }
+  enableSecure(value) {
+    modifierWithKey(this._modifiersWithKeys, XComponentEnableSecureModifier.identity, XComponentEnableSecureModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.XComponent !== undefined) {
@@ -26067,6 +26124,23 @@ class XComponentEnableAnalyzerModifier extends ModifierWithKey {
   }
 }
 XComponentEnableAnalyzerModifier.identity = Symbol('xComponentEnableAnalyzer');
+class XComponentEnableSecureModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetEnableSecure(node);
+    }
+    else {
+      getUINativeModule().xComponent.setEnableSecure(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+XComponentEnableSecureModifier.identity = Symbol('xComponentEnableSecure');
 /// <reference path='./import.ts' />
 class ArkBadgeComponent extends ArkComponent {
   constructor(nativePtr, classType) {

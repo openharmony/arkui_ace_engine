@@ -408,26 +408,6 @@ public:
         return followSystem_;
     }
 
-    void SetUseAppFontScale(const bool useSystemFontScale)
-    {
-        useAppFontScale_ = useSystemFontScale;
-    }
-
-    bool UseAppFontScale()
-    {
-        return useAppFontScale_;
-    }
-
-    void SetAppFontScale(const float scale)
-    {
-        appFontScale_ = scale;
-    }
-
-    float GetAppFontScale()
-    {
-        return appFontScale_;
-    }
-
     double NormalizeToPx(const Dimension& dimension) const;
 
     double ConvertPxToVp(const Dimension& dimension) const;
@@ -1049,7 +1029,6 @@ public:
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
-    virtual void SetContainerWindow(bool isShow) = 0;
 
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
@@ -1431,6 +1410,15 @@ public:
         }
     }
 
+    void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
+    {
+        isOpenInvisibleFreeze_ = isOpenInvisibleFreeze;
+    }
+
+    bool IsOpenInvisibleFreeze()
+    {
+        return isOpenInvisibleFreeze_;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1483,6 +1471,7 @@ protected:
     bool isReloading_ = false;
 
     bool isJsPlugin_ = false;
+    bool isOpenInvisibleFreeze_ = false;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     std::unordered_map<int32_t, AceVsyncCallback> jsFormVsyncCallbacks_;
@@ -1609,8 +1598,6 @@ private:
     bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
-    bool useAppFontScale_;
-    float appFontScale_;
 
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;

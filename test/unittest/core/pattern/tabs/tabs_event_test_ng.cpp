@@ -342,7 +342,7 @@ HWTEST_F(TabsEventTestNg, HandleClick004, TestSize.Level1)
     CreateTabsDone(model);
     auto scrollable = tabBarPattern_->scrollableEvent_->GetScrollable();
     scrollable->GetSpringProperty();
-    scrollable->isSpringAnimationStop_ = false;
+    scrollable->state_ = Scrollable::AnimationState::SPRING;
     HandleClick(Offset(200.f, 30.f), 1); // click second tabBarItem
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
     EXPECT_TRUE(scrollable->IsSpringStopped());

@@ -223,6 +223,9 @@ public:
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
     static void ResetTextInputPadding(FrameNode* frameNode);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
+    static void SetAutoWidth(FrameNode* frameNode);
+    static void SetWidth(FrameNode* frameNode, const std::string& value);
+    static void ClearWidth(FrameNode* frameNode);
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
     static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue);

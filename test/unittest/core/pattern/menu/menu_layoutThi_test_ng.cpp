@@ -90,6 +90,8 @@ constexpr float KEYBOARD_HEIGHT = 600.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const Dimension CONTAINER_BORDER_WIDTH = 1.0_vp;
 const Dimension CONTENT_PADDING = 4.0_vp;
+constexpr float OFFSET_FIRST = 50.0f;
+constexpr float OFFSET_SECOND = 100.0f;
 } // namespace
 
 class MenuLayout3TestNg : public testing::Test {
@@ -106,6 +108,8 @@ public:
     }
     RefPtr<MenuLayoutAlgorithm> CreateMenuLayoutAlgorithm(MenuType type = MenuType::MENU);
     void MountMenuItemToParent(const RefPtr<FrameNode>& parent, int32_t childCount, bool isNeedGroup = false);
+    RefPtr<FrameNode> GetPreviewMenuWrapper(
+        SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
 private:
     RefPtr<FrameNode> CreateMenuWrapperElement(MenuType type);
     RefPtr<FrameNode> CreateTargetNodeWithMainTree();
@@ -237,6 +241,41 @@ void MenuLayout3TestNg::MountMenuItemToParent(const RefPtr<FrameNode>& parent, i
     if (isNeedGroup && itemGroupNode) {
         itemGroupNode->MountToParent(parent);
     }
+}
+
+RefPtr<FrameNode> MenuLayout3TestNg::GetPreviewMenuWrapper(
+    SizeF itemSize, std::optional<MenuPreviewAnimationOptions> scaleOptions)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    if (!(LessOrEqual(itemSize.Width(), 0.0) || LessOrEqual(itemSize.Height(), 0.0))) {
+        auto itemGeometryNode = textNode->GetGeometryNode();
+        CHECK_NULL_RETURN(itemGeometryNode, nullptr);
+        itemGeometryNode->SetFrameSize(itemSize);
+    }
+    targetNode->MountToParent(rootNode);
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    if (scaleOptions != std::nullopt) {
+        menuParam.previewAnimationOptions = scaleOptions.value();
+    }
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(customNode, nullptr);
+    auto customGeometryNode = customNode->GetGeometryNode();
+    CHECK_NULL_RETURN(customGeometryNode, nullptr);
+    customGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    auto menuWrapperNode =
+        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    return menuWrapperNode;
 }
 
 /**
@@ -686,4 +725,69 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg051, TestSize.Level1)
     EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(left, top, width - left - right, height - top - bottom));
 }
 
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg052
+ * @tc.desc: Verify Initialize and Measure when layoutRegion is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg052, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    MarginProperty margin = {
+        .top = CalcLength(OFFSET_SECOND),
+        .bottom = CalcLength(0.0),
+        .start = CalcLength(OFFSET_SECOND),
+        .end = CalcLength(0.0),
+    };
+    menuWrapperPattern->menuParam_.layoutRegionMargin = margin;
+
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuGeometryNode = menuNode->GetGeometryNode();
+    ASSERT_NE(menuGeometryNode, nullptr);
+    menuGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+
+    auto previewNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(1));
+    auto previewGeometryNode = previewNode->GetGeometryNode();
+    ASSERT_NE(previewGeometryNode, nullptr);
+    previewGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+
+    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
+    ASSERT_NE(menuAlgorithmWrapper, nullptr);
+    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(menuAlgorithm, nullptr);
+
+    Rect windowRect = Rect(0.0f, 0.0f, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+    menuAlgorithm->wrapperRect_ = windowRect;
+    menuAlgorithm->param_.windowGlobalSizeF = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);;
+    menuAlgorithm->wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);;
+    menuAlgorithm->targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FIRST, OFFSET_FIRST);
+    menuAlgorithm->param_.previewMenuGap = TARGET_SECURITY.ConvertToPx();
+    menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
+    menuAlgorithm->previewScale_ = 1.0f;
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuAlgorithm->InitializeLayoutRegionMargin(menuPattern);
+    EXPECT_EQ(menuAlgorithm->layoutRegionMargin_, (MarginPropertyF{ OFFSET_SECOND, 0.0f, OFFSET_SECOND, 0.0f}));
+
+    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo(windowRect);
+
+    auto layoutProperty = AceType::DynamicCast<MenuLayoutProperty>(menuNode->GetLayoutProperty());
+    menuAlgorithm->placement_ = Placement::TOP_LEFT;
+    layoutProperty->UpdateMenuPlacement(Placement::TOP_LEFT);
+    menuAlgorithm->Layout(AceType::RawPtr(menuNode));
+
+    auto previewOffset = OffsetF(OFFSET_SECOND, OFFSET_SECOND + TARGET_SIZE_HEIGHT + TARGET_SECURITY.ConvertToPx());
+    EXPECT_EQ(previewGeometryNode->GetFrameOffset(), previewOffset);
+    EXPECT_EQ(menuGeometryNode->GetFrameOffset(), OffsetF(OFFSET_SECOND, OFFSET_SECOND));
+}
 } // namespace OHOS::Ace::NG

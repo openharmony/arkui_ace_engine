@@ -174,7 +174,7 @@ private:
     void UpdateFormComponentSize(const RequestFormInfo& info);
     void UpdateTimeLimitFontCfg();
 
-    void HandleSnapshot(uint32_t delayTime);
+    void HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr);
     void TakeSurfaceCaptureForUI();
     void UpdateStaticCard();
     RefPtr<FrameNode> CreateImageNode();

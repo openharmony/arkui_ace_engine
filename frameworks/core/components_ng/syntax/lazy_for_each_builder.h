@@ -174,6 +174,8 @@ public:
     bool SetActiveChildRange(int32_t start, int32_t end)
     {
         ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d]", start, end);
+        startIndex_ = start;
+        endIndex_ = end;
         int32_t count = GetTotalCount();
         UpdateHistoricalTotalCount(count);
         bool needBuild = false;
@@ -287,7 +289,7 @@ public:
                     idleIndexes.emplace((endIndex_ + i) % count);
                 }
             } else {
-                if (endIndex_ + i < count) {
+                if (endIndex_ + i >= 0 && endIndex_ + i < count) {
                     idleIndexes.emplace(endIndex_ + i);
                 }
             }
@@ -301,7 +303,7 @@ public:
                     idleIndexes.emplace((startIndex_ - i + count) % count);
                 }
             } else {
-                if (startIndex_ >= i) {
+                if (startIndex_ - i >= 0 && startIndex_ - i < count) {
                     idleIndexes.emplace(startIndex_ - i);
                 }
             }
@@ -526,6 +528,7 @@ public:
         OnItemDeleted(node, key);
     }
 
+    void GetAllItems(std::vector<UINode*>& items);
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 
@@ -553,8 +556,6 @@ protected:
 
     virtual void KeepRemovedItemInCache(NG::LazyForEachChild node,
         std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) = 0;
-
-    void GetAllItems(std::vector<UINode*>& items);
 
 private:
     void RecycleItemsOutOfBoundary();

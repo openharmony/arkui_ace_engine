@@ -288,12 +288,11 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
                 continue;
             }
             if (!node.second->OnRemoveFromParent(true)) {
-                const_cast<LazyForEachNode*>(this)->AddDisappearingChild(node.second);
+                AddDisappearingChild(node.second);
             } else {
                 node.second->DetachFromMainTree();
             }
             builder_->ProcessOffscreenNode(node.second, true);
-            builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
         }
         builder_->clearDeletedNodes();
     }
@@ -419,6 +418,20 @@ const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) co
         tempChildren_.clear();
     }
     return children_;
+}
+
+void LazyForEachNode::UpdateChildrenFreezeState(bool isFreeze)
+{
+    if (!builder_) {
+        return;
+    }
+    std::vector<UINode*> children;
+    builder_->GetAllItems(children);
+    for (const auto& child : children) {
+        if (child) {
+            child->SetFreeze(isFreeze);
+        }
+    }
 }
 
 void LazyForEachNode::LoadChildren(bool notDetach) const

@@ -40,6 +40,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
@@ -53,6 +54,8 @@
 #include "core/components_ng/render/render_surface.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -106,8 +109,8 @@ enum class WebInfoType : int32_t {
     TYPE_UNKNOWN
 };
 
-class WebPattern : public NestableScrollContainer, public TextBase {
-    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase);
+class WebPattern : public NestableScrollContainer, public TextBase, public Magnifier {
+    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
@@ -205,6 +208,8 @@ public:
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
 
     void NotifyFillRequestFailed(int32_t errCode, const std::string& fillContent = "", bool isPopup = false) override;
+
+    Color GetDefaultBackgroundColor();
 
     void SetWebSrc(const std::string& webSrc)
     {
@@ -695,6 +700,10 @@ public:
     {
         imageOverlayIsSelected_ = isSelected;
     }
+    // The magnifier needs this to know the web's offset
+    OffsetF GetTextPaintOffset() const override;
+    void OnColorConfigurationUpdate() override;
+
 private:
     friend class WebContextSelectOverlay;
     void ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -806,6 +815,7 @@ private:
     void WebOnMouseEvent(const MouseInfo& info);
     bool HandleDoubleClickEvent(const MouseInfo& info);
     void SendDoubleClickEvent(const MouseClickInfo& info);
+    int32_t HandleMouseClickEvent(const MouseInfo& info);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleFocusEvent();
     void HandleBlurEvent(const BlurReason& blurReason);
@@ -855,6 +865,8 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleTouchClickEvent(const GestureEvent& info, bool fromOverlay);
     void OnSelectHandleStart(bool isFirst);
     void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
     void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
@@ -971,6 +983,10 @@ private:
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitAiEngine();
+    void InitMagnifier();
+    void ShowMagnifier(int centerOffsetX, int centerOffsetY);
+    void HideMagnifier();
+    void OnMagnifierHandleMove(const RectF& handleRect, bool isFirst);
     int32_t GetBufferSizeByDeviceType();
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
 
@@ -1007,10 +1023,9 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle_ = nullptr;
     bool isQuickMenuMouseTrigger_ = false;
-    float selectHotZone_ = 10.0f;
     RefPtr<DragEvent> dragEvent_;
     bool isUrlLoaded_ = false;
-    std::queue<MouseClickInfo> doubleClickQueue_;
+    std::queue<MouseClickInfo> mouseClickQueue_;
     bool isFullScreen_ = false;
     std::shared_ptr<FullScreenEnterEvent> fullScreenExitHandler_ = nullptr;
     bool needOnFocus_ = false;
@@ -1114,7 +1129,7 @@ private:
     TextBlurCallback textBlurCallback_ = nullptr;
     WebComponentClickCallback webComponentClickCallback_ = nullptr;
     uint32_t autoFillSessionId_ = 0;
-    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
+    std::unordered_map<int32_t, std::shared_ptr<AccessibilityChildTreeCallback>> accessibilityChildTreeCallback_;
     int32_t treeId_ = 0;
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;
@@ -1132,6 +1147,10 @@ private:
     };
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
     bool imageOverlayIsSelected_ = false;
+    bool clickEventInitialized_ = false;
+    bool clickedFromOverlay_ = false;
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;

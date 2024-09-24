@@ -74,6 +74,7 @@ constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
 constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
+constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -443,9 +444,6 @@ FrameNode::FrameNode(
 FrameNode::~FrameNode()
 {
     ResetPredictNodes();
-    for (const auto& destroyCallback : destroyCallbacks_) {
-        destroyCallback();
-    }
     for (const auto& destroyCallback : destroyCallbacksMap_) {
         if (destroyCallback.second) {
             destroyCallback.second();
@@ -727,7 +725,10 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("Active: ").append(std::to_string(static_cast<int32_t>(IsActive()))));
     }
-
+    if (IsFreeze()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("Freeze: ").append(std::to_string(static_cast<int32_t>(IsFreeze()))));
+    }
     if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
         DumpLog::GetInstance().AddDesc(std::string("Visible: ")
                                            .append(std::to_string(static_cast<int32_t>(
@@ -2101,6 +2102,10 @@ void FrameNode::RebuildRenderContextTree()
     if (!needSyncRenderTree_) {
         return;
     }
+    auto pipeline = GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("RebuildRenderContextTree doesn't run on UI thread!");
+    }
     frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
     // generate full children list, including disappear children.
@@ -2181,6 +2186,12 @@ void FrameNode::FlushUpdateAndMarkDirty()
 
 void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
+    if (IsFreeze()) {
+        // store the flag.
+        layoutProperty_->UpdatePropertyChangeFlag(extraFlag);
+        paintProperty_->UpdatePropertyChangeFlag(extraFlag);
+        return;
+    }
     if (CheckNeedMakePropertyDiff(extraFlag)) {
         if (isPropertyDiffMarked_) {
             return;
@@ -2192,6 +2203,27 @@ void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
         return;
     }
     MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
+}
+
+void FrameNode::ProcessFreezeNode()
+{
+    MarkDirtyNode();
+}
+
+void FrameNode::onFreezeStateChange()
+{
+    if (IsFreeze()) {
+        return;
+    }
+    // unlock freeze, mark dirty to process freeze node.
+    auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
+    auto paintFlag = paintProperty_->GetPropertyChangeFlag();
+    if (CheckNoChanged(layoutFlag | paintFlag)) {
+        return;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddDirtyFreezeNode(this);
 }
 
 RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame(bool checkBoundary) const
@@ -2284,9 +2316,6 @@ bool FrameNode::RequestParentDirty()
 
 void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag)
 {
-    if (CheckNeedRender(extraFlag)) {
-        paintProperty_->UpdatePropertyChangeFlag(extraFlag);
-    }
     layoutProperty_->UpdatePropertyChangeFlag(extraFlag);
     paintProperty_->UpdatePropertyChangeFlag(extraFlag);
     auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
@@ -3477,9 +3506,6 @@ void FrameNode::OnAccessibilityEvent(
 
 void FrameNode::OnRecycle()
 {
-    for (const auto& destroyCallback : destroyCallbacks_) {
-        destroyCallback();
-    }
     for (const auto& destroyCallback : destroyCallbacksMap_) {
         if (destroyCallback.second) {
             destroyCallback.second();
@@ -5714,6 +5740,57 @@ void FrameNode::ResetPredictNodes()
         if (frameNode && frameNode->isLayoutDirtyMarked_) {
             frameNode->isLayoutDirtyMarked_ = false;
         }
+    }
+}
+
+void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    bool result = func();
+    if (isCNode_) {
+        return;
+    }
+    if (result) {
+        customPropertyMap_[UPDATE_FLAG_KEY] = true;
+    }
+    if (!getCustomProperty_) {
+        getCustomProperty_ = getFunc;
+    }
+}
+
+std::string FrameNode::GetJSCustomProperty(const std::string& key)
+{
+    if (getCustomProperty_) {
+        return getCustomProperty_(key);
+    }
+    return nullptr;
+}
+
+std::string FrameNode::GetCapiCustomProperty(const std::string& key)
+{
+    if (!isCNode_) {
+        return std::string();
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        return customPropertyMap_[key];
+    }
+    return std::string();
+}
+
+void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    customPropertyMap_[key] = value;
+}
+
+void FrameNode::RemoveCustomProperty(const std::string& key)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        customPropertyMap_.erase(iter);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -1162,6 +1162,11 @@ void WebPattern::OnVisibleChange(bool isVisible)
     }
 }
 
+Color WebPattern::GetDefaultBackgroundColor()
+{
+    return Color::WHITE;
+}
+
 void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
 {
     auto host = GetHost();

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/animation/animation_util.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
@@ -127,9 +128,23 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (!IsDefaultToast()) {
         OffsetT<Dimension> displayWindowOffset = { Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetX()),
             Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetY()) };
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast displayWindowOffset, x: %{public}.2f vp, y: %{public}.2f vp",
+            displayWindowOffset.GetX().ConvertToVp(), displayWindowOffset.GetY().ConvertToVp());
         offset += displayWindowOffset;
     }
-    toastContext->UpdateOffset(offset);
+    auto func = [toastContext, offset]() { toastContext->UpdateOffset(offset); };
+    auto toastProp = DynamicCast<ToastLayoutProperty>(dirty->GetLayoutProperty());
+    CHECK_NULL_RETURN(toastProp, false);
+    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
+    if (showMode == ToastShowMode::TOP_MOST) {
+        auto keyboardAnimationConfig = context->GetKeyboardAnimationConfig();
+        auto safeAreaManager = context->GetSafeAreaManager();
+        auto keyboardHeight = safeAreaManager ? safeAreaManager->GetKeyboardInset().Length() : 0;
+        AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
+        context->Animate(option, option.GetCurve(), func);
+    } else {
+        func();
+    }
     return true;
 }
 
@@ -198,6 +213,10 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     if ((showMode == ToastShowMode::TOP_MOST) && (offsetY.Value() + textHeight > deviceHeight - keyboardOffset)) {
         offsetY = Dimension(deviceHeight - keyboardOffset - defaultBottom_.ConvertToPx() - textHeight);
     }
+    TAG_LOGD(AceLogTag::ACE_OVERLAY,
+        "toast device height: %{public}.2f, keyboardOffset: %{public}d, "
+        "textHeight: %{public}.2f, offsetY: %{public}.2f",
+        deviceHeight, keyboardOffset, textHeight, offsetY.Value());
     return offsetY + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
 }
 
@@ -367,6 +386,10 @@ double ToastPattern::GetTextMaxHeight()
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         deviceHeight = windowGlobalRect.Height();
     }
+    if (LessOrEqual(deviceHeight, 0.0)) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY,
+            "toast get device height is invalid, containerId: %{public}d", containerId);
+    }
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
     auto top = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().top_.Length() : 0;
@@ -391,6 +414,10 @@ double ToastPattern::GetTextMaxWidth()
     } else {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
         deviceWidth = windowGlobalRect.Width();
+    }
+    if (LessOrEqual(deviceWidth, 0.0)) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY,
+            "toast get device width is invalid, containerId: %{public}d", containerId);
     }
 
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();

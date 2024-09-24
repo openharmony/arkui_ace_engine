@@ -160,6 +160,24 @@ float OH_ArkUI_SystemFontStyleEvent_GetFontWeightScale(const ArkUI_SystemFontSty
     return event->fontWeight;
 }
 
+void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* name, const char* value)
+{
+    if (node == nullptr) {
+        return;
+    }
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->addCustomProperty(node->uiNodeHandle, name, value);
+}
+
+void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* name)
+{
+    if (node == nullptr) {
+        return;
+    }
+    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->removeCustomProperty(node->uiNodeHandle, name);
+}
+
 #ifdef __cplusplus
 };
 #endif
