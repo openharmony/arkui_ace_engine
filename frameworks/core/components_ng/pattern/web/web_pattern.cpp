@@ -1595,6 +1595,7 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
     }
     OnQuickMenuDismissed();
     CloseContextSelectionMenu();
+    HideMagnifier();
 }
 
 bool WebPattern::HandleKeyEvent(const KeyEvent& keyEvent)
@@ -2405,6 +2406,16 @@ void WebPattern::InitEnhanceSurfaceFlag()
     }
 }
 
+void WebPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (magnifierController_) {
+        magnifierController_->SetColorModeChange(true);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
 void WebPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -2560,6 +2571,7 @@ void WebPattern::OnModifyDone()
     InitEvent();
     // Initialize web params.
     InitFeatureParam();
+    InitMagnifier();
 
     // Initialize scrollupdate listener
     if (renderMode_ == RenderMode::SYNC_RENDER) {
@@ -2824,6 +2836,7 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
     if (!isReceivedArkDrag_) {
         ResetDragAction();
     }
+    HideMagnifier();
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {
         return;
@@ -2867,11 +2880,13 @@ void WebPattern::OnSelectHandleStart(bool isFirst)
     if (isFirst) {
         handle.paintRect.SetHeight(handleHeight);
         info->firstHandle = handle;
+        info->firstHandle.isCircleShow = false;
     } else {
         handle.paintRect.SetOffset(OffsetF(handle.paintRect.GetX(),
             handle.paintRect.GetY() + handle.paintRect.Height() - handleHeight));
         handle.paintRect.SetHeight(handleHeight);
         info->secondHandle = handle;
+        info->secondHandle.isCircleShow = false;
     }
     RectF handleRect = handle.paintRect;
     TouchInfo touchPoint;
@@ -2909,6 +2924,13 @@ void WebPattern::OnSelectHandleDone(const RectF& handleRect, bool isFirst)
     if (!IsQuickMenuShow()) {
         ChangeVisibilityOfQuickMenu();
     }
+}
+
+void WebPattern::OnMagnifierHandleMove(const RectF& handleRect, bool isFirst)
+{
+    auto localX = handleRect.GetX() - webOffset_.GetX() + handleRect.Width() / HALF;
+    auto localY = handleRect.GetY() - webOffset_.GetY() + handleRect.Height() / HALF;
+    ShowMagnifier(localX, localY);
 }
 
 void WebPattern::OnSelectHandleMove(const RectF& handleRect, bool isFirst)
@@ -2974,6 +2996,9 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
         }
+        if (magnifierController_ && magnifierController_->GetMagnifierNodeExist()) {
+            ShowMagnifier(touchPoint.x, touchPoint.y);
+        }
         std::shared_ptr<OHOS::NWeb::NWebTouchPointInfo> touch_point_info =
             std::make_shared<NWebTouchPointInfoImpl>(touchPoint.id, touchPoint.x, touchPoint.y);
         touch_point_infos.emplace_back(touch_point_info);
@@ -2999,6 +3024,7 @@ void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
         imageAnalyzerManager_->UpdateOverlayTouchInfo(0, 0, TouchType::CANCEL);
         overlayCreating_ = false;
     }
+    HideMagnifier();
 }
 
 bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos)
@@ -3132,6 +3158,7 @@ void WebPattern::CloseSelectOverlay()
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "SelectOverlay send touch up id:%{public}d", touchOverlayInfo.id);
             delegate_->HandleTouchUp(touchOverlayInfo.id, touchOverlayInfo.x, touchOverlayInfo.y, true);
+            HideMagnifier();
         }
         touchOverlayInfo_.clear();
     }
@@ -3190,6 +3217,7 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
     selectInfo.onHandleMoveDone = [weak = AceType::WeakClaim(this)](const RectF& rectF, bool isFirst) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
+        webPattern->HideMagnifier();
         webPattern->OnSelectHandleDone(rectF, isFirst);
     };
     selectInfo.onTouchDown = [weak = AceType::WeakClaim(this)](const TouchEventInfo& info) {};
@@ -3199,6 +3227,7 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
         webPattern->OnSelectHandleMove(handleRect, isFirst);
+        webPattern->OnMagnifierHandleMove(handleRect, isFirst);
     };
     selectInfo.onHandleMoveStart = [weak = AceType::WeakClaim(this)](bool isFirst) {
         auto webPattern = weak.Upgrade();
@@ -3384,15 +3413,16 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
     if (overlayType == INVALID_OVERLAY) {
         return false;
     }
+    if (params->GetIsLongPressActived()) {
+        ShowMagnifier(params->GetSelectX(), params->GetSelectY());
+        return false;
+    }
     if (selectOverlayProxy_) {
         CloseSelectOverlay();
     }
     selectTemporarilyHidden_ = false;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<TextOverlayTheme>();
-    CHECK_NULL_RETURN(theme, false);
-    selectHotZone_ = theme->GetHandleHotZoneRadius().ConvertToPx();
     SelectOverlayInfo selectInfo;
     RegisterSelectOverLayOnClose(selectInfo);
     selectInfo.isSingleHandle = (overlayType == INSERT_OVERLAY);
@@ -3419,6 +3449,28 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         return true;
     }
     return false;
+}
+
+void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY)
+{
+    if (magnifierController_) {
+        OffsetF localOffset = OffsetF(centerOffsetX, centerOffsetY);
+        magnifierController_->SetLocalOffset(localOffset);
+    }
+}
+
+void WebPattern::HideMagnifier()
+{
+    if (magnifierController_) {
+        magnifierController_->RemoveMagnifierFrameNode();
+    }
+}
+
+OffsetF WebPattern::GetTextPaintOffset() const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    return frameNode->GetTransformRelativeOffset();
 }
 
 void WebPattern::RegisterSelectOverLayOnClose(SelectOverlayInfo& selectInfo)
@@ -3895,9 +3947,6 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextOverlayTheme>();
-    CHECK_NULL_VOID(theme);
-    selectHotZone_ = theme->GetHandleHotZoneRadius().ConvertToPx();
     insertHandle_ = insertHandle;
     startSelectionHandle_ = startSelectionHandle;
     endSelectionHandle_ = endSelectionHandle;
@@ -5935,6 +5984,11 @@ void WebPattern::InitAiEngine()
         },
         "ArkWebTextInitDataDetect");
     isInit = true;
+}
+
+void WebPattern::InitMagnifier()
+{
+    magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
 }
 
 void WebPattern::StartVibraFeedback(const std::string& vibratorType)
