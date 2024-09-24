@@ -111,6 +111,9 @@ private:
     bool isRegistered_ = false;
     int32_t nodeId_ = 0;
     WeakPtr<NG::LayoutInfoInterface> layoutInfo_;
+    int32_t sInd_ = -1;
+    int32_t eInd_ = -1;
+    bool showMenu_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_STYLUS_STYLUS_DETECTOR_MGR_H
