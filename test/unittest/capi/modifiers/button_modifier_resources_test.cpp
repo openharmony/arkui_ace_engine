@@ -56,19 +56,19 @@ namespace {
     using ButtonLabelResourceTest = std::pair<ResourceStr, std::string>;
 
     // resource names and id
-    const auto resName = "aa.bb.cc";
-    const auto resArkName = Converter::ArkValue<Ark_String>(resName);
-    const auto resId = 11111;
+    const auto RES_NAME = "aa.bb.cc";
+    const auto RES_ARK_NAME = Converter::ArkValue<Ark_String>(RES_NAME);
+    const auto RES_ID = 11111;
 
     // resource values
-    const auto resourceByString = "ResourceByString";
-    const auto resourceByNumber = "ResourceByNumber";
+    const auto RESOURCE_BY_STRING = "ResourceByString";
+    const auto RESOURCE_BY_NUMBER = "ResourceByNumber";
 
     const std::vector<ButtonLabelResourceTest> BUTTON_LABEL_RESOURCES_TEST_PLAN = {
-        { Converter::ArkUnion<ResourceStr, Ark_Resource>(ArkResource(const_cast<Ark_String*>(&resArkName),
-            -1, NodeModifier::ResourceType::STRING)), resourceByString },
-        { Converter::ArkUnion<ResourceStr, Ark_Resource>(ArkResource(nullptr, resId,
-            NodeModifier::ResourceType::STRING)), resourceByNumber }
+        { Converter::ArkUnion<ResourceStr, Ark_Resource>(ArkResource(const_cast<Ark_String*>(&RES_ARK_NAME),
+            -1, NodeModifier::ResourceType::STRING)), RESOURCE_BY_STRING },
+        { Converter::ArkUnion<ResourceStr, Ark_Resource>(ArkResource(nullptr, RES_ID,
+            NodeModifier::ResourceType::STRING)), RESOURCE_BY_NUMBER }
     };
 } // namespace
 
@@ -84,10 +84,10 @@ public:
 
         // set test values to Theme Pattern as data for the Theme building
         auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
-        MockThemeStyle::GetInstance()->SetAttr(std::to_string(resId),
-            { .value = resourceByNumber, .type = ThemeConstantsType::STRING });
-        MockThemeStyle::GetInstance()->SetAttr(resName,
-            { .value = resourceByString, .type = ThemeConstantsType::STRING });
+        MockThemeStyle::GetInstance()->SetAttr(std::to_string(RES_ID),
+            { .value = RESOURCE_BY_NUMBER, .type = ThemeConstantsType::STRING });
+        MockThemeStyle::GetInstance()->SetAttr(RES_NAME,
+            { .value = RESOURCE_BY_STRING, .type = ThemeConstantsType::STRING });
         themeConstants->LoadTheme(0);
 
         // build default ButtonTheme
