@@ -845,6 +845,7 @@ void RelativeContainerLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper
         }
         auto it = idNodeMap_.find(nodeName);
         if (it == idNodeMap_.end()) {
+            ACE_LAYOUT_SCOPED_TRACE("Id %s not in map", nodeName.c_str());
             continue;
         }
         auto childWrapper = it->second.layoutWrapper;
