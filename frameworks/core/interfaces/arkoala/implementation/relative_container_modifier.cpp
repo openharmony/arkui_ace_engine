@@ -13,27 +13,136 @@
  * limitations under the License.
  */
 
+#include "arkoala_api.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+
+namespace OHOS::Ace::NG::Converter {
+
+template<>
+void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src)
+{
+    switch (src) {
+        case ARK_AXIS_VERTICAL: dst = LineDirection::VERTICAL; break;
+        case ARK_AXIS_HORIZONTAL: dst = LineDirection::HORIZONTAL; break;
+        default: LOGE("Unexpected enum value in Ark_Axis: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BarrierDirection>& dst, const Ark_BarrierDirection& src)
+{
+    switch (src) {
+        case ARK_BARRIER_DIRECTION_LEFT: dst = BarrierDirection::LEFT; break;
+        case ARK_BARRIER_DIRECTION_RIGHT: dst = BarrierDirection::RIGHT; break;
+        case ARK_BARRIER_DIRECTION_TOP: dst = BarrierDirection::TOP; break;
+        case ARK_BARRIER_DIRECTION_BOTTOM: dst = BarrierDirection::BOTTOM; break;
+        default: LOGE("Unexpected enum value in Ark_BarrierDirection: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BarrierDirection>& dst, const Ark_LocalizedBarrierDirection& src)
+{
+    switch (src) {
+        case ARK_LOCALIZED_BARRIER_DIRECTION_START: dst = BarrierDirection::START; break;
+        case ARK_LOCALIZED_BARRIER_DIRECTION_END: dst = BarrierDirection::END; break;
+        case ARK_BARRIER_DIRECTION_TOP: dst = BarrierDirection::TOP; break;
+        case ARK_BARRIER_DIRECTION_BOTTOM: dst = BarrierDirection::BOTTOM; break;
+        default: LOGE("Unexpected enum value in Ark_BarrierDirection: %{public}d", src);
+    }
+}
+
+template<>
+GuidelineInfo Convert(const Ark_GuideLineStyle& src)
+{
+    GuidelineInfo info;
+    info.id = Convert<std::string>(src.id);
+    auto direction = OptConvert<LineDirection>(src.direction);
+    if (direction.has_value()) {
+        info.direction = direction.value();
+    }
+    auto start = OptConvert<Dimension>(src.position.start);
+    if (start.has_value()) {
+        info.start = start.value();
+    }
+    auto end = OptConvert<Dimension>(src.position.end);
+    if (end.has_value()) {
+        info.end = end.value();
+    }
+    return info;
+}
+
+template<>
+BarrierInfo Convert(const Ark_BarrierStyle& src)
+{
+    BarrierInfo info = {
+        .id = Convert<std::string>(src.id),
+        .referencedId = Convert<std::vector<std::string>>(src.referencedId)
+    };
+    auto direction = OptConvert<BarrierDirection>(src.direction);
+    if (direction.has_value()) {
+        info.direction = direction.value();
+    }
+    return info;
+}
+
+template<>
+BarrierInfo Convert(const Ark_LocalizedBarrierStyle& src)
+{
+    LocalizedBarrierInfo info;
+    info.id = Convert<std::string>(src.id);
+    info.referencedId = Convert<std::vector<std::string>>(src.referencedId);
+    auto direction = OptConvert<BarrierDirection>(src.localizedDirection);
+    if (direction.has_value()) {
+        info.direction = direction.value();
+    }
+    return info;
+}
+
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RelativeContainerInterfaceModifier {
 void SetRelativeContainerOptionsImpl(Ark_NativePointer node)
 {
+    // keep it empty because RelativeContainer doesn`t have any options
 }
+
 } // RelativeContainerInterfaceModifier
 namespace RelativeContainerAttributeModifier {
 void GuideLineImpl(Ark_NativePointer node,
                    const Array_GuideLineStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto infoVec = Converter::Convert<std::vector<GuidelineInfo>>(*value);
+    RelativeContainerModelNG::SetGuideline(frameNode, infoVec);
 }
+
 void Barrier0Impl(Ark_NativePointer node,
                   const Array_BarrierStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto infoVec = Converter::Convert<std::vector<BarrierInfo>>(*value);
+    RelativeContainerModelNG::SetBarrier(frameNode, infoVec);
 }
+
 void Barrier1Impl(Ark_NativePointer node,
                   const Array_LocalizedBarrierStyle* barrierStyle)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(barrierStyle);
+    auto infoVec = Converter::Convert<std::vector<BarrierInfo>>(*barrierStyle);
+    RelativeContainerModelNG::SetBarrier(frameNode, infoVec);
 }
+
 } // RelativeContainerAttributeModifier
 const GENERATED_ArkUIRelativeContainerModifier* GetRelativeContainerModifier()
 {
@@ -45,5 +154,4 @@ const GENERATED_ArkUIRelativeContainerModifier* GetRelativeContainerModifier()
     };
     return &ArkUIRelativeContainerModifierImpl;
 }
-
 }
