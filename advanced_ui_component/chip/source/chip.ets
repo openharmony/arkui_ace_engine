@@ -108,6 +108,7 @@ interface LabelTheme {
   fontColor: ResourceColor;
   activatedFontColor: ResourceColor;
   fontFamily: string;
+  fontWeight: Resource;
   normalMargin: Margin;
   localizedNormalMargin: LocalizedMargin;
   smallMargin: Margin;
@@ -190,6 +191,7 @@ export const defaultTheme: ChipTheme = {
     fontColor: $r('sys.color.chip_font_color'),
     activatedFontColor: $r('sys.color.chip_activated_fontcolor'),
     fontFamily: "HarmonyOS Sans",
+    fontWeight: $r('sys.float.chip_text_fontweight'),
     normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
     smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
     defaultFontSize: 14,
@@ -440,7 +442,7 @@ export struct ChipComponent {
     if (this.getChipActive()) {
       return FontWeight.Medium
     }
-    return FontWeight.Regular
+    return this.verifyResource(this.theme.label.fontWeight, FontWeight.Regular) as FontWeight;
   }
 
   private lengthMetricsToVp(lengthMetrics?: LengthMetrics): number {
