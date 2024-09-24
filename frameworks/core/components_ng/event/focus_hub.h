@@ -1038,11 +1038,6 @@ public:
         return focusPriority_;
     }
 
-    bool GetArrowKeyStepOut() const
-    {
-        return arrowKeyStepOut_;
-    }
-
     static void ToJsonValue(
         const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter);
 

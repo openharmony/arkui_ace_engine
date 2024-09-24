@@ -154,7 +154,7 @@ bool FrontendDelegate::Activate(bool isActive, bool autoInactive)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    return pipeline->Activate(isActive, autoInactive);
+    return pipeline->SetIsFocusActive(isActive, FocusActiveReason::USE_API, autoInactive);
 }
 
 template<typename T>

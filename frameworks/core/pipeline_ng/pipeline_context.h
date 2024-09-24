@@ -454,7 +454,7 @@ public:
     }
 
     bool SetIsFocusActive(bool isFocusActive,
-        FocusActiveTriggerType triggerType = FocusActiveTriggerType::TRIGGER_BY_OTHER);
+        FocusActiveReason reason = FocusActiveReason::KEY_EVENT, bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
@@ -475,16 +475,6 @@ public:
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
-
-    bool GetAutoInactive() const
-    {
-        return autoInactive_;
-    }
-    void SetAutoInactive(bool autoInactive)
-    {
-        autoInactive_ = autoInactive;
-    }
-    bool Activate(bool isActive, bool autoInactive = true) override;
 
     void SetContainerWindow(bool isShow, Dimension contentBorderRadius);
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
@@ -1226,7 +1216,7 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
-    bool autoInactive_ = true;
+    bool autoFocusInactive_ = true;
 };
 } // namespace OHOS::Ace::NG
 

@@ -32,10 +32,10 @@ using RequestFocusCallback = std::function<void(NG::RequestFocusResult result)>;
 using FocusHubScopeMap = std::unordered_map<std::string, std::pair<WeakPtr<FocusHub>, std::list<WeakPtr<FocusHub>>>>;
 using FocusChangeCallback = std::function<void(const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current)>;
 
-enum class FocusActiveTriggerType : int32_t {
-    TRIGGER_BY_MOUSE_TOUCH = 0,
-    TRIGGER_BY_ACTIVATE_API = 1,
-    TRIGGER_BY_OTHER = 2,
+enum class FocusActiveReason : int32_t {
+    POINTER_EVENT = 0,
+    KEY_EVENT = 1,
+    USE_API = 2,
 };
 
 class FocusManager : public virtual AceType {

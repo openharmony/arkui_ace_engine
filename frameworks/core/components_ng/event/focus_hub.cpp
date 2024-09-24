@@ -251,7 +251,7 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
         if (isFocusScope_ && !focusScopeId_.empty()) {
             information += GetIsFocusGroup() ? " GroupId:" : " ScopeId:";
             information += focusScopeId_;
-            information += GetArrowKeyStepOut() ? "" : " ArrowKeyStepOut:false";
+            information += arrowKeyStepOut_ ? "" : " ArrowKeyStepOut:false";
         }
         bool isPrior = (!focusScopeId_.empty() && (focusPriority_ == FocusPriority::PRIOR));
         if (isPrior) {
@@ -943,39 +943,39 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
             TAG_LOGI(AceLogTag::ACE_FOCUS,
                 "Request next focus failed because direction of node(%{public}d) is different with step(%{public}d).",
                 focusAlgorithm_.isVertical, moveStep);
-            return CheckArrowKeyStepOut(false, moveStep);
+            return CheckArrowKeyStepOut(moveStep);
         }
         auto ret = GoToNextFocusLinear(moveStep, rect);
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request next focus by default linear algorithm. Return %{public}d.", ret);
-        return CheckArrowKeyStepOut(ret, moveStep);
+        return (ret || CheckArrowKeyStepOut(moveStep));
     }
     if (!lastWeakFocusNode_.Upgrade()) {
-        return CheckArrowKeyStepOut(false, moveStep);
+        return CheckArrowKeyStepOut(moveStep);
     }
     WeakPtr<FocusHub> nextFocusHubWeak;
     focusAlgorithm_.getNextFocusNode(moveStep, lastWeakFocusNode_, nextFocusHubWeak);
     auto nextFocusHub = nextFocusHubWeak.Upgrade();
     if (!nextFocusHub || nextFocusHub == lastWeakFocusNode_.Upgrade()) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request next focus failed by custom focus algorithm.");
-        return CheckArrowKeyStepOut(false, moveStep);
+        return CheckArrowKeyStepOut(moveStep);
     }
     auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
     TAG_LOGI(AceLogTag::ACE_FOCUS,
         "Request next focus by custom focus algorithm. Next focus node is %{public}s/%{public}d. Return %{public}d",
         nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
-    return CheckArrowKeyStepOut(ret, moveStep);
+    return (ret || CheckArrowKeyStepOut(moveStep));
 }
 
-bool FocusHub::CheckArrowKeyStepOut(bool ret, FocusStep moveStep)
+bool FocusHub::CheckArrowKeyStepOut(FocusStep moveStep)
 {
-    if (!ret && !IsFocusStepTab(moveStep) && GetIsFocusGroup() && !GetArrowKeyStepOut()) {
+    if (!IsFocusStepTab(moveStep) && GetIsFocusGroup() && !arrowKeyStepOut_) {
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "CheckArrowKeyStepOut Node(%{public}s/%{public}d), ret %{public}d, step(%{public}d),"
+            "CheckArrowKeyStepOut Node(%{public}s/%{public}d), step(%{public}d),"
             "this node is focus group and set can not step out!",
-            GetFrameName().c_str(), GetFrameId(), ret, moveStep);
+            GetFrameName().c_str(), GetFrameId(), moveStep);
         return true;
     }
-    return ret;
+    return false;
 }
 
 bool FocusHub::FocusToHeadOrTailChild(bool isHead)
