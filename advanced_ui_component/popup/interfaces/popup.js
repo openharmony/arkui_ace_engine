@@ -826,7 +826,7 @@ export class PopupComponent extends ViewPU {
             e28 = 400;
         }
         else {
-            e28 = px2vp(h28.width) - 40 - 40;
+            e28 = px2vp(h28.width);
         }
         if (px2vp(h28.height) > 480) {
             f28 = 480;
