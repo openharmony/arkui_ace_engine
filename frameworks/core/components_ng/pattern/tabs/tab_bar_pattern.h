@@ -174,7 +174,7 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         FocusPaintParam focusPaintParams;
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, FocusPattern());
         auto focusTheme = pipeline->GetTheme<FocusAnimationTheme>();
         CHECK_NULL_RETURN(focusTheme, FocusPattern());

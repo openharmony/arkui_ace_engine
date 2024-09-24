@@ -24,12 +24,12 @@ namespace OHOS::Ace::NG {
 
 RectF TabBarLayoutProperty::GetIndicatorRect(int32_t index)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto node = GetHost();
+    CHECK_NULL_RETURN(node, RectF());
+    auto pipelineContext = node->GetContext();
     CHECK_NULL_RETURN(pipelineContext, RectF());
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, RectF());
-    auto node = GetHost();
-    CHECK_NULL_RETURN(node, RectF());
     auto childColumn = DynamicCast<FrameNode>(node->GetChildAtIndex(index));
     CHECK_NULL_RETURN(childColumn, RectF());
     auto grandChildren = DynamicCast<FrameNode>(childColumn->GetChildren().back());

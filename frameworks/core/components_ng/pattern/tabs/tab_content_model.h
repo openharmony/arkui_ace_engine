@@ -55,7 +55,7 @@ struct IndicatorStyle final {
     Dimension marginTop = 0.0_vp;
     IndicatorStyle()
     {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (!pipelineContext) {
             return;
         }
@@ -79,7 +79,7 @@ struct BoardStyle final {
     Dimension borderRadius = 0.0_vp;
     BoardStyle()
     {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (!pipelineContext) {
             return;
         }

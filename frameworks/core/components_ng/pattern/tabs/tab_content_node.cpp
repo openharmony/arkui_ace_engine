@@ -145,7 +145,7 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     label->Put("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
         labelStyle.heightAdaptivePolicy.value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
     label->Put("font", font);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
