@@ -660,8 +660,8 @@ frameworks/bridge/declarative_frontend/ark_prefetcher/ @arkuistatemgmt
 frameworks/bridge/declarative_frontend/ark_shape/ @arkuiframework
 frameworks/bridge/declarative_frontend/ark_theme/ @hanyujia1
 frameworks/bridge/declarative_frontend/BUILD.gn @arkui_architecture
-frameworks/bridge/declarative_frontend/declarative_frontend.cpp @arkui_superman
-frameworks/bridge/declarative_frontend/declarative_frontend.h @arkui_superman
+frameworks/bridge/declarative_frontend/declarative_frontend.cpp @arkuiframework
+frameworks/bridge/declarative_frontend/declarative_frontend.h @arkuiframework
 frameworks/bridge/declarative_frontend/engine/arkComponent.js
 frameworks/bridge/declarative_frontend/engine/arkModifier.js
 frameworks/bridge/declarative_frontend/engine/arkThemeControl.js
@@ -971,8 +971,8 @@ frameworks/bridge/declarative_frontend/frontend_delegate_declarative.cpp @arkuif
 frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h @arkuiframework
 frameworks/bridge/declarative_frontend/interfaces/profiler/js_profiler.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/interfaces/profiler/js_profiler.h @arkuiframework
-frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.cpp @arkui_superman
-frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h @arkui_superman
+frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.cpp @arkuipopupwindow
+frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/canvas/ @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/dialog/ @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/js_ability_component_controller.cpp @arkuilayout
@@ -1320,8 +1320,8 @@ frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/menu/ @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/models/ability_component_model_impl.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/ability_component_model_impl.h @arkuilayout
-frameworks/bridge/declarative_frontend/jsview/models/action_sheet_model_impl.cpp @arkui_superman
-frameworks/bridge/declarative_frontend/jsview/models/action_sheet_model_impl.h @arkui_superman
+frameworks/bridge/declarative_frontend/jsview/models/action_sheet_model_impl.cpp @arkuipopupwindow
+frameworks/bridge/declarative_frontend/jsview/models/action_sheet_model_impl.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/models/alert_dialog_model_impl.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/models/alert_dialog_model_impl.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/models/animator_model_impl.cpp @arkuiframework
@@ -1352,8 +1352,8 @@ frameworks/bridge/declarative_frontend/jsview/models/counter_model_impl.cpp @ark
 frameworks/bridge/declarative_frontend/jsview/models/counter_model_impl.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h @arkuipopupwindow
-frameworks/bridge/declarative_frontend/jsview/models/data_panel_model_impl.cpp @arkui_superman
-frameworks/bridge/declarative_frontend/jsview/models/data_panel_model_impl.h @arkui_superman
+frameworks/bridge/declarative_frontend/jsview/models/data_panel_model_impl.cpp @arkui_image
+frameworks/bridge/declarative_frontend/jsview/models/data_panel_model_impl.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/divider_model_impl.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/divider_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/effect_component_model_impl.cpp
@@ -2061,8 +2061,8 @@ frameworks/core/components_v2/pattern_lock/ @arkui_image
 frameworks/core/components_v2/swiper/ @arkuiscroll
 frameworks/core/components_v2/tabs/ @arkuiscroll
 frameworks/core/components_v2/water_flow/ @arkuiscroll
-frameworks/core/components_v2/inspector/actionsheetdialog_composed_element.cpp @arkui_superman
-frameworks/core/components_v2/inspector/actionsheetdialog_composed_element.h @arkui_superman
+frameworks/core/components_v2/inspector/actionsheetdialog_composed_element.cpp @arkuipopupwindow
+frameworks/core/components_v2/inspector/actionsheetdialog_composed_element.h @arkuipopupwindow
 frameworks/core/components_v2/inspector/alertdialog_composed_element.cpp @arkuipopupwindow
 frameworks/core/components_v2/inspector/alertdialog_composed_element.h @arkuipopupwindow
 frameworks/core/components_v2/inspector/badge_composed_element.cpp @arkui_image
@@ -2311,7 +2311,7 @@ frameworks/core/components_ng/manager/select_content_overlay/ @huawei_g_five
 frameworks/core/components_ng/manager/select_overlay/ @huawei_g_five
 frameworks/core/components_ng/manager/shared_overlay/ @arkuiframework
 frameworks/core/components_ng/pattern/ability_component/ @arkuilayout
-frameworks/core/components_ng/pattern/action_sheet/ @arkui_superman
+frameworks/core/components_ng/pattern/action_sheet/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/animator/ @arkuiframework
 frameworks/core/components_ng/pattern/app_bar/ @arkuievent
 frameworks/core/components_ng/pattern/badge/ @arkui_image
