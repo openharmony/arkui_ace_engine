@@ -99,6 +99,11 @@ int32_t ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosById(
 
     ArkUI_AccessibilityElementInfoList* accessibilityElementInfoList
         = new (std::nothrow) ArkUI_AccessibilityElementInfoList();
+    if (accessibilityElementInfoList == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "info list is null");
+        return NOT_REGISTERED;
+    }
+
     int32_t ret = accessibilityProviderCallbacks_->findAccessibilityNodeInfosById(
         elementId, static_cast<ArkUI_AccessibilitySearchMode>(mode),
         requestId, accessibilityElementInfoList);
@@ -123,6 +128,11 @@ int32_t ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosByText(
 
     ArkUI_AccessibilityElementInfoList* accessibilityElementInfoList
         = new (std::nothrow) ArkUI_AccessibilityElementInfoList();
+    if (accessibilityElementInfoList == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "info list is null");
+        return NOT_REGISTERED;
+    }
+
     int32_t ret = accessibilityProviderCallbacks_->findAccessibilityNodeInfosByText(
         elementId, text.c_str(), requestId, accessibilityElementInfoList);
     if (!accessibilityElementInfoList->CopyAccessibilityElementInfo(infos)) {
