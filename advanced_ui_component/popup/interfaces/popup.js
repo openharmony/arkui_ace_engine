@@ -251,7 +251,7 @@ export class PopupComponent extends ViewPU {
         this.__buttonHeight = new ObservedPropertySimplePU(0, this, "buttonHeight");
         this.__messageMaxWeight = new ObservedPropertyObjectPU(0, this, "messageMaxWeight");
         this.__beforeScreenStatus = new ObservedPropertySimplePU(undefined, this, "beforeScreenStatus");
-        this.__currentScreenStatus = new ObservedPropertySimplePU(true, this, "currentScreenStatus");
+        this.__screenChanged = new ObservedPropertySimplePU(true, this, "screenChanged");
         this.__applySizeOptions = new ObservedPropertyObjectPU(undefined, this, "applySizeOptions");
         this.__closeButtonBackgroundColor = new ObservedPropertyObjectPU({
             "id": -1,
@@ -329,8 +329,8 @@ export class PopupComponent extends ViewPU {
         if (k29.beforeScreenStatus !== undefined) {
             this.beforeScreenStatus = k29.beforeScreenStatus;
         }
-        if (k29.currentScreenStatus !== undefined) {
-            this.currentScreenStatus = k29.currentScreenStatus;
+        if (k29.screenChanged !== undefined) {
+            this.screenChanged = k29.screenChanged;
         }
         if (k29.applySizeOptions !== undefined) {
             this.applySizeOptions = k29.applySizeOptions;
@@ -373,7 +373,7 @@ export class PopupComponent extends ViewPU {
         this.__buttonHeight.purgeDependencyOnElmtId(i29);
         this.__messageMaxWeight.purgeDependencyOnElmtId(i29);
         this.__beforeScreenStatus.purgeDependencyOnElmtId(i29);
-        this.__currentScreenStatus.purgeDependencyOnElmtId(i29);
+        this.__screenChanged.purgeDependencyOnElmtId(i29);
         this.__applySizeOptions.purgeDependencyOnElmtId(i29);
         this.__closeButtonBackgroundColor.purgeDependencyOnElmtId(i29);
         this.__firstButtonBackgroundColor.purgeDependencyOnElmtId(i29);
@@ -393,7 +393,7 @@ export class PopupComponent extends ViewPU {
         this.__buttonHeight.aboutToBeDeleted();
         this.__messageMaxWeight.aboutToBeDeleted();
         this.__beforeScreenStatus.aboutToBeDeleted();
-        this.__currentScreenStatus.aboutToBeDeleted();
+        this.__screenChanged.aboutToBeDeleted();
         this.__applySizeOptions.aboutToBeDeleted();
         this.__closeButtonBackgroundColor.aboutToBeDeleted();
         this.__firstButtonBackgroundColor.aboutToBeDeleted();
@@ -491,12 +491,12 @@ export class PopupComponent extends ViewPU {
         this.__beforeScreenStatus.set(x28);
     }
 
-    get currentScreenStatus() {
-        return this.__currentScreenStatus.get();
+    get screenChanged() {
+        return this.__screenChanged.get();
     }
 
-    set currentScreenStatus(w28) {
-        this.__currentScreenStatus.set(w28);
+    set screenChanged(w28) {
+        this.__screenChanged.set(w28);
     }
 
     get applySizeOptions() {
@@ -771,7 +771,14 @@ export class PopupComponent extends ViewPU {
 
     aboutToAppear() {
         this.listener.on("change", (l28) => {
-            this.currentScreenStatus = l28.matches;
+            if (l28.matches !== this.beforeScreenStatus) {
+                this.applySizeOptions = this.getApplyMaxSize();
+                this.beforeScreenStatus = l28.matches;
+                this.screenChanged = true;
+            } 
+            else {
+                this.screenChanged = false;
+            }
         });
     }
 
@@ -781,9 +788,7 @@ export class PopupComponent extends ViewPU {
 
     getScrollMaxHeight() {
         let j28 = undefined;
-        if (this.currentScreenStatus !== this.beforeScreenStatus) {
-            this.applySizeOptions = this.getApplyMaxSize();
-            this.beforeScreenStatus = this.currentScreenStatus;
+        if (this.screenChanged) {
             return j28;
         }
         j28 = this.applyHeight;
