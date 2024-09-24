@@ -20,12 +20,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-void checkNegativeBorderRadius(std::optional<Dimension>& radius, const float defaultHeight)
+void checkNegativeBorderRadius(std::optional<Dimension>& radius, const float defaultBorderRadius)
 {
-    int defaultDiv = 2;
     // Change the borderRadius size of a negative number to the default.
     if ((radius.has_value()) && LessNotEqual(radius.value().ConvertToPx(), 0.0)) {
-        radius = Dimension(defaultHeight / defaultDiv);
+        radius = Dimension(defaultBorderRadius);
     }
 }
 }
@@ -213,13 +212,13 @@ void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
         auto normalRadius = buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty(Dimension()));
         renderContext->UpdateBorderRadius(normalRadius);
     } else if (buttonType == ButtonType::ROUNDED_RECTANGLE) {
-        auto defaultHeight = GetDefaultHeight(layoutWrapper);
+        auto defaultBorderRadius = GetDefaultBorderRadius(layoutWrapper);
         auto roundedRectRadius =
-            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty(Dimension(defaultHeight / 2)));
-        checkNegativeBorderRadius(roundedRectRadius.radiusTopLeft, defaultHeight);
-        checkNegativeBorderRadius(roundedRectRadius.radiusTopRight, defaultHeight);
-        checkNegativeBorderRadius(roundedRectRadius.radiusBottomLeft, defaultHeight);
-        checkNegativeBorderRadius(roundedRectRadius.radiusBottomRight, defaultHeight);
+            buttonLayoutProperty->GetBorderRadiusValue(BorderRadiusProperty(Dimension(defaultBorderRadius)));
+        checkNegativeBorderRadius(roundedRectRadius.radiusTopLeft, defaultBorderRadius);
+        checkNegativeBorderRadius(roundedRectRadius.radiusTopRight, defaultBorderRadius);
+        checkNegativeBorderRadius(roundedRectRadius.radiusBottomLeft, defaultBorderRadius);
+        checkNegativeBorderRadius(roundedRectRadius.radiusBottomRight, defaultBorderRadius);
         renderContext->UpdateBorderRadius(roundedRectRadius);
     }
 }
@@ -345,6 +344,20 @@ float ButtonLayoutAlgorithm::GetDefaultHeight(LayoutWrapper* layoutWrapper)
     }
     ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
     return static_cast<float>(buttonTheme->GetHeight(controlSize).ConvertToPx());
+}
+
+float ButtonLayoutAlgorithm::GetDefaultBorderRadius(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto* context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, 0.0f);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, 0.0f);
+    ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+    return static_cast<float>(buttonTheme->GetBorderRadius(controlSize).ConvertToPx());
 }
 
 void ButtonLayoutAlgorithm::MarkNeedFlushMouseEvent(LayoutWrapper* layoutWrapper)

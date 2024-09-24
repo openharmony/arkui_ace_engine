@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLE = 2.0f;
+constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 }
 
 bool RichEditorSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -387,11 +388,13 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
     isHandleMoving_ = false;
-    if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
-        pattern->ResetSelection();
-    }
-    if (reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
-        pattern->ResetSelection();
+    auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus();
+    auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;
+    auto isHoldByOther = reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER;
+    needResetSelection = needResetSelection || isBackPressed || isHoldByOther;
+    IF_TRUE(needResetSelection, pattern->ResetSelection());
+    IF_TRUE(isHoldByOther, pattern->CloseSelectOverlay());
+    if (isBackPressed) {
         if (!pattern->IsEditing() && pattern->HasFocus()) {
             FocusHub::LostFocusToViewRoot();
         }
@@ -604,6 +607,27 @@ float RichEditorSelectOverlay::GetHandleHotZoneRadius()
     CHECK_NULL_RETURN(theme, hotZoneRadius);
     hotZoneRadius = theme->GetHandleHotZoneRadius().ConvertToPx();
     return hotZoneRadius;
+}
+
+void RichEditorSelectOverlay::OnHandleMarkInfoChange(
+    std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
+{
+    CHECK_NULL_VOID((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG);
+    CHECK_NULL_VOID(info);
+
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    info->handlerColor = pattern->caretColor_;
+    manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorSelectOverlay::UpdateHandleColor()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
 }
 
 } // namespace OHOS::Ace::NG

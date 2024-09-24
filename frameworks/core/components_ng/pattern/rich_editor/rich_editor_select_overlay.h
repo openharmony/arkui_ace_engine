@@ -51,6 +51,8 @@ public:
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
+    void OnHandleMarkInfoChange(std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
+    void UpdateHandleColor();
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
     bool IsSingleHandleShow();
     void UpdateMenuOffset();

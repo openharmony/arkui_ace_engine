@@ -191,6 +191,9 @@ void JSNavigationUtils::ParseTitleBarOptions(
     }
 
     if (info.Length() > 1) {
+        if (!info[1]->IsObject()) {
+            return;
+        }
         ParseBackgroundOptions(info[1], options.bgOptions);
         ParseBarOptions(info[1], options.brOptions);
         ParseTextOptions(info, info[1], options.textOptions);

@@ -33,6 +33,8 @@ public:
     static std::string GetDotIndicatorStyle(const std::shared_ptr<SwiperParameters>& params);
     static std::string GetDigitIndicatorStyle(const std::shared_ptr<SwiperDigitalParameters>& params);
 
+    static float CalculateFriction(float gamma);
+
 private:
     static void DumpInfoAddPositionDesc(SwiperPattern& swiper);
     static void DumpInfoAddGestureDesc(SwiperPattern& swiper);

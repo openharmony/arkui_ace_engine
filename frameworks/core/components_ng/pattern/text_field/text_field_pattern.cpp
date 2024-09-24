@@ -140,7 +140,7 @@ constexpr float TIME_UNIT = 1000.0f;
 constexpr float MAX_DRAG_SCROLL_SPEED = 2400.0f;
 constexpr Dimension AUTO_SCROLL_HOT_ZONE_HEIGHT = 58.0_vp;
 constexpr Dimension AUTO_SCROLL_HOT_ZONE_WIDTH = 26.0_vp;
-constexpr float AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION = 0.0f;
+constexpr float AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION = 80.0f;
 constexpr Dimension AUTO_SCROLL_HOT_AREA_LONGPRESS_DISTANCE = 5.0_vp;
 
 static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
@@ -570,6 +570,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     SetAccessibilityClearAction();
     SetAccessibilityPasswordIconAction();
+    SetAccessibilityUnitAction();
     return true;
 }
 
@@ -581,6 +582,7 @@ void TextFieldPattern::SetAccessibilityPasswordIconAction()
         auto node = passwordArea->GetFrameNode();
         CHECK_NULL_VOID(node);
         auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+        textAccessibilityProperty->SetAccessibilityLevel("yes");
         CHECK_NULL_VOID(textAccessibilityProperty);
         textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
     }
@@ -594,6 +596,7 @@ void TextFieldPattern::SetAccessibilityClearAction()
             auto stackNode = cleanNodeResponseArea->GetFrameNode();
             CHECK_NULL_VOID(stackNode);
             auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
+            textAccessibilityProperty->SetAccessibilityLevel("yes");
             CHECK_NULL_VOID(textAccessibilityProperty);
             auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
@@ -602,6 +605,17 @@ void TextFieldPattern::SetAccessibilityClearAction()
                               (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
             textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelImageText() : "");
         }
+    }
+}
+
+void TextFieldPattern::SetAccessibilityUnitAction()
+{
+    if (unitNode_ && responseArea_) {
+        auto unitNode = AceType::DynamicCast<FrameNode>(unitNode_);
+        CHECK_NULL_VOID(unitNode);
+        auto unitAccessibilityProperty = unitNode->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(unitAccessibilityProperty);
+        unitAccessibilityProperty->SetAccessibilityLevel("yes");
     }
 }
 
@@ -621,7 +635,10 @@ void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
     if (eventHub->GetOnContentSizeChange()) {
         auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
-        pipeline->AddAfterLayoutTask([textRect, eventHub]() {
+        auto weak = WeakClaim(eventHub.GetRawPtr());
+        pipeline->AddAfterLayoutTask([textRect, weak]() {
+            auto eventHub = weak.Upgrade();
+            CHECK_NULL_VOID(eventHub);
             eventHub->FireOnContentSizeChange(std::max(0.0f, textRect.Width()), textRect.Height());
         });
     }
@@ -1726,7 +1743,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
         if (SelectOverlayIsOn() && !moveCaretState_.isTouchCaret) {
             return;
         }
-        if (!IsUsingMouse()) {
+        if (!IsUsingMouse() && HasFocus()) {
             HandleTouchMove(touchInfo.value());
         }
     } else if (touchType == TouchType::CANCEL) {
@@ -1764,7 +1781,11 @@ void TextFieldPattern::HandleTouchUp()
     if (moveCaretState_.isMoveCaret) {
         moveCaretState_.isMoveCaret = false;
         StopContentScroll();
-        StartTwinkling();
+        if (HasFocus()) {
+            StartTwinkling();
+        } else {
+            StopTwinkling();
+        }
     }
     if (isMousePressed_) {
         isMousePressed_ = false;
@@ -6604,6 +6625,11 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void TextFieldPattern::SetAccessibilityAction()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityGroup(true);
     SetAccessibilityActionOverlayAndSelection();
     SetAccessibilityActionGetAndSetCaretPosition();
     SetAccessibilityScrollAction();
@@ -8379,6 +8405,11 @@ bool TextFieldPattern::InsertOrDeleteSpace(int32_t index)
 
 bool TextFieldPattern::IsShowAIWrite()
 {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
+
     auto textFieldTheme = GetTheme();
     CHECK_NULL_RETURN(textFieldTheme, false);
     auto bundleName = textFieldTheme->GetAIWriteBundleName();

@@ -184,14 +184,14 @@ export const defaultTheme = {
         normalBorderRadius: {
             "id": -1,
             "type": 10002,
-            params: ['sys.float.ohos_id_corner_radius_tips_instant_tip'],
+            params: ['sys.float.chip_border_radius_normal'],
             "bundleName": "__harDefaultBundleName__",
             "moduleName": "__harDefaultModuleName__"
         },
         smallBorderRadius: {
             "id": -1,
             "type": 10002,
-            params: ['sys.float.ohos_id_corner_radius_piece'],
+            params: ['sys.float.chip_border_radius_small'],
             "bundleName": "__harDefaultBundleName__",
             "moduleName": "__harDefaultModuleName__"
         },

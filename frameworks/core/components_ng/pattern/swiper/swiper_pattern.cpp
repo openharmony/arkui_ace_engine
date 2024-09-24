@@ -50,7 +50,6 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -84,16 +83,6 @@ constexpr char APP_TABS_FLING[] = "APP_TABS_FLING";
 constexpr char APP_TABS_SCROLL[] = "APP_TABS_SCROLL";
 constexpr char APP_TABS_NO_ANIMATION_SWITCH[] = "APP_TABS_NO_ANIMATION_SWITCH";
 constexpr char APP_TABS_FRAME_ANIMATION[] = "APP_TABS_FRAME_ANIMATION";
-
-// TODO define as common method
-float CalculateFriction(float gamma)
-{
-    constexpr float SCROLL_RATIO = 0.72f;
-    if (GreatOrEqual(gamma, 1.0)) {
-        gamma = 1.0;
-    }
-    return SCROLL_RATIO * static_cast<float>(std::pow(1.0 - gamma, SQUARE));
-}
 
 } // namespace
 
@@ -158,7 +147,9 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetCurrentIndex(currentIndex_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     algo->SetContentMainSize(contentMainSize_);
-    algo->SetCurrentDelta(currentDelta_);
+    if (!usePropertyAnimation_) {
+        algo->SetCurrentDelta(currentDelta_);
+    }
     algo->SetItemsPosition(itemPosition_);
     if (IsOutOfBoundary() && !IsLoop()) {
         algo->SetOverScrollFeature();
@@ -669,6 +660,9 @@ void SwiperPattern::InitSurfaceChangedCallback()
 bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub)
 {
     for (const auto& item : itemPosition_) {
+        if (!item.second.node) {
+            continue;
+        }
         auto focusHub = item.second.node->GetFirstFocusHubChild();
         if (focusHub == targetFocusHub) {
             return true;
@@ -2403,6 +2397,7 @@ bool SwiperPattern::SpringOverScroll(float offset)
 {
     bool outOfBounds = IsOutOfBoundary(offset);
     if (!outOfBounds) {
+        springOffset_ = 0.0f;
         return false;
     }
     offset = IsHorizontalAndRightToLeft() ? -offset : offset;
@@ -2411,12 +2406,25 @@ bool SwiperPattern::SpringOverScroll(float offset)
     if (LessOrEqual(visibleSize, 0.0)) {
         return true;
     }
-    auto friction = currentIndexOffset_ > 0
-                        ? CalculateFriction(itemPosition_.begin()->second.startPos / visibleSize)
-                        : CalculateFriction((visibleSize - itemPosition_.rbegin()->second.endPos) / visibleSize);
-
-    currentDelta_ = currentDelta_ - friction * offset;
-    currentIndexOffset_ += friction * offset;
+    auto currentRealOffset = springOffset_ * SwiperHelper::CalculateFriction(std::abs(springOffset_ / visibleSize));
+    auto delta = 0.0f;
+    if (IsOutOfBoundary()) {
+        springOffset_ += offset;
+    } else {
+        if (offset > 0) {
+            springOffset_ = itemPosition_.begin()->second.startPos + offset;
+        } else {
+            springOffset_ = itemPosition_.rbegin()->second.endPos + offset - visibleSize;
+        }
+        delta = offset - springOffset_;
+    }
+    if (std::abs(springOffset_) > visibleSize) {
+        springOffset_ = springOffset_ > 0 ? visibleSize : -visibleSize;
+    }
+    auto realOffset = springOffset_ * SwiperHelper::CalculateFriction(std::abs(springOffset_ / visibleSize));
+    delta += (realOffset - currentRealOffset);
+    currentDelta_ -= delta;
+    currentIndexOffset_ += delta;
     AnimationCallbackInfo callbackInfo;
     callbackInfo.currentOffset =
         GetCustomPropertyOffset() + Dimension(currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
@@ -2426,7 +2434,7 @@ bool SwiperPattern::SpringOverScroll(float offset)
     }
 
     FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
-    HandleSwiperCustomAnimation(friction * offset);
+    HandleSwiperCustomAnimation(delta);
     MarkDirtyNodeSelf();
     return true;
 }
@@ -2770,7 +2778,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
     PointF dragPoint(
         static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
-    NGGestureRecognizer::Transform(dragPoint, GetHost(), true);
+    NGGestureRecognizer::Transform(dragPoint, GetHost(), true, info.GetIsPostEventResult(), info.GetPostEventNodeId());
     if (IsOutOfHotRegion(dragPoint)) {
         isTouchPad_ = false;
         return;
@@ -3549,6 +3557,42 @@ void SwiperPattern::OnSpringAnimationFinish()
     OnSpringAndFadeAnimationFinish();
 }
 
+float SwiperPattern::EstimateSpringOffset(float realOffset)
+{
+    float springOffset = 0.0f;
+    if (GetEdgeEffect() != EdgeEffect::SPRING || !IsOutOfBoundary() || NearEqual(realOffset, 0.0f)) {
+        return springOffset;
+    }
+    auto visibleSize = CalculateVisibleSize();
+    if (LessOrEqual(visibleSize, 0.0f)) {
+        return springOffset;
+    }
+    constexpr float MIN_FRICTION = 0.419f;
+    auto absRealOffset = std::abs(realOffset);
+    auto start = absRealOffset;
+    auto end = std::min(visibleSize, absRealOffset / MIN_FRICTION);
+    while (LessNotEqual(start, end)) {
+        constexpr float factor = 0.5f;
+        springOffset = (start + end) * factor;
+        auto estimate = springOffset * SwiperHelper::CalculateFriction(springOffset / visibleSize);
+        if (NearEqual(estimate, absRealOffset)) {
+            break;
+        }
+        if (estimate < absRealOffset) {
+            start = springOffset;
+        } else {
+            end = springOffset;
+        }
+    }
+    if (springOffset > 0 && realOffset < 0) {
+        springOffset = -springOffset;
+    }
+    if (NearZero(springOffset)) {
+        springOffset = 0.0f;
+    }
+    return springOffset;
+}
+
 void SwiperPattern::OnSpringAndFadeAnimationFinish()
 {
     auto itemInfoInVisibleArea = std::make_pair(0, SwiperItemInfo {});
@@ -3571,6 +3615,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     }
     FireAnimationEndEvent(GetLoopIndex(currentIndex_), info);
     currentIndexOffset_ = indexStartPos;
+    springOffset_ = EstimateSpringOffset(currentIndexOffset_);
     UpdateItemRenderGroup(false);
     NotifyParentScrollEnd();
 
@@ -3650,14 +3695,12 @@ void SwiperPattern::CreateSpringProperty()
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
             auto positionDelta = static_cast<float>(position) - swiper->currentIndexOffset_;
-            if (!swiper->isTouchDown_) {
-                if (swiper->IsHorizontalAndRightToLeft()) {
-                    positionDelta = -positionDelta;
-                }
-                swiper->UpdateCurrentOffset(positionDelta);
-                if (LessNotEqual(std::abs(positionDelta), 1) && !NearZero(positionDelta)) {
-                    AceAsyncTraceBeginCommercial(0, TRAILING_ANIMATION);
-                }
+            if (swiper->IsHorizontalAndRightToLeft()) {
+                positionDelta = -positionDelta;
+            }
+            swiper->UpdateCurrentOffset(positionDelta);
+            if (LessNotEqual(std::abs(positionDelta), 1) && !NearZero(positionDelta)) {
+                AceAsyncTraceBeginCommercial(0, TRAILING_ANIMATION);
             }
         },
         PropertyUnit::PIXEL_POSITION);
@@ -3695,7 +3738,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         option,
         [weak = AceType::WeakClaim(this), dragVelocity, host, delta]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation");
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation with offset:%{public}f", delta);
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             ACE_SCOPED_TRACE_COMMERCIAL(
@@ -4499,13 +4542,8 @@ void SwiperPattern::SetLazyLoadIsLoop() const
     auto targetNode = FindLazyForEachNode(host);
     if (targetNode.has_value()) {
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
-        if (lazyForEachNode) {
-            lazyForEachNode->SetIsLoop(IsLoop());
-        }
-        auto repeatVirtualNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
-        if (repeatVirtualNode) {
-            repeatVirtualNode->SetIsLoop(IsLoop());
-        }
+        CHECK_NULL_VOID(lazyForEachNode);
+        lazyForEachNode->SetIsLoop(IsLoop());
     }
 }
 
@@ -5394,6 +5432,7 @@ void SwiperPattern::UpdateSwiperPanEvent(bool disableSwipe)
     if (!disableSwipe) {
         InitPanEvent(gestureHub);
     } else if (panEvent_) {
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Remove pan event when disable swipe.");
         gestureHub->RemovePanEvent(panEvent_);
         panEvent_.Reset();
         if (isDragging_) {
@@ -5805,9 +5844,6 @@ void SwiperPattern::RemoveOnHiddenChange()
 std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode) const
 {
     if (AceType::DynamicCast<LazyForEachNode>(baseNode)) {
-        return baseNode;
-    }
-    if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
         return baseNode;
     }
     if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {

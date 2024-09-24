@@ -503,27 +503,23 @@ TextMetrics CanvasRenderingContext2DModelImpl::GetMeasureTextMetrics(const Paint
 }
 
 // All interfaces that only the 'CanvasRenderingContext2D' has.
-void CanvasRenderingContext2DModelImpl::GetWidth(RefPtr<AceType>& canvasPattern, double& width)
+void CanvasRenderingContext2DModelImpl::GetWidth(double& width)
 {
-    auto pool = AceType::DynamicCast<CanvasTaskPool>(canvasPattern);
-    CHECK_NULL_VOID(pool);
-    width = pool->GetWidth();
+    CHECK_NULL_VOID(pattern_);
+    width = pattern_->GetWidth();
 }
 
-void CanvasRenderingContext2DModelImpl::GetHeight(RefPtr<AceType>& canvasPattern, double& height)
+void CanvasRenderingContext2DModelImpl::GetHeight(double& height)
 {
-    auto pool = AceType::DynamicCast<CanvasTaskPool>(canvasPattern);
-    CHECK_NULL_VOID(pool);
-    height = pool->GetHeight();
+    CHECK_NULL_VOID(pattern_);
+    height = pattern_->GetHeight();
 }
 
-void CanvasRenderingContext2DModelImpl::SetTransferFromImageBitmap(
-    RefPtr<AceType>& canvasPattern, RefPtr<AceType> offscreenCPattern)
+void CanvasRenderingContext2DModelImpl::SetTransferFromImageBitmap(RefPtr<AceType> offscreenCPattern)
 {
-    auto pool = AceType::DynamicCast<CanvasTaskPool>(canvasPattern);
-    CHECK_NULL_VOID(pool);
+    CHECK_NULL_VOID(pattern_);
     auto offscreenCanvas = AceType::DynamicCast<OffscreenCanvas>(offscreenCPattern);
     CHECK_NULL_VOID(offscreenCanvas);
-    pool->TransferFromImageBitmap(offscreenCanvas);
+    pattern_->TransferFromImageBitmap(offscreenCanvas);
 }
 } // namespace OHOS::Ace::Framework

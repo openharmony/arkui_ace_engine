@@ -452,6 +452,16 @@ public:
         return menuParam_;
     }
 
+    void SetIsShowFromUser(bool isShow)
+    {
+        isShowFromUser_ = isShow;
+    }
+
+    bool GetIsShowFromUser() const
+    {
+        return isShowFromUser_;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -509,6 +519,7 @@ private:
     float hoverImageToPreviewRate_ = -1.0;
     float hoverImageToPreviewScale_ = -1.0;
     MenuParam menuParam_;
+    bool isShowFromUser_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

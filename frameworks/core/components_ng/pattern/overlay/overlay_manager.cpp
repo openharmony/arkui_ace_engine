@@ -143,6 +143,8 @@ constexpr int32_t UIEXTNODE_ANGLE_90 = 90;
 constexpr int32_t UIEXTNODE_ANGLE_180 = 180;
 constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
+constexpr double DISTANCE_THRESHOLD = 20.0;
+
 RefPtr<FrameNode> GetLastPage()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -1068,6 +1070,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
         if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
             SetPreviewFirstShow(menu);
         }
+        SetPatternFirstShow(menu);
         return;
     }
     AnimationOption option;
@@ -1381,6 +1384,13 @@ void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::functi
         callback(callbackToastId);
     }
     OpenToastAnimation(toastNode, toastInfo.duration);
+    if (toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast DEFAULT");
+    } else if (toastInfo.showMode == NG::ToastShowMode::TOP_MOST) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast TOP_MOST");
+    } else if (toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast SYSTEM_TOP_MOST");
+    }
 }
 
 void OverlayManager::CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback)
@@ -3816,7 +3826,9 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     const NG::ContentCoverParam& contentCoverParam, int32_t targetId, std::optional<ModalTransition> modalTransition)
 {
     // builder content
-    auto builder = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+    auto buildNode = buildNodeFunc();
+    CHECK_NULL_VOID(buildNode);
+    auto builder = AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
     CHECK_NULL_VOID(builder);
     builder->GetRenderContext()->SetIsModalRootNode(true);
 
@@ -4171,7 +4183,7 @@ void OverlayManager::InitSheetMask(
             });
         auto maskNodeId = maskNode->GetId();
         sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
-        eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
+        eventConfirmHub->AddClickEvent(sheetMaskClickEvent, DISTANCE_THRESHOLD);
         if (!sheetStyle.interactive.has_value()) {
             if (sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType() == SheetType::SHEET_POPUP) {
                 maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
@@ -4883,7 +4895,7 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
                     sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
                 });
             sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
-            eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
+            eventConfirmHub->AddClickEvent(sheetMaskClickEvent, DISTANCE_THRESHOLD);
             return;
         }
 

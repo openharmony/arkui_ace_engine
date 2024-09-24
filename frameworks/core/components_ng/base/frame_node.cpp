@@ -74,6 +74,7 @@ constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
 constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
+constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -615,6 +616,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     }
     paintProperty->CleanDirty();
     CHECK_NULL_VOID(pipeline);
+    pipeline->FlushModifier();
     pipeline->FlushMessages();
     node->SetActive(false);
 }
@@ -3117,7 +3119,7 @@ OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
     CHECK_NULL_RETURN(context, OffsetF());
     auto rect = context->GetPaintRectWithoutTransform();
     OffsetF offset;
-    if (fromBottom == false) {
+    if (!fromBottom) {
         offset = rect.GetOffset();
     } else {
         OffsetF offsetBottom(rect.GetX() + rect.Width(), rect.GetY() + rect.Height());
@@ -5735,6 +5737,57 @@ void FrameNode::ResetPredictNodes()
         if (frameNode && frameNode->isLayoutDirtyMarked_) {
             frameNode->isLayoutDirtyMarked_ = false;
         }
+    }
+}
+
+void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    bool result = func();
+    if (isCNode_) {
+        return;
+    }
+    if (result) {
+        customPropertyMap_[UPDATE_FLAG_KEY] = true;
+    }
+    if (!getCustomProperty_) {
+        getCustomProperty_ = getFunc;
+    }
+}
+
+std::string FrameNode::GetJSCustomProperty(const std::string& key)
+{
+    if (getCustomProperty_) {
+        return getCustomProperty_(key);
+    }
+    return nullptr;
+}
+
+std::string FrameNode::GetCapiCustomProperty(const std::string& key)
+{
+    if (!isCNode_) {
+        return std::string();
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        return customPropertyMap_[key];
+    }
+    return std::string();
+}
+
+void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    customPropertyMap_[key] = value;
+}
+
+void FrameNode::RemoveCustomProperty(const std::string& key)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        customPropertyMap_.erase(iter);
     }
 }
 } // namespace OHOS::Ace::NG

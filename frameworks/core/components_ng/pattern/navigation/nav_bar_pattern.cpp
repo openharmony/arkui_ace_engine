@@ -223,7 +223,9 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
         }
         titleBarNode->SetMenu(navBarNode->GetMenu());
         titleBarNode->AddChild(titleBarNode->GetMenu());
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
     } else {
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
         auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
         CHECK_NULL_VOID(navBarPattern);
         auto titleBarMenuItems = navBarPattern->GetTitleBarMenuItems();
@@ -538,7 +540,7 @@ bool NavBarPattern::CanCoordScrollUp(float offset) const
     CHECK_NULL_RETURN(titleNode, false);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, false);
-    return Negative(offset) && titlePattern->IsCurrentMaxTitle();
+    return Negative(offset) && !titlePattern->IsCurrentMinTitle();
 }
 
 Dimension NavBarPattern::GetTitleBarHeightBeforeMeasure()
@@ -560,5 +562,16 @@ Dimension NavBarPattern::GetTitleBarHeightBeforeMeasure()
         return SINGLE_LINE_TITLEBAR_HEIGHT;
     }
     return FULL_SINGLE_LINE_TITLEBAR_HEIGHT;
+}
+
+float NavBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, 0.f);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleBarNode, 0.f);
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, 0.f);
+    return titlePattern->GetTitleBarHeightLessThanMaxBarHeight();
 }
 } // namespace OHOS::Ace::NG

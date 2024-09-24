@@ -43,7 +43,7 @@ void TextModelNG::Create(const std::string& content)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
     // set draggable for framenode
     if (frameNode->IsFirstBuilding()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto draggable = pipeline->GetDraggable<TextTheme>();
         frameNode->SetDraggable(draggable);

@@ -732,7 +732,7 @@ void NavigationPattern::CheckTopNavPathChange(
             currentProxy_->SetIsSuccess(false);
         }
         hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_HIDE);
-        NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true, true);
+        NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterLayoutTask([weakPattern = WeakClaim(this)]() {
@@ -742,7 +742,7 @@ void NavigationPattern::CheckTopNavPathChange(
             CHECK_NULL_VOID(hostNode);
             hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_HIDE);
             hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_DISAPPEAR);
-            pattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true, true);
+            pattern->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true);
             hostNode->RemoveDialogDestination();
         });
         navigationStack_->ClearRecoveryList();
@@ -756,8 +756,6 @@ void NavigationPattern::CheckTopNavPathChange(
         const int32_t replaceAnimation = 2;
         navigationStack_->UpdateReplaceValue(replaceAnimation);
     }
-    auto contentNode = hostNode->GetContentNode();
-    CHECK_NULL_VOID(contentNode);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     // close the text selection menu before transition.
@@ -871,7 +869,7 @@ int32_t NavigationPattern::FireNavDestinationStateChange(NavDestinationLifecycle
     auto errIndex = static_cast<int32_t>(navDestinationNodes.size());
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, errIndex);
-    NotifyDialogChange(lifecycle, false, true);
+    NotifyDialogChange(lifecycle, true);
     return hostNode->GetLastStandardIndex();
 }
 
@@ -1053,8 +1051,6 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     CHECK_NULL_VOID(navigationNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
 
     // replace
     auto replaceVal = navigationStack_->GetReplaceValue();
@@ -1136,8 +1132,6 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(navigationNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto layoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetHideNavBarValue(false) && (!newTopNavDestination || !preTopNavDestination)) {
@@ -1150,8 +1144,6 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
                 preTopNavDestination->GetContentNode()->Clean();
             }
             parent->RemoveChild(preTopNavDestination);
-            auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
-            CHECK_NULL_VOID(preTopNavDestinationPattern);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         navigationNode->RemoveDialogDestination();
@@ -1736,8 +1728,7 @@ void NavigationPattern::AddDividerHotZoneRect()
     dividerGestureHub->SetResponseRegion(responseRegion);
 }
 
-void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged,
-    bool isFromStandardIndex)
+void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isFromStandardIndex)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     const auto& navDestinationNodes = navigationStack_->GetAllNavDestinationNodes();
@@ -2326,7 +2317,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     auto navigationManager = pipeline->GetNavigationManager();
     navigationManager->FireNavigationUpdateCallback();
     if (topDestination) {
-        NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, false, true);
+        NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true);
     }
     bool isNotNeedAnimation = !isAnimated;
 #if defined(ENABLE_NAV_SPLIT_MODE)
@@ -2496,10 +2487,10 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
         pipelineContext->AddAfterLayoutTask([weakNavigation = WeakClaim(this)]() {
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
-            navigation->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, false, true);
+            navigation->NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true);
         });
     } else {
-        NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, false, true);
+        NotifyDialogChange(NavDestinationLifecycle::ON_SHOW, true);
     }
     FireInterceptionEvent(false, navigationStack_->GetTopNavPath());
 }
@@ -2769,6 +2760,10 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
         if (isPopPage) {
             navigationNode->StartDialogtransition(preTopNavDestination, newTopNavDestination, false);
         } else {
+            if (!preTopNavDestination && navigationMode_ == NavigationMode::SPLIT) {
+                // if split mode and push one dialog at the first time, no animation
+                return;
+            }
             navigationNode->StartDialogtransition(preTopNavDestination, newTopNavDestination, true);
         }
         return;

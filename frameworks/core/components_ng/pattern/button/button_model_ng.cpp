@@ -418,6 +418,7 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+    textLayoutProperty->UpdateAdaptFontSizeStep(Dimension(1.0, DimensionUnit::FP));
 }
 
 void ButtonModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)

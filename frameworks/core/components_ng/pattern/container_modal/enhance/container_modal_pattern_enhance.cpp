@@ -74,8 +74,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(windowManager);
     windowMode_ = windowManager->GetWindowMode();
     isShow = isShow && hasDeco;
-    // set container window show state to RS
-    pipelineContext->SetContainerWindow(isShow);
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -102,13 +100,17 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
     BorderRadiusProperty stageBorderRadius;
-    stageBorderRadius.SetRadius((isFloatingWindow && isShow) ? GetStackNodeRadius() : 0.0_vp);
+    auto contentBorderRadius = (isFloatingWindow && isShow) ? GetStackNodeRadius() : 0.0_vp;
+    stageBorderRadius.SetRadius(contentBorderRadius);
     stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
     customTitleLayoutProperty->UpdateVisibility(
         (isShow && customTitleSettedShow_) ? VisibleType::VISIBLE : VisibleType::GONE);
+
+    // set container window show state to RS
+    pipelineContext->SetContainerWindow(isShow, (isFloatingWindow && isShow) ? CONTAINER_OUTER_RADIUS : 0.0_vp);
 
     auto floatingLayoutProperty = floatingTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(floatingLayoutProperty);

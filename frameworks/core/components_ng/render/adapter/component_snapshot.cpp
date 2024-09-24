@@ -274,6 +274,8 @@ void ComponentSnapshot::Create(
         stackNode->AddChild(uiNode);
         node = stackNode;
     }
+    ACE_SCOPED_TRACE("ComponentSnapshot::Create_Tag=%s_Id=%d_Key=%s", node->GetTag().c_str(), node->GetId(),
+        node->GetInspectorId().value_or("").c_str());
     FrameNode::ProcessOffscreenNode(node);
     node->SetActive();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
@@ -294,6 +296,7 @@ void ComponentSnapshot::Create(
                 auto pipeline = node->GetContext();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->FlushUITasks();
+                pipeline->FlushModifier();
                 pipeline->FlushMessages();
             },
             TaskExecutor::TaskType::UI, "ArkUIComponentSnapshotFlushUITasks", PriorityType::VIP);
@@ -333,6 +336,7 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     }
     if (param.options.waitUntilRenderFinished) {
         pipeline->FlushUITasks();
+        pipeline->FlushModifier();
         pipeline->FlushMessages();
     }
     auto rsNode = GetRsNode(node);
@@ -429,6 +433,7 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
 
     ProcessImageNode(node);
     pipeline->FlushUITasks();
+    pipeline->FlushModifier();
     pipeline->FlushMessages();
     int32_t imageCount = 0;
     bool checkImage = CheckImageSuccessfullyLoad(node, imageCount);

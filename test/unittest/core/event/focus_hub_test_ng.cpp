@@ -549,7 +549,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0014, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**
@@ -1241,7 +1244,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent003, TestSize.Level1)
     auto lastFocusNode = focusHub->lastWeakFocusNode_.Upgrade();
     lastFocusNode->currentFocus_ = true;
     lastFocusNode->SetOnKeyEventInternal(onKeyEvent);
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_TRUE(focusHub->OnKeyEvent(keyEvent));
 
     /**
      * @tc.steps7: call the function OnKeyEvent with FocusType::SCOPE.
@@ -1451,7 +1454,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestDisableFocus001, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
     auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
 
     /**

@@ -320,9 +320,8 @@ class SetMapProxyHandler {
                     }
                     return receiver;
                 } : (typeof ret === 'function') ?
-                    // SendableSet can't be bound -> functions not observed
-                    ret.bind(SendableType.isSet(target) ? target : receiver) : 
-                    ret;
+                    // Bind to target ==> functions not observed
+                    ret.bind(target) : ret;
         }
 
         if (target instanceof Map || (this.isMakeObserved_ && SendableType.isMap(target))) {
@@ -351,9 +350,8 @@ class SetMapProxyHandler {
             }
         }
         return (typeof ret === 'function') ? 
-            // SendableMap can't be bound -> functions not observed
-            ret.bind(SendableType.isMap(target) ? target : receiver) : 
-            ret;
+            // Bind to target ==> functions not observed
+            ret.bind(target) : ret;
     }
 
     set(target: any, key: string | symbol, value: any): boolean {

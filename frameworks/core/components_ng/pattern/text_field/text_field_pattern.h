@@ -1685,6 +1685,7 @@ private:
     void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
+    void SetAccessibilityUnitAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();

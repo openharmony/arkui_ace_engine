@@ -915,7 +915,7 @@ HWTEST_F(CustomTestNg, CustomTest020, TestSize.Level1)
      */
     RefPtr<CustomNode> customNode =
         CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
-
+    EXPECT_NE(customNode, nullptr);
     /**
      * @tc.steps: step2. Create frameNode and frameNode2 and Add Child to customNode.
      */
@@ -926,6 +926,8 @@ HWTEST_F(CustomTestNg, CustomTest020, TestSize.Level1)
     auto geo = AceType::MakeRefPtr<GeometryTransition>(TEST_TAG, true, true);
     frameNode2->layoutProperty_->geometryTransition_ = AceType::WeakClaim(AceType::RawPtr(geo));
     customNode->AddChild(frameNode2);
+    EXPECT_NE(frameNode2->layoutProperty_, nullptr);
+    EXPECT_FALSE(customNode->GetChildren().empty());
 }
 
 /**

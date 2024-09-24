@@ -1335,6 +1335,12 @@ void UpdateChildrenOfAccessibilityElementInfo(
         for (const auto& item : node->GetChildren(true)) {
             GetFrameNodeChildren(item, children, commonProperty.pageId);
         }
+
+        auto overlayNode = node->GetOverlayNode();
+        if (overlayNode != nullptr) {
+            GetFrameNodeChildren(overlayNode, children, commonProperty.pageId);
+        }
+
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
         if (uiVirtualNode != nullptr) {
@@ -1439,15 +1445,19 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
 }
 
 namespace {
-    NG::RectF GetFinalRealRect(const RefPtr<NG::FrameNode>& node) 
+    NG::RectF GetFinalRealRect(const RefPtr<NG::FrameNode>& node)
     {
         auto offset = node->GetPositionToWindowWithTransform(false);
         auto offseBottom = node->GetPositionToWindowWithTransform(true);
         return {
             offset.GetX() < offseBottom.GetX() ? offset.GetX() : offseBottom.GetX(),
             offset.GetY() < offseBottom.GetY() ? offset.GetY() : offseBottom.GetY(),
-            offset.GetX() < offseBottom.GetX() ? offseBottom.GetX() - offset.GetX() : offset.GetX() - offseBottom.GetX(),
-            offset.GetY() < offseBottom.GetY() ? offseBottom.GetY() - offset.GetY() : offset.GetY() - offseBottom.GetY()
+            offset.GetX() < offseBottom.GetX()
+                ? offseBottom.GetX() - offset.GetX()
+                : offset.GetX() - offseBottom.GetX(),
+            offset.GetY() < offseBottom.GetY()
+                ? offseBottom.GetY() - offset.GetY()
+                : offset.GetY() - offseBottom.GetY()
             };
     }
 }
@@ -1480,6 +1490,7 @@ void JsAccessibilityManager::UpdateAccessibilityVisible(
     }
     nodeInfo.SetAccessibilityVisible(node->GetAccessibilityVisible());
 }
+
 void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
@@ -1615,6 +1626,11 @@ void GetChildrenFromFrameNode(const RefPtr<NG::FrameNode>& node,
     } else {
         for (const auto& item : node->GetChildren(true)) {
             GetFrameNodeChildren(item, frameNodeChildren, pageId);
+        }
+
+        auto overlayNode = node->GetOverlayNode();
+        if (overlayNode != nullptr) {
+            GetFrameNodeChildren(overlayNode, frameNodeChildren, pageId);
         }
     }
     while (!frameNodeChildren.empty()) {
@@ -1794,7 +1810,17 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode)
 {
     auto gesture = frameNode->GetEventHub<NG::EventHub>()->GetGestureEventHub();
     CHECK_NULL_RETURN(gesture, false);
-    return gesture->ActClick();
+    bool result = gesture->ActClick();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, result);
+    auto accessibilityAction = ACTIONS.find(ACCESSIBILITY_ACTION_CLICK);
+    if (accessibilityAction == ACTIONS.end()) {
+        return result;
+    }
+    AccessibilityActionParam param;
+    param.accessibilityProperty = accessibilityProperty;
+    result |= accessibilityAction->second(param);
+    return result;
 }
 
 bool ActLongClick(RefPtr<NG::FrameNode>& frameNode)
@@ -2813,14 +2839,14 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
     }
 }
 
-bool JsAccessibilityManager::CheckDumpHandleEventParams(const std::vector<std::string>& params) 
+bool JsAccessibilityManager::CheckDumpHandleEventParams(const std::vector<std::string>& params)
 {
     if (params.size() > EVENT_DUMP_PARAM_LENGTH_UPPER + 1) {
         DumpLog::GetInstance().Print("Error: params length is illegal!");
         return false;
     }
     if (params[EVENT_DUMP_ORDER_INDEX] != DUMP_ORDER && params[EVENT_DUMP_ORDER_INDEX] != DUMP_INSPECTOR) {
-        DumpLog::GetInstance().Print("Error: Invalid accessibility dump order!");
+        DumpLog::GetInstance().Print("Error: Unrecognized dump command for accessibility!");
         return false;
     }
     return true;

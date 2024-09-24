@@ -470,7 +470,15 @@ class FrameNode {
   }
 
   getCustomProperty(key: string): Object | undefined {
-    return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
+    if (key === undefined) {
+      return undefined;
+    }
+    let value = __getCustomProperty__(this._nodeId, key);
+    if (value === undefined) {
+      const valueStr = getUINativeModule().frameNode.getCustomPropertyCapiByKey(this.getNodePtr(), key);
+      value = valueStr === undefined ? undefined : valueStr;
+    }
+    return value;
   }
 
   setMeasuredSize(size: Size): void {

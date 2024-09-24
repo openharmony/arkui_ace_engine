@@ -895,7 +895,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 #if defined(PIXEL_MAP_SUPPORTED)
     if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
         ACE_SCOPED_TRACE("drag: handling for custom builder");
-        TAG_LOGI(AceLogTag::ACE_DRAG, "CustomNode exist, get thumbnail.");
         StartDragForCustomBuilder(info, pipeline, frameNode, dragDropInfo, event);
         return;
     }
@@ -1172,10 +1171,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             dragEventActuator_, gatherNodeChildrenInfo);
         DragEventActuator::MountGatherNode(subWindowOverlayManager, frameNode, gatherNode, gatherNodeChildrenInfo);
         DragEventActuator::UpdatePreviewPositionAndScale(
-            imageNode, imageNode->GetOffsetInSubwindow(subWindow->GetRect().GetOffset()));
+            imageNode, imageNode->GetOffsetInSubwindow(subWindow->GetWindowRect().GetOffset()));
         if (textNode) {
             DragEventActuator::UpdatePreviewPositionAndScale(
-                textNode, textNode->GetOffsetInSubwindow(subWindow->GetRect().GetOffset()));
+                textNode, textNode->GetOffsetInSubwindow(subWindow->GetWindowRect().GetOffset()));
         }
         DragEventActuator::MountPixelMap(
             subWindowOverlayManager, eventHub->GetGestureEventHub(), imageNode, textNode, true);
@@ -2134,6 +2133,7 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask(
             [pipeline, info, gestureEventHubPtr, frameNode, dragDropInfo, event]() {
+                TAG_LOGI(AceLogTag::ACE_DRAG, "Get thumbnail finished, start drag.");
                 CHECK_NULL_VOID(gestureEventHubPtr);
                 CHECK_NULL_VOID(frameNode);
                 gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);

@@ -565,6 +565,7 @@ RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
         centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
         centerX = centerX + FOUCS_WIDTH.ConvertToPx();
     }
+
     if (piantRectWidth > columnWidth) {
         if (!GetIsShowInDialog()) {
             piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_INTERVAL.ConvertToPx();
@@ -1089,7 +1090,7 @@ void TextPickerPattern::OnDirectionConfigurationUpdate()
     isNeedUpdateSelectedIndex_ = false;
 }
 
-void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
+void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size, bool isNeedAdaptForAging)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1124,7 +1125,11 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
     auto version10OrLarger = context->GetMinPlatformVersion() > 9;
     pickerContentSize.Constrain(minSize, stackLayoutConstraint->maxSize, version10OrLarger);
 
-    size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
+    if (isNeedAdaptForAging && GetIsShowInDialog()) {
+        size.SetWidth(pickerContentSize.Width());
+    } else {
+        size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
+    }
     size.SetHeight(std::min(pickerContentSize.Height(), size.Height()));
 }
 
@@ -1145,5 +1150,18 @@ void TextPickerPattern::SetCanLoop(bool isLoop)
         CHECK_NULL_VOID(pickerColumnPattern);
         pickerColumnPattern->SetCanLoop(isLoop);
     }
+}
+
+bool TextPickerPattern::NeedAdaptForAging()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale())) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

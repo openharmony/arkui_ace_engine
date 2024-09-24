@@ -374,13 +374,14 @@ void TextPattern::HandleLongPress(GestureEvent& info)
 
 bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)
 {
+    CHECK_NULL_RETURN(urlMouseEventInitialized_, false);
     CHECK_NULL_RETURN(!spans_.empty() && pManager_, false);
     int32_t start = 0;
     for (const auto& item : spans_) {
         if (!item) {
             continue;
         }
-        auto selectedRects = pManager_->GetRects(start, item->position);
+        auto selectedRects = GetSelectedRects(start, item->position);
         for (auto&& rect : selectedRects) {
             if (!rect.IsInRegion(textOffset)) {
                 continue;
@@ -391,7 +392,7 @@ bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)
                 return false;
             }
             auto inter = GetStartAndEnd(start);
-            auto rects = pManager_->GetRects(inter.first, inter.second);
+            auto rects = GetSelectedRects(inter.first, inter.second);
             overlayMod_->SetSelectedForegroundColorAndRects(rects, color.GetValue());
             MarkDirtySelf();
             return true;
@@ -1035,6 +1036,9 @@ void TextPattern::URLOnHover(bool isHover)
 
 void TextPattern::HandleUrlMouseEvent(const MouseInfo& info)
 {
+    if (isMousePressed_) {
+        return;
+    }
     RectF textContentRect = contentRect_;
     textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
     textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
@@ -1375,6 +1379,7 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
 {
     isMousePressed_ = true;
     leftMousePressed_ = true;
+    ShowShadow({ textOffset.GetX(), textOffset.GetY() }, GetUrlPressColor());
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         blockPress_ = true;
         return;
@@ -1392,6 +1397,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     }
     auto oldMouseStatus = mouseStatus_;
     mouseStatus_ = MouseStatus::RELEASED;
+    ShowShadow({ textOffset.GetX(), textOffset.GetY() }, GetUrlHoverColor());
     if (isDoubleClick_) {
         isDoubleClick_ = false;
         isMousePressed_ = false;
@@ -1935,6 +1941,7 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     CHECK_NULL_VOID(pattern);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    isMousePressed_ = false;
     if (status_ == Status::DRAGGING) {
         status_ = Status::NONE;
     }
@@ -1962,6 +1969,7 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    isMousePressed_ = false;
     if (pattern->status_ == Status::DRAGGING) {
         pattern->status_ = Status::NONE;
         pattern->MarkContentChange();
@@ -2945,7 +2953,6 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         auto tag = current.node->GetTag();
         if (spanNode && tag == V2::SYMBOL_SPAN_ETS_TAG && spanNode->GetSpanItem()->GetSymbolUnicode() != 0) {
             spanNode->CleanSpanItemChildren();
-            UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
             textForDisplay_.append("    ");
             dataDetectorAdapter_->textForAI_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
@@ -2989,7 +2996,6 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
 void TextPattern::CollectTextSpanNodes(const RefPtr<SpanNode>& spanNode, bool& isSpanHasClick)
 {
     spanNode->CleanSpanItemChildren();
-    UpdateChildProperty(spanNode);
     spanNode->MountToParagraph();
     textForDisplay_.append(spanNode->GetSpanItem()->content);
     dataDetectorAdapter_->textForAI_.append(spanNode->GetSpanItem()->content);
@@ -3257,7 +3263,9 @@ void TextPattern::DumpScaleInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("-----DumpScaleInfo-----"));
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto fontScale = pipeline->GetFontScale();
     auto fontWeightScale = pipeline->GetFontWeightScale();
@@ -3323,117 +3331,6 @@ void TextPattern::DumpParagraphsInfo()
             auto textStyle = paragraph->GetParagraphStyle();
             auto direction = V2::ConvertTextDirectionToString(textStyle.direction);
             dumpLog.AddDesc(std::string("paragraph: ").append(text).append("; direction:").append(direction));
-        }
-    }
-}
-
-void TextPattern::UpdateChildProperty(const RefPtr<SpanNode>& child) const
-{
-    CHECK_NULL_VOID(child);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textLayoutProp = host->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProp);
-
-    auto inheritPropertyInfo = child->GetInheritPropertyInfo();
-    for (const PropertyInfo& info : inheritPropertyInfo) {
-        switch (info) {
-            case PropertyInfo::FONTSIZE:
-                if (textLayoutProp->HasFontSize()) {
-                    child->UpdateFontSizeWithoutFlushDirty(textLayoutProp->GetFontSize().value());
-                }
-                break;
-            case PropertyInfo::FONTCOLOR:
-                if (textLayoutProp->HasTextColor()) {
-                    child->UpdateTextColorWithoutFlushDirty(textLayoutProp->GetTextColor().value());
-                }
-                break;
-            case PropertyInfo::FONTSTYLE:
-                if (textLayoutProp->HasItalicFontStyle()) {
-                    child->UpdateItalicFontStyleWithoutFlushDirty(textLayoutProp->GetItalicFontStyle().value());
-                }
-                break;
-            case PropertyInfo::FONTWEIGHT:
-                if (textLayoutProp->HasFontWeight()) {
-                    child->UpdateFontWeightWithoutFlushDirty(textLayoutProp->GetFontWeight().value());
-                }
-                break;
-            case PropertyInfo::FONTFAMILY:
-                if (textLayoutProp->HasFontFamily()) {
-                    child->UpdateFontFamilyWithoutFlushDirty(textLayoutProp->GetFontFamily().value());
-                }
-                break;
-            case PropertyInfo::FONTFEATURE:
-                if (textLayoutProp->HasFontFeature()) {
-                    child->UpdateFontFeatureWithoutFlushDirty(textLayoutProp->GetFontFeature().value());
-                }
-                break;
-            case PropertyInfo::TEXTDECORATION:
-                if (textLayoutProp->HasTextDecoration()) {
-                    child->UpdateTextDecorationWithoutFlushDirty(textLayoutProp->GetTextDecoration().value());
-                    if (textLayoutProp->HasTextDecorationColor()) {
-                        child->UpdateTextDecorationColorWithoutFlushDirty(
-                            textLayoutProp->GetTextDecorationColor().value());
-                    }
-                    if (textLayoutProp->HasTextDecorationStyle()) {
-                        child->UpdateTextDecorationStyleWithoutFlushDirty(
-                            textLayoutProp->GetTextDecorationStyle().value());
-                    }
-                }
-                break;
-            case PropertyInfo::TEXTCASE:
-                if (textLayoutProp->HasTextCase()) {
-                    child->UpdateTextCaseWithoutFlushDirty(textLayoutProp->GetTextCase().value());
-                }
-                break;
-            case PropertyInfo::LETTERSPACE:
-                if (textLayoutProp->HasLetterSpacing()) {
-                    child->UpdateLetterSpacingWithoutFlushDirty(textLayoutProp->GetLetterSpacing().value());
-                }
-                break;
-            case PropertyInfo::LINEHEIGHT:
-                if (textLayoutProp->HasLineHeight()) {
-                    child->UpdateLineHeightWithoutFlushDirty(textLayoutProp->GetLineHeight().value());
-                }
-                break;
-            case PropertyInfo::LINESPACING:
-                if (textLayoutProp->HasLineSpacing()) {
-                    child->UpdateLineSpacingWithoutFlushDirty(textLayoutProp->GetLineSpacing().value());
-                }
-                break;
-            case PropertyInfo::TEXTSHADOW:
-                if (textLayoutProp->HasTextShadow()) {
-                    child->UpdateTextShadowWithoutFlushDirty(textLayoutProp->GetTextShadow().value());
-                }
-                break;
-            case PropertyInfo::HALFLEADING:
-                if (textLayoutProp->HasHalfLeading()) {
-                    child->UpdateHalfLeadingWithoutFlushDirty(textLayoutProp->GetHalfLeading().value());
-                }
-                break;
-            case PropertyInfo::MIN_FONT_SCALE:
-                if (textLayoutProp->HasMinFontScale()) {
-                    child->UpdateMinFontScaleWithoutFlushDirty(textLayoutProp->GetMinFontScale().value());
-                }
-                break;
-            case PropertyInfo::MAX_FONT_SCALE:
-                if (textLayoutProp->HasMaxFontScale()) {
-                    child->UpdateMaxFontScaleWithoutFlushDirty(textLayoutProp->GetMaxFontScale().value());
-                }
-                break;
-            case PropertyInfo::VARIABLE_FONT_WEIGHT:
-                if (textLayoutProp->HasVariableFontWeight() && !child->GetHasUserFontWeight()) {
-                    child->UpdateVariableFontWeightWithoutFlushDirty(textLayoutProp->GetVariableFontWeight().value());
-                }
-                break;
-            case PropertyInfo::ENABLE_VARIABLE_FONT_WEIGHT:
-                if (textLayoutProp->HasEnableVariableFontWeight() && !child->GetHasUserFontWeight()) {
-                    child->UpdateEnableVariableFontWeightWithoutFlushDirty(
-                        textLayoutProp->GetEnableVariableFontWeight().value());
-                }
-                break;
-            default:
-                break;
         }
     }
 }

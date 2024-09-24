@@ -1089,6 +1089,18 @@ public:
 
     void OnForegroundColorUpdate(const Color& value);
 
+    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
+    std::string GetJSCustomProperty(const std::string& key);
+    std::string GetCapiCustomProperty(const std::string& key);
+
+    void AddCustomProperty(const std::string& key, const std::string& value);
+    void RemoveCustomProperty(const std::string& key);
+
+    void setIsCNode(bool createByCapi)
+    {
+        isCNode_ = createByCapi;
+    }
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1257,6 +1269,7 @@ private:
     std::set<std::string> allowDrop_;
     const static std::set<std::string> layoutTags_;
     std::function<void()> removeCustomProperties_;
+    std::function<std::string(const std::string& key)> getCustomProperty_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -1326,11 +1339,16 @@ private:
 
     bool isUseTransitionAnimator_ = false;
 
+    bool isCNode_ = false;
+
     RefPtr<FrameNode> overlayNode_;
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
     DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
+
+    std::unordered_map<std::string, std::string> customPropertyMap_;
+    std::mutex mutex_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

@@ -66,11 +66,10 @@ struct TextConfig;
 #endif
 #endif
 
-#define COPY_SPAN_STYLE_IF_PRESENT(sourceNode, targetNode, styleType, propertyInfo) \
+#define COPY_SPAN_STYLE_IF_PRESENT(sourceNode, targetNode, styleType) \
     do {                                                                            \
         if ((sourceNode)->Has##styleType()) {                                       \
             (targetNode)->Update##styleType(*((sourceNode)->Get##styleType()));     \
-            (targetNode)->AddPropertyInfo(propertyInfo);                            \
         }                                                                           \
     } while (false)
 #define CONTENT_MODIFY_LOCK(patternPtr) ContentModifyLock contentModifyLock(patternPtr)
@@ -802,6 +801,7 @@ public:
     void SetCaretColor(const Color& caretColor)
     {
         caretColor_ = caretColor;
+        IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }
 
     Color GetCaretColor();
@@ -973,7 +973,14 @@ protected:
         return pipelineContext->GetTheme<T>();
     }
 
+    std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
+
 private:
+    bool HandleUrlSpanClickEvent(const GestureEvent& info);
+    void HandleUrlSpanForegroundClear();
+    bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
+    Color GetUrlHoverColor();
+    Color GetUrlPressColor();
     friend class RichEditorSelectOverlay;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
@@ -1267,6 +1274,7 @@ private:
     void CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub);
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     void UpdateImagePreviewParam();
+    void UpdateGestureHotZone();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1330,6 +1338,8 @@ private:
     RefPtr<OverlayManager> keyboardOverlay_;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     Offset selectionMenuOffset_;
+    // has urlspan
+    bool hasUrlSpan_ = false;
     // add for scroll
     RectF richTextRect_;
     float scrollOffset_ = 0.0f;

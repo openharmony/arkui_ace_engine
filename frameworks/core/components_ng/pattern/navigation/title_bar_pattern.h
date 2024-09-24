@@ -316,6 +316,8 @@ public:
         InitFoldCreaseRegion();
     }
 
+    float GetTitleBarHeightLessThanMaxBarHeight() const;
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 

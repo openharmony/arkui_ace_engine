@@ -56,6 +56,7 @@ typedef unsigned int ArkUI_Uint32;
 typedef long long ArkUI_Int64;
 typedef float ArkUI_Float32;
 typedef double ArkUI_Float64;
+typedef char* ArkUI_CommonCharPtr;
 typedef const char* ArkUI_CharPtr;
 typedef unsigned long long ArkUI_Uint64;
 
@@ -1244,6 +1245,11 @@ struct ArkUIOptionalBool {
     ArkUI_Bool value;
 };
 
+struct ArkUIOptionalCommonCharPtr {
+    ArkUI_Int32 isSet;
+    ArkUI_CommonCharPtr value;
+};
+
 struct ArkUISwiperIndicator {
     ArkUISwiperIndicatorType type;
     ArkUI_Int32 dimUnit;
@@ -1460,8 +1466,8 @@ struct ArkUINavigationTitlebarOptions {
 };
 
 struct ArkUIBarItem {
-    ArkUIOptionalCharPtr text;
-    ArkUIOptionalCharPtr icon;
+    ArkUIOptionalCommonCharPtr text;
+    ArkUIOptionalCommonCharPtr icon;
     ArkUIOptionalBool isEnable;
 };
 
@@ -1557,7 +1563,8 @@ struct ArkUICommonModifier {
         ArkUI_Uint32 inactiveColorArg);
     void (*resetBackgroundBlurStyle)(ArkUINodeHandle node);
     void (*setBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
-        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
+        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize, ArkUI_Bool isLocalizedBorderWidth,
+        ArkUI_Bool isLocalizedBorderColor, ArkUI_Bool isLocalizedBorderRadius);
     void (*resetBorder)(ArkUINodeHandle node);
     void (*setBackgroundImagePosition)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
         ArkUI_Bool isAlign, ArkUI_Int32 size);
@@ -4743,6 +4750,10 @@ struct ArkUIFrameNodeModifier {
     void (*resetSystemColorModeChangeEvent)(ArkUINodeHandle node);
     ArkUI_Int32 (*setSystemFontStyleChangeEvent)(ArkUINodeHandle node, void* userData, void* onFontStyleChange);
     void (*resetSystemFontStyleChangeEvent)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getCustomPropertyCapiByKey)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*setCustomPropertyModiferByKey)(ArkUINodeHandle node, void* callback, void* getCallback);
+    void (*addCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value);
+    void (*removeCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
 };
 
 struct ArkUINodeContentEvent {

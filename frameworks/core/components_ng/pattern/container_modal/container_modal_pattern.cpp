@@ -76,9 +76,6 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
         isShow = false;
     }
 
-    // set container window show state to RS
-    pipelineContext->SetContainerWindow(isShow);
-
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -111,9 +108,13 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
     BorderRadiusProperty stageBorderRadius;
-    stageBorderRadius.SetRadius(isShow ? GetStackNodeRadius() : 0.0_vp);
+    auto contentBorderRadius = isShow ? GetStackNodeRadius() : 0.0_vp;
+    stageBorderRadius.SetRadius(contentBorderRadius);
     stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
+
+    // set container window show state to RS
+    pipelineContext->SetContainerWindow(isShow, isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
 
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
@@ -671,6 +672,21 @@ void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& r
     auto titleHeight = round(GetCustomTitleHeight().ConvertToPx());
     auto padding = layoutProperty->CreatePaddingAndBorder();
     rect.SetRect(padding.Offset().GetX(), padding.Offset().GetY() + titleHeight, rect.Width() - padding.Width(),
+        rect.Height() - padding.Height() - titleHeight);
+}
+
+void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect, bool isContainerModal)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto titleHeight = round(GetCustomTitleHeight().ConvertToPx());
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    rect.SetRect(
+        padding.Offset().GetX(),
+        isContainerModal ? padding.Offset().GetY() + titleHeight : padding.Offset().GetY(),
+        rect.Width() - padding.Width(),
         rect.Height() - padding.Height() - titleHeight);
 }
 

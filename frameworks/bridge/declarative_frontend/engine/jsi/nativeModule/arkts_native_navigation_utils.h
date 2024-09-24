@@ -31,6 +31,8 @@ public:
         ArkUINavigationTitlebarOptions& options);
     static void ParseAndSendFunctionParam(ArkUIRuntimeCallInfo* runtimeCallInfo, const Local<JSValueRef>& jsValue,
         ParamSendFunction& actionSendFunc, ParamSendFunction& symbolSendFunc);
+private:
+    static void DeepCopyStringValue(char* des, uint32_t desLength, const std::string& src);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_NAVIGATION_UTILS_H

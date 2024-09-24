@@ -475,7 +475,7 @@ public:
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
-    void SetContainerWindow(bool isShow) override;
+    void SetContainerWindow(bool isShow, Dimension contentBorderRadius);
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetCloseButtonStatus(bool isEnabled);
 
@@ -1038,8 +1038,8 @@ private:
 
     std::tuple<float, float, uint64_t> GetAvgPoint(const std::vector<TouchEvent>& events, const bool isScreen);
 
-    TouchEvent GetResampleTouchEvent(
-        const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+    bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
+        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
 
     TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
     

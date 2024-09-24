@@ -266,6 +266,8 @@ void SwiperHelper::DumpAdvanceInfo(SwiperPattern& swiper)
     }
     DumpPanDirection(swiper.panDirection_);
     DumpDirection(swiper.direction_);
+    swiper.IsDisableSwipe() ? DumpLog::GetInstance().AddDesc("disableSwipe:true")
+                            : DumpLog::GetInstance().AddDesc("disableSwipe:false");
 }
 
 void SwiperHelper::DumpInfoAddPositionDesc(SwiperPattern& swiper)
@@ -423,5 +425,19 @@ std::string SwiperHelper::GetDigitIndicatorStyle(const std::shared_ptr<SwiperDig
     jsonValue->Put("selectedFontWeight",
         V2::ConvertWrapFontWeightToStirng(params->selectedFontWeight.value_or(FontWeight::NORMAL)).c_str());
     return jsonValue->ToString();
+}
+
+float SwiperHelper::CalculateFriction(float gamma)
+{
+    if (LessOrEqual(gamma, 0.0f)) {
+        return 1.0f;
+    }
+    if (GreatOrEqual(gamma, 1.0f)) {
+        gamma = 1.0f;
+    }
+    constexpr float scrollRatio = 0.72f;
+    constexpr float coefficient = M_E / (1.0f -  M_E);
+    auto fx = (gamma + coefficient) * (log(M_E - (M_E - 1.0f) * gamma) - 1.0f);
+    return scrollRatio * fx / gamma;
 }
 } // namespace OHOS::Ace::NG

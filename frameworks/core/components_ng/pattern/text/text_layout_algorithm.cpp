@@ -121,7 +121,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         textStyle_ = textStyle;
         BuildParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
-        textStyle_ = textStyle;
         if (!AddPropertiesAndAnimations(textStyle, textLayoutProperty, contentConstraint, layoutWrapper)) {
             return std::nullopt;
         }
@@ -393,7 +392,7 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::stri
     // IsNeedAdaptFontSize
     double maxFontSize = 0.0;
     double minFontSize = 0.0;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     GetAdaptMaxMinFontSize(textStyle, maxFontSize, minFontSize, contentConstraint);
     if (!IsNeedAdaptFontSize(maxFontSize, minFontSize)) {
@@ -674,7 +673,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     paragraphWidth = std::ceil(paragraphWidth);
     paragraph->Layout(paragraphWidth);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     // calculate the content size
     auto height = static_cast<float>(paragraph->GetHeight());
     baselineOffset_ = static_cast<float>(

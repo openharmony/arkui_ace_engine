@@ -1029,7 +1029,6 @@ public:
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
-    virtual void SetContainerWindow(bool isShow) = 0;
 
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.

@@ -100,6 +100,7 @@ const SPECIAL_ICON_SIZE = 0;
 const DEFAULT_ROW_SPACE = 0;
 const SPECICAL_ROW_SPACE = 4;
 const OPERATEITEM_ICONLIKE_SIZE = 24;
+const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
 const OPERATEITEM_ARROW_WIDTH = 12
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
@@ -488,6 +489,7 @@ struct OperateItemStruct {
       .onChange(this.radio?.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
+      .padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE)
       .onFocus(() => {
         this.parentCanFocus = false;
       })
@@ -523,6 +525,7 @@ struct OperateItemStruct {
       .onChange(this.checkBox?.onChange)
       .height(OPERATEITEM_ICONLIKE_SIZE)
       .width(OPERATEITEM_ICONLIKE_SIZE)
+      .padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE)
       .onFocus(() => {
         this.parentCanFocus = false;
       })

@@ -85,6 +85,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
 
     // Determines whether a foreground color is set or inherited.
     UpdateTextColorIfForeground(frameNode, textStyle);
+    textStyle_ = textStyle;
 }
 
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -563,11 +564,18 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
     return true;
 }
 
+TextStyle MultipleParagraphLayoutAlgorithm::InheritParentTextStyle()
+{
+    TextStyle textStyle = textStyle_.value_or(TextStyle());
+    textStyle.ResetTextBaseline();
+    return textStyle;
+}
+
 void MultipleParagraphLayoutAlgorithm::AddSymbolSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
     const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph)
 {
     child->SetIsParentText(frameNode->GetTag() == V2::TEXT_ETS_TAG);
-    child->UpdateSymbolSpanParagraph(frameNode, paragraph);
+    child->UpdateSymbolSpanParagraph(frameNode, InheritParentTextStyle(), paragraph);
     spanTextLength += SYMBOL_SPAN_LENGTH;
     child->length = SYMBOL_SPAN_LENGTH;
     child->position = spanTextLength;
@@ -580,7 +588,7 @@ void MultipleParagraphLayoutAlgorithm::AddTextSpanToParagraph(const RefPtr<SpanI
     child->length = StringUtils::ToWstring(child->content).length();
     spanTextLength += static_cast<int32_t>(child->length);
     child->position = spanTextLength;
-    child->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, PlaceholderStyle(), isMarquee_);
+    child->UpdateParagraph(frameNode, paragraph, InheritParentTextStyle(), PlaceholderStyle(), isMarquee_);
 }
 
 void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem,
@@ -607,15 +615,14 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
     placeholderStyle.paragraphFontSize = Dimension(paragraphFontSize_);
-    placeholderStyle.paragraphTextColor = textStyle_.value_or(TextStyle()).GetTextColor();
     if (NearZero(baselineOffset.Value())) {
         imageSpanItem->placeholderIndex =
-            imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
+            imageSpanItem->UpdateParagraph(frameNode, paragraph, InheritParentTextStyle(), placeholderStyle);
     } else {
         placeholderStyle.baselineOffset = baselineOffset.ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         imageSpanItem->placeholderIndex =
-            imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
+            imageSpanItem->UpdateParagraph(frameNode, paragraph, InheritParentTextStyle(), placeholderStyle);
     }
     currentParagraphPlaceholderCount_++;
     imageSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
@@ -643,7 +650,7 @@ void MultipleParagraphLayoutAlgorithm::AddPlaceHolderToParagraph(RefPtr<Placehol
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
     placeholderStyle.verticalAlign = VerticalAlign::NONE;
     placeholderSpanItem->placeholderIndex =
-        placeholderSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
+        placeholderSpanItem->UpdateParagraph(frameNode, paragraph, InheritParentTextStyle(), placeholderStyle);
     currentParagraphPlaceholderCount_++;
     placeholderSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     placeholderSpanItem->content = " ";
@@ -683,7 +690,7 @@ void MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<Custom
     placeholderStyle.height = height;
     placeholderStyle.verticalAlign = VerticalAlign::NONE;
     customSpanItem->placeholderIndex =
-        customSpanItem->UpdateParagraph(nullptr, paragraph, isSpanStringMode_, placeholderStyle);
+        customSpanItem->UpdateParagraph(nullptr, paragraph, InheritParentTextStyle(), placeholderStyle);
     currentParagraphPlaceholderCount_++;
     customSpanItem->placeholderIndex += preParagraphsPlaceholderCount_;
     customSpanItem->content = " ";
@@ -704,7 +711,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
     double value = 0.0;
     if (GreatNotEqual(indentValue.Value(), 0.0)) {
         // first line indent
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_VOID(pipeline);
         if (indentValue.Unit() != DimensionUnit::PERCENT) {
             value = indentValue.ConvertToPxDistribute(
