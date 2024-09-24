@@ -2665,11 +2665,12 @@ std::string TextPattern::GetBindSelectionMenuInJson() const
     for (auto& [spanResponsePair, params] : selectionMenuMap_) {
         auto& [spanType, responseType] = spanResponsePair;
         auto jsonItem = JsonUtil::Create(true);
-        jsonItem->Put("spanType", static_cast<uint64_t>(spanType));
-        jsonItem->Put("responseType", static_cast<uint64_t>(responseType));
-        jsonItem->Put("menuType", static_cast<uint64_t>(MenuType.SELECTION_MENU));
+        jsonItem->Put("spanType", spanType);
+        jsonItem->Put("responseType", responseType);
+        jsonItem->Put("menuType", SelectionMenuType.SELECTION_MENU);
         jsonArray->Put(jsonItem);
     }
+    FillPreviewMenuInJson(jsonArray);
     return StringUtils::RestoreBackslash(jsonArray->ToString());
 }
 
