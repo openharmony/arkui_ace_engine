@@ -7606,6 +7606,16 @@ void JSViewAbstract::JsAccessibilityVirtualNode(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsAccessibilitySelected(bool selected)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilitySelected(selected);
+}
+
+void JSViewAbstract::JsAccessibilityChecked(bool checked)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityChecked(checked);
+}
+
 void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
 {
     // Check the parameters
@@ -8706,6 +8716,9 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("accessibilityLevel", &JSViewAbstract::JsAccessibilityLevel);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityVirtualNode", &JSViewAbstract::JsAccessibilityVirtualNode);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilitySelected", &JSViewAbstract::JsAccessibilitySelected);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityChecked", &JSViewAbstract::JsAccessibilityChecked);
+
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
