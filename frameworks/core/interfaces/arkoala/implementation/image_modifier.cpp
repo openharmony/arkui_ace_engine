@@ -142,7 +142,7 @@ void InterpolationImpl(Ark_NativePointer node,
                                                                                ImageInterpolation::NONE));
 }
 void SourceSizeImpl(Ark_NativePointer node,
-                    const Type_ImageAttribute_sourceSize_Arg0* value)
+                    const Ark_ImageSourceSize* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

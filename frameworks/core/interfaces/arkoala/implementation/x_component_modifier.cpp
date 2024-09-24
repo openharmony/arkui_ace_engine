@@ -43,6 +43,10 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
                         Ark_Boolean enable)
 {
 }
+void EnableSecureImpl(Ark_NativePointer node,
+                      Ark_Boolean isSecure)
+{
+}
 } // XComponentAttributeModifier
 const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
 {
@@ -53,6 +57,7 @@ const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
         XComponentAttributeModifier::OnLoadImpl,
         XComponentAttributeModifier::OnDestroyImpl,
         XComponentAttributeModifier::EnableAnalyzerImpl,
+        XComponentAttributeModifier::EnableSecureImpl,
     };
     return &ArkUIXComponentModifierImpl;
 }
