@@ -500,10 +500,11 @@ void CanvasRenderingContext2DModelNG::GetImageDataModel(const ImageSize& imageSi
     std::unique_ptr<Ace::ImageData> data = GetImageData(imageSize);
     CHECK_NULL_VOID(data);
     for (uint32_t idx = 0; idx < finalHeight * finalWidth; ++idx) {
-        buffer[4 * idx] = data->data[idx].GetRed();
-        buffer[4 * idx + 1] = data->data[idx].GetGreen();
-        buffer[4 * idx + 2] = data->data[idx].GetBlue();
-        buffer[4 * idx + 3] = data->data[idx].GetAlpha();
+        Color color = Color(data->data[idx]);
+        buffer[4 * idx] = color.GetRed(); // 4 * idx: the 1st byte format: red.
+        buffer[4 * idx + 1] = color.GetGreen(); // 4 * idx + 1: the 2nd byte format: green.
+        buffer[4 * idx + 2] = color.GetBlue(); // 4 * idx + 2: the 3rd byte format: blue.
+        buffer[4 * idx + 3] = color.GetAlpha(); // 4 * idx + 3: the 4th byte format: alpha.
     }
 #endif
 }
