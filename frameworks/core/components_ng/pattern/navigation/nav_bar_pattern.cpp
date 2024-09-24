@@ -223,7 +223,9 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
         }
         titleBarNode->SetMenu(navBarNode->GetMenu());
         titleBarNode->AddChild(titleBarNode->GetMenu());
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
     } else {
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
         auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
         CHECK_NULL_VOID(navBarPattern);
         auto titleBarMenuItems = navBarPattern->GetTitleBarMenuItems();
