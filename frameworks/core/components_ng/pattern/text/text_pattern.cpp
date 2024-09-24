@@ -2661,7 +2661,16 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
 
 std::string TextPattern::GetBindSelectionMenuInJson() const
 {
-    
+    auto jsonArray = JsonUtil::CreateArray(true);
+    for (auto& [spanResponsePair, params] : selectionMenuMap_) {
+        auto& [spanType, responseType] = spanResponsePair;
+        auto jsonItem = JsonUtil::Create(true);
+        jsonItem->Put("spanType", static_cast<uint64_t>(spanType));
+        jsonItem->Put("responseType", static_cast<uint64_t>(responseType));
+        jsonItem->Put("menuType", static_cast<uint64_t>(MenuType.SELECTION_MENU));
+        jsonArray->Put(jsonItem);
+    }
+    return StringUtils::RestoreBackslash(jsonArray->ToString());
 }
 
 std::string TextPattern::GetFontInJson() const
