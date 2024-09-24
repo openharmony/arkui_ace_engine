@@ -2418,6 +2418,9 @@ bool SwiperPattern::SpringOverScroll(float offset)
         }
         delta = offset - springOffset_;
     }
+    if (std::abs(springOffset_) > visibleSize) {
+        springOffset_ = springOffset_ > 0 ? visibleSize : -visibleSize;
+    }
     auto realOffset = springOffset_ * SwiperHelper::CalculateFriction(std::abs(springOffset_ / visibleSize));
     delta += (realOffset - currentRealOffset);
     currentDelta_ -= delta;
