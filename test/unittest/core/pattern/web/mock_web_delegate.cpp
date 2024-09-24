@@ -19,8 +19,10 @@
 
 namespace OHOS::Ace {
 #define EGLCONFIG_VERSION 3
+static int32_t returnTime = 0;
 constexpr int32_t COUNTER_NUMBER_ZERO = 0;
 constexpr int32_t NODE_INFO_DIVISOR = 2;
+constexpr int32_t COUNTER_NUMBER_MAX = 10;
 class MockNWebAccessibilityNodeInfoOnlyForReturn : public NWeb::NWebAccessibilityNodeInfo {
 public:
     std::string GetHint() override
@@ -524,7 +526,13 @@ void WebDelegate::BackOrForward(int32_t step)
 }
 bool WebDelegate::AccessBackward()
 {
-return false;
+    static bool temp = true;
+    if (temp) {
+        temp = false;
+        return temp;
+    }
+    temp = true;
+    return temp;
 }
 bool WebDelegate::AccessForward()
 {
@@ -1669,7 +1677,14 @@ void WebDelegate::OnDestroyImageAnalyzerOverlay()
 }
 std::string WebDelegate::GetWebInfoType()
 {
-return "";
+    if (returnTime >= COUNTER_NUMBER_MAX) {
+        returnTime = COUNTER_NUMBER_ZERO;
+    }
+    returnTime++;
+    if (returnTime % NODE_INFO_DIVISOR == COUNTER_NUMBER_ZERO) {
+        return "8";
+    }
+    return "";
 }
 void WebDelegate::SetSurfaceId(const std::string& surfaceId)
 {
