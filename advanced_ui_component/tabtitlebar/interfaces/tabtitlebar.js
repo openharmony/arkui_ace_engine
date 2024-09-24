@@ -1320,6 +1320,7 @@ class ImageMenuItem extends ViewPU {
       Image.height(ImageMenuItem.imageSize);
       Image.focusable(this.item.isEnabled);
       Image.key(ImageMenuItem.focusablePrefix + this.index);
+      Image.draggable(false);
     }, Image);
     Row.pop();
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
