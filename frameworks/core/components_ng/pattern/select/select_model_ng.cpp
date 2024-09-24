@@ -477,8 +477,6 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     auto* pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        pattern->SetSelectDefaultTheme();
-    
         NG::PaddingProperty paddings;
         paddings.top = std::nullopt;
         paddings.bottom = std::nullopt;
