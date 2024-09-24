@@ -653,7 +653,7 @@ public:
         return false;
     }
 
-    virtual void SetOnInnerGestureRecognizerJudgeBegin(
+    virtual void AddInnerOnGestureRecognizerJudgeBegin(
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
 
 protected:
