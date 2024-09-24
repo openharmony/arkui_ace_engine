@@ -306,4 +306,24 @@ ItemDragInfo Convert(const Ark_ItemDragInfo& src)
     itemDragInfo.SetY(Convert<float>(src.y));
     return itemDragInfo;
 }
+
+template<>
+void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src)
+{
+    auto intVal = src.tag == Ark_Tag::ARK_TAG_INT32 ? src.i32 : static_cast<int32_t>(src.f32);
+    if (intVal >= 0) {
+        auto strVal = std::to_string(intVal);
+        if (auto [parseOk, val] = StringUtils::ParseFontWeight(strVal); parseOk) {
+            dst = val;
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
+{
+    if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
+        dst = val;
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

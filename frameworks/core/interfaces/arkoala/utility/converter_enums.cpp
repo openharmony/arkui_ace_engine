@@ -209,6 +209,16 @@ void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_TextDecoratio
         default: LOGE("Unexpected enum value in Ark_TextDecorationStyle: %{public}d", src);
     }
 }
+template<>
+void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src)
+{
+    switch (src) {
+        case ARK_STICKY_NONE: dst = V2::StickyMode::NONE; break;
+        case ARK_STICKY_NORMAL: dst = V2::StickyMode::NORMAL; break;
+        case ARK_STICKY_OPACITY: dst = V2::StickyMode::OPACITY; break;
+        default: LOGE("Unexpected enum value in Ark_Sticky: %{public}d", src);
+    }
+}
 
 template<>
 void AssignCast(std::optional<V2::ListItemAlign>& dst, const Ark_ListItemAlign& src)
@@ -263,6 +273,16 @@ void AssignCast(std::optional<TextDecoration>& dst, const Ark_TextDecorationType
         case ARK_TEXT_DECORATION_TYPE_OVERLINE: dst = TextDecoration::OVERLINE; break;
         case ARK_TEXT_DECORATION_TYPE_LINE_THROUGH: dst = TextDecoration::LINE_THROUGH; break;
         default: LOGE("Unexpected enum value in Ark_TextDecorationType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<V2::ListItemStyle>& dst, const Ark_ListItemStyle& src)
+{
+    switch (src) {
+        case ARK_LIST_ITEM_STYLE_NONE: dst = V2::ListItemStyle::NONE; break;
+        case ARK_LIST_ITEM_STYLE_CARD: dst = V2::ListItemStyle::CARD; break;
+        default: LOGE("Unexpected enum value in Ark_ListItemStyle: %{public}d", src);
     }
 }
 
@@ -470,4 +490,25 @@ void AssignCast(std::optional<ListItemGroupArea>& dst, const Ark_ListItemGroupAr
         default: LOGE("Unexpected enum value in Ark_ListItemGroupArea: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<V2::ListItemGroupStyle>& dst, const Ark_ListItemGroupStyle& src)
+{
+    switch (src) {
+        case ARK_LIST_ITEM_GROUP_STYLE_NONE: dst = V2::ListItemGroupStyle::NONE; break;
+        case ARK_LIST_ITEM_GROUP_STYLE_CARD: dst = V2::ListItemGroupStyle::CARD; break;
+        default: LOGE("Unexpected enum value in Ark_ListItemGroupStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src)
+{
+    switch (src) {
+        case ARK_SWIPE_EDGE_EFFECT_SPRING: dst = V2::SwipeEdgeEffect::Spring; break;
+        case ARK_SWIPE_EDGE_EFFECT_NONE: dst = V2::SwipeEdgeEffect::None; break;
+        default: LOGE("Unexpected enum value in Ark_SwipeEdgeEffect: %{public}d", src);
+    }
+}
+
 } // namespace OHOS::Ace::NG::Converter

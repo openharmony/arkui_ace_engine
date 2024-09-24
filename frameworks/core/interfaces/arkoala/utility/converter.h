@@ -509,26 +509,8 @@ namespace Converter {
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
-
-    template<>
-    inline void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src)
-    {
-        auto intVal = src.tag == Ark_Tag::ARK_TAG_INT32 ? src.i32 : static_cast<int32_t>(src.f32);
-        if (intVal >= 0) {
-            auto strVal = std::to_string(intVal);
-            if (auto [parseOk, val] = StringUtils::ParseFontWeight(strVal); parseOk) {
-                dst = val;
-            }
-        }
-    }
-
-    template<>
-    inline void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
-    {
-        if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
-            dst = val;
-        }
-    }
+    template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src);
+    template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
 
     Shadow ToShadow(const Ark_ShadowOptions& src);
 
@@ -590,7 +572,11 @@ namespace Converter {
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<ListItemGroupArea>& dst, const Ark_ListItemGroupArea& src);
     template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
-    
+    template<> void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src);
+    template<> void AssignCast(std::optional<V2::ListItemStyle>& dst, const Ark_ListItemStyle& src);
+    template<> void AssignCast(std::optional<V2::ListItemGroupStyle>& dst, const Ark_ListItemGroupStyle& src);
+    template<> void AssignCast(std::optional<V2::EditMode>& dst, const Ark_EditMode& src);
+    template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 
