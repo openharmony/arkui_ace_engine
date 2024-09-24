@@ -296,6 +296,13 @@ namespace Converter {
     }
 
     template<>
+    inline CalcDimension Convert(const Ark_Length& src)
+    {
+        return src.type == Ark_Tag::ARK_TAG_RESOURCE ?
+               CalcDimension() : CalcDimension(src.value, static_cast<DimensionUnit>(src.unit));
+    }
+
+    template<>
     inline std::pair<Dimension, Dimension> Convert(const Tuple_Length_Length& src)
     {
         return { Converter::Convert<Dimension>(src.value0), Converter::Convert<Dimension>(src.value1) };
