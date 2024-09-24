@@ -44,6 +44,8 @@ public:
         value->propIconStyle_ = CloneIconStyle();
         value->propIconSize_ = CloneIconSize();
         value->propFontSize_ = CloneFontSize();
+        value->propStateEffect_ = CloneStateEffect();
+        value->propHoverEffect_ = CloneHoverEffect();
         value->propFontStyle_ = CloneFontStyle();
         value->propFontWeight_ = CloneFontWeight();
         value->propFontFamily_ = CloneFontFamily();
@@ -68,6 +70,8 @@ public:
         ResetIconStyle();
         ResetIconSize();
         ResetFontSize();
+        ResetStateEffect();
+        ResetHoverEffect();
         ResetFontStyle();
         ResetFontWeight();
         ResetFontFamily();
@@ -89,6 +93,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconStyle, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StateEffect, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverEffect, HoverEffectType, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
