@@ -380,6 +380,7 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
     caches_.ForEachL1IndexUINode(
         [&children](int32_t index, const RefPtr<UINode>& node) -> void { children.emplace(index, node); });
     for (const auto& [index, child] : children) {
+        const_cast<RepeatVirtualScrollNode*>(this)->RemoveDisappearingChild(child);
         children_.emplace_back(child);
     }
     return children_;
