@@ -2527,7 +2527,8 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     } else if (rsTransaction != nullptr || isAvoidAreaDoChanged) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
         // When avoidAreas need updating, the task shouldn't be cancelled.
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
+        viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container,
+            "ArkUIPromiseViewportConfig");
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
