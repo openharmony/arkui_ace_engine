@@ -129,6 +129,9 @@ public:
     DragAction(std::shared_ptr<DragControllerAsyncCtx> asyncCtx) : asyncCtx_(asyncCtx) {}
     ~DragAction()
     {
+        if (asyncCtx_) {
+            asyncCtx_->dragAction = nullptr;
+        }
         CHECK_NULL_VOID(env_);
         for (auto& item : cbList_) {
             napi_delete_reference(env_, item);
@@ -1554,7 +1557,7 @@ void HandleStopDragCallback(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, co
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         auto windowId = container->GetWindowId();
-        taskExecutor->PostTask(
+        taskExecutor->PostSyncTask(
             [asyncCtx, windowId]() {
                 CHECK_NULL_VOID(asyncCtx);
                 napi_handle_scope scope = nullptr;

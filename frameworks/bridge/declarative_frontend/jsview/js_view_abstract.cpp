@@ -8676,6 +8676,11 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSViewAbstract>::StaticMethod("restoreId", &JSViewAbstract::JsRestoreId);
     JSClass<JSViewAbstract>::StaticMethod("hoverEffect", &JSViewAbstract::JsHoverEffect);
+    JSClass<JSViewAbstract>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSViewAbstract>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
+    JSClass<JSViewAbstract>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSViewAbstract>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
+    JSClass<JSViewAbstract>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibilityHover", &JSViewAbstract::JsOnAccessibilityHover);

@@ -1327,6 +1327,8 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
                                          [](const RefPtr<FocusHub>& focusNode) { return focusNode->IsFocusable(); });
 
     if (focusDepend_ == FocusDependence::AUTO && !isAnyChildFocusable) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Node(%{public}s/%{public}d) has no focusable child.", GetFrameName().c_str(),
+            GetFrameId());
         lastWeakFocusNode_ = nullptr;
         OnFocusNode();
         GetFocusManager()->FocusSwitchingEnd(SwitchingEndReason::NO_FOCUSABLE_CHILD);

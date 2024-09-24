@@ -461,7 +461,7 @@ void SpanItem::UpdateTextStyle(const std::string& content, const RefPtr<Paragrap
             finalSelEnd = contentLength;
         }
         if (finalSelStart < contentLength) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
+            auto pipelineContext = PipelineContext::GetCurrentContextSafely();
             TextStyle selectedTextStyle = textStyle;
             Color color = selectedTextStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextColor(color);

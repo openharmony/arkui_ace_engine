@@ -465,7 +465,7 @@ HWTEST_F(TextTestFiveNg, GetSelectedText001, TestSize.Level1)
     textPattern->AddChildSpanItem(textSpanNode6);
 
     auto selectedText = textPattern->GetSelectedText(0, 10);
-    ASSERT_EQ(selectedText, "");
+    ASSERT_EQ(selectedText, " ");
 }
 
 /**

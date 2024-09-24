@@ -14,10 +14,206 @@
  */
 
 #include <vector>
+#include <gmock/gmock.h>
 #include "core/components/web/resource/web_delegate.h"
 
 namespace OHOS::Ace {
 #define EGLCONFIG_VERSION 3
+constexpr int32_t COUNTER_NUMBER_ZERO = 0;
+constexpr int32_t NODE_INFO_DIVISOR = 2;
+class MockNWebAccessibilityNodeInfoOnlyForReturn : public NWeb::NWebAccessibilityNodeInfo {
+public:
+    std::string GetHint() override
+    {
+        return "";
+    }
+    std::string GetError() override
+    {
+        return "";
+    }
+    int32_t GetRectX()
+    {
+        return 0;
+    }
+    int32_t GetRectY()
+    {
+        return 0;
+    }
+    void SetPageId(int32_t pageId) override {}
+    int32_t GetPageId() override
+    {
+        return 0;
+    }
+    std::vector<uint32_t> GetActions() override
+    {
+        return {};
+    }
+    std::string GetContent() override
+    {
+        return "";
+    }
+    std::vector<int64_t> GetChildIds() override
+    {
+        return {};
+    }
+    void SetParentId(int64_t parentId) override {}
+    int64_t GetParentId() override
+    {
+        return 0;
+    }
+    bool GetIsHeading() override
+    {
+        return false;
+    }
+    bool GetIsChecked() override
+    {
+        return false;
+    }
+    bool GetIsEnabled() override
+    {
+        return false;
+    }
+    bool GetIsFocused() override
+    {
+        return false;
+    }
+    int32_t GetRectWidth()
+    {
+        return 0;
+    }
+    int32_t GetRectHeight()
+    {
+        return 0;
+    }
+    bool GetIsVisible() override
+    {
+        return false;
+    }
+    bool GetIsHinting() override
+    {
+        return false;
+    }
+    bool GetIsEditable() override
+    {
+        return false;
+    }
+    bool GetIsSelected() override
+    {
+        return false;
+    }
+    size_t GetItemCounts() override
+    {
+        return 0;
+    }
+    int32_t GetLiveRegion() override
+    {
+        return 0;
+    }
+    bool GetIsPassword() override
+    {
+        return false;
+    }
+    bool GetIsCheckable() override
+    {
+        return false;
+    }
+    bool GetIsClickable() override
+    {
+        return false;
+    }
+    bool GetIsFocusable() override
+    {
+        return false;
+    }
+    bool GetIsScrollable() override
+    {
+        return false;
+    }
+    bool GetIsDeletable() override
+    {
+        return false;
+    }
+    int64_t GetAccessibilityId() override
+    {
+        return 0;
+    }
+    bool GetIsPopupSupported() override
+    {
+        return false;
+    }
+    bool GetIsContentInvalid() override
+    {
+        return false;
+    }
+    int32_t GetSelectionEnd() override
+    {
+        return 0;
+    }
+    int32_t GetSelectionStart() override
+    {
+        return 0;
+    }
+    float GetRangeInfoMin() override
+    {
+        return 0.0f;
+    }
+    float GetRangeInfoMax() override
+    {
+        return 0.0f;
+    }
+    float GetRangeInfoCurrent() override
+    {
+        return 0.0f;
+    }
+    int32_t GetInputType() override
+    {
+        return 0;
+    }
+    std::string GetComponentType() override
+    {
+        return "";
+    }
+    std::string GetDescriptionInfo() override
+    {
+        return "";
+    }
+    int32_t GetGridRows() override
+    {
+        return 0;
+    }
+    int32_t GetGridItemRow() override
+    {
+        return 0;
+    }
+    int32_t GetGridColumns() override
+    {
+        return 0;
+    }
+    int32_t GetGridItemColumn() override
+    {
+        return 0;
+    }
+    int32_t GetGridItemRowSpan() override
+    {
+        return 0;
+    }
+    int32_t GetGridSelectedMode() override
+    {
+        return 0;
+    }
+    int32_t GetGridItemColumnSpan() override
+    {
+        return 0;
+    }
+    bool GetIsAccessibilityFocus() override
+    {
+        return false;
+    }
+    bool GetIsPluralLineSupported() override
+    {
+        return false;
+    }
+};
 void WebMessagePortOhos::SetPortHandle(std::string& handle)
 {
 }
@@ -1323,7 +1519,7 @@ void WebDelegate::SetVirtualKeyBoardArg(int32_t width, int32_t height, double ke
 }
 bool WebDelegate::ShouldVirtualKeyboardOverlay()
 {
-return false;
+return true;
 }
 void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type)
 {
@@ -1350,6 +1546,9 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAc
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoById(
     int64_t accessibilityId)
 {
+    if (accessibilityId % NODE_INFO_DIVISOR == COUNTER_NUMBER_ZERO) {
+        return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
+    }
     return nullptr;
 }
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoByFocusMove(

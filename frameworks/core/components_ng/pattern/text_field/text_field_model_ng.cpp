@@ -561,12 +561,12 @@ void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
 
 void TextFieldModelNG::AddDragFrameNodeToManager() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     dragDropManager->AddTextFieldDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
@@ -738,7 +738,9 @@ void TextFieldModelNG::SetPadding(const NG::PaddingProperty& newPadding, Edge ol
 
 void TextFieldModelNG::SetDefaultPadding()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);

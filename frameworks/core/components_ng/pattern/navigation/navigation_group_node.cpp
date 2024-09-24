@@ -827,6 +827,19 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
     CHECK_NULL_VOID(navDestinationNode);
     navDestinationNode->SetIsOnAnimation(false);
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    auto stack = navigationPattern->GetNavigationStack();
+    bool isInStack = stack->FindIndex(navDestinationPattern->GetName(),
+        navDestinationPattern->GetCustomNode(), true) != -1;
+    if (isInStack) {
+        RemoveDialogDestination(true);
+        auto preContext = navDestinationNode->GetRenderContext();
+        CHECK_NULL_VOID(preContext);
+        preContext->UpdateZIndex(0);
+        return;
+    }
     auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
     if (shallowBuilder) {
         shallowBuilder->MarkIsExecuteDeepRenderDone(false);
@@ -838,7 +851,7 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
     auto parent = AceType::DynamicCast<FrameNode>(preNode->GetParent());
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(preNode);
-    RemoveDialogDestination();
+    RemoveDialogDestination(true);
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1069,7 +1082,7 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
     }
 }
 
-void NavigationGroupNode::RemoveDialogDestination()
+void NavigationGroupNode::RemoveDialogDestination(bool isReplace)
 {
     for (auto iter = hideNodes_.begin(); iter != hideNodes_.end(); iter++) {
         auto navDestination = iter->first;
@@ -1080,6 +1093,14 @@ void NavigationGroupNode::RemoveDialogDestination()
             // navDestination node don't need to remove, update visibility invisible
             navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
             navDestination->SetJSViewActive(false);
+            if (!isReplace) {
+                continue;
+            }
+            auto context = navDestination->GetRenderContext();
+            if (!context) {
+                continue;
+            }
+            context->UpdateZIndex(0);
             continue;
         }
         auto parent = navDestination->GetParent();

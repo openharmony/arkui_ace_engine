@@ -1719,7 +1719,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest028, TestSize.Level1)
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     frameNode->geometryNode_->SetFrameSize(SizeF(5, 5));
     listNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
-    listNode->geometryNode_->SetFrameSize(SizeF(10, 10));
+    listNode->geometryNode_->SetFrameSize(SizeF(15, 15));
     EXPECT_FALSE(focusHub->ScrollByOffsetToParent(listNode));
 }
 

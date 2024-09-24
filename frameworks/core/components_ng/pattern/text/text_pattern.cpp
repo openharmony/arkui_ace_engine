@@ -3263,7 +3263,9 @@ void TextPattern::DumpScaleInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("-----DumpScaleInfo-----"));
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto fontScale = pipeline->GetFontScale();
     auto fontWeightScale = pipeline->GetFontWeightScale();

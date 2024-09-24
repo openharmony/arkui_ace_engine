@@ -1785,6 +1785,8 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     videoSrcInfo_.src = videoSrcInfo->GetSrc();
     videoSrcInfo_.bundleName = videoSrcInfo->GetBundleName();
     videoSrcInfo_.moduleName = videoSrcInfo->GetModuleName();
+    isPrepared_ = GetIsPrepared();
+    isSeeking_ = GetIsSeeking();
     isStop_ = videoPattern->GetIsStop();
     muted_ = videoPattern->GetMuted();
     autoPlay_ = videoPattern->GetAutoPlay();

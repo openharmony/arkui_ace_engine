@@ -553,6 +553,17 @@ void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
     }
 }
 
+void RichEditorPattern::UpdateGestureHotZone()
+{
+    auto gestureHub = GetGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    auto hotZoneWidth = Dimension(contentRect_.Width());
+    auto hotZoneHeight = Dimension(contentRect_.Height());
+    auto hotZoneOffset = DimensionOffset(Offset(contentRect_.GetX(), contentRect_.GetY()));
+    gestureHub->SetResponseRegion({ { hotZoneWidth, hotZoneHeight, hotZoneOffset } });
+}
+
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(!config.skipMeasure && !dirty->SkipMeasureContent(), false);
@@ -600,6 +611,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     caretUpdateType_ = CaretUpdateType::NONE;
     UpdateImagePreviewParam();
+    UpdateGestureHotZone();
     return ret;
 }
 
@@ -1724,7 +1736,7 @@ void RichEditorPattern::FireOnSelectionChange(int32_t start, int32_t end, bool i
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
-    CHECK_NULL_VOID(isForced || HasFocus());
+    CHECK_NULL_VOID(isForced || HasFocus() || dataDetectorAdapter_->hasClickedMenuOption_);
     bool isSingleHandle = selectOverlay_->IsSingleHandle();
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d],isTwinkling=%{public}d,isSingleHandle=%{public}d",
         start, end, caretTwinkling_, isSingleHandle);
@@ -10385,6 +10397,11 @@ TextStyle RichEditorPattern::GetDefaultTextStyle()
 bool RichEditorPattern::IsShowAIWrite()
 {
     CHECK_NULL_RETURN(!textSelector_.SelectNothing(), false);
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
+
     auto theme = GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(theme, false);
     auto bundleName = theme->GetAIWriteBundleName();

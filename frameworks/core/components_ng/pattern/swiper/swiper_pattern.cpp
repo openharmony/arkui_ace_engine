@@ -50,7 +50,6 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -148,7 +147,9 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetCurrentIndex(currentIndex_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     algo->SetContentMainSize(contentMainSize_);
-    algo->SetCurrentDelta(currentDelta_);
+    if (!usePropertyAnimation_) {
+        algo->SetCurrentDelta(currentDelta_);
+    }
     algo->SetItemsPosition(itemPosition_);
     if (IsOutOfBoundary() && !IsLoop()) {
         algo->SetOverScrollFeature();
@@ -2417,6 +2418,9 @@ bool SwiperPattern::SpringOverScroll(float offset)
         }
         delta = offset - springOffset_;
     }
+    if (std::abs(springOffset_) > visibleSize) {
+        springOffset_ = springOffset_ > 0 ? visibleSize : -visibleSize;
+    }
     auto realOffset = springOffset_ * SwiperHelper::CalculateFriction(std::abs(springOffset_ / visibleSize));
     delta += (realOffset - currentRealOffset);
     currentDelta_ -= delta;
@@ -3691,14 +3695,12 @@ void SwiperPattern::CreateSpringProperty()
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
             auto positionDelta = static_cast<float>(position) - swiper->currentIndexOffset_;
-            if (!swiper->isTouchDown_) {
-                if (swiper->IsHorizontalAndRightToLeft()) {
-                    positionDelta = -positionDelta;
-                }
-                swiper->UpdateCurrentOffset(positionDelta);
-                if (LessNotEqual(std::abs(positionDelta), 1) && !NearZero(positionDelta)) {
-                    AceAsyncTraceBeginCommercial(0, TRAILING_ANIMATION);
-                }
+            if (swiper->IsHorizontalAndRightToLeft()) {
+                positionDelta = -positionDelta;
+            }
+            swiper->UpdateCurrentOffset(positionDelta);
+            if (LessNotEqual(std::abs(positionDelta), 1) && !NearZero(positionDelta)) {
+                AceAsyncTraceBeginCommercial(0, TRAILING_ANIMATION);
             }
         },
         PropertyUnit::PIXEL_POSITION);
@@ -3736,7 +3738,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         option,
         [weak = AceType::WeakClaim(this), dragVelocity, host, delta]() {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation");
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation with offset:%{public}f", delta);
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             ACE_SCOPED_TRACE_COMMERCIAL(
@@ -4540,13 +4542,8 @@ void SwiperPattern::SetLazyLoadIsLoop() const
     auto targetNode = FindLazyForEachNode(host);
     if (targetNode.has_value()) {
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
-        if (lazyForEachNode) {
-            lazyForEachNode->SetIsLoop(IsLoop());
-        }
-        auto repeatVirtualNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
-        if (repeatVirtualNode) {
-            repeatVirtualNode->SetIsLoop(IsLoop());
-        }
+        CHECK_NULL_VOID(lazyForEachNode);
+        lazyForEachNode->SetIsLoop(IsLoop());
     }
 }
 
@@ -5847,9 +5844,6 @@ void SwiperPattern::RemoveOnHiddenChange()
 std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode) const
 {
     if (AceType::DynamicCast<LazyForEachNode>(baseNode)) {
-        return baseNode;
-    }
-    if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
         return baseNode;
     }
     if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {

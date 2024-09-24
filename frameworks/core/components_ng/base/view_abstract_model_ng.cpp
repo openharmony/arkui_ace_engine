@@ -161,6 +161,19 @@ void CreateCustomMenuWithPreview(
         std::move(buildFunc), refTargetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
 }
 
+void UpdateIsShowStatusForMenu(int32_t targetId, bool isShow)
+{
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    CHECK_NULL_VOID(subwindow);
+    auto overlayManager = subwindow->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto menuNode = overlayManager->GetMenuNode(targetId);
+    CHECK_NULL_VOID(menuNode);
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->SetIsShowFromUser(isShow);
+}
+
 void BindContextMenuSingle(
     std::function<void()>& buildFunc, const MenuParam& menuParam, std::function<void()>& previewBuildFunc)
 {
@@ -182,19 +195,29 @@ void BindContextMenuSingle(
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "menuNode already exist");
             auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
             CHECK_NULL_VOID(wrapperPattern);
+            // If menu is shown or in show animation, set isShow to false will close menu. If menu is not shown or
+            // in close animation, wrapperPattern->IsShow() is false, set isShow to false will not trigger close again.
             if (wrapperPattern->IsShow() && !menuParam.isShow) {
                 TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d.", targetId);
                 SubwindowManager::GetInstance()->HideMenuNG(menuNode, targetId);
-            } else if (!wrapperPattern->IsShow() && menuParam.isShow) {
+                UpdateIsShowStatusForMenu(targetId, false);
+            } else if (!wrapperPattern->IsShow() && menuParam.isShow &&
+                       wrapperPattern->GetIsShowFromUser() != menuParam.isShow) {
+                // If click outside to close menu during show animation, and isShow is always true without changing,
+                // then show new menu will result in an incorrect isShow state because onDisappear not be triggered.
+                // The menu only show if isShow is manually set from false to true.
                 CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
+                UpdateIsShowStatusForMenu(targetId, true);
             }
         } else if (menuParam.isShow && buildFunc) {
             CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
+            UpdateIsShowStatusForMenu(targetId, true);
         }
     } else {
         // first response for build subwindow and menu
         if (menuParam.isShow && buildFunc) {
             CreateCustomMenuWithPreview(buildFunc, menuParam, previewBuildFunc);
+            UpdateIsShowStatusForMenu(targetId, true);
         }
     }
 }

@@ -138,6 +138,7 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
     Rect GetUIExtensionHostWindowRect() const override;
+    NG::RectF GetWindowRect() const override;
     bool IsFreeMultiWindow() const override;
     void OnFreeMultiWindowSwitch(bool enable) override;
     int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) override;
