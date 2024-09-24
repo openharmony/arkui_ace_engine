@@ -344,6 +344,11 @@ void EventHub::ClearOnAreaChangedInnerCallbacks()
     onAreaChangedInnerCallbacks_.clear();
 }
 
+void EventHub::RemoveInnerOnAreaChangedCallback(int32_t id)
+{
+    onAreaChangedInnerCallbacks_.erase(id);
+}
+
 void EventHub::ClearCustomerOnDragFunc()
 {
     onDragStart_ = nullptr;
