@@ -388,11 +388,13 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
     isHandleMoving_ = false;
-    if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
-        pattern->ResetSelection();
-    }
-    if (reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
-        pattern->ResetSelection();
+    auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus();
+    auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;
+    auto isHoldByOther = reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER;
+    needResetSelection = needResetSelection || isBackPressed || isHoldByOther;
+    IF_TRUE(needResetSelection, pattern->ResetSelection());
+    IF_TRUE(isHoldByOther, pattern->CloseSelectOverlay());
+    if (isBackPressed) {
         if (!pattern->IsEditing() && pattern->HasFocus()) {
             FocusHub::LostFocusToViewRoot();
         }
