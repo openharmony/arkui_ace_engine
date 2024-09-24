@@ -1970,8 +1970,8 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     auto radian = Degree2Radian(degree);
     if (degree != 0) {
         auto newRect = GetPaintRectWithoutTransform();
-        double leftX = 0.0;
-        double leftY = 0.0;
+        double leftX = 0;
+        double leftY = oldSize.Height();
         degree = degree < 0 ? degree + FULL_ROTATION : degree;
         SetCorner(leftX, leftY, oldSize.Width(), oldSize.Height(), degree);
         double centerX = oldSize.Width() * center[0];
@@ -2063,7 +2063,7 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
 
 Matrix4 RosenRenderContext::GetMatrix()
 {
-    CHECK_NULL_RETURN(rsNode_, {});
+    CHECK_NULL_RETURN(rsNode_, Matrix4::CreateIdentity());
     auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
     if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {

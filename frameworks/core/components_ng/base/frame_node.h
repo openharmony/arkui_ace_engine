@@ -898,7 +898,6 @@ public:
 
     RectF GetRectWithRender();
     RectF GetRectWithFrame();
-    bool CheckAncestorPageShow();
     void PaintDebugBoundary(bool flag) override;
     static std::pair<float, float> ContextPositionConvertToPX(
         const RefPtr<RenderContext>& context, const SizeF& percentReference);

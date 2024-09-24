@@ -1173,8 +1173,8 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
         }
         focusHub->RemoveSelf();
     }
-    eventHub_->FireOnDetach();
     pattern_->OnDetachFromMainTree();
+    eventHub_->FireOnDetach();
     eventHub_->FireOnDisappear();
     CHECK_NULL_VOID(renderContext_);
     renderContext_->OnNodeDisappear(recursive);
@@ -1276,7 +1276,13 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         builderFunc_ = nullptr;
         backgroundNode_ = columnNode;
     }
-    UpdateFocusState();
+    
+    // update focus state
+    auto focusHub = GetFocusHub();
+    if (focusHub && focusHub->IsCurrentFocus()) {
+        focusHub->ClearFocusState(false);
+        focusHub->PaintFocusState(false);
+    }
 
     // rebuild child render node.
     RebuildRenderContextTree();
@@ -1407,18 +1413,9 @@ RectF FrameNode::GetRectWithRender()
     return currFrameRect;
 }
 
-bool FrameNode::CheckAncestorPageShow()
-{
-    auto pageNode = GetPageNode();
-    if (!pageNode) {
-        return true;
-    }
-    return pageNode->GetPattern<PagePattern>()->IsOnShow();
-}
-
 void FrameNode::TriggerOnSizeChangeCallback()
 {
-    if (!IsActive() || !CheckAncestorPageShow()) {
+    if (!IsActive()) {
         return;
     }
     if ((eventHub_->HasOnSizeChanged() || eventHub_->HasInnerOnSizeChanged()) && lastFrameNodeRect_) {
@@ -4303,12 +4300,16 @@ OffsetF FrameNode::CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp
             auto result = offset + parentTimestampOffset.second;
             SetCachedTransformRelativeOffset({ nanoTimestamp, result });
             return result;
+        } else {
+            auto result = offset + parent->CalculateCachedTransformRelativeOffset(nanoTimestamp);
+            SetCachedTransformRelativeOffset({ nanoTimestamp, result });
+            return result;
         }
-        auto result = offset + parent->CalculateCachedTransformRelativeOffset(nanoTimestamp);
-        SetCachedTransformRelativeOffset({ nanoTimestamp, result });
-        return result;
+    } else {
+        SetCachedTransformRelativeOffset({ nanoTimestamp, offset });
+        return offset;
     }
-    SetCachedTransformRelativeOffset({ nanoTimestamp, offset });
+
     return offset;
 }
 
