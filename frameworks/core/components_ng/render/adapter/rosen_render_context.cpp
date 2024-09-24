@@ -4410,14 +4410,30 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
     CHECK_NULL_VOID(rsNode_);
     auto& gradientProperty = GetOrCreateGradient();
     Gradient gradient;
-    if (gradientProperty->HasLinearGradient()) {
-        gradient = gradientProperty->GetLinearGradientValue();
-    }
-    if (gradientProperty->HasRadialGradient()) {
-        gradient = gradientProperty->GetRadialGradientValue();
-    }
-    if (gradientProperty->HasSweepGradient()) {
-        gradient = gradientProperty->GetSweepGradientValue();
+    if (gradientProperty->HasLastGradientType()) {
+        switch (gradientProperty->GetLastGradientTypeValue()) {
+            case GradientType::LINEAR:
+                gradient = gradientProperty->GetLinearGradientValue();
+                break;
+            case GradientType::RADIAL:
+                gradient = gradientProperty->GetRadialGradientValue();
+                break;
+            case GradientType::SWEEP:
+                gradient = gradientProperty->GetSweepGradientValue();
+                break;
+            default:
+                return;
+        }
+    } else {
+        if (gradientProperty->HasLinearGradient()) {
+            gradient = gradientProperty->GetLinearGradientValue();
+        }
+        if (gradientProperty->HasRadialGradient()) {
+            gradient = gradientProperty->GetRadialGradientValue();
+        }
+        if (gradientProperty->HasSweepGradient()) {
+            gradient = gradientProperty->GetSweepGradientValue();
+        }
     }
     if (!gradientStyleModifier_) {
         gradientStyleModifier_ = std::make_shared<GradientStyleModifier>(WeakClaim(this));
