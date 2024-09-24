@@ -186,11 +186,6 @@ public:
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
 
-    virtual void RegisterAccessibilitySAObserverCallback(
-        int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback) {};
-
-    virtual void DeregisterAccessibilitySAObserverCallback(int64_t elementId) {};
-
     virtual bool RegisterInteractionOperationAsChildTree(
         const Registration& registration) { return false; };
     virtual bool DeregisterInteractionOperationAsChildTree(

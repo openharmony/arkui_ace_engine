@@ -556,9 +556,9 @@ void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
     auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
     config.offset = displayOffset;
     config.pageId = host->GetPageId();
-    config.windowId = context->GetRealHostWindowId();
+    config.windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.belongTreeId = belongTreeId_;
-    config.parentWindowId = context->GetRealHostWindowId();
+    config.parentWindowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
 }
 
@@ -611,6 +611,39 @@ int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEventForThird
     CHECK_NULL_RETURN(host, -1);
     SendAccessibilitySyncEventToService(event, nullptr);
     return 0;
+}
+
+bool JsThirdProviderInteractionOperation::HandleNativeFocusUpdate(
+    int64_t elementId,
+    Accessibility::AccessibilityEventInfo& accessibilityEventInfo)
+{
+    ExecuteActionForThird(
+        elementId,
+        accessibilityEventInfo.GetElementInfo(),
+        static_cast<int32_t>(
+            Accessibility::ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS));
+    return false;
+}
+
+bool JsThirdProviderInteractionOperation::HandleEventByFramework(
+    const ArkUI_AccessibilityEventInfo& nativeAccessibilityEvent,
+    Accessibility::AccessibilityEventInfo& accessibilityEventInfo)
+{
+    auto eventType = nativeAccessibilityEvent.GetEventType();
+    bool needSendEvent = true;
+    switch (eventType) {
+        case ArkUI_AccessibilityEventType::
+            ARKUI_ACCESSIBILITY_NATIVE_EVENT_TYPE_FOCUS_NODE_UPDATE:
+            if (nativeAccessibilityEvent.GetElementInfo()) {
+                needSendEvent = HandleNativeFocusUpdate(
+                    nativeAccessibilityEvent.GetElementInfo()->GetElementId(),
+                    accessibilityEventInfo);
+            }
+            break;
+        default:
+            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Unsupported eventType");
+    }
+    return needSendEvent;
 }
 
 int32_t JsThirdProviderInteractionOperation::SendAccessibilityAsyncEvent(
