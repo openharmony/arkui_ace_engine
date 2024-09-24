@@ -8605,10 +8605,25 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("placeholder", GetPlaceHolderInJson().c_str(), filter);
 }
 
-std::string GetBindSelectionMenuInJson() const
+std::string RichEditorPattern::GetBindSelectionMenuInJson() const
 {
     auto jsonArray = JsonUtil::CreateArray(true);
-    for (auto& [span])
+    for (auto& [spanResponsePair, params] : selectionMenuMap_) {
+        auto& [spanType, responseType] = spanResponsePair;
+        auto jsonItem = JsonUtil::Create(true);
+        jsonItem->Put("spanType", static_cast<uint64_t>(spanType));
+        jsonItem->Put("responseType", static_cast<uint64_t>(responseType));
+        jsonItem->Put("menuType", static_cast<uint64_t>(MenuType.SELECTION_MENU));
+        jsonArray->Put(jsonItem);
+    }
+    if (oneStepDragParam_) {
+        auto jsonItem = JsonUtil::Create(true);
+        jsonItem->Put("spanType", static_cast<uint64_t>(TextSpanType::IMAGE));
+        jsonItem->Put("responseType", static_cast<uint64_t>(TextResponseType::LONG_PRESS));
+        jsonItem->Put("menuType", static_cast<uint64_t>(MenuType.PREVIEW_MENU));
+        jsonArray->Put(jsonItem);
+    }
+    return StringUtils::RestoreBackslash(jsonArray->ToString());
 }
 
 std::string RichEditorPattern::GetPlaceHolderInJson() const
