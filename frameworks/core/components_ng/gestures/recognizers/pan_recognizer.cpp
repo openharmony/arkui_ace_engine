@@ -688,6 +688,8 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetTiltX(lastTouchEvent_.tiltX.value_or(0.0));
     info.SetTiltY(lastTouchEvent_.tiltY.value_or(0.0));
     info.SetPointerEvent(lastPointEvent_);
+    info.SetIsPostEventResult(isPostEventResult_);
+    info.SetPostEventNodeId(lastTouchEvent_.postEventNodeId);
     return info;
 }
 
