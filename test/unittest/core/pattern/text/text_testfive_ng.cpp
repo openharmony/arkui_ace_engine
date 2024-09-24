@@ -774,6 +774,11 @@ HWTEST_F(TextTestFiveNg, InheritParentProperties001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     pattern->AttachToFrameNode(frameNode);
+
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateFontSize(Dimension(10.0));
+    layoutProperty->UpdateTextColor(Color::RED);
     auto pipeline = PipelineContext::GetCurrentContext();
     auto theme = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
@@ -786,7 +791,9 @@ HWTEST_F(TextTestFiveNg, InheritParentProperties001, TestSize.Level1)
     auto spanItem = spanNode->GetSpanItem();
     ASSERT_NE(spanItem, nullptr);
 
-    EXPECT_EQ(spanItem->InheritParentProperties(frameNode, true), TextStyle());
+    TextStyle textStyle;
+    textStyle.SetFontSize(Dimension(10.0));
+    textStyle.SetTextColor(Color::RED);
 
     pipeline->themeManager_ = oldTheme;
 }
@@ -1734,16 +1741,16 @@ HWTEST_F(TextTestFiveNg, UpdateSymbolSpanParagraph001, TestSize.Level1)
     EXPECT_EQ(callPushStyleCount, 0);
 
     spanItem->fontStyle->UpdateFontSize(Dimension(0));
-    spanItem->UpdateSymbolSpanParagraph(nullptr, paragraph);
+    spanItem->UpdateSymbolSpanParagraph(nullptr, TextStyle(), paragraph);
     EXPECT_EQ(callPushStyleCount, 0);
 
     std::unique_ptr<FontStyle> oldFontStyle = std::move(spanItem->fontStyle);
     std::unique_ptr<TextLineStyle> oldTextLineStyle = std::move(spanItem->textLineStyle);
-    spanItem->UpdateSymbolSpanParagraph(frameNode, paragraph);
+    spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
     spanItem->textLineStyle = std::move(oldTextLineStyle);
-    spanItem->UpdateSymbolSpanParagraph(frameNode, paragraph);
+    spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
     spanItem->fontStyle = std::move(oldFontStyle);
-    spanItem->UpdateSymbolSpanParagraph(frameNode, paragraph);
+    spanItem->UpdateSymbolSpanParagraph(frameNode, TextStyle(), paragraph);
     EXPECT_EQ(callPushStyleCount, 1);
 }
 

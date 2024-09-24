@@ -854,7 +854,6 @@ private:
     void OnHandleTouchUp();
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
-    void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     bool IsShowHandle();
     void InitUrlMouseEvent();

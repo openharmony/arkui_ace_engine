@@ -1097,34 +1097,21 @@ int32_t RichEditorPattern::AddTextSpanOperation(
 void RichEditorPattern::UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpanOptions& options)
 {
     spanNode->UpdateContent(options.value);
-    spanNode->AddPropertyInfo(PropertyInfo::NONE);
     CHECK_NULL_VOID(options.style.has_value());
 
     TextStyle textStyle = options.style.value();
     spanNode->UpdateTextColor(textStyle.GetTextColor());
-    spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
     spanNode->UpdateFontSize(textStyle.GetFontSize());
-    spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
     spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
-    spanNode->AddPropertyInfo(PropertyInfo::FONTSTYLE);
     spanNode->UpdateFontWeight(textStyle.GetFontWeight());
-    spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
     spanNode->UpdateFontFamily(textStyle.GetFontFamilies());
-    spanNode->AddPropertyInfo(PropertyInfo::FONTFAMILY);
     spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
-    spanNode->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
     spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
-    spanNode->AddPropertyInfo(PropertyInfo::NONE);
     spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
-    spanNode->AddPropertyInfo(PropertyInfo::NONE);
     spanNode->UpdateTextShadow(textStyle.GetTextShadows());
-    spanNode->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
     spanNode->UpdateLineHeight(textStyle.GetLineHeight());
-    spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
     spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
-    spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
     spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
-    spanNode->AddPropertyInfo(PropertyInfo::FONTFEATURE);
 }
 
 int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste, int32_t index)
@@ -1162,18 +1149,12 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     }
     spanNode->MountToParent(host, spanIndex);
     spanNode->UpdateContent(options.symbolId);
-    spanNode->AddPropertyInfo(PropertyInfo::NONE);
     if (options.style.has_value()) {
         spanNode->UpdateFontSize(options.style.value().GetFontSize());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
         spanNode->UpdateFontWeight(options.style.value().GetFontWeight());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
         spanNode->UpdateSymbolColorList(options.style.value().GetSymbolColorList());
-        spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_COLOR);
         spanNode->UpdateSymbolRenderingStrategy(options.style.value().GetRenderStrategy());
-        spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_RENDERING_STRATEGY);
         spanNode->UpdateSymbolEffectStrategy(options.style.value().GetEffectStrategy());
-        spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_EFFECT_STRATEGY);
     }
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = "  ";
@@ -1510,19 +1491,19 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
     CHECK_NULL_VOID(source);
     CHECK_NULL_VOID(source->GetTag() == V2::SPAN_ETS_TAG);
     CHECK_NULL_VOID(target);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontSize, PropertyInfo::FONTSIZE);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextColor, PropertyInfo::FONTCOLOR);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, ItalicFontStyle, PropertyInfo::FONTSTYLE);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontWeight, PropertyInfo::FONTWEIGHT);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontFamily, PropertyInfo::FONTFAMILY);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecoration, PropertyInfo::TEXTDECORATION);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecorationColor, PropertyInfo::NONE);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecorationStyle, PropertyInfo::NONE);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextCase, PropertyInfo::TEXTCASE);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, LineHeight, PropertyInfo::LINEHEIGHT);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, LetterSpacing, PropertyInfo::LETTERSPACE);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontFeature, PropertyInfo::FONTFEATURE);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextShadow, PropertyInfo::TEXTSHADOW);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontSize);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextColor);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, ItalicFontStyle);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontWeight);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontFamily);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecoration);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecorationColor);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextDecorationStyle);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextCase);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, LineHeight);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, LetterSpacing);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, FontFeature);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextShadow);
     target->GetSpanItem()->useThemeFontColor = source->GetSpanItem()->useThemeFontColor;
     target->GetSpanItem()->useThemeDecorationColor = source->GetSpanItem()->useThemeDecorationColor;
 }
@@ -1532,9 +1513,9 @@ void RichEditorPattern::CopyTextSpanLineStyle(
 {
     CHECK_NULL_VOID(source);
     CHECK_NULL_VOID(target);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextAlign, PropertyInfo::TEXT_ALIGN);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, WordBreak, PropertyInfo::WORD_BREAK);
-    COPY_SPAN_STYLE_IF_PRESENT(source, target, LineBreakStrategy, PropertyInfo::LINE_BREAK_STRATEGY);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, TextAlign);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, WordBreak);
+    COPY_SPAN_STYLE_IF_PRESENT(source, target, LineBreakStrategy);
     needLeadingMargin |= previewTextRecord_.isPreviewTextInputting;
     if (source->HasLeadingMargin()) {
         auto leadingMargin = source->GetLeadingMarginValue({});
@@ -1542,7 +1523,6 @@ void RichEditorPattern::CopyTextSpanLineStyle(
             leadingMargin.pixmap.Reset();
         }
         target->UpdateLeadingMargin(leadingMargin);
-        target->AddPropertyInfo(PropertyInfo::LEADING_MARGIN);
     }
 }
 
@@ -1822,7 +1802,6 @@ void RichEditorPattern::UpdateFontFeatureTextStyle(
 {
     if (updateSpanStyle.updateFontFeature.has_value()) {
         spanNode->UpdateFontFeature(textStyle.GetFontFeatures());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTFEATURE);
     }
 }
 
@@ -1836,36 +1815,28 @@ void RichEditorPattern::UpdateTextStyle(
     if (updateSpanStyle.updateTextColor.has_value()) {
         spanNode->UpdateTextColor(textStyle.GetTextColor());
         spanNode->GetSpanItem()->useThemeFontColor = false;
-        spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
     }
     if (updateSpanStyle.updateLineHeight.has_value()) {
         spanNode->UpdateLineHeight(textStyle.GetLineHeight());
-        spanNode->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
     }
     if (updateSpanStyle.updateLetterSpacing.has_value()) {
         spanNode->UpdateLetterSpacing(textStyle.GetLetterSpacing());
-        spanNode->AddPropertyInfo(PropertyInfo::LETTERSPACE);
     }
     if (updateSpanStyle.updateFontSize.has_value()) {
         spanNode->UpdateFontSize(textStyle.GetFontSize());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
     }
     if (updateSpanStyle.updateItalicFontStyle.has_value()) {
         spanNode->UpdateItalicFontStyle(textStyle.GetFontStyle());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTSTYLE);
     }
     if (updateSpanStyle.updateFontWeight.has_value()) {
         spanNode->UpdateFontWeight(textStyle.GetFontWeight());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
     }
     if (updateSpanStyle.updateFontFamily.has_value()) {
         spanNode->UpdateFontFamily(textStyle.GetFontFamilies());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTFAMILY);
     }
     UpdateDecoration(spanNode, updateSpanStyle, textStyle);
     if (updateSpanStyle.updateTextShadows.has_value()) {
         spanNode->UpdateTextShadow(textStyle.GetTextShadows());
-        spanNode->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
@@ -1877,15 +1848,12 @@ void RichEditorPattern::UpdateDecoration(
     if (updateSpanStyle.updateTextDecoration.has_value()) {
         spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
         spanNode->GetSpanItem()->useThemeDecorationColor = false;
-        spanNode->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
     }
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
         spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
-        spanNode->AddPropertyInfo(PropertyInfo::NONE);
     }
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
         spanNode->UpdateTextDecorationStyle(textStyle.GetTextDecorationStyle());
-        spanNode->AddPropertyInfo(PropertyInfo::NONE);
     }
 }
 
@@ -1898,23 +1866,18 @@ void RichEditorPattern::UpdateSymbolStyle(
     UpdateFontFeatureTextStyle(spanNode, updateSpanStyle, textStyle);
     if (updateSpanStyle.updateSymbolFontSize.has_value()) {
         spanNode->UpdateFontSize(updateSpanStyle.updateSymbolFontSize.value());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
     }
     if (updateSpanStyle.updateSymbolFontWeight.has_value()) {
         spanNode->UpdateFontWeight(updateSpanStyle.updateSymbolFontWeight.value());
-        spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
     }
     if (updateSpanStyle.updateSymbolColor.has_value()) {
         spanNode->UpdateSymbolColorList(updateSpanStyle.updateSymbolColor.value());
-        spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_COLOR);
     }
     if (updateSpanStyle.updateSymbolRenderingStrategy.has_value()) {
         spanNode->UpdateSymbolRenderingStrategy(updateSpanStyle.updateSymbolRenderingStrategy.value());
-        spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_RENDERING_STRATEGY);
     }
     if (updateSpanStyle.updateSymbolEffectStrategy.has_value()) {
         spanNode->UpdateSymbolEffectStrategy(updateSpanStyle.updateSymbolEffectStrategy.value());
-        spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_EFFECT_STRATEGY);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
@@ -5000,7 +4963,6 @@ void RichEditorPattern::CreateTextSpanNode(
         spanItem->SetTextStyle(typingTextStyle_);
     } else {
         spanNode->UpdateFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
-        spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
         SetDefaultColor(spanNode);
     }
     AddSpanItem(spanItem, info.GetSpanIndex());
@@ -5019,9 +4981,7 @@ void RichEditorPattern::SetDefaultColor(RefPtr<SpanNode>& spanNode)
     CHECK_NULL_VOID(richEditorTheme);
     Color textColor = richEditorTheme->GetTextStyle().GetTextColor();
     spanNode->UpdateTextColor(textColor);
-    spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
     spanNode->UpdateTextDecorationColor(textColor);
-    spanNode->AddPropertyInfo(PropertyInfo::NONE);
 }
 
 bool RichEditorPattern::BeforeIMEInsertValue(const std::string& insertValue)

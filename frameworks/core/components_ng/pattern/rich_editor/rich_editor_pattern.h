@@ -66,11 +66,10 @@ struct TextConfig;
 #endif
 #endif
 
-#define COPY_SPAN_STYLE_IF_PRESENT(sourceNode, targetNode, styleType, propertyInfo) \
+#define COPY_SPAN_STYLE_IF_PRESENT(sourceNode, targetNode, styleType) \
     do {                                                                            \
         if ((sourceNode)->Has##styleType()) {                                       \
             (targetNode)->Update##styleType(*((sourceNode)->Get##styleType()));     \
-            (targetNode)->AddPropertyInfo(propertyInfo);                            \
         }                                                                           \
     } while (false)
 #define CONTENT_MODIFY_LOCK(patternPtr) ContentModifyLock contentModifyLock(patternPtr)
