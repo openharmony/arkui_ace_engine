@@ -1063,16 +1063,9 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
+            preTopNavDestination->CleanContent();
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
-            auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
-            auto shallowBuilder = preTopNavDestinationPattern->GetShallowBuilder();
-            if (shallowBuilder) {
-                shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-            }
-            if (preTopNavDestination->GetContentNode()) {
-                preTopNavDestination->GetContentNode()->Clean(false, true);
-            }
             parent->RemoveChild(preTopNavDestination, true);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else {
@@ -1080,6 +1073,13 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             preTopNavDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
             DealTransitionVisibility(preTopNavDestination, needVisible, false);
+            if (preTopNavDestination->NeedRemoveInPush()) {
+                preTopNavDestination->CleanContent();
+                auto parent = preTopNavDestination->GetParent();
+                CHECK_NULL_VOID(parent);
+                parent->RemoveChild(preTopNavDestination, true);
+                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
         }
         navigationNode->RemoveDialogDestination();
         auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
@@ -2283,8 +2283,11 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         CHECK_NULL_VOID(preDestinationPattern);
         auto navDestinationName = preDestinationPattern->GetName();
         fromPathInfo += ", navDesitinationName: " + navDestinationName;
-        if (isPopPage && !isAnimated) {
-            // only pop page without animation need to post afterLayoutTask to delay old top's onDisappear
+        if ((isPopPage || preDestination->NeedRemoveInPush()) && !isAnimated) {
+            /**
+             * when transition without animation, 'pop' and 'push with remove' need to post
+             * afterLayoutTask to delay old top's onDisappear. So set this flag to 'false'
+             */
             preDestination->SetIsAnimated(false);
         }
     } else {
