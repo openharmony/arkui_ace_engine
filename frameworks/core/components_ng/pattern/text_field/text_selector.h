@@ -241,7 +241,7 @@ enum class TextResponseType : int32_t {
 enum class SelectionMenuType : int32_t {
     SELECTION_MENU = 0,
     PREVIEW_MENU = 1,
-}
+};
 
 struct SelectMenuParam {
     std::function<void(int32_t, int32_t)> onAppear;
