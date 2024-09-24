@@ -7100,4 +7100,11 @@ std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t> &conte
         " string length = %{public}u", static_cast<int32_t>(htmlStr.length()));
     return htmlStr;
 }
+
+void WebDelegate::StartVibraFeedback(const std::string& vibratorType)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->StartVibraFeedback(vibratorType);
+}
 } // namespace OHOS::Ace

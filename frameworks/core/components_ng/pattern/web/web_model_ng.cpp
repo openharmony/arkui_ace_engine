@@ -1172,4 +1172,11 @@ void WebModelNG::SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateKeyboardAvoidMode(mode);
 }
+
+void WebModelNG::SetEnabledHapticFeedback(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnabledHapticFeedback(isEnabled);
+}
 } // namespace OHOS::Ace::NG

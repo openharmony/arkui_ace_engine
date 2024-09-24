@@ -1231,4 +1231,12 @@ void WebClientImpl::OnNativeEmbedVisibilityChange(const std::string& embedId, bo
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnNativeEmbedVisibilityChange(embedId, visibility);
 }
+
+void WebClientImpl::StartVibraFeedback(const std::string& vibratorType)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->StartVibraFeedback(vibratorType);
+}
 } // namespace OHOS::Ace

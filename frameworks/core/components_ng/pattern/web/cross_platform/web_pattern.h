@@ -371,6 +371,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const
@@ -517,6 +518,7 @@ private:
     void OnMetaViewportUpdate(bool value);
     void OnOverlayScrollbarEnabledUpdate(bool value);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
+    void OnEnabledHapticFeedbackUpdate(bool enable);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -572,6 +574,7 @@ private:
     void UpdateBackgroundColorRightNow(int32_t color);
     void UpdateContentOffset(const RefPtr<LayoutWrapper>& dirty);
     void PostTaskToUI(const std::function<void()>&& task) const;
+    void StartVibraFeedback(const std::string& vibratorType);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;

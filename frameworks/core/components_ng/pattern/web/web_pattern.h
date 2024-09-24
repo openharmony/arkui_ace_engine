@@ -479,6 +479,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
 
     bool IsFocus() const
     {
@@ -667,6 +668,7 @@ public:
     void RegisterWebComponentClickCallback(WebComponentClickCallback&& callback);
     void UnregisterWebComponentClickCallback();
     WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
+    void StartVibraFeedback(const std::string& vibratorType);
 
 private:
     friend class WebContextSelectOverlay;
@@ -752,6 +754,7 @@ private:
     void WindowDrag(int32_t width, int32_t height);
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
+    void OnEnabledHapticFeedbackUpdate(bool enable);
     int GetWebId();
 
     void InitEvent();
@@ -1072,6 +1075,7 @@ private:
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
+    bool isEnabledHapticFeedback_ = true;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
