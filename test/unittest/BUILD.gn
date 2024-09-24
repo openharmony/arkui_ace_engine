@@ -815,6 +815,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_stack.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_title_util.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_toolbar_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/title_bar_pattern.cpp",
