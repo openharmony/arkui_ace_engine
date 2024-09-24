@@ -140,7 +140,7 @@ constexpr float TIME_UNIT = 1000.0f;
 constexpr float MAX_DRAG_SCROLL_SPEED = 2400.0f;
 constexpr Dimension AUTO_SCROLL_HOT_ZONE_HEIGHT = 58.0_vp;
 constexpr Dimension AUTO_SCROLL_HOT_ZONE_WIDTH = 26.0_vp;
-constexpr float AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION = 0.0f;
+constexpr float AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION = 80.0f;
 constexpr Dimension AUTO_SCROLL_HOT_AREA_LONGPRESS_DISTANCE = 5.0_vp;
 
 static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
