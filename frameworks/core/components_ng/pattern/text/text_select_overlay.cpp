@@ -217,8 +217,10 @@ void TextSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, 
     CHECK_NULL_VOID(textPattern);
     auto currentHandleIndex = textPattern->GetHandleIndex(Offset(handleOffset.GetX(), handleOffset.GetY()));
     if (isFirstHandle) {
+        textPattern->StartVibratorByIndexChange(currentHandleIndex, textPattern->GetTextSelector().baseOffset);
         textPattern->HandleSelectionChange(currentHandleIndex, textPattern->GetTextSelector().destinationOffset);
     } else {
+        textPattern->StartVibratorByIndexChange(currentHandleIndex, textPattern->GetTextSelector().destinationOffset);
         textPattern->HandleSelectionChange(textPattern->GetTextSelector().baseOffset, currentHandleIndex);
     }
 }

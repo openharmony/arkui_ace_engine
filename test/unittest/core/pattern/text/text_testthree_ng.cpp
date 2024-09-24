@@ -936,6 +936,180 @@ HWTEST_F(TextTestThreeNg, OnTextSelectionChange002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnTextSelectionChange003
+ * @tc.desc: Test onTextSelectionChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, OnTextSelectionChange003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    /**
+     * @tc.steps: step2. call SetTextSelection with CopyOptions::InApp
+     * @tc.expected: longPress/gesture/input will be regist when CopyOptions not none.
+     */
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    textModelNG.SetTextDetectEnable(true);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->draggable_ = true;
+    auto pattern = frameNode->GetPattern<TextPattern>();
+
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step3. create paragraph
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(2));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(10.f));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    /**
+     * @tc.steps: step4. select range is 0-5
+     */
+    pattern->textSelector_.Update(0, 5);
+    int32_t secondIndex = pattern->GetTextSelector().destinationOffset;
+
+    /**
+     * @tc.steps: step5. move secondHandle to index 2
+     */
+    OffsetF secondOffset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETX_VALUE);
+    int32_t currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, false);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 2);
+    EXPECT_NE(currentHaandleIndex, secondIndex);
+
+    secondIndex = pattern->GetTextSelector().destinationOffset;
+    currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, false);
+    EXPECT_EQ(currentHaandleIndex, secondIndex);
+
+    pattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: OnTextSelectionChange004
+ * @tc.desc: Test onTextSelectionChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, OnTextSelectionChange004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    /**
+     * @tc.steps: step2. call SetTextSelection with CopyOptions::InApp
+     * @tc.expected: longPress/gesture/input will be regist when CopyOptions not none.
+     */
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    textModelNG.SetTextDetectEnable(true);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->draggable_ = true;
+    auto pattern = frameNode->GetPattern<TextPattern>();
+
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step3. create paragraph
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(2));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(10.f));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    /**
+     * @tc.steps: step4. select range is 0-5
+     */
+    pattern->textSelector_.Update(0, 5);
+    int32_t firstIndex = pattern->GetTextSelector().baseOffset;
+
+    /**
+     * @tc.steps: step5. move firstHandle to index 2
+     */
+    OffsetF secondOffset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETX_VALUE);
+    int32_t currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, true);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 2);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 5);
+    EXPECT_NE(currentHaandleIndex, firstIndex);
+
+    firstIndex = pattern->GetTextSelector().baseOffset;
+    currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, true);
+    EXPECT_EQ(currentHaandleIndex, firstIndex);
+
+    pattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: OnTextSelectionChange005
+ * @tc.desc: Test onTextSelectionChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, OnTextSelectionChange005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    /**
+     * @tc.steps: step2. call SetTextSelection with CopyOptions::InApp
+     * @tc.expected: longPress/gesture/input will be regist when CopyOptions not none.
+     */
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    textModelNG.SetTextDetectEnable(true);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->draggable_ = true;
+    auto pattern = frameNode->GetPattern<TextPattern>();
+
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step3. create paragraph
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(10));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(10.f));
+    pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    /**
+     * @tc.steps: step4. select range is 0-5
+     */
+    pattern->textSelector_.Update(0, 5);
+    int32_t firstIndex = pattern->GetTextSelector().baseOffset;
+
+    /**
+     * @tc.steps: step5. move firstHandle to index 10
+     */
+    OffsetF secondOffset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETX_VALUE);
+    int32_t currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, true);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 5);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 10);
+    EXPECT_NE(currentHaandleIndex, firstIndex);
+
+    firstIndex = pattern->GetTextSelector().baseOffset;
+    currentHaandleIndex = pattern->GetHandleIndex(Offset(ADAPT_OFFSETY_VALUE, ADAPT_OFFSETY_VALUE));
+    textSelectOverlay->UpdateSelectorOnHandleMove(secondOffset, true);
+    EXPECT_EQ(currentHaandleIndex, firstIndex);
+
+    pattern->pManager_->Reset();
+}
+
+/**
  * @tc.name: TextLayoutAlgorithmTest009
  * @tc.desc: test text_layout_algorithm.cpp: new method UpdateParagraphForAISpan001
  * @tc.type: FUNC

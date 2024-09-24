@@ -1413,6 +1413,12 @@ public:
         return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
     }
 
+    void SetEnableHapticFeedback(bool isEnabled)
+    {
+        isEnableHapticFeedback_ = isEnabled;
+    }
+
+    void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     bool IsTextEditableForStylus() const override;
 protected:
     virtual void InitDragEvent();
@@ -1480,6 +1486,7 @@ private:
     void HandleLeftMousePressEvent(MouseInfo& info);
     void HandleLeftMouseMoveEvent(MouseInfo& info);
     void HandleLeftMouseReleaseEvent(MouseInfo& info);
+    void StartVibratorByLongPress();
     void HandleLongPress(GestureEvent& info);
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
@@ -1830,6 +1837,7 @@ private:
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
     bool isTextChangedAtCreation_ = false;
+    bool isEnableHapticFeedback_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
 };
 } // namespace OHOS::Ace::NG

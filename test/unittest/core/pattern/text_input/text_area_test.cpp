@@ -672,6 +672,160 @@ HWTEST_F(TextFieldUXTest, OnHandleMove004, TestSize.Level1)
     pattern_->selectOverlay_->OnHandleMove(handleRect, true);
 }
 
+/**
+ * @tc.name: OnHandleMove005
+ * @tc.desc: Test OnHandleMove.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnHandleMove005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Call ProcessOverlay.
+     */
+    pattern_->ProcessOverlay();
+
+    /**
+     * @tc.steps: step3. set contentRect and add paragraph.
+     */
+    auto contentRect = pattern_->GetContentRect();
+    contentRect.SetRect(0, 0, 100.0, 50.0);
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(2));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(50.f));
+    pattern_->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step4. set init selection
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    int32_t firstIndex = pattern_->selectController_->GetFirstHandleIndex();
+    pattern_->SetIsSingleHandle(false);
+
+    /**
+     * @tc.steps: step5. move firstHandle to index 0
+     */
+    RectF handleRect(5, 5, 1, 1);
+    int32_t position = pattern_->selectOverlay_->GetCaretPositionOnHandleMove(handleRect.GetOffset());
+    pattern_->selectOverlay_->OnHandleMove(handleRect, true);
+    EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 2);
+    EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 10);
+    EXPECT_NE(position, firstIndex);
+
+    firstIndex = pattern_->selectController_->GetFirstHandleIndex();
+    pattern_->selectOverlay_->OnHandleMove(handleRect, true);
+    EXPECT_EQ(position, firstIndex);
+}
+
+/**
+ * @tc.name: OnHandleMove006
+ * @tc.desc: Test OnHandleMove.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnHandleMove006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Call ProcessOverlay.
+     */
+    pattern_->ProcessOverlay();
+
+    /**
+     * @tc.steps: step3. set contentRect and add paragraph.
+     */
+    auto contentRect = pattern_->GetContentRect();
+    contentRect.SetRect(0, 0, 100.0, 50.0);
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(8));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(50.f));
+    pattern_->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step4. set init selection
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    int32_t secondIndex = pattern_->selectController_->GetSecondHandleIndex();
+    pattern_->SetIsSingleHandle(false);
+
+    /**
+     * @tc.steps: step5. move secondIndex to index 8
+     */
+    RectF handleRect(5, 5, 1, 1);
+    int32_t position = pattern_->selectOverlay_->GetCaretPositionOnHandleMove(handleRect.GetOffset());
+    pattern_->selectOverlay_->OnHandleMove(handleRect, false);
+    EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 5);
+    EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 8);
+    EXPECT_NE(position, secondIndex);
+
+    /**
+     * @tc.steps: step6. call OnHandleMove again, GetSecondHandleIndex equals the touch position
+     */
+    // currently GetSecondHandleIndex equals the GetEndIndex()
+    secondIndex = pattern_->selectController_->GetSecondHandleIndex();
+    pattern_->selectOverlay_->OnHandleMove(handleRect, true);
+    EXPECT_EQ(position, secondIndex);
+}
+
+/**
+ * @tc.name: OnHandleMove007
+ * @tc.desc: Test OnHandleMove.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, OnHandleMove007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Call ProcessOverlay.
+     */
+    pattern_->ProcessOverlay();
+
+    /**
+     * @tc.steps: step3. set contentRect and add paragraph.
+     */
+    auto contentRect = pattern_->GetContentRect();
+    contentRect.SetRect(0, 0, 100.0, 50.0);
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(2));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(50.f));
+    pattern_->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step4. set init selection
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    int32_t secondIndex = pattern_->selectController_->GetSecondHandleIndex();
+    pattern_->SetIsSingleHandle(false);
+
+    /**
+     * @tc.steps: step5. move secondIndex to index 2
+     */
+    RectF handleRect(5, 5, 1, 1);
+    int32_t position = pattern_->selectOverlay_->GetCaretPositionOnHandleMove(handleRect.GetOffset());
+    pattern_->selectOverlay_->OnHandleMove(handleRect, false);
+    EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 2);
+    EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 5);
+    EXPECT_NE(position, secondIndex);
+
+    /**
+     * @tc.steps: step6. call OnHandleMove again, GetSecondHandleIndex equals the touch position
+     */
+    // currently GetSecondHandleIndex equals the GetStartIndex()
+    secondIndex = pattern_->selectController_->GetSecondHandleIndex();
+    pattern_->selectOverlay_->OnHandleMove(handleRect, true);
+    EXPECT_EQ(position, secondIndex);
+}
 
 /**
  * @tc.name: HandleSelect001

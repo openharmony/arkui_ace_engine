@@ -67,7 +67,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/cj_utils/cj_utils.cpp",
 
       #Miscdevice Vibrator
-      "$ace_root/adapter/ohos/entrance/vibrator/vibrator_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/vibrator/vibrator_utils.cpp",
 
       # AudioHaptic
       "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_factory.cpp",
