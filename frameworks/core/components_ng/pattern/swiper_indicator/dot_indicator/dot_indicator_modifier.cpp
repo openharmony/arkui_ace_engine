@@ -485,7 +485,11 @@ void DotIndicatorModifier::UpdateNormalToHoverPointDilateRatio()
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [&]() { normalToHoverPointDilateRatio_->Set(INDICATOR_ZOOM_IN_SCALE); });
+    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->normalToHoverPointDilateRatio_->Set(INDICATOR_ZOOM_IN_SCALE);
+    });
 }
 
 void DotIndicatorModifier::UpdateHoverToNormalPointDilateRatio()
@@ -494,7 +498,11 @@ void DotIndicatorModifier::UpdateHoverToNormalPointDilateRatio()
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [&]() { hoverToNormalPointDilateRatio_->Set(1.0f); });
+    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->hoverToNormalPointDilateRatio_->Set(1.0f);
+    });
 }
 
 void DotIndicatorModifier::UpdateLongPointDilateRatio()
@@ -503,9 +511,17 @@ void DotIndicatorModifier::UpdateLongPointDilateRatio()
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
     if (longPointIsHover_) {
-        AnimationUtils::Animate(option, [&]() { longPointDilateRatio_->Set(INDICATOR_ZOOM_IN_SCALE); });
+        AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->longPointDilateRatio_->Set(INDICATOR_ZOOM_IN_SCALE);
+        });
     } else {
-        AnimationUtils::Animate(option, [&]() { longPointDilateRatio_->Set(1.0f); });
+        AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->longPointDilateRatio_->Set(1.0f);
+        });
     }
 }
 
@@ -516,7 +532,11 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(GestureState gestureSt
     blackPointOption.SetDuration(BLACK_POINT_DURATION);
     blackPointOption.SetCurve(AceType::MakeRefPtr<CubicCurve>(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING));
-    AnimationUtils::Animate(blackPointOption, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
+    AnimationUtils::Animate(blackPointOption, [weak = WeakClaim(this), vectorBlackPointCenterX]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
+    });
 
     // normal page turning
     AnimationOption optionHead;
@@ -605,7 +625,11 @@ void DotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector<float>& v
     AnimationOption option;
     option.SetCurve(curve);
     option.SetDuration(animationDuration_);
-    AnimationUtils::StartAnimation(option, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
+    AnimationUtils::StartAnimation(option, [weak = WeakClaim(this), vectorBlackPointCenterX]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
+    });
 }
 
 void DotIndicatorModifier::PlayOpacityAnimation()
