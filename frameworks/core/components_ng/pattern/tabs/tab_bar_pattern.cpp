@@ -826,13 +826,14 @@ void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(pipeline);
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    auto radius = tabTheme->GetFocusIndicatorRadius();
+    auto padding = tabTheme->GetFocusPadding();
+    auto radius = tabTheme->GetFocusIndicatorRadius() + padding;
     auto outLineWidth = tabTheme->GetActiveIndicatorWidth();
     columnPaintRect.SetOffset(OffsetF((columnPaintRect.GetOffset().GetX() + outLineWidth.ConvertToPx() / 2),
         (columnPaintRect.GetOffset().GetY() + outLineWidth.ConvertToPx() / 2)));
     columnPaintRect.SetSize(SizeF((columnPaintRect.GetSize().Width() - outLineWidth.ConvertToPx()),
         (columnPaintRect.GetSize().Height() - outLineWidth.ConvertToPx())));
-    auto focusPadding = tabTheme->GetFocusPadding().ConvertToPx();
+    auto focusPadding = padding.ConvertToPx();
     columnPaintRect -= OffsetF(focusPadding, focusPadding);
     columnPaintRect += SizeF(focusPadding + focusPadding, focusPadding + focusPadding);
 
