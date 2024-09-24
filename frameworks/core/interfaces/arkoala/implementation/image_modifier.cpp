@@ -73,7 +73,7 @@ void InterpolationImpl(Ark_NativePointer node,
 {
 }
 void SourceSizeImpl(Ark_NativePointer node,
-                    const Type_ImageAttribute_sourceSize_Arg0* value)
+                    const Ark_ImageSourceSize* value)
 {
 }
 void SyncLoadImpl(Ark_NativePointer node,
