@@ -47,9 +47,7 @@ void MarqueeModelNG::Create()
 void MarqueeModelNG::SetValue(const std::optional<std::string>& srcValue)
 {
     if (srcValue.has_value()) {
-        std::string content = srcValue.value();
-        std::replace(content.begin(), content.end(), '\n', ' ');
-        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Src, content);
+        ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Src, srcValue.value());
     } else {
         ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(MarqueeLayoutProperty, Src, PROPERTY_UPDATE_MEASURE);
     }
@@ -292,9 +290,7 @@ void MarqueeModelNG::SetOnFinish(FrameNode* frameNode, std::function<void()>&& o
 void MarqueeModelNG::SetValue(FrameNode* frameNode, const std::optional<std::string>& srcValue)
 {
     if (srcValue.has_value()) {
-        std::string content = srcValue.value();
-        std::replace(content.begin(), content.end(), '\n', ' ');
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Src, content, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Src, srcValue.value(), frameNode);
     }
 }
 
