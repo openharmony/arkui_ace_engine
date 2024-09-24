@@ -21,6 +21,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -139,6 +140,7 @@ void NavDestinationPattern::OnModifyDone()
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
     MountTitleBar(hostNode);
+    NavigationToolbarUtil::MountToolBar(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {

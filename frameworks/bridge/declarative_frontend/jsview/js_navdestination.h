@@ -40,6 +40,8 @@ public:
     static void SetWillShow(const JSCallbackInfo& info);
     static void SetWillHide(const JSCallbackInfo& info);
     static void SetWillDisAppear(const JSCallbackInfo& info);
+    static void SetToolBarConfiguration(const JSCallbackInfo& info);
+    static void SetHideToolBar(bool hide);
     static void SetIgnoreLayoutSafeArea(const JSCallbackInfo& info);
     static void SetSystemBarStyle(const JSCallbackInfo& info);
     static void SetRecoverable(const JSCallbackInfo& info);
