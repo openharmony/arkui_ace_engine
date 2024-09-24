@@ -973,7 +973,14 @@ protected:
         return pipelineContext->GetTheme<T>();
     }
 
+    std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
+
 private:
+    bool HandleUrlSpanClickEvent(const GestureEvent& info);
+    void HandleUrlSpanForegroundClear();
+    bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
+    Color GetUrlHoverColor();
+    Color GetUrlPressColor();
     friend class RichEditorSelectOverlay;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
@@ -1331,6 +1338,8 @@ private:
     RefPtr<OverlayManager> keyboardOverlay_;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     Offset selectionMenuOffset_;
+    // has urlspan
+    bool hasUrlSpan_ = false;
     // add for scroll
     RectF richTextRect_;
     float scrollOffset_ = 0.0f;

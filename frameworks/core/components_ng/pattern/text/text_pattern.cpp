@@ -381,7 +381,7 @@ bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)
         if (!item) {
             continue;
         }
-        auto selectedRects = pManager_->GetRects(start, item->position);
+        auto selectedRects = GetSelectedRects(start, item->position);
         for (auto&& rect : selectedRects) {
             if (!rect.IsInRegion(textOffset)) {
                 continue;
@@ -392,7 +392,7 @@ bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)
                 return false;
             }
             auto inter = GetStartAndEnd(start);
-            auto rects = pManager_->GetRects(inter.first, inter.second);
+            auto rects = GetSelectedRects(inter.first, inter.second);
             overlayMod_->SetSelectedForegroundColorAndRects(rects, color.GetValue());
             MarkDirtySelf();
             return true;
