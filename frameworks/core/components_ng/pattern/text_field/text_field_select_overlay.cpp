@@ -315,6 +315,11 @@ void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
             overlayInfo.isSingleLine = true;
         }
     }
+    if (!textFieldPattern->IsTextArea()) {
+        overlayInfo.checkHandleReverse = [](const RectF& first, const RectF& second) {
+            return GreatNotEqual(first.Left(), second.Left());
+        };
+    }
 }
 
 RectF TextFieldSelectOverlay::GetSelectArea()
@@ -386,12 +391,11 @@ int32_t TextFieldSelectOverlay::GetTextAreaCaretPosition(const OffsetF& localOff
     auto contentRect = pattern->GetContentRect();
     auto paddingLeft = pattern->GetPaddingLeft();
     auto textRect = pattern->GetTextRect();
-    auto lineHeight = pattern->PreferredLineHeight();
     Offset offset;
     if (LessNotEqual(localOffset.GetY(), contentRect.GetY())) {
-        offset = Offset(localOffset.GetX() - paddingLeft, localOffset.GetY() - textRect.GetY() - lineHeight);
+        offset = Offset(localOffset.GetX() - paddingLeft, contentRect.GetY() - textRect.GetY());
     } else if (GreatOrEqual(localOffset.GetY(), contentRect.GetY() + contentRect.Height())) {
-        offset = Offset(localOffset.GetX() - paddingLeft, localOffset.GetY() - textRect.GetY() + lineHeight);
+        offset = Offset(localOffset.GetX() - paddingLeft, contentRect.GetY() + contentRect.Height() - textRect.GetY());
     } else {
         offset = Offset(localOffset.GetX() - paddingLeft, localOffset.GetY() - textRect.GetY());
     }
@@ -409,16 +413,14 @@ int32_t TextFieldSelectOverlay::GetTextInputCaretPosition(const OffsetF& localOf
         if ((!isFirst && !IsHandleReverse()) || (isFirst && IsHandleReverse())) {
             index = selectController->GetEndIndex();
         }
-        auto len = pattern->GetGraphemeClusterLength(wideText, index, true);
-        return std::max(index - len, 0);
+        return index;
     }
     if (GreatOrEqual(localOffset.GetX(), contentRect.GetX() + contentRect.Width())) {
         auto index = selectController->GetEndIndex();
         if ((isFirst && !IsHandleReverse()) || (!isFirst && IsHandleReverse())) {
             index = selectController->GetStartIndex();
         }
-        auto len = pattern->GetGraphemeClusterLength(wideText, index);
-        return std::min(index + len, pattern->GetContentWideTextLength());
+        return index;
     }
     Offset offset(localOffset.GetX() - pattern->GetTextRect().GetX(), 0.0f);
     return pattern->ConvertTouchOffsetToCaretPosition(offset);
@@ -506,10 +508,16 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
             pattern->StartTwinkling();
             selectController->MoveCaretToContentRect(pattern->GetCaretIndex());
         } else {
+            if (isFirst) {
+                selectController->MoveFirstHandleToContentRect(selectController->GetFirstHandleIndex(), false);
+            } else {
+                selectController->MoveSecondHandleToContentRect(selectController->GetSecondHandleIndex(), false);
+            }
             overlayManager->MarkInfoChange(DIRTY_DOUBLE_HANDLE | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT);
         }
     } else {
         pattern->StopTwinkling();
+        selectController->MoveSecondHandleToContentRect(selectController->GetSecondHandleIndex(), false);
         overlayManager->MarkInfoChange(DIRTY_SECOND_HANDLE);
     }
     overlayManager->SetHandleCircleIsShow(isFirst, true);
