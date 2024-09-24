@@ -467,6 +467,17 @@ public:
         menuWrapperNode_ = frameNode;
     }
 
+    bool CheckIsNewDrag(const PointerEvent& pointerEvent) const;
+
+    void RequireSummaryIfNecessary(const PointerEvent& pointerEvent);
+
+    inline void ResetPullId()
+    {
+        summaryMap_.clear();
+        parentHitNodes_.clear();
+        currentPullId_ = -1;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -535,6 +546,7 @@ private:
     uint32_t recordSize_ = 0;
     int64_t currentId_ = -1;
     int32_t currentPointerId_ = -1;
+    int32_t currentPullId_ = -1;
     bool draggingPressedState_ = false;
 
     std::function<void(void)> notifyInDraggedCallback_ = nullptr;

@@ -499,6 +499,7 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.rawPointerEvent = pointerEvent;
     event.pointerEventId = pointerEvent->GetId();
     event.pointerId = pointerEvent->GetPointerId();
+    event.pullId = pointerEvent->GetPullId();
     MMI::PointerEvent::PointerItem pointerItem;
     pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
     event.pressed = pointerItem.IsPressed();
