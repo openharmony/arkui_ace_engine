@@ -2659,6 +2659,11 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     json->PutExtAttr("font", GetFontInJson().c_str(), filter);
 }
 
+std::string TextPattern::GetBindSelectionMenuInJson() const
+{
+    
+}
+
 std::string TextPattern::GetFontInJson() const
 {
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();

@@ -8605,6 +8605,12 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("placeholder", GetPlaceHolderInJson().c_str(), filter);
 }
 
+std::string GetBindSelectionMenuInJson() const
+{
+    auto jsonArray = JsonUtil::CreateArray(true);
+    for (auto& [span])
+}
+
 std::string RichEditorPattern::GetPlaceHolderInJson() const
 {
     auto host = GetHost();

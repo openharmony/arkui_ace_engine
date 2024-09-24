@@ -375,6 +375,7 @@ public:
     ResultObject GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     std::string GetFontInJson() const;
+    std::string GetBindSelectionMenuInJson() const;
 
     const std::vector<std::string>& GetDragContents() const
     {
