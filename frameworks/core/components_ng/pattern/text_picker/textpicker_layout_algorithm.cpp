@@ -59,7 +59,7 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     GetColumnSize(layoutProperty, pickerTheme, dialogTheme, frameSize, pickerNode);
 
-    textPickerPattern->CheckAndUpdateColumnSize(frameSize);
+    textPickerPattern->CheckAndUpdateColumnSize(frameSize, NeedAdaptForAging());
     pickerItemHeight_ = frameSize.Height();
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     auto layoutChildConstraint = blendNode->GetLayoutProperty()->CreateChildConstraint();
