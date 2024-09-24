@@ -287,6 +287,7 @@ public:
     void FlushOnceVsyncTask() override;
 
     void FlushFreezeNode();
+    void FlushDirtyPropertyNodes();
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
