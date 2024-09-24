@@ -50,16 +50,19 @@ public:
 
     void UpdateCanvasImage(const RefPtr<CanvasImage>& foregroundImageCanvas,
         const RefPtr<CanvasImage>& secondaryImageCanvas, const RefPtr<CanvasImage>& backgroundImageCanvas,
+        const RefPtr<CanvasImage>& backgroundImageFocusCanvas,
         const ImagePaintConfig& foregroundConfig, const ImagePaintConfig& secondaryConfig,
-        const ImagePaintConfig& backgroundConfig)
+        const ImagePaintConfig& backgroundConfig, const ImagePaintConfig& backgroundFocusConfig)
     {
         SetNeedDraw(true);
         foregroundImageCanvas_ = foregroundImageCanvas;
         secondaryImageCanvas_ = secondaryImageCanvas;
         backgroundImageCanvas_ = backgroundImageCanvas;
+        backgroundImageFocusCanvas_ = backgroundImageFocusCanvas;
         foregroundImageCanvas_->SetPaintConfig(foregroundConfig);
         secondaryImageCanvas_->SetPaintConfig(secondaryConfig);
         backgroundImageCanvas_->SetPaintConfig(backgroundConfig);
+        backgroundImageFocusCanvas_->SetPaintConfig(backgroundFocusConfig);
     }
 
     void UpdateImageSourceInfo(
@@ -130,6 +133,11 @@ public:
         if (contentSize_) {
             contentSize_->Set(contentSize);
         }
+    }
+
+    RefPtr<PropertySizeF> GetContentSize()
+    {
+        return contentSize_;
     }
 
     void SetDrawScore(double drawScore)
@@ -226,6 +234,7 @@ private:
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
+    RefPtr<CanvasImage> backgroundImageFocusCanvas_;
     ImageSourceInfo foreground_;
     ImageSourceInfo secondary_;
     ImageSourceInfo background_;
@@ -242,6 +251,7 @@ private:
     RefPtr<AnimatablePropertyColor> boardColor_;
     RefPtr<PropertyBool> reverse_;
     RefPtr<RatingTheme> ratingTheme_;
+    static constexpr int32_t NUMBER_TWO = 2;
     ACE_DISALLOW_COPY_AND_MOVE(RatingModifier);
 };
 } // namespace OHOS::Ace::NG

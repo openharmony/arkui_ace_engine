@@ -34,8 +34,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
+constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b1111;
 constexpr int32_t DEFAULT_RATING_TOUCH_STAR_NUMBER = 0;
+constexpr int32_t NUMBER_TWO = 2;
 
 void RatingPattern::OnAttachToFrameNode()
 {
@@ -143,6 +144,12 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
         backgroundConfig_.dstRect_ = backgroundImageLoadingCtx_->GetDstRect();
         imageSuccessStateCode_ |= static_cast<uint32_t>(imageFlag);
     }
+    if (imageFlag == 0b1000) {
+        backgroundImageFocusCanvas_ = backgroundImageFocusLoadingCtx_->MoveCanvasImage();
+        backgroundFocusConfig_.srcRect_ = backgroundImageFocusLoadingCtx_->GetSrcRect();
+        backgroundFocusConfig_.dstRect_ = backgroundImageFocusLoadingCtx_->GetDstRect();
+        imageSuccessStateCode_ |= static_cast<uint32_t>(imageFlag);
+    }
     // only when foreground, secondary and background image are all loaded successfully, mark dirty to update rendering.
     if (imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
         MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -174,12 +181,15 @@ void RatingPattern::UpdatePaintConfig()
     foregroundConfig_.imageFit_ = ImageFit::FILL;
     secondaryConfig_.imageFit_ = ImageFit::FILL;
     backgroundConfig_.imageFit_ = ImageFit::FILL;
+    backgroundFocusConfig_.imageFit_ = ImageFit::FILL;
     foregroundConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
     foregroundConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
     secondaryConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
     secondaryConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
     backgroundConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
     backgroundConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
+    backgroundFocusConfig_.scaleX_ = contentSize.Width() / frameSize.Width() / static_cast<float>(starsNum);
+    backgroundFocusConfig_.scaleY_ = contentSize.Height() / frameSize.Height();
 }
 
 RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
@@ -195,13 +205,16 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(foregroundImageCanvas_, defaultPaintMethod);
     CHECK_NULL_RETURN(secondaryImageCanvas_, defaultPaintMethod);
     CHECK_NULL_RETURN(backgroundImageCanvas_, defaultPaintMethod);
+    CHECK_NULL_RETURN(backgroundImageFocusCanvas_, defaultPaintMethod);
     CHECK_NULL_RETURN(foregroundImageLoadingCtx_, defaultPaintMethod);
     CHECK_NULL_RETURN(secondaryImageLoadingCtx_, defaultPaintMethod);
     CHECK_NULL_RETURN(backgroundImageLoadingCtx_, defaultPaintMethod);
+    CHECK_NULL_RETURN(backgroundImageFocusLoadingCtx_, defaultPaintMethod);
     UpdatePaintConfig();
     PrepareAnimation(foregroundImageCanvas_);
     PrepareAnimation(secondaryImageCanvas_);
     PrepareAnimation(backgroundImageCanvas_);
+    PrepareAnimation(backgroundImageFocusCanvas_);
     // when frameNode mark dirty to update rendering, only when 3 images are all loaded successfully and
     // JudgeImageSourceInfo is true, pattern will update ratingModifier's CanvasImage.
     if (ratingModifier_->JudgeImageSourceInfo(foregroundImageLoadingCtx_->GetSourceInfo(),
@@ -211,7 +224,8 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
         ratingModifier_->UpdateImageSourceInfo(foregroundImageLoadingCtx_->GetSourceInfo(),
             secondaryImageLoadingCtx_->GetSourceInfo(), backgroundImageLoadingCtx_->GetSourceInfo());
         ratingModifier_->UpdateCanvasImage(foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_,
-            foregroundConfig_, secondaryConfig_, backgroundConfig_);
+            backgroundImageFocusCanvas_, foregroundConfig_, secondaryConfig_,
+            backgroundConfig_, backgroundFocusConfig_);
     }
     if (!(foregroundImageCanvas_->IsStatic() && secondaryImageCanvas_->IsStatic() &&
             backgroundImageCanvas_->IsStatic())) {
@@ -524,30 +538,45 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     ratingRenderProperty->UpdateTouchStar(wholeStarNum);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
-    CHECK_NULL_VOID(ratingTheme);
-    auto radius = ratingTheme->GetFocusBorderRadius();
+    float focusSpace = 0.0f;
+    float radius = GetFocusRectRadius(property, focusSpace);
     auto focusButtonRect = RectF(static_cast<float>(wholeStarNum) * singleStarWidth_ + offsetLeft, offsetTop,
         singleStarWidth_, singleStarHeight);
-    auto focusSpace = ratingTheme->GetFocusSpace().ConvertToPx();
     focusButtonRect -= OffsetF(focusSpace, focusSpace);
     focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
-    PaintFocusRect(paintRect, focusButtonRect, radius);
+    paintRect.SetRect(focusButtonRect);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius),
+        static_cast<RSScalar>(radius));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius),
+        static_cast<RSScalar>(radius));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(radius),
+        static_cast<RSScalar>(radius));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(radius),
+        static_cast<RSScalar>(radius));
 }
 
-void RatingPattern::PaintFocusRect(RoundRect& paintRect, RectF& focusButtonRect, Dimension& radius)
+float RatingPattern::GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& property, float& focusSpace)
 {
-    paintRect.SetRect(focusButtonRect);
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
-        static_cast<RSScalar>(radius.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
-        static_cast<RSScalar>(radius.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
-        static_cast<RSScalar>(radius.ConvertToPx()));
-    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
-        static_cast<RSScalar>(radius.ConvertToPx()));
+    CHECK_NULL_RETURN(ratingModifier_, 0.0);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0);
+    auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+    CHECK_NULL_RETURN(ratingTheme, 0.0);
+    focusSpace = ratingTheme->GetFocusSpace().ConvertToPx();
+    float radius = 0.0f;
+    if (!ratingTheme->GetIsCircleRadius()) {
+        radius = ratingTheme->GetFocusBorderRadius().ConvertToPx();
+    } else {
+        double starNum = property->GetStarsValue(themeStarNum_);
+        if (starNum != 0) {
+            auto contentSize = ratingModifier_->GetContentSize();
+            CHECK_NULL_RETURN(contentSize, 0.0);
+            auto isSquare = contentSize->Get().Width() / starNum == contentSize->Get().Height();
+            radius = isSquare ? contentSize->Get().Height() / NUMBER_TWO + ratingTheme->GetFocusSpace().ConvertToPx()
+                : ratingTheme->GetFocusBorderRadius().ConvertToPx();
+        }
+    }
+    return radius;
 }
 
 void RatingPattern::PaintFocusState(double ratingScore)
@@ -644,6 +673,7 @@ void RatingPattern::SetModifierFocus(bool isFocus)
         ratingModifier_->SetFocusOrBlurColor(isfocus_ ? ratingTheme->GetFocusColor() : Color::TRANSPARENT);
     }
     ratingModifier_->SetIsFocus(isFocus);
+    ratingModifier_->SetNeedDraw(true);
     MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -859,6 +889,34 @@ void RatingPattern::LoadBackground(const RefPtr<RatingLayoutProperty>& layoutPro
     }
 }
 
+void RatingPattern::LoadFocusBackground(const RefPtr<RatingLayoutProperty>& layoutProperty,
+    const RefPtr<RatingTheme>& ratingTheme, const RefPtr<IconTheme>& iconTheme)
+{
+    backgroundFocusConfig_.isSvg_ = false;
+    ImageSourceInfo sourceInfo;
+    if (!layoutProperty->HasBackgroundImageSourceInfo()) {
+        isBackgroundImageInfoFromTheme_ = true;
+        sourceInfo.SetResourceId(ratingTheme->GetBackgroundResourceId());
+        layoutProperty->UpdateBackgroundImageSourceInfo(sourceInfo);
+    } else {
+        sourceInfo = layoutProperty->GetBackgroundImageSourceInfo().value();
+    }
+    auto iconPath = iconTheme->GetIconPath(sourceInfo.GetResourceId());
+    if (!iconPath.empty()) {
+        sourceInfo.SetSrc(iconPath, ratingTheme->GetUnlitStarFocusColor());
+    }
+    if (sourceInfo.IsSvg()) {
+        backgroundFocusConfig_.isSvg_ = true;
+    }
+    if (!backgroundImageFocusLoadingCtx_ || backgroundImageFocusLoadingCtx_->GetSourceInfo() != sourceInfo) {
+        LoadNotifier loadNotifierBackgroundImage(
+            CreateDataReadyCallback(0b1000), CreateLoadSuccessCallback(0b1000), CreateLoadFailCallback(0b1000));
+        backgroundImageFocusLoadingCtx_ =
+            AceType::MakeRefPtr<ImageLoadingContext>(sourceInfo, std::move(loadNotifierBackgroundImage));
+        backgroundImageFocusLoadingCtx_->LoadImageData();
+    }
+}
+
 void RatingPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -882,6 +940,7 @@ void RatingPattern::OnModifyDone()
     LoadForeground(layoutProperty, ratingTheme, iconTheme);
     LoadSecondary(layoutProperty, ratingTheme, iconTheme);
     LoadBackground(layoutProperty, ratingTheme, iconTheme);
+    LoadFocusBackground(layoutProperty, ratingTheme, iconTheme);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
