@@ -78,11 +78,9 @@ void MockImplicitAnimation::End()
 
 void MockImplicitAnimation::JumpToEnd()
 {
-    remainingTicks_ = 1;
-    UpdateProp(prop_);
-    if (cbs_.repeatCb) {
-        cbs_.repeatCb();
+    if (Finished()) {
+        return;
     }
-    End();
+    remainingTicks_ = 1;
 }
 } // namespace OHOS::Ace
