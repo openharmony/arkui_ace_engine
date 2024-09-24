@@ -482,7 +482,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
             }
             menuOffset.SetY(offsetY);
         } else {
-            if (GreatNotEqual(topArea, menuOffset.GetY()) && info_->isSingleHandle) {
+            if (topArea > menuOffset.GetY() && info_->isSingleHandle) {
                 menuOffset.SetY(downPaint.Bottom() + spaceBetweenText + spaceBetweenHandle);
             }
             AdjustMenuOffsetAtSingleHandleBottom(downPaint, menuRect, menuOffset, spaceBetweenText);
