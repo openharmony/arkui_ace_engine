@@ -60,9 +60,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         if (self->startingWindow_) {
-            if (self->IsWindowSizeEqual()) {
-                self->BufferAvailableCallback();
-            }
+            self->BufferAvailableCallback();
             return;
         }
         CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
@@ -256,6 +254,10 @@ void WindowScene::BufferAvailableCallback()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        if (!self->IsWindowSizeEqual() || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
+            return;
+        }
         CHECK_NULL_VOID(self->startingWindow_);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
@@ -505,11 +507,10 @@ void WindowScene::OnLayoutFinished()
     auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-
+        CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
         if (self->startingWindow_) {
             self->BufferAvailableCallback();
         }
-        
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("WindowScene::OnLayoutFinished[id:%d][self:%d][enabled:%d]",
@@ -559,6 +560,7 @@ void WindowScene::OnDrawingCompleted()
 
 bool WindowScene::IsWindowSizeEqual()
 {
+    CHECK_EQUAL_RETURN(session_->GetSystemConfig().IsPcWindow(), true, true);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto geometryNode = host->GetGeometryNode();
