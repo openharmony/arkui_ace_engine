@@ -35,6 +35,7 @@ const std::string SURFACE_HEIGHT = "surface_height";
 const int32_t SIZE_LIMIT = 5999;
 const int32_t PERMITTED_DIFFERENCE = 100;
 const int32_t FAILED_LIMIT = 3;
+const int32_t WAIT_FENCE_TIME = 5000;
 
 GraphicTransformType ConvertRotation(uint32_t rotation)
 {
@@ -375,6 +376,8 @@ void RosenRenderSurface::ConsumeWebBuffer()
     OHOS::Rect damage;
 
     SurfaceError surfaceErr = consumerSurface_->AcquireBuffer(surfaceBuffer, fence, timestamp, damage);
+    auto errorCode = fence->Wait(WAIT_FENCE_TIME);
+    LOGD("RosenRenderSurface::ConsumeWebBuffer, wait Fence ,errorCode : %{public}d", errorCode);
     if (surfaceErr != SURFACE_ERROR_OK) {
         LOGE("cannot acquire buffer error = %{public}d", surfaceErr);
         return;
