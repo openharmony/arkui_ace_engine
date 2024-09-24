@@ -111,8 +111,7 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
     }
     switch (point.type) {
         case TouchType::MOVE:
-        case TouchType::DOWN:
-        case TouchType::CANCEL: {
+        case TouchType::DOWN: {
             if (activeRecognizer_ && activeRecognizer_->CheckTouchId(point.id)) {
                 DispatchEventToActiveRecognizers(point);
             } else {
@@ -120,7 +119,8 @@ bool ExclusiveRecognizer::HandleEvent(const TouchEvent& point)
             }
             break;
         }
-        case TouchType::UP: {
+        case TouchType::UP:
+        case TouchType::CANCEL: {
             DispatchEventToAllRecognizers(point);
             break;
         }
