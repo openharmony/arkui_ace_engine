@@ -349,13 +349,13 @@ float ButtonLayoutAlgorithm::GetDefaultHeight(LayoutWrapper* layoutWrapper)
 float ButtonLayoutAlgorithm::GetDefaultBorderRadius(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(layoutProperty, 0.0);
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
     auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, 0.0);
+    CHECK_NULL_RETURN(frameNode, 0.0f);
     auto* context = frameNode->GetContext();
-    CHECK_NULL_RETURN(context, 0.0);
+    CHECK_NULL_RETURN(context, 0.0f);
     auto buttonTheme = context->GetTheme<ButtonTheme>();
-    CHECK_NULL_RETURN(buttonTheme, 0.0);
+    CHECK_NULL_RETURN(buttonTheme, 0.0f);
     ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
     return static_cast<float>(buttonTheme->GetBorderRadius(controlSize).ConvertToPx());
 }
