@@ -387,6 +387,7 @@ void ButtonPattern::OnModifyDone()
     renderContext_ = host->GetRenderContext();
     layoutProperty_ = GetLayoutProperty<ButtonLayoutProperty>();
     buttonTheme_ = pipeline_->GetTheme<ButtonTheme>();
+    shadow_ = Shadow::CreateShadow(static_cast<ShadowStyle>(buttonTheme_->GetShadowNormal()));
     HandleBorderAndShadow();
     HandleFocusStatusStyle();
     if (pipeline_->GetIsFocusActive()) {
@@ -580,11 +581,10 @@ void ButtonPattern::HandleBorderAndShadow()
     if (shadowStyle != ShadowStyle::None) {
         auto&& graphics = renderContext_->GetOrCreateGraphics();
         CHECK_NULL_VOID(graphics);
-        if ((!graphics->HasBackShadow() ||
-            IsDynamicSwitchButtonStyle(graphics->GetBackShadowValue())) && isApplyShadow_) {
-            Shadow shadow = Shadow::CreateShadow(
+        if ((!graphics->HasBackShadow() || graphics->GetBackShadowValue() == shadow_) && isApplyShadow_) {
+            shadow_ = Shadow::CreateShadow(
                 buttonStyle == ButtonStyleMode::TEXT ? ShadowStyle::None : shadowStyle);
-            renderContext_->UpdateBackShadow(shadow);
+            renderContext_->UpdateBackShadow(shadow_);
         }
     }
 
