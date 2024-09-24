@@ -98,6 +98,7 @@ interface DefaultSymbolTheme {
   smallFontSize: Length;
   normalFontSize: Length;
   defaultEffect: number;
+  isShowMargin: Resource;
 }
 
 interface LabelTheme {
@@ -230,6 +231,7 @@ export const defaultTheme: ChipTheme = {
     normalFontSize: $r('sys.float.chip_normal_icon_size'),
     smallFontSize: $r('sys.float.chip_small_icon_size'),
     defaultEffect: -1,
+    isShowMargin: $r('sys.float.chip_show_close_icon_margin'),
   },
   chipNode: {
     suitAgeScale: 1.75,
@@ -371,6 +373,10 @@ export struct ChipComponent {
 
   private isChipSizeEnum(): boolean {
     return typeof (this.chipSize) === 'string'
+  }
+
+  private isShowCloseIconMargin(): boolean{
+    return this.verifyResource(this.theme.defaultSymbol.isShowMargin, 0) !== 0 && this.allowClose;
   }
 
   private getLabelFontSize(): Dimension {
@@ -566,7 +572,7 @@ export struct ChipComponent {
       this.lengthMetricsToVp(this.label.localizedLabelMargin.end) >= 0) {
       localizedLabelMargin.end = this.label?.localizedLabelMargin?.end
     } else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
-      this.suffixIcon?.src || this.useDefaultSuffixIcon) {
+      this.suffixIcon?.src || this.useDefaultSuffixIcon || this.isShowCloseIconMargin()) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
         localizedLabelMargin.end = this.theme.label.localizedSmallMargin.end
       } else {
