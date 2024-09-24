@@ -94,7 +94,7 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
             iter->second = std::move(sharedImage);
         } else {
             sharedImageMap_.emplace(name, std::move(sharedImage));
-            if (sharedImageMap_.size() >= MAX_NUM_OF_IMAGE) {
+            if (sharedImageMap_.size() > MAX_NUM_OF_IMAGE) {
                 isClear = true;
             }
         }
