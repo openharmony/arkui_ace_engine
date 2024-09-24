@@ -974,10 +974,15 @@ bool EventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<N
 
 bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode)
 {
-    CHECK_NULL_RETURN(focusNode, false);
+    if (!focusNode) {
+        TAG_LOGD(AceLogTag::ACE_FOCUS,
+            "Cannot dispatch key event: code:%{private}d/action:%{public}d/isPreIme:%{public}d on node: nullptr",
+            event.code, event.action, event.isPreIme);
+        return false;
+    }
     TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Dispatch key event: code:%{private}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
-        event.action, focusNode->GetTag().c_str(), focusNode->GetId());
+        "Dispatch key event: code:%{private}d/action:%{public}d/isPreIme:%{public}d on node: %{public}s/%{public}d.",
+        event.code, event.action, event.isPreIme, focusNode->GetTag().c_str(), focusNode->GetId());
     isKeyConsumed_ = false;
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
@@ -1876,6 +1881,7 @@ bool EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
 {
     auto container = Container::GetContainer(instanceId_);
     if (container && container->GetUIContentType() == UIContentType::SECURITY_UI_EXTENSION) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Do not dispatch keyboard shortcut because in security UEC");
         return false;
     }
     if (event.action != KeyAction::DOWN) {

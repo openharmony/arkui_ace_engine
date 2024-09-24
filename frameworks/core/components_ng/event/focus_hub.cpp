@@ -164,6 +164,9 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
 bool FocusHub::HandleKeyEvent(const KeyEvent& keyEvent)
 {
     if (!IsCurrentFocus()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "node: %{public}s/%{public}d cannot handle key event because is not current focus",
+            GetFrameName().c_str(), GetFrameId());
         return false;
     }
     bool shiftTabPressed = keyEvent.IsShiftWith(KeyCode::KEY_TAB);
@@ -663,6 +666,10 @@ bool FocusHub::OnKeyEvent(const KeyEvent& keyEvent)
 
 bool FocusHub::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
 {
+    TAG_LOGD(AceLogTag::ACE_FOCUS,
+        "node: %{public}s/%{public}d try to handle OnKeyPreIme by "
+        "code:%{private}d/action:%{public}d/isPreIme:%{public}d",
+        GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, keyEvent.isPreIme);
     auto onKeyPreIme = GetOnKeyPreIme();
     if (onKeyPreIme) {
         bool retPreIme = onKeyPreIme(info);
@@ -673,9 +680,13 @@ bool FocusHub::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
         if (eventManager) {
             eventManager->SetIsKeyConsumed(retPreIme);
         }
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "node: %{public}s/%{public}d handle OnKeyPreIme",
+            GetFrameName().c_str(), GetFrameId());
         return info.IsStopPropagation();
     } else if (GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG ||
                GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "node: %{public}s/%{public}d try to process OnKeyEventInternal",
+            GetFrameName().c_str(), GetFrameId());
         return ProcessOnKeyEventInternal(keyEvent);
     } else {
         return false;
