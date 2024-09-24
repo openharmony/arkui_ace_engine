@@ -332,7 +332,6 @@ void VideoPattern::PrepareMediaPlayer()
 
 bool VideoPattern::SetSourceForMediaPlayer()
 {
-    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video Set src for media, it is : %{private}s", videoSrcInfo_.GetSrc().c_str());
     CHECK_NULL_RETURN(mediaPlayer_, false);
     return mediaPlayer_->SetSource(videoSrcInfo_.GetSrc(), videoSrcInfo_.GetBundleName(),
         videoSrcInfo_.GetModuleName());
