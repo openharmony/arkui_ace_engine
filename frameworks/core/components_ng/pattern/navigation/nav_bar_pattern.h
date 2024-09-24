@@ -169,6 +169,8 @@ public:
         return avoidKeyboardOffset_;
     }
 
+    float GetTitleBarHeightLessThanMaxBarHeight() const;
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 

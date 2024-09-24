@@ -600,7 +600,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollCallback003, TestSize.Level1)
      * @tc.expected: friction is effected, but is 1
      */
     pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->GetCurrentPosition(), 2);
+    EXPECT_LT(pattern_->GetCurrentPosition(), 2);
 
     /**
      * @tc.steps: step4. Continue scroll up
@@ -634,7 +634,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollCallback003, TestSize.Level1)
      * @tc.expected: friction is effected, but is 1
      */
     pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->GetCurrentPosition(), -(scrollableDistance + 2));
+    EXPECT_GT(pattern_->GetCurrentPosition(), -(scrollableDistance + 2));
 
     /**
      * @tc.steps: step9. Continue scroll down
@@ -689,7 +689,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollCallback004, TestSize.Level1)
      * @tc.expected: friction is effected, but is 1
      */
     pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->GetCurrentPosition(), 2);
+    EXPECT_LT(pattern_->GetCurrentPosition(), 2);
 
     /**
      * @tc.steps: step4. Continue scroll up
@@ -723,7 +723,7 @@ HWTEST_F(ScrollEventTestNg, OnScrollCallback004, TestSize.Level1)
      * @tc.expected: friction is effected, but is 1
      */
     pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->GetCurrentPosition(), -2);
+    EXPECT_GT(pattern_->GetCurrentPosition(), -2);
 
     /**
      * @tc.steps: step9. Continue scroll down

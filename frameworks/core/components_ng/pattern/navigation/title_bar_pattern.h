@@ -283,6 +283,9 @@ public:
 
     void UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& hostNode);
     void UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode);
+
+    float GetTitleBarHeightLessThanMaxBarHeight() const;
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
