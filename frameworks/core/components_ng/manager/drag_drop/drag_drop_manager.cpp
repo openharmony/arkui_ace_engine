@@ -1589,14 +1589,13 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     if (!isMouseDragged_ && dragPreviewInfo.scale == 1.0f) {
         dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
     }
+    // set menu preview scale only for no scale menu preview.
     if (isDragWithContextMenu_) {
-        auto gestureHub = imageNode->GetOrCreateGestureEventHub();
-        if (gestureHub) {
-            auto menuPreviewScale = gestureHub->GetMenuPreviewScale();
-            // use menuPreviewScale only for 1.0f menu scale.
-            if (NearEqual(menuPreviewScale, 1.0f)) {
-                dragPreviewInfo.scale = menuPreviewScale;
-            }
+        auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
+        if (imageGestureEventHub) {
+            auto menuPreviewScale = imageGestureEventHub->GetMenuPreviewScale();
+            dragPreviewInfo.scale =
+                GreatNotEqual(menuPreviewScale, 0.0f) ? menuPreviewScale : TOUCH_DRAG_PIXELMAP_SCALE;
         }
     }
     dragPreviewInfo.height = imageNode->GetGeometryNode()->GetFrameRect().Height();
@@ -2085,6 +2084,24 @@ bool DragDropManager::IsUIExtensionComponent(const RefPtr<NG::UINode>& node)
 {
     return (V2::UI_EXTENSION_COMPONENT_ETS_TAG == node->GetTag() || V2::EMBEDDED_COMPONENT_ETS_TAG == node->GetTag()) &&
            (!IsUIExtensionShowPlaceholder(node));
+}
+
+RectF DragDropManager::GetMenuPreviewRect()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, RectF());
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, RectF());
+    auto menuWrapperNode = dragDropManager->GetMenuWrapperNode();
+    CHECK_NULL_RETURN(menuWrapperNode, RectF());
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, RectF());
+    auto menuPreview = menuWrapperPattern->GetPreview();
+    CHECK_NULL_RETURN(menuPreview, RectF());
+    auto menuRenderContext = menuPreview->GetRenderContext();
+    CHECK_NULL_RETURN(menuRenderContext, RectF());
+    auto previewPaintRect = menuRenderContext->GetPaintRectWithTransform();
+    return previewPaintRect;
 }
 
 double DragDropManager::GetMaxWidthBaseOnGridSystem(const RefPtr<PipelineBase>& pipeline)

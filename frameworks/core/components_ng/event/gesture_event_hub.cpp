@@ -586,7 +586,7 @@ RefPtr<PixelMap> CreatePixelMapFromString(const std::string& filePath)
 }
 
 OffsetF GestureEventHub::GetPixelMapOffset(
-    const GestureEvent& info, const SizeF& size, const float scale, const bool needScale) const
+    const GestureEvent& info, const SizeF& size, const float scale, bool isCalculateInSubwindow) const
 {
     OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     auto frameNode = GetFrameNode();
@@ -594,7 +594,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     auto frameTag = frameNode->GetTag();
     auto coordinateX = frameNodeOffset_.GetX();
     auto coordinateY = frameNodeOffset_.GetY();
-    if (NearZero(frameNodeSize_.Width()) || NearZero(size.Width())) {
+    if (NearZero(frameNodeSize_.Width()) || NearZero(size.Width()) || isCalculateInSubwindow) {
         result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
         result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
     } else {
@@ -954,9 +954,20 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     }
     float defaultPixelMapScale =
         info.GetInputEventType() == InputEventType::MOUSE_BUTTON ? 1.0f : DEFALUT_DRAG_PPIXELMAP_SCALE;
-    // use menuPreviewScale only for 1.0f menu scale.
-    if (isMenuShow && !IsPixelMapNeedScale() && NearEqual(menuPreviewScale_, 1.0f)) {
-        defaultPixelMapScale = menuPreviewScale_;
+    // use menuPreviewScale for drag framework. this is not final solution.
+    if (isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
+        auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
+        if (GreatNotEqual(menuPreviewRect.Width(), 0.0f)) {
+            frameNodeOffset_ = menuPreviewRect.GetOffset();
+        }
+        auto originPixelMapWidth = pixelMap->GetWidth();
+        if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(originPixelMapWidth, 0.0f) &&
+            menuPreviewRect.Width() < originPixelMapWidth * menuPreviewScale_) {
+            defaultPixelMapScale = menuPreviewRect.Width() / originPixelMapWidth;
+            menuPreviewScale_ = defaultPixelMapScale;
+        } else {
+            defaultPixelMapScale = menuPreviewScale_;
+        }
     }
     auto windowScale = dragDropManager->GetWindowScale();
     float scale = windowScale * defaultPixelMapScale;
@@ -985,7 +996,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
                 DragEventActuator::UpdatePreviewPositionAndScale(imageNode, previewDragMovePosition + originPoint);
             }
 
-            dragDropManager ->ResetContextMenuDragPosition();
+            dragDropManager->ResetContextMenuDragPosition();
         }
 
         auto frameTag = frameNode->GetTag();
@@ -1016,6 +1027,16 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             previewScale = static_cast<float>(imageNode->GetPreviewScaleVal());
             scale = previewScale * windowScale;
         }
+        // use menu preview scale replace default pixelMap scale.
+        if (isMenuShow) {
+            auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(imageGestureEventHub);
+            if (!IsPixelMapNeedScale()) {
+                imageGestureEventHub->SetMenuPreviewScale(defaultPixelMapScale);
+            } else {
+                imageGestureEventHub->SetMenuPreviewScale(scale);
+            }
+        }
         auto childSize = badgeNumber.has_value() ? badgeNumber.value() : GetSelectItemSize();
         if (childSize > 1) {
             recordsSize = childSize;
@@ -1038,7 +1059,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     RefPtr<PixelMap> pixelMapDuplicated = GetPreScaledPixelMapIfExist(scale, pixelMap);
     auto width = pixelMapDuplicated->GetWidth();
     auto height = pixelMapDuplicated->GetHeight();
-    auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale, IsPixelMapNeedScale());
+    auto pixelMapOffset = OffsetF();
+    if (isMenuShow) {
+        pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale / defaultPixelMapScale, true);
+    } else {
+        pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), scale);
+    }
     windowScale = NearZero(windowScale) ? 1.0f : windowScale;
     dragDropManager->SetPixelMapOffset(pixelMapOffset / windowScale);
     DragEventActuator::ResetNode(frameNode);
