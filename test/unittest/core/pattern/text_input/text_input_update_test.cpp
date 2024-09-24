@@ -562,12 +562,16 @@ HWTEST_F(TextInputUpdateTestNg, HandleTouchUp, TestSize.Level1)
     TouchLocationInfo touchLocationInfo1(0);
     touchLocationInfo1.touchType_ = TouchType::UP;
     touchLocationInfo1.localLocation_ = Offset(0.0f, 0.0f);
+    TouchLocationInfo touchLocationInfo11(0);
+    touchLocationInfo11.touchType_ = TouchType::UP;
+    touchLocationInfo11.localLocation_ = Offset(0.0f, 0.0f);
 
     /**
      * @tc.steps: step3. create touch info, touch type DOWN
      */
     TouchEventInfo touchInfo1("");
     touchInfo1.AddTouchLocationInfo(std::move(touchLocationInfo1));
+    touchInfo1.AddChangedTouchLocationInfo(std::move(touchLocationInfo11));
 
     /**
      * @tc.steps: step4. test touch down

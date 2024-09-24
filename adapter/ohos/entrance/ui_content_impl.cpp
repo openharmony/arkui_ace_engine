@@ -114,7 +114,7 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
-constexpr int32_t AVOID_DELAY_TIME = 20;
+constexpr int32_t AVOID_DELAY_TIME = 50;
 
 Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 {
