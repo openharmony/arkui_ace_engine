@@ -66,9 +66,11 @@ namespace {
 
     const std::vector<ButtonLabelResourceTest> BUTTON_LABEL_RESOURCES_TEST_PLAN = {
         { Converter::ArkUnion<ResourceStr, Ark_Resource>(ArkResource(const_cast<Ark_String*>(&RES_ARK_NAME),
-            -1, NodeModifier::ResourceType::STRING)), RESOURCE_BY_STRING },
+            -1, NodeModifier::ResourceType::STRING)),
+            RESOURCE_BY_STRING },
         { Converter::ArkUnion<ResourceStr, Ark_Resource>(ArkResource(nullptr, RES_ID,
-            NodeModifier::ResourceType::STRING)), RESOURCE_BY_NUMBER }
+            NodeModifier::ResourceType::STRING)),
+            RESOURCE_BY_NUMBER }
     };
 } // namespace
 
