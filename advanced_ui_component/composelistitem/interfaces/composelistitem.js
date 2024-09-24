@@ -66,6 +66,7 @@ const SPECIAL_ICON_SIZE = 0;
 const DEFAULT_ROW_SPACE = 0;
 const SPECICAL_ROW_SPACE = 4;
 const OPERATEITEM_ICONLIKE_SIZE = 24;
+const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
 const OPERATEITEM_ARROW_WIDTH = 12;
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
@@ -951,6 +952,7 @@ class OperateItemStruct extends ViewPU {
             Radio.onChange(this.radio?.onChange);
             Radio.height(OPERATEITEM_ICONLIKE_SIZE);
             Radio.width(OPERATEITEM_ICONLIKE_SIZE);
+            Radio.padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE);
             Radio.onFocus(() => {
                 this.parentCanFocus = false;
             });
@@ -986,6 +988,7 @@ class OperateItemStruct extends ViewPU {
             Checkbox.onChange(this.checkBox?.onChange);
             Checkbox.height(OPERATEITEM_ICONLIKE_SIZE);
             Checkbox.width(OPERATEITEM_ICONLIKE_SIZE);
+            Checkbox.padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE);
             Checkbox.onFocus(() => {
                 this.parentCanFocus = false;
             });
