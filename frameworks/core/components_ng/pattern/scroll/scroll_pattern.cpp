@@ -27,19 +27,6 @@ constexpr int32_t COLUMN_NUM = 2;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 constexpr int32_t SCROLL_LAYOUT_INFO_COUNT = 30;
 constexpr int32_t SCROLL_MEASURE_INFO_COUNT = 30;
-
-float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
-{
-    if (NearZero(friction)) {
-        return delta;
-    }
-    float deltaToLimit = extentOffset / friction;
-    if (delta < deltaToLimit) {
-        return delta * friction;
-    }
-    return extentOffset + delta - deltaToLimit;
-}
-
 } // namespace
 
 void ScrollPattern::OnModifyDone()
@@ -297,17 +284,12 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     } else {
         overScrollPastEnd = std::abs(std::min(currentOffset_, 0.0f));
     }
-    // do not adjust offset if direction opposite from the overScroll direction when out of boundary
-    if ((overScrollPastStart > 0.0f && delta < 0.0f) || (overScrollPastEnd > 0.0f && delta > 0.0f)) {
-        return;
-    }
     overScrollPast = std::max(overScrollPastStart, overScrollPastEnd);
     if (overScrollPast == 0.0f) {
         return;
     }
-    float friction = ScrollablePattern::CalculateFriction((overScrollPast - std::abs(delta)) / viewPortLength_);
-    float direction = delta > 0.0f ? 1.0f : -1.0f;
-    delta = direction * CalculateOffsetByFriction(overScrollPast, std::abs(delta), friction);
+    float friction = ScrollablePattern::CalculateFriction(overScrollPast / viewPortLength_);
+    delta = delta * friction;
 }
 
 float ScrollPattern::ValidateOffset(int32_t source, float willScrollOffset)

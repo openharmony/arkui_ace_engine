@@ -70,6 +70,8 @@ public:
 
     Dimension GetTitleBarHeightBeforeMeasure() override;
 
+    float GetTitleBarHeightLessThanMaxBarHeight() const;
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
