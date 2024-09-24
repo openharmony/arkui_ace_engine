@@ -101,6 +101,10 @@ std::optional<std::string> ResourceConverter::ToString()
         case NodeModifier::ResourceType::STRING:
             if (id_ != -1) {
                 result = themeConstants_->GetString(id_);
+            } else if (params_.size() > 0) {
+                result = themeConstants_->GetStringByName(params_.at(0));
+            } else {
+                LOGE("Unknown resource value");
             }
             break;
 
