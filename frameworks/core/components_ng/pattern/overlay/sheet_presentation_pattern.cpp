@@ -133,7 +133,8 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
     if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         !NearEqual(windowGlobalRect.Height(), deviceHeight)) {
         sheetTopSafeArea = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
-    } else if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM) &&
+    } else if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM ||
+                sheetType == SheetType::SHEET_BOTTOM_OFFSET) &&
                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         sheetTopSafeArea = GetBottomSafeArea();
     } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
@@ -183,7 +184,8 @@ void SheetPresentationPattern::InitPageHeight()
     if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING &&
         !NearEqual(windowGlobalRect.Height(), deviceHeight)) {
         sheetTopSafeArea_ = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
-    } else if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM) &&
+    } else if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM ||
+                sheetType == SheetType::SHEET_BOTTOM_OFFSET) &&
                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         sheetTopSafeArea_ = GetBottomSafeArea();
     }
@@ -406,7 +408,8 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
         auto sheetRadius = sheetTheme->GetSheetRadius();
         auto borderWidth = sheetStyle.borderWidth.value();
         BorderRadiusProperty borderRadius;
-        if ((sheetType == SheetType::SHEET_CENTER) || (sheetType == SheetType::SHEET_POPUP)) {
+        if (sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
+            sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
             borderRadius.SetRadius(sheetRadius);
         } else {
             borderRadius = BorderRadiusProperty(sheetRadius, sheetRadius, 0.0_vp, 0.0_vp);
@@ -498,11 +501,11 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     if (detentSize <= 0) {
         return;
     }
-    auto height = height_ + sheetHeightUp_;
+    auto height = height_ + sheetHeightUp_ - bottomOffsetY_;
     auto maxDetentSize = sheetDetentHeight_[detentSize - 1];
     if (GreatNotEqual((height - currentOffset_), maxDetentSize)) {
         if (LessNotEqual(mainDelta, 0) && GreatNotEqual(sheetMaxHeight_, 0.0f)) {
-            auto friction = CalculateFriction((height - currentOffset_) / sheetMaxHeight_);
+            auto friction = CalculateFriction((height - currentOffset_) / sheetMaxHeight_, GetRadio());
             mainDelta = mainDelta * friction;
         }
     }
@@ -538,7 +541,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     }
     float upHeight = 0.0f;
     float downHeight = 0.0f;
-    auto height = height_ + sheetHeightUp_;
+    auto height = height_ + sheetHeightUp_ - bottomOffsetY_;
     auto currentSheetHeight =
         GreatNotEqual((height - currentOffset_), sheetMaxHeight_) ? sheetMaxHeight_ : (height - currentOffset_);
     start_ = currentSheetHeight;
@@ -845,7 +848,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto offset = GetPageHeight() - (height_ + sheetHeightUp_);
+    auto offset = GetPageHeight() - (height_ + sheetHeightUp_) + bottomOffsetY_;
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     renderContext->AttachNodeAnimatableProperty(property_);
@@ -895,7 +898,7 @@ float SheetPresentationPattern::UpdateSheetTransitionOffset()
         // don't consider the height difference introduced by avoidance after switching detents
         sheetHeightUp_ = 0.0f;
     }
-    auto offset = GetPageHeightWithoutOffset() - (height_ + sheetHeightUp_);
+    auto offset = GetPageHeightWithoutOffset() - (height_ + sheetHeightUp_) + bottomOffsetY_;
     return offset;
 }
 
@@ -1028,7 +1031,8 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
     CHECK_NULL_VOID(scrollProps);
     auto scrollHeight = height - operationHeight;
     auto sheetType = GetSheetType();
-    if ((sheetType == SheetType::SHEET_POPUP) || (sheetType == SheetType::SHEET_CENTER)) {
+    if (sheetType == SheetType::SHEET_POPUP || sheetType == SheetType::SHEET_CENTER ||
+        sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         auto sheetHeight = geometryNode->GetFrameSize().Height();
         scrollHeight = sheetHeight - operationHeight;
     }
@@ -1479,6 +1483,10 @@ void SheetPresentationPattern::InitSheetDetents()
             height = (centerHeight_ + pageHeight_) / SHEET_HALF_HEIGHT;
             sheetDetentHeight_.emplace_back(height);
             break;
+        case SheetType::SHEET_BOTTOM_OFFSET:
+            height = InitialSingleGearHeight(sheetStyle);
+            sheetDetentHeight_.emplace_back(height);
+            break;
         default:
             break;
     }
@@ -1511,7 +1519,7 @@ SheetType SheetPresentationPattern::GetSheetType()
     // only bottom when width is less than 600vp
     if ((windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) ||
         (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM)) {
-        return SheetType::SHEET_BOTTOM;
+        return sheetStyle.bottomOffset.has_value() ? SheetType::SHEET_BOTTOM_OFFSET : SheetType::SHEET_BOTTOM;
     }
     if (sheetThemeType_ == "auto") {
         GetSheetTypeWithAuto(sheetType);
@@ -1829,7 +1837,8 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet WindowSizeChangeReason type is: %{public}d", type);
     auto sheetType = GetSheetType();
     if ((type == WindowSizeChangeReason::ROTATION) &&
-        ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMLANDSPACE))) {
+        ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMLANDSPACE) ||
+         (sheetType == SheetType::SHEET_BOTTOM_OFFSET))) {
         windowRotate_ = true;
         SetColumnMinSize(true);
         // Before rotation, reset to the initial mode sheet ratio of the current vertical or horizontal screen
@@ -2053,29 +2062,14 @@ void SheetPresentationPattern::ProcessColumnRect(float height)
     auto geometryNode = sheetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto sheetSize = geometryNode->GetFrameSize();
-    float sheetOffsetX = 0.0f;
-    float sheetOffsetY = 0.0f;
-    float sheetWidth = 0.0f;
-    float sheetHeight = 0.0f;
+    float sheetOffsetX = sheetOffsetX_;
+    float sheetOffsetY = pageHeight_ - height;
+    float sheetWidth = sheetSize.Width();
+    float sheetHeight = sheetSize.Height();
     if (sheetType == SheetType::SHEET_POPUP) {
-        sheetOffsetX = sheetOffsetX_;
-        sheetWidth = sheetSize.Width();
         sheetOffsetY = sheetOffsetY_;
-        sheetHeight = sheetSize.Height();
-    } else if (sheetType == SheetType::SHEET_CENTER) {
-        sheetOffsetX = sheetOffsetX_;
-        sheetOffsetY = pageHeight_ - height;
-        sheetWidth = sheetSize.Width();
-        sheetHeight = sheetSize.Height();
-    } else if ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOM_FREE_WINDOW)) {
-        sheetOffsetY = pageHeight_ - height;
-        sheetWidth = sheetSize.Width();
-        sheetOffsetX = sheetOffsetX_;
-        sheetHeight = height;
-    } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE) {
-        sheetOffsetX = sheetOffsetX_;
-        sheetOffsetY = pageHeight_ - height;
-        sheetWidth = sheetSize.Width();
+    } else if ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOM_FREE_WINDOW) ||
+               (sheetType == SheetType::SHEET_BOTTOMLANDSPACE) || (sheetType == SheetType::SHEET_BOTTOM_OFFSET)) {
         sheetHeight = height;
     }
     auto hub = column->GetEventHub<EventHub>();
@@ -2373,7 +2367,7 @@ ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
         GreatNotEqual((currentHeightPos - currentOffset_), sheetDetentHeight_[sheetDetentsSize - 1]);
     bool isNeedCalculateFriction = isExceedMaxSheetHeight && isDraggingUp;
     if (isNeedCalculateFriction && GreatNotEqual(sheetMaxHeight_, 0.0f)) {
-        auto friction = CalculateFriction((currentHeightPos - currentOffset_) / sheetMaxHeight_);
+        auto friction = CalculateFriction((currentHeightPos - currentOffset_) / sheetMaxHeight_, GetRadio());
         scrollOffset = scrollOffset * friction;
     }
 
@@ -2430,7 +2424,8 @@ bool SheetPresentationPattern::IsTypeNeedAvoidAiBar()
         layoutProp->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false)) {
         return false;
     }
-    return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
+    return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE ||
+           sheetType_ == SheetType::SHEET_BOTTOM_OFFSET;
 }
 
 void SheetPresentationPattern::OverlayDismissSheet()
@@ -2511,7 +2506,7 @@ void SheetPresentationPattern::SetSheetOuterBorderWidth(
             outBorderColor.SetColor(sheetTheme->GetSheetOuterBorderColor());
             renderContext->UpdateOuterBorderColor(outBorderColor);
             renderContext->UpdateBorderColor(borderColor);
-            if (sheetType == SheetType::SHEET_CENTER) {
+            if (sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
                 borderraduis.SetRadius(sheetTheme->GetSheetRadius());
                 borderWidth.SetBorderWidth(sheetTheme->GetSheetInnerBorderWidth());
                 outBorderWidth.SetBorderWidth(sheetTheme->GetSheetOuterBorderWidth());
