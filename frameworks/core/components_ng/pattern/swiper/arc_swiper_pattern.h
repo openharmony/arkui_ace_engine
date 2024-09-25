@@ -87,6 +87,10 @@ private:
     void PlayScrollAnimation(float offset) override;
     void ResetCurrentFrameNodeAnimation() override;
     void ResetParentNodeColor() override;
+    RefPtr<Curve> GetCurve() const override;
+    int32_t GetDuration() const override;
+
+    int32_t CalcTime(int32_t time);
     void ResetFrameNodeAnimation(const RefPtr<FrameNode>& frameNode, bool resetBackgroundcolor);
     void ClearAnimationFinishList();
     void HorizontalScrollAnimation();
@@ -104,14 +108,14 @@ private:
 
     void PlayHorizontalEntryAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
     void PlayHorizontalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
-    
+
     void PlayVerticalExitAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
     void PlayVerticalEntryAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
-   
+
     void PlayAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode);
     void PlayHorizontalAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode);
     void PlayVerticalAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode);
-   
+
     void AnimationFinish();
     void BuildAnimationFinishCallback(bool exit, AnimationParam& param, const RefPtr<RenderContext>& renderContext,
         FinishCallback& finishCallback);

@@ -76,6 +76,9 @@ constexpr float VERTICAL_ENTRY_WHOLE_REDUCTION_FACTOR = 330.0f / 200.0f;
 constexpr float DEFAULT_MINIMUM_AMPLITUDE_PX = 1.0f;
 constexpr int32_t HALF = 2;
 constexpr int32_t ANIMATION_SIZE = 8;
+constexpr int32_t NO_ANIMAION_DEFAULT_DURATION = 400;
+constexpr int32_t VERTICAL_ANIMAION_DEFAULT_DURATION = 330;
+constexpr int32_t HORIZONTAL_ANIMAION_DEFAULT_DURATION = 750;
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr int32_t MIN_TURN_PAGE_VELOCITY = 1200;
 constexpr int32_t NEW_MIN_TURN_PAGE_VELOCITY = 780;
@@ -319,7 +322,7 @@ void ArcSwiperPattern::PlayHorizontalExitAnimation(const OffsetF& offset, const 
     scaleParam.scaleValue = HORIZONTAL_EXIT_SCALE_FINAL_VALUE;
 
     AnimationOption scaleOption;
-    scaleOption.SetDuration(HORIZONTAL_EXIT_SCALE_DURATION);
+    scaleOption.SetDuration(CalcTime(HORIZONTAL_EXIT_SCALE_DURATION));
     scaleOption.SetCurve(Curves::FRICTION);
     scaleParam.option = scaleOption;
     animationVector_.push_back(Animation(true, scaleParam));
@@ -331,7 +334,7 @@ void ArcSwiperPattern::PlayHorizontalExitAnimation(const OffsetF& offset, const 
     offsetParam.offset = offset;
 
     AnimationOption offsetOption;
-    offsetOption.SetDuration(HORIZONTAL_EXIT_OFFSET_DURATION);
+    offsetOption.SetDuration(CalcTime(HORIZONTAL_EXIT_OFFSET_DURATION));
     offsetOption.SetCurve(Curves::FRICTION);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost(), offsetOption);
     offsetParam.option = offsetOption;
@@ -346,8 +349,8 @@ void ArcSwiperPattern::PlayHorizontalExitAnimation(const OffsetF& offset, const 
     blurParam.blurValue = HORIZONTAL_EXIT_BLUR_VALUE;
 
     AnimationOption blurAnimationOption;
-    blurAnimationOption.SetDelay(HORIZONTAL_EXIT_BLUR_DELAY);
-    blurAnimationOption.SetDuration(HORIZONTAL_EXIT_BLUR_DURATION);
+    blurAnimationOption.SetDelay(CalcTime(HORIZONTAL_EXIT_BLUR_DELAY));
+    blurAnimationOption.SetDuration(CalcTime(HORIZONTAL_EXIT_BLUR_DURATION));
     blurAnimationOption.SetCurve(Curves::LINEAR);
     blurParam.option = blurAnimationOption;
     animationVector_.push_back(Animation(true, blurParam));
@@ -360,7 +363,7 @@ void ArcSwiperPattern::PlayHorizontalExitAnimation(const OffsetF& offset, const 
     alphaParam.opacityValue = 0.0f;
 
     AnimationOption alphaOption;
-    alphaOption.SetDuration(HORIZONTAL_EXIT_ALPHA_DURATION);
+    alphaOption.SetDuration(CalcTime(HORIZONTAL_EXIT_ALPHA_DURATION));
     alphaOption.SetCurve(Curves::LINEAR);
     alphaParam.option = alphaOption;
     animationVector_.push_back(Animation(true, alphaParam));
@@ -381,7 +384,7 @@ void ArcSwiperPattern::PlayHorizontalEntryAnimation(const OffsetF& offset, const
     scaleParam.scaleValue = 1.0f;
 
     AnimationOption scaleOption;
-    scaleOption.SetDuration(HORIZONTAL_ENTRY_SCALE_DURATION);
+    scaleOption.SetDuration(CalcTime(HORIZONTAL_ENTRY_SCALE_DURATION));
     scaleOption.SetCurve(Curves::FRICTION);
     scaleParam.option = scaleOption;
     animationVector_.push_back(Animation(false, scaleParam));
@@ -393,7 +396,7 @@ void ArcSwiperPattern::PlayHorizontalEntryAnimation(const OffsetF& offset, const
     offsetParam.offset = offset;
 
     AnimationOption offsetOption;
-    offsetOption.SetDuration(HORIZONTAL_ENTRY_OFFSET_DURATION);
+    offsetOption.SetDuration(CalcTime(HORIZONTAL_ENTRY_OFFSET_DURATION));
     offsetOption.SetCurve(Curves::FRICTION);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost(), offsetOption);
     offsetParam.option = offsetOption;
@@ -408,7 +411,7 @@ void ArcSwiperPattern::PlayHorizontalEntryAnimation(const OffsetF& offset, const
     blurParam.blurValue = 0.0f;
 
     AnimationOption blurAnimationOption;
-    blurAnimationOption.SetDuration(HORIZONTAL_ENTRY_BLUR_DURATION);
+    blurAnimationOption.SetDuration(CalcTime(HORIZONTAL_ENTRY_BLUR_DURATION));
     blurAnimationOption.SetCurve(Curves::LINEAR);
     blurParam.option = blurAnimationOption;
     animationVector_.push_back(Animation(false, blurParam));
@@ -421,7 +424,7 @@ void ArcSwiperPattern::PlayHorizontalEntryAnimation(const OffsetF& offset, const
     alphaParam.opacityValue = 1.0f;
 
     AnimationOption alphaOption;
-    alphaOption.SetDuration(HORIZONTAL_ENTRY_ALPHA_DURATION);
+    alphaOption.SetDuration(CalcTime(HORIZONTAL_ENTRY_ALPHA_DURATION));
     alphaOption.SetCurve(Curves::LINEAR);
     alphaParam.option = alphaOption;
     animationVector_.push_back(Animation(false, alphaParam));
@@ -451,7 +454,7 @@ void ArcSwiperPattern::PlayVerticalExitAnimation(const OffsetF& offset, const Re
     scaleParam.scaleValue = VERTICAL_EXIT_SCALE_VALUE;
 
     AnimationOption scaleOption;
-    scaleOption.SetDuration(VERTICAL_EXIT_SCALE_DURATION);
+    scaleOption.SetDuration(CalcTime(VERTICAL_EXIT_SCALE_DURATION));
     scaleOption.SetCurve(Curves::FRICTION);
     scaleParam.option = scaleOption;
     animationVector_.push_back(Animation(true, scaleParam));
@@ -463,7 +466,7 @@ void ArcSwiperPattern::PlayVerticalExitAnimation(const OffsetF& offset, const Re
     offsetParam.offset = offset;
 
     AnimationOption offsetOption;
-    offsetOption.SetDuration(VERTICAL_EXIT_OFFSET_DURATION);
+    offsetOption.SetDuration(CalcTime(VERTICAL_EXIT_OFFSET_DURATION));
     offsetOption.SetCurve(Curves::FRICTION);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost(), offsetOption);
     offsetParam.option = offsetOption;
@@ -479,7 +482,7 @@ void ArcSwiperPattern::PlayVerticalExitAnimation(const OffsetF& offset, const Re
     blurParam.blurValue = VERTICAL_EXIT_BLUR_VALUE;
 
     AnimationOption blurAnimationOption;
-    blurAnimationOption.SetDuration(VERTICAL_EXIT_BLUR_DURATION);
+    blurAnimationOption.SetDuration(CalcTime(VERTICAL_EXIT_BLUR_DURATION));
     blurAnimationOption.SetCurve(Curves::LINEAR);
     blurParam.option = blurAnimationOption;
     animationVector_.push_back(Animation(true, blurParam));
@@ -492,7 +495,7 @@ void ArcSwiperPattern::PlayVerticalExitAnimation(const OffsetF& offset, const Re
     alphaParam.opacityValue = 0.0f;
 
     AnimationOption alphaOption;
-    alphaOption.SetDuration(VERTICAL_EXIT_ALPHA_DURATION);
+    alphaOption.SetDuration(CalcTime(VERTICAL_EXIT_ALPHA_DURATION));
     alphaOption.SetCurve(Curves::LINEAR);
     alphaParam.option = alphaOption;
     animationVector_.push_back(Animation(true, alphaParam));
@@ -521,7 +524,7 @@ void ArcSwiperPattern::PlayVerticalEntryAnimation(const OffsetF& offset, const R
     CHECK_NULL_VOID(renderContext);
     // color
     frameNode->GetRenderContext()->OnBackgroundColorUpdate(Color::TRANSPARENT);
-    
+
     // scale
     renderContext->UpdateTransformScale({ verticalEntryNodeScale_, verticalEntryNodeScale_ });
     AnimationParam scaleParam;
@@ -530,8 +533,8 @@ void ArcSwiperPattern::PlayVerticalEntryAnimation(const OffsetF& offset, const R
     scaleParam.scaleValue = 1.0f;
 
     AnimationOption scaleOption;
-    scaleOption.SetDelay(VERTICAL_ENTRY_SCALE_DELAY);
-    scaleOption.SetDuration(VERTICAL_ENTRY_SCALE_DURATION);
+    scaleOption.SetDelay(CalcTime(VERTICAL_ENTRY_SCALE_DELAY));
+    scaleOption.SetDuration(CalcTime(VERTICAL_ENTRY_SCALE_DURATION));
     scaleOption.SetCurve(Curves::FRICTION);
     scaleParam.option = scaleOption;
     animationVector_.push_back(Animation(false, scaleParam));
@@ -543,8 +546,8 @@ void ArcSwiperPattern::PlayVerticalEntryAnimation(const OffsetF& offset, const R
     offsetParam.offset = offset;
 
     AnimationOption offsetOption;
-    offsetOption.SetDelay(VERTICAL_ENTRY_OFFSET_DELAY);
-    offsetOption.SetDuration(VERTICAL_ENTRY_OFFSET_DURATION);
+    offsetOption.SetDelay(CalcTime(VERTICAL_ENTRY_OFFSET_DELAY));
+    offsetOption.SetDuration(CalcTime(VERTICAL_ENTRY_OFFSET_DURATION));
     offsetOption.SetCurve(Curves::FRICTION);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost(), offsetOption);
     offsetParam.option = offsetOption;
@@ -558,8 +561,8 @@ void ArcSwiperPattern::PlayVerticalEntryAnimation(const OffsetF& offset, const R
     alphaParam.opacityValue = 1.0f;
 
     AnimationOption alphaOption;
-    alphaOption.SetDelay(VERTICAL_ENTRY_ALPHA_DELAY);
-    alphaOption.SetDuration(VERTICAL_ENTRY_ALPHA_DURATION);
+    alphaOption.SetDelay(CalcTime(VERTICAL_ENTRY_ALPHA_DELAY));
+    alphaOption.SetDuration(CalcTime(VERTICAL_ENTRY_ALPHA_DURATION));
     alphaOption.SetCurve(Curves::LINEAR);
     alphaParam.option = alphaOption;
     animationVector_.push_back(Animation(false, alphaParam));
@@ -574,7 +577,7 @@ void ArcSwiperPattern::PlayVerticalEntryAnimation(const OffsetF& offset, const R
     colorParam.backColor = *entryNodeBackgroundColor_;
 
     AnimationOption colorOption;
-    colorOption.SetDuration(VERTICAL_ENTRY_COLOR_DURATION);
+    colorOption.SetDuration(CalcTime(VERTICAL_ENTRY_COLOR_DURATION));
     colorOption.SetCurve(Curves::LINEAR);
     colorParam.option = colorOption;
     animationVector_.push_back(Animation(false, colorParam));
@@ -600,7 +603,6 @@ void ArcSwiperPattern::PlayAnimation(const OffsetF& offset, int32_t index, const
     } else {
         InitialFrameNodePropertyAnimation(offset, frameNode);
     }
-    MarkDirtyNodeSelf();
 }
 
 void ArcSwiperPattern::ClearAnimationFinishList()
@@ -815,11 +817,11 @@ void ArcSwiperPattern::PlayPropertyTranslateAnimation(
         OnAnimationTranslateZero(nextIndex, stopAutoPlay);
         return;
     }
-    
+
     if (translate != 0) {
         motionVelocity_ = velocity / translate;
     }
-    
+
     OffsetF offset;
     if (GetDirection() == Axis::HORIZONTAL) {
         offset.AddX(translate);
@@ -845,7 +847,7 @@ void ArcSwiperPattern::PlayPropertyTranslateAnimation(
     }
 
     HandlePropertyTranslateCallback(translate, nextIndex, velocity);
-    
+
     // enable lazy load feature.
     SetLazyLoadFeature(true);
     UpdateItemRenderGroup(true);
@@ -1004,7 +1006,7 @@ void ArcSwiperPattern::VerticalScrollAnimation()
     if (nextInter == itemPosition_.end()) {
         return;
     }
-    
+
     auto curInter = itemPosition_.find(currentIndex_);
     if (curInter != itemPosition_.end()) {
         auto curStartPos = curInter->second.startPos;
@@ -1033,7 +1035,7 @@ void ArcSwiperPattern::PlayVerticalScrollExitAnimation(float swiperWidth, float 
     auto exitNodePercent = std::abs(startPos) / swiperWidth;
     // color
     preNodeBackgroundColor_ = GetBackgroundColorValue(frameNode);
-  
+
     // scale
     verticalExitNodeScale_ = 1.0f - exitNodePercent * VERTICAL_EXIT_SCALE_REDUCTION_FACTOR;
     if (verticalExitNodeScale_ < VERTICAL_EXIT_SCALE_MIN_VALUE) {
@@ -1043,7 +1045,7 @@ void ArcSwiperPattern::PlayVerticalScrollExitAnimation(float swiperWidth, float 
 
     // blur
     verticalExitNodeBlur_ = VERTICAL_EXIT_BLUR_INITIAL_VALUE + exitNodePercent * VERTICAL_EXIT_BLUR_INCREASE_FACTOR;
-    
+
     if (verticalExitNodeBlur_ > VERTICAL_EXIT_BLUR_MAX_VALUE) {
         verticalExitNodeBlur_ = VERTICAL_EXIT_BLUR_MAX_VALUE;
     }
@@ -1138,7 +1140,7 @@ void ArcSwiperPattern::ResetAnimationParam()
 {
     StopPropertyTranslateAnimation(isFinishAnimation_);
     StopIndicatorAnimation();
-    
+
     horizontalExitNodeScale_ = 1.0f;
     horizontalExitNodeBlur_ = 0.0f;
     horizontalExitNodeOpacity_ = 1.0f;
@@ -1226,6 +1228,46 @@ bool ArcSwiperPattern::EnableTransitionAnimation() const
         return false;
     }
     return true;
+}
+
+
+RefPtr<Curve> ArcSwiperPattern::GetCurve() const
+{
+    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
+    if (EnableTransitionAnimation()) {
+        return Curves::FRICTION;
+    }
+    return swiperPaintProperty->GetCurve().value_or(nullptr);
+}
+
+int32_t ArcSwiperPattern::GetDuration() const
+{
+    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
+    int32_t defaultDuration = 0;
+    if (EnableTransitionAnimation()) {
+        if (GetDirection() == Axis::HORIZONTAL) {
+            defaultDuration = HORIZONTAL_ANIMAION_DEFAULT_DURATION;
+        } else {
+            defaultDuration = VERTICAL_ANIMAION_DEFAULT_DURATION;
+        }
+    } else {
+        defaultDuration = NO_ANIMAION_DEFAULT_DURATION;
+    }
+    CHECK_NULL_RETURN(swiperPaintProperty, defaultDuration);
+    return swiperPaintProperty->GetDuration().value_or(defaultDuration);
+}
+
+int32_t ArcSwiperPattern::CalcTime(int32_t time)
+{
+    auto duration = GetDuration();
+    int32_t baseTime = 0;
+    if (GetDirection() == Axis::HORIZONTAL) {
+        baseTime = HORIZONTAL_ANIMAION_DEFAULT_DURATION;
+    } else {
+        baseTime = VERTICAL_ANIMAION_DEFAULT_DURATION;
+    }
+    return time * duration / baseTime;
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
