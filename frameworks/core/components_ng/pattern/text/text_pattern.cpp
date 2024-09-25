@@ -2657,6 +2657,22 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
         json->PutExtAttr("actualFontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
     }
     json->PutExtAttr("font", GetFontInJson().c_str(), filter);
+    json->PutExtAttr("bindSelectionMenu", GetBindSelectionMenuInJson().c_str(), filter);
+}
+
+std::string TextPattern::GetBindSelectionMenuInJson() const
+{
+    auto jsonArray = JsonUtil::CreateArray(true);
+    for (auto& [spanResponsePair, params] : selectionMenuMap_) {
+        auto& [spanType, responseType] = spanResponsePair;
+        auto jsonItem = JsonUtil::Create(true);
+        jsonItem->Put("spanType", static_cast<int32_t>(spanType));
+        jsonItem->Put("responseType", static_cast<int32_t>(responseType));
+        jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType::SELECTION_MENU));
+        jsonArray->Put(jsonItem);
+    }
+    FillPreviewMenuInJson(jsonArray);
+    return StringUtils::RestoreBackslash(jsonArray->ToString());
 }
 
 std::string TextPattern::GetFontInJson() const

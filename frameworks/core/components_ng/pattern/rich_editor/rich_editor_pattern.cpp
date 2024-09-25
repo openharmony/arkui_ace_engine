@@ -8591,6 +8591,17 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("enableDataDetector", textDetectEnable_ ? "true" : "false", filter);
     json->PutExtAttr("dataDetectorConfig", dataDetectorAdapter_->textDetectConfigStr_.c_str(), filter);
     json->PutExtAttr("placeholder", GetPlaceHolderInJson().c_str(), filter);
+    json->PutExtAttr("bindSelectionMenu", GetBindSelectionMenuInJson().c_str(), filter);
+}
+
+void RichEditorPattern::FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const
+{
+    CHECK_NULL_VOID(jsonValue && oneStepDragParam_);
+    auto jsonItem = JsonUtil::Create(true);
+    jsonItem->Put("spanType", static_cast<int32_t>(TextSpanType::IMAGE));
+    jsonItem->Put("responseType", static_cast<int32_t>(TextResponseType::LONG_PRESS));
+    jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType::PREVIEW_MENU));
+    jsonValue->Put(jsonItem);
 }
 
 std::string RichEditorPattern::GetPlaceHolderInJson() const
