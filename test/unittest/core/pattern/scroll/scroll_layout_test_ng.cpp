@@ -44,7 +44,6 @@ HWTEST_F(ScrollLayoutTestNg, ScrollSetFrictionTest001, TestSize.Level1)
      * @tc.expected: friction should be more than 0.0,if out of range,should be default value.
      */
     friction = 10;
-    ClearOldNodes();
     model = CreateScroll();
     model.SetFriction(friction);
     CreateScrollDone();
@@ -253,7 +252,6 @@ HWTEST_F(ScrollLayoutTestNg, InitialOffset001, TestSize.Level1)
      * @tc.steps: step2. Create scroll and set initialOffset ITEM_MAIN_SIZE.
      * @tc.expected: the value of currentOffset_ is -ITEM_MAIN_SIZE
      */
-    ClearOldNodes();
     ScrollModelNG model = CreateScroll();
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(ITEM_MAIN_SIZE)));
     CreateContent();
@@ -264,7 +262,6 @@ HWTEST_F(ScrollLayoutTestNg, InitialOffset001, TestSize.Level1)
      * @tc.steps: step3. Create scroll , set axis HORIZONTAL and set initialOffset ITEM_MAIN_SIZE.
      * @tc.expected: the value of currentOffset_ is -ITEM_MAIN_SIZE
      */
-    ClearOldNodes();
     model = CreateScroll();
     model.SetInitialOffset(OffsetT(CalcDimension(ITEM_MAIN_SIZE), CalcDimension(0.f)));
     model.SetAxis(Axis::HORIZONTAL);
@@ -276,7 +273,6 @@ HWTEST_F(ScrollLayoutTestNg, InitialOffset001, TestSize.Level1)
      * @tc.steps: step4. Create scroll , set initialOffset 10%.
      * @tc.expected: the value of currentOffset_ is -ITEM_MAIN_SIZE
      */
-    ClearOldNodes();
     model = CreateScroll();
     auto offset = Dimension(0.1, DimensionUnit::PERCENT);
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(offset)));
@@ -288,7 +284,6 @@ HWTEST_F(ScrollLayoutTestNg, InitialOffset001, TestSize.Level1)
      * @tc.steps: step5. Create scroll , set axis HORIZONTAL and set initialOffset 10%.
      * @tc.expected: the value of currentOffset_ is -ITEM_MAIN_SIZE
      */
-    ClearOldNodes();
     model = CreateScroll();
     model.SetInitialOffset(OffsetT(CalcDimension(offset), CalcDimension(0.f)));
     model.SetAxis(Axis::HORIZONTAL);
@@ -318,7 +313,6 @@ HWTEST_F(ScrollLayoutTestNg, InitialOffset002, TestSize.Level1)
      * @tc.steps: step2. Create scroll and set initialOffset 3*ITEM_MAIN_SIZE.
      * @tc.expected: the value of currentOffset_ is -2*ITEM_MAIN_SIZE
      */
-    ClearOldNodes();
     model = CreateScroll();
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(100 * ITEM_MAIN_SIZE)));
     CreateContent();
@@ -329,7 +323,6 @@ HWTEST_F(ScrollLayoutTestNg, InitialOffset002, TestSize.Level1)
      * @tc.steps: step3. Create scroll and set initialOffset -ITEM_MAIN_SIZE.
      * @tc.expected: the value of currentOffset_ is 0
      */
-    ClearOldNodes();
     model = CreateScroll();
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(-ITEM_MAIN_SIZE)));
     CreateContent();
@@ -340,7 +333,6 @@ HWTEST_F(ScrollLayoutTestNg, InitialOffset002, TestSize.Level1)
      * @tc.steps: step4. Create scroll , set initialOffset 100%.
      * @tc.expected: the value of currentOffset_ is -2*ITEM_MAIN_SIZE
      */
-    ClearOldNodes();
     model = CreateScroll();
     auto offset = Dimension(100, DimensionUnit::PERCENT);
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(offset)));
@@ -381,7 +373,7 @@ HWTEST_F(ScrollLayoutTestNg, Model001, TestSize.Level1)
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_TOP);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_NONE);
-    ScrollTo(CONTENT_MAIN_SIZE);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_BOTTOM);
 
     ScrollTo(0.f);
@@ -390,7 +382,7 @@ HWTEST_F(ScrollLayoutTestNg, Model001, TestSize.Level1)
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_LEFT);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_NONE);
-    ScrollTo(CONTENT_MAIN_SIZE);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_RIGHT);
 
     pattern_->SetAxis(Axis::NONE);
