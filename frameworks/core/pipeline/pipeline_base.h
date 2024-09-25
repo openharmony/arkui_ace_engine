@@ -271,6 +271,19 @@ public:
         accessibilityManager->UpdateVirtualNodeFocus();
     }
 
+    void RegisterWindowDensityCallback(std::function<double()>&& callback)
+    {
+        windowDensityCallback_ = callback;
+    }
+
+    double GetWindowDensity() const
+    {
+        if (windowDensityCallback_) {
+            return windowDensityCallback_();
+        }
+        return 1.0;
+    }
+
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
     {
         if (callback) {
@@ -1565,6 +1578,7 @@ private:
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
+    std::function<double()> windowDensityCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

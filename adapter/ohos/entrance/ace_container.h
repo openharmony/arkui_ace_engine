@@ -387,6 +387,14 @@ public:
         return windowScale_;
     }
 
+    double GetWindowDensity() const
+    {
+        if (!uiWindow_) {
+            return 1.0;
+        }
+        return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
+    }
+
     int32_t GetParentId() const
     {
         return parentId_;
