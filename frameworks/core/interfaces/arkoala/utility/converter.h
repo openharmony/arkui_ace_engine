@@ -298,8 +298,7 @@ namespace Converter {
     template<>
     inline CalcDimension Convert(const Ark_Length& src)
     {
-        return src.type == Ark_Tag::ARK_TAG_RESOURCE ?
-               CalcDimension() : CalcDimension(src.value, static_cast<DimensionUnit>(src.unit));
+        return Convert<Dimension>(src);
     }
 
     template<>
