@@ -76,6 +76,16 @@ public:
 
     GestureRecognizerJudgeFunc GetOnGestureRecognizerJudgeBegin() const;
 
+    void SetInnerRecoJudge()
+    {
+        isInnerRecoJudgeSet_ = true;
+    }
+
+    bool GetInnerRecoJudge() const
+    {
+        return isInnerRecoJudgeSet_;
+    }
+
 private:
     WeakPtr<UINode> node_;
     RefPtr<NGGestureRecognizer> nodeLinkGesture_;
@@ -86,6 +96,7 @@ private:
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc_;
     std::set<int32_t> path_;
     SourceType sourceType_ = SourceType::TOUCH;
+    bool isInnerRecoJudgeSet_ = false;
 };
 } // namespace OHOS::Ace::NG
 

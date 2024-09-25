@@ -1103,6 +1103,11 @@ public:
         return targetComponent_;
     }
 
+    WeakPtr<TargetComponent> GetTargetComponent() const
+    {
+        return targetComponent_;
+    }
+
     void SetExposeInnerGestureFlag(bool exposeInnerGestureFlag)
     {
         exposeInnerGestureFlag_ = exposeInnerGestureFlag;
