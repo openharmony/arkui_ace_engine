@@ -90,9 +90,7 @@ void ButtonPattern::UpdateTextLayoutProperty(
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(textLayoutProperty);
-    (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE)
-        ? textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE)
-        : textLayoutProperty->ResetMaxFontScale();
+    UpdateTextFontScale(layoutProperty, textLayoutProperty);
     auto label = layoutProperty->GetLabelValue("");
     textLayoutProperty->UpdateContent(label);
     if (layoutProperty->GetFontSize().has_value()) {
@@ -558,5 +556,17 @@ void ButtonPattern::SetBuilderFunc(ButtonMakeCallback&& makeFunc)
         return;
     }
     makeFunc_ = std::move(makeFunc);
+}
+
+void ButtonPattern::UpdateTextFontScale(
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
+    } else {
+        textLayoutProperty->ResetMaxFontScale();
+    }
 }
 } // namespace OHOS::Ace::NG

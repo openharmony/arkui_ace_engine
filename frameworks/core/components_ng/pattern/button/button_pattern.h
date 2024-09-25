@@ -397,6 +397,8 @@ private:
         RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     static bool NeedAgingUpdateText(RefPtr<ButtonLayoutProperty>& layoutProperty);
     bool IsNeedToHandleHoverOpacity();
+    static void UpdateTextFontScale(
+        RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty);
     Color backgroundColor_;
     Color focusBorderColor_;
     Color themeBgColor_;
