@@ -182,7 +182,7 @@ void RosenWindow::OnHide()
 
 void RosenWindow::Destroy()
 {
-    LOG_DESTROY();
+    LOGI("RosenWindow destroyed");
     rsWindow_ = nullptr;
     vsyncCallback_.reset();
     rsUIDirector_->Destroy();

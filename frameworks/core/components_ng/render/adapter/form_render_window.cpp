@@ -123,7 +123,7 @@ void FormRenderWindow::RequestFrame()
 
 void FormRenderWindow::Destroy()
 {
-    LOG_DESTROY();
+    TAG_LOGI(AceLogTag::ACE_FORM, "RenderWindow destroyed");
 #ifdef ENABLE_ROSEN_BACKEND
     frameCallback_.userData_ = nullptr;
     frameCallback_.callback_ = nullptr;

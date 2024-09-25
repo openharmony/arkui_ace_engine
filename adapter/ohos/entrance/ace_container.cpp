@@ -265,7 +265,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
 AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
-    LOG_DESTROY();
+    LOGI("Container Destroyed");
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)

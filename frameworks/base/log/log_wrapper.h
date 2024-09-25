@@ -76,7 +76,6 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define TAG_LOGE(tag, fmt, ...) PRINT_LOG(ERROR, tag, fmt, ##__VA_ARGS__)
 #define TAG_LOGF(tag, fmt, ...) PRINT_LOG(FATAL, tag, fmt, ##__VA_ARGS__)
 
-#define LOG_DESTROY() LOGI("destroyed")
 #define LOG_FUNCTION() LOGD("function track: %{public}s", __FUNCTION__)
 
 #define APP_LOGD(fmt, ...) PRINT_APP_LOG(DEBUG, fmt, ##__VA_ARGS__)

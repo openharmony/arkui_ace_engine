@@ -159,7 +159,7 @@ void SwipeInfoToString(const BaseEventInfo& info, std::string& eventParam)
 
 DeclarativeFrontend::~DeclarativeFrontend() noexcept
 {
-    LOG_DESTROY();
+    LOGI("DeclarativeFrontend destroyed");
 }
 
 void DeclarativeFrontend::Destroy()
