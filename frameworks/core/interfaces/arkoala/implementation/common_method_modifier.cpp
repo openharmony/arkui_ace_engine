@@ -377,6 +377,7 @@ void OnClick1Impl(Ark_NativePointer node,
         onClick.source = static_cast<Ark_SourceType>(info.GetSourceDevice());
 
         onClick.sourceTool = static_cast<Ark_SourceTool>(0);
+        onClick.deviceId = Converter::ArkValue<Opt_Number>();
         onClick.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
         onClick.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
         onClick.target.area.height.type = 0;
