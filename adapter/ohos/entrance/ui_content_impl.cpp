@@ -1920,6 +1920,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     bool isOpenInvisibleFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "ArkUIInvisibleFreeze" && metaDataItem.value == "true";
     });
+    LOGI("ArkUIInvisibleFreeze: %{public}d", isOpenInvisibleFreeze);
     pipeline->SetOpenInvisibleFreeze(isOpenInvisibleFreeze);
     // Set sdk version in module json mode
     if (isModelJson) {
