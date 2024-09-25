@@ -30,12 +30,11 @@ void SetScrollOptionsImpl(Ark_NativePointer node,
 namespace ScrollAttributeModifier {
 
 namespace {
-inline void AssignCast(OffsetT<CalcDimension>& dst, const Ark_OffsetOptions& value)
+inline OffsetT<CalcDimension> Convert(const Ark_OffsetOptions& value)
 {
-    std::optional<CalcDimension> xOffset;
-    Converter::AssignOptionalTo(xOffset, value.xOffset);
-    std::optional<CalcDimension> yOffset;
-    Converter::AssignOptionalTo(yOffset, value.yOffset);
+    auto xOffset = Converter::OptConvert<CalcDimension>(value.xOffset);
+    auto yOffset = Converter::OptConvert<CalcDimension>(value.yOffset);
+    OffsetT<CalcDimension> dst;
     if (xOffset.has_value())
     {
         dst.SetX(xOffset.value());
@@ -44,6 +43,7 @@ inline void AssignCast(OffsetT<CalcDimension>& dst, const Ark_OffsetOptions& val
     {
         dst.SetY(yOffset.value());
     }
+    return dst;
 }
 }
 
@@ -57,10 +57,8 @@ void OnScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](Dimension xOffset, Dimension yOffset) {
-        Ark_Number _xOffset;
-        Ark_Number _yOffset;
-        Converter::AssignArkValue(_xOffset, xOffset);
-        Converter::AssignArkValue(_yOffset, yOffset);
+        auto _xOffset = Converter::ArkValue<Ark_Number>(xOffset);
+        auto _yOffset = Converter::ArkValue<Ark_Number>(yOffset);
         GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
             onScroll(frameNode->GetId(), _xOffset, _yOffset);
     };
@@ -161,8 +159,7 @@ void InitialOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    OffsetT<CalcDimension> offset;
-    AssignCast(offset, *value);
+    OffsetT<CalcDimension> offset = Convert(*value);
     ScrollModelNG::SetInitialOffset(frameNode, offset);
 }
 } // ScrollAttributeModifier
