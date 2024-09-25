@@ -121,7 +121,11 @@ void SwiperPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->SetClipToBounds(true);
-    host->GetRenderContext()->UpdateClipEdge(true);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto swiperTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperTheme);
+    host->GetRenderContext()->UpdateClipEdge(swiperTheme->GetClipToBounds());
     InitSurfaceChangedCallback();
 }
 
