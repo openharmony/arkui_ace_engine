@@ -9222,17 +9222,23 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
     return true;
 }
 
-void JSViewAbstract::ParseShadowOffsetX(const JSRef<JSObject>& jsObj, CalcDimension& offsetX, Shadow& shadow)
+void JSViewAbstract::ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& shadow)
 {
-    auto jsOffsetX = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET_X));
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (ParseJsResource(jsOffsetX, offsetX)) {
-        double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
-        shadow.SetOffsetX(xValue);
+    CalcDimension offsetX;
+    if (ParseJsResource(jsObj->GetProperty("offsetX"), offsetX)) {
+        shadow.SetOffsetX(offsetX.Value());
     } else {
-        if (ParseJsDimensionVp(jsOffsetX, offsetX)) {
-            double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
-            shadow.SetOffsetX(xValue);
+        if (ParseJsDimensionVp(jsObj->GetProperty("offsetX"), offsetX)) {
+            shadow.SetOffsetX(offsetX.Value());
+        }
+    }
+    CalcDimension offsetY;
+    auto jsOffsetY = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET_Y));
+    if (ParseJsResource(jsOffsetY, offsetY)) {
+        shadow.SetOffsetY(offsetY.Value());
+    } else {
+        if (ParseJsDimensionVp(jsOffsetY, offsetY)) {
+            shadow.SetOffsetY(offsetY.Value());
         }
     }
 }
@@ -9254,17 +9260,8 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
         radius = 0.0;
     }
     shadow.SetBlurRadius(radius);
-    CalcDimension offsetX;
-    ParseShadowOffsetX(jsObj, offsetX, shadow);
-    CalcDimension offsetY;
-    auto jsOffsetY = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET_Y));
-    if (ParseJsResource(jsOffsetY, offsetY)) {
-        shadow.SetOffsetY(offsetY.Value());
-    } else {
-        if (ParseJsDimensionVp(jsOffsetY, offsetY)) {
-            shadow.SetOffsetY(offsetY.Value());
-        }
-    }
+    ParseShadowOffsetXY(jsObj, shadow);
+
     Color color;
     ShadowColorStrategy shadowColorStrategy;
     auto jsColor = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR));
