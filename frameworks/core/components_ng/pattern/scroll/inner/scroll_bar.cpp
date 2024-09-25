@@ -41,7 +41,7 @@ ScrollBar::ScrollBar(DisplayMode displayMode, ShapeMode shapeMode, PositionMode 
 
 void ScrollBar::InitTheme()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
@@ -343,7 +343,7 @@ float ScrollBar::CalcPatternOffset(float scrollBarOffset) const
 
 double ScrollBar::NormalizeToPx(const Dimension& dimension) const
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     return pipelineContext->NormalizeToPx(dimension);
 }
@@ -454,7 +454,7 @@ void ScrollBar::SetHoverEvent()
 
 void ScrollBar::CalcReservedHeight()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
@@ -634,7 +634,9 @@ void ScrollBar::HandleDragEnd(const GestureEvent& info)
     }
 
     if (!frictionController_) {
-        frictionController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(context);
+        frictionController_ = CREATE_ANIMATOR(context);
         frictionController_->AddStopListener([weakBar = AceType::WeakClaim(this)]() {
             auto scrollBar = weakBar.Upgrade();
             CHECK_NULL_VOID(scrollBar);
@@ -686,7 +688,7 @@ void ScrollBar::ScheduleDisappearDelayTask()
 {
     if (displayMode_ == DisplayMode::AUTO && isScrollable_ && !isHover_) {
         disappearDelayTask_.Cancel();
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -763,7 +765,7 @@ bool ScrollBar::AnalysisUpOrDown(Point point, bool& reverse)
 
 void ScrollBar::ScheduleCaretLongPress()
 {
-    auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     if (!context->GetTaskExecutor()) {
         return;

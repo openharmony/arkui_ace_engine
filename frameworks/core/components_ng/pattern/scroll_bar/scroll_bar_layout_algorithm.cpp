@@ -32,7 +32,7 @@ void UpdateChildConstraint(Axis axis, const OptionalSizeF& selfIdealSize, Layout
 
 void UpdateIdealSize(Axis axis, const SizeF& childSize, const OptionalSizeF& parentSize, OptionalSizeF& idealSize)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
