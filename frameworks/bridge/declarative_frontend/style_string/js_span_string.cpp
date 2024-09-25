@@ -117,6 +117,8 @@ void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
     info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
 }
 
+static std::atomic<int32_t> gestureStyleStoreIndex_;
+static std::atomic<int32_t> spanStringStoreIndex_;
 };
 
 const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
@@ -149,7 +151,9 @@ void JSSpanString::Constructor(const JSCallbackInfo& args)
             JSViewAbstract::ParseJsString(args[0], data);
             spanString = AceType::MakeRefPtr<SpanString>(data);
             if (args.Length() > 1) {
-                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length());
+                auto thisObj = args.This();
+                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length(),
+                    thisObj);
                 spanString->BindWithSpans(spanBases);
             }
         } else {
@@ -636,7 +640,8 @@ bool JSSpanString::CheckParameters(int32_t start, int32_t length)
     return true;
 }
 
-std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(const JSRef<JSObject>& obj, int32_t maxLength)
+std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(const JSRef<JSObject>& obj, int32_t maxLength,
+    JsiRef<JsiObject> thisObj)
 {
     std::vector<RefPtr<SpanBase>> spanBaseVector;
     auto arrays = JSRef<JSArray>::Cast(obj);
@@ -669,6 +674,11 @@ std::vector<RefPtr<SpanBase>> JSSpanString::ParseJsSpanBaseVector(const JSRef<JS
         auto type = static_cast<SpanType>(styleKey->ToNumber<int32_t>());
         if (type == SpanType::Image || type == SpanType::CustomSpan) {
             continue;
+        }
+        if (type == SpanType::Gesture) {
+            auto newIndex = gestureStyleStoreIndex_.fetch_add(1);
+            std::string key = "STYLED_STRING_GESTURESTYLE_STORE_" + std::to_string(newIndex);
+            thisObj->SetPropertyObject(key.c_str(), styleStringValue);
         }
         auto spanBase = ParseJsSpanBase(start, length, type, JSRef<JSObject>::Cast(styleStringValue));
         if (spanBase) {
@@ -859,7 +869,9 @@ void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
             JSViewAbstract::ParseJsString(args[0], data);
             spanString = AceType::MakeRefPtr<MutableSpanString>(data);
             if (args.Length() > 1) {
-                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length());
+                auto thisObj = args.This();
+                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1],
+                    StringUtils::ToWstring(data).length(), thisObj);
                 spanString->BindWithSpans(spanBases);
             }
         } else {
@@ -1047,6 +1059,12 @@ void JSMutableSpanString::ReplaceSpan(const JSCallbackInfo& info)
     if (!CheckParameters(start, length)) {
         return;
     }
+    if (type == SpanType::Gesture) {
+        auto thisObj = info.This();
+        auto newIndex = gestureStyleStoreIndex_.fetch_add(1);
+        std::string key = "STYLED_STRING_GESTURESTYLE_STORE_" + std::to_string(newIndex);
+        thisObj->SetPropertyObject(key.c_str(), styleValueObj);
+    }
     controller->ReplaceSpan(start, length, spanBase);
 }
 
@@ -1066,9 +1084,7 @@ void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
         return;
     }
     auto spanType = styleKeyObj->ToNumber<int32_t>();
-    if (!CheckSpanType(spanType)) {
-        return;
-    }
+    CHECK_NULL_VOID(CheckSpanType(spanType));
     auto start = startObj->ToNumber<int32_t>();
     auto length = lengthObj->ToNumber<int32_t>();
     auto type = static_cast<SpanType>(spanType);
@@ -1078,9 +1094,7 @@ void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
     if (type == SpanType::CustomSpan && !VerifyCustomSpanParameters(start, length)) {
         return;
     }
-    if (!styleValueObj->IsObject()) {
-        return;
-    }
+    CHECK_NULL_VOID(styleValueObj->IsObject());
     auto spanBase = ParseJsSpanBaseWithoutSpecialSpan(start, length, type, JSRef<JSObject>::Cast(styleValueObj), info);
     if (!spanBase) {
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s",
@@ -1096,6 +1110,11 @@ void JSMutableSpanString::AddSpan(const JSCallbackInfo& info)
         controller->RemoveSpan(start, length, SpanType::Image);
     } else if (type == SpanType::CustomSpan) {
         controller->RemoveSpan(start, length, SpanType::CustomSpan);
+    } else if (type == SpanType::Gesture) {
+        auto thisObj = info.This();
+        auto newIndex = gestureStyleStoreIndex_.fetch_add(1);
+        std::string key = "STYLED_STRING_GESTURESTYLE_STORE_" + std::to_string(newIndex);
+        thisObj->SetPropertyObject(key.c_str(), styleValueObj);
     }
     controller->AddSpan(spanBase);
 }
@@ -1164,6 +1183,10 @@ void JSMutableSpanString::ReplaceSpanString(const JSCallbackInfo& info)
     if (!CheckParameters(start, length)) {
         return;
     }
+    auto thisObj = info.This();
+    auto newIndex = spanStringStoreIndex_.fetch_add(1);
+    std::string key = "STYLED_STRING_SPANSTRING_STORE_" + std::to_string(newIndex);
+    thisObj->SetPropertyObject(key.c_str(), info[0]);
     controller->ReplaceSpanString(start, length, spanStringController);
 }
 
@@ -1190,6 +1213,10 @@ void JSMutableSpanString::InsertSpanString(const JSCallbackInfo& info)
             "Out of bounds", start, characterLength);
         return;
     }
+    auto thisObj = info.This();
+    auto newIndex = spanStringStoreIndex_.fetch_add(1);
+    std::string key = "STYLED_STRING_SPANSTRING_STORE_" + std::to_string(newIndex);
+    thisObj->SetPropertyObject(key.c_str(), info[0]);
     controller->InsertSpanString(start, spanStringController);
 }
 
@@ -1208,6 +1235,10 @@ void JSMutableSpanString::AppendSpanString(const JSCallbackInfo& info)
     CHECK_NULL_VOID(spanStringController);
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
+    auto thisObj = info.This();
+    auto newIndex = spanStringStoreIndex_.fetch_add(1);
+    std::string key = "STYLED_STRING_SPANSTRING_STORE_" + std::to_string(newIndex);
+    thisObj->SetPropertyObject(key.c_str(), info[0]);
     controller->AppendSpanString(spanStringController);
 }
 
