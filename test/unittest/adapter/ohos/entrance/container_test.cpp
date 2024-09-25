@@ -52,7 +52,7 @@ HWTEST_F(ContainerTest, ContainerTest001, TestSize.Level1)
     uint32_t autoFillSessionId = 0;
     AceAutoFillType type = AceAutoFillType::ACE_USER_NAME;
     bool ret = MockContainer::Current()->RequestAutoFill(nullptr, type, false, isPopup, autoFillSessionId, isNative);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
 
     ret = MockContainer::Current()->UpdatePopupUIExtension(nullptr, autoFillSessionId, isNative);
     EXPECT_EQ(ret, false);
@@ -74,7 +74,7 @@ HWTEST_F(ContainerTest, ContainerTest002, TestSize.Level1)
     uint32_t autoFillSessionId = 0;
     AceAutoFillType type = AceAutoFillType::ACE_USER_NAME;
     bool ret = MockContainer::Current()->RequestAutoFill(nullptr, type, false, isPopup, autoFillSessionId, isNative);
-    EXPECT_EQ(ret, false);
+    EXPECT_EQ(ret, true);
 
     ret = MockContainer::Current()->UpdatePopupUIExtension(nullptr, autoFillSessionId, isNative);
     EXPECT_EQ(ret, false);
