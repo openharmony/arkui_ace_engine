@@ -205,6 +205,25 @@ void MenuWrapperPattern::HideMenu()
     HideMenu(menuNode);
 }
 
+void MenuWrapperPattern::GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode,
+    bool& hasAnimation)
+{
+    CHECK_NULL_VOID(subMenu);
+    auto subMenuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    hasAnimation = subMenuPattern->GetDisappearAnimation();
+    auto menuItem = FrameNode::GetFrameNode(subMenuPattern->GetTargetTag(), subMenuPattern->GetTargetId());
+    CHECK_NULL_VOID(menuItem);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    auto menuNode = menuItemPattern->GetMenu();
+    CHECK_NULL_VOID(menuNode);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    expandingMode = menuProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    menuItemPattern->SetIsSubMenuShowed (false);
+}
+
 void MenuWrapperPattern::HideSubMenu()
 {
     auto host = GetHost();
@@ -219,16 +238,6 @@ void MenuWrapperPattern::HideSubMenu()
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetShowedSubMenu(nullptr);
     auto subMenu = host->GetChildren().back();
-    auto subMenuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
-    if (subMenuPattern) {
-        subMenuPattern->RemoveParentHoverStyle();
-        auto frameNode = FrameNode::GetFrameNode(subMenuPattern->GetTargetTag(), subMenuPattern->GetTargetId());
-        CHECK_NULL_VOID(frameNode);
-        auto menuItem = frameNode->GetPattern<MenuItemPattern>();
-        if (menuItem) {
-            menuItem->SetIsSubMenuShowed(false);
-        }
-    }
     auto focusMenu = MenuFocusViewShow();
     CHECK_NULL_VOID(focusMenu);
     auto innerMenu = GetMenuChild(focusMenu);
@@ -239,7 +248,6 @@ void MenuWrapperPattern::HideSubMenu()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         return;
     }
-    CHECK_NULL_VOID(innerMenu);
     auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(innerMenuPattern);
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
@@ -248,8 +256,11 @@ void MenuWrapperPattern::HideSubMenu()
     auto outterMenuPattern = focusMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(outterMenuPattern);
     bool hasAnimation = outterMenuPattern->GetDisappearAnimation();
+    GetExpandingMode(subMenu, expandingMode, hasAnimation);
     if (expandingMode == SubMenuExpandingMode::STACK && hasAnimation) {
         HideStackExpandMenu(subMenu);
+        host->RemoveChild(subMenu);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } else {
         UpdateMenuAnimation(host);
         SendToAccessibility(subMenu, false);
