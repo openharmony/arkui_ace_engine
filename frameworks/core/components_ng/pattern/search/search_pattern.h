@@ -200,6 +200,7 @@ public:
 
     void SetSearchIconSize(const Dimension& value);
     void SetSearchIconColor(const Color& color);
+    void SetSymbolSearchIconColor(const Color& color);
     void SetSearchSrcPath(const std::string& src, const std::string& bundleName, const std::string& moduleName);
     void SetSearchSymbolIcon();
     void SetSearchImageIcon(IconOptions& iconOptions);

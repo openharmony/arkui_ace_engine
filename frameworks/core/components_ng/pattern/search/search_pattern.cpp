@@ -955,7 +955,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     }
 
     if (GetDefaultIconColor(IMAGE_INDEX) == normalIconColor_) {
-        SetSearchIconColor(focusIconColor_);
+        SetSymbolSearchIconColor(focusIconColor_);
         isFocusIconColorSet_ = true;
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -1397,7 +1397,7 @@ void SearchPattern::HandleBlurEvent()
         isFocusBgColorSet_ = false;
     }
     if (isFocusIconColorSet_) {
-        SetSearchIconColor(normalIconColor_);
+        SetSymbolSearchIconColor(normalIconColor_);
         isFocusIconColorSet_ = false;
     }
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
@@ -1859,7 +1859,7 @@ void SearchPattern::UpdateSearchSymbolIconColor()
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateSymbolColorList({ GetSearchNode()->GetSearchSymbolIconColor() });
     if (isFocusIconColorSet_ && GetDefaultIconColor(IMAGE_INDEX) == normalIconColor_) {
-        SetSearchIconColor(focusIconColor_);
+        SetSymbolSearchIconColor(focusIconColor_);
     }
 }
 
@@ -1994,6 +1994,13 @@ void SearchPattern::SetSearchIconColor(const Color& color)
     auto& imageIconOptions = GetSearchNode()->GetSearchImageIconOptions();
     imageIconOptions.UpdateColor(Color(color));
     UpdateImageIconNode(IMAGE_INDEX);
+}
+
+void SearchPattern::SetSymbolSearchIconColor(const Color& color)
+{
+    CHECK_NULL_VOID(GetSearchNode());
+    GetSearchNode()->SetSearchSymbolIconColor(Color(color));
+    UpdateSymbolIconNode(IMAGE_INDEX);
 }
 
 void SearchPattern::SetSearchImageIcon(IconOptions& iconOptions)
