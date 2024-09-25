@@ -208,7 +208,7 @@ public:
     void DumpLayoutInfo();
     void DumpRenderInfo();
     void DumpAdvanceInfo() override;
-
+    void DumpSvgInfo();
     WeakPtr<ImageLoadingContext> GetImageLoadingContext()
     {
         return WeakClaim(AceType::RawPtr(loadingCtx_));

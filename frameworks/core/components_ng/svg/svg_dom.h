@@ -58,6 +58,7 @@ public:
     void SetContainerSize(const SizeF& containerSize) override {}
 
     void PushAnimatorOnFinishCallback(const RefPtr<SvgNode>& root, std::function<void()> onFinishCallback);
+    std::string GetDumpInfo() override;
 
 protected:
     void FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& layout);

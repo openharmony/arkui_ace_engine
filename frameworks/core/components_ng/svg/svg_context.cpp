@@ -19,6 +19,9 @@
 #include "core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr int32_t MILLISECOND_DIVIDER = 1000;
+}
 RefPtr<SvgNode> SvgContext::GetSvgNodeById(const std::string& id) const
 {
     auto item = idMapper_.find(id);
@@ -112,11 +115,33 @@ void SvgContext::SetFuncNormalizeToPx(const FuncNormalizeToPx& funcNormalizeToPx
     funcNormalizeToPx_ = funcNormalizeToPx;
 }
 
+void SvgContext::CreateDumpInfo(SvgDumpInfo dumpInfo)
+{
+    dumpInfo_ = dumpInfo;
+}
+
+SvgDumpInfo& SvgContext::GetDumpInfo()
+{
+    return dumpInfo_;
+}
+
 double SvgContext::NormalizeToPx(const Dimension& value)
 {
     if (funcNormalizeToPx_ == nullptr) {
         return 0.0;
     }
     return funcNormalizeToPx_(value);
+}
+
+std::string SvgContext::GetCurrentTimeString()
+{
+    auto now = std::chrono::system_clock::now();
+    std::time_t nowTime = std::chrono::system_clock::to_time_t(now);
+    std::tm* now_time = std::localtime(&nowTime);
+    std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        now.time_since_epoch()) % MILLISECOND_DIVIDER;
+    std::ostringstream oss;
+    oss << std::put_time(now_time, "%Y-%m-%d %H:%M:%S:");
+    return oss.str().append(std::to_string(ms.count()));
 }
 } // namespace OHOS::Ace::NG

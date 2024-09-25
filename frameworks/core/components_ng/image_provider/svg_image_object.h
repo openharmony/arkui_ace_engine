@@ -30,7 +30,7 @@ public:
 
     static RefPtr<SvgImageObject> Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
     RefPtr<SvgDomBase> GetSVGDom() const override;
-
+    std::string GetDumpInfo() override;
     RefPtr<ImageObject> Clone() override
     {
         return Claim(this);
