@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "core/components/common/properties/paint_state.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -39,7 +40,13 @@ void FillImpl(Ark_NativePointer node,
 void StrokeDashOffsetImpl(Ark_NativePointer node,
                           const Type_CommonShapeMethod_strokeDashOffset_Arg0* value)
 {
-    // Union_Number_String
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto strokeDashOffset = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidatePositive(strokeDashOffset);
+    Validator::ValidateNonPercent(strokeDashOffset);
+    ShapeModelNG::SetStrokeDashOffset(frameNode, strokeDashOffset);
 }
 void StrokeLineCapImpl(Ark_NativePointer node,
                        enum Ark_LineCapStyle value)
@@ -53,12 +60,20 @@ void StrokeLineCapImpl(Ark_NativePointer node,
 void StrokeLineJoinImpl(Ark_NativePointer node,
                         enum Ark_LineJoinStyle value)
 {
-    // enum 
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto enumLineJoinStyle = Converter::OptConvert<LineJoinStyle>(value);
+    auto intLineJoinStyle = EnumToInt(enumLineJoinStyle);
+    ShapeModelNG::SetStrokeLineJoin(frameNode, intLineJoinStyle);
 }
 void StrokeMiterLimitImpl(Ark_NativePointer node,
                           const Type_CommonShapeMethod_strokeMiterLimit_Arg0* value)
 {
-    // Union_Number_String
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto strokeMiterLimit = Converter::OptConvert<float>(*value);
+    ShapeModelNG::SetStrokeMiterLimit(frameNode, strokeMiterLimit);
 }
 void StrokeOpacityImpl(Ark_NativePointer node,
                        const Type_CommonShapeMethod_strokeOpacity_Arg0* value)
@@ -73,7 +88,13 @@ void FillOpacityImpl(Ark_NativePointer node,
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Ark_Length* value)
 {
-    // Ark_Length
+    // Should be Union_Number_String
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto strokeWidth = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidatePositive(strokeWidth);
+    Validator::ValidateNonPercent(strokeWidth);
+    ShapeModelNG::SetStrokeWidth(frameNode, strokeWidth);
 }
 void AntiAliasImpl(Ark_NativePointer node,
                    Ark_Boolean value)

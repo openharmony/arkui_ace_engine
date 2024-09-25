@@ -40,11 +40,20 @@ Ark_Resource ArkRes(Ark_String *name, int id = -1,
 
 // attributes name
 const auto ATTRIBUTE_STROKE_LINE_CAP_NAME = "strokeLineCap";
+const auto ATTRIBUTE_STROKE_LINE_JOIN_NAME = "strokeLineJoin";
+const auto ATTRIBUTE_STROKE_WIDTH_NAME = "strokeWidth";
+const auto ATTRIBUTE_STROKE_DASH_OFFSET_NAME = "strokeDashOffset";
+const auto ATTRIBUTE_STROKE_MITER_LIMIT_NAME = "strokeMiterLimit";
 
 // attributes default
 const auto ATTRIBUTE_STROKE_LINE_CAP_DEFAULT_VALUE = "LineCapStyle.Butt";
+const auto ATTRIBUTE_STROKE_LINE_JOIN_DEFAULT_VALUE = "LineJoinStyle.Miter";
+const auto ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE = 0.0f;
 
+// global types
 using OneTestColorStep = std::pair<Ark_ResourceColor, std::string>;
+
+// global test plans
 static Ark_String RESOURCE_NAME = ArkValue<Ark_String>("aa.bb.cc");
 static const std::string EXPECTED_RESOURCE_COLOR =
     Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
@@ -175,7 +184,202 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineCapTestInvalidValues, TestS
     // Initial verification
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_CAP_NAME);
-    EXPECT_EQ(resultStr, "LineCapStyle.Butt");
+    EXPECT_EQ(resultStr, ATTRIBUTE_STROKE_LINE_CAP_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setStrokeLineJoinTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineJoinTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_JOIN_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_STROKE_LINE_JOIN_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setStrokeLineJoinTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineJoinTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    enum Ark_LineJoinStyle inputValueStrokeLineJoin;
+
+    // Initial setup
+    inputValueStrokeLineJoin = ARK_LINE_JOIN_STYLE_MITER;
+
+    // Test
+    modifier_->setStrokeLineJoin(node_, inputValueStrokeLineJoin);
+
+    // Initial verification
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_JOIN_NAME);
+    EXPECT_EQ(resultStr, "LineJoinStyle.Miter");
+
+    // Verifying attribute's other values
+    inputValueStrokeLineJoin = ARK_LINE_JOIN_STYLE_ROUND;
+    modifier_->setStrokeLineJoin(node_, inputValueStrokeLineJoin);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_JOIN_NAME);
+    EXPECT_EQ(resultStr, "LineJoinStyle.Round");
+
+    inputValueStrokeLineJoin = ARK_LINE_JOIN_STYLE_BEVEL;
+    modifier_->setStrokeLineJoin(node_, inputValueStrokeLineJoin);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_JOIN_NAME);
+    EXPECT_EQ(resultStr, "LineJoinStyle.Bevel");
+
+}
+
+/*
+ * @tc.name: setStrokeLineJoinTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineJoinTestInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    enum Ark_LineJoinStyle inputValueStrokeLineJoin;
+
+    // Initial setup
+    inputValueStrokeLineJoin = static_cast<Ark_LineJoinStyle>(-1);
+
+    // Test
+    modifier_->setStrokeLineJoin(node_, inputValueStrokeLineJoin);
+
+    // Initial verification
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_JOIN_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_STROKE_LINE_JOIN_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setStrokeWidthTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeWidthTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    double result;
+
+    result = GetAttrValue<double>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
+    EXPECT_NEAR(result, ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE, FLT_EPSILON);
+}
+
+/*
+ * @tc.name: setStrokeWidthTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    double result;
+
+    typedef std::pair<Ark_Length, double> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkValue<Ark_Length>(1.0f), 1.0f },
+        { Converter::ArkValue<Ark_Length>(2.45f), 2.45f },
+        { Converter::ArkValue<Ark_Length>(5.0_px), 5.0f },
+        { Converter::ArkValue<Ark_Length>(22.35_px), 22.35f },
+        { Converter::ArkValue<Ark_Length>(0.23_pct), 0.0f },
+        { Converter::ArkValue<Ark_Length>(7.0_vp), 7.0f },
+        { Converter::ArkValue<Ark_Length>(1.65_vp), 1.65f },
+        { Converter::ArkValue<Ark_Length>(-0.1f), 0.0f },
+        { Converter::ArkValue<Ark_Length>(65.0_fp), 65.0f },
+        { Converter::ArkValue<Ark_Length>(4.3_fp), 4.30f },
+        { Converter::ArkValue<Ark_Length>(-5.0_px), 0.0f },
+    };
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        modifier_->setStrokeWidth(node_, &arkLength);
+        jsonValue = GetJsonValue(node_);
+        result = GetAttrValue<double>(jsonValue, ATTRIBUTE_STROKE_WIDTH_NAME);
+        EXPECT_NEAR(result, expected, FLT_EPSILON);
+    }
+}
+
+/*
+ * @tc.name: setStrokeDashOffsetTest
+ * @tc.desc: check work setStrokeDashOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashOffsetTest, TestSize.Level1)
+{
+    using OneTestStep = std::pair<Union_Number_String, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Union_Number_String, Ark_Number>(1), "1.00vp" },
+        { Converter::ArkUnion<Union_Number_String, Ark_Number>(0), "0.00px" },
+        { Converter::ArkUnion<Union_Number_String, Ark_Number>(2.45f), "2.45vp" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("5px"), "5.00px" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("22.35px"), "22.35px" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("7vp"), "7.00vp" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("1.65vp"), "1.65vp" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("65fp"), "65.00fp" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("4.3fp"), "4.30fp" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("11lpx"), "11.00lpx" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("0.5lpx"), "0.50lpx" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("3"), "3.00fp" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("10.65"), "10.65fp" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("23%"), "0.00px" },
+    };
+
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    for (const auto &[arkValue, expected]: testPlan) {
+        modifier_->setStrokeDashOffset(node_, &arkValue);
+
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_DASH_OFFSET_NAME);
+        EXPECT_EQ(resultStr, expected);
+    }
+}
+
+/*
+ * @tc.name: setStrokeMiterLimitTest
+ * @tc.desc: check work setStrokeMiterLimit
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeMiterLimitTest, TestSize.Level1)
+{
+    using OneTestStep = std::pair<Union_Number_String, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Union_Number_String, Ark_Number>(1), "1.000000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_Number>(0), "0.000000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_Number>(2.45f), "2.450000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("5px"), "5.000000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("22.35px"), "22.350000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("7vp"), "7.000000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("1.65vp"), "1.650000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("65fp"), "65.000000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("4.3fp"), "4.300000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("11lpx"), "11.000000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("0.5lpx"), "0.500000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("3"), "3.000000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("10.65"), "10.650000" },
+        { Converter::ArkUnion<Union_Number_String, Ark_String>("23%"), "23.000000" },
+    };
+
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    for (const auto &[arkValue, expected]: testPlan) {
+        modifier_->setStrokeMiterLimit(node_, &arkValue);
+
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_MITER_LIMIT_NAME);
+        EXPECT_EQ(resultStr, expected);
+    }
 }
 
 /**

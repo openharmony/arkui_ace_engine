@@ -210,7 +210,14 @@ namespace Converter {
     {
         return src.tag == ARK_TAG_FLOAT32 ? src.f32 : static_cast<float>(src.i32);
     }
-
+     
+    template<>
+    inline float Convert(const Ark_String& src)
+    {
+        auto value = Convert<std::string>(src);
+        return std::stof(value);
+    }
+    
     // Implementation is in cpp
     Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo &info);
 
@@ -556,6 +563,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
     template<> void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src);
+    template<> void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src);
     template<> void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);

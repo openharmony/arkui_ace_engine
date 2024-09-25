@@ -187,6 +187,17 @@ void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src)
 }
 
 template<>
+void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src)
+{
+    switch (src) {
+        case ARK_LINE_JOIN_STYLE_MITER: dst = LineJoinStyle::MITER; break;
+        case ARK_LINE_JOIN_STYLE_ROUND: dst = LineJoinStyle::ROUND; break;
+        case ARK_LINE_JOIN_STYLE_BEVEL: dst = LineJoinStyle::BEVEL; break;
+        default: LOGE("Unexpected enum value in Ark_LineJoinStyle: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src)
 {
     switch (src) {
