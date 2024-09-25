@@ -409,6 +409,15 @@ public:
         return posMap_[startIndex].mainPos - startPos;
     }
 
+    PositionInfo GetPositionInfo(int32_t index) const
+    {
+        auto it = posMap_.find(index);
+        if (it == posMap_.end()) {
+            return { -1.0f, -1.0f };
+        }
+        return it->second;
+    }
+
     std::pair<int32_t, float> GetStartIndexAndPos() const
     {
         if (posMap_.empty()) {
