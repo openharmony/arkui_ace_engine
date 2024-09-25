@@ -75,6 +75,7 @@ constexpr int32_t VSYNC_PERIOD_COUNT = 5;
 constexpr int32_t MIN_IDLE_TIME = 1000000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
+constexpr int32_t MAX_MISS_COUNT = 3;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -566,7 +567,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp);
     SetVsyncTime(nanoTimestamp);
-    bool hasRunningAnimation = window_->FlushAnimation(nanoTimestamp);
+    auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
@@ -633,7 +634,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         isNeedFlushMouseEvent_ = false;
     }
     if (isNeedFlushAnimationStartTime_) {
-        window_->FlushAnimationStartTime(nanoTimestamp);
+        window_->FlushAnimationStartTime(animationTimeStamp_);
         isNeedFlushAnimationStartTime_ = false;
     }
     needRenderNode_.clear();
@@ -4386,5 +4387,28 @@ bool PipelineContext::CheckThreadSafe() const
         return false;
     }
     return true;
+}
+
+uint64_t PipelineContext::AdjustVsyncTimeStamp(uint64_t nanoTimestamp)
+{
+    auto period = window_->GetVSyncPeriod();
+    if (period > 0 && recvTime_ > static_cast<int64_t>(nanoTimestamp) + MAX_MISS_COUNT * period) {
+        return static_cast<uint64_t>(recvTime_ - ((recvTime_ - static_cast<int64_t>(nanoTimestamp)) % period));
+    }
+    return nanoTimestamp;
+}
+
+bool PipelineContext::FlushModifierAnimation(uint64_t nanoTimestamp)
+{
+    auto animationTimeStamp = AdjustVsyncTimeStamp(nanoTimestamp);
+    if (animationTimeStamp < animationTimeStamp_) {
+        ACE_SCOPED_TRACE("skip ModifierAnimation");
+        TAG_LOGW(AceLogTag::ACE_ANIMATION,
+            "Time decreases, skip ModifierAnimation, lastTime:%{public}" PRIu64 ", nowTime:%{public}" PRIu64,
+            animationTimeStamp_, animationTimeStamp);
+        return true;
+    }
+    animationTimeStamp_ = animationTimeStamp;
+    return window_->FlushAnimation(animationTimeStamp);
 }
 } // namespace OHOS::Ace::NG
