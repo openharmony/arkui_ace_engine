@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
+#include "modifier_test_base.h"
+#include "modifiers_test_utils.h"
+
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
+
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "modifier_test_base.h"
-#include "modifiers_test_utils.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,42 +53,12 @@ class SelectModifierTest : public ModifierTestBase<GENERATED_ArkUISelectModifier
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
+        ModifierTestBase::SetUpTestCase();
 
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+        SetupThemeStyle("select_pattern");
 
-        // set test values to Theme Pattern as data for the Theme building
-        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
-        MockThemeStyle::GetInstance()->SetAttr("select_pattern", { .value = themeStyle });
-        themeConstants->LoadTheme(0);
-
-        auto selectTheme = SelectTheme::Builder().Build(themeConstants);
-
-        auto textTheme = TextTheme::Builder().Build(nullptr);
-
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
-        auto getThemeMockFunc = [selectTheme, textTheme](ThemeType type) -> RefPtr<Theme> {
-            if (type == SelectTheme::TypeId()) {
-                return selectTheme;
-            } else if (type == TextTheme::TypeId()) {
-                return textTheme;
-            }
-            return nullptr;
-        };
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(getThemeMockFunc);
-
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        SetupTheme<SelectTheme>();
+        SetupTheme<TextTheme>();
     }
 
     void SetUp(void) override

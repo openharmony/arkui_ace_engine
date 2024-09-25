@@ -17,13 +17,11 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
+
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/utility/converter.h"
-#include "arkoala_api_generated.h"
+
 #include "core/components_ng/pattern/navrouter/navrouter_event_hub.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -54,22 +52,16 @@ class NavRouterModifierTest : public ModifierTestBase<GENERATED_ArkUINavRouterMo
     public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
-    }
+        ModifierTestBase::SetUpTestCase();
 
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
 /*
  * @tc.name: setNavRouterOptions0Test
  * @tc.desc: check set name and params in the constructor
- * DISABLED because set RouteInfo for NavRouter not implmented on the ace_engine side
+ * DISABLED because set RouteInfo for NavRouter not implemented on the ace_engine side
  * @tc.type: FUNC
  */
 HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions0Test, TestSize.Level1)
@@ -89,7 +81,7 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions0Test, TestSize.Leve
 /*
  * @tc.name: setNavRouterOptions1TestDefaultValues
  * @tc.desc: check set name and params in the constructor
- * DISABLED because set RouteInfo for NavRouter not implmented on the ace_engine side
+ * DISABLED because set RouteInfo for NavRouter not implemented on the ace_engine side
  * @tc.type: FUNC
  */
 HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestDefaultValues, TestSize.Level1)
@@ -107,7 +99,7 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestDefaultValues, 
 /*
  * @tc.name: setNavRouterOptions1TestValidValues
  * @tc.desc: check set name and params in the constructor
- * DISABLED because set RouteInfo for NavRouter not implmented on the ace_engine side
+ * DISABLED because set RouteInfo for NavRouter not implemented on the ace_engine side
  * @tc.type: FUNC
  */
 HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestValidValues, TestSize.Level1)
@@ -116,7 +108,7 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestValidValues, Te
     std::string resultStr;
     Ark_RouteInfo inputValueOptions;
 
-    // Inital setup
+    // Initial setup
     inputValueOptions.name = Converter::ArkValue<Ark_String>("");
     // Valid values are not defined for attribute 'param' of type 'Ark_CustomObject'
 
@@ -141,7 +133,7 @@ HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestValidValues, Te
 /*
  * @tc.name: setNavRouterOptions1TestInvalidValues
  * @tc.desc: check set name and params in the constructor
- * DISABLED because set RouteInfo for NavRouter not implmented on the ace_engine side
+ * DISABLED because set RouteInfo for NavRouter not implemented on the ace_engine side
  * @tc.type: FUNC
  */
 HWTEST_F(NavRouterModifierTest, DISABLED_setNavRouterOptions1TestInvalidValues, TestSize.Level1)
@@ -250,7 +242,7 @@ HWTEST_F(NavRouterModifierTest, setModeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    // Inital setup
+    // Initial setup
     auto inputValueModeMode = static_cast<Ark_NavRouteMode>(3);
 
     // Test

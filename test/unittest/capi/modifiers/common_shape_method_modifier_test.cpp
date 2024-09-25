@@ -15,12 +15,9 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
-
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -60,31 +57,6 @@ class CommonShapeMethodModifierTest : public ModifierTestBase<GENERATED_ArkUICom
     &GENERATED_ArkUINodeModifiers::getCommonShapeMethodModifier,
     GENERATED_ARKUI_CIRCLE // test common shape methods on frameNode for Circle component
     > {
-public:
-    static void SetUpTestCase()
-    {
-         // setup Context
-        MockPipelineContext::SetUp();
-        // assume using of the stub test/mock/core/common/mock_theme_constants.cpp in build process
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-        // create Theme Manager and provide return of ThemeConstants
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_))
-            .WillRepeatedly(Return(themeConstants));
-        // set Theme Manager to Context
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-         // setup Container with Context
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    }
-
-    static void TearDownTestCase()
-    {
-        MockContainer::TearDown();
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-    }
 };
 
 /**

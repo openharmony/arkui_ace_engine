@@ -18,16 +18,12 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "arkoala_api_generated.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
+
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
-
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -50,15 +46,9 @@ class GridModifierCallbacksTest : public ModifierTestBase<GENERATED_ArkUIGridMod
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
-    }
+        ModifierTestBase::SetUpTestCase();
 
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 

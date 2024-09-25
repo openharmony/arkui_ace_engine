@@ -17,7 +17,7 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
+
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
@@ -25,11 +25,6 @@
 #include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -103,47 +98,21 @@ class SwiperModifierTest : public ModifierTestBase<GENERATED_ArkUISwiperModifier
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+        ModifierTestBase::SetUpTestCase();
 
         // set test values to Theme Pattern as data for the Theme building
-        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
+        auto themeStyle = SetupThemeStyle("swiper_pattern");
         themeStyle->SetAttr("swiper_indicator_size", { .value = THEME_SWIPER_INDICATOR_SIZE });
         themeStyle->SetAttr("indicator_color", { .value = THEME_SWIPER_INDICATOR_COLOR });
         themeStyle->SetAttr("indicator_color_selected", { .value = THEME_SWIPER_INDICATOR_COLOR });
         themeStyle->SetAttr("indicator_text_font_size", { .value = THEME_SWIPER_FONT_SIZE });
         themeStyle->SetAttr(ARROW_COLOR_PRIMARY, { .value = THEME_SWIPER_ARROW_COLOR });
         themeStyle->SetAttr(ARROW_COLOR_COMPONENT_NORMAL, { .value = THEME_SWIPER_ARROW_COLOR });
-        MockThemeStyle::GetInstance()->SetAttr("swiper_pattern", { .value = themeStyle });
-        themeConstants->LoadTheme(0);
 
-        // build default SwiperTheme
-        SwiperIndicatorTheme::Builder builder;
-        auto swiperTheme = builder.Build(themeConstants);
-
-        // create Theme Manager and provide return of SwiperTheme
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_))
-            .WillRepeatedly(Return(themeConstants));
-        EXPECT_CALL(*themeManager, GetTheme(testing::_))
-            .WillRepeatedly(Return(swiperTheme));
-
-        // setup Context with Theme Manager and Container
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+        SetupTheme<SwiperIndicatorTheme>();
 
         // setup the test event handler
-        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 

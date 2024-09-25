@@ -13,15 +13,12 @@
  * limitations under the License.
  */
 
-#include "core/components/progress/progress_theme.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components/progress/progress_theme.h"
+
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 
@@ -51,34 +48,13 @@ class LoadingProgressModifierTest : public ModifierTestBase<GENERATED_ArkUILoadi
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+        ModifierTestBase::SetUpTestCase();
 
         // set test values to Theme Pattern as data for the Theme building
-        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
+        auto themeStyle = SetupThemeStyle("progress_pattern");
         themeStyle->SetAttr("fg_progress_color", { .value = THEME_LOADING_COLOR });
-        MockThemeStyle::GetInstance()->SetAttr("progress_pattern", { .value = themeStyle });
-        themeConstants->LoadTheme(0);
 
-        auto builder = ProgressTheme::Builder();
-        auto theme = builder.Build(themeConstants);
-
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
-        EXPECT_CALL(*themeManager, GetTheme(testing::_)).WillRepeatedly(Return(theme));
-
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
-        MockThemeStyle::GetInstance()->SetAttributes({});
+        SetupTheme<ProgressTheme>();
     }
 };
 

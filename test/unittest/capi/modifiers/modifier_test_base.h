@@ -22,6 +22,12 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/node/view_model.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_theme_style.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 
 extern "C" const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version);
@@ -47,6 +53,52 @@ public:
         return nodeModifiers_;
     }
 
+    static void SetUpTestCase()
+    {
+        MockPipelineContext::SetUp();
+        themeManager_ = AceType::MakeRefPtr<MockThemeManager>();
+        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
+
+        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
+        themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+        EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
+            .WillRepeatedly(testing::Return(themeConstants_));
+        EXPECT_CALL(*themeManager_, GetTheme(testing::_)).WillRepeatedly(testing::Return(nullptr));
+
+        themeConstants_->LoadTheme(0);
+        MockThemeStyle::GetInstance()->SetAttributes({});
+
+        MockContainer::SetUp(MockPipelineContext::GetCurrent());
+        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+        MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutor);
+    }
+
+    static void TearDownTestCase()
+    {
+        MockPipelineContext::GetCurrent()->SetTaskExecutor(nullptr);
+        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
+        MockPipelineContext::TearDown();
+        MockContainer::TearDown();
+        themeManager_ = nullptr;
+        themeConstants_ = nullptr;
+    }
+
+    template<typename Theme>
+    static void SetupTheme()
+    {
+        auto theme = typename Theme::Builder().Build(themeConstants_);
+        EXPECT_CALL(*themeManager_, GetTheme(Theme::TypeId())).WillRepeatedly(testing::Return(theme));
+    }
+
+    static RefPtr<ThemeStyle> SetupThemeStyle(const std::string& pattern)
+    {
+        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
+        MockThemeStyle::GetInstance()->SetAttr(pattern, { .value = themeStyle });
+        return themeStyle;
+    }
+
     virtual void SetUp(void)
     {
         ASSERT_NE(modifier_, nullptr);
@@ -59,7 +111,10 @@ public:
         DisposeNode(node_);
     }
 
-private:
+protected:
+    inline static RefPtr<MockThemeManager> themeManager_;
+    inline static RefPtr<ThemeConstants> themeConstants_;
+
     inline static const GENERATED_ArkUIBasicNodeAPI *basicAPI_
         = reinterpret_cast<const GENERATED_ArkUIBasicNodeAPI *>(
             GetArkUIAPI(static_cast<ArkUIAPIVariantKind>(GENERATED_Ark_APIVariantKind::GENERATED_BASIC),
@@ -73,7 +128,6 @@ private:
     inline static const GENERATED_ArkUINodeModifiers *nodeModifiers_
         = fullAPI_ ? fullAPI_->getNodeModifiers() : nullptr;
 
-public:
     inline static const Modifier *modifier_
         = nodeModifiers_ && GetModifierFunc ? (nodeModifiers_->*GetModifierFunc)() : nullptr;
 };

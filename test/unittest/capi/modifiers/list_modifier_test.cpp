@@ -15,16 +15,14 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+
 #include "base/geometry/dimension.h"
-#include "node_api.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/components_v2/list/list_properties.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/list/list_event_hub.h"
+#include "core/components_v2/list/list_properties.h"
+
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "core/components_ng/pattern/list/list_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -61,15 +59,9 @@ class ListModifierTest : public ModifierTestBase<GENERATED_ArkUIListModifier,
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
-    }
+        ModifierTestBase::SetUpTestCase();
 
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -143,7 +135,7 @@ HWTEST_F(ListModifierTest, setCachedCountTest, TestSize.Level1)
     modifier_->setCachedCount(node_, &arg);
     checkValue = GetAttrValue<std::string>(node_, "cachedCount");
     EXPECT_EQ(checkValue, "10");
-    
+
     arg = Converter::ArkValue<Ark_Number>(-10);
     modifier_->setCachedCount(node_, &arg);
     checkValue = GetAttrValue<std::string>(node_, "cachedCount");
@@ -355,7 +347,7 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
             (Converter::ArkUnion<Union_Number_String, Ark_Number>(55.7f)),
         .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
     };
-    
+
     Opt_ListOptions options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
     indexCheckValue = GetAttrValue<std::string>(node_, "initialIndex");
@@ -451,7 +443,7 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
     modifier_->setLanes(node_, &value, &gutterOpt);
     gutterCheckValue = GetAttrValue<std::string>(node_, "laneGutter");
     EXPECT_EQ(gutterCheckValue, "55.50vp");
-    
+
     // lanes as constraints
     Ark_LengthConstrain constraint = {
         .minLength = {.value = Converter::ArkValue<Ark_Int32>(11), .unit = Converter::ArkValue<Ark_Int32>(2)},
@@ -703,7 +695,7 @@ HWTEST_F(ListModifierTest, setFrictionTest, TestSize.Level1)
 {
     // default values
     auto frictionCheckValue = GetAttrValue<double>(node_, "friction");
-    EXPECT_EQ(frictionCheckValue, 0.6);
+    EXPECT_EQ(frictionCheckValue, 0.75);
 
     // set float friction
     Type_ListAttribute_friction_Arg0 friction =

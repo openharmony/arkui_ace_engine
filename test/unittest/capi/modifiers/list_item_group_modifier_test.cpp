@@ -17,16 +17,14 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+
 #include "base/geometry/dimension.h"
-#include "node_api.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/components_v2/list/list_properties.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/list/list_item_event_hub.h"
+#include "core/components_v2/list/list_properties.h"
+
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "core/components_ng/pattern/list/list_item_event_hub.h"
 
 using namespace testing;
 using namespace testing::ext;
