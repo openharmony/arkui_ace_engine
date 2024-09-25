@@ -13,6 +13,10 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+declare_args() {
+  capi_theme_debug = false
+}
+
 ace_unittest("capi_all_modifiers_test") {
   type = "new"
   module_output = "capi"
@@ -53,6 +57,31 @@ ace_unittest("capi_all_modifiers_test") {
     "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_linux_unittest",
     "../stubs:capi-ut-stubs",
   ]
+  if (capi_theme_debug) {
+    defines = [ "CAPI_BACKTRACE" ]
+    sources += [ "unwind_utils.cpp" ]
+    external_deps = [ "libunwind:libunwind" ]
+    extra_deps += [
+      ":copy_libunwind",
+      ":copy_libunwind_unstripped",
+    ]
+  }
+}
+
+if (capi_theme_debug) {
+  copy("copy_libunwind") {
+    testonly = true
+    sources = [ root_out_dir + "/thirdparty/libunwind/libunwind.so" ]
+    outputs = [ root_out_dir + "/tests/unittest/ace_engine/capi/libunwind.so" ]
+    external_deps = [ "libunwind:libunwind" ]
+  }
+  copy("copy_libunwind_unstripped") {
+    testonly = true
+    sources = [ root_out_dir +
+                "/lib.unstripped/clang_x64/thirdparty/libunwind/libunwind.so" ]
+    outputs = [ root_out_dir + "/exe.unstripped/clang_x64/tests/unittest/ace_engine/capi/libunwind.so" ]
+    external_deps = [ "libunwind:libunwind" ]
+  }
 }
 
 group("capi_modifiers_unittest") {

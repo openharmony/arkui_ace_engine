@@ -15,6 +15,9 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_MODIFIER_TEST_BASE_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_MODIFIER_TEST_BASE_H
 
+#include <iostream>
+#include <set>
+
 #include "gtest/gtest.h"
 
 #include "arkoala_api.h"
@@ -31,6 +34,19 @@
 namespace OHOS::Ace::NG {
 
 extern "C" const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version);
+
+#ifdef CAPI_BACKTRACE
+void ReportTheme(ThemeType type);
+void ResetThemes();
+#endif
+
+inline RefPtr<Theme> CatchEmptyTheme(ThemeType type)
+{
+#ifdef CAPI_BACKTRACE
+    ReportTheme(type);
+#endif
+    return nullptr;
+}
 
 template <typename Modifier, auto GetModifierFunc, GENERATED_Ark_NodeType NodeType>
 class ModifierTestBase : public testing::Test {
@@ -63,7 +79,7 @@ public:
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
             .WillRepeatedly(testing::Return(themeConstants_));
-        EXPECT_CALL(*themeManager_, GetTheme(testing::_)).WillRepeatedly(testing::Return(nullptr));
+        EXPECT_CALL(*themeManager_, GetTheme(testing::_)).WillRepeatedly(CatchEmptyTheme);
 
         themeConstants_->LoadTheme(0);
         MockThemeStyle::GetInstance()->SetAttributes({});
@@ -73,6 +89,10 @@ public:
 
         auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
         MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutor);
+
+#ifdef CAPI_BACKTRACE
+        ResetThemes();
+#endif
     }
 
     static void TearDownTestCase()
