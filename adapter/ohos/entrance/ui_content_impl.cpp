@@ -1376,10 +1376,8 @@ void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Conf
     }
 
     auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    bool useAppFontScale = !fontScale.empty();
-    context->SetUseAppFontScale(useAppFontScale);
-    if (useAppFontScale) {
-        context->SetAppFontScale(StringUtils::StringToFloat(fontScale));
+    if (!fontScale.empty()) {
+        context->SetFontScale(StringUtils::StringToFloat(fontScale));
     }
 }
 
