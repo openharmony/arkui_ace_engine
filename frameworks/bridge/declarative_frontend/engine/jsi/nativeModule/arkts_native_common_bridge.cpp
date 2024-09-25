@@ -7629,6 +7629,7 @@ ArkUINativeModuleValue CommonBridge::SetFocusScopeId(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> isGroupArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> arrowKeyStepOutArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     if (!idArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -7637,7 +7638,11 @@ ArkUINativeModuleValue CommonBridge::SetFocusScopeId(ArkUIRuntimeCallInfo* runti
     if (isGroupArg->IsBoolean()) {
         isGroup = isGroupArg->ToBoolean(vm)->Value();
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setFocusScopeId(nativeNode, id.c_str(), isGroup);
+    bool arrowKeyStepOut = true;
+    if (arrowKeyStepOutArg->IsBoolean()) {
+        arrowKeyStepOut = arrowKeyStepOutArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setFocusScopeId(nativeNode, id.c_str(), isGroup, arrowKeyStepOut);
     return panda::JSValueRef::Undefined(vm);
 }
 

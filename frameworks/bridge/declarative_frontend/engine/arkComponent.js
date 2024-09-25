@@ -2891,7 +2891,7 @@ class FocusScopeIdModifier extends ModifierWithKey {
       getUINativeModule().common.resetFocusScopeId(node);
     }
     else {
-      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup);
+      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup, this.value.arrowStepOut);
     }
   }
 }
@@ -4268,13 +4268,16 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SystemBarEffectModifier.identity, SystemBarEffectModifier, null);
     return this;
   }
-  focusScopeId(id, isGroup) {
+  focusScopeId(id, isGroup, arrowStepOut) {
     let arkFocusScopeId = new ArkFocusScopeId();
     if (isString(id)) {
       arkFocusScopeId.id = id;
     }
     if (typeof isGroup === 'boolean') {
       arkFocusScopeId.isGroup = isGroup;
+    }
+    if (typeof arrowStepOut === 'boolean') {
+      arkFocusScopeId.arrowStepOut = arrowStepOut;
     }
     modifierWithKey(this._modifiersWithKeys, FocusScopeIdModifier.identity, FocusScopeIdModifier, arkFocusScopeId);
     return this;
@@ -16125,9 +16128,11 @@ class ArkFocusScopeId {
   constructor() {
     this.id = undefined;
     this.isGroup = undefined;
+    this.arrowStepOut = undefined;
   }
   isEqual(another) {
-    return (this.id === another.id) && (this.isGroup === another.isGroup);
+    return ((this.id === another.id) && (this.isGroup === another.isGroup) &&
+      (this.arrowStepOut === another.arrowStepOut));
   }
 }
 class ArkFocusScopePriority {
