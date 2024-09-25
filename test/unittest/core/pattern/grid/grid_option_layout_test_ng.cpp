@@ -972,7 +972,7 @@ HWTEST_F(GridOptionLayoutTestNg, Refresh001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "245.45px");
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_TRUE(scrollable->isSpringAnimationStop_);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
 
     MockAnimationManager::GetInstance().TickByVelocity(200.0f);
     FlushLayoutTask(frameNode_);
@@ -987,5 +987,61 @@ HWTEST_F(GridOptionLayoutTestNg, Refresh001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
     EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0.f);
+}
+
+/**
+ * @tc.name: OnScrollStart001
+ * @tc.desc: Test Grid onScrollStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, OnScrollStart001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetLayoutOptions({});
+
+    int32_t count = 0;
+    model.SetOnScrollStart([&count]() { ++count; });
+    int32_t stopCount = 0;
+    model.SetOnScrollStop([&stopCount]() { ++stopCount; });
+    CreateGridItems(20, ITEM_WIDTH, ITEM_HEIGHT);
+    CreateDone();
+
+    pattern_->ScrollToIndex(10, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(count, 0);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(100.f);
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    (*scrollable->panRecognizerNG_->onActionStart_)(info);
+    (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(count, 1);
+    (*scrollable->panRecognizerNG_->onActionEnd_)(info);
+    FlushLayoutTask(frameNode_);
+
+    MockAnimationManager::GetInstance().TickByVelocity(2000.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(stopCount, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
+
+    MockAnimationManager::GetInstance().TickByVelocity(100.f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(stopCount, 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 100.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(count, 1);
+    EXPECT_EQ(stopCount, 1);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.0f);
 }
 } // namespace OHOS::Ace::NG

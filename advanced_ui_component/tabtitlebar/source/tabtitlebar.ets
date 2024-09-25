@@ -640,6 +640,7 @@ struct ImageMenuItem {
         .height(ImageMenuItem.imageSize)
         .focusable(this.item.isEnabled)
         .key(ImageMenuItem.focusablePrefix + this.index)
+        .draggable(false)
     }
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)

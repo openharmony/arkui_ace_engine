@@ -1,5 +1,3 @@
-
-
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,20 +48,20 @@ HWTEST_F(GradientStyleModifierTest, gradientStyleModifierTest001, TestSize.Level
     colorEnd.SetColor(Color::RED);
     colorEnd.SetDimension(Dimension(MAX_COLOR_STOP, DimensionUnit::PERCENT));
     gradient.AddColor(colorEnd);
-     /**
+    /**
      * @tc.steps: step2. create animatable color and color stop .
      */
     ColorAnimatableArithmetic colors(gradient);
     ColorStopAnimatableArithmetic colorStops(gradient);
-     /**
+    /**
      * @tc.steps: step3. padding color and color stop .
      */
     auto context = RosenRenderContext();
     auto modifier = std::make_shared<GradientStyleModifier>(AceType::WeakClaim(&context));
     modifier->SetGradient(gradient);
-    modifier->PaddingColorStops(colorStops);
+    modifier->PaddingColorStops(colorStops, true);
     auto outputGradient = modifier->GetGradient();
-     /**
+    /**
      * @tc.steps: step4. check data size.
      */
     EXPECT_EQ(outputGradient.GetColors().size(), gradient.GetColors().size());

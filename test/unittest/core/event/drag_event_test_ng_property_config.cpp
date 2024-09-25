@@ -791,7 +791,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest002, TestSize.Leve
     dragDropManager->ResetDragging(DragDropMgrState::IDLE);
     dragEventActuator->isRedragStart_ = false;
     dragEventActuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId(), true);
-    SUCCEED();
+    EXPECT_EQ(dragEventActuator->isRedragStart_, true);
 }
 
 /**
@@ -823,7 +823,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest003, TestSize.Leve
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->windowModal_ = WindowModal::SEMI_MODAL;
     dragEventActuator->GetFloatImageOffset(framenode, pixelMap);
-    SUCCEED();
+    EXPECT_EQ(dragEventActuator->GetFloatImageOffset(framenode, pixelMap).GetX(), 5.0);
 }
 
 /**
@@ -850,7 +850,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest004, TestSize.Leve
     previewOption.isDefaultRadiusEnabled = true;
     framenode->SetDragPreviewOptions(previewOption);
     dragEventActuator->UpdatePreviewOptionDefaultAttr(framenode);
-    SUCCEED();
+    EXPECT_EQ(previewOption.isDefaultRadiusEnabled, true);
 }
 
 /**
@@ -878,7 +878,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest005, TestSize.Leve
     auto manager = pipelineContext->GetOverlayManager();
     manager->hasEvent_ = true;
     dragEventActuator->SetEventColumn(dragEventActuator);
-    SUCCEED();
+    EXPECT_EQ(manager->hasEvent_, true);
 }
 
 /**
@@ -908,7 +908,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest006, TestSize.Leve
     for (auto item : event) {
         (*item)(info);
     }
-    SUCCEED();
+    EXPECT_EQ(columnGestureHub->GetHitTestMode(), HitTestMode::HTMBLOCK);
 }
 
 /**
@@ -940,7 +940,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest007, TestSize.Leve
     for (auto item : event) {
         (*item)(info);
     }
-    SUCCEED();
+    EXPECT_EQ(columnGestureHub->GetHitTestMode(), HitTestMode::HTMBLOCK);
 }
 
 /**
@@ -966,10 +966,9 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest008, TestSize.Leve
     framenode->previewOption_.defaultAnimationBeforeLifting = true;
     ASSERT_NE(dragEventActuator, nullptr);
     dragEventActuator->SetImageNodeInitAttr(framenode, framenode1);
-    SUCCEED();
     framenode->layoutProperty_ = nullptr;
     dragEventActuator->SetImageNodeInitAttr(framenode, framenode1);
-    SUCCEED();
+    EXPECT_EQ(framenode->previewOption_.defaultAnimationBeforeLifting, true);
 }
 
 /**
@@ -994,12 +993,11 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest009, TestSize.Leve
     ASSERT_NE(dragEventActuator, nullptr);
     framenode->dragPreviewInfo_.inspectorId = "test";
     dragEventActuator->GetFrameNodePreviewPixelMap(framenode);
-    SUCCEED();
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(static_cast<void*>(new char[0]));
     framenode->dragPreviewInfo_.pixelMap = pixelMap;
     framenode->dragPreviewInfo_.inspectorId = "";
     dragEventActuator->GetFrameNodePreviewPixelMap(framenode);
-    SUCCEED();
+    EXPECT_EQ(gestureEventHub->GetDragPreviewPixelMap(), nullptr);;
 }
 
 /**
@@ -1050,7 +1048,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest010, TestSize.Leve
     auto gestureHub = dragEventActuator->gestureEventHub_.Upgrade();
     gestureHub->textDraggable_ = true;
     (*(dragEventActuator->panRecognizer_->onActionEnd_))(info);
-    SUCCEED();
+    EXPECT_EQ(gestureHub->textDraggable_, true);
 }
 
 /**
@@ -1098,6 +1096,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest011, TestSize.Leve
     frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
+        [&unknownPropertyValue]() { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
     ASSERT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     dragEventActuator->isNotInPreviewState_ = true;
@@ -1411,7 +1411,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest017, TestSize.Leve
     optBlurStyleInfo->colorMode = ThemeColorMode::LIGHT;
     optEffectOption = dragEventActuator->BrulStyleToEffection(optBlurStyleInfo);
     ASSERT_NE(optEffectOption.has_value(), true);
-    SUCCEED();
+    EXPECT_EQ(resValueWrapper.type, ThemeConstantsType::THEME);
 }
 
 /**
@@ -1440,7 +1440,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest018, TestSize.Leve
     dragEventActuator->SetFilter(dragEventActuatorTwo);
     parentNode->depth_ = 1;
     dragEventActuator->SetFilter(dragEventActuatorTwo);
-    SUCCEED();
+    EXPECT_EQ(parentNode->depth_, 1);
 }
 
 /**
@@ -1484,7 +1484,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest019, TestSize.Leve
     dragEventActuator->SetFilter(dragEventActuatorTwo);
     container->isScenceBoardWindow_ = false;
     MockContainer::TearDown();
-    SUCCEED();
+    EXPECT_EQ(manager->hasFilter_, true);
 }
 
 /**
@@ -1527,7 +1527,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest020, TestSize.Leve
     container->isScenceBoardWindow_ = false;
     dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode, nullptr);
     MockContainer::TearDown();
-    SUCCEED();
+    EXPECT_EQ(container->isScenceBoardWindow_, false);
 }
 
 /**
@@ -1566,7 +1566,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest021, TestSize.Leve
     container->isScenceBoardWindow_ = false;
     dragEventActuator->SetPixelMap(dragEventActuator);
     MockContainer::TearDown();
-    SUCCEED();
+    EXPECT_EQ(container->isScenceBoardWindow_, false);
 }
 
 /**
@@ -1621,7 +1621,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest022, TestSize.Leve
     };
     framenode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->UpdatePreviewOptionFromModifier(framenode);
-    SUCCEED();
+    EXPECT_EQ(previewOptions.isMultiSelectionEnabled, false);
 }
 
 /**
@@ -1668,7 +1668,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest023, TestSize.Leve
     };
     framenode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->UpdatePreviewOptionFromModifier(framenode);
-    SUCCEED();
+    EXPECT_EQ(previewOptions.isMultiSelectionEnabled, false);
 }
 
 /**
@@ -1707,7 +1707,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest024, TestSize.Leve
     previewOptions.options = optionTmp;
     parentNode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->ApplyNewestOptionExecutedFromModifierToNode(framenode, parentNode);
-    SUCCEED();
+    EXPECT_EQ(previewOptions.isMultiSelectionEnabled, false);
 }
 
 /**
@@ -1763,7 +1763,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest025, TestSize.Leve
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
     MockContainer::TearDown();
-    SUCCEED();
+    EXPECT_EQ(manager->hasEvent_, true);
 }
 
 /**
@@ -1817,7 +1817,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest026, TestSize.Leve
     framenode->SetDragPreview(dragDropInfo);
     GatherNodeChildInfo gatherNodeChildInfo;
     dragEventActuator->CreateImageNode(framenode, gatherNodeChildInfo);
-    SUCCEED();
+    EXPECT_EQ(shadow.GetBlurRadius(), 10.0);
 }
 
 /**
@@ -1855,7 +1855,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest027, TestSize.Leve
     dragEventActuator->MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
     container->isScenceBoardWindow_ = false;
     MockContainer::TearDown();
-    SUCCEED();
+    EXPECT_EQ(container->isScenceBoardWindow_, false);
 }
 
 /**
@@ -1895,7 +1895,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest028, TestSize.Leve
     childNode->SetParent(parentNodeTwo);
     dragEventActuator->FindItemParentNode(frameNode);
     dragEventActuator->FindItemParentNode(childNode);
-    SUCCEED();
+    EXPECT_EQ(previewOption.isMultiSelectionEnabled, true);
 }
 
 /**
@@ -1945,7 +1945,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest029, TestSize.Leve
     gestureHubOne->isTextDraggable_ = true;
     gestureHubOne->textDraggable_ = true;
     dragEventActuator->PrepareShadowParametersForDragData(framenodeOne, arkExtraInfoJson, scale);
-    SUCCEED();
+    EXPECT_EQ(gestureHubOne->textDraggable_, true);
 }
 
 /**
@@ -1990,6 +1990,6 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest030, TestSize.Leve
     previewOptions.options = optionTmp;
     framenode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->PrepareShadowParametersForDragData(framenode, arkExtraInfoJson, scale);
-    SUCCEED();
+    EXPECT_EQ(previewOptions.options.opacity, 0.0f);
 }
 }

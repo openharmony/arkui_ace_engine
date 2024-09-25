@@ -87,7 +87,7 @@ bool GetToastMessage(napi_env env, napi_value messageNApi, std::string& messageS
             return false;
         }
         if (messageString.size() == 0) {
-            TAG_LOGD(AceLogTag::ACE_DIALOG, "Toast message is empty");
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Toast message is empty");
         }
     } else {
         NapiThrow(env, "The type of message is incorrect.", ERROR_CODE_PARAM_INVALID);

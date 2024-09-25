@@ -37,6 +37,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t HIDDEN_HANDLE_TIMER_MS = 4000; // 4000ms
+constexpr float EXPAND_HANDLE_PAINT_RECT = 3.0f;
+constexpr float EXPAND_HANDLE_PAINT_RECT_HALF = 1.5f;
 } // namespace
 
 void SelectOverlayPattern::OnAttachToFrameNode()
@@ -167,7 +169,7 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto firstHandle = info_->GetFirstHandlePaintRect();
     auto secondHandle = info_->GetSecondHandlePaintRect();
@@ -180,6 +182,8 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     secondHandleRegion_.SetSize({ hotZone * 2, hotZone * 2 + secondHandle.Height() });
     auto secondHandleOffsetX = (secondHandle.Left() + secondHandle.Right()) / 2;
     std::vector<DimensionRect> responseRegion;
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
     if (info_->isSingleHandle) {
         if (!info_->firstHandle.isShow && info_->secondHandle.isShow) {
             // Use the second handle to make a single handle.
@@ -191,7 +195,7 @@ void SelectOverlayPattern::UpdateHandleHotZone()
             secondHandleRegion.SetOffset(DimensionOffset(
                 Offset(secondHandleRegion_.GetOffset().GetX(), secondHandleRegion_.GetOffset().GetY())));
             responseRegion.emplace_back(secondHandleRegion);
-            host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
+            gestureEventHub->SetResponseRegion(responseRegion);
             firstHandleRegion_.Reset();
         } else {
             // Use the first handle to make a single handle.
@@ -203,7 +207,7 @@ void SelectOverlayPattern::UpdateHandleHotZone()
             firstHandleRegion.SetOffset(
                 DimensionOffset(Offset(firstHandleRegion_.GetOffset().GetX(), firstHandleRegion_.GetOffset().GetY())));
             responseRegion.emplace_back(firstHandleRegion);
-            host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
+            gestureEventHub->SetResponseRegion(responseRegion);
             secondHandleRegion_.Reset();
         }
         return;
@@ -360,7 +364,7 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
     } else {
         LOGW("the move point is not in drag area");
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     if (host->IsLayoutDirtyMarked()) {
         context->AddDirtyLayoutNode(host);
@@ -450,7 +454,7 @@ void SelectOverlayPattern::CheckHandleReverse()
 {
     bool handleReverseChanged = false;
     if (IsHandlesInSameLine()) {
-        if (info_->firstHandle.paintRect.Left() > info_->secondHandle.paintRect.Left()) {
+        if (GreatNotEqual(info_->firstHandle.paintRect.Left(), info_->secondHandle.paintRect.Left())) {
             if (!info_->handleReverse) {
                 info_->handleReverse = true;
                 handleReverseChanged = true;
@@ -753,9 +757,9 @@ bool SelectOverlayPattern::CheckIfNeedHandle()
 
 float SelectOverlayPattern::GetHandleDiameter()
 {
-    auto pipleline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipleline, 0.0f);
-    auto textOverlayTheme = pipleline->GetTheme<TextOverlayTheme>();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, 0.0f);
     return textOverlayTheme->GetHandleDiameter().ConvertToPx();
 }
@@ -770,10 +774,10 @@ void SelectOverlayPattern::SetContentModifierBounds(const RefPtr<SelectOverlayCo
     auto frameRect = geometryNode->GetFrameRect();
     auto handleDiameter = GetHandleDiameter();
     RectF boundsRect;
-    boundsRect.SetLeft(frameRect.Left() - handleDiameter * 1.5f);
-    boundsRect.SetTop(frameRect.Top() - handleDiameter * 1.5f);
-    boundsRect.SetWidth(frameRect.Width() + handleDiameter * 3.0f);
-    boundsRect.SetHeight(frameRect.Height() + handleDiameter * 3.0f);
+    boundsRect.SetLeft(frameRect.Left() - handleDiameter * EXPAND_HANDLE_PAINT_RECT_HALF);
+    boundsRect.SetTop(frameRect.Top() - handleDiameter * EXPAND_HANDLE_PAINT_RECT_HALF);
+    boundsRect.SetWidth(frameRect.Width() + handleDiameter * EXPAND_HANDLE_PAINT_RECT);
+    boundsRect.SetHeight(frameRect.Height() + handleDiameter * EXPAND_HANDLE_PAINT_RECT);
     modifier->SetBoundsRect(boundsRect);
 }
 

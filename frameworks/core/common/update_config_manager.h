@@ -47,6 +47,18 @@ public:
         task();
     }
 
+    void UpdatePromiseConfig(const T& config, std::function<void()> &&task, const RefPtr<Container>& container,
+        const std::string& taskName, TaskExecutor::TaskType type = TaskExecutor::TaskType::PLATFORM)
+    {
+        std::lock_guard<std::mutex> taskLock(updateTaskMutex_);
+        CancelUselessTaskLocked();
+        currentTask_.target = config;
+
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(std::move(task), type, taskName);
+    }
+
     void UpdateConfig(const T& config, std::function<void()> &&task, const RefPtr<Container>& container,
         const std::string& taskName, TaskExecutor::TaskType type = TaskExecutor::TaskType::PLATFORM)
     {

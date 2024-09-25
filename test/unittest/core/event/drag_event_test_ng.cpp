@@ -206,6 +206,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     };
     auto dragEvent = AceType::MakeRefPtr<DragEvent>(
         std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
+        [&unknownPropertyValue]() { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
     dragEventActuator->ReplaceDragEvent(dragEvent);
     dragEventActuator->SetCustomDragEvent(dragEvent);
     EXPECT_NE(dragEventActuator->userCallback_, nullptr);
@@ -262,6 +264,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     (*(dragEventActuator->panRecognizer_->onActionStart_))(info);
     (*(dragEventActuator->panRecognizer_->onActionUpdate_))(info);
     (*(dragEventActuator->panRecognizer_->onActionEnd_))(info);
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
+        [&unknownPropertyValue]() { unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE; });
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 }
@@ -715,6 +719,8 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
+        [&unknownPropertyValue]() { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
     /**
      * @tc.steps: step4. Invoke onActionCancel callback, when gestureHub->GetTextDraggable() is true.
@@ -744,7 +750,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     EXPECT_EQ(dragEventActuator->GetIsBindOverlayValue(dragEventActuator), true);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     /**
      * @tc.steps: step7. Invoke onActionCancel callback, GetIsBindOverlayValue is true.
      * @tc.expected: cover getDeviceType() == SourceType::MOUSE.
@@ -752,12 +758,12 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     dragEventActuator->panRecognizer_->deviceType_ = SourceType::MOUSE;
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 
     gestureEventHub->SetTextDraggable(false);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 }
 
 /**
@@ -860,6 +866,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     imageNode->GetGeometryNode()->frame_.rect_.width_ = IMAGE_INVALID_RECT_WIDTH;
     EXPECT_EQ(imageNode->IsPreviewNeedScale(), false);
     dragEventActuator->SetPreviewDefaultAnimateProperty(imageNode);
+    EXPECT_FALSE(imageContext->GetTransformTranslate().has_value());
     TranslateOptions result = imageContext->GetTransformTranslate().value_or(TranslateOptions());
     TranslateOptions expectValue { 0.0f, 0.0f, 0.0f };
     EXPECT_EQ(result.x.calcvalue_, expectValue.x.calcvalue_);
@@ -1738,7 +1745,10 @@ HWTEST_F(DragEventTestNg, TestUpdateDefaultShadow, TestSize.Level1)
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ShadowTheme>()));
+    auto shadowTheme = AceType::MakeRefPtr<ShadowTheme>();
+    auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
+    shadowTheme->SetThemeStyle(themeStyle);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(shadowTheme));
 
     dragEventActuator->UpdatePreviewOptionDefaultAttr(frameNode);
     dragPreviewOption = frameNode->GetDragPreviewOption();
@@ -1768,7 +1778,10 @@ HWTEST_F(DragEventTestNg, TestApplyShadow, TestSize.Level1)
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ShadowTheme>()));
+    auto shadowTheme = AceType::MakeRefPtr<ShadowTheme>();
+    auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
+    shadowTheme->SetThemeStyle(themeStyle);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(shadowTheme));
     
     dragPreviewOption.options.shadow = DragEventActuator::GetDefaultShadow();
     frameNode->SetDragPreviewOptions(dragPreviewOption);

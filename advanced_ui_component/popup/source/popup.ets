@@ -511,7 +511,7 @@ export struct PopupComponent {
     if (px2vp(defaultDisplaySync.width) > 400) {
       applyMaxWidth = 400
     } else {
-      applyMaxWidth = px2vp(defaultDisplaySync.width) - 40 - 40
+      applyMaxWidth = px2vp(defaultDisplaySync.width)
     }
     if (px2vp(defaultDisplaySync.height) > 480) {
       applyMaxHeight = 480

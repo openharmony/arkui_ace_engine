@@ -160,6 +160,10 @@ HWTEST_F(RichEditorPatternTestTwoNg, RequestKeyboardToEdit001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->previewLongPress_ = true;
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = false;
     richEditorPattern->RequestKeyboardToEdit();
     EXPECT_FALSE(richEditorPattern->previewLongPress_);
 }

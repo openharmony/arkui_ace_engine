@@ -46,68 +46,10 @@ public:
         return MakeRefPtr<NavBarLayoutAlgorithm>();
     }
 
-    void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
-    {
-        titleBarMenuItems_ = menuItems;
-    }
-
-    const std::vector<NG::BarItem>& GetTitleBarMenuItems() const
-    {
-        return titleBarMenuItems_;
-    }
-
-    void SetToolBarMenuItems(const std::vector<NG::BarItem>& menuItems)
-    {
-        toolBarMenuItems_ = menuItems;
-    }
-
-    const std::vector<NG::BarItem>& GetToolBarMenuItems() const
-    {
-        return toolBarMenuItems_;
-    }
-
-    int32_t GetMenuNodeId() const
-    {
-        return menuNodeId_.value();
-    }
-
-    int32_t GetLandscapeMenuNodeId()
-    {
-        if (!landscapeMenuNodeId_.has_value()) {
-            landscapeMenuNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
-        return landscapeMenuNodeId_.value();
-    }
-
-    void SetMenuNodeId(const int32_t menuNodeId)
-    {
-        menuNodeId_ = menuNodeId;
-    }
-
-    void SetLandscapeMenuNodeId(const int32_t landscapeMenuNodeId)
-    {
-        landscapeMenuNodeId_ = landscapeMenuNodeId;
-    }
-
-    bool HasMenuNodeId() const
-    {
-        return menuNodeId_.has_value();
-    }
-
-    bool HasLandscapeMenuNodeId() const
-    {
-        return landscapeMenuNodeId_.has_value();
-    }
-
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
     bool CanCoordScrollUp(float offset) const;
-
-    bool GetToolbarHideStatus()
-    {
-        return isHideToolbar_;
-    }
 
     void OnAttachToFrameNode() override;
     void OnWindowFocused() override
@@ -120,16 +62,6 @@ public:
         WindowFocus(false);
     }
 
-    int32_t GetMaxMenuNum() const
-    {
-        return maxMenuNums_;
-    }
-
-    void SetMaxMenuNum(int32_t maxMenu)
-    {
-        maxMenuNums_ = maxMenu;
-    }
-
     bool NeedCoordWithScroll()
     {
         return !isHideTitlebar_ && titleMode_ == NavigationTitleMode::FREE;
@@ -137,6 +69,8 @@ public:
     OffsetF GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode);
 
     Dimension GetTitleBarHeightBeforeMeasure() override;
+
+    float GetTitleBarHeightLessThanMaxBarHeight() const;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -150,14 +84,9 @@ private:
 
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
-    std::vector<NG::BarItem> titleBarMenuItems_;
-    std::vector<NG::BarItem> toolBarMenuItems_;
-    std::optional<int32_t> menuNodeId_;
-    std::optional<int32_t> landscapeMenuNodeId_;
     RefPtr<FrictionMotion> motion_;
     RefPtr<Animator> controller_;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
-    int32_t maxMenuNums_ = -1;
     bool isWindowFocus_ = true;
 };
 

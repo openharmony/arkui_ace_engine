@@ -140,6 +140,10 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
     }
     sectionChangeStartPos_.clear();
 
+    if (sections_ && layoutInfo_->segmentTails_.empty()) {
+        layoutInfo_->InitSegments(sections_->GetSectionInfo(), 0);
+    }
+    
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         return;
     }

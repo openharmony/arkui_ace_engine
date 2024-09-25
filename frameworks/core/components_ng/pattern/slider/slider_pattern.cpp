@@ -21,6 +21,7 @@
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -93,9 +94,34 @@ void SliderPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitializeBubble();
+    HandleEnabled();
     SetAccessibilityAction();
     InitAccessibilityHoverEvent();
     AccessibilityVirtualNodeRenderTask();
+}
+
+void SliderPattern::HandleEnabled()
+{
+    if (UseContentModifier()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (enabled) {
+        return;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    auto alpha = theme->GetDisabledAlpha();
+    auto originalOpacity = renderContext->GetOpacityValue(1.0f);
+    renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
 }
 
 void SliderPattern::InitAccessibilityHoverEvent()
@@ -1690,12 +1716,6 @@ void SliderPattern::OnAttachToFrameNode()
     RegisterVisibleAreaChange();
 }
 
-void SliderPattern::OnVisibleChange(bool isVisible)
-{
-    isVisible_ = isVisible;
-    isVisible_ ? StartAnimation() : StopAnimation();
-}
-
 void SliderPattern::StartAnimation()
 {
     CHECK_NULL_VOID(sliderContentModifier_);
@@ -1742,6 +1762,9 @@ void SliderPattern::RegisterVisibleAreaChange()
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
     pipeline->AddWindowStateChangedCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetAlphaOffscreen(true);
 }
 
 void SliderPattern::OnWindowHide()
@@ -1758,7 +1781,7 @@ void SliderPattern::OnWindowShow()
 
 bool SliderPattern::IsSliderVisible()
 {
-    return isVisibleArea_ && isVisible_ && isShow_;
+    return isVisibleArea_ && isShow_;
 }
 
 void SliderPattern::UpdateTipState()

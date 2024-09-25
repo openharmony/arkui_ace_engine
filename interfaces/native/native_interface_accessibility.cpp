@@ -178,7 +178,7 @@ int32_t OH_ArkUI_AccessibilityElementInfoSetOperationActions(
     if (operationCount <= 0) {
         return ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER;
     }
-    elementInfo->ClearChildNodeIds();
+    elementInfo->ClearOperationActions();
     for (int32_t i = 0; i < operationCount; i++) {
         elementInfo->AddOperationAction(operationActions[i]);
     }

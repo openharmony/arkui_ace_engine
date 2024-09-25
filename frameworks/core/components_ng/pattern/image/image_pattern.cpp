@@ -34,6 +34,7 @@ constexpr int32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t CRITICAL_TIME = 50;      // ms. If show time of image is less than this, use more cacheImages.
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL_STATUS = 2;
 std::string ImageDfxConfigToString(const ImageDfxConfig& imageDfxConfig)
 {
     return "src = " + imageDfxConfig.imageSrc_ + ", nodeInfo = [" + std::to_string(imageDfxConfig.nodeId_) + "-" +
@@ -379,7 +380,11 @@ void ImagePattern::OnImageLoadSuccess()
     CHECK_NULL_VOID(geometryNode);
 
     image_ = loadingCtx_->MoveCanvasImage();
-    CHECK_NULL_VOID(image_);
+    if (!image_) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "nodeId = %{public}d OnImageLoadSuccess but Canvas image is null.",
+            imageDfxConfig_.nodeId_);
+        return;
+    }
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
     auto srcInfo = loadingCtx_->GetSourceInfo();
@@ -998,30 +1003,20 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
     // when image component is [onShow], do not clean image data
-    if (isShow_) {
+    if (isShow_ || level < MEMORY_LEVEL_CRITICAL_STATUS) {
         return;
     }
-
     // clean image data
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-
-    // clean rs node to release the sk_sp<SkImage> held by it
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto rsRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushMessages();
 }
 
 // when recycle image component, release the pixelmap resource
 void ImagePattern::OnRecycle()
 {
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "OnRecycle. nodeId = %{public}d", imageDfxConfig_.nodeId_);
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
@@ -1031,7 +1026,7 @@ void ImagePattern::OnRecycle()
     CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
+    rsRenderContext->RemoveContentModifier(contentMod_);
     UnregisterWindowStateChangedCallback();
 }
 
@@ -1072,6 +1067,8 @@ void ImagePattern::OnWindowHide()
 
 void ImagePattern::OnWindowShow()
 {
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. nodeId = %{public}d isImageQualityChange_ = %{public}d",
+        imageDfxConfig_.nodeId_, isImageQualityChange_);
     isShow_ = true;
     LoadImageDataIfNeed();
 }
@@ -1079,6 +1076,7 @@ void ImagePattern::OnWindowShow()
 void ImagePattern::OnVisibleChange(bool visible)
 {
     if (!visible) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "OnInVisible. nodeId = %{public}d", imageDfxConfig_.nodeId_);
         CloseSelectOverlay();
     }
 }
@@ -1095,7 +1093,7 @@ void ImagePattern::OnVisibleAreaChange(bool visible, double ratio)
         CloseSelectOverlay();
     }
     // control pixelMap List
-    if (GetIsAnimation() && !animator_->IsStopped()) {
+    if (GetIsAnimation() && !animator_->IsStopped() && animator_->HasScheduler()) {
         if (visible) {
             animator_->Forward();
         } else {
@@ -1450,6 +1448,20 @@ void ImagePattern::DumpRenderInfo()
         DumpLog::GetInstance().AddDesc("borderRadius: null");
     }
 }
+void ImagePattern::DumpSvgInfo()
+{
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    CHECK_NULL_VOID(imageSourceInfo);
+    if (!imageSourceInfo->IsSvg()|| !loadingCtx_) {
+        return;
+    }
+    auto imageObject = loadingCtx_->GetImageObject();
+    CHECK_NULL_VOID(imageObject);
+    DumpLog::GetInstance().AddDesc(
+        std::string("Svg:").append(imageObject->GetDumpInfo()));
+}
 
 void ImagePattern::DumpInfo()
 {
@@ -1475,6 +1487,7 @@ void ImagePattern::DumpInfo()
     }
 
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
+    DumpSvgInfo();
 }
 
 void ImagePattern::DumpAdvanceInfo()
@@ -2138,7 +2151,8 @@ void ImagePattern::ResetImage()
     if (!altImage_) {
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        rsRenderContext->ClearDrawCommands();
+        rsRenderContext->RemoveContentModifier(contentMod_);
+        contentMod_ = nullptr;
     }
 }
 
@@ -2151,7 +2165,8 @@ void ImagePattern::ResetAltImage()
         CHECK_NULL_VOID(host);
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        rsRenderContext->ClearDrawCommands();
+        rsRenderContext->RemoveContentModifier(contentMod_);
+        contentMod_ = nullptr;
     }
 }
 
@@ -2169,7 +2184,8 @@ void ImagePattern::ResetImageAndAlt()
     CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
     CloseSelectOverlay();
     DestroyAnalyzerOverlay();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

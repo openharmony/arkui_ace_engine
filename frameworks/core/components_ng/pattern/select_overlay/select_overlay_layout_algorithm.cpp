@@ -61,7 +61,7 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     auto layoutConstraint = layoutProperty->CreateChildConstraint();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
@@ -95,7 +95,7 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
 void SelectOverlayLayoutAlgorithm::CalculateCustomMenuLayoutConstraint(
     LayoutWrapper* layoutWrapper, LayoutConstraintF& layoutConstraint)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
@@ -141,7 +141,7 @@ OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWra
         }
     }
     auto maxHeight = layoutConstraint->selfIdealSize.Height().value_or(0.0f);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, menuOffset);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, menuOffset);
@@ -188,14 +188,11 @@ void SelectOverlayLayoutAlgorithm::LayoutChild(LayoutWrapper* layoutWrapper, Sel
         return;
     }
     menu->SetActive(true);
-    OffsetF menuOffset;
-    if (info_->isUsingMouse) {
-        menuOffset = CalculateCustomMenuByMouseOffset(layoutWrapper);
-    } else {
-        menuOffset = ComputeSelectMenuPosition(layoutWrapper);
-    }
-    menu->GetGeometryNode()->SetMarginFrameOffset(menuOffset);
-
+    OffsetF menuOffset = info_->isUsingMouse ? CalculateCustomMenuByMouseOffset(layoutWrapper)
+                                             : ComputeSelectMenuPosition(layoutWrapper);
+    auto menuGetGeometryNode = menu->GetGeometryNode();
+    CHECK_NULL_VOID(menuGetGeometryNode);
+    menuGetGeometryNode->SetMarginFrameOffset(menuOffset);
     // custom menu need to layout all menu and submenu
     if (info_->menuInfo.menuBuilder) {
         for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -257,7 +254,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 {
     auto menuItem = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(menuItem, OffsetF());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
@@ -369,7 +366,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     if (LessNotEqual(menuPosition.GetY(), viewPort.GetY() - spaceBetweenViewPort - menuHeight) ||
         LessNotEqual(menuPosition.GetY(), menuSpacingBetweenText)) {
         auto menuOffsetY = viewPort.GetY() - spaceBetweenViewPort - menuHeight;
-        if (menuOffsetY > menuSpacingBetweenText) {
+        if (GreatNotEqual(menuOffsetY, menuSpacingBetweenText)) {
             menuPosition.SetY(menuOffsetY);
         } else {
             menuPosition.SetY(menuSpacingBetweenText);
@@ -419,7 +416,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
 void SelectOverlayLayoutAlgorithm::AdjustMenuInRootRect(
     OffsetF& menuOffset, const SizeF& menuSize, const SizeF& rootSize)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
@@ -460,7 +457,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     }
     // avoid soft keyboard and root bottom
     if ((!upHandle.isShow && downHandle.isShow) || info_->menuInfo.menuBuilder) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, menuOffset);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_RETURN(safeAreaManager, menuOffset);
@@ -472,13 +469,13 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
         auto menuSpace = NearEqual(upPaint.Top(), downPaint.Top()) ? spaceBetweenHandle : spaceBetweenText;
         auto offsetY = downPaint.GetY() - menuSpace - menuRect.Height();
         auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
-        if ((shouldAvoidKeyboard || shouldAvoidBottom) && offsetY > 0) {
-            if (topArea > offsetY) {
+        if ((shouldAvoidKeyboard || shouldAvoidBottom) && GreatNotEqual(offsetY, 0)) {
+            if (GreatNotEqual(topArea, offsetY)) {
                 offsetY = downPaint.Bottom() - spaceBetweenText - menuRect.Height();
             }
             menuOffset.SetY(offsetY);
         } else {
-            if (topArea > menuOffset.GetY() && info_->isSingleHandle) {
+            if (GreatNotEqual(topArea, menuOffset.GetY()) && info_->isSingleHandle) {
                 menuOffset.SetY(downPaint.Bottom() + spaceBetweenText + spaceBetweenHandle);
             }
             AdjustMenuOffsetAtSingleHandleBottom(downPaint, menuRect, menuOffset, spaceBetweenText);
@@ -491,7 +488,7 @@ void SelectOverlayLayoutAlgorithm::AdjustMenuOffsetAtSingleHandleBottom(const Re
     OffsetF& menuOffset, double spaceBetweenText)
 {
     CHECK_NULL_VOID(info_->isSingleHandle);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
@@ -508,7 +505,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffsetWhenHandlesUnshown(c
 {
     auto menuOffset = menuRect.GetOffset();
     CHECK_NULL_RETURN(info_->isSingleHandle, menuOffset);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, menuOffset);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, menuOffset);
@@ -541,10 +538,10 @@ bool SelectOverlayLayoutAlgorithm::IsMenuAreaSmallerHandleArea(RectF handleRect,
 void SelectOverlayLayoutAlgorithm::AdjustMenuTooFarAway(OffsetF& menuOffset, const RectF& menuRect)
 {
     // the menu is too far away.
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto hostFrameNode = info_->callerFrameNode.Upgrade();
     CHECK_NULL_VOID(hostFrameNode);
+    auto pipeline = hostFrameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto hostFrameRect = hostFrameNode->GetGeometryNode()->GetFrameRect();
     auto hostGlobalOffset = hostFrameNode->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset();
     auto centerX = menuRect.Width() / 2.0f;
@@ -576,7 +573,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper
         defaultMenuEndOffset_ - OffsetF(extensionWidth, -menuHeight - MORE_MENU_INTERVAL.ConvertToPx());
     auto extensionBottom = extensionOffset.GetY() + extensionHeight;
     auto isCoveredBySoftKeyBoard = [extensionBottom]() -> bool {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
         CHECK_NULL_RETURN(pipeline, false);
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_RETURN(safeAreaManager, false);
@@ -598,7 +595,7 @@ bool SelectOverlayLayoutAlgorithm::IsTextAreaSelectAll()
 OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     LayoutWrapper* layoutWrapper, float menuWidth, float menuHeight)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
@@ -649,7 +646,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
 void SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategyGetY(const AvoidStrategyMember& avoidStrategyMember,
                                                             float& offsetY)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);

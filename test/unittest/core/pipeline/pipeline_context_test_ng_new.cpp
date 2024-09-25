@@ -1161,7 +1161,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg069, TestSize.Level1)
     current.push_back(TouchEvent {}.SetX(250.0f).SetY(350.0f).SetTime(timeStampFour));
     uint64_t nanoTimeStamp = 2500;
 
-    TouchEvent resampledTouchEvent = context_->GetResampleTouchEvent(history, current, nanoTimeStamp);
+    TouchEvent resampledTouchEvent;
+    context_->GetResampleTouchEvent(history, current, nanoTimeStamp, resampledTouchEvent);
 
     ASSERT_FLOAT_EQ(175.0f, resampledTouchEvent.x);
     ASSERT_FLOAT_EQ(275.0f, resampledTouchEvent.y);

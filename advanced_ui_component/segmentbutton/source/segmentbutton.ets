@@ -62,17 +62,27 @@ function nearEqual(first: number, second: number): boolean {
 
 interface SegmentButtonTextItem {
   text: ResourceStr
+  accessibilityLevel?: string
+  accessibilityDescription?: ResourceStr
 }
 
 interface SegmentButtonIconItem {
   icon: ResourceStr,
+  iconAccessibilityText?: ResourceStr
   selectedIcon: ResourceStr
+  selectedIconAccessibilityText?: ResourceStr
+  accessibilityLevel?: string
+  accessibilityDescription?: ResourceStr
 }
 
 interface SegmentButtonIconTextItem {
   icon: ResourceStr,
+  iconAccessibilityText?: ResourceStr
   selectedIcon: ResourceStr,
+  selectedIconAccessibilityText?: ResourceStr
   text: ResourceStr
+  accessibilityLevel?: string
+  accessibilityDescription?: ResourceStr
 }
 
 type DimensionNoPercentage = PX | VP | FP | LPX | Resource
@@ -120,20 +130,32 @@ export interface CapsuleSegmentButtonOptions extends CapsuleSegmentButtonConstru
 
 interface SegmentButtonItemOptionsConstructorOptions {
   icon?: ResourceStr
+  iconAccessibilityText?: ResourceStr
   selectedIcon?: ResourceStr
+  selectedIconAccessibilityText?: ResourceStr
   text?: ResourceStr
+  accessibilityLevel?: string
+  accessibilityDescription?: ResourceStr
 }
 
 @Observed
 class SegmentButtonItemOptions {
   public icon?: ResourceStr
+  public iconAccessibilityText?: ResourceStr
   public selectedIcon?: ResourceStr
+  public selectedIconAccessibilityText?: ResourceStr
   public text?: ResourceStr
+  public accessibilityLevel?: string
+  public accessibilityDescription?: ResourceStr
 
   constructor(options: SegmentButtonItemOptionsConstructorOptions) {
     this.icon = options.icon
     this.selectedIcon = options.selectedIcon
     this.text = options.text
+    this.iconAccessibilityText = options.iconAccessibilityText
+    this.selectedIconAccessibilityText = options.selectedIconAccessibilityText
+    this.accessibilityLevel = options.accessibilityLevel
+    this.accessibilityDescription = options.accessibilityDescription
   }
 }
 
@@ -497,6 +519,19 @@ struct SegmentButtonItem {
     }
   }
 
+  private getAccessibilityText(): string {
+    if (this.selectedIndexes.includes(this.index) && this.itemOptions.selectedIconAccessibilityText) {
+      return (typeof this.itemOptions.selectedIconAccessibilityText === 'string') ?
+      this.itemOptions.selectedIconAccessibilityText :
+      getContext(this).resourceManager.getStringSync((this.itemOptions.selectedIconAccessibilityText as Resource).id)
+    } else if (this.itemOptions.iconAccessibilityText) {
+      return (typeof this.itemOptions.iconAccessibilityText === 'string') ?
+      this.itemOptions.iconAccessibilityText :
+      getContext(this).resourceManager.getStringSync((this.itemOptions.iconAccessibilityText as Resource).id)
+    }
+    return '';
+  }
+
   build() {
     Column({ space: 2 }) {
       if (this.options.showIcon) {
@@ -508,6 +543,7 @@ struct SegmentButtonItem {
           .fillColor(this.property.isSelected ? (this.options.selectedFontColor ??
           segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) : (this.options.fontColor ??
           segmentButtonTheme.FONT_COLOR))
+          .accessibilityText(this.getAccessibilityText())
       }
       if (this.options.showText) {
         Text(this.itemOptions.text)
@@ -522,18 +558,6 @@ struct SegmentButtonItem {
           .textAlign(TextAlign.Center)
           .focusable(true)
           .padding(this.getTextPadding())
-          .gesture(TapGesture().onAction(() => {
-            this.focusIndex = -1
-            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-              if (this.selectedIndexes.indexOf(this.index) === -1) {
-                this.selectedIndexes.push(this.index)
-              } else {
-                this.selectedIndexes.splice(this.selectedIndexes.indexOf(this.index), 1)
-              }
-            } else {
-              this.selectedIndexes[0] = this.index
-            }
-          }))
       }
     }
     .direction(this.options.direction)
@@ -758,12 +782,21 @@ struct SegmentButtonItemArrayComponent {
     this.buttonBorderRadius = borderRadiusArray
   }
 
+  getAccessibilityDescription(value?: ResourceStr): string {
+    if (value) {
+      return (typeof value === 'string') ? value :
+      getContext(this).resourceManager.getStringSync((value as Resource).id)
+    } else {
+      return '';
+    }
+  }
+
   build() {
     if (this.optionsArray !== void 0 && this.optionsArray.length > 1) {
       Row({ space: 1 }) {
         ForEach(this.optionsArray, (item: SegmentButtonItemOptions, index) => {
           if (index < MAX_ITEM_COUNT) {
-            Stack() {
+            Button() {
               SegmentButtonItem({
                 selectedIndexes: $selectedIndexes,
                 focusIndex: this.focusIndex,
@@ -784,6 +817,12 @@ struct SegmentButtonItemArrayComponent {
                   this.calculateBorderRadius()
                 })
             }
+            .type(ButtonType.Normal)
+            .stateEffect(false)
+            .hoverEffect(HoverEffect.None)
+            .backgroundColor(Color.Transparent)
+            .accessibilityLevel(item.accessibilityLevel)
+            .accessibilityDescription(this.getAccessibilityDescription(item.accessibilityDescription))
             .direction(this.options.direction)
             .borderRadius(this.buttonBorderRadius[index])
             .scale({
@@ -816,6 +855,18 @@ struct SegmentButtonItemArrayComponent {
             .onFocus(() => {
               this.focusIndex = index
             })
+            .gesture(TapGesture().onAction(() => {
+              this.focusIndex = -1
+              if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+                if (this.selectedIndexes.indexOf(index) === -1) {
+                  this.selectedIndexes.push(index)
+                } else {
+                  this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1)
+                }
+              } else {
+                this.selectedIndexes[0] = index
+              }
+            }))
             .onTouch((event: TouchEvent) => {
               if (event.source !== SourceType.TouchScreen) {
                 return
@@ -1191,13 +1242,13 @@ export struct SegmentButton {
             if (this.isCurrentPositionSelected) {
               return
             }
-            if (event.angle > 0 && this.selectedIndexes[0] !== Math.min(this.options.buttons.length,
+            if (Math.abs(event.angle) < 90 && this.selectedIndexes[0] !== Math.min(this.options.buttons.length,
               this.buttonItemsSize.length) - 1) {
               // Move to next
               this.doSelectedChangeAnimate = true
               this.selectedIndexes[0] = this.selectedIndexes[0] + 1
               this.doSelectedChangeAnimate = false
-            } else if (event.angle < 0 && this.selectedIndexes[0] !== 0) {
+            } else if (Math.abs(event.angle) > 90 && this.selectedIndexes[0] !== 0) {
               // Move to previous
               this.doSelectedChangeAnimate = true
               this.selectedIndexes[0] = this.selectedIndexes[0] - 1

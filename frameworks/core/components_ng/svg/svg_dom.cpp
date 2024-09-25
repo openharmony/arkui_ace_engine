@@ -49,7 +49,6 @@ namespace {
 
 const char DOM_SVG_STYLE[] = "style";
 const char DOM_SVG_CLASS[] = "class";
-
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
@@ -108,6 +107,7 @@ RefPtr<SvgDom> SvgDom::CreateSvgDom(SkStream& svgStream, const ImageSourceInfo& 
     if (ret) {
         return svgDom;
     }
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "CreateSvgDom Failed(Reason:Svg parse error).");
     return nullptr;
 }
 
@@ -277,6 +277,14 @@ void SvgDom::SetAnimationOnFinishCallback(const std::function<void()>& onFinishC
     svgContext_->SetOnAnimationFinished(onFinishCallback);
 }
 
+std::string SvgDom::GetDumpInfo()
+{
+    if (svgContext_) {
+        return svgContext_->GetDumpInfo().ToString();
+    }
+    return "";
+}
+
 void SvgDom::InitStyles()
 {
     CHECK_NULL_VOID(root_);
@@ -289,13 +297,19 @@ void SvgDom::InitStyles()
 void SvgDom::DrawImage(
     RSCanvas& canvas, const ImageFit& imageFit, const Size& layout)
 {
-    CHECK_NULL_VOID(root_);
+    if (!root_ || !svgContext_) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Svg DrawImage. root:%{public}d svgContext_:%{public}d",
+            !!root_, !!svgContext_);
+        return;
+    }
     root_->SetIsRootNode(true);
     InitStyles();
     canvas.Save();
     // viewBox scale and imageFit scale
     FitImage(canvas, imageFit, layout);
     FitViewPort(layout);
+    svgContext_->CreateDumpInfo(SvgDumpInfo(svgContext_->GetContentSize(),
+        svgContext_->GetCurrentTimeString()));
     // draw svg tree
     if (GreatNotEqual(smoothEdge_, 0.0f)) {
         root_->SetSmoothEdge(smoothEdge_);
@@ -321,6 +335,9 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
         Size svgContentSize;
         SvgUtils::CalculateSvgConentSize(svgContentSize, layout_, svgSize_, viewBox_);
         SvgFitConvertor::ApplyFit(imageFit, canvas, layout_, svgContentSize);
+        if (svgContext_) {
+            svgContext_->SetContentSize(svgContentSize);
+        }
     }
 }
 

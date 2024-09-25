@@ -1285,6 +1285,8 @@ public:
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
+    void SetAccessibilitySelected(bool selected) override;
+    void SetAccessibilityChecked(bool checked) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1452,6 +1454,8 @@ public:
 
     static void SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance);
     static void SetAccessibilityDescription(FrameNode* frameNode, const std::string& description);
+    static void SetAccessibilitySelected(FrameNode* frameNode, bool selected);
+    static void SetAccessibilityChecked(FrameNode* frameNode, bool checked);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {

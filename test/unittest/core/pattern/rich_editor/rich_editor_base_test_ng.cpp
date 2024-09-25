@@ -1571,7 +1571,16 @@ HWTEST_F(RichEditorBaseTestNg, MagnifierTest002, TestSize.Level1)
     layoutWrapper->skipMeasureContent_ = false;
     DirtySwapConfig config;
     config.frameSizeChange = true;
+
+    richEditorPattern->selectOverlay_->isHandleMoving_ = true;
+    richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_TRUE(controller->GetShowMagnifier());
+
+    richEditorPattern->selectOverlay_->isHandleMoving_ = false;
+    richEditorPattern->isCursorAlwaysDisplayed_ = true;
+    richEditorPattern->moveCaretState_.isMoveCaret = true;
     richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(controller->GetShowMagnifier());
+    EXPECT_FALSE(richEditorPattern->isCursorAlwaysDisplayed_);
 }
 } // namespace OHOS::Ace::NG

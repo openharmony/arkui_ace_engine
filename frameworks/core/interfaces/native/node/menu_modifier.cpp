@@ -21,10 +21,69 @@ namespace OHOS::Ace::NG {
 const char DELIMITER = '|';
 constexpr int32_t SIZE_OF_FONT_INFO = 3;
 static const char* ERR_CODE = "-1";
+constexpr int SUB_MENU_EXPANDING_MODE_SIDE = 0;
+constexpr int SUB_MENU_EXPANDING_MODE_EMBEDDED = 1;
+constexpr int SUB_MENU_EXPANDING_MODE_STACK = 2;
 const std::string DEFAULT_FONT_WEIGHT = "normal";
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
+
+SubMenuExpandingMode ParseSubMenuExpandingMode(int32_t subMenuExpandingMode)
+{
+    SubMenuExpandingMode mode = SubMenuExpandingMode::SIDE;
+    switch (subMenuExpandingMode) {
+        case SUB_MENU_EXPANDING_MODE_SIDE:
+            mode = SubMenuExpandingMode::SIDE;
+            break;
+        case SUB_MENU_EXPANDING_MODE_EMBEDDED:
+            mode = SubMenuExpandingMode::EMBEDDED;
+            break;
+        case SUB_MENU_EXPANDING_MODE_STACK:
+            mode = SubMenuExpandingMode::STACK;
+            break;
+        default:
+            break;
+    }
+    return mode;
+}
+
+void SetMenuDivider(ArkUINodeHandle node, ArkUIMenuDividerOptions* dividerInfo, bool isGroupDivider)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    V2::ItemDivider divider;
+    divider.strokeWidth = Dimension(dividerInfo->strokeWidth.value,
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->strokeWidth.units));
+    divider.color = Color(dividerInfo->color);
+    divider.startMargin = Dimension(dividerInfo->startMargin.value,
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->startMargin.units));;
+    divider.endMargin = Dimension(dividerInfo->endMargin.value,
+        static_cast<OHOS::Ace::DimensionUnit>(dividerInfo->endMargin.units));;
+    if (isGroupDivider) {
+        MenuModelNG::SetItemGroupDivider(frameNode, divider);
+    } else {
+        MenuModelNG::SetItemDivider(frameNode, divider);
+    }
+}
+
+void ResetMenuDivider(ArkUINodeHandle node, bool isGroupDivider)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    V2::ItemDivider divider;
+    divider.strokeWidth = Dimension(0.0);
+    divider.color = Color::TRANSPARENT;
+    divider.startMargin = Dimension(0.0);
+    divider.endMargin = Dimension(0.0);
+    if (isGroupDivider) {
+        MenuModelNG::SetItemGroupDivider(frameNode, divider);
+    } else {
+        MenuModelNG::SetItemDivider(frameNode, divider);
+    }
+}
+
 void SetMenuFontColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -130,11 +189,48 @@ void ResetMenuWidth(ArkUINodeHandle node)
     MenuModelNG::SetWidth(frameNode, reset);
 }
 
+void SetMenuItemDivider(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemDividerInfo)
+{
+    SetMenuDivider(node, menuItemDividerInfo, false);
+}
+
+void ResetMenuItemDivider(ArkUINodeHandle node)
+{
+    ResetMenuDivider(node, false);
+}
+
+void SetMenuItemGroupDivider(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemGroupDividerInfo)
+{
+    SetMenuDivider(node, menuItemGroupDividerInfo, true);
+}
+
+void ResetMenuItemGroupDivider(ArkUINodeHandle node)
+{
+    ResetMenuDivider(node, true);
+}
+
+void SetSubMenuExpandingMode(ArkUINodeHandle node, ArkUI_Int32 modeParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    SubMenuExpandingMode subMenuExpandingMode = ParseSubMenuExpandingMode(modeParam);
+    MenuModelNG::SetExpandingMode(frameNode, subMenuExpandingMode);
+}
+
+void ResetSubMenuExpandingMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MenuModelNG::SetExpandingMode(frameNode, SubMenuExpandingMode::SIDE);
+}
+
 namespace NodeModifier {
 const ArkUIMenuModifier* GetMenuModifier()
 {
     static const ArkUIMenuModifier modifier = { SetMenuFontColor, ResetMenuFontColor, SetMenuFont, ResetMenuFont,
-        SetRadius, ResetRadius, SetMenuWidth, ResetMenuWidth };
+        SetRadius, ResetRadius, SetMenuWidth, ResetMenuWidth, SetMenuItemDivider, ResetMenuItemDivider,
+        SetMenuItemGroupDivider, ResetMenuItemGroupDivider, SetSubMenuExpandingMode, ResetSubMenuExpandingMode };
 
     return &modifier;
 }

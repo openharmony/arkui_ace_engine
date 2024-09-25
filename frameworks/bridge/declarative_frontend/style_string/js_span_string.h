@@ -83,7 +83,7 @@ public:
 
     static RefPtr<SpanBase> ParseJsExtSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
 
-    static JSRef<JSObject> CreateJsURLStyleSpan(const RefPtr<SpanBase>& spanObject);
+    static JSRef<JSObject> CreateJsUrlSpan(const RefPtr<SpanBase>& spanObject);
     static RefPtr<SpanBase> ParseJsUrlSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
 
     static bool CheckSpanType(int32_t spanType);

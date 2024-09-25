@@ -1035,6 +1035,10 @@ void JSSwiper::SetOnClick(const JSCallbackInfo& info)
                        const BaseEventInfo* info, const RefPtr<V2::InspectorFunctionImpl>& impl) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+        if (!clickInfo) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "Swiper onClick callback execute failed.");
+            return;
+        }
         auto newInfo = *clickInfo;
         if (impl) {
             impl->UpdateEventInfo(newInfo);

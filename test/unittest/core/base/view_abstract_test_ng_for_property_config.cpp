@@ -1064,7 +1064,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractPositionEdges002, TestSize.Level1)
     CalcDimension right(20, DimensionUnit::VP);
     edges.SetBottom(bottom);
     edges.SetRight(right);
-    ViewAbstract::SetPositionEdges(nullptr, edges);
+    ViewAbstract::SetPositionEdges(rootFrameNode, edges);
 
     EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
     EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
@@ -1106,7 +1106,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractOffset002, TestSize.Level1)
     CalcDimension left(20, DimensionUnit::VP);
     edges.SetTop(top);
     edges.SetLeft(left);
-    ViewAbstract::SetOffsetEdges(nullptr, edges);
+    ViewAbstract::SetOffsetEdges(rootFrameNode, edges);
 
     EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
     EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()

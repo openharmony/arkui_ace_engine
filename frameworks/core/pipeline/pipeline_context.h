@@ -807,8 +807,6 @@ public:
         SetRootSizeWithWidthHeight(width, height, offset);
     }
 
-    void SetContainerWindow(bool isShow) override;
-
     void SetAppTitle(const std::string& title) override;
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
     void FlushMessages() override;

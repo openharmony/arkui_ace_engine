@@ -342,7 +342,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout012, TestSize.Level1)
 {
     auto appBar = AceType::MakeRefPtr<AppBarView>();
     appBar->CreateServicePanel(true);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**
@@ -364,7 +364,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout013, TestSize.Level1)
     pattern->UpdateOverlayLayout();
     pattern->UpdateMenuBarColor(theme, menuBar, true);
     pattern->UpdateMenuBarColor(theme, menuBar, false);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**
@@ -382,7 +382,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout014, TestSize.Level1)
     auto theme = pipeline->GetTheme<AppBarTheme>();
     pipeline->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
     pattern->UpdateOverlayLayout();
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**
@@ -404,7 +404,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout015, TestSize.Level1)
     auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     pipeline->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
     pattern->OnColorConfigurationUpdate();
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**
@@ -428,7 +428,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout016, TestSize.Level1)
     pattern->settedColorMode = true;
     pattern->OnColorConfigurationUpdate();
     pattern->UpdateColor(false);
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**
@@ -458,7 +458,7 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout017, TestSize.Level1)
     for (const auto& callback : Events) {
         (*callback)(info);
     }
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 
 /**
@@ -490,6 +490,6 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout018, TestSize.Level1)
         (*callback)(info);
     }
     MockContainer::TearDown();
-    EXPECT_TRUE(true);
+    EXPECT_EQ(appBar->sessionId_, 0);
 }
 } // namespace OHOS::Ace::NG

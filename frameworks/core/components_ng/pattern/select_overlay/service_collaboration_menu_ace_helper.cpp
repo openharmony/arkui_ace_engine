@@ -64,7 +64,7 @@ void ServiceCollaborationMenuAceHelper::CreateText(
     const std::string& value, const RefPtr<FrameNode>& parent, const Color& color, bool needMargin)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "text is %{public}s", value.c_str());
-    auto textPipeline = PipelineBase::GetCurrentContext();
+    auto textPipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(textPipeline);
     auto textTheme = textPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(textTheme);
@@ -93,7 +93,7 @@ void ServiceCollaborationMenuAceHelper::CreateText(
 void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, text is %{public}s", value.c_str());
-    auto textPipeline = PipelineBase::GetCurrentContext();
+    auto textPipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(textPipeline);
     auto textTheme = textPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(textTheme);
@@ -126,7 +126,7 @@ void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& valu
 void ServiceCollaborationMenuAceHelper::CreateEndIcon(const std::string& icon, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, icon is %{public}s", icon.c_str());
-    auto iconPipeline = PipelineBase::GetCurrentContext();
+    auto iconPipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(iconPipeline);
     auto iconTheme = iconPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -152,7 +152,7 @@ void ServiceCollaborationMenuAceHelper::CreateEndIcon(const std::string& icon, c
 void ServiceCollaborationMenuAceHelper::CreateStartIcon(const std::string& icon, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, icon is %{public}s", icon.c_str());
-    auto iconPipeline = PipelineBase::GetCurrentContext();
+    auto iconPipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(iconPipeline);
     auto iconTheme = iconPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -178,7 +178,7 @@ void ServiceCollaborationMenuAceHelper::CreateStartIcon(const std::string& icon,
 RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     const std::string& value, InternalResource::ResourceId resId, const Color& color)
 {
-    auto iconPipeline = PipelineContext::GetCurrentContext();
+    auto iconPipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(iconPipeline, nullptr);
     auto iconTheme = iconPipeline->GetTheme<IconTheme>();
     CHECK_NULL_RETURN(iconTheme, nullptr);
@@ -192,7 +192,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     const std::string& value, const std::string& icon, const Color& color)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter");
-    auto menuPipeline = PipelineBase::GetCurrentContext();
+    auto menuPipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(menuPipeline, nullptr);
     auto menuTheme = menuPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(menuTheme, nullptr);
@@ -225,7 +225,8 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     rowContext->UpdateBorderColor(borderColorProperty);
     rowProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(MENUITEM_WIDTH)), CalcLength(static_cast<float>(MENUITEM_HEIGHT))));
-    rowProperty->UpdatePadding({.right = CalcLength(0.0f)});
+    PaddingProperty rowpadding { .right = CalcLength(static_cast<float>(PANDDING_ZERO)) };
+    rowProperty->UpdatePadding(rowpadding);
     MarginProperty margin;
     margin.bottom = CalcLength(static_cast<float>(ROW_PADDING));
     rowProperty->UpdateMargin(margin);
@@ -237,7 +238,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
 }
 std::string ServiceCollaborationMenuAceHelper::GetIconPath(const std::string& abilityType)
 {
-    auto iconPipeline = PipelineContext::GetCurrentContext();
+    auto iconPipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(iconPipeline, "");
     auto iconTheme = iconPipeline->GetTheme<IconTheme>();
     CHECK_NULL_RETURN(iconTheme, "");
@@ -258,7 +259,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateDeviceMenuItem(
     const std::string& value, const std::string& icon)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter icon is %{public}s, value is %{public}s", icon.c_str(), value.c_str());
-    auto menuPipeline = PipelineBase::GetCurrentContext();
+    auto menuPipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(menuPipeline, nullptr);
     auto menuTheme = menuPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(menuTheme, nullptr);
@@ -383,22 +384,24 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateSubDeviceMenuOnCol(
     auto subMenu = MenuView::Create(column, SUB_MENU_ID, SUN_MENU_TAG, param);
     auto inputHub = subMenu->GetOrCreateInputEventHub();
     CHECK_NULL_RETURN(inputHub, nullptr);
-    auto mouseTask = [this, weak = AceType::WeakClaim(AceType::RawPtr(menuWrapper))](bool isHover) {
+    auto mouseTask = [weakHelper = WeakClaim(this), weakMenuWrapper = WeakClaim(RawPtr(menuWrapper))](bool isHover) {
+        auto helper = weakHelper.Upgrade();
+        CHECK_NULL_VOID(helper);
         TAG_LOGI(AceLogTag::ACE_MENU, "mouseTask, isHover=%{public}d", isHover);
-        auto menuWrapper = weak.Upgrade();
         if (isHover) {
-            subMenuIsHover_ = true;
+            helper->subMenuIsHover_ = true;
             return;
         }
-        subMenuIsHover_ = false;
+        helper->subMenuIsHover_ = false;
         ContainerScope scope(Container::CurrentIdSafely());
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        auto cancelableCallback = [this, weak2 = AceType::WeakClaim(AceType::RawPtr(menuWrapper)),
-                                   instanceId = Container::CurrentIdSafely()] {
-            auto menuWrapper = weak2.Upgrade();
+        auto cancelableCallback = [weakHelper, weakMenuWrapper, instanceId = Container::CurrentIdSafely()] {
+            auto helper = weakHelper.Upgrade();
+            auto menuWrapper = weakMenuWrapper.Upgrade();
+            CHECK_NULL_VOID(helper && menuWrapper);
             ContainerScope scope(instanceId);
-            RemoveSubmenu(menuWrapper);
+            helper->RemoveSubmenu(menuWrapper);
         };
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -416,41 +419,44 @@ void ServiceCollaborationMenuAceHelper::SubMeunMountToMainMenu(
 {
     auto inputHub = menuNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
-    auto mouseTask = [this, &menuNode, wrapper = AceType::WeakClaim(AceType::RawPtr(menuWrapper)),
-        subDeviceMenuCreator, node = AceType::WeakClaim(AceType::RawPtr(menuNode))](bool isHover) {
-        auto menuItemNode = node.Upgrade();
-        auto menuWrapper = wrapper.Upgrade();
+    auto mouseTask = [weakHelper = WeakClaim(this), weakMenuWrapper = WeakClaim(RawPtr(menuWrapper)),
+                      weakMenuNode = WeakClaim(RawPtr(menuNode)), subDeviceMenuCreator](bool isHover) {
+        auto menuItemNode = weakMenuNode.Upgrade();
+        auto menuWrapper = weakMenuWrapper.Upgrade();
+        auto helper = weakHelper.Upgrade();
+        CHECK_NULL_VOID(menuItemNode && menuWrapper && helper);
         if (isHover) {
-            mainMenuIsHover_ = true;
-            if (!subMenuIsShow_) {
+            helper->mainMenuIsHover_ = true;
+            if (!helper->subMenuIsShow_) {
                 TAG_LOGI(AceLogTag::ACE_MENU, "create SubMenu enter.1");
                 auto subMenu = subDeviceMenuCreator();
+                CHECK_NULL_VOID(subMenu);
                 TAG_LOGI(AceLogTag::ACE_MENU, "create SubMenu enter.2");
                 auto submenuPattern = subMenu->GetPattern<MenuPattern>();
+                CHECK_NULL_VOID(submenuPattern);
                 submenuPattern->SetParentMenuItem(menuItemNode);
                 subMenu->MountToParent(menuWrapper);
                 auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
-                OffsetF position;
                 auto frameSize = menuItemNode->GetGeometryNode()->GetMarginFrameSize();
-                position = menuItemNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
+                OffsetF position = menuItemNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
                 menuProps->UpdateMenuOffset(position);
                 subMenu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-                subMenuIsShow_ = true;
+                helper->subMenuIsShow_ = true;
             }
             return;
         }
         TAG_LOGI(AceLogTag::ACE_MENU, "remove SubMenu enter.");
-        mainMenuIsHover_ = false;
+        helper->mainMenuIsHover_ = false;
         // timeout 100ms to RemoveChild
         ContainerScope scope(Container::CurrentIdSafely());
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        auto cancelableCallback = [this, weak = AceType::WeakClaim(AceType::RawPtr(menuWrapper)),
-                instanceId = Container::CurrentIdSafely()] {
-            auto menuWrapper = weak.Upgrade();
+        auto cancelableCallback = [weakHelper, weakMenuWrapper, instanceId = Container::CurrentIdSafely()] {
+            auto menuWrapper = weakMenuWrapper.Upgrade();
+            auto helper = weakHelper.Upgrade();
             ContainerScope scope(instanceId);
-            if (!subMenuIsHover_) {
-                SubMenuDown(menuWrapper);
+            if (!helper->subMenuIsHover_) {
+                helper->SubMenuDown(menuWrapper);
             }
         };
         auto taskExecutor = context->GetTaskExecutor();
@@ -467,7 +473,7 @@ void ServiceCollaborationMenuAceHelper::SubMeunMountToMainMenu(
 void ServiceCollaborationAceCallback::CreateText(const std::string& value, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, text is %{public}s", value.c_str());
-    auto textPipeline = PipelineBase::GetCurrentContext();
+    auto textPipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(textPipeline);
     auto textTheme = textPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(textTheme);
@@ -494,10 +500,60 @@ void ServiceCollaborationAceCallback::CreateText(const std::string& value, const
     textNode->MarkModifyDone();
 }
 
+void ServiceCollaborationAceCallback::AddMouseEventToEndIcon(const RefPtr<FrameNode>& iconNode)
+{
+    auto inputHub = iconNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto gestureHub = iconNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto mouseTask = [weakHelper = WeakClaim(this), node = WeakClaim(RawPtr(iconNode))](bool isHover) {
+        auto helper = weakHelper.Upgrade();
+        auto iconNode = node.Upgrade();
+        CHECK_NULL_VOID(helper && iconNode);
+        auto iconContext = iconNode->GetRenderContext();
+        CHECK_NULL_VOID(iconContext);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        if (isHover) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "hover");
+            helper->endIconIsHover_ = isHover;
+            iconContext->UpdateBackgroundColor(theme->GetHoverColor());
+        } else {
+            TAG_LOGI(AceLogTag::ACE_MENU, "leave");
+            helper->endIconIsHover_ = isHover;
+            iconContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
+    };
+    auto touchCallback = [weakHelper = WeakClaim(this), node = WeakClaim(RawPtr(iconNode))]
+        (const TouchEventInfo& info) {
+        auto helper = weakHelper.Upgrade();
+        auto iconNode = node.Upgrade();
+        CHECK_NULL_VOID(helper && iconNode);
+        auto iconContext = iconNode->GetRenderContext();
+        CHECK_NULL_VOID(iconContext);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        auto touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN) {
+            iconContext->UpdateBackgroundColor(theme->GetClickedColor());
+        }
+        if (touchType == TouchType::UP) {
+            iconContext->UpdateBackgroundColor(helper->endIconIsHover_ ? theme->GetHoverColor() : Color::TRANSPARENT);
+        }
+    };
+    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    inputHub->AddOnHoverEvent(mouseEvent);
+    gestureHub->AddTouchEvent(touchEvent);
+}
+
 void ServiceCollaborationAceCallback::CreateEndIcon(const std::string& icon, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, icon is %{public}s", icon.c_str());
-    auto iconPipeline = PipelineBase::GetCurrentContext();
+    auto iconPipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(iconPipeline);
     auto iconTheme = iconPipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -515,6 +571,10 @@ void ServiceCollaborationAceCallback::CreateEndIcon(const std::string& icon, con
             CalcLength(static_cast<float>(ENDICON_SIZE), DimensionUnit::VP)
         )
     );
+    iconProperty->UpdatePadding({ .right = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP),
+        .top = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP),
+        .left = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP),
+        .bottom = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP)});
     iconProperty->UpdateAlignment(Alignment::CENTER_LEFT);
     MarginProperty margin;
     margin.right = CalcLength(static_cast<float>(ENDICON_MARGIN));
@@ -522,21 +582,27 @@ void ServiceCollaborationAceCallback::CreateEndIcon(const std::string& icon, con
     margin.top = CalcLength(static_cast<float>(ENDICON_MARGIN_TOP));
     margin.bottom = CalcLength(static_cast<float>(ENDICON_MARGIN));
     iconProperty->UpdateMargin(margin);
-    auto clickEvent = AceType::MakeRefPtr<ClickEvent>([this](GestureEvent& callback) {
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>([weakCallback = WeakClaim(this)](GestureEvent& event) {
+        auto callback = weakCallback.Upgrade();
+        CHECK_NULL_VOID(callback);
         ContainerScope scope(Container::CurrentIdSafely());
-        RemovePopupNode();
+        callback->RemovePopupNode();
     });
     auto gestureHub = iconNode->GetOrCreateGestureEventHub();
     gestureHub->AddClickEvent(clickEvent);
     iconNode->MountToParent(parent);
     iconNode->MarkModifyDone();
+    auto iconContext = iconNode->GetRenderContext();
+    CHECK_NULL_VOID(iconContext);
+    BorderRadiusProperty border(Dimension(static_cast<float>(ICON_BORDER_RADIUS), DimensionUnit::VP));
+    iconContext->UpdateBorderRadius(border);
+    AddMouseEventToEndIcon(iconNode);
 }
 
-void ServiceCollaborationAceCallback::CreateStartIcon(
-    const std::string& icon, const RefPtr<FrameNode>& parent)
+void ServiceCollaborationAceCallback::CreateStartIcon(const std::string& icon, const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, icon is %{public}s", icon.c_str());
-    auto iconPipeline = PipelineBase::GetCurrentContext();
+    auto iconPipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(iconPipeline);
     auto iconTheme = iconPipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(iconTheme);
@@ -603,7 +669,7 @@ RefPtr<FrameNode> ServiceCollaborationAceCallback::CreateCustomPopUpNode(
 
 void ServiceCollaborationAceCallback::RemovePopupNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto overlay = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
@@ -654,10 +720,12 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
         position_ = AceType::DynamicCast<RichEditorPattern>(info_->pattern.Upgrade())->GetCaretRect().GetOffset();
         auto popupParam = GetPopupParam(true, onStateChange_);
         auto pattern = AceType::DynamicCast<RichEditorPattern>(info_->pattern.Upgrade());
-        std::function<void(int32_t)> func = [this](int32_t num) {
-            if (!isTransmit_) {
-                RemovePopupNode();
-                info_ = nullptr;
+        std::function<void(int32_t)> func = [weak = WeakClaim(this)](int32_t num) {
+            auto callback = weak.Upgrade();
+            CHECK_NULL_VOID(callback);
+            if (!callback->isTransmit_) {
+                callback->RemovePopupNode();
+                callback->info_ = nullptr;
             }
         };
         pattern->RegisterCaretChangeListener(std::move(func));
@@ -718,7 +786,6 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
     uint32_t dataLength, std::unique_ptr<char[]>& data)
 {
     CHECK_NULL_RETURN(menuHelper_, -1);
-    auto& photoCount = menuHelper_->photoCount_;
     ContainerScope scope(Container::CurrentIdSafely());
     CHECK_NULL_RETURN(info_, -1);
     isTransmit_ = true;
@@ -728,22 +795,24 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, -1);
     CancelableCallback<void()> caretTwinklingTask;
-    caretTwinklingTask.Reset([this, code, weak = imagePix, instanceId = Container::CurrentIdSafely(), &photoCount] {
-        CHECK_NULL_VOID(weak);
-        CHECK_NULL_VOID(info_);
-        auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(info_->pattern.Upgrade());
+    caretTwinklingTask.Reset([weakCallback = WeakClaim(this), code, imagePix,
+        instanceId = Container::CurrentIdSafely(), weakHelper = WeakClaim(RawPtr(menuHelper_))] {
+        auto callback = weakCallback.Upgrade();
+        auto helper = weakHelper.Upgrade();
+        CHECK_NULL_VOID(callback && imagePix && callback->info_);
+        auto richEditorPattern = DynamicCast<RichEditorPattern>(callback->info_->pattern.Upgrade());
         CHECK_NULL_VOID(richEditorPattern);
         ContainerScope scope(instanceId);
         ImageSpanOptions options;
-        options.imagePixelMap = weak;
-        options.offset = richEditorPattern->GetCaretPosition() + photoCount;
-        auto width = weak->GetWidth();
-        auto height = weak->GetHeight();
-        photoCount++;
+        options.imagePixelMap = imagePix;
+        options.offset = richEditorPattern->GetCaretPosition() + helper->photoCount_;
+        auto width = imagePix->GetWidth();
+        auto height = imagePix->GetHeight();
+        helper->photoCount_++;
         ImageSpanAttribute attr = {
             .size = ImageSpanSize{ .width = CalcDimension(width), .height = CalcDimension(height) } };
         options.imageAttribute = attr;
-        if (!info_->pattern.Upgrade()) {
+        if (!callback->info_->pattern.Upgrade()) {
             TAG_LOGE(AceLogTag::ACE_MENU, "info_->pattern.Upgrade() is nullptr.");
             return;
         }
@@ -752,10 +821,10 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
         }
         richEditorPattern->AddImageSpan(options, false, 0, false);
         if (code == SEND_PHOTO_SUCCESS) {
-            richEditorPattern->SetCaretPosition(richEditorPattern->GetCaretPosition() + photoCount);
-            RemovePopupNode();
-            isTransmit_ = false;
-            info_ = nullptr;
+            richEditorPattern->SetCaretPosition(richEditorPattern->GetCaretPosition() + helper->photoCount_);
+            callback->RemovePopupNode();
+            callback->isTransmit_ = false;
+            callback->info_ = nullptr;
         }
     });
     auto taskExecutor = context->GetTaskExecutor();

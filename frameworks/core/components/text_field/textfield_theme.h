@@ -52,6 +52,7 @@ public:
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             theme->showSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye");
             theme->hideSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.eye_slash");
+            theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
             return theme;
         }
 
@@ -215,7 +216,7 @@ public:
             theme->hasHiddenPassword_ = pattern->GetAttr<std::string>("textfield_has_hidden_password", "");
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("textfield_writting_ability_name", "");
-            
+            theme->aiWriteIsSupport_ = pattern->GetAttr<std::string>("textfield_writting_is_support", "");
         }
     };
 
@@ -394,6 +395,11 @@ public:
     uint32_t GetHideSymbolId() const
     {
         return hideSymbolId_;
+    }
+
+    uint32_t GetCancelSymbolId() const
+    {
+        return cancelSymbolId_;
     }
 
     bool ShowEllipsis() const
@@ -655,6 +661,11 @@ public:
     {
         return aiWriteAbilityName_;
     }
+
+    const std::string& GetAIWriteIsSupport() const
+    {
+        return aiWriteIsSupport_;
+    }
 protected:
     TextFieldTheme() = default;
 
@@ -736,6 +747,7 @@ private:
     Color symbolColor_;
     uint32_t showSymbolId_ = 0;
     uint32_t hideSymbolId_ = 0;
+    uint32_t cancelSymbolId_ = 0;
 
     // UX::insert cursor offset up by 32vp
     Dimension insertCursorOffset_ = 32.0_vp;
@@ -765,6 +777,7 @@ private:
     std::string hidePassword_;
     std::string aiWriteBundleName_;
     std::string aiWriteAbilityName_;
+    std::string aiWriteIsSupport_;
     std::string cancelImageText_;
 };
 
