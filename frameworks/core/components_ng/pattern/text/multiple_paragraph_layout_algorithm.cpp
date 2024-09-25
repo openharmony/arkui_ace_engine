@@ -394,17 +394,13 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
         return direction;
     }
 
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (isRtl) {
-        return TextDirection::RTL;
-    }
-
     return GetTextDirectionByContent(content);
 }
 
 TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::string& content)
 {
-    TextDirection textDirection = TextDirection::LTR;
+    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
         if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
