@@ -38,6 +38,7 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
+#include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_accessibility_node.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
@@ -826,6 +827,8 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleTouchClickEvent(const GestureEvent& info, bool fromOverlay);
     void OnSelectHandleStart(bool isFirst);
     void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
     void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
@@ -1073,6 +1076,9 @@ private:
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
+    bool clickEventInitialized_ = false;
+    bool clickedFromOverlay_ = false;
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
