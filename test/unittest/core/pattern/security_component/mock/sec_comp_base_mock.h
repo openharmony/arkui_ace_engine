@@ -87,6 +87,12 @@ public:
 
     // parent effect
     bool parentEffect_ = false;
+    bool isClipped_ = false;
+    double topClip_;
+    double bottomClip_;
+    double leftClip_;
+    double rightClip_;
+    std::string parentTag_;
 
     SecCompType type_ = UNKNOWN_SC_TYPE;
     SecCompRect rect_;

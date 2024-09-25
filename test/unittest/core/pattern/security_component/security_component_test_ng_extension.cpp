@@ -100,12 +100,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateForegroundColor(Color::TRANSPARENT);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(renderContext->GetForegroundColor().value(), Color::TRANSPARENT);
     renderContext->UpdateForegroundColor(Color::GRAY);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -125,10 +126,11 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     RefPtr<BasicShape> basicShape;
     renderContext->UpdateClipMask(basicShape);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -148,13 +150,14 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateClipEdge(true);
-    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 
     OffsetF invalidOffset(-100.0, -100.0);
     childFrameNode->geometryNode_->SetFrameOffset(invalidOffset);
-    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -174,12 +177,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontColorBlend(Color::TRANSPARENT);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(renderContext->GetFrontColorBlend().value(), Color::TRANSPARENT);
     renderContext->UpdateFrontColorBlend(Color::GRAY);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -199,15 +203,16 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontHueRotate(0);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(renderContext->GetFrontHueRotate().value(), 0.0f);
     renderContext->UpdateFrontHueRotate(MAX_ROTATE);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(renderContext->GetFrontHueRotate().value(), MAX_ROTATE);
     renderContext->UpdateFrontHueRotate(1);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -227,12 +232,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontSepia(0.0_vp);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(renderContext->GetFrontSepia().value().ConvertToVp(), 0.0f);
     renderContext->UpdateFrontSepia(1.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -252,14 +258,15 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     InvertVariant invert = 0.0f;
     renderContext->UpdateFrontInvert(invert);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(renderContext->GetFrontInvert().value(), InvertVariant(0.0f));
     invert = 1.0f; // 1.0 means have frontinvert
     renderContext->UpdateFrontInvert(invert);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -279,12 +286,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontContrast(1.0_vp);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(renderContext->GetFrontContrast().value().ConvertToVp(), 1.0f);
     renderContext->UpdateFrontContrast(2.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -304,12 +312,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontSaturate(1.0_vp);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(renderContext->GetFrontSaturate().value().ConvertToVp(), 1.0f);
     renderContext->UpdateFrontSaturate(2.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -329,12 +338,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontGrayScale(0.0_vp);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(renderContext->GetFrontGrayScale().value().ConvertToVp(), 0.0f);
     renderContext->UpdateFrontGrayScale(1.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -354,9 +364,10 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontBlurRadius(0.0_px);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -376,12 +387,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto property = parentFrameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(property, nullptr);
     property->UpdateVisibility(VisibleType::VISIBLE);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(property->GetVisibility().value(), VisibleType::VISIBLE);
     property->UpdateVisibility(VisibleType::INVISIBLE);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -401,12 +413,13 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateFrontBrightness(1.0_vp);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(renderContext->GetFrontBrightness().value().ConvertToVp(), 1.0f);
     renderContext->UpdateFrontBrightness(2.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -426,20 +439,21 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateOpacity(1);
-    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     EXPECT_EQ(renderContext->GetOpacity().value(), 1.0f);
     renderContext->UpdateOpacity(2);
-    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 
     parentFrameNode->tag_ = V2::MENU_WRAPPER_ETS_TAG;
-    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 
     // parent is not FrameNode
     RefPtr<TestNode> unFrameNode = AceType::MakeRefPtr<TestNode>(0);
     unFrameNode->AddChild(childFrameNode);
-    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    EXPECT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -459,11 +473,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     BlurStyleOption blur;
     blur.blurStyle = BlurStyle::NO_MATERIAL;
     renderContext->UpdateFrontBlurStyle(blur);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     auto blurStyleOption = renderContext->GetFrontBlurStyle();
     ASSERT_EQ(blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
 }
@@ -478,8 +493,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCalculateCurrentVisibleR
 {
     RectF invalidRect(-1.0, -1.0, -1.0, -1.0);
     RectF validRect(1.0, 1.0, 1.0, 1.0);
-    EXPECT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(invalidRect, validRect), 0.0);
-    EXPECT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(validRect, invalidRect), 0.0);
+    EXPECT_EQ(SecurityComponentHandler::IsOutOfParent(invalidRect, validRect), true);
+    EXPECT_EQ(SecurityComponentHandler::IsOutOfParent(validRect, invalidRect), true);
 }
 
 /**

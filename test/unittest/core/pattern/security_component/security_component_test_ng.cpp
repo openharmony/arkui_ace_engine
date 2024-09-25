@@ -1736,7 +1736,8 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     // security component is not completely displayed
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     RefPtr<RenderContext> parentRenderContext = parentFrameNode->GetRenderContext();
     auto parentFrameRect = parentRenderContext->GetPaintRectWithTransform();
     RefPtr<RenderContext> childRenderContext = childFrameNode->GetRenderContext();
@@ -1748,7 +1749,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     auto renderContext = parentFrameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdatePixelStretchEffect(pixelStretchEffectOption);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -1768,9 +1769,10 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateLightUpEffect(1);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 
 /**
@@ -1790,11 +1792,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     parentFrameNode->AddChild(childFrameNode);
 
     auto renderContext = parentFrameNode->GetRenderContext();
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateSphericalEffect(0);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
     ASSERT_EQ(renderContext->GetSphericalEffect().value(), 0.0f);
     renderContext->UpdateSphericalEffect(1);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 }
 } // namespace OHOS::Ace::NG
