@@ -75,11 +75,17 @@ double ThemeConstants::GetDoubleByName(const std::string& resName) const
 
 std::string ThemeConstants::GetString(uint32_t key) const
 {
+    if (currentThemeStyle_) {
+        return currentThemeStyle_->GetAttr<std::string>(std::to_string(key), "");
+    }
     return "";
 }
 
 std::string ThemeConstants::GetStringByName(const std::string& resName) const
 {
+    if (currentThemeStyle_) {
+        return currentThemeStyle_->GetAttr<std::string>(resName, "");
+    }
     return "";
 }
 
