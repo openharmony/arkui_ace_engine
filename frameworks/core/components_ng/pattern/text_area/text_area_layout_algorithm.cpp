@@ -133,6 +133,7 @@ void TextAreaLayoutAlgorithm::ConstraintHeight(LayoutWrapper* layoutWrapper, Opt
     CHECK_NULL_VOID(pattern);
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto paddingAndBorder = textFieldLayoutProperty->CreatePaddingAndBorder();
     auto contentConstraint = layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
     auto textFieldContentConstraint =
         CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
@@ -141,10 +142,10 @@ void TextAreaLayoutAlgorithm::ConstraintHeight(LayoutWrapper* layoutWrapper, Opt
             frameSize.SetHeight(textFieldContentConstraint.maxSize.Height());
         } else {
             frameSize.SetHeight(
-                textFieldContentConstraint.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
+                textFieldContentConstraint.maxSize.Height() + paddingAndBorder.Height());
         }
     } else {
-        frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingAndBorderSum());
+        frameSize.SetHeight(contentHeight + paddingAndBorder.Height());
     }
 
     // Height is constrained by the CalcLayoutConstraint.
