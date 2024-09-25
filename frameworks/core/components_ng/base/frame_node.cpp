@@ -2485,8 +2485,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, const To
     MapPointTo(revertPoint, GetOrRefreshRevertMatrixFromCache());
     auto subRevertPoint = revertPoint - paintRect.GetOffset();
     auto clip = renderContext_->GetClipEdge().value_or(false);
-    if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable() ||
-        IsPaintRectWithTransformValid()) {
+    if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable()) {
         if (clip) {
             return true;
         }
@@ -2891,8 +2890,11 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
     }
 }
 
-bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
+bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList)
 {
+    if (IsPaintRectWithTransformValid()) {
+        return false;
+    }
     for (const auto& rect : responseRegionList) {
         if (rect.IsInRegion(parentLocalPoint)) {
             return true;
