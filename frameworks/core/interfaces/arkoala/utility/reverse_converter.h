@@ -322,15 +322,12 @@ namespace OHOS::Ace::NG::Converter {
         }
     }
 
-    inline void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src)
-    {
-        switch (src) {
-            case V2::SwipeEdgeEffect::Spring: dst = ARK_SWIPE_EDGE_EFFECT_SPRING; break;
-            case V2::SwipeEdgeEffect::None: dst = ARK_SWIPE_EDGE_EFFECT_NONE; break;
-            default: dst = static_cast<Ark_SwipeEdgeEffect>(-1);
-                LOGE("Unexpected enum value in V2::SwipeEdgeEffect: %{public}d", src);
-        }
-    }
+    void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
+    void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
+    void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
+    void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
+    void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
+    void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 

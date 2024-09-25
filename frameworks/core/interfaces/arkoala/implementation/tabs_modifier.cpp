@@ -13,7 +13,11 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabsInterfaceModifier {
@@ -26,18 +30,30 @@ namespace TabsAttributeModifier {
 void VerticalImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetIsVertical(frameNode, Converter::Convert<bool>(value));
 }
 void BarPositionImpl(Ark_NativePointer node,
                      enum Ark_BarPosition value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetTabBarPosition(frameNode, Converter::OptConvert<BarPosition>(value));
 }
 void ScrollableImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetScrollable(frameNode, Converter::Convert<bool>(value));
 }
 void BarMode0Impl(Ark_NativePointer node,
                   enum Ark_BarMode value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetTabBarMode(frameNode, Converter::OptConvert<TabBarMode>(value));
 }
 void BarMode1Impl(Ark_NativePointer node,
                   enum Ark_BarMode value,
@@ -60,14 +76,27 @@ void BarHeightImpl(Ark_NativePointer node,
 void AnimationDurationImpl(Ark_NativePointer node,
                            const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    TabsModelNG::SetAnimationDuration(frameNode, Converter::Convert<float>(*value));
 }
 void AnimationModeImpl(Ark_NativePointer node,
                        const Opt_AnimationMode* mode)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(mode);
+    TabsModelNG::SetAnimateMode(frameNode, Converter::OptConvert<TabAnimateMode>(*mode));
 }
 void EdgeEffectImpl(Ark_NativePointer node,
                     const Opt_EdgeEffect* edgeEffect)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(edgeEffect);
+    auto edgeEffectOpt = Converter::OptConvert<EdgeEffect>(*edgeEffect);
+    TabsModelNG::SetEdgeEffect(frameNode, OHOS::Ace::NG::EnumToInt(edgeEffectOpt));
 }
 void OnChangeImpl(Ark_NativePointer node,
                   Ark_Function event)
@@ -92,6 +121,9 @@ void OnGestureSwipeImpl(Ark_NativePointer node,
 void FadingEdgeImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetFadingEdge(frameNode, Converter::Convert<bool>(value));
 }
 void DividerImpl(Ark_NativePointer node,
                  const Type_TabsAttribute_divider_Arg0* value)
@@ -100,6 +132,9 @@ void DividerImpl(Ark_NativePointer node,
 void BarOverlapImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarOverlap(frameNode, Converter::Convert<bool>(value));
 }
 void BarBackgroundColorImpl(Ark_NativePointer node,
                             const ResourceColor* value)
@@ -116,6 +151,9 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
 void BarBackgroundBlurStyleImpl(Ark_NativePointer node,
                                 enum Ark_BlurStyle value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, Converter::OptConvert<BlurStyle>(value));
 }
 void OnContentWillChangeImpl(Ark_NativePointer node,
                              Ark_Function handler)

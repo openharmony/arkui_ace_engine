@@ -64,6 +64,7 @@ void TabsNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     FrameNode::ToJsonValue(json, filter);
+    json->Delete("scrollable");
     json->PutFixedAttr("scrollable", Scrollable(), filter, FIXED_ATTR_SCROLLABLE);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
@@ -291,7 +292,7 @@ std::string TabsNode::GetEdgeEffect() const
     CHECK_NULL_RETURN(swiperNode, ret);
     auto paintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, ret);
-    EdgeEffect edgeEffect = paintProperty->GetEdgeEffect().value();
+    EdgeEffect edgeEffect = paintProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     switch (edgeEffect) {
         case EdgeEffect::SPRING:
             ret = "EdgeEffect::SPRING";

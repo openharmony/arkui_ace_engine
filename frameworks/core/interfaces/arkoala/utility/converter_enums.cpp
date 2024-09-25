@@ -41,7 +41,6 @@ void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
     }
 }
 
-// Convert Ark_ButtonRole
 template<>
 void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
 {
@@ -63,6 +62,7 @@ void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
     }
 }
 
+// Convert Ark_ButtonRole
 template<>
 void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src)
 {
@@ -520,6 +520,37 @@ void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_Shared
         case ARK_SHARED_TRANSITION_EFFECT_TYPE_EXCHANGE:
             dst = OHOS::Ace::SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE; break;
         default: LOGE("Unexpected enum value in Ark_SharedTransitionEffectType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src)
+{
+    switch (src) {
+        case ARK_ANIMATION_MODE_CONTENT_FIRST: dst = TabAnimateMode::CONTENT_FIRST; break;
+        case ARK_ANIMATION_MODE_ACTION_FIRST: dst = TabAnimateMode::ACTION_FIRST; break;
+        case ARK_ANIMATION_MODE_NO_ANIMATION: dst = TabAnimateMode::NO_ANIMATION; break;
+        default: LOGE("Unexpected enum value in Ark_AnimationMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src)
+{
+    switch (src) {
+        case ARK_BAR_POSITION_START: dst = BarPosition::START; break;
+        case ARK_BAR_POSITION_END: dst = BarPosition::END; break;
+        default: LOGE("Unexpected enum value in Ark_BarPosition: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src)
+{
+    switch (src) {
+        case ARK_BAR_MODE_SCROLLABLE: dst = TabBarMode::SCROLLABLE; break;
+        case ARK_BAR_MODE_FIXED: dst = TabBarMode::FIXED; break;
+        default: LOGE("Unexpected enum value in Ark_BarMode: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter
