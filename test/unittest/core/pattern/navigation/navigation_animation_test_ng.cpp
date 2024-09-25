@@ -1064,10 +1064,11 @@ HWTEST_F(NavigationAnimationTest, UpdateTextNodeListAsRenderGroup001, TestSize.L
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         "navDestinationNode", 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(navDestinationNode, nullptr);
+    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
     /**
      * @tc.steps: step2. call the target function.
      */
-    navDestinationNode->UpdateTextNodeListAsRenderGroup(true);
+    navDestinationNode->UpdateTextNodeListAsRenderGroup(true, proxy);
 }
 
 /**
@@ -1083,10 +1084,11 @@ HWTEST_F(NavigationAnimationTest, UpdateTextNodeListAsRenderGroup002, TestSize.L
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         "navDestinationNode", 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(navDestinationNode, nullptr);
+    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
     /**
      * @tc.steps: step2. call the target function.
      */
-    navDestinationNode->UpdateTextNodeListAsRenderGroup(false);
+    navDestinationNode->UpdateTextNodeListAsRenderGroup(false, proxy);
 }
 
 /**

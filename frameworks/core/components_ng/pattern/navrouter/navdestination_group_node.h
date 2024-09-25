@@ -29,6 +29,7 @@
 namespace OHOS::Ace::NG {
 
 class CustomNodeBase;
+class NavigationTransitionProxy;
 
 using NavDestinationBackButtonEvent = std::function<bool(GestureEvent&)>;
 
@@ -181,7 +182,7 @@ public:
         return needAppearFromRecovery_;
     }
 
-    void UpdateTextNodeListAsRenderGroup(bool isPopPage);
+    void UpdateTextNodeListAsRenderGroup(bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
     void ReleaseTextNodeList();
     void CollectTextNodeAsRenderGroup();
 

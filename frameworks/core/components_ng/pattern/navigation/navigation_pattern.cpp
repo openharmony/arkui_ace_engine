@@ -1834,10 +1834,10 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         // enable render group for text node during custom animation to reduce
         // unnecessary redrawing
         if (isPopPage && preTopNavDestination) {
-            preTopNavDestination->UpdateTextNodeListAsRenderGroup(isPopPage);
+            preTopNavDestination->UpdateTextNodeListAsRenderGroup(isPopPage, proxy);
         }
         if (!isPopPage && newTopNavDestination) {
-            newTopNavDestination->UpdateTextNodeListAsRenderGroup(isPopPage);
+            newTopNavDestination->UpdateTextNodeListAsRenderGroup(isPopPage, proxy);
         }
     }
 
