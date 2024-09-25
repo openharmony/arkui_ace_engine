@@ -592,10 +592,10 @@ void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper
         CreateDialogChildConstraint(layoutWrapper, dialogChildSize_.Height(), dialogChildSize_.Width());
     auto dialogHeight = Dimension(dialogChildSize_.Height(), DimensionUnit::PX);
     auto dialogWidth = Dimension(dialogChildSize_.Width(), DimensionUnit::PX);
-    if (dialogProp->GetWidth().has_value()) {
+    if (!customSize_ && dialogProp->GetWidth().has_value()) {
         childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dialogWidth), std::nullopt));
     }
-    if (dialogProp->GetHeight().has_value()) {
+    if (!customSize_ && dialogProp->GetHeight().has_value()) {
         childLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(dialogHeight)));
     }
     child->Measure(childConstraint);
