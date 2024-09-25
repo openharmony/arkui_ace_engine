@@ -671,10 +671,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern015, TestSize.Level1)
      * @tc.expected: dotIndicatorModifier_ methods are called, overlongDotIndicatorModifier_ is created.
      */
     indicatorPattern->dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
-    indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_ = false;
     indicatorPattern->overlongDotIndicatorModifier_ = nullptr;
     auto result = indicatorPattern->CreateOverlongDotIndicatorPaintMethod(pattern_);
-    EXPECT_TRUE(indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_);
+    EXPECT_EQ(indicatorPattern->dotIndicatorModifier_, nullptr);
     EXPECT_NE(indicatorPattern->overlongDotIndicatorModifier_, nullptr);
     EXPECT_NE(result, nullptr);
     /**
@@ -682,10 +681,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern015, TestSize.Level1)
      * @tc.expected: dotIndicatorModifier_ methods are called, overlongDotIndicatorModifier_ is reused.
      */
     indicatorPattern->dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
-    indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_ = false;
     indicatorPattern->overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
     result = indicatorPattern->CreateOverlongDotIndicatorPaintMethod(pattern_);
-    EXPECT_TRUE(indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_);
+    EXPECT_EQ(indicatorPattern->dotIndicatorModifier_, nullptr);
     EXPECT_NE(indicatorPattern->overlongDotIndicatorModifier_, nullptr);
     EXPECT_NE(result, nullptr);
 
@@ -724,9 +722,8 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern016, TestSize.Level1)
      * @tc.expected: overlongDotIndicatorModifier_ methods are called
      */
     indicatorPattern->overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
-    indicatorPattern->overlongDotIndicatorModifier_->blackPointsAnimEnd_ = false;
     indicatorPattern->CreateDotIndicatorPaintMethod(pattern_);
-    EXPECT_TRUE(indicatorPattern->overlongDotIndicatorModifier_->blackPointsAnimEnd_);
+    EXPECT_EQ(indicatorPattern->overlongDotIndicatorModifier_, nullptr);
 }
 
 /**

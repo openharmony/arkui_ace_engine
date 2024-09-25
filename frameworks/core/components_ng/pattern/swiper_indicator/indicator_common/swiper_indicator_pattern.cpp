@@ -834,13 +834,38 @@ void SwiperIndicatorPattern::DumpAdvanceInfo()
     }
 }
 
+void SwiperIndicatorPattern::ResetDotModifier()
+{
+    if (!dotIndicatorModifier_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rsRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->RemoveContentModifier(dotIndicatorModifier_);
+    dotIndicatorModifier_ = nullptr;
+}
+
+void SwiperIndicatorPattern::ResetOverlongModifier()
+{
+    if (!overlongDotIndicatorModifier_) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rsRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->RemoveContentModifier(overlongDotIndicatorModifier_);
+    overlongDotIndicatorModifier_ = nullptr;
+}
+
 RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlongDotIndicatorPaintMethod(
     RefPtr<SwiperPattern> swiperPattern)
 {
-    if (dotIndicatorModifier_) {
-        dotIndicatorModifier_->StopAnimation(true);
-        dotIndicatorModifier_->SetIsOverlong(true);
-    }
+    ResetDotModifier();
 
     if (!overlongDotIndicatorModifier_) {
         overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
@@ -863,16 +888,12 @@ RefPtr<OverlengthDotIndicatorPaintMethod> SwiperIndicatorPattern::CreateOverlong
 RefPtr<DotIndicatorPaintMethod> SwiperIndicatorPattern::CreateDotIndicatorPaintMethod(
     RefPtr<SwiperPattern> swiperPattern)
 {
-    if (overlongDotIndicatorModifier_) {
-        overlongDotIndicatorModifier_->StopAnimation(true);
-        overlongDotIndicatorModifier_->SetMaxDisplayCount(0);
-    }
+    ResetOverlongModifier();
 
     if (!dotIndicatorModifier_) {
         dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
     }
 
-    dotIndicatorModifier_->SetIsOverlong(false);
     dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
     dotIndicatorModifier_->SetLongPointHeadCurve(
         swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());

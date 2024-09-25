@@ -297,11 +297,6 @@ public:
         motionVelocity_ = motionVelocity;
     }
 
-    void SetIsOverlong(bool isOverlong)
-    {
-        isOverlong_ = isOverlong;
-    }
-
 protected:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -368,7 +363,6 @@ protected:
     float selectedItemWidth_ = 0.0f;
     float selectedItemHeight_ = 0.0f;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
-    bool isOverlong_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG
