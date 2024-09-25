@@ -32,9 +32,9 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string BUNDLE_NAME = "com.example.helloworld";
 const std::string ABILITY_NAME = "MainAbility";
-const int32_t NODE_ID = 1000;
+const std::string BUNDLE_NAME = "com.example.helloworld";
+const std::string MODULE_NAME = "entry";
 } // namespace
 
 class WindowSceneTest : public testing::Test {
@@ -45,49 +45,51 @@ public:
 
 /**
  * @tc.name: WindowSceneTest01
- * @tc.desc: Create WindowScene with invalid persistentId
+ * @tc.desc: Create WindowNode with invalid persistentId
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneTest, WindowSceneTest01, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create WindowPatternModel.
+     * @tc.steps: step1. Create WindowNode.
      */
     int32_t persistentId = 0;
     WindowSceneModel::Create(persistentId);
     /**
-     * @tc.steps: step2. Get and check WindowSceneModel.
+     * @tc.steps: step2. Get and check WindowNode.
      */
-    auto windowSceneNode =
+    auto windowNode =
         AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    EXPECT_EQ(windowSceneNode, nullptr);
+    EXPECT_EQ(windowNode, nullptr);
 }
 
 /**
  * @tc.name: WindowSceneTest02
- * @tc.desc: Create WindowScene with invalid persistentId
+ * @tc.desc: Create WindowScene with valid persistentId
  * @tc.type: FUNC
  */
 HWTEST_F(WindowSceneTest, WindowSceneTest02, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Request sceneSession.
+     * @tc.steps: step1. Request scene session.
      */
     Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
         .bundleName_ = BUNDLE_NAME,
-        .abilityName_ = ABILITY_NAME
+        .moduleName_ = MODULE_NAME,
     };
     auto session = Rosen::SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
     /**
-     * @tc.steps: step2. Create WindowPatternModel with persistentId.
+     * @tc.steps: step2. Create WindowNode with persistentId.
      */
     int32_t persistentId = session->GetPersistentId();
     WindowSceneModel::Create(persistentId);
     /**
-     * @tc.steps: step3. Get and check WindowSceneModel.
+     * @tc.steps: step3. Get and check WindowNode.
      */
-    auto windowSceneNode =
+    auto windowNode =
         AceType::DynamicCast<WindowNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    EXPECT_NE(windowSceneNode, nullptr);
+    EXPECT_NE(windowNode, nullptr);
 }
-}
+} // namespace OHOS::Ace::NG

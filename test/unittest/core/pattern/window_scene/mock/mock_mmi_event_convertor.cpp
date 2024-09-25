@@ -18,7 +18,7 @@
 namespace OHOS::Ace::Platform {
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    return TouchEvent{};
+    return {};
 }
 
 void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
