@@ -374,6 +374,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
 
 bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)
 {
+    CHECK_NULL_RETURN(overlayMod_, false);
     CHECK_NULL_RETURN(urlMouseEventInitialized_, false);
     CHECK_NULL_RETURN(!spans_.empty() && pManager_, false);
     int32_t start = 0;
@@ -1030,6 +1031,7 @@ void TextPattern::URLOnHover(bool isHover)
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->ChangeMouseStyle(nodeId, MouseFormat::DEFAULT);
     pipelineContext->FreeMouseStyleHoldNode(nodeId);
+    CHECK_NULL_VOID(overlayMod_);
     overlayMod_->ClearSelectedForegroundColorAndRects();
     MarkDirtySelf();
 }
@@ -1067,6 +1069,7 @@ void TextPattern::HandleUrlMouseEvent(const MouseInfo& info)
 
 void TextPattern::HandleUrlTouchEvent(const TouchEventInfo& info)
 {
+    CHECK_NULL_VOID(overlayMod_);
     CHECK_NULL_VOID(!IsDragging());
     if (selectOverlay_->IsTouchAtHandle(info)) {
         return;
@@ -1735,6 +1738,9 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     DragDropInfo itemInfo;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, itemInfo);
+    if (overlayMod_) {
+        overlayMod_->ClearSelectedForegroundColorAndRects();
+    }
     auto hub = host->GetEventHub<EventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     auto selectStart = textSelector_.GetTextStart();

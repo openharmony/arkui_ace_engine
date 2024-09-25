@@ -45,21 +45,18 @@ std::mutex SearchModel::mutex_;
 
 SearchModel* SearchModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::SearchModelNG());
+    static NG::SearchModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::SearchModelNG());
-            } else {
-                instance_.reset(new Framework::SearchModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::SearchModelNG instance;
+        return &instance;
+    } else {
+        static Framework::SearchModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
