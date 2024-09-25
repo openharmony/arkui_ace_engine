@@ -296,6 +296,31 @@ function isValidDimensionString(dimension: string): boolean {
   return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
 }
 
+function isValidResource(context: Context | undefined, value: Resource) {
+  const resourceManager = context?.resourceManager;
+  if (value === void (0) || value === null || resourceManager === void (0)) {
+    return false;
+  }
+  if (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
+    value.type !== RESOURCE_TYPE_FLOAT) {
+    return false;
+  }
+
+  if (value.type === RESOURCE_TYPE_INTEGER || value.type === RESOURCE_TYPE_FLOAT) {
+    if (resourceManager.getNumber(value.id) >= 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  if (value.type === RESOURCE_TYPE_STRING && !isValidDimensionString(resourceManager.getStringSync(value.id))) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 @Component
 export struct ChipComponent {
   private theme: ChipTheme = defaultTheme;
@@ -422,13 +447,9 @@ export struct ChipComponent {
       case 'object':
         try {
           let returnValue = this.lengthMetricsToVp(LengthMetrics.resource(value));
-          if (returnValue === 0) {
-            if ((value.type === RESOURCE_TYPE_STRING &&
-              !isValidDimensionString(getContext(this).resourceManager.getStringSync(value.id))) ||
-              (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
-                value.type !== RESOURCE_TYPE_FLOAT)) {
-              return Number.NEGATIVE_INFINITY;
-            }
+          if (returnValue === 0 &&
+            !isValidResource(getContext(this), value)) {
+            return Number.NEGATIVE_INFINITY;
           }
           return returnValue;
         } catch (error) {
