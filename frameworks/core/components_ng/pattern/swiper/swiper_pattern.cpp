@@ -910,7 +910,8 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     // set tabs invisible item freeze state.
     if (hasTabsAncestor_) {
-        for (int32_t index = 0; index < RealTotalCount(); index++) {
+        auto realTotalCount = RealTotalCount();
+        for (int32_t index = 0; index < realTotalCount; index++) {
             auto childFrameNode = GetCurrentFrameNode(index);
             if (childFrameNode) {
                 auto isActive = childFrameNode->IsActive();
