@@ -207,4 +207,5 @@ generated_sources = [
   "../arkoala/implementation/x_component_controller_modifier.cpp",
   "../arkoala/implementation/x_component_modifier.cpp",
   "../arkoala/utility/converter.cpp",
+  "../arkoala/utility/validators.cpp",
 ]

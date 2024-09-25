@@ -67,6 +67,7 @@ const auto DECORATION_ATTRS("decoration");
 const auto DECORATION_TYPE_ATTR("type");
 const auto DECORATION_STYLE_ATTR("style");
 const auto DECORATION_COLOR_ATTR("color");
+const auto DEFAULT_ICON_SRC_STR("resource:///ohos_test_image.svg");
 const auto ENABLE_KEYBOARD_ON_FOCUS("enableKeyboardOnFocus");
 const auto ENABLE_PREVIEW_TEXT("enablePreviewText");
 const auto ENTER_KEY_TYPE_ATTR("enterKeyType");
@@ -588,7 +589,7 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestDefault, TestSize.Level1)
     auto defaultCancelButtonIconColor = defaultCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
     auto defaultCancelButtonIconSize = defaultCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SIZE_ATTR);
     EXPECT_EQ(defaultButtonIconStyleAttr, BUTTON_STYLE_INPUT);
-    EXPECT_EQ(defaultCancelButtonIconSrc, EMPTY_TEXT);
+    EXPECT_EQ(defaultCancelButtonIconSrc, DEFAULT_ICON_SRC_STR);
     EXPECT_EQ(defaultCancelButtonIconColor, CHECK_DEFAULT_BLACK_COLOR);
     EXPECT_EQ(defaultCancelButtonIconSize, CHECK_DEFAULT_PX);
 }
