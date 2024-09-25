@@ -17574,7 +17574,10 @@ class ArkToggleComponent extends ArkComponent {
     return 0;
   }
   initialize(value) {
-    if (isObject(value[0])) {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
       this.toggleType = value[0].type;
       modifierWithKey(this._modifiersWithKeys, ToggleOptionsModifier.identity, ToggleOptionsModifier, value[0]);
     } else {
@@ -17921,7 +17924,10 @@ class ArkSelectComponent extends ArkComponent {
     return 0;
   }
   initialize(value) {
-    if (isObject(value[0])) {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
       modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, value[0]);
     } else {
       modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, undefined);
@@ -18509,7 +18515,10 @@ class ArkRadioComponent extends ArkComponent {
     return 0;
   }
   initialize(value) {
-    if (isObject(value[0])) {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
       modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, value[0]);
     } else {
       modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, undefined);
@@ -19334,7 +19343,10 @@ class ArkSliderComponent extends ArkComponent {
     return 0;
   }
   initialize(value) {
-    if (isObject(value[0])) {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
       modifierWithKey(this._modifiersWithKeys, SliderOptionsModifier.identity, SliderOptionsModifier, value[0]);
     } else {
       modifierWithKey(this._modifiersWithKeys, SliderOptionsModifier.identity, SliderOptionsModifier, undefined);
@@ -19872,7 +19884,10 @@ class ArkRatingComponent extends ArkComponent {
     return 0;
   }
   initialize(value) {
-    if (isObject(value[0])) {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
       modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, value[0]);
     } else {
       modifierWithKey(this._modifiersWithKeys, RatingOptionsModifier.identity, RatingOptionsModifier, undefined);
@@ -19979,7 +19994,10 @@ class ArkCheckboxComponent extends ArkComponent {
     return 0;
   }
   initialize(value) {
-    if (isObject(value[0])) {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
       modifierWithKey(this._modifiersWithKeys, CheckboxOptionsModifier.identity, CheckboxOptionsModifier, value[0]);
     } else {
       modifierWithKey(this._modifiersWithKeys, CheckboxOptionsModifier.identity, CheckboxOptionsModifier, undefined);
@@ -20853,7 +20871,10 @@ class ArkCheckboxGroupComponent extends ArkComponent {
     return 0;
   }
   initialize(value){
-    if (isObject(value[0])) {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
       modifierWithKey(this._modifiersWithKeys, CheckBoxGroupOptionsModifier.identity, CheckBoxGroupOptionsModifier,
         value[0]);
     } else {

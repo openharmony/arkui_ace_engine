@@ -27,7 +27,10 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     return 0;
   }
   initialize(value: Object[]): this {
-    if (isObject(value[0])) {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
       modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, value[0]);
     } else {
       modifierWithKey(this._modifiersWithKeys, RadioOptionsModifier.identity, RadioOptionsModifier, undefined);

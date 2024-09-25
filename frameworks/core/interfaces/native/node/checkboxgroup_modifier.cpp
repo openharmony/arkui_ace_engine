@@ -157,6 +157,7 @@ void ResetCheckboxGroupStyle(ArkUINodeHandle node)
 
 void SetCheckboxGroupName(ArkUINodeHandle node, ArkUI_CharPtr group)
 {
+    CHECK_NULL_VOID(group);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxGroupModelNG::SetCheckboxGroupName(frameNode, std::string(group));

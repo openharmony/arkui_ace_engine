@@ -184,7 +184,10 @@ class ArkCheckboxGroupComponent extends ArkComponent implements CheckboxGroupAtt
     return 0;
   }
   initialize(value: Object[]): this {
-    if (isObject(value[0])) {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
       modifierWithKey(this._modifiersWithKeys, CheckBoxGroupOptionsModifier.identity, CheckBoxGroupOptionsModifier,
         value[0]);
     } else {

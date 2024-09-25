@@ -296,6 +296,9 @@ ArkUI_CharPtr GetRadioGroup(ArkUINodeHandle node)
 
 void SetRadioOptions(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr group, ArkUI_Uint32 indicatorType)
 {
+    if (value == nullptr || group == nullptr) {
+        return;
+    }
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::TICK &&
