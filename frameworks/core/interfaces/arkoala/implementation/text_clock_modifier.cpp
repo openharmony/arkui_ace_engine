@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextClockInterfaceModifier {
 void SetTextClockOptionsImpl(Ark_NativePointer node,
-                             const Opt_Type_TextClockInterface_setTextClockOptions_Arg0* options)
+                             const Opt_TextClockOptions* options)
 {
 }
 } // TextClockInterfaceModifier
