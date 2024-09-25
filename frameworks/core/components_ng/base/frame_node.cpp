@@ -1441,7 +1441,7 @@ void FrameNode::TriggerOnSizeChangeCallback()
     }
 }
 
-bool FrameNode::IsFrameDisappear()
+bool FrameNode::IsFrameDisappear() const
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
@@ -4565,7 +4565,7 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
     frameRect = visibleRect;
     visibleInnerRect = visibleRect;
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
-    if (!AllowVisibleAreaCheck() || !parentUi) {
+    if (!AllowVisibleAreaCheck() || !parentUi || IsFrameDisappear()) {
         visibleRect.SetWidth(0.0f);
         visibleRect.SetHeight(0.0f);
         visibleInnerRect.SetWidth(0.0f);
