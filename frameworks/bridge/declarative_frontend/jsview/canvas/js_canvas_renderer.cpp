@@ -1551,6 +1551,12 @@ void JSCanvasRenderer::JsRestoreLayer(const JSCallbackInfo& info)
 // reset(): void
 void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
 {
+    ResetPaintState();
+    renderingContext2DModel_->Reset();
+}
+
+void JSCanvasRenderer::ResetPaintState()
+{
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
         // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
         // The default value of the font size in canvas is 14px.
@@ -1558,16 +1564,7 @@ void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
     } else {
         paintState_ = PaintState();
     }
-    anti_ = false;
-    isInitializeShadow_ = false;
-    isOffscreenInitializeShadow_ = false;
-    renderingContext2DModel_->Reset();
-}
-
-void JSCanvasRenderer::ResetPaintState()
-{
     std::vector<PaintState>().swap(savePaintState_);
-    paintState_ = PaintState();
     isInitializeShadow_ = false;
     isOffscreenInitializeShadow_ = false;
 }
