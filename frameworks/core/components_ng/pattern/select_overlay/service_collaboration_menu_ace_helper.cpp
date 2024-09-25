@@ -226,6 +226,9 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     rowProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(MENUITEM_WIDTH)), CalcLength(static_cast<float>(MENUITEM_HEIGHT))));
     PaddingProperty rowpadding { .right = CalcLength(static_cast<float>(PANDDING_ZERO)) };
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        rowpadding.top = CalcLength(menuTheme->GetMenuItemVerticalPadding().ConvertToPx());
+    }
     rowProperty->UpdatePadding(rowpadding);
     MarginProperty margin;
     margin.bottom = CalcLength(static_cast<float>(ROW_PADDING));
@@ -280,10 +283,11 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateDeviceMenuItem(
     MarginProperty margin;
     margin.top = CalcLength(static_cast<float>(MENUITEM_MARGIN));
     margin.bottom = CalcLength(static_cast<float>(MENUITEM_MARGIN));
-    auto size = CalcSize();
-    size.SetHeight(CalcLength(static_cast<float>(MENUITEM_HEIGHT)));
     rowProperty->UpdateMargin(margin);
-    rowProperty->UpdateUserDefinedIdealSize(size);
+    auto menuHeight = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+        ? menuTheme->GetMenuChildMinHeight().ConvertToPx()
+        : menuTheme->GetOptionMinHeight().ConvertToPx();
+    rowProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(menuHeight)));
     CreateStartIcon(icon, row);
     CreateText(value, row, richTheme->GetMenuTextColor(), false);
     row->MountToParent(menuItemNode);
