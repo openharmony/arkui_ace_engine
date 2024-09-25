@@ -38,38 +38,49 @@ void FillImpl(Ark_NativePointer node,
 void StrokeDashOffsetImpl(Ark_NativePointer node,
                           const Type_CommonShapeMethod_strokeDashOffset_Arg0* value)
 {
+    // Union_Number_String
 }
 void StrokeLineCapImpl(Ark_NativePointer node,
                        enum Ark_LineCapStyle value)
 {
+    // enum
 }
 void StrokeLineJoinImpl(Ark_NativePointer node,
                         enum Ark_LineJoinStyle value)
 {
+    // enum 
 }
 void StrokeMiterLimitImpl(Ark_NativePointer node,
                           const Type_CommonShapeMethod_strokeMiterLimit_Arg0* value)
 {
+    // Union_Number_String
 }
 void StrokeOpacityImpl(Ark_NativePointer node,
                        const Type_CommonShapeMethod_strokeOpacity_Arg0* value)
 {
+    // Union_Number_String_Resource 
 }
 void FillOpacityImpl(Ark_NativePointer node,
                      const Type_CommonShapeMethod_fillOpacity_Arg0* value)
 {
+    // Union_Number_String_Resource
 }
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Ark_Length* value)
 {
+    // Ark_Length
 }
 void AntiAliasImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ShapeModelNG::SetAntiAlias(frameNode, Converter::Convert<bool>(value));
 }
 void StrokeDashArrayImpl(Ark_NativePointer node,
                          const Array_CustomObject* value)
 {
+    LOGE("ARKOALA CommonShapeMethodModifier.StrokeDashArray -> Method is not implemented.");
 }
 } // CommonShapeMethodModifier
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()

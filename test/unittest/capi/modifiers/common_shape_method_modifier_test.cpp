@@ -98,4 +98,35 @@ HWTEST_F(CommonShapeMethodModifierTest, setFillTest, TestSize.Level1)
         EXPECT_EQ(checkColor, expected);
     }
 }
+
+/**
+ * @tc.name: setAntiAliasTest
+ * @tc.desc: Check the functionality of setAntiAlias
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setAntiAliasTest, TestSize.Level1)
+{
+    static const std::string PROP_NAME("antiAlias");
+    ASSERT_NE(modifier_->setAntiAlias, nullptr);
+    using OneBoolStep = std::tuple<Ark_Boolean, std::string>;
+    const std::vector<OneBoolStep> BOOL_TEST_PLAN = {
+        { false, "false" },
+        { true, "true" },
+        { 0, "false" },
+        { -25, "true" },
+        { 0, "false" },
+        { 25, "true" },
+        { false, "false" }
+    };
+    auto fullJson = GetJsonValue(node_);
+    auto checkVal = GetAttrValue<std::string>(fullJson, PROP_NAME);
+    EXPECT_EQ(checkVal, "true");
+
+    for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
+        modifier_->setAntiAlias(node_, value);
+        auto fullJson = GetJsonValue(node_);
+        checkVal = GetAttrValue<std::string>(fullJson, PROP_NAME);
+        EXPECT_EQ(checkVal, expectVal);
+    }
+}
 } // namespace OHOS::Ace::NG
