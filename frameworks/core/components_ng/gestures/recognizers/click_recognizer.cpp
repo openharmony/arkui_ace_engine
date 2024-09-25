@@ -318,6 +318,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
     }
+    bool fingersNumberSatisfied = equalsToFingers_;
     // Check whether multi-finger taps are completed in count_ times
     if (equalsToFingers_ && (currentTouchPointsNum_ == 0) && isUpInRegion) {
         // Turn off the multi-finger lift deadline timer
@@ -332,7 +333,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         DeadlineTimer(tapDeadlineTimer_, MULTI_TAP_TIMEOUT);
     }
     if (refereeState_ != RefereeState::PENDING && refereeState_ != RefereeState::FAIL) {
-        if (equalsToFingers_) {
+        if (fingersNumberSatisfied) {
             Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
         } else {
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
