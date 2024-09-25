@@ -4034,6 +4034,13 @@ void WebPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool ne
     viewDataWrap->SetPageUrl(viewDataCommon_.pageUrl);
     viewDataWrap->SetUserSelected(viewDataCommon_.isUserSelected);
     viewDataWrap->SetOtherAccount(viewDataCommon_.isOtherAccount);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto rect = pipelineContext->GetDisplayWindowRectInfo();
+    NG::RectF rectF;
+    rectF.SetRect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
+    viewDataWrap->SetPageRect(rectF);
 }
 
 void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
