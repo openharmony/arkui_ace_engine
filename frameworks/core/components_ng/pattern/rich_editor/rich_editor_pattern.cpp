@@ -8606,7 +8606,7 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("bindSelectionMenu", GetBindSelectionMenuInJson().c_str(), filter);
 }
 
-void RichEditorPattern::FillPreviewMenuInJson(std::unique_ptr<JsonValue> jsonValue) const
+void RichEditorPattern::FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const
 {
     CHECK_NULL_VOID(jsonValue && oneStepDragParam_);
     auto jsonItem = JsonUtil::Create(true);
