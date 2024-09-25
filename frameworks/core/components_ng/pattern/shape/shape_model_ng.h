@@ -52,7 +52,7 @@ public:
     static void SetStroke(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetFill(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset);
-    static void SetStrokeLineCap(FrameNode* frameNode, int lineCapStyle);
+    static void SetStrokeLineCap(FrameNode* frameNode, const std::optional<int>& lineCapStyle);
     static void SetStrokeLineJoin(FrameNode* frameNode, int lineJoinStyle);
     static void SetViewPort(FrameNode* frameNode, const Dimension& dimLeft, const Dimension& dimTop,
         const Dimension& dimWidth, const Dimension& dimHeight);

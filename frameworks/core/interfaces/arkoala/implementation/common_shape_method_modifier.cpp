@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/components/common/properties/paint_state.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonShapeMethodModifier {
@@ -43,7 +44,11 @@ void StrokeDashOffsetImpl(Ark_NativePointer node,
 void StrokeLineCapImpl(Ark_NativePointer node,
                        enum Ark_LineCapStyle value)
 {
-    // enum
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto enumLineCapStyle = Converter::OptConvert<LineCapStyle>(value);
+    auto intLineCapStyle = EnumToInt(enumLineCapStyle);
+    ShapeModelNG::SetStrokeLineCap(frameNode, intLineCapStyle);
 }
 void StrokeLineJoinImpl(Ark_NativePointer node,
                         enum Ark_LineJoinStyle value)

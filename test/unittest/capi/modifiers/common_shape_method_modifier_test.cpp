@@ -38,6 +38,12 @@ Ark_Resource ArkRes(Ark_String *name, int id = -1,
     };
 }
 
+// attributes name
+const auto ATTRIBUTE_STROKE_LINE_CAP_NAME = "strokeLineCap";
+
+// attributes default
+const auto ATTRIBUTE_STROKE_LINE_CAP_DEFAULT_VALUE = "LineCapStyle.Butt";
+
 using OneTestColorStep = std::pair<Ark_ResourceColor, std::string>;
 static Ark_String RESOURCE_NAME = ArkValue<Ark_String>("aa.bb.cc");
 static const std::string EXPECTED_RESOURCE_COLOR =
@@ -97,6 +103,79 @@ HWTEST_F(CommonShapeMethodModifierTest, setFillTest, TestSize.Level1)
         auto checkColor = GetAttrValue<std::string>(node_, PROP_NAME);
         EXPECT_EQ(checkColor, expected);
     }
+}
+
+/*
+ * @tc.name: setStrokeLineCapTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineCapTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_CAP_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_STROKE_LINE_CAP_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setStrokeLineCapTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineCapTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    Ark_LineCapStyle inputValueStrokeLineCap;
+
+    // Initial setup
+    inputValueStrokeLineCap = ARK_LINE_CAP_STYLE_BUTT;
+
+    // Test
+    modifier_->setStrokeLineCap(node_, inputValueStrokeLineCap);
+
+    // Initial verification
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_CAP_NAME);
+    EXPECT_EQ(resultStr, "LineCapStyle.Butt");
+
+    // Verifying attribute's other values
+    inputValueStrokeLineCap = ARK_LINE_CAP_STYLE_ROUND;
+    modifier_->setStrokeLineCap(node_, inputValueStrokeLineCap);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_CAP_NAME);
+    EXPECT_EQ(resultStr, "LineCapStyle.Round");
+
+    inputValueStrokeLineCap = ARK_LINE_CAP_STYLE_SQUARE;
+    modifier_->setStrokeLineCap(node_, inputValueStrokeLineCap);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_CAP_NAME);
+    EXPECT_EQ(resultStr, "LineCapStyle.Square");
+}
+
+/*
+ * @tc.name: setStrokeLineCapTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineCapTestInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    Ark_LineCapStyle inputValueStrokeLineCap;
+
+    // Initial setup
+    inputValueStrokeLineCap = static_cast<Ark_LineCapStyle>(-1);
+
+    // Test
+    modifier_->setStrokeLineCap(node_, inputValueStrokeLineCap);
+
+    // Initial verification
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_CAP_NAME);
+    EXPECT_EQ(resultStr, "LineCapStyle.Butt");
 }
 
 /**

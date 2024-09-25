@@ -136,9 +136,14 @@ void ShapeModelNG::SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimensio
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashOffset, dashOffset, frameNode);
 }
 
-void ShapeModelNG::SetStrokeLineCap(FrameNode* frameNode, int lineCapStyle)
+void ShapeModelNG::SetStrokeLineCap(FrameNode* frameNode, const std::optional<int>& lineCapStyle)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineCap, lineCapStyle, frameNode);
+    if (lineCapStyle) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineCap, lineCapStyle.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineCap, frameNode);
+    }
+
 }
 
 void ShapeModelNG::SetStrokeLineJoin(FrameNode* frameNode, int lineJoinStyle)
