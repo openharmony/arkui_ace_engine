@@ -1421,15 +1421,6 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
     return hintToTypeWrap;
 }
 
-bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
-{
-    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    CHECK_NULL_RETURN(viewDataWrap, false);
-    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
-    CHECK_NULL_RETURN(viewDataWrapOhos, false);
-    return viewDataWrapOhos->GetPlaceHolderValue(viewData);
-}
-
 void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap)
 {
     CHECK_NULL_VOID(node);
@@ -1541,7 +1532,6 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
-    ChangeType(viewData);
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isNewPassWord is: %{public}d", isNewPassWord);
     if (isNewPassWord) {
         callback->OnFillRequestSuccess(viewData);
