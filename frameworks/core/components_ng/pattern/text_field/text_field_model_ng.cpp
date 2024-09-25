@@ -883,6 +883,30 @@ void TextFieldModelNG::SetTextDecorationStyle(Ace::TextDecorationStyle value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecorationStyle, value);
 }
 
+void TextFieldModelNG::SetBackBorderRadius()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto radius = renderContext->GetBorderRadius().value();
+
+    radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
+        (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);
+    radius.radiusTopRight = radius.radiusTopRight.has_value() ? radius.radiusTopRight :
+        (isRTL ? radius.radiusTopStart : radius.radiusTopEnd);
+    radius.radiusBottomLeft = radius.radiusBottomLeft.has_value() ? radius.radiusBottomLeft :
+        (isRTL ? radius.radiusBottomEnd : radius.radiusBottomStart);
+    radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
+        (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
+
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BorderRadiusFlagByUser, radius);
+}
+
 void TextFieldModelNG::SetBackBorder()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -890,8 +914,7 @@ void TextFieldModelNG::SetBackBorder()
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (renderContext->HasBorderRadius()) {
-        ACE_UPDATE_PAINT_PROPERTY(
-            TextFieldPaintProperty, BorderRadiusFlagByUser, renderContext->GetBorderRadius().value());
+        SetBackBorderRadius();
     }
     if (renderContext->HasBorderColor()) {
         ACE_UPDATE_PAINT_PROPERTY(

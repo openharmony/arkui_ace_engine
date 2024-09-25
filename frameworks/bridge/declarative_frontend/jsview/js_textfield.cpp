@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_textarea.h"
@@ -92,9 +93,29 @@ constexpr uint32_t MAX_VAILD_VALUE = 100;
 constexpr uint32_t ILLEGAL_VALUE = 0;
 constexpr uint32_t DEFAULT_MODE = -1;
 constexpr uint32_t DEFAULT_OVERFLOW = 4;
+const char* TOP_START_PROPERTY = "topStart";
+const char* TOP_END_PROPERTY = "topEnd";
+const char* BOTTOM_START_PROPERTY = "bottomStart";
+const char* BOTTOM_END_PROPERTY = "bottomEnd";
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 constexpr TextDecorationStyle DEFAULT_TEXT_DECORATION_STYLE = TextDecorationStyle::SOLID;
+
+bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
+{
+    auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return true;
+}
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -816,9 +837,41 @@ NG::PaddingProperty JSTextField::SetPaddings(const std::optional<CalcDimension>&
 void JSTextField::JsBorder(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
+        CalcDimension borderWidth;
+        ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
+        ViewAbstractModel::GetInstance()->SetBorderColor(Color::BLACK);
+        ViewAbstractModel::GetInstance()->SetBorderRadius(borderWidth);
+        ViewAbstractModel::GetInstance()->SetBorderStyle(BorderStyle::SOLID);
+        ViewAbstractModel::GetInstance()->SetDashGap(Dimension(-1));
+        ViewAbstractModel::GetInstance()->SetDashWidth(Dimension(-1));
         return;
     }
-    JSViewAbstract::JsBorder(info);
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+
+    auto valueWidth = object->GetProperty(static_cast<int32_t>(ArkUIIndex::WIDTH));
+    if (!valueWidth->IsUndefined()) {
+        JSViewAbstract::ParseBorderWidth(valueWidth);
+    }
+
+    // use default value when undefined.
+    JSViewAbstract::ParseBorderColor(object->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR)));
+
+    auto valueRadius = object->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
+    if (!valueRadius->IsUndefined()) {
+        ParseBorderRadius(valueRadius);
+    }
+    // use default value when undefined.
+    JSViewAbstract::ParseBorderStyle(object->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE)));
+
+    auto dashGap = object->GetProperty("dashGap");
+    if (!dashGap->IsUndefined()) {
+        JSViewAbstract::ParseDashGap(dashGap);
+    }
+    auto dashWidth = object->GetProperty("dashWidth");
+    if (!dashWidth->IsUndefined()) {
+        JSViewAbstract::ParseDashWidth(dashWidth);
+    }
+
     TextFieldModel::GetInstance()->SetBackBorder();
     info.ReturnSelf();
 }
@@ -853,13 +906,88 @@ void JSTextField::JsBorderStyle(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetBackBorder();
 }
 
+void JSTextField::GetBorderRadiusByLengthMetrics(const char* key, JSRef<JSObject>& object,
+    std::optional<CalcDimension>& radius)
+{
+    if (object->HasProperty(key) && object->GetProperty(key)->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(object->GetProperty(key));
+        CalcDimension value;
+        ParseJsLengthMetrics(startObj, value);
+        radius = value;
+    }
+}
+
+bool JSTextField::ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft,
+    CalcDimension& topRight, CalcDimension& bottomLeft, CalcDimension& bottomRight)
+{
+    if (object->HasProperty(TOP_START_PROPERTY) || object->HasProperty(TOP_END_PROPERTY) ||
+        object->HasProperty(BOTTOM_START_PROPERTY) || object->HasProperty(BOTTOM_END_PROPERTY)) {
+        std::optional<CalcDimension> topStart;
+        std::optional<CalcDimension> topEnd;
+        std::optional<CalcDimension> bottomStart;
+        std::optional<CalcDimension> bottomEnd;
+        GetBorderRadiusByLengthMetrics(TOP_START_PROPERTY, object, topStart);
+        GetBorderRadiusByLengthMetrics(TOP_END_PROPERTY, object, topEnd);
+        GetBorderRadiusByLengthMetrics(BOTTOM_START_PROPERTY, object, bottomStart);
+        GetBorderRadiusByLengthMetrics(BOTTOM_END_PROPERTY, object, bottomEnd);
+        topLeft = topStart.has_value() ? topStart.value() : topLeft;
+        topRight = topEnd.has_value() ? topEnd.value() : topRight;
+        bottomLeft = bottomStart.has_value() ? bottomStart.value() : bottomLeft;
+        bottomRight = bottomEnd.has_value() ? bottomEnd.value() : bottomRight;
+        return true;
+    }
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("topRight"), topRight);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft);
+    JSViewAbstract::ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight);
+    return false;
+}
+
+void JSTextField::ParseBorderRadius(const JSRef<JSVal>& args)
+{
+    CalcDimension borderRadius;
+    if (ParseJsDimensionVp(args, borderRadius)) {
+        ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
+    } else if (args->IsObject()) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
+        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
+        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
+        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
+        if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
+            ViewAbstractModel::GetInstance()->SetBorderRadius(
+                JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+                return;
+        }
+        ViewAbstractModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+    }
+}
+
 void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
-    if (!jsValue->IsObject() && !jsValue->IsString() && !jsValue->IsNumber()) {
+    static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING,
+        JSCallbackInfoType::NUMBER, JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsBorderRadius", jsValue, checkList)) {
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+        ViewAbstractModel::GetInstance()->SetBorderRadius(defaultBorderRadius);
         return;
     }
-    JSViewAbstract::JsBorderRadius(info);
+    ParseBorderRadius(jsValue);
     TextFieldModel::GetInstance()->SetBackBorder();
 }
 

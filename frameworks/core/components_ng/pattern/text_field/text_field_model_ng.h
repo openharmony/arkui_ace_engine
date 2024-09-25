@@ -285,6 +285,7 @@ private:
     void SetDraggable(bool draggable);
     void SetTextRectWillChange();
     void SetDefaultPadding();
+    void SetBackBorderRadius();
 };
 
 } // namespace OHOS::Ace::NG
