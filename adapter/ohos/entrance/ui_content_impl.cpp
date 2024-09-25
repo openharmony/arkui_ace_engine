@@ -114,7 +114,7 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
-constexpr int32_t AVOID_DELAY_TIME = 20;
+constexpr int32_t AVOID_DELAY_TIME = 50;
 
 Rosen::Rect ConvertToRSRect(NG::RectF& rect)
 {
@@ -172,6 +172,7 @@ void AddResConfigInfo(
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
 const std::string SUBWINDOW_TOAST_DIALOG_PREFIX = "ARK_APP_SUBWINDOW_TOAST_DIALOG_";
+const std::string SUBWINDOW_TOAST_PREFIX = "ARK_APP_SUBWINDOW_TOPMOST_TOAST";
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
@@ -1374,7 +1375,7 @@ void UIContentImpl::SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Con
 
 void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
-    if (config == nullptr) {
+    if (!config) {
         return;
     }
     TAG_LOGD(AceLogTag::ACE_WINDOW, "StoreConfiguration %{public}s", config->GetName().c_str());
@@ -1388,11 +1389,7 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     }
 
     auto string2float = [](const std::string& str) {
-        try {
-            return std::stof(str);
-        } catch (...) {
-            return (float)1.0;
-        }
+        return std::stof(str);
     };
     auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
     if (!fontScale.empty()) {
@@ -1867,10 +1864,18 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     SetFontScaleAndWeightScale(container, instanceId_);
     if (pipeline) {
         auto rsConfig = window_->GetKeyboardAnimationConfig();
-        KeyboardAnimationConfig config = { rsConfig.curveType_, rsConfig.curveParams_, rsConfig.durationIn_,
-            rsConfig.durationOut_ };
+        KeyboardAnimationCurve curveIn = {
+            rsConfig.curveIn.curveType_, rsConfig.curveIn.curveParams_, rsConfig.curveIn.duration_};
+        KeyboardAnimationCurve curveOut = {
+            rsConfig.curveOut.curveType_, rsConfig.curveOut.curveParams_, rsConfig.curveOut.duration_};
+        KeyboardAnimationConfig config = {curveIn, curveOut};
         pipeline->SetKeyboardAnimationConfig(config);
     }
+    // Use metadata to control whether dirty mark is blocked.
+    bool isOpenInvisibleFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "ArkUIInvisibleFreeze" && metaDataItem.value == "true";
+    });
+    pipeline->SetOpenInvisibleFreeze(isOpenInvisibleFreeze);
     // Set sdk version in module json mode
     if (isModelJson) {
         if (pipeline && appInfo) {
@@ -2635,8 +2640,10 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     }
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
-    touchOutsideListener_ = new TouchOutsideListener(instanceId_);
-    window_->RegisterTouchOutsideListener(touchOutsideListener_);
+    if (!StringUtils::StartWith(window_->GetWindowName(), SUBWINDOW_TOAST_PREFIX)) {
+        touchOutsideListener_ = new TouchOutsideListener(instanceId_);
+        window_->RegisterTouchOutsideListener(touchOutsideListener_);
+    }
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);

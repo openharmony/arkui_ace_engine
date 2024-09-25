@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/text/text_emoji_processor.h"
 
 #if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
@@ -454,7 +455,7 @@ public:
     void CloseSelectionMenu();
     bool SetCaretOffset(int32_t caretPosition);
     void ResetFirstNodeStyle();
-    void DoDeleteActions(const RichEditorDeleteValue& info);
+    void DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
 
     void UpdateSpanStyle(int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle);
     bool SymbolSpanUpdateStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
@@ -799,6 +800,7 @@ public:
     void AdjustSelector(int32_t& start, int32_t& end, SelectorAdjustPolicy policy = SelectorAdjustPolicy::INCLUDE);
     bool AdjustSelectorForSymbol(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
     bool AdjustSelectorForEmoji(int32_t& index, HandleType handleType, SelectorAdjustPolicy policy);
+    EmojiRelation GetEmojiRelation(int index);
     void UpdateSelector(int32_t start, int32_t end);
     void UpdateSelectionType(const SelectionInfo& textSelectInfo);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);

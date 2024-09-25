@@ -39,6 +39,7 @@ public:
         std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
         RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
         const std::string& sharedRenderProcessToken = "") override;
+    Color GetDefaultBackgroundColor() override;
     void SetCustomScheme(const std::string& cmdLine) override;
     void SetOnCommonDialog(std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType) override;
     void SetOnConsoleLog(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;

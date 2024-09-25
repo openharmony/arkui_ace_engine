@@ -140,9 +140,9 @@ public:
         frame_.rect_.SetSize(size);
     }
 
-    void SetFrameHeight(const float height)
+    void SetFrameHeight(const float heigth)
     {
-        frame_.rect_.SetHeight(height);
+        frame_.rect_.SetHeight(heigth);
     }
 
     void SetFrameWidth(const float width)

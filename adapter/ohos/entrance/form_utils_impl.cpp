@@ -80,7 +80,7 @@ int32_t FormUtilsImpl::RouterEvent(
 }
 
 int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want,
-    const std::string& formBindingDataStr, int64_t& formId, std::string &errMsg)
+    const std::string& formBindingDataStr, std::function<void(int32_t, int64_t&, std::string&)> numCallBack)
 {
     std::unique_ptr<AppExecFwk::FormProviderData> formBindingData = std::make_unique<AppExecFwk::FormProviderData>();
     bool withFormBindingData = false;
@@ -90,12 +90,23 @@ int32_t FormUtilsImpl::RequestPublishFormEvent(const AAFwk::Want& want,
         formBindingData->ParseImagesData();
     }
     std::vector<AppExecFwk::FormDataProxy> formDataProxies;
+    int64_t formId = 0;
+    std::string errMsg;
+    formBindingData->ParseProxies(formDataProxies);
     int32_t ret = AppExecFwk::FormMgr::GetInstance().RequestPublishFormWithSnapshot(const_cast<Want&>(want),
         withFormBindingData, formBindingData, formId, formDataProxies);
     if (ret != ERR_OK) {
         errMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
+        numCallBack(ret, formId, errMsg);
+        return ret;
     }
-    
+
+    ret = OHOS::AppExecFwk::FormMgr::GetInstance().AcquireAddFormResult(static_cast<const int64_t>(formId));
+    if (ret != ERR_OK) {
+        errMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
+    }
+
+    numCallBack(ret, formId, errMsg);
     return ret;
 }
 

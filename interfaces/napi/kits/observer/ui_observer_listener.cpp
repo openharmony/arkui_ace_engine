@@ -37,10 +37,16 @@ void UIObserverListener::OnNavigationStateChange(const NG::NavDestinationInfo& i
             "Handle navDestination state change failed, runtime or callback function invalid!");
         return;
     }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     napi_value argv[] = { CreateNavDestinationInfoObj(info) };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
 }
 
 void UIObserverListener::OnScrollEventStateChange(
@@ -141,11 +147,16 @@ void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchIn
             "Handle navDestination switch failed, runtime or callback function invalid!");
         return;
     }
-
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     napi_value argv[] = { CreateNavDestinationSwitchInfoObj(switchInfo) };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
 }
 
 napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo)

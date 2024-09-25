@@ -261,17 +261,17 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 SyncGeometry(wrapper);
             }
-            auto layoutProperty = wrapper->GetLayoutProperty();
-            CHECK_NULL_VOID(layoutProperty);
-            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
-            CHECK_NULL_VOID(gridItemLayoutProperty);
-            gridItemLayoutProperty->UpdateMainIndex(line->first);
-            gridItemLayoutProperty->UpdateCrossIndex(iter->first);
-            UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
             auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
             if (frameNode) {
                 frameNode->MarkAndCheckNewOpIncNode();
             }
+            auto layoutProperty = wrapper->GetLayoutProperty();
+            CHECK_NULL_CONTINUE(layoutProperty);
+            auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
+            CHECK_NULL_CONTINUE(gridItemLayoutProperty);
+            gridItemLayoutProperty->UpdateMainIndex(line->first);
+            gridItemLayoutProperty->UpdateCrossIndex(iter->first);
+            UpdateRealGridItemPositionInfo(wrapper, line->first, iter->first);
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }

@@ -908,6 +908,17 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto algo = DynamicCast<SwiperLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(algo, false);
 
+    // set tabs invisible item freeze state.
+    if (hasTabsAncestor_) {
+        for (int32_t index = 0; index < RealTotalCount(); index++) {
+            auto childFrameNode = GetCurrentFrameNode(index);
+            if (childFrameNode) {
+                auto isActive = childFrameNode->IsActive();
+                childFrameNode->SetFreeze(!isActive);
+            }
+        }
+    }
+
     if (props->GetIsCustomAnimation().value_or(false)) {
         needUnmountIndexs_ = algo->GetNeedUnmountIndexs();
         return false;
@@ -1582,7 +1593,7 @@ void SwiperPattern::SwipeTo(int32_t index)
 
     targetIndex_ = targetIndex;
 
-    UpdateTabIndexAndTabBarAnimationDuration(index);
+    UpdateTabBarAnimationDuration(index);
     if (GetDuration() == 0 || !isVisible_) {
         SwipeToWithoutAnimation(index);
         return;
@@ -1595,17 +1606,12 @@ void SwiperPattern::SwipeTo(int32_t index)
     MarkDirtyNodeSelf();
 }
 
-void SwiperPattern::UpdateTabIndexAndTabBarAnimationDuration(int32_t index)
+void SwiperPattern::UpdateTabBarAnimationDuration(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
-    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
-    CHECK_NULL_VOID(tabsLayoutProperty);
-    tabsLayoutProperty->UpdateIndex(index);
-    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(tabsPattern);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();

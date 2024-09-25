@@ -419,27 +419,11 @@ TextAlign TextFieldLayoutAlgorithm::GetCounterNodeAlignment(LayoutWrapper* layou
     RefPtr<LayoutProperty> property = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(property, TextAlign::END);
     TextDirection layoutDirection = property->GetLayoutDirection();
-    TextAlign textAlign = TextAlign::END;
-    switch (layoutDirection) {
-        case TextDirection::LTR:
-        case TextDirection::AUTO:
-            if (isRTL) {
-                textAlign = TextAlign::START;
-            } else {
-                textAlign = TextAlign::END;
-            }
-            break;
-        case TextDirection::RTL:
-            if (isRTL) {
-                textAlign = TextAlign::END;
-            } else {
-                textAlign = TextAlign::START;
-            }
-            break;
-        default:
-            break;
+    if ((layoutDirection == TextDirection::RTL && !isRTL) ||
+        (layoutDirection == TextDirection::LTR && isRTL)) {
+        return TextAlign::START;
     }
-    return textAlign;
+    return TextAlign::END;
 }
 
 void TextFieldLayoutAlgorithm::UpdateCounterNode(
@@ -747,7 +731,6 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
                 isCustomFont = true;
             }
         }
-        fontManager->AddVariationNodeNG(frameNode);
         if (isCustomFont || fontManager->IsDefaultFontChanged()) {
             auto pattern = frameNode->GetPattern<TextFieldPattern>();
             CHECK_NULL_VOID(pattern);

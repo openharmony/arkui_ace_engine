@@ -50,6 +50,7 @@ public:
 
     void OnModifyDone() override
     {
+        Pattern::OnModifyDone();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto paintProperty = host->GetPaintProperty<ShapePaintProperty>();

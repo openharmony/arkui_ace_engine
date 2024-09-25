@@ -79,6 +79,53 @@ SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContain
         instanceId);
 }
 
+Rosen::WindowType SubwindowOhos::GetToastRosenType(bool IsSceneBoardEnabled)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW,
+        "SubwindowOhos::GetToastRosenType, windowType: %{public}d, IsSceneBoardEnabled: %{public}d",
+        GetToastWindowType(), IsSceneBoardEnabled);
+    if (GetToastWindowType() == ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW) {
+        if (!IsSceneBoardEnabled) {
+            return Rosen::WindowType::WINDOW_TYPE_TOAST;
+        }
+        return Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+    } else if (GetToastWindowType() ==  ToastWindowType::TOAST_IN_TYPE_SYSTEM_SUB_WINDOW) {
+        return Rosen::WindowType::WINDOW_TYPE_TOAST;
+    } else if (GetToastWindowType() == ToastWindowType::TOAST_IN_TYPE_SYSTEM_FLOAT) {
+        return Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT;
+    }
+    return Rosen::WindowType::WINDOW_TYPE_TOAST;
+}
+
+void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
+    OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
+    const Rosen::WindowType& toastWindowType, uint32_t mainWindowId)
+{
+    if (toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW) {
+        windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
+        windowOption->AddWindowFlag(Rosen::WindowFlag::WINDOW_FLAG_IS_TOAST);
+    }
+    windowOption->SetWindowType(toastWindowType);
+    if (parentContainer->IsUIExtensionWindow()) {
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_VOID(parentPipeline);
+        auto hostWindowId = parentPipeline->GetFocusWindowId();
+        windowOption->SetIsUIExtensionSubWindowFlag(true);
+        windowOption->SetParentId(hostWindowId);
+    } else {
+        windowOption->SetParentId(mainWindowId);
+    }
+}
+
+void SetUIExtensionSubwindowFlag(OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
+    bool isAppSubwindow, sptr<OHOS::Rosen::Window>& parentWindow)
+{
+    if (isAppSubwindow && (parentWindow->GetIsUIExtensionFlag() ||
+        parentWindow->GetIsUIExtensionSubWindowFlag())) {
+        windowOption->SetIsUIExtensionSubWindowFlag(true);
+    }
+}
+
 void SubwindowOhos::InitContainer()
 {
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -93,24 +140,32 @@ void SubwindowOhos::InitContainer()
         CHECK_NULL_VOID(parentWindow);
         parentWindow_ = parentWindow;
         auto windowType = parentWindow->GetType();
+        std::string windowTag = "";
+        bool isAppSubwindow = false;
         if (IsSystemTopMost()) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_TOAST);
+        } else if (GetAboveApps()) {
+            auto toastWindowType = GetToastRosenType(parentContainer->IsSceneBoardEnabled());
+            isAppSubwindow = toastWindowType == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+            auto mainWindowId = GetMainWindowId();
+            SetToastWindowOption(parentContainer, windowOption, toastWindowType, mainWindowId);
+            windowTag = "TOPMOST_TOAST_";
         } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
-        } else if (GetAboveApps()) {
-            windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_TOAST);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
             auto hostWindowId = parentPipeline->GetFocusWindowId();
             windowOption->SetExtensionTag(true);
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(hostWindowId);
             SetUIExtensionHostWindowId(hostWindowId);
+            isAppSubwindow = true;
         } else if (windowType >= Rosen::WindowType::SYSTEM_WINDOW_BASE) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
         } else {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(parentWindowId);
+            isAppSubwindow = true;
         }
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         if (!defaultDisplay) {
@@ -119,8 +174,9 @@ void SubwindowOhos::InitContainer()
         CHECK_NULL_VOID(defaultDisplay);
         windowOption->SetWindowRect({ 0, 0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() });
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
-        window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + parentWindowName + std::to_string(windowId_),
-            windowOption, parentWindow->GetContext());
+        SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
+        window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
+            std::to_string(windowId_), windowOption, parentWindow->GetContext());
         if (!window_) {
             SetIsRosenWindowCreate(false);
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed");
@@ -1138,7 +1194,6 @@ void SubwindowOhos::ClearToast()
 void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast for ability enter, containerId : %{public}d", childContainerId_);
-    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
     SetIsToastWindow(
         toastInfo.showMode == NG::ToastShowMode::TOP_MOST || toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST);
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -1148,15 +1203,23 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo)
     }
 
     auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    RefPtr<Framework::FrontendDelegate> delegate;
     if (!engine) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get engine failed, containerId : %{public}d",
-            aceContainer->GetInstanceId());
-        return;
-    }
-    auto delegate = engine->GetFrontend();
-    if (!delegate) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get frontend failed, child containerId : %{public}d", childContainerId_);
-        return;
+        auto frontend = AceType::DynamicCast<DeclarativeFrontend>(aceContainer->GetFrontend());
+        CHECK_NULL_VOID(frontend);
+        delegate = frontend->GetDelegate();
+        if (!delegate) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get engine failed, containerId : %{public}d",
+                aceContainer->GetInstanceId());
+            return;
+        }
+    } else {
+        delegate = engine->GetFrontend();
+        if (!delegate) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get frontend failed, child containerId : %{public}d",
+                childContainerId_);
+            return;
+        }
     }
     ContainerScope scope(childContainerId_);
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -1164,7 +1227,12 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo)
     if (parentContainer->IsScenceBoardWindow() || toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
         toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
         ResizeWindow();
+        // Recover current subwindow in subwindow manager to ensure popup/menu can close the right subwindow
+        auto currentWindow = SubwindowManager::GetInstance()->GetCurrentWindow();
         ShowWindow(false);
+        SubwindowManager::GetInstance()->SetCurrentSubwindow(currentWindow);
+        CHECK_NULL_VOID(window_);
+        window_->SetTouchable(false);
     }
     delegate->ShowToast(toastInfo);
 }
@@ -1226,7 +1294,10 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo)
 void SubwindowOhos::ShowToast(const NG::ToastInfo& toastInfo)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show toast, window parent id is %{public}d", parentContainerId_);
-    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
+    bool isTopMost = toastInfo.showMode == NG::ToastShowMode::TOP_MOST;
+    // for pa service
+    if ((isTopMost && parentContainerId_ >= MIN_PA_SERVICE_ID && parentContainerId_ < MIN_SUBCONTAINER_ID) ||
+        (!isTopMost && parentContainerId_ >= MIN_PA_SERVICE_ID) || parentContainerId_ < 0) {
         ShowToastForService(toastInfo);
     } else {
         ShowToastForAbility(toastInfo);

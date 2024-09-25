@@ -407,6 +407,8 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
 
 void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
+void PipelineContext::AddDirtyFreezeNode(FrameNode* node) {}
+
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation) {}
 
@@ -859,6 +861,11 @@ void PipelineBase::SetFontScale(float fontScale)
 }
 
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
+{
+    return false;
+}
+
+bool NG::PipelineContext::CheckThreadSafe() const
 {
     return false;
 }

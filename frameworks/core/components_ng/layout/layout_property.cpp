@@ -1128,6 +1128,23 @@ void LayoutProperty::UpdateDisplayIndex(int32_t displayIndex)
     }
     if (flexItemProperty_->UpdateDisplayIndex(displayIndex)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto parent = host->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parent);
+        const auto& children = parent->GetChildren();
+        CHECK_EQUAL_VOID(children.empty(), true);
+        for (const auto& child : children) {
+            auto childFrameNode = AceType::DynamicCast<NG::FrameNode>(child);
+            if (!childFrameNode) {
+                continue;
+            }
+            auto layoutProperty = childFrameNode->GetLayoutProperty();
+            if (!layoutProperty) {
+                continue;
+            }
+            layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     }
 }
 
@@ -1510,7 +1527,7 @@ void LayoutProperty::CheckLocalizedEdgeColors(const TextDirection& direction)
         borderColors.topColor = colorProperty.topColor;
     }
     if (colorProperty.bottomColor.has_value()) {
-        borderColors.topColor = colorProperty.bottomColor;
+        borderColors.bottomColor = colorProperty.bottomColor;
     }
     borderColors.multiValued = true;
     target->UpdateBorderColor(borderColors);

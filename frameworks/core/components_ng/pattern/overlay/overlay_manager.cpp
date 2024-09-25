@@ -704,6 +704,10 @@ bool OverlayManager::GetMenuPreviewCenter(NG::OffsetF& offset)
             CHECK_NULL_RETURN(menuWarpperPattern, false);
             auto previewChild = menuWarpperPattern->GetPreview();
             CHECK_NULL_RETURN(previewChild, false);
+            auto geometryNode = previewChild->GetGeometryNode();
+            if (geometryNode && geometryNode->GetFrameRect().IsEmpty()) {
+                return false;
+            }
             auto previewOffset = previewChild->GetPaintRectCenter();
             offset.SetX(previewOffset.GetX());
             offset.SetY(previewOffset.GetY());
@@ -1033,6 +1037,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     wrapperPattern->CallMenuAboutToAppearCallback();
     wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
     SetIsMenuShow(true);
+    ResetContextMenuDragHideFinished();
     if (wrapperPattern->HasTransitionEffect()) {
         UpdateMenuVisibility(menu);
         auto renderContext = menu->GetRenderContext();
@@ -1411,7 +1416,7 @@ void OverlayManager::PopToast(int32_t toastId)
             if (toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
                 SubwindowManager::GetInstance()->HideSystemTopMostWindow();
             } else {
-                SubwindowManager::GetInstance()->HideSubWindowNG();
+                SubwindowManager::GetInstance()->HideToastSubWindowNG();
             }
         }
     });
@@ -4364,7 +4369,9 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         return;
     }
     // build content
-    auto sheetContentNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+    auto buildNode = buildNodeFunc();
+    CHECK_NULL_VOID(buildNode);
+    auto sheetContentNode = AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
     OnBindSheetInner(std::move(callback), sheetContentNode, std::move(buildtitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),

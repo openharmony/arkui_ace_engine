@@ -226,7 +226,6 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
                 isCustomFont = true;
             }
         }
-        fontManager->AddVariationNodeNG(frameNode);
         if (isCustomFont || fontManager->IsDefaultFontChanged()) {
             auto pattern = frameNode->GetPattern<TextPattern>();
             CHECK_NULL_VOID(pattern);
@@ -536,7 +535,9 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     CHECK_NULL_VOID(frameNode);
     auto id = frameNode->GetId();
     int32_t targetId = imageSpanItem->imageNodeId;
-    CHECK_NULL_VOID(id == targetId);
+    if (!isSpanStringMode_) {
+        CHECK_NULL_VOID(id == targetId);
+    }
     layoutWrapper->Measure(layoutConstrain);
     PlaceholderStyle placeholderStyle;
     auto baselineOffset = Dimension(0.0f);

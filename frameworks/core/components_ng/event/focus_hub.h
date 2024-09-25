@@ -1093,6 +1093,9 @@ private:
 
     void RaiseZIndex(); // Recover z-index in ClearFocusState
 
+    // donot move focus before detach if has focus view child
+    bool SkipFocusMoveBeforeRemove() const;
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;

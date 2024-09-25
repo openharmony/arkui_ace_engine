@@ -24,6 +24,7 @@
 #include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -567,6 +568,17 @@ void RichEditorSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
         CHECK_NULL_VOID(pattern);
         pattern->StopTwinkling();
     }
+}
+
+float RichEditorSelectOverlay::GetHandleHotZoneRadius()
+{
+    auto hotZoneRadius = 0.0f;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, hotZoneRadius);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, hotZoneRadius);
+    hotZoneRadius = theme->GetHandleHotZoneRadius().ConvertToPx();
+    return hotZoneRadius;
 }
 
 } // namespace OHOS::Ace::NG

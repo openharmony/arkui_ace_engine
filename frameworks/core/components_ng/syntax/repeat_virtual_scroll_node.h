@@ -91,6 +91,9 @@ public:
      */
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
 
+    bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd,
+        RefPtr<FrameNode>& frameNode);
+
     /**
      * those items with index in cachedItems are marked active
      * those items with index in cachedItems are marked inactive
@@ -154,6 +157,8 @@ public:
         }
     }
 
+protected:
+    void UpdateChildrenFreezeState(bool isFreeze) override;
 private:
     void PostIdleTask();
 

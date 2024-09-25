@@ -93,6 +93,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     if (refereeNG_->CheckEventTypeChange(touchPoint.sourceType)) {
         AxisEvent axisEvent;
         MockCancelEventAndDispatch(axisEvent);
+        responseCtrl_->Reset();
         refereeNG_->CleanAll(true);
         touchTestResults_.clear();
         axisTouchTestResults_.clear();
@@ -109,6 +110,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     if (lastDownFingerNumber_ == 0 && refereeNG_->QueryAllDone()) {
         MockCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
+        responseCtrl_->Reset();
         refereeNG_->CleanAll();
         CleanGestureEventHub();
     }
@@ -158,6 +160,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         eventTree_.eventTreeList.clear();
         MockCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
+        responseCtrl_->Reset();
         refereeNG_->CleanAll();
 
         TouchTestResult reHitTestResult;
@@ -360,6 +363,7 @@ void EventManager::TouchTest(
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
         TouchEvent touchEvent;
         MockCancelEventAndDispatch(touchEvent);
+        responseCtrl_->Reset();
         refereeNG_->CleanAll(true);
         touchTestResults_.clear();
         axisTouchTestResults_.clear();
@@ -1078,6 +1082,7 @@ void EventManager::AccessibilityHoverTest(
     CHECK_NULL_VOID(frameNode);
     if (downFingerIds_.empty()) {
         MockCancelEventAndDispatch(event);
+        responseCtrl_->Reset();
         refereeNG_->CleanAll();
         touchTestResults_.clear();
         downFingerIds_.clear();

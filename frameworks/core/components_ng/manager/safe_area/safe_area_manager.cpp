@@ -172,7 +172,7 @@ bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
         return false;
     }
     keyboardSafeAreaEnabled_ = value;
-    LOGI("SafeAreaManager::SetKeyBoardAvoidMode %{public}d", int(keyboardSafeAreaEnabled_));
+    LOGI("SafeAreaManager::SetKeyBoardAvoidMode %{public}d", keyboardSafeAreaEnabled_);
     return true;
 }
 
@@ -182,7 +182,7 @@ bool SafeAreaManager::SetIsAtomicService(bool value)
         return false;
     }
     isAtomicService_ = value;
-    LOGI("SafeAreaManager::SetIsAtomicService %{public}d", int(isAtomicService_));
+    LOGI("SafeAreaManager::SetIsAtomicService %{public}d", isAtomicService_);
     return true;
 }
 

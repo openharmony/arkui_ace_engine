@@ -68,11 +68,15 @@ namespace NG {
 class FrameNode;
 } // namespace NG
 
-struct KeyboardAnimationConfig {
+struct KeyboardAnimationCurve {
     std::string curveType_;
     std::vector<float> curveParams_;
-    uint32_t durationIn_ = 0;
-    uint32_t durationOut_ = 0;
+    uint32_t duration_ = 0;
+};
+
+struct KeyboardAnimationConfig {
+    KeyboardAnimationCurve curveIn_;
+    KeyboardAnimationCurve curveOut_;
 };
 
 struct FontInfo;
@@ -1328,6 +1332,16 @@ public:
     {
         return dragNodeGrayscale_;
     }
+
+    void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
+    {
+        isOpenInvisibleFreeze_ = isOpenInvisibleFreeze;
+    }
+
+    bool IsOpenInvisibleFreeze()
+    {
+        return isOpenInvisibleFreeze_;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1379,6 +1393,7 @@ protected:
     bool isReloading_ = false;
 
     bool isJsPlugin_ = false;
+    bool isOpenInvisibleFreeze_ = false;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     std::unordered_map<int32_t, AceVsyncCallback> jsFormVsyncCallbacks_;
