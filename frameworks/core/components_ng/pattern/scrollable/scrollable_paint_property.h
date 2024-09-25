@@ -42,7 +42,7 @@ enum class ContentClipMode {
     SAFE_AREA,
     CUSTOM, // inner enum, not present in JS
 };
-using ContentClip = std::pair<ContentClipMode, RefPtr<BasicShape>>;
+using ContentClip = std::pair<ContentClipMode, RefPtr<ShapeRect>>;
 
 class ScrollablePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ScrollablePaintProperty, PaintProperty)

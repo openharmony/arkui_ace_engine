@@ -119,7 +119,8 @@ void JSScrollableBase::JSContentClip(const JSCallbackInfo& info)
     } else if (info[0]->IsObject()) {
         auto* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (clipShape) {
-            NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::CUSTOM, clipShape->GetBasicShape());
+            NG::ScrollableModelNG::SetContentClip(
+                NG::ContentClipMode::CUSTOM, AceType::DynamicCast<ShapeRect>(clipShape->GetBasicShape()));
             return;
         }
     }
