@@ -679,7 +679,7 @@ export class PopupComponent extends ViewPU {
                 n28 = 400;
             }
             else {
-                n28 = px2vp(o28.width) - 40 - 40;
+                n28 = px2vp(o28.width);
             }
             n28 -= (this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2));
             n28 -= this.theme.windows.padding.end.value;
