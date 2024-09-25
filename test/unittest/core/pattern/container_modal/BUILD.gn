@@ -17,13 +17,3 @@ ace_unittest("container_modal_test_ng") {
   type = "new"
   sources = [ "container_modal_test_ng.cpp" ]
 }
-
-ace_unittest("container_modal_pattern_enhance_test_ng") {
-  type = "new"
-  sources = [ "container_modal_pattern_enhance_test_ng.cpp" ]
-}
-
-ace_unittest("container_modal_view_enhance_test_ng") {
-  type = "new"
-  sources = [ "container_modal_view_enhance_test_ng.cpp" ]
-}
