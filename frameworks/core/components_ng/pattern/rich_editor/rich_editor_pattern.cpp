@@ -8612,7 +8612,7 @@ void RichEditorPattern::FillPreviewMenuInJson(std::unique_ptr<JsonValue> jsonVal
     auto jsonItem = JsonUtil::Create(true);
     jsonItem->Put("spanType", static_cast<int32_t>(TextSpanType::IMAGE));
     jsonItem->Put("responseType", static_cast<int32_t>(TextResponseType::LONG_PRESS));
-    jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType.PREVIEW_MENU));
+    jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType::PREVIEW_MENU));
     jsonValue->Put(jsonItem);
 }
 
