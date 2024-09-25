@@ -195,7 +195,9 @@ private:
         const std::unique_ptr<JsonValue>& propsJson, const std::string& key, bool& value, bool& hasAttr);
     void ParseVersionAndUpdateData();
     void ReplaceParam(const std::unique_ptr<JsonValue>& node);
-
+    void UpdateChildRen(const std::unique_ptr<JsonValue>& childList, const RefPtr<Framework::JsAcePage>& page,
+        int32_t selfId, const std::vector<int>& idArray, const std::unique_ptr<JsonValue>& dataJson,
+        const std::unique_ptr<JsonValue>& styleJson, const std::unique_ptr<JsonValue>& propsJson);
     double density_ = 1.0;
     int32_t nodeId_ = 0;
     int32_t maxNodeId_ = 0;
