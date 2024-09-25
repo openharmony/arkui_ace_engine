@@ -32,8 +32,8 @@ public:
         return 1;
     }
 
-    int32_t RequestPublishFormEvent(const AAFwk::Want& want, const std::string& formBindingDataStr,
-        std::function<void(int32_t, int64_t&, std::string&)> numCallBack)
+    int32_t RequestPublishFormEvent(const AAFwk::Want& want, const std::string& formBindingDataStr, int64_t& formId,
+        std::string& errMsg)
     {
         return 1;
     }
