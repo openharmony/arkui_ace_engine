@@ -826,6 +826,7 @@ private:
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
     bool HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result);
     bool HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset, float oppositeOverOffset);
+    bool HasEdgeEffect(float offset) const;
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 

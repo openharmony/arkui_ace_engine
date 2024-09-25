@@ -2039,11 +2039,17 @@ ScrollResult ScrollablePattern::HandleScrollSelfOnly(float& offset, int32_t sour
         offset -= overOffset;
     } else if (state == NestedState::GESTURE) {
         canOverScroll = !NearZero(overOffset) && GetEdgeEffect() != EdgeEffect::NONE;
-    } else if (GetEdgeEffect() != EdgeEffect::NONE) {
+    } else if (HasEdgeEffect(offset)) {
         remainOffset = 0;
     }
     SetCanOverScroll(canOverScroll);
     return { remainOffset, !NearZero(overOffset) };
+}
+
+bool ScrollablePattern::HasEdgeEffect(float offset) const
+{
+    return (GetEdgeEffect() != EdgeEffect::NONE) ||
+           (offset > 0 && refreshCoordination_ && refreshCoordination_->InCoordination());
 }
 
 ScrollResult ScrollablePattern::HandleScrollParallel(float& offset, int32_t source, NestedState state)
