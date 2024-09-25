@@ -5393,6 +5393,7 @@ void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, 
     customKeyboardMap_[targetId] = customKeyboard;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "BindKeyboard targetId:%{public}d", targetId);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this), customKeyboard] {
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
@@ -5412,6 +5413,7 @@ void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_
     if (!customKeyboard) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "BindKeyboardWithNode targetId:%{public}d", targetId);
     customKeyboard->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     customKeyboardMap_[targetId] = customKeyboard;
