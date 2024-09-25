@@ -575,6 +575,9 @@ public:
         return detentsFinalIndex_;
     }
 
+    bool IsScrollOutOfBoundary();
+    RefPtr<FrameNode> GetScrollNode();
+
     bool IsSheetBottomStyle()
     {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -597,8 +600,6 @@ public:
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
-    bool IsScrollOutOfBoundary();
-    RefPtr<FrameNode> GetScrollNode();
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
