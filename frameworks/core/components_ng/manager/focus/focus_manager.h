@@ -34,7 +34,7 @@ using FocusChangeCallback = std::function<void(const WeakPtr<FocusHub>& last, co
 
 enum class FocusActiveReason : int32_t {
     POINTER_EVENT = 0,
-    KEY_EVENT = 1,
+    KEYBOARD_EVENT = 1,
     USE_API = 2,
 };
 
