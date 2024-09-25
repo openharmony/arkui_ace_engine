@@ -6355,10 +6355,11 @@ void RichEditorPattern::HandleTouchUp()
 void RichEditorPattern::HandleTouchUpAfterLongPress()
 {
     CHECK_NULL_VOID(editingLongPress_ || previewLongPress_);
-    auto selectStart = textSelector_.GetTextStart();
-    auto selectEnd = textSelector_.GetTextEnd();
+    auto selectStart = std::min(textSelector_.GetTextStart(), GetTextContentLength());
+    auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "after long press textSelector=[%{public}d, %{public}d] isEditing=%{public}d",
         selectStart, selectEnd, isEditing_);
+    textSelector_.Update(selectStart, selectEnd);
     FireOnSelect(selectStart, selectEnd);
     SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
     CalculateHandleOffsetAndShowOverlay();
