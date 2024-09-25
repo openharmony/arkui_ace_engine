@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/arc_swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
@@ -1811,17 +1812,36 @@ void SwiperPattern::InitSwiperController()
     });
 }
 
+void SwiperPattern::SaveIndicatorProperty(
+    const RefPtr<FrameNode>& indicatorNode, SwiperIndicatorType swiperIndicatorType)
+{
+    if (swiperIndicatorType == SwiperIndicatorType::DOT) {
+        SaveDotIndicatorProperty(indicatorNode);
+    } else if (swiperIndicatorType == SwiperIndicatorType::ARC_DOT) {
+        SaveCircleDotIndicatorProperty(indicatorNode);
+    } else {
+        SaveDigitIndicatorProperty(indicatorNode);
+    }
+}
+
 void SwiperPattern::InitIndicator()
 {
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
     RefPtr<FrameNode> indicatorNode;
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (!HasIndicatorNode()) {
         if (!IsShowIndicator()) {
             return;
         }
-        indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, GetIndicatorId(),
-            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
+            indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, GetIndicatorId(),
+                []() { return AceType::MakeRefPtr<ArcSwiperIndicatorPattern>(); });
+        } else {
+            indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, GetIndicatorId(),
+                []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        }
         swiperNode->AddChild(indicatorNode);
     } else {
         indicatorNode =
@@ -1840,25 +1860,14 @@ void SwiperPattern::InitIndicator()
     }
     lastSwiperIndicatorType_ = GetIndicatorType();
     CHECK_NULL_VOID(indicatorNode);
-    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
-        SaveDotIndicatorProperty(indicatorNode);
-    } else if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
-        SaveCircleDotIndicatorProperty(indicatorNode);
-    } else {
-        SaveDigitIndicatorProperty(indicatorNode);
-    }
-
+    SaveIndicatorProperty(indicatorNode, layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT));
     auto renderContext = indicatorNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     BorderRadiusProperty radius;
     radius.SetRadius(INDICATOR_BORDER_RADIUS);
     renderContext->UpdateBorderRadius(radius);
-
     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->SetIndicatorInteractive(isIndicatorInteractive_);
-
     indicatorNode->MarkModifyDone();
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

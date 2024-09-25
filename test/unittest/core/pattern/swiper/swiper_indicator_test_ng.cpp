@@ -684,7 +684,7 @@ HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternCheckIsTouchBottom00
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
-    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
     GestureEvent info;
     TouchLocationInfo touchLocationInfo("down", 0);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
@@ -717,7 +717,7 @@ HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternCheckIsTouchBottom00
         model.SetDirection(Axis::VERTICAL);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
-    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
     TouchLocationInfo touchLocationInfo("down", 2);
     indicatorPattern->swiperIndicatorType_ = SwiperIndicatorType::ARC_DOT;
     indicatorPattern->HandleLongDragUpdate(touchLocationInfo);
@@ -742,7 +742,7 @@ HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternConvertAngleWithArcD
         model.Create(true);
         model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
     });
-    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
 
     /**
      * @tc.steps: step2. call ConvertAngleWithArcDirection.
