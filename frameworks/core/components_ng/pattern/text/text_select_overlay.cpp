@@ -443,6 +443,7 @@ void TextSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirs
     manager->SetHandleCircleIsShow(isFirst, false);
     isDraggingFirstHandle_ = isFirst;
     hostPaintOffset_ = GetHotPaintOffset();
+    textPattern->SetupMagnifier();
 }
 
 void TextSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)
@@ -462,19 +463,29 @@ void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
         return;
     }
     auto clipNode = host->GetAncestorNodeOfFrame(true);
+    RefPtr<FrameNode> prevNode;
     while (clipNode) {
         renderContext = clipNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (renderContext->GetClipEdge().value_or(false)) {
             break;
         }
+        prevNode = clipNode;
         clipNode = clipNode->GetAncestorNodeOfFrame(true);
     }
-    CHECK_NULL_VOID(clipNode);
-    RectF visibleRect;
-    RectF frameRect;
-    clipNode->GetVisibleRect(visibleRect, frameRect);
-    rect.SetHeight(visibleRect.Bottom() - rect.Top());
+    if (clipNode) {
+        RectF visibleRect;
+        RectF frameRect;
+        clipNode->GetVisibleRect(visibleRect, frameRect);
+        rect.SetHeight(visibleRect.Bottom() - rect.Top());
+        return;
+    }
+    // root node.
+    if (prevNode) {
+        auto geoNode = prevNode->GetGeometryNode();
+        CHECK_NULL_VOID(geoNode);
+        rect.SetHeight(geoNode->GetFrameRect().Height() - rect.Top());
+    }
 }
 
 void TextSelectOverlay::TriggerScrollableParentToScroll(
