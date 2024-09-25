@@ -65,6 +65,7 @@ export const defaultTheme = {
         fontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_font_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         activatedFontColor: { "id": -1, "type": 10001, params: ['sys.color.chip_activated_fontcolor'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontFamily: "HarmonyOS Sans",
+        fontWeight: { "id": -1, "type": 10002, params: ['sys.float.chip_text_fontweight'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
         smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
         defaultFontSize: 14,
@@ -103,6 +104,7 @@ export const defaultTheme = {
         normalFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_normal_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         smallFontSize: { "id": -1, "type": 10002, params: ['sys.float.chip_small_icon_size'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         defaultEffect: -1,
+        isShowMargin: { "id": -1, "type": 10002, params: ['sys.float.chip_show_close_icon_margin'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
     },
     chipNode: {
         suitAgeScale: 1.75,
@@ -664,6 +666,9 @@ export class ChipComponent extends ViewPU {
     isChipSizeEnum() {
         return typeof (this.chipSize) === 'string';
     }
+    isShowCloseIconMargin() {
+        return this.verifyResource(this.theme.defaultSymbol.isShowMargin, 0) !== 0 && this.allowClose;
+    }
     getLabelFontSize() {
         if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
             return this.label.fontSize;
@@ -727,7 +732,7 @@ export class ChipComponent extends ViewPU {
         if (this.getChipActive()) {
             return FontWeight.Medium;
         }
-        return FontWeight.Regular;
+        return this.verifyResource(this.theme.label.fontWeight, FontWeight.Regular);
     }
     lengthMetricsToVp(lengthMetrics) {
         let defaultValue = 0;
@@ -855,7 +860,7 @@ export class ChipComponent extends ViewPU {
             localizedLabelMargin.end = this.label?.localizedLabelMargin?.end;
         }
         else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
-            this.suffixIcon?.src || this.useDefaultSuffixIcon) {
+            this.suffixIcon?.src || this.useDefaultSuffixIcon || this.isShowCloseIconMargin()) {
             if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
                 localizedLabelMargin.end = this.theme.label.localizedSmallMargin.end;
             }

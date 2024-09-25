@@ -98,6 +98,7 @@ interface DefaultSymbolTheme {
   smallFontSize: Length;
   normalFontSize: Length;
   defaultEffect: number;
+  isShowMargin: Resource;
 }
 
 interface LabelTheme {
@@ -108,6 +109,7 @@ interface LabelTheme {
   fontColor: ResourceColor;
   activatedFontColor: ResourceColor;
   fontFamily: string;
+  fontWeight: Resource;
   normalMargin: Margin;
   localizedNormalMargin: LocalizedMargin;
   smallMargin: Margin;
@@ -190,6 +192,7 @@ export const defaultTheme: ChipTheme = {
     fontColor: $r('sys.color.chip_font_color'),
     activatedFontColor: $r('sys.color.chip_activated_fontcolor'),
     fontFamily: "HarmonyOS Sans",
+    fontWeight: $r('sys.float.chip_text_fontweight'),
     normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
     smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
     defaultFontSize: 14,
@@ -228,6 +231,7 @@ export const defaultTheme: ChipTheme = {
     normalFontSize: $r('sys.float.chip_normal_icon_size'),
     smallFontSize: $r('sys.float.chip_small_icon_size'),
     defaultEffect: -1,
+    isShowMargin: $r('sys.float.chip_show_close_icon_margin'),
   },
   chipNode: {
     suitAgeScale: 1.75,
@@ -371,6 +375,10 @@ export struct ChipComponent {
     return typeof (this.chipSize) === 'string'
   }
 
+  private isShowCloseIconMargin(): boolean{
+    return this.verifyResource(this.theme.defaultSymbol.isShowMargin, 0) !== 0 && this.allowClose;
+  }
+
   private getLabelFontSize(): Dimension {
     if (this.label?.fontSize !== void (0) && this.toVp(this.label.fontSize) >= 0) {
       return this.label.fontSize;
@@ -440,7 +448,7 @@ export struct ChipComponent {
     if (this.getChipActive()) {
       return FontWeight.Medium
     }
-    return FontWeight.Regular
+    return this.verifyResource(this.theme.label.fontWeight, FontWeight.Regular) as FontWeight;
   }
 
   private lengthMetricsToVp(lengthMetrics?: LengthMetrics): number {
@@ -564,7 +572,7 @@ export struct ChipComponent {
       this.lengthMetricsToVp(this.label.localizedLabelMargin.end) >= 0) {
       localizedLabelMargin.end = this.label?.localizedLabelMargin?.end
     } else if ((this.suffixSymbol?.normal || this.suffixSymbol?.activated) ||
-      this.suffixIcon?.src || this.useDefaultSuffixIcon) {
+      this.suffixIcon?.src || this.useDefaultSuffixIcon || this.isShowCloseIconMargin()) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
         localizedLabelMargin.end = this.theme.label.localizedSmallMargin.end
       } else {
