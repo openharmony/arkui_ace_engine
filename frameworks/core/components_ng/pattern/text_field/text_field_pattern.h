@@ -109,20 +109,6 @@ enum class InputOperation {
     SET_PREVIEW_FINISH,
 };
 
-enum {
-    ACTION_SELECT_ALL, // Smallest code unit.
-    ACTION_UNDO,
-    ACTION_REDO,
-    ACTION_CUT,
-    ACTION_COPY,
-    ACTION_PASTE,
-    ACTION_SHARE,
-    ACTION_PASTE_AS_PLAIN_TEXT,
-    ACTION_REPLACE,
-    ACTION_ASSIST,
-    ACTION_AUTOFILL,
-};
-
 struct PasswordModeStyle {
     Color bgColor;
     Color textColor;

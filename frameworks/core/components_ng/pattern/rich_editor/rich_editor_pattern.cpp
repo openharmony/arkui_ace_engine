@@ -3404,7 +3404,7 @@ bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
     return HandleUserGestureEvent(info, std::move(longPressFunc));
 }
 
-void RichEditorPattern::HandleMenuCallbackOnSelectAll()
+void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleMenuCallbackOnSelectAll");
     auto textSize = GetTextContentLength();
@@ -3426,7 +3426,7 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll()
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     showSelect_ = true;
     if (!selectOverlay_->IsUsingMouse()) {
-        selectOverlay_->ProcessOverlay({ .animation = true });
+        selectOverlay_->ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
     }
     SetCaretPosition(textSize);
     MoveCaretToContentRect();
@@ -6233,6 +6233,27 @@ RefPtr<GestureEventHub> RichEditorPattern::GetGestureEventHub() {
 bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
 {
     return TextInputClient::HandleKeyEvent(keyEvent);
+}
+
+void RichEditorPattern::HandleExtendAction(int32_t action)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleExtendAction %{public}d", action);
+    switch (action) {
+        case ACTION_SELECT_ALL:
+            HandleMenuCallbackOnSelectAll(false);
+            break;
+        case ACTION_CUT:
+            HandleOnCut();
+            break;
+        case ACTION_COPY:
+            HandleOnCopy();
+            break;
+        case ACTION_PASTE:
+            HandleOnPaste();
+            break;
+        default:
+            break;
+    }
 }
 
 void RichEditorPattern::CursorMove(CaretMoveIntent direction)
