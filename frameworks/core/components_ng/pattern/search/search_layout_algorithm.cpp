@@ -875,10 +875,7 @@ double SearchLayoutAlgorithm::CalcSymbolIconHeight(
     auto defaultSymbolIconSize =
         (index == IMAGE_INDEX ? searchNode->GetSearchSymbolIconSize() : searchNode->GetCancelSymbolIconSize());
     auto iconSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
-    if (iconSize.Unit() == DimensionUnit::FP) {
-        float maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
-        return iconSize.ConvertToPxDistribute(0, maxFontScale);
-    }
-    return iconSize.ConvertToPx();
+
+    return iconSize.ConvertToPxDistribute(0.0f, MAX_FONT_SCALE);
 }
 } // namespace OHOS::Ace::NG
