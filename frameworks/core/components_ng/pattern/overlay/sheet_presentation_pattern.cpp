@@ -350,7 +350,9 @@ void SheetPresentationPattern::OnAttachToFrameNode()
             sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
-    targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
@@ -370,14 +372,16 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     UpdateFoldDisplayModeChangedCallbackId(callbackId);
 }
 
-void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipeline->RemoveWindowSizeChangeCallback(sheetNode->GetId());
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->RemoveInnerOnAreaChangedCallback(sheetNode->GetId());
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
     }
@@ -1099,10 +1103,6 @@ RefPtr<FrameNode> SheetPresentationPattern::GetTitleNode()
 
 void SheetPresentationPattern::UpdateTitlePadding()
 {
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        return;
-    }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
@@ -1115,15 +1115,22 @@ void SheetPresentationPattern::UpdateTitlePadding()
     CHECK_NULL_VOID(titleNode);
     auto titleLayoutProperty = DynamicCast<LinearLayoutProperty>(titleNode->GetLayoutProperty());
     CHECK_NULL_VOID(titleLayoutProperty);
-    auto showCloseIcon = IsShowCloseIcon();
-    PaddingProperty padding;
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        padding.left = CalcLength(showCloseIcon ? SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
-    } else {
-        padding.right = CalcLength(showCloseIcon ? SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
+    auto showCloseIcon = true;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        showCloseIcon = IsShowCloseIcon();
     }
+    PaddingProperty padding;
 
+    // The title bar area is reserved for the close button area size by default.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        padding.end = CalcLength(showCloseIcon ? SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH : 0.0_vp);
+    } else {
+        padding.right = CalcLength(SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
+    }
     titleLayoutProperty->UpdatePadding(padding);
+    auto titleColumnPattern = titleNode->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_VOID(titleColumnPattern);
+    titleColumnPattern->CheckLocalized();
     titleNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

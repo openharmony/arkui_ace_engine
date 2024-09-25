@@ -2013,4 +2013,13 @@ void XComponentPattern::SetRenderFit(RenderFit renderFit)
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetRenderFit(renderFit);
 }
+
+void XComponentPattern::EnableSecure(bool isSecure)
+{
+    if (type_ != XComponentType::SURFACE) {
+        return;
+    }
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->SetSecurityLayer(isSecure);
+}
 } // namespace OHOS::Ace::NG

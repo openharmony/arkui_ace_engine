@@ -42,10 +42,9 @@ inline std::string GenJsThreadName()
 TaskExecutor::Task TaskExecutorImpl::WrapTaskWithContainer(
     TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc) const
 {
-    auto wrappedTask = [originTask = std::move(task), id, traceId = TraceId::CreateTraceId(),
+    auto wrappedTask = [originTask = std::move(task), id, traceIdPtr = TraceId::CreateTraceId(),
                            traceIdFunc = std::move(traceIdFunc)]() {
         ContainerScope scope(id);
-        std::unique_ptr<TraceId> traceIdPtr(traceId);
         if (originTask && traceIdPtr) {
             traceIdPtr->SetTraceId();
             originTask();
@@ -64,9 +63,8 @@ TaskExecutor::Task TaskExecutorImpl::WrapTaskWithCustomWrapper(
     TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc) const
 {
     auto wrappedTask = [taskWrapper = taskWrapper_, originTask = std::move(task), id,
-                           traceId = TraceId::CreateTraceId(), traceIdFunc = std::move(traceIdFunc)]() {
+                           traceIdPtr = TraceId::CreateTraceId(), traceIdFunc = std::move(traceIdFunc)]() {
         ContainerScope scope(id);
-        std::unique_ptr<TraceId> traceIdPtr(traceId);
         if (originTask && traceIdPtr) {
             traceIdPtr->SetTraceId();
             taskWrapper->Call(originTask);

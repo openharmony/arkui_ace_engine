@@ -193,6 +193,14 @@ public:
         }
     }
 
+    void UpdatePageParam()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->SetAccessibilityVisible(true);
+        host->SetJSViewActive(true);
+    }
+
     void RemoveOnHiddenChange(int32_t id)
     {
         auto iter = onHiddenChange_.find(id);

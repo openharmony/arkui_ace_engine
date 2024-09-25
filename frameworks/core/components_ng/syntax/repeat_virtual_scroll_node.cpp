@@ -127,8 +127,8 @@ bool RepeatVirtualScrollNode::CheckNode4IndexInL1(int32_t index, int32_t start, 
 
     auto totalCount = static_cast<int32_t>(totalCount_);
     if (((start - cacheStart <= index) && (index <= end + cacheEnd)) ||
-        (isLoop_ && (start - cacheStart < 0 && start - cacheStart + totalCount <= index)) ||
-        (isLoop_ && (end + cacheEnd >= totalCount && index <= end + cacheEnd - totalCount)) ||
+        ((start - cacheStart < 0) && (start - cacheStart + totalCount <= index)) ||
+        ((end + cacheEnd >= totalCount) && (end + cacheEnd - totalCount >= index)) ||
         ((end < start) && (index <= end + cacheEnd || start - cacheStart <= index))) {
         return true;
     }
@@ -364,6 +364,7 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
     caches_.ForEachL1IndexUINode(
         [&children](int32_t index, const RefPtr<UINode>& node) -> void { children.emplace(index, node); });
     for (const auto& [index, child] : children) {
+        const_cast<RepeatVirtualScrollNode*>(this)->RemoveDisappearingChild(child);
         children_.emplace_back(child);
     }
     return children_;

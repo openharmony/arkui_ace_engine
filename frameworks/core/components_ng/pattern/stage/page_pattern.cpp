@@ -221,9 +221,7 @@ void PagePattern::OnShow()
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->SetJSViewActive(true);
+    UpdatePageParam();
     isOnShow_ = true;
 #if defined(ENABLE_SPLIT_MODE)
     if (needFireObserver_) {
@@ -272,6 +270,7 @@ void PagePattern::OnHide()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);
     isOnShow_ = false;
+    host->SetAccessibilityVisible(false);
 #if defined(ENABLE_SPLIT_MODE)
     if (needFireObserver_) {
         state_ = RouterPageState::ON_PAGE_HIDE;

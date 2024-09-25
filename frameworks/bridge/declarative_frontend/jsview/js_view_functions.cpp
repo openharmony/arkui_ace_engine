@@ -170,6 +170,7 @@ void ViewFunctions::ExecuteSetActive(bool active)
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     auto func = jsSetActive_.Lock();
     if (!func->IsEmpty()) {
+        JSFastNativeScope scope(func->GetEcmaVM());
         auto isActive = JSRef<JSVal>::Make(ToJSValue(active));
         func->Call(jsObject_.Lock(), 1, &isActive);
     } else {

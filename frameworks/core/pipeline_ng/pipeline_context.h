@@ -119,6 +119,20 @@ public:
         return focusOnNodeCallback_;
     }
 
+    void SetSizeChangeByRotateCallback(const std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback)
+    {
+        sizeChangeByRotateCallback_ = callback;
+    }
+
+    void FireSizeChangeByRotateCallback(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    {
+        if (sizeChangeByRotateCallback_) {
+            sizeChangeByRotateCallback_(isRotate, rsTransaction);
+        }
+    }
+
     const RefPtr<FrameNode>& GetRootElement() const
     {
         return rootNode_;
@@ -310,6 +324,7 @@ public:
     void FlushOnceVsyncTask() override;
 
     void FlushFreezeNode();
+    void FlushDirtyPropertyNodes();
     void FlushDirtyNodeUpdate();
     void FlushSafeAreaPaddingProcess();
 
@@ -460,7 +475,7 @@ public:
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
-    void SetContainerWindow(bool isShow) override;
+    void SetContainerWindow(bool isShow, Dimension contentBorderRadius);
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetCloseButtonStatus(bool isEnabled);
 
@@ -903,6 +918,14 @@ public:
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
+    bool CheckThreadSafe();
+
+    bool IsHoverModeChange() const
+    {
+        return isHoverModeChanged_;
+    }
+
+    void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1015,8 +1038,8 @@ private:
 
     std::tuple<float, float, uint64_t> GetAvgPoint(const std::vector<TouchEvent>& events, const bool isScreen);
 
-    TouchEvent GetResampleTouchEvent(
-        const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+    bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
+        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
 
     TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
     
@@ -1070,6 +1093,9 @@ private:
     RefPtr<FrameNode> rootNode_;
 
     int32_t curFocusNodeId_ = -1;
+
+    bool preIsHalfFoldHoverStatus_ = false;
+    bool isHoverModeChanged_ = false;
 
     std::set<WeakPtr<FrameNode>> needRenderNode_;
 
@@ -1130,6 +1156,8 @@ private:
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
+    std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> sizeChangeByRotateCallback_;
     std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;

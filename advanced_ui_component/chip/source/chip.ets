@@ -23,6 +23,10 @@ import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
 
+const RESOURCE_TYPE_STRING = 10003;
+const RESOURCE_TYPE_FLOAT = 10002;
+const RESOURCE_TYPE_INTEGER = 10007;
+
 export enum ChipSize {
   NORMAL = "NORMAL",
   SMALL = "SMALL"
@@ -160,8 +164,18 @@ export const defaultTheme: ChipTheme = {
     fontColor: $r('sys.color.ohos_id_color_text_primary'),
     activatedFontColor: $r('sys.color.ohos_id_color_text_primary_contrary'),
     fontFamily: "HarmonyOS Sans",
-    normalMargin: { left: 6, right: 6, top: 0, bottom: 0 },
-    smallMargin: { left: 4, right: 4, top: 0, bottom: 0 },
+    normalMargin: {
+      left: 6,
+      right: 6,
+      top: 0,
+      bottom: 0
+    },
+    smallMargin: {
+      left: 4,
+      right: 4,
+      top: 0,
+      bottom: 0
+    },
     defaultFontSize: 14,
     localizedNormalMargin: {
       start: LengthMetrics.vp(6),
@@ -200,8 +214,8 @@ export const defaultTheme: ChipTheme = {
     activatedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
     focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
     focusOutlineMargin: 2,
-    normalBorderRadius: $r('sys.float.ohos_id_corner_radius_tips_instant_tip'),
-    smallBorderRadius: $r('sys.float.ohos_id_corner_radius_piece'),
+    normalBorderRadius: $r('sys.float.chip_border_radius_normal'),
+    smallBorderRadius: $r('sys.float.chip_border_radius_small'),
     borderWidth: 2,
     localizedNormalPadding: {
       start: LengthMetrics.vp(16),
@@ -269,6 +283,19 @@ export function Chip(options: ChipOptions) {
   })
 }
 
+function isValidString(dimension: string, regex: RegExp): boolean {
+  const matches = dimension.match(regex);
+  if (!matches || matches.length < 3) {
+    return false;
+  }
+  const value = Number.parseFloat(matches[1]);
+  return value >= 0;
+}
+
+function isValidDimensionString(dimension: string): boolean {
+  return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
+}
+
 @Component
 export struct ChipComponent {
   private theme: ChipTheme = defaultTheme;
@@ -311,9 +338,12 @@ export struct ChipComponent {
     }
   }
   private callbackId: number | undefined = undefined
-  @State prefixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById('PrefixSymbolGlyph')?.size?.width);
-  @State suffixSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById('SuffixSymbolGlyph')?.size?.width);
-  @State allowCloseSymbolWidth: Length | undefined = this.toVp(componentUtils.getRectangleById('AllowCloseSymbolGlyph')?.size?.width);
+  @State prefixSymbolWidth: Length | undefined =
+    this.toVp(componentUtils.getRectangleById('PrefixSymbolGlyph')?.size?.width);
+  @State suffixSymbolWidth: Length | undefined =
+    this.toVp(componentUtils.getRectangleById('SuffixSymbolGlyph')?.size?.width);
+  @State allowCloseSymbolWidth: Length | undefined =
+    this.toVp(componentUtils.getRectangleById('AllowCloseSymbolGlyph')?.size?.width);
   @State symbolEffect: SymbolEffect = new SymbolEffect();
 
   private isChipSizeEnum(): boolean {
@@ -391,7 +421,16 @@ export struct ChipComponent {
         return value as number
       case 'object':
         try {
-          return this.lengthMetricsToVp(LengthMetrics.resource(value))
+          let returnValue = this.lengthMetricsToVp(LengthMetrics.resource(value));
+          if (returnValue === 0) {
+            if ((value.type === RESOURCE_TYPE_STRING &&
+              !isValidDimensionString(getContext(this).resourceManager.getStringSync(value.id))) ||
+              (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
+                value.type !== RESOURCE_TYPE_FLOAT)) {
+              return Number.NEGATIVE_INFINITY;
+            }
+          }
+          return returnValue;
         } catch (error) {
           return Number.NEGATIVE_INFINITY
         }
@@ -589,7 +628,8 @@ export struct ChipComponent {
   }
 
   private getChipNodePadding(): LocalizedPadding {
-    return (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ? this.theme.chipNode.localizedSmallPadding : this.theme.chipNode.localizedNormalPadding
+    return (this.isChipSizeEnum() && this.chipSize === ChipSize.SMALL) ? this.theme.chipNode.localizedSmallPadding :
+    this.theme.chipNode.localizedNormalPadding
   }
 
   private getChipNodeRadius(): Dimension {
@@ -962,6 +1002,11 @@ export struct ChipComponent {
             .flexShrink(0)
             .visibility(this.getVisibility())
             .draggable(false)
+            .focusBox({
+              margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+              strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+              strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+            })
             .onFocus(() => {
               this.suffixIconOnFocus = true
             })
@@ -1022,6 +1067,12 @@ export struct ChipComponent {
     .scale(this.chipScale)
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
+    .padding(0)
+    .focusBox({
+      margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+      strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+      strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+    })
     .onFocus(() => {
       this.chipNodeOnFocus = true
     })

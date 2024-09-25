@@ -787,7 +787,8 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
             CHECK_NULL_VOID(renderContext);
             auto opacity = renderContext->GetOpacityValue(NON_TRANSPARENT_VAL);
             std::string nodeIdStr = std::to_string(host->GetId());
-            TAG_LOGI(AceLogTag::ACE_FORM, "Static-form, current opacity: %{public}f, visible: %{public}d, nodeId: %{public}s.",
+            TAG_LOGI(AceLogTag::ACE_FORM,
+                "Static-form, current opacity: %{public}f, visible: %{public}d, nodeId: %{public}s.",
                 opacity, static_cast<int>(visible), nodeIdStr.c_str());
             if (visible == VisibleType::VISIBLE && opacity == NON_TRANSPARENT_VAL) {
                 HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_3S, nodeIdStr);
@@ -805,6 +806,12 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
     cardInfo_.width = info.width;
     cardInfo_.height = info.height;
     cardInfo_.borderWidth = info.borderWidth;
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+
+    externalRenderContext->SetBounds(round(cardInfo_.borderWidth), round(cardInfo_.borderWidth),
+        round(cardInfo_.width.Value() - cardInfo_.borderWidth * DOUBLE),
+        round(cardInfo_.height.Value() - cardInfo_.borderWidth * DOUBLE));
 
     if (formManagerBridge_) {
         formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value(), info.borderWidth);
@@ -1397,6 +1404,13 @@ void FormPattern::InitFormManagerDelegate()
             formPattern->HandleEnableForm(enable);
             }, "ArkUIFormHandleEnableForm");
         });
+
+    const std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback = [this](bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
+        FormManager::GetInstance().NotifyIsSizeChangeByRotate(isRotate, rsTransaction);
+    };
+    context->SetSizeChangeByRotateCallback(callback);
 }
 
 void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)

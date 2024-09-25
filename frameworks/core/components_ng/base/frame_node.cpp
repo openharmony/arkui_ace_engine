@@ -74,6 +74,7 @@ constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
 constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
+constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -443,9 +444,6 @@ FrameNode::FrameNode(
 FrameNode::~FrameNode()
 {
     ResetPredictNodes();
-    for (const auto& destroyCallback : destroyCallbacks_) {
-        destroyCallback();
-    }
     for (const auto& destroyCallback : destroyCallbacksMap_) {
         if (destroyCallback.second) {
             destroyCallback.second();
@@ -618,6 +616,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     }
     paintProperty->CleanDirty();
     CHECK_NULL_VOID(pipeline);
+    pipeline->FlushModifier();
     pipeline->FlushMessages();
     node->SetActive(false);
 }
@@ -2095,6 +2094,10 @@ void FrameNode::RebuildRenderContextTree()
     if (!needSyncRenderTree_) {
         return;
     }
+    auto pipeline = GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("RebuildRenderContextTree doesn't run on UI thread!");
+    }
     frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
     // generate full children list, including disappear children.
@@ -3110,11 +3113,19 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
 // returns a node's offset relative to window 
 // and consider every ancestor node's graphic transform rotate properties
 // ancestor will check boundary of window scene(exclude)
-OffsetF FrameNode::GetPositionToWindowWithTransform() const
+OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
-    auto offset = context->GetPaintRectWithoutTransform().GetOffset();
+    auto rect = context->GetPaintRectWithoutTransform();
+    OffsetF offset;
+    if (!fromBottom) {
+        offset = rect.GetOffset();
+    } else {
+        OffsetF offsetBottom(rect.GetX() + rect.Width(), rect.GetY() + rect.Height());
+        offset = offsetBottom;
+    }
+    
     PointF pointNode(offset.GetX(), offset.GetY());
     context->GetPointTransformRotate(pointNode);
     auto parent = GetAncestorNodeOfFrame(true);
@@ -3495,9 +3506,6 @@ void FrameNode::OnAccessibilityEvent(
 
 void FrameNode::OnRecycle()
 {
-    for (const auto& destroyCallback : destroyCallbacks_) {
-        destroyCallback();
-    }
     for (const auto& destroyCallback : destroyCallbacksMap_) {
         if (destroyCallback.second) {
             destroyCallback.second();
@@ -5729,6 +5737,57 @@ void FrameNode::ResetPredictNodes()
         if (frameNode && frameNode->isLayoutDirtyMarked_) {
             frameNode->isLayoutDirtyMarked_ = false;
         }
+    }
+}
+
+void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    bool result = func();
+    if (isCNode_) {
+        return;
+    }
+    if (result) {
+        customPropertyMap_[UPDATE_FLAG_KEY] = true;
+    }
+    if (!getCustomProperty_) {
+        getCustomProperty_ = getFunc;
+    }
+}
+
+std::string FrameNode::GetJSCustomProperty(const std::string& key)
+{
+    if (getCustomProperty_) {
+        return getCustomProperty_(key);
+    }
+    return nullptr;
+}
+
+std::string FrameNode::GetCapiCustomProperty(const std::string& key)
+{
+    if (!isCNode_) {
+        return std::string();
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        return customPropertyMap_[key];
+    }
+    return std::string();
+}
+
+void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    customPropertyMap_[key] = value;
+}
+
+void FrameNode::RemoveCustomProperty(const std::string& key)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        customPropertyMap_.erase(iter);
     }
 }
 } // namespace OHOS::Ace::NG

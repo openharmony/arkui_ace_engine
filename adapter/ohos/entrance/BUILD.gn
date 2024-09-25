@@ -165,6 +165,12 @@ template("ace_ohos_standard_source_set") {
     if (enable_graphic_text_gine) {
       external_deps += [ "graphic_2d:rosen_text" ]
     }
+
+    if (os_account_exists) {
+      external_deps += [ "os_account:os_account_innerkits" ]
+    }
+    deps +=
+        [ "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr" ]
   }
 }
 

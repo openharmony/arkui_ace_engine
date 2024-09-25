@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include <cstdint>
+#include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -360,7 +361,9 @@ void SearchPattern::HandleBackgroundColor()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto textFieldTheme = PipelineBase::GetCurrentContext()->GetTheme<TextFieldTheme>();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     if (!renderContext->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
@@ -487,7 +490,7 @@ void SearchPattern::RemoveDragFrameNodeFromManager()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto dragDropManager = context->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -965,7 +968,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
         searchTextFieldPattern->SearchRequestStopTwinkling(); // Hide caret
     }
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     RoundRect focusRect;
     GetInnerFocusPaintRect(focusRect);
@@ -1120,7 +1123,9 @@ void SearchPattern::OnButtonTouchUp(int32_t childId)
 
 void SearchPattern::SetMouseStyle(MouseFormat format)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
@@ -1581,7 +1586,7 @@ void SearchPattern::OnColorConfigurationUpdate()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetNeedCallChildrenUpdate(false);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
@@ -1663,7 +1668,9 @@ void SearchPattern::InitIconColorSize()
 
 void SearchPattern::InitSearchIconColorSize()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
@@ -1675,7 +1682,9 @@ void SearchPattern::InitSearchIconColorSize()
 
 void SearchPattern::InitCancelIconColorSize()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
@@ -1750,8 +1759,9 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
 {
     CHECK_NULL_VOID(GetSearchNode());
     imageClickListener_ = nullptr;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
@@ -1764,7 +1774,11 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
         index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconSize() : GetSearchNode()->GetCancelSymbolIconSize());
     layoutProperty->UpdateSymbolColorList({index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
                                                                 : GetSearchNode()->GetCancelSymbolIconColor()});
-    layoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+    float maxFontScale = MAX_FONT_SCALE;
+    if (layoutProperty->GetFontSize()->Unit() != DimensionUnit::VP) {
+        maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
+    }
+    layoutProperty->UpdateMaxFontScale(maxFontScale);
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
     iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
 
@@ -1796,7 +1810,9 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, bool isCreateNode)
 {
     CHECK_NULL_VOID(GetSearchNode());
     imageClickListener_ = nullptr;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
@@ -2017,7 +2033,9 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
         if (imageSourceInfoOp.has_value()) {
             imageSourceInfo = imageSourceInfoOp.value();
         }
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto searchTheme = pipeline->GetTheme<SearchTheme>();
         CHECK_NULL_VOID(searchTheme);
@@ -2055,7 +2073,7 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(iconFrameNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
@@ -2113,7 +2131,7 @@ void SearchPattern::UpdateIconChangeEvent()
 const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSizeValue)
 {
     if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
-        return ConvertImageIconScaleLimit(ICON_MAX_SIZE);
+        return ICON_MAX_SIZE;
     }
     return ConvertImageIconScaleLimit(iconSizeValue);
 }
@@ -2130,10 +2148,10 @@ const Dimension SearchPattern::ConvertImageIconScaleLimit(const Dimension& iconS
         return iconSizeValue;
     }
 
-    if (GreatOrEqualCustomPrecision(fontScale, MAX_FONT_SCALE)) {
-        if (iconSizeValue.Unit() != DimensionUnit::VP) {
-            return Dimension(iconSizeValue / fontScale * MAX_FONT_SCALE);
-        }
+    if (iconSizeValue.Unit() != DimensionUnit::VP) {
+        float maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
+        fontScale = std::clamp(fontScale, 0.0f, maxFontScale);
+        return iconSizeValue * fontScale;
     }
     return iconSizeValue;
 }

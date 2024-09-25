@@ -779,6 +779,10 @@ uint32_t MenuPattern::GetInnerMenuCount() const
         // found component <Menu>
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             child = child->GetFrameChildByIndex(0, false);
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child = child->GetChildAtIndex(0);
+                ++depth;
+            }
             continue;
         }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
@@ -806,6 +810,10 @@ RefPtr<FrameNode> MenuPattern::GetFirstInnerMenu() const
         // found component <Menu>
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             child = child->GetFrameChildByIndex(0, false);
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child = child->GetChildAtIndex(0);
+                ++depth;
+            }
             continue;
         }
         if (child->GetTag() == V2::MENU_ETS_TAG) {

@@ -404,7 +404,9 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
 
     CHECK_NULL_RETURN(navBarPattern_ && navBarPattern_->NeedCoordWithScroll(), false);
 
-    auto overOffsets = GetOverScrollOffset(offset);
+    float diff = navBarPattern_->GetTitleBarHeightLessThanMaxBarHeight();
+    auto overOffsets = GetOverScrollOffset(offset + std::max(diff, 0.0f));
+    overOffsets.start = Positive(offset) ? std::min(offset, overOffsets.start) : overOffsets.start;
     float offsetRemain = 0.0f;
     float offsetCoordinate = offset;
 
@@ -427,8 +429,11 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         } else {
             offset = offsetRemain + (offsetCoordinate - handledByNav);
         }
+        if (Negative(diff) && Negative(offset)) {
+            offset = overOffsets.start;
+        }
 
-        if (Negative(offset) && (source == SCROLL_FROM_ANIMATION_SPRING || !isAtTop)) {
+        if (Negative(offset) && (source == SCROLL_FROM_ANIMATION_SPRING || !navBarPattern_->CanCoordScrollUp(offset))) {
             // When rebounding form scrolling over, trigger the ProcessNavBarReactOnEnd callback.
             isReactInParentMovement_ = false;
             ProcessNavBarReactOnEnd();
@@ -1266,7 +1271,11 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
     isAnimationStop_ = false;
     useTotalOffset_ = useTotalOffset;
-    AnimationUtils::ExecuteWithoutAnimation([this]() { springOffsetProperty_->Set(GetTotalOffset()); });
+    AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->springOffsetProperty_->Set(pattern->GetTotalOffset());
+    });
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), position]() {
@@ -3080,7 +3089,8 @@ void ScrollablePattern::CheckRestartSpring(bool sizeDiminished, bool needNestedS
     }
     if (needNestedScrolling && !ScrollableIdle()) {
         return;
-    } else if (!needNestedScrolling && !IsScrollableAnimationNotRunning()) {
+    }
+    if (!needNestedScrolling && !IsScrollableAnimationNotRunning()) {
         return;
     }
     FireOnScrollStart();

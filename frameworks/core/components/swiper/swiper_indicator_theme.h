@@ -88,6 +88,7 @@ public:
             return theme;
         }
 
+    private:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwiperIndicatorTheme>& theme) const
         {
             RefPtr<ThemeStyle> swiperPattern = themeConstants->GetPatternByName(THEME_PATTERN_SWIPER);

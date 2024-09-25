@@ -62,9 +62,9 @@ void ListEventHub::OnItemDragStart(const GestureEvent& info, const DragDropInfo&
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     if (dragDropInfo.pixelMap) {
-        dragDropProxy_ = manager->CreateAndShowDragWindow(dragDropInfo.pixelMap, info);
+        dragDropProxy_ = manager->CreateAndShowItemDragOverlay(dragDropInfo.pixelMap, info, AceType::Claim(this));
     } else if (dragDropInfo.customNode) {
-        dragDropProxy_ = manager->CreateAndShowDragWindow(dragDropInfo.customNode, info);
+        dragDropProxy_ = manager->CreateAndShowItemDragOverlay(dragDropInfo.customNode, info, AceType::Claim(this));
     }
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info, GetFrameNode());

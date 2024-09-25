@@ -1911,6 +1911,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     touchLocationInfo.touchType_ = TouchType::MOVE;
     touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
 
     pattern->isMoveCaretAnywhere_ = true;
     pattern->HandleTouchEvent(touchEventInfo);
@@ -1931,7 +1932,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     EXPECT_TRUE(controller->GetShowMagnifier());
     touchLocationInfo.touchType_ = TouchType::CANCEL;
     touchEventInfo.touches_.clear();
+    touchEventInfo.changedTouches_.clear();
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_FALSE(controller->GetShowMagnifier());
 }

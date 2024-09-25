@@ -668,4 +668,18 @@ int32_t PerfMonitor::GetFilterType() const
     return filterType;
 }
 
+void PerfMonitor::RecordWindowRectResize(OHOS::Ace::WindowSizeChangeReason reason, const std::string& bundleName)
+{
+    switch (reason) {
+        case OHOS::Ace::WindowSizeChangeReason::DRAG_START:
+            Start(PerfConstants::WINDOW_RECT_RESIZE, PerfActionType::LAST_DOWN, bundleName.c_str());
+            break;
+        case OHOS::Ace::WindowSizeChangeReason::DRAG_END:
+            End(PerfConstants::WINDOW_RECT_RESIZE, true);
+            break;
+        default:
+            break;
+    }
+}
+
 } // namespace OHOS::Ace

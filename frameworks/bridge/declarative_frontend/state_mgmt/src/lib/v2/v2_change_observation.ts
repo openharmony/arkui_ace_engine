@@ -94,7 +94,7 @@ class ObserveV2 {
   // Map bindId to WeakRef<ViewPU> | MonitorV2
   private id2cmp_: { number: WeakRef<Object> } = {} as { number: WeakRef<Object> };
 
-  // Map bindId -> Set of @Observed class objects
+  // Map bindId -> Set of @ObservedV2 class objects
   // reverse dependency map for quickly removing all dependencies of a bindId
   private id2targets_: { number: Set<WeakRef<Object>> } = {} as { number: Set<WeakRef<Object>> };
 
@@ -126,9 +126,14 @@ class ObserveV2 {
     return this.obsInstance_;
   }
 
-  // return true given value is @Observed object
+  // return true given value is @ObservedV2 object
   public static IsObservedObjectV2(value: any): boolean {
     return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
+  }
+
+  // return true if given value is proxied observed object, either makeObserved or autoProxyObject
+  public static IsProxiedObservedV2(value: any): boolean {
+    return (value && typeof value === 'object' && value[ObserveV2.SYMBOL_PROXY_GET_TARGET]);
   }
 
   // return true given value is the return value of makeObserved

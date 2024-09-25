@@ -34,8 +34,10 @@ void SwiperArrowPattern::OnModifyDone()
         CHECK_NULL_VOID(swiperNode);
         auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(swiperEventHub);
+        auto layoutProperty = GetSwiperArrowLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
         InitSwiperChangeEvent(swiperEventHub);
-        index_ = GetSwiperArrowLayoutProperty()->GetIndex().value_or(0);
+        index_ = layoutProperty->GetIndex().value_or(0);
         isFirstCreate_ = false;
         InitButtonEvent();
         InitOnKeyEvent();
@@ -50,6 +52,7 @@ void SwiperArrowPattern::InitOnKeyEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         if (pattern) {
@@ -259,6 +262,7 @@ void SwiperArrowPattern::ButtonTouchEvent(RefPtr<FrameNode> buttonNode, TouchTyp
 
 void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHovered)
 {
+    CHECK_NULL_VOID(buttonNode);
     hoverOnClickFlag_ = isHovered;
     isHover_ = isHovered;
     const auto& renderContext = buttonNode->GetRenderContext();
@@ -357,7 +361,9 @@ void SwiperArrowPattern::UpdateArrowContent()
     CHECK_NULL_VOID(host);
     auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(
+    auto buttonRenderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(buttonRenderContext);
+    buttonRenderContext->UpdateBackgroundColor(
         swiperArrowLayoutProperty->GetIsShowBackgroundValue(false)
             ? swiperArrowLayoutProperty->GetBackgroundColorValue(backgroundColor_)
             : Color::TRANSPARENT);
@@ -366,7 +372,7 @@ void SwiperArrowPattern::UpdateArrowContent()
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(swiperArrowLayoutProperty->GetBackgroundSizeValue()),
             CalcLength(swiperArrowLayoutProperty->GetBackgroundSizeValue())));
-    backgroundColor_ = buttonNode->GetRenderContext()->GetBackgroundColorValue(Color::TRANSPARENT);
+    backgroundColor_ = buttonRenderContext->GetBackgroundColorValue(Color::TRANSPARENT);
     RefPtr<FrameNode> symbolNode = DynamicCast<FrameNode>(buttonNode->GetFirstChild());
     CHECK_NULL_VOID(symbolNode);
     auto symbolLayoutProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
@@ -378,14 +384,14 @@ void SwiperArrowPattern::UpdateArrowContent()
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
     bool isRtl = swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (V2::SWIPER_LEFT_ARROW_ETS_TAG == GetHost()->GetTag()) {
+    if (V2::SWIPER_LEFT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(
                 isRtl ? swiperIndicatorTheme->GetRightSymbolId() : swiperIndicatorTheme->GetLeftSymbolId()));
         } else {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(swiperIndicatorTheme->GetUpSymbolId()));
         }
-    } else if (V2::SWIPER_RIGHT_ARROW_ETS_TAG == GetHost()->GetTag()) {
+    } else if (V2::SWIPER_RIGHT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(
                 isRtl ? swiperIndicatorTheme->GetLeftSymbolId() : swiperIndicatorTheme->GetRightSymbolId()));
@@ -396,7 +402,7 @@ void SwiperArrowPattern::UpdateArrowContent()
     symbolLayoutProperty->UpdateFontSize(swiperArrowLayoutProperty->GetArrowSizeValue());
     symbolLayoutProperty->UpdateSymbolColorList({ swiperArrowLayoutProperty->GetArrowColorValue() });
     if (!swiperArrowLayoutProperty->GetEnabledValue(true)) {
-        buttonNode->GetRenderContext()->UpdateBackgroundColor(
+        buttonRenderContext->UpdateBackgroundColor(
             backgroundColor_.BlendOpacity(swiperIndicatorTheme->GetArrowDisabledAlpha()));
         symbolLayoutProperty->UpdateSymbolColorList({ swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(
             swiperIndicatorTheme->GetArrowDisabledAlpha()) });

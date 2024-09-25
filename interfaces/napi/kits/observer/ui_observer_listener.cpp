@@ -76,6 +76,11 @@ void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pag
             "Handle router page state change failed, runtime or callback function invalid!");
         return;
     }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     napi_value objValue = nullptr;
@@ -99,6 +104,7 @@ void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pag
     napi_set_named_property(env_, objValue, "pageId", napiPageId);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
 }
 
 void UIObserverListener::OnDensityChange(double density)

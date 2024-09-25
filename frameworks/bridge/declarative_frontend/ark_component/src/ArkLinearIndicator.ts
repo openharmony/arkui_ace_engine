@@ -67,17 +67,17 @@ class ArkLinearIndicatorComponent extends ArkComponent implements CommonMethod<L
     super(nativePtr, classType);
   }
 
-  indicatorStyle(value: LinearIndicatorStyle) {
+  indicatorStyle(value: LinearIndicatorStyle): LinearIndicatorAttribute {
     modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorStyleModifier.identity, LinearIndicatorIndicatorStyleModifier, value);
     return this;
   }
 
-  indicatorLoop(value: boolean) {
+  indicatorLoop(value: boolean): LinearIndicatorAttribute {
     modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorLoopModifier.identity, LinearIndicatorIndicatorLoopModifier, value);
     return this;
   }
 
-  onChange(value: OnLinearIndicatorChangeCallback) {
+  onChange(value: OnLinearIndicatorChangeCallback): LinearIndicatorAttribute {
     modifierWithKey(this._modifiersWithKeys, LinearIndicatorOnChangeModifier.identity, LinearIndicatorOnChangeModifier, value);
     return this;
   }

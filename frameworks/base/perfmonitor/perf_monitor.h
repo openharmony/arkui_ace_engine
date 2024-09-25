@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include "base/utils/macros.h"
+#include "core/common/window_animation_config.h"
 
 namespace OHOS::Ace {
 constexpr int32_t US_TO_MS = 1000;
@@ -147,6 +148,8 @@ public:
     static PerfMonitor* pMonitor;
     void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                            const std::string& pageName);
+    void RecordWindowRectResize(OHOS::Ace::WindowSizeChangeReason reason,
+                           const std::string& bundleName);
 
 private:
     SceneRecord* GetRecord(const std::string& sceneId);

@@ -15,7 +15,7 @@
 
 /**
  * ConfigureStateMgmt keeps track if V2 @ObservedV2 and @Trace are used. 
- * If yes, it enables object deep observation mechanisms need with ObservedV2.
+ * If yes, it enables object deep observation mechanisms need with @ObservedV2.
  */
 class ConfigureStateMgmt {
 

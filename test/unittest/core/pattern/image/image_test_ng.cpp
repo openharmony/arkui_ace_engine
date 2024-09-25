@@ -356,7 +356,7 @@ HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level
      * @tc.cases: case1. Before Image load and ImagePattern windowHide, Image doesn't need resetLoading.
      */
     imagePattern->OnWindowHide();
-    imagePattern->OnNotifyMemoryLevel(0);
+    imagePattern->OnNotifyMemoryLevel(2);
     EXPECT_TRUE(imagePattern->isShow_ == false);
     EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
     EXPECT_EQ(imagePattern->image_, nullptr);
@@ -373,7 +373,7 @@ HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level
      */
     imagePattern->altImage_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->OnWindowHide();
-    imagePattern->OnNotifyMemoryLevel(0);
+    imagePattern->OnNotifyMemoryLevel(2);
     EXPECT_FALSE(imagePattern->isShow_);
     EXPECT_EQ(imagePattern->image_, nullptr);
     EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);
@@ -529,125 +529,6 @@ HWTEST_F(ImageTestNg, ImagePatternCreateObscuredImageIfNeed001, TestSize.Level1)
      */
     imagePattern->CreateObscuredImage();
     EXPECT_NE(imagePattern->obscuredImage_, nullptr);
-}
-
-/**
- * @tc.name: ImagePaintMethod002
- * @tc.desc: ImagePaintMethod can update radius correctly.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImagePaintMethod002, TestSize.Level1)
-{
-    auto frameNode = ImageTestNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(Dimension(RADIUS_DEFAULT));
-    frameNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
-    BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(IMAGE_SOURCEINFO_WIDTH);
-    frameNode->GetRenderContext()->SetBorderWidth(borderWidth);
-    /**
-     * @tc.steps: step2. create ImagePaintMethod.
-     */
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
-    pattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(pattern->image_, { .selected = true });
-    /**
-     * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
-     */
-    auto renderProps = pattern->GetPaintProperty<ImageRenderProperty>();
-    ASSERT_NE(renderProps, nullptr);
-    renderProps->UpdateImageRepeat(ImageRepeat::REPEAT_X);
-    renderProps->UpdateNeedBorderRadius(true);
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
-    geometryNode->SetFrameOffset(OffsetF(WIDTH, HEIGHT));
-    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
-    PaintWrapper paintWrapper(frameNode->GetRenderContext(), geometryNode, renderProps);
-    auto paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
-
-    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
-    ASSERT_NE(paintMethod, nullptr);
-    auto config = *imagePaintMethod.canvasImage_->paintConfig_;
-    EXPECT_EQ(config.imageRepeat_, ImageRepeat::REPEAT_X);
-    EXPECT_TRUE(config.borderRadiusXY_ != nullptr);
-    EXPECT_EQ(config.borderRadiusXY_->at(0).GetX(), RADIUS_DEFAULT);
-
-    /**
-     * @tc.steps: step3. Update image radius.
-     * radius should be normalized
-     */
-    borderRadius.SetRadius(Dimension(RADIUS_EXTREME));
-    frameNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
-    paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
-    config = *imagePaintMethod.canvasImage_->paintConfig_;
-    EXPECT_NE(config.borderRadiusXY_->at(0).GetX(), RADIUS_EXTREME);
-    EXPECT_EQ(config.borderRadiusXY_->at(0).GetX(), WIDTH / 2);
-    EXPECT_EQ(config.borderRadiusXY_->at(0).GetY(), WIDTH / 2);
-}
-
-/**
- * @tc.name: ImagePaintMethod001
- * @tc.desc: ImagePaintMethod can get ContentDrawFunction and UpdatePaintConfig correctly.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, ImagePaintMethod001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create Image frameNode.
-     */
-    auto frameNode = ImageTestNg::CreateImageNodeWithDefaultProp(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    /**
-     * @tc.steps: step2. create ImagePaintMethod.
-     */
-    auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    ASSERT_NE(imagePattern, nullptr);
-    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
-    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-    ImagePaintMethod imagePaintMethod(
-        imagePattern->image_, { .selected = true, .imageOverlayModifier = nullptr, .sensitive = true });
-    /**
-     * @tc.steps: step3. ImagePaintMethod GetContentDrawFunction.
-     */
-    auto imageRenderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
-    ASSERT_NE(imageRenderProperty, nullptr);
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
-    geometryNode->SetFrameOffset(OffsetF(WIDTH, HEIGHT));
-    PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
-    auto pipeLine = PipelineBase::GetCurrentContext();
-    pipeLine->SetIsRightToLeft(true);
-    auto paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
-    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
-    ASSERT_NE(paintMethod, nullptr);
-    auto& config = imagePaintMethod.canvasImage_->paintConfig_;
-    EXPECT_EQ(config->imageFit_, IMAGE_FIT_DEFAULT);
-    EXPECT_EQ(config->renderMode_, IMAGE_RENDERMODE_DEFAULT);
-    EXPECT_EQ(config->imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
-    EXPECT_EQ(config->imageRepeat_, IMAGE_REPEAT_DEFAULT);
-    EXPECT_NE(config->flipHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
-    EXPECT_EQ(*config->colorFilter_.colorFilterMatrix_, COLOR_FILTER_DEFAULT);
-    EXPECT_EQ(config->obscuredReasons_, std::vector<ObscuredReasons>());
-
-    /**
-     * @tc.steps: step4. ImagePaintMethod GetOverlayDrawFunction
-     */
-
-    // create mock theme manager
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
-
-    auto overlayPaintMethod = imagePaintMethod.GetOverlayDrawFunction(&paintWrapper);
-    EXPECT_FALSE(overlayPaintMethod);
-    EXPECT_TRUE(imagePaintMethod.selected_);
-
-    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**

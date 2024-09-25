@@ -13,9 +13,6 @@
  * limitations under the License.
  */
 
-#include <functional>
-#include <optional>
-#include <utility>
 
 #include "gtest/gtest.h"
 
@@ -30,11 +27,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/point.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/frame_node.h"
@@ -56,7 +49,6 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/ace_events.h"
 #undef private
 #undef protected
 

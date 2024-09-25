@@ -552,6 +552,8 @@ public:
     float shadowSize_ = 0.f;
     float shadowStrength_ = 0.f;
 
+    bool changed_ = false;
+
     // rgba
     uint32_t gradientMaskColor1_ = 0x00000000;
     uint32_t gradientMaskColor2_ = 0x00000000;
@@ -569,7 +571,8 @@ public:
                NearEqual(gradientMaskColor1_, other.gradientMaskColor1_) &&
                NearEqual(gradientMaskColor2_, other.gradientMaskColor2_) &&
                NearEqual(outerContourColor1_, other.outerContourColor1_) &&
-               NearEqual(outerContourColor2_, other.outerContourColor2_);
+               NearEqual(outerContourColor2_, other.outerContourColor2_) &&
+               changed_ == other.changed_;
     }
     MagnifierParams() = default;
     ~MagnifierParams() = default;

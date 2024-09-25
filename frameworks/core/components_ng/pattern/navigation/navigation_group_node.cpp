@@ -478,6 +478,7 @@ bool NavigationGroupNode::HandleBack(const RefPtr<FrameNode>& node, bool isLastC
 void NavigationGroupNode::CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
     const AnimationFinishCallback finishCallback, bool isNavBar)
 {
+    // this function has been override for different device type
     CHECK_NULL_VOID(preNode);
     auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
     CHECK_NULL_VOID(preNavDestination);
@@ -585,8 +586,21 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
     const AnimationFinishCallback finishCallback, bool isNavBar)
 {
+    // this function has been override for different device type
     CHECK_NULL_VOID(preNode);
     CHECK_NULL_VOID(curNode);
+    if (isNavBar) {
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
+        CHECK_NULL_VOID(navBarNode);
+        navBarNode->SystemTransitionPushAction(true);
+    } else {
+        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+        CHECK_NULL_VOID(navDestination);
+        navDestination->InitSystemTransitionPush(false);
+    }
+    auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+    CHECK_NULL_VOID(curNavDestination);
+    curNavDestination->InitSystemTransitionPush(true);
 
     // start transition animation
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
@@ -638,24 +652,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     CHECK_NULL_VOID(preNode);
     CHECK_NULL_VOID(curNode);
 
-    RefPtr<TitleBarNode> preTitleNode;
-    if (isNavBar) {
-        auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
-        CHECK_NULL_VOID(navBarNode);
-        navBarNode->SystemTransitionPushAction(true);
-    } else {
-        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-        CHECK_NULL_VOID(navDestination);
-        navDestination->InitSystemTransitionPush(false);
-    }
-    auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-    CHECK_NULL_VOID(curNavDestination);
-    curNavDestination->InitSystemTransitionPush(true);
-    
     // Create animation callback
     CleanPushAnimations();
     AnimationFinishCallback callback = [weakPreNode = WeakPtr<FrameNode>(preNode),
-        weakPreTitle = WeakPtr<FrameNode>(preTitleNode),
         weakNavigation = WeakClaim(this),
         weakCurNode = WeakPtr<FrameNode>(curNode),
         isNavBar] {
@@ -705,6 +704,8 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     CreateAnimationWithPush(preNode, curNode, callback, isNavBar);
 
     isOnAnimation_ = true;
+    auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+    CHECK_NULL_VOID(curNavDestination);
     if (AceChecker::IsPerformanceCheckEnabled()) {
         int64_t startTime = GetSysTimestamp();
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
@@ -795,6 +796,7 @@ void NavigationGroupNode::TransitionWithReplace(
     AnimationUtils::Animate(
         option,
         [curNode]() {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation replace animation start");
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page replace transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             curNode->GetRenderContext()->UpdateOpacity(1.0f);
@@ -825,6 +827,19 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
     CHECK_NULL_VOID(navDestinationNode);
     navDestinationNode->SetIsOnAnimation(false);
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto navigationPattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    auto stack = navigationPattern->GetNavigationStack();
+    bool isInStack = stack->FindIndex(navDestinationPattern->GetName(),
+        navDestinationPattern->GetCustomNode(), true) != -1;
+    if (isInStack) {
+        RemoveDialogDestination(true);
+        auto preContext = navDestinationNode->GetRenderContext();
+        CHECK_NULL_VOID(preContext);
+        preContext->UpdateZIndex(0);
+        return;
+    }
     auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
     if (shallowBuilder) {
         shallowBuilder->MarkIsExecuteDeepRenderDone(false);
@@ -836,7 +851,7 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
     auto parent = AceType::DynamicCast<FrameNode>(preNode->GetParent());
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(preNode);
-    RemoveDialogDestination();
+    RemoveDialogDestination(true);
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1067,7 +1082,7 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
     }
 }
 
-void NavigationGroupNode::RemoveDialogDestination()
+void NavigationGroupNode::RemoveDialogDestination(bool isReplace)
 {
     for (auto iter = hideNodes_.begin(); iter != hideNodes_.end(); iter++) {
         auto navDestination = iter->first;
@@ -1078,6 +1093,14 @@ void NavigationGroupNode::RemoveDialogDestination()
             // navDestination node don't need to remove, update visibility invisible
             navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
             navDestination->SetJSViewActive(false);
+            if (!isReplace) {
+                continue;
+            }
+            auto context = navDestination->GetRenderContext();
+            if (!context) {
+                continue;
+            }
+            context->UpdateZIndex(0);
             continue;
         }
         auto parent = navDestination->GetParent();

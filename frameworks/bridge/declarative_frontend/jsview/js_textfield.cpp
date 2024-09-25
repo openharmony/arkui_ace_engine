@@ -32,8 +32,8 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -42,11 +42,12 @@
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/components/common/properties/text_style_parser.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 
@@ -1456,6 +1457,11 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
         TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
+        return;
+    }
+    auto info = ImageSourceInfo(iconSrc, bundleName, moduleName);
+    if (info.IsSvg() && iconSrc != "") {
+        // svg need not default color, otherwise multi color svg will render fault
         return;
     }
     if (SystemProperties::GetColorMode() == ColorMode::DARK) {
