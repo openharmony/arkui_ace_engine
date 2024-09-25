@@ -4561,13 +4561,13 @@ bool FrameNode::AllowVisibleAreaCheck() const
     return IsOnMainTree() || (pattern_ && pattern_->AllowVisibleAreaCheck());
 }
 
-void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const
+void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect)
 {
     visibleRect = GetPaintRectWithTransform();
     frameRect = visibleRect;
     visibleInnerRect = visibleRect;
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
-    if (!AllowVisibleAreaCheck() || !parentUi) {
+    if (!AllowVisibleAreaCheck() || !parentUi || IsFrameDisappear()) {
         visibleRect.SetWidth(0.0f);
         visibleRect.SetHeight(0.0f);
         visibleInnerRect.SetWidth(0.0f);
