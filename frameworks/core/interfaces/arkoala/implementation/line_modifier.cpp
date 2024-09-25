@@ -13,13 +13,51 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/shape/line_model_ng.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+
+namespace OHOS::Ace::NG {
+struct LineOptions {
+    std::optional<Dimension> width;
+    std::optional<Dimension> height;
+};
+}
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+LineOptions Convert(const Literal_Opt_Union_String_Number_width_height& src)
+{
+    LineOptions options;
+    options.width = Converter::OptConvert<Dimension>(src.width);
+    options.height = Converter::OptConvert<Dimension>(src.height);
+    return options;
+}
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineInterfaceModifier {
+
 void SetLineOptionsImpl(Ark_NativePointer node,
                         const Opt_Type_LineInterface_setLineOptions_Arg0* value)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto options = Converter::OptConvert<LineOptions>(*value);
+    CHECK_NULL_VOID(options);
+    if (options->width) {
+        ShapeAbstractModelNG::SetWidth(frameNode, options->width.value());
+    }
+
+    if (options->height) {
+        ShapeAbstractModelNG::SetHeight(frameNode, options->height.value());
+    }
 }
 } // LineInterfaceModifier
 namespace LineAttributeModifier {
