@@ -1970,6 +1970,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     }
 #endif
 
+    auto windowDensityCallback = [weak = WeakClaim(this)]() {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, 0.0);
+        return container->GetWindowDensity();
+    };
+    pipelineContext_->RegisterWindowDensityCallback(std::move(windowDensityCallback));
+
     pipelineContext_->SetRootSize(density, width, height);
     if (isFormRender_) {
         pipelineContext_->OnSurfaceDensityChanged(density);
