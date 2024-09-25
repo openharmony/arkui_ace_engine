@@ -144,8 +144,9 @@ void GetMatchedNodes(const std::string& pageUrl, const RefPtr<NG::UINode>& root,
     }
 }
 
-void EventController::ApplyNewestConfig() const
+void EventController::ApplyNewestConfig()
 {
+    std::shared_lock<std::shared_mutex> lock(cacheLock_);
     if (clientList_.empty()) {
         return;
     }
@@ -155,6 +156,7 @@ void EventController::ApplyNewestConfig() const
         return;
     }
     auto config = clientList_.back().config.GetConfig();
+    lock.unlock();
     auto pageIter = config->find(pageUrl);
     if (pageIter == config->end()) {
         return;
