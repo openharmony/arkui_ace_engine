@@ -716,6 +716,7 @@ void StepperPattern::OnLanguageConfigurationUpdate()
             }
             leftimageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
             leftimageLayoutProperty->UpdateImageSourceInfo(leftimageSourceInfo);
+            leftImage_->MarkModifyDone();
         }
         if (rightImage_) {
             auto rightimageLayoutProperty = rightImage_->GetLayoutProperty<ImageLayoutProperty>();
@@ -732,6 +733,7 @@ void StepperPattern::OnLanguageConfigurationUpdate()
             }
             rightimageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
             rightimageLayoutProperty->UpdateImageSourceInfo(rightimageSourceInfo);
+            rightImage_->MarkModifyDone();
         }
     }
 }
