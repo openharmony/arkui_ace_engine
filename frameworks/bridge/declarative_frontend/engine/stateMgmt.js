@@ -10718,7 +10718,7 @@ class __RepeatVirtualScrollImpl {
                 }
             }
             else {
-                for (let i = 0; i < to && i < this.arr_.length; i++) {
+                for (let i = 0; i <= to && i < this.arr_.length; i++) {
                     const item = this.arr_[i];
                     const ttype = this.typeGenFunc_(this.arr_[i], i);
                     this.lastActiveRangeData_[i] = { item, ttype };
