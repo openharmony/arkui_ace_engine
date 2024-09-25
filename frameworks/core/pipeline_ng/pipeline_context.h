@@ -1067,6 +1067,9 @@ private:
     void FlushNodeChangeFlag();
     void CleanNodeChangeFlag();
 
+    uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
+    bool FlushModifierAnimation(uint64_t nanoTimestamp);
+
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
@@ -1138,6 +1141,7 @@ private:
     uint32_t nextScheduleTaskId_ = 0;
     std::optional<int32_t> mouseStyleNodeId_;
     uint64_t resampleTimeStamp_ = 0;
+    uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
