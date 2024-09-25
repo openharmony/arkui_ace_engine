@@ -718,11 +718,15 @@ void TextFieldModelNG::SetMargin()
     CHECK_NULL_VOID(layoutProperty);
     const auto& margin = layoutProperty->GetMarginProperty();
     CHECK_NULL_VOID(margin);
+    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+
     MarginProperty userMargin;
     userMargin.top = margin->top;
     userMargin.bottom = margin->bottom;
-    userMargin.left = margin->left;
-    userMargin.right = margin->right;
+    userMargin.left = margin->left.has_value() ? margin->left :
+        (isRTL ? margin->end : margin->start);
+    userMargin.right = margin->right.has_value() ? margin->right :
+        (isRTL ? margin->start : margin->end);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin);
 }
 
