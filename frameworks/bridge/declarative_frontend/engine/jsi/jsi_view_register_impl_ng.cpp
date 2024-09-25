@@ -425,6 +425,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSView::JSBind(globalObj);
     JSShapeAbstract::JSBind(globalObj);
     JSText::JSBind(globalObj);
+    JSTextController::JSBind(globalObj);
     JSColumn::JSBind(globalObj);
     JSRow::JSBind(globalObj);
     JSStack::JSBind(globalObj);
