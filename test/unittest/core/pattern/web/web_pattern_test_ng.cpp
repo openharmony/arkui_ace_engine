@@ -1091,7 +1091,7 @@ HWTEST_F(WebPatternTestNg, NeedSoftKeyboard_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     auto ret = webPattern->NeedSoftKeyboard();
-    EXPECT_EQ(ret, false);
+    EXPECT_NE(ret, false);
 #endif
 }
 

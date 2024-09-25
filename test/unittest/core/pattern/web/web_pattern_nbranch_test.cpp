@@ -591,7 +591,7 @@ HWTEST_F(WebPatternBranchTestUT, NotifyFillRequestSuccess009, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetHintTypeAndMetadata010
+ * @tc.name: GetHintTypeAndMetadata_001
  * @tc.desc: GetHintTypeAndMetadata.
  * @tc.type: FUNC
  */
@@ -609,19 +609,20 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_001, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
-    const std::string attribute = OHOS::NWeb::NWEB_AUTOFILL_NEW_PASSWORD;
+
+    const std::string attribute = OHOS::NWeb::NWEB_AUTOFILL_USERNAME;
     std::string value = "value";
     auto viewDataWrap = AceType::MakeRefPtr<ViewDataWrapMock>();
     auto nodeWrap = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
+    EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(true));
     EXPECT_CALL(*nodeWrap, GetPlaceholder()).WillOnce(ReturnRef(value));
-
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
     EXPECT_EQ(webPattern->isPasswordFill_, true);
 #endif
 }
 
 /**
- * @tc.name: GetHintTypeAndMetadata0101
+ * @tc.name: GetHintTypeAndMetadata_002
  * @tc.desc: GetHintTypeAndMetadata.
  * @tc.type: FUNC
  */
@@ -639,23 +640,24 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_002, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
+
     const std::string attribute = OHOS::NWeb::NWEB_AUTOFILL_PASSWORD;
     std::string value = "value";
     auto viewDataWrap = AceType::MakeRefPtr<ViewDataWrapMock>();
     auto nodeWrap = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
+    EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(true));
     EXPECT_CALL(*nodeWrap, GetPlaceholder()).WillOnce(ReturnRef(value));
-
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
     EXPECT_EQ(webPattern->isPasswordFill_, true);
 #endif
 }
 
 /**
- * @tc.name: GetHintTypeAndMetadata0102
+ * @tc.name: GetHintTypeAndMetadata_003
  * @tc.desc: GetHintTypeAndMetadata.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata__003, TestSize.Level1)
+HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -669,19 +671,20 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata__003, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
-    const std::string attribute = OHOS::NWeb::NWEB_AUTOFILL_STREET_ADDRESS;
-    std::string value = "";
+
+    const std::string attribute = OHOS::NWeb::NWEB_AUTOFILL_NEW_PASSWORD;
+    std::string value = "value";
     auto viewDataWrap = AceType::MakeRefPtr<ViewDataWrapMock>();
     auto nodeWrap = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
+    EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(true));
     EXPECT_CALL(*nodeWrap, GetPlaceholder()).WillOnce(ReturnRef(value));
-
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
-    EXPECT_EQ(webPattern->isPasswordFill_, false);
+    EXPECT_EQ(webPattern->isPasswordFill_, true);
 #endif
 }
 
 /**
- * @tc.name: GetHintTypeAndMetadata0103
+ * @tc.name: GetHintTypeAndMetadata_004
  * @tc.desc: GetHintTypeAndMetadata.
  * @tc.type: FUNC
  */
@@ -699,14 +702,77 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_004, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
-    const std::string attribute = OHOS::NWeb::NWEB_AUTOFILL_USERNAME;
+
+    const std::string attribute = "";
     std::string value = "value";
     auto viewDataWrap = AceType::MakeRefPtr<ViewDataWrapMock>();
     auto nodeWrap = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
     EXPECT_CALL(*nodeWrap, GetPlaceholder()).WillOnce(ReturnRef(value));
-
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
-    EXPECT_EQ(webPattern->isPasswordFill_, true);
+    EXPECT_EQ(webPattern->isPasswordFill_, false);
+#endif
+}
+
+/**
+ * @tc.name: GetHintTypeAndMetadata_005
+ * @tc.desc: GetHintTypeAndMetadata.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+
+    MockContainer::SetUp();
+    const std::string attribute = "";
+    std::string value = "value";
+    auto viewDataWrap = AceType::MakeRefPtr<ViewDataWrapMock>();
+    auto nodeWrap = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
+    EXPECT_CALL(*nodeWrap, GetPlaceholder()).WillOnce(ReturnRef(value));
+    webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
+    MockContainer::TearDown();
+    EXPECT_EQ(webPattern->isPasswordFill_, false);
+#endif
+}
+
+/**
+ * @tc.name: GetHintTypeAndMetadata_006
+ * @tc.desc: GetHintTypeAndMetadata.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern, nullptr);
+
+    const std::string attribute = OHOS::NWeb::NWEB_AUTOFILL_STREET_ADDRESS;
+    std::string value = "value";
+    auto viewDataWrap = AceType::MakeRefPtr<ViewDataWrapMock>();
+    auto nodeWrap = AceType::MakeRefPtr<PageNodeInfoWrapMock>();
+    EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(false));
+    EXPECT_CALL(*nodeWrap, GetPlaceholder()).WillOnce(ReturnRef(value));
+    webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
+    EXPECT_EQ(webPattern->isPasswordFill_, false);
 #endif
 }
 

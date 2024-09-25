@@ -860,7 +860,7 @@ void WebDelegate::OnAudioStateChanged(bool audible) {}
 void WebDelegate::OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchHandleHotZone> hotZone) {}
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 {
-    return nullptr;
+    return pixelMap_;
 }
 #ifdef OHOS_STANDARD_SYSTEM
 void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y, bool from_overlay) {}
@@ -890,8 +890,7 @@ void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, c
 void WebDelegate::OnFocus(const OHOS::NWeb::FocusReason& reason) {}
 bool WebDelegate::NeedSoftKeyboard()
 {
-    return false;
-    return false;
+    return true;
 }
 void WebDelegate::OnBlur() {}
 void WebDelegate::UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h) {}
