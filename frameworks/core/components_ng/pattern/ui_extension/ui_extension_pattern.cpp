@@ -740,10 +740,11 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto rsWindow = window->GetRSWindow();
     auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
+    std::shared_ptr<MMI::PointerEvent> newPointerEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
     if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
-        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
+        Platform::CalculateWindowCoordinate(selfGlobalOffset, newPointerEvent, scale, udegree);
     } else {
-        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
+        Platform::CalculatePointerEvent(selfGlobalOffset, newPointerEvent, scale, udegree);
     }
     AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
@@ -758,9 +759,9 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         }
     }
     focusState_ = pipeline->IsWindowFocused();
-    DispatchPointerEvent(pointerEvent);
+    DispatchPointerEvent(newPointerEvent);
     if (pipeline->IsWindowFocused() && needReSendFocusToUIExtension_ &&
-        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
+        newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
         HandleFocusEvent();
         needReSendFocusToUIExtension_ = false;
     }
