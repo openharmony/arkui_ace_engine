@@ -254,6 +254,17 @@ public:
     {
         changeByClick_ = changeByClick;
     }
+
+    bool GetClickRepeat() const
+    {
+        return clickRepeat_;
+    }
+
+    void SetClickRepeat(bool clickRepeat)
+    {
+        clickRepeat_ = clickRepeat;
+    }
+
     void SetSelectedMode(SelectedMode selectedMode, uint32_t position)
     {
         if (selectedModes_.size() <= position) {
@@ -617,6 +628,7 @@ private:
     std::vector<bool> gradientRegions_ = {false, false, false, false};
     bool isAnimating_ = false;
     bool changeByClick_ = false;
+    bool clickRepeat_ = false;
     float scrollMargin_ = 0.0f;
     bool isFirstLayout_ = true;
     std::optional<int32_t> animationTargetIndex_;
