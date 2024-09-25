@@ -167,6 +167,310 @@ HWTEST_F(TitleBarTestNg, GetTempTitleBarHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTempTitleBarHeight002
+ * @tc.desc: Test GetTempTitleBarHeight interface after scroll by overDragging
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleBarHeight002, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->maxTitleBarHeight_ = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    EXPECT_TRUE(NearEqual(startTempTitleBarHeight, fullTitleHeight));
+
+    /*
+     * @tc.steps: step3. start overDragging and check whether tempTitleBarHeight is changing as well.
+     */
+    float overDragDistance = 100.0f;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    auto overDragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    auto expectedOverDragHeight = fullTitleHeight + overDragDistance / 6.0f;
+    EXPECT_TRUE(NearEqual(overDragTempTitleBarHeight, expectedOverDragHeight));
+
+    /*
+     * @tc.steps: step4. overDrag again,
+     * and check whether tempTitleBarHeight is changing as well.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    overDragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedOverDragHeight += overDragDistance / 6.0f;
+    EXPECT_TRUE(NearEqual(overDragTempTitleBarHeight, expectedOverDragHeight));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-overDragDistance * 2.0f);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    overDragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedOverDragHeight = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(overDragTempTitleBarHeight, expectedOverDragHeight));
+
+    /*
+     * @tc.steps: step5. overdrag and send scroll end,
+     * check whether tempTitleBarHeight recover to fullTitleBarHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance * 3.0f);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    titleBarPattern_->OnCoordScrollEnd();
+    overDragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedOverDragHeight = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(overDragTempTitleBarHeight, expectedOverDragHeight));
+}
+
+/**
+ * @tc.name: GetTempTitleBarHeight003
+ * @tc.desc: Test GetTempTitleBarHeight after scrolling between min title height and max title height
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleBarHeight003, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->maxTitleBarHeight_ = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    EXPECT_TRUE(NearEqual(startTempTitleBarHeight, fullTitleHeight));
+
+    /*
+     * @tc.steps: step3. start dragging,
+     * and check whether tempTitleBarHeight is changing between min and max titlebar height.
+     */
+    float dragDistance = -10.0f;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    auto dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    auto expectedDragHeight = fullTitleHeight + dragDistance;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step4. drag again,
+     * and check whether tempTitleBarHeight is changing between min and max titlebar height.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedDragHeight += dragDistance;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-dragDistance * 2.0f);
+    EXPECT_TRUE(NearEqual(offsetHandled, -dragDistance * 2.0f));
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedDragHeight = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step5. drag and send scroll end,
+     * check whether tempTitleBarHeight recover to fullTitleBarHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    titleBarPattern_->OnCoordScrollEnd();
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedDragHeight = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+}
+
+/**
+ * @tc.name: GetTempTitleBarHeight004
+ * @tc.desc: Test GetTempTitleBarHeight after scrolling and the target height is smaller than the minHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleBarHeight004, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->SetMaxTitleBarHeight();
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    auto minTitleHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->minTitleHeight_ = minTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->minTitleHeight_, minTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    EXPECT_TRUE(NearEqual(startTempTitleBarHeight, fullTitleHeight));
+
+    /*
+     * @tc.steps: step3. start dragging to minHeight
+     * and check whether tempTitleBarHeight is equal to minHeight.
+     */
+    float dragDistance = minTitleHeight - fullTitleHeight;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    auto dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    auto expectedDragHeight = fullTitleHeight + dragDistance;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step4. drag again,
+     * and check whether tempTitleBarHeight is changing between min and max titlebar height.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, 0.0f));
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleBarHeight is equal to fullTitleBarHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-dragDistance * 2.0f);
+    EXPECT_TRUE(NearEqual(offsetHandled, -dragDistance));
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedDragHeight = fullTitleHeight;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+
+    /*
+     * @tc.steps: step5. drag and send scroll end,
+     * check whether tempTitleBarHeight recover to minTitleHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    titleBarPattern_->OnCoordScrollEnd();
+    dragTempTitleBarHeight = titleBarPattern_->GetTempTitleBarHeight();
+    expectedDragHeight = minTitleHeight;
+    EXPECT_TRUE(NearEqual(dragTempTitleBarHeight, expectedDragHeight));
+}
+
+/**
  * @tc.name: GetDefaultTitleBarHeight001
  * @tc.desc: Test GetDefaultTitleBarHeight interface.
  * @tc.type: FUNC
@@ -188,6 +492,318 @@ HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY001, TestSize.Level1)
     auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
     auto ret = titleBarPattern->GetTempTitleOffsetY();
     EXPECT_EQ(ret, RET_VALUE);
+}
+
+/**
+ * @tc.name: GetTempTitleOffsetY002
+ * @tc.desc: Test GetTempTitleOffsetY interface after overDragging
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY002, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->SetMaxTitleBarHeight();
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    auto minTitleHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->minTitleHeight_ = minTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->minTitleHeight_, minTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+    
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleOffsetY is equal to titleOffsetY.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    EXPECT_TRUE(NearEqual(startTempTitleOffsetY, 0.f));
+
+    /*
+     * @tc.steps: step3. start overDragging and check whether tempTitleOffsetY is changing as well.
+     */
+    float overDragDistance = 100.0f;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    auto overDragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    auto expectedOverDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(overDragTempTitleOffsetY, expectedOverDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. overDrag again,
+     * and check whether tempTitleOffsetY is changing as well.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    overDragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedOverDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(overDragTempTitleOffsetY, expectedOverDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleOffsetY is equal to titleOffsetY.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-overDragDistance * 2.0f);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    overDragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedOverDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(overDragTempTitleOffsetY, expectedOverDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step5. overdrag and send scroll end,
+     * check whether tempTitleOffsetY recover to 0.f.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(overDragDistance * 3.0f);
+    EXPECT_TRUE(NearZero(offsetHandled));
+    titleBarPattern_->OnCoordScrollEnd();
+    overDragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedOverDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(overDragTempTitleOffsetY, 0.f));
+}
+
+/**
+ * @tc.name: GetTempTitleOffsetY003
+ * @tc.desc: Test GetTempTitleOffsetY interface after scrolling between min title height and max title height
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY003, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->SetMaxTitleBarHeight();
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    auto minTitleHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->minTitleHeight_ = minTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->minTitleHeight_, minTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+    
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleOffsetY is equal to 0.f.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    EXPECT_TRUE(NearEqual(startTempTitleOffsetY, 0.f));
+    auto moveRatio = titleBarPattern_->moveRatio_;
+
+    /*
+     * @tc.steps: step3. start dragging
+     * and check whether tempTitleOffsetY is changing between min and max title offsetY.
+     */
+    float dragDistance = -10.0f;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    auto dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    auto expectedDragTitleOffsetY = titleOffsetY + dragDistance * moveRatio;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. drag again,
+     * and check whether tempTitleOffsetY is changing between min and max title offsetY.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedDragTitleOffsetY += dragDistance * moveRatio;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleOffsetY is equal to titleOffsetY.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-dragDistance * 2.0f);
+    EXPECT_TRUE(NearEqual(offsetHandled, -dragDistance * 2.0f));
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step5. drag and send scroll end,
+     * check whether tempTitleOffsetY recover to 0.f.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    titleBarPattern_->OnCoordScrollEnd();
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, 0.f));
+}
+
+/**
+ * @tc.name: GetTempTitleOffsetY004
+ * @tc.desc: Test GetTempTitleOffsetY interface after scrolling and the target height is smaller than the minHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY004, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. init titleBar relative environment
+     */
+    InitTitleBarTestNg();
+    MockPipelineContext::SetUp();
+    auto subtitleNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode_->SetSubtitle(subtitleNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    titleBarLayoutProperty->UpdateTitleMode(NavigationTitleMode::FREE);
+    auto fullTitleHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->SetMaxTitleBarHeight();
+    EXPECT_TRUE(NearEqual(titleBarPattern_->maxTitleBarHeight_, fullTitleHeight));
+    auto minTitleHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    titleBarPattern_->minTitleHeight_ = minTitleHeight;
+    EXPECT_TRUE(NearEqual(titleBarPattern_->minTitleHeight_, minTitleHeight));
+    titleBarPattern_->currentTitleBarHeight_ = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+    EXPECT_TRUE(NearEqual(titleBarPattern_->currentTitleBarHeight_, fullTitleHeight));
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    auto paddingTwoLines = theme->GetPaddingTopTwolines();
+    auto titleSpaceVertical = static_cast<float>(theme->GetTitleSpaceVertical().ConvertToPx());
+    auto titleSpace = fullTitleHeight - static_cast<float>(paddingTwoLines.ConvertToPx());
+    auto titleNode = frameNode_->GetTitle();
+    ASSERT_NE(titleNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(titleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto titleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    auto titleHeight = titleGeometryNode->GetFrameSize().Height();
+    frameNode = AceType::DynamicCast<FrameNode>(subtitleNode);
+    ASSERT_NE(frameNode, nullptr);
+    auto subtitleGeometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(subtitleGeometryNode, nullptr);
+    auto subtitleHeight = subtitleGeometryNode->GetFrameSize().Height();
+    auto titleRealHeight = titleHeight + subtitleHeight + titleSpaceVertical;
+    float dividerOffset = 2.0f;
+    auto titleOffsetY = (titleSpace - titleRealHeight +
+        static_cast<float>(paddingTwoLines.ConvertToPx())) / dividerOffset;
+    titleBarPattern_->SetCurrentTitleOffsetY(titleOffsetY);
+    titleBarPattern_->initialTitleOffsetY_ = titleOffsetY;
+    
+    /*
+     * @tc.steps: step2. start titleBar scroll and check whether tempTitleOffsetY is equal to 0.f.
+     */
+    titleBarPattern_->OnCoordScrollStart();
+    auto startTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    EXPECT_TRUE(NearEqual(startTempTitleOffsetY, 0.f));
+    auto moveRatio = titleBarPattern_->moveRatio_;
+
+    /*
+     * @tc.steps: step3. start dragging to minHeight
+     * and check whether tempTitleOffsetY is equal to minHeight.
+     */
+    float dragDistance = minTitleHeight - fullTitleHeight;
+    auto offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    auto dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    auto expectedDragTitleOffsetY = titleOffsetY + dragDistance * moveRatio;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. drag again,
+     * and check whether tempTitleOffsetY is equal to minHeight.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, 0.0f));
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step4. recover drag state,
+     * check whether tempTitleOffsetY is equal to titleOffsetY.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(-dragDistance * 2.0f);
+    EXPECT_TRUE(NearEqual(offsetHandled, -dragDistance));
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedDragTitleOffsetY = titleOffsetY;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
+
+    /*
+     * @tc.steps: step5. drag and send scroll end,
+     * check whether tempTitleOffsetY recover to min titleOffsetY.
+     */
+    offsetHandled = titleBarPattern_->OnCoordScrollUpdate(dragDistance);
+    EXPECT_TRUE(NearEqual(offsetHandled, dragDistance));
+    titleBarPattern_->OnCoordScrollEnd();
+    dragTempTitleOffsetY = titleBarPattern_->GetTempTitleOffsetY();
+    expectedDragTitleOffsetY = titleBarPattern_->minTitleOffsetY_;
+    EXPECT_TRUE(NearEqual(dragTempTitleOffsetY, expectedDragTitleOffsetY));
 }
 
 /**
