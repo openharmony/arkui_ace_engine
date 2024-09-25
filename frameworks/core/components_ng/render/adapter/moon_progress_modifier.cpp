@@ -72,7 +72,7 @@ void MoonProgressModifier::onDraw(DrawingContext& context)
     frameSize_.SetWidth(contentSize.Width());
     frameSize_.SetHeight(contentSize.Height());
     SetBigRadius();
-    if (GreatOrEqual(ratio_->Get(), bigRadius_ / smallRadius_) || hideMask_) {
+    if (GreatOrEqual(ratio_->Get(), bigRadius_ / smallRadius_)) {
         hideMask_ = true;
         return;
     }
