@@ -240,8 +240,8 @@ void Scrollable::HandleTouchUp()
         }
         return;
     }
-    if (state_ != AnimationState::SNAP && scrollSnapCallback_) {
-        scrollSnapCallback_(0.0, 0.0);
+    if (state_ != AnimationState::SNAP && scrollSnapListCallback_) {
+        scrollSnapListCallback_(0.0, 0.0);
     }
 }
 
@@ -494,7 +494,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
         }
     }
 
-    if (scrollSnapCallback_ && scrollSnapCallback_(GetFinalPosition() - mainPosition, correctVelocity)) {
+    if (scrollSnapListCallback_ && scrollSnapListCallback_(GetFinalPosition() - mainPosition, correctVelocity)) {
         currentVelocity_ = 0.0;
         return;
     }

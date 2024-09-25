@@ -57,7 +57,7 @@ using ScrollFrameBeginCallback = std::function<ScrollFrameResult(Dimension, Scro
 using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
-using ScrollSnapCallback = std::function<bool(double targetOffset, double velocity)>;
+using ScrollSnapListCallback = std::function<bool(double targetOffset, double velocity)>;
 using ContinuousSlidingCallback = std::function<double()>;
 using CalcPredictSnapOffsetCallback =
     std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
@@ -368,9 +368,9 @@ public:
         edgeEffect_ = effect;
     }
 
-    void SetOnScrollSnapCallback(const ScrollSnapCallback& scrollSnapCallback)
+    void SetScrollSnapListCallback(const ScrollSnapListCallback& scrollSnapListCallback)
     {
-        scrollSnapCallback_ = scrollSnapCallback;
+        scrollSnapListCallback_ = scrollSnapListCallback;
     }
     void SetContinuousDragStatus(bool status)
     {
@@ -520,7 +520,7 @@ private:
 
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
-    ScrollSnapCallback scrollSnapCallback_;
+    ScrollSnapListCallback scrollSnapListCallback_;
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
     ContinuousSlidingCallback continuousSlidingCallback_;

@@ -1342,11 +1342,11 @@ HWTEST_F(ScrollableCoverTestNg, HandleTouchUpTest001, TestSize.Level1)
     scrollable->HandleTouchUp();
     EXPECT_FALSE(scrollable->isTouching_);
     /**
-     * @tc.steps: step3. Set nestedScrolling_ to false and scrollSnapCallback_ is executed
+     * @tc.steps: step3. Set nestedScrolling_ to false and scrollSnapListCallback_ is executed
      */
     bool isScrollSnapCallbackCalled = false;
     scrollable->state_ = Scrollable::AnimationState::IDLE;
-    scrollable->scrollSnapCallback_ = [&isScrollSnapCallbackCalled](double targetOffset, double velocity) {
+    scrollable->scrollSnapListCallback_ = [&isScrollSnapCallbackCalled](double targetOffset, double velocity) {
         isScrollSnapCallbackCalled = true;
         return true;
     };
