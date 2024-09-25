@@ -408,26 +408,6 @@ public:
         return followSystem_;
     }
 
-    void SetUseAppFontScale(const bool useSystemFontScale)
-    {
-        useAppFontScale_ = useSystemFontScale;
-    }
-
-    bool UseAppFontScale()
-    {
-        return useAppFontScale_;
-    }
-
-    void SetAppFontScale(const float scale)
-    {
-        appFontScale_ = scale;
-    }
-
-    float GetAppFontScale()
-    {
-        return appFontScale_;
-    }
-
     double NormalizeToPx(const Dimension& dimension) const;
 
     double ConvertPxToVp(const Dimension& dimension) const;
@@ -1609,8 +1589,6 @@ private:
     bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
-    bool useAppFontScale_;
-    float appFontScale_;
 
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
