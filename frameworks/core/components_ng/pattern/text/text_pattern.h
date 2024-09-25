@@ -716,6 +716,7 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
     bool HasContent();
+    void SetupMagnifier();
 protected:
     int32_t GetClickedSpanPosition()
     {

@@ -251,6 +251,7 @@ public:
         };
         selectInfo.onCreateCallback.textRangeCallback = textRange;
     }
+    bool GetClipHandleViewPort(RectF& rect);
 
 protected:
     RectF MergeSelectedBoxes(
@@ -290,7 +291,6 @@ protected:
         originalMenuIsShow_ = IsCurrentMenuVisibile();
     }
     virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
-    bool GetClipHandleViewPort(RectF& rect);
     virtual void UpdateClipHandleViewPort(RectF& rect) {};
     bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
     virtual bool IsClipHandleWithViewPort()
