@@ -1309,6 +1309,7 @@ void ListPattern::OnAnimateStop()
         MarkDirtyNodeSelf();
         isScrollEnd_ = true;
     }
+    scrollTarget_.reset();
 }
 
 void ListPattern::ScrollTo(float position)
@@ -1552,9 +1553,10 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         }
         GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
     }
-    auto extraOffset = GetExtraOffset();
-    if (extraOffset.has_value()) {
-        targetPos += extraOffset.value();
+    float extraOffset = 0.0f;
+    if (GetExtraOffset().has_value()) {
+        extraOffset = GetExtraOffset().value();
+        targetPos += extraOffset;
         ResetExtraOffset();
     }
     if (!NearZero(targetPos)) {
@@ -1563,6 +1565,9 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
             scrollSnapVelocity_ = 0.0f;
             predictSnapOffset_.reset();
             snapTrigOnScrollStart_ = false;
+        }
+        if (!indexInGroup.has_value()) {
+            scrollTarget_ = { index, extraOffset, align, targetPos + currentOffset_ };
         }
     }
     return true;
@@ -1691,6 +1696,22 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
             posMap_->ClearPosMap();
         }
         CalculateCurrentOffset(relativeOffset, listLayoutAlgorithm->GetRecycledItemPosition());
+    }
+    if (scrollTarget_) {
+        auto& target = scrollTarget_.value();
+        auto posInfo = posMap_->GetPositionInfo(target.index);
+        if (!Negative(posInfo.mainPos)) {
+            float startPos = posInfo.mainPos - currentOffset_;
+            float targetPos = 0.0f;
+            GetListItemAnimatePos(startPos, startPos + posInfo.mainSize, target.align, targetPos);
+            targetPos += currentOffset_ + target.extraOffset;
+            const float epsilon = 0.1f;
+            if (!NearEqual(relativeOffset + prevOffset, currentOffset_, epsilon) ||
+                !NearEqual(target.targetOffset, targetPos, epsilon)) {
+                target.targetOffset = targetPos;
+                AnimateTo(targetPos, -1, nullptr, true);
+            }
+        }
     }
     return currentOffset_ - prevOffset;
 }
