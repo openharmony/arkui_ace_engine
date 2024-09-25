@@ -53,7 +53,7 @@ namespace {
     const auto ATTRIBUTE_CONTROL_SIZE_NAME("controlSize");
     const auto ATTRIBUTE_BUTTON_STYLE_NAME("buttonStyle");
 
-    using ButtonLabelResourceTest = std::pair<ResourceStr, std::string>;
+    using ButtonLabelResourceTest = std::tuple<ResourceStr, std::string>;
 
     // resource names and id
     const auto RES_NAME = "aa.bb.cc";
@@ -85,7 +85,6 @@ public:
         auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
 
         // set test values to Theme Pattern as data for the Theme building
-        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
         MockThemeStyle::GetInstance()->SetAttr(std::to_string(RES_ID),
             { .value = RESOURCE_BY_NUMBER, .type = ThemeConstantsType::STRING });
         MockThemeStyle::GetInstance()->SetAttr(RES_NAME,
@@ -132,10 +131,12 @@ HWTEST_F(ButtonModifierResourcesTest, SetButtonOptions2TestLabelResource, TestSi
     inputValueOptions.buttonStyle = Converter::ArkValue<Opt_ButtonStyleMode>(ARK_BUTTON_STYLE_MODE_NORMAL);
     inputValueOptions.controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_SMALL);
     inputValueOptions.role = Converter::ArkValue<Opt_ButtonRole>(ARK_BUTTON_ROLE_NORMAL);
-    auto labelString = BUTTON_LABEL_RESOURCES_TEST_PLAN.at(0).first;
+    ResourceStr label;
+    std::string expectValue;
+    std::tie(label, expectValue) = BUTTON_LABEL_RESOURCES_TEST_PLAN.front();
     auto optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
     // Test
-    modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
+    modifier_->setButtonOptions2(node_, &label, &optInputValueOptions);
     // Initial verification
     jsonValue = GetJsonValue(node_);
     auto checkType = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
@@ -149,11 +150,11 @@ HWTEST_F(ButtonModifierResourcesTest, SetButtonOptions2TestLabelResource, TestSi
     EXPECT_EQ(checkButtonStyle, "ButtonStyleMode.NORMAL");
     EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
     EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
-    EXPECT_EQ(checkLabel, BUTTON_LABEL_RESOURCES_TEST_PLAN.at(0).second);
+    EXPECT_EQ(checkLabel, expectValue);
     
-    for (auto label : BUTTON_LABEL_RESOURCES_TEST_PLAN) {
-        modifier_->setButtonOptions2(node_, &label.first, &optInputValueOptions);
-        checkLabel = GetAttrValue<std::string>(jsonValue, label.second);
+    for (const auto& [label, expectValue] : BUTTON_LABEL_RESOURCES_TEST_PLAN) {
+        modifier_->setButtonOptions2(node_, &label, &optInputValueOptions);
+        checkLabel = GetAttrValue<std::string>(jsonValue, expectValue);
     }
 }
 } // namespace OHOS::Ace::NG

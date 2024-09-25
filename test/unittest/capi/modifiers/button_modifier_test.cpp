@@ -106,7 +106,6 @@ public:
         auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
 
         // set test values to Theme Pattern as data for the Theme building
-        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
         themeConstants->LoadTheme(0);
 
         // build default ButtonTheme
