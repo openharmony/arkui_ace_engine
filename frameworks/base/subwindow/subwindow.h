@@ -190,10 +190,10 @@ private:
     int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
+    bool isRosenWindowCreate_ = false;
     ToastWindowType toastWindowType_ = ToastWindowType::TOAST_IN_TYPE_TOAST;
     // toast main window ID
     uint32_t mainWindowId_ = 0;
-    bool isRosenWindowCreate_ = false;
 };
 
 } // namespace OHOS::Ace
