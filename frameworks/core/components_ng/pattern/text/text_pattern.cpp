@@ -2668,7 +2668,7 @@ std::string TextPattern::GetBindSelectionMenuInJson() const
         auto jsonItem = JsonUtil::Create(true);
         jsonItem->Put("spanType", static_cast<int32_t>(spanType));
         jsonItem->Put("responseType", static_cast<int32_t>(responseType));
-        jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType.SELECTION_MENU));
+        jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType::SELECTION_MENU));
         jsonArray->Put(jsonItem);
     }
     FillPreviewMenuInJson(jsonArray);
