@@ -1122,7 +1122,7 @@ private:
 
     bool SkipFocusMoveBeforeRemove();
 
-    bool CheckArrowKeyStepOut(FocusStep moveStep);
+    bool IsArrowKeyStepOut(FocusStep moveStep);
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

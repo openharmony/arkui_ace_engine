@@ -943,34 +943,34 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
             TAG_LOGI(AceLogTag::ACE_FOCUS,
                 "Request next focus failed because direction of node(%{public}d) is different with step(%{public}d).",
                 focusAlgorithm_.isVertical, moveStep);
-            return CheckArrowKeyStepOut(moveStep);
+            return IsArrowKeyStepOut(moveStep);
         }
         auto ret = GoToNextFocusLinear(moveStep, rect);
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request next focus by default linear algorithm. Return %{public}d.", ret);
-        return (ret || CheckArrowKeyStepOut(moveStep));
+        return (ret || IsArrowKeyStepOut(moveStep));
     }
     if (!lastWeakFocusNode_.Upgrade()) {
-        return CheckArrowKeyStepOut(moveStep);
+        return IsArrowKeyStepOut(moveStep);
     }
     WeakPtr<FocusHub> nextFocusHubWeak;
     focusAlgorithm_.getNextFocusNode(moveStep, lastWeakFocusNode_, nextFocusHubWeak);
     auto nextFocusHub = nextFocusHubWeak.Upgrade();
     if (!nextFocusHub || nextFocusHub == lastWeakFocusNode_.Upgrade()) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request next focus failed by custom focus algorithm.");
-        return CheckArrowKeyStepOut(moveStep);
+        return IsArrowKeyStepOut(moveStep);
     }
     auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
     TAG_LOGI(AceLogTag::ACE_FOCUS,
         "Request next focus by custom focus algorithm. Next focus node is %{public}s/%{public}d. Return %{public}d",
         nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
-    return (ret || CheckArrowKeyStepOut(moveStep));
+    return (ret || IsArrowKeyStepOut(moveStep));
 }
 
-bool FocusHub::CheckArrowKeyStepOut(FocusStep moveStep)
+bool FocusHub::IsArrowKeyStepOut(FocusStep moveStep)
 {
     if (!IsFocusStepTab(moveStep) && GetIsFocusGroup() && !arrowKeyStepOut_) {
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "CheckArrowKeyStepOut Node(%{public}s/%{public}d), step(%{public}d),"
+            "IsArrowKeyStepOut Node(%{public}s/%{public}d), step(%{public}d),"
             "this node is focus group and set can not step out!",
             GetFrameName().c_str(), GetFrameId(), moveStep);
         return true;
