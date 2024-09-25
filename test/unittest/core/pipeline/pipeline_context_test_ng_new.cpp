@@ -1845,5 +1845,86 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg100, TestSize.Level1)
     context_->UpdateHalfFoldHoverStatus(DEFAULT_INT10, DEFAULT_INT10);
     ASSERT_EQ(context_->isHalfFoldHoverStatus_, true);
 }
+
+/**
+ * @tc.name: MouseEvent01
+ * @tc.desc: Test GetResampleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, MouseEvent01, TestSize.Level1)
+{
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
+    auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
+    std::vector<MouseEvent> history;
+    MouseEvent historyMouseEvent1;
+    historyMouseEvent1.x = 100.0f;
+    historyMouseEvent1.y = 200.0f;
+    historyMouseEvent1.time = timeStampAce;
+    history.push_back(historyMouseEvent1);
+    MouseEvent historyMouseEvent2;
+    historyMouseEvent2.x = 150.0f;
+    historyMouseEvent2.y = 250.0f;
+    historyMouseEvent2.time = timeStampTwo;
+    history.push_back(historyMouseEvent2);
+    std::vector<MouseEvent> current;
+    MouseEvent currentMouseEvent1;
+    currentMouseEvent1.x = 200.0f;
+    currentMouseEvent1.y = 300.0f;
+    currentMouseEvent1.time = timeStampThree;
+    current.push_back(currentMouseEvent1);
+    MouseEvent currentMouseEvent2;
+    currentMouseEvent2.x = 250.0f;
+    currentMouseEvent2.y = 350.0f;
+    currentMouseEvent2.time = timeStampFour;
+    current.push_back(currentMouseEvent2);
+    uint64_t nanoTimeStamp = 2500;
+
+    MouseEvent resampledMouseEvent = context_->GetResampleMouseEvent(history, current, nanoTimeStamp);
+    EXPECT_EQ(175.0f, resampledMouseEvent.x);
+    EXPECT_EQ(275.0f, resampledMouseEvent.y);
+}
+
+/**
+ * @tc.name: DragEvent01
+ * @tc.desc: Test GetResamplePointerEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, DragEvent01, TestSize.Level1)
+{
+    auto timeStampAce = TimeStamp(std::chrono::nanoseconds(1000));
+    auto timeStampTwo = TimeStamp(std::chrono::nanoseconds(2000));
+    auto timeStampThree = TimeStamp(std::chrono::nanoseconds(3000));
+    auto timeStampFour = TimeStamp(std::chrono::nanoseconds(4000));
+
+    std::vector<PointerEvent> history;
+    PointerEvent historyDrageEvent1;
+    historyDrageEvent1.x = 200;
+    historyDrageEvent1.y = 300;
+    historyDrageEvent1.time = timeStampAce;
+    history.push_back(historyDrageEvent1);
+    PointerEvent historyDrageEvent2;
+    historyDrageEvent2.x = 250;
+    historyDrageEvent2.y = 350;
+    historyDrageEvent2.time = timeStampTwo;
+    history.push_back(historyDrageEvent2);
+    std::vector<PointerEvent> current;
+    PointerEvent currentDragEvent1;
+    currentDragEvent1.x = 300;
+    currentDragEvent1.y = 400;
+    currentDragEvent1.time = timeStampThree;
+    current.push_back(currentDragEvent1);
+    PointerEvent currentDragEvent2;
+    currentDragEvent2.x = 350;
+    currentDragEvent2.y = 450;
+    currentDragEvent2.time = timeStampFour;
+    current.push_back(currentDragEvent2);
+    uint64_t nanoTimeStamp = 3100;
+
+    PointerEvent resampledPointerEvent = context_->GetResamplePointerEvent(history, current, nanoTimeStamp);
+    EXPECT_EQ(300, resampledPointerEvent.x);
+    EXPECT_EQ(400, resampledPointerEvent.y);
+}
 } // namespace NG
 } // namespace OHOS::Ace
