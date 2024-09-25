@@ -22,6 +22,8 @@
 
 namespace OHOS::Ace::NG {
 namespace Validator {
+void ValidateNonNegative(std::optional<Dimension>& opt);
+void ValidateNonPercent(std::optional<Dimension>& opt);
 void ValidatePositive(std::optional<Dimension>& opt);
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG

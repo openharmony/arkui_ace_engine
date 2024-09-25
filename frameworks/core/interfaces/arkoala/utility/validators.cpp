@@ -17,6 +17,18 @@
 
 namespace OHOS::Ace::NG {
 namespace Validator {
+void ValidateNonNegative(std::optional<Dimension>& opt)
+{
+    if (opt.has_value() && opt.value().IsNegative()) {
+        opt.reset();
+    }
+}
+void ValidateNonPercent(std::optional<Dimension>& opt)
+{
+    if (opt.has_value() && (opt.value().Unit() == DimensionUnit::PERCENT)) {
+        opt.reset();
+    }
+}
 void ValidatePositive(std::optional<Dimension>& opt)
 {
     if (opt.has_value() && opt.value().IsNonPositive()) {

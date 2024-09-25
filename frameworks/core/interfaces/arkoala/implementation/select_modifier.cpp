@@ -63,7 +63,7 @@ void SelectedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto optValue = Converter::OptConvert<int32_t>(*value);
     if (optValue && optValue.value() < -1) {
-        optValue = -1;
+        optValue.reset();
     }
     SelectModelNG::SetSelected(frameNode, optValue);
 }
@@ -142,13 +142,8 @@ void SpaceImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto valueOpt = Converter::OptConvert<Dimension>(*value);
-
-    if (valueOpt) {
-        Dimension space = valueOpt.value();
-        if (LessNotEqual(space.Value(), 0.0) || space.Unit() == DimensionUnit::PERCENT) {
-            valueOpt.reset();
-        }
-    }
+    Validator::ValidateNonNegative(valueOpt);
+    Validator::ValidateNonPercent(valueOpt);
     SelectModelNG::SetSpace(frameNode, valueOpt);
 }
 void ArrowPositionImpl(Ark_NativePointer node,
