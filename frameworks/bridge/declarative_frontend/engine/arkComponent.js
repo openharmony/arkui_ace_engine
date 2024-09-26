@@ -20399,6 +20399,14 @@ class ArkNavDestinationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
     return this;
   }
+  hideToolBar(value) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationHideToolBarModifier.identity,
+      NavDestinationHideToolBarModifier, value);
+    return this;
+  }
+  toolbarConfiguration(value) {
+    throw new Error('Method not implemented.');
+  }
   backButtonIcon(value) {
     modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
       NavDestinationBackButtonIconModifier, value);
@@ -20481,6 +20489,21 @@ class HideTitleBarModifier extends ModifierWithKey {
   }
 }
 HideTitleBarModifier.identity = Symbol('hideTitleBar');
+
+class NavDestinationHideToolBarModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetHideToolBar(node);
+    }
+    else {
+      getUINativeModule().navDestination.setHideToolBar(node, this.value);
+    }
+  }
+}
+NavDestinationHideToolBarModifier.identity = Symbol('hideToolBar');
 
 class IgnoreLayoutSafeAreaModifier extends ModifierWithKey {
   constructor(value) {

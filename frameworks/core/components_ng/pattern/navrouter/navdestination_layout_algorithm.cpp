@@ -348,8 +348,10 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty);
     auto resetTitleBarHeight = TransferTitleBarHeight(hostNode, titlebarHeight);
     LayoutContent(layoutWrapper, hostNode, navDestinationLayoutProperty, resetTitleBarHeight);
-    float toolbarHeight = NavigationLayoutUtil::LayoutToolBar(layoutWrapper, hostNode, navDestinationLayoutProperty);
-    NavigationLayoutUtil::LayoutToolBarDivider(layoutWrapper, hostNode, navDestinationLayoutProperty, toolbarHeight);
+    float toolbarHeight = NavigationLayoutUtil::LayoutToolBar(
+        layoutWrapper, hostNode, navDestinationLayoutProperty, true);
+    NavigationLayoutUtil::LayoutToolBarDivider(
+        layoutWrapper, hostNode, navDestinationLayoutProperty, toolbarHeight, true);
     auto&& opts = navDestinationLayoutProperty->GetSafeAreaExpandOpts();
     if (opts) {
         auto geometryNode = hostNode->GetGeometryNode();

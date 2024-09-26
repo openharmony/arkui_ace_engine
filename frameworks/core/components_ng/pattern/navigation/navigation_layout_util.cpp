@@ -154,7 +154,7 @@ float NavigationLayoutUtil::MeasureToolBarDivider(
 }
 
 float NavigationLayoutUtil::LayoutToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationNodeBase>& nodeBase,
-    const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase)
+    const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, bool isNeedToCreatePaddingAndBorder)
 {
     if (layoutPropertyBase->GetHideToolBar().value_or(false)) {
         return 0.0f;
@@ -169,9 +169,14 @@ float NavigationLayoutUtil::LayoutToolBar(LayoutWrapper* layoutWrapper, const Re
     if (NearZero(toolbarHeight)) {
         return 0.0f;
     }
-
+    auto toolBarOffsetX = geometryNode->GetFrameOffset().GetX();
     auto toolBarOffsetY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - toolbarHeight;
-    auto toolBarOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), static_cast<float>(toolBarOffsetY));
+    if (isNeedToCreatePaddingAndBorder) {
+        const auto& padding = layoutPropertyBase->CreatePaddingAndBorder();
+        toolBarOffsetX = padding.left.value_or(0.0f);
+        toolBarOffsetY -= padding.bottom.value_or(0.0f);
+    }
+    auto toolBarOffset = OffsetF(static_cast<float>(toolBarOffsetX), static_cast<float>(toolBarOffsetY));
     geometryNode->SetMarginFrameOffset(toolBarOffset);
     toolBarWrapper->Layout();
     return toolbarHeight;
@@ -179,7 +184,8 @@ float NavigationLayoutUtil::LayoutToolBar(LayoutWrapper* layoutWrapper, const Re
 
 void NavigationLayoutUtil::LayoutToolBarDivider(
     LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationNodeBase>& nodeBase,
-    const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, float toolbarHeight)
+    const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, float toolbarHeight,
+    bool isNeedToCreatePaddingAndBorder)
 {
     if (layoutPropertyBase->GetHideToolBar().value_or(false) || nodeBase->GetPrevToolBarIsCustom().value_or(false) ||
         !nodeBase->IsUseToolbarConfiguration() || NearZero(toolbarHeight)) {
@@ -194,10 +200,15 @@ void NavigationLayoutUtil::LayoutToolBarDivider(
 
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
+    auto dividerOffsetX = dividerGeometryNode->GetFrameOffset().GetX();
     auto dividerOffsetY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - toolbarHeight -
                           theme->GetToolBarDividerWidth().ConvertToPx();
-    auto toolBarDividerOffset =
-        OffsetF(dividerGeometryNode->GetFrameOffset().GetX(), static_cast<float>(dividerOffsetY));
+    if (isNeedToCreatePaddingAndBorder) {
+        const auto& padding = layoutPropertyBase->CreatePaddingAndBorder();
+        dividerOffsetX = padding.left.value_or(0.0f);
+        dividerOffsetY -= padding.bottom.value_or(0.0f);
+    }
+    auto toolBarDividerOffset = OffsetF(static_cast<float>(dividerOffsetX), static_cast<float>(dividerOffsetY));
     dividerGeometryNode->SetFrameOffset(toolBarDividerOffset);
     dividerWrapper->Layout();
 }
