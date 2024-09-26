@@ -1876,14 +1876,14 @@ void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc
     touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
 }
 
-void GestureEventHub::SetDragForbiddenForcely(bool isDragForbidden)
+void GestureEventHub::SetDragForbiddenForcely(bool isDragForbiddenForWholeSubTree)
 {
-    isDragForbidden_ = isDragForbidden;
+    isDragForbiddenForWholeSubTree_ = isDragForbiddenForWholeSubTree;
 }
 
 bool GestureEventHub::IsDragForbidden()
 {
-    return isDragForbidden_;
+    return isDragForbiddenForWholeSubTree_;
 }
 
 bool GestureEventHub::IsNeedSwitchToSubWindow() const

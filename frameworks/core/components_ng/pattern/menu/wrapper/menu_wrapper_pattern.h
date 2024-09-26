@@ -480,6 +480,8 @@ private:
     void OnAttachToFrameNode() override;
     void RegisterOnTouch();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    // mark self and all children no-draggable
+    void MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& frameNode);
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
