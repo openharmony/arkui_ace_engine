@@ -394,6 +394,7 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     IF_TRUE(needResetSelection, pattern->ResetSelection());
     IF_TRUE(isHoldByOther, pattern->CloseSelectOverlay());
     if (isBackPressed) {
+        IF_TRUE((info && info->isSingleHandle), pattern->OnBackPressed());
         if (!pattern->IsEditing() && pattern->HasFocus()) {
             FocusHub::LostFocusToViewRoot();
         }
