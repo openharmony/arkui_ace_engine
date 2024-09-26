@@ -219,8 +219,9 @@ void TextFieldLayoutAlgorithm::ApplyIndent(double width)
     CHECK_NULL_VOID(pipeline);
     double indentValue = 0.0;
     if (textIndent_.Unit() != DimensionUnit::PERCENT) {
+        float fontScale = std::min(pipeline->GetFontScale(), pipeline->GetMaxAppFontScale());
         if (!textIndent_.NormalizeToPx(pipeline->GetDipScale(),
-            pipeline->GetFontScale(), pipeline->GetLogicScale(), width, indentValue)) {
+            fontScale, pipeline->GetLogicScale(), width, indentValue)) {
             return;
         }
     } else {
