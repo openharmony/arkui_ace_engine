@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/node/node_api.h"
 #include "converter.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -77,8 +76,8 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
     if (resource.id.tag == ARK_TAG_INT32 && resource.type.tag == ARK_TAG_INT32) {
         id_ = resource.id.i32;
         type_ = static_cast<NodeModifier::ResourceType>(resource.type.i32);
-        bundleName_ = std::string(resource.bundleName.chars);
-        moduleName_ = std::string(resource.moduleName.chars);
+        bundleName_ = Convert<std::string>(resource.bundleName);
+        moduleName_ = Convert<std::string>(resource.moduleName);
         if (resource.params.tag != ARK_TAG_UNDEFINED) {
             for (int i = 0; i < resource.params.value.length; i++) {
                 params_.emplace_back(resource.params.value.array[i].chars);
@@ -140,7 +139,7 @@ std::optional<StringArray> ResourceConverter::ToStringArray()
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == NodeModifier::ResourceType::STRING) {
+    if (type_ == NodeModifier::ResourceType::FLOAT) {
         return themeConstants_->GetDimension(id_);
     }
     return std::nullopt;

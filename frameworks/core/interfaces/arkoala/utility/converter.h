@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include "reverse_converter.h"
 #include "bridge/common/utils/utils.h"
 #include "base/geometry/axis.h"
 #include "base/geometry/calc_dimension.h"
@@ -40,7 +41,6 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/image/image_source_info.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
 #include "ace_engine_types.h"
@@ -322,8 +322,13 @@ namespace Converter {
     template<>
     inline Dimension Convert(const Ark_Length& src)
     {
-        return src.type == Ark_Tag::ARK_TAG_RESOURCE ?
-               Dimension() : Dimension(src.value, static_cast<DimensionUnit>(src.unit));
+        if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
+            auto resource = ArkValue<Ark_Resource>(src);
+            ResourceConverter converter(resource);
+            return converter.ToDimension().value_or(Dimension());
+        } else {
+            return Dimension(src.value, static_cast<DimensionUnit>(src.unit));
+        }
     }
 
     template<>

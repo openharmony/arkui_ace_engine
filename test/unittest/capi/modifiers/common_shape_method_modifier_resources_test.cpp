@@ -96,7 +96,7 @@ public:
  * @tc.desc: check setStrokeWidth from resource
  * @tc.type: FUNC
  */
-HWTEST_F(CommonShapeMethodModifierResourcesTest, DISABLED_setStrokeWidthTestResources, TestSize.Level1)
+HWTEST_F(CommonShapeMethodModifierResourcesTest, setStrokeWidthTestResources, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     double result;
