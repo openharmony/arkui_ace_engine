@@ -7486,8 +7486,8 @@ ArkUINativeModuleValue CommonBridge::GetWindowWidthBreakpoint(ArkUIRuntimeCallIn
     auto window = container->GetWindow();
     CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
     double density = PipelineBase::GetCurrentDensity();
-    double width;
-    if (density == 0) {
+    double width = 0.0;
+    if (NearZero(density)) {
         width = window->GetCurrentWindowRect().Width();
     } else {
         width = window->GetCurrentWindowRect().Width() / density;
@@ -7519,7 +7519,7 @@ ArkUINativeModuleValue CommonBridge::GetWindowHeightBreakpoint(ArkUIRuntimeCallI
     auto width = window->GetCurrentWindowRect().Width();
     auto height = window->GetCurrentWindowRect().Height();
     auto aspectRatio = 0.0;
-    if (width == 0) {
+    if (NearZero(width)) {
         aspectRatio = 0.0;
     } else {
         aspectRatio = height / width;
