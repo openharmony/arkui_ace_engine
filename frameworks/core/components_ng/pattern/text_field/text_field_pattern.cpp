@@ -7289,9 +7289,6 @@ void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, Window
                     textField->parentGlobalOffset_.GetY()), textField->frameRect_.Height());
                 textField->UpdateCaretInfoToController(true);
                 auto textFieldManager = manager.Upgrade();
-                if (textFieldManager && textField->HasFocus()) {
-                    textFieldManager->AvoidKeyboardInSheet(textField->GetHost());
-                }
                 TAG_LOGI(ACE_TEXT_FIELD, "OnWindowSizeChanged change parentGlobalOffset to: %{public}s",
                     textField->parentGlobalOffset_.ToString().c_str());
             },
