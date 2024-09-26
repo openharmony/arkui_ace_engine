@@ -2470,7 +2470,9 @@ void JSWeb::OnCommonDialog(const JSCallbackInfo& args, int dialogEventType)
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext,false);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info);
@@ -2497,7 +2499,9 @@ void JSWeb::OnConsoleLog(const JSCallbackInfo& args)
                           const BaseEventInfo* info) -> bool {
         bool result = false;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, result);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext,false);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebConsoleLogEvent>(info);
@@ -2525,7 +2529,9 @@ void JSWeb::OnPageStart(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebPageStartEvent>(info);
@@ -2548,7 +2554,9 @@ void JSWeb::OnPageFinish(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebPageFinishEvent>(info);
@@ -2571,7 +2579,9 @@ void JSWeb::OnProgressChange(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
@@ -2593,7 +2603,9 @@ void JSWeb::OnTitleReceive(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebTitleReceiveEvent>(info);
@@ -2615,7 +2627,9 @@ void JSWeb::OnFullScreenExit(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenExitEvent>(info);
@@ -2638,7 +2652,9 @@ void JSWeb::OnFullScreenEnter(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         CHECK_NULL_VOID(func);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info);
@@ -2661,7 +2677,9 @@ void JSWeb::OnGeolocationHide(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationHideEvent>(info);
@@ -2683,7 +2701,9 @@ void JSWeb::OnGeolocationShow(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationShowEvent>(info);
@@ -2703,7 +2723,9 @@ void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                           const BaseEventInfo* info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebRequestFocusEvent>(info);
@@ -2725,7 +2747,9 @@ void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<DownloadStartEvent>(info);
@@ -2747,7 +2771,9 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext,false);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebHttpAuthEvent>(info);
@@ -2778,7 +2804,9 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext,false);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info);
@@ -2801,7 +2829,9 @@ void JSWeb::OnAllSslErrorRequest(const JSCallbackInfo& args)
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext,false);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebAllSslErrorEvent>(info);
@@ -2824,7 +2854,9 @@ void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext,false);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslSelectCertEvent>(info);
@@ -2853,7 +2885,9 @@ void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnKeyEventFunc), node = frameNode](
                           KeyEventInfo& keyEventInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(keyEventInfo);
@@ -2910,7 +2944,9 @@ void JSWeb::OnErrorReceive(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedErrorEvent>(info);
@@ -2932,7 +2968,9 @@ void JSWeb::OnHttpErrorReceive(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedHttpErrorEvent>(info);
@@ -2964,7 +3002,9 @@ void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
                           const BaseEventInfo* info) -> RefPtr<WebResponse> {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<OnInterceptRequestEvent>(info);
@@ -2994,7 +3034,9 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext,false);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<UrlLoadInterceptEvent>(info);
@@ -3021,7 +3063,9 @@ void JSWeb::OnLoadIntercept(const JSCallbackInfo& args)
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext,false);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
@@ -3065,7 +3109,9 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext,false);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
@@ -3108,7 +3154,9 @@ void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext,false);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ContextMenuEvent>(info);
@@ -3135,7 +3183,9 @@ void JSWeb::OnContextMenuHide(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ContextMenuHideEvent>(info);
@@ -3292,7 +3342,9 @@ void JSWeb::OnRenderExited(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<RenderExitedEvent>(info);
@@ -3314,7 +3366,9 @@ void JSWeb::OnRefreshAccessedHistory(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<RefreshAccessedHistoryEvent>(info);
@@ -3399,7 +3453,9 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsOnMouseFunc), node = frameNode](
                           MouseInfo& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(info);
@@ -3427,7 +3483,9 @@ void JSWeb::OnResourceLoad(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ResourceLoadEvent>(info);
@@ -3457,7 +3515,9 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ScaleChangeEvent>(info);
@@ -3488,7 +3548,9 @@ void JSWeb::OnScroll(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnScrollEvent>(info);
@@ -3520,7 +3582,9 @@ void JSWeb::OnPermissionRequest(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info);
@@ -3552,7 +3616,9 @@ void JSWeb::OnScreenCaptureRequest(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebScreenCaptureRequestEvent>(info);
@@ -3601,7 +3667,9 @@ void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<SearchResultReceiveEvent>(info);
@@ -3622,7 +3690,9 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
                              const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
         NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(fNode, iteminfo);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, itemInfo);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto ret = func->Execute(info, extraParams);
@@ -3667,7 +3737,9 @@ void JSWeb::JsOnDragEnter(const JSCallbackInfo& info)
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragEnter");
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(info, extraParams);
@@ -3688,7 +3760,9 @@ void JSWeb::JsOnDragMove(const JSCallbackInfo& info)
                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragMove");
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(info, extraParams);
@@ -3709,7 +3783,9 @@ void JSWeb::JsOnDragLeave(const JSCallbackInfo& info)
                              const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDragLeave");
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(info, extraParams);
@@ -3730,7 +3806,9 @@ void JSWeb::JsOnDrop(const JSCallbackInfo& info)
                         const RefPtr<DragEvent>& info, const std::string& extraParams) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onDrop");
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         func->Execute(info, extraParams);
@@ -3799,7 +3877,9 @@ void JSWeb::OnWindowNew(const JSCallbackInfo& args)
                           const std::shared_ptr<BaseEventInfo>& info) {
         ContainerScope scope(instanceId);
         ACE_SCORING_EVENT("OnWindowNew CallBack");
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewEvent>(info.get());
@@ -3830,7 +3910,9 @@ void JSWeb::OnWindowExit(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowExitEvent>(info);
@@ -3966,7 +4048,9 @@ void JSWeb::OnInterceptKeyEvent(const JSCallbackInfo& args)
         bool result = false;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, result);
         ACE_SCORING_EVENT("onPreKeyEvent");
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(fNode, result);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, result);
         pipelineContext->UpdateCurrentActiveNode(node);
         JSRef<JSVal> obj = func->ExecuteWithValue(keyEventInfo);
@@ -4209,7 +4293,9 @@ void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
                           const std::shared_ptr<BaseEventInfo>& info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<AudioStateChangedEvent>(info.get());
@@ -4652,7 +4738,9 @@ void JSWeb::OnOverScroll(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnOverScrollEvent>(info);
@@ -4806,7 +4894,9 @@ void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
                           const BaseEventInfo* info) -> bool {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(pipelineContext,false);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadOverrideEvent>(info);
@@ -4896,7 +4986,9 @@ void JSWeb::OnRenderProcessNotResponding(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<RenderProcessNotRespondingEvent>(info);
@@ -4924,7 +5016,9 @@ void JSWeb::OnRenderProcessResponding(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<RenderProcessRespondingEvent>(info);
@@ -4970,7 +5064,9 @@ void JSWeb::SelectionMenuOptions(const JSCallbackInfo& args)
                             instanceId, node = frameNode](const std::string selectInfo) {
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto pipelineContext = PipelineContext::GetCurrentContext();
+            auto fNode = node.Upgrade();
+            CHECK_NULL_VOID(fNode);
+            auto pipelineContext = fNode->GetContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             pipelineContext->SetCallBackNode(node);
@@ -5003,7 +5099,9 @@ void JSWeb::OnViewportFitChanged(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<ViewportFitChangedEvent>(info);
@@ -5103,7 +5201,9 @@ void JSWeb::OnInterceptKeyboardAttach(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         WebKeyboardOption opt;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, opt);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_RETURN(fNode, opt);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, opt);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<InterceptKeyboardEvent>(info);
@@ -5128,7 +5228,9 @@ void JSWeb::OnAdsBlocked(const JSCallbackInfo& args)
                           const BaseEventInfo* info) {
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto fNode = node.Upgrade();
+        CHECK_NULL_VOID(fNode);
+        auto pipelineContext = fNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->UpdateCurrentActiveNode(node);
         auto* eventInfo = TypeInfoHelper::DynamicCast<AdsBlockedEvent>(info);
