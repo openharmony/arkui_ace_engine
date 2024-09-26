@@ -3003,7 +3003,7 @@ void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        CHECK_NULL_RETURN(fNode, nullptr);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         pipelineContext->UpdateCurrentActiveNode(node);
