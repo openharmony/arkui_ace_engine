@@ -29,13 +29,8 @@ std::mutex SymbolModel::mutex_;
 
 SymbolModel* SymbolModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-            instance_.reset(new NG::SymbolModelNG());
-        }
-    }
-    return instance_.get();
+    static NG::SymbolModelNG instance;
+    return &instance;
 }
 
 } // namespace OHOS::Ace

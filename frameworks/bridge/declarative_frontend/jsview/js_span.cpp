@@ -52,21 +52,18 @@ std::mutex SpanModel::mutex_;
 
 SpanModel* SpanModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::SpanModelNG());
+    static NG::SpanModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::SpanModelNG());
-            } else {
-                instance_.reset(new Framework::SpanModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::SpanModelNG instance;
+        return &instance;
+    } else {
+        static Framework::SpanModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
