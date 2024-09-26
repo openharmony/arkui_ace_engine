@@ -80,13 +80,15 @@ public:
         auto offsetIsRtl = GreatOrEqual(actualSize_.Width(), actualSize_.Height())
                                ? (isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height())
                                : (isSelect_->Get() ? actualTrackRadius_ : actualSize_.Width() - actualTrackRadius_);
-        AnimationOption colorOption = AnimationOption();
-        colorOption.SetDuration(colorAnimationDuration_);
-        colorOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
-        AnimationUtils::Animate(colorOption, [&]() {
-            animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
-        });
-
+        if (isCancelAnimation_ && !isFocusOrBlur_) {
+            AnimationOption colorOption = AnimationOption();
+            colorOption.SetDuration(colorAnimationDuration_);
+            colorOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
+            AnimationUtils::Animate(colorOption, [&]() {
+                animatableBoardColor_->Set(isSelect_->Get() ?
+                    LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
+            });
+        }
         AnimationOption pointOption = AnimationOption();
         pointOption.SetDuration(pointAnimationDuration_);
         pointOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
@@ -116,6 +118,13 @@ public:
             option.SetDuration(duratuion);
             option.SetCurve(curve);
             AnimationUtils::Animate(option, [&]() { animateTouchHoverColor_->Set(color); });
+        }
+    }
+
+    void SetBoardColor(Color color)
+    {
+        if (animatableBoardColor_) {
+            animatableBoardColor_->Set(LinearColor(color));
         }
     }
 
@@ -278,6 +287,11 @@ public:
         actualTrackRadius_ = borderRadius;
     }
 
+    void SetIsFocusOrBlur(bool isFocusOrBlur)
+    {
+        isFocusOrBlur_ = isFocusOrBlur;
+    }
+
 private:
     float actualWidth_ = 0.0f;
     float actualHeight_ = 0.0f;
@@ -294,6 +308,7 @@ private:
     Dimension hoverRadius_ = 8.0_vp;
     Dimension focusRadius_ = 8.0_vp;
     bool isUseDiffPointColor_ = false;
+    bool isCancelAnimation_ = false;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
@@ -302,6 +317,7 @@ private:
     bool isDragEvent_ = false;
     bool isFirstCreated_ = true;
     bool showHoverEffect_ = true;
+    bool isFocusOrBlur_ = false;
     float actualTrackRadius_ = 0.0f;
 
     OffsetF hotZoneOffset_;
