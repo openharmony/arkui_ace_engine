@@ -88,7 +88,8 @@ constexpr Dimension KEYBOARD_AVOID_OFFSET = 24.0_vp;
 #endif
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
-constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
+constexpr uint32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
+constexpr uint32_t RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG = 3000;
 constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 constexpr int32_t AUTO_SCROLL_INTERVAL = 15;
 constexpr Dimension CARET_BOTTOM_DISTANCE = 16.0_vp;
@@ -131,6 +132,8 @@ RichEditorPattern::RichEditorPattern()
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     styledString_ = MakeRefPtr<MutableSpanString>("");
     styledString_->SetSpanWatcher(WeakClaim(this));
+    twinklingInterval_ = SystemProperties::GetDebugEnabled()
+        ? RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG : RICH_EDITOR_TWINKLING_INTERVAL_MS;
 }
 
 RichEditorPattern::~RichEditorPattern()
@@ -2538,7 +2541,7 @@ void RichEditorPattern::ScheduleCaretTwinkling()
     });
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(caretTwinklingTask_, TaskExecutor::TaskType::UI, RICH_EDITOR_TWINKLING_INTERVAL_MS,
+    taskExecutor->PostDelayedTask(caretTwinklingTask_, TaskExecutor::TaskType::UI, twinklingInterval_,
         "ArkUIRichEditorScheduleCaretTwinkling");
 }
 

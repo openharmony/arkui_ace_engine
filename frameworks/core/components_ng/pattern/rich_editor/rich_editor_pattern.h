@@ -1397,6 +1397,7 @@ private:
     std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
     bool isImageSelfResponseEvent_ = true;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
+    uint32_t twinklingInterval_ = 0;
 };
 } // namespace OHOS::Ace::NG
 
