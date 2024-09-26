@@ -4451,6 +4451,7 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     }
     IF_PRESENT(typingTextStyle_, UpdateColorByResourceId());
     IF_PRESENT(typingStyle_, UpdateColorByResourceId());
+    IF_PRESENT(selectedBackgroundColor_, UpdateColorByResourceId());
 
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
     auto scrollBar = GetScrollBar();
