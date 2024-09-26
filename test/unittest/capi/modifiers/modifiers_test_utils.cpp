@@ -29,27 +29,6 @@ std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name)
     return {};
 }
 
-std::optional<bool> GetBoolAttribute(ArkUINodeHandle node, const std::string &name)
-{
-    static const InspectorFilter inspector;
-    std::optional<bool> retVal;
-
-    if (auto fnode = reinterpret_cast<FrameNode *>(node); fnode) {
-        if (auto jsonVal = JsonUtil::Create(true); jsonVal) {
-            fnode->ToJsonValue(jsonVal, inspector);
-            if (jsonVal->Contains(name))
-            {
-                auto val = jsonVal->GetValue(name);
-                if (val->IsBool())
-                {
-                    retVal = val->GetBool();
-                }
-            }
-        }
-    }
-    return retVal;
-}
-
 std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node)
 {
     static const InspectorFilter inspector;

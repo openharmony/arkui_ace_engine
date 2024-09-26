@@ -111,12 +111,12 @@ public:
         });
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
         MockContainer::SetUp();
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
         NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 
     static void TearDownTestCase()
     {
+        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
         MockPipelineContext::TearDown();
         MockContainer::TearDown();
     }
@@ -223,19 +223,23 @@ HWTEST_F(ScrollModifierTest, OnScrollStop_setCallback, testing::ext::TestSize.Le
  */
 HWTEST_F(ScrollModifierTest, EnablePaging_SetValues, testing::ext::TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto pattern = frameNode->GetPattern<NG::ScrollPattern>();
     // enablePaging is initialy hidden in JSON
-    auto enablePaging = GetBoolAttribute(node_, "enablePaging");
+    auto root = GetJsonValue(node_);
+    EXPECT_TRUE(root);
+    auto enablePaging = GetAttrValue<std::optional<bool>>(root, "enablePaging");
     EXPECT_FALSE(enablePaging.has_value());
 
     modifier_->setEnablePaging(node_, 1);
-    enablePaging = GetBoolAttribute(node_, "enablePaging");
+    root = GetJsonValue(node_);
+    EXPECT_TRUE(root);
+    enablePaging = GetAttrValue<std::optional<bool>>(root, "enablePaging");
     EXPECT_TRUE(enablePaging.has_value());
     EXPECT_TRUE(enablePaging.value());
 
     modifier_->setEnablePaging(node_, 0);
-    enablePaging = GetBoolAttribute(node_, "enablePaging");
+    root = GetJsonValue(node_);
+    EXPECT_TRUE(root);
+    enablePaging = GetAttrValue<std::optional<bool>>(root, "enablePaging");
     EXPECT_TRUE(enablePaging.has_value());
     EXPECT_FALSE(enablePaging.value());
 }

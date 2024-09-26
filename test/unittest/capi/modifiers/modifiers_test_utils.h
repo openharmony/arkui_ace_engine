@@ -24,7 +24,6 @@
 namespace OHOS::Ace::NG {
 
 std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name);
-std::optional<bool> GetBoolAttribute(ArkUINodeHandle node, const std::string &name);
 std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node);
 
 template <typename T>
@@ -67,6 +66,17 @@ template<>
 inline double GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
 {
     return jsonVal ? jsonVal->GetDouble(attrKey) : double();
+}
+
+template<>
+inline std::optional<bool> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
+{
+    if (!jsonVal)
+    {
+        return std::nullopt;
+    }
+    auto val = jsonVal->GetValue(attrKey);
+    return val && val->IsBool() ? std::optional<bool>(val->GetBool()) : std::nullopt;
 }
 
 template <typename T>
