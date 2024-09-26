@@ -103,8 +103,7 @@ HWTEST_F(CommonShapeMethodModifierResourcesTest, setStrokeWidthTestResources, Te
 
     typedef std::pair<Ark_Length, double> OneTestStep;
     const std::vector<OneTestStep> testPlan = {
-    { 
-        { .type = ARK_TAG_RESOURCE, .resource = FAKE_RES_ID }, 10 }
+        { { .type = ARK_TAG_RESOURCE, .resource = FAKE_RES_ID }, 10 }
     };
 
     for (const auto &[arkLength, expected]: testPlan) {

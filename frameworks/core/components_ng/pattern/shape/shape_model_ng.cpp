@@ -147,7 +147,6 @@ void ShapeModelNG::SetStrokeLineCap(FrameNode* frameNode, const std::optional<in
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeLineCap, frameNode);
     }
-
 }
 
 void ShapeModelNG::SetStrokeLineJoin(FrameNode* frameNode, const std::optional<int>& lineJoinStyle)

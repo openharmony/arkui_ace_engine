@@ -210,7 +210,7 @@ namespace Converter {
     {
         return src.tag == ARK_TAG_FLOAT32 ? src.f32 : static_cast<float>(src.i32);
     }
-     
+
     // Implementation is in cpp
     Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo &info);
 

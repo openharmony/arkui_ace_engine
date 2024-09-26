@@ -34,14 +34,12 @@ void ValidateNonPercent(std::optional<Dimension>& opt)
         opt.reset();
     }
 }
-
 void ValidatePositive(std::optional<Dimension>& opt)
 {
     if (opt.has_value() && opt.value().IsNonPositive()) {
         opt.reset();
     }
 }
-
 void ValidateOpacity(std::optional<float>& opt)
 {
     if (opt.has_value()) {

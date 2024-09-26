@@ -21,7 +21,8 @@
 
 namespace {
     static const double STROKE_MITER_LIMIT_MIN_VALUE = 1.0;
-    void validateStrokeMiterLimit(std::optional<float>& limit) {
+    void validateStrokeMiterLimit(std::optional<float>& limit)
+    {
         if (limit && limit.value() < STROKE_MITER_LIMIT_MIN_VALUE) {
             limit = 1.0;
         } 

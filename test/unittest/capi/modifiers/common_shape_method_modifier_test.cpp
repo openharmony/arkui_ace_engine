@@ -242,7 +242,6 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineJoinTestValidValues, TestSi
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STROKE_LINE_JOIN_NAME);
     EXPECT_EQ(resultStr, "LineJoinStyle.Bevel");
-
 }
 
 /*
