@@ -16,10 +16,18 @@
 #include "converter.h"
 #include "reverse_converter.h"
 
+#include "core/interfaces/native/node/node_api.h"
+
 namespace OHOS::Ace::NG::Converter {
-Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
+void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
 {
-    Ark_TouchObject touch;
+    dst.id = ArkValue<Ark_Number>(src.resource);
+    dst.type = ArkValue<Ark_Number>(static_cast<Ark_Int32>(NodeModifier::ResourceType::FLOAT));
+    dst.params = ArkValue<Opt_Array_String>();
+}
+
+void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& info)
+{
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
@@ -56,13 +64,10 @@ Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
     touch.y.tag = Ark_Tag::ARK_TAG_FLOAT32;
     touch.y.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-
-    return touch;
 }
 
-Ark_ClickEvent ConvertClickEventInfo(OHOS::Ace::GestureEvent& info)
+void AssignArkValue(Ark_ClickEvent& onClick, OHOS::Ace::GestureEvent& info)
 {
-    Ark_ClickEvent onClick;
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
@@ -100,8 +105,6 @@ Ark_ClickEvent ConvertClickEventInfo(OHOS::Ace::GestureEvent& info)
 
     onClick.x = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
     onClick.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-
-    return onClick;
 }
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
@@ -284,6 +287,12 @@ Shadow Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
+std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
+{
+    return { Convert<Shadow>(src) };
+}
+
+template<>
 Font Convert(const Ark_Font& src)
 {
         Font font;
@@ -410,7 +419,7 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
 }
 
 template<>
-void AssignTo(std::optional<float>& dst, const Ark_String& src)
+void AssignCast(std::optional<float>& dst, const Ark_String& src)
 {
     auto value = Convert<std::string>(src);
     double result;

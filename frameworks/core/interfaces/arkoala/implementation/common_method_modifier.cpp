@@ -138,7 +138,7 @@ OffsetOrEdgesParam Convert(const Ark_Edges& src)
 template<>
 OffsetOrEdgesParam Convert(const Ark_LocalizedEdges& src)
 {
-    // Ark_LocalizedEdges convertation need to be supported
+    // Ark_LocalizedEdges conversion need to be supported
     EdgesParamOptions edgesParamOptions;
     edgesParamOptions.isLocalized = false;
     return edgesParamOptions;
@@ -459,7 +459,7 @@ void OnClick0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](GestureEvent& info) {
-        Ark_ClickEvent onClick = Converter::ConvertClickEventInfo(info);
+        Ark_ClickEvent onClick = Converter::ArkValue<Ark_ClickEvent>(info);
         GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onClick0(frameNode->GetId(), onClick);
     };
 
@@ -476,7 +476,7 @@ void OnClick1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](GestureEvent& info) {
-        Ark_ClickEvent onClick = Converter::ConvertClickEventInfo(info);
+        Ark_ClickEvent onClick = Converter::ArkValue<Ark_ClickEvent>(info);
         GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onClick1(frameNode->GetId(), onClick);
     };
 
@@ -517,7 +517,7 @@ void OnTouchImpl(Ark_NativePointer node,
         if (!changedTouches.empty()) {
             std::vector<Ark_TouchObject> array;
             for (auto& info : changedTouches) {
-                array.push_back(Converter::ConvertTouchInfo(info));
+                array.push_back(Converter::ArkValue<Ark_TouchObject>(info));
             }
             onTouch.changedTouches.array = &array[0];
             onTouch.changedTouches.length = changedTouches.size();
@@ -551,7 +551,7 @@ void OnTouchImpl(Ark_NativePointer node,
         if (!touches.empty()) {
             std::vector<Ark_TouchObject> array;
             for (auto& info : touches) {
-                array.push_back(Converter::ConvertTouchInfo(info));
+                array.push_back(Converter::ArkValue<Ark_TouchObject>(info));
             }
             onTouch.touches.array = &array[0];
             onTouch.touches.length = touches.size();

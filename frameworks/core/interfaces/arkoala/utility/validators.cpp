@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+
 #include "validators.h"
 
 namespace OHOS::Ace::NG {

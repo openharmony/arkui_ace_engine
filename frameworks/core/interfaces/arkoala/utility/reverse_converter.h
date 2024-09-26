@@ -18,29 +18,30 @@
 
 #pragma once
 
+// SORTED_SECTION
 #include <iterator>
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <vector>
 
-#include "core/interfaces/native/node/node_api.h"
+// SORTED_SECTION
 #include "base/geometry/dimension.h"
+#include "core/common/ime/text_input_action.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/components_v2/list/list_properties.h"
 #include "core/gestures/drag_event.h"
 #include "generated/converter_generated.h"
-#include "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h"
-#include "frameworks/core/common/ime/text_input_action.h"
-#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/list/list_item_group_pattern.h"
-#include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG::Converter {
     // Forward declaration for use in custom AssignArkValue() functions
     template<typename To, typename From = Ark_Empty>
     To ArkValue(From&& src = Ark_Empty());
 
+    // Basic types
     inline void AssignArkValue(Ark_Boolean& dst, const bool& src)
     {
         dst = static_cast<Ark_Boolean>(src);
@@ -97,6 +98,7 @@ namespace OHOS::Ace::NG::Converter {
         dst.id = src;
     }
 
+    // Complex types
     inline void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src)
     {
         dst = {
@@ -152,15 +154,10 @@ namespace OHOS::Ace::NG::Converter {
         dst.alwaysEnabled = src;
     }
 
-    inline void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
-    {
-        dst.id = ArkValue<Ark_Number>(src.resource);
-        dst.type = ArkValue<Ark_Number>(static_cast<Ark_Int32>(NodeModifier::ResourceType::FLOAT));
-        dst.params.tag = ARK_TAG_UNDEFINED;
-    }
-
+    // SORTED_SECTION
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
+    void AssignArkValue(Ark_ClickEvent& dst, OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
     void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src);
@@ -170,13 +167,15 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src);
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src);
+    void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
     void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
+    void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
     void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src);
     void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);
-    void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
+    void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
 
     inline void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src)
     {
@@ -362,6 +361,15 @@ namespace OHOS::Ace::NG::Converter {
         return {
             .selector = SELECTOR_ID_11,
             .value11 = ArkValue<Which>(src),
+        };
+    }
+    template<typename To, typename Which,
+        std::enable_if_t<std::is_same_v<Which, Ark_Empty> && std::is_same_v<Ark_Int32, decltype(To().selector)>,
+            int> = -1>
+    To ArkUnion(std::nullptr_t&& src)
+    {
+        return {
+            .selector = -1,
         };
     }
 
