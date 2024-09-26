@@ -58,8 +58,6 @@ public:
     MOCK_METHOD1(ProcessAxisEvent, bool(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent));
     MOCK_METHOD1(ProcessVsyncEvent, bool(uint64_t timeStampNanos));
     MOCK_METHOD1(UpdateConfiguration, void(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config));
-    MOCK_METHOD3(UpdateViewportConfig, void(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-                                           const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD2(UpdateWindowMode, void(OHOS::Rosen::WindowMode mode, bool hasDeco));
     MOCK_METHOD2(UpdateTitleInTargetPos, void(bool isShow, int32_t height));
     MOCK_METHOD2(UpdateDecorVisible, void(bool visible, bool hasDeco));
