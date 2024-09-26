@@ -1442,8 +1442,7 @@ class AdvancedBlendModeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().common.resetAdvancedBlendMode(node);
-    }
-    else {
+    } else {
       getUINativeModule().common.setAdvancedBlendMode(node, this.value.blendMode, this.value.blendApplyType);
     }
   }
