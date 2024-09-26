@@ -131,7 +131,7 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
         return;
     }
     GetDependencyRelationship();
-    if (!PreTopologicalLoopDetection()) {
+    if (!PreTopologicalLoopDetection(layoutWrapper)) {
         auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
         CHECK_NULL_VOID(relativeContainerLayoutProperty);
         const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
@@ -948,10 +948,6 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWrapper)
 {
     idNodeMap_.clear();
-    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
-    auto left = padding_.left.value_or(0);
-    auto top = padding_.top.value_or(0);
-    auto paddingOffset = OffsetF(left, top);
     const auto& childrenWrappers = layoutWrapper->GetAllChildrenWithBuild();
     for (const auto& childWrapper : childrenWrappers) {
         if (!childWrapper) {
@@ -1103,7 +1099,31 @@ void RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetectionGetAnchorSet(
     }
 }
 
-bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
+void RelativeContainerLayoutAlgorithm::UpdateDegreeMapWithBarrier(std::queue<std::string>& layoutQueue)
+{
+    if (barriers_.empty()) {
+        return;
+    }
+    for (const auto& barrier : barriers_) {
+        std::set<std::string> anchorSet;
+        for (const auto& nodeName : barrier.second.second) {
+            if (IsBarrier(nodeName)) {
+                anchorSet.insert(nodeName);
+                continue;
+            }
+            if (IsGuideline(nodeName) || idNodeMap_.find(nodeName) == idNodeMap_.end()) {
+                continue;
+            }
+            anchorSet.insert(nodeName);
+        }
+        incomingDegreeMap_[barrier.first] = anchorSet.size();
+        if (incomingDegreeMap_[barrier.first] == 0) {
+            layoutQueue.push(barrier.first);
+        }
+    }
+}
+
+bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection(LayoutWrapper* layoutWrapper)
 {
     std::queue<std::string> visitedNode;
     std::queue<std::string> layoutQueue;
@@ -1125,25 +1145,9 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
         }
     }
 
-    for (const auto& barrier : barriers_) {
-        std::set<std::string> anchorSet;
-        for (const auto& nodeName : barrier.second.second) {
-            if (IsBarrier(nodeName)) {
-                anchorSet.insert(nodeName);
-                continue;
-            }
-            if (IsGuideline(nodeName) || idNodeMap_.find(nodeName) == idNodeMap_.end()) {
-                continue;
-            }
-            anchorSet.insert(nodeName);
-        }
-        incomingDegreeMap_[barrier.first] = anchorSet.size();
-        if (incomingDegreeMap_[barrier.first] == 0) {
-            layoutQueue.push(barrier.first);
-        }
-    }
+    UpdateDegreeMapWithBarrier(layoutQueue);
 
-    std::map<std::string, uint32_t> incomingDegreeMapCopy;
+    std::unordered_map<std::string, uint32_t> incomingDegreeMapCopy;
     incomingDegreeMapCopy.insert(incomingDegreeMap_.begin(), incomingDegreeMap_.end());
     while (!layoutQueue.empty()) {
         auto currentNodeInspectorId = layoutQueue.front();
@@ -1162,14 +1166,14 @@ bool RelativeContainerLayoutAlgorithm::PreTopologicalLoopDetection()
         incomingDegreeMapCopy.erase(currentNodeInspectorId);
         visitedNode.push(currentNodeInspectorId);
     }
-    if (!incomingDegreeMapCopy.empty()) {
-        std::string loopDependentNodes;
-        for (const auto& node : incomingDegreeMapCopy) {
-            loopDependentNodes += node.first + ",";
-        }
-        return false;
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<RelativeContainerPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    if (SystemProperties::GetDebugEnabled()) {
+        pattern->SetLoopDependentNodes(RelativeContainerPattern::LoopDependentNodesToString(incomingDegreeMapCopy));
     }
-    return true;
+    return incomingDegreeMapCopy.empty();
 }
 
 void RelativeContainerLayoutAlgorithm::TopologicalSort(std::list<std::string>& renderList)

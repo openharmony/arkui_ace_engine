@@ -112,7 +112,7 @@ private:
     bool CalcOffsetInChain(const std::string& chainName, LineDirection direction);
     void PreTopologicalLoopDetectionGetAnchorSet(
         const std::string& nodeName, const AlignRulesItem& alignRulesItem, std::set<std::string>& anchorSet);
-    bool PreTopologicalLoopDetection();
+    bool PreTopologicalLoopDetection(LayoutWrapper* layoutWrapper);
     void TopologicalSort(std::list<std::string>& renderList);
     void CalcSizeParam(LayoutWrapper* layoutWrapper, const std::string& nodeName);
     void CalcOffsetParam(LayoutWrapper* layoutWrapper, const std::string& nodeName);
@@ -143,6 +143,7 @@ private:
     void MeasureChild(LayoutWrapper* layoutWrapper);
     BarrierDirection BarrierDirectionRtl(BarrierDirection barrierDirection);
     void AdjustOffsetRtl(LayoutWrapper* layoutWrapper);
+    void UpdateDegreeMapWithBarrier(std::queue<std::string>& layoutQueue);
     bool versionGreatorOrEqualToEleven_ = false;
     bool isHorizontalRelyOnContainer_ = false;
     bool isVerticalRelyOnContainer_ = false;
