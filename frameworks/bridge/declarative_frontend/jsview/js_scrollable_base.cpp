@@ -112,8 +112,8 @@ void JSScrollableBase::JSContentClip(const JSCallbackInfo& info)
     }
     if (info[0]->IsNumber()) {
         auto mode = static_cast<NG::ContentClipMode>(info[0]->ToNumber<int32_t>());
-        if (mode < NG::ContentClipMode::CONTENT_ONLY || mode > NG::ContentClipMode::SAFE_AREA) {
-            NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::CONTENT_ONLY, nullptr);
+        if (mode >= NG::ContentClipMode::CONTENT_ONLY && mode <= NG::ContentClipMode::SAFE_AREA) {
+            NG::ScrollableModelNG::SetContentClip(mode, nullptr);
             return;
         }
     } else if (info[0]->IsObject()) {

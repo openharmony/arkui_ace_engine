@@ -66,6 +66,7 @@ public:
         ResetScrollBarProperty();
         ResetFadingEdgeProperty();
         PaintProperty::Reset();
+        ResetContentClip();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
