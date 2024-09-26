@@ -27,6 +27,7 @@
 
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_view.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -37,6 +38,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension WINDOW_EDGE_SPACE = 6.0_vp;
 const NG::BorderWidthProperty BORDER_WIDTH_TEST = { 1.0_vp, 1.0_vp, 1.0_vp, 0.0_vp };
+const std::string MESSAGE = "hello world";
 } // namespace
 
 class SheetPresentationTestNg : public testing::Test {
@@ -1434,5 +1436,131 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth005, TestSize.Level1)
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
     EXPECT_EQ(renderContext->GetBorderWidth().has_value(), true);
     SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateTitlePadding001
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::UpdateTitlePadding function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, UpdateTitlePadding001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.showCloseIcon = false;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set API11.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step3. Excute the UpdateTitlePadding function.
+     * @tc.expected: padding.right is 72vp
+     */
+    sheetPattern->UpdateTitlePadding();
+    auto titleNode  = sheetPattern->GetTitleNode();
+    auto titleLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(titleNode->GetLayoutProperty());
+    const auto& paddingProperty = titleLayoutProperty->GetPaddingProperty();
+    ASSERT_NE(paddingProperty, nullptr);
+    EXPECT_EQ(paddingProperty->right->GetDimension(), SHEET_CLOSE_ICON_TITLE_SPACE + SHEET_CLOSE_ICON_WIDTH);
+    SheetPresentationTestNg::TearDownTestCase();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: UpdateTitlePadding002
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::UpdateTitlePadding function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, UpdateTitlePadding002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.showCloseIcon = false;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set API12.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step3. Excute the UpdateTitlePadding function.
+     * @tc.expected: padding.right is 48vp
+     */
+    sheetPattern->UpdateTitlePadding();
+    auto titleNode  = sheetPattern->GetTitleNode();
+    auto titleLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(titleNode->GetLayoutProperty());
+    const auto& paddingProperty = titleLayoutProperty->GetPaddingProperty();
+    ASSERT_NE(paddingProperty, nullptr);
+    EXPECT_EQ(paddingProperty->right->GetDimension(), SHEET_CLOSE_ICON_TITLE_SPACE_NEW + SHEET_CLOSE_ICON_WIDTH);
+    SheetPresentationTestNg::TearDownTestCase();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: UpdateTitlePadding003
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::UpdateTitlePadding function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, UpdateTitlePadding003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetTitle = MESSAGE;
+    style.showCloseIcon = false;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set API13.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step3. Excute the UpdateTitlePadding function.
+     * @tc.expected: padding.right is 0vp
+     */
+    sheetPattern->UpdateTitlePadding();
+    auto titleNode  = sheetPattern->GetTitleNode();
+    auto titleLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(titleNode->GetLayoutProperty());
+    const auto& paddingProperty = titleLayoutProperty->GetPaddingProperty();
+    ASSERT_NE(paddingProperty, nullptr);
+    EXPECT_EQ(paddingProperty->right->GetDimension(), 0.0_vp);
+    SheetPresentationTestNg::TearDownTestCase();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
 } // namespace OHOS::Ace::NG
