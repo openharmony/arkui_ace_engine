@@ -3691,7 +3691,7 @@ void JSWeb::JsOnDragStart(const JSCallbackInfo& info)
         NG::DragDropBaseInfo itemInfo;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode, iteminfo);
+        CHECK_NULL_RETURN(fNode, itemInfo);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, itemInfo);
         pipelineContext->UpdateCurrentActiveNode(node);
