@@ -23,7 +23,13 @@
 #include <regex>
 #include <string>
 #include <utility>
+#include "base/geometry/dimension.h"
 #include "core/common/ime/constant.h"
+#include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/property/layout_constraint.h"
+#include "core/pipeline/pipeline_base.h"
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -92,9 +98,6 @@ constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
 constexpr Dimension AVOID_OFFSET = 24.0_vp;
 #endif
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
-constexpr Dimension COUNTER_BOTTOM = 22.0_vp;
-constexpr Dimension COUNTER_BOTTOM_EXP_BOUNDS = 5.0_px;
-constexpr double BOTTOM_MARGIN = 22.0;
 constexpr int32_t ILLEGAL_VALUE = 0;
 constexpr float ERROR_TEXT_MAX_FONT_SCALE = 2.0f;
 constexpr double VELOCITY = -1000;
@@ -106,6 +109,9 @@ constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 1;
 constexpr Dimension ERROR_TEXT_TOP_MARGIN = 8.0_vp;
 constexpr Dimension ERROR_TEXT_BOTTOM_MARGIN = 8.0_vp;
+constexpr Dimension COUNTER_TEXT_TOP_MARGIN = 8.0_vp;
+constexpr Dimension COUNTER_TEXT_BOTTOM_MARGIN = 8.0_vp;
+constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
 constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
@@ -285,6 +291,13 @@ void TextFieldPattern::CalculateBoundsRect()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto pattern = host->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto counterNode = pattern->GetCounterNode().Upgrade();
+    CHECK_NULL_VOID(counterNode);
+    auto counterFrameNode = counterNode->GetHostNode();
+    CHECK_NULL_VOID(counterFrameNode);
+
     auto geometryNode = host->GetGeometryNode();
     auto frameOffset = geometryNode->GetFrameOffset();
     auto frameSize = geometryNode->GetFrameSize();
@@ -294,12 +307,14 @@ void TextFieldPattern::CalculateBoundsRect()
         auto textWidth = std::max(errorParagraph_->GetLongestLine(), frameSize.Width());
         auto errorHeight = errorParagraph_->GetHeight() + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
                                            ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx();
-        auto countHeight = COUNTER_BOTTOM.ConvertToPx() + COUNTER_BOTTOM_EXP_BOUNDS.ConvertToPx();
+        auto countHeight = COUNTER_TEXT_TOP_MARGIN.ConvertToPx() + COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx() +
+            counterFrameNode->GetGeometryNode()->GetFrameRect().Height();
         auto bottomHeight = std::max(errorHeight, countHeight);
         RectF boundsRect(0.0f, 0.0f, textWidth, bottomHeight + frameSize.Height());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
     } else if (isShowCount) {
-        auto countHeight = COUNTER_BOTTOM.ConvertToPx() + COUNTER_BOTTOM_EXP_BOUNDS.ConvertToPx();
+        auto countHeight = COUNTER_TEXT_TOP_MARGIN.ConvertToPx() + COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx() +
+            counterFrameNode->GetGeometryNode()->GetFrameRect().Height();
         RectF boundsRect(0.0f, 0.0f, frameSize.Width(), countHeight + frameSize.Height());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
     } else if (isShowError) {
@@ -4214,6 +4229,42 @@ void TextFieldPattern::UltralimitShake()
         option.GetOnFinishEvent());
 }
 
+float TextFieldPattern::MeasureCounterNodeHeight()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, 0.0);
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, 0.0);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, 0.0);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, 0.0);
+    auto counterNode = pattern->GetCounterNode().Upgrade();
+    CHECK_NULL_RETURN(counterNode, 0.0);
+    auto counterFrameNode = counterNode->GetHostNode();
+    CHECK_NULL_RETURN(counterFrameNode, 0.0);
+    auto counterNodeLayoutProperty = DynamicCast<TextLayoutProperty>(counterNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(counterNodeLayoutProperty, 0.0);
+
+    auto textContent = contentController_->GetTextValue();
+    auto textLength = static_cast<uint32_t>(StringUtils::ToWstring(textContent).length());
+    auto maxLength = static_cast<uint32_t>(layoutProperty->GetMaxLength().value());
+    std::string counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
+
+    TextStyle countTextStyle = (this->GetShowCounterStyleValue() && this->HasFocus()) ?
+                                theme->GetOverCountTextStyle() :
+                                theme->GetCountTextStyle();
+
+    counterNodeLayoutProperty->UpdateContent(counterText);
+    counterNodeLayoutProperty->UpdateFontSize(countTextStyle.GetFontSize());
+    counterNodeLayoutProperty->UpdateFontWeight(countTextStyle.GetFontWeight());
+    counterNodeLayoutProperty->UpdateMaxLines(COUNTER_TEXT_MAXLINE);
+    counterFrameNode->Measure(LayoutConstraintF());
+    return counterFrameNode->GetGeometryNode()->GetFrameRect().Height();
+}
+
 void TextFieldPattern::UpdateCounterMargin()
 {
     auto host = GetHost();
@@ -4223,12 +4274,14 @@ void TextFieldPattern::UpdateCounterMargin()
     if (!IsTextArea() && IsShowCount()) {
         MarginProperty margin;
         const auto& getMargin = layoutProperty->GetMarginProperty();
+        auto counterHeight = MeasureCounterNodeHeight();
+        Dimension marginProperty(COUNTER_TEXT_TOP_MARGIN.ConvertToPx() +
+            COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx() + counterHeight, DimensionUnit::PX);
         if (!getMargin) {
-            margin.bottom = CalcLength(COUNTER_BOTTOM);
+            margin.bottom = CalcLength(marginProperty);
             layoutProperty->UpdateMargin(margin);
             return;
         }
-        Dimension marginProperty { BOTTOM_MARGIN, DimensionUnit::VP };
         auto systemMargin = getMargin->bottom->GetDimension();
         if (systemMargin < marginProperty) {
             margin.bottom = CalcLength(marginProperty);
@@ -6089,6 +6142,8 @@ void TextFieldPattern::AddCounterNode()
         counterTextNode->MountToParent(host);
         counterTextNode->MarkModifyDone();
         counterTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+        auto counterNodeLayoutProperty = DynamicCast<TextLayoutProperty>(counterTextNode->GetLayoutProperty());
+        counterNodeLayoutProperty->UpdateIsAnimationNeeded(false);
     }
 }
 

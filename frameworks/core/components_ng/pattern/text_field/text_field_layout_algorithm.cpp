@@ -39,6 +39,7 @@ namespace {
 constexpr float PARAGRAPH_SAVE_BOUNDARY = 1.0f;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
+constexpr Dimension COUNTER_TEXT_MARGIN_OFFSET = 8._vp;
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
 constexpr double TEXT_DECORATION_DISABLED_COLOR_ALPHA = 0.2;
@@ -524,7 +525,8 @@ void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, c
             countX += cleanNodeResponseArea->GetAreaRect().Width();
         }
     }
-    textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
+    textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Bottom() - frameRect.Top() +
+        COUNTER_TEXT_MARGIN_OFFSET.ConvertToPx()));
     counterNode->Layout();
 }
 
