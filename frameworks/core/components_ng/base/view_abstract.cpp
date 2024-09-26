@@ -209,9 +209,13 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
 }
 
-void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const Color& color)
+void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, *color, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
@@ -3602,6 +3606,15 @@ void ViewAbstract::SetSharedTransition(
     CHECK_NULL_VOID(frameNode);
     const auto& target = frameNode->GetRenderContext();
     if (target) {
+        if (option) {
+            option->duration = option->duration < 0 ? CommonAnimationStyle::DEFAULT_ANIMATION_DURATION :
+                option->duration;
+            option->delay = option->delay < 0 ? 0 : option->delay;
+            option->zIndex = option->zIndex < 0 ? 0 : option->zIndex;
+            if (!option->curve) {
+                option->curve = Curves::LINEAR;
+            }
+        }
         target->SetSharedTransitionOptions(option);
         target->SetShareId(shareId);
     }

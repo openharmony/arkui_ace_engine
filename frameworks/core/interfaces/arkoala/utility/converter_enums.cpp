@@ -511,4 +511,15 @@ void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffe
     }
 }
 
+template<>
+void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src)
+{
+    switch (src) {
+        case ARK_SHARED_TRANSITION_EFFECT_TYPE_STATIC:
+            dst = OHOS::Ace::SharedTransitionEffectType::SHARED_EFFECT_STATIC; break;
+        case ARK_SHARED_TRANSITION_EFFECT_TYPE_EXCHANGE:
+            dst = OHOS::Ace::SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE; break;
+        default: LOGE("Unexpected enum value in Ark_SharedTransitionEffectType: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

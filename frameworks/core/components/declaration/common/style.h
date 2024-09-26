@@ -182,6 +182,8 @@ struct CommonAnimationStyle : Style {
     TweenOption tweenOption;
 
     AnimationOperation animationOperation = AnimationOperation::PLAY;
+
+    static constexpr int32_t DEFAULT_ANIMATION_DURATION = 1000; // ms
 };
 
 struct CommonShareTransitionStyle : Style {
