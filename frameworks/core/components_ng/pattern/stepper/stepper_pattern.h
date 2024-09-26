@@ -83,6 +83,11 @@ public:
         return stepperTheme;
     }
 
+    bool GetIsLoadingButton() const
+    {
+        return isLoadingButton_;
+    }
+
     int32_t GetCurrentIndex() const
     {
         return index_;
