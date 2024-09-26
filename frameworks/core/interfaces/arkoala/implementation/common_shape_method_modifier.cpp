@@ -25,7 +25,7 @@ namespace {
     {
         if (limit && limit.value() < STROKE_MITER_LIMIT_MIN_VALUE) {
             limit = 1.0;
-        } 
+        }
     }
 } // namespace
 

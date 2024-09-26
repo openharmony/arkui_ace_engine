@@ -364,4 +364,26 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
     return nullptr;
 }
 
+template<>
+void AssignTo(std::optional<float>& dst, const Ark_String& src)
+{
+    auto value = Convert<std::string>(src);
+    double result;
+    if (StringUtils::StringToDouble(value, result)) {
+        dst = result;
+    }
+}
+
+template<>
+Dimension Convert(const Ark_Length& src)
+{
+    if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
+        auto resource = ArkValue<Ark_Resource>(src);
+        ResourceConverter converter(resource);
+        return converter.ToDimension().value_or(Dimension());
+    } else {
+        return Dimension(src.value, static_cast<DimensionUnit>(src.unit));
+    }
+}
+
 } // namespace OHOS::Ace::NG::Converter

@@ -320,16 +320,7 @@ namespace Converter {
     }
 
     template<>
-    inline Dimension Convert(const Ark_Length& src)
-    {
-        if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
-            auto resource = ArkValue<Ark_Resource>(src);
-            ResourceConverter converter(resource);
-            return converter.ToDimension().value_or(Dimension());
-        } else {
-            return Dimension(src.value, static_cast<DimensionUnit>(src.unit));
-        }
-    }
+    Dimension Convert(const Ark_Length& src);
 
     template<>
     inline std::pair<Dimension, Dimension> Convert(const Tuple_Length_Length& src)
@@ -549,15 +540,7 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
 
-    template<>
-    inline void AssignTo(std::optional<float>& dst, const Ark_String& src)
-    {
-        auto value = Convert<std::string>(src);
-        double result;
-        if (StringUtils::StringToDouble(value, result)) {
-            dst = result;
-        }
-    }
+    template<> void AssignTo(std::optional<float>& dst, const Ark_String& src);
 
     // Enums specializations
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);

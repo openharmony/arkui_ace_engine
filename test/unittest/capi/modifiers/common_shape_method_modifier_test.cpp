@@ -217,7 +217,7 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineJoinTestValidValues, TestSi
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    enum Ark_LineJoinStyle inputValueStrokeLineJoin;
+    Ark_LineJoinStyle inputValueStrokeLineJoin;
 
     // Initial setup
     inputValueStrokeLineJoin = ARK_LINE_JOIN_STYLE_MITER;
@@ -253,7 +253,7 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeLineJoinTestInvalidValues, Test
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    enum Ark_LineJoinStyle inputValueStrokeLineJoin;
+    Ark_LineJoinStyle inputValueStrokeLineJoin;
 
     // Initial setup
     inputValueStrokeLineJoin = static_cast<Ark_LineJoinStyle>(-1);
