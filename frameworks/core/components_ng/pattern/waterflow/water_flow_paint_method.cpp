@@ -44,6 +44,7 @@ void WaterFlowPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto renderContext = paintWrapper->GetRenderContext();
     UpdateFadingGradient(renderContext);
     if (TryContentClip(paintWrapper)) {
+        contentModifier_->SetClip(false);
         return;
     }
     bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
