@@ -154,14 +154,10 @@ void OptionPattern::SetFocusStyle()
         isFocusShadowSet_ = true;
     }
 
-    if (!isBGColorSetByUser_) {
-        renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
-    }
+    renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
 
-    if (!isTextColorSetByUser_) {
-        SetFontColor(selectTheme_->GetOptionFocusedFontColor());
-        text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
+    SetFontColor(selectTheme_->GetOptionFocusedFontColor());
+    text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 
@@ -177,16 +173,24 @@ void OptionPattern::ClearFocusStyle()
     if (!isBGColorSetByUser_) {
         renderContext->UpdateBackgroundColor(
             rowSelected_ == index_ ? selectTheme_->GetSelectedColor() : Color::TRANSPARENT);
+    } else {
+        renderContext->UpdateBackgroundColor(
+            rowSelected_ == index_ ? bgColor_.value() : Color::TRANSPARENT);
     }
+
     if (isFocusShadowSet_) {
         renderContext->ResetBackShadow();
         renderContext->SetShadowRadius(0.0f);
         isFocusShadowSet_ = false;
     }
     if (!isTextColorSetByUser_) {
-        SetFontColor(rowSelected_ == index_ ? selectTheme_->GetSelectedColorText() : selectTheme_->GetMenuFontColor());
-        text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        SetFontColor(rowSelected_ == index_ ? selectTheme_->GetSelectedColorText() :
+            (isOptionFontColorSetByUser_ ? optionFontColor_.value() : selectTheme_->GetMenuFontColor()));
+    } else {
+        SetFontColor(rowSelected_ == index_ ? selectFontColor_.value() :
+            (isOptionFontColorSetByUser_ ? optionFontColor_.value() : selectTheme_->GetMenuFontColor()));
     }
+    text_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void OptionPattern::UpdatePasteFontColor(const Color& fontColor)
