@@ -713,6 +713,11 @@ public:
     {
         isEnableHapticFeedback_ = isEnabled;
     }
+
+    virtual bool IsEnabledObscured() const
+    {
+        return true;
+    }
 protected:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
