@@ -1440,16 +1440,16 @@ void ListLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
 {
     for (auto& pos : recycledItemPosition_) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
-        auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(wrapper);
-        if (wrapperFrameNode) {
-            wrapperFrameNode->ClearSubtreeLayoutAlgorithm();
-        }
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
         if (pos.second.isGroup) {
             pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
         } else {
             pos.second.groupInfo.reset();
+        }
+        auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(wrapper);
+        if (wrapperFrameNode) {
+            wrapperFrameNode->ClearSubtreeLayoutAlgorithm();
         }
     }
 }
