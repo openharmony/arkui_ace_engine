@@ -10646,6 +10646,10 @@ class __RepeatVirtualScrollImpl {
             
             // make sparse copy of this.arr_
             this.lastActiveRangeData_ = new Array(this.arr_.length);
+            from = Math.min(this.arr_.length - 1, from);
+            to = Math.min(this.arr_.length - 1, to);
+            from = Math.max(0, from);
+            to = Math.max(0, to);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
                 const item = this.arr_[i];
                 const ttype = this.typeGenFunc_(this.arr_[i], i);
