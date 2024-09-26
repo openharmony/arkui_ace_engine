@@ -71,15 +71,15 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetWidthAuto(FrameNode* frameNode, bool isAuto);
     static void SetHeightAuto(FrameNode* frameNode, bool isAuto);
-    static void SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode);
+    static void SetTabBarMode(FrameNode* frameNode, const std::optional<TabBarMode>& tabBarModeOpt);
     static void SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& BarGridColumnOptions);
     static void SetDivider(FrameNode* frameNode, const TabsItemDivider& divider);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
     static void SetBarBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);
-    static void SetBarBackgroundBlurStyle(FrameNode* frameNode, BlurStyle tabBarBlurStyle);
+    static void SetBarBackgroundBlurStyle(FrameNode* frameNode, const std::optional<BlurStyle>& tabBarBlurStyleOpt);
     static void SetBarOverlap(FrameNode* frameNode, bool barOverlap);
     static void SetIsVertical(FrameNode* frameNode, bool isVertical);
-    static void SetTabBarPosition(FrameNode* frameNode, BarPosition tabBarPosition);
+    static void SetTabBarPosition(FrameNode* frameNode, const std::optional<BarPosition>& tabBarPositionOpt);
     static void SetScrollable(FrameNode* frameNode, bool scrollable);
     static void SetTabBarWidth(FrameNode* frameNode, const Dimension& tabBarWidth);
     static void SetTabBarHeight(FrameNode* frameNode, const Dimension& tabBarHeight);
@@ -87,8 +87,8 @@ public:
     static void SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight);
     static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);
     static void SetClipEdge(FrameNode* frameNode, bool clipEdge);
-    static void SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode);
-    static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect);
+    static void SetAnimateMode(FrameNode* frameNode, const std::optional<TabAnimateMode>& modeOpt);
+    static void SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_t>& edgeEffect);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

@@ -576,6 +576,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
+    template<> void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src);
+    template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
+    template<> void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 
