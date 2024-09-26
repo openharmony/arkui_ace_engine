@@ -1096,6 +1096,7 @@ public:
     void AddCustomProperty(const std::string& key, const std::string& value);
     void RemoveCustomProperty(const std::string& key);
 
+<<<<<<< HEAD
     LayoutConstraintF GetLayoutConstraint() const;
 
     WeakPtr<TargetComponent> GetTargetComponent() const
@@ -1103,6 +1104,8 @@ public:
         return targetComponent_;
     }
 
+=======
+>>>>>>> 修改
     WeakPtr<TargetComponent> GetTargetComponent() const
     {
         return targetComponent_;

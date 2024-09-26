@@ -2521,14 +2521,17 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
             targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
         }
 
-        auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+        if (!targetComponent->GetInnerRecoJudge()) {
+            auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+            targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+        }
+
         if (GetExposeInnerGestureFlag()) {
             auto pattern = GetPattern();
             if (pattern) {
+                auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
                 pattern->AddInnerOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
             }
-        } else if (!targetComponent->GetInnerRecoJudge()) {
-            targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
         }
     }
 }
