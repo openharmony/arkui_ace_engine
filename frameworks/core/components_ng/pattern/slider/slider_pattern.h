@@ -191,7 +191,6 @@ private:
     void HandlingGestureStart(const GestureEvent& info);
     void HandlingGestureEvent(const GestureEvent& info);
     void HandledGestureEvent();
-    void InitWindowSizeChanged(const RefPtr<FrameNode>& host);
 
     void UpdateValueByLocalLocation(const std::optional<Offset>& localLocation);
     void FireChangeEvent(int32_t mode);
