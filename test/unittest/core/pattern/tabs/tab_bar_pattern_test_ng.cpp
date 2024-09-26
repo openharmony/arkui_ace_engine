@@ -1163,6 +1163,46 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight022, Test
 }
 
 /**
+ * @tc.name: TabBarPatternUpdateTextColorAndFontWeight023
+ * @tc.desc: test UpdateTextColorAndFontWeight and UpdateImageColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    tabTheme->isChangeFocusTextStyle_ = 1;
+    tabTheme->subTabTextFocusedColor_ = Color::RED;
+    TabsModelNG model = CreateTabs();
+    TabsItemDivider divider;
+    model.SetDivider(divider);
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    ASSERT_TRUE(pr.second);
+    auto layoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    /**
+     * @tc.steps: step1. Test function UpdateSubTabFocusedTextColor.
+     * @tc.expected: Related functions run ok.
+     */
+    int32_t index = 0;
+    int32_t isFocusedItem = 1;
+    tabBarPattern_->labelStyles_[index].selectedColor = std::nullopt;
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    tabBarPattern_->SetFocusSet(true);
+    tabBarPattern_->UpdateSubTabFocusedTextColor(tabTheme, isFocusedItem, layoutProperty, index);
+    EXPECT_EQ(tabTheme->subTabTextFocusedColor_, Color::RED);
+
+    tabBarPattern_->labelStyles_[index].selectedColor = Color::WHITE;
+    tabBarPattern_->UpdateSubTabFocusedTextColor(tabTheme, isFocusedItem, layoutProperty, index);
+    EXPECT_EQ(tabBarPattern_->labelStyles_[index].selectedColor, Color::WHITE);
+}
+
+/**
  * @tc.name: TabBarPatternPlayMaskAnimation002
  * @tc.desc: test PlayMaskAnimation
  * @tc.type: FUNC
@@ -1174,7 +1214,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternPlayMaskAnimation002, TestSize.Level1
     CreateTabsDone(model);
 
     /**
-     * @tc.steps: step2. Test function PlayMaskAnimation.
+     * @tc.steps: step1. Test function PlayMaskAnimation.
      * @tc.expected: Related function runs ok.
      */
     float selectedImageSize = 0.1f;

@@ -1457,4 +1457,31 @@ HWTEST_F(TabsEventTestNg, ObserverTestNg001, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
 }
+
+/**
+ * @tc.name: TabBarPatternInitFocusEvent001
+ * @tc.desc: test InitHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, TabBarPatternInitFocusEvent001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. Test function InitHoverEvent and InitMouseEvent.
+     * @tc.expected: Related functions run ok.
+     */
+    tabBarPattern_->HandleFocusEvent();
+    tabBarPattern_->AddIsFocusActiveUpdateEvent();
+    tabBarPattern_->SetFocusSet(true);
+    EXPECT_TRUE(tabBarPattern_->isTabBarFocus_);
+
+    tabBarPattern_->HandleBlurEvent();
+    tabBarPattern_->RemoveIsFocusActiveUpdateEvent();
+    tabBarPattern_->UpdateFocusTabarPageState();
+    tabBarPattern_->SetFocusSet(false);
+    EXPECT_FALSE(tabBarPattern_->isTabBarFocus_);
+}
 } // namespace OHOS::Ace::NG
