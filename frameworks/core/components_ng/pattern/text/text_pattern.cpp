@@ -4215,6 +4215,7 @@ void TextPattern::BeforeCreatePaintWrapper()
 void TextPattern::StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset)
 {
     scrollableParent_ = selectOverlay_->FindScrollableParent();
+    SetupMagnifier();
     TextGestureSelector::StartGestureSelection(start, end, startOffset);
 }
 
@@ -4406,5 +4407,22 @@ bool TextPattern::HasContent()
         return false;
     }
     return true;
+}
+
+void TextPattern::SetupMagnifier()
+{
+    CHECK_NULL_VOID(magnifierController_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetClipEdge().value_or(false)) {
+        return;
+    }
+    RectF viewPort;
+    if (selectOverlay_->GetClipHandleViewPort(viewPort)) {
+        viewPort.SetHeight(std::min(pManager_->GetHeight(), viewPort.Height()));
+        magnifierController_->SetHostViewPort(viewPort);
+    }
 }
 } // namespace OHOS::Ace::NG

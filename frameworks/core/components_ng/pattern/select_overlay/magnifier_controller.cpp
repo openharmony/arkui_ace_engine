@@ -37,7 +37,7 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
     const OffsetF& basePaintOffset, const RefPtr<FrameNode>& host)
 {
     auto geometryNode = host->GetGeometryNode();
-    auto frameSize = geometryNode->GetFrameSize();
+    auto frameSize = hostViewPort_.has_value() ? hostViewPort_->GetSize() : geometryNode->GetFrameSize();
     if (localOffset_.GetX() < 0 || localOffset_.GetX() > frameSize.Width()) {
         UpdateShowMagnifier();
         return false;
@@ -72,7 +72,7 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
         return false;
     }
     auto geometryNode = host->GetGeometryNode();
-    auto frameSize = geometryNode->GetFrameSize();
+    auto frameSize = hostViewPort_.has_value() ? hostViewPort_->GetSize() : geometryNode->GetFrameSize();
     if (localOffset_.GetY() < 0 || localOffset_.GetY() > frameSize.Height()) {
         UpdateShowMagnifier();
         return false;
@@ -229,6 +229,7 @@ void MagnifierController::RemoveMagnifierFrameNode()
         parentNode->RebuildRenderContextTree();
     }
     removeFrameNode_ = false;
+    hostViewPort_.reset();
 }
 
 void MagnifierController::CloseMagnifier()
