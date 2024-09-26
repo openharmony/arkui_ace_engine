@@ -42,7 +42,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension TITLEBAR_VERTICAL_PADDING = 56.0_vp;
-constexpr int32_t TITLEBAR_OPACITY_ANIMATION_DURATION = 180;
+constexpr int32_t TITLEBAR_OPACITY_ANIMATION_DURATION = 120;
 const RefPtr<CubicCurve> TITLEBAR_OPACITY_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.4, 0.0, 0.4, 1.0);
 }
 
