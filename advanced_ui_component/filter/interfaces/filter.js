@@ -877,6 +877,7 @@ class MultiFilterRow extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             });
             Image.focusable(true);
+            Image.draggable(false);
             ViewStackProcessor.visualState('focused');
             Image.border({
                 radius: {
@@ -2622,6 +2623,7 @@ export class Filter extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             });
             Image.focusable(true);
+            Image.draggable(false);
         }, Image);
         Row.pop();
         Row.pop();

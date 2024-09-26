@@ -341,6 +341,7 @@ struct MultiFilterRow {
         .height(LIST_ROW_HEIGHT)
         .fillColor($r('sys.color.ohos_id_color_tertiary'))
         .focusable(true)
+        .draggable(false)
         .stateStyles({
           focused: {
             .border({
@@ -1099,6 +1100,7 @@ export struct Filter {
               .height(ARROW_IMG_SIZE)
               .fillColor($r('sys.color.ohos_id_color_text_primary_activated'))
               .focusable(true)
+              .draggable(false)
           }
           .height(LIST_ROW_HEIGHT)
           .margin({ start: LengthMetrics.vp(FILTER_BAR_MARGIN) })
