@@ -20,6 +20,7 @@ ace_unittest("water_flow_test_original") {
     "water_flow_regular_test.cpp",
     "water_flow_scroller_test_ng.cpp",
     "water_flow_test_ng.cpp",
+    "water_flow_misc_test.cpp",
     "water_flow_top_down_test.cpp",
   ]
 }
