@@ -15,14 +15,11 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
+
 #include "core/components/checkable/checkable_theme.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,23 +53,11 @@ class CheckboxGroupModifierTest : public ModifierTestBase<GENERATED_ArkUICheckbo
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            auto theme = AceType::MakeRefPtr<CheckboxTheme>();
-            return theme;
-        });
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp();
-        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(GetArkUiEventsAPITest());
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    }
+        ModifierTestBase::SetUpTestCase();
 
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        SetupTheme<CheckboxTheme>();
+
+        fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 };
 

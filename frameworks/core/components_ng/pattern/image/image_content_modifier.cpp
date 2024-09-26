@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/image/image_content_modifier.h"
+#include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/common/ace_application_info.h"
 
@@ -33,9 +34,27 @@ void ImageContentModifier::onDraw(DrawingContext& drawingContext)
     CHECK_NULL_VOID(canvasImageWrapper_);
     auto canvasImage = canvasImageWrapper_->Get().GetCanvasImage();
     CHECK_NULL_VOID(canvasImage);
+    UpdateSvgColorFilter(canvasImage);
     ImagePainter imagePainter(canvasImage);
     if (!sensitive_->Get()) {
         imagePainter.DrawImage(drawingContext.canvas, {}, size_->Get());
+    }
+}
+
+void ImageContentModifier::UpdateSvgColorFilter(const RefPtr<CanvasImage>& canvasImage)
+{
+    auto&& paintConfig = canvasImage->GetPaintConfig();
+    auto svgCanvas = AceType::DynamicCast<SvgCanvasImage>(canvasImage);
+    if (svgCanvas) {
+        svgCanvas->SetFillColor(paintConfig.svgFillColor_);
+        svgCanvas->SetSmoothEdge(paintConfig.smoothEdge_);
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+            std::optional<ImageColorFilter> imageColorFilter = std::nullopt;
+            if (paintConfig.colorFilter_.colorFilterMatrix_ || paintConfig.colorFilter_.colorFilterDrawing_) {
+                imageColorFilter = paintConfig.colorFilter_;
+            }
+            svgCanvas->SetColorFilter(imageColorFilter);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

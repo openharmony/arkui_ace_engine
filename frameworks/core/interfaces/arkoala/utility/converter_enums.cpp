@@ -41,7 +41,6 @@ void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
     }
 }
 
-// Convert Ark_ButtonRole
 template<>
 void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
 {
@@ -63,6 +62,7 @@ void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
     }
 }
 
+// Convert Ark_ButtonRole
 template<>
 void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src)
 {
@@ -143,6 +143,18 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src)
     }
 }
 
+// Convert Ark_NavRouteMode
+template<>
+void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src)
+{
+    switch (src) {
+        case ARK_NAV_ROUTE_MODE_PUSH_WITH_RECREATE: dst = NavRouteMode::PUSH_WITH_RECREATE; break;
+        case ARK_NAV_ROUTE_MODE_PUSH: dst = NavRouteMode::PUSH; break;
+        case ARK_NAV_ROUTE_MODE_REPLACE: dst = NavRouteMode::REPLACE; break;
+        default: LOGE("Unexpected enum value in Ark_NavRouteMode: %{public}d", src);
+    }
+}
+
 template<>
 void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src)
 {
@@ -195,6 +207,16 @@ void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_TextDecoratio
         case ARK_TEXT_DECORATION_STYLE_DASHED: dst = TextDecorationStyle::DASHED; break;
         case ARK_TEXT_DECORATION_STYLE_WAVY: dst = TextDecorationStyle::WAVY; break;
         default: LOGE("Unexpected enum value in Ark_TextDecorationStyle: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src)
+{
+    switch (src) {
+        case ARK_STICKY_NONE: dst = V2::StickyMode::NONE; break;
+        case ARK_STICKY_NORMAL: dst = V2::StickyMode::NORMAL; break;
+        case ARK_STICKY_OPACITY: dst = V2::StickyMode::OPACITY; break;
+        default: LOGE("Unexpected enum value in Ark_Sticky: %{public}d", src);
     }
 }
 
@@ -251,6 +273,16 @@ void AssignCast(std::optional<TextDecoration>& dst, const Ark_TextDecorationType
         case ARK_TEXT_DECORATION_TYPE_OVERLINE: dst = TextDecoration::OVERLINE; break;
         case ARK_TEXT_DECORATION_TYPE_LINE_THROUGH: dst = TextDecoration::LINE_THROUGH; break;
         default: LOGE("Unexpected enum value in Ark_TextDecorationType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<V2::ListItemStyle>& dst, const Ark_ListItemStyle& src)
+{
+    switch (src) {
+        case ARK_LIST_ITEM_STYLE_NONE: dst = V2::ListItemStyle::NONE; break;
+        case ARK_LIST_ITEM_STYLE_CARD: dst = V2::ListItemStyle::CARD; break;
+        default: LOGE("Unexpected enum value in Ark_ListItemStyle: %{public}d", src);
     }
 }
 
@@ -456,6 +488,69 @@ void AssignCast(std::optional<ListItemGroupArea>& dst, const Ark_ListItemGroupAr
         case ARK_LIST_ITEM_GROUP_AREA_IN_HEADER_AREA: dst = ListItemGroupArea::IN_HEADER_AREA; break;
         case ARK_LIST_ITEM_GROUP_AREA_IN_FOOTER_AREA: dst = ListItemGroupArea::IN_FOOTER_AREA; break;
         default: LOGE("Unexpected enum value in Ark_ListItemGroupArea: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<V2::ListItemGroupStyle>& dst, const Ark_ListItemGroupStyle& src)
+{
+    switch (src) {
+        case ARK_LIST_ITEM_GROUP_STYLE_NONE: dst = V2::ListItemGroupStyle::NONE; break;
+        case ARK_LIST_ITEM_GROUP_STYLE_CARD: dst = V2::ListItemGroupStyle::CARD; break;
+        default: LOGE("Unexpected enum value in Ark_ListItemGroupStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src)
+{
+    switch (src) {
+        case ARK_SWIPE_EDGE_EFFECT_SPRING: dst = V2::SwipeEdgeEffect::Spring; break;
+        case ARK_SWIPE_EDGE_EFFECT_NONE: dst = V2::SwipeEdgeEffect::None; break;
+        default: LOGE("Unexpected enum value in Ark_SwipeEdgeEffect: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src)
+{
+    switch (src) {
+        case ARK_SHARED_TRANSITION_EFFECT_TYPE_STATIC:
+            dst = OHOS::Ace::SharedTransitionEffectType::SHARED_EFFECT_STATIC; break;
+        case ARK_SHARED_TRANSITION_EFFECT_TYPE_EXCHANGE:
+            dst = OHOS::Ace::SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE; break;
+        default: LOGE("Unexpected enum value in Ark_SharedTransitionEffectType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src)
+{
+    switch (src) {
+        case ARK_ANIMATION_MODE_CONTENT_FIRST: dst = TabAnimateMode::CONTENT_FIRST; break;
+        case ARK_ANIMATION_MODE_ACTION_FIRST: dst = TabAnimateMode::ACTION_FIRST; break;
+        case ARK_ANIMATION_MODE_NO_ANIMATION: dst = TabAnimateMode::NO_ANIMATION; break;
+        default: LOGE("Unexpected enum value in Ark_AnimationMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src)
+{
+    switch (src) {
+        case ARK_BAR_POSITION_START: dst = BarPosition::START; break;
+        case ARK_BAR_POSITION_END: dst = BarPosition::END; break;
+        default: LOGE("Unexpected enum value in Ark_BarPosition: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src)
+{
+    switch (src) {
+        case ARK_BAR_MODE_SCROLLABLE: dst = TabBarMode::SCROLLABLE; break;
+        case ARK_BAR_MODE_FIXED: dst = TabBarMode::FIXED; break;
+        default: LOGE("Unexpected enum value in Ark_BarMode: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

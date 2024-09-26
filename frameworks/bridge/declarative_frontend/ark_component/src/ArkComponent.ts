@@ -4439,10 +4439,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   customProperty(key: string, value: object): this {
-    const property = new ArkCustomProperty();
-    property.key = key;
-    property.value = value;
-    modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+    let returnBool = getUINativeModule().frameNode.setCustomPropertyModiferByKey(this.nativePtr, key, value);
+    if (!returnBool) {
+      const property = new ArkCustomProperty();
+      property.key = key;
+      property.value = value;
+      modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+    }
     return this;
   }
 
@@ -4865,6 +4868,18 @@ function __getCustomProperty__(nodeId: number, key: string): Object | undefined 
 
     if (customProperties) {
       return customProperties.get(key);
+    }
+  }
+
+  return undefined;
+}
+
+function __getCustomPropertyString__(nodeId: number, key: string): string | undefined {
+  if (__elementIdToCustomProperties__.has(nodeId)) {
+    const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+    if (customProperties) {
+      return JSON.stringify(customProperties.get(key));
     }
   }
 

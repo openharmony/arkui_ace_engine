@@ -31,6 +31,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/property/calc_length.h"
@@ -92,6 +93,7 @@ namespace Converter {
             std::optional<StringArray> ToStringArray();
             std::optional<Dimension> ToDimension();
             std::optional<float> ToFloat();
+            std::optional<int32_t> ToInt();
             std::optional<Color> ToColor();
 
             inline const char* BundleName() { return bundleName_.c_str(); }
@@ -199,7 +201,7 @@ namespace Converter {
     template<>
     inline ImageSourceInfo Convert(const Ark_CustomObject& value)
     {
-        LOGE("Ark_CustomObject is not implemented\n");
+        LOGE("Convert [Ark_CustomObject] to [ImageSourceInfo] is not supported");
         return ImageSourceInfo();
     }
 
@@ -267,6 +269,13 @@ namespace Converter {
     {
         ResourceConverter converter(src);
         dst = converter.ToFloat();
+    }
+
+    template<>
+    inline void AssignCast(std::optional<int32_t>& dst, const Ark_Resource& src)
+    {
+        ResourceConverter converter(src);
+        dst = converter.ToInt();
     }
 
     // Converter implementations
@@ -385,31 +394,24 @@ namespace Converter {
         return static_cast<ImageFit>(src);
     }
 
-
     template<>
     inline StringArray Convert(const Ark_String& src)
     {
-        if (src.chars != nullptr) {
-            return { src.chars };
-        } else {
-            return {};
-        }
+        return (src.chars != nullptr)  ? StringArray(1, src.chars) : StringArray();
     }
 
     template<>
     inline StringArray Convert(const Ark_CustomObject& src)
     {
-        return {};
+        LOGE("Convert [Ark_CustomObject] to [StringArray] is not supported");
+        return StringArray();
     }
 
     template<>
     inline Color Convert(const Ark_Number& src)
     {
-        uint32_t value = Convert<int>(src);
-        if (value <= 0xFFFFFF && value > 0) {
-            return Color((unsigned) value + 0xFF000000U);
-        }
-        return Color(value);
+        uint32_t value = static_cast<uint32_t>(Convert<int>(src));
+        return Color((value <= 0xFFFFFF && value > 0) ? value + 0xFF000000U : value);
     }
 
     template<>
@@ -454,30 +456,24 @@ namespace Converter {
     template<>
     inline PaddingProperty Convert(const Ark_Length& src)
     {
-        PaddingProperty padding;
         auto value = OptConvert<CalcLength>(src);
-        padding.left = value;
-        padding.top = value;
-        padding.right = value;
-        padding.bottom = value;
-        return padding;
+        return { .left = value, .top = value, .right = value, .bottom = value
+        };
     }
 
     template<>
     inline PaddingProperty Convert(const Ark_LocalizedPadding& src)
     {
         LOGE("Convert [Ark_LocalizedPadding] to [PaddingProperty] is not supported.");
-        PaddingProperty padding;
-        return padding;
+        return PaddingProperty();
     }
     template<>
     inline RadioStyle Convert(const Ark_RadioStyle& src)
     {
-        RadioStyle style;
-        style.checkedBackgroundColor = Converter::OptConvert<Color>(src.checkedBackgroundColor);
-        style.uncheckedBorderColor = Converter::OptConvert<Color>(src.uncheckedBorderColor);
-        style.indicatorColor = Converter::OptConvert<Color>(src.indicatorColor);
-        return style;
+        return { .checkedBackgroundColor = Converter::OptConvert<Color>(src.checkedBackgroundColor),
+            .uncheckedBorderColor = Converter::OptConvert<Color>(src.uncheckedBorderColor),
+            .indicatorColor = Converter::OptConvert<Color>(src.indicatorColor)
+        };
     }
 
     template<>
@@ -496,10 +492,7 @@ namespace Converter {
     template<>
     inline FontMetaData Convert(const Ark_Font& src)
     {
-        return {
-            OptConvert<Dimension>(src.size),
-            OptConvert<FontWeight>(src.weight),
-        };
+        return { OptConvert<Dimension>(src.size), OptConvert<FontWeight>(src.weight) };
     }
 
     template<>
@@ -514,26 +507,8 @@ namespace Converter {
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
-
-    template<>
-    inline void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src)
-    {
-        auto intVal = src.tag == Ark_Tag::ARK_TAG_INT32 ? src.i32 : static_cast<int32_t>(src.f32);
-        if (intVal >= 0) {
-            auto strVal = std::to_string(intVal);
-            if (auto [parseOk, val] = StringUtils::ParseFontWeight(strVal); parseOk) {
-                dst = val;
-            }
-        }
-    }
-
-    template<>
-    inline void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
-    {
-        if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
-            dst = val;
-        }
-    }
+    template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src);
+    template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
 
     Shadow ToShadow(const Ark_ShadowOptions& src);
 
@@ -558,6 +533,11 @@ namespace Converter {
         }
         return result;
     }
+
+    template<> RefPtr<Curve> Convert(const Ark_String& src);
+    template<> RefPtr<Curve> Convert(const Ark_Curve& src);
+    template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
+
     // Enums specializations
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
     template<> void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
@@ -594,7 +574,17 @@ namespace Converter {
     template<> void AssignCast(std::optional<ChainEdgeEffect>& dst, const Ark_ChainEdgeEffect& src);
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<ListItemGroupArea>& dst, const Ark_ListItemGroupArea& src);
-    
+    template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
+    template<> void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src);
+    template<> void AssignCast(std::optional<V2::ListItemStyle>& dst, const Ark_ListItemStyle& src);
+    template<> void AssignCast(std::optional<V2::ListItemGroupStyle>& dst, const Ark_ListItemGroupStyle& src);
+    template<> void AssignCast(std::optional<V2::EditMode>& dst, const Ark_EditMode& src);
+    template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
+    template<>
+    void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
+    template<> void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src);
+    template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
+    template<> void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

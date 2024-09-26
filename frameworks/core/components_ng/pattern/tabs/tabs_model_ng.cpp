@@ -722,12 +722,20 @@ RefPtr<SwiperPaintProperty> TabsModelNG::GetSwiperPaintProperty(FrameNode* frame
     return swiperPaintProperty;
 }
 
-void TabsModelNG::SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode)
+void TabsModelNG::SetTabBarMode(FrameNode* frameNode, const std::optional<TabBarMode>& tabBarModeOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarMode, tabBarMode, frameNode);
+    if (tabBarModeOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarMode, tabBarModeOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarMode, frameNode);
+    }
     auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    tabBarLayoutProperty->UpdateTabBarMode(tabBarMode);
+    if (tabBarModeOpt) {
+        tabBarLayoutProperty->UpdateTabBarMode(tabBarModeOpt.value());
+    } else {
+        tabBarLayoutProperty->ResetTabBarMode();
+    }
 }
 
 void TabsModelNG::SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& BarGridColumnOptions)
@@ -782,7 +790,7 @@ void TabsModelNG::SetBarBackgroundColor(FrameNode* frameNode, const Color& backg
     tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
 }
 
-void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, BlurStyle tabBarBlurStyle)
+void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, const std::optional<BlurStyle>& tabBarBlurStyleOpt)
 {
     CHECK_NULL_VOID(frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -791,7 +799,11 @@ void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, BlurStyle tabB
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
     CHECK_NULL_VOID(tabBarPaintProperty);
-    tabBarPaintProperty->UpdateTabBarBlurStyle(tabBarBlurStyle);
+    if (tabBarBlurStyleOpt) {
+        tabBarPaintProperty->UpdateTabBarBlurStyle(tabBarBlurStyleOpt.value());
+    } else {
+        tabBarPaintProperty->ResetTabBarBlurStyle();
+    }
 }
 
 void TabsModelNG::SetBarOverlap(FrameNode* frameNode, bool barOverlap)
@@ -848,9 +860,13 @@ void TabsModelNG::SetIsVertical(FrameNode* frameNode, bool isVertical)
     swiperLayoutProperty->UpdateDirection(axis);
 }
 
-void TabsModelNG::SetTabBarPosition(FrameNode* frameNode, BarPosition tabBarPosition)
+void TabsModelNG::SetTabBarPosition(FrameNode* frameNode, const std::optional<BarPosition>& tabBarPositionOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, tabBarPosition, frameNode);
+    if (tabBarPositionOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, tabBarPositionOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, frameNode);
+    }
 }
 
 void TabsModelNG::SetScrollable(FrameNode* frameNode, bool scrollable)
@@ -914,12 +930,13 @@ void TabsModelNG::SetAnimationDuration(FrameNode* frameNode, float duration)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetAnimationDuration(static_cast<int32_t>(duration));
-    if (static_cast<int32_t>(duration) < 0) {
-        return;
-    }
     auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
     CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateDuration(static_cast<int32_t>(duration));
+    if (static_cast<int32_t>(duration) < 0) {
+        swiperPaintProperty->ResetDuration();
+    } else {
+        swiperPaintProperty->UpdateDuration(static_cast<int32_t>(duration));
+    }
 }
 
 void TabsModelNG::SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option)
@@ -994,13 +1011,14 @@ void TabsModelNG::SetAnimateMode(TabAnimateMode mode)
     tabPattern->SetAnimateMode(mode);
 }
 
-void TabsModelNG::SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode)
+void TabsModelNG::SetAnimateMode(FrameNode* frameNode, const std::optional<TabAnimateMode>& modeOpt)
 {
     CHECK_NULL_VOID(frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
+    auto mode = modeOpt.value_or(TabAnimateMode::CONTENT_FIRST);
     tabPattern->SetAnimateMode(mode);
 }
 
@@ -1011,10 +1029,14 @@ void TabsModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
     swiperPaintProperty->UpdateEdgeEffect(edgeEffect);
 }
 
-void TabsModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect)
+void TabsModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_t>& edgeEffect)
 {
     auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
     CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+    if (edgeEffect) {
+        swiperPaintProperty->UpdateEdgeEffect(static_cast<EdgeEffect>(edgeEffect.value()));
+    } else {
+        swiperPaintProperty->ResetEdgeEffect();
+    }
 }
 } // namespace OHOS::Ace::NG

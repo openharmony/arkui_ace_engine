@@ -50,6 +50,10 @@ public:
     }
 
 private:
+    // The same svg resource has only one copy of SVGDOM in the object cache. Therefore
+    // the value of fill color must be changed on the modifier berfore the onDraw method
+    static void UpdateSvgColorFilter(const RefPtr<CanvasImage>& canvasImage);
+
     RefPtr<PropertyBool> sensitive_;
     RefPtr<PropertySizeF> size_;
     RefPtr<PropertyCanvasImageModifierWrapper> canvasImageWrapper_;

@@ -15,14 +15,11 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "node_api.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
@@ -242,8 +239,8 @@ const std::vector<UnionStringResourceTestStep> UNION_RESOURCE_STRING_PLAN = {
     { OPT_UNION_RESOURCE_RESOURCE, CHECK_RESOURCE_STR }
 };
 
-typedef std::pair<Opt_Length, std::string> OptLenghtTestStep;
-const std::vector<OptLenghtTestStep> OPT_LENGTH_TEST_PLAN = {
+typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
+const std::vector<OptLengthTestStep> OPT_LENGTH_TEST_PLAN = {
     { Converter::ArkValue<Opt_Length>(AINT32_POS), "70.00px" },
     { Converter::ArkValue<Opt_Length>(AINT32_NEG), "0.00px" },
     { Converter::ArkValue<Opt_Length>(AFLT32_NEG), "0.00px" },
@@ -375,25 +372,11 @@ class TextAreaModifierTest : public ModifierTestBase<GENERATED_ArkUITextAreaModi
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            auto builder = TextFieldTheme::Builder();
-            auto textFieldTheme = builder.Build(nullptr);
-            return textFieldTheme;
-        });
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_)).WillRepeatedly(Return(themeConstants));
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(GetArkUiEventsAPITest());
-    }
+        ModifierTestBase::SetUpTestCase();
 
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        SetupTheme<TextFieldTheme>();
+
+        fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 };
 
@@ -1248,7 +1231,7 @@ HWTEST_F(TextAreaModifierTest, setFontFeatureTest, TestSize.Level1)
         { Converter::ArkValue<Ark_String>("\"ss01\" on, ss02 off"),  "\"ss01\" 1" },
         { Converter::ArkValue<Ark_String>("ss01 on, ss02 off"), "" },
         { Converter::ArkValue<Ark_String>("\"ss01\" on"),  "\"ss01\" 1" },
-        { Converter::ArkValue<Ark_String>("\"incorect\" on"), "" },
+        { Converter::ArkValue<Ark_String>("\"incorrect\" on"), "" },
         { Converter::ArkValue<Ark_String>("\"ss01\" on"),  "\"ss01\" 1" },
         { Converter::ArkValue<Ark_String>("invalid"), "" },
     };

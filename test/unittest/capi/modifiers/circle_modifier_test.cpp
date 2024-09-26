@@ -17,9 +17,7 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "arkoala_api_generated.h"
 
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 using namespace testing;
@@ -28,10 +26,10 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace  {
     const auto ATTRIBUTE_WIDTH_NAME = "width";
-    const auto ATTRIBUTE_WIDTH_DEFAULT_VALUE = "0.00vp";
+    const auto ATTRIBUTE_WIDTH_DEFAULT_VALUE = "-";
 
     const auto ATTRIBUTE_HEIGHT_NAME = "height";
-    const auto ATTRIBUTE_HEIGHT_DEFAULT_VALUE = "0.00vp";
+    const auto ATTRIBUTE_HEIGHT_DEFAULT_VALUE = "-";
 } // namespace
 
 class CircleModifierTest : public ModifierTestBase<GENERATED_ArkUICircleModifier,

@@ -17,11 +17,10 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "arkoala_api_generated.h"
 
 #include "core/components_ng/pattern/grid/grid_item_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
+
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 using namespace testing;
@@ -62,7 +61,11 @@ class GridItemModifierTest : public ModifierTestBase<GENERATED_ArkUIGridItemModi
 public:
     static void SetUpTestCase()
     {
-        GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
+        ModifierTestBase::SetUpTestCase();
+
+        SetupTheme<GridItemTheme>();
+
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 

@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GaugeInterfaceModifier {
 void SetGaugeOptionsImpl(Ark_NativePointer node,
-                         const Type_GaugeInterface_setGaugeOptions_Arg0* options)
+                         const Ark_GaugeOptions* options)
 {
 }
 } // GaugeInterfaceModifier

@@ -138,7 +138,8 @@ public:
         ResponseLinkResult& responseLinkResult) override;
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
-    static void UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset);
+    static void UpdatePreviewPositionAndScale(
+        const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset, float scale = -1.0f);
     static void UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
     static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
@@ -321,7 +322,7 @@ private:
 
     bool isDragUserReject_ = false;
     bool defaultOnDragStartExecuted_ = false;
-    bool isResponseRegionFull = false;
+    bool isResponseRegionFull_ = false;
     OptionsAfterApplied optionsAfterApplied_;
 
     PanDirection direction_;

@@ -150,26 +150,56 @@ RefPtr<FrameNode> CalendarPickerPatternTestNg::CalendarDialogShow(RefPtr<FrameNo
 HWTEST_F(CalendarPickerPatternTestNg, HandleHoverEvent001, TestSize.Level1)
 {
     CreateCalendarPicker();
-
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
-
+    auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    ASSERT_NE(frameNode, nullptr);
-
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
-    ASSERT_NE(pickerPattern, nullptr);
 
-    auto json = JsonUtil::Create(true);
-    pickerPattern->isKeyWaiting_ = true;
-    json->Put("year", 800);
-    json->Put("month", 2);
-    json->Put("day", 29);
-    pickerPattern->SetDate(json->ToString());
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto theme = pipelineContext->GetTheme<CalendarTheme>();
+    auto contentNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(contentNode, nullptr);
+    auto yearNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(pickerPattern->yearIndex_));
+    ASSERT_NE(yearNode, nullptr);
+    auto monthNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(pickerPattern->monthIndex_));
+    ASSERT_NE(monthNode, nullptr);
+    auto dayNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(pickerPattern->dayIndex_));
+    ASSERT_NE(dayNode, nullptr);
+    auto buttonFlexNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(buttonFlexNode, nullptr);
+    auto addBtnNode = AceType::DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(0));
+    ASSERT_NE(addBtnNode, nullptr);
+    auto subBtnNode = AceType::DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(1));
+    ASSERT_NE(subBtnNode, nullptr);
 
-    Offset globalLocation(2, 1);
-    pickerPattern->HandleHoverEvent(true, globalLocation);
-    EXPECT_EQ(pickerPattern->CheckRegion(globalLocation), CalendarPickerSelectedType::OTHER);
+    auto yearMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    yearMockRenderContext->rect_.SetRect(0, 0, 10, 10);
+    yearNode->renderContext_ = yearMockRenderContext;
+    auto monthMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    monthMockRenderContext->rect_.SetRect(0, 10, 10, 10);
+    monthNode->renderContext_ = monthMockRenderContext;
+    auto dayMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    dayMockRenderContext->rect_.SetRect(0, 20, 10, 10);
+    dayNode->renderContext_ = dayMockRenderContext;
+    auto addBtnMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    addBtnMockRenderContext->rect_.SetRect(0, 30, 10, 10);
+    addBtnNode->renderContext_ = addBtnMockRenderContext;
+    auto subBtnMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    subBtnMockRenderContext->rect_.SetRect(0, 40, 10, 10);
+    subBtnNode->renderContext_ = subBtnMockRenderContext;
+
+    Offset addBtnLocation(5, 35);
+    pickerPattern->HandleHoverEvent(true, addBtnLocation);
+    Offset subBtnLocation(5, 45);
+    pickerPattern->HandleHoverEvent(true, subBtnLocation);
+    Offset yeatLocation(5, 5);
+    pickerPattern->HandleHoverEvent(true, yeatLocation);
+    EXPECT_EQ(yearNode->GetRenderContext()->GetBackgroundColor(), theme->GetBackgroundHoverColor());
+    Offset monthLocation(5, 15);
+    pickerPattern->HandleHoverEvent(true, monthLocation);
+    EXPECT_EQ(monthNode->GetRenderContext()->GetBackgroundColor(), theme->GetBackgroundHoverColor());
+    Offset dayLocation(5, 25);
+    pickerPattern->HandleHoverEvent(true, dayLocation);
+    EXPECT_EQ(dayNode->GetRenderContext()->GetBackgroundColor(), theme->GetBackgroundHoverColor());
 }
 
 /**
@@ -181,7 +211,7 @@ HWTEST_F(CalendarPickerPatternTestNg, HandleTouchEvent001, TestSize.Level1)
 {
     CreateCalendarPicker();
 
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
@@ -190,17 +220,35 @@ HWTEST_F(CalendarPickerPatternTestNg, HandleTouchEvent001, TestSize.Level1)
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     ASSERT_NE(pickerPattern, nullptr);
 
-    auto json = JsonUtil::Create(true);
-    pickerPattern->isKeyWaiting_ = true;
-    json->Put("year", 800);
-    json->Put("month", 2);
-    json->Put("day", 29);
-    pickerPattern->SetDate(json->ToString());
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<CalendarTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto buttonFlexNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    ASSERT_NE(buttonFlexNode, nullptr);
+    auto addBtnNode = AceType::DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(0));
+    ASSERT_NE(addBtnNode, nullptr);
+    auto subBtnNode = AceType::DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(1));
+    ASSERT_NE(subBtnNode, nullptr);
 
-    Offset globalLocation(800, 0);
-    pickerPattern->HandleTouchEvent(true, globalLocation);
-    pickerPattern->HandleTouchEvent(false, globalLocation);
-    EXPECT_EQ(pickerPattern->CheckRegion(globalLocation), CalendarPickerSelectedType::OTHER);
+    auto addBtnMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    addBtnMockRenderContext->rect_.SetRect(0, 0, 10, 10);
+    addBtnNode->renderContext_ = addBtnMockRenderContext;
+    auto subBtnMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    subBtnMockRenderContext->rect_.SetRect(0, 10, 10, 10);
+    subBtnNode->renderContext_ = subBtnMockRenderContext;
+
+    Offset otherLocation(20, 30);
+    pickerPattern->HandleTouchEvent(true, otherLocation);
+    pickerPattern->HandleTouchEvent(false, otherLocation);
+
+    Offset addBtnLocation(5, 5);
+    pickerPattern->HandleTouchEvent(true, addBtnLocation);
+    EXPECT_EQ(addBtnNode->GetRenderContext()->GetBackgroundColor(), theme->GetBackgroundHoverColor());
+
+    Offset subBtnLocation(5, 15);
+    pickerPattern->HandleTouchEvent(true, subBtnLocation);
+    EXPECT_EQ(subBtnNode->GetRenderContext()->GetBackgroundColor(), theme->GetBackgroundHoverColor());
 }
 
 /**
@@ -211,19 +259,54 @@ HWTEST_F(CalendarPickerPatternTestNg, HandleTouchEvent001, TestSize.Level1)
 HWTEST_F(CalendarPickerPatternTestNg, HandleClickEvent001, TestSize.Level1)
 {
     CreateCalendarPicker();
-
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
-
+    auto element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    ASSERT_NE(frameNode, nullptr);
-
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
-    ASSERT_NE(pickerPattern, nullptr);
 
-    Offset globalLocation(800, 0);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto theme = pipelineContext->GetTheme<CalendarTheme>();
+    auto contentNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    auto yearNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(pickerPattern->yearIndex_));
+    auto monthNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(pickerPattern->monthIndex_));
+    auto dayNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(pickerPattern->dayIndex_));
+    auto buttonFlexNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
+    auto addBtnNode = AceType::DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(0));
+    auto subBtnNode = AceType::DynamicCast<FrameNode>(buttonFlexNode->GetChildAtIndex(1));
+
+    auto yearMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    yearMockRenderContext->rect_.SetRect(0, 0, 10, 10);
+    yearNode->renderContext_ = yearMockRenderContext;
+    auto monthMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    monthMockRenderContext->rect_.SetRect(0, 10, 10, 10);
+    monthNode->renderContext_ = monthMockRenderContext;
+    auto dayMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    dayMockRenderContext->rect_.SetRect(0, 20, 10, 10);
+    dayNode->renderContext_ = dayMockRenderContext;
+    auto addBtnMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    addBtnMockRenderContext->rect_.SetRect(0, 30, 10, 10);
+    addBtnNode->renderContext_ = addBtnMockRenderContext;
+    auto subBtnMockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    subBtnMockRenderContext->rect_.SetRect(0, 40, 10, 10);
+    subBtnNode->renderContext_ = subBtnMockRenderContext;
+
+    Offset otherLocation(20, 50);
     pickerPattern->SetDialogShow(true);
-    pickerPattern->HandleClickEvent(globalLocation);
+    pickerPattern->HandleClickEvent(otherLocation);
+    pickerPattern->SetDialogShow(false);
+    pickerPattern->HandleClickEvent(otherLocation);
+    Offset addBtnLocation(5, 35);
+    pickerPattern->HandleClickEvent(addBtnLocation);
+    Offset subBtnLocation(5, 45);
+    pickerPattern->HandleClickEvent(subBtnLocation);
+    Offset yeatLocation(5, 5);
+    pickerPattern->HandleClickEvent(yeatLocation);
+    EXPECT_EQ(pickerPattern->selected_, CalendarPickerSelectedType::YEAR);
+    Offset monthLocation(5, 15);
+    pickerPattern->HandleClickEvent(monthLocation);
+    EXPECT_EQ(pickerPattern->selected_, CalendarPickerSelectedType::MONTH);
+    Offset dayLocation(5, 25);
+    pickerPattern->HandleClickEvent(dayLocation);
+    EXPECT_EQ(pickerPattern->selected_, CalendarPickerSelectedType::DAY);
 }
 
 /**

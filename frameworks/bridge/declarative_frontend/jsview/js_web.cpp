@@ -3568,7 +3568,7 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        return;
+        backgroundColor = WebModel::GetInstance()->GetDefaultBackgroundColor();
     }
     WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
@@ -4691,34 +4691,34 @@ void JSWeb::SetNestedScroll(const JSCallbackInfo& args)
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-    int32_t froward = 0;
+    int32_t froward = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollForward"), froward);
     if (CheckNestedScrollMode(froward)) {
         nestedOpt.scrollDown = static_cast<NestedScrollMode>(froward);
         nestedOpt.scrollRight = static_cast<NestedScrollMode>(froward);
     }
-    int32_t backward = 0;
+    int32_t backward = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollBackward"), backward);
     if (CheckNestedScrollMode(backward)) {
         nestedOpt.scrollUp = static_cast<NestedScrollMode>(backward);
         nestedOpt.scrollLeft = static_cast<NestedScrollMode>(backward);
     }
-    int32_t scrollUp = 0;
+    int32_t scrollUp = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollUp"), scrollUp);
     if (CheckNestedScrollMode(scrollUp)) {
         nestedOpt.scrollUp = static_cast<NestedScrollMode>(scrollUp);
     }
-    int32_t scrollDown = 0;
+    int32_t scrollDown = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollDown"), scrollDown);
     if (CheckNestedScrollMode(scrollDown)) {
         nestedOpt.scrollDown = static_cast<NestedScrollMode>(scrollDown);
     }
-    int32_t scrollLeft = 0;
+    int32_t scrollLeft = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollLeft"), scrollLeft);
     if (CheckNestedScrollMode(scrollLeft)) {
         nestedOpt.scrollLeft = static_cast<NestedScrollMode>(scrollLeft);
     }
-    int32_t scrollRight = 0;
+    int32_t scrollRight = -1;
     JSViewAbstract::ParseJsInt32(obj->GetProperty("scrollRight"), scrollRight);
     if (CheckNestedScrollMode(scrollRight)) {
         nestedOpt.scrollRight = static_cast<NestedScrollMode>(scrollRight);

@@ -51,7 +51,7 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
 void BaseTextSelectOverlay::ShowSelectOverlay(const OverlayRequest& request, bool hasClipboardData)
 {
     SetShowPaste(hasClipboardData);
-    SetMenuIsShow(request.menuIsShow);
+    SetMenuIsShow(request.menuIsShow && !GetSelectArea().IsEmpty());
     SetIsShowHandleLine(!request.hideHandleLine);
     latestReqeust_ = request;
     if (!SelectOverlayIsOn() && enableHandleLevel_) {

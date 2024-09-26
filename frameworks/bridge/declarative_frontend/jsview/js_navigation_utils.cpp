@@ -194,6 +194,11 @@ void JSNavigationUtils::ParseTitleBarOptions(
         ParseBackgroundOptions(info[1], options.bgOptions);
         ParseBarOptions(info[1], options.brOptions);
         ParseTextOptions(info, info[1], options.textOptions);
+        JSRef<JSObject> jsObjOption = JSRef<JSObject>::Cast(info[1]);
+        auto enableHoverModeProperty = jsObjOption->GetProperty("enableHoverMode");
+        if (enableHoverModeProperty->IsBoolean()) {
+            options.enableHoverMode = enableHoverModeProperty->ToBoolean();
+        }
     }
 }
 

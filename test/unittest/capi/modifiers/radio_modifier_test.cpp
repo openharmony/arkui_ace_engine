@@ -15,14 +15,11 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
+
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
@@ -86,6 +83,9 @@ const auto CHECK_FLOAT_COLOR = "#00000000";
 const auto CHECKED_COLOR_DEFAULT = "#FF000000";
 const auto UNCHECKED_COLOR_DEFAULT = "#FF000000";
 const auto INDICATOR_COLOR_DEFAULT = "#FF000000";
+const auto CHECKED_COLOR_THEME_DEFAULT = "#FFFF0000";
+const auto UNCHECKED_COLOR_THEME_DEFAULT = "#FFFF0000";
+const auto INDICATOR_COLOR_THEME_DEFAULT = "#FFFF0000";
 // attributes
 const std::string CHECKED_ATTR = "checked";
 const std::string RADIO_STYLE_ATTR = "radioStyle";
@@ -126,23 +126,11 @@ class RadioModifierTest : public ModifierTestBase<GENERATED_ArkUIRadioModifier,
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
-            return radioTheme;
-        });
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp();
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(GetArkUiEventsAPITest());
-    }
+        ModifierTestBase::SetUpTestCase();
 
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        SetupTheme<RadioTheme>();
+
+        fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 };
 
@@ -337,11 +325,11 @@ HWTEST_F(RadioModifierTest, RadioModifierTest007, TestSize.Level1)
     auto customRadioStyleJSON = GetStringAttribute(node_, RADIO_STYLE_ATTR);
     auto customRadioStyle = JsonUtil::ParseJsonString(customRadioStyleJSON);
     auto customCheckedBackgroundColor = customRadioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CHECKED_COLOR_DEFAULT);
+    EXPECT_EQ(customCheckedBackgroundColor, CHECKED_COLOR_THEME_DEFAULT);
     auto customUncheckedBackgroundColor = customRadioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, UNCHECKED_COLOR_DEFAULT);
+    EXPECT_EQ(customCheckedBackgroundColor, UNCHECKED_COLOR_THEME_DEFAULT);
     auto customIndicatorBackgroundColor = customRadioStyle->GetString(INDICATOR_COLOR_ATTR);
-    EXPECT_EQ(customIndicatorBackgroundColor, INDICATOR_COLOR_DEFAULT);
+    EXPECT_EQ(customIndicatorBackgroundColor, INDICATOR_COLOR_THEME_DEFAULT);
 }
 
 /**

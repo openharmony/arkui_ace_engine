@@ -2421,13 +2421,6 @@ void AceContainer::SetFontScaleAndWeightScale(
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "Keyboard does not adjust font");
         return;
     }
-    if (pipelineContext_) {
-        bool useAppFontScale = !parsedConfig.appFontScale.empty();
-        pipelineContext_->SetUseAppFontScale(useAppFontScale);
-        if (useAppFontScale) {
-            pipelineContext_->SetAppFontScale(StringUtils::StringToFloat(parsedConfig.appFontScale));
-        }
-    }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
@@ -2907,6 +2900,22 @@ bool AceContainer::IsHostSceneBoardWindow() const
 {
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
+}
+
+uint32_t AceContainer::GetParentMainWindowId(uint32_t currentWindowId) const
+{
+    uint32_t parentMainWindowId = 0;
+    if (uiWindow_) {
+        parentMainWindowId = uiWindow_->GetParentMainWindowId(currentWindowId);
+        if (parentMainWindowId == 0) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW,
+                "GetParentMainWindowId, current windowId: %{public}d, main windowId: %{public}d",
+                currentWindowId, parentMainWindowId);
+        }
+    } else {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Window in container is nullptr when getting main windowId");
+    }
+    return parentMainWindowId;
 }
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)

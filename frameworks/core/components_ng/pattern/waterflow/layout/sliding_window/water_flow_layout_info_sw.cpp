@@ -576,6 +576,7 @@ void WaterFlowLayoutInfoSW::InitSegmentsForKeepPositionMode(const std::vector<Wa
     synced_ = false;
     const size_t n = sections.size();
     if (n == 0) {
+        ClearData();
         return;
     }
 
@@ -688,5 +689,18 @@ void WaterFlowLayoutInfoSW::EndCacheUpdate()
         lanes_ = std::move(*savedLanes_);
         savedLanes_.reset();
     }
+}
+
+void WaterFlowLayoutInfoSW::ClearData()
+{
+    segmentCache_.clear();
+    segmentTails_.clear();
+    lanes_.clear();
+    idxToLane_.clear();
+    margins_.clear();
+    maxHeight_ = 0.0f;
+    synced_ = false;
+    startIndex_ = 0;
+    endIndex_ = -1;
 }
 } // namespace OHOS::Ace::NG

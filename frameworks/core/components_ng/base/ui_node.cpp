@@ -616,6 +616,10 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     for (const auto& child : GetChildren()) {
         child->AttachToMainTree(isRecursive, context);
     }
+    if (isFreeze_) {
+        auto parent = GetParent();
+        SetFreeze(parent ? parent->isFreeze_ : false);
+    }
 }
 
 [[deprecated]] void UINode::AttachToMainTree(bool recursive)
@@ -657,6 +661,28 @@ void UINode::DetachFromMainTree(bool recursive)
         child->DetachFromMainTree(isRecursive);
     }
     isTraversing_ = false;
+}
+
+void UINode::SetFreeze(bool isFreeze)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
+    if (isOpenInvisibleFreeze && isFreeze_ != isFreeze) {
+        isFreeze_ = isFreeze;
+        onFreezeStateChange();
+        UpdateChildrenFreezeState(isFreeze_);
+    }
+}
+
+void UINode::UpdateChildrenFreezeState(bool isFreeze)
+{
+    const auto& children = GetChildren(true);
+    for (const auto& child : children) {
+        if (child) {
+            child->SetFreeze(isFreeze);
+        }
+    }
 }
 
 void UINode::FireCustomDisappear()

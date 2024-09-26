@@ -512,6 +512,8 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent006, TestSize.Level1)
     event.pressedCodes.push_back(KeyCode::KEY_V);
     event.code = KeyCode::KEY_V;
     pattern_->SetCaretPosition(0);
+    // ctrl+z undo, for this record
+    pattern_->CheckAndUpdateRecordBeforeOperation();
     ret = pattern_->OnKeyEvent(event);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
@@ -526,7 +528,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent006, TestSize.Level1)
     event.code = KeyCode::KEY_Z;
     ret = pattern_->OnKeyEvent(event);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue(), "abcdefghijklmnopqrstuvwxyz");
+    EXPECT_EQ(pattern_->GetTextValue(), DEFAULT_TEXT);
     EXPECT_TRUE(ret);
 
     event.pressedCodes.clear();
@@ -535,7 +537,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent006, TestSize.Level1)
     event.code = KeyCode::KEY_Y;
     ret = pattern_->OnKeyEvent(event);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetTextValue(), "abcdefghijklmnopqrstuvwxyz");
+    EXPECT_EQ(pattern_->GetTextValue(), expectStr + DEFAULT_TEXT);
     EXPECT_TRUE(ret);
 }
 

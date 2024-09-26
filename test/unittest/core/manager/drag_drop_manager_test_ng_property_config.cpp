@@ -629,16 +629,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnItemDragEventTest002, Te
     auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
 
     /**
-     * @tc.steps: step2. call OnItemDragMove
-     *                   case: listDragFrameNodes_ is empty & preTargetFrameNode_ is null
-     * @tc.expected: step2. DragWindow.MoveTo() will be called
-     */
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
-        .Times(1);
-    dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
-
-    /**
-     * @tc.steps: step3. construct a frameNode whose tag is List set its ItemDragEvent and GeometryNode
+     * @tc.steps: step2. construct a frameNode whose tag is List set its ItemDragEvent and GeometryNode
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(LIST_TAG, -1, AceType::MakeRefPtr<ListPattern>());
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
@@ -668,16 +659,13 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerFireOnItemDragEventTest002, Te
     frameNode->SetGeometryNode(geoNode);
 
     /**
-     * @tc.steps: step4. call OnItemDragMove
+     * @tc.steps: step3. call OnItemDragMove
      *                   case: listDragFrameNodes_ is empty & preGridTargetFrameNode_ is not null
-     * @tc.expected: step4. frameNode's onItemDragLeave_ will be called
+     * @tc.expected: step3. frameNode's onItemDragLeave_ will be called
      *                      itemInfoLeave will be assigned to ITEM_INFO_LEAVE
-     *                      DragWindow.MoveTo() will be called
      */
     dragDropManager->OnItemDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
     auto preGridTargetNode = dragDropManager->preGridTargetFrameNode_;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
-        .Times(2);
     dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
     preGridTargetNode = dragDropManager->preGridTargetFrameNode_;
     dragDropManager->AddGridDragFrameNode(frameNode->GetId(), frameNode);
@@ -1890,16 +1878,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest063, TestSize.Level1)
     EXPECT_TRUE(dragDropProxy);
 
     /**
-     * @tc.steps: step2. call OnItemDragMove
-     *                   case: listDragFrameNodes_ is empty & preTargetFrameNode_ is null
-     * @tc.expected: step2. DragWindow.MoveTo() will be called
-     */
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
-        .Times(1);
-    dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
-
-    /**
-     * @tc.steps: step3. construct a frameNode whose tag is List set its ItemDragEvent and GeometryNode
+     * @tc.steps: step2. construct a frameNode whose tag is List set its ItemDragEvent and GeometryNode
      */
     auto frameNode = AceType::MakeRefPtr<FrameNode>(LIST_TAG, -1, AceType::MakeRefPtr<ListPattern>());
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
@@ -1929,16 +1908,13 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest063, TestSize.Level1)
     frameNode->SetGeometryNode(geoNode);
 
     /**
-     * @tc.steps: step4. call OnItemDragMove
+     * @tc.steps: step3. call OnItemDragMove
      *                   case: listDragFrameNodes_ is empty & preGridTargetFrameNode_ is not null
-     * @tc.expected: step4. frameNode's onItemDragLeave_ will be called
+     * @tc.expected: step3. frameNode's onItemDragLeave_ will be called
      *                      itemInfoLeave will be assigned to ITEM_INFO_LEAVE
-     *                      DragWindow.MoveTo() will be called
      */
     dragDropManager->OnItemDragStart(GLOBAL_X, GLOBAL_Y, frameNode);
     auto preGridTargetNode = dragDropManager->preGridTargetFrameNode_;
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
-        .Times(2);
     dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
     preGridTargetNode = dragDropManager->preGridTargetFrameNode_;
     dragDropManager->AddGridDragFrameNode(frameNode->GetId(), frameNode);

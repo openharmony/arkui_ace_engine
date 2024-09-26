@@ -776,14 +776,14 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     if (curChildStartIndex != 0 && curMainIndex == curMainStart && nextMainIndex < curMainIndex) {
         // Scroll item up.
         UpdateStartIndex(curChildStartIndex - 1);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         if (pipeline) {
             pipeline->FlushUITasks();
         }
     } else if (curChildEndIndex != childrenCount - 1 && curMainIndex == curMainEnd && nextMainIndex > curMainIndex) {
         // Scroll item down.
         UpdateStartIndex(curChildEndIndex + 1);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         if (pipeline) {
             pipeline->FlushUITasks();
         }
@@ -1194,7 +1194,7 @@ int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
 void GridPattern::ScrollToFocusNodeIndex(int32_t index)
 {
     UpdateStartIndex(index);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
     }
@@ -1215,7 +1215,7 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
         return false;
     }
     auto ret = UpdateStartIndex(scrollToIndex);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
     }
@@ -1573,7 +1573,7 @@ void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
     }

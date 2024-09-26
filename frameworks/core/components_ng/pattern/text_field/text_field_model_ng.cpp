@@ -155,6 +155,33 @@ void TextFieldModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFeature, value, frameNode);
 }
 
+void TextFieldModelNG::SetAutoWidth(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, true, frameNode);
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+}
+
+void TextFieldModelNG::SetWidth(FrameNode* frameNode, const std::string& value)
+{
+    if (value == "auto") {
+        SetAutoWidth(frameNode);
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, false, frameNode);
+    CalcDimension result;
+    StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
+    ViewAbstract::SetWidth(frameNode, NG::CalcLength(result));
+}
+
+void TextFieldModelNG::ClearWidth(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, false, frameNode);
+    ViewAbstract::ClearWidthOrHeight(frameNode, true);
+}
+
 void TextFieldModelNG::SetUserUnderlineColor(UserUnderlineColor userColor)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
@@ -602,6 +629,14 @@ void TextFieldModelNG::SetShowCounter(bool value)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCounterState(false);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (value && !pattern->IsNormalInlineState() && !pattern->IsInPasswordMode() &&
+        layoutProperty->HasMaxLength()) {
+        pattern->AddCounterNode();
+    } else {
+        pattern->CleanCounterNode();
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
@@ -666,11 +701,15 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, backgroundColor);
 }
 
-void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBackgroundColor(frameNode, color);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, *color, frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetHeight(const Dimension& value) {}
@@ -1272,7 +1311,15 @@ void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCounterState(false);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);
+    if (value && !pattern->IsNormalInlineState() && !pattern->IsInPasswordMode() &&
+        layoutProperty->HasMaxLength()) {
+        pattern->AddCounterNode();
+    } else {
+        pattern->CleanCounterNode();
+    }
 }
 
 void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible)

@@ -43,7 +43,7 @@ Shadow ShadowTheme::GetShadow(ShadowStyle style, ColorMode colorMode)
         return iter->second;
     }
     auto shadowIter = validShadowStyles_.find(style);
-    if (shadowIter == validShadowStyles_.end()) {
+    if (shadowIter == validShadowStyles_.end() || !themeStyle_) {
         return Shadow();
     }
     auto shadow = ParseShadowParam(themeStyle_, style, shadowIter->second, colorMode == ColorMode::DARK);

@@ -1537,6 +1537,8 @@ public:
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
+    void StopContentScroll();
+    void UpdateContentScroller(const Offset& localOffset);
 
 protected:
     virtual void InitDragEvent();
@@ -1683,6 +1685,7 @@ private:
     void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
+    void SetAccessibilityUnitAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();
@@ -1793,8 +1796,6 @@ private:
     bool HasAutoFillPasswordNode();
     bool IsTriggerAutoFillPassword();
 
-    void UpdateContentScroller(const Offset& localOffset);
-    void StopContentScroll();
     void PauseContentScroll();
     void ScheduleContentScroll(float delay);
     void UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset);

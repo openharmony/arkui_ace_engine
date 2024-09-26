@@ -13,23 +13,56 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+V2::ItemDivider Convert(const Ark_ListDividerOptions& src);
+
+template<>
+Converter::ListItemGroupOptions Convert(const Ark_ListItemGroupOptions& src)
+{
+    return {
+        .space = OptConvert<Dimension>(src.space),
+        .style = OptConvert<V2::ListItemGroupStyle>(src.style)
+    };
+}
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ListItemGroupInterfaceModifier {
 void SetListItemGroupOptionsImpl(Ark_NativePointer node,
                                  const Opt_ListItemGroupOptions* options)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    auto optionsOpt = Converter::OptConvert<Converter::ListItemGroupOptions>(*options);
+    if (optionsOpt.has_value()) {
+        ListItemGroupModelNG::SetSpace(frameNode, optionsOpt.value().space);
+        ListItemGroupModelNG::SetStyle(frameNode, optionsOpt.value().style);
+        // process CustomBuilder parameters
+        LOGE("ListItemGroupModifier::SetListItemGroupOptionsImpl support CustomObjects not implemented");
+    }
 }
 } // ListItemGroupInterfaceModifier
 namespace ListItemGroupAttributeModifier {
 void DividerImpl(Ark_NativePointer node,
                  const Type_ListItemGroupAttribute_divider_Arg0* value)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    ListItemGroupModelNG::SetDivider(frameNode, divider);
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           const Ark_Materialized* value)
 {
+    LOGE("ListItemGroupModifier::ChildrenMainSizeImpl is not implemented yet!");
 }
 } // ListItemGroupAttributeModifier
 const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()

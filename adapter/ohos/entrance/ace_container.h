@@ -72,13 +72,11 @@ struct ParsedConfig {
     std::string colorModeIsSetByApp;
     std::string mcc;
     std::string mnc;
-    std::string appFontScale;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
                  densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontFamily.empty() &&
-                 fontWeightScale.empty() && colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() &&
-                 appFontScale.empty());
+                 fontWeightScale.empty() && colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty());
     }
 };
 
@@ -577,6 +575,7 @@ public:
     bool IsHostDialogWindow() const override;
     bool IsHostSystemWindow() const override;
     bool IsHostSceneBoardWindow() const override;
+    uint32_t GetParentMainWindowId(uint32_t currentWindowId) const override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,

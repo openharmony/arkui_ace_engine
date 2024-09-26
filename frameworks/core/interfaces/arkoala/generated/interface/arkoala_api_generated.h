@@ -23,7 +23,7 @@
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 101
+#define GENERATED_ARKUI_FULL_API_VERSION 102
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -6760,14 +6760,14 @@ typedef struct Opt_TextInputOptions {
     enum Ark_Tag tag;
     Ark_TextInputOptions value;
 } Opt_TextInputOptions;
-typedef struct Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller {
+typedef struct Ark_TextClockOptions {
     Opt_Number timeZoneOffset;
     Opt_TextClockController controller;
-} Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller;
-typedef struct Opt_Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller {
+} Ark_TextClockOptions;
+typedef struct Opt_TextClockOptions {
     enum Ark_Tag tag;
-    Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller value;
-} Opt_Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller;
+    Ark_TextClockOptions value;
+} Opt_TextClockOptions;
 enum Ark_ContentType
 {
     ARK_CONTENT_TYPE_USER_NAME = 0,
@@ -8097,14 +8097,14 @@ typedef struct Opt_CopyOptions {
     enum Ark_Tag tag;
     enum  Ark_CopyOptions value;
 } Opt_CopyOptions;
-typedef struct Literal_Number_width_height {
+typedef struct Ark_ImageSourceSize {
     Ark_Number width;
     Ark_Number height;
-} Literal_Number_width_height;
-typedef struct Opt_Literal_Number_width_height {
+} Ark_ImageSourceSize;
+typedef struct Opt_ImageSourceSize {
     enum Ark_Tag tag;
-    Literal_Number_width_height value;
-} Opt_Literal_Number_width_height;
+    Ark_ImageSourceSize value;
+} Opt_ImageSourceSize;
 enum Ark_ImageInterpolation
 {
     ARK_IMAGE_INTERPOLATION_NONE,
@@ -8281,15 +8281,15 @@ typedef struct Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_Ark_Reso
     enum Ark_Tag tag;
     Union_Ark_ResourceColor_LinearGradient_Array_Tuple_Union_Ark_ResourceColor_LinearGradient_Number value;
 } Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_Ark_ResourceColor_LinearGradient_Number;
-typedef struct Literal_Number_value_Opt_Number_min_max {
+typedef struct Ark_GaugeOptions {
     Ark_Number value;
     Opt_Number min;
     Opt_Number max;
-} Literal_Number_value_Opt_Number_min_max;
-typedef struct Opt_Literal_Number_value_Opt_Number_min_max {
+} Ark_GaugeOptions;
+typedef struct Opt_GaugeOptions {
     enum Ark_Tag tag;
-    Literal_Number_value_Opt_Number_min_max value;
-} Opt_Literal_Number_value_Opt_Number_min_max;
+    Ark_GaugeOptions value;
+} Opt_GaugeOptions;
 typedef struct Ark_FormLinkOptions {
     Ark_String action;
     Opt_String moduleName;
@@ -8302,6 +8302,14 @@ typedef struct Opt_FormLinkOptions {
     enum Ark_Tag tag;
     Ark_FormLinkOptions value;
 } Opt_FormLinkOptions;
+typedef struct Literal_Number_width_height {
+    Ark_Number width;
+    Ark_Number height;
+} Literal_Number_width_height;
+typedef struct Opt_Literal_Number_width_height {
+    enum Ark_Tag tag;
+    Literal_Number_width_height value;
+} Opt_Literal_Number_width_height;
 typedef struct Ark_FormInfo {
     struct Union_Number_String id;
     Ark_String name;
@@ -9713,8 +9721,6 @@ typedef Literal_Opt_Union_String_Number_width_height Type_EllipseInterface_setEl
 typedef Opt_Literal_Opt_Union_String_Number_width_height Opt_Type_EllipseInterface_setEllipseOptions_Arg0;
 typedef Literal_Number_width_height Type_FormComponentAttribute_size_Arg0;
 typedef Opt_Literal_Number_width_height Opt_Type_FormComponentAttribute_size_Arg0;
-typedef Literal_Number_value_Opt_Number_min_max Type_GaugeInterface_setGaugeOptions_Arg0;
-typedef Opt_Literal_Number_value_Opt_Number_min_max Opt_Type_GaugeInterface_setGaugeOptions_Arg0;
 typedef Union_Ark_ResourceColor_LinearGradient_Array_Tuple_Union_Ark_ResourceColor_LinearGradient_Number Type_GaugeAttribute_colors_Arg0;
 typedef Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_Ark_ResourceColor_LinearGradient_Number Opt_Type_GaugeAttribute_colors_Arg0;
 typedef Union_Color_Number_String Type_ScrollableCommonMethod_scrollBarColor_Arg0;
@@ -9749,8 +9755,6 @@ typedef Union_CustomObject_Ark_ResourceStr_CustomObject Type_ImageInterface_setI
 typedef Opt_Union_CustomObject_ResourceStr_CustomObject Opt_Type_ImageInterface_setImageOptions2_Arg0;
 typedef Union_String_Resource_CustomObject Type_ImageAttribute_alt_Arg0;
 typedef Opt_Union_String_Resource_CustomObject Opt_Type_ImageAttribute_alt_Arg0;
-typedef Literal_Number_width_height Type_ImageAttribute_sourceSize_Arg0;
-typedef Opt_Literal_Number_width_height Opt_Type_ImageAttribute_sourceSize_Arg0;
 typedef Union_ColorFilter_CustomObject Type_ImageAttribute_colorFilter_Arg0;
 typedef Opt_Union_ColorFilter_CustomObject Opt_Type_ImageAttribute_colorFilter_Arg0;
 typedef Ark_CustomObject ResolutionQuality;
@@ -9966,8 +9970,6 @@ typedef Union_Number_String_Resource Type_TextAreaAttribute_letterSpacing_Arg0;
 typedef Opt_Union_Number_String_Resource Opt_Type_TextAreaAttribute_letterSpacing_Arg0;
 typedef Union_Number_String_Resource Type_TextAreaAttribute_lineHeight_Arg0;
 typedef Opt_Union_Number_String_Resource Opt_Type_TextAreaAttribute_lineHeight_Arg0;
-typedef Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller Type_TextClockInterface_setTextClockOptions_Arg0;
-typedef Opt_Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller Opt_Type_TextClockInterface_setTextClockOptions_Arg0;
 typedef Union_Number_FontWeight_String Type_TextClockAttribute_fontWeight_Arg0;
 typedef Opt_Union_Number_FontWeight_String Opt_Type_TextClockAttribute_fontWeight_Arg0;
 typedef Union_ShadowOptions_Array_ShadowOptions Type_TextClockAttribute_textShadow_Arg0;
@@ -10988,7 +10990,7 @@ typedef struct GENERATED_ArkUIFormLinkModifier {
 
 typedef struct GENERATED_ArkUIGaugeModifier {
     void (*setGaugeOptions)(Ark_NativePointer node,
-                            const Type_GaugeInterface_setGaugeOptions_Arg0* options);
+                            const Ark_GaugeOptions* options);
     void (*setValue)(Ark_NativePointer node,
                      const Ark_Number* value);
     void (*setStartAngle)(Ark_NativePointer node,
@@ -11167,7 +11169,7 @@ typedef struct GENERATED_ArkUIImageModifier {
     void (*setInterpolation)(Ark_NativePointer node,
                              enum Ark_ImageInterpolation value);
     void (*setSourceSize)(Ark_NativePointer node,
-                          const Type_ImageAttribute_sourceSize_Arg0* value);
+                          const Ark_ImageSourceSize* value);
     void (*setSyncLoad)(Ark_NativePointer node,
                         Ark_Boolean value);
     void (*setColorFilter)(Ark_NativePointer node,
@@ -12629,7 +12631,7 @@ typedef struct GENERATED_ArkUITextAreaModifier {
 
 typedef struct GENERATED_ArkUITextClockModifier {
     void (*setTextClockOptions)(Ark_NativePointer node,
-                                const Opt_Type_TextClockInterface_setTextClockOptions_Arg0* options);
+                                const Opt_TextClockOptions* options);
     void (*setFormat)(Ark_NativePointer node,
                       const Ark_String* value);
     void (*setOnDateChange)(Ark_NativePointer node,
@@ -13182,6 +13184,8 @@ typedef struct GENERATED_ArkUIXComponentModifier {
                          Ark_Function event);
     void (*setEnableAnalyzer)(Ark_NativePointer node,
                               Ark_Boolean enable);
+    void (*setEnableSecure)(Ark_NativePointer node,
+                            Ark_Boolean isSecure);
 } GENERATED_ArkUIXComponentModifier;
 
 typedef struct GENERATED_ArkUISideBarContainerModifier {

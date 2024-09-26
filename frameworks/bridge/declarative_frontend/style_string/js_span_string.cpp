@@ -133,7 +133,7 @@ const std::unordered_map<SpanType, std::function<JSRef<JSObject>(const RefPtr<Sp
     { SpanType::LineHeight, JSSpanString::CreateJsLineHeightSpan },
     { SpanType::Image, JSSpanString::CreateJsImageSpan },
     { SpanType::ParagraphStyle, JSSpanString::CreateJsParagraphStyleSpan },
-    { SpanType::Url, JSSpanString::CreateJsURLStyleSpan },
+    { SpanType::Url, JSSpanString::CreateJsUrlSpan },
 };
 
 void JSSpanString::Constructor(const JSCallbackInfo& args)
@@ -312,7 +312,7 @@ JSRef<JSObject> JSSpanString::CreateJsParagraphStyleSpan(const RefPtr<SpanBase>&
     return obj;
 }
 
-JSRef<JSObject> JSSpanString::CreateJsURLStyleSpan(const RefPtr<SpanBase>& spanObject)
+JSRef<JSObject> JSSpanString::CreateJsUrlSpan(const RefPtr<SpanBase>& spanObject)
 {
     auto span = AceType::DynamicCast<UrlSpan>(spanObject);
     CHECK_NULL_RETURN(span, JSRef<JSObject>::New());
@@ -444,10 +444,10 @@ RefPtr<SpanBase> JSSpanString::ParseJsSpanBase(int32_t start, int32_t length, Sp
             return ParseJsParagraphStyleSpan(start, length, obj);
         case SpanType::ExtSpan:
             return ParseJsExtSpan(start, length, obj);
-        case SpanType::Url:
-            return ParseJsUrlSpan(start, length, obj);
         case SpanType::BackgroundColor:
             return ParseJSBackgroundColorSpan(start, length, obj);
+        case SpanType::Url:
+            return ParseJsUrlSpan(start, length, obj);
         default:
             break;
     }

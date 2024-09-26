@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
+#include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
@@ -59,8 +60,10 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
+#include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
+#include "core/components_ng/pattern/shape/rect_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
@@ -730,7 +733,10 @@ void* createNavDestinationNode(ArkUI_Int32 nodeId)
 
 void* createNavRouterNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = NavRouterModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createNavigatorNode(ArkUI_Int32 nodeId)
@@ -758,7 +764,10 @@ void* createPasteButtonNode(ArkUI_Int32 nodeId)
 
 void* createPathNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = PathModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createPatternLockNode(ArkUI_Int32 nodeId)
@@ -783,7 +792,10 @@ void* createPolylineNode(ArkUI_Int32 nodeId)
 
 void* createRectNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = RectModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createRichEditorNode(ArkUI_Int32 nodeId)

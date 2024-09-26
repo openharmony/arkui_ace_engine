@@ -108,6 +108,7 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
+        CHECK_NULL_VOID(json);
         LayoutProperty::ToJsonValue(json, filter);
         /* no fixed attr below, just return */
         if (filter.IsFastFilter()) {
@@ -153,6 +154,7 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
     {
+        CHECK_NULL_VOID(json);
         static const std::unordered_map<std::string, SwiperDisplayMode> uMap {
             { "SwiperDisplayMode.AutoLinear", SwiperDisplayMode::AUTO_LINEAR },
             { "SwiperDisplayMode.Stretch", SwiperDisplayMode::STRETCH },

@@ -1050,4 +1050,111 @@ HWTEST_F(NavigationAnimationTest, OpacityAnimation002, TestSize.Level1)
     navDestinationNode->TitleOpacityAnimation(false);
     navDestinationNode->TitleOpacityAnimation(true);
 }
+
+/**
+ * @tc.name: UpdateTextNodeListAsRenderGroup
+ * @tc.desc: Test NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, UpdateTextNodeListAsRenderGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    /**
+     * @tc.steps: step2. call the target function.
+     */
+    navDestinationNode->UpdateTextNodeListAsRenderGroup(true);
+}
+
+/**
+ * @tc.name: UpdateTextNodeListAsRenderGroup
+ * @tc.desc: Test NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, UpdateTextNodeListAsRenderGroup002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    /**
+     * @tc.steps: step2. call the target function.
+     */
+    navDestinationNode->UpdateTextNodeListAsRenderGroup(false);
+}
+
+/**
+ * @tc.name: CollectTextNodeAsRenderGroup
+ * @tc.desc: Test NavDestinationGroupNode::CollectTextNodeAsRenderGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, CollectTextNodeAsRenderGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 55, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    /**
+     * @tc.steps: step2. create contentNode for navDestination and add text node to content node.
+     */
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 1,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navDestinationNode->AddChild(navDestinationContentNode);
+    navDestinationNode->SetContentNode(navDestinationContentNode);
+    auto textNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 66, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    navDestinationContentNode->AddChild(textNode);
+    /**
+     * @tc.steps: step3. call the target function.
+     */
+    navDestinationNode->CollectTextNodeAsRenderGroup();
+    ASSERT_NE(navDestinationNode->textNodeList_.size(), 0);
+}
+
+/**
+ * @tc.name: ReleaseTextNodeList
+ * @tc.desc: Test NavDestinationGroupNode::ReleaseTextNodeList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, ReleaseTextNodeList001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 77, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    /**
+     * @tc.steps: step2. create contentNode for navDestination and add text node to content node.
+     */
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 1,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navDestinationNode->AddChild(navDestinationContentNode);
+    navDestinationNode->SetContentNode(navDestinationContentNode);
+    auto textNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 88, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    navDestinationContentNode->AddChild(textNode);
+    /**
+     * @tc.steps: step3. collect text nodes before release.
+     */
+    navDestinationNode->CollectTextNodeAsRenderGroup();
+    ASSERT_NE(navDestinationNode->textNodeList_.size(), 0);
+    /**
+     * @tc.steps: step4. call the target function.
+     */
+    navDestinationNode->ReleaseTextNodeList();
+    ASSERT_EQ(navDestinationNode->textNodeList_.size(), 0);
+}
 }; // namespace OHOS::Ace::NG

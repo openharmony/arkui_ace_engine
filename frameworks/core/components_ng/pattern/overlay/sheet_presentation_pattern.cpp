@@ -350,7 +350,9 @@ void SheetPresentationPattern::OnAttachToFrameNode()
             sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
-    targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
@@ -370,14 +372,16 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     UpdateFoldDisplayModeChangedCallbackId(callbackId);
 }
 
-void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void SheetPresentationPattern::OnDetachFromFrameNode(FrameNode* sheetNode)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipeline->RemoveWindowSizeChangeCallback(sheetNode->GetId());
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    pipeline->RemoveOnAreaChangeNode(targetNode->GetId());
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->RemoveInnerOnAreaChangedCallback(sheetNode->GetId());
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
     }

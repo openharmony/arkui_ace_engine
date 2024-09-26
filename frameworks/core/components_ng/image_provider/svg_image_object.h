@@ -36,9 +36,10 @@ public:
         return Claim(this);
     }
 
-private:
     void MakeCanvasImage(
         const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
+
+private:
     // return true if process is successful
     bool MakeSvgDom(const RefPtr<ImageData>& data, const ImageSourceInfo& src);
     RefPtr<SvgDomBase> svgDomBase_;

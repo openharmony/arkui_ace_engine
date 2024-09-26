@@ -611,10 +611,7 @@ public:
         return isMenuShow_;
     }
 
-    void SetIsMenuShow(bool isMenuShow)
-    {
-        isMenuShow_ = isMenuShow;
-    }
+    void SetIsMenuShow(bool isMenuShow);
 
     void SetIsAttachToCustomNode(bool isAttachToCustomNode)
     {

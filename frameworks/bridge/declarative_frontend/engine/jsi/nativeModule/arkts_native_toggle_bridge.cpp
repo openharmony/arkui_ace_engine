@@ -394,10 +394,10 @@ ArkUINativeModuleValue ToggleBridge::SetToggleOptions(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
-    CHECK_EQUAL_RETURN(nodeArg.IsEmpty(), false, panda::JSValueRef::Undefined(vm));
+    CHECK_EQUAL_RETURN(nodeArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> isOnArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_1);
-    CHECK_EQUAL_RETURN(isOnArg.IsEmpty(), false, panda::JSValueRef::Undefined(vm));
+    CHECK_EQUAL_RETURN(isOnArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
     bool isOn = false;
     if (!isOnArg->IsUndefined() && isOnArg->IsBoolean()) {
         isOn = isOnArg->ToBoolean(vm)->Value();
@@ -420,12 +420,12 @@ ArkUINativeModuleValue ToggleBridge::ParseParams(ArkUIRuntimeCallInfo* runtimeCa
         auto isOnStr = panda::StringRef::NewFromUtf8(vm, "isOn");
         auto typeArg = obj->Get(vm, typeStr);
         auto isOnArg = obj->Get(vm, isOnStr);
-        CHECK_EQUAL_RETURN(typeArg.IsEmpty(), false, panda::JSValueRef::Undefined(vm));
-        CHECK_EQUAL_RETURN(isOnArg.IsEmpty(), false, panda::JSValueRef::Undefined(vm));
+        CHECK_EQUAL_RETURN(typeArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+        CHECK_EQUAL_RETURN(isOnArg.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
         if (!typeArg->IsNull() && typeArg->IsNumber()) {
             toggleParams->toggleType = static_cast<ToggleType>(typeArg->Int32Value(vm));
         }
-        if (!typeArg->IsNull() && isOnArg->IsBoolean()) {
+        if (!isOnArg->IsNull() && isOnArg->IsBoolean()) {
             toggleParams->isOn = isOnArg->ToBoolean(vm)->Value();
         }
     }

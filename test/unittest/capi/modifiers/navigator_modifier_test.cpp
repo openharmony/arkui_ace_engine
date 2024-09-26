@@ -17,11 +17,8 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
 
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,19 +36,6 @@ namespace  {
 
 class NavigatorModifierTest : public ModifierTestBase<GENERATED_ArkUINavigatorModifier,
     &GENERATED_ArkUINodeModifiers::getNavigatorModifier, GENERATED_ARKUI_NAVIGATOR> {
-public:
-    static void SetUpTestCase()
-    {
-        MockPipelineContext::SetUp();
-        auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
-        MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutor);
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetTaskExecutor(nullptr);
-        MockPipelineContext::TearDown();
-    }
 };
 
 /*
@@ -83,7 +67,7 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestValidValues, TestSize.Le
 
     ASSERT_NE(modifier_->setNavigatorOptions0, nullptr);
 
-    // Inital setup
+    // Initial setup
     Type_NavigatorInterface_setNavigatorOptions_Arg0 inputValueOptions = {
         .target = {"abc"},
         .type = Converter::ArkValue<Opt_NavigationType>(ARK_NAVIGATION_TYPE_REPLACE)
@@ -113,7 +97,7 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestInvalidValues, TestSize.
 
     ASSERT_NE(modifier_->setNavigatorOptions0, nullptr);
 
-    // Inital setup
+    // Initial setup
     Type_NavigatorInterface_setNavigatorOptions_Arg0 inputValueOptions = {
         .target = { .chars = nullptr },
         .type = { .tag = ARK_TAG_OBJECT, .value = static_cast<Ark_NavigationType>(INT_MIN) }
@@ -177,7 +161,7 @@ HWTEST_F(NavigatorModifierTest, setActiveTestValidValues, TestSize.Level1)
 
     ASSERT_NE(modifier_->setActive, nullptr);
 
-    // Inital setup
+    // Initial setup
     inputValueActive = Converter::ArkValue<Ark_Boolean>(true);
 
     // Test
@@ -218,7 +202,7 @@ HWTEST_F(NavigatorModifierTest, setTypeTestValidValues, TestSize.Level1)
 
     ASSERT_NE(modifier_->setType, nullptr);
 
-    // Inital setup
+    // Initial setup
     inputValueType = ARK_NAVIGATION_TYPE_PUSH;
 
     // Test
@@ -256,7 +240,7 @@ HWTEST_F(NavigatorModifierTest, setTypeTestInvalidValues, TestSize.Level1)
 
     ASSERT_NE(modifier_->setType, nullptr);
 
-    // Inital setup
+    // Initial setup
     inputValueType = static_cast<Ark_NavigationType>(INT_MIN);
 
     // Test
@@ -295,7 +279,7 @@ HWTEST_F(NavigatorModifierTest, setTargetTestValidValues, TestSize.Level1)
 
     ASSERT_NE(modifier_->setTarget, nullptr);
 
-    // Inital setup
+    // Initial setup
     inputValueTarget = Converter::ArkValue<Ark_String>("");
 
     // Test

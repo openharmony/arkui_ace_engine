@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,13 +49,13 @@ public:
 
     void fullScreenReset()
     {
-        auto src_ = GetVideoSourceValue("");
+        auto videoSrcInfo_ = GetVideoSourceValue(VideoSourceInfo());
         auto objectFit_ = GetObjectFitValue(ImageFit::COVER);
         auto ImageSourceInfo_ = GetPosterImageInfoValue(ImageSourceInfo());
         auto control_ = GetControlsValue(true);
         auto videoSize_ = GetVideoSizeValue(SizeF());
         Reset();
-        UpdateVideoSource(src_);
+        UpdateVideoSource(videoSrcInfo_);
         UpdateObjectFit(objectFit_);
         UpdateControls(control_);
         UpdatePosterImageInfo(ImageSourceInfo_);
@@ -64,7 +64,7 @@ public:
 
     ACE_DEFINE_PROPERTY_GROUP(VideoStyle, VideoStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(VideoStyle, ObjectFit, ImageFit, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(VideoStyle, VideoSource, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(VideoStyle, VideoSource, VideoSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(VideoStyle, PosterImageInfo, ImageSourceInfo, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(VideoStyle, Controls, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(VideoStyle, VideoSize, SizeF, PROPERTY_UPDATE_MEASURE);

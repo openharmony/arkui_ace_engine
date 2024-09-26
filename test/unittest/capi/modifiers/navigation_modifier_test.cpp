@@ -21,7 +21,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
+
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 using namespace testing;
@@ -70,7 +70,9 @@ class NavigationModifierTest : public ModifierTestBase<GENERATED_ArkUINavigation
 public:
     static void SetUpTestCase()
     {
-        GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
+        ModifierTestBase::SetUpTestCase();
+
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -780,7 +782,7 @@ HWTEST_F(NavigationModifierTest, setHideToolBar0TestValidValues, TestSize.Level1
     bool boolResult;
     Ark_Boolean inputValue;
 
-    // Inital setup
+    // Initial setup
     inputValue = Converter::ArkValue<Ark_Boolean>(true);
     modifier_->setHideToolBar0(node_, inputValue);
     boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_HIDE_TOOL_BAR_NAME);
@@ -922,7 +924,7 @@ HWTEST_F(NavigationModifierTest, setRecoverableTestValidValues, TestSize.Level1)
     bool boolResult;
     Opt_Boolean inputValue;
 
-    // Inital setup
+    // Initial setup
     inputValue = Converter::ArkValue<Opt_Boolean>(std::optional(true));
     modifier_->setRecoverable(node_, &inputValue);
     boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_RECOVERABLE_NAME);
@@ -945,7 +947,7 @@ HWTEST_F(NavigationModifierTest, setRecoverableTestInvalidValues, TestSize.Level
     bool boolResult;
     Opt_Boolean inputValue;
 
-    // Inital setup
+    // Initial setup
     inputValue = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     modifier_->setRecoverable(node_, &inputValue);
     boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_RECOVERABLE_NAME);

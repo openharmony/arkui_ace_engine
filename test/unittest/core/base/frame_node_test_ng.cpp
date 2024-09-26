@@ -47,7 +47,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg001, TestSize.Level1)
     bool flag = false;
     auto three = FrameNode::GetOrCreateFrameNode("one", 1, nullptr);
     ASSERT_NE(three, nullptr);
-    three->PushDestroyCallback([&flag]() { flag = !flag; });
+    three->PushDestroyCallbackWithTag([&flag]() { flag = !flag; }, "");
     three = nullptr;
     EXPECT_TRUE(flag);
 }

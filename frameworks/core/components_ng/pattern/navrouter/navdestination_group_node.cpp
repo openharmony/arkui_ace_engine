@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr double HALF = 0.5;
@@ -393,5 +394,64 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAn
         CHECK_NULL_VOID(renderContext);
         renderContext->SetOpacity(0.0f);
     });
+}
+
+void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(bool isPopPage)
+{
+    if (isPopPage) {
+        CollectTextNodeAsRenderGroup();
+    } else {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterLayoutTask([weakNavDestiniation = WeakClaim(this)] () {
+            auto navDestination = weakNavDestiniation.Upgrade();
+            CHECK_NULL_VOID(navDestination);
+            navDestination->CollectTextNodeAsRenderGroup();
+        });
+    }
+}
+
+void NavDestinationGroupNode::CollectTextNodeAsRenderGroup()
+{
+    ReleaseTextNodeList();
+    std::queue<RefPtr<UINode>> auxiliaryQueue;
+    auxiliaryQueue.push(contentNode_);
+    while (!auxiliaryQueue.empty()) {
+        auto currentNode = auxiliaryQueue.front();
+        auxiliaryQueue.pop();
+        if (!currentNode) {
+            continue;
+        }
+        for (auto& child : currentNode->GetChildren()) {
+            if (!child) {
+                continue;
+            }
+            auxiliaryQueue.push(child);
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (!frameNode || frameNode->GetTag() != V2::TEXT_ETS_TAG) {
+                continue;
+            }
+            auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+            if (!layoutProperty) {
+                continue;
+            }
+            if ((layoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) &&
+                frameNode->GetRenderContext()) {
+                frameNode->GetRenderContext()->UpdateRenderGroup(true);
+                textNodeList_.emplace_back(WeakPtr<UINode>(child));
+            }
+        }
+    }
+}
+
+void NavDestinationGroupNode::ReleaseTextNodeList()
+{
+    for (auto& child : textNodeList_) {
+        auto textNode = AceType::DynamicCast<FrameNode>(child.Upgrade());
+        if (textNode && textNode->GetRenderContext()) {
+            textNode->GetRenderContext()->UpdateRenderGroup(false);
+        }
+    }
+    textNodeList_.clear();
 }
 } // namespace OHOS::Ace::NG

@@ -73,14 +73,16 @@ void SetButtonOptions2Impl(Ark_NativePointer node,
                            const ResourceStr* label,
                            const Opt_ButtonOptions* options)
 {
-    if (options->tag == ARK_TAG_UNDEFINED) {
-        SetButtonOptions0Impl(node);
-    } else {
-        SetButtonOptions1Impl(node, &options->value);
+    if (options != nullptr) {
+        if (auto buttonOptions = Converter::OptConvert<Ark_ButtonOptions>(*options); buttonOptions) {
+            SetButtonOptions1Impl(node, &buttonOptions.value());
+        }
     }
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetLabel(frameNode, Converter::ConvertOrDefault(*label, ""));
+    CHECK_NULL_VOID(label);
+    auto labelString = Converter::OptConvert<std::string>(*label);
+    ButtonModelNG::SetLabel(frameNode, labelString.value_or("").c_str());
 }
 } // ButtonInterfaceModifier
 namespace ButtonAttributeModifier {

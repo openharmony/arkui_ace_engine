@@ -117,7 +117,7 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
-constexpr int32_t AVOID_DELAY_TIME = 20;
+constexpr int32_t AVOID_DELAY_TIME = 50;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -1376,10 +1376,8 @@ void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Conf
     }
 
     auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    bool useAppFontScale = !fontScale.empty();
-    context->SetUseAppFontScale(useAppFontScale);
-    if (useAppFontScale) {
-        context->SetAppFontScale(StringUtils::StringToFloat(fontScale));
+    if (!fontScale.empty()) {
+        context->SetFontScale(StringUtils::StringToFloat(fontScale));
     }
 }
 
@@ -1922,6 +1920,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         KeyboardAnimationConfig config = {curveIn, curveOut};
         pipeline->SetKeyboardAnimationConfig(config);
     }
+    // Use metadata to control whether dirty mark is blocked.
+    bool isOpenInvisibleFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "ArkUIInvisibleFreeze" && metaDataItem.value == "true";
+    });
+    pipeline->SetOpenInvisibleFreeze(isOpenInvisibleFreeze);
     // Set sdk version in module json mode
     if (isModelJson) {
         if (pipeline && appInfo) {
@@ -2399,6 +2402,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
+    PerfMonitor::GetPerfMonitor()->RecordWindowRectResize(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason),
+                                                          bundleName_);
     UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction, avoidAreas);
 }
 
@@ -2410,6 +2415,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
         static_cast<uint32_t>(reason));
+    bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
         AceLogTag::ACE_WINDOW, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
@@ -2447,6 +2453,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> updatingInsets;
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
+        context->FireSizeChangeByRotateCallback(isOrientationChanged, rsTransaction);
     }
     if (safeAreaManager) {
         DeduplicateAvoidAreas(context, updatingInsets, avoidAreas, config);
@@ -2584,14 +2591,18 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [container, visible, hasDeco]() {
-           auto pipelineContext = container->GetPipelineContext();
-           CHECK_NULL_VOID(pipelineContext);
-           pipelineContext->ShowContainerTitle(visible, hasDeco);
-           pipelineContext->ChangeDarkModeBrightness();
-        },
-        TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
+    auto task = [container, visible, hasDeco]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->ShowContainerTitle(visible, hasDeco);
+        pipelineContext->ChangeDarkModeBrightness();
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
+    }
 }
 
 void UIContentImpl::SetUIContentType(UIContentType uIContentType)
@@ -2604,23 +2615,27 @@ void UIContentImpl::SetUIContentType(UIContentType uIContentType)
 
 void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateMaximizeMode: %{public}d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, mode);
+    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateMaximizeMode: %{public}d", bundleName_.c_str(),
+        moduleName_.c_str(), instanceId_, mode);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [container, mode]() {
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto windowManager = pipelineContext->GetWindowManager();
-            CHECK_NULL_VOID(windowManager);
-            windowManager->SetCurrentWindowMaximizeMode(static_cast<OHOS::Ace::MaximizeMode>(mode));
-            pipelineContext->ShowContainerTitle(true, true, true);
-        },
-        TaskExecutor::TaskType::UI, "ArkUIUpdateMaximizeMode");
+    auto task = [container, mode]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto windowManager = pipelineContext->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        windowManager->SetCurrentWindowMaximizeMode(static_cast<OHOS::Ace::MaximizeMode>(mode));
+        pipelineContext->ShowContainerTitle(true, true, true);
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateMaximizeMode");
+    }
 }
 
 bool UIContentImpl::NeedSoftKeyboard()
@@ -2984,7 +2999,8 @@ void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, 
     return front->SetErrorEventHandler(std::move(errorCallback));
 }
 
-void UIContentImpl::OnFormSurfaceChange(float width, float height)
+void UIContentImpl::OnFormSurfaceChange(float width, float height, OHOS::Rosen::WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2997,7 +3013,7 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
     ContainerScope scope(instanceId_);
     auto density = pipelineContext->GetDensity();
     pipelineContext->SetRootSize(density, formWidth, formHeight);
-    pipelineContext->OnSurfaceChanged(formWidth, formHeight);
+    pipelineContext->OnSurfaceChanged(formWidth, formHeight, static_cast<WindowSizeChangeReason>(type), rsTransaction);
 }
 
 void UIContentImpl::SetFormBackgroundColor(const std::string& color)
@@ -3568,13 +3584,17 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [customTitleSettedShow, floatingTitleSettedShow]() {
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
-        },
-        TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleVisible");
+    auto task = [customTitleSettedShow, floatingTitleSettedShow]() {
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleVisible");
+    }
 }
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
@@ -3582,13 +3602,17 @@ void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [height]() {
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetContainerModalTitleHeight(height);
-        },
-        TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleHeight");
+    auto task = [height]() {
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetContainerModalTitleHeight(height);
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleHeight");
+    }
 }
 
 int32_t UIContentImpl::GetContainerModalTitleHeight()

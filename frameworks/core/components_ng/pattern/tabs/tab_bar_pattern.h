@@ -469,6 +469,7 @@ private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void BeforeCreateLayoutWrapper() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -553,6 +554,7 @@ private:
     bool CanScroll() const;
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
+    int32_t GetLoopIndex(int32_t originalIndex) const;
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;

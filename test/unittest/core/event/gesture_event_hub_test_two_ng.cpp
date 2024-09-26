@@ -248,7 +248,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset002, TestSize.Le
     auto size = SizeF(1, 1);
     gestureEventHub->frameNodeOffset_.SetX(1);
     gestureEventHub->frameNodeOffset_.SetY(1);
-    gestureEventHub->GetPixelMapOffset(info, size, -1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, -1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
     OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);

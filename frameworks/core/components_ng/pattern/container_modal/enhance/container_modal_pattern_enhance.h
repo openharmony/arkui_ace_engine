@@ -39,6 +39,8 @@ public:
     {
         controlButtonVisibleBeforeAnim_ = visibleType;
     }
+    RefPtr<FrameNode> GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode);
+    OffsetF GetMenuOffset();
 
 protected:
     RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;
@@ -63,9 +65,18 @@ protected:
     Color GetContainerColor(bool isFocus);
 
 private:
+    RefPtr<FrameNode> BuildLeftSplitMenuItem();
+    RefPtr<FrameNode> BuildRightSplitMenuItem();
+    RefPtr<FrameNode> BuildMenuItem(
+        std::string title, InternalResource::ResourceId resourceId, RefPtr<ClickEvent> event, bool chooseCurrent);
+    Dimension GetMenuWidth();
+    void CalculateMenuOffset(const RefPtr<FrameNode>& targetNode);
     VisibleType controlButtonVisibleBeforeAnim_;
     RefPtr<RenderContext> closeBtnRenderContext_;
     bool isTitleRowHovered_;
+    RefPtr<FrameNode> menuList_;
+    OffsetF menuOffset_;
+    float textWidth_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H

@@ -18,19 +18,13 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "arkoala_api_generated.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
+
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
-#include "core/interfaces/arkoala/generated/interface/node_api.h"
-
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/common/mock_theme_style.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -86,7 +80,7 @@ namespace {
     const auto ATTRIBUTE_ENABLE_SCROLL_INTERACTION_NAME = "enableScrollInteraction";
     const auto ATTRIBUTE_ENABLE_SCROLL_INTERACTION_DEFAULT_VALUE = true;
     const auto ATTRIBUTE_FRICTION_NAME = "friction";
-    const auto ATTRIBUTE_FRICTION_DEFAULT_VALUE = 0.6f;
+    const auto ATTRIBUTE_FRICTION_DEFAULT_VALUE = 0.75f;
     const auto ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_NAME = "alignItems";
     const auto ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_DEFAULT_VALUE = "GridItemAlignment.Default";
 
@@ -98,37 +92,13 @@ class GridModifierTest : public ModifierTestBase<GENERATED_ArkUIGridModifier,
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+        ModifierTestBase::SetUpTestCase();
 
         // set test values to Theme Pattern as data for the Theme building
-        auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
+        auto themeStyle = SetupThemeStyle(THEME_PATTERN_SCROLL_BAR);
         themeStyle->SetAttr(PATTERN_FG_COLOR, { .value = THEME_SCROLLBAR_COLOR });
-        MockThemeStyle::GetInstance()->SetAttr(THEME_PATTERN_SCROLL_BAR, { .value = themeStyle });
-        themeConstants->LoadTheme(0);
 
-        // build default ScrollBarTheme
-        ScrollBarTheme::Builder builder;
-        auto scrollBarTheme = builder.Build(themeConstants);
-
-        // create Theme Manager and provide return of ScrollBarTheme
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_))
-            .WillRepeatedly(Return(themeConstants));
-        EXPECT_CALL(*themeManager, GetTheme(testing::_))
-            .WillRepeatedly(Return(scrollBarTheme));
-
-        // setup Context with Theme Manager and Container
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        SetupTheme<ScrollBarTheme>();
     }
 };
 
@@ -770,7 +740,7 @@ HWTEST_F(GridModifierTest, setScrollBarTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_BarState inputValue;
-    
+
     // check Auto mode (default is Off mode)
     inputValue = ARK_BAR_STATE_AUTO;
     modifier_->setScrollBar(node_, inputValue);

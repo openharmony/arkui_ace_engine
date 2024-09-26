@@ -2675,13 +2675,6 @@ void AssignLiteralTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignLiteralTo(std::optional<T>& dst,
-                     const Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller& src)
-{
-    AssignTo(dst, src.timeZoneOffset);
-}
-
-template<typename T>
-void AssignLiteralTo(std::optional<T>& dst,
                      const Literal_Opt_BarPosition_barPosition_Opt_Number_index_Opt_TabsController_controller& src)
 {
     AssignTo(dst, src.barPosition);
@@ -2741,13 +2734,6 @@ void AssignLiteralTo(std::optional<T>& dst,
                      const Literal_Number_width_height& src)
 {
     AssignTo(dst, src.width);
-}
-
-template<typename T>
-void AssignLiteralTo(std::optional<T>& dst,
-                     const Literal_Number_value_Opt_Number_min_max& src)
-{
-    AssignTo(dst, src.value);
 }
 
 template<typename T>
@@ -3499,7 +3485,7 @@ ASSIGN_OPT(Opt_PasswordIcon)
 ASSIGN_OPT(Opt_Union_TextInputStyle_TextContentStyle)
 ASSIGN_OPT(Opt_InputType)
 ASSIGN_OPT(Opt_TextInputOptions)
-ASSIGN_OPT(Opt_Literal_Opt_Number_timeZoneOffset_Opt_TextClockController_controller)
+ASSIGN_OPT(Opt_TextClockOptions)
 ASSIGN_OPT(Opt_ContentType)
 ASSIGN_OPT(Opt_TextAreaType)
 ASSIGN_OPT(Opt_InputCounterOptions)
@@ -3637,7 +3623,7 @@ ASSIGN_OPT(Opt_ImageFrameInfo)
 ASSIGN_OPT(Opt_Array_ImageFrameInfo)
 ASSIGN_OPT(Opt_ImageAnalyzerConfig)
 ASSIGN_OPT(Opt_CopyOptions)
-ASSIGN_OPT(Opt_Literal_Number_width_height)
+ASSIGN_OPT(Opt_ImageSourceSize)
 ASSIGN_OPT(Opt_ImageInterpolation)
 ASSIGN_OPT(Opt_DynamicRangeMode)
 ASSIGN_OPT(Opt_ImageRenderMode)
@@ -3656,8 +3642,9 @@ ASSIGN_OPT(Opt_GaugeIndicatorOptions)
 ASSIGN_OPT(Opt_GaugeShadowOptions)
 ASSIGN_OPT(Opt_Tuple_Union_ResourceColor_LinearGradient_Number)
 ASSIGN_OPT(Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_Ark_ResourceColor_LinearGradient_Number)
-ASSIGN_OPT(Opt_Literal_Number_value_Opt_Number_min_max)
+ASSIGN_OPT(Opt_GaugeOptions)
 ASSIGN_OPT(Opt_FormLinkOptions)
+ASSIGN_OPT(Opt_Literal_Number_width_height)
 ASSIGN_OPT(Opt_FormInfo)
 ASSIGN_OPT(Opt_FolderStackOptions)
 ASSIGN_OPT(Opt_FlexOptions)

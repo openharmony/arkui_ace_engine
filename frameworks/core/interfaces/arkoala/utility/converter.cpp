@@ -101,6 +101,10 @@ std::optional<std::string> ResourceConverter::ToString()
         case NodeModifier::ResourceType::STRING:
             if (id_ != -1) {
                 result = themeConstants_->GetString(id_);
+            } else if (!params_.empty()) {
+                result = themeConstants_->GetStringByName(params_.front());
+            } else {
+                LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
             }
             break;
 
@@ -147,6 +151,15 @@ std::optional<float> ResourceConverter::ToFloat()
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
     if (type_ == NodeModifier::ResourceType::FLOAT) {
         return static_cast<float>(themeConstants_->GetDouble(id_));
+    }
+    return std::nullopt;
+}
+
+std::optional<int32_t> ResourceConverter::ToInt()
+{
+    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    if (type_ == NodeModifier::ResourceType::INTEGER) {
+        return themeConstants_->GetInt(id_);
     }
     return std::nullopt;
 }
@@ -306,4 +319,44 @@ ItemDragInfo Convert(const Ark_ItemDragInfo& src)
     itemDragInfo.SetY(Convert<float>(src.y));
     return itemDragInfo;
 }
+
+template<>
+void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src)
+{
+    auto intVal = src.tag == Ark_Tag::ARK_TAG_INT32 ? src.i32 : static_cast<int32_t>(src.f32);
+    if (intVal >= 0) {
+        auto strVal = std::to_string(intVal);
+        if (auto [parseOk, val] = StringUtils::ParseFontWeight(strVal); parseOk) {
+            dst = val;
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
+{
+    if (auto [parseOk, val] = StringUtils::ParseFontWeight(src.chars); parseOk) {
+        dst = val;
+    }
+}
+
+template<>
+RefPtr<Curve> Convert(const Ark_String& src)
+{
+    return Framework::CreateCurve(Converter::Convert<std::string>(src), false);
+}
+
+template<>
+RefPtr<Curve> Convert(const Ark_Curve& src)
+{
+    return Framework::CreateCurve(src, false);
+}
+
+template<>
+RefPtr<Curve> Convert(const Ark_ICurve& src)
+{
+    LOGE("Convert [Ark_ICurve] to [RefPtr<Curve>] is not supported");
+    return nullptr;
+}
+
 } // namespace OHOS::Ace::NG::Converter

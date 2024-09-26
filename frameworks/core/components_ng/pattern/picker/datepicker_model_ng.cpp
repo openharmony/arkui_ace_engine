@@ -672,6 +672,7 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     }
 
     properties.maskRect = pickerDialog.maskRect;
+    properties.onLanguageChange = [](DialogProperties&) {};
 
     std::map<std::string, PickerDate> datePickerProperty;
     std::map<std::string, PickerTime> timePickerProperty;

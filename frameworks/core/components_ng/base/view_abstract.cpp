@@ -209,9 +209,13 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, updateColor);
 }
 
-void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const Color& color)
+void ViewAbstract::SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, *color, frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
@@ -2100,6 +2104,7 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR);
 }
 
 void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
@@ -2108,6 +2113,7 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP);
 }
 
 void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
@@ -2116,6 +2122,7 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL);
 }
 
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
@@ -2929,16 +2936,19 @@ void ViewAbstract::SetZIndex(FrameNode *frameNode, int32_t value)
 void ViewAbstract::SetLinearGradient(FrameNode *frameNode, const NG::Gradient& gradient)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR, frameNode);
 }
 
 void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
 }
 
 void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL, frameNode);
 }
 
 void ViewAbstract::SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay)
@@ -3596,6 +3606,15 @@ void ViewAbstract::SetSharedTransition(
     CHECK_NULL_VOID(frameNode);
     const auto& target = frameNode->GetRenderContext();
     if (target) {
+        if (option) {
+            option->duration = option->duration < 0 ? CommonAnimationStyle::DEFAULT_ANIMATION_DURATION :
+                option->duration;
+            option->delay = option->delay < 0 ? 0 : option->delay;
+            option->zIndex = option->zIndex < 0 ? 0 : option->zIndex;
+            if (!option->curve) {
+                option->curve = Curves::LINEAR;
+            }
+        }
         target->SetSharedTransitionOptions(option);
         target->SetShareId(shareId);
     }
@@ -4999,4 +5018,17 @@ void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<
     CHECK_NULL_VOID(frameNode);
     frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
 }
+
+void ViewAbstract::AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddCustomProperty(key, value);
+}
+
+void ViewAbstract::RemoveCustomProperty(FrameNode* frameNode, const std::string& key)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->RemoveCustomProperty(key);
+}
+
 } // namespace OHOS::Ace::NG

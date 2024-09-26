@@ -629,7 +629,7 @@ public:
     }
 
 protected:
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
 private:
     void OnModifyDone() override;

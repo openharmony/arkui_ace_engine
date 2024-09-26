@@ -24,6 +24,10 @@ const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const EnvironmentCallback = requireNapi('EnvironmentCallback');
 
+const RESOURCE_TYPE_STRING = 10003;
+const RESOURCE_TYPE_FLOAT = 10002;
+const RESOURCE_TYPE_INTEGER = 10007;
+
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {
     });
@@ -295,7 +299,17 @@ export function Chip(r5, s5 = null) {
         }, { name: "ChipComponent" });
     }
 }
-
+function isValidString(dimension, regex) {
+    const matches = dimension.match(regex);
+    if (!matches || matches.length < 3) {
+        return false;
+    }
+    const value = Number.parseFloat(matches[1]);
+    return value >= 0;
+}
+function isValidDimensionString(dimension) {
+    return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
+}
 export class ChipComponent extends ViewPU {
     constructor(k5, l5, m5, n5 = -1, o5 = undefined, p5) {
         super(k5, m5, n5, p5);
@@ -855,7 +869,16 @@ export class ChipComponent extends ViewPU {
                 return v3;
             case 'object':
                 try {
-                    return this.lengthMetricsToVp(LengthMetrics.resource(v3));
+                    let w3 = this.lengthMetricsToVp(LengthMetrics.resource(v3));
+                    if (w3 === 0) {
+                        if ((v3.type === RESOURCE_TYPE_STRING &&
+                            !isValidDimensionString(getContext(this).resourceManager.getStringSync(v3.id))) ||
+                            (v3.type !== RESOURCE_TYPE_STRING && v3.type !== RESOURCE_TYPE_INTEGER &&
+                                v3.type !== RESOURCE_TYPE_FLOAT)) {
+                            return Number.NEGATIVE_INFINITY;
+                        }
+                    }
+                    return w3;
                 }
                 catch (a4) {
                     return Number.NEGATIVE_INFINITY;
@@ -1395,6 +1418,11 @@ export class ChipComponent extends ViewPU {
             Button.scale(ObservedObject.GetRawObject(this.chipScale));
             Button.focusable(true);
             Button.opacity(this.getChipNodeOpacity());
+            Button.focusBox({
+                margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+                strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+                strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+            });
             Button.onFocus(() => {
                 this.chipNodeOnFocus = true;
             });
@@ -1526,6 +1554,11 @@ export class ChipComponent extends ViewPU {
                         Image.flexShrink(0);
                         Image.visibility(this.getVisibility());
                         Image.draggable(false);
+                        Image.focusBox({
+                            margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
+                            strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
+                            strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
+                        });
                         Image.onFocus(() => {
                             this.suffixIconOnFocus = true;
                         });

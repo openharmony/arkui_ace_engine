@@ -20,6 +20,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -27,6 +28,47 @@ namespace {
 std::atomic<uint64_t> g_navDestinationPatternNextAutoGenId = 0;
 // titlebar ZINDEX
 constexpr static int32_t DEFAULT_TITLEBAR_ZINDEX = 2;
+
+void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, const RefPtr<TitleBarNode>& titleBarNode)
+{
+    if (navDestinationGroupNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
+        titleBarNode->RemoveChild(titleBarNode->GetMenu());
+        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    if (navDestinationGroupNode->GetPrevMenuIsCustomValue(false)) {
+        if (navDestinationGroupNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
+            return;
+        }
+        titleBarNode->SetMenu(navDestinationGroupNode->GetMenu());
+        titleBarNode->AddChild(titleBarNode->GetMenu());
+        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    } else {
+        auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(navDestinationPattern);
+        auto titleBarMenuItems = navDestinationPattern->GetTitleBarMenuItems();
+        auto toolBarMenuItems = navDestinationPattern->GetToolBarMenuItems();
+
+        bool isButtonEnabled = false;
+        auto hub = navDestinationGroupNode->GetEventHub<EventHub>();
+        if (hub) {
+            isButtonEnabled = hub->IsEnabled();
+        }
+        if (navDestinationPattern->HasMenuNodeId()) {
+            auto menuNode = NavigationTitleUtil::CreateMenuItems(navDestinationPattern->GetMenuNodeId(),
+                titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD,
+                titleBarNode->GetInnerParentId(), false);
+            CHECK_NULL_VOID(menuNode);
+            navDestinationGroupNode->SetMenu(menuNode);
+        }
+
+        titleBarMenuItems.insert(titleBarMenuItems.end(), toolBarMenuItems.begin(), toolBarMenuItems.end());
+        auto landscapeMenuNode = NavigationTitleUtil::CreateMenuItems(navDestinationPattern->GetLandscapeMenuNodeId(),
+            titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD, titleBarNode->GetInnerParentId(),
+            true);
+        CHECK_NULL_VOID(landscapeMenuNode);
+        navDestinationGroupNode->SetLandscapeMenu(landscapeMenuNode);
+    }
+}
 }
 
 NavDestinationPattern::NavDestinationPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
@@ -80,6 +122,7 @@ void NavDestinationPattern::OnModifyDone()
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
+    isHideToolbar_ = navDestinationLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navDestinationLayoutProperty->GetHideTitleBar().value_or(false);
     bool safeAreaOptSet = UpdateBarSafeAreaPadding();
     auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
@@ -95,7 +138,7 @@ void NavDestinationPattern::OnModifyDone()
 
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
-    UpdateTitlebarVisibility(hostNode);
+    MountTitleBar(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
@@ -167,7 +210,7 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
         renderContext->GetBackgroundColor()->ColorToString().c_str());
 }
 
-void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode)
+void NavDestinationPattern::MountTitleBar(RefPtr<NavDestinationGroupNode>& hostNode)
 {
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
@@ -203,6 +246,9 @@ void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupN
         navDestinationLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
+
+    BuildMenu(hostNode, titleBarNode);
+
     titleBarNode->MarkModifyDone();
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
@@ -471,5 +517,27 @@ void NavDestinationPattern::OnWindowHide()
 void NavDestinationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("name", name_.c_str());
+}
+
+void NavDestinationPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    // change menu num in landscape and orientation
+    do {
+        if (navDestinationGroupNode->GetPrevMenuIsCustomValue(false)) {
+            break;
+        }
+        auto targetNum = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE ? MAX_MENU_NUM_LARGE
+                                                                                                  : MAX_MENU_NUM_SMALL;
+        if (targetNum == maxMenuNums_) {
+            break;
+        }
+        maxMenuNums_ = targetNum;
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+        CHECK_NULL_VOID(titleBarNode);
+        BuildMenu(navDestinationGroupNode, titleBarNode);
+        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    } while (0);
 }
 } // namespace OHOS::Ace::NG

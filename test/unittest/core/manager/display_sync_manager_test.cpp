@@ -23,6 +23,9 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
+constexpr int32_t LOW_FRAME_NUMBER = 30;
+constexpr int32_t MEDIUM_FRAME_NUMBER = 60;
+
 class DisplaySyncManagerTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -401,6 +404,9 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest007, TestSize.Level1)
     int32_t displaySyncRate1 = displaySyncManager->GetDisplaySyncRate();
     EXPECT_EQ(60, displaySyncRate1);
 
+    int32_t monitorSyncRate = displaySyncManager->GetMonitorVsyncRate();
+    EXPECT_TRUE(monitorSyncRate == MEDIUM_FRAME_NUMBER || monitorSyncRate == LOW_FRAME_NUMBER);
+
     displaySync2->DelFromPipelineOnContainer();
     displaySyncManager->DispatchFunc(nanoTimestamp);
     int32_t displaySyncRate2 = displaySyncManager->GetDisplaySyncRate();
@@ -411,11 +417,17 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest007, TestSize.Level1)
      */
     EXPECT_EQ(30, displaySyncRate2);
 
+    monitorSyncRate = displaySyncManager->GetMonitorVsyncRate();
+    EXPECT_TRUE(monitorSyncRate == MEDIUM_FRAME_NUMBER || monitorSyncRate == LOW_FRAME_NUMBER);
+
     displaySync1->DelFromPipelineOnContainer();
     displaySyncManager->DispatchFunc(nanoTimestamp);
     int32_t displaySyncRate3 = displaySyncManager->GetDisplaySyncRate();
 
     EXPECT_EQ(0, displaySyncRate3);
+
+    monitorSyncRate = displaySyncManager->GetMonitorVsyncRate();
+    EXPECT_EQ(0, monitorSyncRate);
 }
 
 /**

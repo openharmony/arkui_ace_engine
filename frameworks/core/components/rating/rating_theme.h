@@ -74,6 +74,7 @@ public:
                 theme->borderRadius_ = pattern->GetAttr<Dimension>("hover_radius_size", BORDER_RADIUS);
                 theme->hoverAnimationDuration_ = pattern->GetAttr<double>("hover_animation_duration", 0.0);
                 theme->pressAnimationDuration_ = pattern->GetAttr<double>("press_animation_duration", 0.0);
+                theme->disabledAlpha_ = pattern->GetAttr<double>("rating_disable_alpha", 0.0);
             } else {
                 LOGW("find pattern of rating fail");
             }
@@ -203,6 +204,11 @@ public:
         return pressAnimationDuration_;
     }
 
+    double GetDisabledAlpha() const
+    {
+        return disabledAlpha_;
+    }
+
 protected:
     RatingTheme() = default;
 
@@ -219,6 +225,7 @@ private:
     double designedStarAspectRatio_ = 1.0;
     double hoverAnimationDuration_ = 0.0;
     double pressAnimationDuration_ = 0.0;
+    double disabledAlpha_ = 1.0;
     InternalResource::ResourceId foregroundResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_ON_SVG;
     InternalResource::ResourceId secondaryResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_OFF_SVG;
     InternalResource::ResourceId backgroundResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_OFF_SVG;

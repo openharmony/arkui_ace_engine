@@ -120,6 +120,9 @@ void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINav
         finalOptions.brOptions.paddingEnd = CalcDimension(static_cast<double>(options.paddingEnd.dimension.value),
             static_cast<DimensionUnit>(options.paddingEnd.dimension.units));
     }
+    if (options.enableHoverMode.isSet) {
+        finalOptions.enableHoverMode = options.enableHoverMode.value;
+    }
     NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
 }
 
@@ -151,6 +154,14 @@ void SetMenus(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length)
             menuItem.isEnabled = items[i].isEnable.value;
         }
         menuItems.push_back(menuItem);
+        if (items[i].text.value) {
+            delete[] items[i].text.value;
+            items[i].text.value = nullptr;
+        }
+        if (items[i].icon.value) {
+            delete[] items[i].icon.value;
+            items[i].icon.value = nullptr;
+        }
     }
     NavDestinationModelNG::SetMenuItems(frameNode, std::move(menuItems));
 }

@@ -54,7 +54,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest031, TestSize.Leve
     previewOptions.options = optionTmp;
     frameNode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->UpdatePreviewAttr(frameNode, imageNode);
-    SUCCEED();
+    EXPECT_EQ(shadow.GetBlurRadius(), 10.0);
 }
 /**
  * @tc.name: DragEventActuatorUpdatePreviewAttrTest032
@@ -95,7 +95,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest032, TestSize.Le
     previewOptions.options = optionTmp;
     frameNode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->PrepareRadiusParametersForDragData(frameNode, arkExtraInfoJson);
-    SUCCEED();
+    EXPECT_EQ(shadow.GetBlurRadius(), 10.0);
 }
 
 /**
@@ -192,7 +192,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest034, TestSize.Le
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    SUCCEED();
+    EXPECT_EQ(previewOptions.isNumber, true);
 }
 
 /**
@@ -246,7 +246,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest035, TestSize.Le
     dragEventActuator->previewLongPressRecognizer_->callback_(offSet);
     gestureEventHub->textDraggable_ = true;
     dragEventActuator->previewLongPressRecognizer_->callback_(offSet);
-    SUCCEED();
+    EXPECT_EQ(gestureEventHub->textDraggable_, true);
 }
 
 /**
@@ -353,7 +353,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest037, TestSize.Le
     pattern->gridLayoutInfo_.endIndex_ = 3;
     parentNode->pattern_ = pattern;
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    SUCCEED();
+    EXPECT_EQ(itemPattern->isSelected_, true);
 }
 
 /**
@@ -393,7 +393,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest038, TestSize.Le
     pattern->gridLayoutInfo_.endIndex_ = 3;
     parentNode->pattern_ = pattern;
     dragEventActuator->SetGatherNodeAboveFilter(dragEventActuator);
-    SUCCEED();
+    EXPECT_EQ(itemPattern->isSelected_, true);
 }
 
 /**
@@ -491,9 +491,9 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest040, TestSize.Le
     dragEventActuator->HandleTouchUpEvent();
     dragEventActuator->SetResponseRegionFull();
     dragEventActuator->ResetResponseRegion();
-    dragEventActuator->isResponseRegionFull = false;
+    dragEventActuator->isResponseRegionFull_ = false;
     dragEventActuator->ResetResponseRegion();
-    SUCCEED();
+    EXPECT_EQ(dragEventActuator->isResponseRegionFull_, false);
 }
 
 /**
@@ -546,7 +546,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest041, TestSize.Le
     for (auto event : events) {
         event->callback_(info);
     }
-    SUCCEED();
+    EXPECT_EQ(gestureEventHub->GetTextDraggable(), false);
 }
 
 /**
@@ -585,7 +585,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest042, TestSize.Le
     for (auto event : events) {
         event->callback_(info);
     }
-    SUCCEED();
+    EXPECT_EQ(gestureEventHub->GetTextDraggable(), false);
 }
 
 /**

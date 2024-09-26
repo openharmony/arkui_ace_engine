@@ -84,6 +84,9 @@ public:
         RefPtr<DotIndicatorPaintMethod>& paintMethod,
         RefPtr<SwiperLayoutProperty>& swiperLayoutProperty)
     {
+        CHECK_NULL_VOID(swiperPattern);
+        CHECK_NULL_VOID(paintMethod);
+        CHECK_NULL_VOID(swiperLayoutProperty);
         paintMethod->SetAxis(swiperPattern->GetDirection());
         paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));

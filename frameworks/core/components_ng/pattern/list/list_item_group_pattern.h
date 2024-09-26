@@ -227,7 +227,7 @@ public:
         return lanes_;
     }
 
-    V2::ListItemGroupStyle GetListItemGroupStyle()
+    V2::ListItemGroupStyle GetListItemGroupStyle() const
     {
         return listItemGroupStyle_;
     }
@@ -283,6 +283,7 @@ public:
     int32_t UpdateBackwardCachedIndex(int32_t cacheCount, bool outOfView);
     void LayoutCache(const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached,
         ListMainSizeValues listSizeValues);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
     bool IsNeedInitClickEventRecorder() const override

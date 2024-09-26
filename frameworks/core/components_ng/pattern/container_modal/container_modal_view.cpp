@@ -44,7 +44,6 @@ constexpr float CURRENT_RATIO = 0.86f;
 constexpr float CURRENT_DURATION = 0.25f;
 } // namespace
 float ContainerModalView::baseScale = 1.0f;
-RefPtr<ContainerModalPattern> ContainerModalView::containerModalPattern_;
 /**
  * The structure of container_modal is designed as follows :
  * |--container_modal(stack)
@@ -78,7 +77,6 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
     column->AddChild(stack);
     auto containerPattern = containerModalNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_RETURN(containerPattern, nullptr);
-    containerModalPattern_ = containerPattern;
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
     containerModalNode->AddChild(AddControlButtons(controlButtonsRow));
@@ -365,15 +363,19 @@ void ContainerModalView::AddButtonStyleMouseEvent(
 void ContainerModalView::AddButtonHoverEvent(
     RefPtr<InputEventHub>& inputHub, RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn)
 {
-    auto task = [buttonWk = WeakClaim(RawPtr(buttonNode)), imageWk = WeakClaim(RawPtr(imageNode)),
-                    containerModalPatternWK = WeakClaim(RawPtr(containerModalPattern_)), isCloseBtn](bool isHover) {
-        auto containerModalPattern = containerModalPatternWK.Upgrade();
-        CHECK_NULL_VOID(containerModalPattern);
-        bool isFocus = containerModalPattern->GetIsFocus() || containerModalPattern->GetIsHoveredMenu();
+    auto task = [buttonWk = WeakClaim(RawPtr(buttonNode)), imageWk = WeakClaim(RawPtr(imageNode)), isCloseBtn](
+                    bool isHover) {
         auto buttonNode = buttonWk.Upgrade();
         CHECK_NULL_VOID(buttonNode);
         auto imageNode = imageWk.Upgrade();
         CHECK_NULL_VOID(imageNode);
+        auto pipeline = buttonNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto containerNode = AceType::DynamicCast<FrameNode>(pipeline->GetRootElement()->GetChildAtIndex(0));
+        auto containerModalPattern = containerNode->GetPattern<ContainerModalPattern>();
+        CHECK_NULL_VOID(containerModalPattern);
+        bool isFocus = containerModalPattern->GetIsFocus() || containerModalPattern->GetIsHoveredMenu();
+         
         auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();

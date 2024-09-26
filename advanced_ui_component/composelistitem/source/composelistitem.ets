@@ -609,6 +609,7 @@ struct OperateItemStruct {
             .fillColor($r('sys.color.ohos_id_color_fourth'))
             .focusable(false)
             .draggable(false)
+            .matchTextDirection(true)
         }
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
@@ -630,6 +631,7 @@ struct OperateItemStruct {
             .fillColor($r('sys.color.ohos_id_color_fourth'))
             .focusable(false)
             .draggable(false)
+            .matchTextDirection(true)
         }
         .padding({
           start: LengthMetrics.vp(TEXT_SAFE_MARGIN),

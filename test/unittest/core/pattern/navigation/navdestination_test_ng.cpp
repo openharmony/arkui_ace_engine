@@ -656,8 +656,10 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest001, TestSi
     BarItem menuItem;
     std::vector<NG::BarItem> menuItems;
     menuItems.insert(menuItems.begin(), menuItem);
-    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
-        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
     /**
@@ -698,8 +700,10 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest002, TestSi
     BarItem menuItem;
     std::vector<NG::BarItem> menuItems;
     menuItems.insert(menuItems.begin(), menuItem);
-    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
-        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
     /**
@@ -741,8 +745,10 @@ HWTEST_F(NavdestinationTestNg, NavigationTitleUtilHandleLongPressTest003, TestSi
     BarItem menuItem;
     std::vector<NG::BarItem> menuItems;
     menuItems.insert(menuItems.begin(), menuItem);
-    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(
-        ElementRegister::GetInstance()->MakeUniqueId(), menuItems, ui.titleBarNode, true);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(ui.frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto navDestinationMenuItems = NavigationTitleUtil::CreateMenuItems(ElementRegister::GetInstance()->MakeUniqueId(),
+        menuItems, navDestinationNode, true, DES_FIELD, ui.titleBarNode->GetInnerParentId());
     ASSERT_NE(navDestinationMenuItems, nullptr);
     ui.titleBarNode->AddChild(navDestinationMenuItems);
     /**

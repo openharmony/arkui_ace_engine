@@ -176,7 +176,6 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
-    attachToFrameNodeFlag_ = true;
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
@@ -186,19 +185,20 @@ void WindowPattern::OnAttachToFrameNode()
         surfaceNode->SetBufferAvailableCallback(callback_);
         return;
     }
+    attachToFrameNodeFlag_ = true;
 }
 
-void WindowPattern::CreateBlankWindow()
+void WindowPattern::CreateBlankWindow(RefPtr<FrameNode>& window)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("CreateBlankWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
-    blankWindow_ = FrameNode::CreateFrameNode(
+    window = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    auto layoutProperty = blankWindow_->GetLayoutProperty<LayoutProperty>();
+    auto layoutProperty = window->GetLayoutProperty<LayoutProperty>();
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    blankWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+    window->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
 }
 
 void WindowPattern::CreateAppWindow()
@@ -430,12 +430,36 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     snapshotWindow_->MarkModifyDone();
 }
 
+bool WindowPattern::IsSnapshotSizeChanged()
+{
+    // pc and pad use the same snapshot size
+    CHECK_EQUAL_RETURN(session_->GetSystemConfig().IsPcWindow(), true, false);
+    CHECK_EQUAL_RETURN(session_->GetSystemConfig().freeMultiWindowEnable_, true, false);
+    Rosen::WSRect lastRect = session_->GetLastLayoutRect();
+    Rosen::WSRect curRect = session_->GetLayoutRect();
+    if (!session_->GetShowRecent() && !lastRect.IsInvalid() &&
+        NearEqual(lastRect.width_, curRect.width_, 1.0f) && NearEqual(lastRect.height_, curRect.height_, 1.0f)) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id:%{public}d, name:%{public}s",
+            session_->GetPersistentId(), session_->GetSessionInfo().bundleName_.c_str());
+        return true;
+    }
+    return false;
+}
+
 void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::PixelMap>> snapshot)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("CreateSnapshotWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
     session_->SetNeedSnapshot(false);
+    isBlankForSnapshot_ = false;
+
+    if (IsSnapshotSizeChanged()) {
+        isBlankForSnapshot_ = true;
+        CreateBlankWindow(snapshotWindow_);
+        return;
+    }
+
     snapshotWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();

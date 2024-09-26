@@ -10530,45 +10530,84 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
     return drawCallback;
 }
 
+std::function<std::string(const std::string&)> ParseJsGetFunc(const JSCallbackInfo& info, int32_t nodeId)
+{
+    auto* vm = info.GetVm();
+    return [vm, nodeId](const std::string& key) -> std::string {
+        std::string resultString = std::string();
+        CHECK_NULL_RETURN(vm, resultString);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        auto getCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getCustomPropertyString__"));
+        if (getCustomProperty->IsUndefined() || !getCustomProperty->IsFunction(vm)) {
+            return resultString;
+        }
+        auto obj = getCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        panda::Local<panda::JSValueRef> params2[2] = { panda::NumberRef::New(vm, nodeId),
+            panda::StringRef::NewFromUtf8(vm, key.c_str()) };
+        auto function = panda::CopyableGlobal(vm, func);
+        auto callValue = function->Call(vm, function.ToLocal(), params2, 2);
+        if (callValue.IsNull() || callValue->IsUndefined() || !callValue->IsString(vm)) {
+            return resultString;
+        }
+        auto value = callValue->ToString(vm)->ToString(vm);
+        return value.c_str();
+    };
+}
+
+std::function<bool()> ParseJsFunc(const JSCallbackInfo& info, int32_t nodeId)
+{
+    auto* vm = info.GetVm();
+    panda::Local<panda::JSValueRef> params3[3] = { panda::NumberRef::New(vm, nodeId), info[0]->GetLocalHandle(),
+        info[1]->GetLocalHandle() };
+    return [vm, params3]() -> bool {
+        CHECK_NULL_RETURN(vm, false);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        auto setCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__setCustomProperty__"));
+        if (setCustomProperty->IsUndefined() || !setCustomProperty->IsFunction(vm)) {
+            return false;
+        }
+        auto obj = setCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
+        auto nodeId = frameNode->GetId();
+        auto function = panda::CopyableGlobal(vm, func);
+        auto customPropertyExisted = function->Call(vm, function.ToLocal(), params3, 3)->ToBoolean(vm)->Value();
+        if (customPropertyExisted) {
+            frameNode->SetRemoveCustomProperties([vm, nodeId]() -> void {
+                CHECK_NULL_VOID(vm);
+                panda::LocalScope scope(vm);
+                auto global = JSNApi::GetGlobalObject(vm);
+                auto removeCustomProperty =
+                    global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__removeCustomProperties__"));
+                if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction(vm)) {
+                    return;
+                }
+                auto obj = removeCustomProperty->ToObject(vm);
+                panda::Local<panda::FunctionRef> func = obj;
+                panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+                auto function = panda::CopyableGlobal(vm, func);
+                function->Call(vm, function.ToLocal(), params, 1);
+            });
+        }
+        return true;
+    };
+}
+
 void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
 {
     if (info[0]->GetLocalHandle()->IsUndefined()) {
         return;
     }
-
     auto* vm = info.GetVm();
     CHECK_NULL_VOID(vm);
-    auto global = JSNApi::GetGlobalObject(vm);
-    auto setCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__setCustomProperty__"));
-    if (setCustomProperty->IsUndefined() || !setCustomProperty->IsFunction(vm)) {
-        return;
-    }
-    auto obj = setCustomProperty->ToObject(vm);
-    panda::Local<panda::FunctionRef> func = obj;
-    auto thisObj = info.This()->GetLocalHandle();
     auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
     auto nodeId = frameNode->GetId();
-    panda::Local<panda::JSValueRef> params[3] = { panda::NumberRef::New(vm, nodeId), info[0]->GetLocalHandle(),
-        info[1]->GetLocalHandle()
-    };
-    auto customPropertyExisted = func->Call(vm, thisObj, params, 3)->ToBoolean(vm)->Value();
-    if (customPropertyExisted) {
-        frameNode->SetRemoveCustomProperties([vm, thisObj, nodeId]()->void {
-            CHECK_NULL_VOID(vm);
-            panda::LocalScope scope(vm);
-            auto global = JSNApi::GetGlobalObject(vm);
-            auto removeCustomProperty = global->Get(vm,
-                panda::StringRef::NewFromUtf8(vm, "__removeCustomProperties__"));
-            if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction(vm)) {
-                return;
-            }
-
-            auto obj = removeCustomProperty->ToObject(vm);
-            panda::Local<panda::FunctionRef> func = obj;
-            panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
-            func->Call(vm, thisObj, params, 1);
-        });
-    }
+    auto getFunc = ParseJsGetFunc(info, nodeId);
+    auto func = ParseJsFunc(info, nodeId);
+    frameNode->SetJSCustomProperty(func, getFunc);
 }
 
 void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)

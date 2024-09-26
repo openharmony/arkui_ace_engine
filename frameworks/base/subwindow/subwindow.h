@@ -135,6 +135,16 @@ public:
         SetAboveApps(true);
     }
 
+    void SetMainWindowId(uint32_t mainWindowId)
+    {
+        mainWindowId_ = mainWindowId;
+    }
+
+    uint32_t GetMainWindowId() const
+    {
+        return mainWindowId_;
+    }
+
     ToastWindowType GetToastWindowType() const
     {
         return toastWindowType_;
@@ -178,6 +188,8 @@ private:
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
     ToastWindowType toastWindowType_ = ToastWindowType::TOAST_IN_TYPE_TOAST;
+    // toast main window ID
+    uint32_t mainWindowId_ = 0;
 };
 
 } // namespace OHOS::Ace

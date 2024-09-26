@@ -39,6 +39,8 @@ else
     GENERATOR=${GENERATOR_ARG:=node $IDLIZE_PATH/lib/index.js --dts2peer}
 fi
 
+API_VER=${API_VER:=99}
+
 echo "Generating C API from ${DTS_DIR} to ${DEST_DIR} with ${GENERATOR}"
 
 ${GENERATOR} \
@@ -46,4 +48,4 @@ ${GENERATOR} \
     --input-dir ${DTS_DIR} \
     --generator-target libace \
     --libace-destination ${DEST_DIR} \
-    --api-version 99
+    --api-version ${API_VER}

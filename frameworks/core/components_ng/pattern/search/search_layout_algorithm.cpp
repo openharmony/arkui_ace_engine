@@ -854,9 +854,8 @@ double SearchLayoutAlgorithm::CalcSymbolIconHeight(
         (index == IMAGE_INDEX ? searchNode->GetSearchSymbolIconSize() : searchNode->GetCancelSymbolIconSize());
     auto iconSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
     if (iconSize.Unit() == DimensionUnit::FP) {
-        if (GreatOrEqualCustomPrecision(pipeline->GetFontScale(), MAX_FONT_SCALE)) {
-            return iconSize.ConvertToPx() / pipeline->GetFontScale() * MAX_FONT_SCALE;
-        }
+        float maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
+        return iconSize.ConvertToPxDistribute(0, maxFontScale);
     }
     return iconSize.ConvertToPx();
 }

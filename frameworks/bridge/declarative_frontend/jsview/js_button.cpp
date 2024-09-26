@@ -181,38 +181,6 @@ void JSButton::SetStateEffect(const JSCallbackInfo& info)
     ButtonModel::GetInstance()->SetStateEffect(value);
 }
 
-void JSButton::HandleDifferentRadius(const JSRef<JSVal>& args)
-{
-    std::optional<CalcDimension> radiusTopLeft;
-    std::optional<CalcDimension> radiusTopRight;
-    std::optional<CalcDimension> radiusBottomLeft;
-    std::optional<CalcDimension> radiusBottomRight;
-    if (args->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft;
-        if (ParseJsDimensionVp(object->GetProperty("topLeft"), topLeft)) {
-            radiusTopLeft = topLeft;
-        }
-        CalcDimension topRight;
-        if (ParseJsDimensionVp(object->GetProperty("topRight"), topRight)) {
-            radiusTopRight = topRight;
-        }
-        CalcDimension bottomLeft;
-        if (ParseJsDimensionVp(object->GetProperty("bottomLeft"), bottomLeft)) {
-            radiusBottomLeft = bottomLeft;
-        }
-        CalcDimension bottomRight;
-        if (ParseJsDimensionVp(object->GetProperty("bottomRight"), bottomRight)) {
-            radiusBottomRight = bottomRight;
-        }
-        if (!radiusTopLeft.has_value() && !radiusTopRight.has_value() && !radiusBottomLeft.has_value() &&
-            !radiusBottomRight.has_value()) {
-            return;
-        }
-        ButtonModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
-    }
-}
-
 void JSButton::GetFontContent(JSRef<JSVal>& font, ButtonParameters& buttonParameters)
 {
     if (font->IsNull() || !font->IsObject()) {
@@ -590,11 +558,18 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 
 void JSButton::JsRadius(const JSCallbackInfo& info)
 {
+    JsRadius(info[0]);
+}
+
+void JSButton::JsRadius(const JSRef<JSVal>& jsValue)
+{
+    constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
     CalcDimension radius;
-    if (ParseJsDimensionVpNG(info[0], radius)) {
+    if (ParseJsDimensionVpNG(jsValue, radius)) {
         ButtonModel::GetInstance()->SetBorderRadius(radius);
-    } else if (info[0]->IsObject()) {
-        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    } else if (jsValue->IsObject() && ((JSRef<JSObject>::Cast(jsValue)->GetPropertyValue<int32_t>(
+                                           "type", UNKNOWN_RESOURCE_TYPE)) == UNKNOWN_RESOURCE_TYPE)) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
         CalcDimension topLeft;
         CalcDimension topRight;
         CalcDimension bottomLeft;
@@ -615,9 +590,7 @@ void JSButton::JsBorder(const JSCallbackInfo& info)
     JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
     CalcDimension borderRadius;
     auto valueRadius = object->GetProperty("radius");
-    ParseJsDimensionVp(valueRadius, borderRadius);
-    ButtonModel::GetInstance()->SetBorderRadius(borderRadius);
-    HandleDifferentRadius(valueRadius);
+    JsRadius(valueRadius);
 }
 
 CalcDimension JSButton::GetSizeValue(const JSCallbackInfo& info)

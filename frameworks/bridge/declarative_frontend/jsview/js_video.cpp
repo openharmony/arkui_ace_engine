@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,9 +76,12 @@ void JSVideo::Create(const JSCallbackInfo& info)
     VideoModel::GetInstance()->Create(videoController);
 
     // Parse the src, if it is invalid, use the empty string.
-    std::string videoSrc;
-    ParseJsMedia(srcValue, videoSrc);
-    VideoModel::GetInstance()->SetSrc(videoSrc);
+    std::string bundleNameSrc;
+    std::string moduleNameSrc;
+    std::string src;
+    int32_t resId = 0;
+    ParseJsMediaWithBundleName(srcValue, src, bundleNameSrc, moduleNameSrc, resId);
+    VideoModel::GetInstance()->SetSrc(src, bundleNameSrc, moduleNameSrc);
 
     // Parse the rate, if it is invalid, set it as 1.0.
     double currentProgressRate = 1.0;

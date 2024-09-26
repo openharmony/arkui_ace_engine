@@ -26,7 +26,6 @@ namespace OHOS::Ace::NG {
 using IndicatorVariantType = std::variant<SwiperParameters, SwiperDigitalParameters, bool>;
 using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
 using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAutoFill>;
-using CurveVariantType = std::variant<std::string, Ark_Curve, Ark_ICurve>;
 }
 
 namespace OHOS::Ace::NG::Converter {
@@ -135,24 +134,6 @@ DisplayCountVariantType Convert(const Ark_String& src)
 
 template<>
 DisplayCountVariantType Convert(const Ark_SwiperAutoFill& src)
-{
-    return src;
-}
-
-template<>
-CurveVariantType Convert(const Ark_String& src)
-{
-    return Converter::Convert<std::string>(src);
-}
-
-template<>
-CurveVariantType Convert(const Ark_Curve& src)
-{
-    return src;
-}
-
-template<>
-CurveVariantType Convert(const Ark_ICurve& src)
 {
     return src;
 }
@@ -462,20 +443,14 @@ void CurveImpl(Ark_NativePointer node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    RefPtr<Curve> curve = Framework::CreateCurve(std::string(), true); // the default Framework Curve
-    std::optional<CurveVariantType> optCurveVar;
+    RefPtr<Curve> curve = nullptr;
     if (value) {
-        optCurveVar = Converter::OptConvert<CurveVariantType>(*value);
-    }
-    if (optCurveVar) {
-        if (auto curveDescPtr = std::get_if<std::string>(&(*optCurveVar)); curveDescPtr) {
-            curve = Framework::CreateCurve(*curveDescPtr);
-        } else if (auto curveTypePtr = std::get_if<Ark_Curve>(&(*optCurveVar)); curveTypePtr) {
-            curve = Framework::CreateCurve(*curveTypePtr);
-        } else {
-            LOGE("SwiperAttributeModifier::CurveImpl, the optCurveVar->index()=%{public}zd is not supported",
-                optCurveVar->index());
+        if (auto curveOpt = Converter::OptConvert<RefPtr<Curve>>(*value); curveOpt) {
+            curve = *curveOpt;
         }
+    }
+    if (!curve) {
+        curve = Framework::CreateCurve(std::string(), true); // the default Framework Curve
     }
     SwiperModelNG::SetCurve(frameNode, curve);
 }

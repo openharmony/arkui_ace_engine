@@ -246,13 +246,14 @@ public:
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
-    void UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode);
+    void MountTitleBar(RefPtr<NavDestinationGroupNode>& hostNode);
     void InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode);
     void HandleLongPress();
     void HandleLongPressActionEnd();
     void OnFontScaleConfigurationUpdate() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;

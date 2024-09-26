@@ -34,6 +34,7 @@ constexpr int32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t CRITICAL_TIME = 50;      // ms. If show time of image is less than this, use more cacheImages.
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL_STATUS = 2;
 std::string ImageDfxConfigToString(const ImageDfxConfig& imageDfxConfig)
 {
     return "src = " + imageDfxConfig.imageSrc_ + ", nodeInfo = [" + std::to_string(imageDfxConfig.nodeId_) + "-" +
@@ -1002,27 +1003,14 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
     // when image component is [onShow], do not clean image data
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnNotifyMemoryLevel level = %{public}d. nodeId = %{public}d isShown = %{public}d",
-        level, imageDfxConfig_.nodeId_, isShow_);
-    if (isShow_) {
+    if (isShow_ || level < MEMORY_LEVEL_CRITICAL_STATUS) {
         return;
     }
-
     // clean image data
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-
-    // clean rs node to release the sk_sp<SkImage> held by it
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto rsRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushMessages();
 }
 
 // when recycle image component, release the pixelmap resource
@@ -1038,7 +1026,7 @@ void ImagePattern::OnRecycle()
     CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
+    rsRenderContext->RemoveContentModifier(contentMod_);
     UnregisterWindowStateChangedCallback();
 }
 
@@ -1105,7 +1093,7 @@ void ImagePattern::OnVisibleAreaChange(bool visible, double ratio)
         CloseSelectOverlay();
     }
     // control pixelMap List
-    if (GetIsAnimation() && !animator_->IsStopped()) {
+    if (GetIsAnimation() && !animator_->IsStopped() && animator_->HasScheduler()) {
         if (visible) {
             animator_->Forward();
         } else {
@@ -2163,7 +2151,8 @@ void ImagePattern::ResetImage()
     if (!altImage_) {
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        rsRenderContext->ClearDrawCommands();
+        rsRenderContext->RemoveContentModifier(contentMod_);
+        contentMod_ = nullptr;
     }
 }
 
@@ -2176,7 +2165,8 @@ void ImagePattern::ResetAltImage()
         CHECK_NULL_VOID(host);
         auto rsRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(rsRenderContext);
-        rsRenderContext->ClearDrawCommands();
+        rsRenderContext->RemoveContentModifier(contentMod_);
+        contentMod_ = nullptr;
     }
 }
 
@@ -2194,7 +2184,8 @@ void ImagePattern::ResetImageAndAlt()
     CHECK_NULL_VOID(frameNode);
     auto rsRenderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
     CloseSelectOverlay();
     DestroyAnalyzerOverlay();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

@@ -46,9 +46,7 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest001, TestSize.Level1)
     longPressRecognizers.push_back(AceType::DynamicCast<NGGestureRecognizer>(longPressRecognizer));
     ExclusiveRecognizer excluRecognizer(longPressRecognizers);
     auto recognizer = excluRecognizer.CreateGestureFromRecognizer();
-    if (recognizer) {
-        SUCCEED();
-    }
+    EXPECT_NE(recognizer, nullptr);
 }
 
 /**
@@ -80,7 +78,7 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest003, TestSize.Level1)
         return target;
     };
     excluRecognizer.SetRecognizerInfoRecursively(coordinateOffset, nodePtr, component, getEventTargetImpl);
-    SUCCEED();
+    EXPECT_EQ(panDirection.type, PanDirection::VERTICAL);
 }
 
 /**
@@ -101,7 +99,7 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest004, TestSize.Level1)
     std::map<std::string, std::list<TouchTestResultInfo>> tetMap;
     tetMap["test"] = testList;
     excluRecognizer.AddHittedRecognizerType(tetMap);
-    SUCCEED();
+    EXPECT_EQ(tesultInfo.depth, 1);
 }
 
 /**
@@ -118,7 +116,6 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest005, TestSize.Level1)
     excluRecognizer.refereeState_ = RefereeState::SUCCEED;
     excluRecognizer.currentFingers_ = 0;
     excluRecognizer.RecognizerGroup::CleanRecognizerState();
-    SUCCEED();
     std::vector<RefPtr<NGGestureRecognizer>> longPressRecognizers1;
     auto longPressRecognizer1 = AceType::MakeRefPtr<LongPressRecognizer>(false, true);
     longPressRecognizers1.push_back(AceType::DynamicCast<NGGestureRecognizer>(longPressRecognizer1));
@@ -126,7 +123,6 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest005, TestSize.Level1)
     excluRecognizer1.refereeState_ = RefereeState::FAIL;
     excluRecognizer1.currentFingers_ = 0;
     excluRecognizer1.RecognizerGroup::CleanRecognizerState();
-    SUCCEED();
     std::vector<RefPtr<NGGestureRecognizer>> longPressRecognizers2;
     auto longPressRecognizer2 = AceType::MakeRefPtr<LongPressRecognizer>(false, true);
     longPressRecognizers2.push_back(AceType::DynamicCast<NGGestureRecognizer>(longPressRecognizer2));
@@ -134,7 +130,7 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest005, TestSize.Level1)
     excluRecognizer2.refereeState_ = RefereeState::DETECTING;
     excluRecognizer2.currentFingers_ = 0;
     excluRecognizer2.RecognizerGroup::CleanRecognizerState();
-    SUCCEED();
+    EXPECT_EQ(excluRecognizer2.currentFingers_, 0);
 }
 
 /**
@@ -151,7 +147,6 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest0052, TestSize.Level1)
     excluRecognizer3.refereeState_ = RefereeState::DETECTING;
     excluRecognizer3.currentFingers_ = 0;
     excluRecognizer3.RecognizerGroup::CleanRecognizerState();
-    SUCCEED();
     std::vector<RefPtr<NGGestureRecognizer>> longPressRecognizers4;
     auto longPressRecognizer4 = AceType::MakeRefPtr<LongPressRecognizer>(false, true);
     longPressRecognizers4.push_back(AceType::DynamicCast<NGGestureRecognizer>(longPressRecognizer4));
@@ -159,7 +154,6 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest0052, TestSize.Level1)
     excluRecognizer4.refereeState_ = RefereeState::DETECTING;
     excluRecognizer4.currentFingers_ = 1;
     excluRecognizer4.RecognizerGroup::CleanRecognizerState();
-    SUCCEED();
     std::vector<RefPtr<NGGestureRecognizer>> longPressRecognizers5;
     auto longPressRecognizer5 = AceType::MakeRefPtr<LongPressRecognizer>(false, true);
     longPressRecognizers5.push_back(AceType::DynamicCast<NGGestureRecognizer>(longPressRecognizer5));
@@ -168,7 +162,7 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest0052, TestSize.Level1)
     excluRecognizer5.currentFingers_ = 1;
     excluRecognizer5.recognizers_.clear();
     excluRecognizer5.RecognizerGroup::CleanRecognizerState();
-    SUCCEED();
+    EXPECT_EQ(excluRecognizer5.currentFingers_, 1);
 }
 
 /**
@@ -229,7 +223,7 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest008, TestSize.Level1)
     excluRecognizer.recognizers_.clear();
     excluRecognizer.recognizers_.push_back(clickRecognizerPtr);
     excluRecognizer.SetRecognizerInfoRecursively(coordinateOffset, nodePtr, component, getEventTargetImpl);
-    SUCCEED();
+    EXPECT_EQ(nodeid, 1);
 }
 
 /**
@@ -247,9 +241,7 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest009, TestSize.Level1)
     excluRecognizer.recognizers_.push_back(clickRecognizerPtrNotSame);
     excluRecognizer.recognizers_.push_back(nullptr);
     auto recognizer = excluRecognizer.CreateGestureFromRecognizer();
-    if (recognizer) {
-        SUCCEED();
-    }
+    EXPECT_NE(recognizer, nullptr);
 }
 
 /**
@@ -280,7 +272,7 @@ HWTEST_F(RecognizerGroupTestNg, RecognizerGroupTest010, TestSize.Level1)
     Ngg->AttachFrameNode(FRAME_NODE_0);
     excluRecognizer.recognizers_.push_back(Ngg);
     excluRecognizer.AddHittedRecognizerType(tetMap);
-    SUCCEED();
+    EXPECT_EQ(panDirection.type, PanDirection::VERTICAL);
 }
 
 /**

@@ -396,7 +396,7 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (NearZero(delta) || axis_ == Axis::NONE) {
+    if (NearZero(delta) || axis_ == Axis::NONE || LessOrEqual(scrollableDistance_, 0.0f)) {
         return false;
     }
 

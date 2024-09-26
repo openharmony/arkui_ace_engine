@@ -392,6 +392,9 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     }
     if (reason == CloseReason::CLOSE_REASON_BACK_PRESSED) {
         pattern->ResetSelection();
+        if (!pattern->IsEditing() && pattern->HasFocus()) {
+            FocusHub::LostFocusToViewRoot();
+        }
         ResumeTwinkling();
     }
 }

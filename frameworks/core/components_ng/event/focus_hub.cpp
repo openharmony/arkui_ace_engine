@@ -413,7 +413,7 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
     if (focusNode->IsCurrentFocus()) {
         FocusManager::FocusGuard guard(Claim(this), SwitchingStartReason::REMOVE_CHILD);
         // Try to goto next focus, otherwise goto previous focus.
-        if (!SkipFocusMoveBeforeRemove() && !GoToNextFocusLinear(FocusStep::TAB) &&
+        if (!focusNode->SkipFocusMoveBeforeRemove() && !GoToNextFocusLinear(FocusStep::TAB) &&
             !GoToNextFocusLinear(FocusStep::SHIFT_TAB)) {
             lastWeakFocusNode_ = nullptr;
             auto focusView = FocusView::GetCurrentFocusView();
@@ -1783,16 +1783,11 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     rect = frameNode->GetPaintRectWithTransform();
 
     //  Calculate currentNode -> childNode offset
-    auto uiNode = frameNode->GetParent();
-    CHECK_NULL_RETURN(uiNode, false);
-    while (uiNode != GetFrameNode()) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-        if (!frameNode) {
-            uiNode = uiNode -> GetParent();
-            continue;
-        }
-        rect += frameNode->GetPaintRectWithTransform().GetOffset();
-        uiNode = frameNode->GetParent();
+    auto parent = frameNode->GetAncestorNodeOfFrame();
+    CHECK_NULL_RETURN(parent, false);
+    while (parent && parent != GetFrameNode()) {
+        rect += parent->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
     }
     return true;
 }

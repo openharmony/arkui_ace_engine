@@ -659,12 +659,18 @@ void SubwindowManager::ShowToastNG(const NG::ToastInfo& toastInfo, std::function
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast ng enter");
     auto containerId = Container::CurrentId();
     auto windowType = GetToastWindowType(containerId);
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_VOID(container);
+    auto windowId = container->GetWindowId();
+    // Get the parent window ID before the asynchronous operation
+    auto mainWindowId = container->GetParentMainWindowId(windowId);
     // for ability
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [containerId, toastInfo, callbackParam = std::move(callback), windowType] {
-            auto subwindow = SubwindowManager::GetInstance()->GetOrCreateToastWindowNG(containerId, windowType);
+        [containerId, toastInfo, callbackParam = std::move(callback), windowType, mainWindowId] {
+            auto subwindow = SubwindowManager::GetInstance()->GetOrCreateToastWindowNG(
+                containerId, windowType, mainWindowId);
             CHECK_NULL_VOID(subwindow);
             TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
             subwindow->ShowToast(toastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
@@ -681,18 +687,18 @@ ToastWindowType SubwindowManager::GetToastWindowType(int32_t instanceId)
     if (parentContainer->IsMainWindow() || parentContainer->IsSubWindow() ||
         parentContainer->IsDialogWindow()) {
         return ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW;
-    } else if (parentContainer->IsSystemWindow()) {
-        return ToastWindowType::TOAST_IN_TYPE_SYSTEM_SUB_WINDOW;
     } else if (parentContainer->IsScenceBoardWindow()) {
         return ToastWindowType::TOAST_IN_TYPE_SYSTEM_FLOAT;
+    } else if (parentContainer->IsSystemWindow()) {
+        return ToastWindowType::TOAST_IN_TYPE_SYSTEM_SUB_WINDOW;
     } else if (parentContainer->IsUIExtensionWindow()) {
         if (parentContainer->IsHostMainWindow() || parentContainer->IsHostSubWindow() ||
             parentContainer->IsHostDialogWindow()) {
             return ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW;
+        } else if (parentContainer->IsHostSceneBoardWindow()) {
+            return ToastWindowType::TOAST_IN_TYPE_SYSTEM_FLOAT;
         } else if (parentContainer->IsHostSystemWindow()) {
             return ToastWindowType::TOAST_IN_TYPE_SYSTEM_SUB_WINDOW;
-        } else if (parentContainer->IsHostSystemWindow()) {
-            return ToastWindowType::TOAST_IN_TYPE_SYSTEM_FLOAT;
         }
     }
     return ToastWindowType::TOAST_IN_TYPE_TOAST;
@@ -702,8 +708,10 @@ void SubwindowManager::ShowToast(const NG::ToastInfo& toastInfo, std::function<v
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast enter");
     auto containerId = Container::CurrentId();
+    auto isTopMost = toastInfo.showMode == NG::ToastShowMode::TOP_MOST;
     // for pa service
-    if ((containerId >= MIN_PA_SERVICE_ID && containerId < MIN_SUBCONTAINER_ID) || containerId < 0) {
+    if ((isTopMost && containerId >= MIN_PA_SERVICE_ID && containerId < MIN_SUBCONTAINER_ID) ||
+        (!isTopMost && containerId >= MIN_PA_SERVICE_ID) || containerId < 0) {
         auto subwindow = toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST ? GetOrCreateSystemSubWindow()
                                                                                   : GetOrCreateSubWindow();
         CHECK_NULL_VOID(subwindow);
@@ -712,7 +720,12 @@ void SubwindowManager::ShowToast(const NG::ToastInfo& toastInfo, std::function<v
         subwindow->ShowToast(toastInfo, std::move(callback));
     } else {
         // for ability
-        if (toastInfo.showMode == NG::ToastShowMode::TOP_MOST) {
+        auto parentContainer = Container::GetContainer(containerId);
+        // in scenceboard, system_top_most needs to go the old way,
+        // default and top_most need to go showToastNG
+        if (toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
+            (parentContainer && parentContainer->IsScenceBoardWindow() &&
+            toastInfo.showMode != NG::ToastShowMode::SYSTEM_TOP_MOST)) {
             ShowToastNG(toastInfo, std::move(callback));
             return;
         }
@@ -789,7 +802,8 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindow(int32_t containerId, 
     return subwindow;
 }
 
-RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType)
+RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId,
+    const ToastWindowType& windowType, uint32_t mainWindowId)
 {
     RefPtr<Subwindow> subwindow = GetToastSubwindow(containerId, windowType);
     if (!subwindow) {
@@ -799,6 +813,7 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId
             return nullptr;
         }
         subwindow->SetToastWindowType(windowType);
+        subwindow->SetMainWindowId(mainWindowId);
         AddToastSubwindow(containerId, subwindow, windowType);
     }
     return subwindow;
