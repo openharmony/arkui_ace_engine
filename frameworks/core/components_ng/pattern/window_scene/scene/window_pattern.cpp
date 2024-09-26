@@ -29,8 +29,6 @@
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
 #include "core/components_ng/pattern/window_scene/scene/atomicservice_basic_engine_plugin.h"
 #endif
-#include "start_window_option.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_BLACK = 0xff000000;
@@ -376,6 +374,21 @@ void WindowPattern::CreateASStartingWindow()
 }
 #endif
 
+void WindowPattern::UpdateStartWindowProperty(std::shared_ptr<AAFwk::StartWindowOption> startWindowOption,
+    Color &color, ImageSourceInfo &sourceInfo)
+{
+    if (startWindowOption == nullptr && !startWindowOption->hasStartWindow) {
+        return;
+    }
+    if (!startWindowOption->startWindowBackgroundColor.empty()) {
+        Color::ParseColorString(sessionInfo.startWindowOption->startWindowBackgroundColor, color);
+    }
+    if (startWindowOption->startWindowIcon != nullptr) {
+        auto pixelMap = PixelMap::CreatePixelMap(&(sessionInfo.startWindowOption->startWindowIcon));
+        sourceInfo = ImageSourceInfo(pixelMap);
+    }
+}
+
 void WindowPattern::CreateStartingWindow()
 {
     const auto& sessionInfo = session_->GetSessionInfo();
@@ -397,23 +410,14 @@ void WindowPattern::CreateStartingWindow()
 
     std::string startupPagePath;
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    auto color = Color(backgroundColor);
     Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startupPagePath, backgroundColor);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
     imageLayoutProperty->UpdateImageSourceInfo(
         ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
+    auto color = Color(backgroundColor);
     auto sourceInfo = ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_);
-    if (sessionInfo.startWindowOption != nullptr && sessionInfo.startWindowOption->hasStartWindow) {
-        if (!sessionInfo.startWindowOption->startWindowBackgroundColor.empty()) {
-            Color::ParseColorString(sessionInfo.startWindowOption->startWindowBackgroundColor, color);
-        }
-#ifdef SUPPORT_GRAPHICS
-        if (sessionInfo.startWindowOption->startWindowIcon != nullptr) {
-            auto pixelMap = PixelMap::CreatePixelMap(&(sessionInfo.startWindowOption->startWindowIcon));
-            sourceInfo = ImageSourceInfo(pixelMap);
-        }
-#endif
-    }
+    UpdateStartWindowProperty(sessionInfo.startWindowOption, color, sourceInfo);
+
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
