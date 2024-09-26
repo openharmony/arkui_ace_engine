@@ -648,13 +648,14 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     if (SystemProperties::GetResourceDecoupling()) {
         auto adapterInCache = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         CHECK_NULL_RETURN(adapterInCache, nullptr);
-        resourceAdapter = adapterInCache;
+        ResourceConfiguration resConfig;
         if (imageSourceInfo.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
-            ResourceConfiguration resConfig;
             resConfig.SetColorMode(imageSourceInfo.GetLocalColorMode());
-            ConfigurationChange configChange { .colorModeUpdate = true };
-            resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
+        } else {
+            resConfig.SetColorMode(SystemProperties::GetColorMode());
         }
+        ConfigurationChange configChange { .colorModeUpdate = true };
+        resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
     } else {
         auto themeManager = PipelineBase::CurrentThemeManager();
         CHECK_NULL_RETURN(themeManager, nullptr);
