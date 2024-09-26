@@ -925,6 +925,7 @@ public:
  */
 HWTEST_F(WebPatternNewBranchTestUT, ComputeClippedSelectionBound_001, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -973,6 +974,7 @@ HWTEST_F(WebPatternNewBranchTestUT, ComputeClippedSelectionBound_001, TestSize.L
     endHandleone->GetViewPortY();
     webPattern->ComputeClippedSelectionBounds(paramsone, startHandleone, endHandleone, isNewAvoid);
     EXPECT_EQ(isNewAvoid, false);
+#endif
 }
 
 /**
@@ -982,6 +984,7 @@ HWTEST_F(WebPatternNewBranchTestUT, ComputeClippedSelectionBound_001, TestSize.L
  */
 HWTEST_F(WebPatternNewBranchTestUT, ComputeClippedSelectionBound_002, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -1065,6 +1068,7 @@ HWTEST_F(WebPatternNewBranchTestUT, ComputeClippedSelectionBound_002, TestSize.L
     webPattern->ComputeClippedSelectionBounds(paramstwo, startHandletwo, endHandletwo, isNewAvoid);
     EXPECT_EQ(isNewAvoid, true);
     MockPipelineContext::TearDown();
+#endif
 }
 
 /**
@@ -1074,6 +1078,7 @@ HWTEST_F(WebPatternNewBranchTestUT, ComputeClippedSelectionBound_002, TestSize.L
  */
 HWTEST_F(WebPatternNewBranchTestUT, ComputeClippedSelectionBound_003, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -1114,6 +1119,7 @@ HWTEST_F(WebPatternNewBranchTestUT, ComputeClippedSelectionBound_003, TestSize.L
     webPattern->ComputeClippedSelectionBounds(params, startHandle, endHandle, isNewAvoid);
     EXPECT_EQ(isNewAvoid, true);
     MockPipelineContext::TearDown();
+#endif
 }
 
 /**
@@ -1123,6 +1129,7 @@ HWTEST_F(WebPatternNewBranchTestUT, ComputeClippedSelectionBound_003, TestSize.L
  */
 HWTEST_F(WebPatternNewBranchTestUT, QuickMenuIsNeedNewAvoid_001, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -1142,6 +1149,7 @@ HWTEST_F(WebPatternNewBranchTestUT, QuickMenuIsNeedNewAvoid_001, TestSize.Level1
     webPattern->QuickMenuIsNeedNewAvoid(selectInfo, params, startHandle, endHandle);
     auto ret = webPattern->isQuickMenuMouseTrigger_;
     EXPECT_EQ(ret, false);
+#endif
 }
 
 /**
@@ -1151,6 +1159,7 @@ HWTEST_F(WebPatternNewBranchTestUT, QuickMenuIsNeedNewAvoid_001, TestSize.Level1
  */
 HWTEST_F(WebPatternNewBranchTestUT, QuickMenuIsNeedNewAvoid_002, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -1181,6 +1190,7 @@ HWTEST_F(WebPatternNewBranchTestUT, QuickMenuIsNeedNewAvoid_002, TestSize.Level1
     endHandle->GetViewPortY();
     webPattern->QuickMenuIsNeedNewAvoid(selectInfo, params, startHandle, endHandle);
     EXPECT_EQ(selectInfo.isNewAvoid, false);
+#endif
 }
 
 /**
@@ -1190,6 +1200,7 @@ HWTEST_F(WebPatternNewBranchTestUT, QuickMenuIsNeedNewAvoid_002, TestSize.Level1
  */
 HWTEST_F(WebPatternNewBranchTestUT, QuickMenuIsNeedNewAvoid_003, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -1219,5 +1230,6 @@ HWTEST_F(WebPatternNewBranchTestUT, QuickMenuIsNeedNewAvoid_003, TestSize.Level1
     endHandle->GetViewPortY();
     webPattern->QuickMenuIsNeedNewAvoid(selectInfo, params, startHandle, endHandle);
     EXPECT_EQ(selectInfo.isNewAvoid, false);
+#endif
 }
 } // namespace OHOS::Ace::NG

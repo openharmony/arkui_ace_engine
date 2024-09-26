@@ -339,6 +339,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDefaultTextEncodingFormatUpdate, TestSize.Lev
  */
 HWTEST_F(WebPatternBranchTestUT, OnDetachContext, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -353,6 +354,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContext, TestSize.Level1)
     auto pipelineContext = MockPipelineContext::GetCurrent();
     webPattern->OnDetachContext(pipelineContext.GetRawPtr());
     ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
+#endif
 }
 
 /**
@@ -362,6 +364,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContext, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, OnDetachContext001, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -377,6 +380,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContext001, TestSize.Level1)
     pipelineContext->SetupRootElement();
     webPattern->OnDetachContext(pipelineContext.GetRawPtr());
     ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
+#endif
 }
 
 /**
@@ -386,6 +390,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContext001, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, OnDetachContext002, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -401,6 +406,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContext002, TestSize.Level1)
     pipelineContext->selectOverlayManager_ = nullptr;
     webPattern->OnDetachContext(pipelineContext.GetRawPtr());
     ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
+#endif
 }
 
 /**
@@ -410,6 +416,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContext002, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, RegisterSelectOverLayOnClose002, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -426,6 +433,7 @@ HWTEST_F(WebPatternBranchTestUT, RegisterSelectOverLayOnClose002, TestSize.Level
     webPattern->RegisterSelectOverLayOnClose(selectInfo);
     selectInfo.onClose(false);
     ASSERT_FALSE(webPattern->isReceivedArkDrag_);
+#endif
 }
 
 /**
@@ -435,6 +443,7 @@ HWTEST_F(WebPatternBranchTestUT, RegisterSelectOverLayOnClose002, TestSize.Level
  */
 HWTEST_F(WebPatternBranchTestUT, RegisterSelectOverLayOnClose003, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -451,6 +460,7 @@ HWTEST_F(WebPatternBranchTestUT, RegisterSelectOverLayOnClose003, TestSize.Level
     webPattern->RegisterSelectOverLayOnClose(selectInfo);
     selectInfo.onClose(true);
     ASSERT_FALSE(webPattern->isReceivedArkDrag_);
+#endif
 }
 
 /**
@@ -460,6 +470,7 @@ HWTEST_F(WebPatternBranchTestUT, RegisterSelectOverLayOnClose003, TestSize.Level
  */
 HWTEST_F(WebPatternBranchTestUT, DumpViewDataPageNode007, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -492,6 +503,7 @@ HWTEST_F(WebPatternBranchTestUT, DumpViewDataPageNode007, TestSize.Level1)
     webPattern->pageNodeInfo_.push_back(nodeWrap);
     webPattern->DumpViewDataPageNode(viewDataWrap, needsRecordData);
     EXPECT_EQ(viewDataWrap, true);
+#endif
 }
 
 /**
@@ -501,6 +513,7 @@ HWTEST_F(WebPatternBranchTestUT, DumpViewDataPageNode007, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, NotifyFillRequestSuccess008, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -530,6 +543,7 @@ HWTEST_F(WebPatternBranchTestUT, NotifyFillRequestSuccess008, TestSize.Level1)
     webPattern->isPasswordFill_ = true;
     webPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
     EXPECT_EQ(webPattern->isPasswordFill_, true);
+#endif
 }
 
 /**
@@ -539,6 +553,7 @@ HWTEST_F(WebPatternBranchTestUT, NotifyFillRequestSuccess008, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, NotifyFillRequestSuccess009, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -572,6 +587,7 @@ HWTEST_F(WebPatternBranchTestUT, NotifyFillRequestSuccess009, TestSize.Level1)
     webPattern->pageNodeInfo_.push_back(nodeWrap);
     webPattern->NotifyFillRequestSuccess(viewDataWrap, nodeWrap, AceAutoFillType::ACE_UNSPECIFIED);
     EXPECT_EQ(webPattern->isPasswordFill_, false);
+#endif
 }
 
 /**
@@ -581,6 +597,7 @@ HWTEST_F(WebPatternBranchTestUT, NotifyFillRequestSuccess009, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_001, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -600,6 +617,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_001, TestSize.Level1)
 
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
     EXPECT_EQ(webPattern->isPasswordFill_, true);
+#endif
 }
 
 /**
@@ -609,6 +627,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_001, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_002, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -628,6 +647,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_002, TestSize.Level1)
 
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
     EXPECT_EQ(webPattern->isPasswordFill_, true);
+#endif
 }
 
 /**
@@ -637,6 +657,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_002, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata__003, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -656,6 +677,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata__003, TestSize.Level1)
 
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
     EXPECT_EQ(webPattern->isPasswordFill_, false);
+#endif
 }
 
 /**
@@ -665,6 +687,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata__003, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_004, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -684,6 +707,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_004, TestSize.Level1)
 
     webPattern->GetHintTypeAndMetadata(attribute, nodeWrap);
     EXPECT_EQ(webPattern->isPasswordFill_, true);
+#endif
 }
 
 /**
@@ -693,6 +717,7 @@ HWTEST_F(WebPatternBranchTestUT, GetHintTypeAndMetadata_004, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, GetFocusedType_001, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -711,6 +736,7 @@ HWTEST_F(WebPatternBranchTestUT, GetFocusedType_001, TestSize.Level1)
     EXPECT_CALL(*nodeWrap, GetAutoFillType()).WillRepeatedly(::testing::Return(AceAutoFillType::ACE_UNSPECIFIED));
     webPattern->pageNodeInfo_.push_back(nodeWrap);
     EXPECT_EQ(webPattern->GetFocusedType(), AceAutoFillType::ACE_UNSPECIFIED);
+#endif
 }
 
 /**
@@ -720,6 +746,7 @@ HWTEST_F(WebPatternBranchTestUT, GetFocusedType_001, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, GetFocusedType_002, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -739,6 +766,7 @@ HWTEST_F(WebPatternBranchTestUT, GetFocusedType_002, TestSize.Level1)
     webPattern->pageNodeInfo_.push_back(nodeWrap);
 
     EXPECT_EQ(webPattern->GetFocusedType(), AceAutoFillType::ACE_UNSPECIFIED);
+#endif
 }
 
 /**
@@ -748,6 +776,7 @@ HWTEST_F(WebPatternBranchTestUT, GetFocusedType_002, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, RequestAutoFill_001, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -770,6 +799,7 @@ HWTEST_F(WebPatternBranchTestUT, RequestAutoFill_001, TestSize.Level1)
     bool flag = webPattern->RequestAutoFill(focusType);
     ASSERT_FALSE(flag);
     MockContainer::TearDown();
+#endif
 }
 
 /**
@@ -779,6 +809,7 @@ HWTEST_F(WebPatternBranchTestUT, RequestAutoFill_001, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, RequestAutoFill_002, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -798,6 +829,7 @@ HWTEST_F(WebPatternBranchTestUT, RequestAutoFill_002, TestSize.Level1)
     webPattern->isPasswordFill_ = false;
     bool flag = webPattern->RequestAutoFill(focusType);
     ASSERT_FALSE(flag);
+#endif
 }
 
 /**
@@ -807,6 +839,7 @@ HWTEST_F(WebPatternBranchTestUT, RequestAutoFill_002, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, UpdateAutoFillPopup_001, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -825,6 +858,7 @@ HWTEST_F(WebPatternBranchTestUT, UpdateAutoFillPopup_001, TestSize.Level1)
     webPattern->isAutoFillClosing_ = false;
     bool flag = webPattern->UpdateAutoFillPopup();
     ASSERT_FALSE(flag);
+#endif
 }
 
 /**
@@ -834,6 +868,7 @@ HWTEST_F(WebPatternBranchTestUT, UpdateAutoFillPopup_001, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, UpdateAutoFillPopup_002, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -850,6 +885,7 @@ HWTEST_F(WebPatternBranchTestUT, UpdateAutoFillPopup_002, TestSize.Level1)
     webPattern->isAutoFillClosing_ = true;
     bool flag = webPattern->UpdateAutoFillPopup();
     ASSERT_FALSE(flag);
+#endif
 }
 
 /**
@@ -859,6 +895,7 @@ HWTEST_F(WebPatternBranchTestUT, UpdateAutoFillPopup_002, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, UpdateAutoFillPopup_003, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -880,6 +917,7 @@ HWTEST_F(WebPatternBranchTestUT, UpdateAutoFillPopup_003, TestSize.Level1)
     bool flag = webPattern->UpdateAutoFillPopup();
     MockContainer::TearDown();
     ASSERT_FALSE(flag);
+#endif
 }
 
 /**
@@ -889,6 +927,7 @@ HWTEST_F(WebPatternBranchTestUT, UpdateAutoFillPopup_003, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, RequestAutoSave, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -906,6 +945,7 @@ HWTEST_F(WebPatternBranchTestUT, RequestAutoSave, TestSize.Level1)
     pipelineContext->PipelineBase::GetCurrentContext();
     bool flag = webPattern->RequestAutoSave();
     ASSERT_FALSE(flag);
+#endif
 }
 
 /**
@@ -915,6 +955,7 @@ HWTEST_F(WebPatternBranchTestUT, RequestAutoSave, TestSize.Level1)
  */
 HWTEST_F(WebPatternBranchTestUT, RequestAutoSave_001, TestSize.Level1)
 {
+#ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
     EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
@@ -936,5 +977,6 @@ HWTEST_F(WebPatternBranchTestUT, RequestAutoSave_001, TestSize.Level1)
     bool flag = webPattern->RequestAutoSave();
     MockContainer::TearDown();
     ASSERT_FALSE(flag);
+#endif
 }
 } // namespace OHOS::Ace::NG
