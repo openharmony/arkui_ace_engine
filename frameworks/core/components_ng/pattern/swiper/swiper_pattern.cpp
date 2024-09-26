@@ -50,6 +50,8 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -4548,8 +4550,13 @@ void SwiperPattern::SetLazyLoadIsLoop() const
     auto targetNode = FindLazyForEachNode(host);
     if (targetNode.has_value()) {
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
-        CHECK_NULL_VOID(lazyForEachNode);
-        lazyForEachNode->SetIsLoop(IsLoop());
+        if (lazyForEachNode) {
+            lazyForEachNode->SetIsLoop(IsLoop());
+        }
+        auto repeatVirtualNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
+        if (repeatVirtualNode) {
+            repeatVirtualNode->SetIsLoop(IsLoop());
+        }
     }
 }
 
@@ -5850,6 +5857,9 @@ void SwiperPattern::RemoveOnHiddenChange()
 std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode) const
 {
     if (AceType::DynamicCast<LazyForEachNode>(baseNode)) {
+        return baseNode;
+    }
+    if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
         return baseNode;
     }
     if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {

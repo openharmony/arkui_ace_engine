@@ -126,11 +126,15 @@ bool RepeatVirtualScrollNode::CheckNode4IndexInL1(int32_t index, int32_t start, 
     }
 
     auto totalCount = static_cast<int32_t>(totalCount_);
-    if (((start - cacheStart <= index) && (index <= end + cacheEnd)) ||
-        ((start - cacheStart < 0) && (start - cacheStart + totalCount <= index)) ||
-        ((end + cacheEnd >= totalCount) && (end + cacheEnd - totalCount >= index)) ||
-        ((end < start) && (index <= end + cacheEnd || start - cacheStart <= index))) {
+    if ((start - cacheStart <= index) && (index <= end + cacheEnd)) {
         return true;
+    }
+    if (isLoop_) {
+        if (((end < start) && (start - cacheStart <= index || index <= end + cacheEnd)) ||
+            ((start - cacheStart < 0) && (index >= start - cacheStart + totalCount)) ||
+            ((end + cacheEnd >= totalCount) && (index <= end + cacheEnd - totalCount))) {
+            return true;
+        }
     }
     return false;
 }
