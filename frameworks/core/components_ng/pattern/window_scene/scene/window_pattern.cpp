@@ -421,8 +421,8 @@ void WindowPattern::CreateStartingWindow()
     auto color = Color(backgroundColor);
     UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
 
-    startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
+    startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
     startingWindow_->MarkModifyDone();
 }

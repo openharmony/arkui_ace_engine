@@ -17,7 +17,6 @@ import(
 if (is_ohos_standard_system) {
   config("window_scene_config") {
     visibility = [ ":*" ]
-
     defines = [ "SUPPORT_GRAPHICS" ]
     cflags = []
     if (ace_engine_feature_asbng_path_enable) {
