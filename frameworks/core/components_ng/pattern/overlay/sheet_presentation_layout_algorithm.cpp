@@ -73,6 +73,18 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         sheetMaxWidth_ = maxSize.Width();
         sheetWidth_ = GetWidthByScreenSizeType(maxSize, layoutWrapper);
         sheetHeight_ = GetHeightByScreenSizeType(maxSize);
+        if (sheetStyle_.width.has_value()) {
+            float width = 0.0f;
+            if (sheetStyle_.width->Unit() == DimensionUnit::PERCENT) {
+                width = sheetStyle_.width->ConvertToPxWithSize(maxSize.Width());
+            } else {
+                width = sheetStyle_.width->ConvertToPx();
+            }
+            if (width > maxSize.Width() || width < 0.0f) {
+                width = sheetWidth_;
+            }
+            sheetWidth_ = width;
+        }
         SizeF idealSize(sheetWidth_, sheetHeight_);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
@@ -135,7 +147,11 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
-    if (sheetType_ == SheetType::SHEET_POPUP) {
+    if (sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE) {
+        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
+    } else if (sheetType_ == SheetType::SHEET_CENTER) {
+        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
+    } else if (sheetType_ == SheetType::SHEET_POPUP) {
         auto frameNode = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(frameNode);
         auto parent = DynamicCast<FrameNode>(frameNode->GetParent());
@@ -346,17 +362,6 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& ma
     LayoutWrapper* layoutWrapper) const
 {
     float width = maxSize.Width();
-    if (sheetStyle_.width.has_value()) {
-        if (sheetStyle_.width->Unit() == DimensionUnit::PERCENT) {
-            width = sheetStyle_.width->ConvertToPxWithSize(maxSize.Width());
-        } else {
-            width = sheetStyle_.width->ConvertToPx();
-        }
-        if (width > maxSize.Width() || width < 0.0f) {
-            width = sheetWidth_;
-        }
-        return width;
-    }
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, width);
     auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
