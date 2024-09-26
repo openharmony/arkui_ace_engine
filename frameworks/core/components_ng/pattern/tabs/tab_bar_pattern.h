@@ -482,6 +482,7 @@ private:
     void RemoveIsFocusActiveUpdateEvent();
     void HandleFocusEvent();
     void HandleBlurEvent();
+    bool HandleKeyEvent(const KeyEvent& event);
     void InitTabbarProperties(const RefPtr<TabTheme>& tabTheme);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     const Color& GetSubTabBarHoverColor(int32_t index) const;
