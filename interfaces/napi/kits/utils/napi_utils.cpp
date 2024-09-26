@@ -32,6 +32,7 @@ namespace {
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 constexpr int32_t NAPI_BUF_LENGTH = 256;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
+constexpr char BUNDLE_NAME[] = "bundleName";
 std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 } // namespace
 
@@ -125,20 +126,30 @@ size_t GetParamLen(napi_env env, napi_value param)
     return buffSize;
 }
 
-bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_valuetype& valueType)
+bool NapiStringToString(napi_env env, napi_value value, std::string& retStr)
 {
     size_t ret = 0;
+    napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
-    if (valueType == napi_string) {
-        if (GetParamLen(env, value) == 0) {
-            return false;
-        }
-        size_t valueLen = GetParamLen(env, value) + 1;
-        std::unique_ptr<char[]> buffer = std::make_unique<char[]>(valueLen);
-        napi_get_value_string_utf8(env, value, buffer.get(), valueLen, &ret);
-        retStr = buffer.get();
+    if (valueType != napi_string) {
+        return false;
+    }
+    if (GetParamLen(env, value) == 0) {
+        return false;
+    }
+    size_t valueLen = GetParamLen(env, value) + 1;
+    std::unique_ptr<char[]> buffer = std::make_unique<char[]>(valueLen);
+    napi_get_value_string_utf8(env, value, buffer.get(), valueLen, &ret);
+    retStr = buffer.get();
+    return true;
+}
+
+bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_valuetype& valueType)
+{
+    if (NapiStringToString(env, value, retStr)) {
         return true;
     }
+    napi_typeof(env, value, &valueType);
     if (valueType == napi_object) {
         ResourceInfo recv;
         if (ParseResourceParam(env, value, recv)) {
@@ -270,6 +281,23 @@ bool ParseDollarResource(
     return true;
 }
 
+void PreFixEmptyBundleName(napi_env env, napi_value value)
+{
+    napi_value bundleNameNApi = nullptr;
+    if (napi_get_named_property(env, value, BUNDLE_NAME, &bundleNameNApi) != napi_ok) {
+        return;
+    }
+    std::string bundleName;
+    NapiStringToString(env, bundleNameNApi, bundleName);
+    if (bundleName.empty()) {
+        auto container = Container::CurrentSafely();
+        CHECK_NULL_VOID(container);
+        bundleName = container->GetBundleName();
+        bundleNameNApi = CreateNapiString(env, bundleName);
+        napi_set_named_property(env, value, BUNDLE_NAME, bundleNameNApi);
+    }
+}
+
 ResourceStruct CheckResourceStruct(napi_env env, napi_value value)
 {
     napi_value idNApi = nullptr;
@@ -297,6 +325,7 @@ ResourceStruct CheckResourceStruct(napi_env env, napi_value value)
 
 void CompleteResourceParam(napi_env env, napi_value value)
 {
+    PreFixEmptyBundleName(env, value);
     ResourceStruct resourceStruct = CheckResourceStruct(env, value);
     switch (resourceStruct) {
         case ResourceStruct::CONSTANT:
