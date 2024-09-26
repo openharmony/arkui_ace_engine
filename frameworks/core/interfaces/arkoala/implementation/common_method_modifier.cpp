@@ -388,6 +388,18 @@ void ForegroundColorImpl(Ark_NativePointer node,
 void OnClick0Impl(Ark_NativePointer node,
                   Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode](GestureEvent& info) {
+        Ark_ClickEvent onClick = Converter::ConvertClickEventInfo(info);
+        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onClick0(frameNode->GetId(), onClick);
+    };
+
+    if (frameNode->GetTag() == "Span") {
+        SpanModelNG::SetOnClick(reinterpret_cast<UINode *>(node), std::move(onEvent));
+    } else {
+        ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+    }
 }
 void OnClick1Impl(Ark_NativePointer node,
                   Ark_Function event,
@@ -396,50 +408,7 @@ void OnClick1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](GestureEvent& info) {
-        Ark_ClickEvent onClick;
-
-        Offset globalOffset = info.GetGlobalLocation();
-        Offset localOffset = info.GetLocalLocation();
-        Offset screenOffset = info.GetScreenLocation();
-
-        onClick.axisHorizontal.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onClick.axisVertical.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onClick.displayX = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-        onClick.displayY = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
-
-        onClick.pressure = Converter::ArkValue<Ark_Number>(0.0f);
-        onClick.preventDefault.id = 0;
-
-        onClick.screenX = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-        onClick.screenY = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-        onClick.source = static_cast<Ark_SourceType>(info.GetSourceDevice());
-
-        onClick.sourceTool = static_cast<Ark_SourceTool>(0);
-        onClick.deviceId = Converter::ArkValue<Opt_Number>();
-        onClick.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onClick.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onClick.target.area.height.type = 0;
-        onClick.target.area.height.unit = 1;
-        onClick.target.area.height.value = 0;
-        onClick.target.area.width.type = 0;
-        onClick.target.area.width.unit = 1;
-        onClick.target.area.width.value = 0;
-        onClick.target.area.position.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onClick.target.area.position.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-
-        onClick.tiltX = Converter::ArkValue<Ark_Number>(0);
-        onClick.tiltY = Converter::ArkValue<Ark_Number>(0);
-
-        onClick.timestamp = Converter::ArkValue<Ark_Number>(
-            static_cast<float>(info.GetTimeStamp().time_since_epoch().count()));
-
-        onClick.windowX = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-        onClick.windowY = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-        onClick.x = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-        onClick.y = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-
+        Ark_ClickEvent onClick = Converter::ConvertClickEventInfo(info);
         GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onClick1(frameNode->GetId(), onClick);
     };
 
