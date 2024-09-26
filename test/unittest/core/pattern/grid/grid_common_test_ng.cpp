@@ -17,6 +17,7 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
+#include "test/unittest/core/pattern/scrollable/scrollable_test_utils.h"
 
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
@@ -1400,5 +1401,41 @@ HWTEST_F(GridCommonTestNg, GridItemModelNg001, TestSize.Level1)
     auto theme = themeManager->GetTheme<GridItemTheme>();
     ASSERT_NE(theme, nullptr);
     EXPECT_EQ(theme->GetGridItemBorderRadius(), radius);
+}
+
+/**
+ * @tc.name: ClipContent001
+ * @tc.desc: Test Grid contentClip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, ClipContent001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    CreateGridItems(10, ITEM_WIDTH, ITEM_HEIGHT);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    ViewAbstract::SetMargin(CalcLength(10.0f));
+    ViewAbstract::SetPadding(CalcLength(1.0f));
+    CreateDone(frameNode_);
+
+    auto ctx = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    ASSERT_TRUE(ctx);
+    auto props = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+
+    auto rect = AceType::MakeRefPtr<ShapeRect>();
+    rect->SetWidth(Dimension(200.0f));
+    rect->SetHeight(Dimension(200.0f));
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect))).Times(1);
+    props->UpdateContentClip({ ContentClipMode::CUSTOM, rect });
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetPaddingSize(true), SizeF(478.0f, 798.0f));
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetPaddingRect()))).Times(1);
+    props->UpdateContentClip({ ContentClipMode::CONTENT_ONLY, nullptr });
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetMarginFrameRect()))).Times(1);
+    props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
+    FlushLayoutTask(frameNode_);
 }
 } // namespace OHOS::Ace::NG
