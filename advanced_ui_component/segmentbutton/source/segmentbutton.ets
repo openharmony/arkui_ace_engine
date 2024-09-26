@@ -241,8 +241,8 @@ export class SegmentButtonOptions {
   public backgroundColor: ResourceColor
   public selectedBackgroundColor: ResourceColor
   public imageSize: SizeOptions
-  public buttonPadding: Padding | Dimension
-  public textPadding: Padding | Dimension
+  public buttonPadding: Padding | Dimension | undefined
+  public textPadding: Padding | Dimension | undefined
   public componentPadding: Padding | Dimension
   public localizedTextPadding?: LocalizedPadding
   public localizedButtonPadding?: LocalizedPadding
@@ -553,6 +553,7 @@ class HoverColorProperty {
 struct PressAndHoverEffect {
   @Consume buttonItemsSize: SizeOptions[]
   @Prop press: boolean
+  @Prop hover: boolean
   @ObjectLink colorProperty: HoverColorProperty
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
   @ObjectLink options: SegmentButtonOptions;
@@ -563,7 +564,7 @@ struct PressAndHoverEffect {
     Stack()
       .direction(this.options.direction)
       .size(this.buttonItemsSize[this.pressIndex])
-      .backgroundColor(this.press ? this.pressColor : this.colorProperty.hoverColor)
+      .backgroundColor(this.press && this.hover ? this.pressColor : this.colorProperty.hoverColor)
       .borderRadius(this.buttonBorderRadius[this.pressIndex])
   }
 }
@@ -582,6 +583,7 @@ struct SegmentButtonItemArrayComponent {
   @Consume buttonItemProperty: ItemProperty[]
   @Consume buttonItemsSelected: boolean[]
   @Link pressArray: boolean[]
+  @Link hoverArray: boolean[]
   @Link hoverColorArray: HoverColorProperty[]
   @State buttonWidth: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
@@ -829,6 +831,7 @@ struct SegmentButtonItemArrayComponent {
               }
             })
             .onHover((isHover: boolean) => {
+              this.hoverArray[index] = isHover
               if (isHover) {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
                   this.hoverColorArray[index].hoverColor = (segmentButtonTheme.HOVER_COLOR)
@@ -884,6 +887,7 @@ class ItemProperty {
 export struct SegmentButton {
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
   @Link @Watch('onSelectedChange') selectedIndexes: number[]
+  public onItemClicked?: Callback<number>
   @Provide componentSize: SizeOptions = { width: 0, height: 0 }
   @Provide buttonBorderRadius: LocalizedBorderRadiuses[] = Array.from({
     length: MAX_ITEM_COUNT
@@ -911,6 +915,7 @@ export struct SegmentButton {
   @Provide selectedItemPosition: LocalizedEdges = {}
   @Provide zoomScaleArray: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 1.0)
   @State pressArray: boolean[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => false)
+  @State hoverArray: boolean[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => false)
   @State hoverColorArray: HoverColorProperty[] = Array.from({
     length: MAX_ITEM_COUNT
   }, (_: Object, index) => new HoverColorProperty())
@@ -1052,16 +1057,18 @@ export struct SegmentButton {
                         pressIndex: index,
                         colorProperty: this.hoverColorArray[index],
                         press: this.pressArray[index],
+                        hover: this.hoverArray[index],
                         options: this.options,
                       })
                     }
+                    .direction(this.options.direction)
                     .scale({
                       x: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index],
                       y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index]
                     })
                   }
                 })
-              }
+              }.direction(this.options.direction)
             }
           }
           .direction(this.options.direction)
@@ -1087,6 +1094,7 @@ export struct SegmentButton {
         }
         .direction(this.options.direction)
         .size(this.componentSize)
+        .animation({ duration: 0 })
         .borderRadius((this.options.type === 'capsule' && (this.options.multiply ?? false) ?
         this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
           this.componentSize.height as number / 2)
@@ -1094,6 +1102,7 @@ export struct SegmentButton {
 
         SegmentButtonItemArrayComponent({
           pressArray: this.pressArray,
+          hoverArray: this.hoverArray,
           hoverColorArray: this.hoverColorArray,
           optionsArray: this.options.buttons,
           options: this.options,
@@ -1127,6 +1136,7 @@ export struct SegmentButton {
         }
       }
     })
+    .accessibilityLevel('no')
     .priorityGesture(
       GestureGroup(GestureMode.Parallel,
         TapGesture()
@@ -1152,6 +1162,9 @@ export struct SegmentButton {
                   this.buttonItemsSize.length) ? false : true
 
               let realClickIndex: number = this.isShouldMirror() ? buttonLength - 1 - i : i
+              if (this.onItemClicked) {
+                this.onItemClicked(realClickIndex)
+              }
               if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                 let selectedIndex: number = this.selectedIndexes.indexOf(realClickIndex)
                 if (selectedIndex === -1) {
@@ -1168,8 +1181,7 @@ export struct SegmentButton {
           }),
         SwipeGesture()
           .onAction((event: GestureEvent) => {
-            if (this.options === void 0 || this.options.buttons === void 0 ||
-              event.sourceTool === SourceTool.TOUCHPAD) {
+            if (this.options === void 0 || this.options.buttons === void 0 || event.sourceTool === SourceTool.TOUCHPAD) {
               return
             }
             if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
