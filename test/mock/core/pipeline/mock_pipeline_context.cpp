@@ -181,6 +181,11 @@ void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
     rootHeight_ = rootHeight;
 }
 
+void MockPipelineContext::SetInstanceId(int32_t instanceId)
+{
+    pipeline_->instanceId_ = instanceId;
+}
+
 void MockPipelineContext::SetCurrentWindowRect(Rect rect)
 {
     windowRect_ = rect;
