@@ -285,21 +285,9 @@ public:
     {
         return scrollEndCallback_;
     }
-    void SetCalcPredictSnapOffsetCallback(CalcPredictSnapOffsetCallback&& calcPredictSnapOffsetCallback)
+    void SetStartSnapMotionCallback(StartSnapMotionCallback&& startSnapMotionCallback)
     {
-        calcPredictSnapOffsetCallback_ = std::move(calcPredictSnapOffsetCallback);
-    }
-    const CalcPredictSnapOffsetCallback& GetCalcPredictSnapOffsetCallback() const
-    {
-        return calcPredictSnapOffsetCallback_;
-    }
-    void SetStartScrollSnapMotionCallback(StartScrollSnapMotionCallback&& startScrollSnapMotionCallback)
-    {
-        startScrollSnapMotionCallback_ = std::move(startScrollSnapMotionCallback);
-    }
-    const StartScrollSnapMotionCallback& GetStartScrollSnapMotionCallback() const
-    {
-        return startScrollSnapMotionCallback_;
+        startSnapMotionCallback_ = std::move(startSnapMotionCallback);
     }
     void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)
     {
@@ -337,7 +325,6 @@ public:
     {
         scrollPageCallback_ = std::move(scrollPageCallback);
     }
-
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
@@ -409,7 +396,6 @@ private:
     void HandleDragEnd(const GestureEvent& info);
     void ProcessFrictionMotion(double value);
     void ProcessFrictionMotionStop();
-
     DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
     PositionMode positionMode_ = PositionMode::RIGHT;
@@ -432,9 +418,7 @@ private:
     Dimension touchWidth_;
     Dimension hoverWidth_;
     double barWidth_ = 0.0; // actual width of the scrollbar
-
     Dimension position_;
-
     double trickStartAngle_ = 0.0;
     double trickSweepAngle_ = 0.0;
     double topAngle_ = DEFAULT_TOPANGLE;
@@ -448,9 +432,7 @@ private:
     double frictionPosition_ = 0.0;
     float dragStartPosition_ = 0.0f;
     float dragEndPosition_ = 0.0f;
-
     bool isScrollable_ = false;
-
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
     bool isHover_ = false;
@@ -462,7 +444,6 @@ private:
     bool isReverse_ = false;
     bool isReverseUpdate_ = false;
     bool isShowScrollBar_ = false;
-
     Offset paintOffset_;
     Size viewPortSize_;
     Offset lastOffset_;
@@ -476,20 +457,17 @@ private:
     std::function<void()> markNeedRenderFunc_;
     ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
-    CalcPredictSnapOffsetCallback calcPredictSnapOffsetCallback_;
-    StartScrollSnapMotionCallback startScrollSnapMotionCallback_;
+    StartSnapMotionCallback startSnapMotionCallback_;
     ScrollPageCallback scrollPageCallback_;
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
     HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
     CancelableCallback<void()> disappearDelayTask_;
-
     DragFRCSceneCallback dragFRCSceneCallback_;
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ClickEvent> clickevent_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     bool isMousePressed_ = false;
     Offset locationInfo_;
-
     // dump info
     std::list<InnerScrollBarLayoutInfo> innerScrollBarLayoutInfos_;
     bool needAddLayoutInfo = false;

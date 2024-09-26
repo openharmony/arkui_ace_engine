@@ -587,12 +587,12 @@ void ScrollablePattern::AddScrollEvent()
     scrollable->SetUnstaticFriction(friction_);
     scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
 
-    auto scrollSnap = [weak = WeakClaim(this)](double targetOffset, double velocity) -> bool {
+    auto scrollSnapListCallback = [weak = WeakClaim(this)](double targetOffset, double velocity) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         return pattern->OnScrollSnapCallback(targetOffset, velocity);
     };
-    scrollable->SetOnScrollSnapCallback(scrollSnap);
+    scrollable->SetScrollSnapListCallback(scrollSnapListCallback);
 
     auto calcPredictSnapOffsetCallback =
             [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
@@ -803,19 +803,20 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         pattern->OnScrollEnd();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
-    auto calcPredictSnapOffsetCallback =
-            [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
+    auto startSnapMotionCallback = [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> bool {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, std::optional<float>());
-        return pattern->CalcPredictSnapOffset(delta, dragDistance, velocity);
+        CHECK_NULL_RETURN(pattern, false);
+        auto listSnapResult = pattern->OnScrollSnapCallback(delta, -velocity);
+        if (!listSnapResult) {
+            auto predictSnapOffset = pattern->CalcPredictSnapOffset(delta, dragDistance, -velocity);
+            if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
+                pattern->StartScrollSnapMotion(predictSnapOffset.value(), velocity);
+                return true;
+            }
+        }
+        return listSnapResult;
     };
-    scrollBar_->SetCalcPredictSnapOffsetCallback(std::move(calcPredictSnapOffsetCallback));
-    auto startScrollSnapMotionCallback = [weak = WeakClaim(this)](float scrollSnapDelta, float scrollSnapVelocity) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->StartScrollSnapMotion(scrollSnapDelta, scrollSnapVelocity);
-    };
-    scrollBar_->SetStartScrollSnapMotionCallback(std::move(startScrollSnapMotionCallback));
+    scrollBar_->SetStartSnapMotionCallback(std::move(startSnapMotionCallback));
     auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1040,18 +1041,19 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         CHECK_NULL_VOID(pattern);
         pattern->OnScrollEnd();
     };
-    auto calcPredictSnapOffsetCallback =
-            [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> std::optional<float> {
+    auto startSnapMotionCallback = [weak = WeakClaim(this)](float delta, float dragDistance, float velocity) -> bool {
         auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, std::optional<float>());
-        return pattern->CalcPredictSnapOffset(delta, dragDistance, velocity);
+        CHECK_NULL_RETURN(pattern, false);
+        auto listSnapResult = pattern->OnScrollSnapCallback(delta, -velocity);
+        if (!listSnapResult) {
+            auto predictSnapOffset = pattern->CalcPredictSnapOffset(delta, dragDistance, -velocity);
+            if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
+                pattern->StartScrollSnapMotion(predictSnapOffset.value(), velocity);
+                return true;
+            }
+        }
+        return listSnapResult;
     };
-    auto startScrollSnapMotionCallback = [weak = WeakClaim(this)](float scrollSnapDelta, float scrollSnapVelocity) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->StartScrollSnapMotion(scrollSnapDelta, scrollSnapVelocity);
-    };
-
     auto scrollbarFRcallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1064,8 +1066,8 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         return pattern->ScrollPage(reverse, smooth);
     };
     ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction), std::move(scrollStartCallback),
-        std::move(scrollEndCallback), std::move(calcPredictSnapOffsetCallback),
-        std::move(startScrollSnapMotionCallback), std::move(scrollbarFRcallback), std::move(scrollPageCallback) };
+        std::move(scrollEndCallback), std::move(startSnapMotionCallback), std::move(scrollbarFRcallback),
+        std::move(scrollPageCallback) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;
 }
