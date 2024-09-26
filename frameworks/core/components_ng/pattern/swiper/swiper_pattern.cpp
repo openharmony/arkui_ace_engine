@@ -4488,6 +4488,12 @@ void SwiperPattern::SetLazyLoadFeature(bool useLazyLoad)
     auto cacheCount = std::min(GetCachedCount(), RealTotalCount());
     std::set<int32_t> forEachIndexSet;
     for (auto count = 1; count <= cacheCount; count++) {
+        if (!IsLoop()) {
+            forEachIndexSet.emplace(std::min(GetLoopIndex(currentIndex_) + count, TotalCount() - 1));
+            forEachIndexSet.emplace(std::max(GetLoopIndex(currentIndex_) - count, 0));
+            continue;
+        }
+
         forEachIndexSet.emplace(GetLoopIndex(currentIndex_ + count));
         forEachIndexSet.emplace(GetLoopIndex(currentIndex_ - count));
     }
