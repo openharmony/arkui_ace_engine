@@ -288,7 +288,7 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     if (overScrollPast == 0.0f) {
         return;
     }
-    float friction = ScrollablePattern::CalculateFriction(overScrollPast / viewPortLength_);
+    float friction = CalculateFriction((overScrollPast - std::abs(delta)) / viewPortLength_);
     delta = delta * friction;
 }
 
