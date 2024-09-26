@@ -2989,6 +2989,7 @@ test/unittest/core/image_provider/ @arkui_image
 test/unittest/core/layout/ @arkuilayout
 test/unittest/core/layout/safe_area/ @arkuilayout
 test/unittest/core/manager/  @arkuievent
+test/unittest/core/manager/navigation_manager_test_ng.cpp  @arkui_superman
 test/unittest/core/pattern/animator/ @arkuiframework
 test/unittest/core/pattern/app_bar/ @arkuievent
 test/unittest/core/pattern/badge/ @arkui_image
