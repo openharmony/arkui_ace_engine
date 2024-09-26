@@ -5702,7 +5702,7 @@ void WebPattern::OnRootLayerChanged(int width, int height)
     if ((rootLayerWidth_ == width) && (rootLayerHeight_ == height)) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "OnRootLayerChanged width : %{public}d, height : %{public}d", width, height);
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnRootLayerChanged width : %{public}d, height : %{public}d", width, height);
     rootLayerWidth_ = width;
     rootLayerHeight_ = height;
     if (layoutMode_ != WebLayoutMode::FIT_CONTENT) {
