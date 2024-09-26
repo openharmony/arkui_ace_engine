@@ -221,6 +221,11 @@ public:
         isTextColorSetByUser_ = isSet;
     }
 
+    void SetIsOptionFontColorSetByUser(bool isSet)
+    {
+        isOptionFontColorSetByUser_ = isSet;
+    }
+
     const RefPtr<SelectTheme>& GetSelectTheme() const
     {
         return selectTheme_;
@@ -234,6 +239,16 @@ public:
     bool IsSelected()
     {
         return selected_;
+    }
+
+    void SetSelectFontColor(const Color& color)
+    {
+        selectFontColor_ = color;
+    }
+
+    void SetOptionFontColor(const Color& color)
+    {
+        optionFontColor_ = color;
     }
 
 private:
@@ -267,6 +282,8 @@ private:
     void SetFocusStyle();
     void ClearFocusStyle();
     std::optional<Color> bgColor_;
+    std::optional<Color> selectFontColor_;
+    std::optional<Color> optionFontColor_;
     std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     // src of icon image, used in XTS inspector
@@ -290,6 +307,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
     bool isBGColorSetByUser_ = false;
     bool isTextColorSetByUser_ = false;
+    bool isOptionFontColorSetByUser_ = false;
     bool focusEventInitialized_ = false;
     bool isFocusShadowSet_ = false;
     int32_t rowSelected_ = -1;
