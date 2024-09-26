@@ -478,4 +478,17 @@ void NavDestinationGroupNode::ReleaseTextNodeList()
     }
     textNodeList_.clear();
 }
+
+void NavDestinationGroupNode::CleanContent()
+{
+    auto pattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto shallowBuilder = pattern->GetShallowBuilder();
+    if (shallowBuilder) {
+        shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+    }
+    if (GetContentNode()) {
+        GetContentNode()->Clean(false, true);
+    }
+}
 } // namespace OHOS::Ace::NG

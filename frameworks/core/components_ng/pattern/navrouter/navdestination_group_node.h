@@ -189,6 +189,7 @@ public:
     void ReleaseTextNodeList();
     void CollectTextNodeAsRenderGroup();
 
+    void CleanContent();
 private:
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
