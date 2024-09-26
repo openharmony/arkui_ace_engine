@@ -19,9 +19,11 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #define private public
+#define protected public
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#undef protected
 #undef private
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -1647,7 +1649,12 @@ HWTEST_F(WebPatternSelectTestNg, ComputeMouseClippedSelectionBounds, TestSize.Le
     int32_t startY = 20;
     int32_t width = 100;
     int32_t height = 50;
-    webPattern->ComputeMouseClippedSelectionBounds(startX, startY, width, height);
+    auto ret1 = webPattern->ComputeMouseClippedSelectionBounds(startX, startY, width, height);
+    EXPECT_EQ(ret1.GetY(), 0);
+    auto ret2 = webPattern->ComputeMouseClippedSelectionBounds(0, -1, 0, 0);
+    EXPECT_EQ(ret2.GetY(), 0);
+    auto ret3 = webPattern->ComputeMouseClippedSelectionBounds(0, -1, 0, 2);
+    EXPECT_EQ(ret3.GetY(), -1);
 #endif
 }
 
@@ -1843,6 +1850,11 @@ HWTEST_F(WebPatternSelectTestNg, UpdateRunQuickMenuSelectInfo_001, TestSize.Leve
     OnMenuItemClickCallback onMenuItemClick = HandleMenuItemClick;
     webPattern->UpdateEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
     webPattern->UpdateRunQuickMenuSelectInfo(selectInfo, params, insertTouchHandle, beginTouchHandle, endTouchHandle);
+    EXPECT_FALSE(webPattern->isQuickMenuMouseTrigger_);
+    int start = 0, end = 0;
+    selectInfo.onCreateCallback.textRangeCallback(start, end);
+    EXPECT_EQ(start, -1);
+    EXPECT_EQ(end, -1);
 #endif
 }
 
@@ -1872,6 +1884,40 @@ HWTEST_F(WebPatternSelectTestNg, UpdateRunQuickMenuSelectInfo_002, TestSize.Leve
     SelectOverlayInfo selectInfo;
     selectInfo.isSingleHandle = true;
     webPattern->UpdateRunQuickMenuSelectInfo(selectInfo, params, insertTouchHandle, beginTouchHandle, endTouchHandle);
+    EXPECT_FALSE(webPattern->isQuickMenuMouseTrigger_);
+#endif
+}
+
+/**
+ * @tc.name: UpdateRunQuickMenuSelectInfo_003
+ * @tc.desc: UpdateRunQuickMenuSelectInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, UpdateRunQuickMenuSelectInfo_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsMock>();
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle =
+        std::make_shared<OHOS::NWeb::CustomNWebTouchHandleState>();
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle =
+        std::make_shared<OHOS::NWeb::CustomNWebTouchHandleState>();
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle =
+        std::make_shared<OHOS::NWeb::CustomNWebTouchHandleState>();
+    SelectOverlayInfo selectInfo;
+    OnCreateMenuCallback onCreateMenuCallback = CreateMenuOptions;
+    OnMenuItemClickCallback onMenuItemClick = HandleMenuItemClick;
+    webPattern->onCreateMenuCallback_ = nullptr;
+    webPattern->onMenuItemClick_ = nullptr;
+    webPattern->UpdateRunQuickMenuSelectInfo(selectInfo, params, insertTouchHandle, beginTouchHandle, endTouchHandle);
+    EXPECT_FALSE(webPattern->isQuickMenuMouseTrigger_);
 #endif
 }
 
