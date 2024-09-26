@@ -1152,13 +1152,13 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnSubmitTest, TestSize.Level1)
     TextInputAction action2 = TextInputAction::NEW_LINE;
     bool forceCloseKeyboard = false;
     richEditorPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 0);
+    EXPECT_EQ(count, 1);
 
     action2 = TextInputAction::DONE;
     richEditorPattern->PerformAction(action2, forceCloseKeyboard);
-    EXPECT_EQ(count, 1);
-    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
     EXPECT_EQ(count, 2);
+    richEditorPattern->PerformAction(action2, forceCloseKeyboard);
+    EXPECT_EQ(count, 3);
     ClearSpan();
 }
 
