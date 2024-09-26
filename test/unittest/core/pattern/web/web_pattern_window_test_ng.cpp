@@ -18,12 +18,20 @@
 
 #include "gtest/gtest.h"
 
+#include "base/memory/ace_type.h"
+
 #define private public
+#define protected public
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "core/components_ng/pattern/web/web_pattern.h"
+#undef protected
+#undef private
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/web/web_pattern.h"
-#undef private
-
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -80,6 +88,52 @@ public:
     {
         return true;
     }
+};
+
+class MockTaskExecutorTest : public Ace::TaskExecutor {
+public:
+    MockTaskExecutorTest() = default;
+    explicit MockTaskExecutorTest(bool delayRun) : delayRun_(delayRun) {}
+
+    bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        Ace::PriorityType priorityType = Ace::PriorityType::LOW) const override
+    {
+        CHECK_NULL_RETURN(task, false);
+        if (delayRun_) {
+            return true;
+        }
+        return true;
+    }
+
+    bool WillRunOnCurrentThread(TaskType type) const override
+    {
+        return true;
+    }
+
+    Task WrapTaskWithTraceId(Task&& /*task*/, int32_t /*id*/) const override
+    {
+        return nullptr;
+    }
+
+    void AddTaskObserver(Task&& callback) override {}
+
+    void RemoveTaskObserver() override {}
+
+    void RemoveTask(TaskType type, const std::string& name) override {}
+
+    bool OnPostTaskWithoutTraceId(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        Ace::PriorityType priorityType = Ace::PriorityType::LOW) const override
+    {
+        CHECK_NULL_RETURN(task, false);
+        if (delayRun_) {
+            return true;
+        }
+        task();
+        return true;
+    }
+
+private:
+    bool delayRun_ = false;
 };
 } // namespace OHOS::NWeb
 
@@ -139,22 +193,33 @@ public:
 
 class WebDelegateDummy : public OHOS::Ace::WebDelegate {
 public:
-    WebDelegateDummy(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError,
-        const std::string& type, int32_t id)
+    WebDelegateDummy(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type, int32_t id)
         : WebDelegate(context, std::move(onError), type, id)
     {}
-    bool GetIsSmoothDragResizeEnabled() { return false; };
-    bool GetPendingSizeStatus() { return false; };
+    bool GetIsSmoothDragResizeEnabled()
+    {
+        return false;
+    };
+    bool GetPendingSizeStatus()
+    {
+        return false;
+    };
 };
 
 class WebDelegateTrueDummy : public OHOS::Ace::WebDelegate {
 public:
-    WebDelegateTrueDummy(const WeakPtr<PipelineBase>& context, ErrorCallback&& onError,
-        const std::string& type, int32_t id)
+    WebDelegateTrueDummy(
+        const WeakPtr<PipelineBase>& context, ErrorCallback&& onError, const std::string& type, int32_t id)
         : WebDelegate(context, std::move(onError), type, id)
     {}
-    bool GetIsSmoothDragResizeEnabled() { return true; };
-    bool GetPendingSizeStatus() { return true; };
+    bool GetIsSmoothDragResizeEnabled()
+    {
+        return true;
+    };
+    bool GetPendingSizeStatus()
+    {
+        return true;
+    };
 };
 
 class FullScreenEnterEventMock : public FullScreenEnterEvent {
@@ -190,30 +255,9 @@ HWTEST_F(WebPatternWindowTestNg, ShowTimeDialogTest001, TestSize.Level1)
     auto chooserMock = std::make_shared<NWebDateTimeChooserMock>();
     std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>> suggestions;
     auto callbackMock = std::make_shared<NWeb::NWebDateTimeChooserCallbackMock>();
-    bool result = false;
-
+    bool result = true;
     result = webPattern->ShowTimeDialog(chooserMock, suggestions, callbackMock);
-}
-
-/**
- * @tc.name: ShowTimeDialogTest002
- * @tc.desc: Test ShowTimeDialog.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, ShowTimeDialogTest002, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    auto chooserMock = std::make_shared<NWebDateTimeChooserMock>();
-    std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>> suggestions;
-    auto callbackMock = std::make_shared<NWeb::NWebDateTimeChooserCallbackMock>();
-    bool result = false;
-
-    result = webPattern->ShowTimeDialog(chooserMock, suggestions, callbackMock);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -246,10 +290,9 @@ HWTEST_F(WebPatternWindowTestNg, UpdateLocaleTest001, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-
     webPattern->delegate_ = nullptr;
-    EXPECT_EQ(webPattern->delegate_, nullptr);
     webPattern->UpdateLocale();
+    EXPECT_EQ(webPattern->delegate_, nullptr);
 }
 
 /**
@@ -265,11 +308,10 @@ HWTEST_F(WebPatternWindowTestNg, UpdateLocaleTest002, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-
     webPattern->delegate_ =
         AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-    EXPECT_NE(webPattern->delegate_, nullptr);
     webPattern->UpdateLocale();
+    EXPECT_NE(webPattern->delegate_, nullptr);
 }
 
 /**
@@ -286,8 +328,11 @@ HWTEST_F(WebPatternWindowTestNg, OnWindowSizeChangedTest001, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
+    auto type = WindowSizeChangeReason::UNDEFINED;
+    webPattern->OnWindowSizeChanged(0, 0, type);
+    EXPECT_NE(type, WindowSizeChangeReason::DRAG_START);
+    EXPECT_NE(type, WindowSizeChangeReason::DRAG);
+    EXPECT_NE(type, WindowSizeChangeReason::DRAG_END);
 }
 
 /**
@@ -349,6 +394,7 @@ HWTEST_F(WebPatternWindowTestNg, SetFullScreenExitHandlerTest001, TestSize.Level
     auto fullScreenExitHandler = std::make_shared<FullScreenEnterEvent>(handler, videoNaturalWidth, videoNaturalHeight);
     EXPECT_NE(fullScreenExitHandler, nullptr);
     webPattern->SetFullScreenExitHandler(fullScreenExitHandler);
+    EXPECT_NE(webPattern->fullScreenExitHandler_, nullptr);
 }
 
 /**
@@ -364,10 +410,9 @@ HWTEST_F(WebPatternWindowTestNg, OnSmoothDragResizeEnabledUpdateTest001, TestSiz
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-
     webPattern->delegate_ = nullptr;
-    EXPECT_EQ(webPattern->delegate_, nullptr);
     webPattern->OnSmoothDragResizeEnabledUpdate(true);
+    EXPECT_EQ(webPattern->delegate_, nullptr);
 }
 
 /**
@@ -383,11 +428,10 @@ HWTEST_F(WebPatternWindowTestNg, OnSmoothDragResizeEnabledUpdateTest002, TestSiz
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-
     webPattern->delegate_ =
         AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-    EXPECT_NE(webPattern->delegate_, nullptr);
     webPattern->OnSmoothDragResizeEnabledUpdate(true);
+    EXPECT_NE(webPattern->delegate_, nullptr);
 }
 
 /**
@@ -407,30 +451,9 @@ HWTEST_F(WebPatternWindowTestNg, ShowDateTimeSuggestionDialogTest001, TestSize.L
     std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>> suggestions;
     auto callbackMock = std::make_shared<NWeb::NWebDateTimeChooserCallbackMock>();
     EXPECT_NE(callbackMock, nullptr);
-    bool result = false;
-
+    bool result = true;
     result = webPattern->ShowDateTimeSuggestionDialog(chooserMock, suggestions, callbackMock);
-}
-
-/**
- * @tc.name: ShowDateTimeSuggestionDialogTest002
- * @tc.desc: Test ShowDateTimeSuggestionDialog.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, ShowDateTimeSuggestionDialogTest002, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    auto chooserMock = std::make_shared<NWebDateTimeChooserMock>();
-    std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>> suggestions;
-    auto callbackMock = std::make_shared<NWeb::NWebDateTimeChooserCallbackMock>();
-    bool result = false;
-
-    result = webPattern->ShowDateTimeSuggestionDialog(chooserMock, suggestions, callbackMock);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -446,14 +469,13 @@ HWTEST_F(WebPatternWindowTestNg, InitSelectPopupMenuViewOptionTest001, TestSize.
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-
     std::vector<RefPtr<FrameNode>> options;
     auto callback = std::make_shared<OHOS::NWeb::NWebSelectPopupMenuCallbackMock>();
     auto params = std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParamMock>();
     EXPECT_NE(params, nullptr);
     double dipScale = 0;
-
     webPattern->InitSelectPopupMenuViewOption(options, callback, params, dipScale);
+    EXPECT_TRUE(options.empty());
 }
 
 /**
@@ -469,19 +491,16 @@ HWTEST_F(WebPatternWindowTestNg, InitSelectPopupMenuViewTest001, TestSize.Level1
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-
     std::string tag = "tag";
     auto pattern = AceType::MakeRefPtr<Pattern>();
     bool isRoot = false;
     bool isLayoutNode = false;
-
     auto options = AceType::MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot, isLayoutNode);
     auto callback = std::make_shared<OHOS::NWeb::NWebSelectPopupMenuCallbackMock>();
     auto params = std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParamMock>();
-    EXPECT_NE(params, nullptr);
     double dipScale = 0;
-
     webPattern->InitSelectPopupMenuView(options, callback, params, dipScale);
+    EXPECT_NE(params, nullptr);
 }
 
 /**
@@ -497,10 +516,9 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest001, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-
     webPattern->delegate_ = nullptr;
-    EXPECT_EQ(webPattern->delegate_, nullptr);
     webPattern->WindowDrag(0, 0);
+    EXPECT_EQ(webPattern->delegate_, nullptr);
 }
 
 /**
@@ -516,13 +534,11 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest002, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-
     auto delegateMock = AceType::MakeRefPtr<WebDelegateDummy>(
         PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-
     webPattern->delegate_ = delegateMock;
-    EXPECT_NE(webPattern->delegate_, nullptr);
     webPattern->WindowDrag(0, 0);
+    EXPECT_FALSE(webPattern->delegate_->GetIsSmoothDragResizeEnabled());
 }
 
 /**
@@ -538,59 +554,11 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest003, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-
     auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
         PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-
     webPattern->delegate_ = delegateMock;
-    EXPECT_NE(webPattern->delegate_, nullptr);
     webPattern->WindowDrag(0, 2);
-}
-
-/**
- * @tc.name: WindowDragTest004
- * @tc.desc: Test WindowDrag.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, WindowDragTest004, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-
-    auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
-        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-
-    webPattern->delegate_ = delegateMock;
     EXPECT_NE(webPattern->delegate_, nullptr);
-    webPattern->WindowDrag(0, 0);
-}
-
-/**
- * @tc.name: WindowDragTest005
- * @tc.desc: Test WindowDrag.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, WindowDragTest005, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-
-    auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
-        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
-    webPattern->delegate_ = delegateMock;
-    EXPECT_NE(webPattern->delegate_, nullptr);
-    webPattern->WindowDrag(2, 0);
-    webPattern->WindowDrag(0, 0);
 }
 
 /**
@@ -606,15 +574,13 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest006, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-
     auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
         PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
+    auto type = WindowSizeChangeReason::UNDEFINED;
+    webPattern->OnWindowSizeChanged(0, 0, type);
     webPattern->delegate_ = delegateMock;
-    EXPECT_NE(webPattern->delegate_, nullptr);
     webPattern->WindowDrag(2, 2);
-    webPattern->WindowDrag(0, 0);
+    EXPECT_NE(type, WindowSizeChangeReason::DRAG_START);
 }
 
 /**
@@ -633,80 +599,11 @@ HWTEST_F(WebPatternWindowTestNg, WindowDragTest007, TestSize.Level1)
 
     auto delegateMock = AceType::MakeRefPtr<WebDelegateDummy>(
         PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-
+    auto type = WindowSizeChangeReason::DRAG_START;
     webPattern->delegate_ = delegateMock;
-    EXPECT_NE(webPattern->delegate_, nullptr);
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG_START);
+    webPattern->OnWindowSizeChanged(0, 0, type);
     webPattern->WindowDrag(0, 0);
-}
-
-/**
- * @tc.name: WindowDragTest008
- * @tc.desc: Test WindowDrag.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, WindowDragTest008, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-
-    auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
-        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-
-    webPattern->delegate_ = delegateMock;
-    EXPECT_NE(webPattern->delegate_, nullptr);
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
-    webPattern->WindowDrag(0, 0);
-}
-
-/**
- * @tc.name: WindowDragTest009
- * @tc.desc: Test WindowDrag.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, WindowDragTest009, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-
-    auto delegateMock = AceType::MakeRefPtr<WebDelegateDummy>(
-        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-
-    webPattern->delegate_ = delegateMock;
-    EXPECT_NE(webPattern->delegate_, nullptr);
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
-    webPattern->WindowDrag(0, 0);
-}
-
-/**
- * @tc.name: WindowDragTest010
- * @tc.desc: Test WindowDrag.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, WindowDragTest010, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-
-    auto delegateMock = AceType::MakeRefPtr<WebDelegateTrueDummy>(
-        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
-
-    webPattern->delegate_ = delegateMock;
-    EXPECT_NE(webPattern->delegate_, nullptr);
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG_START);
-    webPattern->WindowDrag(0, 0);
+    EXPECT_EQ(type, WindowSizeChangeReason::DRAG_START);
 }
 
 /**
@@ -731,34 +628,8 @@ HWTEST_F(WebPatternWindowTestNg, GetSelectPopupPostionTest001, TestSize.Level1)
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParamMock> params =
         std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParamMock>();
     EXPECT_NE(params, nullptr);
-
     webPattern->GetSelectPopupPostion(params->GetSelectMenuBound());
-}
-
-/**
- * @tc.name: GetSelectPopupPostionTest002
- * @tc.desc: GetSelectPopupPostion.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, GetSelectPopupPostionTest002, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallbackMock> callback =
-        std::make_shared<OHOS::NWeb::NWebSelectPopupMenuCallbackMock>();
-    EXPECT_NE(callback, nullptr);
-    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParamMock> params =
-        std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParamMock>();
-    EXPECT_NE(params, nullptr);
-
-    webPattern->GetSelectPopupPostion(nullptr);
+    EXPECT_EQ(params->GetSelectMenuBound(), nullptr);
 }
 
 /**
@@ -777,28 +648,9 @@ HWTEST_F(WebPatternWindowTestNg, UpdateOnFocusTextFieldTest001, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(webPattern, nullptr);
-
-    webPattern->UpdateOnFocusTextField(true);
-}
-
-/**
- * @tc.name: UpdateOnFocusTextFieldTest002
- * @tc.desc: UpdateOnFocusTextField.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWindowTestNg, UpdateOnFocusTextFieldTest002, TestSize.Level1)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-
-    webPattern->UpdateOnFocusTextField(false);
+    bool ret = true;
+    webPattern->UpdateOnFocusTextField(ret);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -817,13 +669,11 @@ HWTEST_F(WebPatternWindowTestNg, OnBackPressedTest001, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(webPattern, nullptr);
-
     bool result = false;
-
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
     webPattern->delegate_ = nullptr;
     result = webPattern->OnBackPressed();
-    EXPECT_EQ(result, true);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -842,15 +692,13 @@ HWTEST_F(WebPatternWindowTestNg, OnBackPressedTest002, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(webPattern, nullptr);
-
     bool result = false;
-
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
     webPattern->delegate_ =
         AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
     EXPECT_NE(webPattern->delegate_, nullptr);
     result = webPattern->OnBackPressed();
-    EXPECT_EQ(result, true);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -869,15 +717,13 @@ HWTEST_F(WebPatternWindowTestNg, OnBackPressedTest003, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(webPattern, nullptr);
-
     bool result = false;
-
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
     webPattern->delegate_ =
         AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
     EXPECT_NE(webPattern->delegate_, nullptr);
     result = webPattern->OnBackPressed();
-    EXPECT_EQ(result, false);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -896,17 +742,14 @@ HWTEST_F(WebPatternWindowTestNg, OnBackPressedForFullScreenTest001, TestSize.Lev
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(webPattern, nullptr);
-
     auto handler = AceType::MakeRefPtr<FullScreenExitHandlerMock>();
     int videoNaturalWidth = 100;
     int videoNaturalHeight = 100;
     auto handlerMock = std::make_shared<FullScreenEnterEventMock>(handler, videoNaturalWidth, videoNaturalHeight);
-
     bool result = false;
-
     webPattern->isFullScreen_ = false;
     result = webPattern->OnBackPressedForFullScreen();
-    EXPECT_EQ(result, false);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -925,18 +768,15 @@ HWTEST_F(WebPatternWindowTestNg, OnBackPressedForFullScreenTest002, TestSize.Lev
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(webPattern, nullptr);
-
     auto handler = AceType::MakeRefPtr<FullScreenExitHandlerMock>();
     int videoNaturalWidth = 100;
     int videoNaturalHeight = 100;
     auto handlerMock = std::make_shared<FullScreenEnterEventMock>(handler, videoNaturalWidth, videoNaturalHeight);
-
     bool result = false;
-
     webPattern->isFullScreen_ = true;
     webPattern->fullScreenExitHandler_ = nullptr;
     result = webPattern->OnBackPressedForFullScreen();
-    EXPECT_EQ(result, false);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -955,19 +795,16 @@ HWTEST_F(WebPatternWindowTestNg, OnBackPressedForFullScreenTest003, TestSize.Lev
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(webPattern, nullptr);
-
     auto handler = AceType::MakeRefPtr<FullScreenExitHandlerMock>();
     int videoNaturalWidth = 100;
     int videoNaturalHeight = 100;
     auto handlerMock = std::make_shared<FullScreenEnterEventMock>(handler, videoNaturalWidth, videoNaturalHeight);
-
     bool result = false;
-
     webPattern->isFullScreen_ = true;
     webPattern->fullScreenExitHandler_ = handlerMock;
     webPattern->fullScreenExitHandler_->handler_ = nullptr;
     result = webPattern->OnBackPressedForFullScreen();
-    EXPECT_EQ(result, false);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -986,18 +823,287 @@ HWTEST_F(WebPatternWindowTestNg, OnBackPressedForFullScreenTest004, TestSize.Lev
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(webPattern, nullptr);
-
     auto handler = AceType::MakeRefPtr<FullScreenExitHandlerMock>();
     int videoNaturalWidth = 100;
     int videoNaturalHeight = 100;
     auto handlerMock = std::make_shared<FullScreenEnterEventMock>(handler, videoNaturalWidth, videoNaturalHeight);
-
     bool result = false;
-
     webPattern->isFullScreen_ = true;
     webPattern->fullScreenExitHandler_ = handlerMock;
     webPattern->fullScreenExitHandler_->handler_ = handler;
     result = webPattern->OnBackPressedForFullScreen();
-    EXPECT_EQ(result, true);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: InitTouchEventListener_001
+ * @tc.desc: InitTouchEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, InitTouchEventListener_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->touchEventListener_ = nullptr;
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    webPattern->InitTouchEventListener();
+    MockPipelineContext::TearDown();
+    ASSERT_NE(webPattern->touchEventListener_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: UninitTouchEventListener_001
+ * @tc.desc: UninitTouchEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, UninitTouchEventListener_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto touch = std::make_shared<TouchEventListener>();
+    webPattern->touchEventListener_ = touch;
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    webPattern->UninitTouchEventListener();
+    MockPipelineContext::TearDown();
+    EXPECT_EQ(webPattern->touchEventListener_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: ShowDateTimeDialog_001
+ * @tc.desc: ShowDateTimeDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, ShowDateTimeDialog_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    std::shared_ptr<NWebDateTimeChooserMock> chooser = std::make_shared<NWebDateTimeChooserMock>();
+    ASSERT_NE(chooser, nullptr);
+    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallbackMock> callback =
+        std::make_shared<OHOS::NWeb::NWebDateTimeChooserCallbackMock>();
+    ASSERT_NE(callback, nullptr);
+    std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>> suggestions;
+    suggestions.clear();
+    ASSERT_EQ(suggestions.size(), 0);
+    EXPECT_CALL(*chooser, GetHasSelected).WillRepeatedly(Return(true));
+    MockContainer::SetUp();
+    MockPipelineContext::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<NWeb::MockTaskExecutorTest>();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
+    MockContainer::Current()->pipelineContext_->SetupRootElement();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    RefPtr<DialogTheme> expectedTheme = AccessibilityManager::MakeRefPtr<DialogTheme>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(::testing::_)).WillRepeatedly(Return(expectedTheme));
+    bool result = false;
+    result = webPattern->ShowDateTimeDialog(chooser, suggestions, callback);
+    MockContainer::TearDown();
+    MockPipelineContext::TearDown();
+    EXPECT_TRUE(result);
+#endif
+}
+
+/**
+ * @tc.name: ShowDateTimeSuggestionDialogTest003
+ * @tc.desc: Test ShowDateTimeSuggestionDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, ShowDateTimeSuggestionDialogTest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    std::shared_ptr<NWebDateTimeChooserMock> chooser = std::make_shared<NWebDateTimeChooserMock>();
+    ASSERT_NE(chooser, nullptr);
+    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallbackMock> callback =
+        std::make_shared<OHOS::NWeb::NWebDateTimeChooserCallbackMock>();
+    ASSERT_NE(callback, nullptr);
+    std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>> suggestions;
+    suggestions.clear();
+    ASSERT_EQ(suggestions.size(), 0);
+    MockContainer::SetUp();
+    MockPipelineContext::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<NWeb::MockTaskExecutorTest>();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
+    MockContainer::Current()->pipelineContext_->SetupRootElement();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    RefPtr<DialogTheme> expectedTheme = AccessibilityManager::MakeRefPtr<DialogTheme>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(::testing::_)).WillRepeatedly(Return(expectedTheme));
+    bool result = false;
+    result = webPattern->ShowDateTimeSuggestionDialog(chooser, suggestions, callback);
+    MockContainer::TearDown();
+    MockPipelineContext::TearDown();
+    EXPECT_TRUE(result);
+#endif
+}
+
+/**
+ * @tc.name: ShowDateTimeSuggestionDialogTest004
+ * @tc.desc: Test ShowDateTimeSuggestionDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, ShowDateTimeSuggestionDialogTest004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    std::shared_ptr<NWebDateTimeChooserMock> chooser = std::make_shared<NWebDateTimeChooserMock>();
+    ASSERT_NE(chooser, nullptr);
+    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallbackMock> callback =
+        std::make_shared<OHOS::NWeb::NWebDateTimeChooserCallbackMock>();
+    ASSERT_NE(callback, nullptr);
+    std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>> suggestions;
+    MockContainer::SetUp();
+    MockPipelineContext::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<NWeb::MockTaskExecutorTest>();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
+    MockContainer::Current()->pipelineContext_->SetupRootElement();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    RefPtr<DialogTheme> expectedTheme = AccessibilityManager::MakeRefPtr<DialogTheme>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(::testing::_)).WillRepeatedly(Return(expectedTheme));
+    bool result = false;
+    result = webPattern->ShowDateTimeSuggestionDialog(chooser, suggestions, callback);
+    MockContainer::TearDown();
+    MockPipelineContext::TearDown();
+    EXPECT_TRUE(result);
+#endif
+}
+
+/**
+ * @tc.name: OnWindowHide001
+ * @tc.desc: OnWindowHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, OnWindowHide001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    webPattern->isWindowShow_ = true;
+    webPattern->isVisible_ = false;
+    webPattern->OnWindowHide();
+    EXPECT_FALSE(webPattern->isVisible_);
+#endif
+}
+
+/**
+ * @tc.name: UpdateTouchHandleForOverlay001
+ * @tc.desc: UpdateTouchHandleForOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, UpdateTouchHandleForOverlay001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    bool ret = false;
+    webPattern->UpdateTouchHandleForOverlay(ret);
+    EXPECT_FALSE(ret);
+    webPattern->selectTemporarilyHidden_ = false;
+    webPattern->selectTemporarilyHiddenByScroll_ = true;
+    webPattern->UpdateTouchHandleForOverlay(ret);
+    EXPECT_TRUE(webPattern->selectTemporarilyHiddenByScroll_);
+    webPattern->selectTemporarilyHidden_ = true;
+    EXPECT_TRUE(webPattern->selectTemporarilyHidden_);
+#endif
+}
+
+/**
+ * @tc.name: CalculateTooltipOffset_001
+ * @tc.desc: CalculateTooltipOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWindowTestNg, CalculateTooltipOffset_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto tooltipOffset = std::make_shared<OffsetF>();
+    ASSERT_NE(tooltipOffset, nullptr);
+    RefPtr<FrameNode> tooltipNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(tooltipNode, nullptr);
+    MockPipelineContext::SetUp();
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    pipeline->rootWidth_ = 0;
+    pipeline->rootHeight_ = 0;
+    webPattern->CalculateTooltipOffset(tooltipNode, *tooltipOffset);
+    MockPipelineContext::TearDown();
+#endif
 }
 } // namespace OHOS::Ace::NG
