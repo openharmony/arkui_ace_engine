@@ -726,7 +726,8 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     UiSessionManager::GetInstance().OnRouterChange(navigationPathInfo_, "navigationPushPage");
 #endif
 #if !defined(ACE_UNITTEST)
-    TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode);
+    TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
+        curNavDestination->GetNavDestinationPathInfo());
 #endif
 }
 

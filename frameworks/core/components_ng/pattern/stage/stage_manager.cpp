@@ -231,7 +231,12 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         });
     }
 #if !defined(ACE_UNITTEST)
-    TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(node);
+    auto pageInfo = pagePattern->GetPageInfo();
+    std::string pageUrl = "";
+    if (pageInfo) {
+        pageUrl = pageInfo->GetFullPath();
+    }
+    TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(node, pageUrl);
 #endif
 
     // close keyboard

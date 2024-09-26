@@ -538,7 +538,7 @@ void SecuritySessionWrapperImpl::OnExtensionTimeout(int32_t errorCode)
             }
             bool isTransparent = errorCode == ERROR_CODE_UIEXTENSION_TRANSPARENT;
             pattern->FireOnErrorCallback(
-                ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT,
+                isTransparent ? errorCode : ERROR_CODE_UIEXTENSION_LIFECYCLE_TIMEOUT,
                 isTransparent ? EXTENSION_TRANSPARENT_NAME : LIFECYCLE_TIMEOUT_NAME,
                 isTransparent ? EXTENSION_TRANSPARENT_MESSAGE : LIFECYCLE_TIMEOUT_MESSAGE);
         },
