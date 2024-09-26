@@ -492,16 +492,25 @@ void ResetSystemFontStyleChangeEvent(ArkUINodeHandle node)
     ViewAbstract::SetSystemFontChangeEvent(frameNode, nullptr);
 }
 
-ArkUI_CharPtr getCustomPropertyCapiByKey(ArkUINodeHandle node, ArkUI_CharPtr key)
+ArkUI_Uint32 getCustomPropertyCapiByKey(ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    static std::string capiCustomProperty;
-    capiCustomProperty = frameNode->GetCapiCustomProperty(key);
-    if (capiCustomProperty.empty()) {
-        return nullptr;
+    CHECK_NULL_RETURN(frameNode, 0);
+    std::string capiCustomProperty;
+    if (frameNode->GetCapiCustomProperty(key, capiCustomProperty)) {
+        return 0;
     }
-    return capiCustomProperty.c_str();
+    *size = capiCustomProperty.size();
+    *value = new char[*size + 1];
+    capiCustomProperty.copy(*value, *size);
+    (*value)[*size] = '\0';
+    return 1;
+}
+
+void FreeCustomPropertyCharPtr(char* value, ArkUI_Uint32 size)
+{
+    delete[] value;
+    value = nullptr;
 }
 
 void SetCustomPropertyModiferByKey(ArkUINodeHandle node, void* callback, void* getCallback)
@@ -543,7 +552,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         GetFrameNodeByKey, GetAttachedFrameNodeById, PropertyUpdate, GetLast, GetFirstUINode, GetLayoutSize,
         GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
         SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent, getCustomPropertyCapiByKey,
-        SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty };
+        SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty, FreeCustomPropertyCharPtr };
     return &modifier;
 }
 
