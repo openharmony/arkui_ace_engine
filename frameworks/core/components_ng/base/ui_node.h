@@ -770,6 +770,16 @@ public:
         return isFreeze_;
     }
 
+    bool IsCNode() const
+    {
+        return isCNode_;
+    }
+
+    void setIsCNode(bool createByCapi)
+    {
+        isCNode_ = createByCapi;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -885,6 +895,8 @@ private:
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;
+
+    bool isCNode_ = false;
 
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;

@@ -201,8 +201,10 @@ ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
     if (flags == ARKUI_NODE_FLAG_C) {
         ContainerScope Scope(Container::CurrentIdSafelyWithCheck());
         node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
-        auto* frameNode = reinterpret_cast<FrameNode*>(node);
-        frameNode->setIsCNode(true);
+        auto* uiNode = reinterpret_cast<UINode*>(node);
+        if (uiNode) {
+            uiNode->setIsCNode(true);
+        }
     } else {
         node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
     }

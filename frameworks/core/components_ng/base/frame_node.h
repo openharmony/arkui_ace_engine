@@ -1096,11 +1096,6 @@ public:
     void AddCustomProperty(const std::string& key, const std::string& value);
     void RemoveCustomProperty(const std::string& key);
 
-    void setIsCNode(bool createByCapi)
-    {
-        isCNode_ = createByCapi;
-    }
-
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1338,8 +1333,6 @@ private:
     bool dragHitTestBlock_ = false;
 
     bool isUseTransitionAnimator_ = false;
-
-    bool isCNode_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 
