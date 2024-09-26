@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 
 #include "session_manager/include/scene_session_manager.h"
+#include "start_window_option.h"
 #include "ui/rs_surface_node.h"
 
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
@@ -374,16 +375,16 @@ void WindowPattern::CreateASStartingWindow()
 }
 #endif
 
-void WindowPattern::UpdateStartWindowProperty(std::shared_ptr<AAFwk::StartWindowOption> startWindowOption,
+void WindowPattern::UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
     Color &color, ImageSourceInfo &sourceInfo)
 {
-    if (startWindowOption == nullptr && !startWindowOption->hasStartWindow) {
+    if (sessionInfo.startWindowOption == nullptr && !sessionInfo.startWindowOption->hasStartWindow) {
         return;
     }
-    if (!startWindowOption->startWindowBackgroundColor.empty()) {
+    if (!sessionInfo.startWindowOption->startWindowBackgroundColor.empty()) {
         Color::ParseColorString(sessionInfo.startWindowOption->startWindowBackgroundColor, color);
     }
-    if (startWindowOption->startWindowIcon != nullptr) {
+    if (sessionInfo.startWindowOption->startWindowIcon != nullptr) {
         auto pixelMap = PixelMap::CreatePixelMap(&(sessionInfo.startWindowOption->startWindowIcon));
         sourceInfo = ImageSourceInfo(pixelMap);
     }
@@ -416,7 +417,7 @@ void WindowPattern::CreateStartingWindow()
         ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
     auto color = Color(backgroundColor);
     auto sourceInfo = ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_);
-    UpdateStartWindowProperty(sessionInfo.startWindowOption, color, sourceInfo);
+    UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
 
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);

@@ -25,7 +25,6 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/image/image_source_info.h"
 
-#include "start_window_option.h"
 namespace OHOS::Ace::NG {
 class WindowPattern : public StackPattern {
     DECLARE_ACE_TYPE(WindowPattern, StackPattern);
@@ -107,7 +106,7 @@ private:
     void FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateSnapshotWindowProperty();
     bool IsSnapshotSizeChanged();
-    void UpdateStartWindowProperty(std::shared_ptr<AAFwk::StartWindowOption> startWindowOption,
+    void UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
         Color &color, ImageSourceInfo &sourceInfo);
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
