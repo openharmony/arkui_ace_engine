@@ -1093,6 +1093,11 @@ void FocusHub::OnFocus()
     } else if (focusType_ == FocusType::SCOPE) {
         OnFocusScope();
     }
+    // if root focused, it has no focus view to update.
+    auto node = GetFrameNode();
+    if (!node || node->IsRootNode()) {
+        return;
+    }
     UpdateFocusView();
 }
 
