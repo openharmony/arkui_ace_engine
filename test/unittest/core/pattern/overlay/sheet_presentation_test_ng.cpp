@@ -1544,10 +1544,10 @@ HWTEST_F(SheetPresentationTestNg, UpdateTitlePadding003, TestSize.Level1)
     ASSERT_NE(sheetNode, nullptr);
 
     /**
-     * @tc.steps: step2. set API13.
+     * @tc.steps: step2. set API14.
      */
     int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
 
     /**
