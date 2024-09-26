@@ -10469,12 +10469,14 @@ void RichEditorPattern::TripleClickSection(GestureEvent& info, int32_t start, in
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     textSelector_.Update(start, end);
+    if (IsShowHandle()) {
+        SetCaretPositionWithAffinity({ end, TextAffinity::UPSTREAM });
+        MoveCaretToContentRect();
+    }
     if (info.GetSourceDevice() == SourceType::TOUCH) {
         showSelect_ = true;
         RequestKeyboard(false, true, true);
         HandleOnEditChanged(true);
-        SetCaretPositionWithAffinity({ end, TextAffinity::UPSTREAM });
-        MoveCaretToContentRect();
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->ProcessOverlay({ .menuIsShow = !selectOverlay_->GetIsHandleMoving(), .animation = true });
     }
