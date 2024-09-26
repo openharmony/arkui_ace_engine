@@ -367,7 +367,8 @@ float MarqueePattern::GetTextOffset()
         auto diffMilliseconds =
             std::abs(static_cast<int32_t>(currentMilliseconds - lastAnimationParam_.lastStartMilliseconds));
         auto tempStartPosition = lastAnimationParam_.lastAnimationPosition;
-        if ((diffMilliseconds / static_cast<int32_t>(lastAnimationParam_.lastDuration)) > 0) {
+        if (NearEqual(static_cast<int32_t>(lastAnimationParam_.lastDuration), 0.0f) ||
+            (diffMilliseconds / static_cast<int32_t>(lastAnimationParam_.lastDuration)) > 0) {
             diffMilliseconds -= lastAnimationParam_.lastDuration;
             auto duration = static_cast<int32_t>(
                 std::abs(lastAnimationParam_.lastEnd - lastAnimationParam_.lastStart) * DEFAULT_MARQUEE_SCROLL_DELAY);

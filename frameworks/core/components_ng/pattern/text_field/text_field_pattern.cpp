@@ -7708,8 +7708,6 @@ void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, Window
                 auto keyboardOverLay = textField->GetKeyboardOverLay();
                 CHECK_NULL_VOID(keyboardOverLay);
                 keyboardOverLay->AvoidCustomKeyboard(nodeId, safeHeight);
-            } else if (textFieldManager && textField->HasFocus()) {
-                textFieldManager->AvoidKeyboardInSheet(textField->GetHost());
             }
             TAG_LOGI(ACE_TEXT_FIELD, "%{public}d OnWindowSizeChanged change parentGlobalOffset to: %{public}s",
                 nodeId, textField->parentGlobalOffset_.ToString().c_str());
