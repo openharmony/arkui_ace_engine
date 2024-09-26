@@ -25,7 +25,7 @@
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
-    
+
 using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
@@ -79,40 +79,13 @@ class ButtonModifierResourcesTest : public ModifierTestBase<GENERATED_ArkUIButto
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
+        ModifierTestBase::SetUpTestCase();
 
-        // assume using of test/mock/core/common/mock_theme_constants.cpp in build
-        auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(nullptr);
+        SetupTheme<ButtonTheme>();
 
         // set test values to Theme Pattern as data for the Theme building
-        MockThemeStyle::GetInstance()->SetAttr(std::to_string(RES_ID),
-            { .value = RESOURCE_BY_NUMBER, .type = ThemeConstantsType::STRING });
-        MockThemeStyle::GetInstance()->SetAttr(RES_NAME,
-            { .value = RESOURCE_BY_STRING, .type = ThemeConstantsType::STRING });
-        themeConstants->LoadTheme(0);
-
-        // build default ButtonTheme
-        ButtonTheme::Builder builder;
-        auto buttonTheme = builder.Build(themeConstants);
-
-        // create Theme Manager and provide return of ButtonTheme
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetThemeConstants(testing::_, testing::_))
-            .WillRepeatedly(Return(themeConstants));
-        EXPECT_CALL(*themeManager, GetTheme(testing::_))
-            .WillRepeatedly(Return(buttonTheme));
-
-        // setup Context with Theme Manager and Container
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp(MockPipelineContext::GetCurrent());
-        MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        AddResource(RES_ID, RESOURCE_BY_NUMBER);
+        AddResource(RES_NAME, RESOURCE_BY_STRING);
     }
 };
 
@@ -151,7 +124,7 @@ HWTEST_F(ButtonModifierResourcesTest, SetButtonOptions2TestLabelResource, TestSi
     EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
     EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
     EXPECT_EQ(checkLabel, expectValue);
-    
+
     for (const auto& [label, expectValue] : BUTTON_LABEL_RESOURCES_TEST_PLAN) {
         modifier_->setButtonOptions2(node_, &label, &optInputValueOptions);
         checkLabel = GetAttrValue<std::string>(jsonValue, expectValue);
