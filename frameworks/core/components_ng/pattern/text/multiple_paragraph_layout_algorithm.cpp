@@ -74,7 +74,10 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     }
     if (contentModifier) {
         SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
-        contentModifier->ModifyTextStyle(textStyle);
+        if (!textLayoutProperty->GetIsAnimationNeeded().has_value() ||
+            textLayoutProperty->GetIsAnimationNeeded().value()) {
+            contentModifier->ModifyTextStyle(textStyle);
+        }
         contentModifier->SetFontReady(false);
     }
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
