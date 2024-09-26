@@ -1992,4 +1992,99 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator009, Tes
     paintMethod->PaintHoverIndicator(itemHalfSizes, paddingSide);
     EXPECT_NEAR(paintMethod->longPointCenterX_.first, 177.0f, 0.001f);
 }
+
+/**
+ * @tc.name: SwiperIndicatorUpdateContentModifier016
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorUpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier016, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::FREE);
+    });
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    EXPECT_FALSE(paintMethod->GetContentModifier(nullptr) == nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step3. call GetContentModifier.
+     * @tc.expected: dotIndicatorModifier_->isFocused_ is true.
+     */
+    indicatorPattern->InitFocusEvent();
+    indicatorPattern->RemoveIsFocusActiveUpdateEvent();
+    indicatorPattern->OnIsFocusActiveUpdate(false);
+    EXPECT_TRUE(modifier->isFocused_);
+}
+
+/**
+ * @tc.name: SwiperIndicatorUpdateContentModifier017
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorUpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier017, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::FREE);
+    });
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    EXPECT_FALSE(paintMethod->GetContentModifier(nullptr) == nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step3. call GetContentModifier.
+     * @tc.expected: dotIndicatorModifier_->isFocused_ is true.
+     */
+    indicatorPattern->InitFocusEvent();
+    indicatorPattern->RemoveIsFocusActiveUpdateEvent();
+    indicatorPattern->OnIsFocusActiveUpdate(true);
+    EXPECT_TRUE(modifier->isFocused_);
+}
+
+/**
+ * @tc.name: SwiperIndicatorUpdateContentModifier018
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorUpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorUpdateContentModifier018, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::FREE);
+    });
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    EXPECT_FALSE(paintMethod->GetContentModifier(nullptr) == nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    /**
+     * @tc.steps: step2. Set swiper focus and blur
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    pipelineContext->SetIsFocusActive(true);
+    indicatorPattern->HandleFocusEvent();
+    indicatorPattern->AddIsFocusActiveUpdateEvent();
+    indicatorPattern->OnIsFocusActiveUpdate(true);
+    EXPECT_TRUE(modifier->isFocused_);
+}
 } // namespace OHOS::Ace::NG

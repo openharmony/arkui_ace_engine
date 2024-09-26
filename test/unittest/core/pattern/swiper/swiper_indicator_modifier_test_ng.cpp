@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
+#include "core/components/swiper/swiper_indicator_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1770,5 +1771,36 @@ HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier012, TestSize.Level1
     dotIndicatorModifier.headCurve_ = AceType::MakeRefPtr<InterpolatingSpring>(0.1f, 0.1f, 0.1f, 0.1f);
     auto result = dotIndicatorModifier.GetLoopOpacityDuration();
     EXPECT_EQ(result, defaultOpacityAnimationDuration);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier013
+ * @tc.desc: Test PaintBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Create dotIndicatorModifier and ContentProperty attributes
+     */
+    DotIndicatorModifier::ContentProperty contentProperty;
+    contentProperty.vectorBlackPointCenterX = { 100.0f, 200.0f, 300.0f };
+    LinearVector<float> itemHalfSizes = { 20.f, 30.f, 40.f, 50.f };
+
+    contentProperty.itemHalfSizes = itemHalfSizes;
+    DotIndicatorModifier dotIndicatorModifier;
+    dotIndicatorModifier.SetUnselectedColor(Color::WHITE);
+    dotIndicatorModifier.SetIsFocused(true);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    swiperTheme->focusedBgColor_ = Color::RED;
+    dotIndicatorModifier.backgroundWidthDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(10.0f);
+    dotIndicatorModifier.backgroundHeightDilateRatio_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(20.0f);
+    /**
+     * @tc.steps: step2.Call PaintBackground
+     * @tc.expected: The PaintBackground executed successfuly
+     */
+    dotIndicatorModifier.SetFocusedAndSelectedColor(contentProperty);
+    EXPECT_EQ(contentProperty.backgroundColor, Color::RED);
 }
 } // namespace OHOS::Ace::NG
