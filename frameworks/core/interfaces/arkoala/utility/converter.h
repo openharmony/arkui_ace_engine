@@ -55,9 +55,10 @@ std::optional<int32_t> EnumToInt(const std::optional<T>& src)
 
 using StringArray = std::vector<std::string>;
 namespace Converter {
-    constexpr int32_t OFFSET_0 = 0;
-    constexpr int32_t OFFSET_1 = 1;
-    constexpr int32_t OFFSET_2 = 2;
+    template<typename To, typename From>
+    To Convert(const From& src);
+    template<typename To, typename From>
+    std::optional<To> OptConvert(const From& value);
 
      //Allow conversion for Ark_Xxx type to same Ark_Xxx type
     template<typename T>
@@ -70,6 +71,26 @@ namespace Converter {
     void AssignTo(std::variant<Types...>& dst, const T& src)
     {
         dst = src;
+    }
+
+    template<typename To, typename From, typename = decltype(From().array), typename = decltype(From().length)>
+    void AssignTo(std::vector<To>& dst, const From& src)
+    {
+        dst.clear();
+        dst.reserve(src.length);
+        for (Ark_Int32 i = 0; i < src.length; i++) {
+            dst.push_back(Convert<To>(src.array[i]));
+        }
+    }
+
+    template<typename To, typename From, typename = decltype(From().array), typename = decltype(From().length)>
+    void AssignTo(std::vector<std::optional<To>>& dst, const From& src)
+    {
+        dst.clear();
+        dst.reserve(src.length);
+        for (Ark_Int32 i = 0; i < src.length; i++) {
+            dst.push_back(OptConvert<To>(src.array[i]));
+        }
     }
 
     template<typename To, typename From>
@@ -451,7 +472,7 @@ namespace Converter {
     inline PaddingProperty Convert(const Ark_Length& src)
     {
         auto value = OptConvert<CalcLength>(src);
-        return { .left = value, .top = value, .right = value, .bottom = value
+        return { .left = value, .right = value, .top = value, .bottom = value
         };
     }
 
@@ -504,7 +525,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
 
-    Shadow ToShadow(const Ark_ShadowOptions& src);
+    template<> Shadow Convert(const Ark_ShadowOptions& src);
 
     template<>
     inline ShadowType Convert(const Ark_ShadowType& src)
@@ -515,17 +536,7 @@ namespace Converter {
     template<>
     inline std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
     {
-        return { ToShadow(src) };
-    }
-
-    template<>
-    inline std::vector<Shadow> Convert(const Array_ShadowOptions& src)
-    {
-        std::vector<Shadow> result(src.length);
-        for (int i = 0; i < src.length; i++) {
-            result[i] = ToShadow(src.array[i]);
-        }
-        return result;
+        return { Convert<Shadow>(src) };
     }
 
     template<> RefPtr<Curve> Convert(const Ark_String& src);

@@ -196,7 +196,8 @@ std::optional<Color> ResourceConverter::ToColor()
     return result;
 }
 
-Shadow ToShadow(const Ark_ShadowOptions& src)
+template<>
+Shadow Convert(const Ark_ShadowOptions& src)
 {
     Shadow shadow;
 

@@ -18,6 +18,7 @@ ace_unittest("capi_all_utils_test") {
   module_output = "capi"
   sources = [
     # place here your UT source code
+    "converter_test.cpp",
     "reverse_converter_test.cpp",
   ]
   extra_deps = []
