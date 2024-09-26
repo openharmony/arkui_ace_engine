@@ -85,6 +85,7 @@ public:
             theme->sheetRadius_ = sheetPattern->GetAttr<Dimension>("sheet_radius", 32.0_vp);
             theme->titleTextFontSize_ = sheetPattern->GetAttr<Dimension>("title_text_font_size", 20.0_vp);
             theme->titleTextMargin_ = sheetPattern->GetAttr<Dimension>("title_text_margin", 16.0_vp);
+            theme->titleTextHorizMargin_ = sheetPattern->GetAttr<Dimension>("title_text_horizontal_margin", 16.0_vp);
             theme->subtitleTextFontSize_ = sheetPattern->GetAttr<Dimension>("subtitle_text_font_size", 14.0_fp);
             theme->subtitleTextMargin_ = sheetPattern->GetAttr<Dimension>("subtitle_text_margin", 2.0_fp);
             theme->titleTextFontColor_ = sheetPattern->GetAttr<Color>("title_text_font_color", Color(0xff182431));
@@ -124,6 +125,11 @@ public:
     const Dimension& GetTitleTextMargin() const
     {
         return titleTextMargin_;
+    }
+
+    const Dimension& GetTitleTextHorizMargin() const
+    {
+        return titleTextHorizMargin_;
     }
 
     const Dimension& GetSubtitleTextFontSize() const
@@ -238,6 +244,7 @@ private:
     Dimension sheetRadius_;
     Dimension titleTextFontSize_;
     Dimension titleTextMargin_;
+    Dimension titleTextHorizMargin_;
     Dimension subtitleTextFontSize_;
     Dimension subtitleTextMargin_;
     Color titleTextFontColor_;

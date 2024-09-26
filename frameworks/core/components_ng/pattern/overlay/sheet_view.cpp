@@ -90,8 +90,8 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, nullptr);
     MarginProperty margin;
-    margin.right = CalcLength(sheetTheme->GetTitleTextMargin());
-    margin.left = CalcLength(sheetTheme->GetTitleTextMargin());
+    margin.right = CalcLength(sheetTheme->GetTitleTextHorizMargin());
+    margin.left = CalcLength(sheetTheme->GetTitleTextHorizMargin());
     layoutProps->UpdateMargin(margin);
 
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
