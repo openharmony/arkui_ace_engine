@@ -93,6 +93,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef FORM_SUPPORTED
@@ -117,7 +118,6 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
-constexpr int32_t AVOID_DELAY_TIME = 50;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -448,20 +448,50 @@ public:
         auto curWindow = context->GetCurrentWindowRect();
         positionY -= curWindow.Top();
         ContainerScope scope(instanceId_);
-        if (NearZero(keyboardRect.Height())) {
-            taskExecutor->PostSyncTask([context, keyboardRect, rsTransaction, positionY, height] {
-                    CHECK_NULL_VOID(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
-                }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
-        } else {
-            taskExecutor->PostDelayedTask([context, keyboardRect, rsTransaction, positionY, height] {
-                    CHECK_NULL_VOID(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
-                }, TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChange");
+        if (LaterAvoid(keyboardRect, positionY, height)) {
+            return;
         }
+        taskExecutor->PostSyncTask([context, keyboardRect, rsTransaction, positionY, height] {
+                CHECK_NULL_VOID(context);
+                context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
+            }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
     }
 
 private:
+    bool LaterAvoid(const Rect& keyboardRect, double positionY, double height)
+    {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_RETURN(container, false);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, false);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_RETURN(context, false);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+        bool isRotate = false;
+        auto displayInfo = container->GetDisplayInfo();
+        uint32_t lastKeyboardHeight = pipeline && pipeline->GetSafeAreaManager() ?
+            pipeline->GetSafeAreaManager()->GetKeyboardInset().Length() : 0;
+        if (displayInfo) {
+            auto dmRotation = static_cast<int32_t>(displayInfo->GetRotation());
+            isRotate = lastRotation != -1 && lastRotation != dmRotation;
+            lastRotation = dmRotation;
+        } else {
+            lastRotation = -1;
+        }
+        // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
+        if (pipeline && isRotate && !NearZero(lastKeyboardHeight) && !NearZero(keyboardRect.Height())) {
+            auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+            if (textFieldManager) {
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
+                    "later avoid %{public}s %{public}f %{public}f",
+                    lastRotation, keyboardRect.ToString().c_str(), positionY, height);
+                textFieldManager->SetLaterAvoidArgs(keyboardRect, positionY, height);
+                return true;
+            }
+        }
+        return false;
+    }
+
     void SetUIExtensionImeShow(const Rect& keyboardRect)
     {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -486,6 +516,7 @@ private:
         }
     }
     int32_t instanceId_ = -1;
+    int32_t lastRotation = -1;
 };
 
 class AvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
