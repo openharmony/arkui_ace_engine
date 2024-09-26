@@ -52,6 +52,8 @@
 #include "core/components_ng/render/render_surface.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
+#include "core/components_ng/pattern/select_overlay/magnifier.h"
+#include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 
 namespace OHOS::Ace {
 class WebDelegateObserver;
@@ -104,8 +106,8 @@ enum class WebInfoType : int32_t {
     TYPE_UNKNOWN
 };
 
-class WebPattern : public NestableScrollContainer, public TextBase {
-    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase);
+class WebPattern : public NestableScrollContainer, public TextBase, public Magnifier {
+    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
@@ -669,6 +671,9 @@ public:
     void UnregisterWebComponentClickCallback();
     WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
     void StartVibraFeedback(const std::string& vibratorType);
+    // The magnifier needs this to know the web's offset
+    OffsetF GetTextPaintOffset() const override;
+    void OnColorConfigurationUpdate() override;
 
 private:
     friend class WebContextSelectOverlay;
@@ -936,6 +941,10 @@ private:
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitAiEngine();
+    void InitMagnifier();
+    void ShowMagnifier(int centerOffsetX, int centerOffsetY);
+    void HideMagnifier();
+    void OnMagnifierHandleMove(const RectF& handleRect, bool isFirst);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -965,7 +974,6 @@ private:
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle_ = nullptr;
     bool isQuickMenuMouseTrigger_ = false;
-    float selectHotZone_ = 10.0f;
     RefPtr<DragEvent> dragEvent_;
     bool isUrlLoaded_ = false;
     std::queue<MouseClickInfo> doubleClickQueue_;
