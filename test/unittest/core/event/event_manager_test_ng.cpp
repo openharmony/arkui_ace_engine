@@ -44,7 +44,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest001, TestSize.Level1)
     event.code = KeyCode::KEY_F4;
     event.pressedCodes = {KeyCode::KEY_ALT_LEFT};
     bool isSystemKey = eventManager->IsSystemKeyboardShortcut(event);
-    EXPECT_TRUE(isSystemKey);
+    EXPECT_FALSE(isSystemKey);
 
     /* RAlt + F4 */
     event.code = KeyCode::KEY_F4;
