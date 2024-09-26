@@ -2471,7 +2471,7 @@ void JSWeb::OnCommonDialog(const JSCallbackInfo& args, int dialogEventType)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode,false);
+        CHECK_NULL_RETURN(fNode, false);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
@@ -2500,7 +2500,7 @@ void JSWeb::OnConsoleLog(const JSCallbackInfo& args)
         bool result = false;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, result);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode,false);
+        CHECK_NULL_RETURN(fNode, false);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
@@ -2772,7 +2772,7 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode,false);
+        CHECK_NULL_RETURN(fNode, false);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
@@ -2805,7 +2805,7 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode,false);
+        CHECK_NULL_RETURN(fNode, false);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
@@ -2830,7 +2830,7 @@ void JSWeb::OnAllSslErrorRequest(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode,false);
+        CHECK_NULL_RETURN(fNode, false);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
@@ -2855,7 +2855,7 @@ void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode,false);
+        CHECK_NULL_RETURN(fNode, false);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
@@ -3035,7 +3035,7 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode,false);
+        CHECK_NULL_RETURN(fNode, false);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
@@ -3064,7 +3064,7 @@ void JSWeb::OnLoadIntercept(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode,false);
+        CHECK_NULL_RETURN(fNode, false);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
@@ -3110,7 +3110,7 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode,false);
+        CHECK_NULL_RETURN(fNode, false);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
@@ -3155,7 +3155,7 @@ void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode,false);
+        CHECK_NULL_RETURN(fNode, false);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
@@ -4895,7 +4895,7 @@ void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         auto fNode = node.Upgrade();
-        CHECK_NULL_RETURN(fNode,false);
+        CHECK_NULL_RETURN(fNode, false);
         auto pipelineContext = fNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
         pipelineContext->UpdateCurrentActiveNode(node);
