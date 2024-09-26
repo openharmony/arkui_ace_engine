@@ -23,13 +23,35 @@
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
-// Reverse-convert Ark_TextDeleteDirection
-void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src)
+void AssignArkValue(Ark_Axis& dst, const Axis& src)
 {
     switch (src) {
-        case TextDeleteDirection::BACKWARD: dst = ARK_TEXT_DELETE_DIRECTION_BACKWARD; break;
-        case TextDeleteDirection::FORWARD: dst = ARK_TEXT_DELETE_DIRECTION_FORWARD; break;
-        default: dst = static_cast<Ark_TextDeleteDirection>(-1);
+        case Axis::VERTICAL: dst = ARK_AXIS_VERTICAL; break;
+        case Axis::HORIZONTAL: dst = ARK_AXIS_HORIZONTAL; break;
+        default: dst = static_cast<Ark_Axis>(-1);
+            LOGE("Unexpected enum value in Axis: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_BarState& dst, const DisplayMode& src)
+{
+    switch (src) {
+        case DisplayMode::OFF: dst = ARK_BAR_STATE_OFF; break;
+        case DisplayMode::AUTO: dst = ARK_BAR_STATE_AUTO; break;
+        case DisplayMode::ON: dst = ARK_BAR_STATE_ON; break;
+        default: dst = static_cast<Ark_BarState>(-1);
+            LOGE("Unexpected enum value in DisplayMode: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src)
+{
+    switch (src) {
+        case EdgeEffect::SPRING: dst = ARK_EDGE_EFFECT_SPRING; break;
+        case EdgeEffect::FADE: dst = ARK_EDGE_EFFECT_FADE; break;
+        case EdgeEffect::NONE: dst = ARK_EDGE_EFFECT_NONE; break;
+        default: dst = static_cast<Ark_EdgeEffect>(-1);
+            LOGE("Unexpected enum value in EdgeEffect: %{public}d", src);
     }
 }
 
@@ -49,6 +71,105 @@ void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src)
     }
 }
 
+void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src)
+{
+    switch (src) {
+        case V2::ListItemAlign::START: dst = ARK_LIST_ITEM_ALIGN_START; break;
+        case V2::ListItemAlign::CENTER: dst = ARK_LIST_ITEM_ALIGN_CENTER; break;
+        case V2::ListItemAlign::END: dst = ARK_LIST_ITEM_ALIGN_END; break;
+        default: dst = static_cast<Ark_ListItemAlign>(-1);
+            LOGE("Unexpected enum value in V2::ListItemAlign: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src)
+{
+    switch (src) {
+        case ListItemGroupArea::NONE_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_NONE; break;
+        case ListItemGroupArea::IN_LIST_ITEM_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_IN_LIST_ITEM_AREA; break;
+        case ListItemGroupArea::IN_HEADER_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_IN_HEADER_AREA; break;
+        case ListItemGroupArea::IN_FOOTER_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_IN_FOOTER_AREA; break;
+        default: dst = static_cast<Ark_ListItemGroupArea>(-1);
+            LOGE("Unexpected enum value in ListItemGroupArea: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_ListItemGroupStyle& dst, const V2::ListItemGroupStyle& src)
+{
+    switch (src) {
+        case V2::ListItemGroupStyle::NONE: dst = ARK_LIST_ITEM_GROUP_STYLE_NONE; break;
+        case V2::ListItemGroupStyle::CARD: dst = ARK_LIST_ITEM_GROUP_STYLE_CARD; break;
+        default: dst = static_cast<Ark_ListItemGroupStyle>(-1);
+            LOGE("Unexpected enum value in ListItemGroupStyle: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src)
+{
+    switch (src) {
+        case V2::ListItemStyle::NONE: dst = ARK_LIST_ITEM_STYLE_NONE; break;
+        case V2::ListItemStyle::CARD: dst = ARK_LIST_ITEM_STYLE_CARD; break;
+        default: dst = static_cast<Ark_ListItemStyle>(-1);
+            LOGE("Unexpected enum value in V2::ListItemStyle: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src)
+{
+    switch (src) {
+        case NavigationMode::STACK: dst = ARK_NAVIGATION_MODE_STACK; break;
+        case NavigationMode::SPLIT: dst = ARK_NAVIGATION_MODE_SPLIT; break;
+        case NavigationMode::AUTO: dst = ARK_NAVIGATION_MODE_AUTO; break;
+        default: {
+            dst = static_cast<Ark_NavigationMode>(-1);
+            LOGE("Unexpected enum value in NavigationMode: %{public}d", src);
+        }
+    }
+}
+
+void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src)
+{
+    switch (src) {
+        case NestedScrollMode::SELF_ONLY: dst = ARK_NESTED_SCROLL_MODE_SELF_ONLY; break;
+        case NestedScrollMode::SELF_FIRST: dst = ARK_NESTED_SCROLL_MODE_SELF_FIRST; break;
+        case NestedScrollMode::PARENT_FIRST: dst = ARK_NESTED_SCROLL_MODE_PARENT_FIRST; break;
+        case NestedScrollMode::PARALLEL: dst = ARK_NESTED_SCROLL_MODE_PARALLEL; break;
+        default: {
+            dst = static_cast<Ark_NestedScrollMode>(-1);
+            LOGE("Unexpected enum value in NestedScrollMode: %{public}d", src);
+        }
+    }
+}
+
+void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src)
+{
+    dst.scrollForward = ArkValue<Ark_NestedScrollMode>(src.forward);
+    dst.scrollBackward = ArkValue<Ark_NestedScrollMode>(src.backward);
+}
+
+void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src)
+{
+    switch (src) {
+        case V2::ScrollSnapAlign::NONE: dst = ARK_SCROLL_SNAP_ALIGN_NONE; break;
+        case V2::ScrollSnapAlign::START: dst = ARK_SCROLL_SNAP_ALIGN_START; break;
+        case V2::ScrollSnapAlign::CENTER: dst = ARK_SCROLL_SNAP_ALIGN_CENTER; break;
+        case V2::ScrollSnapAlign::END: dst = ARK_SCROLL_SNAP_ALIGN_END; break;
+        default: dst = static_cast<Ark_ScrollSnapAlign>(-1);
+            LOGE("Unexpected enum value in V2::ScrollSnapAlign: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src)
+{
+    switch (src) {
+        case ScrollState::IDLE: dst = ARK_SCROLL_STATE_IDLE; break;
+        case ScrollState::SCROLL: dst = ARK_SCROLL_STATE_SCROLL; break;
+        case ScrollState::FLING: dst = ARK_SCROLL_STATE_FLING; break;
+        default: dst = static_cast<Ark_ScrollState>(-1);
+            LOGE("Unexpected enum value in ScrollState: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src)
 {
     switch (src) {
@@ -60,67 +181,25 @@ void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionE
     }
 }
 
-// Reverse-convert Ark_AnimationMode
-void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src)
+void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src)
 {
     switch (src) {
-        case TabAnimateMode::CONTENT_FIRST: dst = ARK_ANIMATION_MODE_CONTENT_FIRST; break;
-        case TabAnimateMode::ACTION_FIRST: dst = ARK_ANIMATION_MODE_ACTION_FIRST; break;
-        case TabAnimateMode::NO_ANIMATION: dst = ARK_ANIMATION_MODE_NO_ANIMATION; break;
-        default:
-            dst = static_cast<Ark_AnimationMode>(-1);
-            LOGE("Unexpected enum value in TabAnimateMode: %{public}d", src);
-            break;
+        case V2::StickyMode::NONE: dst = ARK_STICKY_NONE; break;
+        case V2::StickyMode::NORMAL: dst = ARK_STICKY_NORMAL; break;
+        case V2::StickyMode::OPACITY: dst = ARK_STICKY_OPACITY; break;
+        default: dst = static_cast<Ark_Sticky>(-1);
+            LOGE("Unexpected enum value in V2::StickyMode: %{public}d", src);
     }
 }
 
-// Reverse-convert Ark_BarPosition
-void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src)
+void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src)
 {
     switch (src) {
-        case BarPosition::START: dst = ARK_BAR_POSITION_START; break;
-        case BarPosition::END: dst = ARK_BAR_POSITION_END; break;
-        default:
-            dst = static_cast<Ark_BarPosition>(-1);
-            LOGE("Unexpected enum value in BarPosition: %{public}d", src);
-            break;
-    }
-}
-
-// Reverse-convert Ark_BarMode
-void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src)
-{
-    switch (src) {
-        case TabBarMode::SCROLLABLE: dst = ARK_BAR_MODE_SCROLLABLE; break;
-        case TabBarMode::FIXED: dst = ARK_BAR_MODE_FIXED; break;
-        default:
-            dst = static_cast<Ark_BarMode>(-1);
-            LOGE("Unexpected enum value in TabBarMode: %{public}d", src);
-            break;
-    }
-}
-
-// Reverse-convert Ark_BlurStyle
-void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src)
-{
-    switch (src) {
-        case BlurStyle::THIN: dst = ARK_BLUR_STYLE_THIN; break;
-        case BlurStyle::REGULAR: dst = ARK_BLUR_STYLE_REGULAR; break;
-        case BlurStyle::THICK: dst = ARK_BLUR_STYLE_THICK; break;
-        case BlurStyle::BACKGROUND_THIN: dst = ARK_BLUR_STYLE_BACKGROUND_THIN; break;
-        case BlurStyle::BACKGROUND_REGULAR: dst = ARK_BLUR_STYLE_BACKGROUND_REGULAR; break;
-        case BlurStyle::BACKGROUND_THICK: dst = ARK_BLUR_STYLE_BACKGROUND_THICK; break;
-        case BlurStyle::BACKGROUND_ULTRA_THICK: dst = ARK_BLUR_STYLE_BACKGROUND_ULTRA_THICK; break;
-        case BlurStyle::NO_MATERIAL: dst = ARK_BLUR_STYLE_NONE; break;
-        case BlurStyle::COMPONENT_ULTRA_THIN: dst = ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN; break;
-        case BlurStyle::COMPONENT_THIN: dst = ARK_BLUR_STYLE_COMPONENT_THIN; break;
-        case BlurStyle::COMPONENT_REGULAR: dst = ARK_BLUR_STYLE_COMPONENT_REGULAR; break;
-        case BlurStyle::COMPONENT_THICK: dst = ARK_BLUR_STYLE_COMPONENT_THICK; break;
-        case BlurStyle::COMPONENT_ULTRA_THICK: dst = ARK_BLUR_STYLE_COMPONENT_ULTRA_THICK; break;
-        default:
-            dst = static_cast<Ark_BlurStyle>(-1);
-            LOGE("Unexpected enum value in BlurStyle: %{public}d", src);
-            break;
+        case V2::StickyStyle::NONE: dst = ARK_STICKY_STYLE_NONE; break;
+        case V2::StickyStyle::HEADER: dst = ARK_STICKY_STYLE_HEADER; break;
+        case V2::StickyStyle::FOOTER: dst = ARK_STICKY_STYLE_FOOTER; break;
+        default: dst = static_cast<Ark_StickyStyle>(-1);
+            LOGE("Unexpected enum value in V2::StickyStyle: %{public}d", src);
     }
 }
 
@@ -131,6 +210,15 @@ void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src)
         case V2::SwipeEdgeEffect::None: dst = ARK_SWIPE_EDGE_EFFECT_NONE; break;
         default: dst = static_cast<Ark_SwipeEdgeEffect>(-1);
             LOGE("Unexpected enum value in V2::SwipeEdgeEffect: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src)
+{
+    switch (src) {
+        case TextDeleteDirection::BACKWARD: dst = ARK_TEXT_DELETE_DIRECTION_BACKWARD; break;
+        case TextDeleteDirection::FORWARD: dst = ARK_TEXT_DELETE_DIRECTION_FORWARD; break;
+        default: dst = static_cast<Ark_TextDeleteDirection>(-1);
     }
 }
 } // namespace OHOS::Ace::NG::Converter
