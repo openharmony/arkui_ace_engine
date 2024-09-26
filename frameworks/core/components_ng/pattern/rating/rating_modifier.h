@@ -104,6 +104,11 @@ public:
         }
     }
 
+    void SetIndicator(bool indicator)
+    {
+        indicator_ = indicator;
+    }
+
     void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
     {
         if (boardColor_) {
@@ -231,6 +236,7 @@ private:
     // others
     RatingAnimationType state_ = RatingAnimationType::NONE;
     bool isFocus_ = false;
+    bool indicator_ = false;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
