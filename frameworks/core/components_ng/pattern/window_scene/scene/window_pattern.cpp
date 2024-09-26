@@ -381,6 +381,7 @@ void WindowPattern::UpdateStartingWindowProperty(const Rosen::SessionInfo& sessi
     if (sessionInfo.startWindowOption == nullptr && !sessionInfo.startWindowOption->hasStartWindow) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "In UpdateStartingWindowProperty");
     if (!sessionInfo.startWindowOption->startWindowBackgroundColor.empty()) {
         Color::ParseColorString(sessionInfo.startWindowOption->startWindowBackgroundColor, color);
     }
@@ -415,8 +416,8 @@ void WindowPattern::CreateStartingWindow()
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
     imageLayoutProperty->UpdateImageSourceInfo(
         ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
-    auto color = Color(backgroundColor);
     auto sourceInfo = ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_);
+    auto color = Color(backgroundColor);
     UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
 
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
