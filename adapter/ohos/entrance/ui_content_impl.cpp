@@ -184,9 +184,16 @@ void AddResConfigInfo(
     aceResCfg.SetAppHasDarkRes(resConfig->GetAppDarkRes());
     auto preferredLocaleInfo = resConfig->GetPreferredLocaleInfo();
     if (preferredLocaleInfo != nullptr) {
-        aceResCfg.SetPreferredLanguage(preferredLocaleInfo->getLanguage());
-        aceResCfg.SetPreferredCountry(preferredLocaleInfo->getCountry());
-        aceResCfg.SetPreferredScript(preferredLocaleInfo->getScript());
+        std::string preferredlanguage = preferredLocaleInfo->getLanguage();
+        std::string script = preferredLocaleInfo->getScript();
+        std::string country = preferredLocaleInfo->getCountry();
+        if (!script.empty()) {
+            preferredlanguage += "-" + script;
+        }
+        if (!country.empty()) {
+            preferredlanguage += "-" + country;
+        }
+        aceResCfg.SetPreferredLanguage(preferredlanguage);
     }
 }
 
@@ -2380,6 +2387,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
                 config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
             parsedConfig.mcc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
             parsedConfig.mnc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
+            parsedConfig.preferredLanguage = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 parsedConfig.fontScale = "1.0";

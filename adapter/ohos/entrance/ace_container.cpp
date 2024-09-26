@@ -2538,6 +2538,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
     }
+    if (!parsedConfig.preferredLanguage.empty()) {
+        resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
+    }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
