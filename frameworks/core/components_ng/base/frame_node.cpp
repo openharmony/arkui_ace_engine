@@ -2530,8 +2530,6 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
         } else if (!targetComponent->GetInnerRecoJudge()) {
             targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
         }
-        
-        
     }
 }
 
