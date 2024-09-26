@@ -99,7 +99,7 @@ RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode
 {
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, nullptr);
@@ -407,7 +407,7 @@ void TabsModelNG::SetBarOverlap(bool barOverlap)
         tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
         tabBarRenderContext->ResetFrontSaturate();
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = tabsNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
@@ -814,7 +814,7 @@ void TabsModelNG::SetBarOverlap(FrameNode* frameNode, bool barOverlap)
         tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
         tabBarRenderContext->ResetFrontSaturate();
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = tabsNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);

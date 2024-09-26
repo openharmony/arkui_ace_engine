@@ -82,7 +82,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
             pattern->RecordChangeEvent(currentIndex);
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = tabsNode->GetContext();
             CHECK_NULL_VOID(context);
             context->AddAfterLayoutTask(
                 [currentIndex, jsEvent]() {

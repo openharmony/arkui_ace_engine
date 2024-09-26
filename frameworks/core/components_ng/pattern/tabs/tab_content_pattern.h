@@ -122,7 +122,7 @@ public:
             shallowBuilder_->ExecuteDeepRender();
             shallowBuilder_.Reset();
         } else if (shallowBuilder_ && shallowBuilder_->IsExecuteDeepRenderDone()) {
-            auto pipeline = PipelineContext::GetCurrentContextSafely();
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             if (!pipeline) {
                 shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
                 return;

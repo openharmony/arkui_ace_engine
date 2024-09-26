@@ -101,7 +101,7 @@ void TabBarModifier::SetHasIndicator(bool hasIndicator)
 void TabBarModifier::PaintIndicator(DrawingContext& context)
 {
     auto& canvas = context.canvas;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
