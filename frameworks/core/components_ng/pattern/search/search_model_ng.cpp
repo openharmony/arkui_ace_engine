@@ -1854,4 +1854,34 @@ const Dimension SearchModelNG::ConvertTextFontScaleValue(const Dimension& fontSi
     }
     return fontSizeValue;
 }
+
+void SearchModelNG::SetBackBorderRadius()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+
+    bool isRTL = textFieldLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto radius = renderContext->GetBorderRadius().value();
+
+    radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
+        (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);
+    radius.radiusTopRight = radius.radiusTopRight.has_value() ? radius.radiusTopRight :
+        (isRTL ? radius.radiusTopStart : radius.radiusTopEnd);
+    radius.radiusBottomLeft = radius.radiusBottomLeft.has_value() ? radius.radiusBottomLeft :
+        (isRTL ? radius.radiusBottomEnd : radius.radiusBottomStart);
+    radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
+        (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
+
+
+    auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdateBorderRadiusFlagByUser(radius);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 } // namespace OHOS::Ace::NG
