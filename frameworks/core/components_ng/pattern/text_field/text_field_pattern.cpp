@@ -1577,6 +1577,7 @@ void TextFieldPattern::HandleOnPaste()
 
 void TextFieldPattern::HandleOnCameraInput()
 {
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextFieldPattern::HandleOnCameraInput");
 #if defined(ENABLE_STANDARD_INPUT)
     if (textChangeListener_ == nullptr) {
         textChangeListener_ = new OnTextChangedListenerImpl(WeakClaim(this));
