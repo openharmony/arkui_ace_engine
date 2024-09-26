@@ -3255,7 +3255,7 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
     NG::BorderRadiusProperty menuBorderRadius;
     CalcDimension borderRadius;
     if (JSViewAbstract::ParseJsDimensionVp(borderRadiusValue, borderRadius)) {
-        if (borderRadius.Unit() != DimensionUnit::PERCENT && GreatOrEqual(borderRadius.Value(), 0.0f)) {
+        if (GreatOrEqual(borderRadius.Value(), 0.0f)) {
             menuBorderRadius.SetRadius(borderRadius);
             menuBorderRadius.multiValued = false;
             menuParam.borderRadius = menuBorderRadius;
