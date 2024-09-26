@@ -650,6 +650,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
         return;
     }
     changeByClick_ = true;
+    clickRepeat_ = true;
     SetSwiperCurve(DurationCubicCurve);
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
@@ -1121,6 +1122,7 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
     }
 
     changeByClick_ = true;
+    clickRepeat_ = true;
     if (duration > 0 && CanScroll()) {
         targetIndex_ = index;
     } else {
@@ -1475,6 +1477,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     }
     swiperController_->FinishAnimation();
     changeByClick_ = true;
+    clickRepeat_ = true;
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
@@ -1676,10 +1679,11 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->UpdateSubTabBoard(index);
         tabBarPattern->UpdatePaintIndicator(index, true);
         tabBarPattern->UpdateTextColorAndFontWeight(index);
-        if (!tabBarPattern->GetChangeByClick() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
+        if (!tabBarPattern->GetClickRepeat() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
             tabBarPattern->ResetIndicatorAnimationState();
             tabBarLayoutProperty->UpdateIndicator(index);
         }
+        tabBarPattern->SetClickRepeat(false);
         if (tabBarPattern->GetChangeByClick()) {
             tabBarPattern->SetChangeByClick(false);
             return;
@@ -1719,6 +1723,7 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateIndicator(indicator);
+    clickRepeat_ = false;
 
     UpdatePaintIndicator(indicator, true);
 }
@@ -2520,6 +2525,7 @@ void TabBarPattern::OnRestoreInfo(const std::string& restoreInfo)
     CHECK_NULL_VOID(tabsFrameNode);
     auto tabsPattern = tabsFrameNode->GetPattern<TabsPattern>();
     tabBarLayoutProperty->UpdateIndicator(index);
+    clickRepeat_ = false;
     UpdateAnimationDuration();
     if (GetAnimationDuration().has_value()
         && (!tabsPattern || tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION)) {
