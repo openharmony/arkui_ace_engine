@@ -3967,6 +3967,10 @@ void RichEditorPattern::AddSpanByPasteData(const RefPtr<SpanString>& spanString)
     } else {
         AddSpansByPaste(spanString->GetSpanItems());
     }
+
+    if (aiWriteAdapter_->GetAIWrite()) {
+        return;
+    }
     StartTwinkling();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -10536,7 +10540,12 @@ void RichEditorPattern::ReplacePlaceholderWithRawSpans(
         CHECK_NULL_VOID(imageSpanItem);
         auto options = imageSpanItem->options;
         options.offset = caretPosition_;
-        AddImageSpan(options, true, caretPosition_, true);
+        if (isSpanStringMode_) {
+            auto spanString = MakeRefPtr<SpanString>(options);
+            InsertStyledStringByPaste(spanString);
+        } else {
+            AddImageSpan(options, true, caretPosition_, true);
+        }
         textIndex = index + PLACEHOLDER_LENGTH;
     } else if (spanItem->spanItemType == SpanItemType::CustomSpan ||
                spanItem->spanItemType == SpanItemType::PLACEHOLDER) {
@@ -10545,7 +10554,15 @@ void RichEditorPattern::ReplacePlaceholderWithRawSpans(
         auto customNode = customSpanItem->GetCustomNode();
         SpanOptionBase options;
         options.offset = caretPosition_;
-        AddPlaceholderSpan(customNode, options);
+        if (isSpanStringMode_) {
+            auto customSpan = MakeRefPtr<CustomSpan>();
+            customSpan->ApplyToSpanItem(customSpanItem, SpanOperation::ADD);
+            CHECK_NULL_VOID(customSpan);
+            auto spanString = MakeRefPtr<MutableSpanString>(customSpan);
+            InsertStyledStringByPaste(spanString);
+        } else {
+            AddPlaceholderSpan(customNode, options);
+        }
         textIndex = index + PLACEHOLDER_LENGTH;
     } else if (spanItem->spanItemType == SpanItemType::SYMBOL) {
         auto options = GetSymbolSpanOptions(spanItem);
@@ -10564,7 +10581,7 @@ void RichEditorPattern::AddSpansAndReplacePlaceholder(RefPtr<SpanString>& spanSt
     while (index != std::string::npos) {
         if (textIndex < index) {
             auto subSpan = spanString->GetSubSpanString(textIndex, index - textIndex);
-            AddSpansByPaste(subSpan->GetSpanItems());
+            AddSpanByPasteData(subSpan);
         }
         auto key = StringUtils::ToString(content.substr(index, PLACEHOLDER_LENGTH));
         if (placeholderSpansMap_.find(key) == placeholderSpansMap_.end()) {
@@ -10581,7 +10598,7 @@ void RichEditorPattern::AddSpansAndReplacePlaceholder(RefPtr<SpanString>& spanSt
     }
     if (textIndex < content.length()) {
         auto subSpan = spanString->GetSubSpanString(textIndex, content.length() - textIndex);
-        AddSpansByPaste(subSpan->GetSpanItems());
+        AddSpanByPasteData(subSpan);
     }
 }
 
@@ -10594,7 +10611,7 @@ void RichEditorPattern::InsertSpanByBackData(RefPtr<SpanString>& spanString)
         ResetSelection();
     }
     if (placeholderSpansMap_.empty()) {
-        AddSpansByPaste(spanString->GetSpanItems());
+        AddSpanByPasteData(spanString);
     } else {
         AddSpansAndReplacePlaceholder(spanString);
     }
@@ -10619,6 +10636,8 @@ void RichEditorPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vec
     CHECK_NULL_VOID(length > 0);
     DeleteBackward(length);
     InsertSpanByBackData(spanString);
+    BeforeIMEInsertValue(spanString->GetString());
+    InsertValue("");
 }
 
 bool RichEditorPattern::IsTextEditableForStylus() const
