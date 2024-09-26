@@ -36,7 +36,7 @@ public:
     virtual void SetFillColor(const std::optional<Color>& color) {}
     virtual void SetSmoothEdge(float value) {}
     virtual void SetColorFilter(const std::optional<ImageColorFilter>& colorFilter) {}
-
+    virtual std::string GetDumpInfo() { return ""; }
     void SetRadius(const BorderRadiusArray& radiusXY)
     {
         if (!radius_) {

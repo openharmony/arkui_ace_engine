@@ -34,6 +34,20 @@ using ClassStyleMap = std::unordered_map<std::string, AttrMap>;
 using FuncNormalizeToPx = std::function<double(const Dimension&)>;
 using FuncAnimateFlush = std::function<void()>;
 
+class SvgDumpInfo {
+public:
+    SvgDumpInfo(Size contentSize, std::string drawTime) : contentSize_(contentSize), drawTime_(drawTime) {}
+    SvgDumpInfo() = default;
+    ~SvgDumpInfo() = default;
+    std::string ToString()
+    {
+        return std::string("contentSize: ").append(contentSize_.ToString()).append(", drawTime: ").append(drawTime_);
+    }
+private:
+   Size contentSize_;
+   std::string drawTime_;
+};
+
 class SvgNode;
 
 class SvgContext : public AceType {
@@ -102,7 +116,17 @@ public:
     {
         animatorNeedFinishCnt_ = animatorSumCnt_;
     }
-
+    void CreateDumpInfo(SvgDumpInfo dumpInfo);
+    void SetContentSize(Size& contentSize)
+    {
+        contentSize_ = contentSize;
+    }
+    const Size& GetContentSize()
+    {
+        return contentSize_;
+    }
+    SvgDumpInfo& GetDumpInfo();
+    std::string GetCurrentTimeString();
 private:
     std::unordered_map<std::string, WeakPtr<SvgNode>> idMapper_;
     uint32_t animatorNeedFinishCnt_ = 0;
@@ -115,7 +139,8 @@ private:
     std::map<WeakPtr<CanvasImage>, FuncAnimateFlush> animateCallbacks_;
     Rect rootViewBox_;
     Size viewPort_;
-
+    Size contentSize_;
+    SvgDumpInfo dumpInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(SvgContext);
 };
 } // namespace OHOS::Ace::NG
