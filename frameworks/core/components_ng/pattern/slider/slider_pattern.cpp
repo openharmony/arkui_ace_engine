@@ -1340,12 +1340,6 @@ void SliderPattern::OnAttachToFrameNode()
     RegisterVisibleAreaChange();
 }
 
-void SliderPattern::OnVisibleChange(bool isVisible)
-{
-    isVisible_ = isVisible;
-    isVisible_ ? StartAnimation() : StopAnimation();
-}
-
 void SliderPattern::StartAnimation()
 {
     CHECK_NULL_VOID(sliderContentModifier_);
@@ -1408,7 +1402,7 @@ void SliderPattern::OnWindowShow()
 
 bool SliderPattern::IsSliderVisible()
 {
-    return isVisibleArea_ && isVisible_ && isShow_;
+    return isVisibleArea_ && isShow_;
 }
 
 void SliderPattern::UpdateTipState()
