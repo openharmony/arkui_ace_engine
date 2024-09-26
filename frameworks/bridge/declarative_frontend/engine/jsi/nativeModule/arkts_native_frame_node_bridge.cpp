@@ -308,9 +308,9 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
                 nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
 #endif
             } else if (nodeType == ARKUI_TOGGLE) {
-                ArkUI_Params params;
-                ToggleBridge::ParseParams(runtimeCallInfo, params);
+                ArkUI_Toggle_Params params;
                 params.nodeType = ARKUI_TOGGLE;
+                ToggleBridge::ParseParams(runtimeCallInfo, params);
                 nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
             } else {
                 nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
