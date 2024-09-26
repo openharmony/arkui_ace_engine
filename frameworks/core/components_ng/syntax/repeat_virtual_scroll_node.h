@@ -156,6 +156,10 @@ public:
             child.item->PaintDebugBoundaryTreeAll(flag);
         }
     }
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
 protected:
     void UpdateChildrenFreezeState(bool isFreeze) override;
 private:
@@ -180,6 +184,9 @@ private:
 
     // size of data source when all data items loaded
     uint32_t totalCount_ = 0;
+
+    // loop property of the parent container
+    bool isLoop_ = false;
 
     // caches:
     mutable RepeatVirtualScrollCaches caches_;
