@@ -148,11 +148,16 @@ std::optional<Dimension> ResourceConverter::ToDimension()
 
 std::optional<float> ResourceConverter::ToFloat()
 {
+    std::optional<float> optFloat = std::nullopt;
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
     if (type_ == NodeModifier::ResourceType::FLOAT) {
-        return static_cast<float>(themeConstants_->GetDouble(id_));
+        if (id_ == -1 && params_.size() > 0) {
+            optFloat = static_cast<float>(themeConstants_->GetDoubleByName(params_[0]));
+        } else {
+            optFloat = static_cast<float>(themeConstants_->GetDouble(id_));
+        }
     }
-    return std::nullopt;
+    return optFloat;
 }
 
 std::optional<int32_t> ResourceConverter::ToInt()

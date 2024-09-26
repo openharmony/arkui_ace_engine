@@ -45,8 +45,8 @@ public:
     void SetHeight() override {}
     static void SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ace::Dimension>& segments);
     static void SetStrokeMiterLimit(FrameNode* frameNode, const std::optional<double>& miterLimit);
-    static void SetFillOpacity(FrameNode* frameNode, double fillOpacity);
-    static void SetStrokeOpacity(FrameNode* frameNode, double strokeOpacity);
+    static void SetFillOpacity(FrameNode* frameNode, const std::optional<double>& fillOpacity);
+    static void SetStrokeOpacity(FrameNode* frameNode, const std::optional<double>& strokeOpacity);
     static void SetStrokeWidth(FrameNode* frameNode, const std::optional<Ace::Dimension>& strokeWidth);
     static void SetAntiAlias(FrameNode* frameNode, bool antiAlias);
     static void SetStroke(FrameNode* frameNode, const std::optional<Color>& color);

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_UTILITY_VALIDATORS_H
 
 #include <optional>
+#include <algorithm>
 
 #include "base/geometry/dimension.h"
 
@@ -25,6 +26,7 @@ namespace Validator {
 void ValidateNonNegative(std::optional<Dimension>& opt);
 void ValidateNonPercent(std::optional<Dimension>& opt);
 void ValidatePositive(std::optional<Dimension>& opt);
+void ValidateOpacity(std::optional<float>& opt);
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
 

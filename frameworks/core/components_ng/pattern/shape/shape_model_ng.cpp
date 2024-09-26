@@ -168,15 +168,25 @@ void ShapeModelNG::SetStrokeMiterLimit(FrameNode* frameNode, const std::optional
     }
 }
 
-void ShapeModelNG::SetFillOpacity(FrameNode* frameNode, double fillOpacity)
+void ShapeModelNG::SetFillOpacity(FrameNode* frameNode, const std::optional<double>& fillOpacity)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(
-        ShapePaintProperty, FillOpacity, std::clamp(fillOpacity, FILL_OPACITY_MIN, FILL_OPACITY_MAX), frameNode);
+    if (fillOpacity) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            ShapePaintProperty, FillOpacity,
+            std::clamp(fillOpacity.value(), FILL_OPACITY_MIN, FILL_OPACITY_MAX),
+            frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, FillOpacity, frameNode);
+    }
 }
 
-void ShapeModelNG::SetStrokeOpacity(FrameNode* frameNode, double strokeOpacity)
+void ShapeModelNG::SetStrokeOpacity(FrameNode* frameNode, const std::optional<double>& strokeOpacity)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeOpacity, strokeOpacity, frameNode);
+    if (strokeOpacity) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeOpacity, strokeOpacity.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeOpacity, frameNode);
+    }
 }
 
 void ShapeModelNG::SetStrokeWidth(FrameNode* frameNode, const std::optional<Ace::Dimension>& strokeWidth)

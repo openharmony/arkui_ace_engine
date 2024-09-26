@@ -19,6 +19,15 @@
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "core/components/common/properties/paint_state.h"
 
+namespace {
+    static const double STROKE_MITER_LIMIT_MIN_VALUE = 1.0;
+    void validateStrokeMiterLimit(std::optional<float>& limit) {
+        if (limit && limit.value() < STROKE_MITER_LIMIT_MIN_VALUE) {
+            limit = 1.0;
+        } 
+    }
+} // namespace
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonShapeMethodModifier {
 void StrokeImpl(Ark_NativePointer node,
@@ -73,22 +82,32 @@ void StrokeMiterLimitImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto strokeMiterLimit = Converter::OptConvert<float>(*value);
+    validateStrokeMiterLimit(strokeMiterLimit);
     ShapeModelNG::SetStrokeMiterLimit(frameNode, strokeMiterLimit);
 }
 void StrokeOpacityImpl(Ark_NativePointer node,
                        const Type_CommonShapeMethod_strokeOpacity_Arg0* value)
 {
-    // Union_Number_String_Resource 
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto strokeOpacity = Converter::OptConvert<float>(*value);
+    Validator::ValidateOpacity(strokeOpacity);
+    ShapeModelNG::SetStrokeOpacity(frameNode, strokeOpacity);
 }
 void FillOpacityImpl(Ark_NativePointer node,
                      const Type_CommonShapeMethod_fillOpacity_Arg0* value)
 {
-    // Union_Number_String_Resource
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto strokeOpacity = Converter::OptConvert<float>(*value);
+    Validator::ValidateOpacity(strokeOpacity);
+    ShapeModelNG::SetFillOpacity(frameNode, strokeOpacity);
 }
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Ark_Length* value)
 {
-    // Should be Union_Number_String
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto strokeWidth = Converter::OptConvert<Dimension>(*value);

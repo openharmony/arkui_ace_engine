@@ -211,13 +211,6 @@ namespace Converter {
         return src.tag == ARK_TAG_FLOAT32 ? src.f32 : static_cast<float>(src.i32);
     }
      
-    template<>
-    inline float Convert(const Ark_String& src)
-    {
-        auto value = Convert<std::string>(src);
-        return std::stof(value);
-    }
-    
     // Implementation is in cpp
     Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo &info);
 
@@ -550,6 +543,16 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
+
+    template<>
+    inline void AssignTo(std::optional<float>& dst, const Ark_String& src)
+    {
+        auto value = Convert<std::string>(src);
+        double result;
+        if (StringUtils::StringToDouble(value, result)) {
+            dst = result;
+        }
+    }
 
     // Enums specializations
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
