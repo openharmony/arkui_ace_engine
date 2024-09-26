@@ -596,6 +596,8 @@ void CleanNodeResponseArea::UpdateSymbolSource()
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
     auto host = textFieldPattern->GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
@@ -616,6 +618,9 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
 
     auto fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetSymbolSize());
+    if (textFieldLayoutProperty->HasIconSize()) {
+        fontSize = textFieldLayoutProperty->GetIconSizeValue();
+    }
     if (GreatOrEqualCustomPrecision(fontSize.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
         symbolProperty->UpdateFontSize(ICON_MAX_SIZE);
         fontSize = ICON_MAX_SIZE;
