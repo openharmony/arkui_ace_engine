@@ -59,6 +59,7 @@ void OnScrollImpl(Ark_NativePointer node,
     auto onEvent = [frameNode](Dimension xOffset, Dimension yOffset) {
         auto _xOffset = Converter::ArkValue<Ark_Number>(xOffset);
         auto _yOffset = Converter::ArkValue<Ark_Number>(yOffset);
+        CHECK_NULL_VOID(GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->onScroll);
         GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
             onScroll(frameNode->GetId(), _xOffset, _yOffset);
     };

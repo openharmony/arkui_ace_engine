@@ -30,55 +30,20 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-static Ark_Number g_xOffset;
-static Ark_Number g_yOffset;
-static Ark_Int32  g_scrollState;
-static bool g_isBoolEventSet = false;
-static Ark_Int32 g_scrollEdge = 0;
-static Ark_Number g_setNumberTestValue;
-static auto onScrollEvent(Ark_Int32 nodeId, const Ark_Number x, const Ark_Number y)
-{
-    g_xOffset = x;
-    g_yOffset = y;
-}
-static auto onScrollFrameBegin(Ark_Int32 nodeId, const Ark_Number value1, const enum Ark_ScrollState state)
-{
-    g_setNumberTestValue = value1;
-    g_scrollState = state;
-}
-static auto onScrollEdge(Ark_Int32 nodeId, const enum Ark_Edge edge)
-{
-    g_scrollEdge = edge;
-}
-static auto scrollOnBooleanEvent(Ark_Int32 nodeId)
-{
+struct EventsTracker {
+    static inline GENERATED_ArkUIScrollEventsReceiver eventsReceiver {};
 
-    g_isBoolEventSet = !g_isBoolEventSet;
-}
-static auto onDidScrollEvent(Ark_Int32 nodeId, const Ark_Number x, const Ark_Number y, const enum Ark_ScrollState state)
-{
-    g_xOffset = x;
-    g_yOffset = y;
-    g_scrollState = state;
-}
+    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
+        .getScrollEventsReceiver = [] () -> const GENERATED_ArkUIScrollEventsReceiver* {
+            return &eventsReceiver;
+        }
+    };
+};
 
-static GENERATED_ArkUIScrollEventsReceiver recv {
-    .onScrollStart = scrollOnBooleanEvent,
-    .onScrollStop = scrollOnBooleanEvent,
-    .onScrollEnd = scrollOnBooleanEvent,
-    .onScrollEdge = onScrollEdge,
-    .onScrollFrameBegin = onScrollFrameBegin,
-    .onDidScroll = onDidScrollEvent,
-    .onScroll = onScrollEvent,
-};
-static const GENERATED_ArkUIScrollEventsReceiver* getScrollEventsReceiverTest()
+struct ScrollStateValue
 {
-    return &recv;
-};
-static const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
-{
-    static const GENERATED_ArkUIEventsAPI eventsImpl = { .getScrollEventsReceiver = getScrollEventsReceiverTest };
-    return &eventsImpl;
+    Ark_Int32 nodeId;
+    bool state;
 };
 
 inline void AssignArkValue(Opt_Length& dst, const CalcDimension& src)
@@ -94,7 +59,6 @@ inline void AssignArkValue(Ark_OffsetOptions& dst, const OffsetT<CalcDimension>&
     AssignArkValue(dst.xOffset, src.GetX());
     AssignArkValue(dst.yOffset, src.GetY());
 }
-
 } // namespace
 
 class ScrollModifierTest : public ModifierTestBase<GENERATED_ArkUIScrollModifier,
@@ -102,23 +66,9 @@ class ScrollModifierTest : public ModifierTestBase<GENERATED_ArkUIScrollModifier
 public:
     static void SetUpTestCase()
     {
-        MockPipelineContext::SetUp();
-        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-        EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-            auto constants = RefPtr<ThemeConstants>();
-            auto theme = ScrollBarTheme::Builder().Build(constants);
-            return theme;
-        });
-        MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-        MockContainer::SetUp();
-        NG::GeneratedModifier::GetFullAPI()->setArkUIEventsAPI(GetArkUiEventsAPITest());
-    }
-
-    static void TearDownTestCase()
-    {
-        MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
-        MockPipelineContext::TearDown();
-        MockContainer::TearDown();
+        ModifierTestBase::SetUpTestCase();
+        SetupTheme<ScrollBarTheme>();
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
@@ -136,6 +86,18 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
     ASSERT_NE(eventHub, nullptr);
     EXPECT_FALSE(eventHub->GetOnScrollEvent());
 
+    struct ScrollData
+    {
+        Ark_Number x;
+        Ark_Number y;
+        Ark_Int32  nodeId;
+    };
+    static std::optional<ScrollData> data;
+    EventsTracker::eventsReceiver.onScroll = [] (Ark_Int32 nodeId, const Ark_Number x, const Ark_Number y)
+    {
+        data = {x, y, nodeId};
+    };
+
     modifier_->setOnScroll(node_, func);
     ASSERT_NE(eventHub, nullptr);
     EXPECT_TRUE(eventHub->GetOnScrollEvent());
@@ -143,8 +105,10 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
     Dimension x(33.0, DimensionUnit::VP);
     Dimension y(133.0, DimensionUnit::VP);
     eventHub->GetOnScrollEvent()(x, y);
-    EXPECT_EQ(33.0, g_xOffset.f32);
-    EXPECT_EQ(133.0, g_yOffset.f32);
+    EXPECT_TRUE(data);
+    EXPECT_EQ(x.Value(), data->x.f32);
+    EXPECT_EQ(y.Value(), data->y.f32);
+    EXPECT_EQ(frameNode->GetId(), data->nodeId);
 }
 
 /**
@@ -161,13 +125,20 @@ HWTEST_F(ScrollModifierTest, OnScrollStart_SetCallback, testing::ext::TestSize.L
     ASSERT_NE(eventHub, nullptr);
     EXPECT_FALSE(eventHub->GetOnScrollStart());
 
+    static std::optional<ScrollStateValue> state;
+    EventsTracker::eventsReceiver.onScrollStart = [] (Ark_Int32 nodeId)
+    {
+        state = {nodeId, true};
+    };
+
     modifier_->setOnScrollStart(node_, func);
     ASSERT_NE(eventHub, nullptr);
     EXPECT_TRUE(eventHub->GetOnScrollStart());
 
-    g_isBoolEventSet = false;
     eventHub->GetOnScrollStart()();
-    EXPECT_TRUE(g_isBoolEventSet);
+    EXPECT_TRUE(state.has_value());
+    EXPECT_TRUE(state->state);
+    EXPECT_EQ(frameNode->GetId(), state->nodeId);
 }
 
 /**
@@ -184,13 +155,20 @@ HWTEST_F(ScrollModifierTest, SetOnScrollEnd_SetCallBack, testing::ext::TestSize.
     ASSERT_NE(eventHub, nullptr);
     EXPECT_FALSE(eventHub->GetScrollEndEvent());
 
+    static std::optional<ScrollStateValue> state;
+    EventsTracker::eventsReceiver.onScrollEnd = [] (Ark_Int32 nodeId)
+    {
+        state = {nodeId, false};
+    };
+
     modifier_->setOnScrollEnd(node_, func);
     ASSERT_NE(eventHub, nullptr);
     EXPECT_TRUE(eventHub->GetScrollEndEvent());
 
-    g_isBoolEventSet = false;
     eventHub->GetScrollEndEvent()();
-    EXPECT_TRUE(g_isBoolEventSet);
+    EXPECT_TRUE(state.has_value());
+    EXPECT_FALSE(state->state);
+    EXPECT_EQ(frameNode->GetId(), state->nodeId);
 }
 
 /**
@@ -207,13 +185,20 @@ HWTEST_F(ScrollModifierTest, OnScrollStop_setCallback, testing::ext::TestSize.Le
     ASSERT_NE(eventHub, nullptr);
     EXPECT_FALSE(eventHub->GetOnScrollStop());
 
+    static std::optional<ScrollStateValue> state;
+    EventsTracker::eventsReceiver.onScrollStop = [] (Ark_Int32 nodeId)
+    {
+        state = {nodeId, true};
+    };
+
     modifier_->setOnScrollStop(node_, func);
     ASSERT_NE(eventHub, nullptr);
     EXPECT_TRUE(eventHub->GetOnScrollStop());
 
-    g_isBoolEventSet = false;
     eventHub->GetOnScrollStop()();
-    EXPECT_TRUE(g_isBoolEventSet);
+    EXPECT_TRUE(state.has_value());
+    EXPECT_TRUE(state->state);
+    EXPECT_EQ(frameNode->GetId(), state->nodeId);
 }
 
 /**
