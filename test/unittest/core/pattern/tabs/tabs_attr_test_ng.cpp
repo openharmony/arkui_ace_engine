@@ -1395,4 +1395,28 @@ HWTEST_F(TabsAttrTestNg, BarGridAlign003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(frameNode_->GetIndex(), 0);
 }
+
+/**
+ * @tc.name: TabsModelSetScrollableBarModeOptions002
+ * @tc.desc: Test the SetScrollableBarModeOptions function in the TabsModel class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabsModelSetScrollableBarModeOptions002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Default ScrollableBarModeOptions
+     * @tc.expected: The items are compact and centered
+     */
+    TabsModelNG model = CreateTabs();
+    model.SetTabBarMode(TabBarMode::SCROLLABLE);
+    model.ResetScrollableBarModeOptions();
+    CreateTabContentsWithBuilder(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    float halfTabsWidth = TABS_WIDTH / 2;
+    EXPECT_EQ(GetChildX(tabBarNode_, 0), halfTabsWidth - BARITEM_SIZE * 2);
+    EXPECT_EQ(GetChildX(tabBarNode_, 1), halfTabsWidth - BARITEM_SIZE);
+    EXPECT_EQ(GetChildX(tabBarNode_, 2), halfTabsWidth);
+    EXPECT_EQ(GetChildX(tabBarNode_, 3), halfTabsWidth + BARITEM_SIZE);
+}
+
 } // namespace OHOS::Ace::NG
