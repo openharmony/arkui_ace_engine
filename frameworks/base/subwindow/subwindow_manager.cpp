@@ -581,13 +581,15 @@ void SubwindowManager::UpdateCustomDialogNG(
 
 void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide dialog subwindow enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide dialog subwindow enter");
     auto subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
     CHECK_NULL_VOID(subwindow);
     auto overlay = subwindow->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     if (overlay->GetDialogMap().size() == 0) {
         subwindow->HideSubWindowNG();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "fail to hide dialog subwindow, instanceId is %{public}d.", instanceId);
     }
 }
 

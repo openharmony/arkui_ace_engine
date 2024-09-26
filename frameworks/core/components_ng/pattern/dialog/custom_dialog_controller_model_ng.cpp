@@ -142,6 +142,7 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     bool& pending, bool& isShown, std::function<void()>&& cancelTask, RefPtr<AceType>& dialogComponent,
     RefPtr<AceType>& customDialog, std::list<DialogOperation>& dialogOperation)
 {
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "CustomDialogController SetCloseDialog enter.");
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     if (!container) {
