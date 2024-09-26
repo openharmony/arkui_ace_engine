@@ -3403,14 +3403,14 @@ void JsAccessibilityManager::HandleComponentPostBinding()
             ++targetIter;
         } else {
             // clear the disabled node in the maps
-            nodeWithTargetMap_.erase(targetIter++);
+            targetIter = nodeWithTargetMap_.erase(targetIter);
         }
     }
 
     // clear the disabled node in the maps
     for (auto idItem = nodeWithIdMap_.begin(); idItem != nodeWithIdMap_.end();) {
         if (!idItem->second.Upgrade()) {
-            nodeWithIdMap_.erase(idItem++);
+            idItem = nodeWithIdMap_.erase(idItem);
         } else {
             ++idItem;
         }
