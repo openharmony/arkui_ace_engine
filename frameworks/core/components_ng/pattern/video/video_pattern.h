@@ -203,8 +203,11 @@ public:
     {
         mediaPlayer_.Reset();
         renderSurface_.Reset();
+        RemoveMediaPlayerSurfaceNode();
         renderContextForMediaPlayer_.Reset();
     }
+
+    void RemoveMediaPlayerSurfaceNode();
 
     void OnFullScreenChange(bool isFullScreen);
 
