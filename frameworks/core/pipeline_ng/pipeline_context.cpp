@@ -3294,6 +3294,8 @@ bool PipelineContext::TriggerKeyEventDispatch(const KeyEvent& event)
 
     if (!IsSkipShortcutAndFocusMove() && DispatchTabKey(event, curFocusView)) {
         return true;
+    } else {
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Do not dispatch tab key because Web is current focus");
     }
     return eventManager_->DispatchKeyEventNG(event, curEntryFocusViewFrame);
 }
@@ -3364,6 +3366,8 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
         }
         if (!IsSkipShortcutAndFocusMove()) {
             return eventManager_->DispatchKeyboardShortcut(event);
+        } else {
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Do not dispatch keyboard shortcut because Web is current focus");
         }
         return false;
     }
