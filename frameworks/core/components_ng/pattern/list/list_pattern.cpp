@@ -1221,7 +1221,7 @@ WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t
 bool ListPattern::ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup)
 {
     auto isScrollIndex = false;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, isScrollIndex);
     if (nextIndex < startIndex_ && nextIndexInGroup == -1) {
         isScrollIndex = true;
@@ -1239,7 +1239,7 @@ bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIn
     int32_t moveStep, FocusStep step, bool isScrollIndex)
 {
     auto groupIndexInGroup = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, groupIndexInGroup);
     RefPtr<FrameNode> nextIndexNode;
     auto isNextInGroup = IsListItemGroup(nextIndex, nextIndexNode);
@@ -2421,7 +2421,7 @@ RefPtr<ListChildrenMainSize> ListPattern::GetOrCreateListChildrenMainSize()
     auto callback = [weakPattern = WeakClaim(this)](std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = pattern->GetContext();
         CHECK_NULL_VOID(context);
         context->AddBuildFinishCallBack([weakPattern, change, flag]() {
             auto pattern = weakPattern.Upgrade();

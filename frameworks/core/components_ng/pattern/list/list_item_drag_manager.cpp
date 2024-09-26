@@ -411,7 +411,7 @@ void ListItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
     auto list = listNode_.Upgrade();
     CHECK_NULL_VOID(list);
     if (list->CheckNeedForceMeasureAndLayout()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = list->GetContext();
         if (pipeline) {
             pipeline->FlushUITasks();
         }

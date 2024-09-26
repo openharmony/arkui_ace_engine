@@ -270,7 +270,7 @@ RefPtr<ListChildrenMainSize> ListItemGroupPattern::GetOrCreateListChildrenMainSi
     auto callback = [weakPattern = WeakClaim(this)](std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = pattern->GetContext();
         CHECK_NULL_VOID(context);
         context->AddBuildFinishCallBack([weakPattern, change, flag]() {
             auto pattern = weakPattern.Upgrade();
