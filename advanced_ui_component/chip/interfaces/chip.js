@@ -330,6 +330,30 @@ function i(r3, s3) {
 function j(q3) {
   return i(q3, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
 }
+function k(context, value) {
+  const resourceManager = context?.resourceManager;
+  if (value === void (0) || value === null || resourceManager === void (0)) {
+    return false;
+  }
+  if (value.type !== m && value.type !== t &&
+    value.type !== o) {
+    return false;
+  }
+  if (value.type === t || value.type === o) {
+    if (resourceManager.getNumber(value.id) >= 0) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  if (value.type === m && !j(resourceManager.getStringSync(value.id))) {
+    return false;
+  }
+  else {
+    return true;
+  }
+}
 export class c1 extends ViewPU {
   constructor(
     parent,
@@ -912,14 +936,8 @@ export class c1 extends ViewPU {
       case 'object':
         try {
           let n3 = this.lengthMetricsToVp(LengthMetrics.resource(value));
-          if (n3 === 0) {
-            if (
-              (value.type === m &&
-                !j(getContext(this).resourceManager.getStringSync(value.id))) ||
-              (value.type !== m && value.type !== t && value.type !== o)
-            ) {
-              return Number.NEGATIVE_INFINITY;
-            }
+          if (n3 === 0 && !k(getContext(this), value)) {
+            return Number.NEGATIVE_INFINITY;
           }
           return n3;
         } catch (error) {
