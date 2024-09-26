@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_PATTERN_MAGNIFIER_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_PATTERN_MAGNIFIER_CONTROLLER_H
 
+#include "base/geometry/offset.h"
 #include "base/memory/type_info_base.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -50,10 +51,11 @@ public:
         return isShowMagnifier_;
     }
 
-    void SetLocalOffset(OffsetF localOffset)
+    void SetLocalOffset(const OffsetF& localOffset, const Offset& globalOffset = Offset::ErrorOffset())
     {
         localOffset_.SetX(localOffset.GetX());
         localOffset_.SetY(localOffset.GetY());
+        globalOffset_ = globalOffset;
         magnifierNodeExist_ = true;
         UpdateShowMagnifier(true);
     }
@@ -99,6 +101,7 @@ private:
     RefPtr<FrameNode> magnifierFrameNode_ = nullptr;
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
+    Offset globalOffset_ = Offset::ErrorOffset();
     WeakPtr<Pattern> pattern_;
     bool removeFrameNode_ = false;
     bool colorModeChange_ = false;

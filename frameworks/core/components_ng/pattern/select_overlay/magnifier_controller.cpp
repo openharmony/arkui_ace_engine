@@ -43,6 +43,9 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
         return false;
     }
     float left = basePaintOffset.GetX() + localOffset_.GetX() - magnifierNodeWidth_.ConvertToPx() / 2;
+    if (!globalOffset_.IsErrorOffset()) {
+        left = globalOffset_.GetX() - magnifierNodeWidth_.ConvertToPx() / 2;
+    }
     auto rootUINode = GetRootNode();
     CHECK_NULL_RETURN(rootUINode, false);
     auto rootGeometryNode = rootUINode->GetGeometryNode();
@@ -65,6 +68,9 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
     auto magnifierY = basePaintOffset.GetY() + localOffset_.GetY() - menuHeight / 2;
+    if (!globalOffset_.IsErrorOffset()) {
+        magnifierY = globalOffset_.GetY() - menuHeight / 2;
+    }
     float offsetY_ = 0.f;
 
     if (hasKeyboard && basePaintOffset.GetY() + localOffset_.GetY() >= keyboardInsert.start) {
@@ -230,6 +236,7 @@ void MagnifierController::RemoveMagnifierFrameNode()
     }
     removeFrameNode_ = false;
     hostViewPort_.reset();
+    globalOffset_ = Offset::ErrorOffset();
 }
 
 void MagnifierController::CloseMagnifier()

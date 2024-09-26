@@ -186,6 +186,7 @@ struct ContentScroller {
     float scrollInterval = 15;
     float stepOffset = 0.0f;
     Offset localOffset;
+    Offset globalOffset;
     std::optional<Offset> hotAreaOffset;
     float updateMagniferEpsilon = 0.5f;
 

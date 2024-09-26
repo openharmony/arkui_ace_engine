@@ -316,6 +316,8 @@ struct SelectOverlayInfo {
     bool clipHandleDrawRect = false;
     std::optional<RectF> clipViewPort;
 
+    std::optional<GestureEvent> panEvent;
+
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);

@@ -1871,7 +1871,7 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
         UpdateContentScroller(touchOffset);
         selectController_->UpdateCaretInfoByOffset(touchOffset, false);
         if (magnifierController_ && IsOperation()) {
-            magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() });
+            magnifierController_->SetLocalOffset({ touchOffset.GetX(), touchOffset.GetY() }, info.GetGlobalLocation());
         }
         StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
     }
@@ -3252,7 +3252,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CloseSelectOverlay();
     longPressFingerNum_ = info.GetFingerList().size();
     if (magnifierController_ && IsOperation() && (longPressFingerNum_ == 1)) {
-        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() }, info.GetGlobalLocation());
     }
     StartGestureSelection(start, end, localOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -8385,6 +8385,7 @@ void TextFieldPattern::StartGestureSelection(int32_t start, int32_t end, const O
 void TextFieldPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info)
 {
     auto localOffset = info.GetTouches().front().GetLocalLocation();
+    contentScroller_.globalOffset = info.GetTouches().front().GetGlobalLocation();
     UpdateContentScroller(localOffset);
     if (contentScroller_.isScrolling) {
         return;
@@ -8397,7 +8398,8 @@ void TextFieldPattern::UpdateSelectionByLongPress(int32_t start, int32_t end, co
     if (magnifierController_ && IsOperation() && (longPressFingerNum_ == 1)) {
         contentScroller_.updateMagniferEpsilon = 0.0f - contentScroller_.updateMagniferEpsilon;
         magnifierController_->SetLocalOffset(
-            { localOffset.GetX(), localOffset.GetY() + contentScroller_.updateMagniferEpsilon });
+            { localOffset.GetX(), localOffset.GetY() + contentScroller_.updateMagniferEpsilon },
+            contentScroller_.globalOffset);
     }
     auto firstIndex = selectController_->GetFirstHandleIndex();
     auto secondIndex = selectController_->GetSecondHandleIndex();

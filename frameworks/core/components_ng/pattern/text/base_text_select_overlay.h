@@ -297,6 +297,7 @@ protected:
     {
         return false;
     }
+    Offset GetMagnifierGlobalOffset(bool isFirst);
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;

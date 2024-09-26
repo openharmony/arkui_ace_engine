@@ -456,7 +456,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         if (IsOverlayMode()) {
             GetLocalPointWithTransform(magnifierLocalOffset);
         }
-        pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
+        pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset, GetMagnifierGlobalOffset(isFirst));
     }
     TriggerContentToScroll(localOffset, false);
     if (IsSingleHandle()) {
@@ -606,6 +606,14 @@ void TextFieldSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool i
         }
     }
     pattern->StopContentScroll();
+    if (pattern->GetMagnifierController() && HasRenderTransform()) {
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto viewPort = HasUnsupportedTransform() ? pipeline->GetRootRect() : GetPaintRectWithTransform();
+        pattern->GetMagnifierController()->SetHostViewPort(viewPort);
+    }
 }
 
 void TextFieldSelectOverlay::TriggerContentToScroll(const OffsetF& localOffset, bool isEnd)

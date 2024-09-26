@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 
 namespace OHOS::Ace::NG {
@@ -933,7 +934,7 @@ bool BaseTextSelectOverlay::HasUnsupportedTransform()
         }
         auto rotateVector = renderContext->GetTransformRotate();
         if (rotateVector.has_value() && !NearZero(rotateVector->w) &&
-            !(NearZero(rotateVector->x) && NearZero(rotateVector->y))) {
+            !(NearZero(rotateVector->x) && NearZero(rotateVector->y) && NearZero(rotateVector->z))) {
             return true;
         }
         auto transformMatrix = renderContext->GetTransformMatrix();
@@ -1157,5 +1158,21 @@ bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& nod
         contentRect = RectF(OffsetF(0.0f, 0.0f), geometryNode->GetFrameSize());
     }
     return true;
+}
+
+Offset BaseTextSelectOverlay::GetMagnifierGlobalOffset(bool isFirst)
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(manager, Offset::ErrorOffset());
+    auto overlayInfo = manager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(overlayInfo, Offset::ErrorOffset());
+    if (HasUnsupportedTransform()) {
+        CHECK_NULL_RETURN(overlayInfo->panEvent, Offset::ErrorOffset());
+        return overlayInfo->panEvent->GetGlobalLocation();
+    }
+    auto handleRect = isFirst ? overlayInfo->firstHandle.GetPaintRect() : overlayInfo->secondHandle.GetPaintRect();
+    Offset offset(handleRect.GetX(), handleRect.GetY());
+    offset.SetY(offset.GetY() + handleRect.Height() / 2.0f);
+    return offset;
 }
 } // namespace OHOS::Ace::NG

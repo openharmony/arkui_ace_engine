@@ -366,7 +366,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
     if (magnifierController_ && HasContent()) {
-        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() }, info.GetGlobalLocation());
     }
     StartGestureSelection(textSelector_.GetStart(), textSelector_.GetEnd(), localOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -4247,8 +4247,9 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
     selectOverlay_->TriggerScrollableParentToScroll(
         scrollableParent_.Upgrade(), info.GetTouches().front().GetGlobalLocation(), false);
     auto localOffset = info.GetTouches().front().GetLocalLocation();
+    auto globalOffset = info.GetTouches().front().GetGlobalLocation();
     if (magnifierController_) {
-        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
+        magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() }, globalOffset);
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -4271,6 +4272,9 @@ void TextPattern::OnTextGenstureSelectionEnd()
 void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst)
 {
     auto touchOffset = event.GetLocalLocation();
+    if (!selectOverlay_->IsOverlayMode()) {
+        touchOffset = touchOffset + Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY());
+    }
     auto& currentHandle = isFirst ? textSelector_.firstHandle : textSelector_.secondHandle;
     bool isChangeFirstHandle = isFirst ? (!textSelector_.StartGreaterDest()) : textSelector_.StartGreaterDest();
     if (isChangeFirstHandle) {
@@ -4425,6 +4429,12 @@ void TextPattern::SetupMagnifier()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (renderContext->GetClipEdge().value_or(false)) {
+        return;
+    }
+    if (selectOverlay_->HasRenderTransform()) {
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        magnifierController_->SetHostViewPort(pipeline->GetRootRect());
         return;
     }
     RectF viewPort;

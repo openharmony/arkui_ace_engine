@@ -355,12 +355,16 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
         if (info_->onHandlePanMove) {
             info_->onHandlePanMove(info, true);
         }
+        info_->panEvent = info;
         UpdateOffsetOnMove(firstHandleRegion_, info_->firstHandle, offset, true);
+        info_->panEvent.reset();
     } else if (secondHandleDrag_) {
         if (info_->onHandlePanMove) {
             info_->onHandlePanMove(info, false);
         }
+        info_->panEvent = info;
         UpdateOffsetOnMove(secondHandleRegion_, info_->secondHandle, offset, false);
+        info_->panEvent.reset();
     } else {
         LOGW("the move point is not in drag area");
     }
