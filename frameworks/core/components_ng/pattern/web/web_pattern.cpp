@@ -687,6 +687,9 @@ void WebPattern::HandleDragMove(const GestureEvent& event)
 void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     if (pinchGesture_) {
+        if (gestureHub->WillRecreateGesture()) {
+            gestureHub->AddGesture(pinchGesture_);
+        }
         return;
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {

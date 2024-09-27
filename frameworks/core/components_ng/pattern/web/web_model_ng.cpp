@@ -112,7 +112,7 @@ void WebModelNG::SetOnConsoleLog(std::function<bool(const BaseEventInfo* info)>&
 {
     auto func = jsCallback;
     auto onConsole = [func](const std::shared_ptr<BaseEventInfo>& info) -> bool {
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_RETURN(context, false);
         bool result = false;
         context->PostSyncEvent([func, info, &result]() { result = func(info.get()); }, "ArkUIWebConsoleLogCallback");

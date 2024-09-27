@@ -580,7 +580,7 @@ std::string WebDelegate::GetCustomScheme()
 void WebDelegate::SurfaceOcclusionCallback(float visibleRatio) {}
 void WebDelegate::ratioStrToFloat(const std::string& str) {}
 void WebDelegate::RegisterSurfaceOcclusionChangeFun() {}
-void WebDelegate::RegisterAvoidAreaChangeListener() {}
+void WebDelegate::RegisterAvoidAreaChangeListener(int32_t) {}
 class NWebAutoFillCallbackImpl : public OHOS::NWeb::NWebMessageValueCallback {
 public:
     NWebAutoFillCallbackImpl(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
@@ -597,7 +597,7 @@ public:
 private:
     WeakPtr<WebDelegate> delegate_;
 };
-void WebDelegate::UnregisterAvoidAreaChangeListener() {}
+void WebDelegate::UnregisterAvoidAreaChangeListener(int32_t) {}
 void WebDelegate::InitWebViewWithSurface()
 {
 #ifdef ENABLE_ROSEN_BACKEND
