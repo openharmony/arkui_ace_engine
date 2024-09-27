@@ -2403,10 +2403,18 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SetViewportMetrics(aceView, modifyConfig); // update density into pipeline
     };
+    auto updateDeviceOrientationTask = [container, modifyConfig, reason]() {
+        if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
+            container->UpdateResourceOrientation(modifyConfig.Orientation());
+        }
+    };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         updateDensityTask(); // ensure density has been updated before load first page
+        updateDeviceOrientationTask();
     } else {
         taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
+        taskExecutor->PostTask(
+            std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI, "ArkUIDeviceOrientation");
     }
     RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
     auto pipelineContext = container->GetPipelineContext();
