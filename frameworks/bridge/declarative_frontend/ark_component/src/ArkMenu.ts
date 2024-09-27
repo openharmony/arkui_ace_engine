@@ -198,15 +198,15 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
     modifierWithKey(this._modifiersWithKeys, RadiusModifier.identity, RadiusModifier, value);
     return this;
   }
-  menuItemDivider(value: any): this {
+  menuItemDivider(value: DividerStyleOptions): this {
     modifierWithKey(this._modifiersWithKeys, MenuItemDividerModifier.identity, MenuItemDividerModifier, value);
     return this;
   }
-  menuItemGroupDivider(value: any): this {
+  menuItemGroupDivider(value: DividerStyleOptions): this {
     modifierWithKey(this._modifiersWithKeys, MenuItemGroupDividerModifier.identity, MenuItemGroupDividerModifier, value);
     return this;
   }
-  subMenuExpandingMode(value: any): this {
+  subMenuExpandingMode(value: SubMenuExpandingMode): this {
     modifierWithKey(this._modifiersWithKeys, SubMenuExpandingModeModifier.identity, SubMenuExpandingModeModifier, value);
     return this;
   }
