@@ -69,6 +69,7 @@ public:
     // The interface for responsing provider
     void OnConnect() override;
     void OnDisconnect(bool isAbnormal) override;
+    void OnReleaseDone() override;
     void OnExtensionTimeout(int32_t errorCode) override;
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) override;
 

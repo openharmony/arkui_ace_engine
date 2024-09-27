@@ -603,6 +603,16 @@ void SessionWrapperImpl::NotifyBackground()
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
         session_, std::move(backgroundCallback_));
 }
+
+void SessionWrapperImpl::OnReleaseDone()
+{
+    CHECK_NULL_VOID(session_);
+    UIEXT_LOGI("OnReleaseDone, persistentid = %{public}d.", session_->GetPersistentId());
+    session_->UnregisterLifecycleListener(lifecycleListener_);
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestructionDone(session_);
+    session_ = nullptr;
+}
+
 void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);

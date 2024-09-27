@@ -237,6 +237,9 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     return true;
 }
 
+void SessionWrapperImpl::OnReleaseDone()
+{}
+
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
 }
