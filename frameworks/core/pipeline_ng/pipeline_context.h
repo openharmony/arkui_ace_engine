@@ -859,6 +859,8 @@ public:
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 
+    void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
+
     bool CheckThreadSafe() const;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -933,7 +935,6 @@ private:
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     void AnimateOnSafeAreaUpdate();
-    void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
 
     // only used for static form.
     void UpdateFormLinkInfos();
