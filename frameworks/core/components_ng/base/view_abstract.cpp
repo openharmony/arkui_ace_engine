@@ -2117,8 +2117,8 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
     ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR);
+    ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
 }
 
 void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
@@ -2126,8 +2126,8 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
     ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP);
+    ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
 }
 
 void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
@@ -2135,8 +2135,8 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
     ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL);
+    ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
 }
 
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
@@ -2929,20 +2929,20 @@ void ViewAbstract::SetZIndex(FrameNode* frameNode, int32_t value)
 
 void ViewAbstract::SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay)
