@@ -102,6 +102,7 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("onWillScroll", &JSScrollableBase::JsOnWillScroll);
     JSClass<JSScrollableBase>::StaticMethod("onDidScroll", &JSScrollableBase::JsOnDidScroll);
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
+    JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSContentClip);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
