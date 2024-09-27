@@ -714,7 +714,7 @@ ToastWindowType SubwindowManager::GetToastWindowType(int32_t instanceId)
     auto parentContainer = Container::GetContainer(instanceId);
     CHECK_NULL_RETURN(parentContainer, ToastWindowType::TOAST_IN_TYPE_TOAST);
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "GetToastWindowType instanceID: %{public}d", instanceId);
-    // toast window should be TOAST_IN_TYPE_APP_SUB_WINDOW when current window is dialog Window.
+    // toast window should be TOAST_IN_TYPE_APP_SUB_WINDOW when current window is dialogWindow.
     if (parentContainer->IsSubWindow() || parentContainer->IsMainWindow() || parentContainer->IsDialogWindow()) {
         return ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW;
     } else if (parentContainer->IsScenceBoardWindow()) {
@@ -751,7 +751,7 @@ void SubwindowManager::ShowToast(const NG::ToastInfo& toastInfo)
     } else {
         // for ability
         auto parentContainer = Container::GetContainer(containerId);
-        // in scenceboard, system_top_most needs to go the old way,
+        // in scenceboard, sytem_top_most needs to go the old way,
         // default and top_most need to go ShowToastNG
         if (toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
             (parentContainer && parentContainer->IsScenceBoardWindow() &&
