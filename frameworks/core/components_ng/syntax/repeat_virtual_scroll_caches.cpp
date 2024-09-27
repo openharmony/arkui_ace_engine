@@ -43,30 +43,65 @@ RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
 
 std::optional<std::string> RepeatVirtualScrollCaches::GetKey4Index(uint32_t index, bool allowFetch)
 {
-    auto it = key4index_.find(index);
-    if (it == key4index_.end()) {
-        // request more keys from TS key gen
-        if (!allowFetch || !FetchMoreKeysTTypes(index, index)) {
-            return std::nullopt;
-        }
+    if (key4index_.find(index) != key4index_.end()) {
+        return key4index_[index];
     }
-    return key4index_[index];
+
+    if (!allowFetch) {
+        return std::nullopt;
+    }
+
+    // need to rebuild L1 after fetch ?
+    const bool rebuildL1 =
+        key4index_.size() == 0 && HasOverlapWithLastActiveRange(index, index);
+
+    // allow to fetch extended range of keys if rebuildL1 is needed
+    FetchMoreKeysTTypes(index, index, rebuildL1 == true);
+
+    if (rebuildL1) {
+        // check for each L1 entry if its key is includes in newly received keys
+        // only keep these in L1
+        RebuildL1WithKey([&](const std::string &key) { return index4Key_.find(key) != index4Key_.end(); });
+    }
+
+    return GetKey4Index(index, false);
+}
+
+/**
+ * does given range overlap the last active range?
+ */
+bool RepeatVirtualScrollCaches::HasOverlapWithLastActiveRange(uint32_t from, uint32_t to)
+{
+    const auto a = lastActiveRanges_[0].first;
+    const auto b = lastActiveRanges_[0].second;
+    if (a <= b) {
+        return to >= a && from <= b;
+    } else {
+        return to <= b || to >= a || from <= b || from >= a;
+    }
 }
 
 /**
  * get more index -> key and index -> ttype from TS side
  */
-bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
+bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to, bool allowFetchMore)
 {
     if (from > to) {
         return false;
     }
 
-    const bool isRebuildingKeyCaches =
-        ((key4index_.size() == 0) && (to >= lastActiveRanges_[0].first) && (from <= lastActiveRanges_[0].second));
-    if (isRebuildingKeyCaches) {
+    if (allowFetchMore) {
         // following a key4index_/ttype4index_ purge fetch the whole range
-        to = (to < lastActiveRanges_[0].second) ? lastActiveRanges_[0].second : to;
+        const auto a = lastActiveRanges_[0].first;
+        const auto b = lastActiveRanges_[0].second;
+
+        if (a <= b) {
+            return FetchMoreKeysTTypes(from, std::max(to, b), false);
+        } else {
+            const bool v1 = FetchMoreKeysTTypes(0, b, false);
+            const bool v2 = FetchMoreKeysTTypes(a, std::numeric_limits<int>::max(), false);
+            return v1 || v2;
+        }
     }
 
     TAG_LOGD(AceLogTag::ACE_REPEAT, "from:%{public}d, to:%{public}d",
@@ -108,12 +143,6 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to)
         ttype4index_[from1] = ttype;
         index4ttype_[ttype] = from1;
         from1++;
-    }
-
-    if (isRebuildingKeyCaches) {
-        // check for each L1 entry if its key is includes in newly received keys
-        // only keep these in L1
-        RebuildL1WithKey([&](const std::string &key) { return index4Key_.find(key) != index4Key_.end(); });
     }
 
     // false when nothing was fetched
