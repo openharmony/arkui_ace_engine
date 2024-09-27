@@ -24,6 +24,7 @@
 #include "parameters.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/osal/window_utils.h"
 #include "core/common/ace_application_info.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "systemcapability.h"
@@ -63,8 +64,6 @@ constexpr char DISABLE_ROSEN_FILE_PATH[] = "/etc/disablerosen";
 constexpr char DISABLE_WINDOW_ANIMATION_PATH[] = "/etc/disable_window_size_animation";
 #endif
 constexpr int32_t CONVERT_ASTC_THRESHOLD = 2;
-
-using RsOrientation = Rosen::DisplayOrientation;
 
 bool IsOpIncEnabled()
 {
@@ -585,10 +584,7 @@ void SystemProperties::InitDeviceInfo(
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
 {
-    int32_t newOrientation = ((orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE)) ||
-                                 (orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE_INVERTED)))
-                                 ? ORIENTATION_LANDSCAPE
-                                 : ORIENTATION_PORTRAIT;
+    auto newOrientation = static_cast<int32_t>(WindowUtils::GetDeviceOrientation(orientation));
     if (newOrientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::PORTRAIT;
