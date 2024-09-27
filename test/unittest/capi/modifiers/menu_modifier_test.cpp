@@ -402,9 +402,9 @@ HWTEST_F(MenuModifierTest, setRadiusRadiusesNegativeOrEmptyTest, TestSize.Level1
     fullJson = GetJsonValue(node_);
     radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
     topLeft = GetAttrValue<std::string>(radiusObject, "topLeft");
-    EXPECT_EQ(topLeft, "0.00vp");
+    EXPECT_EQ(topLeft, "5.00px");
     topRight = GetAttrValue<std::string>(radiusObject, "topRight");
-    EXPECT_EQ(topRight, "0.00vp");
+    EXPECT_EQ(topRight, "7.00px");
     bottomLeft = GetAttrValue<std::string>(radiusObject, "bottomLeft");
     EXPECT_EQ(bottomLeft, "0.00vp");
     bottomRight = GetAttrValue<std::string>(radiusObject, "bottomRight");
@@ -420,9 +420,9 @@ HWTEST_F(MenuModifierTest, setRadiusRadiusesNegativeOrEmptyTest, TestSize.Level1
     fullJson = GetJsonValue(node_);
     radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
     topLeft = GetAttrValue<std::string>(radiusObject, "topLeft");
-    EXPECT_EQ(topLeft, "0.00vp");
+    EXPECT_EQ(topLeft, "5.00px");
     topRight = GetAttrValue<std::string>(radiusObject, "topRight");
-    EXPECT_EQ(topRight, "0.00vp");
+    EXPECT_EQ(topRight, "7.00px");
     bottomLeft = GetAttrValue<std::string>(radiusObject, "bottomLeft");
     EXPECT_EQ(bottomLeft, "0.00vp");
     bottomRight = GetAttrValue<std::string>(radiusObject, "bottomRight");
