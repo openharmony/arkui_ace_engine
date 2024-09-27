@@ -3869,13 +3869,13 @@ void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId)
 
 void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
 {
+    if (!CheckThreadSafe()) {
+        LOGW("FlushWindowStateChangedCallback doesn't run on UI thread!");
+    }
     auto iter = onWindowStateChangedCallbacks_.begin();
     while (iter != onWindowStateChangedCallbacks_.end()) {
         auto node = ElementRegister::GetInstance()->GetUINodeById(*iter);
         if (!node) {
-            if (!CheckThreadSafe()) {
-                LOGW("FlushWindowStateChangedCallback doesn't run on UI thread!");
-            }
             iter = onWindowStateChangedCallbacks_.erase(iter);
         } else {
             if (isShow) {
