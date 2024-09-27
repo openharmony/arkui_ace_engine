@@ -345,14 +345,6 @@ struct OperateItemStruct {
     .onFocus(() => {
       this.parentCanFocus = false;
     })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
       if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -385,14 +377,6 @@ struct OperateItemStruct {
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .onFocus(() => {
       this.parentCanFocus = false;
-    })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
@@ -442,7 +426,7 @@ struct OperateItemStruct {
         .matchTextDirection(true)
     }
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
-    .hitTestBehavior(HitTestMode.Transparent)
+    .hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
@@ -450,17 +434,6 @@ struct OperateItemStruct {
       this.parentCanFocus = false;
     })
     .stateEffect(this.arrow?.action !== undefined)
-    .onTouch((event: TouchEvent) => {
-      if (this.arrow?.action === undefined) {
-        return;
-      }
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
     .onHover((isHover: boolean) => {
       if (this.arrow?.action === undefined) {
@@ -494,14 +467,6 @@ struct OperateItemStruct {
         this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down) {
-          this.parentCanTouch = false;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.parentCanTouch = true;
-        }
-      })
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
         if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -530,14 +495,6 @@ struct OperateItemStruct {
         this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down) {
-          this.parentCanTouch = false;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.parentCanTouch = true;
-        }
-      })
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
         if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -569,14 +526,6 @@ struct OperateItemStruct {
     .justifyContent(FlexAlign.Center)
     .onFocus(() => {
       this.parentCanFocus = false;
-    })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
@@ -642,7 +591,7 @@ struct OperateItemStruct {
         })
       }
     }
-    .hitTestBehavior(HitTestMode.Transparent)
+    .hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent)
     .labelStyle({
       maxLines: TEXT_MAX_LINE
     })
@@ -659,17 +608,6 @@ struct OperateItemStruct {
       right: 0
     })
     .stateEffect(this.arrow?.action !== undefined)
-    .onTouch((event: TouchEvent) => {
-      if (this.arrow?.action === undefined) {
-        return;
-      }
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
     .onHover((isHover: boolean) => {
       if (this.arrow?.action === undefined) {
@@ -952,7 +890,6 @@ export struct ComposeListItem {
             parentDirection: this.containerDirection,
             itemDirection: this.contentItemDirection,
           })
-            .flexShrink(0)
         }
         if (this.operateItem !== null) {
           OperateItemStruct({
@@ -1002,14 +939,6 @@ export struct ComposeListItem {
             (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
       })
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down && this.canTouch) {
-          this.frontColor = this.touchDownColor;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
-        }
-      })
       .stateStyles({
         focused: {
           .border({
@@ -1025,6 +954,9 @@ export struct ComposeListItem {
             width: ITEM_BORDER_SHOWN,
             color: Color.Transparent
           })
+        },
+        pressed: {
+          .backgroundColor(this.touchDownColor)
         }
       }).padding(this.containerPadding)
     }

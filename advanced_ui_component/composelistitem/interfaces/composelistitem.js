@@ -789,14 +789,6 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Button.onTouch((d1) => {
-                if (d1.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (d1.type === TouchType.Up || d1.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
-            });
             Button.onHover((c1) => {
                 this.parentCanHover = false;
                 if (c1 && this.parentFrontColor === this.hoveringColor) {
@@ -836,14 +828,6 @@ class OperateItemStruct extends ViewPU {
             Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Button.onFocus(() => {
                 this.parentCanFocus = false;
-            });
-            Button.onTouch((y6) => {
-                if (y6.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (y6.type === TouchType.Up || y6.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
             });
             Button.onHover((x6) => {
                 this.parentCanHover = false;
@@ -895,7 +879,7 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((x5, y5) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-            Button.hitTestBehavior(HitTestMode.Transparent);
+            Button.hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent);
             Button.backgroundColor(Color.Transparent);
             Button.height(OPERATEITEM_ICONLIKE_SIZE);
             Button.width(OPERATEITEM_ARROW_WIDTH);
@@ -903,17 +887,6 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Button.stateEffect(this.arrow?.action !== undefined);
-            Button.onTouch((d6) => {
-                if (this.arrow?.action === undefined) {
-                    return;
-                }
-                if (d6.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (d6.type === TouchType.Up || d6.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
-            });
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
             Button.onHover((c6) => {
                 if (this.arrow?.action === undefined) {
@@ -957,14 +930,6 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Radio.hitTestBehavior(HitTestMode.Block);
-            Radio.onTouch((r5) => {
-                if (r5.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (r5.type === TouchType.Up || r5.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
-            });
             Radio.onHover((q5) => {
                 this.parentCanHover = false;
                 if (q5 && this.parentFrontColor === this.hoveringColor) {
@@ -993,14 +958,6 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Checkbox.hitTestBehavior(HitTestMode.Block);
-            Checkbox.onTouch((i5) => {
-                if (i5.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (i5.type === TouchType.Up || i5.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
-            });
             Checkbox.onHover((h5) => {
                 this.parentCanHover = false;
                 if (h5 && this.parentFrontColor === this.hoveringColor) {
@@ -1026,14 +983,6 @@ class OperateItemStruct extends ViewPU {
             Row.justifyContent(FlexAlign.Center);
             Row.onFocus(() => {
                 this.parentCanFocus = false;
-            });
-            Row.onTouch((z4) => {
-                if (z4.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (z4.type === TouchType.Up || z4.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
             });
             Row.onHover((y4) => {
                 this.parentCanHover = false;
@@ -1063,7 +1012,7 @@ class OperateItemStruct extends ViewPU {
     createTextArrow(v3 = null) {
         this.observeComponentCreation2((g4, h4) => {
             Button.createWithChild({ type: ButtonType.Normal });
-            Button.hitTestBehavior(HitTestMode.Transparent);
+            Button.hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent);
             Button.labelStyle({
                 maxLines: TEXT_MAX_LINE
             });
@@ -1080,17 +1029,6 @@ class OperateItemStruct extends ViewPU {
                 right: 0
             });
             Button.stateEffect(this.arrow?.action !== undefined);
-            Button.onTouch((b1) => {
-                if (this.arrow?.action === undefined) {
-                    return;
-                }
-                if (b1.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (b1.type === TouchType.Up || b1.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
-            });
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
             Button.onHover((a1) => {
                 if (this.arrow?.action === undefined) {
@@ -1743,14 +1681,6 @@ export class ComposeListItem extends ViewPU {
                         (this.isActive ? this.activedColor : Color.Transparent.toString());
                 }
             });
-            Flex.onTouch((x1) => {
-                if (x1.type === TouchType.Down && this.canTouch) {
-                    this.frontColor = this.touchDownColor;
-                }
-                if (x1.type === TouchType.Up || x1.type === TouchType.Cancel) {
-                    this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
-                }
-            });
             ViewStackProcessor.visualState("focused");
             Flex.border({
                 radius: {
@@ -1776,6 +1706,8 @@ export class ComposeListItem extends ViewPU {
                 width: ITEM_BORDER_SHOWN,
                 color: Color.Transparent
             });
+            ViewStackProcessor.visualState("pressed");
+            Flex.backgroundColor(ObservedObject.GetRawObject(this.touchDownColor));
             ViewStackProcessor.visualState();
             Flex.padding(ObservedObject.GetRawObject(this.containerPadding));
         }, Flex);
@@ -1811,10 +1743,6 @@ export class ComposeListItem extends ViewPU {
             If.create();
             if (this.contentItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((o1, p1) => {
-                        __Common__.create();
-                        __Common__.flexShrink(0);
-                    }, __Common__);
                     {
                         this.observeComponentCreation2((d, o) => {
                             if (o) {
@@ -1861,7 +1789,6 @@ export class ComposeListItem extends ViewPU {
                             }
                         }, { name: "ContentItemStruct" });
                     }
-                    __Common__.pop();
                 });
             }
             else {
