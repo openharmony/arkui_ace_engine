@@ -44,6 +44,7 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "adapter/ohos/osal/system_bar_style_ohos.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
+#include "adapter/ohos/osal/window_utils.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
@@ -981,6 +982,7 @@ void AceContainer::InitializeCallback()
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
+                aceContainer->UpdateResourceDensity(density);
                 aceContainer->NotifyDensityUpdate();
             }
         };
@@ -3295,5 +3297,26 @@ void AceContainer::RemoveWatchSystemParameter()
         ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
+}
+
+void AceContainer::UpdateResourceOrientation(int32_t orientation)
+{
+    DeviceOrientation newOrientation = WindowUtils::GetDeviceOrientation(orientation);
+    auto resConfig = GetResourceConfiguration();
+    resConfig.SetOrientation(newOrientation);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+    }
+    SetResourceConfiguration(resConfig);
+}
+
+void AceContainer::UpdateResourceDensity(double density)
+{
+    auto resConfig = GetResourceConfiguration();
+    resConfig.SetDensity(density);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+    }
+    SetResourceConfiguration(resConfig);
 }
 } // namespace OHOS::Ace::Platform

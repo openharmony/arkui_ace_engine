@@ -184,16 +184,16 @@ void AddResConfigInfo(
     aceResCfg.SetAppHasDarkRes(resConfig->GetAppDarkRes());
     auto preferredLocaleInfo = resConfig->GetPreferredLocaleInfo();
     if (preferredLocaleInfo != nullptr) {
-        std::string preferredlanguage = preferredLocaleInfo->getLanguage();
+        std::string preferredLanguage = preferredLocaleInfo->getLanguage();
         std::string script = preferredLocaleInfo->getScript();
         std::string country = preferredLocaleInfo->getCountry();
         if (!script.empty()) {
-            preferredlanguage += "-" + script;
+            preferredLanguage += "-" + script;
         }
         if (!country.empty()) {
-            preferredlanguage += "-" + country;
+            preferredLanguage += "-" + country;
         }
-        aceResCfg.SetPreferredLanguage(preferredlanguage);
+        aceResCfg.SetPreferredLanguage(preferredLanguage);
     }
 }
 
@@ -2485,10 +2485,18 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SetViewportMetrics(aceView, modifyConfig); // update density into pipeline
     };
+    auto updateDeviceOrientationTask = [container, modifyConfig, reason]() {
+        if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
+            container->UpdateResourceOrientation(modifyConfig.Orientation());
+        }
+    };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         updateDensityTask(); // ensure density has been updated before load first page
+        updateDeviceOrientationTask();
     } else {
         taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
+        taskExecutor->PostTask(
+            std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI, "ArkUIDeviceOrientation");
     }
     RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
     auto pipelineContext = container->GetPipelineContext();
