@@ -22,11 +22,6 @@
 #include "base/json/json_util.h"
 
 namespace OHOS::Ace::NG {
-THPExtraManagerImpl::~THPExtraManagerImpl()
-{
-    Deinit();
-}
-
 bool THPExtraManagerImpl::Init()
 {
     ThpExtraRunCommand_ = [](const char* command, const char* parameters) -> const char* {
@@ -70,13 +65,6 @@ bool THPExtraManagerImpl::Init()
         return false;
     }
     return true;
-}
-
-void THPExtraManagerImpl::Deinit(void)
-{
-    if (lib_) {
-        dlclose(lib_);
-    }
 }
 
 const char* THPExtraManagerImpl::ThpExtraRunCommand(const char* command, const char* parameters)
