@@ -29,11 +29,29 @@ void MenuModelNG::Create()
     CHECK_NULL_VOID(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        auto layoutProps = menuNode->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProps);
-        // default min width
-        layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            auto layoutProps = menuNode->GetLayoutProperty();
+            CHECK_NULL_VOID(layoutProps);
+            // default min width
+            layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
+        }
     }
+}
+
+RefPtr<FrameNode> MenuModelNG::CreateFrameNode(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("MenuModelNG::CreateFrameNode [nodeId = %d]", nodeId);
+    const std::function<RefPtr<Pattern>(void)>& patternCreator =
+        []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); };
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId, patternCreator);
+    if (frameNode == nullptr)
+        return nullptr;
+    auto layoutProps = frameNode->GetLayoutProperty();
+        if (layoutProps == nullptr)
+            return nullptr;
+        // default min width
+    layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
+    return frameNode;
 }
 
 void MenuModelNG::SetFontSize(const Dimension& fontSize)
@@ -114,9 +132,14 @@ void MenuModelNG::SetExpandingMode(const SubMenuExpandingMode& expandingMode)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode);
 }
 
-void MenuModelNG::SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingMode& expandingMode)
+void MenuModelNG::SetExpandingMode(FrameNode* frameNode, const std::optional<SubMenuExpandingMode>& expandingMode)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (expandingMode.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, expandingMode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ExpandingMode, frameNode);
+    }
 }
 
 void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider)
@@ -124,9 +147,14 @@ void MenuModelNG::SetItemDivider(const V2::ItemDivider& divider)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider);
 }
 
-void MenuModelNG::SetItemDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+void MenuModelNG::SetItemDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (divider.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, divider.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemDivider, frameNode);
+    }
 }
 
 void MenuModelNG::SetItemGroupDivider(const V2::ItemDivider& divider)
@@ -134,13 +162,19 @@ void MenuModelNG::SetItemGroupDivider(const V2::ItemDivider& divider)
     ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider);
 }
 
-void MenuModelNG::SetItemGroupDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+void MenuModelNG::SetItemGroupDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (divider.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, divider.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItemGroupDivider, frameNode);
+    }
 }
 
 void MenuModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
+    CHECK_NULL_VOID(frameNode);
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value(), frameNode);
     } else {
@@ -148,43 +182,66 @@ void MenuModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>&
     }
 }
 
-void MenuModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
+void MenuModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize)
 {
-    if (fontSize.IsValid()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (fontSize.has_value() && fontSize.value().IsValid()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, frameNode);
     }
 }
 
-void MenuModelNG::SetFontWeight(FrameNode* frameNode, FontWeight weight)
+void MenuModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& weight)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontWeight, weight, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (weight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontWeight, weight.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontWeight, frameNode);
+    }
 }
 
-void MenuModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle style)
+void MenuModelNG::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& style)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItalicFontStyle, style, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (style.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItalicFontStyle, style.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, ItalicFontStyle, frameNode);
+    }
 }
 
-void MenuModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& families)
+void MenuModelNG::SetFontFamily(FrameNode* frameNode,
+    const std::optional<std::vector<std::string>>& families)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, families, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (families.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, families.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, FontFamily, frameNode);
+    }
 }
 
-void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const Dimension& radius)
+void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radius)
 {
-    NG::BorderRadiusProperty borderRadius;
-    borderRadius.radiusTopLeft = radius;
-    borderRadius.radiusTopRight = radius;
-    borderRadius.radiusBottomLeft = radius;
-    borderRadius.radiusBottomRight = radius;
-    borderRadius.multiValued = true;
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (radius.has_value()) {
+        NG::BorderRadiusProperty borderRadius;
+        borderRadius.radiusTopLeft = radius;
+        borderRadius.radiusTopRight = radius;
+        borderRadius.radiusBottomLeft = radius;
+        borderRadius.radiusBottomRight = radius;
+        borderRadius.multiValued = true;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
+    } else {
+        ResetBorderRadius(frameNode);
+    }
 }
 
 void MenuModelNG::ResetBorderRadius(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(MenuLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE, frameNode);
 }
 
@@ -192,13 +249,19 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dime
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight)
 {
-    NG::BorderRadiusProperty borderRadius;
-    borderRadius.radiusTopLeft = radiusTopLeft;
-    borderRadius.radiusTopRight = radiusTopRight;
-    borderRadius.radiusBottomLeft = radiusBottomLeft;
-    borderRadius.radiusBottomRight = radiusBottomRight;
-    borderRadius.multiValued = true;
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (radiusTopLeft.has_value() && radiusTopRight.has_value() &&
+        radiusBottomLeft.has_value() && radiusBottomRight.has_value()) {
+        NG::BorderRadiusProperty borderRadius;
+        borderRadius.radiusTopLeft = radiusTopLeft;
+        borderRadius.radiusTopRight = radiusTopRight;
+        borderRadius.radiusBottomLeft = radiusBottomLeft;
+        borderRadius.radiusBottomRight = radiusBottomRight;
+        borderRadius.multiValued = true;
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
+    } else {
+        ResetBorderRadius(frameNode);
+    }
 }
 
 void MenuModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
