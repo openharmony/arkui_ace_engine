@@ -10762,7 +10762,6 @@ class __RepeatVirtualScrollImpl {
     }
     hasVisibleItemsChanged() {
         var _a, _b;
-        let lastActiveRangeIndex = 0;
         // has any item or ttype in the active range changed?
         for (let i in this.lastActiveRangeData_) {
             if (!(i in this.arr_)) {
@@ -10780,7 +10779,6 @@ class __RepeatVirtualScrollImpl {
                 
                 return true;
             }
-            lastActiveRangeIndex = +i;
         }
         
         return false;

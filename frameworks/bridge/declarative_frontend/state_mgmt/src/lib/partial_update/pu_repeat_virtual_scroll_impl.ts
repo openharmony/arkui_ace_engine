@@ -268,8 +268,6 @@ class __RepeatVirtualScrollImpl<T> {
     }
 
     private hasVisibleItemsChanged(): boolean {
-        let lastActiveRangeIndex = 0;
-
         // has any item or ttype in the active range changed?
         for (let i in this.lastActiveRangeData_) {
             if (!(i in this.arr_)) {
@@ -288,7 +286,6 @@ class __RepeatVirtualScrollImpl<T> {
                 stateMgmtConsole.debug(`__RepeatVirtualScrollImpl.hasVisibleItemsChanged() i:#${i} ttype changed => true`);
                 return true;
             }
-            lastActiveRangeIndex = +i;
         }
 
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl.hasVisibleItemsChanged() => false`);
