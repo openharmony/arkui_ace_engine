@@ -16,16 +16,9 @@
 
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "surface_utils.h"
-#include "sync_fence.h"
-
 #include "base/log/dump_log.h"
-#include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

@@ -15,9 +15,6 @@
 
 #include "core/components_ng/render/render_context.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

@@ -15,7 +15,6 @@
 
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 
-#include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect_impl.h"
 
