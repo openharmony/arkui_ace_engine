@@ -15,8 +15,6 @@
 
 #include "base/geometry/quaternion.h"
 
-#include <cmath>
-
 namespace OHOS::Ace {
 namespace {
 

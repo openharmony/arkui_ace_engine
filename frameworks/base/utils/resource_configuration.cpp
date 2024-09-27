@@ -15,7 +15,6 @@
 
 #include "base/utils/resource_configuration.h"
 
-#include "base/log/log.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {

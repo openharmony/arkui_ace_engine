@@ -13,19 +13,8 @@
  * limitations under the License.
  */
 
-#include <condition_variable>
-#include <cstdint>
-#include <functional>
-#include <memory>
-#include <mutex>
-#include <optional>
-#include <string>
-#include <vector>
-
-#include "curl/curl.h"
 #include "hilog/log.h"
 #include "http_client.h"
-#include "http_proxy.h"
 #include "net_conn_client.h"
 
 #include "base/network/download_manager.h"

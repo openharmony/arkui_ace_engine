@@ -15,17 +15,6 @@
 
 #include "base/subwindow/subwindow_manager.h"
 
-#include <memory>
-#include <mutex>
-
-#include "unistd.h"
-
-#include "base/geometry/rect.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_page.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {

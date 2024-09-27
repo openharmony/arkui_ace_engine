@@ -15,11 +15,8 @@
 
 #include "base/log/ace_performance_monitor.h"
 
-#include <cinttypes>
-
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
-#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 using namespace std;
