@@ -38,6 +38,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -926,6 +927,29 @@ HWTEST_F(DatePickerTestOne, CreateLunarswitchNode002, TestSize.Level1)
         contentColumn, dateNode, changeEvent, true, checkboxData);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: UpdateCheckboxPaintProperty
+ * @tc.desc: Test DatePickerDialogView UpdateCheckboxPaintProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestOne, UpdateCheckboxPaintProperty, TestSize.Level1)
+{
+    auto checkbox = FrameNode::CreateFrameNode(
+        V2::CHECK_BOX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<CheckBoxPattern>());
+    CHECK_NULL_VOID(checkbox);
+    auto checkboxPaintProps = checkbox->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(checkboxPaintProps);
+    CheckboxSettingData checkboxData;
+    checkboxData.selectedColor = Color::BLUE;
+    checkboxData.unselectedColor = Color::BLUE;
+    checkboxData.strokeColor = Color::BLUE;
+    DatePickerDialogView::UpdateCheckboxPaintProperty(
+        checkboxPaintProps, true, checkboxData);
+    EXPECT_EQ(Color::BLUE, checkboxPaintProps->GetCheckBoxSelectedColor());
+    EXPECT_EQ(Color::BLUE, checkboxPaintProps->GetCheckBoxUnSelectedColor());
+    EXPECT_EQ(Color::BLUE, checkboxPaintProps->GetCheckBoxCheckMarkColor());
 }
 
 /**
