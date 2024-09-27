@@ -1603,7 +1603,7 @@ void TabBarPattern::HandleTouchUp(int32_t index)
 void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, AnimationType animationType)
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-        tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE) {
+        tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE && animationType == AnimationType::PRESS) {
         return;
     }
     auto pipelineContext = GetContext();
