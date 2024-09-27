@@ -274,7 +274,7 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("sticky"), "Sticky.Opacity");
     EXPECT_EQ(json->GetString("editable"), "EditMode.Movable");
     swipeAction = json->GetObject("swipeAction");
-    EXPECT_EQ(swipeAction->GetString("edgeEffect"), "SwipeEdgeEffect.Node");
+    EXPECT_EQ(swipeAction->GetString("edgeEffect"), "SwipeEdgeEffect.None");
 
     /**
      * @tc.steps: step4. Change some property, Call ToJsonValue()

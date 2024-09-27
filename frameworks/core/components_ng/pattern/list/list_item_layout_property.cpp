@@ -58,7 +58,7 @@ void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
     if (propEdgeEffect_.has_value()) {
         auto swipeAction = JsonUtil::Create(true);
         swipeAction->Put("edgeEffect", propEdgeEffect_.value() == V2::SwipeEdgeEffect::Spring ?
-            "SwipeEdgeEffect.Spring" : "SwipeEdgeEffect.Node");
+            "SwipeEdgeEffect.Spring" : "SwipeEdgeEffect.None");
         json->PutExtAttr("swipeAction", swipeAction, filter);
     } else {
         auto swipeAction = JsonUtil::Create(true);
