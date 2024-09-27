@@ -808,6 +808,8 @@ public:
     void DumpFocusTree(int32_t depth, bool hasJson = false);
     void DumpFocusNodeTree(int32_t depth);
     void DumpFocusScopeTree(int32_t depth);
+    void DumpFocusUie();
+    void DumpFocusUieInJson(std::unique_ptr<JsonValue>& json);
 
     bool OnClick(const KeyEvent& event);
 

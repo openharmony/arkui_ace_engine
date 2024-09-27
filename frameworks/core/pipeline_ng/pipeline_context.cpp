@@ -71,7 +71,6 @@ constexpr int32_t INDEX_X_SLOPE = 2;
 constexpr int32_t INDEX_Y_SLOPE = 3;
 constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
-constexpr uint32_t USED_ID_FIND_FLAG = 3; // if args >3 , it means use id to find
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
 constexpr int32_t RESAMPLE_COORD_TIME_THRESHOLD = 20 * 1000 * 1000;
 constexpr int32_t VSYNC_PERIOD_COUNT = 5;
@@ -79,7 +78,6 @@ constexpr int32_t MIN_IDLE_TIME = 1000;
 constexpr uint8_t SINGLECOLOR_UPDATE_ALPHA = 75;
 constexpr int8_t RENDERING_SINGLE_COLOR = 1;
 constexpr int32_t DELAY_TIME = 500;
-constexpr uint32_t USED_JSON_PARAM = 4;
 constexpr int32_t PARAM_NUM = 2;
 constexpr int32_t MAX_MISS_COUNT = 3;
 } // namespace
@@ -2794,17 +2792,22 @@ void PipelineContext::DumpData(
     const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const
 {
     CHECK_NULL_VOID(node);
-    uint32_t used_id_flag = hasJson ? USED_JSON_PARAM : USED_ID_FIND_FLAG;
-    if (params.size() < used_id_flag) {
+    std::string pid = "";
+    for (auto param : params) {
+        if (param.find("-") == std::string::npos) {
+            pid = param;
+            LOGD("Find pid in element dump pipeline");
+        }
+    }
+    if (pid == "") {
+        LOGD("Dump element without pid");
         node->DumpTree(0, hasJson);
         if (hasJson) {
             DumpLog::GetInstance().PrintEndDumpInfoNG(true);
         }
         DumpLog::GetInstance().OutPutBySize();
-    }
-    if (params.size() == used_id_flag && !node->DumpTreeById(0, params[PARAM_NUM], hasJson)) {
-        DumpLog::GetInstance().Print(
-            "There is no id matching the ID in the parameter,please check whether the id is correct");
+    } else {
+        node->DumpTreeById(0, params[PARAM_NUM], hasJson);
     }
 }
 
