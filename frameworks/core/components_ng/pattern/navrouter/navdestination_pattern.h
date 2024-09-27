@@ -248,9 +248,6 @@ private:
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void MountTitleBar(
         RefPtr<NavDestinationGroupNode>& hostNode, bool& needRunTitleBarAnimation);
-    void InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode);
-    void HandleLongPress();
-    void HandleLongPressActionEnd();
     void OnFontScaleConfigurationUpdate() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -267,9 +264,6 @@ private:
     bool isUserDefinedBgColor_ = false;
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;
-
-    RefPtr<LongPressEvent> longPressEvent_;
-    RefPtr<FrameNode> dialogNode_;
 
     std::optional<RefPtr<SystemBarStyle>> backupStyle_;
     std::optional<RefPtr<SystemBarStyle>> currStyle_;
