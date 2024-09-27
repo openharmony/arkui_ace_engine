@@ -75,6 +75,8 @@ public:
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
+    void MountTitleBar(const RefPtr<FrameNode>& host, bool& needRunTitleBarAnimation);
+
 private:
     void WindowFocus(bool isFocus);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;

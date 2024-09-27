@@ -366,9 +366,10 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
     stack->Push(navDestinationNode);
 }
 
-void NavDestinationModelNG::SetHideTitleBar(bool hideTitleBar)
+void NavDestinationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar);
+    ACE_UPDATE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated);
 }
 
 void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
@@ -772,7 +773,7 @@ void NavDestinationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationT
     titleBarPattern->SetTitlebarOptions(std::move(opt));
 }
 
-void NavDestinationModelNG::SetHideToolBar(bool hideToolBar)
+void NavDestinationModelNG::SetHideToolBar(bool hideToolBar, bool animated)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
@@ -780,6 +781,7 @@ void NavDestinationModelNG::SetHideToolBar(bool hideToolBar)
     auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     navDestinationLayoutProperty->UpdateHideToolBar(hideToolBar);
+    navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
 void NavDestinationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
