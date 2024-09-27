@@ -105,6 +105,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
         if (style.text != static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_RETURN(textNode, nullptr);
             textNode->SetInternal();
             std::string textStr = "";
             GetTextResource(style.text, textStr);

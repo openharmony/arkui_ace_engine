@@ -87,7 +87,7 @@ bool SecurityComponentHandler::CheckBrightness(const RefPtr<FrameNode>& node,
         !NearEqual(renderContext->GetFrontBrightness().value().Value(), 1.0f)) {
         SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s brightness = %{public}f, " \
             "security component is invalid", node->GetTag().c_str(),
-            renderContext->GetFrontBrightness().value().ConvertToVp());
+            renderContext->GetFrontBrightness().value().Value());
         return true;
     }
     return false;
@@ -286,6 +286,7 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
     OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
 {
     RefPtr<RenderContext> renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
     auto frameRect = renderContext->GetPaintRectWithTransform();
     frameRect.SetOffset(node->GetOffsetRelativeToWindow());
     auto frameRectOfPosition = renderContext->GetPaintRectWithTransform();
@@ -302,7 +303,8 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
             return true;
         }
         RefPtr<RenderContext> parentRenderContext = parentNode->GetRenderContext();
-        if (!parentRenderContext->GetClipEdge().value_or(false)) {
+        if ((parentRenderContext == nullptr) ||
+            !parentRenderContext->GetClipEdge().value_or(false)) {
             parent = parent->GetParent();
             continue;
         }
@@ -326,7 +328,9 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
 
 void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect, RectF& visibleRectOfPosition)
 {
-    RectF parentRect = node->GetRenderContext()->GetPaintRectWithTransform();
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    RectF parentRect = renderContext->GetPaintRectWithTransform();
     parentRect.SetOffset(node->GetOffsetRelativeToWindow());
     RectF parentRectOfPosition = node->GetRenderContext()->GetPaintRectWithTransform();
     parentRectOfPosition.SetOffset(node->GetPositionToScreenWithTransform());
@@ -438,21 +442,29 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     return true;
 }
 
-bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
-    RefPtr<FrameNode>& node)
+bool InitSCIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& iconNode)
 {
-    RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
     if (iconNode != nullptr) {
         CHECK_NULL_RETURN(iconNode->GetGeometryNode(), false);
         auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_RETURN(iconProp, false);
+        CHECK_NULL_RETURN(iconProp->GetCalcLayoutConstraint(), false);
+        CHECK_EQUAL_RETURN(iconProp->GetCalcLayoutConstraint()->selfIdealSize.has_value(), false, false);
         buttonInfo.iconSize_ =
             iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ConvertToVp();
-        buttonInfo.iconColor_.value =
-            iconProp->GetImageSourceInfo().value().GetFillColor().value().GetValue();
+        CHECK_EQUAL_RETURN(iconProp->GetImageSourceInfo().has_value(), false, false);
+        auto imageSourceInfo = iconProp->GetImageSourceInfo();
+        CHECK_EQUAL_RETURN(imageSourceInfo.value().GetFillColor().has_value(), false, false);
+        auto fillColor = imageSourceInfo.value().GetFillColor();
+        buttonInfo.iconColor_.value = fillColor.value().GetValue();
     }
+    return true;
+}
 
-    RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
+bool InitSCTextInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& textNode)
+{
     if (textNode != nullptr) {
         auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textProp, false);
@@ -469,8 +481,12 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
             buttonInfo.fontColor_.value = textProp->GetTextColor().value().GetValue();
         }
     }
+    return true;
+}
 
-    RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
+bool InitSCButtonInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& buttonNode)
+{
     if (buttonNode != nullptr) {
         const auto& renderContext = buttonNode->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
@@ -487,10 +503,42 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
             }
         }
     }
+    return true;
+}
+
+bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& node)
+{
+    RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
+    if (!InitSCIconInfo(buttonInfo, iconNode)) {
+        return false;
+    }
+
+    RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
+    if (!InitSCTextInfo(buttonInfo, textNode)) {
+        return false;
+    }
+
+    RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
+    if (!InitSCButtonInfo(buttonInfo, buttonNode)) {
+        return false;
+    }
+    
     if (!InitBaseInfo(buttonInfo, node)) {
         return false;
     }
     return true;
+}
+
+void SecurityComponentHandler::WriteButtonInfo(
+    const RefPtr<OHOS::Ace::NG::SecurityComponentLayoutProperty>& layoutProperty,
+    RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+{
+    buttonInfo.parentEffect_ = CheckParentNodesEffect(node, buttonInfo);
+    buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
+    buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
+    buttonInfo.bg_ = static_cast<SecCompBackground>(
+        layoutProperty->GetBackgroundType().value());
 }
 
 bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node, SecCompType& scType)
@@ -501,11 +549,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
     std::string type = node->GetTag();
     if (type == V2::LOCATION_BUTTON_ETS_TAG) {
         LocationButton buttonInfo;
-        buttonInfo.parentEffect_ = CheckParentNodesEffect(node, buttonInfo);
-        buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
-        buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
-        buttonInfo.bg_ = static_cast<SecCompBackground>(
-            layoutProperty->GetBackgroundType().value());
+        WriteButtonInfo(layoutProperty, node, buttonInfo);
         buttonInfo.type_ = SecCompType::LOCATION_COMPONENT;
         scType = SecCompType::LOCATION_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
@@ -514,11 +558,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         componentInfo = buttonInfo.ToJsonStr();
     } else if (type == V2::PASTE_BUTTON_ETS_TAG) {
         PasteButton buttonInfo;
-        buttonInfo.parentEffect_ = CheckParentNodesEffect(node, buttonInfo);
-        buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
-        buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
-        buttonInfo.bg_ = static_cast<SecCompBackground>(
-            layoutProperty->GetBackgroundType().value());
+        WriteButtonInfo(layoutProperty, node, buttonInfo);
         buttonInfo.type_ = SecCompType::PASTE_COMPONENT;
         scType = SecCompType::PASTE_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
@@ -527,11 +567,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         componentInfo = buttonInfo.ToJsonStr();
     } else if (type == V2::SAVE_BUTTON_ETS_TAG) {
         SaveButton buttonInfo;
-        buttonInfo.parentEffect_ = CheckParentNodesEffect(node, buttonInfo);
-        buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
-        buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
-        buttonInfo.bg_ = static_cast<SecCompBackground>(
-            layoutProperty->GetBackgroundType().value());
+        WriteButtonInfo(layoutProperty, node, buttonInfo);
         buttonInfo.type_ = SecCompType::SAVE_COMPONENT;
         scType = SecCompType::SAVE_COMPONENT;
         if (!InitChildInfo(buttonInfo, node)) {
@@ -603,6 +639,7 @@ bool SecurityComponentHandler::CheckContainerTags(const RefPtr<FrameNode>& frame
     const RefPtr<RenderContext> renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     if (containerComponentTags.find(frameNode->GetTag()) != containerComponentTags.end() &&
+        renderContext->GetBackgroundColor().has_value() &&
         renderContext->GetBackgroundColor()->ColorToString().compare("#00000000") == 0) {
         return true;
     }
