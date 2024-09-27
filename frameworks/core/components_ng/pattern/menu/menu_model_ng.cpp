@@ -29,12 +29,10 @@ void MenuModelNG::Create()
     CHECK_NULL_VOID(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            auto layoutProps = menuNode->GetLayoutProperty();
-            CHECK_NULL_VOID(layoutProps);
-            // default min width
-            layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
-        }
+        auto layoutProps = menuNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProps);
+        // default min width
+        layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
     }
 }
 
@@ -46,11 +44,14 @@ RefPtr<FrameNode> MenuModelNG::CreateFrameNode(int32_t nodeId)
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId, patternCreator);
     if (frameNode == nullptr)
         return nullptr;
-    auto layoutProps = frameNode->GetLayoutProperty();
-        if (layoutProps == nullptr)
-            return nullptr;
-        // default min width
-    layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
+    
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        auto layoutProps = frameNode->GetLayoutProperty();
+            if (layoutProps == nullptr)
+                return nullptr;
+            // default min width
+        layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
+    }
     return frameNode;
 }
 
