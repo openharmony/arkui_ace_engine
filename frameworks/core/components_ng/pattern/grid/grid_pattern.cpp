@@ -1735,6 +1735,12 @@ void GridPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(gridLayoutInfo_.childrenCount_));
     DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
     DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
+    property->GetRowsGap().has_value()
+        ? DumpLog::GetInstance().AddDesc("RowsGap:" + std::to_string(property->GetRowsGap().value().Value()))
+        : DumpLog::GetInstance().AddDesc("RowsGap:null");
+    property->GetColumnsGap().has_value()
+        ? DumpLog::GetInstance().AddDesc("ColumnsGap:" + std::to_string(property->GetColumnsGap().value().Value()))
+        : DumpLog::GetInstance().AddDesc("ColumnsGap:null");
     property->GetCachedCount().has_value()
         ? DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value()))
         : DumpLog::GetInstance().AddDesc("CachedCount:null");
