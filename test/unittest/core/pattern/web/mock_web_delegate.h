@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_MOCK_WEB_DELEGATE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_MOCK_WEB_DELEGATE_H
 
+#include <string>
 namespace OHOS::Ace {
-extern int g_funcHandleDragEventRepeat;
+void SetReturnStatus(const std::string& status);
+void SetComponentType(const std::string& type);
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_MOCK_WEB_DELEGATE_H

@@ -22,11 +22,10 @@
 
 namespace OHOS::Ace {
 #define EGLCONFIG_VERSION 3
-int g_funcHandleDragEventRepeat = 0;
-static int32_t returnTime = 0;
-constexpr int32_t COUNTER_NUMBER_ZERO = 0;
-constexpr int32_t NODE_INFO_DIVISOR = 2;
-constexpr int32_t COUNTER_NUMBER_MAX = 10;
+static std::string g_setReturnStatus = "";
+const std::string STATUS_TRUE = "true";
+static std::string g_setComponentType = "";
+const std::string STATUS_FALSE = "false";
 class MockNWebAccessibilityNodeInfoOnlyForReturn : public NWeb::NWebAccessibilityNodeInfo {
 public:
     std::string GetHint() override
@@ -60,6 +59,9 @@ public:
     }
     std::vector<int64_t> GetChildIds() override
     {
+        if (g_setReturnStatus == STATUS_TRUE) {
+            return { 1 };
+        }
         return {};
     }
     void SetParentId(int64_t parentId) override {}
@@ -177,7 +179,8 @@ public:
     }
     std::string GetComponentType() override
     {
-        return "";
+        g_setReturnStatus = STATUS_FALSE;
+        return g_setComponentType;
     }
     std::string GetDescriptionInfo() override
     {
@@ -414,7 +417,6 @@ void WebDelegate::CreatePlatformResource(
 {}
 void WebDelegate::LoadUrl(const std::string& url, const std::map<std::string, std::string>& httpHeaders)
 {
-    g_funcHandleDragEventRepeat++;
 }
 #ifdef OHOS_STANDARD_SYSTEM
 void WebDelegate::Backward() {}
@@ -933,11 +935,6 @@ void WebDelegate::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupM
 }
 void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction)
 {
-    if ((x != 0 || y != 0) && dragAction == DragAction::DRAG_END) {
-        g_funcHandleDragEventRepeat--;
-    } else {
-        g_funcHandleDragEventRepeat++;
-    }
 }
 std::string WebDelegate::GetUrl()
 {
@@ -1067,12 +1064,15 @@ void WebDelegate::SetAccessibilityState(bool state) {}
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
     int64_t accessibilityId, bool isAccessibilityFocus)
 {
+    if (g_setReturnStatus == STATUS_TRUE) {
+        return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
+    }
     return nullptr;
 }
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoById(
     int64_t accessibilityId)
 {
-    if (accessibilityId % NODE_INFO_DIVISOR == COUNTER_NUMBER_ZERO) {
+    if (g_setReturnStatus == STATUS_TRUE) {
         return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
     }
     return nullptr;
@@ -1080,6 +1080,9 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoByFocusMove(
     int64_t accessibilityId, int32_t direction)
 {
+    if (g_setReturnStatus == STATUS_TRUE) {
+        return std::make_shared<MockNWebAccessibilityNodeInfoOnlyForReturn>();
+    }
     return nullptr;
 }
 OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() const
@@ -1151,14 +1154,7 @@ void WebDelegate::OnTextSelected() {}
 void WebDelegate::OnDestroyImageAnalyzerOverlay() {}
 std::string WebDelegate::GetWebInfoType()
 {
-    if (returnTime >= COUNTER_NUMBER_MAX) {
-        returnTime = COUNTER_NUMBER_ZERO;
-    }
-    returnTime++;
-    if (returnTime % NODE_INFO_DIVISOR == COUNTER_NUMBER_ZERO) {
-        return "8";
-    }
-    return "";
+    return g_setReturnStatus;
 }
 void WebDelegate::SetSurfaceId(const std::string& surfaceId) {}
 void WebDelegate::OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) {}
@@ -1169,5 +1165,13 @@ std::string WebDelegate::SpanstringConvertHtml(const std::vector<uint8_t>& conte
 bool WebDelegate::CloseImageOverlaySelection()
 {
     return false;
+}
+void SetReturnStatus(const std::string& status)
+{
+    g_setReturnStatus = status;
+}
+void SetComponentType(const std::string& type)
+{
+    g_setComponentType = type;
 }
 } // namespace OHOS::Ace
