@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/node/node_api.h"
 #include "converter.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -77,8 +76,8 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
     if (resource.id.tag == ARK_TAG_INT32 && resource.type.tag == ARK_TAG_INT32) {
         id_ = resource.id.i32;
         type_ = static_cast<NodeModifier::ResourceType>(resource.type.i32);
-        bundleName_ = std::string(resource.bundleName.chars);
-        moduleName_ = std::string(resource.moduleName.chars);
+        bundleName_ = Convert<std::string>(resource.bundleName);
+        moduleName_ = Convert<std::string>(resource.moduleName);
         if (resource.params.tag != ARK_TAG_UNDEFINED) {
             for (int i = 0; i < resource.params.value.length; i++) {
                 params_.emplace_back(resource.params.value.array[i].chars);
@@ -140,7 +139,7 @@ std::optional<StringArray> ResourceConverter::ToStringArray()
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == NodeModifier::ResourceType::STRING) {
+    if (type_ == NodeModifier::ResourceType::FLOAT) {
         return themeConstants_->GetDimension(id_);
     }
     return std::nullopt;
@@ -148,11 +147,16 @@ std::optional<Dimension> ResourceConverter::ToDimension()
 
 std::optional<float> ResourceConverter::ToFloat()
 {
+    std::optional<float> optFloat = std::nullopt;
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
     if (type_ == NodeModifier::ResourceType::FLOAT) {
-        return static_cast<float>(themeConstants_->GetDouble(id_));
+        if (id_ == -1 && params_.size() > 0) {
+            optFloat = static_cast<float>(themeConstants_->GetDoubleByName(params_[0]));
+        } else {
+            optFloat = static_cast<float>(themeConstants_->GetDouble(id_));
+        }
     }
-    return std::nullopt;
+    return optFloat;
 }
 
 std::optional<int32_t> ResourceConverter::ToInt()
@@ -358,6 +362,28 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
 {
     LOGE("Convert [Ark_ICurve] to [RefPtr<Curve>] is not supported");
     return nullptr;
+}
+
+template<>
+void AssignTo(std::optional<float>& dst, const Ark_String& src)
+{
+    auto value = Convert<std::string>(src);
+    double result;
+    if (StringUtils::StringToDouble(value, result)) {
+        dst = result;
+    }
+}
+
+template<>
+Dimension Convert(const Ark_Length& src)
+{
+    if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
+        auto resource = ArkValue<Ark_Resource>(src);
+        ResourceConverter converter(resource);
+        return converter.ToDimension().value_or(Dimension());
+    } else {
+        return Dimension(src.value, static_cast<DimensionUnit>(src.unit));
+    }
 }
 
 } // namespace OHOS::Ace::NG::Converter

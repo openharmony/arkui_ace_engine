@@ -17,6 +17,11 @@
 
 namespace OHOS::Ace::NG {
 namespace Validator {
+namespace {
+    constexpr float DEFAULT_OPACITY = 1.0;
+    constexpr float MIN_OPACITY = 0.0;
+} // namespace
+
 void ValidateNonNegative(std::optional<Dimension>& opt)
 {
     if (opt.has_value() && opt.value().IsNegative()) {
@@ -33,6 +38,13 @@ void ValidatePositive(std::optional<Dimension>& opt)
 {
     if (opt.has_value() && opt.value().IsNonPositive()) {
         opt.reset();
+    }
+}
+void ValidateOpacity(std::optional<float>& opt)
+{
+    if (opt.has_value()) {
+        opt.value() = std::min(opt.value(), DEFAULT_OPACITY);
+        opt.value() = std::max(opt.value(), MIN_OPACITY);
     }
 }
 } // namespace OHOS::Ace::NG::Validator

@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include "reverse_converter.h"
 #include "bridge/common/utils/utils.h"
 #include "base/geometry/axis.h"
 #include "base/geometry/calc_dimension.h"
@@ -31,6 +32,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -39,7 +41,6 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/image/image_source_info.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
 #include "ace_engine_types.h"
@@ -319,11 +320,7 @@ namespace Converter {
     }
 
     template<>
-    inline Dimension Convert(const Ark_Length& src)
-    {
-        return src.type == Ark_Tag::ARK_TAG_RESOURCE ?
-               Dimension() : Dimension(src.value, static_cast<DimensionUnit>(src.unit));
-    }
+    Dimension Convert(const Ark_Length& src);
 
     template<>
     inline std::pair<Dimension, Dimension> Convert(const Tuple_Length_Length& src)
@@ -543,6 +540,8 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
 
+    template<> void AssignTo(std::optional<float>& dst, const Ark_String& src);
+
     // Enums specializations
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
     template<> void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
@@ -554,6 +553,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
+    template<> void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src);
+    template<> void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src);
     template<> void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);

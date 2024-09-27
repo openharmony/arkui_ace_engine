@@ -164,7 +164,7 @@ HWTEST_F(TextModifierTest, setMinFontSize, TestSize.Level1)
     auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
     const Union_Number_String_Resource size3 = {
         .selector = 2,
-        .value2 = ArkResource(&resName, -1, NodeModifier::ResourceType::STRING)
+        .value2 = ArkResource(&resName, -1, NodeModifier::ResourceType::FLOAT)
     };
 
     modifier_->setMinFontSize(node_, &size3);
@@ -194,7 +194,7 @@ HWTEST_F(TextModifierTest, setMaxFontSize, TestSize.Level1)
     auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
     const Union_Number_String_Resource size3 = {
         .selector = 2,
-        .value2 = ArkResource(&resName, -1, NodeModifier::ResourceType::STRING)
+        .value2 = ArkResource(&resName, -1, NodeModifier::ResourceType::FLOAT)
     };
 
     modifier_->setMaxFontSize(node_, &size3);
@@ -325,7 +325,7 @@ HWTEST_F(TextModifierTest, setLineHeight, TestSize.Level1)
     auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
     const Union_Number_String_Resource size3 = {
         .selector = 2,
-        .value2 = ArkResource(&resName, -1, NodeModifier::ResourceType::STRING)
+        .value2 = ArkResource(&resName, -1, NodeModifier::ResourceType::FLOAT)
     };
 
     modifier_->setLineHeight(node_, &size3);

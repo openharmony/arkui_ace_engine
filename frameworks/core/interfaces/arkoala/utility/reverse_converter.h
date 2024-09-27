@@ -24,6 +24,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "core/interfaces/native/node/node_api.h"
 #include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -149,6 +150,13 @@ namespace OHOS::Ace::NG::Converter {
     inline void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
     {
         dst.alwaysEnabled = src;
+    }
+
+    inline void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
+    {
+        dst.id = ArkValue<Ark_Number>(src.resource);
+        dst.type = ArkValue<Ark_Number>(static_cast<Ark_Int32>(NodeModifier::ResourceType::FLOAT));
+        dst.params.tag = ARK_TAG_UNDEFINED;
     }
 
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
