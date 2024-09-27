@@ -16,11 +16,14 @@
 #include "core/interfaces/native/node/node_animate.h"
 
 #include "base/error/error_code.h"
+#include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG::ViewAnimate {
 namespace {
+int32_t g_animationCount = 0;
+
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES_LIST = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -54,10 +57,33 @@ enum class ArkUICurveType {
     CURVE_TYPE_INTERPOLATING_SPRING,
     CURVE_TYPE_CUSTOM,
 };
+
+void PrintNodeAnimationInfo(const AnimationOption& option,
+    AnimationInterface interface, const std::optional<int32_t>& cnt)
+{
+    if (option.GetIteration() == ANIMATION_REPEAT_INFINITE) {
+        if (interface == AnimationInterface::KEYFRAME_ANIMATE_TO) {
+            TAG_LOGI(AceLogTag::ACE_ANIMATION,
+                "nodeAnimate:keyframeAnimateTo iteration is infinite, remember to stop it. total duration:%{public}d",
+                option.GetDuration());
+        } else {
+            TAG_LOGI(AceLogTag::ACE_ANIMATION,
+                "nodeAnimate:%{public}s iteration is infinite, remember to stop it."
+                "duration:%{public}d, curve:%{public}s",
+                g_animationInterfaceNames[static_cast<int>(interface)],
+                option.GetDuration(), option.GetCurve()->ToString().c_str());
+        }
+        return;
+    }
+    if (cnt) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "nodeAnimate:%{public}s starts, [%{public}s], finish cnt:%{public}d",
+            g_animationInterfaceNames[static_cast<int>(interface)], option.ToString().c_str(), cnt.value());
+    }
+}
 } // namespace
 
 void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::function<void()>& animateToFunc,
-    const std::function<void()>& onFinishFunc, bool immediately)
+    const std::function<void()>& onFinishFunc, const std::optional<int32_t>& count, bool immediately)
 {
     CHECK_NULL_VOID(context);
     ContainerScope scope(context->id);
@@ -68,6 +94,8 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
 
     ACE_SCOPED_TRACE("duration:%d, curve:%s, iteration:%d", option.GetDuration(), option.GetCurve()->ToString().c_str(),
         option.GetIteration());
+    PrintNodeAnimationInfo(
+        option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO, count);
     auto triggerId = context->id;
     AceEngine::Get().NotifyContainers([triggerId, option](const RefPtr<Container>& container) {
         auto context = container->GetPipelineContext();
@@ -151,15 +179,19 @@ void AnimateTo(ArkUIContext* context, ArkUIAnimateOption option, void (*event)(v
             event(user);
         }
     };
-
-    auto onFinishEvent = [option]() {
-        if (option.onFinishCallback) {
+    std::optional<int32_t> count;
+    std::function<void()> onFinishEvent;
+    if (option.onFinishCallback) {
+        count = g_animationCount++;
+        onFinishEvent = [option, count]() {
+            ACE_SCOPED_TRACE("nodeAnimate:onFinish[cnt:%d]", count.value());
+            TAG_LOGI(AceLogTag::ACE_ANIMATION, "nodeAnimate:animateTo finish, cnt:%{public}d", count.value());
             auto* onFinishFunc = reinterpret_cast<void (*)(void*)>(option.onFinishCallback);
             onFinishFunc(option.user);
-        }
-    };
+        };
+    }
 
-    AnimateToInner(context, animationOption, onEvent, onFinishEvent, false);
+    AnimateToInner(context, animationOption, onEvent, onFinishEvent, count, false);
 }
 
 void KeyframeAnimateTo(ArkUIContext* context, ArkUIKeyframeAnimateOption* animateOption)
