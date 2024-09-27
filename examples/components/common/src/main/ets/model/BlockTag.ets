@@ -14,8 +14,8 @@
  */
 
 export class BlockTag {
-  nowTime: string = '';
-  tagDes: string = '';
+  public nowTime: string = '';
+  public tagDes: string = '';
   constructor(nowTime: string, tagDes: string) {
     this.nowTime = nowTime;
     this.tagDes = tagDes;
