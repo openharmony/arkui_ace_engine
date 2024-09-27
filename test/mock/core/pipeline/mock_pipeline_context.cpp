@@ -319,6 +319,8 @@ void PipelineContext::SendEventToAccessibilityWithNode(
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
 
+void PipelineContext::ReDispatch(KeyEvent& keyEvent) {}
+
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}

@@ -1776,11 +1776,44 @@ HWTEST_F(WebPatternSelectTestNg, GetSelectInfo, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnSelectionMenuOptionsUpdate
+ * @tc.name: OnSelectionMenuOptionsUpdate_001
  * @tc.desc: OnSelectionMenuOptionsUpdate.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternSelectTestNg, OnSelectionMenuOptionsUpdate, TestSize.Level1)
+HWTEST_F(WebPatternSelectTestNg, OnSelectionMenuOptionsUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    NG::MenuOptionsParam option1;
+    std::vector<NG::MenuOptionsParam> options;
+    option1.action = [](const std::string&) {};
+    options.push_back(option1);
+    WebMenuOptionsParam webMenuOption;
+    webMenuOption.menuOption = options;
+    webPattern->OnSelectionMenuOptionsUpdate(webMenuOption);
+    for (auto& menuOption : webPattern->menuOptionParam_) {
+        if (menuOption.action) {
+            std::string someString = "Example Selection";
+            menuOption.action(someString);
+        }
+    }
+    EXPECT_FALSE(webPattern->menuOptionParam_.empty());
+#endif
+}
+
+/**
+ * @tc.name: OnSelectionMenuOptionsUpdate_002
+ * @tc.desc: OnSelectionMenuOptionsUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, OnSelectionMenuOptionsUpdate_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1797,6 +1830,13 @@ HWTEST_F(WebPatternSelectTestNg, OnSelectionMenuOptionsUpdate, TestSize.Level1)
     WebMenuOptionsParam webMenuOption;
     webMenuOption.menuOption = options;
     webPattern->OnSelectionMenuOptionsUpdate(webMenuOption);
+    for (auto& menuOption : webPattern->menuOptionParam_) {
+        if (menuOption.action) {
+            std::string someString = "Example Selection";
+            menuOption.action(someString);
+        }
+    }
+    EXPECT_FALSE(webPattern->menuOptionParam_.empty());
 #endif
 }
 
