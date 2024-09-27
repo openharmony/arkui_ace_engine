@@ -38,6 +38,10 @@ const auto OPT_UNDEF_NUM = ArkValue<Opt_Number>();
 const auto ARK_EMPTY_STR = ArkValue<Ark_String>("");
 const Ark_Length RES_ARK_LENGTH = { .type = ARK_TAG_RESOURCE, .resource = FAKE_RES_ID };
 
+const auto ATTRIBUTE_WIDTH_NAME = "width";
+const auto ATTRIBUTE_WIDTH_DEFAULT_VALUE = "0.00vp";
+const auto ATTRIBUTE_HEIGHT_NAME = "height";
+const auto ATTRIBUTE_HEIGHT_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_MARGIN_NAME = "margin";
 const auto ATTRIBUTE_MARGIN_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_PADDING_NAME = "padding";
@@ -124,6 +128,280 @@ public:
         return render_ ? render_->GetSharedTransitionOption() : nullptr;
     }
 };
+
+/*
+ * @tc.name: setWidthTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setWidthTestDefaultValues, TestSize.Level1)
+{
+    std::string strResult;
+
+    strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setWidthTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setWidthTestValidValues, TestSize.Level1)
+{
+    Ark_Length inputValue;
+
+    typedef std::pair<Ark_Length, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkValue<Ark_Length>(1), "1.00px" },
+        { Converter::ArkValue<Ark_Length>(0), "0.00px" },
+        { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
+        { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
+        { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
+        { Converter::ArkValue<Ark_Length>(7.0_vp), "7.00vp" },
+        { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
+        { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
+        { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
+        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { RES_ARK_LENGTH, "10.00px" },
+    };
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        inputValue = Converter::ArkValue<Ark_Length>(arkLength);
+        modifier_->setWidth(node_, &inputValue);
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_EQ(strResult, expected);
+    }
+}
+
+/*
+ * @tc.name: setWidthTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setWidthTestInvalidValues, TestSize.Level1)
+{
+    Ark_Length inputValue;
+
+    typedef std::pair<Ark_Length, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkValue<Ark_Length>(-1), "-1.00px" },
+        { Converter::ArkValue<Ark_Length>(-2.45f), "-2.45vp" },
+        { Converter::ArkValue<Ark_Length>(-5.0_px), "-5.00px" },
+        { Converter::ArkValue<Ark_Length>(-22.35_px), "-22.35px" },
+        { Converter::ArkValue<Ark_Length>(-7.0_vp), "-7.00vp" },
+        { Converter::ArkValue<Ark_Length>(-1.65_vp), "-1.65vp" },
+        { Converter::ArkValue<Ark_Length>(-65.0_fp), "-65.00fp" },
+        { Converter::ArkValue<Ark_Length>(-4.3_fp), "-4.30fp" },
+    };
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        inputValue = Converter::ArkValue<Ark_Length>(arkLength);
+        modifier_->setWidth(node_, &inputValue);
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+    }
+
+    modifier_->setWidth(node_, nullptr);
+    auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setHeightTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setHeightTestDefaultValues, TestSize.Level1)
+{
+    std::string strResult;
+
+    strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setHeightTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setHeightTestValidValues, TestSize.Level1)
+{
+    Ark_Length inputValue;
+
+    typedef std::pair<Ark_Length, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkValue<Ark_Length>(1), "1.00px" },
+        { Converter::ArkValue<Ark_Length>(0), "0.00px" },
+        { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
+        { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
+        { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
+        { Converter::ArkValue<Ark_Length>(7.0_vp), "7.00vp" },
+        { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
+        { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
+        { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
+        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { RES_ARK_LENGTH, "10.00px" },
+    };
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        inputValue = Converter::ArkValue<Ark_Length>(arkLength);
+        modifier_->setHeight(node_, &inputValue);
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_EQ(strResult, expected);
+    }
+}
+
+/*
+ * @tc.name: setHeightTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setHeightTestInvalidValues, TestSize.Level1)
+{
+    Ark_Length inputValue;
+
+    typedef std::pair<Ark_Length, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkValue<Ark_Length>(-1), "-1.00px" },
+        { Converter::ArkValue<Ark_Length>(-2.45f), "-2.45vp" },
+        { Converter::ArkValue<Ark_Length>(-5.0_px), "-5.00px" },
+        { Converter::ArkValue<Ark_Length>(-22.35_px), "-22.35px" },
+        { Converter::ArkValue<Ark_Length>(-7.0_vp), "-7.00vp" },
+        { Converter::ArkValue<Ark_Length>(-1.65_vp), "-1.65vp" },
+        { Converter::ArkValue<Ark_Length>(-65.0_fp), "-65.00fp" },
+        { Converter::ArkValue<Ark_Length>(-4.3_fp), "-4.30fp" },
+    };
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        inputValue = Converter::ArkValue<Ark_Length>(arkLength);
+        modifier_->setHeight(node_, &inputValue);
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+    }
+
+    modifier_->setHeight(node_, nullptr);
+    auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setSizeTestValidHeightValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setSizeTestValidHeightValues, TestSize.Level1)
+{
+    Ark_SizeOptions inputValue;
+
+    typedef std::pair<Ark_Length, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkValue<Ark_Length>(1), "1.00px" },
+        { Converter::ArkValue<Ark_Length>(0), "0.00px" },
+        { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
+        { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
+        { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
+        { Converter::ArkValue<Ark_Length>(7.0_vp), "7.00vp" },
+        { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
+        { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
+        { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
+        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { RES_ARK_LENGTH, "10.00px" },
+    };
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        inputValue.height = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        inputValue.width = Converter::ArkValue<Opt_Length>(Ark_Empty());
+        modifier_->setSize(node_, &inputValue);
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_EQ(strResult, expected);
+        strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+    }
+}
+
+/*
+ * @tc.name: setSizeTestValidWidthValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setSizeTestValidWidthValues, TestSize.Level1)
+{
+    Ark_SizeOptions inputValue;
+
+    typedef std::pair<Ark_Length, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkValue<Ark_Length>(1), "1.00px" },
+        { Converter::ArkValue<Ark_Length>(0), "0.00px" },
+        { Converter::ArkValue<Ark_Length>(2.45f), "2.45vp" },
+        { Converter::ArkValue<Ark_Length>(5.0_px), "5.00px" },
+        { Converter::ArkValue<Ark_Length>(22.35_px), "22.35px" },
+        { Converter::ArkValue<Ark_Length>(7.0_vp), "7.00vp" },
+        { Converter::ArkValue<Ark_Length>(1.65_vp), "1.65vp" },
+        { Converter::ArkValue<Ark_Length>(65.0_fp), "65.00fp" },
+        { Converter::ArkValue<Ark_Length>(4.3_fp), "4.30fp" },
+        { Converter::ArkValue<Ark_Length>(0.12_pct), "12.00%" },
+        { RES_ARK_LENGTH, "10.00px" },
+    };
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        inputValue.width = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        inputValue.height = Converter::ArkValue<Opt_Length>(Ark_Empty());
+        modifier_->setSize(node_, &inputValue);
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_EQ(strResult, expected);
+        strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+    }
+}
+
+/*
+ * @tc.name: setSizeTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setSizeTestInvalidValues, TestSize.Level1)
+{
+    Ark_SizeOptions inputValue;
+
+    typedef std::pair<Ark_Length, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkValue<Ark_Length>(-1), "-1.00px" },
+        { Converter::ArkValue<Ark_Length>(-2.45f), "-2.45vp" },
+        { Converter::ArkValue<Ark_Length>(-5.0_px), "-5.00px" },
+        { Converter::ArkValue<Ark_Length>(-22.35_px), "-22.35px" },
+        { Converter::ArkValue<Ark_Length>(-7.0_vp), "-7.00vp" },
+        { Converter::ArkValue<Ark_Length>(-1.65_vp), "-1.65vp" },
+        { Converter::ArkValue<Ark_Length>(-65.0_fp), "-65.00fp" },
+        { Converter::ArkValue<Ark_Length>(-4.3_fp), "-4.30fp" },
+    };
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        inputValue.width = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        inputValue.height = Converter::ArkValue<Opt_Length>(Ark_Empty());
+        modifier_->setSize(node_, &inputValue);
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+        strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+    }
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        inputValue.height = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
+        inputValue.width = Converter::ArkValue<Opt_Length>(Ark_Empty());
+        modifier_->setSize(node_, &inputValue);
+        auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
+        EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+        strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
+        EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+    }
+
+    modifier_->setSize(node_, nullptr);
+    auto strResult = GetStringAttribute(node_, ATTRIBUTE_WIDTH_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_WIDTH_DEFAULT_VALUE);
+    strResult = GetStringAttribute(node_, ATTRIBUTE_HEIGHT_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_HEIGHT_DEFAULT_VALUE);
+}
 
 /**
  * @tc.name: setSwiperOptionsTest
