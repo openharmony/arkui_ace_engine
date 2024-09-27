@@ -213,6 +213,7 @@ namespace Converter {
 
     // Implementation is in cpp
     Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo &info);
+    Ark_ClickEvent ConvertClickEventInfo(OHOS::Ace::GestureEvent& info);
 
     template<>
     inline ImageSourceInfo Convert(const Ark_String& value)
