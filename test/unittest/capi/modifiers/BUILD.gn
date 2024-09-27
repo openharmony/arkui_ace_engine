@@ -46,6 +46,7 @@ ace_unittest("capi_all_modifiers_test") {
     "path_modifier_test.cpp",
     "radio_modifier_test.cpp",
     "rect_modifier_test.cpp",
+    "scroll_modifier_test.cpp",
     "search_modifier_resources_test.cpp",
     "search_modifier_test.cpp",
     "select_modifier_test.cpp",
@@ -54,7 +55,6 @@ ace_unittest("capi_all_modifiers_test") {
     "tabs_modifier_test.cpp",
     "text_area_modifier_test.cpp",
     "text_modifier_test.cpp",
-    "scroll_modifier_test.cpp",
   ]
   extra_deps = []
   extra_deps += [
