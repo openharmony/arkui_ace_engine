@@ -579,6 +579,21 @@ int32_t AccessibilityProperty::GetUserCheckedType()
     return checkedType_.value_or(0);
 }
 
+void AccessibilityProperty::SetUserCheckable(const bool& checkable)
+{
+    isUserCheckable_ = checkable;
+}
+
+bool AccessibilityProperty::HasUserCheckable()
+{
+    return isUserCheckable_.has_value();
+}
+
+bool AccessibilityProperty::IsUserCheckable()
+{
+    return isUserCheckable_.value_or(false);
+}
+
 void AccessibilityProperty::SetUserMinValue(const int32_t& minValue)
 {
     minValue_ = minValue;

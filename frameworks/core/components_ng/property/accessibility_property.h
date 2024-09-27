@@ -710,6 +710,10 @@ public:
     bool HasUserTextValue();
     std::string GetUserTextValue();
 
+    void SetUserCheckable(const bool& checkable);
+    bool HasUserCheckable();
+    bool IsUserCheckable();
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -787,6 +791,7 @@ protected:
     std::optional<bool> isDisabled_;
     std::optional<bool> isSelected_;
     std::optional<int32_t> checkedType_;
+    std::optional<bool> isUserCheckable_;
 
     std::optional<int32_t> minValue_;
     std::optional<int32_t> maxValue_;

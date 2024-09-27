@@ -1047,6 +1047,33 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
         nodeInfo.AddAction(action);
     }
 }
+
+void UpdateUserAccessibilityElementInfo(
+    const RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo)
+{
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (accessibilityProperty->HasUserDisabled()) {
+        nodeInfo.SetEnabled(!accessibilityProperty->IsUserDisabled());
+    }
+    if (accessibilityProperty->HasUserCheckedType()) {
+        nodeInfo.SetChecked(accessibilityProperty->GetUserCheckedType());
+    } else {
+        nodeInfo.SetChecked(accessibilityProperty->IsChecked());
+    }
+    if (accessibilityProperty->HasUserSelected()) {
+        nodeInfo.SetSelected(accessibilityProperty->IsUserSelected());
+    } else {
+        nodeInfo.SetSelected(accessibilityProperty->IsSelected());
+    }
+
+    if (nodeInfo.IsEnabled()) {
+        if (accessibilityProperty->HasUserCheckable()) {
+            nodeInfo.SetCheckable(accessibilityProperty->IsUserCheckable());
+        } else {
+            nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
+        }
+    }
+}
 }
 
 void JsAccessibilityManager::UpdateAccessibilityElementInfo(
@@ -1101,19 +1128,9 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
             nodeInfo.SetHitTestBehavior(gestureEventHub->GetHitTestModeStr());
         }
     }
-    if (accessibilityProperty->HasUserDisabled()) {
-        nodeInfo.SetEnabled(!accessibilityProperty->IsUserDisabled());
-    }
-    if (accessibilityProperty->HasUserCheckedType()) {
-        nodeInfo.SetChecked(accessibilityProperty->GetUserCheckedType());
-    } else {
-        nodeInfo.SetChecked(accessibilityProperty->IsChecked());
-    }
-    if (accessibilityProperty->HasUserSelected()) {
-        nodeInfo.SetSelected(accessibilityProperty->IsUserSelected());
-    } else {
-        nodeInfo.SetSelected(accessibilityProperty->IsSelected());
-    }
+
+    UpdateUserAccessibilityElementInfo(accessibilityProperty, nodeInfo);
+
     nodeInfo.SetPassword(accessibilityProperty->IsPassword());
     nodeInfo.SetPluraLineSupported(accessibilityProperty->IsMultiLine());
     nodeInfo.SetHinting(accessibilityProperty->IsHint());
@@ -1177,7 +1194,6 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 
     SetAccessibilityFocusAction(nodeInfo, "ace");
     if (nodeInfo.IsEnabled()) {
-        nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
         nodeInfo.SetScrollable(accessibilityProperty->IsScrollable());
         nodeInfo.SetEditable(accessibilityProperty->IsEditable());
         nodeInfo.SetDeletable(accessibilityProperty->IsDeletable());
@@ -2917,7 +2933,7 @@ static void DumpAccessibilityElementInfosTreeNG(
             std::to_string(accessibilityInfo.IsLongClickable()));
         DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(accessibilityInfo.IsCheckable()));
         DumpLog::GetInstance().AddDesc("scrollable: " + std::to_string(accessibilityInfo.IsScrollable()));
-        DumpLog::GetInstance().AddDesc("checked: " + std::to_string(accessibilityInfo.IsCheckable()));
+        DumpLog::GetInstance().AddDesc("checked: " + std::to_string(accessibilityInfo.IsChecked()));
         DumpLog::GetInstance().AddDesc("hint: " + accessibilityInfo.GetHint());
         DumpLog::GetInstance().Print(depth, accessibilityInfo.GetComponentType(), accessibilityInfo.GetChildCount());
         depth ++;

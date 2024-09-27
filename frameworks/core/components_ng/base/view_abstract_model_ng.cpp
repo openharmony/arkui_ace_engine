@@ -648,6 +648,7 @@ void ViewAbstractModelNG::SetAccessibilityChecked(bool checked)
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetUserCheckedType(checked);
+    accessibilityProperty->SetUserCheckable(true);
 }
 
 void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
@@ -712,6 +713,7 @@ void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool che
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetUserCheckedType(checked);
+    accessibilityProperty->SetUserCheckable(true);
 }
 
 } // namespace OHOS::Ace::NG
