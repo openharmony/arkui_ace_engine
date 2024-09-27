@@ -392,7 +392,6 @@ export struct SelectDialog {
   contentScroller: Scroller = new Scroller();
   @State fontSizeScale: number = 1;
   @State minContentHeight: number = MIN_CONTENT_HEIGHT;
-  @State bgColorList: ResourceColor[] = [];
 
   @Styles
   paddingContentStyle() {
@@ -536,7 +535,6 @@ export struct SelectDialog {
     this.theme.colors.compDivider : $r('sys.color.comp_divider');
     this.initContentPadding();
     this.initButtons();
-    this.initBgColorList();
   }
 
   private initContentPadding(): void {
@@ -568,12 +566,6 @@ export struct SelectDialog {
     this.buttons = [];
     if (this.confirm) {
       this.buttons.push(this.confirm);
-    }
-  }
-
-  private initBgColorList(): void {
-    for (let i = 0; i < this.radioContent.length; i++) {
-      this.bgColorList.push($r('sys.color.ohos_id_color_sub_background_transparent'))
     }
   }
 }
