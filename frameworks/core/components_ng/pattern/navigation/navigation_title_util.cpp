@@ -242,6 +242,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<Navigat
         menuItemLayoutProperty->UpdatePadding(padding);
         MarginProperty margin;
         margin.right = CalcLength(theme->GetCompPadding());
+        margin.end = CalcLength(theme->GetCompPadding());
         menuItemLayoutProperty->UpdateMargin(margin);
     } else {
         menuItemLayoutProperty->UpdateUserDefinedIdealSize(
