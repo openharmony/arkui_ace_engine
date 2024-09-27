@@ -5745,7 +5745,7 @@ void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<st
 {
     std::lock_guard<std::mutex> lock(mutex_);
     bool result = func();
-    if (isCNode_) {
+    if (IsCNode()) {
         return;
     }
     if (result) {
@@ -5766,7 +5766,7 @@ std::string FrameNode::GetJSCustomProperty(const std::string& key)
 
 bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)
 {
-    if (!isCNode_) {
+    if (!IsCNode()) {
         return false;
     }
     std::lock_guard<std::mutex> lock(mutex_);
