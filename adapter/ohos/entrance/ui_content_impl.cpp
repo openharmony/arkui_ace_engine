@@ -93,6 +93,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef FORM_SUPPORTED
@@ -117,7 +118,6 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
-constexpr int32_t AVOID_DELAY_TIME = 50;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -184,9 +184,16 @@ void AddResConfigInfo(
     aceResCfg.SetAppHasDarkRes(resConfig->GetAppDarkRes());
     auto preferredLocaleInfo = resConfig->GetPreferredLocaleInfo();
     if (preferredLocaleInfo != nullptr) {
-        aceResCfg.SetPreferredLanguage(preferredLocaleInfo->getLanguage());
-        aceResCfg.SetPreferredCountry(preferredLocaleInfo->getCountry());
-        aceResCfg.SetPreferredScript(preferredLocaleInfo->getScript());
+        std::string preferredlanguage = preferredLocaleInfo->getLanguage();
+        std::string script = preferredLocaleInfo->getScript();
+        std::string country = preferredLocaleInfo->getCountry();
+        if (!script.empty()) {
+            preferredlanguage += "-" + script;
+        }
+        if (!country.empty()) {
+            preferredlanguage += "-" + country;
+        }
+        aceResCfg.SetPreferredLanguage(preferredlanguage);
     }
 }
 
@@ -441,20 +448,50 @@ public:
         auto curWindow = context->GetCurrentWindowRect();
         positionY -= curWindow.Top();
         ContainerScope scope(instanceId_);
-        if (NearZero(keyboardRect.Height())) {
-            taskExecutor->PostSyncTask([context, keyboardRect, rsTransaction, positionY, height] {
-                    CHECK_NULL_VOID(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
-                }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
-        } else {
-            taskExecutor->PostDelayedTask([context, keyboardRect, rsTransaction, positionY, height] {
-                    CHECK_NULL_VOID(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
-                }, TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChange");
+        if (LaterAvoid(keyboardRect, positionY, height)) {
+            return;
         }
+        taskExecutor->PostSyncTask([context, keyboardRect, rsTransaction, positionY, height] {
+                CHECK_NULL_VOID(context);
+                context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
+            }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
     }
 
 private:
+    bool LaterAvoid(const Rect& keyboardRect, double positionY, double height)
+    {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_RETURN(container, false);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, false);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_RETURN(context, false);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+        bool isRotate = false;
+        auto displayInfo = container->GetDisplayInfo();
+        uint32_t lastKeyboardHeight = pipeline && pipeline->GetSafeAreaManager() ?
+            pipeline->GetSafeAreaManager()->GetKeyboardInset().Length() : 0;
+        if (displayInfo) {
+            auto dmRotation = static_cast<int32_t>(displayInfo->GetRotation());
+            isRotate = lastRotation != -1 && lastRotation != dmRotation;
+            lastRotation = dmRotation;
+        } else {
+            lastRotation = -1;
+        }
+        // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
+        if (pipeline && isRotate && !NearZero(lastKeyboardHeight) && !NearZero(keyboardRect.Height())) {
+            auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+            if (textFieldManager) {
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
+                    "later avoid %{public}s %{public}f %{public}f",
+                    lastRotation, keyboardRect.ToString().c_str(), positionY, height);
+                textFieldManager->SetLaterAvoidArgs(keyboardRect, positionY, height);
+                return true;
+            }
+        }
+        return false;
+    }
+
     void SetUIExtensionImeShow(const Rect& keyboardRect)
     {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -479,6 +516,7 @@ private:
         }
     }
     int32_t instanceId_ = -1;
+    int32_t lastRotation = -1;
 };
 
 class AvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
@@ -1427,11 +1465,7 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     }
 
     auto string2float = [](const std::string& str) {
-        try {
-            return std::stof(str);
-        } catch (...) {
-            return 1.0f;
-        }
+        return std::stof(str);
     };
     auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
     if (!fontScale.empty()) {
@@ -1924,6 +1958,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     bool isOpenInvisibleFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "ArkUIInvisibleFreeze" && metaDataItem.value == "true";
     });
+    LOGI("ArkUIInvisibleFreeze: %{public}d", isOpenInvisibleFreeze);
     pipeline->SetOpenInvisibleFreeze(isOpenInvisibleFreeze);
     // Set sdk version in module json mode
     if (isModelJson) {
@@ -2383,6 +2418,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
                 config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
             parsedConfig.mcc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
             parsedConfig.mnc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
+            parsedConfig.preferredLanguage = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 parsedConfig.fontScale = "1.0";
@@ -2520,12 +2556,15 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     bool isReasonRotationOrDPI = (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC);
+    bool isAvoidAreaDoChanged = !updatingInsets.empty() ||
+        avoidAreas.find(OHOS::Rosen::AvoidAreaType::TYPE_KEYBOARD) != avoidAreas.end();
     if (container->IsUseStageModel() && isReasonRotationOrDPI) {
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
-    } else if (rsTransaction != nullptr || !updatingInsets.empty()) {
+    } else if (rsTransaction != nullptr || isAvoidAreaDoChanged) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
         // When avoidAreas need updating, the task shouldn't be cancelled.
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
+        viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container,
+            "ArkUIPromiseViewportConfig");
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }

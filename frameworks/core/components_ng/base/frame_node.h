@@ -174,7 +174,7 @@ public:
 
     void ProcessFreezeNode();
 
-    void onFreezeStateChange() override;
+    void OnFreezeStateChange() override;
 
     void ProcessPropertyDiff()
     {
@@ -438,7 +438,7 @@ public:
 
     OffsetF GetPositionToScreenWithTransform();
 
-    OffsetF GetPositionToWindowWithTransform() const;
+    OffsetF GetPositionToWindowWithTransform(bool fromBottom = false) const;
 
     OffsetF GetTransformRelativeOffset() const;
 
@@ -905,7 +905,7 @@ public:
 
     void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
 
-    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
+    bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList);
 
     bool GetMonopolizeEvents() const;
 
@@ -1091,7 +1091,7 @@ public:
 
     void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
     std::string GetJSCustomProperty(const std::string& key);
-    std::string GetCapiCustomProperty(const std::string& key);
+    bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
     void AddCustomProperty(const std::string& key, const std::string& value);
     void RemoveCustomProperty(const std::string& key);

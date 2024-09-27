@@ -48,7 +48,7 @@ struct TabsItemDivider final {
     bool isNull = false;
     TabsItemDivider()
     {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (!pipelineContext) {
             return;
         }
@@ -74,7 +74,7 @@ struct BarGridColumnOptions final {
 
     BarGridColumnOptions()
     {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (!pipelineContext) {
             return;
         }

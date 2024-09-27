@@ -1389,7 +1389,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest032, TestSize.Leve
      * @tc.expected: check the SymbolColorListValue of frame node correctly.
      */
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultColorOn = tabTheme->GetBottomTabSymbolOn();
     EXPECT_EQ(symbolProperty->GetSymbolColorListValue({})[0], defaultColorOn);
@@ -1449,7 +1449,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest033, TestSize.Leve
      * @tc.expected: check the SymbolColorListValue of frame node correctly.
      */
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultColorOn = tabTheme->GetBottomTabSymbolOn();
     EXPECT_EQ(symbolProperty->GetSymbolColorListValue({})[0], defaultColorOn);

@@ -1444,6 +1444,24 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
     UpdateAccessibilityElementInfo(node, nodeInfo);
 }
 
+namespace {
+    NG::RectF GetFinalRealRect(const RefPtr<NG::FrameNode>& node)
+    {
+        auto offset = node->GetPositionToWindowWithTransform(false);
+        auto offseBottom = node->GetPositionToWindowWithTransform(true);
+        return {
+            offset.GetX() < offseBottom.GetX() ? offset.GetX() : offseBottom.GetX(),
+            offset.GetY() < offseBottom.GetY() ? offset.GetY() : offseBottom.GetY(),
+            offset.GetX() < offseBottom.GetX()
+                ? offseBottom.GetX() - offset.GetX()
+                : offset.GetX() - offseBottom.GetX(),
+            offset.GetY() < offseBottom.GetY()
+                ? offseBottom.GetY() - offset.GetY()
+                : offset.GetY() - offseBottom.GetY()
+            };
+    }
+}
+
 void JsAccessibilityManager::UpdateAccessibilityVisible(
     const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
@@ -1472,6 +1490,7 @@ void JsAccessibilityManager::UpdateAccessibilityVisible(
     }
     nodeInfo.SetAccessibilityVisible(node->GetAccessibilityVisible());
 }
+
 void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
@@ -1498,7 +1517,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     } else if (node->IsVisible()) {
-        auto rect = node->GetTransformRectRelativeToWindow();
+        auto rect = GetFinalRealRect(node);
         if ((scaleX_ != 0) && (scaleY_ != 0)) {
             rect.SetRect(rect.GetX() * scaleX_, rect.GetY() * scaleY_,
                 rect.Width() * scaleX_, rect.Height() * scaleY_);
@@ -1791,7 +1810,17 @@ bool ActClick(RefPtr<NG::FrameNode>& frameNode)
 {
     auto gesture = frameNode->GetEventHub<NG::EventHub>()->GetGestureEventHub();
     CHECK_NULL_RETURN(gesture, false);
-    return gesture->ActClick();
+    bool result = gesture->ActClick();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, result);
+    auto accessibilityAction = ACTIONS.find(ACCESSIBILITY_ACTION_CLICK);
+    if (accessibilityAction == ACTIONS.end()) {
+        return result;
+    }
+    AccessibilityActionParam param;
+    param.accessibilityProperty = accessibilityProperty;
+    result |= accessibilityAction->second(param);
+    return result;
 }
 
 bool ActLongClick(RefPtr<NG::FrameNode>& frameNode)
@@ -2810,13 +2839,23 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
     }
 }
 
-void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& params)
+bool JsAccessibilityManager::CheckDumpHandleEventParams(const std::vector<std::string>& params)
 {
     if (params.size() > EVENT_DUMP_PARAM_LENGTH_UPPER + 1) {
-        return DumpLog::GetInstance().Print("Error: params length is illegal!");
+        DumpLog::GetInstance().Print("Error: params length is illegal!");
+        return false;
     }
     if (params[EVENT_DUMP_ORDER_INDEX] != DUMP_ORDER && params[EVENT_DUMP_ORDER_INDEX] != DUMP_INSPECTOR) {
-        return DumpLog::GetInstance().Print("Error: not accessibility dump order!");
+        DumpLog::GetInstance().Print("Error: Unrecognized dump command for accessibility!");
+        return false;
+    }
+    return true;
+}
+
+void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& params)
+{
+    if (!CheckDumpHandleEventParams(params)) {
+        return;
     }
     auto pipeline = context_.Upgrade();
     CHECK_NULL_VOID(pipeline);
@@ -3364,14 +3403,14 @@ void JsAccessibilityManager::HandleComponentPostBinding()
             ++targetIter;
         } else {
             // clear the disabled node in the maps
-            nodeWithTargetMap_.erase(targetIter++);
+            targetIter = nodeWithTargetMap_.erase(targetIter);
         }
     }
 
     // clear the disabled node in the maps
     for (auto idItem = nodeWithIdMap_.begin(); idItem != nodeWithIdMap_.end();) {
         if (!idItem->second.Upgrade()) {
-            nodeWithIdMap_.erase(idItem++);
+            idItem = nodeWithIdMap_.erase(idItem);
         } else {
             ++idItem;
         }
@@ -4459,12 +4498,20 @@ void JsAccessibilityManager::SearchWebElementInfoByAccessibilityId(const int64_t
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_VOID(ngPipeline);
 
-    if (!ngPipeline->GetOnFoucs()) {
+    if (!ngPipeline->GetOnFoucs() && (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE)) {
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "SearchWebElementInfo GetOnFocus, elementId: %{public}" PRId64
+            ", requestId: %{public}d, mode: %{public}d, windowId: %{public}d",
+            elementId, requestId, mode, windowId);
         return;
     }
     CHECK_NULL_VOID(webPattern);
     auto webNode = webPattern->GetHost();
     if (!IsNodeInRoot(webNode, ngPipeline)) {
+        TAG_LOGD(AceLogTag::ACE_WEB,
+            "SearchWebElementInfo IsNodeInRoot, elementId: %{public}" PRId64
+            ", requestId: %{public}d, mode: %{public}d, windowId: %{public}d",
+            elementId, requestId, mode, windowId);
         return;
     }
 

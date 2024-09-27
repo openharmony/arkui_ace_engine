@@ -175,7 +175,7 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
         touchRestrict.inputEventType == InputEventType::AXIS || IsBelongToMultiItemNode(frameNode)) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
-            "frameNode draggable is %{public}d, custom set is %{public}d,",
+            "frameNode draggable is %{public}d, custom set is %{public}d",
             gestureHub->IsDragForbidden(), frameNode->IsDraggable(), frameNode->IsCustomerSet());
         return false;
     }

@@ -375,6 +375,8 @@ public:
     ResultObject GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     std::string GetFontInJson() const;
+    std::string GetBindSelectionMenuInJson() const;
+    virtual void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const {}
 
     const std::vector<std::string>& GetDragContents() const
     {
@@ -714,7 +716,12 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
     bool HasContent();
+    void SetupMagnifier();
 protected:
+    int32_t GetClickedSpanPosition()
+    {
+        return clickedSpanPosition_;
+    }
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAfterModifyDone() override;
@@ -793,6 +800,7 @@ protected:
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
     void OnForegroundColorUpdate(const Color& value) override;
+    void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
     bool enabled_ = true;
     Status status_ = Status::NONE;
@@ -846,6 +854,7 @@ protected:
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    bool ShowShadow(const PointF& textOffset, const Color& color);
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -854,7 +863,6 @@ private:
     void OnHandleTouchUp();
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
-    void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     bool IsShowHandle();
     void InitUrlMouseEvent();
@@ -864,7 +872,6 @@ private:
     void URLOnHover(bool isHover);
     bool HandleUrlClick();
     std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start);
-    bool ShowShadow(const PointF& textOffset, const Color& color);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
     void SetAccessibilityAction();
@@ -958,6 +965,7 @@ private:
     std::optional<ParagraphStyle> externalParagraphStyle_;
     bool isUserSetResponseRegion_ = false;
     WeakPtr<PipelineContext> pipeline_;
+    WeakPtr<ScrollablePattern> scrollableParent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -112,6 +112,20 @@ RefPtr<Container> Container::GetContainer(int32_t containerId)
     return MockContainer::Current();
 }
 
+bool MockContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative)
+{
+    if (autoFillType == AceAutoFillType::ACE_USER_NAME) {
+        isPopup = true; // if TextInputType::USER_NAME
+    } else if (autoFillType == AceAutoFillType::ACE_PASSWORD || autoFillType == AceAutoFillType::ACE_NEW_PASSWORD) {
+        isPopup = false; // if TextInputType::VISIBLE_PASSWORD or TextInputType::NEW_PASSWORD
+    }
+    if (autoFillType == AceAutoFillType::ACE_PASSWORD) {
+        return true; // cover DoProcessAutoFill
+    }
+    return isPopup;
+}
+
 void MockContainer::SetDisplayInfo(RefPtr<DisplayInfo> displayInfo)
 {
     displayInfo_ = displayInfo;

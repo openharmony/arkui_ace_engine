@@ -2726,6 +2726,7 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 {
+    int32_t resId = 0;
     std::string src;
     std::string bundle;
     std::string module;
@@ -2736,7 +2737,7 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
         src = jsBackgroundImage->ToString();
         ViewAbstractModel::GetInstance()->SetBackgroundImage(
             ImageSourceInfo { src, bundle, module }, GetThemeConstants());
-    } else if (ParseJsMedia(jsBackgroundImage, src)) {
+    } else if (ParseJsMediaWithBundleName(jsBackgroundImage, src, bundle, module, resId)) {
         ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
     } else {
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -3256,7 +3257,7 @@ void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& me
     NG::BorderRadiusProperty menuBorderRadius;
     CalcDimension borderRadius;
     if (JSViewAbstract::ParseJsDimensionVp(borderRadiusValue, borderRadius)) {
-        if (borderRadius.Unit() != DimensionUnit::PERCENT && GreatOrEqual(borderRadius.Value(), 0.0f)) {
+        if (GreatOrEqual(borderRadius.Value(), 0.0f)) {
             menuBorderRadius.SetRadius(borderRadius);
             menuBorderRadius.multiValued = false;
             menuParam.borderRadius = menuBorderRadius;
@@ -7606,6 +7607,16 @@ void JSViewAbstract::JsAccessibilityVirtualNode(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsAccessibilitySelected(bool selected)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilitySelected(selected);
+}
+
+void JSViewAbstract::JsAccessibilityChecked(bool checked)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityChecked(checked);
+}
+
 void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
 {
     // Check the parameters
@@ -7874,6 +7885,7 @@ void JSViewAbstract::ParseSheetStyle(
     auto type = paramObj->GetProperty("preferType");
     auto interactive = paramObj->GetProperty("enableOutsideInteractive");
     auto showMode = paramObj->GetProperty("mode");
+    auto offsetVal = paramObj->GetProperty("offset");
     auto scrollSizeMode = paramObj->GetProperty("scrollSizeMode");
     auto keyboardAvoidMode = paramObj->GetProperty("keyboardAvoidMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
@@ -7884,6 +7896,23 @@ void JSViewAbstract::ParseSheetStyle(
             sheetStyle.instanceId = prop->ToNumber<int32_t>();
         }
     }
+
+    if (offsetVal->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
+        auto xVal = offsetObj->GetProperty("x");
+        auto yVal = offsetObj->GetProperty("y");
+        NG::OffsetF bottomOffset;
+        CalcDimension dx;
+        CalcDimension dy;
+        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx)) {
+            bottomOffset.SetX(dx.ConvertToPx());
+        }
+        if (JSViewAbstract::ParseJsDimensionVp(yVal, dy) && dy.IsNegative()) {
+            bottomOffset.SetY(dy.ConvertToPx());
+        }
+        sheetStyle.bottomOffset = bottomOffset;
+    }
+
     NG::SheetLevel sheetLevel = NG::SheetLevel::OVERLAY;
     if (ParseSheetLevel(showMode, sheetLevel) || !isPartialUpdate) {
         sheetStyle.showInPage = (sheetLevel == NG::SheetLevel::EMBEDDED);
@@ -8706,6 +8735,9 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("accessibilityLevel", &JSViewAbstract::JsAccessibilityLevel);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityVirtualNode", &JSViewAbstract::JsAccessibilityVirtualNode);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibility", &JSInteractableView::JsOnAccessibility);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilitySelected", &JSViewAbstract::JsAccessibilitySelected);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityChecked", &JSViewAbstract::JsAccessibilityChecked);
+
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
@@ -9208,17 +9240,23 @@ bool JSViewAbstract::ParseJsonColor(const std::unique_ptr<JsonValue>& jsonValue,
     return true;
 }
 
-void JSViewAbstract::ParseShadowOffsetX(const JSRef<JSObject>& jsObj, CalcDimension& offsetX, Shadow& shadow)
+void JSViewAbstract::ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& shadow)
 {
-    auto jsOffsetX = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET_X));
-    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (ParseJsResource(jsOffsetX, offsetX)) {
-        double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
-        shadow.SetOffsetX(xValue);
+    CalcDimension offsetX;
+    if (ParseJsResource(jsObj->GetProperty("offsetX"), offsetX)) {
+        shadow.SetOffsetX(offsetX.Value());
     } else {
-        if (ParseJsDimensionVp(jsOffsetX, offsetX)) {
-            double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
-            shadow.SetOffsetX(xValue);
+        if (ParseJsDimensionVp(jsObj->GetProperty("offsetX"), offsetX)) {
+            shadow.SetOffsetX(offsetX.Value());
+        }
+    }
+    CalcDimension offsetY;
+    auto jsOffsetY = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET_Y));
+    if (ParseJsResource(jsOffsetY, offsetY)) {
+        shadow.SetOffsetY(offsetY.Value());
+    } else {
+        if (ParseJsDimensionVp(jsOffsetY, offsetY)) {
+            shadow.SetOffsetY(offsetY.Value());
         }
     }
 }
@@ -9240,17 +9278,8 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
         radius = 0.0;
     }
     shadow.SetBlurRadius(radius);
-    CalcDimension offsetX;
-    ParseShadowOffsetX(jsObj, offsetX, shadow);
-    CalcDimension offsetY;
-    auto jsOffsetY = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::OFFSET_Y));
-    if (ParseJsResource(jsOffsetY, offsetY)) {
-        shadow.SetOffsetY(offsetY.Value());
-    } else {
-        if (ParseJsDimensionVp(jsOffsetY, offsetY)) {
-            shadow.SetOffsetY(offsetY.Value());
-        }
-    }
+    ParseShadowOffsetXY(jsObj, shadow);
+
     Color color;
     ShadowColorStrategy shadowColorStrategy;
     auto jsColor = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR));
@@ -10694,11 +10723,16 @@ void JSViewAbstract::JsFocusScopeId(const JSCallbackInfo& info)
     }
 
     bool isGroup = false;
-    if (info.Length() == PARAMETER_LENGTH_SECOND && !info[0]->IsNull() && !info[0]->IsUndefined() &&
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && !info[1]->IsNull() && !info[1]->IsUndefined() &&
         info[1]->IsBoolean()) {
         isGroup = info[1]->ToBoolean();
     }
-    ViewAbstractModel::GetInstance()->SetFocusScopeId(focusScopeId, isGroup);
+    bool arrowKeyStepOut = true;
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && !info[2]->IsNull() && !info[2]->IsUndefined() &&
+        info[2]->IsBoolean()) {
+        arrowKeyStepOut = info[2]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
 }
 
 void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)

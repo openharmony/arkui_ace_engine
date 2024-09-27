@@ -1070,6 +1070,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
         if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
             SetPreviewFirstShow(menu);
         }
+        SetPatternFirstShow(menu);
         return;
     }
     AnimationOption option;
@@ -3825,7 +3826,9 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     const NG::ContentCoverParam& contentCoverParam, int32_t targetId, std::optional<ModalTransition> modalTransition)
 {
     // builder content
-    auto builder = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+    auto buildNode = buildNodeFunc();
+    CHECK_NULL_VOID(buildNode);
+    auto builder = AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
     CHECK_NULL_VOID(builder);
     builder->GetRenderContext()->SetIsModalRootNode(true);
 
@@ -4417,7 +4420,9 @@ void OverlayManager::PlaySheetTransition(
     if (isTransitionIn) {
         sheetPattern->SetCurrentHeight(sheetHeight_);
         float offset = 0.0f;
-        if (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) {
+        auto sheetType = sheetPattern->GetSheetType();
+        if (sheetType == SheetType::SHEET_POPUP ||
+            sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
             offset = sheetPattern->GetSheetOffset();
         } else {
             offset = sheetMaxHeight - sheetHeight_;
@@ -4654,6 +4659,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
         layoutProperty->UpdateSheetStyle(sheetStyle);
         UpdateSheetProperty(sheetNode, sheetStyle, isPartialUpdate);
     }
+    sheetNodePattern->SetBottomOffset(sheetStyle);
     sheetNode->MarkModifyDone();
     auto sheetType = sheetNodePattern->GetSheetType();
     if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess()) {
@@ -4764,6 +4770,7 @@ void OverlayManager::SetSheetProperty(
     UpdateSheetRender(sheetPageNode, sheetStyle, true);
     auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
+    sheetNodePattern->SetBottomOffset(sheetStyle);
     sheetNodePattern->UpdateOnAppear(std::move(onAppear));
     sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
     sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
@@ -5060,6 +5067,7 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
             }
         case SheetType::SHEET_BOTTOM:
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
+        case SheetType::SHEET_BOTTOM_OFFSET:
             if (!sheetStyle.detents.empty()) {
                 ComputeDetentsSheetOffset(sheetStyle, sheetNode);
             } else {

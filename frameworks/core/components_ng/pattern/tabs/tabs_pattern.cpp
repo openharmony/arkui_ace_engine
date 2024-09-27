@@ -82,7 +82,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
             pattern->RecordChangeEvent(currentIndex);
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = tabsNode->GetContext();
             CHECK_NULL_VOID(context);
             context->AddAfterLayoutTask(
                 [currentIndex, jsEvent]() {
@@ -550,6 +550,7 @@ void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->SetClickRepeat(false);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     tabBarPattern->UpdateImageColor(index);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();

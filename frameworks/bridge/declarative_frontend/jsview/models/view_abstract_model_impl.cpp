@@ -1630,4 +1630,10 @@ void ViewAbstractModelImpl::SetAccessibilityImportance(const std::string& import
     inspector->SetAccessibilityImportance(importance);
 }
 
+void ViewAbstractModelImpl::SetAccessibilitySelected(bool selected)
+{}
+
+void ViewAbstractModelImpl::SetAccessibilityChecked(bool checked)
+{}
+
 } // namespace OHOS::Ace::Framework

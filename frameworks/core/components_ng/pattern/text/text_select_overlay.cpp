@@ -275,6 +275,8 @@ RectF TextSelectOverlay::GetSelectArea()
     RectF visibleContentRect(contentRect.GetOffset() + textPaintOffset, contentRect.GetSize());
     visibleContentRect = GetVisibleRect(pattern->GetHost(), visibleContentRect);
     auto intersectRect = res.IntersectRectT(visibleContentRect);
+    intersectRect.SetWidth(std::max(intersectRect.Width(), 0.0f));
+    intersectRect.SetHeight(std::max(intersectRect.Height(), 0.0f));
     if (hasTransform_) {
         intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
         GetGlobalRectWithTransform(intersectRect);
@@ -333,12 +335,12 @@ void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo
         overlayInfo.onHandlePanMove = [weak = WeakClaim(this), weakParent](const GestureEvent& event, bool isFirst) {
             auto overlay = weak.Upgrade();
             CHECK_NULL_VOID(overlay);
-            overlay->TriggerScrollableParentToScroll(weakParent.Upgrade(), event, false);
+            overlay->TriggerScrollableParentToScroll(weakParent.Upgrade(), event.GetGlobalLocation(), false);
         };
         overlayInfo.onHandlePanEnd = [weak = WeakClaim(this), weakParent](const GestureEvent& event, bool isFirst) {
             auto overlay = weak.Upgrade();
             CHECK_NULL_VOID(overlay);
-            overlay->TriggerScrollableParentToScroll(weakParent.Upgrade(), event, true);
+            overlay->TriggerScrollableParentToScroll(weakParent.Upgrade(), event.GetGlobalLocation(), true);
         };
         overlayInfo.getDeltaHandleOffset = [weak = WeakClaim(this)]() {
             auto overlay = weak.Upgrade();
@@ -441,6 +443,7 @@ void TextSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirs
     manager->SetHandleCircleIsShow(isFirst, false);
     isDraggingFirstHandle_ = isFirst;
     hostPaintOffset_ = GetHotPaintOffset();
+    textPattern->SetupMagnifier();
 }
 
 void TextSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)
@@ -460,23 +463,33 @@ void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
         return;
     }
     auto clipNode = host->GetAncestorNodeOfFrame(true);
+    RefPtr<FrameNode> prevNode;
     while (clipNode) {
         renderContext = clipNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (renderContext->GetClipEdge().value_or(false)) {
             break;
         }
+        prevNode = clipNode;
         clipNode = clipNode->GetAncestorNodeOfFrame(true);
     }
-    CHECK_NULL_VOID(clipNode);
-    RectF visibleRect;
-    RectF frameRect;
-    clipNode->GetVisibleRect(visibleRect, frameRect);
-    rect.SetHeight(visibleRect.Bottom() - rect.Top());
+    if (clipNode) {
+        RectF visibleRect;
+        RectF frameRect;
+        clipNode->GetVisibleRect(visibleRect, frameRect);
+        rect.SetHeight(visibleRect.Bottom() - rect.Top());
+        return;
+    }
+    // root node.
+    if (prevNode) {
+        auto geoNode = prevNode->GetGeometryNode();
+        CHECK_NULL_VOID(geoNode);
+        rect.SetHeight(geoNode->GetFrameRect().Height() - rect.Top());
+    }
 }
 
 void TextSelectOverlay::TriggerScrollableParentToScroll(
-    const RefPtr<ScrollablePattern> scrollablePattern, const GestureEvent& event, bool isStopAutoScroll)
+    const RefPtr<ScrollablePattern> scrollablePattern, const Offset& globalOffset, bool isStopAutoScroll)
 {
     CHECK_NULL_VOID(scrollablePattern);
     auto scrollAxis = scrollablePattern->GetAxis();
@@ -499,8 +512,8 @@ void TextSelectOverlay::TriggerScrollableParentToScroll(
         return;
     }
     RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    notifyDragEvent->SetX(event.GetGlobalLocation().GetX());
-    notifyDragEvent->SetY(event.GetGlobalLocation().GetY());
+    notifyDragEvent->SetX(globalOffset.GetX());
+    notifyDragEvent->SetY(globalOffset.GetY());
     scrollablePattern->HandleOnDragStatusCallback(
         isStopAutoScroll ? DragEventType::DROP : DragEventType::MOVE, notifyDragEvent);
 }

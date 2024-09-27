@@ -21,6 +21,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -34,7 +35,6 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
     if (navDestinationGroupNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
         titleBarNode->RemoveChild(titleBarNode->GetMenu());
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
     }
     if (navDestinationGroupNode->GetPrevMenuIsCustomValue(false)) {
         if (navDestinationGroupNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::NONE) {
@@ -43,7 +43,9 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         titleBarNode->SetMenu(navDestinationGroupNode->GetMenu());
         titleBarNode->AddChild(titleBarNode->GetMenu());
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
     } else {
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
         auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
         auto titleBarMenuItems = navDestinationPattern->GetTitleBarMenuItems();
@@ -140,6 +142,7 @@ void NavDestinationPattern::OnModifyDone()
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
     MountTitleBar(hostNode);
+    NavigationToolbarUtil::MountToolBar(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {

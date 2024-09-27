@@ -72,11 +72,13 @@ struct ParsedConfig {
     std::string colorModeIsSetByApp;
     std::string mcc;
     std::string mnc;
+    std::string preferredLanguage;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
-                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontFamily.empty() &&
-                 fontWeightScale.empty() && colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty());
+                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
+                 colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
+                 preferredLanguage.empty());
     }
 };
 
@@ -591,7 +593,6 @@ public:
         int32_t instanceId = -1) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
     void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode, AbilityBase::ViewData& viewData);
-    bool ChangeType(AbilityBase::ViewData& viewData);
     HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder) override;
 
     void SearchElementInfoByAccessibilityIdNG(
@@ -704,7 +705,10 @@ private:
     void FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
 
     void NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration);
-
+    void ProcessThemeUpdate(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
+    DeviceOrientation ProcessDirectionUpdate(
+        const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
+    void InitDragEventCallback();
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;

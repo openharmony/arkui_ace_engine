@@ -453,7 +453,8 @@ public:
         return isFocusActive_;
     }
 
-    bool SetIsFocusActive(bool isFocusActive);
+    bool SetIsFocusActive(bool isFocusActive,
+        FocusActiveReason reason = FocusActiveReason::KEYBOARD_EVENT, bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
@@ -1038,8 +1039,8 @@ private:
 
     std::tuple<float, float, uint64_t> GetAvgPoint(const std::vector<TouchEvent>& events, const bool isScreen);
 
-    TouchEvent GetResampleTouchEvent(
-        const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+    bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
+        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
 
     TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
     
@@ -1215,6 +1216,7 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
+    bool autoFocusInactive_ = true;
 };
 } // namespace OHOS::Ace::NG
 

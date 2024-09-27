@@ -337,6 +337,18 @@ public:
         ProcessColumnRect(height_);
     }
 
+    void SetBottomOffset(const SheetStyle &sheetStyle)
+    {
+        if (sheetStyle.bottomOffset.has_value() &&
+            sheetStyle.sheetType.value_or(SheetType::SHEET_BOTTOM) == SheetType::SHEET_BOTTOM) {
+            bottomOffsetX_ = sheetStyle.bottomOffset->GetX();
+            bottomOffsetY_ = sheetStyle.bottomOffset->GetY();
+        } else {
+            bottomOffsetX_ = 0;
+            bottomOffsetY_ = 0;
+        }
+    }
+
     void SetCurrentHeightToOverlay(float height)
     {
         auto overlayManager = GetOverlayManager();
@@ -412,13 +424,12 @@ public:
         return subtitleId_.value();
     }
 
-    static float CalculateFriction(float gamma)
+    static float CalculateFriction(float gamma, float ratio)
     {
-        constexpr float RATIO = 1.848f;
         if (GreatOrEqual(gamma, 1.0)) {
             gamma = 1.0f;
         }
-        return exp(-RATIO * gamma);
+        return exp(-ratio * gamma);
     }
 
     SheetType GetSheetType();
@@ -618,9 +629,10 @@ public:
     {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW ||
-            sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
+                   sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE || sheetType_ == SheetType::SHEET_BOTTOM_OFFSET;
         }
-        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
+        return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW ||
+               sheetType_ == SheetType::SHEET_BOTTOM_OFFSET;
     }
 
     uint32_t GetDetentsIndex() const
@@ -677,6 +689,10 @@ private:
     void AvoidKeyboardAfterTranslate(float height);
     void DecreaseScrollHeightInSheet(float decreaseHeight);
     bool IsResizeWhenAvoidKeyboard();
+    float GetRadio() const
+    {
+        return sheetType_ == SheetType::SHEET_BOTTOM_OFFSET ? 5.0f : 1.848f;
+    }
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
@@ -719,6 +735,8 @@ private:
     float sheetFitContentHeight_ = 0.0f;
     float sheetOffsetX_ = 0.0f;
     float sheetOffsetY_ = 0.0f;
+    float bottomOffsetX_ = 0.0f; // offset x with SHEET_BOTTOM_OFFSET
+    float bottomOffsetY_ = 0.0f; // offset y with SHEET_BOTTOM_OFFSET, <= 0
     bool isFirstInit_ = true;
     bool isAnimationBreak_ = false;
     bool isAnimationProcess_ = false;

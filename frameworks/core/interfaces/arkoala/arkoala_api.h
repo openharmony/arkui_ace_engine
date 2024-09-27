@@ -919,6 +919,9 @@ enum ArkUIEventSubKind {
     ON_SEARCH_PASTE,
 
     ON_SELECT_SELECT = ARKUI_MAX_EVENT_NUM * ARKUI_SELECT,
+
+    ON_IMAGE_SPAN_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE_SPAN,
+    ON_IMAGE_SPAN_ERROR,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -1563,7 +1566,8 @@ struct ArkUICommonModifier {
         ArkUI_Uint32 inactiveColorArg);
     void (*resetBackgroundBlurStyle)(ArkUINodeHandle node);
     void (*setBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
-        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
+        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize, ArkUI_Bool isLocalizedBorderWidth,
+        ArkUI_Bool isLocalizedBorderColor, ArkUI_Bool isLocalizedBorderRadius);
     void (*resetBorder)(ArkUINodeHandle node);
     void (*setBackgroundImagePosition)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
         ArkUI_Bool isAlign, ArkUI_Int32 size);
@@ -1904,7 +1908,7 @@ struct ArkUICommonModifier {
     void (*setAccessibilityRole)(ArkUINodeHandle node, ArkUI_CharPtr role);
     void (*resetAccessibilityRole)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getAccessibilityRole)(ArkUINodeHandle node);
-    void (*setFocusScopeId)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup);
+    void (*setFocusScopeId)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup, ArkUI_Bool arrowKeyStepOut);
     void (*resetFocusScopeId)(ArkUINodeHandle node);
     void (*setFocusScopePriority)(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority);
     void (*resetFocusScopePriority)(ArkUINodeHandle node);
@@ -4749,10 +4753,12 @@ struct ArkUIFrameNodeModifier {
     void (*resetSystemColorModeChangeEvent)(ArkUINodeHandle node);
     ArkUI_Int32 (*setSystemFontStyleChangeEvent)(ArkUINodeHandle node, void* userData, void* onFontStyleChange);
     void (*resetSystemFontStyleChangeEvent)(ArkUINodeHandle node);
-    ArkUI_CharPtr (*getCustomPropertyCapiByKey)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    ArkUI_Uint32 (*getCustomPropertyCapiByKey)(
+        ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size);
     void (*setCustomPropertyModiferByKey)(ArkUINodeHandle node, void* callback, void* getCallback);
     void (*addCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value);
     void (*removeCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*freeCustomPropertyCharPtr)(char* value, ArkUI_Uint32 size);
 };
 
 struct ArkUINodeContentEvent {

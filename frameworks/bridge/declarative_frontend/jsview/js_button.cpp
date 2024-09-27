@@ -574,8 +574,38 @@ void JSButton::JsRadius(const JSRef<JSVal>& jsValue)
         CalcDimension topRight;
         CalcDimension bottomLeft;
         CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
-        ButtonModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+        std::optional<CalcDimension> radiusTopLeft;
+        std::optional<CalcDimension> radiusTopRight;
+        std::optional<CalcDimension> radiusBottomLeft;
+        std::optional<CalcDimension> radiusBottomRight;
+        if (JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
+            if (object->HasProperty("topStart")) {
+                radiusTopLeft = topLeft;
+            }
+            if (object->HasProperty("topEnd")) {
+                radiusTopRight = topRight;
+            }
+            if (object->HasProperty("bottomStart")) {
+                radiusBottomLeft = bottomLeft;
+            }
+            if (object->HasProperty("bottomEnd")) {
+                radiusBottomRight = bottomRight;
+            }
+        } else {
+            if (object->HasProperty("topLeft")) {
+                radiusTopLeft = topLeft;
+            }
+            if (object->HasProperty("topRight")) {
+                radiusTopRight = topRight;
+            }
+            if (object->HasProperty("bottomLeft")) {
+                radiusBottomLeft = bottomLeft;
+            }
+            if (object->HasProperty("bottomRight")) {
+                radiusBottomRight = bottomRight;
+            }
+        }
+        ButtonModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
     } else {
         ButtonModel::GetInstance()->ResetBorderRadius();
     }

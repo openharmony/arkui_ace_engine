@@ -282,6 +282,7 @@ void PreFixEmptyBundleName(napi_env env, napi_value value)
     NapiStringToString(env, bundleNameNApi, bundleName);
     if (bundleName.empty()) {
         auto container = Container::CurrentSafely();
+        CHECK_NULL_VOID(container);
         bundleName = container->GetBundleName();
         bundleNameNApi = CreateNapiString(env, bundleName);
         napi_set_named_property(env, value, BUNDLE_NAME, bundleNameNApi);

@@ -1415,10 +1415,11 @@ public:
         isOpenInvisibleFreeze_ = isOpenInvisibleFreeze;
     }
 
-    bool IsOpenInvisibleFreeze()
+    bool IsOpenInvisibleFreeze() const
     {
         return isOpenInvisibleFreeze_;
     }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

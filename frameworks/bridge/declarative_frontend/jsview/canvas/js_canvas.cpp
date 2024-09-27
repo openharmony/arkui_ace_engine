@@ -61,8 +61,6 @@ void JSCanvas::Create(const JSCallbackInfo& info)
             jsContext->SetAntiAlias();
             jsContext->SetDensity();
         }
-    } else {
-        LOGW("Unkown params");
     }
 
     if (info.Length() > 1) {

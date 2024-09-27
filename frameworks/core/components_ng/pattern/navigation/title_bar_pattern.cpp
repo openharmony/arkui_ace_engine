@@ -1625,4 +1625,21 @@ void TitleBarPattern::SetCurrentTitleBarHeight(float currentTitleBarHeight)
 
     contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
 }
+
+float TitleBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_RETURN(titleBarNode, 0.f);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_RETURN(titleBarLayoutProperty, 0.f);
+    auto titleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    if (titleMode != NavigationTitleMode::FREE) {
+        return 0.f;
+    }
+    auto barStyle = options_.brOptions.barStyle.value_or(BarStyle::STANDARD);
+    if (barStyle != BarStyle::STACK) {
+        return 0.f;
+    }
+    return maxTitleBarHeight_ - currentTitleBarHeight_;
+}
 } // namespace OHOS::Ace::NG

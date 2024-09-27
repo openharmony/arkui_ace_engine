@@ -130,7 +130,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
 
 PipelineContext::~PipelineContext()
 {
-    LOG_DESTROY();
+    LOGI("PipelineContext destroyed");
 }
 
 void PipelineContext::FlushPipelineWithoutAnimation()

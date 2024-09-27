@@ -37,7 +37,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     tabBarPattern_->UpdateSubTabBoard(0);
@@ -1082,7 +1082,7 @@ HWTEST_F(TabBarTestNg, TabBarOnAttachToMainTree001, TestSize.Level1)
     tabContentFrameNode->OnAttachToMainTree(true);
     EXPECT_FALSE(tabContentFrameNode->useOffscreenProcess_);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     tabContentFrameNode->OnDetachFromMainTree(true, AceType::RawPtr(pipeline));
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
@@ -1409,7 +1409,8 @@ HWTEST_F(TabBarTestNg, Divider001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarBlurStyle001, TestSize.Level1)
 {
-    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    PipelineContext::GetCurrentContextSafelyWithCheck()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     TabsModelNG model = CreateTabs();
     model.SetBarBackgroundBlurStyle(BlurStyle::COMPONENT_THICK);
     CreateTabContents(TABCONTENT_NUMBER);
@@ -1596,7 +1597,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateSymbolStats001, TestSize.Level1)
     auto columnNode2 = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode2->GetTabBarItemId());
     auto symbolNode2 = GetChildFrameNode(columnNode2, 0);
     auto symbolProperty2 = symbolNode2->GetLayoutProperty<TextLayoutProperty>();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultColorOn = tabTheme->GetBottomTabSymbolOn();
     auto defaultColorOff = tabTheme->GetBottomTabSymbolOff();

@@ -577,6 +577,7 @@ private:
 
     RefPtr<FrameNode> BuildContentModifierNode(int index);
     bool IsMenuScrollable() const;
+    void UpdateClipPath(const RefPtr<LayoutWrapper>& dirty);
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;

@@ -195,6 +195,8 @@ public:
 
 private:
     bool IsShowClean();
+    bool IsShowSymbol();
+    void UpdateSymbolSource();
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
     void OnCleanNodeClicked();
     RefPtr<FrameNode> CreateNode();

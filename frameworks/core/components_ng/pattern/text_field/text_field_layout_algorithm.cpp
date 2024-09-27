@@ -39,6 +39,7 @@ namespace {
 constexpr float PARAGRAPH_SAVE_BOUNDARY = 1.0f;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
+constexpr Dimension COUNTER_TEXT_MARGIN_OFFSET = 8._vp;
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
 constexpr double TEXT_DECORATION_DISABLED_COLOR_ALPHA = 0.2;
@@ -215,12 +216,13 @@ void TextFieldLayoutAlgorithm::ApplyIndent(double width)
     }
     // first line indent
     CHECK_NULL_VOID(paragraph_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     double indentValue = 0.0;
     if (textIndent_.Unit() != DimensionUnit::PERCENT) {
+        float fontScale = std::min(pipeline->GetFontScale(), pipeline->GetMaxAppFontScale());
         if (!textIndent_.NormalizeToPx(pipeline->GetDipScale(),
-            pipeline->GetFontScale(), pipeline->GetLogicScale(), width, indentValue)) {
+            fontScale, pipeline->GetLogicScale(), width, indentValue)) {
             return;
         }
     } else {
@@ -428,12 +430,12 @@ TextAlign TextFieldLayoutAlgorithm::GetCounterNodeAlignment(LayoutWrapper* layou
 void TextFieldLayoutAlgorithm::UpdateCounterNode(
     uint32_t textLength, uint32_t maxLength, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto counterNode = pattern->GetCounterNode().Upgrade();
@@ -524,7 +526,8 @@ void TextFieldLayoutAlgorithm::HandleNonTextArea(LayoutWrapper* layoutWrapper, c
             countX += cleanNodeResponseArea->GetAreaRect().Width();
         }
     }
-    textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Height() + textGeometryNode->GetFrameRect().Height()));
+    textGeometryNode->SetFrameOffset(OffsetF(countX, frameRect.Bottom() - frameRect.Top() +
+        COUNTER_TEXT_MARGIN_OFFSET.ConvertToPx()));
     counterNode->Layout();
 }
 
@@ -779,7 +782,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     CHECK_NULL_VOID(paragraph_);
     paragraph_->PushStyle(textStyle);
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
@@ -844,7 +847,7 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     CHECK_NULL_VOID(paragraph_);
     inlineParagraph_->PushStyle(textStyle);
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
@@ -896,7 +899,7 @@ void TextFieldLayoutAlgorithm::GetSuitableSize(SizeF& maxSize, LayoutWrapper* la
 
 float TextFieldLayoutAlgorithm::GetTextFieldDefaultHeight()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);

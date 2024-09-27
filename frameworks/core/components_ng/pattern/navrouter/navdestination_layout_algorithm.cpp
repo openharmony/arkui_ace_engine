@@ -167,7 +167,8 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationG
 }
 
 float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
-    const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty, const SizeF& size, float titleBarHeight)
+    const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty,
+    const SizeF& size, float titleBarAndToolBarHeight)
 {
     auto contentNode = hostNode->GetContentNode();
     CHECK_NULL_RETURN(contentNode, 0.0f);
@@ -175,7 +176,7 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinat
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(contentWrapper, 0.0f);
     auto constraint = navDestinationLayoutProperty->CreateChildConstraint();
-    float contentHeight = size.Height() - titleBarHeight;
+    float contentHeight = size.Height() - titleBarAndToolBarHeight;
     if (NavigationLayoutAlgorithm::IsAutoHeight(navDestinationLayoutProperty)) {
         constraint.selfIdealSize.SetWidth(size.Width());
         contentWrapper->Measure(constraint);
@@ -278,29 +279,6 @@ void LayoutSheet(const RefPtr<NavDestinationGroupNode>& hostNode)
     sheetWrapper->Layout();
 }
 
-void UpdateTitleBarMenuNode(const RefPtr<NavDestinationGroupNode>& hostNode, const SizeF& navigationSize)
-{
-    if (hostNode->GetPrevMenuIsCustomValue(false)) {
-        return;
-    }
-
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleBarNode);
-    auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(hostNode->GetPattern());
-    auto isHideToolbar = navDestinationPattern->GetToolbarHideStatus();
-    auto preMenuNode = titleBarNode->GetMenu();
-
-    bool isNeedLandscapeMenu =
-        NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(hostNode, navigationSize) && !isHideToolbar;
-    RefPtr<UINode> newMenuNode = isNeedLandscapeMenu ? hostNode->GetLandscapeMenu() : hostNode->GetMenu();
-    if (preMenuNode == newMenuNode) {
-        return;
-    }
-    titleBarNode->RemoveChild(preMenuNode);
-    titleBarNode->SetMenu(newMenuNode);
-    newMenuNode->MountToParent(titleBarNode);
-}
-
 float TransferTitleBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float titleBarHeight)
 {
     CHECK_NULL_RETURN(hostNode, 0.0f);
@@ -326,15 +304,19 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
-    UpdateTitleBarMenuNode(hostNode, size);
-
+    NavigationLayoutUtil::UpdateTitleBarMenuNode(hostNode, size);
     float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
     auto resetTitleBarHeight = TransferTitleBarHeight(hostNode, titleBarHeight);
-    float contentChildHeight =
-            MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, resetTitleBarHeight);
+    float toolBarHeight = NavigationLayoutUtil::MeasureToolBar(
+        layoutWrapper, hostNode, navDestinationLayoutProperty, size);
+    float toolBarDividerHeight = NavigationLayoutUtil::MeasureToolBarDivider(
+        layoutWrapper, hostNode, navDestinationLayoutProperty, size, toolBarHeight);
+    float titleBarAndToolBarHeight = resetTitleBarHeight + toolBarHeight + toolBarDividerHeight;
+    float contentChildHeight = MeasureContentChild(layoutWrapper, hostNode,
+        navDestinationLayoutProperty, size, titleBarAndToolBarHeight);
 
-    size.SetHeight(resetTitleBarHeight + contentChildHeight);
-    if (NearZero(resetTitleBarHeight + contentChildHeight)) {
+    size.SetHeight(resetTitleBarHeight + toolBarHeight + toolBarDividerHeight + contentChildHeight);
+    if (NearZero(size.Height())) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto height = pipeline->GetRootHeight();
@@ -366,7 +348,8 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty);
     auto resetTitleBarHeight = TransferTitleBarHeight(hostNode, titlebarHeight);
     LayoutContent(layoutWrapper, hostNode, navDestinationLayoutProperty, resetTitleBarHeight);
-
+    float toolbarHeight = NavigationLayoutUtil::LayoutToolBar(layoutWrapper, hostNode, navDestinationLayoutProperty);
+    NavigationLayoutUtil::LayoutToolBarDivider(layoutWrapper, hostNode, navDestinationLayoutProperty, toolbarHeight);
     auto&& opts = navDestinationLayoutProperty->GetSafeAreaExpandOpts();
     if (opts) {
         auto geometryNode = hostNode->GetGeometryNode();

@@ -265,7 +265,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
 AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
-    LOG_DESTROY();
+    LOGI("Container Destroyed");
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
@@ -1024,10 +1024,14 @@ void AceContainer::InitializeCallback()
             [context]() { context->OnSurfaceDestroyed(); }, TaskExecutor::TaskType::UI, "ArkUISurfaceDestroyed");
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
+    InitDragEventCallback();
+}
 
+void AceContainer::InitDragEventCallback()
+{
     if (!isFormRender_) {
-        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-            const PointerEvent& pointerEvent, const DragEventAction& action, const RefPtr<NG::FrameNode>& node) {
+        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](const PointerEvent& pointerEvent,
+                                       const DragEventAction& action, const RefPtr<NG::FrameNode>& node) {
             ContainerScope scope(id);
             CHECK_NULL_VOID(context);
             auto callback = [context, pointerEvent, action, node]() {
@@ -1421,15 +1425,6 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
     return hintToTypeWrap;
 }
 
-bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
-{
-    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    CHECK_NULL_RETURN(viewDataWrap, false);
-    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
-    CHECK_NULL_RETURN(viewDataWrapOhos, false);
-    return viewDataWrapOhos->GetPlaceHolderValue(viewData);
-}
-
 void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap)
 {
     CHECK_NULL_VOID(node);
@@ -1541,7 +1536,6 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
-    ChangeType(viewData);
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isNewPassWord is: %{public}d", isNewPassWord);
     if (isNewPassWord) {
         callback->OnFillRequestSuccess(viewData);
@@ -2470,6 +2464,38 @@ void AceContainer::ReleaseResourceAdapter()
     }
 }
 
+DeviceOrientation AceContainer::ProcessDirectionUpdate(
+    const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
+{
+    if (!parsedConfig.direction.empty()) {
+        auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
+        if (parsedConfig.direction == "horizontal") {
+            resDirection = DeviceOrientation::LANDSCAPE;
+        } else if (parsedConfig.direction == "vertical") {
+            resDirection = DeviceOrientation::PORTRAIT;
+        }
+        configurationChange.directionUpdate = true;
+        return resDirection;
+    }
+    return DeviceOrientation::ORIENTATION_UNDEFINED;
+}
+
+void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
+{
+    if (!parsedConfig.themeTag.empty()) {
+        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
+        int fontUpdate = json->GetInt("fonts");
+        configurationChange.fontUpdate = configurationChange.fontUpdate || fontUpdate;
+        int iconUpdate = json->GetInt("icons");
+        configurationChange.iconUpdate = iconUpdate;
+        int skinUpdate = json->GetInt("skin");
+        configurationChange.skinUpdate = skinUpdate;
+        if (fontUpdate) {
+            CheckAndSetFontFamily();
+        }
+    }
+}
+
 void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
 {
     if (!parsedConfig.IsValid()) {
@@ -2515,30 +2541,12 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         fontManager->SetAppCustomFont(parsedConfig.fontFamily);
     }
     if (!parsedConfig.direction.empty()) {
-        auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
-        if (parsedConfig.direction == "horizontal") {
-            resDirection = DeviceOrientation::LANDSCAPE;
-        } else if (parsedConfig.direction == "vertical") {
-            resDirection = DeviceOrientation::PORTRAIT;
-        }
-        configurationChange.directionUpdate = true;
-        resConfig.SetOrientation(resDirection);
+        resConfig.SetOrientation(ProcessDirectionUpdate(parsedConfig, configurationChange));
     }
     if (!parsedConfig.densitydpi.empty()) {
         configurationChange.dpiUpdate = true;
     }
-    if (!parsedConfig.themeTag.empty()) {
-        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
-        int fontUpdate = json->GetInt("fonts");
-        configurationChange.fontUpdate = configurationChange.fontUpdate || fontUpdate;
-        int iconUpdate = json->GetInt("icons");
-        configurationChange.iconUpdate = iconUpdate;
-        int skinUpdate = json->GetInt("skin");
-        configurationChange.skinUpdate = skinUpdate;
-        if (fontUpdate) {
-            CheckAndSetFontFamily();
-        }
-    }
+    ProcessThemeUpdate(parsedConfig, configurationChange);
     if (!parsedConfig.colorModeIsSetByApp.empty()) {
         resConfig.SetColorModeIsSetByApp(true);
     }
@@ -2547,6 +2555,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
+    }
+    if (!parsedConfig.preferredLanguage.empty()) {
+        resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);

@@ -379,7 +379,6 @@ private:
     void UpdateTextFontScale();
     void UpdateTitleTextFontScale();
     void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
-    void CheckDirection();
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -411,7 +410,6 @@ private:
     float fontScaleForElderly_ = 1.0f;
     DeviceOrientation deviceOrientation_ = DeviceOrientation::PORTRAIT;
     RefPtr<FrameNode> titleContainer_;
-    TextDirection direction_ = TextDirection::AUTO;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogPattern);
 

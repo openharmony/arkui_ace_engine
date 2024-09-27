@@ -139,19 +139,23 @@ void SwiperArrowPattern::InitButtonEvent()
     CHECK_NULL_VOID(buttonNode);
 
     auto arrowGestureHub = buttonNode->GetOrCreateGestureEventHub();
-
-    auto touchCallback = [weak = WeakClaim(this), buttonNode](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this), weakButton = WeakClaim(RawPtr(buttonNode))](
+                             const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto buttonNode = weakButton.Upgrade();
+        CHECK_NULL_VOID(buttonNode);
         pattern->ButtonTouchEvent(buttonNode, info.GetTouches().front().GetTouchType());
     };
     buttonTouchListenr_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     arrowGestureHub->AddTouchEvent(buttonTouchListenr_);
     arrowGestureHub->SetHitTestMode(HitTestMode::HTMBLOCK);
 
-    auto hoverCallback = [weak = WeakClaim(this), buttonNode](bool isHovered) {
+    auto hoverCallback = [weak = WeakClaim(this), weakButton = WeakClaim(RawPtr(buttonNode))](bool isHovered) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto buttonNode = weakButton.Upgrade();
+        CHECK_NULL_VOID(buttonNode);
         pattern->ButtonOnHover(buttonNode, isHovered);
     };
     buttonOnHoverListenr_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
@@ -316,31 +320,32 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     auto isHoverShow = swiperArrowLayoutProperty->GetHoverShowValue(false);
     auto hostFocusHub = host->GetFocusHub();
     CHECK_NULL_VOID(hostFocusHub);
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_VOID(swiperPattern);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    auto displaycount = swiperPattern->GetDisplayCount();
+    auto displayCount = swiperPattern->GetDisplayCount();
     bool leftArrowIsHidden = (index_ == 0);
-    bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displaycount);
+    bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount);
     if (swiperPattern->IsSwipeByGroup()) {
-        leftArrowIsHidden = (index_ < displaycount);
-        rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displaycount);
+        leftArrowIsHidden = (index_ < displayCount);
+        rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displayCount);
     }
     if (swiperPattern->IsHorizontalAndRightToLeft()) {
         std::swap(leftArrowIsHidden, rightArrowIsHidden);
     }
-    if ((host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG && leftArrowIsHidden) ||
-        (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG && rightArrowIsHidden)) {
-        if (!swiperArrowLayoutProperty->GetLoopValue(true)) {
-            renderContext->SetVisible(false);
-            gestureHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
-            hostFocusHub->SetParentFocusable(false);
-            hostFocusHub->LostSelfFocus();
-            return;
-        }
+
+    auto isLeftArrow = host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG;
+    auto isRightArrow = host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG;
+    auto isLoop = swiperArrowLayoutProperty->GetLoopValue(true);
+    auto needHideArrow = (((isLeftArrow && leftArrowIsHidden) || (isRightArrow && rightArrowIsHidden)) && !isLoop) ||
+                         (swiperPattern->RealTotalCount() <= displayCount);
+    if (needHideArrow) {
+        renderContext->SetVisible(false);
+        gestureHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+        hostFocusHub->SetParentFocusable(false);
+        hostFocusHub->LostSelfFocus();
+        return;
     }
     if (isHoverShow) {
         hostFocusHub->SetParentFocusable(false);
@@ -426,5 +431,12 @@ void SwiperArrowPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("isTouch", isTouch_);
     json->Put("isHover", isHover_);
     json->Put("hoverOnClickFlag", hoverOnClickFlag_);
+}
+
+RefPtr<SwiperPattern> SwiperArrowPattern::GetSwiperPattern() const
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    return swiperNode->GetPattern<SwiperPattern>();
 }
 } // namespace OHOS::Ace::NG

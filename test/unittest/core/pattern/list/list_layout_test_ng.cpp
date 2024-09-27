@@ -535,6 +535,36 @@ HWTEST_F(ListLayoutTestNg, ContentOffset007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ContentOffset008
+ * @tc.desc: Test List edge check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ContentOffset008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List without item
+     * @tc.expected: not contentStartOffset
+     */
+    const float contentStartOffset = 50;
+    const float contentEndOffset = 50;
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    CreateListItems(0);
+    CreateDone(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 0.0f);
+
+    /**
+     * @tc.steps: step2. add ListItem
+     * @tc.expected: ListItem position is correct.
+     */
+    AddItems(1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), -50.0f);
+}
+
+/**
  * @tc.name: PaintMethod001
  * @tc.desc: Test paint method when has no ListItem in List and in ListItemGroup
  * @tc.type: FUNC

@@ -375,7 +375,7 @@ void ContainerModalView::AddButtonHoverEvent(
         auto containerModalPattern = containerNode->GetPattern<ContainerModalPattern>();
         CHECK_NULL_VOID(containerModalPattern);
         bool isFocus = containerModalPattern->GetIsFocus() || containerModalPattern->GetIsHoveredMenu();
-         
+
         auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();

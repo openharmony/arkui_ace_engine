@@ -89,7 +89,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
 PipelineBase::~PipelineBase()
 {
     std::lock_guard lock(destructMutex_);
-    LOG_DESTROY();
+    LOGI("PipelineBase destroyed");
 }
 
 void PipelineBase::SetCallBackNode(const WeakPtr<NG::FrameNode>& node)

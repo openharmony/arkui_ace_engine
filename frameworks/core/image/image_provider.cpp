@@ -906,6 +906,8 @@ RSColorType ImageProvider::PixelFormatToDrawingColorType(const RefPtr<PixelMap>&
             return RSColorType::COLORTYPE_RGB_565;
         case PixelFormat::RGBA_8888:
             return RSColorType::COLORTYPE_RGBA_8888;
+        case PixelFormat::RGBA_1010102:
+            return RSColorType::COLORTYPE_RGBA_1010102;
         case PixelFormat::BGRA_8888:
             return RSColorType::COLORTYPE_BGRA_8888;
         case PixelFormat::ALPHA_8:

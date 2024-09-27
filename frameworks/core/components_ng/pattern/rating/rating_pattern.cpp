@@ -383,9 +383,6 @@ void RatingPattern::FireChangeEvent()
 void RatingPattern::HandleDragEnd()
 {
     CHECK_NULL_VOID(!IsIndicator());
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     FireChangeEvent();
 }
 

@@ -49,7 +49,9 @@ constexpr int8_t TWO = 2;
 
 void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
@@ -57,8 +59,6 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
     auto tabBarPattern = host->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     axis_ = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
@@ -320,7 +320,9 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
 {
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, {});
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, {});
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, {});
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, {});
@@ -716,12 +718,12 @@ void TabBarLayoutAlgorithm::HandleSpaceBetweenOrCenterLayoutStyle(LayoutWrapper*
 
 void TabBarLayoutAlgorithm::ApplyLayoutMode(LayoutWrapper* layoutWrapper, float allocatedWidth)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
     auto tabBarPattern = host->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
 

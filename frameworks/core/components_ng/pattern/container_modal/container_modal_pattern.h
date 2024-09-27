@@ -81,11 +81,6 @@ public:
         return isFocus_;
     }
 
-    void SetIsFocus(bool isFocus)
-    {
-        isFocus_ = isFocus;
-    }
-
     std::string GetAppLabel()
     {
         return appLabel_;
@@ -174,11 +169,6 @@ public:
 
     void InitColumnTouchTestFunc();
 
-    void SetIsHoveredMenu(bool isHoveredMenu)
-    {
-        isHoveredMenu_ = isHoveredMenu;
-    }
-
     bool GetIsHoveredMenu()
     {
         return isHoveredMenu_;
@@ -222,7 +212,7 @@ protected:
     Color activeColor_;
     Color inactiveColor_;
     void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
-private:
+protected:
     void WindowFocus(bool isFocus);
     void SetTitleButtonHide(
         const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize,

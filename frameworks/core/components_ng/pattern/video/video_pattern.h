@@ -248,9 +248,18 @@ public:
     {
         isSeeking_ = isSeeking;
     }
+    bool GetIsSeeking() const
+    {
+        return isSeeking_;
+    }
+
     void SetIsPrepared(bool isPrepared)
     {
         isPrepared_ = isPrepared;
+    }
+    bool GetIsPrepared() const
+    {
+        return isPrepared_;
     }
 
 #ifdef RENDER_EXTRACT_SUPPORTED

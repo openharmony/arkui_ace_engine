@@ -134,6 +134,7 @@ public:
     {
         return urlPressColor_;
     }
+
 protected:
     TextTheme() = default;
 

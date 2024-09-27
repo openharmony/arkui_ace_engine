@@ -332,7 +332,7 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckLocalizedEdgeColors002, TestSize.Level1)
     layoutProperty->CheckLocalizedEdgeColors(textDirection);
     ASSERT_NE(renderContext->GetBorder(), nullptr);
     EXPECT_EQ(renderContext->GetBorder()->GetBorderColorValue().leftColor.value(), Color::BLUE);
-    EXPECT_EQ(renderContext->GetBorder()->GetBorderColorValue().topColor.value(), Color::GREEN);
+    EXPECT_EQ(renderContext->GetBorder()->GetBorderColorValue().topColor.value(), Color::RED);
 }
 
 /**

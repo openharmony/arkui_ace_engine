@@ -534,12 +534,7 @@ void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, co
 
 Color ContainerModalPattern::GetContainerColor(bool isFocus)
 {
-
-    if (isFocus) {
-        return activeColor_;
-    } else {
-        return inactiveColor_;
-    }
+    return isFocus ? activeColor_ : inactiveColor_;
 }
 
 void ContainerModalPattern::UpdateGestureRowVisible()

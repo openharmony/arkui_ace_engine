@@ -228,6 +228,16 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 #endif
 }
 
+void InputMethodManager::CloseKeyboardInProcess()
+{
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyboardInProcess Ready to close SoftKeyboard.");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyboardInProcess Close SoftKeyboard Successfully.");
+    }
+}
+
 void InputMethodManager::ProcessModalPageScene()
 {
     auto currentFocusNode = curFocusNode_.Upgrade();
@@ -235,7 +245,7 @@ void InputMethodManager::ProcessModalPageScene()
     if (currentFocusNode && currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         HideKeyboardAcrossProcesses();
     } else {
-        CloseKeyboard();
+        CloseKeyboardInProcess();
     }
 }
 } // namespace OHOS::Ace

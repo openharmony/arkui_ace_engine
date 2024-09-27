@@ -127,6 +127,19 @@ void SelectPattern::OnModifyDone()
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->UpdateSelectIndex(selected_);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetBackgroundColor().has_value()) {
+        return;
+    }
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+    } else {
+        renderContext->UpdateBackgroundColor(theme->GetButtonBackgroundColor());
+    }
 }
 
 void SelectPattern::OnAfterModifyDone()
@@ -557,11 +570,6 @@ void SelectPattern::BuildChild()
     // set bgColor and border
     auto renderContext = select->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-    } else {
-        renderContext->UpdateBackgroundColor(theme->GetButtonBackgroundColor());
-    }
     renderContext->SetClipToFrame(true);
     BorderRadiusProperty border;
     border.SetRadius(theme->GetSelectBorderRadius());
@@ -1275,28 +1283,6 @@ Dimension SelectPattern::GetFontSize()
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(selectTheme, defaultRet);
     return props->GetFontSize().value_or(selectTheme->GetFontSize());
-}
-
-void SelectPattern::SetSelectDefaultTheme()
-{
-    auto select = GetHost();
-    CHECK_NULL_VOID(select);
-    auto pipeline = select->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-
-    auto renderContext = select->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    if (selectDefaultBgColor_ == Color::TRANSPARENT) {
-        renderContext->UpdateBackgroundColor(selectTheme->GetSelectDefaultBgColor());
-    } else {
-        renderContext->UpdateBackgroundColor(selectDefaultBgColor_);
-    }
-    BorderRadiusProperty border;
-    border.SetRadius(selectTheme->GetSelectDefaultBorderRadius());
-    renderContext->UpdateBorderRadius(border);
 }
 
 void SelectPattern::SetOptionWidth(const Dimension& value)

@@ -4,7 +4,7 @@
             "https://gitee.com/raulnaruto_admin",
             "https://gitee.com/jiangdayuan",
             "https://gitee.com/tsj_2020",
-            "https://gitee.com/cheng-feiwang",
+            "https://gitee.com/cheng-feiwang"
         ],
         "https://gitee.com/arkuiabilitygroup": [
             "https://gitee.com/lmleon",
@@ -17,26 +17,25 @@
             "https://gitee.com/harmony_zhangjian",
             "https://gitee.com/yesiyuanjim",
             "https://gitee.com/lushi1202",
-            "https://gitee.com/xiang-shouxing",
+            "https://gitee.com/xiang-shouxing"
         ],
         "https://gitee.com/arkuievent": [
             "https://gitee.com/jiangtao92",
             "https://gitee.com/piggyguy",
             "https://gitee.com/zhaojian2021",
             "https://gitee.com/benb365",
-            "https://gitee.com/zhou-chaobo",
+            "https://gitee.com/zhou-chaobo"
         ],
         "https://gitee.com/arkui_architecture": [
             "https://gitee.com/sunfei2021",
             "https://gitee.com/yan-shuifeng",
-            "https://gitee.com/lightningHo",
-            "https://gitee.com/liyi0309",
+            "https://gitee.com/lightningHo"
         ],
         "https://gitee.com/arkui_image": [
             "https://gitee.com/ileft2019",
             "https://gitee.com/jinweiliu",
             "https://gitee.com/lexiaoyao2",
-            "https://gitee.com/liyujie43",
+            "https://gitee.com/liyujie43"
         ],
         "https://gitee.com/arkuistatemgmt": [
             "https://gitee.com/seaside_wu",
@@ -52,7 +51,7 @@
             "https://gitee.com/zcdqs",
             "https://gitee.com/zhoutianer",
             "https://gitee.com/xuzhidan",
-            "https://gitee.com/Hu_ZeQi",
+            "https://gitee.com/Hu_ZeQi"
         ],
         "https://gitee.com/arkuipopupwindow": [
             "https://gitee.com/zhangfanfan2",
@@ -62,19 +61,19 @@
             "https://gitee.com/Armstrong15",
             "https://gitee.com/fredtt",
             "https://gitee.com/futurescape",
-            "https://gitee.com/luoying_ace_admin",
+            "https://gitee.com/luoying_ace_admin"
         ],
         "https://gitee.com/huawei_g_five": [
             "https://gitee.com/kangshihui",
             "https://gitee.com/luckclover",
             "https://gitee.com/lijuan124",
-            "https://gitee.com/tzcurtain",
+            "https://gitee.com/tzcurtain"
         ],
         "https://gitee.com/arkuilayout": [
             "https://gitee.com/ZhangYu-Home",
             "https://gitee.com/xiexiyun",
             "https://gitee.com/keerecles",
-            "https://gitee.com/sunbees",
+            "https://gitee.com/sunbees"
         ]
     },
     "userInfos": {
@@ -160,10 +159,6 @@
         },
         "https://gitee.com/lightningHo": {
             "info": "[渲染核心数据结构 hesu]",
-            "group": "https://gitee.com/arkui_architecture"
-        },
-        "https://gitee.com/liyi0309": {
-            "info": "[C-API框架 liyi]",
             "group": "https://gitee.com/arkui_architecture"
         },
         "https://gitee.com/ileft2019": {
@@ -293,6 +288,6 @@
         "https://gitee.com/sunbees": {
             "info": "[绘制类组件 sunqinjia]",
             "group": "https://gitee.com/arkuilayout"
-        },
+        }
     }
 }

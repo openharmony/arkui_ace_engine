@@ -57,7 +57,7 @@ using ScrollFrameBeginCallback = std::function<ScrollFrameResult(Dimension, Scro
 using DragEndForRefreshCallback = std::function<void()>;
 using DragCancelRefreshCallback = std::function<void()>;
 using MouseLeftButtonScroll = std::function<bool()>;
-using ScrollSnapCallback = std::function<bool(double targetOffset, double velocity)>;
+using ScrollSnapListCallback = std::function<bool(double targetOffset, double velocity)>;
 using ContinuousSlidingCallback = std::function<double()>;
 using CalcPredictSnapOffsetCallback =
     std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
@@ -74,9 +74,9 @@ class Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:
-    Scrollable();
-    Scrollable(ScrollPositionCallback&& callback, Axis axis);
-    Scrollable(const ScrollPositionCallback& callback, Axis axis);
+    Scrollable() = default;
+    Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis) {}
+    Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis) {}
     ~Scrollable() override;
 
     enum class AnimationState {
@@ -176,7 +176,7 @@ public:
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
-    void LayoutDirectionEst(double& correctVelocity);
+    void LayoutDirectionEst(double correctVelocity, double velocityScale, bool isScrollFromTouchPad);
 
     void SetMoved(bool value)
     {
@@ -353,7 +353,7 @@ public:
     {
         overScrollCallback_ = std::move(func);
     }
-    void StartScrollAnimation(float mainPosition, float velocity);
+    void StartScrollAnimation(float mainPosition, float velocity, bool isScrollFromTouchPad = false);
     void SetOnScrollStartRec(std::function<void(float)>&& func)
     {
         onScrollStartRec_ = std::move(func);
@@ -368,9 +368,9 @@ public:
         edgeEffect_ = effect;
     }
 
-    void SetOnScrollSnapCallback(const ScrollSnapCallback& scrollSnapCallback)
+    void SetScrollSnapListCallback(const ScrollSnapListCallback& scrollSnapListCallback)
     {
-        scrollSnapCallback_ = scrollSnapCallback;
+        scrollSnapListCallback_ = scrollSnapListCallback;
     }
     void SetContinuousDragStatus(bool status)
     {
@@ -486,6 +486,11 @@ public:
         return nestedScrolling_;
     }
 
+    void SetOverScrollOffsetCallback(std::function<double()> overScrollOffsetCallback)
+    {
+        overScrollOffsetCallback_ = overScrollOffsetCallback;
+    }
+
 private:
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
@@ -499,6 +504,7 @@ private:
     void MarkNeedFlushAnimationStartTime();
     float GetFrictionVelocityByFinalPosition(
         float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
+    void InitFriction(double friction);
 
     /**
      * @brief Checks if the scroll event is caused by a mouse wheel.
@@ -520,7 +526,7 @@ private:
 
     WatchFixCallback watchFixCallback_;
     ScrollBeginCallback scrollBeginCallback_;
-    ScrollSnapCallback scrollSnapCallback_;
+    ScrollSnapListCallback scrollSnapListCallback_;
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
     ContinuousSlidingCallback continuousSlidingCallback_;
@@ -557,7 +563,6 @@ private:
     double dragEndPosition_ = 0.0;
     double lastVelocity_ = 0.0;
     double friction_ = -1.0;
-    double velocityScale_ = 0.0;
     double preGain_ = 1.0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
@@ -597,6 +602,12 @@ private:
     bool skipRestartSpring_ = false; // set to true when need to skip repeated spring animation
     uint32_t updateSnapAnimationCount_ = 0;
     uint32_t springAnimationCount_ = 0;
+    double flingVelocityScale_ = 1.5;
+    double springVelocityScale_ = 1.5;
+    float ratio_ = 1.848f;
+    float springResponse_ = 0.416f;
+    float touchPadVelocityScaleRate_ = 1.0f;
+    std::function<double()> overScrollOffsetCallback_;
 
     RefPtr<NodeAnimatablePropertyFloat> snapOffsetProperty_;
     float snapVelocity_ = 0.0f;

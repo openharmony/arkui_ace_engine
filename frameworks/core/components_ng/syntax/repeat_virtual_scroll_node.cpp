@@ -26,7 +26,7 @@ RefPtr<RepeatVirtualScrollNode> RepeatVirtualScrollNode::GetOrCreateRepeatNode(i
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-    const std::function<void(uint32_t, uint32_t)>& onSetActiveRange)
+    const std::function<void(int32_t, int32_t)>& onSetActiveRange)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScrollNode>(nodeId);
     if (node) {
@@ -48,7 +48,7 @@ RepeatVirtualScrollNode::RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCo
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-    const std::function<void(uint32_t, uint32_t)>& onSetActiveRange)
+    const std::function<void(int32_t, int32_t)>& onSetActiveRange)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), totalCount_(totalCount),
       caches_(templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range),
       onSetActiveRange_(onSetActiveRange),
@@ -126,11 +126,15 @@ bool RepeatVirtualScrollNode::CheckNode4IndexInL1(int32_t index, int32_t start, 
     }
 
     auto totalCount = static_cast<int32_t>(totalCount_);
-    if (((start - cacheStart <= index) && (index <= end + cacheEnd)) ||
-        (isLoop_ && (start - cacheStart < 0 && start - cacheStart + totalCount <= index)) ||
-        (isLoop_ && (end + cacheEnd >= totalCount && index <= end + cacheEnd - totalCount)) ||
-        ((end < start) && (index <= end + cacheEnd || start - cacheStart <= index))) {
+    if ((start - cacheStart <= index) && (index <= end + cacheEnd)) {
         return true;
+    }
+    if (isLoop_) {
+        if (((end < start) && (start - cacheStart <= index || index <= end + cacheEnd)) ||
+            ((start - cacheStart < 0) && (index >= start - cacheStart + totalCount)) ||
+            ((end + cacheEnd >= totalCount) && (index <= end + cacheEnd - totalCount))) {
+            return true;
+        }
     }
     return false;
 }

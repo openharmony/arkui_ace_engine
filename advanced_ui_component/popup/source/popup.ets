@@ -222,7 +222,7 @@ export struct PopupComponent {
   @State buttonHeight: number = 0;
   @State messageMaxWeight: number | undefined = 0;
   @State beforeScreenStatus: boolean | undefined = undefined;
-  @State currentScreenStatus: boolean = true;
+  @State screenChanged: boolean = false;
   @State applySizeOptions: ConstraintSizeOptions | undefined = undefined;
   @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
@@ -367,7 +367,7 @@ export struct PopupComponent {
       if (px2vp(defaultDisplaySync.width) > 400) {
         textMaxWeight = 400
       } else {
-        textMaxWeight = px2vp(defaultDisplaySync.width) - 40 - 40
+        textMaxWeight = px2vp(defaultDisplaySync.width)
       }
       textMaxWeight -= (this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2))
       textMaxWeight -= this.theme.windows.padding.end.value
@@ -459,7 +459,13 @@ export struct PopupComponent {
 
   aboutToAppear() {
     this.listener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
-      this.currentScreenStatus = mediaQueryResult.matches
+      if (mediaQueryResult.matches !== this.beforeScreenStatus) {
+        this.applySizeOptions = this.getApplyMaxSize();
+        this.beforeScreenStatus = mediaQueryResult.matches;
+        this.screenChanged = true;
+      } else {
+        this.screenChanged = false;
+      }
     })
   }
 
@@ -469,9 +475,7 @@ export struct PopupComponent {
 
   getScrollMaxHeight(): number | undefined {
     let scrollMaxHeight: number | undefined = undefined;
-    if (this.currentScreenStatus !== this.beforeScreenStatus) {
-      this.applySizeOptions = this.getApplyMaxSize();
-      this.beforeScreenStatus = this.currentScreenStatus
+    if (this.screenChanged) {
       return scrollMaxHeight;
     }
     scrollMaxHeight = this.applyHeight
@@ -511,7 +515,7 @@ export struct PopupComponent {
     if (px2vp(defaultDisplaySync.width) > 400) {
       applyMaxWidth = 400
     } else {
-      applyMaxWidth = px2vp(defaultDisplaySync.width) - 40 - 40
+      applyMaxWidth = px2vp(defaultDisplaySync.width)
     }
     if (px2vp(defaultDisplaySync.height) > 480) {
       applyMaxHeight = 480

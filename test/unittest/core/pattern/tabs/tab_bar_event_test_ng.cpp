@@ -685,7 +685,7 @@ HWTEST_F(TabBarEventTestNg, TabBarLayoutAlgorithmHandleSpaceBetweenOrCenterLayou
  */
 HWTEST_F(TabBarEventTestNg, Drag001, TestSize.Level1)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     pipeline->fontScale_ = BIG_FONT_SIZE_SCALE; // for InitLongPressEvent
     TabsModelNG model = CreateTabs();
     CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
@@ -745,7 +745,7 @@ HWTEST_F(TabBarEventTestNg, Drag001, TestSize.Level1)
  */
 HWTEST_F(TabBarEventTestNg, DialogStyle001, TestSize.Level1)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     pipeline->fontScale_ = BIG_FONT_SIZE_SCALE; // for InitLongPressEvent
     TabsModelNG model = CreateTabs();
     CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
@@ -1045,7 +1045,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternOnKeyEvent001, TestSize.Level1)
     CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
     CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
     CreateTabsDone(model);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     pipeline->isFocusActive_ = true;
     /**
      * @tc.steps: step1. call OnKeyEvent use Axis::HORIZONTAL and KeyCode::KEY_TAB and isCustomAnimation_ is true

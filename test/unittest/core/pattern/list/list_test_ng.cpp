@@ -113,6 +113,17 @@ void ListTestNg::CreateListItems(int32_t itemNumber, V2::ListItemStyle listItemS
     }
 }
 
+void ListTestNg::AddItems(int32_t itemNumber, V2::ListItemStyle listItemStyle)
+{
+    for (int i = 0; i < itemNumber; ++i) {
+        auto child = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, -1,
+            [listItemStyle]() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, listItemStyle); });
+        child->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(LIST_WIDTH), CalcLength(Dimension(ITEM_HEIGHT))));
+        frameNode_->AddChild(child);
+    }
+}
+
 ListItemModelNG ListTestNg::CreateListItem(V2::ListItemStyle listItemStyle)
 {
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
@@ -551,7 +562,8 @@ void ListTestNg::FlushIdleTask(const RefPtr<ListPattern>& listPattern)
     auto predictParam = listPattern->GetPredictLayoutParamV2();
     while (predictParam && tryCount > 0) {
         const int64_t time = GetSysTimestamp();
-        PipelineContext::GetCurrentContext()->OnIdle(time + 16 * 1000000); // 16 * 1000000: 16ms
+        auto pipeline = listPattern->GetContext();
+        pipeline->OnIdle(time + 16 * 1000000); // 16 * 1000000: 16ms
         FlushLayoutTask(frameNode_);
         predictParam = listPattern->GetPredictLayoutParamV2();
         tryCount--;

@@ -33,6 +33,12 @@ constexpr float HEIGHT_CONSTRAINT_FACTOR = 0.8;
 constexpr float ARROW_WIDTH_FACTOR = 2.0;
 constexpr double HALF = 2.0;
 
+constexpr Dimension ARROW_RADIUS = 2.0_vp;
+constexpr Dimension ARROW_P1_OFFSET_X = 8.0_vp;
+constexpr Dimension ARROW_P2_OFFSET_X = 1.5_vp;
+constexpr Dimension ARROW_P1_OFFSET_Y = 8.0_vp;
+constexpr Dimension ARROW_P2_OFFSET_Y = 0.68_vp;
+
 const std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
     { Placement::BOTTOM_LEFT,
         {
@@ -829,6 +835,7 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(idealSize);
+    childMarginFrameSize_ = idealSize;
 }
 
 void MenuLayoutAlgorithm::GetPreviewNodeTargetHoverImageChild(const RefPtr<LayoutWrapper>& child,
@@ -1451,6 +1458,77 @@ OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, flo
     return OffsetF(x, y);
 }
 
+void MenuLayoutAlgorithm::CalculateChildOffset(bool didNeedArrow)
+{
+    childOffset_.Reset();
+    if (didNeedArrow) {
+        switch (arrowPlacement_) {
+            case Placement::RIGHT:
+            case Placement::RIGHT_TOP:
+            case Placement::RIGHT_BOTTOM:
+                childOffset_.SetX(ARROW_HIGHT.ConvertToPx());
+                break;
+            case Placement::BOTTOM:
+            case Placement::BOTTOM_LEFT:
+            case Placement::BOTTOM_RIGHT:
+                childOffset_.SetY(ARROW_HIGHT.ConvertToPx());
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+OffsetF MenuLayoutAlgorithm::CalculateMenuPositionWithArrow(const OffsetF& menuPosition, bool didNeedArrow)
+{
+    OffsetF menuPositionWithArrow = menuPosition;
+    if (didNeedArrow) {
+        switch (arrowPlacement_) {
+            case Placement::RIGHT:
+            case Placement::RIGHT_TOP:
+            case Placement::RIGHT_BOTTOM:
+                menuPositionWithArrow -= OffsetF(ARROW_HIGHT.ConvertToPx(), 0);
+                break;
+            case Placement::BOTTOM:
+            case Placement::BOTTOM_LEFT:
+            case Placement::BOTTOM_RIGHT:
+                menuPositionWithArrow -= OffsetF(0, ARROW_HIGHT.ConvertToPx());
+                break;
+            default:
+                break;
+        }
+    }
+    return menuPositionWithArrow;
+}
+
+void MenuLayoutAlgorithm::UpdateMenuFrameSizeWithArrow(const RefPtr<GeometryNode>& geometryNode,
+    bool didNeedArrow)
+{
+    if (didNeedArrow && arrowPlacement_ != Placement::NONE) {
+        switch (arrowPlacement_) {
+            case Placement::LEFT:
+            case Placement::LEFT_TOP:
+            case Placement::LEFT_BOTTOM:
+            case Placement::RIGHT:
+            case Placement::RIGHT_TOP:
+            case Placement::RIGHT_BOTTOM:
+                geometryNode->SetFrameSize(geometryNode->GetFrameSize() + SizeF(ARROW_HIGHT.ConvertToPx(), 0));
+                break;
+            case Placement::TOP:
+            case Placement::TOP_LEFT:
+            case Placement::TOP_RIGHT:
+            case Placement::BOTTOM:
+            case Placement::BOTTOM_LEFT:
+            case Placement::BOTTOM_RIGHT:
+                geometryNode->SetFrameSize(geometryNode->GetFrameSize() + SizeF(0, ARROW_HIGHT.ConvertToPx()));
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+
 void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
@@ -1486,11 +1564,13 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (menuPattern->IsSelectOverlayRightClickMenu()) {
             AdjustSelectOverlayMenuPosition(menuPosition, geometryNode);
         }
+        CalculateChildOffset(didNeedArrow);
+        OffsetF menuPositionWithArrow = CalculateMenuPositionWithArrow(menuPosition, didNeedArrow);
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         TAG_LOGD(AceLogTag::ACE_MENU, "update menu postion: %{public}s", menuPosition.ToString().c_str());
         renderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+            OffsetT<Dimension>(Dimension(menuPositionWithArrow.GetX()), Dimension(menuPositionWithArrow.GetY())));
         dumpInfo_.finalPlacement = PlacementUtils::ConvertPlacementToString(placement_);
         dumpInfo_.finalPosition = menuPosition;
         SetMenuPlacementForAnimation(layoutWrapper);
@@ -1498,7 +1578,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             arrowPosition_ = GetArrowPositionWithPlacement(size, layoutWrapper);
             LayoutArrow(layoutWrapper);
         }
-        geometryNode->SetFrameOffset(menuPosition);
+        geometryNode->SetFrameOffset(menuPositionWithArrow);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
@@ -1524,15 +1604,17 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(wrapperPattern);
         wrapperPattern->SetDumpInfo(dumpInfo_);
+        UpdateMenuFrameSizeWithArrow(geometryNode, didNeedArrow);
     }
 
     TranslateOptions(layoutWrapper);
+    ClipMenuPath(layoutWrapper);
 }
 
 void MenuLayoutAlgorithm::TranslateOptions(LayoutWrapper* layoutWrapper)
 {
     // translate each option by the height of previous options
-    OffsetF translate;
+    OffsetF translate = childOffset_;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
@@ -2113,7 +2195,7 @@ OffsetF MenuLayoutAlgorithm::GetArrowPositionWithPlacement(const SizeF& menuSize
         case Placement::BOTTOM:
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
-            childPosition = OffsetF(addArrowOffsetToArrowMin, -space_);
+            childPosition = OffsetF(addArrowOffsetToArrowMin, 0);
             break;
         case Placement::LEFT:
         case Placement::LEFT_TOP:
@@ -2123,7 +2205,7 @@ OffsetF MenuLayoutAlgorithm::GetArrowPositionWithPlacement(const SizeF& menuSize
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
-            childPosition = OffsetF(-space_, addArrowOffsetToArrowMin);
+            childPosition = OffsetF(0, addArrowOffsetToArrowMin);
             break;
         default:
             break;
@@ -2718,4 +2800,198 @@ bool MenuLayoutAlgorithm::CheckIsEmbeddedMode(LayoutWrapper* layoutWrapper)
     return layoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE) == SubMenuExpandingMode::EMBEDDED;
 }
 
+std::string MenuLayoutAlgorithm::MoveTo(double x, double y)
+{
+    return "M" + std::to_string(x) + " " + std::to_string(y) + " ";
+}
+
+std::string MenuLayoutAlgorithm::LineTo(double x, double y)
+{
+    return "L" + std::to_string(x) + " " + std::to_string(y) + " ";
+}
+
+std::string MenuLayoutAlgorithm::ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y)
+{
+    int32_t sweep_flag = 1;
+    return "A" + std::to_string(rx) + " " + std::to_string(ry) + " " + std::to_string(rotation) + " " +
+           std::to_string(arc_flag) + " " + std::to_string(sweep_flag) + " " + std::to_string(x) + " " +
+           std::to_string(y) + " ";
+}
+
+void MenuLayoutAlgorithm::BuildBottomArrowPath(float arrowX, float arrowY, std::string& path)
+{
+    path += LineTo(arrowX - ARROW_P1_OFFSET_X.ConvertToPx(), arrowY + ARROW_P1_OFFSET_Y.ConvertToPx()); //P1
+    path += LineTo(arrowX - ARROW_P2_OFFSET_X.ConvertToPx(), arrowY + ARROW_P2_OFFSET_Y.ConvertToPx()); //P2
+    path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+        arrowX + ARROW_P2_OFFSET_X.ConvertToPx(), arrowY + ARROW_P2_OFFSET_Y.ConvertToPx()); //P4
+    path += LineTo(arrowX + ARROW_P1_OFFSET_X.ConvertToPx(), arrowY + ARROW_P1_OFFSET_Y.ConvertToPx()); //P5
+}
+
+void MenuLayoutAlgorithm::BuildTopArrowPath(float arrowX, float arrowY, std::string& path)
+{
+    path += LineTo(arrowX + ARROW_P1_OFFSET_X.ConvertToPx(), arrowY - ARROW_P1_OFFSET_Y.ConvertToPx()); //P1
+    path += LineTo(arrowX + ARROW_P2_OFFSET_X.ConvertToPx(), arrowY - ARROW_P2_OFFSET_Y.ConvertToPx()); //P2
+    path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+        arrowX - ARROW_P2_OFFSET_X.ConvertToPx(), arrowY - ARROW_P2_OFFSET_Y.ConvertToPx()); //P4
+    path += LineTo(arrowX - ARROW_P1_OFFSET_X.ConvertToPx(), arrowY - ARROW_P1_OFFSET_Y.ConvertToPx()); //P5
+}
+
+void MenuLayoutAlgorithm::BuildRightArrowPath(float arrowX, float arrowY, std::string& path)
+{
+    path += LineTo(arrowX + ARROW_P1_OFFSET_Y.ConvertToPx(), arrowY + ARROW_P1_OFFSET_X.ConvertToPx()); //P1
+    path += LineTo(arrowX + ARROW_P2_OFFSET_Y.ConvertToPx(), arrowY + ARROW_P2_OFFSET_X.ConvertToPx()); //P2
+    path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+        arrowX + ARROW_P2_OFFSET_Y.ConvertToPx(), arrowY - ARROW_P2_OFFSET_X.ConvertToPx()); //P4
+    path += LineTo(arrowX + ARROW_P1_OFFSET_Y.ConvertToPx(), arrowY - ARROW_P1_OFFSET_X.ConvertToPx()); //P5
+}
+
+void MenuLayoutAlgorithm::BuildLeftArrowPath(float arrowX, float arrowY, std::string& path)
+{
+    path += LineTo(arrowX - ARROW_P1_OFFSET_Y.ConvertToPx(), arrowY - ARROW_P1_OFFSET_X.ConvertToPx()); //P1
+    path += LineTo(arrowX - ARROW_P2_OFFSET_Y.ConvertToPx(), arrowY - ARROW_P2_OFFSET_X.ConvertToPx()); //P2
+    path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+        arrowX - ARROW_P2_OFFSET_Y.ConvertToPx(), arrowY + ARROW_P2_OFFSET_X.ConvertToPx()); //P4
+    path += LineTo(arrowX - ARROW_P1_OFFSET_Y.ConvertToPx(), arrowY + ARROW_P1_OFFSET_X.ConvertToPx()); //P5
+}
+
+std::string MenuLayoutAlgorithm::BuildTopLinePath(const OffsetF& arrowPosition, float radiusPx,
+    Placement arrowBuildPlacement, bool didNeedArrow)
+{
+    std::string path;
+    if (didNeedArrow) {
+        switch (arrowBuildPlacement) {
+            case Placement::BOTTOM:
+            case Placement::BOTTOM_LEFT:
+            case Placement::BOTTOM_RIGHT:
+                BuildBottomArrowPath(arrowPosition.GetX(), arrowPosition.GetY(), path);
+                break;
+            default:
+                break;
+        }
+    }
+    path += LineTo(childOffset_.GetX() + childMarginFrameSize_.Width() - radiusPx, childOffset_.GetY());
+    path += ArcTo(radiusPx, radiusPx, 0.0f, 0, childOffset_.GetX() + childMarginFrameSize_.Width(),
+        childOffset_.GetY() + radiusPx);
+    return path;
+}
+
+std::string MenuLayoutAlgorithm::BuildRightLinePath(const OffsetF& arrowPosition, float radiusPx,
+    Placement arrowBuildPlacement, bool didNeedArrow)
+{
+    std::string path;
+    if (didNeedArrow) {
+        switch (arrowBuildPlacement) {
+            case Placement::LEFT:
+            case Placement::LEFT_TOP:
+            case Placement::LEFT_BOTTOM:
+                BuildLeftArrowPath(arrowPosition.GetX(), arrowPosition.GetY(), path);
+                break;
+            default:
+                break;
+        }
+    }
+    path += LineTo(childOffset_.GetX() + childMarginFrameSize_.Width(),
+        childOffset_.GetY() + childMarginFrameSize_.Height() - radiusPx);
+    path += ArcTo(radiusPx, radiusPx, 0.0f, 0, childOffset_.GetX() + childMarginFrameSize_.Width() - radiusPx,
+        childOffset_.GetY() + childMarginFrameSize_.Height());
+    return path;
+}
+
+std::string MenuLayoutAlgorithm::BuildBottomLinePath(const OffsetF& arrowPosition, float radiusPx,
+    Placement arrowBuildPlacement, bool didNeedArrow)
+{
+    std::string path;
+    if (didNeedArrow) {
+        switch (arrowBuildPlacement) {
+            case Placement::TOP:
+            case Placement::TOP_LEFT:
+            case Placement::TOP_RIGHT:
+                BuildTopArrowPath(arrowPosition.GetX(), arrowPosition.GetY(), path);
+                break;
+            default:
+                break;
+        }
+    }
+    path += LineTo(childOffset_.GetX() + radiusPx, childOffset_.GetY() + childMarginFrameSize_.Height());
+    path += ArcTo(radiusPx, radiusPx, 0.0f, 0, childOffset_.GetX(),
+        childOffset_.GetY() + childMarginFrameSize_.Height() - radiusPx);
+    return path;
+}
+
+std::string MenuLayoutAlgorithm::BuildLeftLinePath(const OffsetF& arrowPosition, float radiusPx,
+    Placement arrowBuildPlacement, bool didNeedArrow)
+{
+    std::string path;
+    if (didNeedArrow) {
+        switch (arrowBuildPlacement) {
+            case Placement::RIGHT:
+            case Placement::RIGHT_TOP:
+            case Placement::RIGHT_BOTTOM:
+                BuildRightArrowPath(arrowPosition.GetX(), arrowPosition.GetY(), path);
+                break;
+            default:
+                break;
+        }
+    }
+    path += LineTo(childOffset_.GetX(), childOffset_.GetY() + radiusPx);
+    path += ArcTo(radiusPx, radiusPx, 0.0f, 0, childOffset_.GetX() + radiusPx, childOffset_.GetY());
+    return path;
+}
+
+void MenuLayoutAlgorithm::NormalizeBorderRadius(float& radiusTopLeftPx, float& radiusTopRightPx,
+    float& radiusBottomLeftPx, float& radiusBottomRightPx)
+{
+    float childMarginFrameWidth = childMarginFrameSize_.Width();
+    float childMarginFrameHeight = childMarginFrameSize_.Height();
+    if (NearZero(childMarginFrameWidth) || NearZero(childMarginFrameHeight)) {
+        radiusTopLeftPx = 0.0f;
+        radiusTopRightPx = 0.0f;
+        radiusBottomLeftPx = 0.0f;
+        radiusBottomRightPx = 0.0f;
+        return;
+    }
+    float topRatio = (radiusTopLeftPx + radiusTopRightPx) / childMarginFrameWidth;
+    float bottomRatio = (radiusBottomLeftPx + radiusBottomRightPx) / childMarginFrameWidth;
+    float leftRatio = (radiusTopLeftPx + radiusBottomLeftPx) / childMarginFrameHeight;
+    float rightRatio = (radiusTopRightPx + radiusBottomRightPx) / childMarginFrameHeight;
+    float maxRatio = std::max(std::max(topRatio, bottomRatio), std::max(leftRatio, rightRatio));
+    if (GreatNotEqual(maxRatio, 1.0f)) {
+        radiusTopLeftPx = radiusTopLeftPx / maxRatio;
+        radiusTopRightPx = radiusTopRightPx / maxRatio;
+        radiusBottomLeftPx = radiusBottomLeftPx / maxRatio;
+        radiusBottomRightPx = radiusBottomRightPx / maxRatio;
+    }
+}
+
+std::string MenuLayoutAlgorithm::CalculateMenuPath(LayoutWrapper* layoutWrapper, bool didNeedArrow)
+{
+    std::string path;
+    BorderRadiusProperty menuBorderRadius = GetMenuRadius(layoutWrapper, childMarginFrameSize_);
+    float radiusTopLeftPx = menuBorderRadius.radiusTopLeft.value_or(Dimension())
+        .ConvertToPxWithSize(childMarginFrameSize_.Width());
+    float radiusTopRightPx = menuBorderRadius.radiusTopRight.value_or(Dimension())
+        .ConvertToPxWithSize(childMarginFrameSize_.Width());
+    float radiusBottomLeftPx = menuBorderRadius.radiusBottomLeft.value_or(Dimension())
+        .ConvertToPxWithSize(childMarginFrameSize_.Width());
+    float radiusBottomRightPx = menuBorderRadius.radiusBottomRight.value_or(Dimension())
+        .ConvertToPxWithSize(childMarginFrameSize_.Width());
+    NormalizeBorderRadius(radiusTopLeftPx, radiusTopRightPx, radiusBottomLeftPx, radiusBottomRightPx);
+
+    path += MoveTo(childOffset_.GetX() + radiusTopLeftPx, childOffset_.GetY());
+    path += BuildTopLinePath(arrowPosition_, radiusTopRightPx, arrowPlacement_, didNeedArrow);
+    path += BuildRightLinePath(arrowPosition_, radiusBottomRightPx, arrowPlacement_, didNeedArrow);
+    path += BuildBottomLinePath(arrowPosition_, radiusBottomLeftPx, arrowPlacement_, didNeedArrow);
+    path += BuildLeftLinePath(arrowPosition_, radiusTopLeftPx, arrowPlacement_, didNeedArrow);
+    return path + "Z";
+}
+
+void MenuLayoutAlgorithm::ClipMenuPath(LayoutWrapper* layoutWrapper)
+{
+    bool didNeedArrow = GetIfNeedArrow(layoutWrapper, childMarginFrameSize_);
+    if (didNeedArrow) {
+        clipPath_ = CalculateMenuPath(layoutWrapper, didNeedArrow);
+    } else {
+        clipPath_ = "";
+    }
+}
 } // namespace OHOS::Ace::NG

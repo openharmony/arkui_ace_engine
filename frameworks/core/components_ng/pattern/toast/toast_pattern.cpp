@@ -379,16 +379,16 @@ double ToastPattern::GetTextMaxHeight()
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     auto containerId = Container::CurrentId();
-    double deviceHeight = 0.0f;
-    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
-        deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
-    } else {
+    double deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
+    if (containerId >= 0 && containerId < MIN_SUBCONTAINER_ID) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-        deviceHeight = windowGlobalRect.Height();
-    }
-    if (LessOrEqual(deviceHeight, 0.0)) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY,
-            "toast get device height is invalid, containerId: %{public}d", containerId);
+        auto windowHeight = windowGlobalRect.Height();
+        if (LessOrEqual(windowHeight, 0.0)) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY,
+                "toast get device height is invalid, containerId: %{public}d", containerId);
+        } else {
+            deviceHeight = windowHeight;
+        }
     }
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
@@ -408,18 +408,17 @@ double ToastPattern::GetTextMaxWidth()
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     auto containerId = Container::CurrentId();
-    double deviceWidth = 0.0f;
-    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
-        deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
-    } else {
+    double deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
+    if (containerId >= 0 && containerId < MIN_SUBCONTAINER_ID) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-        deviceWidth = windowGlobalRect.Width();
+        auto windowWidth = windowGlobalRect.Width();
+        if (LessOrEqual(windowWidth, 0.0)) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY,
+                "toast get device width is invalid, containerId: %{public}d", containerId);
+        } else {
+            deviceWidth = windowWidth;
+        }
     }
-    if (LessOrEqual(deviceWidth, 0.0)) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY,
-            "toast get device width is invalid, containerId: %{public}d", containerId);
-    }
-
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, 0.0);
     auto marging = toastTheme->GetMarging();

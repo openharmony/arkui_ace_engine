@@ -702,16 +702,6 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "outer scrollBar drag end, velocity is %{public}f", velocity);
     ACE_SCOPED_TRACE("outer scrollBar HandleDragEnd velocity:%f", velocity);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
-    if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
-        if (scrollEndCallback_) {
-            if (scrollBarProxy_) {
-                scrollBarProxy_->NotifyScrollStop();
-                scrollBarProxy_->SetScrollSnapTrigger_(false);
-            }
-            scrollEndCallback_();
-        }
-        return;
-    }
     frictionPosition_ = 0.0;
     if (frictionMotion_) {
         frictionMotion_->Reset(friction_, 0, velocity);
@@ -725,6 +715,16 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     }
     CHECK_NULL_VOID(!scrollBarProxy_ || !scrollBarProxy_->NotifySnapScroll(-(frictionMotion_->GetFinalPosition()),
         velocity, GetScrollableDistance(), static_cast<float>(GetDragOffset())));
+    if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
+        if (scrollEndCallback_) {
+            if (scrollBarProxy_) {
+                scrollBarProxy_->NotifyScrollStop();
+                scrollBarProxy_->SetScrollSnapTrigger_(false);
+            }
+            scrollEndCallback_();
+        }
+        return;
+    }
     scrollBarProxy_->SetScrollSnapTrigger_(false);
     if (!frictionController_) {
         frictionController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());

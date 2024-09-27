@@ -787,7 +787,8 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
             CHECK_NULL_VOID(renderContext);
             auto opacity = renderContext->GetOpacityValue(NON_TRANSPARENT_VAL);
             std::string nodeIdStr = std::to_string(host->GetId());
-            TAG_LOGI(AceLogTag::ACE_FORM, "Static-form, current opacity: %{public}f, visible: %{public}d, nodeId: %{public}s.",
+            TAG_LOGI(AceLogTag::ACE_FORM,
+                "Static-form, current opacity: %{public}f, visible: %{public}d, nodeId: %{public}s.",
                 opacity, static_cast<int>(visible), nodeIdStr.c_str());
             if (visible == VisibleType::VISIBLE && opacity == NON_TRANSPARENT_VAL) {
                 HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_3S, nodeIdStr);

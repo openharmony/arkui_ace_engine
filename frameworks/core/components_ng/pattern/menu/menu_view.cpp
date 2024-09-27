@@ -944,14 +944,13 @@ void MenuView::ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode)
     if (menuWrapperPattern->HasPreviewTransitionEffect()) {
         auto layoutProperty = imageNode->GetLayoutProperty();
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+    }
+    if (isShowHoverImage) {
+        auto hoverImageStackNode = menuWrapperPattern->GetHoverImageStackNode();
+        auto previewNode = menuWrapperPattern->GetHoverImageCustomPreview();
+        ShowHoverImageAnimationProc(hoverImageStackNode, previewNode, imageContext, menuWrapperPattern);
     } else {
-        if (isShowHoverImage) {
-            auto hoverImageStackNode = menuWrapperPattern->GetHoverImageStackNode();
-            auto previewNode = menuWrapperPattern->GetHoverImageCustomPreview();
-            ShowHoverImageAnimationProc(hoverImageStackNode, previewNode, imageContext, menuWrapperPattern);
-        } else {
-            ShowPixelMapScaleAnimationProc(menuTheme, imageNode, menuPattern);
-        }
+        ShowPixelMapScaleAnimationProc(menuTheme, imageNode, menuPattern);
     }
     ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext, isShowHoverImage);
 }

@@ -226,7 +226,7 @@ void ProgressModifier::StartCapsuleSweepingAnimationImpl(float value, float spee
 void ProgressModifier::SetRingProgressColor(const Gradient& color)
 {
     CHECK_NULL_VOID(ringProgressColors_);
-    ringProgressColors_ = AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(color));
+    ringProgressColors_->Set(GradientArithmetic(color));
 }
 
 void ProgressModifier::SetPaintShadow(bool paintShadow)
