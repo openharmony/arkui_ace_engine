@@ -16,11 +16,8 @@
 #include "frameworks/bridge/common/dom/dom_list_item_group.h"
 
 #include "base/log/event_report.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
 #include "core/components/focus_animation/focus_animation_theme.h"
 #include "frameworks/bridge/common/dom/dom_list.h"
-#include "frameworks/bridge/common/dom/dom_reflect_map.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

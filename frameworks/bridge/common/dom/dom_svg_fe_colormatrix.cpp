@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_svg_fe_colormatrix.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMSvgFeColorMatrix::DOMSvgFeColorMatrix(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName) {}

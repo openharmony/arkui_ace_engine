@@ -15,10 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_rich_text.h"
 
-#include "core/components/declaration/richtext/rich_text_declaration.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMRichText::DOMRichText(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)

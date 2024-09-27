@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_svg_ellipse.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMSvgEllipse::DOMSvgEllipse(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName) {}

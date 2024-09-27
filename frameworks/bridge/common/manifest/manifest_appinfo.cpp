@@ -16,7 +16,6 @@
 #include "frameworks/bridge/common/manifest/manifest_appinfo.h"
 
 #include "core/common/container.h"
-#include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace::Framework {
 

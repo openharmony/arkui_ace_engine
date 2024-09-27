@@ -14,14 +14,9 @@
  */
 
 #include "frameworks/bridge/common/manifest/manifest_window.h"
-#include <regex>
-#include <string>
 
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/string_utils.h"
+#include <regex>
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::Framework {
 
