@@ -377,7 +377,7 @@ class RichEditorBarStateModifier extends ModifierWithKey<BarState> {
     super(value);
   }
   static identity: Symbol = Symbol('richEditorBarState');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().richEditor.resetBarState(node);
     } else {
