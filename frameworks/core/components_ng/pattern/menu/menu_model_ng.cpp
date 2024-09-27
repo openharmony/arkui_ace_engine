@@ -41,18 +41,7 @@ RefPtr<FrameNode> MenuModelNG::CreateFrameNode(int32_t nodeId)
     ACE_LAYOUT_SCOPED_TRACE("MenuModelNG::CreateFrameNode [nodeId = %d]", nodeId);
     const std::function<RefPtr<Pattern>(void)>& patternCreator =
         []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); };
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId, patternCreator);
-    if (frameNode == nullptr)
-        return nullptr;
-    
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        auto layoutProps = frameNode->GetLayoutProperty();
-            if (layoutProps == nullptr)
-                return nullptr;
-            // default min width
-        layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
-    }
-    return frameNode;
+    return FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, nodeId, patternCreator);
 }
 
 void MenuModelNG::SetFontSize(const Dimension& fontSize)
@@ -251,18 +240,13 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dime
     const std::optional<Dimension>& radiusBottomRight)
 {
     CHECK_NULL_VOID(frameNode);
-    if (radiusTopLeft.has_value() && radiusTopRight.has_value() &&
-        radiusBottomLeft.has_value() && radiusBottomRight.has_value()) {
-        NG::BorderRadiusProperty borderRadius;
-        borderRadius.radiusTopLeft = radiusTopLeft;
-        borderRadius.radiusTopRight = radiusTopRight;
-        borderRadius.radiusBottomLeft = radiusBottomLeft;
-        borderRadius.radiusBottomRight = radiusBottomRight;
-        borderRadius.multiValued = true;
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
-    } else {
-        ResetBorderRadius(frameNode);
-    }
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = radiusTopLeft;
+    borderRadius.radiusTopRight = radiusTopRight;
+    borderRadius.radiusBottomLeft = radiusBottomLeft;
+    borderRadius.radiusBottomRight = radiusBottomRight;
+    borderRadius.multiValued = true;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
 }
 
 void MenuModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
