@@ -21,6 +21,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -42,7 +43,9 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         titleBarNode->SetMenu(navDestinationGroupNode->GetMenu());
         titleBarNode->AddChild(titleBarNode->GetMenu());
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
     } else {
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
         auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
         auto titleBarMenuItems = navDestinationPattern->GetTitleBarMenuItems();
@@ -56,14 +59,15 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         if (navDestinationPattern->HasMenuNodeId()) {
             auto menuNode = NavigationTitleUtil::CreateMenuItems(navDestinationPattern->GetMenuNodeId(),
                 titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD,
-                titleBarNode->GetInnerParentId());
+                titleBarNode->GetInnerParentId(), false);
             CHECK_NULL_VOID(menuNode);
             navDestinationGroupNode->SetMenu(menuNode);
         }
 
         titleBarMenuItems.insert(titleBarMenuItems.end(), toolBarMenuItems.begin(), toolBarMenuItems.end());
         auto landscapeMenuNode = NavigationTitleUtil::CreateMenuItems(navDestinationPattern->GetLandscapeMenuNodeId(),
-            titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD, titleBarNode->GetInnerParentId());
+            titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD, titleBarNode->GetInnerParentId(),
+            true);
         CHECK_NULL_VOID(landscapeMenuNode);
         navDestinationGroupNode->SetLandscapeMenu(landscapeMenuNode);
     }
@@ -138,6 +142,7 @@ void NavDestinationPattern::OnModifyDone()
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
     MountTitleBar(hostNode);
+    NavigationToolbarUtil::MountToolBar(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
@@ -324,6 +329,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(id);
+    pipeline->AddWindowSizeChangeCallback(id);
 }
 
 void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -333,6 +339,7 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    pipeline->RemoveWindowSizeChangeCallback(id);
 }
 
 void NavDestinationPattern::DumpInfo()

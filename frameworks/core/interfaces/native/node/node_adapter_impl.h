@@ -158,6 +158,8 @@ protected:
         NG::LazyForEachChild node, std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) override
     {}
 
+    void FlushDirtyPropertyNodes(const RefPtr<UINode>& node);
+
 private:
     V2::DataChangeListener* listener_;
     uint32_t totalCount_ = 0;

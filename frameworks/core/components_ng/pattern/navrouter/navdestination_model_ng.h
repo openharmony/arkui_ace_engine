@@ -39,6 +39,11 @@ public:
     void SetOnWillHide(std::function<void()>&& willHide) override;
     void SetOnWillDisAppear(std::function<void()>&& willDisAppear) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
+    void SetHideToolBar(bool hideToolBar) override;
+    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar);
+    void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
+    void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
+    void SetToolBarOptions(NavigationToolbarOptions&& opt) override;
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);

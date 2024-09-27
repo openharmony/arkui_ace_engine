@@ -58,23 +58,7 @@ void SwiperIndicatorPattern::OnModifyDone()
     CHECK_NULL_VOID(swiperPattern);
     swiperIndicatorType_ = swiperPattern->GetIndicatorType();
     if (swiperIndicatorType_ == SwiperIndicatorType::DIGIT) {
-        RefPtr<FrameNode> firstTextNode;
-        RefPtr<FrameNode> lastTextNode;
-        auto layoutProperty = host->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        if (host->GetChildren().size() == INDICATOR_HAS_CHILD) {
-            firstTextNode = DynamicCast<FrameNode>(host->GetFirstChild());
-            lastTextNode = DynamicCast<FrameNode>(host->GetLastChild());
-        } else {
-            host->Clean();
-            firstTextNode = FrameNode::CreateFrameNode(
-                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-            lastTextNode = FrameNode::CreateFrameNode(
-                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        }
-        UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
-        host->AddChild(firstTextNode);
-        host->AddChild(lastTextNode);
+        UpdateDigitalIndicator();
     } else {
         host->Clean();
     }
@@ -83,6 +67,51 @@ void SwiperIndicatorPattern::OnModifyDone()
         dotIndicatorModifier_->StopAnimation();
     }
 
+    RegisterIndicatorChangeEvent();
+
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
+        auto gestureHub = host->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        InitClickEvent(gestureHub);
+        InitHoverMouseEvent();
+        InitTouchEvent(gestureHub);
+        InitLongPressEvent(gestureHub);
+    }
+}
+
+void SwiperIndicatorPattern::UpdateDigitalIndicator()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<FrameNode> firstTextNode;
+    RefPtr<FrameNode> lastTextNode;
+    auto layoutProperty = host->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (host->GetChildren().size() == INDICATOR_HAS_CHILD) {
+        firstTextNode = DynamicCast<FrameNode>(host->GetFirstChild());
+        lastTextNode = DynamicCast<FrameNode>(host->GetLastChild());
+    } else {
+        host->Clean();
+        firstTextNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        lastTextNode = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    }
+    UpdateTextContent(layoutProperty, firstTextNode, lastTextNode);
+    host->AddChild(firstTextNode);
+    host->AddChild(lastTextNode);
+}
+
+void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
     auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
 
@@ -109,16 +138,6 @@ void SwiperIndicatorPattern::OnModifyDone()
             });
             pipeline->RequestFrame();
         });
-    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
-        auto gestureHub = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        InitClickEvent(gestureHub);
-        InitHoverMouseEvent();
-        InitTouchEvent(gestureHub);
-        InitLongPressEvent(gestureHub);
-    }
 }
 
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

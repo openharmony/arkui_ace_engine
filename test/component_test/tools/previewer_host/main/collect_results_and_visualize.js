@@ -311,5 +311,5 @@ async function generateHTML(resultPath, htmlName, startTime) {
         </html>
     `;
     fs.writeFileSync(path.join(resultPath, htmlName), htmlContent);
-    console.log(`HTML file with stacked bar chart generated: ${htmlName}`);
+    console.info(`HTML file with stacked bar chart generated: ${htmlName}`);
 }

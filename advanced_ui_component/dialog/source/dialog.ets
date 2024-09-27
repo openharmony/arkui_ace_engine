@@ -1353,15 +1353,15 @@ struct CustomDialogContentComponent {
       Row() {
         this.buildSingleButton(this.buttons[0]);
         if (this.buttons.length === HORIZON_BUTTON_MAX_COUNT) {
-          Divider()
-            .width($r('sys.float.alert_divider_width'))
-            .height($r('sys.float.alert_divider_height'))
-            .color(this.getDividerColor())
-            .vertical(true)
-            .margin({
-              left: $r('sys.float.alert_button_horizontal_space'),
-              right: $r('sys.float.alert_button_horizontal_space'),
-            });
+          Row() {
+            Divider()
+              .width($r('sys.float.alert_divider_width'))
+              .height($r('sys.float.alert_divider_height'))
+              .color(this.getDividerColor())
+              .vertical(true)
+          }
+          .width(BUTTON_HORIZONTAL_SPACE * 2)
+          .justifyContent(FlexAlign.Center)
           this.buildSingleButton(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
         }
       }
@@ -1472,8 +1472,7 @@ function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDi
   .defaultFocus(true)
   .buttonStyle(buttonOptions.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
-  .type(ButtonType.Normal)
-  .borderRadius($r('sys.float.corner_radius_level10'))
+  .type(ButtonType.ROUNDED_RECTANGLE)
 }
 
 /**

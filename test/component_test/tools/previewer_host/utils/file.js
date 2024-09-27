@@ -22,8 +22,10 @@ module.exports = {
     readDir,
     clearDir,
     deleteDir,
+    delFile,
     renameDir,
     moveDir,
+    moveSourceToTarget,
     writeJsonFile,
     isExistFile,
     recursiveCreateFolders,
@@ -85,6 +87,14 @@ async function deleteDir(folderPath) {
             }
         }
         await fs.rmdir(folderPath);
+    } catch (err) {
+        if (err.code !== 'ENOENT') throw err;
+    }
+}
+
+async function delFile(filePath) {
+    try {
+        await fs.rm(filePath, { recursive: true });
     } catch (err) {
         if (err.code !== 'ENOENT') throw err;
     }

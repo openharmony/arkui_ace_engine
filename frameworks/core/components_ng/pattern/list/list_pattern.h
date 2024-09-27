@@ -43,6 +43,13 @@ struct ListItemGroupPara {
     int32_t displayEndIndex = -1;
 };
 
+struct ListScrollTarget {
+    int32_t index = -1;
+    float extraOffset = 0.0f;
+    ScrollAlign align = ScrollAlign::START;
+    float targetOffset;
+};
+
 class ListPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
 
@@ -424,6 +431,7 @@ private:
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> targetIndexInGroup_;
+    std::optional<ListScrollTarget> scrollTarget_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;

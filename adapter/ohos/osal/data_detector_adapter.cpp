@@ -41,7 +41,7 @@ void DataDetectorAdapter::GetAIEntityMenu()
 {
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask(
         [weak = AceType::WeakClaim(this), instanceId = context->GetInstanceId()] {
             ContainerScope scope(instanceId);

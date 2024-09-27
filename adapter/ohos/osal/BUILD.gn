@@ -190,14 +190,10 @@ template("ace_osal_ohos_source_set") {
     }
     deps += [
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
-      "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     ]
 
     if (ability_runtime_graphics) {
       external_deps += [ "image_framework:image_native" ]
-    }
-    if (os_account_exists) {
-      external_deps += [ "os_account:os_account_innerkits" ]
     }
   }
 }

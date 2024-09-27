@@ -143,7 +143,7 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
         auto green = pixels[i + 1];
         auto red = pixels[i + 2];
         auto alpha = pixels[i + 3];
-        imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue));
+        imageData->data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
     }
     return imageData;
 }

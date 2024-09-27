@@ -18,6 +18,7 @@
 #include "include/utils/SkBase64.h"
 
 #include "base/utils/resource_configuration.h"
+#include "base/utils/system_properties.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
@@ -636,13 +637,14 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     if (SystemProperties::GetResourceDecoupling()) {
         auto adapterInCache = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         CHECK_NULL_RETURN(adapterInCache, nullptr);
-        resourceAdapter = adapterInCache;
+        ResourceConfiguration resConfig;
         if (imageSourceInfo.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
-            ResourceConfiguration resConfig;
             resConfig.SetColorMode(imageSourceInfo.GetLocalColorMode());
-            ConfigurationChange configChange { .colorModeUpdate = true };
-            resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
+        } else {
+            resConfig.SetColorMode(SystemProperties::GetColorMode());
         }
+        ConfigurationChange configChange { .colorModeUpdate = true };
+        resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
     } else {
         auto themeManager = PipelineBase::CurrentThemeManager();
         CHECK_NULL_RETURN(themeManager, nullptr);

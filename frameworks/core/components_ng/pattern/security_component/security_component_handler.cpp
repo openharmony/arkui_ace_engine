@@ -282,12 +282,16 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node)
     return false;
 }
 
-bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
+bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
+    OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
 {
     RefPtr<RenderContext> renderContext = node->GetRenderContext();
     auto frameRect = renderContext->GetPaintRectWithTransform();
     frameRect.SetOffset(node->GetOffsetRelativeToWindow());
+    auto frameRectOfPosition = renderContext->GetPaintRectWithTransform();
+    frameRectOfPosition.SetOffset(node->GetPositionToScreenWithTransform());
     auto visibleRect = frameRect;
+    auto visibleRectOfPosition = frameRectOfPosition;
     auto parent = node->GetParent();
     while (parent != nullptr) {
         auto parentNode = AceType::DynamicCast<FrameNode>(parent);
@@ -302,9 +306,12 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
             parent = parent->GetParent();
             continue;
         }
-        GetVisibleRect(parentNode, visibleRect);
-        double currentVisibleRatio = CalculateCurrentVisibleRatio(visibleRect, frameRect);
-        if (!NearEqual(currentVisibleRatio, 1) && (visibleRect.IsValid() || frameRect.IsValid())) {
+        GetVisibleRect(parentNode, visibleRect, visibleRectOfPosition);
+        bool isClipped = IsOutOfParentWithRound(visibleRectOfPosition, frameRectOfPosition, buttonInfo);
+        buttonInfo.isClipped_ = isClipped;
+        buttonInfo.parentTag_ = parentNode->GetTag();
+
+        if (IsOutOfParent(visibleRect, frameRect) && (visibleRect.IsValid() || frameRect.IsValid())) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Parents clip is set, " \
                 "security component is not completely displayed.");
             SC_LOG_ERROR("visibleWidth: %{public}f, visibleHeight: %{public}f, " \
@@ -317,23 +324,49 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
     return false;
 }
 
-void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect)
+void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect, RectF& visibleRectOfPosition)
 {
     RectF parentRect = node->GetRenderContext()->GetPaintRectWithTransform();
     parentRect.SetOffset(node->GetOffsetRelativeToWindow());
+    RectF parentRectOfPosition = node->GetRenderContext()->GetPaintRectWithTransform();
+    parentRectOfPosition.SetOffset(node->GetPositionToScreenWithTransform());
     visibleRect = visibleRect.Constrain(parentRect);
+    visibleRectOfPosition = visibleRectOfPosition.Constrain(parentRectOfPosition);
 }
 
-double SecurityComponentHandler::CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect)
+bool SecurityComponentHandler::IsOutOfParent(const RectF& visibleRect, const RectF& renderRect)
 {
     if (!visibleRect.IsValid() || !renderRect.IsValid()) {
-        return 0.0;
+        return true;
     }
-    float divisor = renderRect.Width() * renderRect.Height();
-    if (NearEqual(divisor, 0.0)) {
-        return 0.0;
+
+    return LessNotEqual(renderRect.Left() + 1.0, visibleRect.Left()) ||
+        GreatNotEqual(renderRect.Right(), visibleRect.Right() + 1.0) ||
+        LessNotEqual(renderRect.Top() + 1.0, visibleRect.Top()) ||
+        GreatNotEqual(renderRect.Bottom(), visibleRect.Bottom() + 1.0);
+}
+
+bool SecurityComponentHandler::IsOutOfParentWithRound(const RectF& visibleRect, const RectF& renderRect,
+    OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+{
+    if (!visibleRect.IsValid() || !renderRect.IsValid()) {
+        return true;
     }
-    return visibleRect.Width() * visibleRect.Height() / divisor;
+
+    if (NearEqual(visibleRect.Width(), 0.0) || NearEqual(visibleRect.Height(), 0.0) ||
+        NearEqual(renderRect.Width(), 0.0) || NearEqual(renderRect.Height(), 0.0)) {
+        return true;
+    }
+
+    buttonInfo.leftClip_ = visibleRect.Left() - renderRect.Left();
+    buttonInfo.rightClip_ = renderRect.Right() - visibleRect.Right();
+    buttonInfo.topClip_ = visibleRect.Top() - renderRect.Top();
+    buttonInfo.bottomClip_ = renderRect.Bottom() - visibleRect.Bottom();
+
+    return LessNotEqual(renderRect.Left() + 1.0, visibleRect.Left()) ||
+        GreatNotEqual(renderRect.Right(), visibleRect.Right() + 1.0) ||
+        LessNotEqual(renderRect.Top() + 1.0, visibleRect.Top()) ||
+        GreatNotEqual(renderRect.Bottom(), visibleRect.Bottom() + 1.0);
 }
 
 bool SecurityComponentHandler::GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId)
@@ -468,7 +501,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
     std::string type = node->GetTag();
     if (type == V2::LOCATION_BUTTON_ETS_TAG) {
         LocationButton buttonInfo;
-        buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
+        buttonInfo.parentEffect_ = CheckParentNodesEffect(node, buttonInfo);
         buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
         buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
         buttonInfo.bg_ = static_cast<SecCompBackground>(
@@ -481,7 +514,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         componentInfo = buttonInfo.ToJsonStr();
     } else if (type == V2::PASTE_BUTTON_ETS_TAG) {
         PasteButton buttonInfo;
-        buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
+        buttonInfo.parentEffect_ = CheckParentNodesEffect(node, buttonInfo);
         buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
         buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
         buttonInfo.bg_ = static_cast<SecCompBackground>(
@@ -494,7 +527,7 @@ bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr
         componentInfo = buttonInfo.ToJsonStr();
     } else if (type == V2::SAVE_BUTTON_ETS_TAG) {
         SaveButton buttonInfo;
-        buttonInfo.parentEffect_ = CheckParentNodesEffect(node);
+        buttonInfo.parentEffect_ = CheckParentNodesEffect(node, buttonInfo);
         buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
         buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
         buttonInfo.bg_ = static_cast<SecCompBackground>(

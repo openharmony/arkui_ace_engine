@@ -132,6 +132,8 @@ public:
 
     void OnModifyDone() override;
 
+    Color GetDefaultBackgroundColor();
+
     void SetWebSrc(const std::string& webSrc)
     {
         if (webSrc_ != webSrc_) {

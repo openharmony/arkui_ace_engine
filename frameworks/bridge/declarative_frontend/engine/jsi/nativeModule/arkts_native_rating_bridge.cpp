@@ -199,10 +199,14 @@ ArkUINativeModuleValue RatingBridge::SetRatingOptions(ArkUIRuntimeCallInfo* runt
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    CHECK_EQUAL_RETURN(runtimeCallInfo->GetArgsNumber() != NUM_3, true, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> ratingArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> indicatorArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto pointer = nodeArg->ToNativePointer(vm);
+    CHECK_EQUAL_RETURN(pointer.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(pointer->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
 
     double rating = 0.0;
     if (!ratingArg->IsNull() && ratingArg->IsNumber()) {

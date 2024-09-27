@@ -131,9 +131,6 @@ void ContainerModalElement::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
         isShow = false;
     }
 
-    // set container window show state to RS
-    context->SetContainerWindow(isShow);
-
     // full screen need to hide border and padding.
     auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
     if (containerRenderBox) {

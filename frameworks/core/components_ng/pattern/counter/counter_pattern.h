@@ -74,7 +74,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        return { FocusType::SCOPE, false, FocusStyleType::OUTER_BORDER };
     }
 
 private:

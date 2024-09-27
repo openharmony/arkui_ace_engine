@@ -20,8 +20,11 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_node.h"
+#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -110,6 +113,44 @@ bool NavDestinationModelNG::ParseCommonTitle(
     return true;
 }
 
+void CreateContentNode(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
+{
+    if (navDestinationNode->GetContentNode()) {
+        return;
+    }
+    int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    navDestinationNode->AddChild(contentNode);
+    navDestinationNode->SetContentNode(contentNode);
+
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+            .edges = SAFE_AREA_EDGE_ALL };
+        contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    }
+}
+
+void CreateToolBarNode(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
+{
+    if (navDestinationNode->GetToolBarNode()) {
+        return;
+    }
+    int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TOOL_BAR_ETS_TAG, toolBarNodeId);
+    auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    toolBarNode->MarkModifyDone();
+    auto property = toolBarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateVisibility(VisibleType::GONE);
+    navDestinationNode->AddChild(toolBarNode);
+    navDestinationNode->SetToolBarNode(toolBarNode);
+    navDestinationNode->SetPreToolBarNode(toolBarNode);
+    navDestinationNode->UpdatePrevToolBarIsCustom(false);
+}
+
 void NavDestinationModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -140,7 +181,7 @@ void NavDestinationModelNG::Create()
         navDestinationNode->AddChild(contentNode);
         navDestinationNode->SetContentNode(contentNode);
     }
-
+    CreateToolBarNode(navDestinationNode);
     stack->Push(navDestinationNode);
 }
 
@@ -319,21 +360,9 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
         }
     }
     // content node
-    if (!navDestinationNode->GetContentNode()) {
-        int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
-        auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-        navDestinationNode->AddChild(contentNode);
-        navDestinationNode->SetContentNode(contentNode);
-
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
-                .edges = SAFE_AREA_EDGE_ALL };
-            contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
-        }
-    }
-
+    CreateContentNode(navDestinationNode);
+    // toolbar node
+    CreateToolBarNode(navDestinationNode);
     stack->Push(navDestinationNode);
 }
 
@@ -741,6 +770,61 @@ void NavDestinationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationT
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
     titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+void NavDestinationModelNG::SetHideToolBar(bool hideToolBar)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    navDestinationLayoutProperty->UpdateHideToolBar(hideToolBar);
+}
+
+void NavDestinationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navDestinationLayoutProperty);
+    navDestinationLayoutProperty->UpdateHideToolBar(hideToolBar);
+}
+
+void NavDestinationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navdestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navdestinationGroupNode);
+    bool enabled = false;
+    auto hub = navdestinationGroupNode->GetEventHub<EventHub>();
+    if (hub) {
+        enabled = hub->IsEnabled();
+    }
+    FieldProperty fieldProperty;
+    fieldProperty.parentId = navdestinationGroupNode->GetInspectorId().value_or("");
+    fieldProperty.field = NG::DES_FIELD;
+    NavigationToolbarUtil::SetToolbarConfiguration(
+        navdestinationGroupNode, std::move(toolBarItems), enabled, fieldProperty);
+}
+
+void NavDestinationModelNG::SetCustomToolBar(const RefPtr<AceType>& customNode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    NavigationToolbarUtil::SetCustomToolBar(navDestinationGroupNode, customNode);
+}
+
+void NavDestinationModelNG::SetToolBarOptions(NavigationToolbarOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    NavigationToolbarUtil::SetToolbarOptions(navDestinationGroupNode, std::move(opt));
 }
 
 void NavDestinationModelNG::SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems)

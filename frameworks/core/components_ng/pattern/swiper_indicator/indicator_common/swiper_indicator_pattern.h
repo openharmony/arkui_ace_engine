@@ -84,6 +84,9 @@ public:
         RefPtr<DotIndicatorPaintMethod>& paintMethod,
         RefPtr<SwiperLayoutProperty>& swiperLayoutProperty)
     {
+        CHECK_NULL_VOID(swiperPattern);
+        CHECK_NULL_VOID(paintMethod);
+        CHECK_NULL_VOID(swiperLayoutProperty);
         paintMethod->SetAxis(swiperPattern->GetDirection());
         paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
         paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
@@ -208,6 +211,8 @@ private:
     void UpdateOverlongPaintMethod(
         const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod);
     int32_t GetDisplayCurrentIndex() const;
+    void UpdateDigitalIndicator();
+    void RegisterIndicatorChangeEvent();
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;

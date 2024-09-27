@@ -99,7 +99,7 @@ RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode
 {
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, nullptr);
@@ -345,6 +345,7 @@ void TabsModelNG::SetIndex(int32_t index)
         index = 0;
     }
     tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->SetClickRepeat(false);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     swiperLayoutProperty->UpdateIndex(index);
     auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
@@ -407,7 +408,7 @@ void TabsModelNG::SetBarOverlap(bool barOverlap)
         tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
         tabBarRenderContext->ResetFrontSaturate();
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = tabsNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
@@ -571,8 +572,11 @@ void TabsModelNG::Pop()
     CHECK_NULL_VOID(tabsFocusNode);
     auto tabBarFocusNode = tabBarNode->GetFocusHub();
     CHECK_NULL_VOID(tabBarFocusNode);
-    if (tabBarPosition == BarPosition::START) {
-        tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
+    if (tabBarPosition == BarPosition::START && !tabsFocusNode->IsCurrentFocus()) {
+        auto lastWeakFocusNode = tabsFocusNode->GetLastWeakFocusNode().Upgrade();
+        if (!lastWeakFocusNode) {
+            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
+        }
     }
 
     auto tabContentNum = swiperNode->TotalChildCount();
@@ -580,6 +584,7 @@ void TabsModelNG::Pop()
         index = 0;
     }
     tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->SetClickRepeat(false);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     swiperLayoutProperty->UpdateIndex(index);
 
@@ -811,7 +816,7 @@ void TabsModelNG::SetBarOverlap(FrameNode* frameNode, bool barOverlap)
         tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
         tabBarRenderContext->ResetFrontSaturate();
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = tabsNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);

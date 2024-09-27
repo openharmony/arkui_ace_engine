@@ -220,8 +220,9 @@ HWTEST_F(AnimatableDimensionTest, AnimatableDimensionTest006, TestSize.Level1)
     animatableDimensionObj1.SetContextAndCallback(nullptr, [&flagCbk]() { flagCbk = true; });
     AnimatableDimension animatableDimensionObj2;
     animatableDimensionObj1 = animatableDimensionObj2;
-
+    ASSERT_NE(animatableDimensionObj1.animationCallback_, nullptr);
     animatableDimensionObj1.SetContextAndCallback(nullptr, nullptr);
     animatableDimensionObj1 = animatableDimensionObj2;
+    ASSERT_EQ(animatableDimensionObj1.animationCallback_, nullptr);
 }
 } // namespace OHOS::Ace

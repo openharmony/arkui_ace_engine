@@ -322,4 +322,62 @@ HWTEST_F(ScrollBarTestNg, UnSetNestedScroll001, TestSize.Level1)
     scrollBarModel.UnSetNestedScroll(scrollNode_, scrollPnTest);
     ASSERT_EQ(scrollPnTest->nestScrollBarProxy_.size(), 0);
 }
+
+/**
+ * @tc.name: HandleDragUpdate001
+ * @tc.desc: Test HandleDragUpdate when child height less than scrollbar height
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleDragUpdate001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainDelta(10.f);
+    pattern_->HandleDragUpdate(info);
+    FlushLayoutTask(stackNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 10.f);
+    auto scrollDelta = pattern_->scrollBarProxy_->CalcPatternOffset(scrollPattern_->scrollableDistance_,
+        pattern_->scrollableDistance_, -pattern_->currentOffset_);
+    EXPECT_EQ(scrollPattern_->currentOffset_, scrollDelta);
+
+    info.SetMainDelta(10.f);
+    auto scrollable = scrollPattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(stackNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+    EXPECT_EQ(scrollPattern_->currentOffset_, 0.f);
+}
+
+/**
+ * @tc.name: HandleDragUpdate002
+ * @tc.desc: Test HandleDragUpdate when child height greater than scrollbar height
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleDragUpdate002, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateScrollBarChild(2000.f);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainDelta(10.f);
+    pattern_->HandleDragUpdate(info);
+    FlushLayoutTask(stackNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+    EXPECT_EQ(scrollPattern_->currentOffset_, 0.f);
+
+    info.SetMainDelta(-10.f);
+    auto scrollable = scrollPattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleDragUpdate(info);
+    FlushLayoutTask(stackNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+    EXPECT_EQ(scrollPattern_->currentOffset_, -10.f);
+}
 } // namespace OHOS::Ace::NG

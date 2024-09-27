@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 
@@ -223,7 +224,9 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
         }
         titleBarNode->SetMenu(navBarNode->GetMenu());
         titleBarNode->AddChild(titleBarNode->GetMenu());
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
     } else {
+        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
         auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
         CHECK_NULL_VOID(navBarPattern);
         auto titleBarMenuItems = navBarPattern->GetTitleBarMenuItems();
@@ -312,36 +315,6 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
     titleBarNode->MarkDirtyNode();
 }
 
-void MountToolBar(const RefPtr<NavBarNode>& hostNode)
-{
-    CHECK_NULL_VOID(hostNode->GetToolBarNode());
-    auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(navBarLayoutProperty);
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
-    CHECK_NULL_VOID(toolBarNode);
-    auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(toolBarLayoutProperty);
-
-    if (hostNode->GetToolBarNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        hostNode->RemoveChild(hostNode->GetPreToolBarNode());
-        hostNode->AddChild(hostNode->GetToolBarNode());
-    }
-
-    if (navBarLayoutProperty->GetHideToolBar().value_or(false) || !toolBarNode->HasValidContent()) {
-        toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        toolBarNode->SetActive(false);
-    } else {
-        toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        toolBarNode->SetActive(true);
-
-        auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts) {
-            toolBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
-        }
-    }
-    toolBarNode->MarkModifyDone();
-    toolBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-}
 } // namespace
 
 OffsetF NavBarPattern::GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode)
@@ -443,7 +416,7 @@ void NavBarPattern::OnModifyDone()
     // set the titlebar to float on the top
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
     MountTitleBar(hostNode);
-    MountToolBar(hostNode);
+    NavigationToolbarUtil::MountToolBar(hostNode);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
 
@@ -538,7 +511,7 @@ bool NavBarPattern::CanCoordScrollUp(float offset) const
     CHECK_NULL_RETURN(titleNode, false);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, false);
-    return Negative(offset) && titlePattern->IsCurrentMaxTitle();
+    return Negative(offset) && !titlePattern->IsCurrentMinTitle();
 }
 
 Dimension NavBarPattern::GetTitleBarHeightBeforeMeasure()
@@ -560,5 +533,16 @@ Dimension NavBarPattern::GetTitleBarHeightBeforeMeasure()
         return SINGLE_LINE_TITLEBAR_HEIGHT;
     }
     return FULL_SINGLE_LINE_TITLEBAR_HEIGHT;
+}
+
+float NavBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, 0.f);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleBarNode, 0.f);
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, 0.f);
+    return titlePattern->GetTitleBarHeightLessThanMaxBarHeight();
 }
 } // namespace OHOS::Ace::NG

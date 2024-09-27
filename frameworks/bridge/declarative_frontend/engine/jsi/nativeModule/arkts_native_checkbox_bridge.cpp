@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
+constexpr int32_t INFO_COUNT = 3;
 const bool DEFAULT_SELECTED = false;
 const char* CHECKBOX_NODEPTR_OF_UINODE = "nodePtr_";
 panda::Local<panda::JSValueRef> JsCheckboxChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
@@ -414,10 +415,14 @@ ArkUINativeModuleValue CheckboxBridge::SetCheckboxOptions(ArkUIRuntimeCallInfo* 
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    CHECK_EQUAL_RETURN(runtimeCallInfo->GetArgsNumber() != INFO_COUNT, true, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> nameArg = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> groupArg = runtimeCallInfo->GetCallArgRef(2);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto pointer = firstArg->ToNativePointer(vm);
+    CHECK_EQUAL_RETURN(pointer.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(pointer->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     std::string nameStr;
     std::string groupStr;
     if (!nameArg.IsNull() && nameArg->IsString(vm)) {

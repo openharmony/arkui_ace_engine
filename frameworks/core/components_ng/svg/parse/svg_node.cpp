@@ -97,6 +97,29 @@ const std::unordered_map<std::string, std::function<double(SvgBaseAttribute&)>> 
             return attr.opacity * (1.0 / UINT8_MAX);
         } },
 };
+
+std::string GetNodeIdFromUrl(const std::string& url)
+{
+    return std::regex_replace(url, std::regex(R"(^url\(\s*['"]?\s*#([^()]+?)\s*['"]?\s*\)$)"), "$1");
+}
+
+void SetCompatibleFill(const std::string& value, SvgBaseAttribute& attrs)
+{
+    if (value.find("url(") == 0) {
+        attrs.fillState.SetHref(GetNodeIdFromUrl(value));
+        return;
+    }
+    attrs.fillState.SetColor((value == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(value)));
+}
+
+void SetCompatibleStroke(const std::string& value, SvgBaseAttribute& attrs)
+{
+    if (value.find("url(") == 0) {
+        attrs.strokeState.SetHref(GetNodeIdFromUrl(value));
+        return;
+    }
+    attrs.strokeState.SetColor((value == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(value)));
+}
 } // namespace
 
 uint8_t OpacityDoubleToUint8(double opacity)
@@ -139,6 +162,10 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
         { SVG_FILL,
             [](const std::string& val, SvgBaseAttribute& attrs) {
                 auto value = StringUtils::TrimStr(val);
+                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+                    SetCompatibleFill(value, attrs);
+                    return;
+                }
                 Color color;
                 if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color)) {
                     attrs.fillState.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));
@@ -200,6 +227,10 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
         { SVG_STROKE,
             [](const std::string& val, SvgBaseAttribute& attrs) {
                 auto value = StringUtils::TrimStr(val);
+                if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+                    SetCompatibleStroke(value, attrs);
+                    return;
+                }
                 Color color;
                 if (val == VALUE_NONE || SvgAttributesParser::ParseColor(value, color)) {
                     attrs.strokeState.SetColor((val == VALUE_NONE ? Color::TRANSPARENT : color));

@@ -127,16 +127,14 @@ public:
     {
         modifierGestures_.emplace_back(gesture);
         backupModifierGestures_.emplace_back(gesture);
-        recreateGesture_ = true;
-        OnModifyDone();
+        UpdateModifierGestureHierarchy();
     }
 
     void RemoveGesture(const RefPtr<NG::Gesture>& gesture)
     {
         modifierGestures_.remove(gesture);
         backupModifierGestures_.remove(gesture);
-        recreateGesture_ = true;
-        OnModifyDone();
+        UpdateModifierGestureHierarchy();
     }
 
     void RemoveGesturesByTag(const std::string& gestureTag);
@@ -280,7 +278,8 @@ public:
     void ClearJSFrameNodeOnClick();
     void ClearJSFrameNodeOnTouch();
 
-    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
+    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent,
+        double distanceThreshold = std::numeric_limits<double>::infinity());
     void AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -684,7 +683,7 @@ public:
     }
     
     void SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode);
-    const BindMenuStatus& GetBindMenuStatus()
+    const BindMenuStatus& GetBindMenuStatus() const
     {
         return bindMenuStatus_;
     }
@@ -695,8 +694,9 @@ private:
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
 
     void UpdateGestureHierarchy();
+    void UpdateModifierGestureHierarchy();
 
-    void AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture);
+    void AddGestureToGestureHierarchy(const RefPtr<NG::Gesture>& gesture, bool isModifier);
 
     // old path.
     void UpdateExternalNGGestureRecognizer();
@@ -746,6 +746,7 @@ private:
     std::list<RefPtr<NG::Gesture>> backupGestures_;
     std::list<RefPtr<NG::Gesture>> backupModifierGestures_;
     std::list<RefPtr<NGGestureRecognizer>> gestureHierarchy_;
+    std::list<RefPtr<NGGestureRecognizer>> modifierGestureHierarchy_;
 
     // used in bindMenu, need to delete the old callback when bindMenu runs again
     RefPtr<ClickEvent> showMenu_;

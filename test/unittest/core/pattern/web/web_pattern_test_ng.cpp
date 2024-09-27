@@ -2523,6 +2523,7 @@ public:
     MOCK_METHOD(int32_t, GetSelectXHeight, (), (override));
     MOCK_METHOD(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>, GetTouchHandleState,
         (OHOS::NWeb::NWebTouchHandleState::TouchHandleType type), (override));
+    MOCK_METHOD(bool, GetIsLongPressActived, (), (override));
 };
 
 class NWebQuickMenuParamsDummy : public OHOS::NWeb::NWebQuickMenuParams {
@@ -2568,12 +2569,17 @@ public:
     {
         return nullptr;
     }
+    bool GetIsLongPressActived() override
+    {
+        return isLongPresseActived;
+    }
 
 private:
     int32_t selectX = 100;
     int32_t selectY = 200;
     int32_t width = 150;
     int32_t height = 50;
+    bool isLongPresseActived = false;
 };
 
 class NWebTouchHandleStateMock : public OHOS::NWeb::NWebTouchHandleState {

@@ -446,6 +446,8 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest006, TestSize.Level1)
      */
     pattern_->autoReset_ = false;
     pattern_->choosePoint_.push_back(PatternLockCell(1, 1));
+    pattern_->patternLockModifier_->choosePoint_.push_back(PatternLockCell(1, 1));
+    pattern_->patternLockModifier_->choosePoint_.push_back(PatternLockCell(2, 2));
     pattern_->isMoveEventValid_ = false;
     pattern_->OnTouchUp();
     pattern_->isMoveEventValid_ = true;
@@ -555,6 +557,8 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest009, TestSize.Level1)
     locationInfoTouchUp.SetTouchType(TouchType::UP);
     TouchEventInfo touchEventInfoUp("onTouchUp");
     touchEventInfoUp.AddChangedTouchLocationInfo(std::move(locationInfoTouchUp));
+    pattern_->patternLockModifier_->choosePoint_.push_back(PatternLockCell(2, 1));
+    pattern_->patternLockModifier_->choosePoint_.push_back(PatternLockCell(2, 2));
     pattern_->HandleTouchEvent(touchEventInfoUp);
     EXPECT_FALSE(pattern_->isMoveEventValid_);
     EXPECT_EQ(pattern_->fingerId_, -1);

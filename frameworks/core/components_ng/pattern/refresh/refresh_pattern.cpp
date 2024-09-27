@@ -157,7 +157,6 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         return;
     }
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
@@ -170,7 +169,6 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()), static_cast<float>(info.GetMainVelocity()));
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag End And Drag Motion Triggered By Self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
@@ -178,7 +176,6 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleDragEnd(speed);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Cancel And Drag Motion Triggered By Self");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragCancel();
@@ -489,7 +486,21 @@ float RefreshPattern::CalculatePullDownRatio()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 1.0f);
     auto contentHeight = geometryNode->GetPaddingSize().Height();
-    return NearZero(contentHeight) ? 1.0f : ScrollablePattern::CalculateFriction(scrollOffset_ / contentHeight);
+    if (NearZero(contentHeight)) {
+        return 1.0f;
+    }
+    if (!ratio_.has_value()) {
+        auto context = GetContext();
+        CHECK_NULL_RETURN(context, 1.0f);
+        auto scrollableTheme = context->GetTheme<ScrollableTheme>();
+        CHECK_NULL_RETURN(scrollableTheme, 1.0f);
+        ratio_ = scrollableTheme->GetRatio();
+    }
+    auto gamma = scrollOffset_ / contentHeight;
+    if (GreatOrEqual(gamma, 1.0)) {
+        gamma = 1.0f;
+    }
+    return exp(-ratio_.value() * gamma);
 }
 
 float RefreshPattern::GetFollowRatio()
@@ -559,7 +570,6 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
             customBuilder_ = nullptr;
             isRemoveCustomBuilder_ = true;
         }
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode Doesn't Exist");
         return;
     }
 
@@ -586,7 +596,6 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
     }
     customBuilder_ = AceType::DynamicCast<FrameNode>(builder);
     isCustomBuilderExist_ = true;
-    TAG_LOGI(AceLogTag::ACE_REFRESH, "CustomNode Exists");
 }
 
 void RefreshPattern::SetAccessibilityAction()
@@ -620,14 +629,12 @@ void RefreshPattern::InitCoordinationEvent(RefPtr<ScrollableCoordinationEvent>& 
     };
     coordinationEvent->SetOnScrollEvent(onScrollEvent);
     auto onScrollStartEvent = [weak = WeakClaim(this)](bool isDrag, float mainSpeed) {
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Scrollable Child");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragStart(isDrag, mainSpeed);
     };
     coordinationEvent->SetOnScrollStartEvent(onScrollStartEvent);
     auto onScrollEndEvent = [weak = WeakClaim(this)](float speed) {
-        TAG_LOGI(AceLogTag::ACE_REFRESH, "Drag Start And Drag Motion Triggered By Scrollable Child");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleDragEnd(speed);
@@ -651,7 +658,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         FireChangeEvent("false");
     }
     FireStateChange(static_cast<int>(refreshStatus_));
-    TAG_LOGI(AceLogTag::ACE_REFRESH, "Refresh Status Changed %{public}d", static_cast<int32_t>(refreshStatus_));
+    TAG_LOGD(AceLogTag::ACE_REFRESH, "refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
 }
 
 void RefreshPattern::SwitchToFinish()

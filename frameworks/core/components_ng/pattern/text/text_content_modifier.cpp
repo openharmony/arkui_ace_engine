@@ -92,7 +92,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     }
 
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     if (pipeline) {
         textRaceSpaceWidth_ *= pipeline->GetDipScale();
     }
@@ -145,7 +145,7 @@ void TextContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
 {
     float fontSizeValue = textStyle.GetFontSize().Value();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -158,7 +158,7 @@ void TextContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
 void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
 {
     float fontSizeValue = textStyle.GetFontSize().Value();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     if (pipelineContext) {
         fontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -228,7 +228,7 @@ void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
 {
     float baselineOffset = textStyle.GetBaselineOffset().Value();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafely();
     if (pipelineContext) {
         baselineOffset = textStyle.GetBaselineOffset().ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -868,7 +868,7 @@ void TextContentModifier::StartTextRace()
     }
 
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     if (pipeline) {
         textRaceSpaceWidth_ *= pipeline->GetDipScale();
     }
