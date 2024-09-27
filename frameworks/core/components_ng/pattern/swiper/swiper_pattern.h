@@ -961,6 +961,7 @@ private:
 
     bool IsItemOverlay() const;
     void UpdateIndicatorOnChildChange();
+    void UpdateDigitalIndicator();
 
     void CheckSpecialItemCount() const;
     int32_t CheckIndexRange(int32_t index) const;
@@ -1073,6 +1074,7 @@ private:
     std::optional<int32_t> preTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;
+    std::optional<int32_t> oldRealTotalCount_;
     std::optional<float> placeItemWidth_;
     float currentDelta_ = 0.0f;
     // cumulated delta in a single drag event

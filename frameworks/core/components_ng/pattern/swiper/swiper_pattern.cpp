@@ -441,6 +441,25 @@ void SwiperPattern::UpdateIndicatorOnChildChange()
     }
 }
 
+void SwiperPattern::UpdateDigitalIndicator()
+{
+    if (!HasIndicatorNode() || GetIndicatorType() != SwiperIndicatorType::DIGIT) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto indicatorNode = DynamicCast<FrameNode>(host->GetChildAtIndex(host->GetChildIndexById(GetIndicatorId())));
+    CHECK_NULL_VOID(indicatorNode);
+
+    if (indicatorNode->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+        return;
+    }
+
+    indicatorNode->MarkModifyDone();
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void SwiperPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
@@ -468,6 +487,8 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         if (IsLoop() && oldIndex != GetLoopIndex(currentIndex_)) {
             currentIndex_ = oldIndex >= TotalCount() ? 0 : oldIndex;
         }
+    } else if (oldRealTotalCount_ && oldRealTotalCount_.value() != RealTotalCount()) {
+        UpdateDigitalIndicator();
     }
     auto index = CheckIndexRange(userSetCurrentIndex);
     if (index != userSetCurrentIndex) {
@@ -1072,6 +1093,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     crossMatchChild_ = algo->IsCrossMatchChild();
     oldIndex_ = currentIndex_;
     oldChildrenSize_ = TotalCount();
+    oldRealTotalCount_ = RealTotalCount();
     needFireCustomAnimationEvent_ = true;
 
     if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
