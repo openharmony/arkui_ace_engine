@@ -20,7 +20,7 @@ import { ColorPalette } from './ColorPalette';
 export struct ColorBlock {
   @Prop title: string;
   @Link isEnabled: boolean;
-  @Link color: ResourceColor
+  @Link color: ResourceColor;
 
   build() {
     Block({
@@ -29,6 +29,7 @@ export struct ColorBlock {
     }) {
       ColorPalette({
         color: this.color,
+        title: this.title,
         onChange: (color) => {
           this.color = color
         },

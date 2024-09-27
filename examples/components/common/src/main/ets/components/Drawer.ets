@@ -14,6 +14,8 @@
  */
 
 import curves from '@ohos.curves';
+import { ItemRestriction, SegmentButton, SegmentButtonOptions, SegmentButtonTextItem } from '@kit.ArkUI';
+import { BlockTag } from '../model/BlockTag';
 
 @Builder
 function IconButton(icon: Resource, action: () => void) {
@@ -35,7 +37,18 @@ export struct Drawer {
   @Link showParameters: boolean
   @BuilderParam content: () => void;
   @BuilderParam parameters: () => void;
-  @Consume('router') router: NavPathStack
+  @Consume('router') router: NavPathStack;
+  @State tags: boolean = true;
+  @State currentIndex: number = 0;
+  @State tabSelectedIndexes: number[] = [0];
+  @State tabSelectedIndexes1: number[] = [0];
+  @State tabOptions: SegmentButtonOptions = SegmentButtonOptions.tab({
+    buttons: [{ text: '参数列表' }, { text: '日志' }],
+    textPadding: { top: 8, bottom: 8 },
+  });
+  @State listBlockTags: Array<BlockTag> = [];
+  @State listSliderBlockTags: Array<BlockTag> = [];
+  @State dividerHeight: number = 1;
 
   build() {
     Column() {
@@ -66,24 +79,119 @@ export struct Drawer {
       if (this.showParameters) {
         Column() {
           Row() {
-            Text('参数列表')
-              .fontSize($r('sys.float.ohos_id_text_size_headline7'))
-              .fontWeight(FontWeight.Bold)
-
             Blank()
+            SegmentButton({ options: this.tabOptions, selectedIndexes: $tabSelectedIndexes })
+              .width(250)
+            Row() {
+              Button({ type: ButtonType.Circle }) {
+                Image($r('sys.media.ohos_ic_public_close'))
+                  .fillColor($r('sys.color.ohos_id_color_primary'))
+                  .width(24)
+                  .height(24)
+              }
+              .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
+              .height(40)
+              .width(40)
+              .margin({ left: 12 })
+              .onClick(() => {
+                animateTo({ curve: curves.interpolatingSpring(0, 1, 328, 36) }, () => {
+                  this.showParameters = false;
+                })
+              })
+            }
+            .justifyContent(FlexAlign.Center)
+            .width(100)
+          }
+          .justifyContent(FlexAlign.Center)
+          .width('100%')
+          .height(56)
+          .margin({ bottom: 12, top: 8 })
 
-            IconButton($r('sys.media.ohos_ic_public_close'), () => {
-              animateTo({ curve: curves.interpolatingSpring(0, 1, 328, 36) }, () => {
-                this.showParameters = false;
-              });
-            })
-          }.width('100%').height(56)
+          if (this.tabSelectedIndexes.toString() === '0') {
+            this.parameters()
+          } else {
+            Scroll() {
+              Stack() {
+                if (this.listBlockTags) {
+                  Row() {
+                    Divider()
+                      .vertical(true)
+                      .strokeWidth(1)
+                      .width(1)
+                      .height(this.dividerHeight)
+                      .margin({ left: 8, top: 4 })
+                      .zIndex(1)
+                  }
+                  .width('100%')
+                  .align(Alignment.Start)
+                }
 
-          this.parameters()
+                Column({ space: 8 }) {
+                  List({ space: 10 }) {
+                    ForEach(this.listBlockTags, (item: BlockTag) => {
+                      ListItem() {
+                        Column() {
+                          Row() {
+                            Circle()
+                              .width(8)
+                              .height(8)
+                              .strokeWidth(1)
+                              .stroke($r('sys.color.brand'))
+                              .margin({ left: 5 })
+                              .fill(Color.White)
+
+                            Text(item.nowTime)
+                              .fontSize($r('sys.float.Body_S'))
+                              .fontWeight(FontWeight.Medium)
+                              .fontColor($r('sys.color.font_secondary'))
+                              .margin({ left: 12 })
+                          }
+                          .justifyContent(FlexAlign.Start)
+                          .width('100%')
+
+                          Row() {
+                            Text(item.tagDes)
+                              .fontSize($r('sys.float.Body_L'))
+                              .fontWeight(FontWeight.Medium)
+                              .fontColor($r('sys.color.font_primary'))
+                              .margin({ left: 16 })
+                              .maxLines(2)
+                          }
+                          .align(Alignment.Top)
+                          .width('100%')
+                          .margin({ left: 48, right: 32, top: 12 })
+                        }
+                        .margin({ top: 12 })
+                        .width('100%')
+                        .justifyContent(FlexAlign.Start)
+                      }
+                    }, (item: string) => JSON.stringify(item))
+                  }
+                  .onAreaChange((oldValue: Area, newValue: Area) => {
+                    console.info(`Ace: on area change, oldValue is ${JSON.stringify(oldValue)} value is ${JSON.stringify(newValue)}`)
+                    this.dividerHeight = newValue.height as number
+                    this.dividerHeight = this.dividerHeight + 16
+                    console.info('Ace: on area change, dividerHeight is' + this.dividerHeight)
+                  })
+                }
+                .width('100%')
+                .zIndex(2)
+                .align(Alignment.Start)
+              }
+              .width('100%')
+              .onAppear(() => {
+                this.listBlockTags = AppStorage.get('Block') as Array<BlockTag>;
+                console.log('Drawer this.listBlockTags == ' + JSON.stringify(this.listBlockTags));
+              })
+              .onDisAppear(()=>{
+                AppStorage.setOrCreate('Block', []);
+              })
+            }
+          }
         }
         .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
         .borderRadius({ topLeft: 30, topRight: 30 })
-        .constraintSize({ maxWidth: 480, maxHeight: '70%', minHeight: '40%' })
+        .constraintSize({ maxWidth: 480, maxHeight: '60%', minHeight: '40%' })
         .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.BOTTOM])
         .padding({
           left: 16,
@@ -95,6 +203,7 @@ export struct Drawer {
         .width('100%')
       }
     }
+    .align(Alignment.Top)
     .height('100%')
     .width('100%')
   }

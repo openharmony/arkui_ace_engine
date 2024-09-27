@@ -29,6 +29,7 @@ export struct IconBlock {
     }) {
       IconPalette({
         icon: this.icon,
+        title: this.title,
         onChange: (icon) => {
           this.icon = icon
         },

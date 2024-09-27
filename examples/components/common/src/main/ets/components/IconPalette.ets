@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { BlockTag } from '../model/BlockTag';
+import { tagDesRule } from '../utils';
+import { formatDate } from '../utils/timeUtil';
 
 @Component
 export struct IconPalette {
@@ -26,6 +29,9 @@ export struct IconPalette {
   ];
   @Prop isEnabled: boolean = false;
   onChange?: (color: ResourceStr) => void;
+  @State listIconBlockTags: Array<BlockTag> = [];
+  @State listIconBlockTagsTemp: Array<BlockTag> = [];
+  @Prop title: string = '';
 
   private equals(icon1: ResourceStr, icon2: ResourceStr) {
     const type1 = typeof icon1;
@@ -43,7 +49,7 @@ export struct IconPalette {
 
   build() {
     Row({ space: 12 }) {
-      ForEach(this.icons, (icon: ResourceStr) => {
+      ForEach(this.icons, (icon: ResourceStr, index: number) => {
         Button() {
           Image(icon)
             .size({ width: 24, height: 24 })
@@ -58,6 +64,29 @@ export struct IconPalette {
         .onClick(() => {
           if (this.isEnabled) {
             this.onChange?.(icon);
+            let time = formatDate(new Date(Date.now()))
+            this.listIconBlockTagsTemp.push(new BlockTag(time, tagDesRule(this.title, (index + 1).toString())))
+            console.log('Block  =====>>>>>' + JSON.stringify(this.listIconBlockTagsTemp));
+            setTimeout(() => {
+              if (AppStorage.get('Block')) {
+                let block = AppStorage.get('Block') as Array<BlockTag>;
+                this.listIconBlockTags = block.concat(this.listIconBlockTagsTemp);
+                this.listIconBlockTagsTemp = [];
+                AppStorage.setOrCreate('Block', this.listIconBlockTags);
+                console.log('get Block Icon ==' + JSON.stringify(this.listIconBlockTagsTemp));
+                console.log('get Block Icon length ==>> ' + this.listIconBlockTags.length);
+              } else {
+                if (this.listIconBlockTagsTemp) {
+                  this.listIconBlockTags = this.listIconBlockTags.concat(this.listIconBlockTagsTemp);
+                }
+                console.log('Block Icon ==' + JSON.stringify(this.listIconBlockTags));
+                console.log('Block Icon length ==>> ' + this.listIconBlockTags.length);
+                AppStorage.setOrCreate('Block', this.listIconBlockTags);
+                if (this.listIconBlockTags) {
+                  this.listIconBlockTagsTemp = [];
+                }
+              }
+            }, 200)
           }
         })
       })

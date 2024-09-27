@@ -137,13 +137,13 @@ export struct TextPickerDialogBootcamp {
             }
           })
         })
-    }.width('100%')
+    }
   }
 
   @Builder
   Parameters() {
     Scroll() {
-      Column({ space: 8 }) {
+      Column() {
         RadioBlock({
           title: '确认按钮类型',
           isEnabled: this.enabledAcceptButtonType,
@@ -314,7 +314,11 @@ export struct TextPickerDialogBootcamp {
           ]
         })
       }.width('100%')
-    }.height('50%')
+    }
+    .height('52%')
+    .onAppear(()=>{
+      AppStorage.setOrCreate('Block', []);
+    })
   }
 }
 

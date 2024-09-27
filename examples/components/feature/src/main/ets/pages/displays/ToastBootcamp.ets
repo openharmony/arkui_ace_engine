@@ -96,7 +96,11 @@ export struct ToastBootcamp {
         })
       }.width('100%')
       .height('100%')
-    }.height('50%')
+    }
+    .height('52%')
+    .onAppear(()=>{
+      AppStorage.setOrCreate('Block', []);
+    })
   }
 }
 

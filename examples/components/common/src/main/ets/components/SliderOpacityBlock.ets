@@ -19,15 +19,15 @@ import { formatDate } from '../utils/timeUtil';
 import { Block } from './Block';
 
 @Component
-export struct SliderBlock {
+export struct SliderOpacityBlock {
   @Prop title: string;
-  @Prop step: number = 1;
+  @Prop step: number = 0.1;
   @Link isEnabled: boolean;
   @Link value: number;
   @Prop min: number = 0;
-  @Prop max: number = 100;
-  @State listSliderTagsTemp: Array<BlockTag> = [];
-  @State listSliderTags: Array<BlockTag> = [];
+  @Prop max: number = 1;
+  @State listSliderOpacityTagsTemp: Array<BlockTag> = [];
+  @State listSliderOpacityTags: Array<BlockTag> = [];
 
   build() {
     Column({ space: 0 }) {
@@ -48,54 +48,37 @@ export struct SliderBlock {
             .showSteps(true)
             .width('80%')
             .onChange((value: number, mode: SliderChangeMode) => {
-              this.value = Math.floor(value)
+              this.value = parseFloat(value.toFixed(1));
+              console.log(`SliderOpacityBlock onChange: ${this.value}`);
               if (mode.toString() === '2') {
+                let time = formatDate(new Date(Date.now()))
+                this.listSliderOpacityTagsTemp.push(new BlockTag(time, tagDesRule(this.title, value.toString())))
+                console.log('Block  =====>>>>>' + JSON.stringify(this.listSliderOpacityTagsTemp));
                 setTimeout(() => {
-                  let time = formatDate(new Date(Date.now()))
-                  this.listSliderTagsTemp.push(new BlockTag(time, tagDesRule(this.title, value.toString())))
-                  console.log('Block  =====>>>>>' + JSON.stringify(this.listSliderTagsTemp));
                   if (AppStorage.get('Block')) {
                     let block = AppStorage.get('Block') as Array<BlockTag>;
-                    this.listSliderTags = block.concat(this.listSliderTagsTemp);
-                    this.listSliderTagsTemp = [];
-                    AppStorage.setOrCreate('Block', this.listSliderTags);
-                    console.log('get Block Slider ==' + JSON.stringify(this.listSliderTags));
-                    console.log('get Block Slider length ==>> ' + this.listSliderTags.length);
+                    this.listSliderOpacityTags = block.concat(this.listSliderOpacityTagsTemp);
+                    this.listSliderOpacityTagsTemp = [];
+                    AppStorage.setOrCreate('Block', this.listSliderOpacityTags);
+                    console.log('get Block SliderOpacity ==' + JSON.stringify(this.listSliderOpacityTags));
+                    console.log('get Block SliderOpacity length ==>> ' + this.listSliderOpacityTags.length);
                   } else {
-                    if (this.listSliderTagsTemp) {
-                      this.listSliderTags = this.listSliderTags.concat(this.listSliderTagsTemp);
+                    if (this.listSliderOpacityTagsTemp) {
+                      this.listSliderOpacityTags = this.listSliderOpacityTags.concat(this.listSliderOpacityTagsTemp);
                     }
-                    console.log('Block Slider ==' + JSON.stringify(this.listSliderTags));
-                    console.log('Block Slider length ==>> ' + this.listSliderTags.length);
-                    AppStorage.setOrCreate('Block', this.listSliderTags);
-                    if (this.listSliderTags) {
-                      this.listSliderTagsTemp = [];
+                    console.log('Block SliderOpacity ==' + JSON.stringify(this.listSliderOpacityTags));
+                    console.log('Block SliderOpacity length ==>> ' + this.listSliderOpacityTags.length);
+                    AppStorage.setOrCreate('Block', this.listSliderOpacityTags);
+                    if (this.listSliderOpacityTags) {
+                      this.listSliderOpacityTagsTemp = [];
                     }
                   }
                 }, 200)
               }
             })
-        }
+        }.width('100%')
         .margin({ left: 16 })
-        .width('100%')
       }
     }
-  }
-}
-
-@Preview
-@Component
-struct SliderBlockPreview {
-  @State isEnabled: boolean = true
-  @State value: number = 1;
-
-  build() {
-    SliderBlock({
-      title: 'SliderBlock',
-      isEnabled: $isEnabled,
-      value: $value,
-      min: 0,
-      max: 100
-    })
   }
 }

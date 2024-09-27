@@ -92,6 +92,10 @@ export struct BindPopupBootcamp {
         })
       }
     }
+    .height('52%')
+    .onAppear(()=>{
+      AppStorage.setOrCreate('Block', []);
+    })
   }
 }
 
