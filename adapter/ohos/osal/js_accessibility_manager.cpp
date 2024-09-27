@@ -1338,7 +1338,7 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
             nodeInfo.AddAction(action);
         }
     }
-    nodeInfo.SetAccessibilityGroup(false);
+    nodeInfo.SetAccessibilityGroup(node->GetIsAccessibilityGroup());
 }
 
 #endif
