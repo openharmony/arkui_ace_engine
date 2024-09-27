@@ -37,10 +37,10 @@ struct FadingEdgeProperty {
 };
 
 enum class ContentClipMode {
-    CONTENT_ONLY,
-    BOUNDARY,
-    SAFE_AREA,
-    CUSTOM, // inner enum, not present in JS
+    CONTENT_ONLY, // area excluding margin & padding & SafeAreaPadding
+    BOUNDARY,     // corresponding to FrameRect, area excluding margin
+    SAFE_AREA,    // CONTENT_ONLY area + SafeAreaPadding (which can stack up with ancestor's SafeAreaPadding)
+    CUSTOM,       // inner enum, not present in JS. Custom shape's offset is relative to FrameOffset.
 };
 using ContentClip = std::pair<ContentClipMode, RefPtr<ShapeRect>>;
 

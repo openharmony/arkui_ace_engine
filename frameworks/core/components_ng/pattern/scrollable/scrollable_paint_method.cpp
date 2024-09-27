@@ -89,7 +89,7 @@ bool ScrollablePaintMethod::TryContentClip(PaintWrapper* wrapper)
                 renderContext->SetContentClip(wrapper->GetGeometryNode()->GetPaddingRect(true));
                 break;
             case ContentClipMode::BOUNDARY:
-                renderContext->SetContentClip(wrapper->GetGeometryNode()->GetMarginFrameRect());
+                renderContext->SetContentClip(wrapper->GetGeometryNode()->GetFrameRect());
                 break;
             default:
                 break;

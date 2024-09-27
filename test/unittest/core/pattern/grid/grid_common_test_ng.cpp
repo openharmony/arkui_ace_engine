@@ -1434,7 +1434,7 @@ HWTEST_F(GridCommonTestNg, ClipContent001, TestSize.Level1)
     props->UpdateContentClip({ ContentClipMode::CONTENT_ONLY, nullptr });
     FlushLayoutTask(frameNode_);
 
-    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetMarginFrameRect()))).Times(1);
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(1);
     props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
     FlushLayoutTask(frameNode_);
 }

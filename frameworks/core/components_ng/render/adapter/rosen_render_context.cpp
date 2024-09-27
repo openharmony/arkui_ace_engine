@@ -4710,10 +4710,10 @@ void RosenRenderContext::SetContentClip(const std::variant<RectF, RefPtr<ShapeRe
         CHECK_NULL_VOID(shape);
         using helper = DrawingDecorationPainter;
 
-        const float x = helper::DrawingDimensionToPx(shape->GetOffset().GetX(), SizeF(), LengthMode::HORIZONTAL);
-        const float y = helper::DrawingDimensionToPx(shape->GetOffset().GetY(), SizeF(), LengthMode::VERTICAL);
-        const float width = helper::DrawingDimensionToPx(shape->GetWidth(), SizeF(), LengthMode::HORIZONTAL);
-        const float height = helper::DrawingDimensionToPx(shape->GetHeight(), SizeF(), LengthMode::VERTICAL);
+        const float x = helper::DrawingDimensionToPx(shape->GetOffset().GetX(), paintRect_.GetSize(), LengthMode::HORIZONTAL);
+        const float y = helper::DrawingDimensionToPx(shape->GetOffset().GetY(), paintRect_.GetSize(), LengthMode::VERTICAL);
+        const float width = helper::DrawingDimensionToPx(shape->GetWidth(), paintRect_.GetSize(), LengthMode::HORIZONTAL);
+        const float height = helper::DrawingDimensionToPx(shape->GetHeight(), paintRect_.GetSize(), LengthMode::VERTICAL);
         rsNode_->SetCustomClipToFrame({ x, y, x + width, y + height });
     }
 }
