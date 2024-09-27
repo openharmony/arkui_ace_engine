@@ -579,6 +579,30 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
     }
 }
 
+void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(point);
+    int32_t pointerId = point->GetPointerId();
+    MMI::PointerEvent::PointerItem item;
+    bool ret = point->GetPointerItem(pointerId, item);
+    if (ret) {
+        float xRelative = item.GetWindowX();
+        float yRelative = item.GetWindowY();
+        if (point->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN &&
+            item.GetToolType() == OHOS::MMI::PointerEvent::TOOL_TYPE_PEN) {
+            xRelative = item.GetWindowXPos();
+            yRelative = item.GetWindowYPos();
+        }
+        NG::PointF transformPoint(xRelative, yRelative);
+        NG::NGGestureRecognizer::Transform(transformPoint, frameNode);
+        item.SetWindowX(static_cast<int32_t>(transformPoint.GetX()));
+        item.SetWindowY(static_cast<int32_t>(transformPoint.GetY()));
+        item.SetWindowXPos(transformPoint.GetX());
+        item.SetWindowYPos(transformPoint.GetY());
+        point->UpdatePointerItem(pointerId, item);
+    }
+}
+
 void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
     const NG::VectorF& scale, int32_t udegree)
 {

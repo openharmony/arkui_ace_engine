@@ -74,6 +74,8 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 
 void SetTouchEventType(int32_t orgAction, TouchEvent& event);
 
+void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode);
+
 void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
     const NG::VectorF& scale, int32_t udegree = 0);
 
