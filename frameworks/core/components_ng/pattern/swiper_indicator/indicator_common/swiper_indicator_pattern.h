@@ -213,6 +213,8 @@ private:
     int32_t GetDisplayCurrentIndex() const;
     void UpdateDigitalIndicator();
     void RegisterIndicatorChangeEvent();
+    void ResetDotModifier();
+    void ResetOverlongModifier();
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;

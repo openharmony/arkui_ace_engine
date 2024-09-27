@@ -52,11 +52,6 @@ constexpr float DEFAULT_MINIMUM_AMPLITUDE_PX = 1.0f;
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
-    if (isOverlong_) {
-        isOverlong_ = false;
-        return;
-    }
-
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
