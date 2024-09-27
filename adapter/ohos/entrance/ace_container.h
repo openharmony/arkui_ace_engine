@@ -537,6 +537,8 @@ public:
     sptr<IRemoteObject> GetToken();
     void SetParentToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetParentToken();
+    uint32_t GetParentWindowType() const;
+    uint32_t GetWindowType() const;
 
     std::string GetWebHapPath() const override
     {
