@@ -781,6 +781,17 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
                 return frameNodeResult;
             }
         }
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(current);
+        if (!frameNode) {
+            continue;
+        }
+        auto overlayNode = frameNode->GetOverlayNode();
+        if (overlayNode) {
+            const auto& children = std::list<RefPtr<NG::UINode>> { overlayNode };
+            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
+                return frameNodeResult;
+            }
+        }
     }
     return nullptr;
 }
@@ -824,6 +835,13 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int64_t>
         }
     }
 
+    if (frameNode) {
+        auto overlayNode = frameNode->GetOverlayNode();
+        if (overlayNode) {
+            GetFrameNodeChildren(overlayNode, children, pageId);
+        }
+    }
+
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -857,6 +875,14 @@ void GetFrameNodeChildren(
                 children.emplace_back(frameNode);
                 return;
             }
+        }
+    }
+
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    if (frameNode) {
+        auto overlayNode = frameNode->GetOverlayNode();
+        if (overlayNode) {
+            GetFrameNodeChildren(overlayNode, children, pageId);
         }
     }
 
@@ -3315,6 +3341,12 @@ void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int
     for (const auto& item : node->GetChildren(true)) {
         GetFrameNodeChildren(item, children, commonProperty.pageId);
     }
+
+    auto overlayNode = node->GetOverlayNode();
+    if (overlayNode) {
+        GetFrameNodeChildren(overlayNode, children, commonProperty.pageId);
+    }
+
     if (isDumpSimplify) {
         DumpTreeNodeSimplifyInfoNG(node, depth, commonProperty, children.size());
     } else if (!isUseJson_) {
