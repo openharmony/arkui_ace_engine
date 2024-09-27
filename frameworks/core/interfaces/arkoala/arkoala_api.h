@@ -1856,6 +1856,7 @@ struct ArkUICommonModifier {
     void (*resetFocusBoxStyle)(ArkUINodeHandle node);
     ArkUI_Int32 (*getNodeUniqueId)(ArkUINodeHandle node);
     void (*setDisAllowDrop)(ArkUINodeHandle node);
+    void (*setBlendModeByBlender)(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
 };

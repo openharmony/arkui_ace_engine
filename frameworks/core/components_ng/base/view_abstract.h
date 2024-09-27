@@ -202,6 +202,7 @@ public:
     static void SetBackShadow(const Shadow &shadow);
     static void SetBlendMode(BlendMode blendMode);
     static void SetBlendApplyType(BlendApplyType blendApplyType);
+    static void SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender);
 
     // graphics
     static void SetBrightness(const Dimension& value);
@@ -591,6 +592,7 @@ public:
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
     static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
+    static void SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender);
     static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
