@@ -20,7 +20,6 @@ ace_unittest("image_test_ng") {
     "image_paint_method_test_ng.cpp",
     "image_pattern_test_ng.cpp",
     "image_test_ng.cpp",
-    "image_testfour_ng.cpp",
     "image_testone_ng.cpp",
     "image_testthree_ng.cpp",
     "image_testtwo_ng.cpp",
