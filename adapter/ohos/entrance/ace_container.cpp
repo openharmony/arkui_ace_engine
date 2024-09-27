@@ -1436,13 +1436,22 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPt
     auto autoFillNewPassword = pattern->GetAutoFillNewPassword();
     if (!autoFillUserName.empty()) {
         for (auto nodeInfoWrap : nodeInfoWraps) {
-            if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
+            if (!nodeInfoWrap) {
+                continue;
+            }
+            auto metadataObject = JsonUtil::ParseJsonString(nodeInfoWrap->GetMetadata());
+            if (nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
                 nodeInfoWrap->SetValue(autoFillUserName);
                 viewDataWrap->SetUserSelected(true);
-                pattern->SetAutoFillUserName("");
                 break;
+            } else if (nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_UNSPECIFIED && metadataObject &&
+                       metadataObject->Contains("type")) {
+                metadataObject->Put("username", autoFillUserName.c_str());
+                nodeInfoWrap->SetMetadata(metadataObject->ToString());
+                viewDataWrap->SetUserSelected(true);
             }
         }
+        pattern->SetAutoFillUserName("");
     }
     if (!autoFillNewPassword.empty()) {
         for (auto nodeInfoWrap : nodeInfoWraps) {
