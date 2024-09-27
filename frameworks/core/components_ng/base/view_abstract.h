@@ -548,9 +548,9 @@ public:
     static void MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value);
     static void SetVisibility(FrameNode* frameNode, VisibleType visible);
     static void SetMargin(FrameNode* frameNode, const CalcLength& value);
-    static void SetMargin(FrameNode* frameNode, const PaddingProperty& value);
+    static void SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value);
     static void SetPadding(FrameNode* frameNode, const CalcLength& value);
-    static void SetPadding(FrameNode* frameNode, const PaddingProperty& value);
+    static void SetPadding(FrameNode* frameNode, const std::optional<PaddingProperty>& value);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
     static void SetAspectRatio(FrameNode* frameNode, float ratio);

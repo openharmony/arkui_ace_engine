@@ -431,4 +431,26 @@ Dimension Convert(const Ark_Length& src)
     }
 }
 
+template<>
+PaddingProperty Convert(const Ark_Padding& src)
+{
+    PaddingProperty padding;
+    padding.left = Converter::OptConvert<CalcLength>(src.left);
+    padding.top = Converter::OptConvert<CalcLength>(src.top);
+    padding.right = Converter::OptConvert<CalcLength>(src.right);
+    padding.bottom = Converter::OptConvert<CalcLength>(src.bottom);
+    return padding;
+}
+
+template<>
+CalcLength Convert(const Ark_Length& src)
+{
+    if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
+        auto resource = ArkValue<Ark_Resource>(src);
+        ResourceConverter converter(resource);
+        Dimension value = converter.ToDimension().value_or(Dimension());
+        return CalcLength(value.Value(), value.Unit());
+    }
+    return CalcLength(src.value, static_cast<OHOS::Ace::DimensionUnit>(src.unit));
+}
 } // namespace OHOS::Ace::NG::Converter
