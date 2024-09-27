@@ -841,7 +841,6 @@ export class SelectDialog extends ViewPU {
         this.contentScroller = new Scroller();
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__minContentHeight = new ObservedPropertySimplePU(MIN_CONTENT_HEIGHT, this, 'minContentHeight');
-        this.__bgColorList = new ObservedPropertyObjectPU([], this, 'bgColorList');
         this.setInitiallyProvidedValue(t18);
         this.finalizeConstruction();
     }
@@ -907,9 +906,6 @@ export class SelectDialog extends ViewPU {
         if (r18.minContentHeight !== undefined) {
             this.minContentHeight = r18.minContentHeight;
         }
-        if (r18.bgColorList !== undefined) {
-            this.bgColorList = r18.bgColorList;
-        }
     }
 
     updateStateVars(q18) {
@@ -921,7 +917,6 @@ export class SelectDialog extends ViewPU {
         this.__dividerColorWithTheme.purgeDependencyOnElmtId(p18);
         this.__fontSizeScale.purgeDependencyOnElmtId(p18);
         this.__minContentHeight.purgeDependencyOnElmtId(p18);
-        this.__bgColorList.purgeDependencyOnElmtId(p18);
     }
     aboutToBeDeleted() {
         this.__selectedIndex.aboutToBeDeleted();
@@ -929,7 +924,6 @@ export class SelectDialog extends ViewPU {
         this.__dividerColorWithTheme.aboutToBeDeleted();
         this.__fontSizeScale.aboutToBeDeleted();
         this.__minContentHeight.aboutToBeDeleted();
-        this.__bgColorList.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -976,12 +970,6 @@ export class SelectDialog extends ViewPU {
 
     set minContentHeight(j18) {
         this.__minContentHeight.set(j18);
-    }
-    get bgColorList() {
-        return this.__bgColorList.get();
-    }
-    set bgColorList(i18) {
-        this.__bgColorList.set(i18);
     }
     buildContent(j16 = null) {
         this.observeComponentCreation2((d18, e18) => {
@@ -1314,7 +1302,6 @@ export class SelectDialog extends ViewPU {
             };
         this.initContentPadding();
         this.initButtons();
-        this.initBgColorList();
     }
 
     initContentPadding() {
@@ -1380,18 +1367,6 @@ export class SelectDialog extends ViewPU {
         this.buttons = [];
         if (this.confirm) {
             this.buttons.push(this.confirm);
-        }
-    }
-
-    initBgColorList() {
-        for (let c16 = 0; c16 < this.radioContent.length; c16++) {
-            this.bgColorList.push({
-                'id': -1,
-                'type': 10001,
-                params: ['sys.color.ohos_id_color_sub_background_transparent'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            });
         }
     }
 
