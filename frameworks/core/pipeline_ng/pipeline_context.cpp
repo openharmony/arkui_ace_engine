@@ -660,10 +660,20 @@ void PipelineContext::FlushDragEvents()
         return ;
     }
     canUseLongPredictTask_ = false;
+    for (auto iter = dragEvents.begin(); iter != dragEvents.end(); ++iter) {
+        FlushDragEvents(manager, extraInfo, iter->first, iter->second);
+    }
+}
+
+void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
+    std::string extraInfo,
+    const RefPtr<FrameNode>& node,
+    const std::list<PointerEvent>& pointEvent)
+{
     std::unordered_map<int, PointerEvent> idToPoints;
     bool needInterpolation = true;
     std::unordered_map<int32_t, PointerEvent> newIdPoints;
-    for (auto iter = dragEvents.rbegin(); iter != dragEvents.rend(); ++iter) {
+    for (auto iter = pointEvent.rbegin(); iter != pointEvent.rend(); ++iter) {
         idToPoints.emplace(iter->pointerId, *iter);
         idToPoints[iter->pointerId].history.insert(idToPoints[iter->pointerId].history.begin(), *iter);
         needInterpolation = iter->action != PointerAction::PULL_MOVE ? false : true;
@@ -682,21 +692,22 @@ void PipelineContext::FlushDragEvents()
                     static_cast<uint64_t>(stamp), targetTimeStamp);
                 continue;
             }
-            PointerEvent newPointerEvent =
-                GetResamplePointerEvent(historyPointsEventById_[idIter.first], idIter.second.history, targetTimeStamp);
+            PointerEvent newPointerEvent = GetResamplePointerEvent(
+                historyPointsEventById_[idIter.first], idIter.second.history, targetTimeStamp);
             if (newPointerEvent.x != 0 && newPointerEvent.y != 0) {
                 newIdPoints[idIter.first] = newPointerEvent;
             }
             historyPointsEventById_[idIter.first] = idIter.second.history;
         }
     }
-    OnFlushDragEvents(manager, newIdPoints, extraInfo, idToPoints);
+    FlushDragEvents(manager, newIdPoints, extraInfo, idToPoints, node);
 }
 
-void PipelineContext::OnFlushDragEvents(const RefPtr<DragDropManager>& manager,
+void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
     std::unordered_map<int32_t, PointerEvent> newIdPoints,
     std::string& extraInfo,
-    std::unordered_map<int, PointerEvent> &idToPoints)
+    std::unordered_map<int, PointerEvent> &idToPoints,
+    const RefPtr<FrameNode>& node)
 {
     std::list<PointerEvent> dragPoint;
     for (const auto& iter : idToPoints) {
@@ -709,7 +720,7 @@ void PipelineContext::OnFlushDragEvents(const RefPtr<DragDropManager>& manager,
         }
     }
     for (auto iter = dragPoint.rbegin(); iter != dragPoint.rend(); ++iter) {
-        manager->OnDragMove(*iter, extraInfo, rootNode_);
+        manager->OnDragMove(*iter, extraInfo, node);
     }
     idToDragPoints_ = std::move(idToPoints);
 }
@@ -3154,7 +3165,7 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
 
     auto container = Container::Current();
     if (event.action == MouseAction::MOVE) {
-        mouseEvents_.emplace_back(event);
+        mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
         return ;
@@ -3244,6 +3255,19 @@ void PipelineContext::OnFlushMouseEvent(TouchRestrict& touchRestrict)
         return;
     }
     canUseLongPredictTask_ = false;
+    for (auto iter = mouseEvents.begin(); iter != mouseEvents.end(); ++iter) {
+        OnFlushMouseEvent(iter->first, iter->second, touchRestrict);
+    }
+}
+
+void PipelineContext::OnFlushMouseEvent(
+    const RefPtr<FrameNode> &node, const std::list<MouseEvent>& mouseEvents, TouchRestrict& touchRestrict)
+{
+    if (mouseEvents.empty()) {
+        canUseLongPredictTask_ = true;
+        return ;
+    }
+    canUseLongPredictTask_ = false;
     std::unordered_map<int, MouseEvent> idToMousePoints;
     bool needInterpolation = true;
     std::unordered_map<int32_t, MouseEvent> newIdMousePoints;
@@ -3275,14 +3299,15 @@ void PipelineContext::OnFlushMouseEvent(TouchRestrict& touchRestrict)
             historyMousePointsById_[idIter.first] = idIter.second.history;
         }
     }
-    DispatchMouseEvent(idToMousePoints, newIdMousePoints, mouseEvents, touchRestrict);
+    DispatchMouseEvent(idToMousePoints, newIdMousePoints, mouseEvents, touchRestrict, node);
 }
 
 void PipelineContext::DispatchMouseEvent(
     std::unordered_map<int, MouseEvent>& idToMousePoints,
     std::unordered_map<int32_t, MouseEvent> &newIdMousePoints,
-    std::list<MouseEvent> &mouseEvents,
-    TouchRestrict& touchRestrict)
+    const std::list<MouseEvent> &mouseEvents,
+    TouchRestrict& touchRestrict,
+    const RefPtr<FrameNode> &node)
 {
     std::list<MouseEvent> mousePoints;
     for (const auto& iter : idToMousePoints) {
@@ -3300,8 +3325,8 @@ void PipelineContext::DispatchMouseEvent(
         for (auto it = mouseEvents.begin(); it != mouseEvents.end(); it++) {
             touchEvent.history.emplace_back(it->CreateTouchPoint());
         }
-        OnTouchEvent(touchEvent, rootNode_);
-        eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
+        OnTouchEvent(touchEvent, node);
+        eventManager_->MouseTest(scaleEvent, node, touchRestrict);
         eventManager_->DispatchMouseEventNG(scaleEvent);
         eventManager_->DispatchMouseHoverEventNG(scaleEvent);
         eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
@@ -4048,7 +4073,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     }
     if (action == DragEventAction::DRAG_EVENT_MOVE) {
         manager->DoDragMoveAnimate(pointerEvent);
-        dragEvents_.emplace_back(pointerEvent);
+        dragEvents_[node].emplace_back(pointerEvent);
         RequestFrame();
     }
     if (action != DragEventAction::DRAG_EVENT_MOVE &&

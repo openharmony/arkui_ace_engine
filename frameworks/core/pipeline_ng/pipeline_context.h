@@ -182,16 +182,24 @@ public:
     // Do mouse event actively.
     void FlushMouseEvent();
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
+    void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
+        const std::list<MouseEvent>& moseEvents, TouchRestrict& touchRestric);
     void DispatchMouseEvent(
         std::unordered_map<int, MouseEvent>& idToMousePoints,
         std::unordered_map<int32_t, MouseEvent> &newIdMousePoints,
-        std::list<MouseEvent> &mouseEvents,
-        TouchRestrict& touchRestrict);
+        const std::list<MouseEvent> &mouseEvents,
+        TouchRestrict& touchRestrict,
+        const RefPtr<FrameNode> &node);
     void FlushDragEvents();
-    void OnFlushDragEvents(const RefPtr<DragDropManager>& manager,
+    void FlushDragEvents(const RefPtr<DragDropManager>& manager,
+        std::string extraInfo,
+        const RefPtr<FrameNode>& node,
+        const std::list<PointerEvent>& pointEvent);
+    void FlushDragEvents(const RefPtr<DragDropManager>& manager,
         std::unordered_map<int32_t, PointerEvent> newIdPoints,
         std::string& extraInfo,
-        std::unordered_map<int, PointerEvent> &idToPoints);
+        std::unordered_map<int, PointerEvent> &idToPoints,
+        const RefPtr<FrameNode>& node);
 
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;
@@ -1089,9 +1097,9 @@ private:
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
     std::list<TouchEvent> touchEvents_;
-    std::list<MouseEvent> mouseEvents_;
-    std::list<PointerEvent> dragEvents_;
-
+    
+    std::map<RefPtr<FrameNode>, std::list<PointerEvent>> dragEvents_;
+    std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
 
     RefPtr<FrameNode> rootNode_;

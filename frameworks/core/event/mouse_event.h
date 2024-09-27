@@ -145,7 +145,8 @@ struct MouseEvent final {
 
     MouseEvent CloneWith(float scale) const
     {
-        return { .x = x / scale,
+        return {.id = id,
+            .x = x / scale,
             .y = y / scale,
             .z = z / scale,
             .deltaX = deltaX / scale,
