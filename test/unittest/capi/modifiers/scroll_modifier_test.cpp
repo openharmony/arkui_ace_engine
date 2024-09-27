@@ -40,16 +40,16 @@ struct EventsTracker {
     };
 };
 
-struct ScrollStateValue
-{
+struct ScrollStateValue {
     Ark_Int32 nodeId;
     bool state;
 };
 
 inline void AssignArkValue(Opt_Length& dst, const CalcDimension& src)
 {
-    if (src.Unit() == DimensionUnit::CALC)
+    if (src.Unit() == DimensionUnit::CALC) {
         return;
+    }
     dst.tag = ARK_TAG_LENGTH;
     dst.value.value = src.ConvertToVp();
 }

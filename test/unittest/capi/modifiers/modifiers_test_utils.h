@@ -71,8 +71,7 @@ inline double GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std:
 template<>
 inline std::optional<bool> GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const std::string &attrKey)
 {
-    if (!jsonVal)
-    {
+    if (!jsonVal) {
         return std::nullopt;
     }
     auto val = jsonVal->GetValue(attrKey);

@@ -35,12 +35,10 @@ inline OffsetT<CalcDimension> Convert(const Ark_OffsetOptions& value)
     auto xOffset = Converter::OptConvert<CalcDimension>(value.xOffset);
     auto yOffset = Converter::OptConvert<CalcDimension>(value.yOffset);
     OffsetT<CalcDimension> dst;
-    if (xOffset.has_value())
-    {
+    if (xOffset.has_value()) {
         dst.SetX(xOffset.value());
     }
-    if (yOffset.has_value())
-    {
+    if (yOffset.has_value()) {
         dst.SetY(yOffset.value());
     }
     return dst;
