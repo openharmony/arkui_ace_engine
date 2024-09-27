@@ -33,6 +33,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -250,8 +251,7 @@ namespace Converter {
         if (resourceString) {
             dst = ImageSourceInfo(resourceString.value(), converter.BundleName(), converter.ModuleName());
         } else {
-            LOGE("Not a string resource: %{public}s:%{public}s\n",
-                 converter.BundleName(), converter.ModuleName());
+            LOGE("Not a string resource: %{public}s:%{public}s\n", converter.BundleName(), converter.ModuleName());
         }
     }
 
@@ -592,6 +592,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
     template<> void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src);
+    template<> void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

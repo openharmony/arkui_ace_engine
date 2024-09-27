@@ -575,4 +575,15 @@ void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src)
         default: LOGE("Unexpected enum value in Ark_BarMode: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src)
+{
+    switch (src) {
+        case ARK_SUB_MENU_EXPANDING_MODE_SIDE_EXPAND: dst = SubMenuExpandingMode::SIDE; break;
+        case ARK_SUB_MENU_EXPANDING_MODE_EMBEDDED_EXPAND: dst = SubMenuExpandingMode::EMBEDDED; break;
+        case ARK_SUB_MENU_EXPANDING_MODE_STACK_EXPAND: dst = SubMenuExpandingMode::STACK; break;
+        default: LOGE("Unexpected enum value in Ark_SubMenuExpandingMode: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
