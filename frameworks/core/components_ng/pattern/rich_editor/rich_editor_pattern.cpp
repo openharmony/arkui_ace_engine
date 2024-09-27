@@ -561,6 +561,21 @@ void RichEditorPattern::UpdateMagnifierStateAfterLayout(bool frameSizeChange)
     }
 }
 
+void RichEditorPattern::UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty)
+{
+    const auto& geometryNode = dirty->GetGeometryNode();
+    auto paddingSize = geometryNode->GetPaddingSize();
+    auto paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+
+    auto hotZoneWidth = Dimension(paddingSize.Width());
+    auto hotZoneHeight = Dimension(paddingSize.Height());
+    auto hotZoneOffset = DimensionOffset(Offset(paddingOffset.GetX(), paddingOffset.GetY()));
+
+    auto gestureHub = GetGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetResponseRegion({ { hotZoneWidth, hotZoneHeight, hotZoneOffset } });
+}
+
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(!config.skipMeasure && !dirty->SkipMeasureContent(), false);
@@ -608,6 +623,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     caretUpdateType_ = CaretUpdateType::NONE;
     UpdateImagePreviewParam();
+    UpdateGestureHotZone(dirty);
     return ret;
 }
 
