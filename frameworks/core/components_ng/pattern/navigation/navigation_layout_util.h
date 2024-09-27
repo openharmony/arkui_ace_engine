@@ -39,10 +39,11 @@ public:
         const SizeF& navigationSize, float toolBarHeight);
     static float LayoutToolBar(
         LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationNodeBase>& nodeBase,
-        const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase);
+        const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, bool isNeedToCreatePaddingAndBorder);
     static void LayoutToolBarDivider(
         LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationNodeBase>& nodeBase,
-        const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, float toolbarHeight);
+        const RefPtr<NavDestinationLayoutPropertyBase>& layoutPropertyBase, float toolbarHeight,
+        bool isNeedToCreatePaddingAndBorder);
 };
 
 } // namespace OHOS::Ace::NG

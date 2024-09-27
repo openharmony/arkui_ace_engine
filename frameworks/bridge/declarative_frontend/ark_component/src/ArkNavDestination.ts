@@ -54,6 +54,14 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
     return this;
   }
+  hideToolBar(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationHideToolBarModifier.identity,
+      NavDestinationHideToolBarModifier, value);
+    return this;
+  }
+  toolbarConfiguration(value: any): this {
+    throw new Error('Method not implemented.');
+  }
   backButtonIcon(value: any): this {
     modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
       NavDestinationBackButtonIconModifier, value);
@@ -182,6 +190,21 @@ class HideTitleBarModifier extends ModifierWithKey<boolean> {
       getUINativeModule().navDestination.resetHideTitleBar(node);
     } else {
       getUINativeModule().navDestination.setHideTitleBar(node, this.value!);
+    }
+  }
+}
+
+class NavDestinationHideToolBarModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('hideToolBar');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetHideToolBar(node);
+    } else {
+      getUINativeModule().navDestination.setHideToolBar(node, this.value);
     }
   }
 }

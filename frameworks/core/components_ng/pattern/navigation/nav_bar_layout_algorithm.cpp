@@ -338,7 +338,9 @@ void NavBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float titlebarHeight = LayoutTitleBar(layoutWrapper, hostNode, navBarLayoutProperty);
     auto transferedTitleBarHeight = TransferBarHeight(hostNode, titlebarHeight, true);
     LayoutContent(layoutWrapper, hostNode, navBarLayoutProperty, transferedTitleBarHeight);
-    float toolbarHeight = NavigationLayoutUtil::LayoutToolBar(layoutWrapper, hostNode, navBarLayoutProperty);
-    NavigationLayoutUtil::LayoutToolBarDivider(layoutWrapper, hostNode, navBarLayoutProperty, toolbarHeight);
+    float toolbarHeight = NavigationLayoutUtil::LayoutToolBar(
+        layoutWrapper, hostNode, navBarLayoutProperty, false);
+    NavigationLayoutUtil::LayoutToolBarDivider(
+        layoutWrapper, hostNode, navBarLayoutProperty, toolbarHeight, false);
 }
 } // namespace OHOS::Ace::NG
