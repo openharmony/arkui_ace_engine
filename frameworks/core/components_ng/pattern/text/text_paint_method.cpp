@@ -97,7 +97,7 @@ void TextPaintMethod::UpdateObscuredRects()
     CHECK_NULL_VOID(pManager);
 
     auto spanItemChildren = pattern->GetSpanItemChildren();
-    auto ifPaintObscuration = spanItemChildren.empty();
+    auto ifPaintObscuration = spanItemChildren.empty() && pattern->IsEnabledObscured();
     textContentModifier_->SetIfPaintObscuration(ifPaintObscuration);
     CHECK_NULL_VOID(ifPaintObscuration);
 

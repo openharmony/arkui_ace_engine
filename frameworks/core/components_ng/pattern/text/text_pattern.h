@@ -715,8 +715,14 @@ public:
     {
         isEnableHapticFeedback_ = isEnabled;
     }
+
     bool HasContent();
     void SetupMagnifier();
+
+    virtual bool IsEnabledObscured() const
+    {
+        return true;
+    }
 protected:
     int32_t GetClickedSpanPosition()
     {
