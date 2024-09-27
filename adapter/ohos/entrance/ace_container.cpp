@@ -2926,6 +2926,18 @@ bool AceContainer::IsSystemWindow() const
         uiWindow_->GetType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
 }
 
+uint32_t AceContainer::GetParentWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetParentWindowType());
+}
+
+uint32_t AceContainer::GetWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetType());
+}
+
 bool AceContainer::IsHostMainWindow() const
 {
     CHECK_NULL_RETURN(uiWindow_, false);

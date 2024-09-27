@@ -281,8 +281,15 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         wantPtr->SetParam(UI_EXTENSION_TYPE_KEY, EMBEDDED_UI);
     }
     isNotifyOccupiedAreaChange_ = want.GetBoolParam(OCCUPIED_AREA_CHANGE_KEY, true);
-    UIEXT_LOGI("Want param isNotifyOccupiedAreaChange is %{public}d, realHostWindowId: %{public}u.",
-        isNotifyOccupiedAreaChange_, realHostWindowId);
+    uint32_t parentWindowType = 0;
+    if (container->IsUIExtensionWindow()) {
+        parentWindowType = container->GetParentWindowType();
+    } else {
+        parentWindowType = container->GetWindowType();
+    }
+    UIEXT_LOGI("Want param isNotifyOccupiedAreaChange is %{public}d, realHostWindowId: %{public}u,"
+        " parentWindowType: %{public}u",
+        isNotifyOccupiedAreaChange_, realHostWindowId, parentWindowType);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
     Rosen::SessionInfo extensionSessionInfo = {
