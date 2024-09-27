@@ -214,7 +214,6 @@ void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<
     container->MarkModifyDone();
 }
 
-
 void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
 {
     CHECK_NULL_VOID(titleBarNode);

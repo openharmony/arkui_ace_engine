@@ -210,10 +210,16 @@ void UpdateToolbarItemNodeWithConfiguration(
         auto itemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(itemEventHub);
         itemEventHub->SetEnabled(false);
+        auto itemFocusHub = barItemNode->GetFocusHub();
+        CHECK_NULL_VOID(itemFocusHub);
+        itemFocusHub->SetEnabled(false);
 
         auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
         CHECK_NULL_VOID(buttonEventHub);
         buttonEventHub->SetEnabled(false);
+        auto buttonFocusHub = buttonNode->GetFocusHub();
+        CHECK_NULL_VOID(buttonFocusHub);
+        buttonFocusHub->SetEnabled(false);
     }
 
     UpdateBarItemPattern(barItemNode, barItem);
