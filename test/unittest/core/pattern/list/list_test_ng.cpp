@@ -51,6 +51,9 @@ void ListTestNg::SetUpTestSuite()
     listItemTheme->defaultLeftMargin_ = GROUP_MARGIN;
     listItemTheme->defaultRightMargin_ = GROUP_MARGIN;
     listItemTheme->defaultPadding_ = Edge(0.0_vp);
+    auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
+    auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
     MockAnimationManager::Enable(true);

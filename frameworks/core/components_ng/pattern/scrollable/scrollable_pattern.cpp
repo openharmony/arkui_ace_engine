@@ -505,13 +505,6 @@ void ScrollablePattern::AddScrollEvent()
     scrollable->SetNodeId(host->GetAccessibilityId());
     scrollable->SetNodeTag(host->GetTag());
     scrollable->Initialize(host->GetContextRefPtr());
-    if (!ratio_.has_value()) {
-        auto context = GetContext();
-        CHECK_NULL_VOID(context);
-        auto scrollableTheme = context->GetTheme<ScrollableTheme>();
-        CHECK_NULL_VOID(scrollableTheme);
-        ratio_ = scrollableTheme->GetRatio();
-    }
 
     AttachAnimatableProperty(scrollable);
 
@@ -630,6 +623,14 @@ void ScrollablePattern::AddScrollEvent()
     RegisterWindowStateChangedCallback();
     if (!clickRecognizer_) {
         InitScrollBarClickEvent();
+    }
+
+    if (!ratio_.has_value()) {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        auto scrollableTheme = context->GetTheme<ScrollableTheme>();
+        CHECK_NULL_VOID(scrollableTheme);
+        ratio_ = scrollableTheme->GetRatio();
     }
 }
 
