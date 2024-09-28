@@ -40,13 +40,13 @@ public:
     void SetOnWillDisAppear(std::function<void()>&& willDisAppear) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
     void SetHideToolBar(bool hideToolBar, bool animated) override;
-    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar);
+    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
     void SetToolBarOptions(NavigationToolbarOptions&& opt) override;
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
-    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
+    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::string& src,
         bool noPixMap, RefPtr<PixelMap>& pixMap);

@@ -56,9 +56,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideToolBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IgnoreLayoutSafeArea, SafeAreaExpandOpts, PROPERTY_UPDATE_MEASURE);
-
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimatedTitleBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimatedToolBar, bool, PROPERTY_UPDATE_MEASURE);
+
 protected:
     void UpdateBaseLayoutProperty(const NavDestinationLayoutPropertyBase* layoutProperty)
     {

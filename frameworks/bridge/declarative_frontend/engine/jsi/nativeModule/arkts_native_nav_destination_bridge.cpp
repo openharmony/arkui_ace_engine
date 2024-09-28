@@ -29,13 +29,18 @@ ArkUINativeModuleValue NavDestinationBridge::SetHideTitleBar(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
+    const int32_t argsNum = 2; // 2: parameter index
+    Local<JSValueRef> animatedArg = runtimeCallInfo->GetCallArgRef(argsNum);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (hideArg->IsUndefined() || !hideArg->IsBoolean()) {
-        GetArkUINodeModifiers()->getNavDestinationModifier()->resetHideTitleBar(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
+    bool hide = false;
+    bool animated = false;
+    if (!hideArg->IsNull() && !hideArg->IsUndefined() && hideArg->IsBoolean()) {
+        hide = hideArg->ToBoolean(vm)->Value();
     }
-    bool hide = hideArg->ToBoolean(vm)->Value();
-    GetArkUINodeModifiers()->getNavDestinationModifier()->setHideTitleBar(nativeNode, hide);
+    if (!animatedArg->IsNull() && !animatedArg->IsUndefined() && animatedArg->IsBoolean()) {
+        animated = animatedArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getNavDestinationModifier()->setHideTitleBar(nativeNode, hide, animated);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -55,13 +60,18 @@ ArkUINativeModuleValue NavDestinationBridge::SetHideToolBar(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
+    const int32_t argsNum = 2; // 2: parameter index
+    Local<JSValueRef> animatedArg = runtimeCallInfo->GetCallArgRef(argsNum);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (hideArg->IsNull() || hideArg->IsUndefined() || !hideArg->IsBoolean()) {
-        GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationHideToolBar(nativeNode);
-    } else {
-        bool hide = hideArg->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getNavDestinationModifier()->setNavDestinationHideToolBar(nativeNode, hide);
+    bool hide = false;
+    bool animated = false;
+    if (!hideArg->IsNull() && !hideArg->IsUndefined() && hideArg->IsBoolean()) {
+        hide = hideArg->ToBoolean(vm)->Value();
     }
+    if (!animatedArg->IsNull() && !animatedArg->IsUndefined() && animatedArg->IsBoolean()) {
+        animated = animatedArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getNavDestinationModifier()->setNavDestinationHideToolBar(nativeNode, hide, animated);
     return panda::JSValueRef::Undefined(vm);
 }
 
