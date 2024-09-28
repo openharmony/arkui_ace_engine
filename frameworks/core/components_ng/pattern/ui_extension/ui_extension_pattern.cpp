@@ -1046,7 +1046,7 @@ void UIExtensionPattern::SetSyncCallbacks(
 
 void UIExtensionPattern::FireSyncCallbacks()
 {
-    UIEXT_LOGD("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    UIEXT_LOGI("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onSyncOnCallbackList_) {
         if (callback) {
@@ -1063,7 +1063,7 @@ void UIExtensionPattern::SetAsyncCallbacks(
 
 void UIExtensionPattern::FireAsyncCallbacks()
 {
-    UIEXT_LOGD("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    UIEXT_LOGI("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onAsyncOnCallbackList_) {
         if (callback) {
