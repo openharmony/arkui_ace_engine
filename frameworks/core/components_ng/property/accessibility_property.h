@@ -654,6 +654,8 @@ public:
     */
     static bool IsAccessibilityFocusableTag(const std::string &tag);
 
+    static bool IsTagInSubTreeComponent(const std::string& tag);
+
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 
     void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)
