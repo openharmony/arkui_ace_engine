@@ -18,6 +18,7 @@
 #define protected public
 #define private public
 
+#include "base/i18n/localization.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
@@ -36,6 +37,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -1962,5 +1964,502 @@ HWTEST_F(TitleBarTestNg, TitleBarModifier003, TestSize.Level1)
     ASSERT_EQ(mainTextNode.value(), mainTitleNode);
     ASSERT_TRUE(subTextNode.has_value());
     ASSERT_EQ(subTextNode.value(), subTitleNode);
+}
+
+/**
+ * @tc.name: TitleBarPatternOnModifyDone002
+ * @tc.desc: Test SetBackButtonImgAboveVersionTen function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 12
+     */
+    MockPipelineContext::SetUp();
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    ImageSourceInfo srcImageSourceInfo = ImageSourceInfo("file://data/data/com.example.test/res/example.svg",
+        Dimension(300.0), Dimension(200.0));
+    titleBarLayoutProperty->UpdateImageSource(srcImageSourceInfo);
+    bool titleBarHasImage = titleBarLayoutProperty->HasImageSource();
+    ASSERT_NE(titleBarHasImage, false);
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    titleBarLayoutProperty->UpdatePixelMap(pixelMap);
+
+    titleBarLayoutProperty->UpdateIsValidImage(true);
+    auto hasIsValidImage = titleBarLayoutProperty->HasIsValidImage();
+    ASSERT_EQ(hasIsValidImage, true);
+    auto curIsValidImage = titleBarLayoutProperty->GetIsValidImageValue();
+    ASSERT_EQ(curIsValidImage, true);
+
+    /**
+     * @tc.steps: step3. call SetBackButtonImgAboveVersionTen.
+     * @tc.expected: set image source info successfully and is equal to pixelMap.
+     */
+    titleBarPattern_->OnModifyDone();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(backButtonImageProperty, nullptr);
+    auto hasImageSourceInfo = backButtonImageProperty->HasImageSourceInfo();
+    ASSERT_NE(hasImageSourceInfo, false);
+    auto imageSourceInfo = backButtonImageProperty->GetImageSourceInfoValue();
+    auto isPixMap = imageSourceInfo.IsPixmap();
+    ASSERT_NE(isPixMap, false);
+    auto pixMapValue = imageSourceInfo.GetPixmap();
+    ASSERT_NE(pixMapValue, nullptr);
+    ASSERT_EQ(pixMapValue, pixelMap);
+
+    auto expectColor = theme->GetIconColor();
+    auto curColor = imageSourceInfo.GetFillColor();
+    ASSERT_TRUE(curColor.has_value());
+    EXPECT_EQ(expectColor, curColor.value());
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: TitleBarPatternOnModifyDone003
+ * @tc.desc: Test SetBackButtonImgAboveVersionTen function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 12
+     */
+    MockPipelineContext::SetUp();
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    ImageSourceInfo srcImageSourceInfo = ImageSourceInfo("file://data/data/com.example.test/res/example.svg",
+        Dimension(300.0), Dimension(200.0));
+    titleBarLayoutProperty->UpdateImageSource(srcImageSourceInfo);
+    bool titleBarHasImage = titleBarLayoutProperty->HasImageSource();
+    ASSERT_NE(titleBarHasImage, false);
+
+    titleBarLayoutProperty->UpdateIsValidImage(true);
+    auto hasIsValidImage = titleBarLayoutProperty->HasIsValidImage();
+    ASSERT_EQ(hasIsValidImage, true);
+    auto curIsValidImage = titleBarLayoutProperty->GetIsValidImageValue();
+    ASSERT_EQ(curIsValidImage, true);
+
+    /**
+     * @tc.steps: step3. call SetBackButtonImgAboveVersionTen.
+     * @tc.expected: set image source info successfully and is equal to ImageSourceValue.
+     */
+    titleBarPattern_->OnModifyDone();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(backButtonImageProperty, nullptr);
+    auto hasImageSourceInfo = backButtonImageProperty->HasImageSourceInfo();
+    ASSERT_NE(hasImageSourceInfo, false);
+    auto imageSourceInfo = backButtonImageProperty->GetImageSourceInfoValue();
+    auto isPixMap = imageSourceInfo.IsPixmap();
+    ASSERT_NE(isPixMap, true);
+
+    auto expectColor = theme->GetIconColor();
+    auto curColor = imageSourceInfo.GetFillColor();
+    ASSERT_TRUE(curColor.has_value());
+    EXPECT_EQ(expectColor, curColor.value());
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: TitleBarPatternOnModifyDone004
+ * @tc.desc: Test SetBackButtonImgAboveVersionTen function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 9
+     */
+    MockPipelineContext::SetUp();
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    MockContainer::SetUp();
+    int32_t apiTargetVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_NINE));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    ImageSourceInfo srcImageSourceInfo = ImageSourceInfo("file://data/data/com.example.test/res/example.svg",
+        Dimension(300.0), Dimension(200.0));
+    titleBarLayoutProperty->UpdateImageSource(srcImageSourceInfo);
+    bool titleBarHasImage = titleBarLayoutProperty->HasImageSource();
+    ASSERT_NE(titleBarHasImage, false);
+
+    titleBarLayoutProperty->UpdateIsValidImage(true);
+    auto hasIsValidImage = titleBarLayoutProperty->HasIsValidImage();
+    ASSERT_EQ(hasIsValidImage, true);
+    auto curIsValidImage = titleBarLayoutProperty->GetIsValidImageValue();
+    ASSERT_EQ(curIsValidImage, true);
+
+    /**
+     * @tc.steps: step3. call SetBackButtonImgAboveVersionTen.
+     * @tc.expected: set image source info successfully and is equal to ImageSourceValue.
+     */
+    titleBarPattern_->OnModifyDone();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(backButtonImageProperty, nullptr);
+    auto hasImageSourceInfo = backButtonImageProperty->HasImageSourceInfo();
+    ASSERT_NE(hasImageSourceInfo, false);
+    auto imageSourceInfo = backButtonImageProperty->GetImageSourceInfoValue();
+    auto isPixMap = imageSourceInfo.IsPixmap();
+    ASSERT_NE(isPixMap, true);
+
+    auto expectColor = theme->GetIconColor();
+    auto curColor = imageSourceInfo.GetFillColor();
+    ASSERT_TRUE(curColor.has_value());
+    EXPECT_EQ(expectColor, curColor.value());
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::Current()->SetApiTargetVersion(apiTargetVersion);
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: TitleBarPatternOnModifyDone005
+ * @tc.desc: Test ApplyThemeIconSize function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternOnModifyDone005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(symbolNode, nullptr);
+    symbolNode->MountToParent(backButtonNode);
+    auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(symbolProperty, nullptr);
+    symbolProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    auto titleBarLayoutProperty = frameNode_->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    std::function callback = [](WeakPtr<NG::FrameNode> frameNode) {
+        return;
+    };
+    titleBarLayoutProperty->SetBackIconSymbol(callback);
+
+    /**
+     * @tc.steps: step3. call ApplyThemeIconSize.
+     * @tc.expected: update symbol icon size successfully and is equal to theme size.
+     */
+    titleBarPattern_->OnModifyDone();
+    auto expectIconSize = theme->GetIconWidth();
+    auto hasIconSize = symbolProperty->HasFontSize();
+    ASSERT_NE(hasIconSize, false);
+    Dimension defaultSize = 0.0_vp;
+    auto curIconSize = symbolProperty->GetFontSizeValue(defaultSize);
+    ASSERT_EQ(curIconSize, expectIconSize);
+}
+
+/**
+ * @tc.name: SetDefaultTitleFontSize001
+ * @tc.desc: Test SetDefaultTitleFontSize function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, SetDefaultTitleFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    /**
+     * @tc.steps: step2. call SetDefaultTitleFontSize.
+     * @tc.expected: defaultTitleFontSize_ is equal to theme size.
+     */
+    titleBarPattern_->SetDefaultTitleFontSize();
+    auto expectedTitleFontSize = theme->GetTitleFontSize();
+    ASSERT_EQ(titleBarPattern_->defaultTitleFontSize_, expectedTitleFontSize);
+}
+
+/**
+ * @tc.name: GetSubTitleOffsetY001
+ * @tc.desc: Test GetSubTitleOffsetY function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetSubTitleOffsetY001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    /**
+     * @tc.steps: step2. call GetSubTitleOffsetY.
+     * @tc.expected: defaultTitleFontSize_ is equal to theme size.
+     */
+    auto offsetY = titleBarPattern_->GetSubTitleOffsetY();
+    ASSERT_EQ(offsetY, 0.f);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate003
+ * @tc.desc: Test OnColorConfigurationUpdate function in api version 12.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnColorConfigurationUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 12
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+
+    /**
+     * @tc.steps: step3. call OnColorConfigurationUpdate.
+     * @tc.expected: value is set successfully
+     */
+    titleBarPattern_->OnColorConfigurationUpdate();
+    auto renderContext = backButtonNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto backButtonPattern = backButtonNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(backButtonPattern, nullptr);
+
+    auto iconColor = theme->GetIconColor();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageRender = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(backButtonImageRender, nullptr);
+    auto hasSvgFillColor = backButtonImageRender->HasSvgFillColor();
+    ASSERT_NE(hasSvgFillColor, false);
+    auto defaultColor = Color::TRANSPARENT;
+    auto svgFillColor = backButtonImageRender->GetSvgFillColorValue(defaultColor);
+    ASSERT_EQ(svgFillColor, iconColor);
+
+    auto backButtonColor = theme->GetCompBackgroundColor();
+    auto hasBackgroundColor = renderContext->HasBackgroundColor();
+    ASSERT_NE(hasBackgroundColor, false);
+    auto backgroundColor = renderContext->GetBackgroundColorValue();
+    ASSERT_EQ(backgroundColor, backButtonColor);
+
+    auto backgroundPressedColor = theme->GetBackgroundPressedColor();
+    auto backgroundHoverColor = theme->GetBackgroundHoverColor();
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    auto blendClickColor = backButtonPattern->GetColorFromType(buttonTheme, 0);
+    auto blendHoverColor = backButtonPattern->GetColorFromType(buttonTheme, 1);
+    ASSERT_EQ(blendClickColor, backgroundPressedColor);
+    ASSERT_EQ(backgroundHoverColor, blendHoverColor);
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate004
+ * @tc.desc: Test OnColorConfigurationUpdate function in api version 10.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnColorConfigurationUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme, set api version 10
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+
+    /**
+     * @tc.steps: step2. create backButtonNode and layoutProperty.
+     */
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    backButtonImageNode->MountToParent(backButtonNode);
+
+    /**
+     * @tc.steps: step3. call OnColorConfigurationUpdate.
+     * @tc.expected: defaultTitleFontSize_ is equal to theme size.
+     */
+    titleBarPattern_->OnColorConfigurationUpdate();
+    auto iconColor = theme->GetBackButtonIconColor();
+    backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    ASSERT_NE(backButtonImageNode, nullptr);
+    auto backButtonImageRender = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(backButtonImageRender, nullptr);
+    auto hasSvgFillColor = backButtonImageRender->HasSvgFillColor();
+    ASSERT_NE(hasSvgFillColor, false);
+    auto defaultColor = Color::TRANSPARENT;
+    auto svgFillColor = backButtonImageRender->GetSvgFillColorValue(defaultColor);
+    ASSERT_EQ(svgFillColor, iconColor);
+
+    /**
+     * @tc.steps: step4. recover api version
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: OnLanguageConfigurationUpdate001
+ * @tc.desc: Test OnLanguageConfigurationUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnLanguageConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init titleBar environment and theme
+     */
+    InitTitleBarTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto backButtonNode = FrameNode::GetOrCreateFrameNode(V2::BACK_BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(backButtonNode, nullptr);
+    frameNode_->SetBackButton(backButtonNode);
+
+    /**
+     * @tc.steps: step2. call OnLanguageConfigurationUpdate.
+     * @tc.expected: relative value is set successfully.
+     */
+    titleBarPattern_->OnLanguageConfigurationUpdate();
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto accessibilityText = accessibilityProperty->GetAccessibilityText();
+    ASSERT_EQ(message, accessibilityText);
+    auto isAccessibilityGroup = accessibilityProperty->IsAccessibilityGroup();
+    ASSERT_EQ(isAccessibilityGroup, true);
 }
 } // namespace OHOS::Ace::NG
