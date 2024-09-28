@@ -5775,7 +5775,7 @@ void RosenRenderContext::OnTransitionOutFinish()
     CHECK_NULL_VOID(host);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
-    if (!host->IsVisible() && !host->IsDisappearing()) {
+    if (!host->IsVisible() && host->IsOnMainTree()) {
         // trigger transition through visibility
         if (transitionOutCallback_) {
             transitionOutCallback_();
