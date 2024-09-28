@@ -350,7 +350,7 @@ HWTEST_F(NavigationBranchTestNg, NavigationModelTest002, TestSize.Level1)
     EXPECT_NE(navBarNode, nullptr);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     EXPECT_NE(navBarLayoutProperty, nullptr);
-    navigationModel.SetHideTitleBar(false);
+    navigationModel.SetHideTitleBar(false, false);
     EXPECT_EQ(navBarLayoutProperty->GetHideTitleBar().value_or(false), false);
 }
 

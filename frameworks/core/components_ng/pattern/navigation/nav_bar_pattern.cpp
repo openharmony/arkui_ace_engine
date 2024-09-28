@@ -277,9 +277,14 @@ void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNo
     // update menu
     BuildMenu(navBarNode, titleBarNode);
 }
+} // namespace
 
-void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
+void NavBarPattern::MountTitleBar(
+    const RefPtr<FrameNode>& host, bool& needRunTitleBarAnimation)
 {
+    needRunTitleBarAnimation = false;
+    auto hostNode = AceType::DynamicCast<NavBarNode>(host);
+    CHECK_NULL_VOID(hostNode);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
@@ -299,23 +304,26 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
     titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE));
     titleBarLayoutProperty->UpdateHideBackButton(navBarLayoutProperty->GetHideBackButtonValue(false));
     BuildTitleBar(hostNode, titleBarNode);
-    if (navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
-        titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        titleBarNode->SetJSViewActive(false);
-    } else {
-        titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        titleBarNode->SetJSViewActive(true);
-
-        auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts) {
-            titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
-        }
+    bool hideTitleBar = navBarLayoutProperty->GetHideTitleBarValue(false);
+    /**
+     * if titlebar is the first time to hide/display
+     * doesn't require animation or isn't currently being animated and the
+     * hidden/display status hasn't changed.
+     */
+    if (!currHideTitleBar_.has_value() ||
+        !navBarLayoutProperty->GetIsAnimatedTitleBarValue(false) ||
+        (titleBarAnimationCount_ <= 0 && currHideTitleBar_.value() == hideTitleBar)) {
+        currHideTitleBar_ = hideTitleBar;
+        HideOrShowTitleBarImmediately(hostNode, hideTitleBar);
+        return;
     }
     titleBarNode->MarkModifyDone();
     titleBarNode->MarkDirtyNode();
-}
 
-} // namespace
+    //set condition for titlebar animation
+    currHideTitleBar_ = hideTitleBar;
+    needRunTitleBarAnimation = true;
+}
 
 OffsetF NavBarPattern::GetShowMenuOffset(const RefPtr<BarItemNode> barItemNode, RefPtr<FrameNode> menuNode)
 {
@@ -415,8 +423,12 @@ void NavBarPattern::OnModifyDone()
     CHECK_NULL_VOID(titleBarRenderContext);
     // set the titlebar to float on the top
     titleBarRenderContext->UpdateZIndex(DEFAULT_TITLEBAR_ZINDEX);
-    MountTitleBar(hostNode);
-    NavigationToolbarUtil::MountToolBar(hostNode);
+    bool needRunTitleBarAnimation = false;
+    MountTitleBar(hostNode, needRunTitleBarAnimation);
+    bool needRunToolBarAnimation = false;
+    NavigationToolbarUtil::MountToolBar(hostNode, needRunToolBarAnimation);
+    HandleTitleBarAndToolBarAnimation(
+        hostNode, needRunTitleBarAnimation, needRunToolBarAnimation);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
 

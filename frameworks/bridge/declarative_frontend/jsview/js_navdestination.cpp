@@ -151,9 +151,17 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
     }
 }
 
-void JSNavDestination::SetHideTitleBar(bool hide)
+void JSNavDestination::SetHideTitleBar(const JSCallbackInfo& info)
 {
-    NavDestinationModel::GetInstance()->SetHideTitleBar(hide);
+    if (info.Length() < 1 || !info[0]->IsBoolean()) {
+        return;
+    }
+
+    bool animated = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        animated = info[1]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetHideTitleBar(info[0]->ToBoolean(), animated);
 }
 
 void JSNavDestination::SetTitle(const JSCallbackInfo& info)
@@ -510,9 +518,17 @@ void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetToolBarOptions(std::move(options));
 }
 
-void JSNavDestination::SetHideToolBar(bool hide)
+void JSNavDestination::SetHideToolBar(const JSCallbackInfo& info)
 {
-    NavDestinationModel::GetInstance()->SetHideToolBar(hide);
+    if (info.Length() < 1 || !info[0]->IsBoolean()) {
+        return;
+    }
+
+    bool animated = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        animated = info[1]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetHideToolBar(info[0]->ToBoolean(), animated);
 }
 
 void JSNavDestination::JSBind(BindingTarget globalObj)
