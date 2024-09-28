@@ -782,12 +782,18 @@ void DeclarativeFrontend::TransferJsResponseData(int callbackId, int32_t code, s
 
 napi_value DeclarativeFrontend::GetContextValue()
 {
-    return jsEngine_->GetContextValue();
+    if (jsEngine_) {
+        return jsEngine_->GetContextValue();
+    }
+    return nullptr;
 }
 
 napi_value DeclarativeFrontend::GetFrameNodeValueByNodeId(int32_t nodeId)
 {
-    return jsEngine_->GetFrameNodeValueByNodeId(nodeId);
+    if (jsEngine_) {
+        return jsEngine_->GetFrameNodeValueByNodeId(nodeId);
+    }
+    return nullptr;
 }
 
 #if defined(PREVIEW)
