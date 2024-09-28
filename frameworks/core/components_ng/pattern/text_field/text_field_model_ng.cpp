@@ -849,6 +849,11 @@ void TextFieldModelNG::SetCancelIconColor(const Color& iconColor)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor);
 }
 
+void TextFieldModelNG::SetCancelButtonSymbol(bool isShowSymbol)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowSymbol, isShowSymbol);
+}
+
 void TextFieldModelNG::SetIsShowCancelButton(bool isShowCancelButton)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowCancelButton, isShowCancelButton);
@@ -1365,6 +1370,11 @@ void TextFieldModelNG::SetCanacelIconSrc(FrameNode* frameNode, const std::string
 void TextFieldModelNG::SetCancelIconColor(FrameNode* frameNode, const Color& iconColor)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor, frameNode);
+}
+
+void TextFieldModelNG::SetCancelButtonSymbol(FrameNode* frameNode, bool isShowSymbol)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsShowSymbol, isShowSymbol, frameNode);
 }
 
 std::string TextFieldModelNG::GetPlaceholderText(FrameNode* frameNode)

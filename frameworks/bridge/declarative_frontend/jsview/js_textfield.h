@@ -135,6 +135,7 @@ public:
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);
+    static void SetCancelDefaultIcon();
 };
 
 } // namespace OHOS::Ace::Framework
