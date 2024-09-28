@@ -1157,9 +1157,9 @@ JSRef<JSObject> JSNavigationStack::CreatePathInfoWithNecessaryProperty(
     pathInfo->SetProperty<std::string>("name", jsPathInfo->GetName());
     pathInfo->SetProperty<int32_t>("index", context->GetIndex());
     pathInfo->SetProperty<std::string>("navDestinationId", std::to_string(context->GetNavDestinationId()));
-    pathInfo->SetProperty("param", jsPathInfo->GetParam());
-    pathInfo->SetProperty("onPop", jsPathInfo->GetOnPop());
-    pathInfo->SetProperty("isEntry", jsPathInfo->GetIsEntry());
+    pathInfo->SetProperty<bool>("isEntry", jsPathInfo->GetIsEntry());
+    pathInfo->SetPropertyObject("param", jsPathInfo->GetParam());
+    pathInfo->SetPropertyObject("onPop", jsPathInfo->GetOnPop());
     return pathInfo;
 }
 
