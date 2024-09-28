@@ -452,7 +452,10 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         ProcessScrollOverCallback(currentVelocity_);
     } else if (canOverScroll_) {
         LayoutDirectionEst(gestureVelocity, springVelocityScale_, isScrollFromTouchPad);
-        auto gamma = overScrollOffsetCallback_() / continuousSlidingCallback_();
+        auto gamma = 0.0f;
+        if (overScrollOffsetCallback_ && continuousSlidingCallback_) {
+            gamma = overScrollOffsetCallback_() / continuousSlidingCallback_();
+        }
         gamma = GreatOrEqual(gamma, 1.0) ? 1.0f : gamma;
         currentVelocity_ = currentVelocity_ * exp(-ratio_ * gamma);
         ResetContinueDragCount();
