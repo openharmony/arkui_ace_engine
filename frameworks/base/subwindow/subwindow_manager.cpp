@@ -533,6 +533,7 @@ void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps, s
 void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto iter = subwindowMap_.begin();
     while (iter != subwindowMap_.end()) {
         auto overlay = iter->second->GetOverlayManager();
@@ -547,6 +548,7 @@ void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
 void SubwindowManager::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto iter = subwindowMap_.begin();
     while (iter != subwindowMap_.end()) {
         auto overlay = iter->second->GetOverlayManager();
@@ -571,6 +573,7 @@ void SubwindowManager::UpdateCustomDialogNG(
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto iter = subwindowMap_.begin();
     while (iter != subwindowMap_.end()) {
         auto overlay = iter->second->GetOverlayManager();
@@ -943,6 +946,7 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get dialog subwindow failed.");
         return;
     }
+    std::lock_guard<std::mutex> lock(parentMutex_);
     for (auto& containerMap : parentContainerMap_) {
         if (containerMap.second == instanceId) {
             subwindow->CloseDialog(containerMap.first);
@@ -1118,6 +1122,7 @@ void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, 
 
 RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node)
 {
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto iter = subwindowMap_.begin();
     while (iter != subwindowMap_.end()) {
         auto overlay = iter->second->GetOverlayManager();
