@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 
 class CustomNodeBase;
+class NavigationTransitionProxy;
 
 using NavDestinationBackButtonEvent = std::function<bool(GestureEvent&)>;
 
@@ -179,6 +180,10 @@ public:
         return needRemoveInPush_;
     }
 
+    void UpdateTextNodeListAsRenderGroup(bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
+    void ReleaseTextNodeList();
+    void CollectTextNodeAsRenderGroup();
+
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
@@ -194,6 +199,7 @@ private:
     std::string navDestinationPathInfo_;
     std::string navDestinationModuleName_;
     bool needRemoveInPush_ = false;
+    std::list<WeakPtr<UINode>> textNodeList_;
 };
 
 } // namespace OHOS::Ace::NG
