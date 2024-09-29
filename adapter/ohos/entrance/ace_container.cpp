@@ -1280,45 +1280,9 @@ public:
         if (isNative_ || !config.targetSize.has_value() || !config.placement.has_value()) {
             return;
         }
-        auto node = node_.Upgrade();
-        CHECK_NULL_VOID(node);
-        auto rectf = node->GetRectWithRender();
         AbilityRuntime::AutoFill::PopupOffset offset;
-        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
-        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
-        if ((windowRect_.height_ - rectf.Height()) > (size.height + POPUP_EDGE_INTERVAL)) {
-            // popup will display at the bottom of the container
-            offset.deltaY = rect_.top + rect_.height - rectf.Height();
-        } else {
-            // popup will display in the middle of the container
-            if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
-                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
-                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-                offset.deltaY = rect_.top + rect_.height -
-                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
-            } else {
-                offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
-            }
-        }
-
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
-            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            offset.deltaX = rect_.left - edgeDist;
-            if (offset.deltaX > edgeDist) {
-                offset.deltaX = edgeDist;
-            }
-        }
-
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            offset.deltaX = edgeDist + rect_.left + rect_.width - rectf.Width();
-            if ((offset.deltaX < -DBL_EPSILON) && (std::fabs(offset.deltaX) > edgeDist)) {
-                offset.deltaX = -edgeDist;
-            }
-        }
-
+        offset.deltaX = GetPopupConfigWillUpdateX(config);
+        offset.deltaY = GetPopupConfigWillUpdateY(config);
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
         config.targetOffset = offset;
         config.placement = AbilityRuntime::AutoFill::PopupPlacement::BOTTOM;
@@ -1334,6 +1298,96 @@ public:
         windowRect_ = rect;
     }
 private:
+    double GetPopupConfigWillUpdateY(AbilityRuntime::AutoFill::AutoFillCustomConfig& config)
+    {
+        auto node = node_.Upgrade();
+        CHECK_NULL_RETURN(node, 0);
+        auto rectf = node->GetRectWithRender();
+        double deltaY = 0;
+        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
+        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
+
+        auto trans = node->GetTransformRelativeOffset();
+        auto bottomAvoidHeight = GetBottomAvoidHeight();
+
+        bool isBottom = placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT;
+
+        if ((windowRect_.height_ - rectf.Height() - trans.GetY()) > 
+            (size.height + POPUP_EDGE_INTERVAL + bottomAvoidHeight)) {
+            // popup will display at the bottom of the container
+            if (isBottom)
+            {
+                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY();
+            } else {
+                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - POPUP_EDGE_INTERVAL;
+            }
+        } else {
+            // popup will display in the middle of the container
+            if (isBottom) {
+                deltaY = rect_.top + rect_.height -
+                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+            } else {
+                deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+            }
+        }
+        return deltaY;
+    }
+
+    double GetPopupConfigWillUpdateX(AbilityRuntime::AutoFill::AutoFillCustomConfig& config)
+    {
+        auto node = node_.Upgrade();
+        CHECK_NULL_RETURN(node);
+        auto rectf = node->GetRectWithRender();
+        double deltaX = 0;
+        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
+        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            deltaX = rect_.left - edgeDist;
+            if (deltaX > edgeDist) {
+                deltaX = edgeDist;
+            }
+            if (rect_.left + size.width > windowRect_.width_) {
+                deltaX = windowRect_.width_ - size.width - edgeDist;
+            }
+            if (edgeDist + size.width > windowRect_.width_) {
+                deltaX = 0;
+            }
+        }
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            deltaX = edgeDist + rect_.left + rect_.width - rectf.Width();
+            if ((deltaX < -DBL_EPSILON) && (std::fabs(deltaX) > edgeDist)) {
+                deltaX = -edgeDist;
+            }
+        }
+        return deltaX;
+    }
+
+    uint32_t GetBottomAvoidHeight()
+    {
+        auto containerId = Container::CurrentId();
+        RefPtr<PipelineContext> pipelineContext;
+        if (containerId >= MIN_SUBCONTAINER_ID) {
+            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+            auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+            CHECK_NULL_RETURN(parentContainer, 0);
+            pipelineContext = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+        } else {
+            pipelineContext = PipelineContext::GetCurrentContext();
+        }
+        CHECK_NULL_RETURN(pipelineContext, 0);
+        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+        CHECK_NULL_RETURN(safeAreaManager, 0);
+        return safeAreaManager->GetSystemSafeArea().bottom_.Length();
+    }
+
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
