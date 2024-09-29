@@ -30,13 +30,14 @@ const vibrator = requireNapi('vibrator');
 const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
 const hilog = requireNapi('hilog');
 
-const ANGULAR_TO_RADIAN = Math.PI / 180;
-const RADIAN_TO_ANGULAR = 180 / Math.PI;
+const ANGLE_TO_RADIAN = Math.PI / 180;
+const RADIAN_TO_ANGLE = 180 / Math.PI;
 const PI_RADIAN = 180;
-const TWO_PI_RADIAN = 360;
+const TWO_PI_ANGLE = 360;
+const TWO_PI_RADIAN = 2 * Math.PI;
+const APPROXIMATE_NUMBER = Math.pow(10, -7);
 const ANGLE_OVER_MIN = 10;
 const LENGTH_OVER_MIN = 0.15;
-const APPROXIMATE_NUMBER = Math.pow(10, -7);
 const TOTAL_LENGTH = 233;
 const VALUE_DEFAULT = 0;
 const MIN_DEFAULT = 0;
@@ -52,13 +53,10 @@ const ACTIVE_END_ANGLE_DEFAULT = 60;
 const REVERSE_DEFAULT = true;
 const TRACK_THICKNESS_DEFAULT = 5;
 const ACTIVE_TRACK_THICKNESS_DEFAULT = 24;
-const TRACK_COLOR_DEFAULT = '#33FFFFFF';
 const TRACK_BLUR_DEFAULT = 20;
+const TRACK_COLOR_DEFAULT = '#33FFFFFF';
 const SELECTED_COLOR_DEFAULT = '#FF5EA1FF';
-const BLUR_COLOR_DEFAULT = '#00ffffff';
-const MIN_STATUS = 'min';
-const MAX_STATUS = 'max';
-const NORMAL_STATUS = 'normal';
+const BLUR_COLOR_DEFAULT = $r('sys.color.ohos_id_color_subtab_bg');
 const VIBRATOR_TYPE_TWO = 'watchhaptic.crown.strength2';
 const VIBRATOR_TYPE_SIX = 'watchhaptic.crown.strength6';
 const CROWN_EVENT_FLAG = 30;
@@ -68,21 +66,28 @@ const CROWN_SENSITIVITY_MEDIUM = 1;
 const CROWN_SENSITIVITY_HIGH = 2;
 const INVALID_TIMEOUT_ID = -1;
 const RESTORE_TIMEOUT = 3000;
+var MinOrMaxStatus;
+(function (MinOrMaxStatus) {
+    MinOrMaxStatus["MinStatus"] = "min";
+    MinOrMaxStatus["MaxStatus"] = "max";
+    MinOrMaxStatus["NormalStatus"] = "normal";
+})(MinOrMaxStatus || (MinOrMaxStatus = {}));
+var ClipPathArc;
+(function (ClipPathArc) {
+    ClipPathArc["Arc1"] = "1";
+    ClipPathArc["Arc2"] = "2";
+    ClipPathArc["Arc3"] = "3";
+    ClipPathArc["Arc4"] = "4";
+})(ClipPathArc || (ClipPathArc = {}));
 let ArcSliderValueOptions = class ArcSliderValueOptions {
     constructor(options) {
         this.value = VALUE_DEFAULT;
         this.min = MIN_DEFAULT;
         this.max = MAX_DEFAULT;
         if (options) {
-            if (options.value !== undefined && options.value !== null) {
-                this.value = options.value;
-            }
-            if (options.min !== undefined && options.min !== null) {
-                this.min = options.min;
-            }
-            if (options.max !== undefined && options.max !== null) {
-                this.max = options.max;
-            }
+            this.value = options.value ?? VALUE_DEFAULT;
+            this.min = options.min ?? MIN_DEFAULT;
+            this.max = options.max ?? MAX_DEFAULT;
         }
     }
 };
@@ -112,33 +117,15 @@ let ArcSliderLayoutOptions = class ArcSliderLayoutOptions {
         this.activeEndAngle = ACTIVE_END_ANGLE_DEFAULT;
         this.reverse = REVERSE_DEFAULT;
         if (options) {
-            if (options.x !== undefined && options.x !== null) {
-                this.x = options.x;
-            }
-            if (options.y !== undefined && options.y !== null) {
-                this.y = options.y;
-            }
-            if (options.radius !== undefined && options.radius !== null) {
-                this.radius = options.radius;
-            }
-            if (options.padding !== undefined && options.padding !== null) {
-                this.padding = options.padding;
-            }
-            if (options.startAngle !== undefined && options.startAngle !== null) {
-                this.startAngle = options.startAngle;
-            }
-            if (options.endAngle !== undefined && options.endAngle !== null) {
-                this.endAngle = options.endAngle;
-            }
-            if (options.activeStartAngle !== undefined && options.activeStartAngle !== null) {
-                this.activeStartAngle = options.activeStartAngle;
-            }
-            if (options.activeEndAngle !== undefined && options.activeEndAngle !== null) {
-                this.activeEndAngle = options.activeEndAngle;
-            }
-            if (options.reverse !== undefined && options.reverse !== null) {
-                this.reverse = options.reverse;
-            }
+            this.x = options.x ?? X_DEFAULT;
+            this.y = options.y ?? Y_DEFAULT;
+            this.radius = options.radius ?? RADIUS_DEFAULT;
+            this.padding = options.padding ?? PADDING_DEFAULT;
+            this.startAngle = options.startAngle ?? START_ANGLE_DEFAULT;
+            this.endAngle = options.endAngle ?? END_ANGLE_DEFAULT;
+            this.activeStartAngle = options.activeStartAngle ?? ACTIVE_START_ANGLE_DEFAULT;
+            this.activeEndAngle = options.activeEndAngle ?? ACTIVE_END_ANGLE_DEFAULT;
+            this.reverse = options.reverse ?? REVERSE_DEFAULT;
         }
     }
 };
@@ -182,21 +169,11 @@ let ArcSliderStyleOptions = class ArcSliderStyleOptions {
         this.selectedColor = SELECTED_COLOR_DEFAULT;
         this.trackBlur = TRACK_BLUR_DEFAULT;
         if (options) {
-            if (options.trackThickness !== undefined && options.trackThickness !== null) {
-                this.trackThickness = options.trackThickness;
-            }
-            if (options.activeTrackThickness !== undefined && options.activeTrackThickness !== null) {
-                this.activeTrackThickness = options.activeTrackThickness;
-            }
-            if (options.trackColor !== undefined && options.trackColor !== null) {
-                this.trackColor = options.trackColor;
-            }
-            if (options.selectedColor !== undefined && options.selectedColor !== null) {
-                this.selectedColor = options.selectedColor;
-            }
-            if (options.trackBlur !== undefined && options.trackBlur !== null) {
-                this.trackBlur = options.trackBlur;
-            }
+            this.trackThickness = options.trackThickness ?? TRACK_THICKNESS_DEFAULT;
+            this.activeTrackThickness = options.activeTrackThickness ?? ACTIVE_TRACK_THICKNESS_DEFAULT;
+            this.trackColor = options.trackColor ?? TRACK_COLOR_DEFAULT;
+            this.selectedColor = options.selectedColor ?? SELECTED_COLOR_DEFAULT;
+            this.trackBlur = options.trackBlur ?? TRACK_BLUR_DEFAULT;
         }
     }
 };
@@ -231,24 +208,14 @@ let ArcSliderOptions = class ArcSliderOptions {
         this.onChange = (value) => {
         };
         if (options) {
-            if (options.valueOptions !== undefined && options.valueOptions !== null) {
-                this.valueOptions = options.valueOptions;
-            }
-            if (options.layoutOptions !== undefined && options.layoutOptions !== null) {
-                this.layoutOptions = options.layoutOptions;
-            }
-            if (options.styleOptions !== undefined && options.styleOptions !== null) {
-                this.styleOptions = options.styleOptions;
-            }
-            if (options.digitalCrownSensitivity !== undefined && options.digitalCrownSensitivity !== null) {
-                this.digitalCrownSensitivity = options.digitalCrownSensitivity;
-            }
-            if (options.onTouch !== undefined && options.onTouch !== null) {
-                this.onTouch = options.onTouch;
-            }
-            if (options.onChange !== undefined && options.onChange !== null) {
-                this.onChange = options.onChange;
-            }
+            this.valueOptions = options.valueOptions ?? new ArcSliderValueOptions();
+            this.layoutOptions = options.layoutOptions ?? new ArcSliderLayoutOptions();
+            this.styleOptions = options.styleOptions ?? new ArcSliderStyleOptions();
+            this.digitalCrownSensitivity = options.digitalCrownSensitivity ?? CrownSensitivity.MEDIUM;
+            this.onTouch = options.onTouch ?? ((event) => {
+            });
+            this.onChange = options.onChange ?? ((value) => {
+            });
         }
     }
 };
@@ -279,11 +246,11 @@ export { ArcSliderOptions };
 class DrawParameters {
     constructor() {
         this.lineWidth = 0;
-        this.normalRadius = 0;
-        this.start = 0;
-        this.end = 0;
-        this.trackStart = 0;
-        this.selectArc = 0;
+        this.radius = 0;
+        this.trackEndAngle = 0;
+        this.trackStartAngle = 0;
+        this.selectedStartAngle = 0;
+        this.selectedEndAngle = 0;
         this.trackColor = ColorMetrics.resourceColor(TRACK_COLOR_DEFAULT);
         this.selectedColor = ColorMetrics.resourceColor(SELECTED_COLOR_DEFAULT);
         this.reverse = REVERSE_DEFAULT;
@@ -294,7 +261,7 @@ class DrawParameters {
     }
 }
 
-function nearEquals(num1, num2) {
+function nearEqual(num1, num2) {
     return Math.abs(num1 - num2) < APPROXIMATE_NUMBER;
 }
 
@@ -322,33 +289,27 @@ class MyFullDrawModifier extends DrawModifier {
         pen.setCapStyle(drawing.CapStyle.ROUND_CAP);
         canvas.attachPen(pen);
         let path = new drawing.Path();
-        let leftTopX = this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius);
-        let leftTopY = this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius);
-        let rightBottomX = this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius);
-        let rightBottomY = this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius);
-        let startAngular;
-        let stopAngular;
-        if (this.parameters.reverse) {
-            if (this.parameters.start < this.parameters.end) {
-                startAngular = this.parameters.end * RADIAN_TO_ANGULAR;
-                stopAngular = TWO_PI_RADIAN + (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR;
-            }
-            else {
-                startAngular = this.parameters.end * RADIAN_TO_ANGULAR;
-                stopAngular = (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR;
-            }
+        let leftTopX = this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.radius);
+        let leftTopY = this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.radius);
+        let rightBottomX = this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.radius);
+        let rightBottomY = this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.radius);
+        let startAngle;
+        let sweepAngle;
+        let trackEndAngle = this.parameters.trackEndAngle * RADIAN_TO_ANGLE;
+        let delta = (this.parameters.trackStartAngle - this.parameters.trackEndAngle) * RADIAN_TO_ANGLE;
+        if (this.parameters.reverse && this.parameters.selectedStartAngle < this.parameters.trackEndAngle) {
+            startAngle = trackEndAngle;
+            sweepAngle = TWO_PI_ANGLE + delta;
+        }
+        else if (!this.parameters.reverse && this.parameters.selectedStartAngle > this.parameters.trackEndAngle) {
+            startAngle = this.parameters.trackStartAngle * RADIAN_TO_ANGLE;
+            sweepAngle = TWO_PI_ANGLE - delta;
         }
         else {
-            if (this.parameters.start < this.parameters.end) {
-                startAngular = this.parameters.end * RADIAN_TO_ANGULAR;
-                stopAngular = (this.parameters.trackStart - this.parameters.end) * RADIAN_TO_ANGULAR;
-            }
-            else {
-                startAngular = this.parameters.trackStart * RADIAN_TO_ANGULAR;
-                stopAngular = TWO_PI_RADIAN + (this.parameters.end - this.parameters.trackStart) * RADIAN_TO_ANGULAR;
-            }
+            startAngle = trackEndAngle;
+            sweepAngle = delta;
         }
-        path.arcTo(leftTopX, leftTopY, rightBottomX, rightBottomY, startAngular, stopAngular);
+        path.arcTo(leftTopX, leftTopY, rightBottomX, rightBottomY, startAngle, sweepAngle);
         canvas.drawPath(path);
         canvas.detachPen();
     }
@@ -358,7 +319,7 @@ class MyFullDrawModifier extends DrawModifier {
             hilog.error(0x3900, 'ArcSlider', `uiContext is undefined`);
             return;
         }
-        if (nearEquals(this.parameters.start, this.parameters.selectArc)) {
+        if (nearEqual(this.parameters.selectedStartAngle, this.parameters.selectedEndAngle)) {
             return;
         }
         const canvas = context.canvas;
@@ -369,45 +330,30 @@ class MyFullDrawModifier extends DrawModifier {
         pen.setCapStyle(drawing.CapStyle.ROUND_CAP);
         canvas.attachPen(pen);
         let path = new drawing.Path();
-        let leftTopX = this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.normalRadius);
-        let leftTopY = this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.normalRadius);
-        let rightBottomX = this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.normalRadius);
-        let rightBottomY = this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.normalRadius);
-        let startAngular;
-        let stopAngular;
-        if (this.parameters.reverse) {
-            if (this.parameters.start < this.parameters.end) {
-                if (this.parameters.selectArc > this.parameters.start) {
-                    startAngular = (this.parameters.selectArc - 2 * Math.PI) * RADIAN_TO_ANGULAR;
-                    stopAngular = (2 * Math.PI + this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR;
-                }
-                else {
-                    startAngular = this.parameters.selectArc * RADIAN_TO_ANGULAR;
-                    stopAngular = (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR;
-                }
-            }
-            else {
-                startAngular = this.parameters.selectArc * RADIAN_TO_ANGULAR;
-                stopAngular = (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR;
-            }
+        let leftTopX = this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.radius);
+        let leftTopY = this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.radius);
+        let rightBottomX = this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.radius);
+        let rightBottomY = this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.radius);
+        let startAngle;
+        let sweepAngle;
+        let selectedEndAngle = this.parameters.selectedEndAngle * RADIAN_TO_ANGLE;
+        let selectedStartAngle = this.parameters.selectedStartAngle * RADIAN_TO_ANGLE;
+        let delta = (this.parameters.selectedStartAngle - this.parameters.selectedEndAngle) * RADIAN_TO_ANGLE;
+        if (this.parameters.reverse && this.parameters.selectedStartAngle < this.parameters.trackEndAngle &&
+            this.parameters.selectedEndAngle > this.parameters.selectedStartAngle) {
+            startAngle = selectedEndAngle - TWO_PI_ANGLE;
+            sweepAngle = TWO_PI_ANGLE + delta;
+        }
+        else if (!this.parameters.reverse && this.parameters.selectedStartAngle > this.parameters.trackEndAngle &&
+            this.parameters.selectedEndAngle < this.parameters.selectedStartAngle) {
+            startAngle = selectedStartAngle - TWO_PI_ANGLE;
+            sweepAngle = TWO_PI_ANGLE - delta;
         }
         else {
-            if (this.parameters.start < this.parameters.end) {
-                startAngular = this.parameters.selectArc * RADIAN_TO_ANGULAR;
-                stopAngular = (this.parameters.start - this.parameters.selectArc) * RADIAN_TO_ANGULAR;
-            }
-            else {
-                if (this.parameters.selectArc < this.parameters.start) {
-                    startAngular = (this.parameters.start - 2 * Math.PI) * RADIAN_TO_ANGULAR;
-                    stopAngular = (2 * Math.PI + this.parameters.selectArc - this.parameters.start) * RADIAN_TO_ANGULAR;
-                }
-                else {
-                    startAngular = this.parameters.start * RADIAN_TO_ANGULAR;
-                    stopAngular = (this.parameters.selectArc - this.parameters.start) * RADIAN_TO_ANGULAR;
-                }
-            }
+            startAngle = selectedEndAngle;
+            sweepAngle = delta;
         }
-        path.arcTo(leftTopX, leftTopY, rightBottomX, rightBottomY, startAngular, stopAngular);
+        path.arcTo(leftTopX, leftTopY, rightBottomX, rightBottomY, startAngle, sweepAngle);
         canvas.drawPath(path);
         canvas.detachPen();
     }
@@ -421,291 +367,118 @@ class MyFullDrawModifier extends DrawModifier {
     }
 }
 
-export class ArcSlider extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
-        }
-        this.options = new ArcSliderOptions();
-        this.parameters = new DrawParameters();
-        this.fullModifier = new MyFullDrawModifier(this.parameters);
-        this.touchAnimator = undefined;
-        this.restoreAnimator = undefined;
-        this.clickSelectedAnimator = undefined;
-        this.maxRestoreAnimator = undefined;
-        this.minRestoreAnimator = undefined;
-        this.delta = 0;
-        this.crownDeltaAngle = 0;
+export class ArcSlider extends ViewV2 {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
+        super(parent, elmtId, extraInfo);
+        this.initParam("options", (params && "options" in params) ? params.options : new ArcSliderOptions());
+        this.parameters = "parameters" in params ? params.parameters : new DrawParameters();
+        this.fullModifier = "fullModifier" in params ? params.fullModifier : new MyFullDrawModifier(this.parameters);
+        this.touchAnimator = "touchAnimator" in params ? params.touchAnimator : undefined;
+        this.restoreAnimator = "restoreAnimator" in params ? params.restoreAnimator : undefined;
+        this.clickSelectedAnimator = "clickSelectedAnimator" in params ? params.clickSelectedAnimator : undefined;
+        this.maxRestoreAnimator = "maxRestoreAnimator" in params ? params.maxRestoreAnimator : undefined;
+        this.minRestoreAnimator = "minRestoreAnimator" in params ? params.minRestoreAnimator : undefined;
+        this.delta = "delta" in params ? params.delta : 0;
+        this.crownDeltaAngle = "crownDeltaAngle" in params ? params.crownDeltaAngle : 0;
         this.lineWidth = 0;
-        this.lineWidthCurrent = 0;
-        this.normalRadius = 0;
-        this.touchY = 0;
-        this.endCurrent = 0;
-        this.meter = 0;
-        this.start = 0;
-        this.end = 0;
-        this.trackStart = 0;
-        this.trackStartCurrent = 0;
-        this.selectArc = 0;
-        this.selectArcCurrent = 0;
+        this.lineWidthBegin = "lineWidthBegin" in params ? params.lineWidthBegin : 0;
+        this.radius = 0;
+        this.touchY = "touchY" in params ? params.touchY : 0;
+        this.endAngleFinish = "endAngleFinish" in params ? params.endAngleFinish : 0;
+        this.meter = "meter" in params ? params.meter : 0;
+        this.trackStartAngle = 0;
+        this.trackEndAngle = 0;
+        this.trackStartAngleBegin = "trackStartAngleBegin" in params ? params.trackStartAngleBegin : 0;
+        this.selectedStartAngle = 0;
+        this.selectedEndAngle = 0;
+        this.selectedEndAngleBegin = "selectedEndAngleBegin" in params ? params.selectedEndAngleBegin : 0;
         this.selectRatioNow = 0;
         this.isEnlarged = false;
-        this.isTouchAnimatorFinished = false;
-        this.isClickAnimatorFinished = false;
-        this.clickValue = 0;
-        this.sliderValue = 0;
-        this.startAngle = -START_ANGLE_DEFAULT;
-        this.endAngle = -END_ANGLE_DEFAULT;
-        this.activeStartAngle = -ACTIVE_START_ANGLE_DEFAULT;
-        this.activeEndAngle = -ACTIVE_END_ANGLE_DEFAULT;
-        this.selectedMaxOrMin = NORMAL_STATUS;
-        this.totalWidth = TOTAL_LENGTH;
-        this.totalHeight = TOTAL_LENGTH;
-        this.isFocus = false;
-        this.needVibrate = true;
-        this.crownEventCounter = 0;
-        this.__clipPath = new ObservedPropertySimplePU('', this, "clipPath");
-        this.__sweepFlag = new ObservedPropertySimplePU(false, this, "sweepFlag");
-        this.__isArcLarge = new ObservedPropertySimplePU(false, this, "isArcLarge");
-        this.setInitiallyProvidedValue(params);
+        this.isTouchAnimatorFinished = "isTouchAnimatorFinished" in params ? params.isTouchAnimatorFinished : false;
+        this.isClickAnimatorFinished = "isClickAnimatorFinished" in params ? params.isClickAnimatorFinished : false;
+        this.clickValue = "clickValue" in params ? params.clickValue : 0;
+        this.sliderValue = "sliderValue" in params ? params.sliderValue : 0;
+        this.normalStartAngle = "normalStartAngle" in params ? params.normalStartAngle : -START_ANGLE_DEFAULT;
+        this.normalEndAngle = "normalEndAngle" in params ? params.normalEndAngle : -END_ANGLE_DEFAULT;
+        this.activeStartAngle = "activeStartAngle" in params ? params.activeStartAngle : -ACTIVE_START_ANGLE_DEFAULT;
+        this.activeEndAngle = "activeEndAngle" in params ? params.activeEndAngle : -ACTIVE_END_ANGLE_DEFAULT;
+        this.selectedMaxOrMin = "selectedMaxOrMin" in params ? params.selectedMaxOrMin : MinOrMaxStatus.NormalStatus;
+        this.totalWidth = "totalWidth" in params ? params.totalWidth : TOTAL_LENGTH;
+        this.totalHeight = "totalHeight" in params ? params.totalHeight : TOTAL_LENGTH;
+        this.isFocus = "isFocus" in params ? params.isFocus : false;
+        this.needVibrate = "needVibrate" in params ? params.needVibrate : true;
+        this.crownEventCounter = "crownEventCounter" in params ? params.crownEventCounter : 0;
+        this.clipPath = '';
+        this.isReverse = false;
+        this.isLargeArc = false;
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        if (params.options !== undefined) {
-            this.options = params.options;
-        }
-        if (params.parameters !== undefined) {
-            this.parameters = params.parameters;
-        }
-        if (params.fullModifier !== undefined) {
-            this.fullModifier = params.fullModifier;
-        }
-        if (params.touchAnimator !== undefined) {
-            this.touchAnimator = params.touchAnimator;
-        }
-        if (params.restoreAnimator !== undefined) {
-            this.restoreAnimator = params.restoreAnimator;
-        }
-        if (params.clickSelectedAnimator !== undefined) {
-            this.clickSelectedAnimator = params.clickSelectedAnimator;
-        }
-        if (params.maxRestoreAnimator !== undefined) {
-            this.maxRestoreAnimator = params.maxRestoreAnimator;
-        }
-        if (params.minRestoreAnimator !== undefined) {
-            this.minRestoreAnimator = params.minRestoreAnimator;
-        }
-        if (params.delta !== undefined) {
-            this.delta = params.delta;
-        }
-        if (params.crownDeltaAngle !== undefined) {
-            this.crownDeltaAngle = params.crownDeltaAngle;
-        }
-        if (params.lineWidth !== undefined) {
-            this.lineWidth = params.lineWidth;
-        }
-        if (params.lineWidthCurrent !== undefined) {
-            this.lineWidthCurrent = params.lineWidthCurrent;
-        }
-        if (params.normalRadius !== undefined) {
-            this.normalRadius = params.normalRadius;
-        }
-        if (params.touchY !== undefined) {
-            this.touchY = params.touchY;
-        }
-        if (params.endCurrent !== undefined) {
-            this.endCurrent = params.endCurrent;
-        }
-        if (params.meter !== undefined) {
-            this.meter = params.meter;
-        }
-        if (params.start !== undefined) {
-            this.start = params.start;
-        }
-        if (params.end !== undefined) {
-            this.end = params.end;
-        }
-        if (params.trackStart !== undefined) {
-            this.trackStart = params.trackStart;
-        }
-        if (params.trackStartCurrent !== undefined) {
-            this.trackStartCurrent = params.trackStartCurrent;
-        }
-        if (params.selectArc !== undefined) {
-            this.selectArc = params.selectArc;
-        }
-        if (params.selectArcCurrent !== undefined) {
-            this.selectArcCurrent = params.selectArcCurrent;
-        }
-        if (params.selectRatioNow !== undefined) {
-            this.selectRatioNow = params.selectRatioNow;
-        }
-        if (params.isEnlarged !== undefined) {
-            this.isEnlarged = params.isEnlarged;
-        }
-        if (params.isTouchAnimatorFinished !== undefined) {
-            this.isTouchAnimatorFinished = params.isTouchAnimatorFinished;
-        }
-        if (params.isClickAnimatorFinished !== undefined) {
-            this.isClickAnimatorFinished = params.isClickAnimatorFinished;
-        }
-        if (params.clickValue !== undefined) {
-            this.clickValue = params.clickValue;
-        }
-        if (params.sliderValue !== undefined) {
-            this.sliderValue = params.sliderValue;
-        }
-        if (params.startAngle !== undefined) {
-            this.startAngle = params.startAngle;
-        }
-        if (params.endAngle !== undefined) {
-            this.endAngle = params.endAngle;
-        }
-        if (params.activeStartAngle !== undefined) {
-            this.activeStartAngle = params.activeStartAngle;
-        }
-        if (params.activeEndAngle !== undefined) {
-            this.activeEndAngle = params.activeEndAngle;
-        }
-        if (params.selectedMaxOrMin !== undefined) {
-            this.selectedMaxOrMin = params.selectedMaxOrMin;
-        }
-        if (params.totalWidth !== undefined) {
-            this.totalWidth = params.totalWidth;
-        }
-        if (params.totalHeight !== undefined) {
-            this.totalHeight = params.totalHeight;
-        }
-        if (params.isFocus !== undefined) {
-            this.isFocus = params.isFocus;
-        }
-        if (params.needVibrate !== undefined) {
-            this.needVibrate = params.needVibrate;
-        }
-        if (params.crownEventCounter !== undefined) {
-            this.crownEventCounter = params.crownEventCounter;
-        }
-        if (params.clipPath !== undefined) {
-            this.clipPath = params.clipPath;
-        }
-        if (params.sweepFlag !== undefined) {
-            this.sweepFlag = params.sweepFlag;
-        }
-        if (params.isArcLarge !== undefined) {
-            this.isArcLarge = params.isArcLarge;
-        }
-    }
-
-    updateStateVars(params) {
-    }
-
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__clipPath.purgeDependencyOnElmtId(rmElmtId);
-        this.__sweepFlag.purgeDependencyOnElmtId(rmElmtId);
-        this.__isArcLarge.purgeDependencyOnElmtId(rmElmtId);
-    }
-
-    aboutToBeDeleted() {
-        this.__clipPath.aboutToBeDeleted();
-        this.__sweepFlag.aboutToBeDeleted();
-        this.__isArcLarge.aboutToBeDeleted();
-        SubscriberManager.Get().delete(this.id__());
-        this.aboutToBeDeletedInternal();
-    }
-
-    get clipPath() {
-        return this.__clipPath.get();
-    }
-
-    set clipPath(newValue) {
-        this.__clipPath.set(newValue);
-    }
-
-    get sweepFlag() {
-        return this.__sweepFlag.get();
-    }
-
-    set sweepFlag(newValue) {
-        this.__sweepFlag.set(newValue);
-    }
-
-    get isArcLarge() {
-        return this.__isArcLarge.get();
-    }
-
-    set isArcLarge(newValue) {
-        this.__isArcLarge.set(newValue);
+    onChange(monitor) {
+        monitor.dirty.forEach((path) => {
+            this.updateArcSlider();
+        });
     }
 
     aboutToAppear() {
         this.updateArcSlider();
     }
 
+    updateArcSlider() {
+        this.checkParam();
+        this.setReverse();
+        this.calcBlur();
+        if (!this.isEnlarged) {
+            this.setNormal();
+        }
+        else {
+            this.setActivation();
+        }
+        this.updateModifier();
+        this.fullModifier.invalidate();
+        return this.totalWidth;
+    }
+
+    biggerThanZero(number1, number2, canEqualToZero) {
+        if ((canEqualToZero == false && number1 < 0) || (canEqualToZero == true && (number1 < 0 || number1 == 0))) {
+            return number2;
+        }
+        else {
+            return number1;
+        }
+    }
+
     checkParam() {
-        if (this.options.valueOptions.max <= this.options.valueOptions.min) {
-            this.options.valueOptions.max = MAX_DEFAULT;
-            this.options.valueOptions.min = MIN_DEFAULT;
-        }
-        if (this.options.valueOptions.value >= this.options.valueOptions.max) {
-            this.options.valueOptions.value = this.options.valueOptions.max;
-        }
-        if (this.options.valueOptions.value <= this.options.valueOptions.min) {
-            this.options.valueOptions.value = this.options.valueOptions.min;
-        }
-        if (this.options.layoutOptions.startAngle >= PI_RADIAN) {
-            this.options.layoutOptions.startAngle = PI_RADIAN;
-        }
-        if (this.options.layoutOptions.startAngle <= -PI_RADIAN) {
-            this.options.layoutOptions.startAngle = -PI_RADIAN;
-        }
-        if (this.options.layoutOptions.endAngle >= PI_RADIAN) {
-            this.options.layoutOptions.endAngle = PI_RADIAN;
-        }
-        if (this.options.layoutOptions.endAngle <= -PI_RADIAN) {
-            this.options.layoutOptions.endAngle = -PI_RADIAN;
-        }
-        if (this.options.layoutOptions.activeStartAngle >= PI_RADIAN) {
-            this.options.layoutOptions.activeStartAngle = PI_RADIAN;
-        }
-        if (this.options.layoutOptions.activeStartAngle <= -PI_RADIAN) {
-            this.options.layoutOptions.activeStartAngle = -PI_RADIAN;
-        }
-        if (this.options.layoutOptions.activeEndAngle >= PI_RADIAN) {
-            this.options.layoutOptions.activeEndAngle = PI_RADIAN;
-        }
-        if (this.options.layoutOptions.activeEndAngle <= -PI_RADIAN) {
-            this.options.layoutOptions.activeEndAngle = -PI_RADIAN;
-        }
-        this.startAngle = -this.options.layoutOptions.startAngle;
-        this.endAngle = -this.options.layoutOptions.endAngle;
+        this.options.valueOptions.max = Math.max(this.options.valueOptions.max, this.options.valueOptions.min);
+        this.options.valueOptions.min = Math.min(this.options.valueOptions.max, this.options.valueOptions.min);
+        this.options.valueOptions.value = Math.min(this.options.valueOptions.max, this.options.valueOptions.value);
+        this.options.valueOptions.value = Math.max(this.options.valueOptions.min, this.options.valueOptions.value);
+        this.options.layoutOptions.startAngle = Math.min(this.options.layoutOptions.startAngle, PI_RADIAN);
+        this.options.layoutOptions.startAngle = Math.max(this.options.layoutOptions.startAngle, -PI_RADIAN);
+        this.options.layoutOptions.endAngle = Math.min(this.options.layoutOptions.endAngle, PI_RADIAN);
+        this.options.layoutOptions.endAngle = Math.max(this.options.layoutOptions.endAngle, -PI_RADIAN);
+        this.options.layoutOptions.activeStartAngle = Math.min(this.options.layoutOptions.activeStartAngle, PI_RADIAN);
+        this.options.layoutOptions.activeStartAngle = Math.max(this.options.layoutOptions.activeStartAngle, -PI_RADIAN);
+        this.options.layoutOptions.activeEndAngle = Math.min(this.options.layoutOptions.activeEndAngle, PI_RADIAN);
+        this.options.layoutOptions.activeEndAngle = Math.max(this.options.layoutOptions.activeEndAngle, -PI_RADIAN);
+        this.normalStartAngle = -this.options.layoutOptions.startAngle;
+        this.normalEndAngle = -this.options.layoutOptions.endAngle;
         this.activeStartAngle = -this.options.layoutOptions.activeStartAngle;
         this.activeEndAngle = -this.options.layoutOptions.activeEndAngle;
-        if (this.options.layoutOptions.padding < 0) {
-            this.options.layoutOptions.padding = PADDING_DEFAULT;
-        }
-        if (this.options.layoutOptions.radius < 0) {
-            this.options.layoutOptions.radius = RADIUS_DEFAULT;
-        }
-        if (this.options.styleOptions.trackThickness <= 0) {
-            this.options.styleOptions.trackThickness = TRACK_THICKNESS_DEFAULT;
-        }
-        if (this.options.styleOptions.activeTrackThickness <= 0) {
-            this.options.styleOptions.activeTrackThickness = ACTIVE_TRACK_THICKNESS_DEFAULT;
-        }
-        if (this.options.styleOptions.trackBlur < 0) {
-            this.options.styleOptions.trackBlur = TRACK_BLUR_DEFAULT;
-        }
+        this.options.layoutOptions.padding = this.biggerThanZero(this.options.layoutOptions.padding, PADDING_DEFAULT, false);
+        this.options.layoutOptions.radius = this.biggerThanZero(this.options.layoutOptions.radius, RADIUS_DEFAULT, false);
+        this.options.styleOptions.trackBlur = this.biggerThanZero(this.options.styleOptions.trackBlur, TRACK_BLUR_DEFAULT, false);
+        this.options.styleOptions.trackThickness = this.biggerThanZero(this.options.styleOptions.trackThickness, TRACK_THICKNESS_DEFAULT, true);
+        this.options.styleOptions.activeTrackThickness = this.biggerThanZero(this.options.styleOptions.activeTrackThickness, ACTIVE_TRACK_THICKNESS_DEFAULT, true);
     }
 
     updateModifier() {
         this.fullModifier.parameters.lineWidth = this.lineWidth;
-        this.fullModifier.parameters.normalRadius = this.normalRadius;
-        this.fullModifier.parameters.start = this.start;
-        this.fullModifier.parameters.end = this.end;
-        this.fullModifier.parameters.trackStart = this.trackStart;
-        this.fullModifier.parameters.selectArc = this.selectArc;
+        this.fullModifier.parameters.radius = this.radius;
+        this.fullModifier.parameters.selectedStartAngle = this.selectedStartAngle;
+        this.fullModifier.parameters.trackEndAngle = this.trackEndAngle;
+        this.fullModifier.parameters.trackStartAngle = this.trackStartAngle;
+        this.fullModifier.parameters.selectedEndAngle = this.selectedEndAngle;
         this.fullModifier.parameters.trackColor = ColorMetrics.resourceColor(this.options.styleOptions.trackColor);
         this.fullModifier.parameters.selectedColor = ColorMetrics.resourceColor(this.options.styleOptions.selectedColor);
         this.fullModifier.parameters.reverse = this.options.layoutOptions.reverse;
@@ -715,28 +488,14 @@ export class ArcSlider extends ViewPU {
         this.fullModifier.parameters.uiContext = this.getUIContext();
     }
 
-    updateArcSlider() {
-        this.checkParam();
-        this.setReverse();
-        if (this.isEnlarged == false) {
-            this.setNormal();
-        }
-        else {
-            this.setSelected();
-        }
-        this.updateModifier();
-        this.fullModifier.invalidate();
-        return this.totalWidth;
-    }
-
     setReverse() {
         if (!this.options.layoutOptions.reverse) {
-            let startAngleInitial = this.startAngle;
-            let endAngleInitial = this.endAngle;
+            let startAngleInitial = this.normalStartAngle;
+            let endAngleInitial = this.normalEndAngle;
             let activeStartAngleInitial = this.activeStartAngle;
             let activeEndAngleInitial = this.activeEndAngle;
-            this.startAngle = endAngleInitial;
-            this.endAngle = startAngleInitial;
+            this.normalStartAngle = endAngleInitial;
+            this.normalEndAngle = startAngleInitial;
             this.activeStartAngle = activeEndAngleInitial;
             this.activeEndAngle = activeStartAngleInitial;
         }
@@ -744,156 +503,222 @@ export class ArcSlider extends ViewPU {
 
     setNormal() {
         this.lineWidth = this.options.styleOptions.trackThickness;
-        this.start = this.startAngle * ANGULAR_TO_RADIAN;
-        this.end = this.endAngle * ANGULAR_TO_RADIAN;
-        this.trackStart = this.startAngle * ANGULAR_TO_RADIAN;
-        let selectRatio = (this.options.valueOptions.value - this.options.valueOptions.min) /
+        this.selectedStartAngle = this.normalStartAngle * ANGLE_TO_RADIAN;
+        this.trackEndAngle = this.normalEndAngle * ANGLE_TO_RADIAN;
+        this.trackStartAngle = this.normalStartAngle * ANGLE_TO_RADIAN;
+        let selectedRatio = (this.options.valueOptions.value - this.options.valueOptions.min) /
             (this.options.valueOptions.max - this.options.valueOptions.min);
-        if (this.end > this.start) {
+        let deltaRadian = this.trackEndAngle - this.selectedStartAngle;
+        let selectedAngle = selectedRatio * Math.abs(deltaRadian);
+        let specialSelectedAngle = selectedRatio * (TWO_PI_RADIAN - Math.abs(deltaRadian));
+        if (this.trackEndAngle > this.selectedStartAngle) {
             if (this.options.layoutOptions.reverse) {
-                this.selectArc = this.start - selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
-                if (this.selectArc <= -Math.PI) {
-                    this.selectArc += 2 * Math.PI;
+                this.selectedEndAngle = this.selectedStartAngle - specialSelectedAngle;
+                if (this.selectedEndAngle <= -Math.PI) {
+                    this.selectedEndAngle += TWO_PI_RADIAN;
                 }
             }
             else {
-                this.selectArc = this.start + selectRatio * Math.abs(this.end - this.start);
+                this.selectedEndAngle = this.selectedStartAngle + selectedAngle;
             }
         }
         else {
             if (this.options.layoutOptions.reverse) {
-                this.selectArc = this.start - selectRatio * Math.abs(this.end - this.start);
+                this.selectedEndAngle = this.selectedStartAngle - selectedAngle;
             }
             else {
-                this.selectArc = this.start + selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
-                if (this.selectArc >= Math.PI) {
-                    this.selectArc = -2 * Math.PI + this.start + selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
+                this.selectedEndAngle = this.selectedStartAngle + specialSelectedAngle;
+                if (this.selectedEndAngle >= Math.PI) {
+                    this.selectedEndAngle = -TWO_PI_RADIAN + this.selectedStartAngle + specialSelectedAngle;
                 }
             }
         }
-        this.normalRadius = this.options.layoutOptions.radius - (this.lineWidth / 2) -
+        this.radius = this.options.layoutOptions.radius - (this.lineWidth / 2) -
         this.options.layoutOptions.padding;
-        this.calBlur();
+        this.calcBlur();
     }
 
-    setSelected() {
-        let selectRatio = (this.options.valueOptions.value - this.options.valueOptions.min) /
+    setActivation() {
+        let selectedRatio = (this.options.valueOptions.value - this.options.valueOptions.min) /
             (this.options.valueOptions.max - this.options.valueOptions.min);
-        if (this.end > this.start) {
+        let deltaRadian = this.trackEndAngle - this.selectedStartAngle;
+        let selectedAngle = selectedRatio * Math.abs(deltaRadian);
+        let specialSelectedAngle = selectedRatio * (TWO_PI_RADIAN - Math.abs(deltaRadian));
+        if (this.trackEndAngle > this.selectedStartAngle) {
             if (this.options.layoutOptions.reverse) {
-                this.selectArc = this.start - selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
-                if (this.selectArc <= -Math.PI) {
-                    this.selectArc = 2 * Math.PI + this.start - selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
+                this.selectedEndAngle = this.selectedStartAngle - specialSelectedAngle;
+                if (this.selectedEndAngle <= -Math.PI) {
+                    this.selectedEndAngle = TWO_PI_RADIAN + this.selectedStartAngle - specialSelectedAngle;
                 }
             }
             else {
-                this.selectArc = this.start + selectRatio * Math.abs(this.end - this.start);
+                this.selectedEndAngle = this.selectedStartAngle + selectedAngle;
             }
         }
         else {
             if (this.options.layoutOptions.reverse) {
-                this.selectArc = this.start - selectRatio * Math.abs(this.end - this.start);
+                this.selectedEndAngle = this.selectedStartAngle - selectedAngle;
             }
             else {
-                this.selectArc = this.start + selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
-                if (this.selectArc >= Math.PI) {
-                    this.selectArc = -2 * Math.PI + this.start + selectRatio * (2 * Math.PI - Math.abs(this.end - this.start));
+                this.selectedEndAngle = this.selectedStartAngle + specialSelectedAngle;
+                if (this.selectedEndAngle >= Math.PI) {
+                    this.selectedEndAngle = -TWO_PI_RADIAN + this.selectedStartAngle + specialSelectedAngle;
                 }
             }
         }
-        this.normalRadius = this.options.layoutOptions.radius - (this.lineWidth / 2);
-        this.calBlur();
+        this.radius = this.options.layoutOptions.radius - (this.lineWidth / 2);
+        this.calcBlur();
     }
 
-    calBlurIsReverseTrue() {
-        if (this.trackStart > this.end) {
-            if (this.trackStart - this.end > Math.PI) {
-                this.isArcLarge = true;
-                this.sweepFlag = false;
+    calcBlurIsReverseTrue() {
+        if (this.trackStartAngle > this.trackEndAngle) {
+            if (this.trackStartAngle - this.trackEndAngle > Math.PI) {
+                this.isLargeArc = true;
+                this.isReverse = false;
             }
             else {
-                this.isArcLarge = false;
-                this.sweepFlag = false;
+                this.isLargeArc = false;
+                this.isReverse = false;
             }
         }
         else {
-            if (2 * Math.PI + this.trackStart - this.end > Math.PI) {
-                this.isArcLarge = true;
-                this.sweepFlag = false;
+            if (TWO_PI_RADIAN + this.trackStartAngle - this.trackEndAngle > Math.PI) {
+                this.isLargeArc = true;
+                this.isReverse = false;
             }
             else {
-                this.isArcLarge = false;
-                this.sweepFlag = false;
+                this.isLargeArc = false;
+                this.isReverse = false;
             }
         }
     }
 
-    calBlurIsReverseFalse() {
-        if (this.trackStart > this.end) {
-            if (2 * Math.PI + this.end - this.trackStart > Math.PI) {
-                this.isArcLarge = true;
-                this.sweepFlag = true;
+    calcBlurIsReverseFalse() {
+        if (this.trackStartAngle > this.trackEndAngle) {
+            if (TWO_PI_RADIAN + this.trackEndAngle - this.trackStartAngle > Math.PI) {
+                this.isLargeArc = true;
+                this.isReverse = true;
             }
             else {
-                this.isArcLarge = false;
-                this.sweepFlag = true;
+                this.isLargeArc = false;
+                this.isReverse = true;
             }
         }
         else {
-            if (this.end - this.trackStart > Math.PI) {
-                this.isArcLarge = true;
-                this.sweepFlag = true;
+            if (this.trackEndAngle - this.trackStartAngle > Math.PI) {
+                this.isLargeArc = true;
+                this.isReverse = true;
             }
             else {
-                this.isArcLarge = false;
-                this.sweepFlag = true;
+                this.isLargeArc = false;
+                this.isReverse = true;
             }
         }
+    }
+
+    calcPathX(isRLarge) {
+        if (this.parameters.uiContext) {
+            let halfLineWidth = this.parameters.lineWidth / 2;
+            let distance = this.parameters.radius;
+            let cosAngle = 0;
+            if (isRLarge == ClipPathArc.Arc1) {
+                distance += halfLineWidth;
+                cosAngle = this.parameters.trackStartAngle;
+            }
+            else if (isRLarge == ClipPathArc.Arc2) {
+                distance += halfLineWidth;
+                cosAngle = this.parameters.trackEndAngle;
+            }
+            else if (isRLarge == ClipPathArc.Arc3) {
+                distance -= halfLineWidth;
+                cosAngle = this.parameters.trackEndAngle;
+            }
+            else if (isRLarge == ClipPathArc.Arc4) {
+                distance -= halfLineWidth;
+                cosAngle = this.parameters.trackStartAngle;
+            }
+            let pathX = this.parameters.uiContext.vp2px(this.parameters.x + distance * Math.cos(cosAngle));
+            return pathX;
+        }
+        return 0;
+    }
+
+    calcPathY(isRLarge) {
+        if (this.parameters.uiContext) {
+            let halfLineWidth = this.parameters.lineWidth / 2;
+            let distance = this.parameters.radius;
+            let sinAngle = 0;
+            if (isRLarge == ClipPathArc.Arc1) {
+                distance += halfLineWidth;
+                sinAngle = this.parameters.trackStartAngle;
+            }
+            else if (isRLarge == ClipPathArc.Arc2) {
+                distance += halfLineWidth;
+                sinAngle = this.parameters.trackEndAngle;
+            }
+            else if (isRLarge == ClipPathArc.Arc3) {
+                distance -= halfLineWidth;
+                sinAngle = this.parameters.trackEndAngle;
+            }
+            else if (isRLarge == ClipPathArc.Arc4) {
+                distance -= halfLineWidth;
+                sinAngle = this.parameters.trackStartAngle;
+            }
+            let pathY = this.parameters.uiContext.vp2px(this.parameters.y + (distance) * Math.sin(sinAngle));
+            return pathY;
+        }
+        return 0;
+    }
+
+    calcPathR(isRLarge) {
+        if (this.parameters.uiContext) {
+            let halfLineWidth = this.parameters.lineWidth / 2;
+            let pathR = this.parameters.uiContext.vp2px(halfLineWidth);
+            if (isRLarge == ClipPathArc.Arc2) {
+                pathR += this.parameters.uiContext.vp2px(this.parameters.radius);
+                return pathR;
+            }
+            else if (isRLarge == ClipPathArc.Arc4) {
+                pathR = this.parameters.uiContext.vp2px(this.parameters.radius) - pathR;
+                return pathR;
+            }
+            else {
+                return pathR;
+            }
+        }
+        return 0;
     }
 
     setClipPath() {
         if (this.parameters.uiContext) {
-            this.clipPath = 'M' + String(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius -
-                this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
-            String(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
-                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
-            String(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' ' +
-            String(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' 0' + ' 1' + ' ' +
-            String(Number(this.sweepFlag)) + ' ' + String(this.parameters.uiContext.vp2px(this.parameters.x +
-                (this.parameters.normalRadius + this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
-            String(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
-                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart))) + ' A' +
-            String(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth / 2)) + ' ' +
-            String(this.parameters.uiContext.vp2px(this.parameters.normalRadius + this.parameters.lineWidth / 2)) + ' 0 ' +
-            String(Number(this.isArcLarge)) + ' ' + String(Number(this.sweepFlag)) + ' ' +
-            String(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius +
-                this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
-            String(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius +
-                this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
-            String(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' ' +
-            String(this.parameters.uiContext.vp2px(this.parameters.lineWidth / 2)) + ' 0' + ' 1 ' +
-            String(Number(this.sweepFlag)) + ' ' + String(this.parameters.uiContext.vp2px(this.parameters.x +
-                (this.parameters.normalRadius - this.parameters.lineWidth / 2) * Math.cos(this.parameters.end))) + ' ' +
-            String(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
-                this.parameters.lineWidth / 2) * Math.sin(this.parameters.end))) + ' A' +
-            String(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth / 2)) + ' ' +
-            String(this.parameters.uiContext.vp2px(this.parameters.normalRadius - this.parameters.lineWidth / 2)) + ' 180 ' +
-            String(Number(this.isArcLarge)) + ' ' + String(Number(!this.sweepFlag)) + ' ' +
-            String(this.parameters.uiContext.vp2px(this.parameters.x + (this.parameters.normalRadius -
-                this.parameters.lineWidth / 2) * Math.cos(this.parameters.trackStart))) + ' ' +
-            String(this.parameters.uiContext.vp2px(this.parameters.y + (this.parameters.normalRadius -
-                this.parameters.lineWidth / 2) * Math.sin(this.parameters.trackStart)));
+            let sourcePoint = `M${this.calcPathX(ClipPathArc.Arc4)} ${this.calcPathY(ClipPathArc.Arc4)}`;
+            let arc1 = ` A${this.calcPathR(ClipPathArc.Arc1)} ${this.calcPathR(ClipPathArc.Arc1)} 0 1 ` +
+                `${Number(this.isReverse)} ${this.calcPathX(ClipPathArc.Arc1)} ${this.calcPathY(ClipPathArc.Arc1)}`;
+            let arc2 = ` A${this.calcPathR(ClipPathArc.Arc2)} ${this.calcPathR(ClipPathArc.Arc2)} 0 ` +
+                `${Number(this.isLargeArc)} ${Number(this.isReverse)} ${this.calcPathX(ClipPathArc.Arc2)} ` +
+                `${this.calcPathY(ClipPathArc.Arc2)}`;
+            let arc3 = ` A${this.calcPathR(ClipPathArc.Arc3)} ${this.calcPathR(ClipPathArc.Arc3)} 0 1 ` +
+                `${Number(this.isReverse)} ${this.calcPathX(ClipPathArc.Arc3)} ${this.calcPathY(ClipPathArc.Arc3)}`;
+            let arc4 = ` A${this.calcPathR(ClipPathArc.Arc4)} ${this.calcPathR(ClipPathArc.Arc4)} 0 ` +
+                `${Number(this.isLargeArc)} ${Number(!this.isReverse)} ${this.calcPathX(ClipPathArc.Arc4)} ` +
+                `${this.calcPathY(ClipPathArc.Arc4)}`;
+            this.clipPath = sourcePoint + arc1 + arc2 + arc3 + arc4;
         }
     }
 
-    calBlur() {
+    calcBlur() {
         if (this.parameters.reverse) {
-            this.calBlurIsReverseTrue();
+            this.calcBlurIsReverseTrue();
         }
         else {
-            this.calBlurIsReverseFalse();
+            this.calcBlurIsReverseFalse();
         }
         this.setClipPath();
+    }
+
+    calcAnimatorChange(start, end, fraction) {
+        let num = fraction * (end - start) + start;
+        return num;
     }
 
     startTouchAnimator() {
@@ -902,25 +727,26 @@ export class ArcSlider extends ViewPU {
             easing: 'friction',
             delay: 0,
             fill: 'forwards',
-            direction: NORMAL_STATUS,
+            direction: MinOrMaxStatus.NormalStatus,
             iterations: 1,
             begin: 0,
             end: 1
         });
-        this.touchAnimator.onFrame = (value) => {
-            this.lineWidth = value * (this.options.styleOptions.activeTrackThickness -
-            this.options.styleOptions.trackThickness) + this.options.styleOptions.trackThickness;
-            this.start = (value * (this.activeStartAngle - this.startAngle) + this.startAngle) * ANGULAR_TO_RADIAN;
-            this.trackStart = (value * (this.activeStartAngle - this.startAngle) + this.startAngle) * ANGULAR_TO_RADIAN;
-            this.end = (value * (this.activeEndAngle - this.endAngle) + this.endAngle) * ANGULAR_TO_RADIAN;
-            this.setSelected();
+        this.touchAnimator.onFrame = (fraction) => {
+            this.lineWidth = this.calcAnimatorChange(this.options.styleOptions.trackThickness, this.options.styleOptions.activeTrackThickness, fraction);
+            this.selectedStartAngle = this.calcAnimatorChange(this.normalStartAngle, this.activeStartAngle, fraction) *
+                ANGLE_TO_RADIAN;
+            this.trackStartAngle = this.selectedStartAngle;
+            this.trackEndAngle = this.calcAnimatorChange(this.normalEndAngle, this.activeEndAngle, fraction) *
+                ANGLE_TO_RADIAN;
+            this.setActivation();
             this.updateModifier();
             this.fullModifier.invalidate();
-            this.calBlur();
+            this.calcBlur();
         };
         this.touchAnimator.onFinish = () => {
             this.isTouchAnimatorFinished = true;
-            this.endCurrent = this.end;
+            this.endAngleFinish = this.trackEndAngle;
         };
         if (this.touchAnimator) {
             this.touchAnimator.play();
@@ -933,22 +759,21 @@ export class ArcSlider extends ViewPU {
             easing: 'sharp',
             delay: 0,
             fill: 'forwards',
-            direction: NORMAL_STATUS,
+            direction: MinOrMaxStatus.NormalStatus,
             iterations: 1,
             begin: 0,
             end: 1
         });
-        this.maxRestoreAnimator.onFrame = (value) => {
-            this.lineWidth = value * (this.options.styleOptions.activeTrackThickness - this.lineWidthCurrent) +
-            this.lineWidthCurrent;
-            this.selectArc = value * (this.endCurrent - this.selectArcCurrent) + this.selectArcCurrent;
-            this.end = this.selectArc;
+        this.maxRestoreAnimator.onFrame = (fraction) => {
+            this.lineWidth = this.calcAnimatorChange(this.lineWidthBegin, this.options.styleOptions.activeTrackThickness, fraction);
+            this.selectedEndAngle = this.calcAnimatorChange(this.selectedEndAngleBegin, this.endAngleFinish, fraction);
+            this.trackEndAngle = this.selectedEndAngle;
             this.updateModifier();
             this.fullModifier.invalidate();
-            this.calBlur();
+            this.calcBlur();
         };
         this.maxRestoreAnimator.onFinish = () => {
-            this.selectedMaxOrMin = 'normal';
+            this.selectedMaxOrMin = MinOrMaxStatus.NormalStatus;
         };
         if (this.maxRestoreAnimator) {
             this.maxRestoreAnimator.play();
@@ -961,22 +786,21 @@ export class ArcSlider extends ViewPU {
             easing: 'sharp',
             delay: 0,
             fill: 'forwards',
-            direction: NORMAL_STATUS,
+            direction: MinOrMaxStatus.NormalStatus,
             iterations: 1,
             begin: 0,
             end: 1
         });
-        this.minRestoreAnimator.onFrame = (value) => {
-            this.lineWidth = value * (this.options.styleOptions.activeTrackThickness - this.lineWidthCurrent) +
-            this.lineWidthCurrent;
-            this.trackStart = value * (this.activeStartAngle * ANGULAR_TO_RADIAN - this.trackStartCurrent) +
-            this.trackStartCurrent;
+        this.minRestoreAnimator.onFrame = (fraction) => {
+            this.lineWidth = this.calcAnimatorChange(this.lineWidthBegin, this.options.styleOptions.activeTrackThickness, fraction);
+            this.trackStartAngle = this.calcAnimatorChange(this.trackStartAngleBegin, this.activeStartAngle *
+                ANGLE_TO_RADIAN, fraction);
             this.updateModifier();
             this.fullModifier.invalidate();
-            this.calBlur();
+            this.calcBlur();
         };
         this.minRestoreAnimator.onFinish = () => {
-            this.selectedMaxOrMin = 'normal';
+            this.selectedMaxOrMin = MinOrMaxStatus.NormalStatus;
         };
         if (this.minRestoreAnimator) {
             this.minRestoreAnimator.play();
@@ -989,22 +813,22 @@ export class ArcSlider extends ViewPU {
             easing: 'friction',
             delay: 0,
             fill: 'forwards',
-            direction: NORMAL_STATUS,
+            direction: MinOrMaxStatus.NormalStatus,
             iterations: 1,
             begin: 0,
             end: 1
         });
-        this.restoreAnimator.onFrame = (value) => {
-            this.lineWidth = value * (this.options.styleOptions.trackThickness -
-            this.options.styleOptions.activeTrackThickness) + this.options.styleOptions.activeTrackThickness;
-            this.start = (value * (this.startAngle - this.activeStartAngle) + this.activeStartAngle) * ANGULAR_TO_RADIAN;
-            this.trackStart = (value * (this.startAngle - this.activeStartAngle) + this.activeStartAngle) *
-                ANGULAR_TO_RADIAN;
-            this.end = (value * (this.endAngle - this.activeEndAngle) + this.activeEndAngle) * ANGULAR_TO_RADIAN;
+        this.restoreAnimator.onFrame = (fraction) => {
+            this.lineWidth = this.calcAnimatorChange(this.options.styleOptions.activeTrackThickness, this.options.styleOptions.trackThickness, fraction);
+            this.selectedStartAngle = this.calcAnimatorChange(this.activeStartAngle, this.normalStartAngle, fraction) *
+                ANGLE_TO_RADIAN;
+            this.trackStartAngle = this.selectedStartAngle;
+            this.trackEndAngle = this.calcAnimatorChange(this.activeEndAngle, this.normalEndAngle, fraction) *
+                ANGLE_TO_RADIAN;
             this.setNormal();
             this.updateModifier();
             this.fullModifier.invalidate();
-            this.calBlur();
+            this.calcBlur();
         };
         if (this.restoreAnimator) {
             this.restoreAnimator.play();
@@ -1017,14 +841,14 @@ export class ArcSlider extends ViewPU {
             easing: 'interpolating-spring(0,1,400,38)',
             delay: 0,
             fill: 'forwards',
-            direction: NORMAL_STATUS,
+            direction: MinOrMaxStatus.NormalStatus,
             iterations: 1,
             begin: this.sliderValue,
             end: this.clickValue
         });
-        this.clickSelectedAnimator.onFrame = (value) => {
-            this.options.valueOptions.value = value;
-            this.setSelected();
+        this.clickSelectedAnimator.onFrame = (fraction) => {
+            this.options.valueOptions.value = fraction;
+            this.setActivation();
             this.updateModifier();
             this.fullModifier.invalidate();
         };
@@ -1037,13 +861,13 @@ export class ArcSlider extends ViewPU {
     }
 
     calcClickValue(clickX, clickY) {
-        if (clickY - this.options.layoutOptions.y > this.normalRadius) {
-            clickY = this.normalRadius + this.options.layoutOptions.y;
+        if (clickY - this.options.layoutOptions.y > this.radius) {
+            clickY = this.radius + this.options.layoutOptions.y;
         }
-        else if (this.options.layoutOptions.y - clickY > this.normalRadius) {
-            clickY = this.options.layoutOptions.y - this.normalRadius;
+        else if (this.options.layoutOptions.y - clickY > this.radius) {
+            clickY = this.options.layoutOptions.y - this.radius;
         }
-        let sin = Math.abs(clickY - this.options.layoutOptions.y) / this.normalRadius;
+        let sin = Math.abs(clickY - this.options.layoutOptions.y) / this.radius;
         let radian = Math.asin(sin);
         if ((clickX < this.options.layoutOptions.x) && (clickY > this.options.layoutOptions.y)) {
             radian = Math.PI - radian;
@@ -1054,25 +878,26 @@ export class ArcSlider extends ViewPU {
         else if ((clickX > this.options.layoutOptions.x) && (clickY < this.options.layoutOptions.y)) {
             radian = -radian;
         }
-        this.selectArc = radian;
-        if ((this.parameters.reverse) && (this.end > this.start)) {
-            if (this.selectArc < this.start) {
-                this.selectRatioNow = (this.start - this.selectArc) / (2 * Math.PI + this.start - this.end);
+        this.selectedEndAngle = radian;
+        let delta = this.selectedStartAngle - this.selectedEndAngle;
+        if ((this.parameters.reverse) && (this.trackEndAngle > this.selectedStartAngle)) {
+            if (this.selectedEndAngle < this.selectedStartAngle) {
+                this.selectRatioNow = delta / (TWO_PI_RADIAN + this.selectedStartAngle - this.trackEndAngle);
             }
             else {
-                this.selectRatioNow = (2 * Math.PI + this.start - this.selectArc) / (2 * Math.PI + this.start - this.end);
+                this.selectRatioNow = (TWO_PI_RADIAN + delta) / (TWO_PI_RADIAN + this.selectedStartAngle - this.trackEndAngle);
             }
         }
-        else if ((!this.parameters.reverse) && (this.end < this.start)) {
-            if (this.selectArc < this.start) {
-                this.selectRatioNow = (2 * Math.PI + this.selectArc - this.start) / (2 * Math.PI - this.start + this.end);
+        else if ((!this.parameters.reverse) && (this.trackEndAngle < this.selectedStartAngle)) {
+            if (this.selectedEndAngle < this.selectedStartAngle) {
+                this.selectRatioNow = (TWO_PI_RADIAN - delta) / (TWO_PI_RADIAN - this.selectedStartAngle + this.trackEndAngle);
             }
             else {
-                this.selectRatioNow = (this.selectArc - this.start) / (2 * Math.PI - this.start + this.end);
+                this.selectRatioNow = -delta / (TWO_PI_RADIAN - this.selectedStartAngle + this.trackEndAngle);
             }
         }
         else {
-            this.selectRatioNow = (this.selectArc - this.start) / (this.end - this.start);
+            this.selectRatioNow = -delta / (this.trackEndAngle - this.selectedStartAngle);
         }
         this.selectRatioNow = Math.min(1, this.selectRatioNow);
         this.selectRatioNow = Math.max(0, this.selectRatioNow);
@@ -1095,25 +920,25 @@ export class ArcSlider extends ViewPU {
 
     calcValue(moveY) {
         this.delta = this.touchY - moveY;
-        let total = 0;
+        let total;
         if (this.parameters.reverse) {
-            if (this.start > this.end) {
-                total = this.normalRadius * (this.calcSin(this.activeEndAngle * ANGULAR_TO_RADIAN) -
-                this.calcSin(this.activeStartAngle * ANGULAR_TO_RADIAN));
+            if (this.selectedStartAngle > this.trackEndAngle) {
+                total = this.radius * (this.calcSin(this.activeEndAngle * ANGLE_TO_RADIAN) -
+                this.calcSin(this.activeStartAngle * ANGLE_TO_RADIAN));
             }
             else {
-                total = this.normalRadius * (this.calcSin(this.activeStartAngle * ANGULAR_TO_RADIAN) + 4 -
-                this.calcSin(this.activeEndAngle * ANGULAR_TO_RADIAN));
+                total = this.radius * (this.calcSin(this.activeEndAngle * ANGLE_TO_RADIAN) + 4 -
+                this.calcSin(this.activeStartAngle * ANGLE_TO_RADIAN));
             }
         }
         else {
-            if (this.start > this.end) {
-                total = this.normalRadius * (this.calcSin(this.activeEndAngle * ANGULAR_TO_RADIAN) + 4 -
-                this.calcSin(this.activeStartAngle * ANGULAR_TO_RADIAN));
+            if (this.selectedStartAngle > this.trackEndAngle) {
+                total = this.radius * (this.calcSin(this.activeStartAngle * ANGLE_TO_RADIAN) + 4 -
+                this.calcSin(this.activeEndAngle * ANGLE_TO_RADIAN));
             }
             else {
-                total = this.normalRadius * (this.calcSin(this.activeStartAngle * ANGULAR_TO_RADIAN) -
-                this.calcSin(this.activeEndAngle * ANGULAR_TO_RADIAN));
+                total = this.radius * (this.calcSin(this.activeStartAngle * ANGLE_TO_RADIAN) -
+                this.calcSin(this.activeEndAngle * ANGLE_TO_RADIAN));
             }
         }
         let valueNow = (this.options.valueOptions.value - this.options.valueOptions.min) /
@@ -1123,7 +948,7 @@ export class ArcSlider extends ViewPU {
         valueNow = Math.max(0, valueNow);
         this.options.valueOptions.value = valueNow *
             (this.options.valueOptions.max - this.options.valueOptions.min) + this.options.valueOptions.min;
-        this.setSelected();
+        this.setActivation();
         this.updateModifier();
         this.fullModifier.invalidate();
         this.touchY = moveY;
@@ -1132,18 +957,18 @@ export class ArcSlider extends ViewPU {
     calcCrownTotal(activeStartAngle, activeEndAngle) {
         if (activeEndAngle > activeStartAngle) {
             if (this.options.layoutOptions.reverse) {
-                return (2 * PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle)) * ANGULAR_TO_RADIAN;
+                return (2 * PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle)) * ANGLE_TO_RADIAN;
             }
             else {
-                return Math.abs(activeEndAngle - activeStartAngle) * ANGULAR_TO_RADIAN;
+                return Math.abs(activeEndAngle - activeStartAngle) * ANGLE_TO_RADIAN;
             }
         }
         else {
             if (this.options.layoutOptions.reverse) {
-                return Math.abs(activeEndAngle - activeStartAngle) * ANGULAR_TO_RADIAN;
+                return Math.abs(activeEndAngle - activeStartAngle) * ANGLE_TO_RADIAN;
             }
             else {
-                return (2 * PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle)) * ANGULAR_TO_RADIAN;
+                return (2 * PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle)) * ANGLE_TO_RADIAN;
             }
         }
     }
@@ -1192,78 +1017,78 @@ export class ArcSlider extends ViewPU {
         else {
             this.needVibrate = true;
         }
-        this.setSelected();
+        this.setActivation();
         this.updateModifier();
         this.fullModifier.invalidate();
     }
 
     calcMaxValueDeltaIsPositive() {
         if (this.options.layoutOptions.reverse) {
-            if ((this.selectArc >= (this.endCurrent - ANGLE_OVER_MIN * ANGULAR_TO_RADIAN)) &&
+            if ((this.selectedEndAngle >= (this.endAngleFinish - ANGLE_OVER_MIN * ANGLE_TO_RADIAN)) &&
                 (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN))) {
-                this.selectArc -= (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
-                    (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
+                this.selectedEndAngle -= (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+                    (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
                 this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
-                this.end = this.selectArc;
+                this.trackEndAngle = this.selectedEndAngle;
             }
-            if ((this.selectArc / ANGULAR_TO_RADIAN) <= (this.endCurrent / ANGULAR_TO_RADIAN - ANGLE_OVER_MIN)) {
-                this.selectArc = this.endCurrent - ANGLE_OVER_MIN * ANGULAR_TO_RADIAN;
-                this.end = this.selectArc;
+            if ((this.selectedEndAngle / ANGLE_TO_RADIAN) <= (this.endAngleFinish / ANGLE_TO_RADIAN - ANGLE_OVER_MIN)) {
+                this.selectedEndAngle = this.endAngleFinish - ANGLE_OVER_MIN * ANGLE_TO_RADIAN;
+                this.trackEndAngle = this.selectedEndAngle;
             }
             if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
                 this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
             }
         }
         else {
-            if ((this.selectArc <= (this.endCurrent + ANGLE_OVER_MIN * ANGULAR_TO_RADIAN)) &&
+            if ((this.selectedEndAngle <= (this.endAngleFinish + ANGLE_OVER_MIN * ANGLE_TO_RADIAN)) &&
                 (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN))) {
-                this.selectArc += (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
-                    (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
+                this.selectedEndAngle += (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+                    (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
                 this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
-                this.end = this.selectArc;
+                this.trackEndAngle = this.selectedEndAngle;
             }
             if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
                 this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
             }
-            if (((this.selectArc / ANGULAR_TO_RADIAN) >= (this.endCurrent / ANGULAR_TO_RADIAN + ANGLE_OVER_MIN))) {
-                this.selectArc = this.endCurrent + ANGLE_OVER_MIN * ANGULAR_TO_RADIAN;
-                this.end = this.selectArc;
+            if (((this.selectedEndAngle / ANGLE_TO_RADIAN) >= (this.endAngleFinish / ANGLE_TO_RADIAN + ANGLE_OVER_MIN))) {
+                this.selectedEndAngle = this.endAngleFinish + ANGLE_OVER_MIN * ANGLE_TO_RADIAN;
+                this.trackEndAngle = this.selectedEndAngle;
             }
         }
     }
 
     calcMaxValueDeltaIsNegative() {
         if (this.options.layoutOptions.reverse) {
-            if ((this.selectArc <= this.endCurrent) ||
+            if ((this.selectedEndAngle <= this.endAngleFinish) ||
                 (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
-                this.selectArc += (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
-                    (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
+                this.selectedEndAngle += (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+                    (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
                 this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
-                this.end = this.selectArc;
+                this.trackEndAngle = this.selectedEndAngle;
             }
-            if (this.selectArc >= this.endCurrent) {
-                this.selectArc = this.endCurrent;
-                this.end = this.selectArc;
+            if (this.selectedEndAngle >= this.endAngleFinish) {
+                this.selectedEndAngle = this.endAngleFinish;
+                this.trackEndAngle = this.selectedEndAngle;
             }
             if (this.lineWidth >= this.options.styleOptions.activeTrackThickness) {
                 this.lineWidth = this.options.styleOptions.activeTrackThickness;
             }
         }
         else {
-            if (((this.selectArc >= this.endCurrent) && (this.selectArc < this.start)) ||
+            if (((this.selectedEndAngle >= this.endAngleFinish) && (this.selectedEndAngle < this.selectedStartAngle)) ||
                 (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
-                this.selectArc -= (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
-                    (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
+                this.selectedEndAngle -= (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+                    (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
                 this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
-                this.end = this.selectArc;
+                this.trackEndAngle = this.selectedEndAngle;
             }
-            if (this.selectArc <= this.endCurrent) {
-                this.selectArc = this.endCurrent;
-                this.end = this.selectArc;
+            if (this.selectedEndAngle <= this.endAngleFinish) {
+                this.selectedEndAngle = this.endAngleFinish;
+                this.trackEndAngle = this.selectedEndAngle;
             }
             if (this.lineWidth >= this.options.styleOptions.activeTrackThickness) {
                 this.lineWidth = this.options.styleOptions.activeTrackThickness;
@@ -1282,35 +1107,35 @@ export class ArcSlider extends ViewPU {
         this.updateModifier();
         this.fullModifier.invalidate();
         this.touchY = moveY;
-        this.calBlur();
+        this.calcBlur();
     }
 
     calcMinValueDeltaIsNegative() {
         if (this.options.layoutOptions.reverse) {
-            if ((this.trackStart < this.start + ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) &&
+            if ((this.trackStartAngle < this.selectedStartAngle + ANGLE_OVER_MIN * ANGLE_TO_RADIAN) &&
                 (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN))) {
-                this.trackStart += (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
-                    (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
+                this.trackStartAngle += (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+                    (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
                 this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
             }
-            if ((this.trackStart / ANGULAR_TO_RADIAN) >= this.start / ANGULAR_TO_RADIAN + ANGLE_OVER_MIN) {
-                this.trackStart = this.start + ANGLE_OVER_MIN * ANGULAR_TO_RADIAN;
+            if ((this.trackStartAngle / ANGLE_TO_RADIAN) >= this.selectedStartAngle / ANGLE_TO_RADIAN + ANGLE_OVER_MIN) {
+                this.trackStartAngle = this.selectedStartAngle + ANGLE_OVER_MIN * ANGLE_TO_RADIAN;
             }
             if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
                 this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
             }
         }
         else {
-            if ((this.trackStart > this.start - ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) &&
+            if ((this.trackStartAngle > this.selectedStartAngle - ANGLE_OVER_MIN * ANGLE_TO_RADIAN) &&
                 (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN))) {
-                this.trackStart -= (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
-                    (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
+                this.trackStartAngle -= (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+                    (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
                 this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
             }
-            if ((this.trackStart / ANGULAR_TO_RADIAN) <= this.start / ANGULAR_TO_RADIAN - ANGLE_OVER_MIN) {
-                this.trackStart = this.start - ANGLE_OVER_MIN * ANGULAR_TO_RADIAN;
+            if ((this.trackStartAngle / ANGLE_TO_RADIAN) <= this.selectedStartAngle / ANGLE_TO_RADIAN - ANGLE_OVER_MIN) {
+                this.trackStartAngle = this.selectedStartAngle - ANGLE_OVER_MIN * ANGLE_TO_RADIAN;
             }
             if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
                 this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
@@ -1320,28 +1145,30 @@ export class ArcSlider extends ViewPU {
 
     calcMinValueDeltaIsPositive() {
         if (this.options.layoutOptions.reverse) {
-            if ((this.trackStart > this.start) || (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
-                this.trackStart -= (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
-                    (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
+            if ((this.trackStartAngle > this.selectedStartAngle) ||
+                (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
+                this.trackStartAngle -= (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+                    (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
                 this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
             }
             if (this.lineWidth > this.options.styleOptions.activeTrackThickness) {
                 this.lineWidth = this.options.styleOptions.activeTrackThickness;
             }
-            if (this.trackStart < this.start) {
-                this.trackStart = this.start;
+            if (this.trackStartAngle < this.selectedStartAngle) {
+                this.trackStartAngle = this.selectedStartAngle;
             }
         }
         else {
-            if ((this.trackStart < this.start) || (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
-                this.trackStart += (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN) * Math.abs(this.delta) /
-                    (ANGLE_OVER_MIN * ANGULAR_TO_RADIAN * this.normalRadius + Math.abs(this.delta));
+            if ((this.trackStartAngle < this.selectedStartAngle) ||
+                (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
+                this.trackStartAngle += (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+                    (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
                 this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
                     (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
             }
-            if (this.trackStart > this.start) {
-                this.trackStart = this.start;
+            if (this.trackStartAngle > this.selectedStartAngle) {
+                this.trackStartAngle = this.selectedStartAngle;
             }
             if (this.lineWidth >= this.options.styleOptions.activeTrackThickness) {
                 this.lineWidth = this.options.styleOptions.activeTrackThickness;
@@ -1360,7 +1187,7 @@ export class ArcSlider extends ViewPU {
         this.updateModifier();
         this.fullModifier.invalidate();
         this.touchY = moveY;
-        this.calBlur();
+        this.calcBlur();
     }
 
     isHotRegion(touchX, touchY) {
@@ -1373,7 +1200,7 @@ export class ArcSlider extends ViewPU {
         }
         let sin = Math.abs(touchY - this.options.layoutOptions.y) / radius;
         let radian = Math.asin(sin);
-        let angle = radian / ANGULAR_TO_RADIAN;
+        let angle = radian / ANGLE_TO_RADIAN;
         if ((touchX < this.options.layoutOptions.x) && (touchY > this.options.layoutOptions.y)) {
             angle = PI_RADIAN - angle;
         }
@@ -1383,49 +1210,43 @@ export class ArcSlider extends ViewPU {
         else if ((touchX > this.options.layoutOptions.x) && (touchY < this.options.layoutOptions.y)) {
             angle = -angle;
         }
-        if (this.options.layoutOptions.reverse) {
-            if (angle > this.start / ANGULAR_TO_RADIAN || angle < this.end / ANGULAR_TO_RADIAN) {
-                if (this.start > this.end) {
-                    this.isFocus = false;
-                    return false;
-                }
-                else {
-                    this.isFocus = true;
-                    return true;
-                }
+        if (this.options.layoutOptions.reverse && this.selectedStartAngle > this.trackEndAngle) {
+            if (angle < this.selectedStartAngle / ANGLE_TO_RADIAN && angle > this.trackEndAngle / ANGLE_TO_RADIAN) {
+                this.isFocus = true;
             }
             else {
-                if (this.start > this.end) {
-                    this.isFocus = true;
-                    return true;
-                }
-                else {
-                    this.isFocus = false;
-                    return false;
-                }
+                this.isFocus = false;
+            }
+        }
+        else if (this.options.layoutOptions.reverse && this.selectedStartAngle < this.trackEndAngle) {
+            if (angle > this.selectedStartAngle / ANGLE_TO_RADIAN && angle < this.trackEndAngle / ANGLE_TO_RADIAN) {
+                this.isFocus = false;
+            }
+            else {
+                this.isFocus = true;
+            }
+        }
+        else if (!this.options.layoutOptions.reverse && this.selectedStartAngle > this.trackEndAngle) {
+            if (angle < this.selectedStartAngle / ANGLE_TO_RADIAN && angle > this.trackEndAngle / ANGLE_TO_RADIAN) {
+                this.isFocus = false;
+            }
+            else {
+                this.isFocus = true;
             }
         }
         else {
-            if (angle < this.start / ANGULAR_TO_RADIAN || angle > this.end / ANGULAR_TO_RADIAN) {
-                if (this.start > this.end) {
-                    this.isFocus = true;
-                    return true;
-                }
-                else {
-                    this.isFocus = false;
-                    return false;
-                }
+            if (angle > this.selectedStartAngle / ANGLE_TO_RADIAN && angle < this.trackEndAngle / ANGLE_TO_RADIAN) {
+                this.isFocus = true;
             }
             else {
-                if (this.start > this.end) {
-                    this.isFocus = false;
-                    return false;
-                }
-                else {
-                    this.isFocus = true;
-                    return true;
-                }
+                this.isFocus = false;
             }
+        }
+        if (this.isFocus) {
+            return true;
+        }
+        else {
+            return false;
         }
     }
 
@@ -1442,6 +1263,312 @@ export class ArcSlider extends ViewPU {
         return CROWN_CONTROL_RATIO * CROWN_SENSITIVITY_MEDIUM;
     }
 
+    onTouchEvent(event) {
+        if (event.type === TouchType.Down) {
+            this.onTouchDown(event);
+        }
+        else if (this.isEnlarged && event.type === TouchType.Up) {
+            this.options.onChange?.(this.options.valueOptions.value);
+            this.options.onTouch?.(event);
+            if (this.meter !== INVALID_TIMEOUT_ID) {
+                clearTimeout(this.meter);
+                this.meter = INVALID_TIMEOUT_ID;
+            }
+            this.meter = setTimeout(() => {
+                if (this.isEnlarged) {
+                    this.isTouchAnimatorFinished = false;
+                    this.isClickAnimatorFinished = false;
+                    this.isEnlarged = false;
+                    this.startRestoreAnimator();
+                    this.calcBlur();
+                }
+            }, RESTORE_TIMEOUT);
+            this.isMaxOrMinAnimator();
+        }
+        else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) &&
+            (event.type === TouchType.Move)) {
+            this.options.onTouch?.(event);
+            if (this.meter !== INVALID_TIMEOUT_ID) {
+                clearTimeout(this.meter);
+                this.meter = INVALID_TIMEOUT_ID;
+            }
+            this.onTouchMove(event.touches[0].y);
+        }
+    }
+
+    onTouchDown(event) {
+        if (!this.isEnlarged) {
+            this.touchY = event.touches[0].y;
+            if (this.meter !== INVALID_TIMEOUT_ID) {
+                clearTimeout(this.meter);
+                this.meter = INVALID_TIMEOUT_ID;
+            }
+            if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
+                this.options.onTouch?.(event);
+                this.isEnlarged = true;
+                this.startTouchAnimator();
+                this.calcBlur();
+            }
+        }
+        else {
+            this.touchY = event.touches[0].y;
+            if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
+                this.options.onTouch?.(event);
+                if (this.meter !== INVALID_TIMEOUT_ID) {
+                    clearTimeout(this.meter);
+                    this.meter = INVALID_TIMEOUT_ID;
+                }
+                if (this.isTouchAnimatorFinished) {
+                    this.sliderValue = this.options.valueOptions.value;
+                    this.calcClickValue(event.touches[0].x, event.touches[0].y);
+                    this.startClickAnimator();
+                }
+                if (this.isClickAnimatorFinished) {
+                    if (this.meter !== INVALID_TIMEOUT_ID) {
+                        clearTimeout(this.meter);
+                        this.meter = INVALID_TIMEOUT_ID;
+                    }
+                    this.touchY = event.touches[0].y;
+                    this.calcValue(event.touches[0].y);
+                    this.setActivation();
+                    this.updateModifier();
+                    this.fullModifier.invalidate();
+                }
+            }
+        }
+    }
+
+    isMaxOrMinAnimator() {
+        if (this.options.layoutOptions.reverse) {
+            if (this.selectedMaxOrMin === MinOrMaxStatus.MaxStatus && this.selectedEndAngle < this.endAngleFinish) {
+                if (this.selectedStartAngle > this.trackEndAngle || (this.selectedStartAngle < this.trackEndAngle &&
+                    this.selectedEndAngle > this.selectedStartAngle)) {
+                    this.lineWidthBegin = this.lineWidth;
+                    this.selectedEndAngleBegin = this.selectedEndAngle;
+                    this.startMaxRestoreAnimator();
+                }
+            }
+            if (this.selectedMaxOrMin === MinOrMaxStatus.MinStatus && this.trackStartAngle > this.selectedStartAngle) {
+                if (this.selectedStartAngle > this.trackEndAngle || (this.selectedStartAngle < this.trackEndAngle &&
+                    this.trackStartAngle < this.trackEndAngle)) {
+                    this.lineWidthBegin = this.lineWidth;
+                    this.trackStartAngleBegin = this.trackStartAngle;
+                    this.startMinRestoreAnimator();
+                    this.calcBlur();
+                }
+            }
+        }
+        else {
+            if (this.selectedMaxOrMin === MinOrMaxStatus.MaxStatus && this.selectedEndAngle > this.endAngleFinish) {
+                if ((this.selectedStartAngle > this.trackEndAngle && this.selectedEndAngle < this.selectedStartAngle) ||
+                    this.selectedStartAngle < this.trackEndAngle) {
+                    this.lineWidthBegin = this.lineWidth;
+                    this.selectedEndAngleBegin = this.selectedEndAngle;
+                    this.startMaxRestoreAnimator();
+                }
+            }
+            if (this.selectedMaxOrMin === MinOrMaxStatus.MinStatus && this.trackStartAngle < this.selectedStartAngle) {
+                if ((this.selectedStartAngle > this.trackEndAngle && this.trackStartAngle > this.trackEndAngle) ||
+                    this.selectedStartAngle < this.trackEndAngle) {
+                    this.lineWidthBegin = this.lineWidth;
+                    this.trackStartAngleBegin = this.trackStartAngle;
+                    this.startMinRestoreAnimator();
+                    this.calcBlur();
+                }
+            }
+        }
+    }
+
+    onTouchMove(touchY) {
+        if (this.options.layoutOptions.reverse) {
+            this.onTouchMoveIsReverse(touchY);
+        }
+        else {
+            this.onTouchMoveIsNotReverse(touchY);
+        }
+    }
+
+    onTouchMoveIsReverse(touchY) {
+        if (this.selectedStartAngle > this.endAngleFinish) {
+            if (((this.selectedEndAngle < this.endAngleFinish || nearEqual(this.selectedEndAngle, this.endAngleFinish)) &&
+                this.delta >= 0) || (this.selectedEndAngle < this.endAngleFinish && this.delta <= 0)) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MaxStatus;
+                this.calcMaxValue(touchY);
+            }
+            else if ((this.trackStartAngle >= this.selectedStartAngle && nearEqual(this.options.valueOptions.value, this.options.valueOptions.min) && this.delta <= 0) || (this.trackStartAngle > this.selectedStartAngle &&
+                this.delta >= 0)) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MinStatus;
+                this.calcMinValue(touchY);
+                this.calcBlur();
+            }
+            else {
+                this.calcValue(touchY);
+                this.selectedMaxOrMin = MinOrMaxStatus.NormalStatus;
+            }
+        }
+        else {
+            if ((this.selectedEndAngle > this.selectedStartAngle && this.selectedEndAngle < this.endAngleFinish &&
+                this.delta <= 0) || (this.selectedEndAngle > this.selectedStartAngle &&
+                (this.selectedEndAngle <= this.endAngleFinish || nearEqual(this.selectedEndAngle, this.endAngleFinish)) &&
+                this.delta >= 0)) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MaxStatus;
+                this.calcMaxValue(touchY);
+            }
+            else if ((this.trackStartAngle >= this.selectedStartAngle && nearEqual(this.options.valueOptions.value, this.options.valueOptions.min) && this.delta <= 0) || (this.trackStartAngle > this.selectedStartAngle &&
+                this.delta >= 0)) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MinStatus;
+                this.calcMinValue(touchY);
+                this.calcBlur();
+            }
+            else {
+                this.calcValue(touchY);
+                this.selectedMaxOrMin = MinOrMaxStatus.NormalStatus;
+            }
+        }
+    }
+
+    onTouchMoveIsNotReverse(touchY) {
+        if (this.selectedStartAngle > this.endAngleFinish) {
+            if ((this.selectedEndAngle < this.selectedStartAngle) && (this.selectedEndAngle > this.endAngleFinish) &&
+                (!nearEqual(this.selectedEndAngle, this.endAngleFinish)) && this.delta <= 0) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MaxStatus;
+                this.calcMaxValue(touchY);
+            }
+            else if (this.selectedEndAngle < this.selectedStartAngle && (this.selectedEndAngle > this.endAngleFinish ||
+            nearEqual(this.selectedEndAngle, this.endAngleFinish)) && this.delta >= 0) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MaxStatus;
+                this.calcMaxValue(touchY);
+            }
+            else if (nearEqual(this.options.valueOptions.value, this.options.valueOptions.min) && this.delta <= 0 &&
+                (this.trackStartAngle <= this.selectedStartAngle || nearEqual(this.selectedEndAngle, this.endAngleFinish))) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MinStatus;
+                this.calcMinValue(touchY);
+                this.calcBlur();
+            }
+            else if (this.trackStartAngle < this.selectedStartAngle && this.delta >= 0) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MinStatus;
+                this.calcMinValue(touchY);
+                this.calcBlur();
+            }
+            else {
+                this.calcValue(touchY);
+                this.selectedMaxOrMin = MinOrMaxStatus.NormalStatus;
+            }
+        }
+        else {
+            if ((this.selectedEndAngle >= this.endAngleFinish || nearEqual(this.selectedEndAngle, this.endAngleFinish)) &&
+                this.delta >= 0) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MaxStatus;
+                this.calcMaxValue(touchY);
+            }
+            else if (this.selectedEndAngle > this.endAngleFinish && this.delta >= 0) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MaxStatus;
+                this.calcMaxValue(touchY);
+            }
+            else if (nearEqual(this.options.valueOptions.value, this.options.valueOptions.min) && this.delta <= 0 &&
+                (this.trackStartAngle <= this.selectedStartAngle || nearEqual(this.selectedEndAngle, this.endAngleFinish))) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MinStatus;
+                this.calcMinValue(touchY);
+                this.calcBlur();
+            }
+            else if (this.trackStartAngle < this.selectedStartAngle && this.delta >= 0) {
+                this.selectedMaxOrMin = MinOrMaxStatus.MinStatus;
+                this.calcMinValue(touchY);
+                this.calcBlur();
+            }
+            else {
+                this.calcValue(touchY);
+                this.selectedMaxOrMin = MinOrMaxStatus.NormalStatus;
+            }
+        }
+    }
+
+    onDigitalCrownEvent(event) {
+        if (event && this.isFocus) {
+            this.crownEventCounter += 1;
+            if (this.crownEventCounter % CROWN_EVENT_FLAG === 0) {
+                try {
+                    let ret = vibrator.isSupportEffectSync(VIBRATOR_TYPE_TWO);
+                    if (ret) {
+                        vibrator.startVibration({
+                            type: 'preset',
+                            effectId: VIBRATOR_TYPE_TWO,
+                            count: 1,
+                        }, {
+                            usage: 'unknown'
+                        }, (error) => {
+                            if (error) {
+                                hilog.error(0x3900, 'ArcSlider', `Failed to start vibration.
+                            Code: ${error.code}, message: ${error.message}`);
+                                this.crownEventCounter = 0;
+                                return;
+                            }
+                            hilog.info(0x3900, 'ArcSlider', 'Succeed in starting vibration');
+                        });
+                    }
+                    else {
+                        hilog.error(0x3900, 'ArcSlider', `watchhaptic.crown.strength2 is not supported`);
+                    }
+                }
+                catch (error) {
+                    let e = error;
+                    hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
+                      Code: ${e.code}, message: ${e.message}`);
+                }
+                this.crownEventCounter = 0;
+            }
+        }
+        this.CrownAction(event);
+    }
+
+    CrownAction(event) {
+        if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
+            if (this.meter !== INVALID_TIMEOUT_ID) {
+                clearTimeout(this.meter);
+                this.meter = INVALID_TIMEOUT_ID;
+            }
+            this.isEnlarged = true;
+            this.startTouchAnimator();
+            this.calcBlur();
+            this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+            this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
+            this.calcCrownValue(this.crownDeltaAngle);
+        }
+        else if (event.action === CrownAction.BEGIN && this.isEnlarged) {
+            if (this.meter !== INVALID_TIMEOUT_ID) {
+                clearTimeout(this.meter);
+                this.meter = INVALID_TIMEOUT_ID;
+            }
+            this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+            this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
+            this.calcCrownValue(this.crownDeltaAngle);
+        }
+        else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) && (event.action === CrownAction.UPDATE)) {
+            if (this.meter !== INVALID_TIMEOUT_ID) {
+                clearTimeout(this.meter);
+                this.meter = INVALID_TIMEOUT_ID;
+            }
+            this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+            this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
+            this.calcCrownValue(this.crownDeltaAngle);
+        }
+        else if (this.isEnlarged && event.action === CrownAction.END) {
+            if (this.meter !== INVALID_TIMEOUT_ID) {
+                clearTimeout(this.meter);
+                this.meter = INVALID_TIMEOUT_ID;
+            }
+            this.meter = setTimeout(() => {
+                if (this.isEnlarged) {
+                    this.isTouchAnimatorFinished = false;
+                    this.isClickAnimatorFinished = false;
+                    this.isEnlarged = false;
+                    this.startRestoreAnimator();
+                    this.calcBlur();
+                }
+            }, RESTORE_TIMEOUT);
+        }
+    }
+
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
@@ -1453,7 +1580,8 @@ export class ArcSlider extends ViewPU {
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Circle.create({ width: TOTAL_LENGTH, height: TOTAL_LENGTH });
-            Circle.width(this.updateArcSlider());
+            Circle.width(this.totalWidth);
+            Circle.height(this.totalHeight);
             Circle.fill(BLUR_COLOR_DEFAULT);
             Circle.clipShape(new Path({ commands: this.clipPath }));
             Circle.backdropBlur(TRACK_BLUR_DEFAULT);
@@ -1461,324 +1589,20 @@ export class ArcSlider extends ViewPU {
         }, Circle);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithLabel();
+            Button.stateEffect(false);
             Button.backgroundColor(BLUR_COLOR_DEFAULT);
             Button.drawModifier(this.fullModifier);
-            Button.width(this.updateArcSlider());
+            Button.width(this.totalWidth);
             Button.height(this.totalHeight);
             Button.onTouch((event) => {
                 if (event) {
-                    if (event.type === TouchType.Down && !this.isEnlarged) {
-                        this.touchY = event.touches[0].y;
-                        if (this.meter !== INVALID_TIMEOUT_ID) {
-                            clearTimeout(this.meter);
-                            this.meter = INVALID_TIMEOUT_ID;
-                        }
-                        if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
-                            this.options.onTouch?.(event);
-                            this.isEnlarged = true;
-                            this.startTouchAnimator();
-                            this.calBlur();
-                        }
-                    }
-                    else if (event.type === TouchType.Down && this.isEnlarged) {
-                        this.touchY = event.touches[0].y;
-                        if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
-                            this.options.onTouch?.(event);
-                            if (this.meter !== INVALID_TIMEOUT_ID) {
-                                clearTimeout(this.meter);
-                                this.meter = INVALID_TIMEOUT_ID;
-                            }
-                            if (this.isTouchAnimatorFinished) {
-                                this.sliderValue = this.options.valueOptions.value;
-                                this.calcClickValue(event.touches[0].x, event.touches[0].y);
-                                this.startClickAnimator();
-                            }
-                            if (this.isClickAnimatorFinished) {
-                                if (this.meter !== INVALID_TIMEOUT_ID) {
-                                    clearTimeout(this.meter);
-                                    this.meter = INVALID_TIMEOUT_ID;
-                                }
-                                this.touchY = event.touches[0].y;
-                                this.calcValue(event.touches[0].y);
-                                this.setSelected();
-                                this.updateModifier();
-                                this.fullModifier.invalidate();
-                            }
-                        }
-                    }
-                    else if (this.isEnlarged && event.type === TouchType.Up) {
-                        this.options.onChange?.(this.options.valueOptions.value);
-                        this.options.onTouch?.(event);
-                        if (this.meter !== INVALID_TIMEOUT_ID) {
-                            clearTimeout(this.meter);
-                            this.meter = INVALID_TIMEOUT_ID;
-                        }
-                        this.meter = setTimeout(() => {
-                            if (this.isEnlarged) {
-                                this.isTouchAnimatorFinished = false;
-                                this.isClickAnimatorFinished = false;
-                                this.isEnlarged = false;
-                                this.startRestoreAnimator();
-                                this.calBlur();
-                            }
-                        }, RESTORE_TIMEOUT);
-                        if (this.options.layoutOptions.reverse) {
-                            if (this.selectedMaxOrMin === MAX_STATUS && (this.selectArc < this.endCurrent)) {
-                                if (this.start > this.end) {
-                                    this.lineWidthCurrent = this.lineWidth;
-                                    this.selectArcCurrent = this.selectArc;
-                                    this.startMaxRestoreAnimator();
-                                }
-                                else if ((this.start < this.end) && (this.selectArc > this.start)) {
-                                    this.lineWidthCurrent = this.lineWidth;
-                                    this.selectArcCurrent = this.selectArc;
-                                    this.startMaxRestoreAnimator();
-                                }
-                            }
-                            if (this.selectedMaxOrMin === MIN_STATUS && this.trackStart > this.start) {
-                                if (this.start > this.end) {
-                                    this.lineWidthCurrent = this.lineWidth;
-                                    this.trackStartCurrent = this.trackStart;
-                                    this.startMinRestoreAnimator();
-                                    this.calBlur();
-                                }
-                                else if (this.start < this.end && this.trackStart < this.end) {
-                                    this.lineWidthCurrent = this.lineWidth;
-                                    this.trackStartCurrent = this.trackStart;
-                                    this.startMinRestoreAnimator();
-                                }
-                            }
-                        }
-                        else {
-                            if (this.selectedMaxOrMin === MAX_STATUS && (this.selectArc > this.endCurrent)) {
-                                if (this.start > this.end && this.selectArc < this.start) {
-                                    this.lineWidthCurrent = this.lineWidth;
-                                    this.selectArcCurrent = this.selectArc;
-                                    this.startMaxRestoreAnimator();
-                                }
-                                else if (this.start < this.end) {
-                                    this.lineWidthCurrent = this.lineWidth;
-                                    this.selectArcCurrent = this.selectArc;
-                                    this.startMaxRestoreAnimator();
-                                }
-                            }
-                            if (this.selectedMaxOrMin === MIN_STATUS && this.trackStart < this.start) {
-                                if (this.start > this.end && this.trackStart > this.end) {
-                                    this.lineWidthCurrent = this.lineWidth;
-                                    this.trackStartCurrent = this.trackStart;
-                                    this.startMinRestoreAnimator();
-                                    this.calBlur();
-                                }
-                                else if (this.start < this.end) {
-                                    this.lineWidthCurrent = this.lineWidth;
-                                    this.trackStartCurrent = this.trackStart;
-                                    this.startMinRestoreAnimator();
-                                    this.calBlur();
-                                }
-                            }
-                        }
-                    }
-                    else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) &&
-                        (event.type === TouchType.Move)) {
-                        this.options.onTouch?.(event);
-                        if (this.meter !== INVALID_TIMEOUT_ID) {
-                            clearTimeout(this.meter);
-                            this.meter = INVALID_TIMEOUT_ID;
-                        }
-                        if (this.options.layoutOptions.reverse) {
-                            if (this.start > this.endCurrent) {
-                                if (((this.selectArc < this.endCurrent) || (nearEquals(this.selectArc, this.endCurrent))) &&
-                                    (this.delta >= 0)) {
-                                    this.selectedMaxOrMin = MAX_STATUS;
-                                    this.calcMaxValue(event.touches[0].y);
-                                }
-                                else if ((this.selectArc < this.endCurrent) && (this.delta <= 0)) {
-                                    this.selectedMaxOrMin = MAX_STATUS;
-                                    this.calcMaxValue(event.touches[0].y);
-                                }
-                                else if ((this.trackStart >= this.start) && (nearEquals(this.options.valueOptions.value, this.options.valueOptions.min)) && (this.delta <= 0)) {
-                                    this.selectedMaxOrMin = MIN_STATUS;
-                                    this.calcMinValue(event.touches[0].y);
-                                    this.calBlur();
-                                }
-                                else if ((this.trackStart > this.start) && (this.delta >= 0)) {
-                                    this.selectedMaxOrMin = MIN_STATUS;
-                                    this.calcMinValue(event.touches[0].y);
-                                    this.calBlur();
-                                }
-                                else {
-                                    this.calcValue(event.touches[0].y);
-                                    this.selectedMaxOrMin = NORMAL_STATUS;
-                                }
-                            }
-                            else {
-                                if ((this.selectArc > this.start) && ((this.selectArc < this.endCurrent)) && (this.delta <= 0)) {
-                                    this.selectedMaxOrMin = MAX_STATUS;
-                                    this.calcMaxValue(event.touches[0].y);
-                                }
-                                else if ((this.selectArc > this.start) && ((this.selectArc <= this.endCurrent) ||
-                                    (nearEquals(this.selectArc, this.endCurrent))) && (this.delta >= 0)) {
-                                    this.selectedMaxOrMin = MAX_STATUS;
-                                    this.calcMaxValue(event.touches[0].y);
-                                }
-                                else if ((this.trackStart > this.start) && (this.delta >= 0)) {
-                                    this.selectedMaxOrMin = MIN_STATUS;
-                                    this.calcMinValue(event.touches[0].y);
-                                    this.calBlur();
-                                }
-                                else if ((this.trackStart >= this.start) && (nearEquals(this.options.valueOptions.value, this.options.valueOptions.min)) && (this.delta <= 0)) {
-                                    this.selectedMaxOrMin = MIN_STATUS;
-                                    this.calcMinValue(event.touches[0].y);
-                                    this.calBlur();
-                                }
-                                else {
-                                    this.calcValue(event.touches[0].y);
-                                    this.selectedMaxOrMin = NORMAL_STATUS;
-                                }
-                            }
-                        }
-                        else {
-                            if (this.start > this.endCurrent) {
-                                if ((((this.selectArc < this.start) && (this.selectArc > this.endCurrent))) && (this.delta <= 0)) {
-                                    this.selectedMaxOrMin = MAX_STATUS;
-                                    this.calcMaxValue(event.touches[0].y);
-                                }
-                                else if ((this.selectArc < this.start) && ((this.selectArc > this.endCurrent) ||
-                                    (nearEquals(this.selectArc, this.endCurrent))) && (this.delta >= 0)) {
-                                    this.selectedMaxOrMin = MAX_STATUS;
-                                    this.calcMaxValue(event.touches[0].y);
-                                }
-                                else if ((nearEquals(this.options.valueOptions.value, this.options.valueOptions.min)) &&
-                                    (this.delta <= 0) && ((this.trackStart <= this.start) ||
-                                    (nearEquals(this.selectArc, this.endCurrent)))) {
-                                    this.selectedMaxOrMin = MIN_STATUS;
-                                    this.calcMinValue(event.touches[0].y);
-                                    this.calBlur();
-                                }
-                                else if ((this.trackStart < this.start) && (this.delta >= 0)) {
-                                    this.selectedMaxOrMin = MIN_STATUS;
-                                    this.calcMinValue(event.touches[0].y);
-                                    this.calBlur();
-                                }
-                                else {
-                                    this.calcValue(event.touches[0].y);
-                                    this.selectedMaxOrMin = NORMAL_STATUS;
-                                }
-                            }
-                            else {
-                                if (((this.selectArc >= this.endCurrent) || (nearEquals(this.selectArc, this.endCurrent))) &&
-                                    (this.delta >= 0)) {
-                                    this.selectedMaxOrMin = MAX_STATUS;
-                                    this.calcMaxValue(event.touches[0].y);
-                                }
-                                else if ((this.selectArc > this.endCurrent) && (this.delta >= 0)) {
-                                    this.selectedMaxOrMin = MAX_STATUS;
-                                    this.calcMaxValue(event.touches[0].y);
-                                }
-                                else if ((nearEquals(this.options.valueOptions.value, this.options.valueOptions.min)) &&
-                                    (this.delta <= 0) && ((this.trackStart <= this.start) ||
-                                    (nearEquals(this.selectArc, this.endCurrent)))) {
-                                    this.selectedMaxOrMin = MIN_STATUS;
-                                    this.calcMinValue(event.touches[0].y);
-                                    this.calBlur();
-                                }
-                                else if ((this.trackStart < this.start) && (this.delta >= 0)) {
-                                    this.selectedMaxOrMin = MIN_STATUS;
-                                    this.calcMinValue(event.touches[0].y);
-                                    this.calBlur();
-                                }
-                                else {
-                                    this.calcValue(event.touches[0].y);
-                                    this.selectedMaxOrMin = NORMAL_STATUS;
-                                }
-                            }
-                        }
-                    }
+                    this.onTouchEvent(event);
                 }
             });
             Button.focusable(true);
             Button.focusOnTouch(true);
             Button.onDigitalCrown((event) => {
-                if (event && this.isFocus) {
-                    this.crownEventCounter += 1;
-                    if (this.crownEventCounter % CROWN_EVENT_FLAG === 0) {
-                        try {
-                            let ret = vibrator.isSupportEffectSync(VIBRATOR_TYPE_TWO);
-                            if (ret) {
-                                vibrator.startVibration({
-                                    type: 'preset',
-                                    effectId: VIBRATOR_TYPE_TWO,
-                                    count: 1,
-                                }, {
-                                    usage: 'unknown'
-                                }, (error) => {
-                                    if (error) {
-                                        hilog.error(0x3900, 'ArcSlider', `Failed to start vibration.
-                            Code: ${error.code}, message: ${error.message}`);
-                                        this.crownEventCounter = 0;
-                                        return;
-                                    }
-                                    hilog.info(0x3900, 'ArcSlider', 'Succeed in starting vibration');
-                                });
-                            }
-                            else {
-                                hilog.error(0x3900, 'ArcSlider', `watchhaptic.crown.strength2 is not supported`);
-                            }
-                        }
-                        catch (error) {
-                            let e = error;
-                            hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
-                      Code: ${e.code}, message: ${e.message}`);
-                        }
-                        this.crownEventCounter = 0;
-                    }
-                    if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
-                        if (this.meter !== INVALID_TIMEOUT_ID) {
-                            clearTimeout(this.meter);
-                            this.meter = INVALID_TIMEOUT_ID;
-                        }
-                        this.isEnlarged = true;
-                        this.startTouchAnimator();
-                        this.calBlur();
-                        this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
-                        this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.normalRadius;
-                        this.calcCrownValue(this.crownDeltaAngle);
-                    }
-                    else if (event.action === CrownAction.BEGIN && this.isEnlarged) {
-                        if (this.meter !== INVALID_TIMEOUT_ID) {
-                            clearTimeout(this.meter);
-                            this.meter = INVALID_TIMEOUT_ID;
-                        }
-                        this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
-                        this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.normalRadius;
-                        this.calcCrownValue(this.crownDeltaAngle);
-                    }
-                    else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) &&
-                        (event.action === CrownAction.UPDATE)) {
-                        if (this.meter !== INVALID_TIMEOUT_ID) {
-                            clearTimeout(this.meter);
-                            this.meter = INVALID_TIMEOUT_ID;
-                        }
-                        this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
-                        this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.normalRadius;
-                        this.calcCrownValue(this.crownDeltaAngle);
-                    }
-                    else if (this.isEnlarged && event.action === CrownAction.END) {
-                        if (this.meter !== INVALID_TIMEOUT_ID) {
-                            clearTimeout(this.meter);
-                            this.meter = INVALID_TIMEOUT_ID;
-                        }
-                        this.meter = setTimeout(() => {
-                            if (this.isEnlarged) {
-                                this.isTouchAnimatorFinished = false;
-                                this.isClickAnimatorFinished = false;
-                                this.isEnlarged = false;
-                                this.startRestoreAnimator();
-                                this.calBlur();
-                            }
-                        }, RESTORE_TIMEOUT);
-                    }
-                }
+                this.onDigitalCrownEvent(event);
             });
             Button.hitTestBehavior(HitTestMode.Transparent);
         }, Button);
@@ -1787,10 +1611,59 @@ export class ArcSlider extends ViewPU {
         Column.pop();
     }
 
+    updateStateVars(params) {
+        if (params === undefined) {
+            return;
+        }
+        if ("options" in params) {
+            this.updateParam("options", params.options);
+        }
+    }
+
     rerender() {
         this.updateDirtyElements();
     }
 }
+__decorate([
+    Param
+], ArcSlider.prototype, "options", void 0);
+__decorate([
+    Local
+], ArcSlider.prototype, "lineWidth", void 0);
+__decorate([
+    Local
+], ArcSlider.prototype, "radius", void 0);
+__decorate([
+    Local
+], ArcSlider.prototype, "trackStartAngle", void 0);
+__decorate([
+    Local
+], ArcSlider.prototype, "trackEndAngle", void 0);
+__decorate([
+    Local
+], ArcSlider.prototype, "selectedStartAngle", void 0);
+__decorate([
+    Local
+], ArcSlider.prototype, "selectedEndAngle", void 0);
+__decorate([
+    Local
+], ArcSlider.prototype, "selectRatioNow", void 0);
+__decorate([
+    Local
+], ArcSlider.prototype, "isEnlarged", void 0);
+__decorate([
+    Local
+], ArcSlider.prototype, "clipPath", void 0);
+__decorate([
+    Local
+], ArcSlider.prototype, "isReverse", void 0);
+__decorate([
+    Local
+], ArcSlider.prototype, "isLargeArc", void 0);
+__decorate([
+    Monitor('trackStartAngle', 'trackEndAngle', 'selectedStartAngle', 'selectedEndAngle', 'options.valueOptions.value', 'options.valueOptions.min', 'options.valueOptions.max', 'options.layoutOptions.x', 'options.layoutOptions.y', 'options.layoutOptions.radius', 'options.layoutOptions.padding', 'options.layoutOptions.startAngle', 'options.layoutOptions.endAngle', 'options.layoutOptions.activeStartAngle', 'options.layoutOptions.activeEndAngle', 'options.layoutOptions.reverse', 'options.styleOptions.trackThickness', 'options.styleOptions.activeTrackThickness', 'options.styleOptions.trackColor', 'options.styleOptions.selectedColor', 'options.styleOptions.trackBlur', 'clipPath')
+], ArcSlider.prototype, "onChange", null);
+
 
 export default {
     ArcSlider,
