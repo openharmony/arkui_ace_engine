@@ -2521,7 +2521,7 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
             targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
         }
 
-        if (!targetComponent->GetInnerRecoJudge()) {
+        if (!targetComponent->IsInnerNodeGestureRecognizerJudgeSet()) {
             auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
             targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
         }

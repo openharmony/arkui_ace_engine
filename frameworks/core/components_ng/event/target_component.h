@@ -76,14 +76,14 @@ public:
 
     GestureRecognizerJudgeFunc GetOnGestureRecognizerJudgeBegin() const;
 
-    void SetInnerRecoJudge()
+    void SetInnerNodeGestureRecognizerJudge()
     {
-        isInnerRecoJudgeSet_ = true;
+        isInnerNodeGestureRecognizerJudgeSet_ = true;
     }
 
-    bool GetInnerRecoJudge() const
+    bool IsInnerNodeGestureRecognizerJudgeSet() const
     {
-        return isInnerRecoJudgeSet_;
+        return isInnerNodeGestureRecognizerJudgeSet_;
     }
 
 private:
@@ -96,7 +96,9 @@ private:
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc_;
     std::set<int32_t> path_;
     SourceType sourceType_ = SourceType::TOUCH;
-    bool isInnerRecoJudgeSet_ = false;
+
+    // This parameter determines whether the callback of the inner node is set.
+    bool isInnerNodeGestureRecognizerJudgeSet_ = false;
 };
 } // namespace OHOS::Ace::NG
 
