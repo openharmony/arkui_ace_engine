@@ -4134,6 +4134,7 @@ void TextFieldPattern::TwinklingByFocus()
     if (HasFocus()) {
         cursorVisible_ = true;
         StartTwinkling();
+        focusIndex_ = FocuseIndex::TEXT;
     } else {
         cursorVisible_ = false;
         StopTwinkling();
@@ -5273,6 +5274,7 @@ void TextFieldPattern::DeleteBackwardOperation(int32_t length)
     }
     AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
     StartTwinkling();
+    focusIndex_ = FocuseIndex::TEXT;
     UpdateEditingValueToRecord();
 }
 
@@ -5290,6 +5292,7 @@ void TextFieldPattern::DeleteForwardOperation(int32_t length)
     }
     AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
     StartTwinkling();
+    focusIndex_ = FocuseIndex::TEXT;
     UpdateEditingValueToRecord();
 }
 
@@ -7634,6 +7637,8 @@ void TextFieldPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         if (IsShowPasswordIcon()) {
             CHECK_NULL_VOID(responseArea_);
             GetIconPaintRect(responseArea_, paintRect);
+            float cornerRadius = paintRect.GetRect().Width() / 2;
+            paintRect.SetCornerRadius(cornerRadius);
         }
         if (IsShowUnit()) {
             CHECK_NULL_VOID(responseArea_);
@@ -7672,8 +7677,6 @@ void TextFieldPattern::PaintPasswordRect()
 {
     RoundRect focusRect;
     GetInnerFocusPaintRect(focusRect);
-    float cornerRadius = focusRect.GetRect().Width() / 2;
-    focusRect.SetCornerRadius(cornerRadius);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
