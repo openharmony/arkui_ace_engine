@@ -15,10 +15,6 @@
 
 #include "frameworks/core/common/sharedata/share_data.h"
 
-#include <functional>
-#include <set>
-#include <string>
-
 namespace OHOS::Ace {
 
 std::map<int32_t, std::shared_ptr<std::vector<uint8_t>>> ShareData::shareDataMap_;

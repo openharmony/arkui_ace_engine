@@ -14,14 +14,7 @@
  */
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 
-#include <algorithm>
-
-#include "base/i18n/localization.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
-#include "core/common/container.h"
-#include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 namespace OHOS::Ace::NG {
 

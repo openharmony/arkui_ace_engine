@@ -15,9 +15,6 @@
 
 #include "core/gestures/velocity_tracker.h"
 
-#include <algorithm>
-#include <optional>
-
 namespace OHOS::Ace {
 namespace {
 void CheckExtremePoint(const LeastSquareImpl& axis, double extremX, uint32_t valSize)

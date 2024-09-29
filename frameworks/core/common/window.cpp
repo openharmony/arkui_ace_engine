@@ -15,11 +15,7 @@
 
 #include "core/common/window.h"
 
-#include "base/log/log.h"
-#include "base/utils/macros.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
 Window::Window(std::unique_ptr<PlatformWindow> platformWindow) : platformWindow_(std::move(platformWindow))

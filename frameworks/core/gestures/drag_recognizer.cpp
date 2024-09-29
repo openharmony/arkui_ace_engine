@@ -15,11 +15,6 @@
 
 #include "core/gestures/drag_recognizer.h"
 
-#include <cmath>
-
-#include "base/log/log.h"
-#include "core/gestures/gesture_referee.h"
-
 namespace OHOS::Ace {
 namespace {
 

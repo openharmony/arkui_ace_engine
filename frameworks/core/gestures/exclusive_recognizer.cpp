@@ -15,13 +15,7 @@
 
 #include "core/gestures/exclusive_recognizer.h"
 
-#include <vector>
-
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
 #include "core/gestures/click_recognizer.h"
-#include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
 

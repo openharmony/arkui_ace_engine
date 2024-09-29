@@ -15,13 +15,6 @@
 
 #include "core/common/ime/text_input_client.h"
 
-#include <cstdint>
-#include <functional>
-#include <map>
-
-#include "base/log/log_wrapper.h"
-#include "core/event/key_event.h"
-
 namespace OHOS::Ace {
 namespace {
 using tic = TextInputClient; // give it a shorter name to maintain a good code layout

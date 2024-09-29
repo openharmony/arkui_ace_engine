@@ -16,12 +16,8 @@
 #include "core/common/font_manager.h"
 
 #include "base/i18n/localization.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/components/text/render_text.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline/base/render_node.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
 #include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_config.h"

@@ -15,11 +15,6 @@
 
 #include "core/gestures/pan_recognizer.h"
 
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
-#include "core/event/axis_event.h"
-#include "core/gestures/gesture_referee.h"
-
 namespace OHOS::Ace {
 
 namespace {

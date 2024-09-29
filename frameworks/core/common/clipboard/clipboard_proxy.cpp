@@ -15,8 +15,6 @@
 
 #include "core/common/clipboard/clipboard_proxy.h"
 
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 
 ClipboardProxy* ClipboardProxy::inst_ = nullptr;

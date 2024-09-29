@@ -15,10 +15,6 @@
 
 #include "core/event/event_convertor.h"
 
-#include <chrono>
-
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 
 void ConvertTouchEvent(const std::vector<uint8_t>& data, std::vector<TouchEvent>& events)

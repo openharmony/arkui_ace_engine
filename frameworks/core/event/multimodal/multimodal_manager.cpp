@@ -16,7 +16,6 @@
 #include "core/event/multimodal/multimodal_manager.h"
 
 #include "base/log/dump_log.h"
-#include "base/log/log.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {

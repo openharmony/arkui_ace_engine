@@ -15,13 +15,6 @@
 
 #include "core/common/resource/resource_wrapper.h"
 
-#include <memory>
-#include <string>
-
-#include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
-#include "core/components/theme/resource_adapter.h"
-
 namespace OHOS::Ace {
 ResourceWrapper::ResourceWrapper(
     RefPtr<ThemeConstants>& themeConstants, RefPtr<ResourceAdapter>& resourceAdapter, ColorMode colorMode)
