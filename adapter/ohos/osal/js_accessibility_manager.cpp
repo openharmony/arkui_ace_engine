@@ -1547,6 +1547,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
     nodeInfo.SetAccessibilityFocus(node->GetRenderContext()->GetAccessibilityFocus().value_or(false));
+    nodeInfo.SetClip(node->GetRenderContext()->GetClipEdge().value_or(false));
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
     nodeInfo.SetVisible(node->IsVisible());
     nodeInfo.SetIsActive(node->IsActive());
@@ -2022,6 +2023,19 @@ static void DumpSupportActionNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc("support action: ", actionForDump);
 }
 
+static void DumpGridInfoNG(const AccessibilityElementInfo& nodeInfo)
+{
+    DumpLog::GetInstance().AddDesc("grid info rows: ", nodeInfo.GetGrid().GetRowCount());
+    DumpLog::GetInstance().AddDesc("grid info columns: ", nodeInfo.GetGrid().GetColumnCount());
+    DumpLog::GetInstance().AddDesc("grid info select mode: ", nodeInfo.GetGrid().GetSelectionMode());
+    DumpLog::GetInstance().AddDesc("grid item info, row: ", nodeInfo.GetGridItem().GetRowIndex());
+    DumpLog::GetInstance().AddDesc("grid item info, column: ", nodeInfo.GetGridItem().GetColumnIndex());
+    DumpLog::GetInstance().AddDesc("grid item info, rowSpan: ", nodeInfo.GetGridItem().GetRowSpan());
+    DumpLog::GetInstance().AddDesc("grid item info, columnSpan: ", nodeInfo.GetGridItem().GetColumnSpan());
+    DumpLog::GetInstance().AddDesc("grid item info, is heading: ", nodeInfo.GetGridItem().IsHeading());
+    DumpLog::GetInstance().AddDesc("grid item info, selected: ", nodeInfo.GetGridItem().IsSelected());
+}
+
 inline void DumpContentListNG(const AccessibilityElementInfo& nodeInfo)
 {
     std::vector<std::string> contentList;
@@ -2153,19 +2167,10 @@ void JsAccessibilityManager::DumpAccessibilityPropertyNG(const AccessibilityElem
     DumpLog::GetInstance().AddDesc("is password: ", BoolToString(nodeInfo.IsPassword()));
     DumpLog::GetInstance().AddDesc(
         "text input type: ", ConvertInputTypeToString(static_cast<AceTextCategory>(nodeInfo.GetInputType())));
-
+    DumpGridInfoNG(nodeInfo);
     DumpLog::GetInstance().AddDesc("min value: ", nodeInfo.GetRange().GetMin());
     DumpLog::GetInstance().AddDesc("max value: ", nodeInfo.GetRange().GetMax());
     DumpLog::GetInstance().AddDesc("current value: ", nodeInfo.GetRange().GetCurrent());
-    DumpLog::GetInstance().AddDesc("grid info rows: ", nodeInfo.GetGrid().GetRowCount());
-    DumpLog::GetInstance().AddDesc("grid info columns: ", nodeInfo.GetGrid().GetColumnCount());
-    DumpLog::GetInstance().AddDesc("grid info select mode: ", nodeInfo.GetGrid().GetSelectionMode());
-    DumpLog::GetInstance().AddDesc("grid item info, row: ", nodeInfo.GetGridItem().GetRowIndex());
-    DumpLog::GetInstance().AddDesc("grid item info, column: ", nodeInfo.GetGridItem().GetColumnIndex());
-    DumpLog::GetInstance().AddDesc("grid item info, rowSpan: ", nodeInfo.GetGridItem().GetRowSpan());
-    DumpLog::GetInstance().AddDesc("grid item info, columnSpan: ", nodeInfo.GetGridItem().GetColumnSpan());
-    DumpLog::GetInstance().AddDesc("grid item info, is heading: ", nodeInfo.GetGridItem().IsHeading());
-    DumpLog::GetInstance().AddDesc("grid item info, selected: ", nodeInfo.GetGridItem().IsSelected());
     DumpLog::GetInstance().AddDesc("current index: ", nodeInfo.GetCurrentIndex());
     DumpLog::GetInstance().AddDesc("begin index: ", nodeInfo.GetBeginIndex());
     DumpLog::GetInstance().AddDesc("end index: ", nodeInfo.GetEndIndex());
@@ -2179,6 +2184,7 @@ void JsAccessibilityManager::DumpAccessibilityPropertyNG(const AccessibilityElem
     DumpLog::GetInstance().AddDesc("accessibility label: ", nodeInfo.GetLabeledAccessibilityId());
     DumpLog::GetInstance().AddDesc("isActive: ", nodeInfo.GetIsActive());
     DumpLog::GetInstance().AddDesc("accessibilityVisible: ", nodeInfo.GetAccessibilityVisible());
+    DumpLog::GetInstance().AddDesc("clip: ", nodeInfo.GetClip());
     DumpExtraElementInfoNG(nodeInfo);
     DumpLog::GetInstance().AddDesc(
         "trigger action: ", static_cast<int32_t>(ConvertAccessibilityAction(nodeInfo.GetTriggerAction())));
