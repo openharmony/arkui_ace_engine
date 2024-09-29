@@ -19,8 +19,8 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "core/components/swiper/swiper_controller.h"
 #include "core/components/tab_bar/tab_controller.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -38,19 +38,23 @@ public:
 
     void PreloadItems(const JSCallbackInfo& args);
 
+    void SetTabBarTranslate(const JSCallbackInfo& args);
+
+    void SetTabBarOpacity(const JSCallbackInfo& args);
+
     const RefPtr<TabController>& GetController() const
     {
         return controller_;
     }
 
-    void SetSwiperController(const RefPtr<SwiperController>& swiperController)
+    void SetTabsController(const RefPtr<NG::TabsControllerNG>& tabsController)
     {
-        swiperController_ = swiperController;
+        tabsController_ = tabsController;
     }
 
-    const RefPtr<SwiperController>& GetSwiperController() const
+    const RefPtr<NG::TabsControllerNG>& GetTabsController() const
     {
-        return swiperController_;
+        return tabsController_;
     }
 
     void SetInstanceId(int32_t id)
@@ -61,7 +65,7 @@ public:
 private:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     RefPtr<TabController> controller_;
-    RefPtr<SwiperController> swiperController_; // used by ng structure
+    RefPtr<NG::TabsControllerNG> tabsController_; // used by ng structure
 
     ACE_DISALLOW_COPY_AND_MOVE(JSTabsController);
 };

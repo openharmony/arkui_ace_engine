@@ -694,6 +694,14 @@ protected:
 
     virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
 
+    void FireObserverOnTouch(const TouchEventInfo& info);
+    void FireObserverOnPanActionEnd(GestureEvent& info);
+    void FireObserverOnReachStart();
+    void FireObserverOnReachEnd();
+    void FireObserverOnScrollStart();
+    void FireObserverOnScrollStop();
+    void FireObserverOnDidScroll(float finalOffset);
+
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
     float FireOnWillScroll(float offset) const;

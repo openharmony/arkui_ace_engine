@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
@@ -61,13 +62,186 @@ constexpr float NEAR_FULL_OPACITY = 0.99f;
 constexpr float NO_OPACITY = 0.0f;
 constexpr float TEXT_COLOR_THREDHOLD = 0.673f;
 constexpr int8_t HALF_OF_WIDTH = 2;
-
 constexpr float MAX_FLING_VELOCITY = 4200.0f;
+
 const auto DurationCubicCurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+const auto SHOW_TAB_BAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.4f, 0.0f, 0.2f, 1.0f);
+const auto SHOW_TAB_BAR_DURATION = 500.0f;
 const std::string TAB_BAR_PROPERTY_NAME = "tabBar";
 const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
 const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
 } // namespace
+
+TabBarPattern::TabBarPattern(const RefPtr<SwiperController>& swiperController) : swiperController_(swiperController)
+{
+    auto tabsController = AceType::DynamicCast<TabsControllerNG>(swiperController_);
+    CHECK_NULL_VOID(tabsController);
+    auto weak = WeakClaim(this);
+    tabsController->SetStartShowTabBarImpl([weak](int32_t delay) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->StartShowTabBar(delay);
+    });
+    tabsController->SetStopShowTabBarImpl([weak]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->StopShowTabBar();
+    });
+    tabsController->SetUpdateTabBarHiddenRatioImpl([weak](float ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdateTabBarHiddenRatio(ratio);
+    });
+    tabsController->SetTabBarTranslateImpl([weak](const TranslateOptions& options) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetTabBarTranslate(options);
+    });
+    tabsController->SetTabBarOpacityImpl([weak](float opacity) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetTabBarOpacity(opacity);
+    });
+}
+
+void TabBarPattern::StartShowTabBar(int32_t delay)
+{
+    if (axis_ == Axis::VERTICAL || isTabBarShowing_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    auto translate = options.y.ConvertToPx();
+    auto size = renderContext->GetPaintRectWithoutTransform().Height();
+    if (NearZero(translate) || NearZero(size)) {
+        return;
+    }
+
+    InitTabBarProperty();
+    AnimationOption option;
+    delay = LessNotEqual(std::abs(translate), size) ? 0 : delay;
+    option.SetDelay(delay);
+    auto duration = SHOW_TAB_BAR_DURATION * (std::abs(translate) / size);
+    option.SetDuration(duration);
+    option.SetCurve(SHOW_TAB_BAR_CURVE);
+
+    showTabBarProperty_->Set(translate);
+    auto propertyCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->showTabBarProperty_->Set(0.0f);
+    };
+    auto finishCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isTabBarShowing_ = false;
+    };
+    AnimationUtils::Animate(option, propertyCallback, finishCallback);
+    isTabBarShowing_ = true;
+}
+
+void TabBarPattern::InitTabBarProperty()
+{
+    if (showTabBarProperty_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto propertyCallback = [weak = WeakClaim(this)](float value) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+
+        pattern->SetTabBarTranslate(TranslateOptions(0.0f, value, 0.0f));
+        auto size = renderContext->GetPaintRectWithoutTransform().Height();
+        if (NearZero(size)) {
+            return;
+        }
+        pattern->SetTabBarOpacity(1.0f - std::abs(value) / size);
+    };
+    showTabBarProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
+    renderContext->AttachNodeAnimatableProperty(showTabBarProperty_);
+}
+
+void TabBarPattern::StopShowTabBar()
+{
+    if (axis_ == Axis::VERTICAL || !isTabBarShowing_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    AnimationOption option;
+    option.SetDuration(0);
+    option.SetCurve(Curves::LINEAR);
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    auto translate = options.y.ConvertToPx();
+    auto propertyCallback = [weak = WeakClaim(this), translate]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->showTabBarProperty_->Set(translate);
+    };
+    AnimationUtils::Animate(option, propertyCallback);
+    isTabBarShowing_ = false;
+}
+
+void TabBarPattern::UpdateTabBarHiddenRatio(float ratio)
+{
+    if (axis_ == Axis::VERTICAL || isTabBarShowing_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_VOID(tabsLayoutProperty);
+
+    auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    float translate = options.y.ConvertToPx();
+    auto size = renderContext->GetPaintRectWithoutTransform().Height();
+    auto barPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
+    if (barPosition == BarPosition::START) {
+        translate = std::clamp(translate - size * ratio, -size, 0.0f);
+    } else {
+        translate = std::clamp(translate + size * ratio, 0.0f, size);
+    }
+    renderContext->UpdateTransformTranslate(TranslateOptions(0.0f, translate, 0.0f));
+    float opacity = renderContext->GetOpacityValue(1.0f);
+    opacity = std::clamp(opacity - ratio, 0.0f, 1.0f);
+    renderContext->UpdateOpacity(opacity);
+}
+
+void TabBarPattern::SetTabBarTranslate(const TranslateOptions& options)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateTransformTranslate(options);
+}
+
+void TabBarPattern::SetTabBarOpacity(float opacity)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateOpacity(opacity);
+}
 
 void FindTextAndImageNode(
     const RefPtr<FrameNode>& columnNode, RefPtr<FrameNode>& textNode, RefPtr<FrameNode>& imageNode)
@@ -784,6 +958,7 @@ void TabBarPattern::OnModifyDone()
     };
     swiperController_->SetSurfaceChangeCallback(std::move(surfaceChangeCallback));
 
+    axis_ = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
     auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
