@@ -284,6 +284,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showCopy = hasText && pattern->AllowCopy() && pattern->IsSelected();
     menuInfo.showCut = menuInfo.showCopy;
     menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
+    menuInfo.showAIWrite = pattern->IsShowAIWrite() && pattern->IsSelected();
 }
 
 void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
@@ -364,6 +365,9 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
             return;
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
+            return;
+        case OptionMenuActionId::AI_WRITE:
+            pattern->HandleOnAIWrite();
             return;
         default:
             return;

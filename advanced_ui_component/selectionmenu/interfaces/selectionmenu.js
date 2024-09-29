@@ -112,6 +112,13 @@ const defaultTheme = {
         'bundleName': '__harDefaultBundleName__',
         'moduleName': '__harDefaultModuleName__'
     },
+    aiWriteIcon: {
+        'id': -1,
+        'type': 20000,
+        params: ['sys.media.ic_public_ai_write'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+    },
     iconPanelShadowStyle: ShadowStyle.OUTER_DEFAULT_MD,
 };
 

@@ -147,6 +147,7 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     overlayInfo.menuCallback.onCut = MakeMenuCallback(OptionMenuActionId::CUT, overlayInfo);
     overlayInfo.menuCallback.onSelectAll = MakeMenuCallback(OptionMenuActionId::SELECT_ALL, overlayInfo);
     overlayInfo.menuCallback.onCameraInput = MakeMenuCallback(OptionMenuActionId::CAMERA_INPUT, overlayInfo);
+    overlayInfo.menuCallback.onAIWrite = MakeMenuCallback(OptionMenuActionId::AI_WRITE, overlayInfo);
     overlayInfo.menuCallback.onAppear = MakeMenuCallback(OptionMenuActionId::APPEAR, overlayInfo);
     overlayInfo.menuCallback.onDisappear = MakeMenuCallback(OptionMenuActionId::DISAPPEAR, overlayInfo);
     overlayInfo.isUseOverlayNG = true;
