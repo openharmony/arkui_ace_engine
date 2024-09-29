@@ -2011,5 +2011,26 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
     context_->ChangeDarkModeBrightness();
     EXPECT_NE(context_->stageManager_, nullptr);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg095
+ * @tc.desc: Test the function FlushDirtyPropertyNodes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg095, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps2: Call the function FlushDirtyPropertyNodes.
+     * @tc.expected: The dirtyPropertyNodes_ is empty.
+     */    
+    context_->FlushDirtyPropertyNodes();
+    EXECPT_TRUE(context_->dirtyPropertyNodes_.empty());
+}
 } // namespace NG
 } // namespace OHOS::Ace
