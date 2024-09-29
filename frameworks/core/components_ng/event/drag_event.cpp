@@ -991,7 +991,10 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
     imageNode->SetActive(true);
-    imageNode->CreateLayoutTask();
+    auto context = imageNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(imageNode);
+    }
     FlushSyncGeometryNodeTasks();
 }
 
@@ -1033,7 +1036,10 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
     columnNode->SetActive(true);
-    columnNode->CreateLayoutTask();
+    auto context = columnNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(columnNode);
+    }
     FlushSyncGeometryNodeTasks();
 }
 
@@ -1171,7 +1177,10 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
     imageNode->SetActive(true);
-    imageNode->CreateLayoutTask();
+    auto context = imageNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(imageNode);
+    }
     FlushSyncGeometryNodeTasks();
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenu = focusHub == nullptr
@@ -1905,7 +1914,10 @@ void DragEventActuator::MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode)
     CHECK_NULL_VOID(gatherNode);
     gatherNode->MarkModifyDone();
     gatherNode->SetLayoutDirtyMarked(true);
-    gatherNode->CreateLayoutTask();
+    auto context = gatherNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(gatherNode);
+    }
 
     auto children = gatherNode->GetChildren();
     for (const auto& child : children) {
@@ -1914,7 +1926,9 @@ void DragEventActuator::MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode)
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkModifyDone();
         imageNode->SetLayoutDirtyMarked(true);
-        imageNode->CreateLayoutTask();
+        if (context) {
+            context->FlushUITaskWithSingleDirtyNode(imageNode);
+        }
     }
 }
 
@@ -2321,7 +2335,10 @@ RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
     textNode->MarkModifyDone();
     textNode->SetLayoutDirtyMarked(true);
     textNode->SetActive(true);
-    textNode->CreateLayoutTask();
+    auto context = textNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(textNode);
+    }
     FlushSyncGeometryNodeTasks();
     return textNode;
 }

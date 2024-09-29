@@ -3297,7 +3297,10 @@ void SwiperPattern::UpdateOffsetAfterPropertyAnimation(float offset)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetLayoutDirtyMarked(true);
-    host->CreateLayoutTask();
+    auto context = host->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(host);
+    }
 }
 
 void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)

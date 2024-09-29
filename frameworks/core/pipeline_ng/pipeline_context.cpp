@@ -1075,6 +1075,37 @@ void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
     window_->Unlock();
 }
 
+void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto layoutProperty = node->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = node->GetLayoutConstraint();
+    auto originLayoutingFlag = IsLayouting();
+    SetIsLayouting(true);
+    if (layoutProperty->GetLayoutRect()) {
+        node->SetActive(true, true);
+        node->Measure(std::nullopt);
+        node->Layout();
+    } else {
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame();
+        {
+            ACE_SCOPED_TRACE("FlushUITaskWithSingleDirtyNodeMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]"
+                             "[pageId:%d][depth:%d]",
+                node->GetTag().c_str(), node->GetId(), ancestorNodeOfFrame ? ancestorNodeOfFrame->GetId() : 0,
+                layoutConstraint.ToString().c_str(), node->GetPageId(), node->GetDepth());
+            node->Measure(layoutConstraint);
+        }
+        {
+            ACE_SCOPED_TRACE("FlushUITaskWithSingleDirtyNodeLayout[%s][self:%d][parent:%d][pageId:%d][depth:%d]",
+                node->GetTag().c_str(), node->GetId(), ancestorNodeOfFrame ? ancestorNodeOfFrame->GetId() : 0,
+                node->GetPageId(), node->GetDepth());
+            node->Layout();
+        }
+    }
+    SetIsLayouting(originLayoutingFlag);
+}
+
 void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
 {
     window_->Lock();
