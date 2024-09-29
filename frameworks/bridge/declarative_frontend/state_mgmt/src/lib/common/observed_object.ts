@@ -61,9 +61,9 @@ type Constructor = { new(...args: any[]): any };
 function Observed<T extends Constructor>(BaseClass: T): Constructor {
   stateMgmtConsole.debug(`@Observed class decorator: Overwriting constructor for '${BaseClass.name}', gets wrapped inside ObservableObject proxy.`);
 
-  // prevent use of V3 @track inside V2 @Observed class
+  // prevent use of V1 @Track inside V2 @ObservedV2 class
   if (BaseClass.prototype && Reflect.has(BaseClass.prototype, ObserveV2.SYMBOL_REFS)) {
-    const error = `'@Observed class ${BaseClass?.name}': invalid use of V3 @track decorator inside V2 @Observed class. Need to fix class definition to use @Track.`;
+    const error = `'@Observed class ${BaseClass?.name}': invalid use of V1 @Track decorator inside V2 @ObservedV2 class. Need to fix class definition to use @Track.`;
     stateMgmtConsole.error(error);
     throw new Error(error);
   }
