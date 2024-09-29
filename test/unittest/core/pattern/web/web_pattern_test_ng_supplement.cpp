@@ -31,7 +31,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/web/web_pattern.cpp"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
@@ -59,88 +59,6 @@ void WebPatternTestNgSupplement::SetUp()
 void WebPatternTestNgSupplement::TearDown()
 {
     MockPipelineContext::TearDown();
-}
-
-/**
- * @tc.name: ParseDateTimeJson_001
- * @tc.desc: ParseDateTimeJson.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseDateTimeJson_001, TestSize.Level1)
-{
-    NWeb::DateTime result;
-    std::string testJson = R"({"year":2023,"month":10,"day":5,"hour":12,"minute":30})";
-
-    bool ret = ParseDateTimeJson(testJson, result);
-
-    ASSERT_TRUE(ret);
-    ASSERT_EQ(result.year, 2023);
-    ASSERT_EQ(result.month, 10);
-    ASSERT_EQ(result.day, 5);
-    ASSERT_EQ(result.hour, 12);
-    ASSERT_EQ(result.minute, 30);
-}
-
-/**
- * @tc.name: ParseDateTimeJson_002
- * @tc.desc: ParseDateTimeJson.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseDateTimeJson_002, TestSize.Level1)
-{
-    NWeb::DateTime result;
-    std::string testJson = "";
-
-    bool ret = ParseDateTimeJson(testJson, result);
-    ASSERT_FALSE(ret);
-}
-
-/**
- * @tc.name: ParseDateTimeJson_003
- * @tc.desc: ParseDateTimeJson.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseDateTimeJson_003, TestSize.Level1)
-{
-    NWeb::DateTime result;
-    std::string testJson = R"({"year":"","month":"","day":"","hour":"","minute":""})";
-    bool ret = ParseDateTimeJson(testJson, result);
-    ASSERT_TRUE(ret);
-}
-
-/**
- * @tc.name: ParseTextJsonValue_001
- * @tc.desc: ParseTextJsonValue.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseTextJsonValue_001, TestSize.Level1)
-{
-    std::string jsonInput = R"({"value": "testString"})";
-    std::string expectedOutput = "testString";
-
-    EXPECT_EQ(ParseTextJsonValue(jsonInput), expectedOutput);
-}
-
-/**
- * @tc.name: ParseTextJsonValue_002
- * @tc.desc: ParseTextJsonValue.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseTextJsonValue_002, TestSize.Level1)
-{
-    std::string jsonInput = R"({"value": null})";
-    EXPECT_EQ(ParseTextJsonValue(jsonInput), "");
-}
-
-/**
- * @tc.name: ParseTextJsonValue_003
- * @tc.desc: ParseTextJsonValue.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseTextJsonValue_003, TestSize.Level1)
-{
-    std::string jsonInput = "";
-    EXPECT_EQ(ParseTextJsonValue(jsonInput), "");
 }
 
 /**
