@@ -834,7 +834,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         } else {
             frameNodeSize_ = SizeF(0.0f, 0.0f);
         }
-        auto rectCenter = frameNode->GetPaintRectCenter();
+        auto rectCenter = frameNode->GetPaintRectCenter(false);
         frameNodeOffset_ = OffsetF(rectCenter.GetX() - frameNodeSize_.Width() / 2.0f,
             rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
 #ifdef WEB_SUPPORTED
