@@ -269,10 +269,11 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     buttonLayoutProperty->UpdateUserDefinedIdealSize(searchButtonCalcSize);
 
     auto textWrapper = buttonWrapper->GetChildByIndex(0);
-    CHECK_NULL_VOID(textWrapper);
-    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+    if (textWrapper) {
+        auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+    }
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
         buttonLayoutProperty->ClearUserDefinedIdealSize(false, true);
     }
