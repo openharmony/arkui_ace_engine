@@ -2634,13 +2634,12 @@ bool RichEditorPattern::HandleClickSelection(const OHOS::Ace::GestureEvent& info
 bool RichEditorPattern::IsClickEventOnlyForMenuToggle(const OHOS::Ace::GestureEvent& info)
 {
     CHECK_NULL_RETURN(info.GetSourceDevice() != SourceType::MOUSE, false);
+    // In preview state or single handle showing, clicking handle has toggled the menu display
+    bool hasHandledMenuToggleByClick =
+        selectOverlay_->IsClickAtHandle(info) && (!isEditing_ || selectOverlay_->IsSingleHandleShow());
+    CHECK_NULL_RETURN(!hasHandledMenuToggleByClick, true);
     if (BetweenSelection(info.GetGlobalLocation())) {
         return HandleClickSelection(info);
-    }
-    CHECK_NULL_RETURN(selectOverlay_->IsClickAtHandle(info), false);
-    // In preview state or singleHandle showing, clicking handle only toggles the menu display
-    if (!isEditing_ || selectOverlay_->IsSingleHandleShow()) {
-        return true;
     }
     return false;
 }
