@@ -2718,11 +2718,11 @@ void PipelineContext::RegisterDumpInfoListener(const std::function<void(const st
 bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
     bool skipSubAutoFillContainer, bool needsRecordData)
 {
+    CHECK_NULL_RETURN(viewDataWrap, false);
     CHECK_NULL_RETURN(rootNode_, false);
     auto rootRect = GetRootRect();
     rootRect.SetOffset(rootNode_->GetPositionToScreenWithTransform());
     viewDataWrap->SetPageRect(rootRect);
-    CHECK_NULL_RETURN(viewDataWrap, false);
     RefPtr<FrameNode> pageNode = nullptr;
     RefPtr<FrameNode> dumpNode = nullptr;
     if (node == nullptr) {
