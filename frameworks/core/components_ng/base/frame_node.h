@@ -1090,7 +1090,7 @@ public:
     void OnForegroundColorUpdate(const Color& value);
 
     void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
-    std::string GetJSCustomProperty(const std::string& key);
+    bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
     void AddCustomProperty(const std::string& key, const std::string& value);

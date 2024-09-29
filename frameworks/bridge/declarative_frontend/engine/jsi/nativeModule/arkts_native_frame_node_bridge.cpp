@@ -1291,7 +1291,7 @@ ArkUINativeModuleValue FrameNodeBridge::GetCustomPropertyCapiByKey(ArkUIRuntimeC
     CHECK_NULL_RETURN(vm, defaultReturnValue);
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), defaultReturnValue);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), defaultReturnValue);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(!secondArg.IsNull(), defaultReturnValue);
     if (!secondArg->IsString(vm)) {
@@ -1386,12 +1386,13 @@ ArkUINativeModuleValue FrameNodeBridge::SetCustomPropertyModiferByKey(ArkUIRunti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::BooleanRef::New(vm, false));
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
         return panda::BooleanRef::New(vm, false);
     }
     auto defaultReturnValue = panda::BooleanRef::New(vm, true);
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> keyArg = runtimeCallInfo->GetCallArgRef(1); // 1 key
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::BooleanRef::New(vm, false));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, defaultReturnValue);
