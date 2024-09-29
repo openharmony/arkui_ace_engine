@@ -624,7 +624,7 @@ void SecuritySessionWrapperImpl::NotifyOriginAvoidArea(
     const Rosen::AvoidArea& avoidArea, uint32_t type) const
 {
     CHECK_NULL_VOID(session_);
-    PLATFORM_LOGD("The avoid area is notified to the provider.");
+    PLATFORM_LOGI("The avoid area is notified to the provider.");
     session_->UpdateAvoidArea(
         sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
 }
@@ -647,7 +647,7 @@ bool SecuritySessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     sptr<Rosen::OccupiedAreaChangeInfo> newInfo = new Rosen::OccupiedAreaChangeInfo(
         info->type_, info->rect_, info->safeHeight_, info->textFieldPositionY_, info->textFieldHeight_);
     newInfo->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
-    PLATFORM_LOGD("The occcupied area with 'keyboardHeight = %{public}d' is notified to the provider.",
+    PLATFORM_LOGI("The occcupied area with 'keyboardHeight = %{public}d' is notified to the provider.",
         keyboardHeight);
     session_->NotifyOccupiedAreaChangeInfo(newInfo);
     return true;
