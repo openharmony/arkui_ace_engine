@@ -337,7 +337,7 @@ HWTEST_F(TabsTestNg, TabsNodeToJsonValue001, TestSize.Level2)
     EXPECT_EQ(json->GetString("barHeight"), "56.000000");
     EXPECT_EQ(json->GetString("fadingEdge"), "true");
     EXPECT_EQ(json->GetString("barBackgroundColor"), "#00000000");
-    EXPECT_EQ(json->GetString("barBackgroundBlurStyle"), "BlurStyle.NONE");
+    EXPECT_EQ(json->GetString("barBackgroundBlurStyle"), "");
     EXPECT_EQ(json->GetString("animationMode"), "AnimationMode.CONTENT_FIRST");
     EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect::SPRING");
     EXPECT_EQ(json->GetString("barGridAlign"), "");
@@ -397,7 +397,7 @@ HWTEST_F(TabsTestNg, TabsNodeToJsonValue002, TestSize.Level2)
     EXPECT_EQ(json->GetString("barHeight"), "0.000000");
     EXPECT_EQ(json->GetString("fadingEdge"), "true");
     EXPECT_EQ(json->GetString("barBackgroundColor"), "#00000000");
-    EXPECT_EQ(json->GetString("barBackgroundBlurStyle"), "BlurStyle.NONE");
+    EXPECT_EQ(json->GetString("barBackgroundBlurStyle"), "");
     EXPECT_EQ(json->GetString("animationMode"), "AnimationMode.CONTENT_FIRST");
     EXPECT_EQ(json->GetString("edgeEffect"), "EdgeEffect::SPRING");
     EXPECT_EQ(json->GetString("barGridAlign"), "");
