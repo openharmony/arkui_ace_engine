@@ -2609,6 +2609,34 @@ void RosenRenderContext::PaintAccessibilityFocus()
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
 }
 
+void RosenRenderContext::UpdateAccessibilityRoundRect()
+{
+    CHECK_NULL_VOID(accessibilityFocusStateModifier_);
+    const constexpr double accessibilityFocusWidth = 4.0;
+    double lineWidth = accessibilityFocusWidth * PipelineBase::GetCurrentDensity();
+    Dimension paintWidth(lineWidth, DimensionUnit::PX);
+    Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
+
+    auto paintWidthPx = static_cast<float>(paintWidth.ConvertToPx());
+    auto borderPaddingPx = static_cast<float>(focusPaddingVp.ConvertToPx());
+
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    auto nodeWidth = node->GetGeometryNode()->GetFrameSize().Width();
+    auto nodeHeight = node->GetGeometryNode()->GetFrameSize().Height();
+
+    double noGreenBorderWidth = GreatOrEqual(nodeWidth - (2 * lineWidth), 0.0) ? (nodeWidth - (2 * lineWidth)) : 0;
+    double noGreenBorderHeight = GreatOrEqual(nodeHeight - (2 * lineWidth), 0.0) ? (nodeHeight - (2 * lineWidth)) : 0;
+
+    RoundRect frameRect;
+    std::shared_ptr<FocusStateModifier> modifier;
+    modifier = accessibilityFocusStateModifier_;
+    frameRect.SetRect(RectF(lineWidth - borderPaddingPx - paintWidthPx / 2,
+        lineWidth - borderPaddingPx - paintWidthPx / 2,
+        noGreenBorderWidth + 2 * borderPaddingPx + paintWidthPx,
+        noGreenBorderHeight + 2 * borderPaddingPx + paintWidthPx)); // 2: framenode to graphic specification
+    modifier->SetRoundRect(frameRect, paintWidthPx);
+}
 void RosenRenderContext::ClearAccessibilityFocus()
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3605,6 +3633,7 @@ void RosenRenderContext::PaintFocusState(
             accessibilityFocusStateModifier_ = std::make_shared<FocusStateModifier>();
         }
         modifier = accessibilityFocusStateModifier_;
+        modifier->SetRoundRect(paintRect, borderWidthPx);
         UpdateDrawRegion(DRAW_REGION_ACCESSIBILITY_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     } else {
         if (!focusStateModifier_) {
@@ -3612,11 +3641,12 @@ void RosenRenderContext::PaintFocusState(
             focusStateModifier_ = std::make_shared<FocusStateModifier>();
         }
         modifier = focusStateModifier_;
+        modifier->SetRoundRect(paintRect, borderWidthPx);
         UpdateDrawRegion(DRAW_REGION_FOCUS_MODIFIER_INDEX, modifier->GetOverlayRect());
     }
-    rsNode_->AddModifier(modifier);
-    modifier->SetRoundRect(paintRect, borderWidthPx);
     modifier->SetPaintTask(std::move(paintTask));
+    rsNode_->AddModifier(modifier);
+    modifier->AttachAnimationRectProperty();
     RequestNextFrame();
 }
 

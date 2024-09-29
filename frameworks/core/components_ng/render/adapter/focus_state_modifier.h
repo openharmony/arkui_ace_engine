@@ -120,7 +120,6 @@ public:
 
         if (!animationRect_) {
             animationRect_ = std::make_shared<Rosen::RSAnimatableProperty<RectF>>(rect.GetRect());
-            AttachProperty(animationRect_);
         } else {
             animationRect_->Set(rect.GetRect());
         }
@@ -135,6 +134,10 @@ public:
         paintTask_ = paintTask;
     }
 
+    void AttachAnimationRectProperty()
+    {
+        AttachProperty(animationRect_);
+    }
 private:
     std::shared_ptr<Rosen::RSProperty<RectF>> rect_;
     RSRoundRect roundRect_;

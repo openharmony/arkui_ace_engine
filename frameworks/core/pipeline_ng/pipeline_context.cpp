@@ -3066,7 +3066,7 @@ void PipelineContext::OnHide()
     OnVirtualKeyboardAreaChange(Rect());
     FlushWindowStateChangedCallback(false);
     AccessibilityEvent event;
-    event.type = AccessibilityEventType::PAGE_CLOSE;
+    event.type = AccessibilityEventType::PAGE_CHANGE;
     SendEventToAccessibility(event);
 }
 
@@ -3081,7 +3081,6 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
-        
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
     }
