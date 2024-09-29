@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/base/frame_node_test_ng.h"
+#include "gtest/gtest.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1678,5 +1679,24 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsPaintRectWithTransformValid054, TestSize.Le
     mockRenderContext->rect_ = RectF(0, 0, 0, 0);
     auto test4 = node->IsPaintRectWithTransformValid();
     EXPECT_TRUE(test4);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_Predict001
+ * @tc.desc: Test frame node method ResetPredictNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodePredict001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. add predictNode to main node and delete main node.
+     * @tc.expected: expect the predictNode is not layout dirty marked after main node desconstructed.
+     */
+    auto node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto predictNode = FrameNode::CreateFrameNode("predict", 1, AceType::MakeRefPtr<Pattern>(), false);
+    predictNode->SetLayoutDirtyMarked(true);
+    node->AddPredictLayoutNode(predictNode);
+    node.Reset();
+    EXPECT_FALSE(predictNode->IsLayoutDirtyMarked());
 }
 } // namespace OHOS::Ace::NG
