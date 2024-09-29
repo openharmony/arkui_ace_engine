@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_TABS_H
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 
