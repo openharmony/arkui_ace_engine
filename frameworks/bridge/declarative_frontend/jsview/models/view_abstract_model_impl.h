@@ -288,8 +288,8 @@ public:
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
-    void SetAccessibilitySelected(bool selected) override;
-    void SetAccessibilityChecked(bool checked) override;
+    void SetAccessibilitySelected(bool selected, bool resetValue) override;
+    void SetAccessibilityChecked(bool checked, bool resetValue) override;
 
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}

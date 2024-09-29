@@ -7607,14 +7607,36 @@ void JSViewAbstract::JsAccessibilityVirtualNode(const JSCallbackInfo& info)
     }
 }
 
-void JSViewAbstract::JsAccessibilitySelected(bool selected)
+void JSViewAbstract::JsAccessibilitySelected(const JSCallbackInfo& info)
 {
-    ViewAbstractModel::GetInstance()->SetAccessibilitySelected(selected);
+    bool selected = false;
+    bool resetValue = false;
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined()) {
+        resetValue = true;
+    } else if (arg->IsBoolean()) {
+        selected = arg->ToBoolean();
+    } else {
+        return;
+    }
+
+    ViewAbstractModel::GetInstance()->SetAccessibilitySelected(selected, resetValue);
 }
 
-void JSViewAbstract::JsAccessibilityChecked(bool checked)
+void JSViewAbstract::JsAccessibilityChecked(const JSCallbackInfo& info)
 {
-    ViewAbstractModel::GetInstance()->SetAccessibilityChecked(checked);
+    bool checked = false;
+    bool resetValue = false;
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined()) {
+        resetValue = true;
+    } else if (arg->IsBoolean()) {
+        checked = arg->ToBoolean();
+    } else {
+        return;
+    }
+
+    ViewAbstractModel::GetInstance()->SetAccessibilityChecked(checked, resetValue);
 }
 
 void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
