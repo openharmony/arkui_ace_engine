@@ -379,7 +379,7 @@ public:
     }
     void InitOnKeyEvent();
 
-    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode = true)
+    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode)
     {
         isComponentSnapshotNode_ = isComponentSnapshotNode;
     }
