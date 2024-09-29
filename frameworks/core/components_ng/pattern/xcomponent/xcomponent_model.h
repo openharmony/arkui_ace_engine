@@ -81,11 +81,6 @@ public:
     virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}
     virtual void SetRenderFit(RenderFit renderFit) {}
     virtual void EnableSecure(bool isSecure) {}
-
-private:
-    static std::unique_ptr<XComponentModel> instance_;
-    static std::mutex mutex_;
 };
-
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_H
