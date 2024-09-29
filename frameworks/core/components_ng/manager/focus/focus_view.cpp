@@ -22,7 +22,8 @@ namespace OHOS::Ace::NG {
 void FocusView::FocusViewShow(bool isTriggerByStep)
 {
     if (GetFrameName() == V2::NAVBAR_ETS_TAG ||
-        GetFrameName() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        GetFrameName() == V2::NAVDESTINATION_VIEW_ETS_TAG ||
+        GetFrameName() == V2::MENU_ETS_TAG) {
         if (!GetFocusViewFocusable()) {
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d is not focusable, cannot be shown",
                 GetFrameName().c_str(), GetFrameId());
