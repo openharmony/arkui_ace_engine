@@ -1089,11 +1089,6 @@ export struct ChipComponent {
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
     .padding(0)
-    .focusBox({
-      margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
-      strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
-      strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
-    })
     .onFocus(() => {
       this.chipNodeOnFocus = true
     })
