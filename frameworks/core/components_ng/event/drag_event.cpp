@@ -242,6 +242,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetPrepareDragFrameNode(nullptr);
+    dragDropManager->SetIsDragNodeNeedClean(false);
     if (!IsGlobalStatusSuitableForDragging() || !IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict)) {
         return;
     }
@@ -269,9 +270,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
             return;
         }
-        if (dragDropManager->IsBackPressedCleanLongPressNodes()) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "Long press image nodes have been cleaned by backpress, stop dragging.");
-            dragDropManager->SetIsBackPressedCleanLongPressNodes(false);
+        if (dragDropManager->IsDragNodeNeedClean()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag node have been cleaned by backpress or click event, stop dragging.");
             return;
         }
         dragDropManager->SetHasGatherNode(false);
@@ -380,7 +380,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (dragDropManager->IsAboutToPreview()) {
             dragDropManager->ResetDragging();
         }
-        dragDropManager->SetIsBackPressedCleanLongPressNodes(false);
+        dragDropManager->SetIsDragNodeNeedClean(false);
         auto actuator = weak.Upgrade();
         if (!actuator) {
             auto overlayManager = pipelineContext->GetOverlayManager();
@@ -507,7 +507,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         } else {
             manager->RemoveGatherNodeWithAnimation();
         }
-        dragDropManager->SetIsBackPressedCleanLongPressNodes(false);
     };
     panRecognizer_->SetOnReject(panOnReject);
     panRecognizer_->SetIsForDrag(true);
@@ -572,7 +571,12 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
-        if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
+        if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging() ||
+            dragDropManager->IsDragNodeNeedClean()) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "No need to show drag preview, is about to preview: %{public}d,"
+                "is dragging: %{public}d, is need clean drag node: %{public}d",
+                dragDropManager->IsAboutToPreview(), dragDropManager->IsDragging(),
+                dragDropManager->IsDragNodeNeedClean());
             return;
         }
         auto actuator = weak.Upgrade();
@@ -1447,6 +1451,12 @@ void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
             actuator->HidePixelMap();
             actuator->HideFilter();
         }
+
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->SetIsDragNodeNeedClean(true);
     };
     auto columnGestureHub = columnNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(columnGestureHub);
