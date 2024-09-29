@@ -379,7 +379,7 @@ void WindowPattern::CreateASStartingWindow()
 void WindowPattern::UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
     Color &color, ImageSourceInfo &sourceInfo)
 {
-    if (sessionInfo.startWindowOption == nullptr && !sessionInfo.startWindowOption->hasStartWindow) {
+    if (sessionInfo.startWindowOption == nullptr || !sessionInfo.startWindowOption->hasStartWindow) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Get starting window info from session info");
