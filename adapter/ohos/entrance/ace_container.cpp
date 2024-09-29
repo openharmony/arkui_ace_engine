@@ -1310,6 +1310,7 @@ public:
         if (isNative_ || !config.targetSize.has_value() || !config.placement.has_value()) {
             return;
         }
+        AbilityRuntime::AutoFill::PopupOffset offset;
         offset.deltaX = GetPopupConfigWillUpdateX(config);
         offset.deltaY = GetPopupConfigWillUpdateY(config);
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
@@ -1343,11 +1344,10 @@ private:
                 placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
                 placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT;
 
-        if ((windowRect_.height_ - rectf.Height() - trans.GetY()) > 
+        if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
             (size.height + POPUP_EDGE_INTERVAL + bottomAvoidHeight)) {
             // popup will display at the bottom of the container
-            if (isBottom)
-            {
+            if (isBottom) {
                 deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY();
             } else {
                 deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - POPUP_EDGE_INTERVAL;
@@ -1402,14 +1402,14 @@ private:
     uint32_t GetBottomAvoidHeight()
     {
         auto containerId = Container::CurrentId();
-        RefPtr<PipelineContext> pipelineContext;
+        RefPtr<NG::PipelineContext> pipelineContext;
         if (containerId >= MIN_SUBCONTAINER_ID) {
             auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
             auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
             CHECK_NULL_RETURN(parentContainer, 0);
-            pipelineContext = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+            pipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
         } else {
-            pipelineContext = PipelineContext::GetCurrentContext();
+            pipelineContext = NG::PipelineContext::GetCurrentContext();
         }
         CHECK_NULL_RETURN(pipelineContext, 0);
         auto safeAreaManager = pipelineContext->GetSafeAreaManager();
