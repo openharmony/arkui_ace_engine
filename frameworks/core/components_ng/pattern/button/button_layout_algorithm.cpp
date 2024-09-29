@@ -23,7 +23,7 @@ namespace {
 void checkNegativeBorderRadius(std::optional<Dimension>& radius, const float defaultBorderRadius)
 {
     // Change the borderRadius size of a negative number to the default.
-    if ((radius.has_value()) && LessNotEqual(radius.value().ConvertToPx(), 0.0)) {
+    if (!radius.has_value() || LessNotEqual(radius.value().ConvertToPx(), 0.0)) {
         radius = Dimension(defaultBorderRadius);
     }
 }
