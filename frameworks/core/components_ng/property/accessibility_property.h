@@ -45,7 +45,7 @@ using ActionSelectImpl = ActionNoParam;
 using ActionClearSelectionImpl = ActionNoParam;
 using ActionMoveTextImpl = std::function<void(int32_t moveUnit, bool forward)>;
 using ActionSetCursorIndexImpl = std::function<void(int32_t index)>;
-using ActionExecSubComponentImpl = std::function<void(int32_t spanId)>;
+using ActionExecSubComponentImpl = std::function<bool(int32_t spanId)>;
 using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
@@ -283,8 +283,7 @@ public:
     bool ActActionExecSubComponent(int32_t spanId)
     {
         if (actionExecSubComponentImpl_) {
-            actionExecSubComponentImpl_(spanId);
-            return true;
+            return actionExecSubComponentImpl_(spanId);
         }
         return false;
     }
