@@ -24,7 +24,7 @@
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/event/touch_event.h"
-#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace {
 constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
