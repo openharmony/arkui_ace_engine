@@ -139,6 +139,7 @@ HWTEST_F(TextFieldResponseAreaTest, TextFieldResponseArea001, TestSize.Level1)
         model.SetPasswordIcon(myIcon);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
     auto passwordArea = AceType::MakeRefPtr<PasswordResponseArea>(pattern_, false);
     passwordArea->InitResponseArea();
@@ -168,6 +169,7 @@ HWTEST_F(TextFieldResponseAreaTest, TextFieldResponseArea002, TestSize.Level1)
         model.SetPasswordIcon(myIcon);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
     RefPtr<TextInputResponseArea> responseArea = AceType::MakeRefPtr<CleanNodeResponseArea>(pattern_);
     auto convertedArea = AceType::DynamicCast<CleanNodeResponseArea>(responseArea);

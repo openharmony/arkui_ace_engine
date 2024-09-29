@@ -707,6 +707,7 @@ void SetTextInputCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const str
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetCleanNodeStyle(frameNode, static_cast<CleanNodeStyle>(style));
     TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, false);
     // set icon size
     CalcDimension iconSize = CalcDimension(size->value, static_cast<DimensionUnit>(size->unit));
     if (LessNotEqual(iconSize.Value(), 0.0)) {
@@ -730,6 +731,7 @@ void resetTextInputCancelButton(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetCleanNodeStyle(frameNode, CleanNodeStyle::INPUT);
     TextFieldModelNG::SetIsShowCancelButton(frameNode, false);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
 }
 
 ArkUI_CharPtr GetTextInputPlaceholder(ArkUINodeHandle node)
