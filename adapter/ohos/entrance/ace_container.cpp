@@ -1367,7 +1367,7 @@ private:
     double GetPopupConfigWillUpdateX(AbilityRuntime::AutoFill::AutoFillCustomConfig& config)
     {
         auto node = node_.Upgrade();
-        CHECK_NULL_RETURN(node);
+        CHECK_NULL_RETURN(node, 0);
         auto rectf = node->GetRectWithRender();
         double deltaX = 0;
         AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
