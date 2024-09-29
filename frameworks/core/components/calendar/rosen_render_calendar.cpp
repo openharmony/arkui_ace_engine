@@ -15,7 +15,6 @@
 
 #include "core/components/calendar/rosen_render_calendar.h"
 
-#include "render_service_client/core/ui/rs_node.h"
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_style.h"
@@ -25,10 +24,6 @@
 #endif
 
 #include "base/i18n/localization.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
-#include "core/common/ace_application_info.h"
-#include "core/components/common/properties/text_style.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
 

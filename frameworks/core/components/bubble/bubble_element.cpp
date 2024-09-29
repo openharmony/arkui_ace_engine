@@ -15,7 +15,6 @@
 
 #include "core/components/bubble/bubble_element.h"
 
-#include "core/components/bubble/bubble_component.h"
 #include "core/components/bubble/render_bubble.h"
 
 namespace OHOS::Ace {

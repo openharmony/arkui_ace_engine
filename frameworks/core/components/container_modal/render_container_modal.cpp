@@ -15,15 +15,8 @@
 
 #include "core/components/container_modal/render_container_modal.h"
 
-#include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/container_modal/container_modal_component.h"
-#include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/image/image_component.h"
-#include "core/components/text/text_component.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 

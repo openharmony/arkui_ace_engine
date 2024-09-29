@@ -16,7 +16,6 @@
 #include "core/components/declaration/swiper/swiper_declaration.h"
 
 #include "core/components/declaration/common/declaration_constants.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace {

@@ -16,15 +16,6 @@
 #include "core/components/button/render_button.h"
 
 #include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "core/accessibility/accessibility_node.h"
-#include "core/animation/keyframe_animation.h"
-#include "core/common/frontend.h"
-#include "core/components/button/button_theme.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 namespace {

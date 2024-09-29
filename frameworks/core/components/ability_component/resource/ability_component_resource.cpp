@@ -15,10 +15,6 @@
 
 #include "core/components/ability_component/resource/ability_component_resource.h"
 
-#include <sstream>
-
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 
 const char ABILITY_COMPONENT_PARAM_AND[] = "#HWJS-&-#";
