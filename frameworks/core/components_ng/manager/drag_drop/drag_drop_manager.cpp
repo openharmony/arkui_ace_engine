@@ -100,7 +100,10 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowItemDragOverlay(
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
     imageNode->SetActive(true);
-    imageNode->CreateLayoutTask();
+    auto context = imageNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(imageNode);
+    }
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_RETURN(imageContext, nullptr);
     imageContext->UpdatePosition(

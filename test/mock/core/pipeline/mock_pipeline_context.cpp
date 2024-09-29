@@ -1039,5 +1039,21 @@ bool NG::PipelineContext::CheckThreadSafe()
 {
     return false;
 }
+void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto layoutProperty = node->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = node->GetLayoutConstraint();
+    if (layoutProperty->GetLayoutRect()) {
+        node->SetActive(true, true);
+        node->Measure(std::nullopt);
+        node->Layout();
+    } else {
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame();
+        node->Measure(layoutConstraint);
+        node->Layout();
+    }
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
