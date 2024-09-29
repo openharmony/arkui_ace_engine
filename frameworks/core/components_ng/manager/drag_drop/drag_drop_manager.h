@@ -518,6 +518,8 @@ private:
     bool ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point);
     bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
     bool IsUIExtensionComponent(const RefPtr<NG::UINode>& node);
+    void HandleUIExtensionDragEvent(
+        const RefPtr<FrameNode>& frameNode, const PointerEvent& pointerEvent, DragEventType type);
     int32_t GetWindowId();
     void AddItemDrag(const RefPtr<FrameNode>& frameNode, const RefPtr<EventHub>& eventHub);
     void RemoveItemDrag();
