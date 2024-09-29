@@ -698,6 +698,15 @@ void RichEditorPattern::SetImagePreviewMenuParam(std::function<void()>& builder,
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetImagePreviewMenuParam");
     oneStepDragParam_ = std::make_shared<OneStepDragParam>(builder, menuParam);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& uiNode : host->GetChildren()) {
+        auto imageNode = DynamicCast<ImageSpanNode>(uiNode);
+        CHECK_NULL_CONTINUE(imageNode);
+        EnableOneStepDrag(imageNode);
+        UpdateImagePreviewParam(imageNode);
+    }
 }
 
 void RichEditorPattern::EnableImageDrag(const RefPtr<ImageSpanNode>& imageNode, bool isEnable)
@@ -804,21 +813,23 @@ void RichEditorPattern::UpdateImagePreviewParam()
         auto weakImageNode = dirtyImageNodes.front();
         dirtyImageNodes.pop();
         auto imageNode = weakImageNode.Upgrade();
-        if (!imageNode) {
-            continue;
-        }
-
-#ifndef ACE_UNITTEST
-        auto& menuBuilder = oneStepDragParam_->menuBuilder;
-        auto& previewBuilder = oneStepDragParam_->previewBuilder;
-        auto resType = ResponseType::LONG_PRESS;
-        auto menuParam = oneStepDragParam_->GetMenuParam(imageNode);
-        ViewStackProcessor::GetInstance()->Push(imageNode);
-        ViewAbstractModel::GetInstance()->BindContextMenu(resType, menuBuilder, menuParam, previewBuilder);
-        ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
-        ViewStackProcessor::GetInstance()->Finish();
-#endif
+        UpdateImagePreviewParam(imageNode);
     }
+}
+
+void RichEditorPattern::UpdateImagePreviewParam(const RefPtr<ImageSpanNode>& imageNode)
+{
+#ifndef ACE_UNITTEST
+    CHECK_NULL_VOID(imageNode && oneStepDragParam_);
+    auto& menuBuilder = oneStepDragParam_->menuBuilder;
+    auto& previewBuilder = oneStepDragParam_->previewBuilder;
+    auto resType = ResponseType::LONG_PRESS;
+    auto menuParam = oneStepDragParam_->GetMenuParam(imageNode);
+    ViewStackProcessor::GetInstance()->Push(imageNode);
+    ViewAbstractModel::GetInstance()->BindContextMenu(resType, menuBuilder, menuParam, previewBuilder);
+    ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
+    ViewStackProcessor::GetInstance()->Finish();
+#endif
 }
 
 void RichEditorPattern::CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub)
