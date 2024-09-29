@@ -100,6 +100,7 @@ constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
 const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
@@ -2897,6 +2898,18 @@ bool AceContainer::IsSystemWindow() const
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
         uiWindow_->GetType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+uint32_t AceContainer::GetParentWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetParentWindowType());
+}
+
+uint32_t AceContainer::GetWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetType());
 }
 
 bool AceContainer::IsHostMainWindow() const
