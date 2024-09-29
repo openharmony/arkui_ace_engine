@@ -591,6 +591,8 @@ public:
 
     static std::string GetWebDebugRenderMode();
 
+    static std::string GetDebugInspectorId();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
