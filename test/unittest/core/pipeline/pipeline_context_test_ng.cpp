@@ -2030,7 +2030,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg101, TestSize.Level1)
      * @tc.expected: The dirtyPropertyNodes_ is empty.
      */    
     context_->FlushDirtyPropertyNodes();
-    EXECPT_TRUE(context_->dirtyPropertyNodes_.empty());
+    EXPECT_TRUE(context_->dirtyPropertyNodes_.empty());
 }
 } // namespace NG
 } // namespace OHOS::Ace
