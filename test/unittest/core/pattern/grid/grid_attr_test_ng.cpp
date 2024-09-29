@@ -1155,4 +1155,37 @@ HWTEST_F(GridAttrTestNg, GridItemDisableEventTest002, TestSize.Level1)
     gridItemPattern->InitDisableStyle();
     EXPECT_EQ(mockRenderContext->opacityMultiplier_, 0.4f);
 }
+
+/**
+ * @tc.name: Property005
+ * @tc.desc: Test selectable and selected of GridItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, Property005, TestSize.Level1)
+{
+    GridItemModelNG itemModel;
+    itemModel.Create(GridItemStyle::NONE);
+    itemModel.SetSelectable(false);
+    itemModel.SetOnSelect([](bool) {});
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
+
+    /**
+     * @tc.steps: step1. Test ToJsonValue
+     */
+    auto json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("selected"), "false");
+    EXPECT_EQ(json->GetString("selectable"), "false");
+
+    /**
+     * @tc.steps: step2. Update GridItemPattern Test ToJsonValue
+     */
+    pattern->SetSelectable(true);
+    pattern->SetSelected(true);
+    json = JsonUtil::Create(true);
+    pattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("selected"), "true");
+    EXPECT_EQ(json->GetString("selectable"), "true");
+}
 } // namespace OHOS::Ace::NG
