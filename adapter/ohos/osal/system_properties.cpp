@@ -147,6 +147,11 @@ bool IsDeveloperModeOn()
     return (system::GetParameter("const.security.developermode.state", "false") == "true");
 }
 
+bool IsWindowRectResizeEnabled()
+{
+    return (system::GetParameter("persist.ace.windowresize.enabled", "true") == "true");
+}
+
 bool IsHookModeEnabled()
 {
 #ifdef PREVIEW
@@ -412,6 +417,7 @@ bool SystemProperties::imageFileCacheConvertAstc_ = GetImageFileCacheConvertToAs
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = GetImageFileCacheConvertAstcThresholdProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
+ACE_WEAK_SYM bool SystemProperties::windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
@@ -573,6 +579,7 @@ void SystemProperties::InitDeviceInfo(
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
     faultInjectEnabled_  = IsFaultInjectEnabled();
+    windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -753,6 +760,11 @@ bool SystemProperties::GetSideBarContainerBlurEnable()
 void SystemProperties::AddWatchSystemParameter(const char* key, void* context, EnableSystemParameterCallback callback)
 {
     WatchParameter(key, callback, context);
+}
+
+ACE_WEAK_SYM bool SystemProperties::GetWindowRectResizeEnabled()
+{
+    return windowRectResizeEnabled_;
 }
 
 void SystemProperties::RemoveWatchSystemParameter(

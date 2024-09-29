@@ -471,6 +471,8 @@ public:
         return astcEnabled_;
     }
 
+    static bool GetWindowRectResizeEnabled();
+
     static int32_t GetAstcMaxError()
     {
         return astcMax_;
@@ -660,6 +662,7 @@ private:
     static float dragStartPanDisThreshold_;
     static float fontScale_;
     static float fontWeightScale_;
+    static bool windowRectResizeEnabled_;
     static FoldScreenType foldScreenType_;
 };
 
