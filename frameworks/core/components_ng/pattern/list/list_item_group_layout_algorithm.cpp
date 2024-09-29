@@ -1211,6 +1211,7 @@ ListItemGroupLayoutInfo ListItemGroupLayoutAlgorithm::GetLayoutInfo() const
     ListItemGroupLayoutInfo info;
     info.headerSize = headerMainSize_;
     info.footerSize = footerMainSize_;
+    info.spaceWidth = spaceWidth_;
     if (totalItemCount_ == 0 || childrenSize_) {
         info.atStart = true;
         info.atEnd = true;

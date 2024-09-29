@@ -157,7 +157,6 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     if (filter.IsFastFilter()) {
         return;
     }
-    json->PutExtAttr("friction", GetFriction(), filter);
     if (edgeEffect_ == EdgeEffect::SPRING) {
         json->PutExtAttr("edgeEffect", "EdgeEffect.Spring", filter);
     } else if (edgeEffect_ == EdgeEffect::FADE) {
@@ -176,6 +175,13 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     nestedScrollOptions->Put("scrollForward", nestedScroll.GetNestedScrollModeStr(nestedScroll.forward).c_str());
     nestedScrollOptions->Put("scrollBackward", nestedScroll.GetNestedScrollModeStr(nestedScroll.backward).c_str());
     json->PutExtAttr("nestedScroll", nestedScrollOptions, filter);
+    if (NearEqual(GetFriction(), -1.0) && scrollableEvent_) {
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        json->PutExtAttr("friction", scrollable->GetFriction(), filter);
+    } else {
+        json->PutExtAttr("friction", GetFriction(), filter);
+    }
 }
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -625,12 +631,16 @@ void ScrollablePattern::AddScrollEvent()
         InitScrollBarClickEvent();
     }
 
+    InitRatio();
+}
+
+void ScrollablePattern::InitRatio()
+{
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    CHECK_NULL_VOID(scrollable);
     if (!ratio_.has_value()) {
-        auto context = GetContext();
-        CHECK_NULL_VOID(context);
-        auto scrollableTheme = context->GetTheme<ScrollableTheme>();
-        CHECK_NULL_VOID(scrollableTheme);
-        ratio_ = scrollableTheme->GetRatio();
+        ratio_ = scrollable->GetRatio();
     }
 }
 

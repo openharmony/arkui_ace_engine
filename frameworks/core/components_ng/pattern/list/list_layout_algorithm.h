@@ -39,6 +39,7 @@ struct ListItemGroupLayoutInfo {
     float averageHeight = -1;
     float headerSize = 0.0f;
     float footerSize = 0.0f;
+    float spaceWidth = 0.0f;
 };
 
 struct ListItemInfo {
