@@ -30,6 +30,21 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t ANIMATION_DURATION_DEFAULT = 200;
+const std::string BAR_BLURSTYLE[] = {
+    "BlurStyle.NONE",
+    "BlurStyle.Thin",
+    "BlurStyle.Regular",
+    "BlurStyle.Thick",
+    "BlurStyle.BACKGROUND_THIN",
+    "BlurStyle.BACKGROUND_REGULAR",
+    "BlurStyle.BACKGROUND_THICK",
+    "BlurStyle.BACKGROUND_ULTRA_THICK",
+    "BlurStyle.COMPONENT_ULTRA_THIN",
+    "BlurStyle.COMPONENT_THIN",
+    "BlurStyle.COMPONENT_REGULAR",
+    "BlurStyle.COMPONENT_THICK",
+    "BlurStyle.COMPONENT_ULTRA_THICK"
+};
 
 } // namespace
 
@@ -77,7 +92,9 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         GetBarAdaptiveHeight() ? "auto" : std::to_string(GetBarHeight().Value()).c_str(), filter);
     json->PutExtAttr("fadingEdge", GetFadingEdge() ? "true" : "false", filter);
     json->PutExtAttr("barBackgroundColor", GetBarBackgroundColor().ColorToString().c_str(), filter);
-    json->PutExtAttr("barBackgroundBlurStyle", GetBarBackgroundBlurStyle(), filter);
+    json->PutExtAttr("barBackgroundBlurStyle",
+        BAR_BLURSTYLE[static_cast<int32_t>(GetBarBackgroundBlurStyle())].c_str(), filter);
+    json->PutExtAttr("barBackgroundBlurStyleOptions", GetBarBackgroundBlurStyleOptions(), filter);
     json->PutExtAttr("animationMode", GetAnimationMode().c_str(), filter);
     json->PutExtAttr("edgeEffect", GetEdgeEffect().c_str(), filter);
     json->PutExtAttr("barBackgroundEffect", GetBarBackgroundEffect(), filter);
@@ -192,16 +209,26 @@ Color TabsNode::GetBarBackgroundColor() const
     return tabBarPaintProperty->GetBarBackgroundColor().value_or(backgroundColor);
 }
 
-std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundBlurStyle() const
+BlurStyle TabsNode::GetBarBackgroundBlurStyle() const
+{
+    auto barBackgroundBlurStyle = BlurStyle::NO_MATERIAL;
+    if (!tabBarId_.has_value()) {
+        return barBackgroundBlurStyle;
+    }
+    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    CHECK_NULL_RETURN(tabBarNode, barBackgroundBlurStyle);
+    auto tabBarProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_RETURN(tabBarProperty, barBackgroundBlurStyle);
+    auto styleOption = tabBarProperty->GetTabBarBlurStyleOption().value_or(BlurStyleOption{});
+    return styleOption.blurStyle;
+}
+
+std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundBlurStyleOptions() const
 {
     auto jsonBlurStyle = JsonUtil::Create(true);
     if (!tabBarId_.has_value()) {
         return jsonBlurStyle;
     }
-    static const char* STYLE[] = { "BlurStyle.NONE", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
-        "BlurStyle.BACKGROUND_THIN", "BlurStyle.BACKGROUND_REGULAR", "BlurStyle.BACKGROUND_THICK",
-        "BlurStyle.BACKGROUND_ULTRA_THICK", "BlurStyle.COMPONENT_ULTRA_THIN", "BlurStyle.COMPONENT_THIN",
-        "BlurStyle.COMPONENT_REGULAR", "BlurStyle.COMPONENT_THICK", "BlurStyle.COMPONENT_ULTRA_THICK" };
     static const char* COLOR_MODE[] = { "ThemeColorMode.System", "ThemeColorMode.Light", "ThemeColorMode.Dark" };
     static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
     static const char* POLICY[] = { "BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE",
@@ -212,16 +239,13 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundBlurStyle() const
     auto tabBarProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
     CHECK_NULL_RETURN(tabBarProperty, jsonBlurStyle);
     auto styleOption = tabBarProperty->GetTabBarBlurStyleOption().value_or(BlurStyleOption{});
-    jsonBlurStyle->Put("value", STYLE[static_cast<int>(styleOption.blurStyle)]);
-    auto jsonBlurStyleOption = JsonUtil::Create(true);
-    jsonBlurStyleOption->Put("colorMode", COLOR_MODE[static_cast<int>(styleOption.colorMode)]);
-    jsonBlurStyleOption->Put("adaptiveColor",
+    jsonBlurStyle->Put("colorMode", COLOR_MODE[static_cast<int>(styleOption.colorMode)]);
+    jsonBlurStyle->Put("adaptiveColor",
         ADAPTIVE_COLOR[static_cast<int>(styleOption.adaptiveColor)]);
-    jsonBlurStyleOption->Put("policy", POLICY[static_cast<int>(styleOption.policy)]);
-    jsonBlurStyleOption->Put("type", BLUR_TYPE[static_cast<int>(styleOption.blurType)]);
-    jsonBlurStyleOption->Put("inactiveColor", styleOption.inactiveColor.ColorToString().c_str());
-    jsonBlurStyleOption->Put("scale", styleOption.scale);
-    jsonBlurStyle->Put("options", jsonBlurStyleOption);
+    jsonBlurStyle->Put("policy", POLICY[static_cast<int>(styleOption.policy)]);
+    jsonBlurStyle->Put("type", BLUR_TYPE[static_cast<int>(styleOption.blurType)]);
+    jsonBlurStyle->Put("inactiveColor", styleOption.inactiveColor.ColorToString().c_str());
+    jsonBlurStyle->Put("scale", styleOption.scale);
     return jsonBlurStyle;
 }
 

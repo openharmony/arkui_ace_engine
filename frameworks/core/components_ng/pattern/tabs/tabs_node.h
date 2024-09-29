@@ -146,7 +146,8 @@ private:
     Dimension GetBarHeight() const;
     bool GetBarAdaptiveHeight() const;
     Color GetBarBackgroundColor() const;
-    std::unique_ptr<JsonValue> GetBarBackgroundBlurStyle() const;
+    BlurStyle GetBarBackgroundBlurStyle() const;
+    std::unique_ptr<JsonValue> GetBarBackgroundBlurStyleOptions() const;
     int32_t GetIndex() const;
     bool GetFadingEdge() const;
     BarGridColumnOptions GetBarGridAlign() const;
