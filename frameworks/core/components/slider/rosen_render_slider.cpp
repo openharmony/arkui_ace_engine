@@ -15,13 +15,8 @@
 
 #include "core/components/slider/rosen_render_slider.h"
 
-#include "core/components/box/render_box.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/painter/rosen_decoration_painter.h"
-#include "core/components/slider/render_block.h"
 #include "core/components/tip/render_tip.h"
 #include "core/components/tip/tip_component.h"
-#include "core/components/track/render_track.h"
 #include "core/pipeline/base/rosen_render_context.h"
 #include "render_service_client/core/ui/rs_node.h"
 

@@ -15,7 +15,6 @@
 
 #include "core/components/shared_transition/shared_transition_component.h"
 
-#include "base/utils/system_properties.h"
 #include "core/components/shared_transition/shared_transition_element.h"
 
 namespace OHOS::Ace {

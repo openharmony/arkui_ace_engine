@@ -15,7 +15,6 @@
 
 #include "core/components/tab_bar/tab_bar_component.h"
 
-#include "base/utils/system_properties.h"
 #include "core/components/tab_bar/render_tab_bar.h"
 #include "core/components/tab_bar/tab_bar_element.h"
 

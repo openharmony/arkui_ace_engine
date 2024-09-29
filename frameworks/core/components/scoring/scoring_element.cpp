@@ -18,7 +18,6 @@
 #include "base/log/ace_scoring_log.h"
 #include "core/components/page/page_element.h"
 #include "core/components/scoring/render_scoring.h"
-#include "core/components/scoring/scoring_component.h"
 
 namespace OHOS::Ace {
 

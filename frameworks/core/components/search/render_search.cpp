@@ -15,21 +15,6 @@
 
 #include "core/components/search/render_search.h"
 
-#include "base/json/json_util.h"
-#include "base/log/log_wrapper.h"
-#include "base/mousestyle/mouse_style.h"
-#include "base/utils/system_properties.h"
-#include "core/components/box/box_component.h"
-#include "core/components/button/button_component.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/divider/divider_component.h"
-#include "core/components/divider/render_divider.h"
-#include "core/components/padding/padding_component.h"
-#include "core/components/text/render_text.h"
-#include "core/components/text/text_component.h"
-#include "core/components/text_field/text_field_component.h"
-#include "core/event/ace_event_helper.h"
-
 namespace OHOS::Ace {
 namespace {
 

@@ -17,7 +17,6 @@
 
 #include "core/common/text_field_manager.h"
 #include "core/components/page/page_element.h"
-#include "core/components/scroll/render_scroll.h"
 
 namespace OHOS::Ace {
 

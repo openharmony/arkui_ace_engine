@@ -21,8 +21,6 @@
 #include "core/components_ng/render/drawing.h"
 #endif
 
-#include "core/pipeline/base/rosen_render_context.h"
-
 namespace OHOS::Ace {
 namespace {
 

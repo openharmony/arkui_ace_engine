@@ -17,7 +17,6 @@
 
 #include "core/pipeline/base/rosen_render_context.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
-#include "frameworks/core/components/svg/rosen_render_svg_text.h"
 
 namespace OHOS::Ace {
 
