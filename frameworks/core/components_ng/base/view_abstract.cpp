@@ -2661,6 +2661,7 @@ void ViewAbstract::SetForegroundColor(const Color& color)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetForegroundColorStrategy().has_value()) {
         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
         renderContext->ResetForegroundColorStrategy();
