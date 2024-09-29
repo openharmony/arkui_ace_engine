@@ -2013,11 +2013,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg094, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineContextTestNg095
+ * @tc.name: PipelineContextTestNg101
  * @tc.desc: Test the function FlushDirtyPropertyNodes.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineContextTestNg095, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg101, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
