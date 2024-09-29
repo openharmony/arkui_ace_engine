@@ -460,15 +460,15 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         actuator->ResetResponseRegion();
-        if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview() || !actuator->GetGatherNode()) {
-            return;
-        }
-        actuator->SetGatherNode(nullptr);
-        actuator->ClearGatherNodeChildrenInfo();
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto manager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(manager);
+        if (manager->IsGatherWithMenu() || !actuator->GetGatherNode()) {
+            return;
+        }
+        actuator->SetGatherNode(nullptr);
+        actuator->ClearGatherNodeChildrenInfo();
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         auto preDragStatus = dragDropManager->GetPreDragStatus();
