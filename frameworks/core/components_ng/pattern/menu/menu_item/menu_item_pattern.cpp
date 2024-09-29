@@ -1363,7 +1363,9 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         }
         textProperty->UpdateTextAlign(textAlign);
     } else {
-        textProperty->UpdateTextAlign(isLabel ? TextAlign::CENTER : textAlign);
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            textProperty->UpdateTextAlign(textAlign);
+        }
     }
     UpdateFont(menuProperty, theme, isLabel);
     textProperty->UpdateContent(content);
