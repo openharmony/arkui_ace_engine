@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,11 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
-#include "base/window/drag_window.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
-#include "core/gestures/velocity_tracker.h"
 #include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
+#include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace {
 class UnifiedData;
@@ -54,8 +53,6 @@ public:
     DragDropManager() = default;
     ~DragDropManager() override = default;
 
-    RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<PixelMap>& pixelMap, const GestureEvent& info);
-    RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<UINode>& customNode, const GestureEvent& info);
     RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
         const RefPtr<PixelMap>& pixelMap, const GestureEvent& info, const RefPtr<EventHub>& eventHub);
     RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
@@ -94,7 +91,6 @@ public:
         return eventStrictReportingEnabled_;
     }
 
-    void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
     void UpdateItemDragPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
@@ -528,12 +524,10 @@ private:
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> textFieldDragFrameNodes_;
-    RefPtr<DragWindow> dragWindow_;
     RefPtr<FrameNode> draggedFrameNode_;
     RefPtr<FrameNode> preTargetFrameNode_;
     RefPtr<FrameNode> draggedGridFrameNode_;
     RefPtr<FrameNode> preGridTargetFrameNode_;
-    RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<FrameNode> itemDragOverlayNode_;
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
