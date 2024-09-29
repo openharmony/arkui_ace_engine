@@ -255,7 +255,7 @@ void WindowScene::BufferAvailableCallback()
         CHECK_NULL_VOID(self);
 
         auto surfaceNode = self->session_->GetSurfaceNode();
-        if (!self->IsWindowSizeEqual() || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
+        if (!self->IsWindowSizeEqual(true) || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
             return;
         }
         CHECK_NULL_VOID(self->startingWindow_);
@@ -558,9 +558,8 @@ void WindowScene::OnDrawingCompleted()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDrawingCompleted", TaskExecutor::TaskType::UI);
 }
 
-bool WindowScene::IsWindowSizeEqual()
+bool WindowScene::IsWindowSizeEqual(bool allowEmpty)
 {
-    CHECK_EQUAL_RETURN(session_->GetSystemConfig().IsPcWindow(), true, true);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto geometryNode = host->GetGeometryNode();
@@ -569,6 +568,7 @@ bool WindowScene::IsWindowSizeEqual()
     ACE_SCOPED_TRACE("WindowScene::IsWindowSizeEqual[id:%d][self:%d][%s][%s]",
         session_->GetPersistentId(), host->GetId(),
         frameSize.ToString().c_str(), session_->GetLayoutRect().ToString().c_str());
+    CHECK_EQUAL_RETURN(allowEmpty && session_->GetLayoutRect().IsEmpty(), true, true);
     if (NearEqual(frameSize.Width(), session_->GetLayoutRect().width_, 1.0f) &&
         NearEqual(frameSize.Height(), session_->GetLayoutRect().height_, 1.0f)) {
         return true;
