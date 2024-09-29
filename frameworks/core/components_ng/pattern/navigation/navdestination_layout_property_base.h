@@ -63,10 +63,10 @@ protected:
     void UpdateBaseLayoutProperty(const NavDestinationLayoutPropertyBase* layoutProperty)
     {
         LayoutProperty::UpdateLayoutProperty(layoutProperty);
-        propHideTitleBar_ = CloneHideTitleBar();
-        propIsAnimatedTitleBar_ = CloneIsAnimatedTitleBar();
-        propHideToolBar_ = CloneHideToolBar();
-        propIsAnimatedToolBar_ = CloneIsAnimatedToolBar();
+        propHideTitleBar_ = layoutProperty->GetHideTitleBar();
+        propIsAnimatedTitleBar_ = layoutProperty->GetIsAnimatedTitleBar();
+        propHideToolBar_ = layoutProperty->GetHideToolBar();
+        propIsAnimatedToolBar_ = layoutProperty->GetIsAnimatedToolBar();
     }
 };
 
