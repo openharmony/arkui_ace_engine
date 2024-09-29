@@ -30,7 +30,6 @@ class FocusHub;
 class EventHub;
 class FocusView;
 class FocusManager;
-class PipelineContext;
 
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
@@ -929,6 +928,7 @@ public:
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
     void ClearFocusState(bool isNeedStateStyles = true);
     void ClearAllFocusState();
+    void PrintOnKeyEventUserInfo(const KeyEvent& keyEvent, bool retCallback);
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
     {
@@ -1081,7 +1081,7 @@ private:
     friend class FocusView;
 
     friend class FocusManager;
-
+ 
     bool CalculatePosition();
 
     void SetScopeFocusAlgorithm();
@@ -1115,12 +1115,11 @@ private:
     bool OnKeyEventNodeInternal(const KeyEvent& keyEvent);
     bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
     bool RequestNextFocusByKey(const KeyEvent& keyEvent);
-    RefPtr<PipelineContext> GetPipelineContext() const;
+
+    bool IsComponentDirectionRtl();
 
     void DumpFocusNodeTreeInJson(int32_t depth);
     void DumpFocusScopeTreeInJson(int32_t depth);
-
-    bool IsComponentDirectionRtl();
 
     bool SkipFocusMoveBeforeRemove();
 
