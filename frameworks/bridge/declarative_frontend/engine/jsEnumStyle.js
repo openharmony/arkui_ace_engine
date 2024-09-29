@@ -3428,6 +3428,20 @@ var WebResponseType;
   WebResponseType[WebResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
 })(WebResponseType || (WebResponseType = {}));
 
+var CrownSensitivity;
+(function (CrownSensitivity) {
+  CrownSensitivity[CrownSensitivity["LOW"] = 0] = "LOW";
+  CrownSensitivity[CrownSensitivity["MEDIUM"] = 1] = "MEDIUM";
+  CrownSensitivity[CrownSensitivity["HIGH"] = 2] = "HIGH";
+})(CrownSensitivity || (CrownSensitivity = {}));
+
+var CrownAction;
+(function (CrownAction) {
+  CrownAction[CrownAction["BEGIN"] = 0] = "BEGIN";
+  CrownAction[CrownAction["UPDATE"] = 1] = "UPDATE";
+  CrownAction[CrownAction["END"] = 2] = "END";
+})(CrownAction || (CrownAction = {}));
+
 class ImageAnalyzerController {
   constructor() {
   }

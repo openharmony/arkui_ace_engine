@@ -490,6 +490,10 @@ template("declarative_js_engine") {
       "jsview/models/water_flow_model_impl.cpp",
     ]
 
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
+    }
+
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
@@ -923,6 +927,10 @@ template("declarative_js_engine_ng") {
       # ark_theme
       "ark_theme/theme_apply/js_with_theme.cpp",
     ]
+
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
+    }
 
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",

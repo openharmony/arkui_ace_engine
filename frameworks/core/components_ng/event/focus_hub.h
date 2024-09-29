@@ -21,6 +21,9 @@
 #include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/event/key_event.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
@@ -338,6 +341,9 @@ public:
     OnBlurFunc onBlurCallback_;
     OnBlurFunc onJSFrameNodeBlurCallback_;
     OnKeyCallbackFunc onKeyEventCallback_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    OnCrownCallbackFunc onCrownEventCallback_;
+#endif
     OnKeyCallbackFunc onJSFrameNodeKeyEventCallback_;
     OnKeyPreImeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
@@ -516,6 +522,14 @@ public:
     int32_t GetFrameId() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool HandleCrownEvent(const CrownEvent& CrownEvent);
+    void SetOnCrownCallback(OnCrownCallbackFunc&& onCrownCallback)
+    void ClearUserOnCrown()
+    OnCrownCallbackFunc GetOnCrownCallback()
+    void SetOnCrownEventInternal(OnCrownEventFunc&& onCrownEventCallback)
+    bool ProcessOnCrownEventInternal(const CrownEvent& event)
+#endif
     bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
@@ -1060,6 +1074,11 @@ protected:
     bool OnKeyEventScope(const KeyEvent& keyEvent);
     bool RequestNextFocusOfKeyTab(const KeyEvent& keyEvent);
     bool OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent);
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool OnCrownEvent(const CrownEvent& CrownEvent);
+    bool OnCrownEventNode(const CrownEvent& CrownEvent);
+    bool OnCrownEventScope(const CrownEvent& CrownEvent);
+#endif
 
     bool AcceptFocusOfSpecifyChild(FocusStep step);
     bool AcceptFocusOfLastFocus();
@@ -1140,6 +1159,9 @@ private:
     OnPreFocusFunc onPreFocusCallback_;
     OnClearFocusStateFunc onClearFocusStateCallback_;
     OnPaintFocusStateFunc onPaintFocusStateCallback_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    OnCrownEventFunc onCrownEventsInternal_;
+#endif
 
     RefPtr<FocusCallbackEvents> focusCallbackEvents_;
 

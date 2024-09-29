@@ -426,6 +426,7 @@ public:
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
+    static void JsOnCrownEvent(const JSCallbackInfo& args);
 
     static void JsObscured(const JSCallbackInfo& info);
     static void JsPrivacySensitive(const JSCallbackInfo& info);
