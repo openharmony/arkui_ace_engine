@@ -274,6 +274,7 @@ void GridPattern::FireOnScrollStart()
         scrollBar->PlayScrollBarAppearAnimation();
     }
     StopScrollBarAnimatorByProxy();
+    FireObserverOnScrollStart();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<GridEventHub>();
@@ -286,11 +287,14 @@ void GridPattern::FireOnScrollStart()
 void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart);
+    CHECK_NULL_VOID(host);
     if (gridLayoutInfo_.startIndex_ == 0) {
         if (!isInitialized_) {
-            onReachStart();
-            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+            FireObserverOnReachStart();
+            if (onReachStart) {
+                onReachStart();
+                AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+            }
         }
         auto finalOffset = gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_;
         if (!NearZero(finalOffset)) {
@@ -299,6 +303,8 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart)
             bool scrollDownToStart =
                 LessNotEqual(gridLayoutInfo_.prevHeight_, 0.0) && GreatOrEqual(gridLayoutInfo_.currentHeight_, 0.0);
             if (scrollUpToStart || scrollDownToStart) {
+                FireObserverOnReachStart();
+                CHECK_NULL_VOID(onReachStart);
                 ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:Grid",
                     scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
                 onReachStart();
@@ -311,7 +317,7 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd);
+    CHECK_NULL_VOID(host);
     if (gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
         auto finalOffset = gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_;
         if (!NearZero(finalOffset)) {
@@ -320,6 +326,8 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
             bool scrollUpToEnd = GreatNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
                                  LessOrEqual(gridLayoutInfo_.currentHeight_, endHeight_);
             if (scrollDownToEnd || scrollUpToEnd) {
+                FireObserverOnReachEnd();
+                CHECK_NULL_VOID(onReachEnd);
                 ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, id:%d, tag:Grid", scrollUpToEnd,
                     scrollDownToEnd, static_cast<int32_t>(host->GetAccessibilityId()));
                 onReachEnd();
@@ -518,6 +526,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     if (onScroll) {
         FireOnScroll(finalOffset, onScroll);
     }
+    FireObserverOnDidScroll(finalOffset);
     auto onDidScroll = gridEventHub->GetOnDidScroll();
     if (onDidScroll) {
         FireOnScroll(finalOffset, onDidScroll);

@@ -147,14 +147,19 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         }
     };
 
-    auto actionEnd = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
+    auto actionEnd = [weakScroll = AceType::WeakClaim(this)](GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             scroll->HandleDragEnd(info);
-            if (scroll->actionEnd_) {
-                auto gestureEvent = info;
-                scroll->actionEnd_(gestureEvent);
+            if (scroll->panActionEndEvents_.empty()) {
+                scroll->isDragging_ = false;
+                return;
             }
+            std::for_each(scroll->panActionEndEvents_.begin(), scroll->panActionEndEvents_.end(),
+                [info](GestureEventFunc& event) {
+                    auto gestureInfo = info;
+                    event(gestureInfo);
+                });
             scroll->isDragging_ = false;
         }
     };
@@ -169,9 +174,15 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         }
         GestureEvent info;
         scroll->HandleDragEnd(info);
-        if (scroll->actionEnd_) {
-            scroll->actionEnd_(info);
+        if (scroll->panActionEndEvents_.empty()) {
+            scroll->isDragging_ = false;
+            return;
         }
+        std::for_each(scroll->panActionEndEvents_.begin(), scroll->panActionEndEvents_.end(),
+            [info](GestureEventFunc& event) {
+                auto gestureInfo = info;
+                event(gestureInfo);
+            });
         scroll->isDragging_ = false;
     };
 

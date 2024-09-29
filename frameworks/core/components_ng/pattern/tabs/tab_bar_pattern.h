@@ -130,7 +130,7 @@ class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
 public:
-    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController) : swiperController_(swiperController) {};
+    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController);
     ~TabBarPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -555,6 +555,16 @@ private:
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
+
+    void StartShowTabBar(int32_t delay);
+    void StopShowTabBar();
+    void InitTabBarProperty();
+    void UpdateTabBarHiddenRatio(float ratio);
+    void SetTabBarTranslate(const TranslateOptions& options);
+    void SetTabBarOpacity(float opacity);
+
+    RefPtr<NodeAnimatablePropertyFloat> showTabBarProperty_;
+    bool isTabBarShowing_ = false;
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;

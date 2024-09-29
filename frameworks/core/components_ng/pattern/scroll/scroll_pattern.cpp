@@ -400,6 +400,7 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
 
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
+    FireObserverOnDidScroll(scroll);
     auto eventHub = GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnDidScrollEvent();
@@ -429,8 +430,10 @@ void ScrollPattern::FireOnDidScroll(float scroll)
 void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart);
+    CHECK_NULL_VOID(host);
     if (ReachStart()) {
+        FireObserverOnReachStart();
+        CHECK_NULL_VOID(onReachStart);
         ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         onReachStart();
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
@@ -440,8 +443,10 @@ void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd);
+    CHECK_NULL_VOID(host);
     if (ReachEnd()) {
+        FireObserverOnReachEnd();
+        CHECK_NULL_VOID(onReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         onReachEnd();
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
