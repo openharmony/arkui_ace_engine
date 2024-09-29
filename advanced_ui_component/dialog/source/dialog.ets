@@ -250,10 +250,10 @@ export struct TipsDialog {
           }
         }
       }
-      .margin({ right: $r('sys.float.padding_level8') })
+      .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
     }
     .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-    .margin({ right: `${this.marginOffset}vp` })
+    .margin({ end: LengthMetrics.vp(this.marginOffset) })
   }
 
   aboutToAppear() {
@@ -410,6 +410,7 @@ export struct SelectDialog {
     })
   }
 
+
   @Builder
   buildContent(): void {
     Scroll(this.contentScroller) {
@@ -463,16 +464,17 @@ export struct SelectDialog {
                 .focusBox({
                   margin: { value: -2, unit: LengthUnit.VP }
                 })
-                .onClick(() => {
-                  this.selectedIndex = index;
-                  item.action && item.action();
-                  this.controller?.close();
-                })
-
                 if (index < this.radioContent.length - 1) {
                   Divider().color(this.dividerColorWithTheme).paddingStyle();
                 }
-              }.paddingStyle()
+              }
+              .paddingStyle()
+              .accessibilityText(getAccessibilityText(item.title, this.selectedIndex === index))
+              .onClick(() => {
+                this.selectedIndex = index;
+                item.action && item.action();
+                this.controller?.close();
+              })
             }
             .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
               this.itemHeight = Number(newValue.height)
@@ -677,17 +679,18 @@ export struct ConfirmDialog {
             })
             .width('100%')
         }
-        .margin({ right: $r('sys.float.padding_level8') })
+        .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
       }
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
-      .margin({ right: `${this.marginOffset}vp` })
+      .margin({ end: LengthMetrics.vp(this.marginOffset) })
     }
   }
 
   @Builder
   checkBoxBuilder(): void {
     Row() {
-      Checkbox({ name: '', group: 'checkboxGroup' }).select(this.isChecked)
+      Checkbox({ name: '', group: 'checkboxGroup' })
+        .select(this.isChecked)
         .onChange((checked: boolean) => {
           this.isChecked = checked;
           if (this.onCheckedChange) {
@@ -819,7 +822,7 @@ export struct AlertDialog {
           .fontSize(`${BODY_L}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
-          .margin({ right: $r('sys.float.padding_level8'), })
+          .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
           .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
           .textAlign(this.textAlign)
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -834,7 +837,7 @@ export struct AlertDialog {
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .width('100%')
     }
-    .margin({ right: `${this.getMargin()}vp`, })
+    .margin({ end: LengthMetrics.vp(this.getMargin()) })
   }
 
   aboutToAppear(): void {
@@ -1053,8 +1056,8 @@ struct CustomDialogContentComponent {
         .backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE)
         .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
         .margin(this.customStyle ? {
-          left: $r('sys.float.ohos_id_dialog_margin_start'),
-          right: $r('sys.float.ohos_id_dialog_margin_end'),
+          start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
+          end: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_end')),
           bottom: $r('sys.float.ohos_id_dialog_margin_bottom'),
         } : { left: 0, right: 0, bottom: 0 })
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
@@ -1123,7 +1126,7 @@ struct CustomDialogContentComponent {
     try {
       let uiContext: UIContext = this.getUIContext();
       let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
-      if(!this.isFollowingSystemFontScale) {
+      if (!this.isFollowingSystemFontScale) {
         return 1;
       }
       return Math.min(systemFontScale, this.appMaxFontScale);
@@ -1362,6 +1365,7 @@ struct CustomDialogContentComponent {
           }
           .width(BUTTON_HORIZONTAL_SPACE * 2)
           .justifyContent(FlexAlign.Center)
+
           this.buildSingleButton(this.buttons[HORIZON_BUTTON_MAX_COUNT - 1]);
         }
       }
@@ -1518,6 +1522,31 @@ function getEnumNumberByResourceId(resourceId: number, defaultValue: number): nu
     let message: string = (error as BusinessError).message;
     hilog.error(0x3900, 'Ace', `getEnumNumberByResourceId error, code: ${code}, message: ${message}`);
     return defaultValue;
+  }
+}
+
+/**
+ * 获取无障碍文本
+ *
+ * @param resource 资源
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityText(resource: ResourceStr, selected: boolean): string {
+  try {
+    let selectText: string = getContext().resourceManager.getStringSync(125833934);
+    let resourceString: string = '';
+    if (typeof resource === 'string') {
+      resourceString = resource;
+    } else {
+      resourceString = getContext().resourceManager.getStringSync(resource);
+    }
+    return selected ? `${selectText},${resourceString}` : resourceString;
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
+    return '';
   }
 }
 
