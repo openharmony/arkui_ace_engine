@@ -5767,19 +5767,20 @@ void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<st
         return;
     }
     if (result) {
-        customPropertyMap_[UPDATE_FLAG_KEY] = true;
+        customPropertyMap_[UPDATE_FLAG_KEY] = "1";
     }
     if (!getCustomProperty_) {
         getCustomProperty_ = getFunc;
     }
 }
 
-std::string FrameNode::GetJSCustomProperty(const std::string& key)
+bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
 {
     if (getCustomProperty_) {
-        return getCustomProperty_(key);
+        value = getCustomProperty_(key);
+        return true;
     }
-    return nullptr;
+    return false;
 }
 
 bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)
