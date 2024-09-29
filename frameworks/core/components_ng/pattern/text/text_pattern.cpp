@@ -375,7 +375,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
 bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)
 {
     CHECK_NULL_RETURN(overlayMod_, false);
-    CHECK_NULL_RETURN(urlMouseEventInitialized_, false);
+    CHECK_NULL_RETURN(hasUrlSpan_, false);
     CHECK_NULL_RETURN(!spans_.empty() && pManager_, false);
     int32_t start = 0;
     for (const auto& item : spans_) {
@@ -2774,6 +2774,25 @@ Color TextPattern::GetUrlPressColor()
     return theme->GetUrlPressColor();
 }
 
+Color TextPattern::GetUrlSpanColor()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, Color());
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, Color());
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Color());
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, Color());
+
+    if (eventHub && !eventHub->IsEnabled()) {
+        return theme->GetUrlDisabledColor();
+    } else {
+        return theme->GetUrlDefaultColor();
+    }
+}
+
 // Deprecated: Use the TextSelectOverlay::ProcessOverlay() instead.
 // It is currently used by RichEditorPattern.
 void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, bool animation)
@@ -3964,6 +3983,7 @@ void TextPattern::ProcessSpanString()
     dataDetectorAdapter_->textForAI_.clear();
     host->Clean();
     hasSpanStringLongPressEvent_ = false;
+    hasUrlSpan_ = false;
 
     // 适配AI&&挂载image节点
     for (const auto& span : spans_) {
@@ -3984,6 +4004,7 @@ void TextPattern::ProcessSpanString()
             hasSpanStringLongPressEvent_ = true;
         }
         if (span->urlOnRelease) {
+            hasUrlSpan_ = true;
             InitUrlMouseEvent();
             InitUrlTouchEvent();
         }
