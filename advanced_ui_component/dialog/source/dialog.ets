@@ -1526,7 +1526,7 @@ function getEnumNumberByResourceId(resourceId: number, defaultValue: number): nu
 }
 
 /**
- * get accessibility text
+ * 获取无障碍文本
  *
  * @param resource 资源
  * @param selected select state
