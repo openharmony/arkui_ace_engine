@@ -2028,7 +2028,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg101, TestSize.Level1)
     /**
      * @tc.steps2: Call the function FlushDirtyPropertyNodes.
      * @tc.expected: The dirtyPropertyNodes_ is empty.
-     */    
+     */
     context_->FlushDirtyPropertyNodes();
     EXPECT_TRUE(context_->dirtyPropertyNodes_.empty());
 }
