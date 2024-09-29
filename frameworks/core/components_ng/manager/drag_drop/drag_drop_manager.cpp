@@ -1980,9 +1980,6 @@ void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlay
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
         auto& childInfo = gatherNodeChildrenInfo[i];
-        imageContext->UpdatePosition(OffsetT<Dimension>(
-            Dimension(info.gatherNodeCenter.GetX() - childInfo.halfWidth),
-            Dimension(info.gatherNodeCenter.GetY() - childInfo.halfHeight)));
         auto updateScale = scale;
         if (((childInfo.width > info.width) || (childInfo.height > info.height)) &&
             !NearZero(childInfo.width) && !NearZero(childInfo.height)) {
