@@ -56,6 +56,7 @@ void WaterFlowTestNg::SetUpTestSuite()
 #endif
     PipelineContext::GetCurrentContext()->SetMinPlatformVersion(12);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(12);
+    testing::FLAGS_gmock_verbose = "error";
 }
 
 void WaterFlowTestNg::TearDownTestSuite()
