@@ -119,7 +119,7 @@ private:
     bool KeyIndexByStep(int32_t step);
     bool MoveIndexBySearch(const std::string& searchStr);
     void ApplyIndexChanged(
-        bool isTextNodeInTree, bool refreshBubble = true, bool fromTouchUp = false, bool indexerSizeChanged = false);
+        bool isTextNodeInTree, bool selectChanged = true, bool fromTouchUp = false, bool indexerSizeChanged = false);
     void OnSelect();
     int32_t GetSkipChildIndex(int32_t step);
     int32_t GetFocusChildIndex(const std::string& searchStr);
@@ -146,9 +146,10 @@ private:
     void ClearClickStatus();
     void ChangeListItemsSelectedStyle(int32_t clickIndex);
     RefPtr<FrameNode> CreatePopupNode();
-    void UpdateBubbleView();
+    void UpdateBubbleList(std::vector<std::string>& currentListData);
+    void UpdateBubbleView(std::vector<std::string>& currentListData);
     Shadow GetPopupShadow();
-    void UpdateBubbleSize();
+    void UpdateBubbleSize(std::vector<std::string>& currentListData);
     void UpdateBubbleLetterView(bool showDivider, std::vector<std::string>& currentListData);
     void CreateBubbleListView(std::vector<std::string>& currentListData);
     void UpdateBubbleListView(std::vector<std::string>& currentListData);
@@ -156,7 +157,7 @@ private:
     void UpdatePopupVisibility(VisibleType visible);
     bool NeedShowPopupView();
     bool NeedShowBubble();
-    void ShowBubble(bool fromTouchUp = false);
+    void ShowBubble();
     bool IfSelectIndexValid();
     int32_t GetSelectChildIndex(const Offset& offset);
     void StartBubbleAppearAnimation();

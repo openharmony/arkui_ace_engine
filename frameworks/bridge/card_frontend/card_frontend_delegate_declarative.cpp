@@ -20,7 +20,7 @@ namespace OHOS::Ace::Framework {
 CardFrontendDelegateDeclarative::~CardFrontendDelegateDeclarative()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    TAG_LOGI(AceLogTag::ACE_FORM, "CardDelegateDeclarative Destroyed");
 }
 
 UIContentErrorCode CardFrontendDelegateDeclarative::RunCard(

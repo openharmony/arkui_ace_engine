@@ -33,6 +33,20 @@ void ResetHideTitleBar(ArkUINodeHandle node)
     NavDestinationModelNG::SetHideTitleBar(frameNode, false);
 }
 
+void SetNavDestinationHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetHideToolBar(frameNode, hide);
+}
+
+void ResetNavDestinationHideToolBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetHideToolBar(frameNode, false);
+}
+
 void SetNavDestinationMode(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -120,6 +134,9 @@ void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINav
         finalOptions.brOptions.paddingEnd = CalcDimension(static_cast<double>(options.paddingEnd.dimension.value),
             static_cast<DimensionUnit>(options.paddingEnd.dimension.units));
     }
+    if (options.enableHoverMode.isSet) {
+        finalOptions.enableHoverMode = options.enableHoverMode.value;
+    }
     NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
 }
 
@@ -151,6 +168,14 @@ void SetMenus(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length)
             menuItem.isEnabled = items[i].isEnable.value;
         }
         menuItems.push_back(menuItem);
+        if (items[i].text.value) {
+            delete[] items[i].text.value;
+            items[i].text.value = nullptr;
+        }
+        if (items[i].icon.value) {
+            delete[] items[i].icon.value;
+            items[i].icon.value = nullptr;
+        }
     }
     NavDestinationModelNG::SetMenuItems(frameNode, std::move(menuItems));
 }
@@ -200,6 +225,8 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
     static const ArkUINavDestinationModifier modifier = {
         SetHideTitleBar,
         ResetHideTitleBar,
+        SetNavDestinationHideToolBar,
+        ResetNavDestinationHideToolBar,
         SetNavDestinationMode,
         ResetNavDestinationMode,
         SetIgnoreLayoutSafeArea,
@@ -222,6 +249,8 @@ const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
     static const CJUINavDestinationModifier modifier = {
         SetHideTitleBar,
         ResetHideTitleBar,
+        SetNavDestinationHideToolBar,
+        ResetNavDestinationHideToolBar,
         SetNavDestinationMode,
         ResetNavDestinationMode,
         SetIgnoreLayoutSafeArea,

@@ -1632,10 +1632,10 @@ var ScrollSizeMode ;
 
 var SheetKeyboardAvoidMode;
 (function (SheetKeyboardAvoidMode) {
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["NONE"] = 0] = "NONE";
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_RESIZE"] = 1] = "TRANSLATE_AND_RESIZE";
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["RESIZE_ONLY"] = 2] = "RESIZE_ONLY";
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_SCROLL"] = 3] = "TRANSLATE_AND_SCROLL";
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["NONE"] = 0] = 'NONE';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_RESIZE"] = 1] = 'TRANSLATE_AND_RESIZE';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["RESIZE_ONLY"] = 2] = 'RESIZE_ONLY';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_SCROLL"] = 3] = 'TRANSLATE_AND_SCROLL'
 })(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}))
 
 var FunctionKey;
@@ -3303,7 +3303,7 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey['LINE_HEIGHT'] = 5] = 'LINE_HEIGHT';
   StyledStringKey[StyledStringKey['PARAGRAPH_STYLE'] = 200] = 'PARAGRAPH_STYLE';
   StyledStringKey[StyledStringKey['BACKGROUND_COLOR'] = 6] = 'BACKGROUND_COLOR';
-  StyledStringKey[StyledStringKey["URL"] = 7] = "URL";
+  StyledStringKey[StyledStringKey['URL'] = 7] = 'URL';
   StyledStringKey[StyledStringKey['GESTURE'] = 100] = 'GESTURE';
   StyledStringKey[StyledStringKey['IMAGE'] = 300] = 'IMAGE';
   StyledStringKey[StyledStringKey['CUSTOM_SPAN'] = 400] = 'CUSTOM_SPAN';

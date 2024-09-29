@@ -178,6 +178,80 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AnimateTo005
+ * @tc.desc: Test AnimateTo in Horizontal Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, AnimateTo005, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->GetScrollableDistance(), HORIZONTAL_SCROLLABLE_DISTANCE);
+
+    /**
+     * @tc.steps: step1. AnimateTo the position without animation
+     * @tc.expected: AnimateTo the position
+     */
+    positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -ITEM_MAIN_SIZE);
+
+    /**
+     * @tc.steps: step2. AnimateTo the position with animation
+     * @tc.expected: AnimateTo the bottom, can not over scroll
+     */
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    positionController_->AnimateTo(Dimension(0), 0, nullptr, true);
+    FlushLayoutTask(frameNode_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -ITEM_MAIN_SIZE / TICK);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0);
+}
+
+/**
+ * @tc.name: AnimateTo006
+ * @tc.desc: Test AnimateTo in Horizontal and RTL Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, AnimateTo006, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->GetScrollableDistance(), HORIZONTAL_SCROLLABLE_DISTANCE);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -HORIZONTAL_SCROLLABLE_DISTANCE);
+
+    /**
+     * @tc.steps: step1. AnimateTo the position without animation
+     * @tc.expected: AnimateTo the position
+     */
+    positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), ITEM_MAIN_SIZE - HORIZONTAL_SCROLLABLE_DISTANCE);
+
+    /**
+     * @tc.steps: step2. AnimateTo the position with animation
+     * @tc.expected: AnimateTo the bottom, can not over scroll
+     */
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    positionController_->AnimateTo(Dimension(0), 0, nullptr, true);
+    FlushLayoutTask(frameNode_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), ITEM_MAIN_SIZE / TICK - HORIZONTAL_SCROLLABLE_DISTANCE);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -HORIZONTAL_SCROLLABLE_DISTANCE);
+}
+
+/**
  * @tc.name: ScrollBy001
  * @tc.desc: Test ScrollBy
  * @tc.type: FUNC

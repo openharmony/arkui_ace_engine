@@ -131,6 +131,7 @@ void TimePickerRowPattern::ColumnPatternInitHapticController()
 
 void TimePickerRowPattern::OnModifyDone()
 {
+    Pattern::CheckLocalized();
     if (isFiredTimeChange_ && !isForceUpdate_ && !isDateTimeOptionUpdate_) {
         isFiredTimeChange_ = false;
         ColumnPatternInitHapticController();
@@ -1220,7 +1221,7 @@ bool TimePickerRowPattern::ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<Tim
 {
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (code == KeyCode::KEY_DPAD_UP || code == KeyCode::KEY_DPAD_DOWN) {
-        auto index = (code == KeyCode::KEY_DPAD_UP) ? 0 : 1;
+        auto index = (code == KeyCode::KEY_DPAD_UP) ? -1 : 1;
         pattern->SetCurrentIndex((totalOptionCount + currentIndex + index) % totalOptionCount);
         pattern->FlushCurrentOptions();
         pattern->HandleChangeCallback((code == KeyCode::KEY_DPAD_UP) ? false : true, true);

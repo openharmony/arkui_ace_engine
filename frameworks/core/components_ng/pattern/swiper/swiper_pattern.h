@@ -564,7 +564,9 @@ public:
 
     void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) override
     {
-        frameRateRange_[type] = rateRange;
+        if (rateRange) {
+            frameRateRange_[type] = rateRange;
+        }
     }
     void UpdateNodeRate();
     int32_t GetMaxDisplayCount() const;
@@ -624,7 +626,6 @@ public:
         return isTouchDownOnOverlong_;
     }
 
-    bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -647,6 +648,7 @@ private:
     void HandleFocusInternal();
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    bool IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
@@ -691,7 +693,7 @@ private:
     float GetDistanceToEdge() const;
     float MainSize() const;
     float GetMainContentSize() const;
-    void FireChangeEvent(int32_t preIndex, int32_t currentIndex) const;
+    void FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout = false) const;
     void FireAnimationStartEvent(int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt = false) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
@@ -731,7 +733,7 @@ private:
     std::pair<int32_t, SwiperItemInfo> GetFirstItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetLastItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
-    void OnIndexChange();
+    void OnIndexChange(bool isInLayout = false);
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
@@ -764,10 +766,12 @@ private:
     void SetLazyForEachLongPredict(bool useLazyLoad) const;
     void SetLazyLoadIsLoop() const;
     void SetLazyForEachFlag() const;
+    float GetVelocityCoefficient();
     int32_t ComputeNextIndexByVelocity(float velocity, bool onlyDistance = false) const;
     void UpdateCurrentIndex(int32_t index);
     void OnSpringAnimationStart(float velocity);
     void OnSpringAnimationFinish();
+    float EstimateSpringOffset(float realOffset);
     void OnSpringAndFadeAnimationFinish();
     void OnFadeAnimationStart();
     int32_t TotalDisPlayCount() const;
@@ -916,6 +920,10 @@ private:
     {
         return hasCachedCapture_ && GetLeftCaptureNode() && GetRightCaptureNode();
     }
+    void UpdateTranslateForCaptureNode(const OffsetF& offset, bool cancel = false);
+    void UpdateFinalTranslateForSwiperItem(const SwiperLayoutAlgorithm::PositionMap& itemPosition);
+    void UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::PositionMap& itemPosition,
+        const OffsetF& offset, bool cancel = false);
     void UpdateTargetCapture(bool forceUpdate);
     void CreateCaptureCallback(int32_t targetIndex, int32_t captureId, bool forceUpdate);
     void UpdateCaptureSource(std::shared_ptr<Media::PixelMap> pixelMap, int32_t captureId, int32_t targetIndex);
@@ -953,6 +961,7 @@ private:
 
     bool IsItemOverlay() const;
     void UpdateIndicatorOnChildChange();
+    void UpdateDigitalIndicator();
 
     void CheckSpecialItemCount() const;
     int32_t CheckIndexRange(int32_t index) const;
@@ -998,6 +1007,7 @@ private:
 
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
+    float springOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
     float groupTurnPageRate_ = 0.0f;
     float translateAnimationEndPos_ = 0.0f;
@@ -1064,6 +1074,7 @@ private:
     std::optional<int32_t> preTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;
+    std::optional<int32_t> oldRealTotalCount_;
     std::optional<float> placeItemWidth_;
     float currentDelta_ = 0.0f;
     // cumulated delta in a single drag event
@@ -1083,6 +1094,7 @@ private:
     bool isIndicatorLongPress_ = false;
     bool stopIndicatorAnimation_ = true;
     bool isTouchPad_ = false;
+    bool isUsingTouchPad_ = false;
     bool fadeAnimationIsRunning_ = false;
     bool autoLinearReachBoundary = false;
     bool needAdjustIndex_ = false;

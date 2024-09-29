@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include <memory>
 
 #include "include/utils/SkParsePath.h"
 #include "modifier/rs_property.h"
@@ -33,6 +34,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
@@ -4475,14 +4477,30 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
     CHECK_NULL_VOID(rsNode_);
     auto& gradientProperty = GetOrCreateGradient();
     Gradient gradient;
-    if (gradientProperty->HasLinearGradient()) {
-        gradient = gradientProperty->GetLinearGradientValue();
-    }
-    if (gradientProperty->HasRadialGradient()) {
-        gradient = gradientProperty->GetRadialGradientValue();
-    }
-    if (gradientProperty->HasSweepGradient()) {
-        gradient = gradientProperty->GetSweepGradientValue();
+    if (gradientProperty->HasLastGradientType()) {
+        switch (gradientProperty->GetLastGradientTypeValue()) {
+            case GradientType::LINEAR:
+                gradient = gradientProperty->GetLinearGradientValue();
+                break;
+            case GradientType::RADIAL:
+                gradient = gradientProperty->GetRadialGradientValue();
+                break;
+            case GradientType::SWEEP:
+                gradient = gradientProperty->GetSweepGradientValue();
+                break;
+            default:
+                return;
+        }
+    } else {
+        if (gradientProperty->HasLinearGradient()) {
+            gradient = gradientProperty->GetLinearGradientValue();
+        }
+        if (gradientProperty->HasRadialGradient()) {
+            gradient = gradientProperty->GetRadialGradientValue();
+        }
+        if (gradientProperty->HasSweepGradient()) {
+            gradient = gradientProperty->GetSweepGradientValue();
+        }
     }
     if (!gradientStyleModifier_) {
         gradientStyleModifier_ = std::make_shared<GradientStyleModifier>(WeakClaim(this));
@@ -5153,6 +5171,14 @@ void RosenRenderContext::SetUsingContentRectForRenderFrame(bool value, bool adju
     adjustRSFrameByContentRect_ = adjustRSFrameByContentRect;
 }
 
+void RosenRenderContext::SetSecurityLayer(bool isSecure)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSecurityLayer(isSecure);
+}
+
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -5215,6 +5241,15 @@ void RosenRenderContext::ClearDrawCommands()
 {
     StartRecording();
     StopRecordingIfNeeded();
+}
+
+void RosenRenderContext::RemoveContentModifier(const RefPtr<ContentModifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+    auto modifierAdapter = std::static_pointer_cast<ContentModifierAdapter>(ConvertContentModifier(modifier));
+    CHECK_NULL_VOID(modifierAdapter);
+    rsNode_->RemoveModifier(modifierAdapter);
 }
 
 void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)

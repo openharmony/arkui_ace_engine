@@ -808,6 +808,8 @@ public:
     void DumpFocusTree(int32_t depth, bool hasJson = false);
     void DumpFocusNodeTree(int32_t depth);
     void DumpFocusScopeTree(int32_t depth);
+    void DumpFocusUie();
+    void DumpFocusUieInJson(std::unique_ptr<JsonValue>& json);
 
     bool OnClick(const KeyEvent& event);
 
@@ -1007,7 +1009,7 @@ public:
     
     static double GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step);
 
-    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut = true);
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     void RemoveFocusScopeIdAndPriority();
     bool AcceptFocusOfPriorityChild();
@@ -1122,6 +1124,8 @@ private:
 
     bool SkipFocusMoveBeforeRemove();
 
+    bool IsArrowKeyStepOut(FocusStep moveStep);
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
@@ -1166,6 +1170,7 @@ private:
     bool isFocusScope_ { false };
     bool isGroup_ { false };
     FocusPriority focusPriority_ = FocusPriority::AUTO;
+    bool arrowKeyStepOut_ { true };
 };
 } // namespace OHOS::Ace::NG
 

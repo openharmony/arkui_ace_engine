@@ -983,7 +983,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubAddGestureToGestureHierarchyTest0
      * @tc.steps: step2. Invoke AddGestureToGestureHierarchy.
      * @tc.expected: gesture is null.
      */
-    guestureEventHub->AddGestureToGestureHierarchy(nullptr);
+    guestureEventHub->AddGestureToGestureHierarchy(nullptr, false);
 }
 
 /**

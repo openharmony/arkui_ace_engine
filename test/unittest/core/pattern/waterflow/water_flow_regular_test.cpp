@@ -88,6 +88,58 @@ HWTEST_F(WaterFlowTestNg, ScrollToEdge001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToEdge006
+ * @tc.desc: Test ScrollToEdge with footer and OffsetEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToEdge006, TestSize.Level1)
+{
+    bool isReachEndCalled = false;
+    auto reachEnd = [&isReachEndCalled]() { isReachEndCalled = true; };
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetOnReachEnd(reachEnd);
+    CreateWaterFlowItems(100);
+    CreateDone();
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->endIndex_, 99);
+    EXPECT_EQ(GetChildY(frameNode_, 100), 550.0f);
+    EXPECT_EQ(GetChildOffset(frameNode_, info->footerIndex_), OffsetF(0.0f, 750.0f));
+    EXPECT_TRUE(info->offsetEnd_);
+    EXPECT_TRUE(isReachEndCalled);
+}
+
+/**
+ * @tc.name: ScrollToEdge007
+ * @tc.desc: Test ScrollToEdge with footer and OffsetEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToEdge007, TestSize.Level1)
+{
+    bool isReachEndCalled = false;
+    auto reachEnd = [&isReachEndCalled]() { isReachEndCalled = true; };
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetFooter(GetDefaultHeaderBuilder());
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetOnReachEnd(reachEnd);
+    CreateWaterFlowItems(3);
+    CreateDone();
+
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->endIndex_, 2);
+    EXPECT_EQ(GetChildY(frameNode_, 3), 0.0f);
+    EXPECT_TRUE(info->itemStart_);
+    EXPECT_TRUE(info->offsetEnd_);
+    EXPECT_FALSE(isReachEndCalled);
+}
+
+/**
  * @tc.name: Constraint001
  * @tc.desc: Test Layout when the layoutConstraint changes.
  * @tc.type: FUNC

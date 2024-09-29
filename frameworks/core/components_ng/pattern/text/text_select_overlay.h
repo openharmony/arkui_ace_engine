@@ -76,6 +76,9 @@ public:
         return true;
     }
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+    void TriggerScrollableParentToScroll(
+        const RefPtr<ScrollablePattern> scrollableParent, const Offset& globalOffset, bool isStopAutoScroll);
+    const RefPtr<ScrollablePattern> FindScrollableParent();
 
 protected:
     virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
@@ -91,9 +94,6 @@ protected:
     bool selectTextUseTopHandle = false;
 
 private:
-    const RefPtr<ScrollablePattern> FindScrollableParent();
-    void TriggerScrollableParentToScroll(
-        const RefPtr<ScrollablePattern> scrollableParent, const GestureEvent& event, bool isStopAutoScroll);
     OffsetF GetHotPaintOffset();
     OffsetF handleGlobalOffset_;
     bool isDraggingFirstHandle_ = true;

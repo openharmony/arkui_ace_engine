@@ -324,8 +324,7 @@ public:
     static void NotifyPerfMonitorPageMsg(const std::string& pageName);
 
     // type: will_show + on_show, will_hide + on_hide, hide, show, willShow, willHide
-    void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged, bool isFromStandard);
-    void NotifyDialogChange(bool isShow, bool isNavigationChanged);
+    void NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isFromStandard);
     void NotifyPageHide(const std::string& pageName);
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
@@ -337,7 +336,8 @@ public:
 
     void SetNavigationTransition(const OnNavigationAnimation navigationAnimation)
     {
-        if (currentProxy_ && !currentProxy_->GetIsFinished()) {
+        auto currentProxy = GetTopNavigationProxy();
+        if (currentProxy && !currentProxy->GetIsFinished()) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "not support to update callback during animation");
             return;
         }
@@ -394,10 +394,14 @@ public:
         return isFinishInteractiveAnimation_;
     }
 
-    const RefPtr<NavigationTransitionProxy>& GetNavigationProxy() const
+    const RefPtr<NavigationTransitionProxy> GetTopNavigationProxy() const
     {
-        return currentProxy_;
+        return proxyList_.empty() ? nullptr : proxyList_.back();
     }
+
+    RefPtr<NavigationTransitionProxy> GetProxyById(uint64_t id) const;
+
+    void RemoveProxyById(uint64_t id);
 
     bool IsCurTopNewInstance() const
     {
@@ -423,6 +427,11 @@ public:
     std::unique_ptr<JsonValue> GetNavdestinationJsonArray();
     void RestoreJsStackIfNeeded();
 
+    RefPtr<FrameNode> GetNavBasePageNode() const
+    {
+        return pageNode_.Upgrade();
+    }
+    
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
@@ -514,7 +523,7 @@ private:
     RefPtr<NavigationStack> navigationStack_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_;
-    RefPtr<NavigationTransitionProxy> currentProxy_;
+    std::vector<RefPtr<NavigationTransitionProxy>> proxyList_;
     RectF dragRect_;
     WeakPtr<FrameNode> pageNode_;
     bool isFullPageNavigation_ = false;

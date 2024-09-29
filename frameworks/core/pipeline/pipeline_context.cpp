@@ -130,7 +130,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
 
 PipelineContext::~PipelineContext()
 {
-    LOG_DESTROY();
+    LOGI("PipelineContext destroyed");
 }
 
 void PipelineContext::FlushPipelineWithoutAnimation()
@@ -325,15 +325,6 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     if (containerModal) {
         containerModal->ShowTitle(isShow, hasDeco);
     }
-}
-
-void PipelineContext::SetContainerWindow(bool isShow)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SetContainerWindow(isShow, density_); // set container window show state to render service
-    }
-#endif
 }
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)

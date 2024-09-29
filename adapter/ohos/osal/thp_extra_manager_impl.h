@@ -25,9 +25,8 @@ namespace OHOS::Ace::NG {
 class THPExtraManagerImpl : public THPExtraManager {
 public:
     THPExtraManagerImpl() = default;
-    ~THPExtraManagerImpl() override;
+    ~THPExtraManagerImpl() override = default;
     bool Init(void) override;
-    void Deinit(void) override;
     const char* ThpExtraRunCommand(const char* command, const char* parameters) override;
     int32_t GetHeight(void) const override;
     int32_t GetWidth(void) const override;

@@ -60,6 +60,8 @@ constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
+constexpr char PID_FLAG[] = "pidflag";
+constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -740,10 +742,11 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto rsWindow = window->GetRSWindow();
     auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
+    std::shared_ptr<MMI::PointerEvent> newPointerEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
     if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
-        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
+        Platform::CalculateWindowCoordinate(selfGlobalOffset, newPointerEvent, scale, udegree);
     } else {
-        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
+        Platform::CalculatePointerEvent(selfGlobalOffset, newPointerEvent, scale, udegree);
     }
     AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
@@ -758,9 +761,9 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         }
     }
     focusState_ = pipeline->IsWindowFocused();
-    DispatchPointerEvent(pointerEvent);
+    DispatchPointerEvent(newPointerEvent);
     if (pipeline->IsWindowFocused() && needReSendFocusToUIExtension_ &&
-        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
+        newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
         HandleFocusEvent();
         needReSendFocusToUIExtension_ = false;
     }
@@ -1046,7 +1049,7 @@ void UIExtensionPattern::SetSyncCallbacks(
 
 void UIExtensionPattern::FireSyncCallbacks()
 {
-    UIEXT_LOGD("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    UIEXT_LOGI("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onSyncOnCallbackList_) {
         if (callback) {
@@ -1063,7 +1066,7 @@ void UIExtensionPattern::SetAsyncCallbacks(
 
 void UIExtensionPattern::FireAsyncCallbacks()
 {
-    UIEXT_LOGD("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    UIEXT_LOGI("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onAsyncOnCallbackList_) {
         if (callback) {
@@ -1307,6 +1310,7 @@ const char* UIExtensionPattern::ToString(AbilityState state)
 void UIExtensionPattern::DumpInfo()
 {
     CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("Dump UIE Info In String Format");
     DumpLog::GetInstance().AddDesc(std::string("focusWindowId: ").append(std::to_string(focusWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("realHostWindowId: ").append(std::to_string(realHostWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("want: ").append(want_));
@@ -1318,10 +1322,50 @@ void UIExtensionPattern::DumpInfo()
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     std::vector<std::string> params = container->GetUieParams();
-    std::vector<std::string> dumpInfo;
-    sessionWrapper_->NotifyUieDump(params, dumpInfo);
-    for (std::string info : dumpInfo) {
-        DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
+    // Use -nouie to choose not dump extra uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        UIEXT_LOGI("Not Support Dump Extra UIE Info");
+    } else {
+        if (!container->IsUIExtensionWindow()) {
+            params.push_back(PID_FLAG);
+        }
+        params.push_back(std::to_string(getpid()));
+        std::vector<std::string> dumpInfo;
+        sessionWrapper_->NotifyUieDump(params, dumpInfo);
+        for (std::string info : dumpInfo) {
+            DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
+        }
+    }
+}
+
+void UIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("Dump UIE Info In Json Format");
+    json->Put("focusWindowId: ", std::to_string(focusWindowId_).c_str());
+    json->Put("realHostWindowId: ", std::to_string(realHostWindowId_).c_str());
+    json->Put("want: ", want_.c_str());
+    json->Put("displayArea: ", displayArea_.ToString().c_str());
+    json->Put("reason: ", std::to_string(sessionWrapper_->GetReasonDump()).c_str());
+    json->Put("focusStatus: ", std::to_string(focusState_).c_str());
+    json->Put("abilityState: ", ToString(state_));
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    // Use -nouie to choose not dump extra uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        UIEXT_LOGI("Not Support Dump Extra UIE Info");
+    } else {
+        if (!container->IsUIExtensionWindow()) {
+            params.push_back(PID_FLAG);
+        }
+        params.push_back(std::to_string(getpid()));
+        std::vector<std::string> dumpInfo;
+        sessionWrapper_->NotifyUieDump(params, dumpInfo);
+        for (std::string info : dumpInfo) {
+            json->Put("UI Extension info: ", info.c_str());
+        }
     }
 }
 } // namespace OHOS::Ace::NG

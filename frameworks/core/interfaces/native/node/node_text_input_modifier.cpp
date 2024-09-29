@@ -707,6 +707,7 @@ void SetTextInputCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const str
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetCleanNodeStyle(frameNode, static_cast<CleanNodeStyle>(style));
     TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, false);
     // set icon size
     CalcDimension iconSize = CalcDimension(size->value, static_cast<DimensionUnit>(size->unit));
     if (LessNotEqual(iconSize.Value(), 0.0)) {
@@ -730,6 +731,7 @@ void resetTextInputCancelButton(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetCleanNodeStyle(frameNode, CleanNodeStyle::INPUT);
     TextFieldModelNG::SetIsShowCancelButton(frameNode, false);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
 }
 
 ArkUI_CharPtr GetTextInputPlaceholder(ArkUINodeHandle node)
@@ -1762,6 +1764,21 @@ void ResetTextInputSelectionMenuOptions(ArkUINodeHandle node)
     TextFieldModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
     TextFieldModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
+
+void SetTextInputWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto widthValue = std::string(value);
+    TextFieldModelNG::SetWidth(frameNode, widthValue);
+}
+
+void ResetTextInputWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ClearWidth(frameNode);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -1815,7 +1832,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputShowKeyBoardOnFocus, ResetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines,
         GetTextInputNumberOfLines, ResetTextInputNumberOfLines, SetTextInputMargin, ResetTextInputMargin,
         SetTextInputCaret, GetTextInputController, GetTextInputMargin, SetTextInputEnablePreviewText,
-        ResetTextInputEnablePreviewText, SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions };
+        ResetTextInputEnablePreviewText, SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions,
+        SetTextInputWidth, ResetTextInputWidth };
     return &modifier;
 }
 

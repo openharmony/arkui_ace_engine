@@ -267,6 +267,7 @@ public:
     void RemoveChild(const RefPtr<RenderContext>& renderContext) override;
     void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
+    void SetSecurityLayer(bool isSecure) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
@@ -303,6 +304,8 @@ public:
     void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;
+
+    void RemoveContentModifier(const RefPtr<ContentModifier>& modifier) override;
 
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
     void ScaleAnimation(const AnimationOption& option, double begin, double end) override;

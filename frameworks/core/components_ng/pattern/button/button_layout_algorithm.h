@@ -48,6 +48,7 @@ private:
     static void MeasureCircleButton(LayoutWrapper* layoutWrapper);
     static Dimension GetFirstValidRadius(const BorderRadiusProperty& borderRadius);
     static float GetDefaultHeight(LayoutWrapper* layoutWrapper);
+    static float GetDefaultBorderRadius(LayoutWrapper* layoutWrapper);
     SizeF childSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ButtonLayoutAlgorithm);

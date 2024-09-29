@@ -42,6 +42,21 @@ public:
     CanvasPattern() = default;
     ~CanvasPattern() override;
 
+    void SetOnContext2DAttach(std::function<void()>&& callback);
+    void SetOnContext2DDetach(std::function<void()>&& callback);
+    void FireOnContext2DAttach();
+    void FireOnContext2DDetach();
+
+    int32_t GetId() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, -1);
+        return host->GetId();
+    }
+
+    void AttachRenderContext();
+    void DetachRenderContext();
+
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
         return RenderContext::ContextParam { RenderContext::ContextType::INCREMENTAL_CANVAS };
@@ -159,6 +174,7 @@ public:
     TransformParam GetTransform() const;
     void SetDensity(double density);
     void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform);
+    int32_t GetId();
 
     void SaveLayer();
     void RestoreLayer();
@@ -184,6 +200,8 @@ private:
     void OnModifyDone() override;
     void UpdateTextDefaultDirection();
 
+    std::function<void()> onContext2DAttach_;
+    std::function<void()> onContext2DDetach_;
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
     SizeF dirtyPixelGridRoundSize_ = { -1, -1 };

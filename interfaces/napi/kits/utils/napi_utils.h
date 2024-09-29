@@ -58,7 +58,10 @@ enum class ResourceType : uint32_t {
 enum class ResourceStruct { CONSTANT, DYNAMIC_V1, DYNAMIC_V2 };
 
 size_t GetParamLen(napi_env env, napi_value param);
+
 bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_valuetype& valueType);
+
+bool NapiStringToString(napi_env env, napi_value value, std::string& retStr);
 
 void NapiThrow(napi_env env, const std::string& message, int32_t errCode);
 
@@ -77,6 +80,8 @@ void CompleteResourceParamV2(napi_env env, napi_value value);
 void ModifyResourceParam(napi_env env, napi_value value, const ResourceType& resType, const std::string& resName);
 
 bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
+
+void PreFixEmptyBundleName(napi_env env, napi_value value);
 
 bool ParseDollarResource(
     napi_env env, napi_value value, ResourceType& resType, std::string& resName, std::string& moduleName);

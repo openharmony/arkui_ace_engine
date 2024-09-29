@@ -141,6 +141,7 @@ void TextClockPattern::UpdateTextLayoutProperty(
 
 void TextClockPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textNode = GetTextNode();

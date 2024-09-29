@@ -29,9 +29,7 @@ namespace OHOS::AAFwk {
 class Want;
 class WantParams;
 } // namespace OHOS::AAFwk
-namespace OHOS::AppExecFwk {
-struct BundleInfo;
-} // namespace OHOS::AppExecFwk
+
 namespace OHOS::Ace {
 struct AIWriteInfo {
     // The position relative to the beginning and end of all text.
@@ -63,7 +61,6 @@ public:
         std::function<void(std::vector<uint8_t>&)> resultCallback);
     std::vector<uint8_t> GetBufferParam(const std::string& key, const AAFwk::WantParams& wantParams);
     bool GetBoolParam(const std::string& key, const AAFwk::WantParams& wantParams);
-    bool GetAISupportFromMetadata(const std::string& bundleName, const std::string& abilityName);
     uint32_t GetSelectLengthOnlyText(const std::wstring& content);
     void SetPipelineContext(const WeakPtr<NG::PipelineContext>& pipelineContext)
     {
@@ -99,7 +96,6 @@ public:
     }
 private:
     void SetWantParams(const AIWriteInfo& info, AAFwk::Want& want);
-    bool GetAISupportFromBundleInfo(const AppExecFwk::BundleInfo& bundleInfo, const std::string& abilityName);
     void SendData();
     void SetArrayParam(AAFwk::WantParams& wantParams, const std::string& key, const std::vector<uint8_t>& value);
     void BindModalUIExtensionCallback(

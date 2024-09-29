@@ -109,20 +109,6 @@ enum class InputOperation {
     SET_PREVIEW_FINISH,
 };
 
-enum {
-    ACTION_SELECT_ALL, // Smallest code unit.
-    ACTION_UNDO,
-    ACTION_REDO,
-    ACTION_CUT,
-    ACTION_COPY,
-    ACTION_PASTE,
-    ACTION_SHARE,
-    ACTION_PASTE_AS_PLAIN_TEXT,
-    ACTION_REPLACE,
-    ACTION_ASSIST,
-    ACTION_AUTOFILL,
-};
-
 struct PasswordModeStyle {
     Color bgColor;
     Color textColor;
@@ -300,6 +286,7 @@ public:
     void InsertValueOperation(const SourceAndValueInfo& info);
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::string insertValue, int32_t maxLength);
     void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
+    float MeasureCounterNodeHeight();
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
@@ -1537,6 +1524,8 @@ public:
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
+    void StopContentScroll();
+    void UpdateContentScroller(const Offset& localOffset);
 
 protected:
     virtual void InitDragEvent();
@@ -1683,6 +1672,7 @@ private:
     void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
+    void SetAccessibilityUnitAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();
@@ -1793,8 +1783,6 @@ private:
     bool HasAutoFillPasswordNode();
     bool IsTriggerAutoFillPassword();
 
-    void UpdateContentScroller(const Offset& localOffset);
-    void StopContentScroll();
     void PauseContentScroll();
     void ScheduleContentScroll(float delay);
     void UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset);

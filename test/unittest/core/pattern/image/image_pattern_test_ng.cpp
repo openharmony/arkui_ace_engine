@@ -391,6 +391,8 @@ HWTEST_F(ImagePatternTestNg, OnVisibleAreaChange001, TestSize.Level1)
      * @tc.steps: step2. call OnVisibleAreaChange.
      * @tc.expected:
      */
+    auto pipeline = frameNode->GetContextRefPtr();
+    imagePattern->animator_->AttachScheduler(pipeline);
     SystemProperties::debugEnabled_ = true;
     imagePattern->animator_->status_ = OHOS::Ace::Animator::Status::PAUSED;
     imagePattern->imageType_ = ImagePattern::ImageType::ANIMATION;

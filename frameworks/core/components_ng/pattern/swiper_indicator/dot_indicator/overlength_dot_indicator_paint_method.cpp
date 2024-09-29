@@ -45,6 +45,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
     CHECK_NULL_VOID(geometryNode);
 
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
     IsCustomSizeValue_ = paintProperty->GetIsCustomSizeValue(false);
     dotIndicatorModifier_->SetAxis(axis_);
     dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
@@ -78,6 +79,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* pain
 void OverlengthDotIndicatorPaintMethod::UpdateNormalIndicator(
     LinearVector<float>& itemHalfSizes, const PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     dotIndicatorModifier_->SetTurnPageRate(turnPageRate_);
     dotIndicatorModifier_->SetGestureState(gestureState_);
     dotIndicatorModifier_->SetIsCustomSizeValue(IsCustomSizeValue_);
@@ -98,6 +100,7 @@ void OverlengthDotIndicatorPaintMethod::UpdateNormalIndicator(
 
 void OverlengthDotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     auto [longPointCenterX, itemHalfSizes] = CalculateLongPointCenterX(paintWrapper);
     longPointCenterX_ = longPointCenterX;
     if (dotIndicatorModifier_->GetIsHover()) {

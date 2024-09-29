@@ -64,7 +64,7 @@ void GridLayoutUtils::PreloadGridItems(
 
 void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern, const BuildGridItemCallback& buildCb)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = pattern->GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = AceType::WeakClaim(AceType::RawPtr(pattern)), buildCb](int64_t deadline, bool _) {
         ACE_SCOPED_TRACE("Grid preload items");

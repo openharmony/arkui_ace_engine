@@ -31,7 +31,7 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
     jsCanvasImageData->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsCanvasImageData));
 
-    if (args.Length() < 2) { // The number of parameters is less than 2
+    if (args.Length() < 2) { // Invalid argument, the arguments should be at least 2: width, height
         return;
     }
     int32_t finalWidth = 0;
@@ -48,7 +48,7 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
     jsCanvasImageData->width_ = finalWidth;
     jsCanvasImageData->height_ = finalHeight;
 
-    if (args.Length() == 2) { // The number of parameters is equal to 2
+    if (args.Length() == 2) { // 2 arguments: width, height
         JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(result);
         args.SetSize(static_cast<size_t>(arrayBuffer->ByteLength()));
         // return the transparent black image
@@ -59,8 +59,7 @@ void JSCanvasImageData::Constructor(const JSCallbackInfo& args)
         }
         jsCanvasImageData->colorArray_ =
             JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
-    } else if (args.Length() >= 3 && // The number of parameters is not less than 3
-               args[THIRD_PARAM]->IsUint8ClampedArray()) {
+    } else if (args.Length() >= 3 && args[THIRD_PARAM]->IsUint8ClampedArray()) { // 3 arguments: width, height, data
         JSRef<JSUint8ClampedArray> data = JSRef<JSUint8ClampedArray>::Cast(args[THIRD_PARAM]);
         auto buffer = data->GetArrayBuffer();
         args.SetSize(static_cast<size_t>(buffer->ByteLength()));

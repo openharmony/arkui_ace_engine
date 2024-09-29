@@ -115,6 +115,7 @@ void EventManager::CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needA
     if (refereeNG_->CheckEventTypeChange(touchPoint.sourceType)) {
         AxisEvent axisEvent;
         FalsifyCancelEventAndDispatch(axisEvent);
+        responseCtrl_->Reset();
         refereeNG_->CleanAll(true);
         touchTestResults_.clear();
         axisTouchTestResults_.clear();
@@ -131,6 +132,7 @@ void EventManager::CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needA
     if (lastDownFingerNumber_ == 0 && refereeNG_->QueryAllDone()) {
         FalsifyCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
+        responseCtrl_->Reset();
         refereeNG_->CleanAll();
         CleanGestureEventHub();
     }
@@ -209,6 +211,7 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
         eventTree_.eventTreeList.clear();
         FalsifyCancelEventAndDispatch(touchPoint);
         refereeNG_->ForceCleanGestureReferee();
+        responseCtrl_->Reset();
         refereeNG_->CleanAll();
 
         TouchTestResult reHitTestResult;
@@ -365,6 +368,7 @@ void EventManager::TouchTest(
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
         TouchEvent touchEvent;
         FalsifyCancelEventAndDispatch(touchEvent, event.sourceTool != lastSourceTool_);
+        responseCtrl_->Reset();
         refereeNG_->CleanAll(true);
         if (event.sourceTool != lastSourceTool_) {
             touchTestResults_.clear();
@@ -970,10 +974,15 @@ bool EventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPtr<N
 
 bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::FrameNode>& focusNode)
 {
-    CHECK_NULL_RETURN(focusNode, false);
+    if (!focusNode) {
+        TAG_LOGD(AceLogTag::ACE_FOCUS,
+            "Cannot dispatch key event: code:%{private}d/action:%{public}d/isPreIme:%{public}d on node: nullptr",
+            event.code, event.action, event.isPreIme);
+        return false;
+    }
     TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Dispatch key event: code:%{private}d/action:%{public}d on node: %{public}s/%{public}d.", event.code,
-        event.action, focusNode->GetTag().c_str(), focusNode->GetId());
+        "Dispatch key event: code:%{private}d/action:%{public}d/isPreIme:%{public}d on node: %{public}s/%{public}d.",
+        event.code, event.action, event.isPreIme, focusNode->GetTag().c_str(), focusNode->GetId());
     isKeyConsumed_ = false;
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
@@ -1132,6 +1141,7 @@ void EventManager::AccessibilityHoverTest(
     CHECK_NULL_VOID(frameNode);
     if (downFingerIds_.empty()) {
         FalsifyCancelEventAndDispatch(event);
+        responseCtrl_->Reset();
         refereeNG_->CleanAll();
         touchTestResults_.clear();
         downFingerIds_.clear();
@@ -1871,6 +1881,7 @@ bool EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
 {
     auto container = Container::GetContainer(instanceId_);
     if (container && container->GetUIContentType() == UIContentType::SECURITY_UI_EXTENSION) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Do not dispatch keyboard shortcut because in security UEC");
         return false;
     }
     if (event.action != KeyAction::DOWN) {

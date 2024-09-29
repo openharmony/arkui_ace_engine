@@ -332,7 +332,9 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     AddPageTransitionTrace(outPageNode, inPageNode);
     if (needTransition) {
         StartTransition(outPageNode, inPageNode, RouteType::POP);
-        inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        if (inPageNode) {
+            inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        }
         return true;
     }
     stageNode_->RemoveChild(pageNode);
@@ -393,6 +395,9 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         }
         stageNode_->RebuildRenderContextTree();
         StartTransition(outPageNode, inPageNode, RouteType::POP);
+        if (inPageNode) {
+            inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        }
         return true;
     }
     for (int32_t current = 0; current < popSize; ++current) {
@@ -455,6 +460,9 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     FireAutoSave(outPageNode, node);
     if (needTransition) {
         StartTransition(outPageNode, node, RouteType::PUSH);
+        if (node) {
+            node->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        }
     }
     pipeline->RequestFrame();
     return true;

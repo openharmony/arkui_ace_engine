@@ -686,9 +686,10 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg012, TestSize.Level1)
     menuParam.isShow = false;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     auto targetNode1 = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto callBak = targetNode1->GetDestroyCallback();
-    for (const auto& destroyCallback : targetNode1->GetDestroyCallback()) {
-        destroyCallback();
+    for (const auto& destroyCallback : targetNode1->destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
     }
     EXPECT_NE(mainNode, nullptr);
 }
@@ -731,9 +732,10 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg013, TestSize.Level1)
     menuParam.isShow = false;
     viewAbstractModelNG.BindContextMenu(type, buildFunc, menuParam, previewBuildFunc);
     auto targetNode1 = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto callBak = targetNode1->GetDestroyCallback();
-    for (const auto& destroyCallback : targetNode1->GetDestroyCallback()) {
-        destroyCallback();
+    for (const auto& destroyCallback : targetNode1->destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
     }
     EXPECT_NE(mainNode, nullptr);
 }
@@ -777,8 +779,10 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg014, TestSize.Level1)
     viewAbstractModelNG.BindSheet(true, nullptr, nullptr, nullptr, sheetStyle, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     auto targetNode1 = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    for (const auto& destroyCallback : targetNode1->GetDestroyCallback()) {
-        destroyCallback();
+    for (const auto& destroyCallback : targetNode1->destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
     }
     auto overlay2 = pagePatern->GetOverlayManager();
     EXPECT_NE(overlay2, nullptr);

@@ -175,7 +175,7 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
         touchRestrict.inputEventType == InputEventType::AXIS || IsBelongToMultiItemNode(frameNode)) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
-            "frameNode draggable is %{public}d, custom set is %{public}d,",
+            "frameNode draggable is %{public}d, custom set is %{public}d",
             gestureHub->IsDragForbidden(), frameNode->IsDraggable(), frameNode->IsCustomerSet());
         return false;
     }
@@ -249,7 +249,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
-        auto renderContext = frameNode->GetRenderContext();
         if (info.GetSourceDevice() != SourceType::MOUSE) {
             if (gestureHub->GetTextDraggable()) {
                 auto pattern = frameNode->GetPattern<TextBase>();
@@ -267,15 +266,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 }
             } else {
                 HideEventColumn();
-                if (gestureHub->GetTextDraggable()) {
-                    HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-                } else {
-                    HideFilter();
-                    RecordMenuWrapperNodeForDrag(frameNode->GetId());
-                    SubwindowManager::GetInstance()->HideMenuNG(false, true);
-                }
-            }
-            if (!gestureHub->GetTextDraggable()) {
+                HideFilter();
+                RecordMenuWrapperNodeForDrag(frameNode->GetId());
+                SubwindowManager::GetInstance()->HideMenuNG(false, true);
                 frameNode->SetOptionsAfterApplied(actuator->GetOptionsAfterApplied());
             }
         }
@@ -1618,7 +1611,8 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         TAG_LOGD(AceLogTag::ACE_DRAG, "In removeColumnNode callback, set DragWindowVisible true.");
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);
-        if (!gestureHub->IsPixelMapNeedScale()) {
+        auto dragDropManager = pipeline->GetDragDropManager();
+        if (!gestureHub->IsPixelMapNeedScale() && dragDropManager && dragDropManager->IsDragging()) {
             InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         }
         gestureHub->SetPixelMap(nullptr);

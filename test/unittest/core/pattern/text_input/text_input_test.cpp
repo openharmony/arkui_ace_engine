@@ -120,6 +120,7 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -127,11 +128,12 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
      */
     auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
     auto stackNode = cleanNodeResponseArea->cleanNode_;
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    auto iconLayoutProperty = iconFrameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(iconLayoutProperty, nullptr);
 
     /**
-     * @tc.steps: step5. create text inco size
+     * @tc.steps: step5. create text icon size
      */
     auto iconSize = Dimension(ICON_SIZE, DimensionUnit::PX);
 
@@ -139,14 +141,14 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
      * @tc.steps: step6. test Update clear node true
      */
     cleanNodeResponseArea->UpdateCleanNode(true);
-    EXPECT_EQ(imageLayoutProperty->calcLayoutConstraint_->selfIdealSize,
+    EXPECT_EQ(iconLayoutProperty->calcLayoutConstraint_->selfIdealSize,
         CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
 
     /**
      * @tc.steps: step7. test Update clear node false
      */
     cleanNodeResponseArea->UpdateCleanNode(false);
-    EXPECT_EQ(imageLayoutProperty->calcLayoutConstraint_->selfIdealSize, CalcSize(CalcLength(0.0), CalcLength(0.0)));
+    EXPECT_EQ(iconLayoutProperty->calcLayoutConstraint_->selfIdealSize, CalcSize(CalcLength(0.0), CalcLength(0.0)));
 }
 
 /**
@@ -163,6 +165,7 @@ HWTEST_F(TextFieldUXTest, CleanNode002, TestSize.Level1)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -248,6 +251,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward002, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -277,6 +281,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward003, TestSize.Level1)
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -355,6 +360,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward002, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -410,6 +416,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward004, TestSize.Level1)
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -1744,6 +1751,7 @@ HWTEST_F(TextFieldUXTest, HandleOnTab001, TestSize.Level1)
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**

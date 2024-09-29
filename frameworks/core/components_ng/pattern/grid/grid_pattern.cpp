@@ -400,7 +400,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             } else {
                 overScroll = gridLayoutInfo_.currentOffset_ - (GetMainContentSize() - itemsHeight);
             }
-            auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
+            auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             offset *= friction;
         }
         auto userOffset = FireOnWillScroll(-offset);
@@ -416,8 +416,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     if (gridLayoutInfo_.reachStart_) {
         if (source == SCROLL_FROM_UPDATE) {
-            auto friction =
-                ScrollablePattern::CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
+            auto friction = CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
             offset *= friction;
         }
         auto userOffset = FireOnWillScroll(-offset);
@@ -761,14 +760,14 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     if (curChildStartIndex != 0 && curMainIndex == curMainStart && nextMainIndex < curMainIndex) {
         // Scroll item up.
         UpdateStartIndex(curChildStartIndex - 1);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         if (pipeline) {
             pipeline->FlushUITasks();
         }
     } else if (curChildEndIndex != childrenCount - 1 && curMainIndex == curMainEnd && nextMainIndex > curMainIndex) {
         // Scroll item down.
         UpdateStartIndex(curChildEndIndex + 1);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         if (pipeline) {
             pipeline->FlushUITasks();
         }
@@ -1179,7 +1178,7 @@ int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
 void GridPattern::ScrollToFocusNodeIndex(int32_t index)
 {
     UpdateStartIndex(index);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
     }
@@ -1200,7 +1199,7 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
         return false;
     }
     auto ret = UpdateStartIndex(scrollToIndex);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
     }
@@ -1558,7 +1557,7 @@ void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
     }
@@ -1745,6 +1744,12 @@ void GridPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(gridLayoutInfo_.childrenCount_));
     DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
     DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
+    property->GetRowsGap().has_value()
+        ? DumpLog::GetInstance().AddDesc("RowsGap:" + std::to_string(property->GetRowsGap().value().Value()))
+        : DumpLog::GetInstance().AddDesc("RowsGap:null");
+    property->GetColumnsGap().has_value()
+        ? DumpLog::GetInstance().AddDesc("ColumnsGap:" + std::to_string(property->GetColumnsGap().value().Value()))
+        : DumpLog::GetInstance().AddDesc("ColumnsGap:null");
     property->GetCachedCount().has_value()
         ? DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value()))
         : DumpLog::GetInstance().AddDesc("CachedCount:null");

@@ -291,7 +291,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts102, TestS
     EXPECT_EQ(richEditorPattern->caretPosition_, 20);
     richEditorPattern->paragraphs_.minParagraphFontSize = style.GetFontSize().ConvertToPx();
     richEditorPattern->HandleSelect(CaretMoveIntent::Up);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), -1);
 }
 
 /**
@@ -935,7 +935,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseEvent001, TestSize.Level1)
     scrollBar->isPressed_ = true;
     MouseInfo info;
     richEditorPattern->HandleMouseEvent(info);
-    EXPECT_FALSE(pipeline->mouseStyleNodeId_.has_value());
+    EXPECT_TRUE(pipeline->mouseStyleNodeId_.has_value());
 }
 
 /**

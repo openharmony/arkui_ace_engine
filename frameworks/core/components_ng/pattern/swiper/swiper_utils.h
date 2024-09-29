@@ -46,7 +46,7 @@ public:
 
     static float GetItemSpace(const RefPtr<SwiperLayoutProperty>& property)
     {
-        if (property->IgnoreItemSpace()) {
+        if (!property || property->IgnoreItemSpace()) {
             return 0.0f;
         }
         auto scale = property->GetLayoutConstraint()->scaleProperty;
@@ -56,6 +56,7 @@ public:
     static LayoutConstraintF CreateChildConstraint(
         const RefPtr<SwiperLayoutProperty>& property, const OptionalSizeF& idealSize, bool getAutoFill)
     {
+        CHECK_NULL_RETURN(property, {});
         auto layoutConstraint = property->CreateChildConstraint();
         layoutConstraint.parentIdealSize = idealSize;
         auto displayCount = property->GetDisplayCount().value_or(1);
@@ -145,6 +146,7 @@ public:
     static void CheckAutoFillDisplayCount(
         RefPtr<SwiperLayoutProperty>& swiperLayoutProperty, float contentWidth, int32_t totalCount)
     {
+        CHECK_NULL_VOID(swiperLayoutProperty);
         bool isAutoFill = swiperLayoutProperty->GetMinSize().has_value();
         if (!isAutoFill) {
             return;

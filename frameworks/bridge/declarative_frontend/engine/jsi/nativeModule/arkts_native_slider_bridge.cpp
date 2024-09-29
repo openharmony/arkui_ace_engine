@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+constexpr int NUM_8 = 8;
 constexpr int SLIDER_MIN = 0;
 constexpr int SLIDER_MAX = 100;
 const char* SLIDER_NODEPTR_OF_UINODE = "nodePtr_";
@@ -679,19 +680,19 @@ static void ParseOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, SliderOptions& o
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(5);
     Local<JSValueRef> directionArg = runtimeCallInfo->GetCallArgRef(6);
     Local<JSValueRef> reverseArg = runtimeCallInfo->GetCallArgRef(7);
-    if (!valueArg.IsNull() && valueArg->IsNumber()) {
+    if (!valueArg.IsNull() && !valueArg->IsUndefined() && valueArg->IsNumber()) {
         options.value = valueArg->ToNumber(vm)->Value();
     }
-    if (!minArg.IsNull() && minArg->IsNumber()) {
+    if (!minArg.IsNull() && !minArg->IsUndefined() && minArg->IsNumber()) {
         options.min = minArg->ToNumber(vm)->Value();
     }
-    if (!maxArg.IsNull() && maxArg->IsNumber()) {
+    if (!maxArg.IsNull() && !maxArg->IsUndefined() && maxArg->IsNumber()) {
         options.max = maxArg->ToNumber(vm)->Value();
     }
-    if (!stepArg.IsNull() && stepArg->IsNumber()) {
+    if (!stepArg.IsNull() && !stepArg->IsUndefined() && stepArg->IsNumber()) {
         options.step = stepArg->ToNumber(vm)->Value();
     }
-    if (!reverseArg.IsNull() && reverseArg->IsBoolean()) {
+    if (!reverseArg.IsNull() && !reverseArg->IsUndefined() && reverseArg->IsBoolean()) {
         options.reverse = reverseArg->ToBoolean(vm)->Value();
     }
     if (GreatOrEqual(options.min, options.max)) {
@@ -702,14 +703,14 @@ static void ParseOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, SliderOptions& o
     GetStep(options);
     GetValue(options);
 
-    if (!styleArg.IsNull() && styleArg->IsNumber()) {
+    if (!styleArg.IsNull() && !styleArg->IsUndefined() && styleArg->IsNumber()) {
         auto tempStyle = styleArg->Int32Value(vm);
         if (tempStyle >= static_cast<int32_t>(SliderMode::OUTSET) &&
                 tempStyle <= static_cast<int32_t>(SliderMode::CAPSULE)) {
             options.style = tempStyle;
         }
     }
-    if (!directionArg.IsNull() && directionArg->IsNumber()) {
+    if (!directionArg.IsNull() && !directionArg->IsUndefined() && directionArg->IsNumber()) {
         auto tempDirection = directionArg->Int32Value(vm);
         if (tempDirection >= static_cast<int32_t>(Axis::VERTICAL) &&
                 tempDirection <= static_cast<int32_t>(Axis::HORIZONTAL)) {
@@ -721,11 +722,16 @@ static void ParseOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, SliderOptions& o
 ArkUINativeModuleValue SliderBridge::SetSliderOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     auto sliderModifier = GetArkUINodeModifiers()->getSliderModifier();
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_EQUAL_RETURN(runtimeCallInfo->GetArgsNumber() != NUM_8, true, panda::JSValueRef::Undefined(vm));
     SliderOptions options;
     ParseOptions(runtimeCallInfo, options);
-    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(runtimeCallInfo->GetCallArgRef(0)->ToNativePointer(vm)->Value());
+    auto pointer = nodeArg->ToNativePointer(vm);
+    CHECK_EQUAL_RETURN(pointer.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(pointer->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     sliderModifier->setStep(nativeNode, options.step);
     sliderModifier->setMinLabel(nativeNode, options.min);
     sliderModifier->setMaxLabel(nativeNode, options.max);

@@ -151,9 +151,17 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
     }
 }
 
-void JSNavDestination::SetHideTitleBar(bool hide)
+void JSNavDestination::SetHideTitleBar(const JSCallbackInfo& info)
 {
-    NavDestinationModel::GetInstance()->SetHideTitleBar(hide);
+    if (info.Length() < 1 || !info[0]->IsBoolean()) {
+        return;
+    }
+
+    bool animated = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        animated = info[1]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetHideTitleBar(info[0]->ToBoolean(), animated);
 }
 
 void JSNavDestination::SetTitle(const JSCallbackInfo& info)
@@ -485,6 +493,44 @@ void JSNavDestination::SetRecoverable(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetRecoverable(recoverable);
 }
 
+void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || info[0]->IsArray()) {
+        std::vector<NG::BarItem> toolBarItems;
+        if (info[0]->IsArray()) {
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            JSNavigationUtils::ParseToolbarItemsConfiguration(
+                targetNode, info, JSRef<JSArray>::Cast(info[0]), toolBarItems);
+        }
+        NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
+    } else if (info[0]->IsObject()) {
+        auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+        if (builderFuncParam->IsFunction()) {
+            ViewStackModel::GetInstance()->NewScope();
+            JsFunction jsBuilderFunc(builderFuncParam);
+            jsBuilderFunc.Execute();
+            auto customNode = ViewStackModel::GetInstance()->Finish();
+            NavDestinationModel::GetInstance()->SetCustomToolBar(customNode);
+        }
+    }
+    NG::NavigationToolbarOptions options;
+    JSNavigationUtils::ParseToolbarOptions(info, options);
+    NavDestinationModel::GetInstance()->SetToolBarOptions(std::move(options));
+}
+
+void JSNavDestination::SetHideToolBar(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsBoolean()) {
+        return;
+    }
+
+    bool animated = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        animated = info[1]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetHideToolBar(info[0]->ToBoolean(), animated);
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
     JSNavDestinationContext::JSBind(globalObj);
@@ -513,6 +559,8 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("ignoreLayoutSafeArea", &JSNavDestination::SetIgnoreLayoutSafeArea);
     JSClass<JSNavDestination>::StaticMethod("systemBarStyle", &JSNavDestination::SetSystemBarStyle);
     JSClass<JSNavDestination>::StaticMethod("recoverable", &JSNavDestination::SetRecoverable);
+    JSClass<JSNavDestination>::StaticMethod("toolbarConfiguration", &JSNavDestination::SetToolBarConfiguration);
+    JSClass<JSNavDestination>::StaticMethod("hideToolBar", &JSNavDestination::SetHideToolBar);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

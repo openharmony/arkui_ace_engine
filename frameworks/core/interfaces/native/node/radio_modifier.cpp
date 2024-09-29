@@ -296,12 +296,15 @@ ArkUI_CharPtr GetRadioGroup(ArkUINodeHandle node)
 
 void SetRadioOptions(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr group, ArkUI_Uint32 indicatorType)
 {
+    if (value == nullptr || group == nullptr) {
+        return;
+    }
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::TICK &&
         static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::DOT &&
         static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::CUSTOM) {
-            indicatorType = static_cast<int32_t>(RadioIndicatorType::TICK);
+            indicatorType = static_cast<ArkUI_Uint32>(RadioIndicatorType::TICK);
     }
     RadioModelNG::SetRadioOptions(frameNode, std::string(value), std::string(group), indicatorType);
 }

@@ -141,15 +141,12 @@ napi_value StartTimeoutOrInterval(napi_env env, napi_callback_info info, bool is
     argv = new napi_value[argc];
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
 
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, argv[0], &valueType);
-    if (valueType != napi_function) {
+    if (!AbilityRuntime::CheckTypeForNapiValue(env, argv[0], napi_function)) {
         LOGE("first param is not napi_function");
         delete[] argv;
         return result;
     }
-    napi_typeof(env, argv[1], &valueType);
-    if (valueType != napi_number) {
+    if (!AbilityRuntime::CheckTypeForNapiValue(env, argv[1], napi_number)) {
         LOGE("second param is not napi_number");
         delete[] argv;
         return result;
@@ -166,7 +163,6 @@ napi_value StartTimeoutOrInterval(napi_env env, napi_callback_info info, bool is
     std::string name = "JsRuntimeTimer_";
     name.append(std::to_string(callbackId));
 
-    // create timer task
     AbilityRuntime::JsRuntime& jsRuntime =
         *reinterpret_cast<AbilityRuntime::JsRuntime*>(reinterpret_cast<NativeEngine*>(env)->GetJsEngine());
     JsTimer task(jsRuntime, jsFunction, name, delayTime, isInterval);

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_TABS_H
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -55,6 +56,7 @@ protected:
     static void SetOnContentWillChange(const JSCallbackInfo& info);
     static void SetAnimateMode(const JSCallbackInfo& info);
     static void SetEdgeEffect(const JSCallbackInfo& info);
+    static void SetBarBackgroundEffect(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

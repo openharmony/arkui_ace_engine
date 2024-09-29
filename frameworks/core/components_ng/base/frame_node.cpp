@@ -74,6 +74,7 @@ constexpr uint8_t APP_RENDER_GROUP_MARKED_MASK = 1 << 7;
 constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
+constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -443,9 +444,6 @@ FrameNode::FrameNode(
 FrameNode::~FrameNode()
 {
     ResetPredictNodes();
-    for (const auto& destroyCallback : destroyCallbacks_) {
-        destroyCallback();
-    }
     for (const auto& destroyCallback : destroyCallbacksMap_) {
         if (destroyCallback.second) {
             destroyCallback.second();
@@ -618,6 +616,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     }
     paintProperty->CleanDirty();
     CHECK_NULL_VOID(pipeline);
+    pipeline->FlushModifier();
     pipeline->FlushMessages();
     node->SetActive(false);
 }
@@ -719,8 +718,7 @@ void FrameNode::DumpCommonInfo()
             std::string("Active: ").append(std::to_string(static_cast<int32_t>(IsActive()))));
     }
     if (IsFreeze()) {
-        DumpLog::GetInstance().AddDesc(
-            std::string("Freeze: ").append(std::to_string(static_cast<int32_t>(IsFreeze()))));
+        DumpLog::GetInstance().AddDesc(std::string("Freeze: 1"));
     }
     if (static_cast<int32_t>(layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE)) != 0) {
         DumpLog::GetInstance().AddDesc(std::string("Visible: ")
@@ -968,6 +966,9 @@ void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
     DumpSimplifyCommonInfo(json);
     DumpSimplifySafeAreaInfo(json);
     DumpSimplifyOverlayInfo(json);
+    if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
+        pattern_->DumpInfo(json);
+    }
 }
 
 void FrameNode::DumpInfo()
@@ -2069,6 +2070,9 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
         // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being
         // modified during the paint process, resulting in the problem of judging whether the front-end setting value
         // changes the next time js is executed.
+        if (!paintMethod) {
+            paintMethod = pattern_->CreateDefaultNodePaintMethod();
+        }
 
         auto paintWrapper = MakeRefPtr<PaintWrapper>(
             renderContext_, geometryNode_->Clone(), paintProperty_->Clone(), extensionHandler_);
@@ -2094,6 +2098,10 @@ void FrameNode::RebuildRenderContextTree()
 {
     if (!needSyncRenderTree_) {
         return;
+    }
+    auto pipeline = GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("RebuildRenderContextTree doesn't run on UI thread!");
     }
     frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
@@ -2199,7 +2207,7 @@ void FrameNode::ProcessFreezeNode()
     MarkDirtyNode();
 }
 
-void FrameNode::onFreezeStateChange()
+void FrameNode::OnFreezeStateChange()
 {
     if (IsFreeze()) {
         return;
@@ -2482,8 +2490,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, const To
     MapPointTo(revertPoint, GetOrRefreshRevertMatrixFromCache());
     auto subRevertPoint = revertPoint - paintRect.GetOffset();
     auto clip = renderContext_->GetClipEdge().value_or(false);
-    if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable() ||
-        IsPaintRectWithTransformValid()) {
+    if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable()) {
         if (clip) {
             return true;
         }
@@ -2888,8 +2895,11 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
     }
 }
 
-bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const
+bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList)
 {
+    if (IsPaintRectWithTransformValid()) {
+        return false;
+    }
     for (const auto& rect : responseRegionList) {
         if (rect.IsInRegion(parentLocalPoint)) {
             return true;
@@ -3078,6 +3088,12 @@ OffsetF FrameNode::GetPositionToScreen()
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        offsetCurrent = offsetCurrent * windowScale;
+    }
     OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
     return offset;
 }
@@ -3103,6 +3119,12 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     OffsetF nodeOffset = GetPositionToWindowWithTransform();
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        nodeOffset = nodeOffset * windowScale;
+    }
     OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
     return offset;
 }
@@ -3110,11 +3132,19 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
 // returns a node's offset relative to window 
 // and consider every ancestor node's graphic transform rotate properties
 // ancestor will check boundary of window scene(exclude)
-OffsetF FrameNode::GetPositionToWindowWithTransform() const
+OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
-    auto offset = context->GetPaintRectWithoutTransform().GetOffset();
+    auto rect = context->GetPaintRectWithoutTransform();
+    OffsetF offset;
+    if (!fromBottom) {
+        offset = rect.GetOffset();
+    } else {
+        OffsetF offsetBottom(rect.GetX() + rect.Width(), rect.GetY() + rect.Height());
+        offset = offsetBottom;
+    }
+    
     PointF pointNode(offset.GetX(), offset.GetY());
     context->GetPointTransformRotate(pointNode);
     auto parent = GetAncestorNodeOfFrame(true);
@@ -3495,9 +3525,6 @@ void FrameNode::OnAccessibilityEvent(
 
 void FrameNode::OnRecycle()
 {
-    for (const auto& destroyCallback : destroyCallbacks_) {
-        destroyCallback();
-    }
     for (const auto& destroyCallback : destroyCallbacksMap_) {
         if (destroyCallback.second) {
             destroyCallback.second();
@@ -3817,12 +3844,12 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
 void FrameNode::GetPercentSensitive()
 {
     auto res = layoutProperty_->GetPercentSensitive();
-    if (res.first || pattern_->IsNeedPercent()) {
+    if (res.first) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentWidth(true);
         }
     }
-    if (res.second || pattern_->IsNeedPercent()) {
+    if (res.second) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -5729,6 +5756,59 @@ void FrameNode::ResetPredictNodes()
         if (frameNode && frameNode->isLayoutDirtyMarked_) {
             frameNode->isLayoutDirtyMarked_ = false;
         }
+    }
+}
+
+void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    bool result = func();
+    if (IsCNode()) {
+        return;
+    }
+    if (result) {
+        customPropertyMap_[UPDATE_FLAG_KEY] = "1";
+    }
+    if (!getCustomProperty_) {
+        getCustomProperty_ = getFunc;
+    }
+}
+
+bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
+{
+    if (getCustomProperty_) {
+        value = getCustomProperty_(key);
+        return true;
+    }
+    return false;
+}
+
+bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)
+{
+    if (!IsCNode()) {
+        return false;
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        value = customPropertyMap_[key];
+        return true;
+    }
+    return false;
+}
+
+void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    customPropertyMap_[key] = value;
+}
+
+void FrameNode::RemoveCustomProperty(const std::string& key)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        customPropertyMap_.erase(iter);
     }
 }
 } // namespace OHOS::Ace::NG

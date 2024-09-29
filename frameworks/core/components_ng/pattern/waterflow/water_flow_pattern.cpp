@@ -54,7 +54,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         // over scroll in drag update from normal to over scroll.
         float overScroll = layoutInfo_->CalcOverScroll(GetMainContentSize(), delta);
         if (source == SCROLL_FROM_UPDATE) {
-            auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
+            auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             delta *= friction;
         }
     } else {
@@ -140,6 +140,10 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
     }
     sectionChangeStartPos_.clear();
 
+    if (sections_ && layoutInfo_->segmentTails_.empty()) {
+        layoutInfo_->InitSegments(sections_->GetSectionInfo(), 0);
+    }
+    
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         return;
     }

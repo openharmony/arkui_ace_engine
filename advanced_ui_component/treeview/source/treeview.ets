@@ -1101,13 +1101,14 @@ export struct TreeView {
       return;
     }
     this.setImageSources(this.viewLastIndex, InteractionStatus.NORMAL);
-
+    this.listNodeDataSource.setImageSource(this.viewLastIndex, InteractionStatus.NORMAL);
     this.nodeList[this.viewLastIndex].setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
     this.nodeList[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
     this.listNodeDataSource.listNode[this.viewLastIndex].setNodeColor($r('sys.color.ohos_id_color_background_transparent'));
     this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
     this.listNodeDataSource.listNode[this.viewLastIndex].setIsSelected(false);
-    this.listNodeDataSource.setImageSource(this.viewLastIndex, InteractionStatus.NORMAL);
+    this.listNodeDataSource.listNode[this.viewLastIndex].imageSource =
+      this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem().imageNode?.source;
   }
 
   setImageSources(index: number, interactionStatus: InteractionStatus): void {

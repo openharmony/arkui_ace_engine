@@ -149,7 +149,9 @@ void JSNavigationStack::Push(const std::string& name, const RefPtr<NG::RouteInfo
         auto getParamByNameFunc = dataSourceObj_->GetProperty("getParamByName");
         if (getParamByNameFunc->IsFunction()) {
             auto getFunc = JSRef<JSFunc>::Cast(getParamByNameFunc);
-            auto funcArray = getFunc->Call(dataSourceObj_);
+            JSRef<JSVal> params[1];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(name));
+            auto funcArray = getFunc->Call(dataSourceObj_, 1, params);
             if (funcArray->IsArray()) {
                 auto result = JSRef<JSArray>::Cast(funcArray);
                 param = result->GetValueAt(0);
@@ -1162,9 +1164,9 @@ JSRef<JSObject> JSNavigationStack::CreatePathInfoWithNecessaryProperty(
     pathInfo->SetProperty<std::string>("name", jsPathInfo->GetName());
     pathInfo->SetProperty<int32_t>("index", context->GetIndex());
     pathInfo->SetProperty<std::string>("navDestinationId", std::to_string(context->GetNavDestinationId()));
-    pathInfo->SetProperty("param", jsPathInfo->GetParam());
-    pathInfo->SetProperty("onPop", jsPathInfo->GetOnPop());
-    pathInfo->SetProperty("isEntry", jsPathInfo->GetIsEntry());
+    pathInfo->SetProperty<bool>("isEntry", jsPathInfo->GetIsEntry());
+    pathInfo->SetPropertyObject("param", jsPathInfo->GetParam());
+    pathInfo->SetPropertyObject("onPop", jsPathInfo->GetOnPop());
     return pathInfo;
 }
 
