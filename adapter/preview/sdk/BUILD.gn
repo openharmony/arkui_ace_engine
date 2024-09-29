@@ -106,6 +106,7 @@ if (is_ohos_standard_system) {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
       "$ace_root/frameworks/bridge/declarative_frontend:ark_theme_control",
+      "$ace_root/frameworks/bridge/declarative_frontend:shape",
       "$ace_root/frameworks/bridge/declarative_frontend:uicontext",
       "$ace_root/frameworks/bridge/declarative_frontend:x_node",
     ]
@@ -115,6 +116,7 @@ if (is_ohos_standard_system) {
     sources = [
       "${out_path}/arkui/ace_engine/modifier.abc",
       "${out_path}/arkui/ace_engine/node.abc",
+      "${out_path}/arkui/ace_engine/shape.abc",
       "${out_path}/arkui/ace_engine/theme.abc",
       "${out_path}/arkui/ace_engine/uicontext.abc",
     ]
