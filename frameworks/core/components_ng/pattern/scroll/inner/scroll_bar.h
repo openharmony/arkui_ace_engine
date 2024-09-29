@@ -396,6 +396,9 @@ private:
     void HandleDragEnd(const GestureEvent& info);
     void ProcessFrictionMotion(double value);
     void ProcessFrictionMotionStop();
+    void CalcScrollBarRegion(double activeMainOffset, double activeSize, const Offset& offset, const Size& size,
+        double& inactiveMainOffset, double& inactiveSize);
+    void GetRadiusAndPadding(float& startRadius, float& endRadius, float& padding);
     DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
     PositionMode positionMode_ = PositionMode::RIGHT;
