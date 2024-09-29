@@ -354,7 +354,8 @@ HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_010, TestSize.Leve
     navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto navigationPattern = navigation->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    navigationPattern->currentProxy_ = AceType::MakeRefPtr<NavigationTransitionProxy>();
+    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
+    navigationPattern->proxyList_.emplace_back(proxy);
     navigationPattern->needSyncWithJsStack_ = false;
     navigationPattern->isFinishInteractiveAnimation_ = false;
     navigationPattern->SyncWithJsStackIfNeeded();
@@ -386,7 +387,8 @@ HWTEST_F(NavigationPatternTestNgOne, NavigationPatternTestOne_011, TestSize.Leve
     navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto navigationPattern = navigation->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    navigationPattern->currentProxy_ = AceType::MakeRefPtr<NavigationTransitionProxy>();
+    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
+    navigationPattern->proxyList_.emplace_back(proxy);
     string name = "name";
     navigationPattern->NotifyPageShow(name);
     EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
