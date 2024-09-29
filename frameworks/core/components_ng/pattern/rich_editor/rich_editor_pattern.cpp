@@ -4948,7 +4948,9 @@ void RichEditorPattern::InsertDiffStyleValueInSpan(
     options.useThemeDecorationColor = typingStyle_->useThemeDecorationColor;
     auto newSpanIndex = AddTextSpanOperation(options, false, -1,  true, false);
     auto newSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(newSpanIndex));
-    UpdateTextStyle(newSpanNode, typingStyle_.value(), typingTextStyle_.value());
+    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
+        UpdateTextStyle(newSpanNode, typingStyle_.value(), typingTextStyle_.value());
+    }
     CopyTextSpanLineStyle(spanNode, newSpanNode, true);
     AfterInsertValue(newSpanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true, isIME);
 }
