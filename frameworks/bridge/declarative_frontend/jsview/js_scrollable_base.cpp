@@ -15,8 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
 
-#include "js_shape_abstract.h"
-
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
@@ -102,11 +101,11 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("onWillScroll", &JSScrollableBase::JsOnWillScroll);
     JSClass<JSScrollableBase>::StaticMethod("onDidScroll", &JSScrollableBase::JsOnDidScroll);
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
-    JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSContentClip);
+    JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
-void JSScrollableBase::JSContentClip(const JSCallbackInfo& info)
+void JSScrollableBase::JSClipContent(const JSCallbackInfo& info)
 {
     if (info.Length() != 1) {
         return;
