@@ -16,15 +16,9 @@
 #include "core/pipeline/base/element.h"
 
 #include "base/log/dump_log.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "core/common/frontend.h"
 #include "core/components/focus_animation/focus_animation_element.h"
 #include "core/components/page/page_element.h"
 #include "core/components/shadow/shadow_element.h"
-#include "core/pipeline/base/component.h"
-#include "core/pipeline/base/composed_element.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 

@@ -27,10 +27,6 @@
 #endif
 
 #include "base/i18n/localization.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
-#include "core/components_ng/pattern/symbol/constants.h"
 
 namespace OHOS::Ace::Constants {
 namespace {

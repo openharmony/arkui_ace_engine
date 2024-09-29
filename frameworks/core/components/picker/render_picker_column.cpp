@@ -16,7 +16,6 @@
 #include "core/components/picker/render_picker_column.h"
 
 #include "base/log/event_report.h"
-#include "core/gestures/pan_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {

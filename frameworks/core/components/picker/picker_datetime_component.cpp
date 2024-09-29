@@ -15,8 +15,6 @@
 
 #include "core/components/picker/picker_datetime_component.h"
 
-#include "base/i18n/localization.h"
-
 namespace OHOS::Ace {
 
 PickerDateTimeComponent::PickerDateTimeComponent() {}

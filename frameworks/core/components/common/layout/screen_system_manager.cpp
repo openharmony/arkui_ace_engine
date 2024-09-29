@@ -14,7 +14,6 @@
  */
 
 #include "core/components/common/layout/screen_system_manager.h"
-#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 namespace {

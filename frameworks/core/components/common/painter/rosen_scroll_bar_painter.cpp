@@ -15,8 +15,6 @@
 
 #include "core/components/common/painter/rosen_scroll_bar_painter.h"
 
-#include <cmath>
-
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPaint.h"

@@ -15,7 +15,6 @@
 
 #include "core/components/common/layout/grid_column_info.h"
 
-#include "base/log/log.h"
 #include "core/components/common/layout/grid_system_manager.h"
 
 namespace OHOS::Ace {

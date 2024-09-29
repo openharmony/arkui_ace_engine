@@ -19,10 +19,6 @@
 #include "include/core/SkImage.h"
 #endif
 
-#include "core/components/common/properties/border.h"
-#include "core/components/common/properties/border_edge.h"
-#include "core/components/common/properties/border_image_edge.h"
-
 namespace OHOS::Ace {
 
 #ifndef USE_ROSEN_DRAWING

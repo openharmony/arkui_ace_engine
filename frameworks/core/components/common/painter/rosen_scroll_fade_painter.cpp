@@ -15,8 +15,6 @@
 
 #include "core/components/common/painter/rosen_scroll_fade_painter.h"
 
-#include "base/geometry/rect.h"
-#include "base/log/log.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {

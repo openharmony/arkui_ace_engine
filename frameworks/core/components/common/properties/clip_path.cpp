@@ -15,8 +15,6 @@
 
 #include "core/components/common/properties/clip_path.h"
 
-#include "base/utils/string_utils.h"
-
 namespace OHOS::Ace {
 
 bool Inset::SetLength(const std::vector<Dimension>& lengths)
