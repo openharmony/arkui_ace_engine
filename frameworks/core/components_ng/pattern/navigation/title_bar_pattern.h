@@ -318,6 +318,13 @@ public:
 
     void InitSideBarButtonUpdateCallbackIfNeeded();
     
+    void SetBackButtonDialogNode(const RefPtr<FrameNode>& dialogNode)
+    {
+        dialogNode_ = dialogNode;
+    }
+
+    void InitMenuDragAndLongPressEvent(const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -385,6 +392,14 @@ private:
     RefPtr<FrameNode> GetParentSideBarContainerNode(const RefPtr<TitleBarNode>& titleBarNode);
     void UpdateTitlePositionInfo();
     float GetNavLeftPadding(float parentWidth);
+
+    void InitMenuDragEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
+        const std::vector<NG::BarItem>& menuItems);
+    void InitMenuLongPressEvent(const RefPtr<GestureEventHub>& gestureHub, const RefPtr<FrameNode>& menuNode,
+        const std::vector<NG::BarItem>& menuItems);
+    void HandleMenuLongPress(
+        const GestureEvent& info, const RefPtr<FrameNode>& menuNode, const std::vector<NG::BarItem>& menuItems);
+    void HandleMenuLongPressActionEnd();
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
