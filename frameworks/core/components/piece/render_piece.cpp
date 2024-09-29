@@ -17,10 +17,6 @@
 
 #include "base/log/event_report.h"
 #include "core/components/box/render_box.h"
-#include "core/components/image/render_image.h"
-#include "core/components/text/render_text.h"
-#include "core/event/ace_event_helper.h"
-#include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 

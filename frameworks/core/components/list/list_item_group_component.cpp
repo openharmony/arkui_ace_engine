@@ -16,7 +16,6 @@
 #include "core/components/list/list_item_group_component.h"
 
 #include "core/components/list/list_item_group_element.h"
-#include "core/components/list/render_list_item_group.h"
 
 namespace OHOS::Ace {
 

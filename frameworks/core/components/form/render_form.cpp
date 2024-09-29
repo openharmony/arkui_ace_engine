@@ -15,8 +15,6 @@
 
 #include "core/components/form/render_form.h"
 
-#include "base/log/event_report.h"
-
 namespace OHOS::Ace {
 
 void RenderForm::Update(const RefPtr<Component>& component)

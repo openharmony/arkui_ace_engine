@@ -15,7 +15,6 @@
 
 #include "core/components/progress/render_bubble_progress.h"
 
-#include "base/log/event_report.h"
 #include "core/components/progress/progress_theme.h"
 
 namespace OHOS::Ace {

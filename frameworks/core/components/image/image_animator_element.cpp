@@ -15,9 +15,6 @@
 
 #include "core/components/image/image_animator_element.h"
 
-#include "base/utils/string_utils.h"
-#include "core/event/ace_event_helper.h"
-
 namespace OHOS::Ace {
 
 ImageAnimatorElement::~ImageAnimatorElement()

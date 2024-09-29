@@ -16,7 +16,6 @@
 #include "core/components/list/interactive_effect.h"
 
 #include "base/log/event_report.h"
-#include "core/animation/keyframe.h"
 #include "core/components/list/render_list_item.h"
 
 namespace OHOS::Ace {

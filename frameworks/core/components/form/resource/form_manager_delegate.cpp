@@ -19,6 +19,7 @@
 #include <iomanip>
 #include <memory>
 #include <sstream>
+
 #include "form_info_base.h"
 
 #include "base/log/log.h"
@@ -27,7 +28,6 @@
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/gestures/gesture_info.h"
 #include "frameworks/base/json/json_util.h"
-#include "frameworks/core/common/frontend.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_callback_client.h"

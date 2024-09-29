@@ -17,7 +17,6 @@
 
 #include "core/components/hyperlink/hyperlink_element.h"
 #include "core/components/hyperlink/render_hyperlink.h"
-#include "core/components/text/text_component.h"
 
 namespace OHOS::Ace {
 

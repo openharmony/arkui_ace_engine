@@ -15,10 +15,6 @@
 
 #include "core/components/list/rosen_render_list_item.h"
 
-#include "render_service_client/core/ui/rs_node.h"
-
-#include "base/utils/device_type.h"
-#include "base/utils/system_properties.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/common/painter/rosen_universal_painter.h"
 #include "core/components/transform/rosen_render_transform.h"

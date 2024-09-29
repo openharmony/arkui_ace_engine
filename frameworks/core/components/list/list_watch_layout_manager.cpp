@@ -16,7 +16,6 @@
 #include "core/components/list/list_watch_layout_manager.h"
 
 #include "core/components/list/render_list_item_group.h"
-#include "core/components/scroll/render_multi_child_scroll.h"
 
 namespace OHOS::Ace {
 

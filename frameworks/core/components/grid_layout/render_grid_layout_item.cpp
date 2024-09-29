@@ -15,7 +15,6 @@
 
 #include "core/components/grid_layout/render_grid_layout_item.h"
 
-#include "base/utils/utils.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/grid_layout/render_grid_layout.h"
 

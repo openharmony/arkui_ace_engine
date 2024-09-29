@@ -15,7 +15,6 @@
 
 #include "core/components/navigation_bar/render_collapsing_navigation_bar.h"
 
-#include "core/animation/curve_animation.h"
 #include "core/components/display/display_component.h"
 #include "core/components/navigation_bar/navigation_bar_component.h"
 #include "core/components/navigation_bar/render_navigation_container.h"
