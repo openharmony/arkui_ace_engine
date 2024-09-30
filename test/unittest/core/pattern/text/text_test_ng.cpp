@@ -2866,6 +2866,9 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestOnMenuItemAction001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto textSelectOverlay = pattern->selectOverlay_;
     ASSERT_NE(textSelectOverlay, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", DEFAULT_NODE_ID, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
 
     pattern->textForDisplay_ = TEXT_CONTENT;
     textSelectOverlay->OnMenuItemAction(OptionMenuActionId::CUT, OptionMenuType::NO_MENU);
