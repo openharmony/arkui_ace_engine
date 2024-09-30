@@ -79,7 +79,7 @@ class TabContentModifierTest : public ModifierTestBase<GENERATED_ArkUITabContent
 
 /*
  * @tc.name: setTabBar0Test
- * @tc.desc:
+ * @tc.desc: check setTabBar0 interface work with only label
  * @tc.type: FUNC
  */
 HWTEST_F(TabContentModifierTest, setTabBar0TestLabel, TestSize.Level1)
@@ -116,7 +116,7 @@ HWTEST_F(TabContentModifierTest, DISABLED_setTabBar0TestCustomBuilder, TestSize.
 
 /*
  * @tc.name: setTabBar0Test
- * @tc.desc:
+ * @tc.desc: check setTabBar0 interface work with label and icon
  * @tc.type: FUNC
  */
 HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
