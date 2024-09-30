@@ -91,6 +91,7 @@ public:
     {
         frameRateRange_[type] = rateRange;
     }
+    TextDirection GetTextDirection(const std::string& content, TextDirection direction);
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -116,6 +117,8 @@ private:
     float GetTextOffset();
     float GetTextNodeWidth();
     double GetScrollAmount();
+    void CheckTextDirectionChange(TextDirection direction);
+    TextDirection GetCurrentTextDirection();
     void ActionAnimation(AnimationOption& option, float end, int32_t playCount, bool needSecondPlay);
     bool IsRunMarquee();
     bool measureChanged_ = false;
@@ -125,6 +128,7 @@ private:
     double scrollAmount_ = DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx();
     int32_t loop_ = -1;
     MarqueeDirection direction_ = MarqueeDirection::LEFT;
+    TextDirection currentTextDirection_ = TextDirection::LTR;
     ACE_DISALLOW_COPY_AND_MOVE(MarqueePattern);
     LastAnimationParam lastAnimationParam_;
     int32_t lastWindowHeight_ = 0.0;

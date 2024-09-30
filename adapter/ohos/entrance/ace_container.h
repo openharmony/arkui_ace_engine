@@ -539,6 +539,8 @@ public:
     sptr<IRemoteObject> GetToken();
     void SetParentToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetParentToken();
+    uint32_t GetParentWindowType() const;
+    uint32_t GetWindowType() const;
 
     std::string GetWebHapPath() const override
     {
@@ -685,6 +687,8 @@ public:
         return paramUie_;
     }
 
+    void UpdateResourceOrientation(int32_t orientation);
+    void UpdateResourceDensity(double density);
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

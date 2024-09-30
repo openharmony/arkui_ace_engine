@@ -597,12 +597,14 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     node->SetActive();
     node->isLayoutDirtyMarked_ = true;
     auto pipeline = PipelineContext::GetCurrentContext();
-    node->CreateLayoutTask();
+    if (pipeline) {
+        pipeline->FlushUITaskWithSingleDirtyNode(node);
+    }
     auto predictLayoutNode = std::move(node->predictLayoutNode_);
     for (auto& node : predictLayoutNode) {
         auto frameNode = node.Upgrade();
-        if (frameNode) {
-            frameNode->CreateLayoutTask();
+        if (frameNode && pipeline) {
+            pipeline->FlushUITaskWithSingleDirtyNode(frameNode);
         }
     }
     if (pipeline) {
@@ -966,6 +968,9 @@ void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
     DumpSimplifyCommonInfo(json);
     DumpSimplifySafeAreaInfo(json);
     DumpSimplifyOverlayInfo(json);
+    if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
+        pattern_->DumpInfo(json);
+    }
 }
 
 void FrameNode::DumpInfo()
@@ -2067,6 +2072,9 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
         // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being
         // modified during the paint process, resulting in the problem of judging whether the front-end setting value
         // changes the next time js is executed.
+        if (!paintMethod) {
+            paintMethod = pattern_->CreateDefaultNodePaintMethod();
+        }
 
         auto paintWrapper = MakeRefPtr<PaintWrapper>(
             renderContext_, geometryNode_->Clone(), paintProperty_->Clone(), extensionHandler_);
@@ -3082,6 +3090,12 @@ OffsetF FrameNode::GetPositionToScreen()
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        offsetCurrent = offsetCurrent * windowScale;
+    }
     OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
     return offset;
 }
@@ -3107,6 +3121,12 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     OffsetF nodeOffset = GetPositionToWindowWithTransform();
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        nodeOffset = nodeOffset * windowScale;
+    }
     OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
     return offset;
 }
@@ -3826,12 +3846,12 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
 void FrameNode::GetPercentSensitive()
 {
     auto res = layoutProperty_->GetPercentSensitive();
-    if (res.first || pattern_->IsNeedPercent()) {
+    if (res.first) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentWidth(true);
         }
     }
-    if (res.second || pattern_->IsNeedPercent()) {
+    if (res.second) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -5749,19 +5769,20 @@ void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<st
         return;
     }
     if (result) {
-        customPropertyMap_[UPDATE_FLAG_KEY] = true;
+        customPropertyMap_[UPDATE_FLAG_KEY] = "1";
     }
     if (!getCustomProperty_) {
         getCustomProperty_ = getFunc;
     }
 }
 
-std::string FrameNode::GetJSCustomProperty(const std::string& key)
+bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
 {
     if (getCustomProperty_) {
-        return getCustomProperty_(key);
+        value = getCustomProperty_(key);
+        return true;
     }
-    return nullptr;
+    return false;
 }
 
 bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)

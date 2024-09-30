@@ -412,6 +412,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
             }
         }
     }
+    FireObserverOnDidScroll(finalOffset);
     auto onDidScroll = listEventHub->GetOnDidScroll();
     if (onDidScroll) {
         FireOnScroll(finalOffset, onDidScroll);
@@ -436,13 +437,15 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
 void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart);
+    CHECK_NULL_VOID(host);
     if (startIndex_ == 0) {
         bool scrollUpToStart =
             GreatNotEqual(prevStartOffset_, contentStartOffset_) && LessOrEqual(startMainPos_, contentStartOffset_);
         bool scrollDownToStart = (LessNotEqual(prevStartOffset_, contentStartOffset_) || !isInitialized_) &&
                                  GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
+            FireObserverOnReachStart();
+            CHECK_NULL_VOID(onReachStart);
             ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:List",
                 scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
             onReachStart();
@@ -454,7 +457,7 @@ void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void ListPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd);
+    CHECK_NULL_VOID(host);
     if (endIndex_ == maxListItemIndex_) {
         float endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
         // deltaOffset passes through multiple items also needs to fire reachEnd
@@ -463,6 +466,8 @@ void ListPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
         bool scrollDownToEnd = Negative(prevEndOffset_) && NonNegative(endOffset);
         auto scrollSource = GetScrollSource();
         if (scrollUpToEnd || (scrollDownToEnd && scrollSource != SCROLL_FROM_NONE)) {
+            FireObserverOnReachEnd();
+            CHECK_NULL_VOID(onReachEnd);
             ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, scrollSource:%d, id:%d, tag:List",
                 scrollUpToEnd, scrollDownToEnd, scrollSource, static_cast<int32_t>(host->GetAccessibilityId()));
             onReachEnd();

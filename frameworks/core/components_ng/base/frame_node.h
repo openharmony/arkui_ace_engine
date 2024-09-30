@@ -1090,11 +1090,13 @@ public:
     void OnForegroundColorUpdate(const Color& value);
 
     void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
-    std::string GetJSCustomProperty(const std::string& key);
+    bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
     void AddCustomProperty(const std::string& key, const std::string& value);
     void RemoveCustomProperty(const std::string& key);
+
+    LayoutConstraintF GetLayoutConstraint() const;
 
 protected:
     void DumpInfo() override;
@@ -1122,7 +1124,6 @@ private:
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
-    LayoutConstraintF GetLayoutConstraint() const;
     OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();

@@ -781,6 +781,17 @@ RefPtr<NG::FrameNode> GetFramenodeByAccessibilityId(const RefPtr<NG::FrameNode>&
                 return frameNodeResult;
             }
         }
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(current);
+        if (!frameNode) {
+            continue;
+        }
+        auto overlayNode = frameNode->GetOverlayNode();
+        if (overlayNode) {
+            const auto& children = std::list<RefPtr<NG::UINode>> { overlayNode };
+            if (FindFrameNodeByAccessibilityId(id, children, nodes, frameNodeResult)) {
+                return frameNodeResult;
+            }
+        }
     }
     return nullptr;
 }
@@ -824,6 +835,13 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<int64_t>
         }
     }
 
+    if (frameNode) {
+        auto overlayNode = frameNode->GetOverlayNode();
+        if (overlayNode) {
+            GetFrameNodeChildren(overlayNode, children, pageId);
+        }
+    }
+
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
         auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -857,6 +875,14 @@ void GetFrameNodeChildren(
                 children.emplace_back(frameNode);
                 return;
             }
+        }
+    }
+
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    if (frameNode) {
+        auto overlayNode = frameNode->GetOverlayNode();
+        if (overlayNode) {
+            GetFrameNodeChildren(overlayNode, children, pageId);
         }
     }
 
@@ -1128,6 +1154,33 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
         nodeInfo.AddAction(action);
     }
 }
+
+void UpdateUserAccessibilityElementInfo(
+    const RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo)
+{
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (accessibilityProperty->HasUserDisabled()) {
+        nodeInfo.SetEnabled(!accessibilityProperty->IsUserDisabled());
+    }
+    if (accessibilityProperty->HasUserCheckedType()) {
+        nodeInfo.SetChecked(accessibilityProperty->GetUserCheckedType());
+    } else {
+        nodeInfo.SetChecked(accessibilityProperty->IsChecked());
+    }
+    if (accessibilityProperty->HasUserSelected()) {
+        nodeInfo.SetSelected(accessibilityProperty->IsUserSelected());
+    } else {
+        nodeInfo.SetSelected(accessibilityProperty->IsSelected());
+    }
+
+    if (nodeInfo.IsEnabled()) {
+        if (accessibilityProperty->HasUserCheckable()) {
+            nodeInfo.SetCheckable(accessibilityProperty->IsUserCheckable());
+        } else {
+            nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
+        }
+    }
+}
 }
 
 void JsAccessibilityManager::UpdateAccessibilityElementInfo(
@@ -1182,19 +1235,9 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
             nodeInfo.SetHitTestBehavior(gestureEventHub->GetHitTestModeStr());
         }
     }
-    if (accessibilityProperty->HasUserDisabled()) {
-        nodeInfo.SetEnabled(!accessibilityProperty->IsUserDisabled());
-    }
-    if (accessibilityProperty->HasUserCheckedType()) {
-        nodeInfo.SetChecked(accessibilityProperty->GetUserCheckedType());
-    } else {
-        nodeInfo.SetChecked(accessibilityProperty->IsChecked());
-    }
-    if (accessibilityProperty->HasUserSelected()) {
-        nodeInfo.SetSelected(accessibilityProperty->IsUserSelected());
-    } else {
-        nodeInfo.SetSelected(accessibilityProperty->IsSelected());
-    }
+
+    UpdateUserAccessibilityElementInfo(accessibilityProperty, nodeInfo);
+
     nodeInfo.SetPassword(accessibilityProperty->IsPassword());
     nodeInfo.SetPluraLineSupported(accessibilityProperty->IsMultiLine());
     nodeInfo.SetHinting(accessibilityProperty->IsHint());
@@ -1258,7 +1301,6 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 
     SetAccessibilityFocusAction(nodeInfo, "ace");
     if (nodeInfo.IsEnabled()) {
-        nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
         nodeInfo.SetScrollable(accessibilityProperty->IsScrollable());
         nodeInfo.SetEditable(accessibilityProperty->IsEditable());
         nodeInfo.SetDeletable(accessibilityProperty->IsDeletable());
@@ -1322,7 +1364,7 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
             nodeInfo.AddAction(action);
         }
     }
-    nodeInfo.SetAccessibilityGroup(false);
+    nodeInfo.SetAccessibilityGroup(node->GetIsAccessibilityGroup());
 }
 
 #endif
@@ -1505,6 +1547,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
     nodeInfo.SetAccessibilityFocus(node->GetRenderContext()->GetAccessibilityFocus().value_or(false));
+    nodeInfo.SetClip(node->GetRenderContext()->GetClipEdge().value_or(false));
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
     nodeInfo.SetVisible(node->IsVisible());
     nodeInfo.SetIsActive(node->IsActive());
@@ -1980,6 +2023,19 @@ static void DumpSupportActionNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc("support action: ", actionForDump);
 }
 
+static void DumpGridInfoNG(const AccessibilityElementInfo& nodeInfo)
+{
+    DumpLog::GetInstance().AddDesc("grid info rows: ", nodeInfo.GetGrid().GetRowCount());
+    DumpLog::GetInstance().AddDesc("grid info columns: ", nodeInfo.GetGrid().GetColumnCount());
+    DumpLog::GetInstance().AddDesc("grid info select mode: ", nodeInfo.GetGrid().GetSelectionMode());
+    DumpLog::GetInstance().AddDesc("grid item info, row: ", nodeInfo.GetGridItem().GetRowIndex());
+    DumpLog::GetInstance().AddDesc("grid item info, column: ", nodeInfo.GetGridItem().GetColumnIndex());
+    DumpLog::GetInstance().AddDesc("grid item info, rowSpan: ", nodeInfo.GetGridItem().GetRowSpan());
+    DumpLog::GetInstance().AddDesc("grid item info, columnSpan: ", nodeInfo.GetGridItem().GetColumnSpan());
+    DumpLog::GetInstance().AddDesc("grid item info, is heading: ", nodeInfo.GetGridItem().IsHeading());
+    DumpLog::GetInstance().AddDesc("grid item info, selected: ", nodeInfo.GetGridItem().IsSelected());
+}
+
 inline void DumpContentListNG(const AccessibilityElementInfo& nodeInfo)
 {
     std::vector<std::string> contentList;
@@ -2111,19 +2167,10 @@ void JsAccessibilityManager::DumpAccessibilityPropertyNG(const AccessibilityElem
     DumpLog::GetInstance().AddDesc("is password: ", BoolToString(nodeInfo.IsPassword()));
     DumpLog::GetInstance().AddDesc(
         "text input type: ", ConvertInputTypeToString(static_cast<AceTextCategory>(nodeInfo.GetInputType())));
-
+    DumpGridInfoNG(nodeInfo);
     DumpLog::GetInstance().AddDesc("min value: ", nodeInfo.GetRange().GetMin());
     DumpLog::GetInstance().AddDesc("max value: ", nodeInfo.GetRange().GetMax());
     DumpLog::GetInstance().AddDesc("current value: ", nodeInfo.GetRange().GetCurrent());
-    DumpLog::GetInstance().AddDesc("grid info rows: ", nodeInfo.GetGrid().GetRowCount());
-    DumpLog::GetInstance().AddDesc("grid info columns: ", nodeInfo.GetGrid().GetColumnCount());
-    DumpLog::GetInstance().AddDesc("grid info select mode: ", nodeInfo.GetGrid().GetSelectionMode());
-    DumpLog::GetInstance().AddDesc("grid item info, row: ", nodeInfo.GetGridItem().GetRowIndex());
-    DumpLog::GetInstance().AddDesc("grid item info, column: ", nodeInfo.GetGridItem().GetColumnIndex());
-    DumpLog::GetInstance().AddDesc("grid item info, rowSpan: ", nodeInfo.GetGridItem().GetRowSpan());
-    DumpLog::GetInstance().AddDesc("grid item info, columnSpan: ", nodeInfo.GetGridItem().GetColumnSpan());
-    DumpLog::GetInstance().AddDesc("grid item info, is heading: ", nodeInfo.GetGridItem().IsHeading());
-    DumpLog::GetInstance().AddDesc("grid item info, selected: ", nodeInfo.GetGridItem().IsSelected());
     DumpLog::GetInstance().AddDesc("current index: ", nodeInfo.GetCurrentIndex());
     DumpLog::GetInstance().AddDesc("begin index: ", nodeInfo.GetBeginIndex());
     DumpLog::GetInstance().AddDesc("end index: ", nodeInfo.GetEndIndex());
@@ -2137,6 +2184,7 @@ void JsAccessibilityManager::DumpAccessibilityPropertyNG(const AccessibilityElem
     DumpLog::GetInstance().AddDesc("accessibility label: ", nodeInfo.GetLabeledAccessibilityId());
     DumpLog::GetInstance().AddDesc("isActive: ", nodeInfo.GetIsActive());
     DumpLog::GetInstance().AddDesc("accessibilityVisible: ", nodeInfo.GetAccessibilityVisible());
+    DumpLog::GetInstance().AddDesc("clip: ", nodeInfo.GetClip());
     DumpExtraElementInfoNG(nodeInfo);
     DumpLog::GetInstance().AddDesc(
         "trigger action: ", static_cast<int32_t>(ConvertAccessibilityAction(nodeInfo.GetTriggerAction())));
@@ -3078,7 +3126,7 @@ static void DumpAccessibilityElementInfosTreeNG(
             std::to_string(accessibilityInfo.IsLongClickable()));
         DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(accessibilityInfo.IsCheckable()));
         DumpLog::GetInstance().AddDesc("scrollable: " + std::to_string(accessibilityInfo.IsScrollable()));
-        DumpLog::GetInstance().AddDesc("checked: " + std::to_string(accessibilityInfo.IsCheckable()));
+        DumpLog::GetInstance().AddDesc("checked: " + std::to_string(accessibilityInfo.IsChecked()));
         DumpLog::GetInstance().AddDesc("hint: " + accessibilityInfo.GetHint());
         DumpLog::GetInstance().Print(depth, accessibilityInfo.GetComponentType(), accessibilityInfo.GetChildCount());
         depth ++;
@@ -3299,6 +3347,12 @@ void JsAccessibilityManager::DumpTreeNG(const RefPtr<NG::FrameNode>& parent, int
     for (const auto& item : node->GetChildren(true)) {
         GetFrameNodeChildren(item, children, commonProperty.pageId);
     }
+
+    auto overlayNode = node->GetOverlayNode();
+    if (overlayNode) {
+        GetFrameNodeChildren(overlayNode, children, commonProperty.pageId);
+    }
+
     if (isDumpSimplify) {
         DumpTreeNodeSimplifyInfoNG(node, depth, commonProperty, children.size());
     } else if (!isUseJson_) {

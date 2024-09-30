@@ -2494,10 +2494,10 @@ bool TextPattern::SetActionExecSubComponent()
     CHECK_NULL_RETURN(host, false);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
-    accessibilityProperty->SetActionExecSubComponent([weakPtr = WeakClaim(this)](int32_t spanId) {
+    accessibilityProperty->SetActionExecSubComponent([weakPtr = WeakClaim(this)](int32_t spanId) -> bool {
             const auto& pattern = weakPtr.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->ExecSubComponent(spanId);
+            CHECK_NULL_RETURN(pattern, false);
+            return pattern->ExecSubComponent(spanId);
         });
     return true;
 }
@@ -3240,6 +3240,26 @@ void TextPattern::DumpInfo()
     if (!IsSetObscured()) {
         dumpLog.AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
     }
+    DumpTextStyleInfo();
+    dumpLog.AddDesc(
+        std::string("HeightAdaptivePolicy: ")
+            .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
+                textLayoutProp->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
+    if (pManager_) {
+        auto num = static_cast<int32_t>(pManager_->GetParagraphs().size());
+        dumpLog.AddDesc(std::string("Paragraphs num: ").append(std::to_string(num)));
+        dumpLog.AddDesc(std::string("PaintInfo: ").append(paintInfo_));
+    }
+    DumpScaleInfo();
+    DumpTextEngineInfo();
+    if (SystemProperties::GetDebugEnabled()) {
+        DumpAdvanceInfo();
+    }
+}
+
+void TextPattern::DumpTextStyleInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("FontColor: ")
                         .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
     dumpLog.AddDesc(
@@ -3264,20 +3284,8 @@ void TextPattern::DumpInfo()
         dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
         dumpLog.AddDesc(
             std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
-    }
-    dumpLog.AddDesc(
-        std::string("HeightAdaptivePolicy: ")
-            .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
-                textLayoutProp->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
-    if (pManager_) {
-        auto num = static_cast<int32_t>(pManager_->GetParagraphs().size());
-        dumpLog.AddDesc(std::string("Paragraphs num: ").append(std::to_string(num)));
-        dumpLog.AddDesc(std::string("PaintInfo: ").append(paintInfo_));
-    }
-    DumpScaleInfo();
-    DumpTextEngineInfo();
-    if (SystemProperties::GetDebugEnabled()) {
-        DumpAdvanceInfo();
+        dumpLog.AddDesc(std::string("SymbolColorList: ")
+            .append(StringUtils::SymbolColorListToString(textStyle_->GetSymbolColorList())));
     }
 }
 

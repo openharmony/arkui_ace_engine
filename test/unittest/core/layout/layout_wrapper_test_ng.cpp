@@ -1573,19 +1573,6 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest043, TestSize.Level1)
 }
 
 /**
- * @tc.name: LayoutWrapperTest044
- * @tc.desc: Test AvoidKeyboard.
- * @tc.type: FUNC
- */
-HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest044, TestSize.Level1)
-{
-    auto [parent, layoutWrapper] = CreateNodeAndWrapper(OHOS::Ace::V2::PAGE_ETS_TAG, NODE_ID_0);
-    layoutWrapper->AvoidKeyboard();
-    string ret = "";
-    EXPECT_EQ(ret, "");
-}
-
-/**
  * @tc.name: LayoutWrapperTest045
  * @tc.desc: Test CreateRootConstraint.
  * @tc.type: FUNC

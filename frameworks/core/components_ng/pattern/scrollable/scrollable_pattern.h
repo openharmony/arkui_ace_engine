@@ -694,6 +694,14 @@ protected:
 
     virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
 
+    void FireObserverOnTouch(const TouchEventInfo& info);
+    void FireObserverOnPanActionEnd(GestureEvent& info);
+    void FireObserverOnReachStart();
+    void FireObserverOnReachEnd();
+    void FireObserverOnScrollStart();
+    void FireObserverOnScrollStop();
+    void FireObserverOnDidScroll(float finalOffset);
+
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
     float FireOnWillScroll(float offset) const;
@@ -828,6 +836,7 @@ private:
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
     bool HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result);
     bool HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset, float oppositeOverOffset);
+    bool HasEdgeEffect(float offset) const;
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 

@@ -1923,8 +1923,8 @@ HWTEST_F(PipelineContextTestNg, DragEvent01, TestSize.Level1)
     uint64_t nanoTimeStamp = 3100;
 
     PointerEvent resampledPointerEvent = context_->GetResamplePointerEvent(history, current, nanoTimeStamp);
-    EXPECT_EQ(300, resampledPointerEvent.x);
-    EXPECT_EQ(400, resampledPointerEvent.y);
+    EXPECT_EQ(305, resampledPointerEvent.x);
+    EXPECT_EQ(405, resampledPointerEvent.y);
 }
 } // namespace NG
 } // namespace OHOS::Ace

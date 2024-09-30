@@ -388,6 +388,11 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     }
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
 
+    PropertyChangeFlag flag = 0;
+    if (NeedMeasureUpdate(flag)) {
+        host->MarkDirtyNode(flag);
+    }
+
     if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
         CHECK_NULL_VOID(contentSize_);

@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_tabs_feature.h"
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/properties/animation_option.h"
@@ -934,6 +935,11 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("closeBindSheet", JSCloseBindSheet);
     JSClass<JSViewContext>::StaticMethod("isFollowingSystemFontScale", IsFollowingSystemFontScale);
     JSClass<JSViewContext>::StaticMethod("getMaxFontScale", GetMaxFontScale);
+    JSClass<JSViewContext>::StaticMethod("bindTabsToScrollable", JSTabsFeature::BindTabsToScrollable);
+    JSClass<JSViewContext>::StaticMethod("unbindTabsFromScrollable", JSTabsFeature::UnbindTabsFromScrollable);
+    JSClass<JSViewContext>::StaticMethod("bindTabsToNestedScrollable", JSTabsFeature::BindTabsToNestedScrollable);
+    JSClass<JSViewContext>::StaticMethod(
+        "unbindTabsFromNestedScrollable", JSTabsFeature::UnbindTabsFromNestedScrollable);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

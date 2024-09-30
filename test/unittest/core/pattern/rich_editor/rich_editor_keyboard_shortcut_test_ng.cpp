@@ -935,7 +935,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseEvent001, TestSize.Level1)
     scrollBar->isPressed_ = true;
     MouseInfo info;
     richEditorPattern->HandleMouseEvent(info);
-    EXPECT_FALSE(pipeline->mouseStyleNodeId_.has_value());
+    EXPECT_TRUE(pipeline->mouseStyleNodeId_.has_value());
 }
 
 /**

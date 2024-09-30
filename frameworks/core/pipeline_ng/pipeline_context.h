@@ -182,16 +182,24 @@ public:
     // Do mouse event actively.
     void FlushMouseEvent();
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
+    void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
+        const std::list<MouseEvent>& moseEvents, TouchRestrict& touchRestric);
     void DispatchMouseEvent(
         std::unordered_map<int, MouseEvent>& idToMousePoints,
         std::unordered_map<int32_t, MouseEvent> &newIdMousePoints,
-        std::list<MouseEvent> &mouseEvents,
-        TouchRestrict& touchRestrict);
+        const std::list<MouseEvent> &mouseEvents,
+        TouchRestrict& touchRestrict,
+        const RefPtr<FrameNode> &node);
     void FlushDragEvents();
-    void OnFlushDragEvents(const RefPtr<DragDropManager>& manager,
+    void FlushDragEvents(const RefPtr<DragDropManager>& manager,
+        std::string extraInfo,
+        const RefPtr<FrameNode>& node,
+        const std::list<PointerEvent>& pointEvent);
+    void FlushDragEvents(const RefPtr<DragDropManager>& manager,
         std::unordered_map<int32_t, PointerEvent> newIdPoints,
         std::string& extraInfo,
-        std::unordered_map<int, PointerEvent> &idToPoints);
+        std::unordered_map<int, PointerEvent> &idToPoints,
+        const RefPtr<FrameNode>& node);
 
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;
@@ -487,6 +495,7 @@ public:
     void FlushMessages() override;
 
     void FlushUITasks(bool triggeredByImplicitAnimation = false) override;
+    void FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& node);
 
     void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
@@ -1067,6 +1076,9 @@ private:
     void FlushNodeChangeFlag();
     void CleanNodeChangeFlag();
 
+    uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
+    bool FlushModifierAnimation(uint64_t nanoTimestamp);
+
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
@@ -1086,9 +1098,9 @@ private:
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
     std::list<TouchEvent> touchEvents_;
-    std::list<MouseEvent> mouseEvents_;
-    std::list<PointerEvent> dragEvents_;
-
+    
+    std::map<RefPtr<FrameNode>, std::list<PointerEvent>> dragEvents_;
+    std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
 
     RefPtr<FrameNode> rootNode_;
@@ -1138,6 +1150,7 @@ private:
     uint32_t nextScheduleTaskId_ = 0;
     std::optional<int32_t> mouseStyleNodeId_;
     uint64_t resampleTimeStamp_ = 0;
+    uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;

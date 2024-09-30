@@ -714,6 +714,15 @@ void RichEditorPattern::SetImagePreviewMenuParam(std::function<void()>& builder,
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetImagePreviewMenuParam");
     oneStepDragParam_ = std::make_shared<OneStepDragParam>(builder, menuParam);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& uiNode : host->GetChildren()) {
+        auto imageNode = DynamicCast<ImageSpanNode>(uiNode);
+        CHECK_NULL_CONTINUE(imageNode);
+        EnableOneStepDrag(imageNode);
+        UpdateImagePreviewParam(imageNode);
+    }
 }
 
 void RichEditorPattern::EnableImageDrag(const RefPtr<ImageSpanNode>& imageNode, bool isEnable)
@@ -820,21 +829,23 @@ void RichEditorPattern::UpdateImagePreviewParam()
         auto weakImageNode = dirtyImageNodes.front();
         dirtyImageNodes.pop();
         auto imageNode = weakImageNode.Upgrade();
-        if (!imageNode) {
-            continue;
-        }
-
-#ifndef ACE_UNITTEST
-        auto& menuBuilder = oneStepDragParam_->menuBuilder;
-        auto& previewBuilder = oneStepDragParam_->previewBuilder;
-        auto resType = ResponseType::LONG_PRESS;
-        auto menuParam = oneStepDragParam_->GetMenuParam(imageNode);
-        ViewStackProcessor::GetInstance()->Push(imageNode);
-        ViewAbstractModel::GetInstance()->BindContextMenu(resType, menuBuilder, menuParam, previewBuilder);
-        ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
-        ViewStackProcessor::GetInstance()->Finish();
-#endif
+        UpdateImagePreviewParam(imageNode);
     }
+}
+
+void RichEditorPattern::UpdateImagePreviewParam(const RefPtr<ImageSpanNode>& imageNode)
+{
+#ifndef ACE_UNITTEST
+    CHECK_NULL_VOID(imageNode && oneStepDragParam_);
+    auto& menuBuilder = oneStepDragParam_->menuBuilder;
+    auto& previewBuilder = oneStepDragParam_->previewBuilder;
+    auto resType = ResponseType::LONG_PRESS;
+    auto menuParam = oneStepDragParam_->GetMenuParam(imageNode);
+    ViewStackProcessor::GetInstance()->Push(imageNode);
+    ViewAbstractModel::GetInstance()->BindContextMenu(resType, menuBuilder, menuParam, previewBuilder);
+    ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
+    ViewStackProcessor::GetInstance()->Finish();
+#endif
 }
 
 void RichEditorPattern::CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub)
@@ -3912,15 +3923,8 @@ void RichEditorPattern::SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, i
             newSpanItem->content = StringUtils::ToString(
                 StringUtils::ToWstring(spanItem->content)
                     .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart)));
-        } else if (spanItem->spanItemType == SpanItemType::SYMBOL) {
-            newSpanItem->content = "![id" + std::to_string(index++) + "]";
-            placeholderSpansMap_[newSpanItem->content] = spanItem;
-            placeholderGains += PLACEHOLDER_LENGTH - SYMBOL_CONTENT_LENGTH;
-            spanEnd += static_cast<int32_t>(placeholderGains);
         } else {
-            newSpanItem->content = "![id" + std::to_string(index++) + "]";
-            placeholderSpansMap_[newSpanItem->content] = spanItem;
-            placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH;
+            InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
             spanEnd += static_cast<int32_t>(placeholderGains);
         }
         newSpanItem->interval = {spanStart, spanEnd};
@@ -3931,6 +3935,32 @@ void RichEditorPattern::SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, i
     }
     spanString->SetString(text);
     spanString->SetSpanItems(std::move(subSpans));
+}
+
+void RichEditorPattern::InitPlaceholderSpansMap(
+    RefPtr<SpanItem>& newSpanItem, const RefPtr<SpanItem>& spanItem, size_t& index, size_t& placeholderGains)
+{
+    newSpanItem->content = "![id" + std::to_string(index++) + "]";
+    switch (spanItem->spanItemType) {
+        case SpanItemType::SYMBOL: {
+            placeholderSpansMap_[newSpanItem->content] = spanItem;
+            placeholderGains += PLACEHOLDER_LENGTH - SYMBOL_CONTENT_LENGTH;
+            break;
+        }
+        case SpanItemType::CustomSpan: {
+            auto customSpanItem = DynamicCast<CustomSpanItem>(spanItem);
+            placeholderSpansMap_[newSpanItem->content] = customSpanItem;
+            placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH;
+            break;
+        }
+        case SpanItemType::IMAGE: {
+            placeholderSpansMap_[newSpanItem->content] = spanItem;
+            placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH;
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 void RichEditorPattern::SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end)
@@ -4939,11 +4969,15 @@ void RichEditorPattern::InsertDiffStyleValueInSpan(
     TextSpanOptions options;
     options.value = insertValue;
     options.offset = caretPosition_;
-    options.style = typingTextStyle_;
+    auto theme = GetTheme<RichEditorTheme>();
+    options.style = theme ? theme->GetTextStyle() : TextStyle();
     options.useThemeFontColor = typingStyle_->useThemeFontColor;
     options.useThemeDecorationColor = typingStyle_->useThemeDecorationColor;
     auto newSpanIndex = AddTextSpanOperation(options, false, -1,  true, false);
     auto newSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(newSpanIndex));
+    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
+        UpdateTextStyle(newSpanNode, typingStyle_.value(), typingTextStyle_.value());
+    }
     CopyTextSpanLineStyle(spanNode, newSpanNode, true);
     AfterInsertValue(newSpanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true, isIME);
 }
@@ -5080,7 +5114,7 @@ void RichEditorPattern::AfterInsertValue(
     moveDirection_ = MoveDirection::FORWARD;
     moveLength_ += insertValueLength;
     UpdateSpanPosition();
-    if (isIME) {
+    if (isIME || aiWriteAdapter_->GetAIWrite()) {
         AfterIMEInsertValue(spanNode, insertValueLength, isCreate);
         return;
     }
@@ -10686,43 +10720,71 @@ SymbolSpanOptions RichEditorPattern::GetSymbolSpanOptions(const RefPtr<SpanItem>
     return options;
 }
 
-void RichEditorPattern::ReplacePlaceholderWithRawSpans(
+void RichEditorPattern::ReplacePlaceholderWithCustomSpan(
     const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex)
 {
-    if (spanItem->spanItemType == SpanItemType::IMAGE) {
-        auto imageSpanItem = DynamicCast<ImageSpanItem>(spanItem);
-        CHECK_NULL_VOID(imageSpanItem);
-        auto options = imageSpanItem->options;
-        options.offset = caretPosition_;
-        if (isSpanStringMode_) {
-            auto spanString = MakeRefPtr<SpanString>(options);
-            InsertStyledStringByPaste(spanString);
-        } else {
-            AddImageSpan(options, true, caretPosition_, true);
+    if (isSpanStringMode_) {
+        auto customSpanItem = DynamicCast<CustomSpanItem>(spanItem);
+        auto customSpan = MakeRefPtr<CustomSpan>();
+        if (customSpanItem->onMeasure.has_value()) {
+            customSpan->SetOnMeasure(customSpanItem->onMeasure.value());
         }
-        textIndex = index + PLACEHOLDER_LENGTH;
-    } else if (spanItem->spanItemType == SpanItemType::CustomSpan ||
-               spanItem->spanItemType == SpanItemType::PLACEHOLDER) {
+        if (customSpanItem->onDraw.has_value()) {
+            customSpan->SetOnDraw(customSpanItem->onDraw.value());
+        }
+        auto spanString = MakeRefPtr<MutableSpanString>(customSpan);
+        InsertStyledStringByPaste(spanString);
+    } else {
         auto customSpanItem = DynamicCast<PlaceholderSpanItem>(spanItem);
         CHECK_NULL_VOID(customSpanItem);
         auto customNode = customSpanItem->GetCustomNode();
         SpanOptionBase options;
         options.offset = caretPosition_;
-        if (isSpanStringMode_) {
-            auto customSpan = MakeRefPtr<CustomSpan>();
-            customSpan->ApplyToSpanItem(customSpanItem, SpanOperation::ADD);
-            CHECK_NULL_VOID(customSpan);
-            auto spanString = MakeRefPtr<MutableSpanString>(customSpan);
-            InsertStyledStringByPaste(spanString);
-        } else {
-            AddPlaceholderSpan(customNode, options);
-        }
-        textIndex = index + PLACEHOLDER_LENGTH;
-    } else if (spanItem->spanItemType == SpanItemType::SYMBOL) {
-        auto options = GetSymbolSpanOptions(spanItem);
-        options.offset = caretPosition_;
-        AddSymbolSpan(options, false, caretPosition_);
-        textIndex = index + PLACEHOLDER_LENGTH;
+        AddPlaceholderSpan(customNode, options);
+    }
+    textIndex = index + PLACEHOLDER_LENGTH;
+}
+
+void RichEditorPattern::ReplacePlaceholderWithSymbolSpan(
+    const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex)
+{
+    auto options = GetSymbolSpanOptions(spanItem);
+    options.offset = caretPosition_;
+    AddSymbolSpan(options, false, caretPosition_);
+    textIndex = index + PLACEHOLDER_LENGTH;
+}
+
+void RichEditorPattern::ReplacePlaceholderWithImageSpan(
+    const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex)
+{
+    auto imageSpanItem = DynamicCast<ImageSpanItem>(spanItem);
+    CHECK_NULL_VOID(imageSpanItem);
+    auto options = imageSpanItem->options;
+    options.offset = caretPosition_;
+    if (isSpanStringMode_) {
+        auto spanString = MakeRefPtr<SpanString>(options);
+        InsertStyledStringByPaste(spanString);
+    } else {
+        AddImageSpan(options, true, caretPosition_, true);
+    }
+    textIndex = index + PLACEHOLDER_LENGTH;
+}
+
+void RichEditorPattern::ReplacePlaceholderWithRawSpans(
+    const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex)
+{
+    switch (spanItem->spanItemType) {
+        case SpanItemType::SYMBOL:
+            ReplacePlaceholderWithSymbolSpan(spanItem, index, textIndex);
+            return;
+        case SpanItemType::CustomSpan:
+            ReplacePlaceholderWithCustomSpan(spanItem, index, textIndex);
+            return;
+        case SpanItemType::IMAGE:
+            ReplacePlaceholderWithImageSpan(spanItem, index, textIndex);
+            return;
+        default:
+            return;
     }
 }
 

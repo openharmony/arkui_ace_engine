@@ -242,6 +242,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<Navigat
         menuItemLayoutProperty->UpdatePadding(padding);
         MarginProperty margin;
         margin.right = CalcLength(theme->GetCompPadding());
+        margin.end = CalcLength(theme->GetCompPadding());
         menuItemLayoutProperty->UpdateMargin(margin);
     } else {
         menuItemLayoutProperty->UpdateUserDefinedIdealSize(
@@ -375,6 +376,9 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
     auto buttonEvent = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isButtonEnabled);
+    auto focusHub = buttonNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetEnabled(isButtonEnabled);
 }
 
 void NavigationTitleUtil::UpdateBarItemNodeWithItem(

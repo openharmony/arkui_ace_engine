@@ -90,10 +90,12 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
     const RefPtr<OverlayManager>& overlayManager)
 {
     CHECK_NULL_VOID(actuator);
+    CHECK_NULL_VOID(overlayManager);
     AnimationOption option;
     option.SetDuration(BEFORE_LIFTING_TIME);
     option.SetCurve(Curves::SHARP);
     auto frameNode = actuator->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto gatherNodeCenter = frameNode->GetPaintRectCenter();
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
 
@@ -322,7 +324,10 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     textNode->MarkModifyDone();
     textNode->SetLayoutDirtyMarked(true);
     textNode->SetActive(true);
-    textNode->CreateLayoutTask();
+    auto context = textNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(textNode);
+    }
     pipeline->FlushSyncGeometryNodeTasks();
 }
 

@@ -538,11 +538,11 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         sensitive = host->IsPrivacySensitive();
     }
     ImagePaintMethodConfig imagePaintMethodConfig {
-        .selected = isSelected_,
         .sensitive = sensitive,
-        .interpolation = interpolationDefault_,
+        .selected = isSelected_,
         .imageOverlayModifier = overlayMod_,
-        .imageContentModifier = contentMod_
+        .imageContentModifier = contentMod_,
+        .interpolation = interpolationDefault_
     };
     if (image_) {
         return MakeRefPtr<ImagePaintMethod>(image_, imagePaintMethodConfig);
@@ -1038,7 +1038,6 @@ void ImagePattern::OnReuse()
     renderProp->UpdateNeedBorderRadius(needBorderRadius_);
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfoCacheKey();
     LoadImageDataIfNeed();
 }
 
@@ -1551,10 +1550,7 @@ void ImagePattern::OnIconConfigurationUpdate()
 void ImagePattern::OnConfigurationUpdate()
 {
     CHECK_NULL_VOID(loadingCtx_);
-
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    imageLayoutProperty->UpdateImageSourceInfoCacheKey();
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
@@ -1562,7 +1558,6 @@ void ImagePattern::OnConfigurationUpdate()
         imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        altImageSourceInfo.GenerateCacheKey();
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }

@@ -184,16 +184,16 @@ void AddResConfigInfo(
     aceResCfg.SetAppHasDarkRes(resConfig->GetAppDarkRes());
     auto preferredLocaleInfo = resConfig->GetPreferredLocaleInfo();
     if (preferredLocaleInfo != nullptr) {
-        std::string preferredlanguage = preferredLocaleInfo->getLanguage();
+        std::string preferredLanguage = preferredLocaleInfo->getLanguage();
         std::string script = preferredLocaleInfo->getScript();
         std::string country = preferredLocaleInfo->getCountry();
         if (!script.empty()) {
-            preferredlanguage += "-" + script;
+            preferredLanguage += "-" + script;
         }
         if (!country.empty()) {
-            preferredlanguage += "-" + country;
+            preferredLanguage += "-" + country;
         }
-        aceResCfg.SetPreferredLanguage(preferredlanguage);
+        aceResCfg.SetPreferredLanguage(preferredLanguage);
     }
 }
 
@@ -2445,8 +2445,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    PerfMonitor::GetPerfMonitor()->RecordWindowRectResize(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason),
-                                                          bundleName_);
+    if (SystemProperties::GetWindowRectResizeEnabled()) {
+        PerfMonitor::GetPerfMonitor()->RecordWindowRectResize(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason),
+            bundleName_);
+    }
     UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction, avoidAreas);
 }
 
@@ -2485,10 +2487,18 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SetViewportMetrics(aceView, modifyConfig); // update density into pipeline
     };
+    auto updateDeviceOrientationTask = [container, modifyConfig, reason]() {
+        if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
+            container->UpdateResourceOrientation(modifyConfig.Orientation());
+        }
+    };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         updateDensityTask(); // ensure density has been updated before load first page
+        updateDeviceOrientationTask();
     } else {
         taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
+        taskExecutor->PostTask(
+            std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI, "ArkUIDeviceOrientation");
     }
     RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
     auto pipelineContext = container->GetPipelineContext();
@@ -2759,6 +2769,13 @@ void UIContentImpl::NotifyRotationAnimationEnd()
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    std::string currentPid = std::to_string(getpid());
+    for (auto param : params) {
+        if (param == currentPid) {
+            LOGE("DumpInfo pid has appeared");
+            return;
+        }
+    }
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();

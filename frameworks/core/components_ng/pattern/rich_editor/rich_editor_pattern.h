@@ -1072,7 +1072,11 @@ private:
     void ResetAfterTextChange() override {};
     void AddOprationWhenAddImage(int32_t beforeCaretPos);
     void UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpanOptions& options);
-
+    void InitPlaceholderSpansMap(
+        RefPtr<SpanItem>& newSpanItem, const RefPtr<SpanItem>& spanItem, size_t& index, size_t& placeholderGains);
+    void ReplacePlaceholderWithCustomSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
+    void ReplacePlaceholderWithSymbolSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
+    void ReplacePlaceholderWithImageSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
         auto host = GetHost();
@@ -1274,6 +1278,7 @@ private:
     void CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub);
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     void UpdateImagePreviewParam();
+    void UpdateImagePreviewParam(const RefPtr<ImageSpanNode>& imageNode);
     void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
 
 #if defined(ENABLE_STANDARD_INPUT)

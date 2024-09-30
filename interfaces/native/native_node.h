@@ -4176,6 +4176,17 @@ typedef enum {
     NODE_SCROLL_BY,
 
     /**
+     * @brief Performs inertial scrolling based on the initial velocity passed in.
+     * 
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: Initial velocity of inertial scrolling. Unit: vp/s. If the value specified is 0, it is
+     * considered as invalid, and the scrolling for this instance will not take effect. If the value is positive,
+     * the scroll will move downward; if the value is negative, the scroll will move upward. \n
+     *
+     */
+    NODE_SCROLL_FLING,
+
+    /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
      * obtained as required through APIs.
      *

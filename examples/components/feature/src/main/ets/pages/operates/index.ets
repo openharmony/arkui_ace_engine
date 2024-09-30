@@ -20,6 +20,7 @@ import { ButtonBootcamp } from './ButtonBootcamp';
 import { ChipBootcamp } from './ChipBootcamp';
 import { SelectBootcamp } from './SelectBootcamp';
 import { MenuBootcamp } from './MenuBootcamp';
+import { BindSheetBootcamp } from './BindSheetBootcamp';
 
 export const operatesRoute: RouteGroup = {
   name: 'operates',
@@ -31,6 +32,7 @@ export const operatesRoute: RouteGroup = {
     { name: 'chip', label: '操作块/Chip' },
     { name: 'select', label: '下拉按钮/Select' },
     { name: 'menu', label: '菜单/Menu' },
+    { name: 'bindsheet', label: '半模态/BindSheet' },
   ]
 };
 
@@ -48,6 +50,8 @@ export function OperatesDestination(name: string, route: Route) {
     SelectBootcamp({ title: route.label })
   } else if (name === 'operates/menu') {
     MenuBootcamp({ title: route.label })
+  } else if (name === 'operates/bindsheet') {
+    BindSheetBootcamp({ title: route.label })
   }
 }
 

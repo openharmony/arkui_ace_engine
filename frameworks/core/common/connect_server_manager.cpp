@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 namespace {
 
 using StartServer = bool (*)(const std::string& packageName);
-using StartServerForSocketPair = void (*)(int32_t);
+using StartServerForSocketPair = bool (*)(int32_t);
 using SendMessage = void (*)(const std::string& message);
 using SendLayoutMessage = void (*)(const std::string& message);
 using StopServer = void (*)(const std::string& packageName);

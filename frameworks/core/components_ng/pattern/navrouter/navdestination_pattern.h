@@ -246,7 +246,8 @@ public:
 private:
     void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
     void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
-    void MountTitleBar(RefPtr<NavDestinationGroupNode>& hostNode);
+    void MountTitleBar(
+        RefPtr<NavDestinationGroupNode>& hostNode, bool& needRunTitleBarAnimation);
     void InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode);
     void HandleLongPress();
     void HandleLongPressActionEnd();

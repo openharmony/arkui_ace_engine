@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 
 #include "core/components/marquee/marquee_theme.h"
+#include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -113,6 +114,9 @@ void MarqueePattern::OnModifyDone()
     auto src = layoutProperty->GetSrc().value_or(" ");
     std::replace(src.begin(), src.end(), '\n', ' ');
     textLayoutProperty->UpdateContent(src);
+    auto direction = layoutProperty->GetLayoutDirection();
+    auto textDirection = GetTextDirection(src, direction);
+    CheckTextDirectionChange(textDirection);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
@@ -183,7 +187,7 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
     bool isFirstStart = start == GetTextOffset() ? true : false;
     float calculateEnd = CalculateEnd();
     float calculateStart = CalculateStart();
-    auto direction = GetLayoutProperty<MarqueeLayoutProperty>()->GetNonAutoLayoutDirection();
+    auto direction = GetCurrentTextDirection();
     bool isRtl = direction == TextDirection::RTL ? true : false;
     if (isRtl) std::swap(calculateEnd, calculateStart);
     lastAnimationParam_.lastEnd = calculateEnd;
@@ -248,9 +252,8 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                 if (newPlayCount == 0) {
                     return;
                 }
-                auto marqueeLayoutProperty = pattern->GetLayoutProperty<MarqueeLayoutProperty>();
-                CHECK_NULL_VOID(marqueeLayoutProperty);
-                auto direction = marqueeLayoutProperty->GetNonAutoLayoutDirection();
+
+                auto direction = pattern->GetCurrentTextDirection();
                 auto newStart = direction == TextDirection::RTL ? pattern->CalculateEnd() : pattern->CalculateStart();
                 pattern->lastAnimationParam_.lastAnimationPosition = newStart;
                 pattern->lastAnimationParam_.lastStartMilliseconds = GetMilliseconds();
@@ -466,7 +469,7 @@ float MarqueePattern::CalculateStart()
     auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     auto layoutProperty = host->GetLayoutProperty<MarqueeLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, start);
-    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
+    auto textDirection = GetCurrentTextDirection();
     Alignment align = (textDirection == TextDirection::RTL ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT);
     if (layoutProperty->GetPositionProperty()) {
         align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
@@ -511,7 +514,7 @@ float MarqueePattern::CalculateEnd()
     CHECK_NULL_RETURN(layoutProperty, end);
     auto direction = paintProperty->GetDirection().value_or(MarqueeDirection::LEFT);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
-    auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
+    auto textDirection = GetCurrentTextDirection();
     Alignment align = (textDirection == TextDirection::RTL ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT);
     if (layoutProperty->GetPositionProperty()) {
         align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
@@ -637,5 +640,40 @@ void MarqueePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("Play status", playStatus_);
     json->Put("loop", loop_);
     json->Put("step", scrollAmount_);
+}
+
+TextDirection MarqueePattern::GetTextDirection(const std::string& content, TextDirection direction)
+{
+    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
+        return direction;
+    }
+
+    bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto textDirection = isRTL ? TextDirection::RTL : TextDirection::LTR;
+    auto showingTextForWString = StringUtils::ToWstring(content);
+    for (const auto& charOfShowingText : showingTextForWString) {
+        if (TextLayoutadapter::IsLeftToRight(charOfShowingText)) {
+            return TextDirection::LTR;
+        }
+        if (TextLayoutadapter::IsRightToLeft(charOfShowingText) ||
+            TextLayoutadapter::IsRightTOLeftArabic(charOfShowingText)) {
+            return TextDirection::RTL;
+        }
+    }
+    return textDirection;
+}
+
+TextDirection MarqueePattern::GetCurrentTextDirection()
+{
+    return currentTextDirection_;
+}
+
+void MarqueePattern::CheckTextDirectionChange(TextDirection direction)
+{
+    if (direction != currentTextDirection_) {
+        lastAnimationParam_.lastStartMilliseconds = ANIMATION_INITIAL_TIME;
+        lastAnimationParam_.lastAnimationPosition = 0.0f;
+    }
+    currentTextDirection_ = direction;
 }
 } // namespace OHOS::Ace::NG

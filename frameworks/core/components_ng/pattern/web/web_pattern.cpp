@@ -678,9 +678,11 @@ void WebPattern::HandleDragMove(const GestureEvent& event)
         for (auto pCode : gesturePressedCodes) {
             pressedCodes.push_back(static_cast<int32_t>(pCode));
         }
+        // this ratio is only for axisEvent delta because delta no need to change in web.
+        auto axisOffsetRatio = (LINE_HEIGHT_DESKTOP * LINE_NUMBER_DESKTOP / MOUSE_WHEEL_DEGREES).ConvertToPx();
         delegate_->WebHandleAxisEvent(localLocation.GetX(), localLocation.GetY(),
-            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO, event.GetDelta().GetY() * DEFAULT_AXIS_RATIO,
-            pressedCodes);
+            event.GetDelta().GetX() * DEFAULT_AXIS_RATIO * axisOffsetRatio,
+            event.GetDelta().GetY() * DEFAULT_AXIS_RATIO * axisOffsetRatio, pressedCodes);
     }
 }
 
@@ -6320,6 +6322,8 @@ void WebPattern::OnShowAutofillPopup(
     auto offset = GetCoordinatePoint().value_or(OffsetF());
     offset.AddX(offsetX);
     offset.AddY(offsetY);
+    menu->GetOrCreateFocusHub()->SetFocusable(false);
+    overlayManager->DeleteMenu(id);
     overlayManager->ShowMenu(id, offset, menu);
 }
 

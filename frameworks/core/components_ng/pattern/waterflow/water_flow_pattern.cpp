@@ -247,6 +247,7 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     float delta = layoutInfo_->GetDelta(prevOffset_);
     PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), delta);
 
+    FireObserverOnDidScroll(delta);
     auto onScroll = eventHub->GetOnScroll();
     if (onScroll) {
         FireOnScroll(delta, onScroll);
@@ -268,7 +269,9 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
 void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
+    CHECK_NULL_VOID(host && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
+    FireObserverOnReachStart();
+    CHECK_NULL_VOID(onReachStart);
     ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
     onReachStart();
     AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
@@ -277,7 +280,9 @@ void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd && layoutInfo_->ReachEnd(prevOffset_));
+    CHECK_NULL_VOID(host && layoutInfo_->ReachEnd(prevOffset_));
+    FireObserverOnReachEnd();
+    CHECK_NULL_VOID(onReachEnd);
     ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
     onReachEnd();
     AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
@@ -723,7 +728,10 @@ WeakPtr<FocusHub> WaterFlowPattern::GetNextFocusNode(FocusStep step, const WeakP
         if (itemIdx >= layoutInfo_->endIndex_ || itemIdx <= layoutInfo_->startIndex_) {
             ScrollToIndex(itemIdx, false, ScrollAlign::AUTO);
             host->SetActive();
-            host->CreateLayoutTask();
+            auto context = host->GetContext();
+            if (context) {
+                context->FlushUITaskWithSingleDirtyNode(host);
+            }
         }
         auto next = host->GetChildByIndex(idx);
         CHECK_NULL_RETURN(next, nullptr);

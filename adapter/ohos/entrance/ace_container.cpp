@@ -44,6 +44,7 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "adapter/ohos/osal/system_bar_style_ohos.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
+#include "adapter/ohos/osal/window_utils.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
@@ -99,6 +100,7 @@ constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
 const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
@@ -981,6 +983,7 @@ void AceContainer::InitializeCallback()
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
+                aceContainer->UpdateResourceDensity(density);
                 aceContainer->NotifyDensityUpdate();
             }
         };
@@ -2585,6 +2588,8 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);
+    // change color mode and theme to clear image cache
+    pipelineContext_->ClearImageCache();
 }
 
 void AceContainer::NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration)
@@ -2893,6 +2898,18 @@ bool AceContainer::IsSystemWindow() const
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
         uiWindow_->GetType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+uint32_t AceContainer::GetParentWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetParentWindowType());
+}
+
+uint32_t AceContainer::GetWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetType());
 }
 
 bool AceContainer::IsHostMainWindow() const
@@ -3293,5 +3310,26 @@ void AceContainer::RemoveWatchSystemParameter()
         ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
+}
+
+void AceContainer::UpdateResourceOrientation(int32_t orientation)
+{
+    DeviceOrientation newOrientation = WindowUtils::GetDeviceOrientation(orientation);
+    auto resConfig = GetResourceConfiguration();
+    resConfig.SetOrientation(newOrientation);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+    }
+    SetResourceConfiguration(resConfig);
+}
+
+void AceContainer::UpdateResourceDensity(double density)
+{
+    auto resConfig = GetResourceConfiguration();
+    resConfig.SetDensity(density);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+    }
+    SetResourceConfiguration(resConfig);
 }
 } // namespace OHOS::Ace::Platform

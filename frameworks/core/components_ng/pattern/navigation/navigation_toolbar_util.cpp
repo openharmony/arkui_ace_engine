@@ -210,10 +210,16 @@ void UpdateToolbarItemNodeWithConfiguration(
         auto itemEventHub = barItemNode->GetEventHub<BarItemEventHub>();
         CHECK_NULL_VOID(itemEventHub);
         itemEventHub->SetEnabled(false);
+        auto itemFocusHub = barItemNode->GetFocusHub();
+        CHECK_NULL_VOID(itemFocusHub);
+        itemFocusHub->SetEnabled(false);
 
         auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
         CHECK_NULL_VOID(buttonEventHub);
         buttonEventHub->SetEnabled(false);
+        auto buttonFocusHub = buttonNode->GetFocusHub();
+        CHECK_NULL_VOID(buttonFocusHub);
+        buttonFocusHub->SetEnabled(false);
     }
 
     UpdateBarItemPattern(barItemNode, barItem);
@@ -506,14 +512,6 @@ bool BuildToolBarItems(const RefPtr<NavToolbarNode>& toolBarNode, const std::vec
     return CreateToolbarItemNodeAndMenuNode(enabled, std::move(params), fieldProperty,
         barMenuNodeOut, containerNode);;
 }
-
-void UpdateToolBarDividerProperty(const RefPtr<FrameNode>& divider, VisibleType type)
-{
-    CHECK_NULL_VOID(divider);
-    auto property = divider->GetLayoutProperty();
-    CHECK_NULL_VOID(property);
-    property->UpdateVisibility(type);
-}
 } //namespace
 
 void NavigationToolbarUtil::CreateToolBarDividerNode(const RefPtr<NavDestinationNodeBase>& nodeBase)
@@ -618,11 +616,15 @@ void NavigationToolbarUtil::SetToolbarOptions(
     toolBarPattern->SetToolbarOptions(std::move(opt));
 }
 
-void NavigationToolbarUtil::MountToolBar(const RefPtr<NavDestinationNodeBase>& nodeBase)
+void NavigationToolbarUtil::MountToolBar(
+    const RefPtr<NavDestinationNodeBase>& nodeBase, bool& needRunToolBarAnimation)
 {
+    needRunToolBarAnimation = false;
     CHECK_NULL_VOID(nodeBase);
     auto toolbarNode = nodeBase->GetToolBarNode();
     CHECK_NULL_VOID(toolbarNode);
+    auto navDestinationPatternBase = nodeBase->GetPattern<NavDestinationPatternBase>();
+    CHECK_NULL_VOID(navDestinationPatternBase);
     auto propertyBase = nodeBase->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
     CHECK_NULL_VOID(propertyBase);
     auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(toolbarNode);
@@ -636,21 +638,22 @@ void NavigationToolbarUtil::MountToolBar(const RefPtr<NavDestinationNodeBase>& n
         nodeBase->AddChild(toolbarNode);
     }
 
-    if (propertyBase->GetHideToolBar().value_or(false) || !toolBarNode->HasValidContent()) {
-        toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        toolBarNode->SetActive(false);
-        UpdateToolBarDividerProperty(divider, VisibleType::GONE);
-    } else {
-        toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        toolBarNode->SetActive(true);
-        UpdateToolBarDividerProperty(divider, VisibleType::VISIBLE);
-
-        auto&& opts = propertyBase->GetSafeAreaExpandOpts();
-        if (opts) {
-            toolBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
-        }
+    bool hideToolBar = propertyBase->GetHideToolBarValue(false);
+    auto currhideToolBar = navDestinationPatternBase->GetCurrHideToolBar();
+    /**
+     * if toolbar is the first time to hide/display, doesn't require animation or isn't currently being animated and the
+     * hidden/display status hasn't changed.
+     */
+    if (!currhideToolBar.has_value() || !propertyBase->GetIsAnimatedToolBarValue(false) ||
+        (navDestinationPatternBase->GetToolBarAnimationCount() <= 0 && currhideToolBar.value() == hideToolBar)) {
+        navDestinationPatternBase->SetCurrHideToolBar(hideToolBar);
+        navDestinationPatternBase->HideOrShowToolBarImmediately(nodeBase, hideToolBar);
+        return;
     }
     toolBarNode->MarkModifyDone();
     toolBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+
+    navDestinationPatternBase->SetCurrHideToolBar(hideToolBar);
+    needRunToolBarAnimation = true;
 }
 } // namespace OHOS::Ace::NG

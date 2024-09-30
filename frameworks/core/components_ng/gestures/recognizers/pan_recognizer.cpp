@@ -243,8 +243,8 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     if (event.isRotationEvent) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
-        "Id:%{public}d, pan axis start, state:%{public}d", event.touchEventId, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d axis start, state:%{public}d",
+        event.touchEventId, event.id, refereeState_);
     fingers_ = newFingers_;
     distance_ = newDistance_;
     direction_ = newDirection_;
@@ -327,8 +327,8 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
-        "Id:%{public}d, pan axis end, state: %{public}d", event.touchEventId, refereeState_);
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d axis end, state: %{public}d",
+        event.touchEventId, event.id, refereeState_);
     // if axisEvent received rotateEvent, no need to active Pan recognizer.
     if (event.isRotationEvent) {
         return;
@@ -365,6 +365,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         SendCallbackMsg(onActionEnd_);
         AddOverTimeTrace();
     }
+    panVelocity_.ResetAll();
 }
 
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
@@ -445,6 +446,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     mainDelta_ = GetMainAxisDelta();
     averageDistance_ += delta_;
 
+    UpdateTouchPointWithAxisEvent(event);
     UpdateAxisPointInVelocityTracker(event);
     time_ = event.time;
 

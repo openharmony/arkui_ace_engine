@@ -1507,11 +1507,6 @@ export class c1 extends ViewPU {
       Button.focusable(true);
       Button.opacity(this.getChipNodeOpacity());
       Button.padding(0);
-      Button.focusBox({
-        margin: LengthMetrics.vp(this.theme.o1.w1),
-        strokeColor: ColorMetrics.resourceColor(this.theme.o1.v1),
-        strokeWidth: LengthMetrics.vp(this.theme.o1.borderWidth),
-      });
       Button.onFocus(() => {
         this.chipNodeOnFocus = true;
       });

@@ -165,13 +165,13 @@ HWTEST_F(NavigationAnimationTest, NavigationInteractiveTest001, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_NE(navigationPattern->currentProxy_, nullptr);
-    EXPECT_TRUE(navigationPattern->currentProxy_->GetInteractive());
+    ASSERT_NE(navigationPattern->GetTopNavigationProxy(), nullptr);
+    EXPECT_TRUE(navigationPattern->GetTopNavigationProxy()->GetInteractive());
 
     /**
      * @tc.steps: step3. set navigation transition callback, set interactive value false
     */
-    navigationPattern->currentProxy_->hasFinished_ = true;
+    navigationPattern->GetTopNavigationProxy()->hasFinished_ = true;
     navigationPattern->isFinishInteractiveAnimation_ = true;
     navigationPattern->SetNavigationTransition([](const RefPtr<NavDestinationContext>& preContext,
         const RefPtr<NavDestinationContext>& topContext, NavigationOperation operation) -> NavigationTransition {
@@ -192,8 +192,8 @@ HWTEST_F(NavigationAnimationTest, NavigationInteractiveTest001, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_NE(navigationPattern->currentProxy_, nullptr);
-    EXPECT_FALSE(navigationPattern->currentProxy_->GetInteractive());
+    ASSERT_NE(navigationPattern->GetTopNavigationProxy(), nullptr);
+    EXPECT_FALSE(navigationPattern->GetTopNavigationProxy()->GetInteractive());
 }
 
 /**
@@ -236,8 +236,8 @@ HWTEST_F(NavigationAnimationTest, NavigationFinishAnimation002, TestSize.Level1)
     stack->Add("pageA", navDestinationA);
     pattern->MarkNeedSyncWithJsStack();
     pattern->SyncWithJsStackIfNeeded();
-    ASSERT_NE(pattern->currentProxy_, nullptr);
-    pattern->currentProxy_->FireCancelAnimation();
+    ASSERT_NE(pattern->GetTopNavigationProxy(), nullptr);
+    pattern->GetTopNavigationProxy()->FireCancelAnimation();
     auto targetPage = stack->Get();
     EXPECT_TRUE(targetPage == navDestinationA);
     ASSERT_EQ(stack->Size(), 1);
@@ -282,8 +282,8 @@ HWTEST_F(NavigationAnimationTest, NavigationCancelAnimation003, TestSize.Level1)
     stack->Add("pageA", destinationA);
     pattern->UpdateNavPathList();
     pattern->RefreshNavDestination();
-    ASSERT_NE(pattern->currentProxy_, nullptr);
-    pattern->currentProxy_->CancelInteractiveAnimation();
+    ASSERT_NE(pattern->GetTopNavigationProxy(), nullptr);
+    pattern->GetTopNavigationProxy()->CancelInteractiveAnimation();
     ASSERT_EQ(stack->Size(), 0);
 }
 
