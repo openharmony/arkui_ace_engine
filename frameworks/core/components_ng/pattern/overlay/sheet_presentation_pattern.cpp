@@ -1832,6 +1832,17 @@ void SheetPresentationPattern::ClipSheetNode()
     }
 }
 
+bool SheetPresentationPattern::IsWindowSizeChangedWithUndefinedReason(
+    int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    bool isWindowChanged = false;
+    if (windowSize_.has_value()) {
+        isWindowChanged = (type == WindowSizeChangeReason::UNDEFINED &&
+                           (windowSize_->Width() != width || windowSize_->Height() != height));
+    }
+    return isWindowChanged;
+}
+
 void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet WindowSizeChangeReason type is: %{public}d", type);
@@ -1847,8 +1858,12 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
             ScrollTo(.0f);
         }
     }
-    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED ||
-        type == WindowSizeChangeReason::DRAG || type == WindowSizeChangeReason::RESIZE) {
+    if (IsWindowSizeChangedWithUndefinedReason(width, height, type)) {
+        windowChanged_ = true;
+    }
+    windowSize_ = SizeT<int32_t>(width, height);
+    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::DRAG ||
+        type == WindowSizeChangeReason::RESIZE) {
         windowChanged_ = true;
     }
 
