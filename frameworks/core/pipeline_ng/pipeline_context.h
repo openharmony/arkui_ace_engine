@@ -681,6 +681,8 @@ public:
 
     void ResetDragging() override;
 
+    void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
+
     const SerializedGesture& GetSerializedGesture() const override;
     // return value means whether it has printed info
     bool PrintVsyncInfoIfNeed() const override;
