@@ -84,7 +84,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure001, TestSize.Level1)
     CreateGridItems(10, ITEM_WIDTH, NULL_VALUE, GridItemStyle::NONE);
     CreateDone(frameNode_);
     LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
-    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->gridLayoutInfo_.currentOffset_ = 0.0f;
@@ -129,7 +129,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure002, TestSize.Level1)
     CreateFixedItems(11);
     CreateDone(frameNode_);
     LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
-    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     auto& info = algorithm->gridLayoutInfo_;
@@ -178,7 +178,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure003, TestSize.Level1)
     CreateFixedItems(11);
     CreateDone(frameNode_);
     LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
-    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     auto& info = algorithm->gridLayoutInfo_;
@@ -228,7 +228,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
     CreateFixedItems(8);
     CreateDone(frameNode_);
     LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
-    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->overScroll_ = false;
@@ -307,7 +307,7 @@ HWTEST_F(GridIrregularLayoutTest, MeasureJump001, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone(frameNode_);
     LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
-    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->layoutConstraint_ = constraint;
     frameNode_->isConstraintNotChanged_ = true;
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     auto& info = algorithm->gridLayoutInfo_;
@@ -355,7 +355,7 @@ HWTEST_F(GridIrregularLayoutTest, MeasureTarget001, TestSize.Level1)
     CreateFixedItems(11);
     CreateDone(frameNode_);
     LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
-    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     auto& info = algorithm->gridLayoutInfo_;
@@ -424,7 +424,7 @@ HWTEST_F(GridIrregularLayoutTest, TestReset001, TestSize.Level1)
     CreateFixedItems(12);
     CreateDone(frameNode_);
     LayoutConstraintF constraint { .maxSize = { 610.0f, 1000.0f }, .percentReference = { 610.0f, 1000.0f } };
-    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->layoutConstraint_ = constraint;
 
     auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
     algo->overScroll_ = true;
@@ -568,7 +568,7 @@ HWTEST_F(GridIrregularLayoutTest, TestReset004, TestSize.Level1)
     CreateFixedItems(8);
     CreateDone(frameNode_);
     LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
-    layoutProperty_->UpdateLayoutConstraint(constraint);
+    layoutProperty_->layoutConstraint_ = constraint;
 
     auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
     algo->wrapper_ = AceType::RawPtr(frameNode_);
