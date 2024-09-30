@@ -597,8 +597,8 @@ void TextFieldPattern::SetAccessibilityPasswordIconAction()
         auto node = passwordArea->GetFrameNode();
         CHECK_NULL_VOID(node);
         auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
-        textAccessibilityProperty->SetAccessibilityLevel("yes");
         CHECK_NULL_VOID(textAccessibilityProperty);
+        textAccessibilityProperty->SetAccessibilityLevel("yes");
         textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
     }
 }
@@ -611,8 +611,8 @@ void TextFieldPattern::SetAccessibilityClearAction()
             auto stackNode = cleanNodeResponseArea->GetFrameNode();
             CHECK_NULL_VOID(stackNode);
             auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
-            textAccessibilityProperty->SetAccessibilityLevel("yes");
             CHECK_NULL_VOID(textAccessibilityProperty);
+            textAccessibilityProperty->SetAccessibilityLevel("yes");
             auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
