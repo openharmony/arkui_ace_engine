@@ -4909,6 +4909,9 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     contentController_->erase(start, end - start);
     UpdateSelection(start);
     selectController_->MoveCaretToContentRect(start);
+    if (isLongPress_) {
+        CancelGestureSelection();
+    }
     CloseSelectOverlay(true);
     StartTwinkling();
     auto tmpHost = GetHost();
@@ -9104,6 +9107,7 @@ void TextFieldPattern::DoTextSelectionTouchCancel()
     CHECK_NULL_VOID(magnifierController_);
     magnifierController_->RemoveMagnifierFrameNode();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
+    StopContentScroll();
 }
 
 float TextFieldPattern::GetVerticalPaddingAndBorderSum() const

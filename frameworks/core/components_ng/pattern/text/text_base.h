@@ -86,17 +86,16 @@ public:
         startOffset_ = startOffset;
     }
 
+    void CancelGestureSelection()
+    {
+        DoTextSelectionTouchCancel();
+        ResetGestureSelection();
+    }
+
     void EndGestureSelection()
     {
-        if (!isStarted_) {
-            return;
-        }
         OnTextGenstureSelectionEnd();
-        start_ = -1;
-        end_ = -1;
-        isStarted_ = false;
-        startOffset_.Reset();
-        isSelecting_ = false;
+        ResetGestureSelection();
     }
 
     void DoGestureSelection(const TouchEventInfo& info);
@@ -110,6 +109,14 @@ protected:
     virtual void OnTextGenstureSelectionEnd() {}
     virtual void DoTextSelectionTouchCancel() {}
 private:
+    void ResetGestureSelection()
+    {
+        start_ = -1;
+        end_ = -1;
+        isStarted_ = false;
+        startOffset_.Reset();
+        isSelecting_ = false;
+    }
     void DoTextSelectionTouchMove(const TouchEventInfo& info);
     int32_t start_ = -1;
     int32_t end_ = -1;
