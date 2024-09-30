@@ -16,13 +16,6 @@
 #include "core/components/dialog_modal/render_dialog_modal.h"
 
 #include "base/log/event_report.h"
-#include "core/animation/curve.h"
-#include "core/animation/curves.h"
-#include "core/animation/keyframe.h"
-#include "core/animation/keyframe_animation.h"
-#include "core/components/dialog_modal/dialog_modal_component.h"
-#include "core/components/page/page_element.h"
-#include "core/components/root/render_root.h"
 #include "core/components/stage/stage_element.h"
 
 namespace OHOS::Ace {

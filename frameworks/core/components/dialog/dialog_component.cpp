@@ -15,36 +15,16 @@
 
 #include "core/components/dialog/dialog_component.h"
 
-#include <atomic>
-
-#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
-#include "base/log/log.h"
-#include "base/resource/internal_resource.h"
-#include "base/utils/system_properties.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/curves.h"
-#include "core/animation/keyframe.h"
-#include "core/animation/keyframe_animation.h"
-#include "core/components/box/box_component.h"
-#include "core/components/button/button_theme.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/dialog/action_sheet/action_sheet_component.h"
 #include "core/components/dialog/alert_dialog_component.h"
 #include "core/components/dialog/dialog_element.h"
 #include "core/components/dialog/render_dialog.h"
 #include "core/components/drag_bar/drag_bar_component.h"
-#include "core/components/focus_collaboration/focus_collaboration_component.h"
 #include "core/components/focusable/focusable_component.h"
-#include "core/components/image/image_component.h"
 #include "core/components/scroll/scroll_component.h"
-#include "core/components/theme/theme_manager.h"
 #include "core/components/wrap/wrap_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {

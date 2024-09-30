@@ -23,9 +23,7 @@
 #endif
 
 #include "core/components/common/painter/rosen_decoration_painter.h"
-#include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/shadow_config.h"
-#include "core/pipeline/base/rosen_render_context.h"
 
 #define SkPathkCCWDirection SkPathDirection::kCCW
 

@@ -15,9 +15,6 @@
 
 #include "core/components/dialog/dialog_element.h"
 
-#include "core/components/box/box_element.h"
-#include "core/components/box/render_box.h"
-#include "core/components/dialog/dialog_component.h"
 #include "core/components/dialog/render_dialog.h"
 #include "core/components/transition/transition_element.h"
 

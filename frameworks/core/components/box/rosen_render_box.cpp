@@ -15,35 +15,22 @@
 
 #include "core/components/box/rosen_render_box.h"
 
-#include <cmath>
-
-#include "animation/rs_animation_timing_protocol.h"
-#include "render_service_client/core/ui/rs_node.h"
 #ifndef USE_ROSEN_DRAWING
 #include "include/effects/SkGradientShader.h"
 #include "include/utils/SkParsePath.h"
 #endif
 
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/common/frontend.h"
 #include "core/common/rosen/rosen_convert_helper.h"
 #include "core/components/box/rosen_mask_painter.h"
 #include "core/components/common/painter/debug_boundary_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
-#include "core/components/common/properties/border.h"
-#include "core/components/common/properties/border_edge.h"
-#include "core/components/common/properties/color.h"
 #include "core/components/flex/render_flex.h"
 #include "core/components/image/image_component.h"
-#include "core/components/image/rosen_render_image.h"
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
 #else
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #endif
-#include "core/components_ng/render/canvas_image.h"
-#include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -15,16 +15,7 @@
 
 #include "core/components/calendar/calendar_data_adapter.h"
 
-#include <fstream>
-#include <streambuf>
-
 #include "base/i18n/localization.h"
-#include "base/json/json_util.h"
-#include "base/log/log.h"
-#include "base/utils/date_util.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
-#include "core/common/platform_bridge.h"
 
 namespace OHOS::Ace {
 namespace {

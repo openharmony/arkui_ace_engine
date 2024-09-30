@@ -15,15 +15,9 @@
 
 #include "core/components/dialog_tween/render_dialog_tween.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/offset.h"
 #include "base/log/event_report.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/stack/stack_element.h"
-#include "core/event/ace_event_helper.h"
-#include "core/event/back_end_event_manager.h"
 
 namespace OHOS::Ace {
 namespace {

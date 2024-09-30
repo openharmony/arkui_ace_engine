@@ -15,19 +15,13 @@
 
 #include "core/components/container_modal/container_modal_component.h"
 
-#include "base/utils/system_properties.h"
-#include "core/components/box/box_component.h"
-#include "core/components/button/button_component.h"
 #include "core/components/clip/clip_component.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/container_modal/container_modal_element.h"
 #include "core/components/container_modal/render_container_modal.h"
-#include "core/components/image/image_component.h"
 #include "core/components/padding/padding_component.h"
-#include "core/components/text/text_component.h"
 #include "core/components/tween/tween_component.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/pan_gesture.h"
 
 namespace OHOS::Ace {
