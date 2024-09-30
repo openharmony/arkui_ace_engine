@@ -940,7 +940,7 @@ public:
     }
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
-    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect);
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -1199,7 +1199,7 @@ private:
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback();
-    bool IsFrameDisappear();
+    bool IsFrameDisappear() const;
     bool IsFrameDisappear(uint64_t timestamp);
     bool IsFrameAncestorDisappear(uint64_t timestamp);
     void ThrottledVisibleTask();
