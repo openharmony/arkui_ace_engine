@@ -288,11 +288,8 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
     RefPtr<RenderContext> renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     auto frameRect = renderContext->GetPaintRectWithTransform();
-    frameRect.SetOffset(node->GetOffsetRelativeToWindow());
-    auto frameRectOfPosition = renderContext->GetPaintRectWithTransform();
-    frameRectOfPosition.SetOffset(node->GetPositionToScreenWithTransform());
+    frameRect.SetOffset(node->GetPositionToScreenWithTransform());
     auto visibleRect = frameRect;
-    auto visibleRectOfPosition = frameRectOfPosition;
     auto parent = node->GetParent();
     while (parent != nullptr) {
         auto parentNode = AceType::DynamicCast<FrameNode>(parent);
@@ -308,12 +305,12 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
             parent = parent->GetParent();
             continue;
         }
-        GetVisibleRect(parentNode, visibleRect, visibleRectOfPosition);
-        bool isClipped = IsOutOfParentWithRound(visibleRectOfPosition, frameRectOfPosition, buttonInfo);
+        GetVisibleRect(parentNode, visibleRect);
+        bool isClipped = IsOutOfParentWithRound(visibleRect, frameRect, buttonInfo);
         buttonInfo.isClipped_ = isClipped;
         buttonInfo.parentTag_ = parentNode->GetTag();
 
-        if (IsOutOfParent(visibleRect, frameRect) && (visibleRect.IsValid() || frameRect.IsValid())) {
+        if (isClipped && (visibleRect.IsValid() || frameRect.IsValid())) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Parents clip is set, " \
                 "security component is not completely displayed.");
             SC_LOG_ERROR("visibleWidth: %{public}f, visibleHeight: %{public}f, " \
@@ -326,28 +323,13 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
     return false;
 }
 
-void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect, RectF& visibleRectOfPosition)
+void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect)
 {
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     RectF parentRect = renderContext->GetPaintRectWithTransform();
-    parentRect.SetOffset(node->GetOffsetRelativeToWindow());
-    RectF parentRectOfPosition = node->GetRenderContext()->GetPaintRectWithTransform();
-    parentRectOfPosition.SetOffset(node->GetPositionToScreenWithTransform());
+    parentRect.SetOffset(node->GetPositionToScreenWithTransform());
     visibleRect = visibleRect.Constrain(parentRect);
-    visibleRectOfPosition = visibleRectOfPosition.Constrain(parentRectOfPosition);
-}
-
-bool SecurityComponentHandler::IsOutOfParent(const RectF& visibleRect, const RectF& renderRect)
-{
-    if (!visibleRect.IsValid() || !renderRect.IsValid()) {
-        return true;
-    }
-
-    return LessNotEqual(renderRect.Left() + 1.0, visibleRect.Left()) ||
-        GreatNotEqual(renderRect.Right(), visibleRect.Right() + 1.0) ||
-        LessNotEqual(renderRect.Top() + 1.0, visibleRect.Top()) ||
-        GreatNotEqual(renderRect.Bottom(), visibleRect.Bottom() + 1.0);
 }
 
 bool SecurityComponentHandler::IsOutOfParentWithRound(const RectF& visibleRect, const RectF& renderRect,
