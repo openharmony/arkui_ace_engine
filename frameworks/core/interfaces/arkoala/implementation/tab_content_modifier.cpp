@@ -59,6 +59,7 @@ void TabBar0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
 
     std::optional<std::string> label = std::nullopt;
     std::optional<std::string> icon = std::nullopt;
