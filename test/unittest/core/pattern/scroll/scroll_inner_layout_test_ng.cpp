@@ -509,4 +509,35 @@ HWTEST_F(ScrollInnerLayoutTestNg, OtherTest002, TestSize.Level1)
     scrollBar_->UpdateActiveRectOffset(30.f);
     EXPECT_EQ(scrollBar_->touchRegion_.Left(), 30.f);
 }
+
+/**
+ * @tc.name: SetScrollBar001
+ * @tc.desc: Test set inner scrollbar off
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetScrollBar001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step1. DisplayMode::AUTO
+     * @tc.expected: the opacity of scrollBar is 255
+     */
+    EXPECT_TRUE(scrollBar_->NeedPaint());
+    auto scrollBarOverlayModifier = pattern_->GetScrollBarOverlayModifier();
+    EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), 255);
+    EXPECT_EQ(paintProperty_->GetBarStateString(), "BarState.Auto");
+
+    /**
+     * @tc.steps: step2. set DisplayMode::OFF and not trigger onModifyDone
+     * @tc.expected: the opacity of scrollBar is 0
+     */
+    paintProperty_->UpdateScrollBarMode(DisplayMode::OFF);
+    EXPECT_EQ(paintProperty_->GetBarStateString(), "BarState.Off");
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->GetScrollBarOverlayModifier()->GetOpacity(), 0);
+}
 } // namespace OHOS::Ace::NG

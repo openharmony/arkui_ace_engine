@@ -113,6 +113,7 @@ void WaterFlowPattern::UpdateScrollBarOffset()
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
         return;
     }
+    CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
