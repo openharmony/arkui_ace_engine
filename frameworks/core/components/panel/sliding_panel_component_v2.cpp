@@ -14,14 +14,9 @@
  */
 
 #include "core/components/panel/sliding_panel_component_v2.h"
-#include "core/components/box/box_component.h"
 #include "core/components/drag_bar/drag_bar_component.h"
-#include "core/components/drop_filter/drop_filter_component.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_item_component.h"
-#include "core/components/focus_collaboration/focus_collaboration_component.h"
-#include "core/components/panel/render_sliding_panel.h"
-#include "core/components/panel/sliding_panel_element.h"
 
 namespace OHOS::Ace {
 namespace {

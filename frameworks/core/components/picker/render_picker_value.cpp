@@ -15,9 +15,7 @@
 
 #include "core/components/picker/render_picker_value.h"
 
-#include "base/utils/system_properties.h"
 #include "core/components/picker/render_picker_option.h"
-#include "core/components/stack/stack_element.h"
 
 namespace OHOS::Ace {
 

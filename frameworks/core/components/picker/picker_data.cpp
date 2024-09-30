@@ -15,11 +15,7 @@
 
 #include "core/components/picker/picker_data.h"
 
-#include <chrono>
-#include <ctime>
-
 #include "base/i18n/localization.h"
-#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace {
 

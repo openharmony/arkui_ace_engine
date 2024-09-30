@@ -20,7 +20,6 @@
 
 #include "base/log/event_report.h"
 #include "core/components/picker/picker_time_component.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

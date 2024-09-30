@@ -14,7 +14,6 @@
  */
 
 #include <regex>
-#include <unordered_map>
 
 #include "core/components/common/properties/text_style.h"
 

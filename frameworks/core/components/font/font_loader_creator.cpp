@@ -13,12 +13,8 @@
  * limitations under the License.
  */
 
-#include <string>
 
 #include "core/common/font_loader.h"
-#ifndef NG_BUILD
-
-#endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/font/rosen_font_loader.h"
 #endif

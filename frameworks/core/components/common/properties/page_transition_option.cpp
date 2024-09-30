@@ -15,12 +15,6 @@
 
 #include "core/components/common/properties/page_transition_option.h"
 
-#include "base/utils/device_type.h"
-#include "base/utils/system_properties.h"
-#include "core/animation/animator.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/property_animatable.h"
-
 namespace OHOS::Ace {
 namespace {
 

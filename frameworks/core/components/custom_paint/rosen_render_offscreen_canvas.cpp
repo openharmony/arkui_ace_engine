@@ -15,8 +15,6 @@
 
 #include "core/components/custom_paint/rosen_render_offscreen_canvas.h"
 
-#include <cmath>
-#include <sstream>
 
 #ifndef USE_GRAPHIC_TEXT_GINE
 #include "txt/paragraph_builder.h"
@@ -34,25 +32,18 @@
 #include "include/core/SkPoint.h"
 #include "include/effects/SkImageFilters.h"
 #endif
-#include "include/effects/SkDashPathEffect.h"
-#include "include/effects/SkGradientShader.h"
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
 #include "include/utils/SkBase64.h"
-#include "include/utils/SkParsePath.h"
 
 #include "base/i18n/localization.h"
-#include "base/image/pixel_map.h"
-#include "base/log/log.h"
-#include "base/utils/string_utils.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
 #endif
-#include "core/image/image_provider.h"
 
 namespace OHOS::Ace {
 namespace {

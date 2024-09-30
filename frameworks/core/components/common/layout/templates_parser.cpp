@@ -15,13 +15,6 @@
 
 #include "core/components/common/layout/templates_parser.h"
 
-#include <algorithm>
-#include <cmath>
-#include <numeric>
-#include <regex>
-
-#include "base/utils/string_utils.h"
-
 namespace OHOS::Ace {
 namespace {
 constexpr double FULL_PERCENT = 100.0;

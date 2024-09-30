@@ -15,9 +15,6 @@
 
 #include "core/components/common/painter/debug_boundary_painter.h"
 
-#include <cmath>
-#include <functional>
-
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
@@ -25,9 +22,6 @@
 #else
 #include "core/components_ng/render/drawing.h"
 #endif
-#include "core/components/common/properties/color.h"
-#include "core/pipeline/base/render_node.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {

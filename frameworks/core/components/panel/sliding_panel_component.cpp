@@ -15,7 +15,6 @@
 
 #include "core/components/panel/sliding_panel_component.h"
 
-#include "core/components/box/box_component.h"
 #include "core/components/drag_bar/drag_bar_component.h"
 #include "core/components/drop_filter/drop_filter_component.h"
 #include "core/components/flex/flex_component.h"

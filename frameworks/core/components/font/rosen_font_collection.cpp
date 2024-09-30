@@ -25,13 +25,7 @@
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkTypeface.h"
 #endif
-#include "base/i18n/localization.h"
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace {
 

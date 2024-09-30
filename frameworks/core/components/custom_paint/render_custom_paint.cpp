@@ -15,8 +15,6 @@
 
 #include "core/components/custom_paint/render_custom_paint.h"
 
-#include "core/components/custom_paint/custom_paint_component.h"
-
 namespace OHOS::Ace {
 
 RenderCustomPaint::RenderCustomPaint() : RenderNode(true) {}

@@ -15,7 +15,6 @@
 
 #include "core/pipeline/base/rosen_render_context.h"
 
-#include "core/components/plugin/render_plugin.h"
 #include "core/pipeline/base/render_sub_container.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #ifndef USE_ROSEN_DRAWING

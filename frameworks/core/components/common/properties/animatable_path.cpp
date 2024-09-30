@@ -15,7 +15,6 @@
 
 #include "core/components/common/properties/animatable_path.h"
 
-#include "include/core/SkPath.h"
 #include "include/core/SkString.h"
 #include "include/utils/SkParsePath.h"
 

@@ -14,10 +14,7 @@
  */
 
 #include "core/components/custom_paint/render_custom_paint.h"
-#include "core/pipeline/pipeline_base.h"
 
-#ifndef NG_BUILD
-#endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "rosen_render_offscreen_canvas.h"
 #endif
