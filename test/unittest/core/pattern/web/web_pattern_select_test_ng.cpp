@@ -22,6 +22,7 @@
 #define protected public
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #undef protected
 #undef private
@@ -211,7 +212,7 @@ public:
     float getEdgeHeight_ = 0.0f;
 };
 
-class NWebQuickMenuParamsMock : public NWebQuickMenuParams {
+class NWebQuickMenuParamsSelectImpl : public NWebQuickMenuParams {
 public:
     int32_t GetXCoord() override
     {
@@ -1574,7 +1575,8 @@ HWTEST_F(WebPatternSelectTestNg, RegisterSelectOverlayCallback_001, TestSize.Lev
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->delegate_ = nullptr;
-    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsMock>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
         std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
     SelectOverlayInfo selectInfo;
@@ -1600,11 +1602,43 @@ HWTEST_F(WebPatternSelectTestNg, RegisterSelectOverlayCallback_002, TestSize.Lev
     auto webPattern = frameNode->GetPattern<WebPattern>();
     std::string type_ = "image/png";
     webPattern->OnModifyDone();
-    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsMock>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
         std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
     SelectOverlayInfo selectInfo;
     webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
+#endif
+}
+
+/**
+ * @tc.name: RegisterSelectOverlayCallback_003
+ * @tc.desc: RegisterSelectOverlayCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, RegisterSelectOverlayCallback_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    std::string type_ = "image/png";
+    webPattern->OnModifyDone();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
+    SelectOverlayInfo selectInfo;
+    auto flags = g_editStateFlags;
+    g_editStateFlags = 0;
+    webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
+    EXPECT_EQ(webPattern->quickMenuCallback_, callback);
+    g_editStateFlags = flags;
 #endif
 }
 
@@ -1878,7 +1912,8 @@ HWTEST_F(WebPatternSelectTestNg, UpdateRunQuickMenuSelectInfo_001, TestSize.Leve
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsMock>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle =
         std::make_shared<OHOS::NWeb::CustomNWebTouchHandleState>();
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle =
@@ -1914,7 +1949,8 @@ HWTEST_F(WebPatternSelectTestNg, UpdateRunQuickMenuSelectInfo_002, TestSize.Leve
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsMock>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle =
         std::make_shared<OHOS::NWeb::CustomNWebTouchHandleState>();
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle =
@@ -1944,7 +1980,8 @@ HWTEST_F(WebPatternSelectTestNg, UpdateRunQuickMenuSelectInfo_003, TestSize.Leve
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsMock>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle =
         std::make_shared<OHOS::NWeb::CustomNWebTouchHandleState>();
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle =
@@ -1956,6 +1993,44 @@ HWTEST_F(WebPatternSelectTestNg, UpdateRunQuickMenuSelectInfo_003, TestSize.Leve
     OnMenuItemClickCallback onMenuItemClick = HandleMenuItemClick;
     webPattern->onCreateMenuCallback_ = nullptr;
     webPattern->onMenuItemClick_ = nullptr;
+    webPattern->UpdateRunQuickMenuSelectInfo(selectInfo, params, insertTouchHandle, beginTouchHandle, endTouchHandle);
+    EXPECT_FALSE(webPattern->isQuickMenuMouseTrigger_);
+#endif
+}
+
+/**
+ * @tc.name: UpdateRunQuickMenuSelectInfo_004
+ * @tc.desc: UpdateRunQuickMenuSelectInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, UpdateRunQuickMenuSelectInfo_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertTouchHandle =
+        std::make_shared<OHOS::NWeb::CustomNWebTouchHandleState>();
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle =
+        std::make_shared<OHOS::NWeb::CustomNWebTouchHandleState>();
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle =
+        std::make_shared<OHOS::NWeb::CustomNWebTouchHandleState>();
+    SelectOverlayInfo selectInfo;
+    OnCreateMenuCallback onCreateMenuCallback = CreateMenuOptions;
+    OnMenuItemClickCallback onMenuItemClick = HandleMenuItemClick;
+    webPattern->onCreateMenuCallback_ =
+        [](const std::vector<NG::MenuItemParam>& menuItems) -> std::vector<MenuOptionsParam> {
+        std::vector<MenuOptionsParam> menuOptions;
+        return menuOptions;
+    };
+    webPattern->onMenuItemClick_ = [](const NG::MenuItemParam& menuItem) -> bool { return false; };
     webPattern->UpdateRunQuickMenuSelectInfo(selectInfo, params, insertTouchHandle, beginTouchHandle, endTouchHandle);
     EXPECT_FALSE(webPattern->isQuickMenuMouseTrigger_);
 #endif
@@ -2164,7 +2239,7 @@ HWTEST_F(WebPatternSelectTestNg, HideHandleAndQuickMenuIfNecessary_005, TestSize
     bool hide = false;
     bool isScroll = true;
     webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
-    webPattern->dropParams_ = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsMock>();
+    webPattern->dropParams_ = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     ASSERT_NE(webPattern->dropParams_, nullptr);
     auto insertHandle = std::make_shared<OHOS::NWeb::NWebTouchHandleStateMockDummy>();
     insertHandle->isEnable_ = false;
@@ -2203,7 +2278,7 @@ HWTEST_F(WebPatternSelectTestNg, HideHandleAndQuickMenuIfNecessary_006, TestSize
     bool hide = false;
     bool isScroll = true;
     webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
-    webPattern->dropParams_ = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsMock>();
+    webPattern->dropParams_ = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     ASSERT_NE(webPattern->dropParams_, nullptr);
     auto insertHandle = std::make_shared<OHOS::NWeb::NWebTouchHandleStateMockDummy>();
     insertHandle->isEnable_ = false;
@@ -2219,6 +2294,7 @@ HWTEST_F(WebPatternSelectTestNg, HideHandleAndQuickMenuIfNecessary_006, TestSize
     EXPECT_NE(webPattern->endSelectionHandle_, nullptr);
     webPattern->selectTemporarilyHiddenByScroll_ = true;
     webPattern->HideHandleAndQuickMenuIfNecessary(hide, isScroll);
+    EXPECT_NE(webPattern->dropParams_, nullptr);
     webPattern->startSelectionHandle_ = startSelectionHandle;
     webPattern->endSelectionHandle_ = endSelectionHandle;
     auto info = webPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo();
@@ -2238,6 +2314,72 @@ HWTEST_F(WebPatternSelectTestNg, HideHandleAndQuickMenuIfNecessary_006, TestSize
     webPattern->selectOverlayProxy_ = nullptr;
     MockPipelineContext::TearDown();
     EXPECT_NE(webPattern->dropParams_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: HideHandleAndQuickMenuIfNecessary_007
+ * @tc.desc: HideHandleAndQuickMenuIfNecessary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, HideHandleAndQuickMenuIfNecessary_007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    bool hide = false;
+    bool isScroll = true;
+    int32_t selectOverlayId = 1;
+    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
+    webPattern->dropParams_ = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
+    ASSERT_NE(webPattern->dropParams_, nullptr);
+    auto insertHandle = std::make_shared<OHOS::NWeb::NWebTouchHandleStateMockDummy>();
+    insertHandle->isEnable_ = false;
+    webPattern->insertHandle_ = insertHandle;
+    EXPECT_NE(webPattern->insertHandle_, nullptr);
+    auto startSelectionHandle = std::make_shared<OHOS::NWeb::NWebTouchHandleStateMockDummy>();
+    startSelectionHandle->isEnable_ = true;
+    startSelectionHandle->alpha_ = 1;
+    startSelectionHandle->y_ = 0;
+    webPattern->startSelectionHandle_ = startSelectionHandle;
+    EXPECT_NE(webPattern->startSelectionHandle_, nullptr);
+    auto endSelectionHandle = std::make_shared<OHOS::NWeb::NWebTouchHandleStateMockDummy>();
+    endSelectionHandle->isEnable_ = true;
+    endSelectionHandle->alpha_ = 1;
+    endSelectionHandle->y_ = 0;
+    webPattern->endSelectionHandle_ = endSelectionHandle;
+    EXPECT_NE(webPattern->endSelectionHandle_, nullptr);
+    webPattern->selectTemporarilyHiddenByScroll_ = true;
+    webPattern->HideHandleAndQuickMenuIfNecessary(hide, isScroll);
+    EXPECT_NE(webPattern->dropParams_, nullptr);
+    webPattern->startSelectionHandle_ = startSelectionHandle;
+    webPattern->endSelectionHandle_ = endSelectionHandle;
+    auto info = webPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo();
+    MockPipelineContext::SetUp();
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSelectOverlayManager();
+    EXPECT_NE(manager, nullptr);
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
+    auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    manager->selectOverlayItem_ = selectOverlayNode;
+    auto current = manager->selectOverlayItem_.Upgrade();
+    EXPECT_NE(current, nullptr);
+    info.menuInfo.menuIsShow = false;
+    manager->selectOverlayInfo_ = info;
+    auto node = manager->GetSelectOverlayNode(current->GetId());
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    webPattern->HideHandleAndQuickMenuIfNecessary(hide, isScroll);
+    EXPECT_FALSE(pattern->info_->isNewAvoid);
+    MockPipelineContext::TearDown();
 #endif
 }
 
@@ -2302,7 +2444,8 @@ HWTEST_F(WebPatternSelectTestNg, RunQuickMenu_001, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsMock>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
         std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
     webPattern->RunQuickMenu(params, callback);
@@ -2326,7 +2469,8 @@ HWTEST_F(WebPatternSelectTestNg, RunQuickMenu_002, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsMock>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
         std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
     webPattern->isQuickMenuMouseTrigger_ = true;
@@ -2351,7 +2495,8 @@ HWTEST_F(WebPatternSelectTestNg, RunQuickMenu_003, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params = std::make_shared<OHOS::NWeb::NWebQuickMenuParamsMock>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuParamsSelectImpl>();
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
         std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
     int32_t selectOverlayId = 1;

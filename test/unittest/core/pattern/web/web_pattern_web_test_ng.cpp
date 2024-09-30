@@ -13,28 +13,10 @@
  * limitations under the License.
  */
 
-#include <cstddef>
 #include <gmock/gmock.h>
 #include <list>
-#include <map>
-#include <memory>
-#include <string>
 
 #include "gtest/gtest.h"
-#include "nweb_accessibility_node_info.h"
-#include "nweb_download_callback.h"
-#include "nweb_drag_data.h"
-#include "nweb_export.h"
-#include "nweb_find_callback.h"
-#include "nweb_history_list.h"
-#include "nweb_hit_testresult.h"
-#include "nweb_javascript_result_callback.h"
-#include "nweb_native_media_player.h"
-#include "nweb_preference.h"
-#include "nweb_release_surface_callback.h"
-#include "nweb_spanstring_convert_html_callback.h"
-#include "nweb_value_callback.h"
-#include "nweb_web_message.h"
 #include "src/core/SkVM.h"
 #define protected public
 #define private public
@@ -71,7 +53,54 @@ constexpr float ALPHA_FA = 0.5;
 constexpr float EDGEHEIGHT_UN = 0.0;
 constexpr float EDGEHEIGHT_FA = 5.0;
 constexpr float EDGEHEIGHT_TR = 1.0;
+constexpr float EDGE_HEIGHT = 30.0;
 } // namespace
+
+namespace OHOS::NWeb {
+class MockNWebTouchHandleStateImpl : public NWebTouchHandleState {
+public:
+    MockNWebTouchHandleStateImpl() = default;
+    int32_t GetTouchHandleId() override
+    {
+        return -1;
+    };
+    int32_t GetX() override
+    {
+        return 0;
+    };
+    int32_t GetY() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortX() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortY() override
+    {
+        return 0;
+    };
+    TouchHandleType GetTouchHandleType() override
+    {
+        return TouchHandleType::SELECTION_END_HANDLE;
+    };
+    bool IsEnable() override
+    {
+        return true;
+    };
+    float GetAlpha() override
+    {
+        return 0.0;
+    };
+    float GetEdgeHeight() override
+    {
+        return edgeHeight_;
+    };
+
+private:
+    float edgeHeight_ = EDGE_HEIGHT;
+};
+} // namespace OHOS::NWeb
 
 namespace OHOS::Ace::NG {
 
@@ -217,7 +246,7 @@ public:
     };
 };
 
-class RenderContextTest : public RenderContext {
+class MockRenderContextTest : public RenderContext {
 public:
     RectF GetPaintRectWithoutTransform() override
     {
@@ -1074,7 +1103,7 @@ HWTEST_F(WebPatternWebTest, WebPatternTest, TestSize.Level1)
     expand->edges = SAFE_AREA_EDGE_BOTTOM;
     layoutProperty->safeAreaExpandOpts_ = std::move(expand);
     frameNode->SetLayoutProperty(layoutProperty);
-    auto reder = AceType::MakeRefPtr<RenderContextTest>();
+    auto reder = AceType::MakeRefPtr<MockRenderContextTest>();
     auto rec = std::make_shared<RectF>(1.0, 1.0, 1.0, 1.0);
     reder->retf = rec;
     frameNode->renderContext_ = reder;
@@ -1444,6 +1473,178 @@ HWTEST_F(WebPatternWebTest, OnModifyDoneNodestatus, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern, nullptr);
     EXPECT_TRUE(webPattern->offlineWebInited_);
+#endif
+}
+
+/**
+ * @tc.name: BeforeSyncGeometryPropertiesTest
+ * @tc.desc: BeforeSyncGeometryProperties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, BeforeSyncGeometryPropertiesTest, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    RefPtr<WebPattern> webPattern = nullptr;
+    RefPtr<FrameNode> frameNode = nullptr;
+    const std::string src = "web_pattern_focus_test";
+    RefPtr<WebController> webController = AceType::MakeRefPtr<WebController>();
+    EXPECT_NE(webController, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
+        [src, webController]() { return AceType::MakeRefPtr<WebPattern>(src, webController); });
+    stack->Push(frameNode);
+    webPattern = frameNode->GetPattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetWebSrc(src);
+    webPattern->SetWebController(webController);
+    webPattern->OnModifyDone();
+    DirtySwapConfig config;
+    webPattern->isResizeContentAvoid_ = true;
+    webPattern->BeforeSyncGeometryProperties(config);
+    EXPECT_TRUE(webPattern->isResizeContentAvoid_);
+    EXPECT_FALSE(frameNode->SelfExpansive());
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto safeAreaExpandOpts = std::make_unique<SafeAreaExpandOpts>();
+    safeAreaExpandOpts->switchToNone = true;
+    layoutProperty->safeAreaExpandOpts_ = move(safeAreaExpandOpts);
+    frameNode->layoutProperty_ = layoutProperty;
+    webPattern->isResizeContentAvoid_ = true;
+    webPattern->BeforeSyncGeometryProperties(config);
+    EXPECT_TRUE(frameNode->SelfExpansive());
+#endif
+}
+
+/**
+ * @tc.name: ClearKeyEventByKeyCodeTest
+ * @tc.desc: ClearKeyEventByKeyCode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, ClearKeyEventByKeyCodeTest, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    RefPtr<WebPattern> webPattern = nullptr;
+    RefPtr<FrameNode> frameNode = nullptr;
+    const std::string src = "web_pattern_focus_test";
+    RefPtr<WebController> webController = AceType::MakeRefPtr<WebController>();
+    EXPECT_NE(webController, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
+        [src, webController]() { return AceType::MakeRefPtr<WebPattern>(src, webController); });
+    stack->Push(frameNode);
+    webPattern = frameNode->GetPattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetWebSrc(src);
+    webPattern->SetWebController(webController);
+    webPattern->OnModifyDone();
+    int32_t value = 1;
+    webPattern->webKeyEvent_.clear();
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_HOME;
+    webPattern->webKeyEvent_.push_front(keyEvent);
+    webPattern->ClearKeyEventByKeyCode(value);
+    EXPECT_TRUE(webPattern->webKeyEvent_.empty());
+#endif
+}
+
+/**
+ * @tc.name: UpdateTouchHandleForOverlay_001
+ * @tc.desc: UpdateTouchHandleForOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, UpdateTouchHandleForOverlay_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    bool ret = true;
+    int32_t someValidSelectOverlayId = 1;
+    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<OHOS::Ace::NG::SelectOverlayProxy>(someValidSelectOverlayId);
+    EXPECT_NE(webPattern->selectOverlayProxy_, nullptr);
+    auto handle_ = std::make_shared<OHOS::NWeb::MockNWebTouchHandleStateImpl>();
+    webPattern->insertHandle_ = handle_;
+    webPattern->startSelectionHandle_ = nullptr;
+    webPattern->endSelectionHandle_ = nullptr;
+    bool result = webPattern->IsTouchHandleValid(handle_);
+    webPattern->UpdateTouchHandleForOverlay(ret);
+    EXPECT_TRUE(result);
+#endif
+}
+
+/**
+ * @tc.name: UpdateTouchHandleForOverlay_002
+ * @tc.desc: UpdateTouchHandleForOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, UpdateTouchHandleForOverlay_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    bool ret = true;
+    int32_t someValidSelectOverlayId = 1;
+    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<OHOS::Ace::NG::SelectOverlayProxy>(someValidSelectOverlayId);
+    EXPECT_NE(webPattern->selectOverlayProxy_, nullptr);
+    webPattern->insertHandle_ = nullptr;
+    auto handle_ = std::make_shared<OHOS::NWeb::MockNWebTouchHandleStateImpl>();
+    webPattern->startSelectionHandle_ = handle_;
+    webPattern->endSelectionHandle_ = handle_;
+    webPattern->selectTemporarilyHidden_ = true;
+    webPattern->selectTemporarilyHiddenByScroll_ = false;
+    bool result = webPattern->IsTouchHandleValid(handle_);
+    webPattern->UpdateTouchHandleForOverlay(ret);
+    EXPECT_TRUE(result);
+#endif
+}
+
+/**
+ * @tc.name: UpdateTouchHandleForOverlay_003
+ * @tc.desc: UpdateTouchHandleForOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, UpdateTouchHandleForOverlay_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    bool ret = true;
+    int32_t someValidSelectOverlayId = 1;
+    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<OHOS::Ace::NG::SelectOverlayProxy>(someValidSelectOverlayId);
+    EXPECT_NE(webPattern->selectOverlayProxy_, nullptr);
+    webPattern->insertHandle_ = nullptr;
+    auto handle_ = std::make_shared<OHOS::NWeb::MockNWebTouchHandleStateImpl>();
+    webPattern->startSelectionHandle_ = handle_;
+    webPattern->endSelectionHandle_ = handle_;
+    webPattern->selectTemporarilyHidden_ = false;
+    webPattern->selectTemporarilyHiddenByScroll_ = true;
+    bool result = webPattern->IsTouchHandleValid(handle_);
+    webPattern->UpdateTouchHandleForOverlay(ret);
+    EXPECT_TRUE(result);
 #endif
 }
 } // namespace OHOS::Ace::NG
