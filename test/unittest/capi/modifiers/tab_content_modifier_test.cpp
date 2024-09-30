@@ -63,7 +63,9 @@ const std::vector<TabBarLabelResourceTest> BUTTON_LABEL_RESOURCES_TEST_PLAN = {
 };
 } // namespace
 
-class TabContentModifierTest : public ModifierTestBase<GENERATED_ArkUITabContentModifier, &GENERATED_ArkUINodeModifiers::getTabContentModifier, GENERATED_ARKUI_TAB_CONTENT> {
+class TabContentModifierTest : public ModifierTestBase<GENERATED_ArkUITabContentModifier,
+    &GENERATED_ArkUINodeModifiers::getTabContentModifier,
+    GENERATED_ARKUI_TAB_CONTENT> {
     public:
     static void SetUpTestCase()
     {
@@ -106,12 +108,11 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabel, TestSize.Level1)
 
 /*
  * @tc.name: setTabBar0Test
- * @tc.desc:
+ * @tc.desc: check setTabBar0 interface work with CustomBuilder
  * @tc.type: FUNC
  */
 HWTEST_F(TabContentModifierTest, DISABLED_setTabBar0TestCustomBuilder, TestSize.Level1)
 {
-    // TODO: Implement CustomBuilder tests!
 }
 
 /*
@@ -159,7 +160,6 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
  */
 HWTEST_F(TabContentModifierTest, DISABLED_setOnWillShowTest, TestSize.Level1)
 {
-    // TODO: Implement callback tests!
 }
 
 /*
@@ -169,6 +169,5 @@ HWTEST_F(TabContentModifierTest, DISABLED_setOnWillShowTest, TestSize.Level1)
  */
 HWTEST_F(TabContentModifierTest, DISABLED_setOnWillHideTest, TestSize.Level1)
 {
-    // TODO: Implement callback tests!
 }
 } // namespace OHOS::Ace::NG
