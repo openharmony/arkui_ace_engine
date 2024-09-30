@@ -1519,6 +1519,25 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
     UpdateAccessibilityElementInfo(node, nodeInfo);
 }
 
+namespace {
+    NG::RectF GetFinalRealRect(const RefPtr<NG::FrameNode>& node)
+    {
+        // get the node position after rotation compensation
+        auto offset = node->GetPositionToWindowWithTransform(false);
+        auto offsetBottom = node->GetPositionToWindowWithTransform(true);
+        return {
+            LessNotEqual(offset.GetX(), offsetBottom.GetX()) ? offset.GetX() : offsetBottom.GetX(),
+            LessNotEqual(offset.GetY(), offsetBottom.GetY()) ? offset.GetY() : offsetBottom.GetY(),
+            LessNotEqual(offset.GetX(), offsetBottom.GetX())
+                ? offsetBottom.GetX() - offset.GetX()
+                : offset.GetX() - offsetBottom.GetX(),
+            LessNotEqual(offset.GetY(), offsetBottom.GetY())
+                ? offsetBottom.GetY() - offset.GetY()
+                : offset.GetY() - offsetBottom.GetY()
+            };
+    }
+}
+
 void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
     AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline)
@@ -1552,7 +1571,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     } else if (node->IsVisible()) {
-        auto rect = node->GetTransformRectRelativeToWindow();
+        auto rect = GetFinalRealRect(node);
         auto left = rect.Left() + commonProperty.windowLeft;
         auto top = rect.Top() + commonProperty.windowTop;
         auto right = rect.Right() + commonProperty.windowLeft;
