@@ -656,6 +656,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 
 void ScrollPattern::UpdateScrollBarOffset()
 {
+    CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
