@@ -23,7 +23,7 @@ class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribu
     return this;
   }
   nextLabel(value: string): this {
-    modifier(this._modifiers, NextLabelModifier, value);
+    modifierWithKey(this._modifiersWithKeys, NextLabelModifier.identity, NextLabelModifier, value);
     return this;
   }
   status(value?: ItemState | undefined): this {
@@ -32,7 +32,7 @@ class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribu
   }
 }
 
-class NextLabelModifier extends Modifier<string> {
+class NextLabelModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('NextLabel');
 
   applyPeer(node: KNode, reset: boolean): void {
