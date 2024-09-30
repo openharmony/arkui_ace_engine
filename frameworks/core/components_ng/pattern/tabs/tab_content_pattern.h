@@ -350,16 +350,6 @@ public:
         }
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {
-        Pattern::ToJsonValue(json, filter);
-        /* no fixed attr below, just return */
-        if (filter.IsFastFilter()) {
-            return;
-        }
-        json->PutExtAttr("tabBarText", tabBarParam_.GetText().c_str(), filter);
-        json->PutExtAttr("tabBarIcon", tabBarParam_.GetIcon().c_str(), filter);
-    }
-
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     TabBarParam tabBarParam_;

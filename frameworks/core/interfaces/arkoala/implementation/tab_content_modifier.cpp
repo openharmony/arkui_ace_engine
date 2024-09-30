@@ -50,7 +50,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentInterfaceModifier {
 void SetTabContentOptionsImpl(Ark_NativePointer node)
 {
-    // keep it empty because RelativeContainer doesn`t have any options
+    // keep it empty because TabContent doesn`t have any options
 }
 } // TabContentInterfaceModifier
 namespace TabContentAttributeModifier {

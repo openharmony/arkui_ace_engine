@@ -86,7 +86,7 @@ class TabContentModifierTest : public ModifierTestBase<GENERATED_ArkUITabContent
  */
 HWTEST_F(TabContentModifierTest, setTabBar0TestLabel, TestSize.Level1)
 {
-    const std::string PROP_NAME("tabBarText");
+    const std::string PROP_NAME("text");
     const std::string TEXT_VALUE("test");
     std::unique_ptr<JsonValue> jsonValue;
     
@@ -113,6 +113,7 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabel, TestSize.Level1)
  */
 HWTEST_F(TabContentModifierTest, DISABLED_setTabBar0TestCustomBuilder, TestSize.Level1)
 {
+    // will be implemented when CustomBuilder in the setTabBar0 will be supported
 }
 
 /*
@@ -122,8 +123,8 @@ HWTEST_F(TabContentModifierTest, DISABLED_setTabBar0TestCustomBuilder, TestSize.
  */
 HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
 {
-    const std::string PROP_LABEL_NAME("tabBarText");
-    const std::string PROP_ICON_NAME("tabBarIcon");
+    const std::string PROP_LABEL_NAME("text");
+    const std::string PROP_ICON_NAME("icon");
     const std::string TEXT_VALUE("test");
     std::unique_ptr<JsonValue> jsonValue;
     
@@ -160,6 +161,7 @@ HWTEST_F(TabContentModifierTest, setTabBar0TestLabelIcon, TestSize.Level1)
  */
 HWTEST_F(TabContentModifierTest, DISABLED_setOnWillShowTest, TestSize.Level1)
 {
+    // setOnWillShowTest doesn't implemented
 }
 
 /*
@@ -169,5 +171,6 @@ HWTEST_F(TabContentModifierTest, DISABLED_setOnWillShowTest, TestSize.Level1)
  */
 HWTEST_F(TabContentModifierTest, DISABLED_setOnWillHideTest, TestSize.Level1)
 {
+    // setOnWillHideTest doesn't implemented
 }
 } // namespace OHOS::Ace::NG
