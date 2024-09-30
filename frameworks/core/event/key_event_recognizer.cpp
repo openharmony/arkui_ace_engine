@@ -15,10 +15,6 @@
 
 #include "core/event/key_event_recognizer.h"
 
-#include <ctime>
-
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 namespace {
 

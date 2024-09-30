@@ -15,7 +15,6 @@
 
 #include "core/gestures/pinch_gesture.h"
 
-#include "base/geometry/dimension.h"
 #include "core/gestures/pinch_recognizer.h"
 #include "core/pipeline/pipeline_context.h"
 

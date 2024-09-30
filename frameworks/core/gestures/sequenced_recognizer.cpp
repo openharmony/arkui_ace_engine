@@ -15,9 +15,6 @@
 
 #include "core/gestures/sequenced_recognizer.h"
 
-#include <vector>
-
-#include "base/thread/task_executor.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {

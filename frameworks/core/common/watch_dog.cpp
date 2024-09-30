@@ -15,20 +15,10 @@
 
 #include "core/common/watch_dog.h"
 
-#include <cerrno>
 #include <csignal>
-#include <cstdint>
-#include <pthread.h>
-#include <queue>
-#include <shared_mutex>
 
 #include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "base/thread/background_task_executor.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/anr_thread.h"
 

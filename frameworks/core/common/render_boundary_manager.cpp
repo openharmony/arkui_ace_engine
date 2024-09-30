@@ -15,11 +15,6 @@
 
 #include "core/common/render_boundary_manager.h"
 
-#include "base/log/ace_trace.h"
-#include "base/log/log.h"
-#include "base/thread/task_executor.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {

@@ -14,9 +14,7 @@
  */
 
 #include "core/common/ime/text_input_formatter.h"
-#include <cstdint>
 
-#include "base/utils/macros.h"
 #include "base/utils/string_utils.h"
 #include "core/common/ime/text_editing_value.h"
 
