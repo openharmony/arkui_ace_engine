@@ -566,6 +566,9 @@ void RichEditorSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isF
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
+    if (!pattern->IsEditing() && !IsSingleHandle()) {
+        ToggleMenu();
+    }
     auto globalOffset = pattern->GetGlobalOffset();
     auto overlayEvent = event;
     auto localLocation = Offset(overlayEvent.GetGlobalLocation().GetX() - globalOffset.GetX(),
