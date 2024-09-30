@@ -35,21 +35,33 @@ const ResValueWrapper* ThemeConstants::GetPlatformConstants(uint32_t key)
 
 Color ThemeConstants::GetColor(uint32_t key) const
 {
+    if (currentThemeStyle_) {
+        return currentThemeStyle_->GetAttr<Color>(std::to_string(key), Color::RED);
+    }
     return Color::RED;
 }
 
 Color ThemeConstants::GetColorByName(const std::string& resName) const
 {
+    if (currentThemeStyle_) {
+        return currentThemeStyle_->GetAttr<Color>(resName, Color::RED);
+    }
     return Color::RED;
 }
 
 Dimension ThemeConstants::GetDimension(uint32_t key) const
 {
+    if (currentThemeStyle_) {
+        return currentThemeStyle_->GetAttr<Dimension>(std::to_string(key), Dimension(DIMENSION_DEFAULT));
+    }
     return Dimension(DIMENSION_DEFAULT);
 }
 
 Dimension ThemeConstants::GetDimensionByName(const std::string& resName) const
 {
+    if (currentThemeStyle_) {
+        return currentThemeStyle_->GetAttr<Dimension>(resName, Dimension(DIMENSION_DEFAULT));
+    }
     return Dimension(DIMENSION_DEFAULT);
 }
 
@@ -107,11 +119,27 @@ std::string ThemeConstants::GetPluralStringByName(const std::string& resName, in
 
 std::vector<std::string> ThemeConstants::GetStringArray(uint32_t key) const
 {
+    if (currentThemeStyle_) {
+        auto value = currentThemeStyle_->GetAttr<std::string>(std::to_string(key), "");
+        if (value.empty()) {
+            return {};
+        } else {
+            return { value };
+        }
+    }
     return {};
 }
 
 std::vector<std::string> ThemeConstants::GetStringArrayByName(const std::string& resName) const
 {
+    if (currentThemeStyle_) {
+        auto value = currentThemeStyle_->GetAttr<std::string>(resName, "");
+        if (value.empty()) {
+            return {};
+        } else {
+            return { value };
+        }
+    }
     return {};
 }
 

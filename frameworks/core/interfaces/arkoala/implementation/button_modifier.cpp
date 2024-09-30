@@ -21,6 +21,7 @@
 #include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 
 namespace OHOS::Ace::NG {
 struct ButtonOptions {
@@ -44,6 +45,37 @@ ButtonOptions Convert(const Ark_ButtonOptions& src)
     options.buttonStyle = OptConvert<ButtonStyleMode>(src.buttonStyle);
     return options;
 }
+
+template<>
+ButtonParameters Convert(const Ark_LabelStyle& src)
+{
+    ButtonParameters parameters;
+    parameters.textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);
+    auto maxLines = Converter::OptConvert<int32_t>(src.maxLines);
+    if (maxLines) {
+        maxLines = std::max(maxLines.value(), 1);
+    }
+    parameters.maxLines = maxLines;
+    parameters.heightAdaptivePolicy = Converter::OptConvert<TextHeightAdaptivePolicy>(src.heightAdaptivePolicy);
+    auto minFontSize = Converter::OptConvert<Dimension>(src.minFontSize);
+    Validator::ValidateNonNegative(minFontSize);
+    Validator::ValidateNonPercent(minFontSize);
+    parameters.minFontSize = minFontSize;
+    auto maxFontSize = Converter::OptConvert<Dimension>(src.maxFontSize);
+    Validator::ValidateNonNegative(maxFontSize);
+    Validator::ValidateNonPercent(minFontSize);
+    parameters.maxFontSize = maxFontSize;
+    auto labelFont = Converter::OptConvert<Font>(src.font);
+    if (labelFont) {
+        parameters.fontSize = labelFont->fontSize;
+        parameters.fontStyle = labelFont->fontStyle;
+        parameters.fontWeight = labelFont->fontWeight;
+        if (labelFont->fontFamilies.size() > 0) {
+            parameters.fontFamily = labelFont->fontFamilies;
+        }
+    }
+    return parameters;
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -60,14 +92,21 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto buttonOptions = Converter::Convert<ButtonOptions>(*options);
     if (buttonOptions.type) {
-        ButtonModelNG::SetType(frameNode, static_cast<int>(buttonOptions.type.value()));
+        auto typeInt = EnumToInt(buttonOptions.type);
+        ButtonModelNG::SetType(frameNode, typeInt);
     }
     if (buttonOptions.stateEffect) {
         ButtonModelNG::SetStateEffect(frameNode, buttonOptions.stateEffect.value());
     }
-    ButtonModelNG::SetRole(frameNode, buttonOptions.role);
-    ButtonModelNG::SetControlSize(frameNode, buttonOptions.controlSize);
-    ButtonModelNG::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
+    if (buttonOptions.role) {
+        ButtonModelNG::SetRole(frameNode, buttonOptions.role);
+    }
+    if (buttonOptions.controlSize) {
+        ButtonModelNG::SetControlSize(frameNode, buttonOptions.controlSize);
+    }
+    if (buttonOptions.buttonStyle) {
+        ButtonModelNG::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
+    }
 }
 void SetButtonOptions2Impl(Ark_NativePointer node,
                            const ResourceStr* label,
@@ -86,79 +125,85 @@ void SetButtonOptions2Impl(Ark_NativePointer node,
 }
 } // ButtonInterfaceModifier
 namespace ButtonAttributeModifier {
-constexpr int32_t DEFAULT_FONT_SIZE = 12;
-constexpr int32_t DEFAULT_MAX_LINES = 100;
-
 void TypeImpl(Ark_NativePointer node,
               Ark_ButtonType value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetType(frameNode, (ArkUI_Int32)Converter::ConvertOrDefault(value, ButtonType::CAPSULE));
+    auto typeInt = EnumToInt(Converter::OptConvert<ButtonType>(value));
+    ButtonModelNG::SetType(frameNode, typeInt);
 }
 void StateEffectImpl(Ark_NativePointer node,
                      Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetStateEffect(frameNode, Converter::ConvertOrDefault(value, true));
+    ButtonModelNG::SetStateEffect(frameNode, Converter::Convert<bool>(value));
 }
 void ButtonStyleImpl(Ark_NativePointer node,
                      Ark_ButtonStyleMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetButtonStyle(frameNode, Converter::ConvertOrDefault(value, ButtonStyleMode::EMPHASIZE));
+    ButtonModelNG::SetButtonStyle(frameNode, Converter::OptConvert<ButtonStyleMode>(value));
 }
 void ControlSizeImpl(Ark_NativePointer node,
                      Ark_ControlSize value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetControlSize(frameNode, Converter::ConvertOrDefault(value, ControlSize::NORMAL));
+    ButtonModelNG::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(value));
 }
 void RoleImpl(Ark_NativePointer node,
               Ark_ButtonRole value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetRole(frameNode, Converter::ConvertOrDefault(value, ButtonRole::NORMAL));
+    ButtonModelNG::SetRole(frameNode, Converter::OptConvert<ButtonRole>(value));
 }
 void FontColorImpl(Ark_NativePointer node,
                    const ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetFontColor(frameNode, Converter::ConvertOrDefault(*value, Color()));
+    CHECK_NULL_VOID(value);
+    ButtonModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetFontSize(frameNode, CalcDimension(value->value, (DimensionUnit)value->unit));
+    CHECK_NULL_VOID(value);
+    auto fontSize = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidatePositive(fontSize);
+    Validator::ValidateNonPercent(fontSize);
+    ButtonModelNG::SetFontSize(frameNode, fontSize);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Type_ButtonAttribute_fontWeight_Arg0* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetFontWeight(frameNode, Converter::ConvertOrDefault(*value, FontWeight::NORMAL));
+    CHECK_NULL_VOID(value);
+    ButtonModelNG::SetFontWeight(frameNode, Converter::OptConvert<Ace::FontWeight>(*value));
 }
 void FontStyleImpl(Ark_NativePointer node,
                    Ark_FontStyle value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetFontStyle(frameNode, (Ace::FontStyle)value);
+    CHECK_NULL_VOID(value);
+    ButtonModelNG::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(value));
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Type_ButtonAttribute_fontFamily_Arg0* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetFontFamily(frameNode,
-                                 Framework::ConvertStrToFontFamilies(Converter::ConvertOrDefault(*value, "")));
+    CHECK_NULL_VOID(value);
+    auto families = Converter::OptConvert<std::vector<std::string>>(*value);
+    ButtonModelNG::SetFontFamily(frameNode, families);
 }
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* modifier)
@@ -171,24 +216,7 @@ void LabelStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonParameters parameters;
-    parameters.textOverflow = Converter::ConvertOrDefault(value->overflow, TextOverflow::ELLIPSIS);
-    parameters.maxLines = Converter::ConvertOrDefault(value->maxLines, DEFAULT_MAX_LINES);
-    parameters.heightAdaptivePolicy = Converter::ConvertOrDefault(
-        value->heightAdaptivePolicy, TextHeightAdaptivePolicy::MAX_LINES_FIRST);
-    parameters.minFontSize = Converter::ConvertOrDefault(value->minFontSize, Dimension());
-    parameters.maxFontSize = Converter::ConvertOrDefault(value->maxFontSize, Dimension());
-
-    parameters.fontSize = Dimension(DEFAULT_FONT_SIZE, DimensionUnit::VP);
-    parameters.fontStyle = Ace::FontStyle::NORMAL;
-    parameters.fontWeight = FontWeight::NORMAL;
-    parameters.fontFamily = std::vector<std::string>();
-    Converter::WithOptional(value->font, [&](const Ark_Font &font) {
-        parameters.fontSize = Converter::ConvertOrDefault(font.size, parameters.fontSize.value());
-        parameters.fontStyle = Converter::ConvertOrDefault(font.style, parameters.fontStyle.value());
-        parameters.fontWeight = Converter::ConvertOrDefault(font.weight, parameters.fontWeight.value());
-        parameters.fontFamily = Converter::ConvertOrDefault(font.family, parameters.fontFamily.value());
-    });
+    auto parameters = Converter::OptConvert<ButtonParameters>(*value);
     ButtonModelNG::SetLabelStyle(frameNode, parameters);
 }
 } // ButtonAttributeModifier
