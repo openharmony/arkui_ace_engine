@@ -22,12 +22,16 @@
 #include "base/json/json_util.h"
 
 namespace OHOS::Ace::NG {
+void* THPExtraManagerImpl::lib_ = nullptr;
+
 bool THPExtraManagerImpl::Init()
 {
     ThpExtraRunCommand_ = [](const char* command, const char* parameters) -> const char* {
         return "ok";
     };
-    lib_ = dlopen("/system/lib64/libthp_extra_innerapi.z.so", RTLD_LAZY);
+    if (lib_ == nullptr) {
+        lib_ = dlopen("/system/lib64/libthp_extra_innerapi.z.so", RTLD_LAZY);
+    }
     if (lib_ == nullptr) {
         LOGI("Failed to open libthp_extra_innerapi.z.so, reason: %{public}s", dlerror());
         return false;
