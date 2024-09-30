@@ -63,7 +63,7 @@ void TabBar0Impl(Ark_NativePointer node,
 
     std::optional<std::string> label = std::nullopt;
     std::optional<std::string> icon = std::nullopt;
-    std::optional<TabBarBuilderFunc> builder = std::nullopt;
+    TabBarBuilderFunc builder = nullptr;
     auto options = Converter::OptConvert<TabBarOptionsVariant>(*value);
     if (auto arkText = std::get_if<Ark_String>(&options.value());
         arkText != nullptr) {
@@ -84,7 +84,7 @@ void TabBar0Impl(Ark_NativePointer node,
     } else {
         LOGE("ARKOALA TabContentAttributeModifier.TabBar0Impl unknown value format.");
     }
-    TabContentModelNG::SetTabBar(frameNode, label, icon, std::move(*builder));
+    TabContentModelNG::SetTabBar(frameNode, label, icon, std::move(builder));
 }
 void TabBar1Impl(Ark_NativePointer node,
                  const Type_TabContentAttribute_tabBar1_Arg0* value)
