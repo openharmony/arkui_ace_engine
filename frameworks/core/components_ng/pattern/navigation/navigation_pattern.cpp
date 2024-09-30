@@ -589,27 +589,32 @@ void NavigationPattern::UpdateNavPathList()
     isCurTopNewInstance_ = false;
     // lastRecoveredStandardIndex will be only used in recovery case
     int32_t lastRecoveredStandardIndex = 0;
+    int32_t removeSize = 0; // push destination failed size
     for (int32_t index = 0; index < pathListSize; ++index) {
         auto pathName = pathNames[index];
         RefPtr<UINode> uiNode = nullptr;
-        if (navigationStack_->IsFromRecovery(index)) {
-            if (navigationStack_->GetRecoveredDestinationMode(index) ==
+        int32_t arrayIndex = index - removeSize;
+        if (navigationStack_->IsFromRecovery(arrayIndex)) {
+            if (navigationStack_->GetRecoveredDestinationMode(arrayIndex) ==
                 static_cast<int32_t>(NavDestinationMode::STANDARD)) {
-                lastRecoveredStandardIndex = index;
+                lastRecoveredStandardIndex = arrayIndex;
             }
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
             // only create recovery node when it is at top
             if (index == pathListSize - 1) {
-                GenerateUINodeFromRecovery(lastRecoveredStandardIndex, navPathList);
+                removeSize += GenerateUINodeFromRecovery(lastRecoveredStandardIndex, navPathList);
             }
             continue;
         }
         auto pathIndex = indexes[index];
-        if (navigationStack_->NeedBuildNewInstance(index)) {
+        if (navigationStack_->NeedBuildNewInstance(arrayIndex)) {
             // if marked NEW_INSTANCE when push/replace in frontend, build a new instance anyway
-            uiNode = GenerateUINodeByIndex(index);
+            if (!GenerateUINodeByIndex(arrayIndex, uiNode)) {
+                removeSize++;
+                continue;
+            }
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
-            navigationStack_->SetNeedBuildNewInstance(index, false);
+            navigationStack_->SetNeedBuildNewInstance(arrayIndex, false);
             if (index == pathListSize - 1) {
                 isCurTopNewInstance_ = true;
             }
@@ -623,15 +628,15 @@ void NavigationPattern::UpdateNavPathList()
         }
         if (uiNode) {
             TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in list, navigation stack reserve node, "
-                "old index: %{public}d, index: %{public}d, name: %{public}s.",
-                pathIndex, index, pathName.c_str());
+                "old index: %{public}d, index: %{public}d, removeSize: %{public}d, name: %{public}s.",
+                pathIndex, index, removeSize, pathName.c_str());
             /**
              * If we call the function pushPath/pushDestination with singleton mode(
              * LaunchMode == MOVE_TO_TOP_SINGLETON/POP_TO_SINGLETON), and the top NavDestination of stack
              * is the NavDestination which we need to push(NavDestination's name == NavPathInfo's name),
              * then wee need to update the NavDestination's parameters.
              */
-            navigationStack_->UpdatePathInfoIfNeeded(uiNode, index);
+            navigationStack_->UpdatePathInfoIfNeeded(uiNode, arrayIndex);
             auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(
                 NavigationGroupNode::GetNavDestinationNode(uiNode));
             if (navDestinationGroupNode && navDestinationGroupNode->GetCanReused()) {
@@ -642,17 +647,19 @@ void NavigationPattern::UpdateNavPathList()
         uiNode = navigationStack_->GetFromCacheNode(cacheNodes, pathName);
         if (uiNode) {
             TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in cached node, navigation stack reserve node, "
-                "index: %{public}d, name: %{public}s.", index, pathName.c_str());
+                "index: %{public}d, removeSize: %{public}d, name: %{public}s.", index, removeSize, pathName.c_str());
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
             navigationStack_->RemoveCacheNode(cacheNodes, pathName, uiNode);
             continue;
         }
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find in nowhere, navigation stack create new node, "
-            "index: %{public}d, name: %{public}s.", index, pathName.c_str());
-        uiNode = GenerateUINodeByIndex(index);
+            "index: %{public}d, removeSize: %{public}d, name: %{public}s.", index, removeSize, pathName.c_str());
+        if (!GenerateUINodeByIndex(arrayIndex, uiNode)) {
+            removeSize++;
+            continue;
+        }
         navPathList.emplace_back(std::make_pair(pathName, uiNode));
     }
-    navigationStack_->ClearPreBuildNodeList();
     navigationStack_->SetNavPathList(navPathList);
     navigationStack_->InitNavPathIndex(pathNames);
 }
@@ -1467,7 +1474,7 @@ bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGro
     return true;
 }
 
-void NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex, NavPathList& navPathList)
+int32_t NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex, NavPathList& navPathList)
 {
     /**
      * In case several pages at the top of stack are dialog pages.
@@ -1475,24 +1482,29 @@ void NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex, Na
      * And the creation process should be bottom-up to satisfy the order of life-cycle.
      */
     int32_t jsStackSize = static_cast<int32_t>(navPathList.size());
+    int32_t removeSize = 0;
     for (int32_t index = lastStandardIndex; index < jsStackSize; ++ index) {
         if (navPathList[index].second || !navigationStack_->IsFromRecovery(index)) {
             continue;
         }
-        navPathList[index].second = GenerateUINodeByIndex(index);
+        if (!GenerateUINodeByIndex(index - removeSize, navPathList[index].second)) {
+            removeSize++;
+            continue;
+        }
         navigationStack_->SetFromRecovery(index, false);
         auto navdestination = AceType::DynamicCast<NavDestinationGroupNode>(
             NavigationGroupNode::GetNavDestinationNode(navPathList[index].second));
         navdestination->SetNeedAppearFromRecovery(true);
     }
+    return removeSize;
 }
 
-RefPtr<UINode> NavigationPattern::GenerateUINodeByIndex(int32_t index)
+bool NavigationPattern::GenerateUINodeByIndex(int32_t index, RefPtr<UINode>& node)
 {
-    auto node = navigationStack_->CreateNodeByIndex(index, parentNode_);
+    bool isCreate = navigationStack_->CreateNodeByIndex(index, parentNode_, node);
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
         NavigationGroupNode::GetNavDestinationNode(node));
-    CHECK_NULL_RETURN(navDestinationNode, node);
+    CHECK_NULL_RETURN(navDestinationNode, isCreate);
     // set navigation id
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestinationNode->GetPattern());
@@ -1503,9 +1515,9 @@ RefPtr<UINode> NavigationPattern::GenerateUINodeByIndex(int32_t index)
             index, std::to_string(navDestinationPattern->GetNavDestinationId()));
     }
     auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
-    CHECK_NULL_RETURN(eventHub, node);
+    CHECK_NULL_RETURN(eventHub, isCreate);
     eventHub->FireOnWillAppear();
-    return node;
+    return isCreate;
 }
 
 void NavigationPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub)
