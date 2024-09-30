@@ -356,6 +356,11 @@ public:
         return borderRadius_;
     }
 
+    const Dimension& GetWhiteBorderRadius() const
+    {
+        return whiteBorderRadius_;
+    }
+
     const Dimension& GetCheckStroke() const
     {
         return checkStroke_;
@@ -368,6 +373,7 @@ public:
 
 private:
     Dimension borderRadius_;
+    Dimension whiteBorderRadius_;
     Dimension checkStroke_;
     double colorAnimationDuration_ = 0.0;
 };

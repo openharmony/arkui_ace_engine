@@ -222,6 +222,7 @@ private:
 
     float borderWidth_ = 0.0f;
     float borderRadius_ = 0.0f;
+    float whiteBorderRadius_ = 0.0f;
     Color pointColor_;
     Color activeColor_;
     Color inactiveColor_;
