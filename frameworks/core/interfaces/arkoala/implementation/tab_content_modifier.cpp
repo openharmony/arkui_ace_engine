@@ -13,18 +13,78 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
+#include "base/utils/string_utils.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+
+namespace OHOS::Ace::NG {
+namespace {
+    struct TabBarOptions {
+        std::optional<std::string> text;
+        std::optional<std::string> icon;
+    };
+    
+    using TabBarOptionsVariant = std::variant<
+        Ark_String,
+        Ark_Resource,
+        Ark_Function,
+        Literal_Opt_Union_String_Resource_icon_text
+    >;
+} // namespace
+
+namespace Converter {
+template<>
+TabBarOptions Convert(const Literal_Opt_Union_String_Resource_icon_text& src)
+{
+    TabBarOptions options;
+    options.text = OptConvert<std::string>(src.text);
+    options.icon = OptConvert<std::string>(src.icon);
+    return options;
+}
+} // namespace Converter
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentInterfaceModifier {
 void SetTabContentOptionsImpl(Ark_NativePointer node)
 {
+    // keep it empty because TabContent doesn`t have any options
 }
 } // TabContentInterfaceModifier
 namespace TabContentAttributeModifier {
 void TabBar0Impl(Ark_NativePointer node,
                  const Type_TabContentAttribute_tabBar_Arg0* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+
+    std::optional<std::string> label = std::nullopt;
+    std::optional<std::string> icon = std::nullopt;
+    TabBarBuilderFunc builder = nullptr;
+    auto options = Converter::OptConvert<TabBarOptionsVariant>(*value);
+    if (auto arkText = std::get_if<Ark_String>(&options.value());
+        arkText != nullptr) {
+        label = Converter::Convert<std::string>(*arkText);
+    } else if (auto arkText = std::get_if<Ark_Resource>(&options.value());
+        arkText != nullptr) {
+        label = Converter::OptConvert<std::string>(*arkText);
+    } else if (auto arkText = std::get_if<Ark_Function>(&options.value());
+        arkText != nullptr) {
+        LOGE("ARKOALA TabContentAttributeModifier.CustomBuilder not implemented.");
+    } else if (auto iconLabel = std::get_if<Literal_Opt_Union_String_Resource_icon_text>(&options.value());
+        iconLabel != nullptr) {
+        auto tabBarOptions = Converter::OptConvert<TabBarOptions>(*iconLabel);
+        if (tabBarOptions) {
+            label = tabBarOptions->text;
+            icon = tabBarOptions->icon;
+        }
+    } else {
+        LOGE("ARKOALA TabContentAttributeModifier.TabBar0Impl unknown value format.");
+    }
+    TabContentModelNG::SetTabBar(frameNode, label, icon, std::move(builder));
 }
 void TabBar1Impl(Ark_NativePointer node,
                  const Type_TabContentAttribute_tabBar1_Arg0* value)

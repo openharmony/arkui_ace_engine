@@ -665,13 +665,23 @@ void TabContentModelNG::SetTabBarLabel(FrameNode* node, const std::string& label
     frameNodePattern->SetTabBar(label, "", std::nullopt, nullptr);
 }
 
-void TabContentModelNG::SetTabBar(
-    FrameNode* node, const std::string& label, const std::string& icon, TabBarBuilderFunc&& builder)
+void TabContentModelNG::SetTabBar(FrameNode* node, const std::optional<std::string>& label,
+    const std::optional<std::string>& icon, TabBarBuilderFunc&& builder)
 {
     CHECK_NULL_VOID(node);
+    if (icon) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, icon.value(), node);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, node);
+    }
+    if (label) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, label.value(), node);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, node);
+    }
     auto frameNodePattern = node->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetTabBar(label, icon, std::nullopt, std::move(builder));
+    frameNodePattern->SetTabBar(label.value_or(""), icon.value_or(""), std::nullopt, std::move(builder));
 }
 
 void TabContentModelNG::SetLayoutMode(FrameNode* node, LayoutMode layoutMode)
