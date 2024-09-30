@@ -15,10 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_progress.h"
 
-#include "base/utils/utils.h"
-#include "core/components/common/properties/decoration.h"
-#include "core/components/progress/progress_theme.h"
-#include "core/components/theme/theme_manager.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

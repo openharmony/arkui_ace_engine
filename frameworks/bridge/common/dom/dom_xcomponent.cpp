@@ -15,10 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
 
-#include "base/log/log.h"
-#include "core/components/declaration/xcomponent/xcomponent_declaration.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
-
 namespace OHOS::Ace::Framework {
 DOMXComponent::DOMXComponent(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {

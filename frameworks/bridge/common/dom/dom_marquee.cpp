@@ -16,11 +16,7 @@
 #include "frameworks/bridge/common/dom/dom_marquee.h"
 
 #include "base/log/event_report.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
 #include "core/components/marquee/marquee_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

@@ -15,11 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_web.h"
 
-#include "base/log/log.h"
-#include "core/components/declaration/web/web_declaration.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMWeb::DOMWeb(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)

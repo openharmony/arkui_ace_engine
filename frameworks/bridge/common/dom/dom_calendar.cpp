@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_calendar.h"
 
-#include "base/utils/string_utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

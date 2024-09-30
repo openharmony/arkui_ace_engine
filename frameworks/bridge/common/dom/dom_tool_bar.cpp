@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_tool_bar.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMToolBar::DOMToolBar(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)

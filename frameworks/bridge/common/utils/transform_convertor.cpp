@@ -15,9 +15,6 @@
 
 #include "frameworks/bridge/common/utils/transform_convertor.h"
 
-#include <algorithm>
-
-#include "base/utils/string_utils.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 
 namespace OHOS::Ace {

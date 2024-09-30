@@ -16,14 +16,6 @@
 #include "frameworks/bridge/common/dom/dom_list.h"
 
 #include "base/log/event_report.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
-#include "core/components/list/list_theme.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/scroll/scroll_fade_effect.h"
-#include "core/components/scroll/scroll_spring_effect.h"
-#include "core/components/theme/theme_manager.h"
-#include "frameworks/bridge/common/dom/dom_list_item.h"
 #include "frameworks/bridge/common/dom/dom_list_item_group.h"
 #include "frameworks/bridge/common/utils/utils.h"
 

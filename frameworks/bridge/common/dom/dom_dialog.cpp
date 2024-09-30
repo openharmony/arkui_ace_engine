@@ -16,8 +16,6 @@
 #include "frameworks/bridge/common/dom/dom_dialog.h"
 
 #include "base/log/event_report.h"
-#include "base/utils/string_utils.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

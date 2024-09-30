@@ -15,13 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_clock.h"
 
-#include "base/log/event_report.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
-#include "core/components/clock/clock_theme.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMClock::DOMClock(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)

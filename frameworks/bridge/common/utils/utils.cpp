@@ -15,9 +15,6 @@
 
 #include "frameworks/bridge/common/utils/utils.h"
 
-#include <unordered_set>
-
-#include "base/utils/string_utils.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "interfaces/native/native_type.h"
 
