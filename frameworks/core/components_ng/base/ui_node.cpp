@@ -913,7 +913,7 @@ void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current
                 array->PutRef(std::move(child));
             }
         }
-        if (!disappearingChildren_.size()) {
+        if (!disappearingChildren_.empty()) {
             for (const auto& [item, index, branch] : disappearingChildren_) {
                 auto child = JsonUtil::Create();
                 item->DumpSimplifyTree(depth + 1, child);

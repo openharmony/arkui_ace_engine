@@ -771,6 +771,8 @@ protected:
     void SetCanOverScroll(bool val);
     bool GetCanOverScroll() const;
 
+    void CheckScrollBarOff();
+
 private:
     virtual void OnScrollEndCallback() {};
 

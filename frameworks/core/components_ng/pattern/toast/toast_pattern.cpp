@@ -183,9 +183,10 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_RETURN(toastProp, Dimension(0.0));
     auto textHeight = text->GetGeometryNode()->GetMarginFrameSize().Height();
     Dimension offsetY;
+    // Get toastBottom and update defaultBottom_
     auto toastBottom = GetBottomValue(layoutWrapper);
-    toastBottom_ = toastBottom;
     if (!toastProp->HasToastAlignment()) {
+        toastBottom_ = toastBottom;
         if (context->GetMinPlatformVersion() > API_VERSION_9) {
             offsetY = Dimension(rootHeight - toastBottom - textHeight);
         } else {

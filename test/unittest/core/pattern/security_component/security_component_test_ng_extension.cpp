@@ -153,7 +153,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
     renderContext->UpdateClipEdge(true);
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
+    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo));
 
     OffsetF invalidOffset(-100.0, -100.0);
     childFrameNode->geometryNode_->SetFrameOffset(invalidOffset);
@@ -484,17 +484,18 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCalculateCurrentVisibleRatio001
- * @tc.desc: Test security component CalculateCurrentVisibleRatio
+ * @tc.name: SecurityComponentIsOutOfParentWithRound001
+ * @tc.desc: Test security component IsOutOfParentWithRound
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCalculateCurrentVisibleRatio001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentIsOutOfParentWithRound001, TestSize.Level1)
 {
-    RectF invalidRect(-1.0, -1.0, -1.0, -1.0);
-    RectF validRect(1.0, 1.0, 1.0, 1.0);
-    EXPECT_EQ(SecurityComponentHandler::IsOutOfParent(invalidRect, validRect), true);
-    EXPECT_EQ(SecurityComponentHandler::IsOutOfParent(validRect, invalidRect), true);
+    RectF smallRect(1.0, 1.0, 10.0, 10.0);
+    RectF largerRect(1.0, 1.0, 12.0, 12.0);
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    EXPECT_EQ(SecurityComponentHandler::IsOutOfParentWithRound(smallRect, largerRect, buttonInfo), true);
+    EXPECT_EQ(SecurityComponentHandler::IsOutOfParentWithRound(largerRect, smallRect, buttonInfo), false);
 }
 
 /**

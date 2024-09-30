@@ -561,9 +561,10 @@ HWTEST_F(WaterFlowSegmentCommonTest, InsertAndJump001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 10), 0.0f);
 
-    AddItems(2);
+    AddItemsAtSlot(2, 100.0f, 4);
     secObj->ChangeData(0, 1, SECTION_9);
     frameNode_->ChildrenUpdatedFrom(4);
+    info_->NotifyDataChange(4, 2);
     pattern_->ScrollToIndex(12, false, ScrollAlign::START, 20.0f);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 12), -20.0f);

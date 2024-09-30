@@ -247,8 +247,12 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
         frameNodeSize.Height(), gatherNodeCenter, renderContext->GetBorderRadius() };
     AnimationUtils::Animate(
         option,
-        [overlayManager, gatherAnimationInfo]() {
+        [weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager)), gatherAnimationInfo,
+            weak = AceType::WeakClaim(AceType::RawPtr(frameNode))]() {
+            auto overlayManager = weakOverlayManager.Upgrade();
+            auto frameNode = weak.Upgrade();
             DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
+            DragDropManager::UpdateGatherNodePosition(overlayManager, frameNode);
         },
         option.GetOnFinishEvent());
 }

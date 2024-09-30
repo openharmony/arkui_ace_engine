@@ -889,8 +889,8 @@ void FrameNode::DumpPadding(const std::unique_ptr<NG::PaddingProperty>& padding,
     CHECK_NULL_VOID(padding);
     NG::CalcLength defaultValue = NG::CalcLength(
         Dimension(0, padding->left.value_or(CalcLength()).GetDimension().Unit()));
-    if (padding->left.value_or(defaultValue) != defaultValue && padding->right.value_or(defaultValue) != defaultValue &&
-        padding->top.value_or(defaultValue) != defaultValue && padding->bottom.value_or(defaultValue) != defaultValue) {
+    if (padding->left.value_or(defaultValue) != defaultValue || padding->right.value_or(defaultValue) != defaultValue ||
+        padding->top.value_or(defaultValue) != defaultValue || padding->bottom.value_or(defaultValue) != defaultValue) {
         json->Put(label.c_str(), padding->ToString().c_str());
     }
 }
@@ -900,9 +900,9 @@ void FrameNode::DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& borde
 {
     CHECK_NULL_VOID(border);
     Dimension defaultValue(0, border->leftDimen.value_or(Dimension()).Unit());
-    if (border->leftDimen.value_or(defaultValue) != defaultValue &&
-        border->rightDimen.value_or(defaultValue) != defaultValue &&
-        border->topDimen.value_or(defaultValue) != defaultValue &&
+    if (border->leftDimen.value_or(defaultValue) != defaultValue ||
+        border->rightDimen.value_or(defaultValue) != defaultValue ||
+        border->topDimen.value_or(defaultValue) != defaultValue ||
         border->bottomDimen.value_or(defaultValue) != defaultValue) {
         json->Put(label.c_str(), border->ToString().c_str());
     }
@@ -911,7 +911,7 @@ void FrameNode::DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& borde
 void FrameNode::DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json)
 {
     auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
-    if (opts && opts->type != NG::SAFE_AREA_TYPE_NONE && opts->edges != NG::SAFE_AREA_EDGE_NONE) {
+    if (opts && (opts->type != NG::SAFE_AREA_TYPE_NONE || opts->edges != NG::SAFE_AREA_EDGE_NONE)) {
         json->Put("SafeAreaExpandOpts", opts->ToString().c_str());
     }
     if (layoutProperty_->GetSafeAreaInsets()) {
@@ -1572,7 +1572,7 @@ void FrameNode::TriggerOnSizeChangeCallback()
     }
 }
 
-bool FrameNode::IsFrameDisappear()
+bool FrameNode::IsFrameDisappear() const
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
@@ -2520,8 +2520,19 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
         if (callbackNative) {
             targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
         }
-        auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
-        targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+
+        if (!targetComponent->IsInnerNodeGestureRecognizerJudgeSet()) {
+            auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+            targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+        }
+
+        if (GetExposeInnerGestureFlag()) {
+            auto pattern = GetPattern();
+            if (pattern) {
+                auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+                pattern->AddInnerOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+            }
+        }
     }
 }
 
@@ -5009,7 +5020,7 @@ bool FrameNode::AllowVisibleAreaCheck() const
     return IsOnMainTree() || (pattern_ && pattern_->AllowVisibleAreaCheck());
 }
 
-void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect)
+void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const
 {
     visibleRect = GetPaintRectWithTransform();
     frameRect = visibleRect;

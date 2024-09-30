@@ -1437,10 +1437,8 @@ float GridPattern::GetTotalHeight() const
 
 void GridPattern::UpdateScrollBarOffset()
 {
-    if (!GetScrollBar() && !GetScrollBarProxy()) {
-        return;
-    }
-    if (!isConfigScrollable_) {
+    CheckScrollBarOff();
+    if ((!GetScrollBar() && !GetScrollBarProxy()) || !isConfigScrollable_) {
         return;
     }
     auto host = GetHost();

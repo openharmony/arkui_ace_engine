@@ -1277,7 +1277,9 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
         size_t pageRouteSize = pageRouterStack_.size();
         if (pageRouteSize <= 1) {
             if (!restorePageStack_.empty()) {
-                StartRestore(RouterPageInfo());
+                auto newInfo = RouterPageInfo();
+                newInfo.params = target.params;
+                StartRestore(newInfo);
                 return;
             }
             LOGI("Router back start ExitToDesktop");
