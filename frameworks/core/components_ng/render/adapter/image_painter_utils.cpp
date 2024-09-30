@@ -14,12 +14,6 @@
  */
 #include "image_painter_utils.h"
 
-#include "include/core/SkColorFilter.h"
-#include "include/core/SkRRect.h"
-
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
-
 namespace {
 // The [GRAY_COLOR_MATRIX] is of dimension [4 x 5], which transforms a RGB source color (R, G, B, A) to the
 // destination color (R', G', B', A').

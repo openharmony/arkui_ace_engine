@@ -15,23 +15,13 @@
 
 #include "core/components_ng/render/adapter/component_snapshot.h"
 
-#include <iterator>
-#include <memory>
-
 #include "transaction/rs_interfaces.h"
-
 #include "base/log/ace_trace.h"
-#include "base/log/log_wrapper.h"
-#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

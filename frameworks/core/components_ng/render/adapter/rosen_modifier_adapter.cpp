@@ -14,17 +14,8 @@
  */
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 
-#include <mutex>
-#include <unordered_map>
-
-#include "base/utils/utils.h"
 #include "core/components_ng/animation/animatable_arithmetic_proxy.h"
-#include "core/components_ng/render/modifier_adapter.h"
-
-#include "render_service_client/core/animation/rs_animation.h"
-#include "render_service_client/core/ui/rs_node.h"
 #include "core/animation/native_curve_helper.h"
-#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 

@@ -16,7 +16,6 @@
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 
 #include "core/components_ng/render/drawing.h"
-#include "utils/rect.h"
 
 namespace OHOS::Ace::NG {
 const RefPtr<SvgDomBase>& SvgCanvasImage::GetSVGDom() const

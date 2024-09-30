@@ -15,12 +15,7 @@
 
 #include "core/components_ng/render/paint_wrapper.h"
 
-#include <utility>
-
-#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/modifier.h"
-#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
