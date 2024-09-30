@@ -53,7 +53,8 @@ void MockNavigationStack::FireNavigationInterception(bool isBefore, const RefPtr
     }
 }
 
-RefPtr<UINode> MockNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode)
+bool MockNavigationStack::CreateNodeByIndex(int32_t index, const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode>& customNode,
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode>& node)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     // navDestination node
@@ -65,18 +66,20 @@ RefPtr<UINode> MockNavigationStack::CreateNodeByIndex(int32_t index, const WeakP
     auto container = MockContainer::Current();
     auto navigationRoute = container->GetNavigationRoute();
     if (!navigationRoute) {
-        return nullptr;
+        return false;
     }
     if (!navigationRoute->HasLoaded(name)) {
         int32_t res = navigationRoute->LoadPage(name);
         if (res != 0) {
-            return frameNode;
+            node = frameNode;
+            return true;
         }
     }
+    node = frameNode;
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(frameNode->GetPattern());
     EXPECT_NE(pattern, nullptr);
     pattern->SetName(name);
-    return frameNode;
+    return true;
 }
 
 void MockNavigationStack::Push(const std::string& name, const RefPtr<RouteInfo>& routeInfo)
