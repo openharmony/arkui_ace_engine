@@ -911,7 +911,7 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachStart002, TestSize.Level1)
     scrollable->isDragging_ = false;
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
-    // friction animation 
+    // friction animation
     MockAnimationManager::GetInstance().TickByVelocity(200.0f);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(reached, 2);
@@ -959,7 +959,7 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachEnd001, TestSize.Level1)
     scrollable->isDragging_ = false;
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
-    // friction animation 
+    // friction animation
     MockAnimationManager::GetInstance().TickByVelocity(-2500.0f);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(reached, 1);

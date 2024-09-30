@@ -215,7 +215,8 @@ bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
     if (!itemStart_ || lanes_.empty()) {
         return false;
     }
-    return firstLayout || Negative(prevPos);
+    const bool backFromOverScroll = Positive(prevPos) && NonPositive(totalOffset_);
+    return firstLayout || Negative(prevPos) || backFromOverScroll;
 }
 
 bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos) const
@@ -223,8 +224,10 @@ bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos) const
     if (!offsetEnd_ || lanes_.empty()) {
         return false;
     }
-    float prevEndPos = EndPos() - (totalOffset_ - prevPos);
-    return GreatNotEqual(prevEndPos + footerHeight_, lastMainSize_);
+    const float prevEndPos = EndPos() - (totalOffset_ - prevPos) + footerHeight_;
+    const bool backFromOverScroll =
+        LessNotEqual(prevEndPos, lastMainSize_) && GreatOrEqual(EndPos() + footerHeight_, lastMainSize_);
+    return GreatNotEqual(prevEndPos, lastMainSize_) || backFromOverScroll;
 }
 
 float WaterFlowLayoutInfoSW::GetContentHeight() const
