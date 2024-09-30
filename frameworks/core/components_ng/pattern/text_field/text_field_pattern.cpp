@@ -6439,6 +6439,7 @@ void TextFieldPattern::DumpInfo()
         std::string("HeightAdaptivePolicy: ")
             .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
                 layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
+    dumpLog.AddDesc(std::string("IsAIWrite: ").append(std::to_string(IsShowAIWrite())));
     DumpPlaceHolderInfo();
     DumpScaleInfo();
     if (SystemProperties::GetDebugEnabled()) {
@@ -7876,5 +7877,122 @@ bool TextFieldPattern::IsTextEditableForStylus() const
         return false;
     }
     return !IsInPasswordMode();
+}
+bool TextFieldPattern::IsShowAIWrite()
+{
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
+
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    auto bundleName = textFieldTheme->GetAIWriteBundleName();
+    auto abilityName = textFieldTheme->GetAIWriteAbilityName();
+    if (bundleName.empty() || abilityName.empty()) {
+        return false;
+    }
+    aiWriteAdapter_->SetBundleName(bundleName);
+    aiWriteAdapter_->SetAbilityName(abilityName);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+        "BundleName: %{public}s, abilityName: %{public}s", bundleName.c_str(), abilityName.c_str());
+
+    auto isAISupport = false;
+    if (textFieldTheme->GetAIWriteIsSupport() == "true") {
+        isAISupport = true;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "isAISupport: %{public}d", isAISupport);
+    return IsUnspecifiedOrTextType() && isAISupport;
+}
+
+void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
+{
+    // serialize the selected text
+    info.selectStart = selectController_->GetStartIndex();
+    info.selectEnd = selectController_->GetEndIndex();
+    auto selectContent = contentController_->GetSelectedValue(info.selectStart, info.selectEnd);
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContent);
+    spanString->EncodeTlv(info.selectBuffer);
+    info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetWideString()));
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content = %{private}s",
+        info.selectStart, info.selectEnd, spanString->GetString().c_str());
+
+    // serialize the sentenced-level text
+    auto textSize = static_cast<int32_t>(contentController_->GetWideText().length());
+    auto contentAll = contentController_->GetWideText();
+    auto sentenceStart = 0;
+    auto sentenceEnd = textSize;
+    for (int32_t i = info.selectStart; i >= 0; --i) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceStart = i + 1;
+            break;
+        }
+    }
+    for (int32_t i = info.selectEnd; i < textSize; i++) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceEnd = i;
+            break;
+        }
+    }
+    info.start = info.selectStart - sentenceStart;
+    info.end = info.selectEnd - sentenceStart;
+    auto sentenceContent = contentController_->GetSelectedValue(sentenceStart, sentenceEnd);
+    spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
+    spanString->EncodeTlv(info.sentenceBuffer);
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Sentence range=[%{public}d--%{public}d], content = %{private}s",
+        sentenceStart, sentenceEnd, spanString->GetString().c_str());
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    info.maxLength = static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
+    info.firstHandle = selectController_->GetFirstHandleRect().ToString();
+    info.secondHandle = selectController_->GetSecondHandleRect().ToString();
+}
+
+void TextFieldPattern::HandleOnAIWrite()
+{
+    AIWriteInfo info;
+    GetAIWriteInfo(info);
+    CloseSelectOverlay();
+    CloseKeyboard(true);
+
+    auto callback = [weak = WeakClaim(this), info](std::vector<uint8_t>& buffer) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleAIWriteResult(info.selectStart, info.selectEnd, buffer);
+        auto aiWriteAdapter = pattern->aiWriteAdapter_;
+        CHECK_NULL_VOID(aiWriteAdapter);
+        aiWriteAdapter->CloseModalUIExtension();
+    };
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    aiWriteAdapter_->SetPipelineContext(pipeline);
+    aiWriteAdapter_->ShowModalUIExtension(info, callback);
+}
+
+void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer)
+{
+    RefPtr<SpanString> spanString = SpanString::DecodeTlv(buffer);
+    auto resultText = spanString->GetString();
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "Backfilling results range=[%{public}d--%{public}d], content = %{private}s",
+        start, end, spanString->GetString().c_str());
+    if (spanString->GetSpanItems().empty()) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto value = contentController_->GetSelectedValue(start, end);
+    BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
+    BeforeIMEInsertValue(resultText, start);
+    contentController_->ReplaceSelectedValue(start, end, resultText);
+    AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    AfterIMEInsertValue(resultText);
+    CloseSelectOverlay(true);
+    SetCaretPosition(start + spanString->GetLength());
+    StartTwinkling();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 } // namespace OHOS::Ace::NG

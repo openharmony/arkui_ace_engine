@@ -98,6 +98,7 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_SHARE_SVG, "ic_public_share" },
     { InternalResource::ResourceId::IC_TRANSLATE_SVG, "ic_public_translate_c2e" },
     { InternalResource::ResourceId::IC_SEARCH_SVG, "ic_public_search_filled" },
+    { InternalResource::ResourceId::IC_AI_WRITE_SVG, "ic_public_ai_write" },
     { InternalResource::ResourceId::MENU_OK_SVG, "ic_public_ok" },
     { InternalResource::ResourceId::IC_WINDOW_CLOSE, "ic_window_close" },
     { InternalResource::ResourceId::IC_WINDOW_MAX, "ic_window_max" },

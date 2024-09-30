@@ -94,6 +94,13 @@ static const std::set<std::string> stringAttrs = {
     "textfield_accessibility_show_password",
     "textfield_accessibility_hide_password",
     "rich_editor_show_handle",
+    "textfield_writting_bundle_name",
+    "textfield_writting_ability_name",
+    "rich_editor_writting_bundle_name",
+    "rich_editor_writting_ability_name",
+    "textfield_writting_is_support",
+    "rich_editor_writting_is_support",
+    "ai_write_menu_name",
     "text_show_handle"
 };
 
