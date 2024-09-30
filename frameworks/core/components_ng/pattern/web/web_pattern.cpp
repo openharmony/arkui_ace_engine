@@ -2859,7 +2859,62 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
     }
 }
 
-void WebPattern::OnSelectHandleStart(bool isFirst)
+void WebPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID(!clickEventInitialized_);
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTouchClickEvent(info, false);
+    };
+    auto clickListener = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickAfterEvent(clickListener);
+    clickEventInitialized_ = true;
+}
+
+void WebPattern::HandleTouchClickEvent(const GestureEvent& info, bool fromOverlay)
+{
+    CHECK_NULL_VOID(delegate_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsFocusable() || info.GetSourceDevice() == SourceType::MOUSE) {
+        return;
+    }
+    if (IsSelectOverlayDragging()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "HandleTouchClickEvent fail when handle dragging.");
+        return;
+    }
+    auto globalLocation = info.GetGlobalLocation();
+    TouchInfo touchPoint;
+    touchPoint.id = 0;
+    touchPoint.x = globalLocation.GetX() - webOffset_.GetX();
+    touchPoint.y = globalLocation.GetY() - webOffset_.GetY();
+    multipleClickRecognizer_->Start(info);
+    if (multipleClickRecognizer_->IsDoubleClick()) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "HandleTouchClickEvent double fromOverlay:%{public}d, clickedFromOverlay_:%{public}d.",
+            fromOverlay, clickedFromOverlay_);
+        if (fromOverlay) {
+            delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, false);
+            delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, false);
+        }
+        if (clickedFromOverlay_) {
+            delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, false);
+            delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, false);
+        }
+    } else {
+        TAG_LOGD(AceLogTag::ACE_WEB, "HandleTouchClickEvent single fromOverlay:%{public}d.", fromOverlay);
+        clickedFromOverlay_ = fromOverlay;
+        if (fromOverlay) {
+            delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, true);
+            delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, true);
+        }
+    }
+}
+
+void WebPattern::OnSelectHandleStart(const GestureEvent& event, bool isFirst)
 {
     CHECK_NULL_VOID(selectOverlayProxy_);
     CHECK_NULL_VOID(delegate_);
@@ -2874,14 +2929,26 @@ void WebPattern::OnSelectHandleStart(bool isFirst)
     CHECK_NULL_VOID(node);
     auto pattern = node->GetPattern<SelectOverlayPattern>();
     CHECK_NULL_VOID(pattern);
+    auto touchOffset = event.GetLocalLocation();
     const std::shared_ptr<SelectOverlayInfo>& info = pattern->GetSelectOverlayInfo();
     auto handle = isFirst ? info->firstHandle : info->secondHandle;
     auto handleHeight = SELECT_HANDLE_DEFAULT_HEIGHT.ConvertToPx();
+    handleHeight = std::min(static_cast<float>(handleHeight), handle.paintRect.Height());
+    bool isTouchHandleCircle = isFirst ?
+        LessNotEqual(touchOffset.GetY(), handle.paintRect.Top()) :
+        GreatNotEqual(touchOffset.GetY(), handle.paintRect.Bottom());
     if (isFirst) {
+        if (!isTouchHandleCircle) {
+            handle.paintRect.SetTop(static_cast<float>(touchOffset.GetY()) - handleHeight / HALF);
+        }
         handle.paintRect.SetHeight(handleHeight);
         info->firstHandle = handle;
         info->firstHandle.isCircleShow = false;
     } else {
+        auto handleOffsetY = isTouchHandleCircle
+                            ? handle.paintRect.Bottom() - handleHeight
+                            : static_cast<float>(touchOffset.GetY()) - handleHeight / HALF;
+        handle.paintRect.SetTop(handleOffsetY);
         handle.paintRect.SetOffset(OffsetF(handle.paintRect.GetX(),
             handle.paintRect.GetY() + handle.paintRect.Height() - handleHeight));
         handle.paintRect.SetHeight(handleHeight);
@@ -3232,7 +3299,7 @@ void WebPattern::RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo)
     selectInfo.onHandleMoveStart = [weak = AceType::WeakClaim(this)](bool isFirst) {
         auto webPattern = weak.Upgrade();
         CHECK_NULL_VOID(webPattern);
-        webPattern->OnSelectHandleStart(isFirst);
+        webPattern->OnSelectHandleStart(event, isFirst);
     };
     selectInfo.checkIsTouchInHostArea =
     [weak = AceType::WeakClaim(this)](const PointF& touchPoint) -> bool {

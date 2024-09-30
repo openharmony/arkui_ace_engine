@@ -834,7 +834,9 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
-    void OnSelectHandleStart(bool isFirst);
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleTouchClickEvent(const GestureEvent& info, bool fromOverlay);
+    void OnSelectHandleStart(const GestureEvent& event, bool isFirst);
     void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
     void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
 
