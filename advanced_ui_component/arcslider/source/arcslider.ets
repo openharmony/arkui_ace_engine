@@ -16,17 +16,289 @@
 import animator, { AnimatorResult } from '@ohos.animator';
 import { vibrator } from '@kit.SensorServiceKit';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { common2D, drawing } from '@kit.ArkGraphics2D';
 import { ColorMetrics } from '@ohos.arkui.node';
 import hilog from '@ohos.hilog';
-import {
-  Const,
-  MinOrMaxStatus,
-  ClipPathArc,
-  ArcSliderOptions,
-  DrawParameters,
-  MyFullDrawModifier,
-  nearEqual
-} from './arcslider_const';
+
+const ANGLE_TO_RADIAN = Math.PI / 180;
+const RADIAN_TO_ANGLE = 180 / Math.PI;
+const PI_RADIAN = 180;
+const TWO_PI_ANGLE = 360;
+const TWO_PI_RADIAN = 2 * Math.PI;
+const APPROXIMATE_NUMBER = Math.pow(10, -7);
+const ANGLE_OVER_MIN = 10;
+const LENGTH_OVER_MIN = 0.15;
+const TOTAL_LENGTH = 233;
+const VALUE_DEFAULT = 0;
+const MIN_DEFAULT = 0;
+const MAX_DEFAULT = 100;
+const X_DEFAULT = 116.5;
+const Y_DEFAULT = 116.5;
+const RADIUS_DEFAULT = 116.5;
+const PADDING_DEFAULT = 5.5;
+const START_ANGLE_DEFAULT = 15;
+const END_ANGLE_DEFAULT = 45;
+const ACTIVE_START_ANGLE_DEFAULT = -60;
+const ACTIVE_END_ANGLE_DEFAULT = 60;
+const REVERSE_DEFAULT = true;
+const TRACK_THICKNESS_DEFAULT = 5;
+const ACTIVE_TRACK_THICKNESS_DEFAULT = 24;
+const TRACK_BLUR_DEFAULT = 20;
+const TRACK_COLOR_DEFAULT = '#33FFFFFF';
+const SELECTED_COLOR_DEFAULT = '#FF5EA1FF';
+const BLUR_COLOR_DEFAULT = $r('sys.color.ohos_id_color_subtab_bg');
+const VIBRATOR_TYPE_TWO = 'watchhaptic.crown.strength2';
+const VIBRATOR_TYPE_SIX = 'watchhaptic.crown.strength6';
+const CROWN_EVENT_FLAG = 30;
+const CROWN_CONTROL_RATIO = 2.10;
+const CROWN_SENSITIVITY_LOW = 0.5;
+const CROWN_SENSITIVITY_MEDIUM = 1;
+const CROWN_SENSITIVITY_HIGH = 2;
+const INVALID_TIMEOUT_ID = -1;
+const RESTORE_TIMEOUT = 3000;
+
+export enum MinOrMaxStatus {
+  MinStatus,
+  MaxStatus,
+  NormalStatus,
+}
+
+export enum ClipPathArc {
+  Arc1,
+  Arc2,
+  Arc3,
+  Arc4
+}
+
+export interface ArcSliderValueOptionsConstructorOptions {
+  value?: number;
+  min?: number;
+  max?: number;
+}
+
+@ObservedV2
+export class ArcSliderValueOptions {
+  @Trace public value: number;
+  @Trace public min: number;
+  @Trace public max: number;
+
+  constructor(options?: ArcSliderValueOptionsConstructorOptions) {
+    this.value = options?.value ?? VALUE_DEFAULT;
+    this.min = options?.min ?? MIN_DEFAULT;
+    this.max = options?.max ?? MAX_DEFAULT;
+  }
+}
+
+export interface ArcSliderLayoutOptionsConstructorOptions {
+  x?: number;
+  y?: number;
+  radius?: number;
+  padding?: number;
+  startAngle?: number;
+  endAngle?: number;
+  activeStartAngle?: number;
+  activeEndAngle?: number;
+  reverse?: boolean;
+}
+
+@ObservedV2
+export class ArcSliderLayoutOptions {
+  @Trace public x: number;
+  @Trace public y: number;
+  @Trace public radius: number;
+  @Trace public padding: number;
+  @Trace public startAngle: number;
+  @Trace public endAngle: number;
+  @Trace public activeStartAngle: number;
+  @Trace public activeEndAngle: number;
+  @Trace public reverse: boolean;
+
+  constructor(options?: ArcSliderLayoutOptionsConstructorOptions) {
+    this.x = options?.x ?? X_DEFAULT;
+    this.y = options?.y ?? Y_DEFAULT;
+    this.radius = options?.radius ?? RADIUS_DEFAULT;
+    this.padding = options?.padding ?? PADDING_DEFAULT;
+    this.startAngle = options?.startAngle ?? START_ANGLE_DEFAULT;
+    this.endAngle = options?.endAngle ?? END_ANGLE_DEFAULT;
+    this.activeStartAngle = options?.activeStartAngle ?? ACTIVE_START_ANGLE_DEFAULT;
+    this.activeEndAngle = options?.activeEndAngle ?? ACTIVE_END_ANGLE_DEFAULT;
+    this.reverse = options?.reverse ?? REVERSE_DEFAULT;
+  }
+}
+
+export interface ArcSliderStyleOptionsConstructorOptions {
+  trackThickness?: number;
+  activeTrackThickness?: number;
+  trackColor?: string;
+  selectedColor?: string;
+  trackBlur?: number;
+}
+
+@ObservedV2
+export class ArcSliderStyleOptions {
+  @Trace public trackThickness: number;
+  @Trace public activeTrackThickness: number;
+  @Trace public trackColor: string;
+  @Trace public selectedColor: string;
+  @Trace public trackBlur: number;
+
+  constructor(options?: ArcSliderStyleOptionsConstructorOptions) {
+    this.trackThickness = options?.trackThickness ?? TRACK_THICKNESS_DEFAULT;
+    this.activeTrackThickness = options?.activeTrackThickness ?? ACTIVE_TRACK_THICKNESS_DEFAULT;
+    this.trackColor = options?.trackColor ?? TRACK_COLOR_DEFAULT;
+    this.selectedColor = options?.selectedColor ?? SELECTED_COLOR_DEFAULT;
+    this.trackBlur = options?.trackBlur ?? TRACK_BLUR_DEFAULT;
+  }
+}
+
+export interface ArcSliderOptionsConstructorOptions {
+  valueOptions?: ArcSliderValueOptions;
+  layoutOptions?: ArcSliderLayoutOptions;
+  styleOptions?: ArcSliderStyleOptions;
+  digitalCrownSensitivity?: CrownSensitivity;
+  onTouch?: Callback<TouchEvent>;
+  onChange?: Callback<number>;
+}
+
+@ObservedV2
+export class ArcSliderOptions {
+  @Trace public valueOptions: ArcSliderValueOptions;
+  @Trace public layoutOptions: ArcSliderLayoutOptions;
+  @Trace public styleOptions: ArcSliderStyleOptions;
+  @Trace public digitalCrownSensitivity: CrownSensitivity;
+  @Trace public onTouch: Callback<TouchEvent>;
+  @Trace public onChange: Callback<number>;
+
+  constructor(options?: ArcSliderOptionsConstructorOptions) {
+    this.valueOptions = options?.valueOptions ?? new ArcSliderValueOptions();
+    this.layoutOptions = options?.layoutOptions ?? new ArcSliderLayoutOptions();
+    this.styleOptions = options?.styleOptions ?? new ArcSliderStyleOptions();
+    this.digitalCrownSensitivity = options?.digitalCrownSensitivity ?? CrownSensitivity.MEDIUM;
+    this.onTouch = options?.onTouch ?? ((event: TouchEvent) => {
+    });
+    this.onChange = options?.onChange ?? ((value: number) => {
+    });
+  }
+}
+
+export class DrawParameters {
+  public lineWidth: number = 0;
+  public radius: number = 0;
+  public trackEndAngle: number = 0;
+  public trackStartAngle: number = 0;
+  public selectedStartAngle: number = 0;
+  public selectedEndAngle: number = 0;
+  public trackColor: ColorMetrics = ColorMetrics.resourceColor(TRACK_COLOR_DEFAULT);
+  public selectedColor: ColorMetrics = ColorMetrics.resourceColor(SELECTED_COLOR_DEFAULT);
+  public reverse: boolean = REVERSE_DEFAULT;
+  public x: number = X_DEFAULT;
+  public y: number = Y_DEFAULT;
+  public blur: number = TRACK_BLUR_DEFAULT;
+  public uiContext: UIContext | undefined = undefined;
+}
+
+export function nearEqual(num1: number, num2: number): boolean {
+  return Math.abs(num1 - num2) < APPROXIMATE_NUMBER;
+}
+
+export class MyFullDrawModifier extends DrawModifier {
+  public parameters: DrawParameters = new DrawParameters();
+
+  constructor(parameters: DrawParameters) {
+    super();
+    this.parameters = parameters;
+  }
+
+  private parseColorString(color: ColorMetrics): common2D.Color {
+    return { alpha: color.alpha, red: color.red, green: color.green, blue: color.blue };
+  }
+
+  private drawTrack(context: DrawContext) {
+    if (this.parameters.uiContext === undefined) {
+      hilog.error(0x3900, 'ArcSlider', `uiContext is undefined`);
+      return;
+    }
+    const canvas = context.canvas;
+    const pen = new drawing.Pen();
+    pen.setAntiAlias(true);
+    pen.setColor(this.parseColorString(this.parameters.trackColor));
+    pen.setStrokeWidth(this.parameters.uiContext.vp2px(this.parameters.lineWidth));
+    pen.setCapStyle(drawing.CapStyle.ROUND_CAP);
+    canvas.attachPen(pen);
+    let path = new drawing.Path();
+    const leftTopX = this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.radius);
+    const leftTopY = this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.radius);
+    const rightBottomX = this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.radius);
+    const rightBottomY = this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.radius);
+    let startAngle: number;
+    let sweepAngle: number;
+    const trackEndAngle = this.parameters.trackEndAngle * RADIAN_TO_ANGLE;
+    const delta = (this.parameters.trackStartAngle - this.parameters.trackEndAngle) * RADIAN_TO_ANGLE;
+    if (this.parameters.reverse && this.parameters.selectedStartAngle < this.parameters.trackEndAngle) {
+      startAngle = trackEndAngle;
+      sweepAngle = TWO_PI_ANGLE + delta;
+    } else if (!this.parameters.reverse && this.parameters.selectedStartAngle > this.parameters.trackEndAngle) {
+      startAngle = this.parameters.trackStartAngle * RADIAN_TO_ANGLE;
+      sweepAngle = TWO_PI_ANGLE - delta;
+    } else {
+      startAngle = trackEndAngle;
+      sweepAngle = delta;
+    }
+    path.arcTo(leftTopX, leftTopY, rightBottomX, rightBottomY, startAngle, sweepAngle);
+    canvas.drawPath(path);
+    canvas.detachPen();
+  }
+
+  private drawSelection(context: DrawContext) {
+    if (this.parameters.uiContext === undefined) {
+      hilog.error(0x3900, 'ArcSlider', `uiContext is undefined`);
+      return;
+    }
+    if (nearEqual(this.parameters.selectedStartAngle, this.parameters.selectedEndAngle)) {
+      return;
+    }
+    const canvas = context.canvas;
+    const pen = new drawing.Pen();
+    pen.setAntiAlias(true);
+    pen.setColor(this.parseColorString(this.parameters.selectedColor));
+    pen.setStrokeWidth(this.parameters.uiContext.vp2px(this.parameters.lineWidth));
+    pen.setCapStyle(drawing.CapStyle.ROUND_CAP);
+    canvas.attachPen(pen);
+    let path = new drawing.Path();
+    const leftTopX = this.parameters.uiContext.vp2px(this.parameters.x - this.parameters.radius);
+    const leftTopY = this.parameters.uiContext.vp2px(this.parameters.y - this.parameters.radius);
+    const rightBottomX = this.parameters.uiContext.vp2px(this.parameters.x + this.parameters.radius);
+    const rightBottomY = this.parameters.uiContext.vp2px(this.parameters.y + this.parameters.radius);
+    let startAngle: number;
+    let sweepAngle: number;
+    const selectedEndAngle = this.parameters.selectedEndAngle * RADIAN_TO_ANGLE;
+    const selectedStartAngle = this.parameters.selectedStartAngle * RADIAN_TO_ANGLE;
+    let delta = (this.parameters.selectedStartAngle - this.parameters.selectedEndAngle) * RADIAN_TO_ANGLE;
+    if (this.parameters.reverse && this.parameters.selectedStartAngle < this.parameters.trackEndAngle &&
+      this.parameters.selectedEndAngle > this.parameters.selectedStartAngle) {
+      startAngle = selectedEndAngle - TWO_PI_ANGLE;
+      sweepAngle = TWO_PI_ANGLE + delta;
+    } else if (!this.parameters.reverse && this.parameters.selectedStartAngle > this.parameters.trackEndAngle &&
+      this.parameters.selectedEndAngle < this.parameters.selectedStartAngle) {
+      startAngle = selectedStartAngle - TWO_PI_ANGLE;
+      sweepAngle = TWO_PI_ANGLE - delta;
+    } else {
+      startAngle = selectedEndAngle;
+      sweepAngle = delta;
+    }
+    path.arcTo(leftTopX, leftTopY, rightBottomX, rightBottomY, startAngle, sweepAngle);
+    canvas.drawPath(path);
+    canvas.detachPen();
+  }
+
+  public drawContent(context: DrawContext): void {
+    this.drawTrack(context);
+  }
+
+  public drawFront(context: DrawContext): void {
+    this.drawSelection(context);
+  }
+}
 
 @ComponentV2
 export struct ArcSlider {
@@ -58,13 +330,13 @@ export struct ArcSlider {
   private isClickAnimatorFinished: boolean = false;
   private clickValue: number = 0;
   private sliderValue: number = 0;
-  private normalStartAngle: number = -Const.START_ANGLE_DEFAULT;
-  private normalEndAngle: number = -Const.END_ANGLE_DEFAULT;
-  private activeStartAngle: number = -Const.ACTIVE_START_ANGLE_DEFAULT;
-  private activeEndAngle: number = -Const.ACTIVE_END_ANGLE_DEFAULT;
-  private selectedMaxOrMin: string = MinOrMaxStatus.NormalStatus;
-  private totalWidth: number = Const.TOTAL_LENGTH;
-  private totalHeight: number = Const.TOTAL_LENGTH;
+  private normalStartAngle: number = -START_ANGLE_DEFAULT;
+  private normalEndAngle: number = -END_ANGLE_DEFAULT;
+  private activeStartAngle: number = -ACTIVE_START_ANGLE_DEFAULT;
+  private activeEndAngle: number = -ACTIVE_END_ANGLE_DEFAULT;
+  private selectedMaxOrMin: number = MinOrMaxStatus.NormalStatus;
+  private totalWidth: number = TOTAL_LENGTH;
+  private totalHeight: number = TOTAL_LENGTH;
   private isFocus: boolean = false;
   private needVibrate: boolean = true;
   private crownEventCounter: number = 0;
@@ -115,30 +387,30 @@ export struct ArcSlider {
     this.options.valueOptions.min = Math.min(this.options.valueOptions.max, this.options.valueOptions.min);
     this.options.valueOptions.value = Math.min(this.options.valueOptions.max, this.options.valueOptions.value);
     this.options.valueOptions.value = Math.max(this.options.valueOptions.min, this.options.valueOptions.value);
-    this.options.layoutOptions.startAngle = Math.min(this.options.layoutOptions.startAngle, Const.PI_RADIAN);
-    this.options.layoutOptions.startAngle = Math.max(this.options.layoutOptions.startAngle, -Const.PI_RADIAN);
-    this.options.layoutOptions.endAngle = Math.min(this.options.layoutOptions.endAngle, Const.PI_RADIAN);
-    this.options.layoutOptions.endAngle = Math.max(this.options.layoutOptions.endAngle, -Const.PI_RADIAN);
-    this.options.layoutOptions.activeStartAngle = Math.min(this.options.layoutOptions.activeStartAngle,
-      Const.PI_RADIAN);
-    this.options.layoutOptions.activeStartAngle = Math.max(this.options.layoutOptions.activeStartAngle,
-      -Const.PI_RADIAN);
-    this.options.layoutOptions.activeEndAngle = Math.min(this.options.layoutOptions.activeEndAngle, Const.PI_RADIAN);
-    this.options.layoutOptions.activeEndAngle = Math.max(this.options.layoutOptions.activeEndAngle, -Const.PI_RADIAN);
+    this.options.layoutOptions.startAngle = Math.min(this.options.layoutOptions.startAngle,
+      PI_RADIAN);
+    this.options.layoutOptions.startAngle = Math.max(this.options.layoutOptions.startAngle,
+      -PI_RADIAN);
+    this.options.layoutOptions.endAngle = Math.min(this.options.layoutOptions.endAngle, PI_RADIAN);
+    this.options.layoutOptions.endAngle = Math.max(this.options.layoutOptions.endAngle, -PI_RADIAN);
+    this.options.layoutOptions.activeStartAngle = Math.min(this.options.layoutOptions.activeStartAngle, PI_RADIAN);
+    this.options.layoutOptions.activeStartAngle = Math.max(this.options.layoutOptions.activeStartAngle, -PI_RADIAN);
+    this.options.layoutOptions.activeEndAngle = Math.min(this.options.layoutOptions.activeEndAngle, PI_RADIAN);
+    this.options.layoutOptions.activeEndAngle = Math.max(this.options.layoutOptions.activeEndAngle, -PI_RADIAN);
     this.normalStartAngle = -this.options.layoutOptions.startAngle;
     this.normalEndAngle = -this.options.layoutOptions.endAngle;
     this.activeStartAngle = -this.options.layoutOptions.activeStartAngle;
     this.activeEndAngle = -this.options.layoutOptions.activeEndAngle;
-    this.options.layoutOptions.padding = this.biggerThanZero(this.options.layoutOptions.padding, Const.PADDING_DEFAULT,
+    this.options.layoutOptions.padding = this.biggerThanZero(this.options.layoutOptions.padding, PADDING_DEFAULT,
       false);
-    this.options.layoutOptions.radius = this.biggerThanZero(this.options.layoutOptions.radius, Const.RADIUS_DEFAULT,
+    this.options.layoutOptions.radius = this.biggerThanZero(this.options.layoutOptions.radius, RADIUS_DEFAULT,
       false);
-    this.options.styleOptions.trackBlur = this.biggerThanZero(this.options.styleOptions.trackBlur,
-      Const.TRACK_BLUR_DEFAULT, false);
+    this.options.styleOptions.trackBlur = this.biggerThanZero(this.options.styleOptions.trackBlur, TRACK_BLUR_DEFAULT,
+      false);
     this.options.styleOptions.trackThickness = this.biggerThanZero(this.options.styleOptions.trackThickness,
-      Const.TRACK_THICKNESS_DEFAULT, true);
-    this.options.styleOptions.activeTrackThickness =
-      this.biggerThanZero(this.options.styleOptions.activeTrackThickness, Const.ACTIVE_TRACK_THICKNESS_DEFAULT, true);
+      TRACK_THICKNESS_DEFAULT, true);
+    this.options.styleOptions.activeTrackThickness = this.biggerThanZero(this.options.styleOptions.activeTrackThickness,
+      ACTIVE_TRACK_THICKNESS_DEFAULT, true);
   }
 
   private updateModifier() {
@@ -159,10 +431,10 @@ export struct ArcSlider {
 
   setReverse() {
     if (!this.options.layoutOptions.reverse) {
-      let startAngleInitial = this.normalStartAngle;
-      let endAngleInitial = this.normalEndAngle;
-      let activeStartAngleInitial = this.activeStartAngle;
-      let activeEndAngleInitial = this.activeEndAngle;
+      const startAngleInitial = this.normalStartAngle;
+      const endAngleInitial = this.normalEndAngle;
+      const activeStartAngleInitial = this.activeStartAngle;
+      const activeEndAngleInitial = this.activeEndAngle;
       this.normalStartAngle = endAngleInitial;
       this.normalEndAngle = startAngleInitial;
       this.activeStartAngle = activeEndAngleInitial;
@@ -172,19 +444,19 @@ export struct ArcSlider {
 
   setNormal() {
     this.lineWidth = this.options.styleOptions.trackThickness;
-    this.selectedStartAngle = this.normalStartAngle * Const.ANGLE_TO_RADIAN;
-    this.trackEndAngle = this.normalEndAngle * Const.ANGLE_TO_RADIAN;
-    this.trackStartAngle = this.normalStartAngle * Const.ANGLE_TO_RADIAN;
-    let selectedRatio = (this.options.valueOptions.value - this.options.valueOptions.min) /
+    this.selectedStartAngle = this.normalStartAngle * ANGLE_TO_RADIAN;
+    this.trackEndAngle = this.normalEndAngle * ANGLE_TO_RADIAN;
+    this.trackStartAngle = this.normalStartAngle * ANGLE_TO_RADIAN;
+    const selectedRatio = (this.options.valueOptions.value - this.options.valueOptions.min) /
       (this.options.valueOptions.max - this.options.valueOptions.min);
-    let deltaRadian = this.trackEndAngle - this.selectedStartAngle;
-    let selectedAngle = selectedRatio * Math.abs(deltaRadian);
-    let specialSelectedAngle = selectedRatio * (Const.TWO_PI_RADIAN - Math.abs(deltaRadian));
+    const deltaRadian = this.trackEndAngle - this.selectedStartAngle;
+    const selectedAngle = selectedRatio * Math.abs(deltaRadian);
+    const specialSelectedAngle = selectedRatio * (TWO_PI_RADIAN - Math.abs(deltaRadian));
     if (this.trackEndAngle > this.selectedStartAngle) {
       if (this.options.layoutOptions.reverse) {
         this.selectedEndAngle = this.selectedStartAngle - specialSelectedAngle;
         if (this.selectedEndAngle <= -Math.PI) {
-          this.selectedEndAngle += Const.TWO_PI_RADIAN;
+          this.selectedEndAngle += TWO_PI_RADIAN;
         }
       } else {
         this.selectedEndAngle = this.selectedStartAngle + selectedAngle;
@@ -195,7 +467,7 @@ export struct ArcSlider {
       } else {
         this.selectedEndAngle = this.selectedStartAngle + specialSelectedAngle;
         if (this.selectedEndAngle >= Math.PI) {
-          this.selectedEndAngle = -Const.TWO_PI_RADIAN + this.selectedStartAngle + specialSelectedAngle;
+          this.selectedEndAngle = -TWO_PI_RADIAN + this.selectedStartAngle + specialSelectedAngle;
         }
       }
     }
@@ -205,16 +477,16 @@ export struct ArcSlider {
   }
 
   setActivation() {
-    let selectedRatio = (this.options.valueOptions.value - this.options.valueOptions.min) /
+    const selectedRatio = (this.options.valueOptions.value - this.options.valueOptions.min) /
       (this.options.valueOptions.max - this.options.valueOptions.min);
-    let deltaRadian = this.trackEndAngle - this.selectedStartAngle;
-    let selectedAngle = selectedRatio * Math.abs(deltaRadian);
-    let specialSelectedAngle = selectedRatio * (Const.TWO_PI_RADIAN - Math.abs(deltaRadian));
+    const deltaRadian = this.trackEndAngle - this.selectedStartAngle;
+    const selectedAngle = selectedRatio * Math.abs(deltaRadian);
+    const specialSelectedAngle = selectedRatio * (TWO_PI_RADIAN - Math.abs(deltaRadian));
     if (this.trackEndAngle > this.selectedStartAngle) {
       if (this.options.layoutOptions.reverse) {
         this.selectedEndAngle = this.selectedStartAngle - specialSelectedAngle;
         if (this.selectedEndAngle <= -Math.PI) {
-          this.selectedEndAngle = Const.TWO_PI_RADIAN + this.selectedStartAngle - specialSelectedAngle;
+          this.selectedEndAngle = TWO_PI_RADIAN + this.selectedStartAngle - specialSelectedAngle;
         }
       } else {
         this.selectedEndAngle = this.selectedStartAngle + selectedAngle;
@@ -225,7 +497,7 @@ export struct ArcSlider {
       } else {
         this.selectedEndAngle = this.selectedStartAngle + specialSelectedAngle;
         if (this.selectedEndAngle >= Math.PI) {
-          this.selectedEndAngle = -Const.TWO_PI_RADIAN + this.selectedStartAngle + specialSelectedAngle;
+          this.selectedEndAngle = -TWO_PI_RADIAN + this.selectedStartAngle + specialSelectedAngle;
         }
       }
     }
@@ -237,7 +509,7 @@ export struct ArcSlider {
     this.isReverse = false;
     this.isLargeArc = false;
     if ((this.trackStartAngle > this.trackEndAngle) && (this.trackStartAngle - this.trackEndAngle > Math.PI) ||
-      (this.trackStartAngle <= this.trackEndAngle && (Const.TWO_PI_RADIAN + this.trackStartAngle - this.trackEndAngle >
+      (this.trackStartAngle <= this.trackEndAngle && (TWO_PI_RADIAN + this.trackStartAngle - this.trackEndAngle >
       Math.PI))) {
       this.isLargeArc = true;
     }
@@ -246,16 +518,15 @@ export struct ArcSlider {
   calcBlurIsReverseFalse() {
     this.isReverse = true;
     this.isLargeArc = false;
-    if ((this.trackStartAngle > this.trackEndAngle) &&
-      (Const.TWO_PI_RADIAN + this.trackEndAngle - this.trackStartAngle > Math.PI) ||
-      (this.trackStartAngle <= this.trackEndAngle) && (this.trackEndAngle - this.trackStartAngle > Math.PI)) {
+    if ((this.trackStartAngle > this.trackEndAngle) && (TWO_PI_RADIAN + this.trackEndAngle - this.trackStartAngle >
+    Math.PI) || (this.trackStartAngle <= this.trackEndAngle) && (this.trackEndAngle - this.trackStartAngle > Math.PI)) {
       this.isLargeArc = true;
     }
   }
 
   calcPathX(isRLarge: ClipPathArc) {
     if (this.parameters.uiContext) {
-      let halfLineWidth = this.parameters.lineWidth / 2;
+      const halfLineWidth = this.parameters.lineWidth / 2;
       let distance = this.parameters.radius;
       let cosAngle = 0;
       if (isRLarge == ClipPathArc.Arc1) {
@@ -271,15 +542,14 @@ export struct ArcSlider {
         distance -= halfLineWidth;
         cosAngle = this.parameters.trackStartAngle;
       }
-      let pathX = this.parameters.uiContext.vp2px(this.parameters.x + distance * Math.cos(cosAngle));
-      return pathX;
+      return (this.parameters.uiContext.vp2px(this.parameters.x + distance * Math.cos(cosAngle)));
     }
     return 0;
   }
 
   calcPathY(isRLarge: ClipPathArc) {
     if (this.parameters.uiContext) {
-      let halfLineWidth = this.parameters.lineWidth / 2;
+      const halfLineWidth = this.parameters.lineWidth / 2;
       let distance = this.parameters.radius;
       let sinAngle = 0;
       if (isRLarge == ClipPathArc.Arc1) {
@@ -295,15 +565,14 @@ export struct ArcSlider {
         distance -= halfLineWidth;
         sinAngle = this.parameters.trackStartAngle
       }
-      let pathY = this.parameters.uiContext.vp2px(this.parameters.y + (distance) * Math.sin(sinAngle));
-      return pathY;
+      return (this.parameters.uiContext.vp2px(this.parameters.y + (distance) * Math.sin(sinAngle)));
     }
     return 0;
   }
 
   calcPathR(isRLarge: ClipPathArc) {
     if (this.parameters.uiContext) {
-      let halfLineWidth = this.parameters.lineWidth / 2;
+      const halfLineWidth = this.parameters.lineWidth / 2;
       let pathR = this.parameters.uiContext.vp2px(halfLineWidth);
       if (isRLarge == ClipPathArc.Arc2) {
         pathR += this.parameters.uiContext.vp2px(this.parameters.radius);
@@ -317,15 +586,15 @@ export struct ArcSlider {
 
   setClipPath() {
     if (this.parameters.uiContext) {
-      let sourcePoint = `M${this.calcPathX(ClipPathArc.Arc4)} ${this.calcPathY(ClipPathArc.Arc4)}`;
-      let arc1 = ` A${this.calcPathR(ClipPathArc.Arc1)} ${this.calcPathR(ClipPathArc.Arc1)} 0 1 ` +
+      const sourcePoint = `M${this.calcPathX(ClipPathArc.Arc4)} ${this.calcPathY(ClipPathArc.Arc4)}`;
+      const arc1 = ` A${this.calcPathR(ClipPathArc.Arc1)} ${this.calcPathR(ClipPathArc.Arc1)} 0 1 ` +
         `${Number(this.isReverse)} ${this.calcPathX(ClipPathArc.Arc1)} ${this.calcPathY(ClipPathArc.Arc1)}`;
-      let arc2 = ` A${this.calcPathR(ClipPathArc.Arc2)} ${this.calcPathR(ClipPathArc.Arc2)} 0 ` +
+      const arc2 = ` A${this.calcPathR(ClipPathArc.Arc2)} ${this.calcPathR(ClipPathArc.Arc2)} 0 ` +
         `${Number(this.isLargeArc)} ${Number(this.isReverse)} ${this.calcPathX(ClipPathArc.Arc2)} ` +
         `${this.calcPathY(ClipPathArc.Arc2)}`;
-      let arc3 = ` A${this.calcPathR(ClipPathArc.Arc3)} ${this.calcPathR(ClipPathArc.Arc3)} 0 1 ` +
+      const arc3 = ` A${this.calcPathR(ClipPathArc.Arc3)} ${this.calcPathR(ClipPathArc.Arc3)} 0 1 ` +
         `${Number(this.isReverse)} ${this.calcPathX(ClipPathArc.Arc3)} ${this.calcPathY(ClipPathArc.Arc3)}`;
-      let arc4 = ` A${this.calcPathR(ClipPathArc.Arc4)} ${this.calcPathR(ClipPathArc.Arc4)} 0 ` +
+      const arc4 = ` A${this.calcPathR(ClipPathArc.Arc4)} ${this.calcPathR(ClipPathArc.Arc4)} 0 ` +
         `${Number(this.isLargeArc)} ${Number(!this.isReverse)} ${this.calcPathX(ClipPathArc.Arc4)} ` +
         `${this.calcPathY(ClipPathArc.Arc4)}`;
       this.clipPath = sourcePoint + arc1 + arc2 + arc3 + arc4;
@@ -342,8 +611,7 @@ export struct ArcSlider {
   }
 
   calcAnimatorChange(start: number, end: number, fraction: number) {
-    let num = fraction * (end - start) + start;
-    return num;
+    return (fraction * (end - start) + start);
   }
 
   startTouchAnimator() {
@@ -352,7 +620,7 @@ export struct ArcSlider {
       easing: 'friction',
       delay: 0,
       fill: 'forwards',
-      direction: MinOrMaxStatus.NormalStatus,
+      direction: 'normal',
       iterations: 1,
       begin: 0,
       end: 1
@@ -361,10 +629,10 @@ export struct ArcSlider {
       this.lineWidth = this.calcAnimatorChange(this.options.styleOptions.trackThickness,
         this.options.styleOptions.activeTrackThickness, fraction);
       this.selectedStartAngle = this.calcAnimatorChange(this.normalStartAngle, this.activeStartAngle, fraction) *
-      Const.ANGLE_TO_RADIAN;
+        ANGLE_TO_RADIAN;
       this.trackStartAngle = this.selectedStartAngle;
       this.trackEndAngle = this.calcAnimatorChange(this.normalEndAngle, this.activeEndAngle, fraction) *
-      Const.ANGLE_TO_RADIAN;
+        ANGLE_TO_RADIAN;
       this.setActivation();
       this.updateModifier();
       this.fullModifier.invalidate();
@@ -385,7 +653,7 @@ export struct ArcSlider {
       easing: 'sharp',
       delay: 0,
       fill: 'forwards',
-      direction: MinOrMaxStatus.NormalStatus,
+      direction: 'normal',
       iterations: 1,
       begin: 0,
       end: 1
@@ -393,8 +661,7 @@ export struct ArcSlider {
     this.maxRestoreAnimator.onFrame = (fraction: number) => {
       this.lineWidth = this.calcAnimatorChange(this.lineWidthBegin, this.options.styleOptions.activeTrackThickness,
         fraction);
-      this.selectedEndAngle = this.calcAnimatorChange(this.selectedEndAngleBegin, this.endAngleFinish,
-        fraction);
+      this.selectedEndAngle = this.calcAnimatorChange(this.selectedEndAngleBegin, this.endAngleFinish, fraction);
       this.trackEndAngle = this.selectedEndAngle;
       this.updateModifier();
       this.fullModifier.invalidate();
@@ -414,7 +681,7 @@ export struct ArcSlider {
       easing: 'sharp',
       delay: 0,
       fill: 'forwards',
-      direction: MinOrMaxStatus.NormalStatus,
+      direction: 'normal',
       iterations: 1,
       begin: 0,
       end: 1
@@ -422,8 +689,8 @@ export struct ArcSlider {
     this.minRestoreAnimator.onFrame = (fraction: number) => {
       this.lineWidth = this.calcAnimatorChange(this.lineWidthBegin, this.options.styleOptions.activeTrackThickness,
         fraction);
-      this.trackStartAngle = this.calcAnimatorChange(this.trackStartAngleBegin, this.activeStartAngle *
-      Const.ANGLE_TO_RADIAN, fraction);
+      this.trackStartAngle = this.calcAnimatorChange(this.trackStartAngleBegin, this.activeStartAngle * ANGLE_TO_RADIAN,
+        fraction);
       this.updateModifier();
       this.fullModifier.invalidate();
       this.calcBlur();
@@ -442,7 +709,7 @@ export struct ArcSlider {
       easing: 'friction',
       delay: 0,
       fill: 'forwards',
-      direction: MinOrMaxStatus.NormalStatus,
+      direction: 'normal',
       iterations: 1,
       begin: 0,
       end: 1
@@ -451,10 +718,10 @@ export struct ArcSlider {
       this.lineWidth = this.calcAnimatorChange(this.options.styleOptions.activeTrackThickness,
         this.options.styleOptions.trackThickness, fraction)
       this.selectedStartAngle = this.calcAnimatorChange(this.activeStartAngle, this.normalStartAngle, fraction) *
-      Const.ANGLE_TO_RADIAN;
+        ANGLE_TO_RADIAN;
       this.trackStartAngle = this.selectedStartAngle;
       this.trackEndAngle = this.calcAnimatorChange(this.activeEndAngle, this.normalEndAngle, fraction) *
-      Const.ANGLE_TO_RADIAN;
+        ANGLE_TO_RADIAN;
       this.setNormal();
       this.updateModifier();
       this.fullModifier.invalidate();
@@ -471,7 +738,7 @@ export struct ArcSlider {
       easing: 'interpolating-spring(0,1,400,38)',
       delay: 0,
       fill: 'forwards',
-      direction: MinOrMaxStatus.NormalStatus,
+      direction: 'normal',
       iterations: 1,
       begin: this.sliderValue,
       end: this.clickValue
@@ -496,7 +763,7 @@ export struct ArcSlider {
     } else if (this.options.layoutOptions.y - clickY > this.radius) {
       clickY = this.options.layoutOptions.y - this.radius;
     }
-    let sin = Math.abs(clickY - this.options.layoutOptions.y) / this.radius;
+    const sin = Math.abs(clickY - this.options.layoutOptions.y) / this.radius;
     let radian = Math.asin(sin);
     if ((clickX < this.options.layoutOptions.x) && (clickY > this.options.layoutOptions.y)) {
       radian = Math.PI - radian;
@@ -506,20 +773,18 @@ export struct ArcSlider {
       radian = -radian;
     }
     this.selectedEndAngle = radian;
-    let delta = this.selectedStartAngle - this.selectedEndAngle;
+    const delta = this.selectedStartAngle - this.selectedEndAngle;
     if ((this.parameters.reverse) && (this.trackEndAngle > this.selectedStartAngle)) {
       if (this.selectedEndAngle < this.selectedStartAngle) {
-        this.selectRatioNow = delta / (Const.TWO_PI_RADIAN + this.selectedStartAngle - this.trackEndAngle);
+        this.selectRatioNow = delta / (TWO_PI_RADIAN + this.selectedStartAngle - this.trackEndAngle);
       } else {
-        this.selectRatioNow = (Const.TWO_PI_RADIAN + delta) / (Const.TWO_PI_RADIAN + this.selectedStartAngle -
-        this.trackEndAngle);
+        this.selectRatioNow = (TWO_PI_RADIAN + delta) / (TWO_PI_RADIAN + this.selectedStartAngle - this.trackEndAngle);
       }
     } else if ((!this.parameters.reverse) && (this.trackEndAngle < this.selectedStartAngle)) {
       if (this.selectedEndAngle < this.selectedStartAngle) {
-        this.selectRatioNow = (Const.TWO_PI_RADIAN - delta) / (Const.TWO_PI_RADIAN - this.selectedStartAngle +
-        this.trackEndAngle);
+        this.selectRatioNow = (TWO_PI_RADIAN - delta) / (TWO_PI_RADIAN - this.selectedStartAngle + this.trackEndAngle);
       } else {
-        this.selectRatioNow = -delta / (Const.TWO_PI_RADIAN - this.selectedStartAngle + this.trackEndAngle);
+        this.selectRatioNow = -delta / (TWO_PI_RADIAN - this.selectedStartAngle + this.trackEndAngle);
       }
     } else {
       this.selectRatioNow = -delta / (this.trackEndAngle - this.selectedStartAngle);
@@ -548,19 +813,19 @@ export struct ArcSlider {
     let total: number;
     if (this.parameters.reverse) {
       if (this.selectedStartAngle > this.trackEndAngle) {
-        total = this.radius * (this.calcSin(this.activeEndAngle * Const.ANGLE_TO_RADIAN) -
-        this.calcSin(this.activeStartAngle * Const.ANGLE_TO_RADIAN));
+        total = this.radius * (this.calcSin(this.activeEndAngle * ANGLE_TO_RADIAN) -
+        this.calcSin(this.activeStartAngle * ANGLE_TO_RADIAN));
       } else {
-        total = this.radius * (this.calcSin(this.activeEndAngle * Const.ANGLE_TO_RADIAN) + 4 -
-        this.calcSin(this.activeStartAngle * Const.ANGLE_TO_RADIAN));
+        total = this.radius * (this.calcSin(this.activeEndAngle * ANGLE_TO_RADIAN) + 4 -
+        this.calcSin(this.activeStartAngle * ANGLE_TO_RADIAN));
       }
     } else {
       if (this.selectedStartAngle > this.trackEndAngle) {
-        total = this.radius * (this.calcSin(this.activeStartAngle * Const.ANGLE_TO_RADIAN) + 4 -
-        this.calcSin(this.activeEndAngle * Const.ANGLE_TO_RADIAN));
+        total = this.radius * (this.calcSin(this.activeStartAngle * ANGLE_TO_RADIAN) + 4 -
+        this.calcSin(this.activeEndAngle * ANGLE_TO_RADIAN));
       } else {
-        total = this.radius * (this.calcSin(this.activeStartAngle * Const.ANGLE_TO_RADIAN) -
-        this.calcSin(this.activeEndAngle * Const.ANGLE_TO_RADIAN));
+        total = this.radius * (this.calcSin(this.activeStartAngle * ANGLE_TO_RADIAN) -
+        this.calcSin(this.activeEndAngle * ANGLE_TO_RADIAN));
       }
     }
     let valueNow = (this.options.valueOptions.value - this.options.valueOptions.min) /
@@ -568,8 +833,8 @@ export struct ArcSlider {
     valueNow += this.delta / total;
     valueNow = Math.min(1, valueNow);
     valueNow = Math.max(0, valueNow);
-    this.options.valueOptions.value = valueNow *
-      (this.options.valueOptions.max - this.options.valueOptions.min) + this.options.valueOptions.min;
+    this.options.valueOptions.value = valueNow * (this.options.valueOptions.max - this.options.valueOptions.min) +
+    this.options.valueOptions.min;
     this.setActivation();
     this.updateModifier();
     this.fullModifier.invalidate();
@@ -579,22 +844,22 @@ export struct ArcSlider {
   calcCrownTotal(activeStartAngle: number, activeEndAngle: number): number {
     if (activeEndAngle > activeStartAngle) {
       if (this.options.layoutOptions.reverse) {
-        return (2 * Const.PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle)) * Const.ANGLE_TO_RADIAN;
+        return (2 * PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle)) * ANGLE_TO_RADIAN;
       } else {
-        return Math.abs(activeEndAngle - activeStartAngle) * Const.ANGLE_TO_RADIAN;
+        return Math.abs(activeEndAngle - activeStartAngle) * ANGLE_TO_RADIAN;
       }
     } else {
       if (this.options.layoutOptions.reverse) {
-        return Math.abs(activeEndAngle - activeStartAngle) * Const.ANGLE_TO_RADIAN;
+        return Math.abs(activeEndAngle - activeStartAngle) * ANGLE_TO_RADIAN;
       } else {
-        return (2 * Const.PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle)) * Const.ANGLE_TO_RADIAN;
+        return (2 * PI_RADIAN - Math.abs(activeEndAngle - activeStartAngle)) * ANGLE_TO_RADIAN;
       }
     }
   }
 
   calcCrownValue(deltaCrownAngle: number) {
-    let totalAngle = this.calcCrownTotal(this.activeStartAngle, this.activeEndAngle);
-    let totalValue = this.options.valueOptions.max - this.options.valueOptions.min;
+    const totalAngle = this.calcCrownTotal(this.activeStartAngle, this.activeEndAngle);
+    const totalValue = this.options.valueOptions.max - this.options.valueOptions.min;
     let valueNow = (this.options.valueOptions.value - this.options.valueOptions.min) / totalValue;
     valueNow += deltaCrownAngle / totalAngle;
     valueNow = Math.min(1, valueNow);
@@ -605,11 +870,11 @@ export struct ArcSlider {
       if (this.needVibrate) {
         this.needVibrate = false;
         try {
-          let ret = vibrator.isSupportEffectSync(Const.VIBRATOR_TYPE_SIX);
+          const ret = vibrator.isSupportEffectSync(VIBRATOR_TYPE_SIX);
           if (ret) {
             vibrator.startVibration({
               type: 'preset',
-              effectId: Const.VIBRATOR_TYPE_SIX,
+              effectId: VIBRATOR_TYPE_SIX,
               count: 1,
             }, {
               usage: 'unknown'
@@ -625,7 +890,7 @@ export struct ArcSlider {
             hilog.error(0x3900, 'ArcSlider', `watchhaptic.crown.strength6 is not supported`);
           }
         } catch (error) {
-          let e: BusinessError = error as BusinessError;
+          const e: BusinessError = error as BusinessError;
           hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
                     Code: ${e.code}, message: ${e.message}`);
         }
@@ -640,37 +905,36 @@ export struct ArcSlider {
 
   calcMaxValueDeltaIsPositive() {
     if (this.options.layoutOptions.reverse) {
-      if ((this.selectedEndAngle >= (this.endAngleFinish - Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN)) &&
-        (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN))) {
-        this.selectedEndAngle -= (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN) * Math.abs(this.delta) /
-          (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
-        this.lineWidth -= Const.LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
-          (Const.LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
+      if ((this.selectedEndAngle >= (this.endAngleFinish - ANGLE_OVER_MIN *
+        ANGLE_TO_RADIAN)) && (this.lineWidth >= this.options.styleOptions.activeTrackThickness *
+        (1 - LENGTH_OVER_MIN))) {
+        this.selectedEndAngle -= (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+          (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
+        this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) / (LENGTH_OVER_MIN * this.lineWidth +
+        Math.abs(this.delta));
         this.trackEndAngle = this.selectedEndAngle;
       }
-      if ((this.selectedEndAngle / Const.ANGLE_TO_RADIAN) <= (this.endAngleFinish / Const.ANGLE_TO_RADIAN -
-      Const.ANGLE_OVER_MIN)) {
-        this.selectedEndAngle = this.endAngleFinish - Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN;
+      if ((this.selectedEndAngle / ANGLE_TO_RADIAN) <= (this.endAngleFinish / ANGLE_TO_RADIAN - ANGLE_OVER_MIN)) {
+        this.selectedEndAngle = this.endAngleFinish - ANGLE_OVER_MIN * ANGLE_TO_RADIAN;
         this.trackEndAngle = this.selectedEndAngle;
       }
-      if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN)) {
-        this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN);
+      if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
+        this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
       }
     } else {
-      if ((this.selectedEndAngle <= (this.endAngleFinish + Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN)) &&
-        (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN))) {
-        this.selectedEndAngle += (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN) * Math.abs(this.delta) /
-          (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
-        this.lineWidth -= Const.LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
-          (Const.LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
+      if ((this.selectedEndAngle <= (this.endAngleFinish + ANGLE_OVER_MIN * ANGLE_TO_RADIAN)) &&
+        (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN))) {
+        this.selectedEndAngle += (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+          (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
+        this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) / (LENGTH_OVER_MIN *
+        this.lineWidth + Math.abs(this.delta));
         this.trackEndAngle = this.selectedEndAngle;
       }
-      if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN)) {
-        this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN);
+      if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
+        this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
       }
-      if (((this.selectedEndAngle / Const.ANGLE_TO_RADIAN) >= (this.endAngleFinish / Const.ANGLE_TO_RADIAN +
-      Const.ANGLE_OVER_MIN))) {
-        this.selectedEndAngle = this.endAngleFinish + Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN;
+      if (((this.selectedEndAngle / ANGLE_TO_RADIAN) >= (this.endAngleFinish / ANGLE_TO_RADIAN + ANGLE_OVER_MIN))) {
+        this.selectedEndAngle = this.endAngleFinish + ANGLE_OVER_MIN * ANGLE_TO_RADIAN;
         this.trackEndAngle = this.selectedEndAngle;
       }
     }
@@ -680,10 +944,10 @@ export struct ArcSlider {
     if (this.options.layoutOptions.reverse) {
       if ((this.selectedEndAngle <= this.endAngleFinish) ||
         (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
-        this.selectedEndAngle += (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN) * Math.abs(this.delta) /
-          (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
-        this.lineWidth += Const.LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
-          (Const.LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
+        this.selectedEndAngle += (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+          (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
+        this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) / (LENGTH_OVER_MIN *
+        this.lineWidth + Math.abs(this.delta));
         this.trackEndAngle = this.selectedEndAngle;
       }
       if (this.selectedEndAngle >= this.endAngleFinish) {
@@ -696,10 +960,10 @@ export struct ArcSlider {
     } else {
       if (((this.selectedEndAngle >= this.endAngleFinish) && (this.selectedEndAngle < this.selectedStartAngle)) ||
         (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
-        this.selectedEndAngle -= (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN) * Math.abs(this.delta) /
-          (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
-        this.lineWidth += Const.LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
-          (Const.LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
+        this.selectedEndAngle -= (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+          (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
+        this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) / (LENGTH_OVER_MIN *
+        this.lineWidth + Math.abs(this.delta));
         this.trackEndAngle = this.selectedEndAngle;
       }
       if (this.selectedEndAngle <= this.endAngleFinish) {
@@ -727,34 +991,33 @@ export struct ArcSlider {
 
   calcMinValueDeltaIsNegative() {
     if (this.options.layoutOptions.reverse) {
-      if ((this.trackStartAngle < this.selectedStartAngle + Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN) &&
-        (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN))) {
-        this.trackStartAngle += (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN) * Math.abs(this.delta) /
-          (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
-        this.lineWidth -= Const.LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
-          (Const.LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
+      if ((this.trackStartAngle < this.selectedStartAngle + ANGLE_OVER_MIN * ANGLE_TO_RADIAN) &&
+        (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN))) {
+        this.trackStartAngle += (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) *
+        Math.abs(this.delta) / (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius +
+        Math.abs(this.delta));
+        this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
+          (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
       }
-      if ((this.trackStartAngle / Const.ANGLE_TO_RADIAN) >= this.selectedStartAngle / Const.ANGLE_TO_RADIAN +
-      Const.ANGLE_OVER_MIN) {
-        this.trackStartAngle = this.selectedStartAngle + Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN;
+      if ((this.trackStartAngle / ANGLE_TO_RADIAN) >= this.selectedStartAngle / ANGLE_TO_RADIAN + ANGLE_OVER_MIN) {
+        this.trackStartAngle = this.selectedStartAngle + ANGLE_OVER_MIN * ANGLE_TO_RADIAN;
       }
-      if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN)) {
-        this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN);
+      if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
+        this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
       }
     } else {
-      if ((this.trackStartAngle > this.selectedStartAngle - Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN) &&
-        (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN))) {
-        this.trackStartAngle -= (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN) * Math.abs(this.delta) /
-          (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
-        this.lineWidth -= Const.LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
-          (Const.LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
+      if ((this.trackStartAngle > this.selectedStartAngle - ANGLE_OVER_MIN * ANGLE_TO_RADIAN) &&
+        (this.lineWidth >= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN))) {
+        this.trackStartAngle -= (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+          (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
+        this.lineWidth -= LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
+          (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
       }
-      if ((this.trackStartAngle / Const.ANGLE_TO_RADIAN) <= this.selectedStartAngle / Const.ANGLE_TO_RADIAN -
-      Const.ANGLE_OVER_MIN) {
-        this.trackStartAngle = this.selectedStartAngle - Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN;
+      if ((this.trackStartAngle / ANGLE_TO_RADIAN) <= this.selectedStartAngle / ANGLE_TO_RADIAN - ANGLE_OVER_MIN) {
+        this.trackStartAngle = this.selectedStartAngle - ANGLE_OVER_MIN * ANGLE_TO_RADIAN;
       }
-      if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN)) {
-        this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - Const.LENGTH_OVER_MIN);
+      if (this.lineWidth <= this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN)) {
+        this.lineWidth = this.options.styleOptions.activeTrackThickness * (1 - LENGTH_OVER_MIN);
       }
     }
   }
@@ -763,10 +1026,10 @@ export struct ArcSlider {
     if (this.options.layoutOptions.reverse) {
       if ((this.trackStartAngle > this.selectedStartAngle) ||
         (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
-        this.trackStartAngle -= (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN) * Math.abs(this.delta) /
-          (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
-        this.lineWidth += Const.LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
-          (Const.LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
+        this.trackStartAngle -= (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+          (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
+        this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
+          (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
       }
       if (this.lineWidth > this.options.styleOptions.activeTrackThickness) {
         this.lineWidth = this.options.styleOptions.activeTrackThickness;
@@ -777,10 +1040,10 @@ export struct ArcSlider {
     } else {
       if ((this.trackStartAngle < this.selectedStartAngle) ||
         (this.lineWidth <= this.options.styleOptions.activeTrackThickness)) {
-        this.trackStartAngle += (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN) * Math.abs(this.delta) /
-          (Const.ANGLE_OVER_MIN * Const.ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
-        this.lineWidth += Const.LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
-          (Const.LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
+        this.trackStartAngle += (ANGLE_OVER_MIN * ANGLE_TO_RADIAN) * Math.abs(this.delta) /
+          (ANGLE_OVER_MIN * ANGLE_TO_RADIAN * this.radius + Math.abs(this.delta));
+        this.lineWidth += LENGTH_OVER_MIN * this.lineWidth * Math.abs(this.delta) /
+          (LENGTH_OVER_MIN * this.lineWidth + Math.abs(this.delta));
       }
       if (this.trackStartAngle > this.selectedStartAngle) {
         this.trackStartAngle = this.selectedStartAngle;
@@ -806,30 +1069,30 @@ export struct ArcSlider {
 
   isHotRegion(touchX: number, touchY: number): boolean {
     this.isFocus = false;
-    let radius = Math.sqrt(Math.pow(touchX - this.options.layoutOptions.x, 2) +
+    const radius = Math.sqrt(Math.pow(touchX - this.options.layoutOptions.x, 2) +
     Math.pow(touchY - this.options.layoutOptions.y, 2));
     if ((radius < this.options.layoutOptions.radius - this.options.styleOptions.activeTrackThickness) ||
       (radius > this.options.layoutOptions.radius)) {
       return false;
     }
-    let sin = Math.abs(touchY - this.options.layoutOptions.y) / radius;
-    let radian = Math.asin(sin);
-    let angle = radian / Const.ANGLE_TO_RADIAN;
+    const sin = Math.abs(touchY - this.options.layoutOptions.y) / radius;
+    const radian = Math.asin(sin);
+    let angle = radian / ANGLE_TO_RADIAN;
     if ((touchX < this.options.layoutOptions.x) && (touchY > this.options.layoutOptions.y)) {
-      angle = Const.PI_RADIAN - angle;
+      angle = PI_RADIAN - angle;
     } else if ((touchX < this.options.layoutOptions.x) && (touchY < this.options.layoutOptions.y)) {
-      angle = angle - Const.PI_RADIAN;
+      angle = angle - PI_RADIAN;
     } else if ((touchX > this.options.layoutOptions.x) && (touchY < this.options.layoutOptions.y)) {
       angle = -angle;
     }
     if ((this.options.layoutOptions.reverse && this.selectedStartAngle >= this.trackEndAngle && angle <=
-      this.selectedStartAngle / Const.ANGLE_TO_RADIAN && angle >= this.trackEndAngle / Const.ANGLE_TO_RADIAN) ||
-      (this.options.layoutOptions.reverse && this.selectedStartAngle <= this.trackEndAngle && (angle <=
-        this.selectedStartAngle / Const.ANGLE_TO_RADIAN || angle >= this.trackEndAngle / Const.ANGLE_TO_RADIAN)) ||
-      (!this.options.layoutOptions.reverse && this.selectedStartAngle >= this.trackEndAngle && (angle >=
-        this.selectedStartAngle / Const.ANGLE_TO_RADIAN || angle <= this.trackEndAngle / Const.ANGLE_TO_RADIAN)) ||
+      this.selectedStartAngle / ANGLE_TO_RADIAN && angle >= this.trackEndAngle / ANGLE_TO_RADIAN) ||
+      (this.options.layoutOptions.reverse && this.selectedStartAngle <= this.trackEndAngle &&
+        (angle <= this.selectedStartAngle / ANGLE_TO_RADIAN || angle >= this.trackEndAngle / ANGLE_TO_RADIAN)) ||
+      (!this.options.layoutOptions.reverse && this.selectedStartAngle >= this.trackEndAngle &&
+        (angle >= this.selectedStartAngle / ANGLE_TO_RADIAN || angle <= this.trackEndAngle / ANGLE_TO_RADIAN)) ||
       (!this.options.layoutOptions.reverse && this.selectedStartAngle <= this.trackEndAngle && angle >=
-        this.selectedStartAngle / Const.ANGLE_TO_RADIAN && angle <= this.trackEndAngle / Const.ANGLE_TO_RADIAN)) {
+        this.selectedStartAngle / ANGLE_TO_RADIAN && angle <= this.trackEndAngle / ANGLE_TO_RADIAN)) {
       this.isFocus = true;
     }
     if (this.isFocus) {
@@ -841,13 +1104,13 @@ export struct ArcSlider {
 
   calcDisplayControlRatio(crownSensitivity: CrownSensitivity): number {
     if (crownSensitivity === CrownSensitivity.LOW) {
-      return Const.CROWN_CONTROL_RATIO * Const.CROWN_SENSITIVITY_LOW;
+      return CROWN_CONTROL_RATIO * CROWN_SENSITIVITY_LOW;
     } else if (crownSensitivity === CrownSensitivity.MEDIUM) {
-      return Const.CROWN_CONTROL_RATIO * Const.CROWN_SENSITIVITY_MEDIUM;
+      return CROWN_CONTROL_RATIO * CROWN_SENSITIVITY_MEDIUM;
     } else if (crownSensitivity === CrownSensitivity.HIGH) {
-      return Const.CROWN_CONTROL_RATIO * Const.CROWN_SENSITIVITY_HIGH;
+      return CROWN_CONTROL_RATIO * CROWN_SENSITIVITY_HIGH;
     }
-    return Const.CROWN_CONTROL_RATIO * Const.CROWN_SENSITIVITY_MEDIUM;
+    return CROWN_CONTROL_RATIO * CROWN_SENSITIVITY_MEDIUM;
   }
 
   onTouchEvent(event: TouchEvent) {
@@ -856,9 +1119,9 @@ export struct ArcSlider {
     } else if (this.isEnlarged && event.type === TouchType.Up) {
       this.options.onChange?.(this.options.valueOptions.value);
       this.options.onTouch?.(event);
-      if (this.meter !== Const.INVALID_TIMEOUT_ID) {
+      if (this.meter !== INVALID_TIMEOUT_ID) {
         clearTimeout(this.meter);
-        this.meter = Const.INVALID_TIMEOUT_ID
+        this.meter = INVALID_TIMEOUT_ID
       }
       this.meter = setTimeout(() => {
         if (this.isEnlarged) {
@@ -868,14 +1131,13 @@ export struct ArcSlider {
           this.startRestoreAnimator();
           this.calcBlur();
         }
-      }, Const.RESTORE_TIMEOUT)
+      }, RESTORE_TIMEOUT)
       this.isMaxOrMinAnimator();
-    } else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) &&
-      (event.type === TouchType.Move)) {
+    } else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) && (event.type === TouchType.Move)) {
       this.options.onTouch?.(event);
-      if (this.meter !== Const.INVALID_TIMEOUT_ID) {
+      if (this.meter !== INVALID_TIMEOUT_ID) {
         clearTimeout(this.meter);
-        this.meter = Const.INVALID_TIMEOUT_ID;
+        this.meter = INVALID_TIMEOUT_ID;
       }
       this.onTouchMove(event.touches[0].y);
     }
@@ -884,9 +1146,9 @@ export struct ArcSlider {
   onTouchDown(event: TouchEvent) {
     if (!this.isEnlarged) {
       this.touchY = event.touches[0].y;
-      if (this.meter !== Const.INVALID_TIMEOUT_ID) {
+      if (this.meter !== INVALID_TIMEOUT_ID) {
         clearTimeout(this.meter);
-        this.meter = Const.INVALID_TIMEOUT_ID
+        this.meter = INVALID_TIMEOUT_ID
       }
       if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
         this.options.onTouch?.(event);
@@ -898,9 +1160,9 @@ export struct ArcSlider {
       this.touchY = event.touches[0].y;
       if (this.isHotRegion(event.touches[0].x, event.touches[0].y)) {
         this.options.onTouch?.(event);
-        if (this.meter !== Const.INVALID_TIMEOUT_ID) {
+        if (this.meter !== INVALID_TIMEOUT_ID) {
           clearTimeout(this.meter);
-          this.meter = Const.INVALID_TIMEOUT_ID
+          this.meter = INVALID_TIMEOUT_ID
         }
         if (this.isTouchAnimatorFinished) {
           this.sliderValue = this.options.valueOptions.value;
@@ -908,9 +1170,9 @@ export struct ArcSlider {
           this.startClickAnimator();
         }
         if (this.isClickAnimatorFinished) {
-          if (this.meter !== Const.INVALID_TIMEOUT_ID) {
+          if (this.meter !== INVALID_TIMEOUT_ID) {
             clearTimeout(this.meter);
-            this.meter = Const.INVALID_TIMEOUT_ID
+            this.meter = INVALID_TIMEOUT_ID
           }
           this.touchY = event.touches[0].y;
           this.calcValue(event.touches[0].y);
@@ -1056,13 +1318,13 @@ export struct ArcSlider {
   onDigitalCrownEvent(event: CrownEvent) {
     if (event && this.isFocus) {
       this.crownEventCounter += 1;
-      if (this.crownEventCounter % Const.CROWN_EVENT_FLAG === 0) {
+      if (this.crownEventCounter % CROWN_EVENT_FLAG === 0) {
         try {
-          let ret = vibrator.isSupportEffectSync(Const.VIBRATOR_TYPE_TWO);
+          const ret = vibrator.isSupportEffectSync(VIBRATOR_TYPE_TWO);
           if (ret) {
             vibrator.startVibration({
               type: 'preset',
-              effectId: Const.VIBRATOR_TYPE_TWO,
+              effectId: VIBRATOR_TYPE_TWO,
               count: 1,
             }, {
               usage: 'unknown'
@@ -1079,7 +1341,7 @@ export struct ArcSlider {
             hilog.error(0x3900, 'ArcSlider', `watchhaptic.crown.strength2 is not supported`);
           }
         } catch (error) {
-          let e: BusinessError = error as BusinessError;
+          const e: BusinessError = error as BusinessError;
           hilog.error(0x3900, 'ArcSlider', `An unexpected error occurred in starting vibration.
                       Code: ${e.code}, message: ${e.message}`);
         }
@@ -1091,9 +1353,9 @@ export struct ArcSlider {
 
   CrownAction(event: CrownEvent) {
     if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
-      if (this.meter !== Const.INVALID_TIMEOUT_ID) {
+      if (this.meter !== INVALID_TIMEOUT_ID) {
         clearTimeout(this.meter);
-        this.meter = Const.INVALID_TIMEOUT_ID;
+        this.meter = INVALID_TIMEOUT_ID;
       }
       this.isEnlarged = true;
       this.startTouchAnimator();
@@ -1102,25 +1364,25 @@ export struct ArcSlider {
       this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
       this.calcCrownValue(this.crownDeltaAngle);
     } else if (event.action === CrownAction.BEGIN && this.isEnlarged) {
-      if (this.meter !== Const.INVALID_TIMEOUT_ID) {
+      if (this.meter !== INVALID_TIMEOUT_ID) {
         clearTimeout(this.meter);
-        this.meter = Const.INVALID_TIMEOUT_ID;
+        this.meter = INVALID_TIMEOUT_ID;
       }
       this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
       this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
       this.calcCrownValue(this.crownDeltaAngle);
     } else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) && (event.action === CrownAction.UPDATE)) {
-      if (this.meter !== Const.INVALID_TIMEOUT_ID) {
+      if (this.meter !== INVALID_TIMEOUT_ID) {
         clearTimeout(this.meter);
-        this.meter = Const.INVALID_TIMEOUT_ID;
+        this.meter = INVALID_TIMEOUT_ID;
       }
       this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
       this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
       this.calcCrownValue(this.crownDeltaAngle);
     } else if (this.isEnlarged && event.action === CrownAction.END) {
-      if (this.meter !== Const.INVALID_TIMEOUT_ID) {
+      if (this.meter !== INVALID_TIMEOUT_ID) {
         clearTimeout(this.meter);
-        this.meter = Const.INVALID_TIMEOUT_ID;
+        this.meter = INVALID_TIMEOUT_ID;
       }
       this.meter = setTimeout(() => {
         if (this.isEnlarged) {
@@ -1130,23 +1392,23 @@ export struct ArcSlider {
           this.startRestoreAnimator();
           this.calcBlur();
         }
-      }, Const.RESTORE_TIMEOUT)
+      }, RESTORE_TIMEOUT)
     }
   }
 
   build() {
     Column() {
       Stack() {
-        Circle({ width: Const.TOTAL_LENGTH, height: Const.TOTAL_LENGTH })
+        Circle({ width: TOTAL_LENGTH, height: TOTAL_LENGTH })
           .width(this.totalWidth)
           .height(this.totalHeight)
-          .fill(Const.BLUR_COLOR_DEFAULT)
+          .fill(BLUR_COLOR_DEFAULT)
           .clipShape(new Path({ commands: this.clipPath }))
-          .backdropBlur(Const.TRACK_BLUR_DEFAULT)
+          .backdropBlur(TRACK_BLUR_DEFAULT)
           .hitTestBehavior(HitTestMode.Transparent)
         Button()
           .stateEffect(false)
-          .backgroundColor(Const.BLUR_COLOR_DEFAULT)
+          .backgroundColor(BLUR_COLOR_DEFAULT)
           .drawModifier(this.fullModifier)
           .width(this.totalWidth)
           .height(this.totalHeight)
