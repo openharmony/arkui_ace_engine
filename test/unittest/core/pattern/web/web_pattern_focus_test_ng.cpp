@@ -1609,7 +1609,7 @@ HWTEST_F(WebPatternFocusTestNg, WebPatternOnParentScrollStartOrEndCallbackTest00
     auto g_webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(g_webPattern, nullptr);
 
-    g_webPattern->selectOverlayProxy_ = new SelectOverlayProxy(1);
+    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
     g_webPattern->OnParentScrollStartOrEndCallback(false);
 #endif
 }

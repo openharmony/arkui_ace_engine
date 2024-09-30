@@ -1703,7 +1703,7 @@ HWTEST_F(WebPatternSelectTestNg, UpdateClippedSelectionBounds_002, TestSize.Leve
     int32_t width = 100;
     int32_t height = 50;
     int32_t selectOverlayId = 1;
-    webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
+    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
     webPattern->isQuickMenuMouseTrigger_ = true;
     webPattern->UpdateClippedSelectionBounds(startX, startY, width, height);
 #endif
@@ -2258,7 +2258,7 @@ HWTEST_F(WebPatternSelectTestNg, ChangeVisibilityOfQuickMenu, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     int32_t selectOverlayId = 1;
-    webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
+    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
     webPattern->ChangeVisibilityOfQuickMenu();
 #endif
 }
@@ -2280,7 +2280,7 @@ HWTEST_F(WebPatternSelectTestNg, IsQuickMenuShow, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     int32_t selectOverlayId = 1;
-    webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
+    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
     webPattern->IsQuickMenuShow();
     EXPECT_NE(webPattern, nullptr);
 #endif
@@ -2355,7 +2355,7 @@ HWTEST_F(WebPatternSelectTestNg, RunQuickMenu_003, TestSize.Level1)
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
         std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
     int32_t selectOverlayId = 1;
-    webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
+    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
     webPattern->RunQuickMenu(params, callback);
     EXPECT_TRUE(webPattern);
 #endif

@@ -20,7 +20,6 @@
 #include <memory>
 #include <string>
 
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "nweb_accessibility_node_info.h"
 #include "nweb_download_callback.h"
@@ -50,6 +49,7 @@
 #include "base/web/webview/ohos_nweb/include/nweb.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -227,11 +227,11 @@ public:
 };
 
 /**
- * @tc.name: InitInOfflineMode
+ * @tc.name: InitInOfflineMode_001
  * @tc.desc: InitInOfflineMode
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternWebTest, InitInOfflineMode, TestSize.Level1)
+HWTEST_F(WebPatternWebTest, InitInOfflineMode_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -245,11 +245,30 @@ HWTEST_F(WebPatternWebTest, InitInOfflineMode, TestSize.Level1)
     webPattern->OnModifyDone();
     webPattern->webSrc_ = "Another Value";
     webPattern->InitInOfflineMode();
-    ASSERT_FALSE(webPattern->webSrc_->empty());
-    webPattern->webSrc_ = "";
+    EXPECT_FALSE(webPattern->delegate_->LoadDataWithRichText());
+#endif
+}
+
+/**
+ * @tc.name: InitInOfflineMode_001
+ * @tc.desc: InitInOfflineMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, InitInOfflineMode_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
     webPattern->webData_ = "Another Value";
     webPattern->InitInOfflineMode();
-    ASSERT_FALSE(webPattern->delegate_->LoadDataWithRichText());
+    EXPECT_FALSE(webPattern->delegate_->LoadDataWithRichText());
 #endif
 }
 
@@ -269,16 +288,16 @@ HWTEST_F(WebPatternWebTest, IsNeedResizeVisibleViewport, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
-    webPattern->visibleViewportSize_.SetWidth(10);
-    auto retHeight = webPattern->IsNeedResizeVisibleViewport();
-    ASSERT_FALSE(retHeight);
+    webPattern->OnModifyDone();
     Size size { 10, 10 };
     webPattern->visibleViewportSize_.SetSize(size);
-    auto retSize = webPattern->IsNeedResizeVisibleViewport();
-    ASSERT_FALSE(retSize);
+    webPattern->lastKeyboardHeight_ = -0.0015;
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
-    auto retVk = webPattern->IsNeedResizeVisibleViewport();
-    ASSERT_FALSE(retVk);
+    EXPECT_TRUE(webPattern->IsNeedResizeVisibleViewport());
+    webPattern->lastKeyboardHeight_ = 0.0;
+    EXPECT_FALSE(webPattern->IsNeedResizeVisibleViewport());
+    webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
+    EXPECT_FALSE(webPattern->IsNeedResizeVisibleViewport());
 #endif
 }
 
@@ -299,9 +318,9 @@ HWTEST_F(WebPatternWebTest, ProcessVirtualKeyBoardHide, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_NONE;
-    ASSERT_FALSE(webPattern->ProcessVirtualKeyBoardHide(10, 10, false));
+    EXPECT_FALSE(webPattern->ProcessVirtualKeyBoardHide(10, 10, false));
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
-    ASSERT_TRUE(webPattern->ProcessVirtualKeyBoardHide(10, 10, false));
+    EXPECT_TRUE(webPattern->ProcessVirtualKeyBoardHide(10, 10, false));
 #endif
 }
 
@@ -321,13 +340,20 @@ HWTEST_F(WebPatternWebTest, ProcessVirtualKeyBoardShow, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
-    webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
+    webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
     webPattern->drawSizeCache_.SetHeight(50.00);
     ASSERT_TRUE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 100.00, true));
     webPattern->OnModifyDone();
     webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
     webPattern->drawSizeCache_.SetHeight(50.00);
-    ASSERT_FALSE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 0.00, true));
+    EXPECT_FALSE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 0.00, true));
+    EXPECT_FALSE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 0.00, false));
+    webPattern->layoutMode_ = WebLayoutMode::FIT_CONTENT;
+    EXPECT_TRUE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 0.00, false));
+    RefPtr<FrameNode> node = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr); });
+    frameNode->SetParent(node);
+    EXPECT_FALSE(webPattern->ProcessVirtualKeyBoardShow(0, 0, 0.00, true));
 #endif
 }
 
@@ -350,17 +376,17 @@ HWTEST_F(WebPatternWebTest, ProcessVirtualKeyBoard, TestSize.Level1)
     webPattern->OnModifyDone();
     webPattern->isFocus_ = true;
     webPattern->isVisible_ = true;
-    ASSERT_FALSE(webPattern->ProcessVirtualKeyBoard(10, 10, 0.00));
-    ASSERT_TRUE(webPattern->ProcessVirtualKeyBoard(10, 10, 10.00));
+    EXPECT_FALSE(webPattern->ProcessVirtualKeyBoard(10, 10, 0.00));
+    EXPECT_TRUE(webPattern->ProcessVirtualKeyBoard(10, 10, 10.00));
     webPattern->isFocus_ = false;
     webPattern->isVisible_ = false;
-    ASSERT_FALSE(webPattern->ProcessVirtualKeyBoard(10, 10, 0.00));
+    EXPECT_FALSE(webPattern->ProcessVirtualKeyBoard(10, 10, 0.00));
     webPattern->isFocus_ = true;
     webPattern->isVisible_ = false;
-    ASSERT_FALSE(webPattern->ProcessVirtualKeyBoard(10, 10, 0.00));
+    EXPECT_FALSE(webPattern->ProcessVirtualKeyBoard(10, 10, 0.00));
     webPattern->isFocus_ = false;
     webPattern->isVisible_ = true;
-    ASSERT_FALSE(webPattern->ProcessVirtualKeyBoard(10, 10, 0.00));
+    EXPECT_FALSE(webPattern->ProcessVirtualKeyBoard(10, 10, 0.00));
 #endif
 }
 
@@ -393,11 +419,13 @@ HWTEST_F(WebPatternWebTest, OnSelectHandleDone, TestSize.Level1)
     webPattern->endSelectionHandle_ = std::make_shared<NWebTouchHandleStateUN>();
     webPattern->OnSelectHandleDone(handleRect, true);
     webPattern->startSelectionHandle_ = std::make_shared<NWebTouchHandleStateUN>();
-    webPattern->OnSelectHandleDone(handleRect, true);
-    ASSERT_EQ(webPattern->startSelectionHandle_->GetX(), 10);
-    ASSERT_EQ(webPattern->startSelectionHandle_->GetY(), 10);
-    ASSERT_EQ(webPattern->endSelectionHandle_->GetX(), 10);
-    ASSERT_EQ(webPattern->endSelectionHandle_->GetY(), 10);
+    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
+    webPattern->selectOverlayProxy_->IsMenuShow();
+    auto info = webPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo();
+    EXPECT_EQ(webPattern->startSelectionHandle_->GetX(), 10);
+    EXPECT_EQ(webPattern->startSelectionHandle_->GetY(), 10);
+    EXPECT_EQ(webPattern->endSelectionHandle_->GetX(), 10);
+    EXPECT_EQ(webPattern->endSelectionHandle_->GetY(), 10);
 #endif
 }
 
@@ -418,18 +446,21 @@ HWTEST_F(WebPatternWebTest, OnSelectHandleMove, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto manager = pipeline->GetDragDropManager();
+    manager->isDragged_ = true;
     RectF handleRect;
     webPattern->isDragging_ = true;
-    DragDropManager drag;
-    drag.isDragged_ = true;
+    manager->isDragged_ = true;
     webPattern->OnSelectHandleMove(handleRect, true);
     webPattern->isDragging_ = false;
-    drag.isDragged_ = false;
+    manager->isDragged_ = false;
     webPattern->OnSelectHandleMove(handleRect, true);
     webPattern->overlayCreating_ = true;
     webPattern->OnSelectHandleMove(handleRect, true);
     webPattern->isDragging_ = true;
-    drag.isDragged_ = false;
+    webPattern->OnSelectHandleMove(handleRect, true);
+    manager->isDragged_ = true;
     webPattern->OnSelectHandleMove(handleRect, true);
     ASSERT_EQ(webPattern->imageAnalyzerManager_, nullptr);
 #endif
@@ -479,7 +510,7 @@ HWTEST_F(WebPatternWebTest, OnDetachContextAllFalse, TestSize.Level1)
     webPattern->tooltipId_ = 1;
     auto pipelineContext = MockPipelineContext::GetCurrent();
     webPattern->OnDetachContext(pipelineContext.GetRawPtr());
-    ASSERT_EQ(webPattern->tooltipId_, -1);
+    EXPECT_EQ(webPattern->tooltipId_, -1);
 #endif
 }
 
@@ -503,7 +534,7 @@ HWTEST_F(WebPatternWebTest, OnDefaultTextEncodingFormatUpdate, TestSize.Level1)
     std::string tag = "";
     webPattern->OnDefaultTextEncodingFormatUpdate(tag);
     auto canonicalEncodingName = webPattern->delegate_->GetCanonicalEncodingName(tag);
-    ASSERT_EQ(canonicalEncodingName, tag);
+    EXPECT_EQ(canonicalEncodingName, tag);
 #endif
 }
 
@@ -526,7 +557,7 @@ HWTEST_F(WebPatternWebTest, OnModifyDoneSurfaceTrue, TestSize.Level1)
     webPattern->SetLayoutMode(WebLayoutMode::NONE);
     SystemProperties::SetExtSurfaceEnabled(true);
     webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->renderSurface_, 0);
+    EXPECT_NE(webPattern->renderSurface_, 0);
 #endif
 }
 
@@ -571,7 +602,7 @@ HWTEST_F(WebPatternWebTest, OnModifyDoneLFIT, TestSize.Level1)
     SystemProperties::SetExtSurfaceEnabled(true);
     webPattern->SetLayoutMode(WebLayoutMode::NONE);
     webPattern->OnModifyDone();
-    ASSERT_TRUE(webPattern->GetZoomAccessEnabledValue(true));
+    EXPECT_TRUE(webPattern->GetZoomAccessEnabledValue(true));
 #endif
 }
 
@@ -623,7 +654,7 @@ HWTEST_F(WebPatternWebTest, OnModifyDoneGetNull, TestSize.Level1)
     webPattern->OnBlockNetworkUpdate(false);
     webPattern->OnUserAgentUpdate("");
     webPattern->OnInitialScaleUpdate(0.0);
-    ASSERT_FALSE(webPattern->GetMetaViewport());
+    EXPECT_FALSE(webPattern->GetMetaViewport());
 #endif
 }
 
@@ -649,7 +680,7 @@ HWTEST_F(WebPatternWebTest, CheckHandles_001, TestSize.Level1)
     auto handle_ = std::make_shared<NWebTouchHandleStateUN>();
     handle_->GetAlpha();
     webPattern->CheckHandles(selectHandleInfo, handle_);
-    ASSERT_FALSE(selectHandleInfo.isShow);
+    EXPECT_FALSE(selectHandleInfo.isShow);
 #endif
 }
 
@@ -677,7 +708,7 @@ HWTEST_F(WebPatternWebTest, CheckHandles_002, TestSize.Level1)
     handle_->GetY();
     handle_->GetEdgeHeight();
     webPattern->CheckHandles(selectHandleInfo, handle_);
-    ASSERT_FALSE(selectHandleInfo.isShow);
+    EXPECT_FALSE(selectHandleInfo.isShow);
 #endif
 }
 
@@ -705,37 +736,7 @@ HWTEST_F(WebPatternWebTest, CheckHandles_003, TestSize.Level1)
     handle_->GetY();
     handle_->GetEdgeHeight();
     webPattern->CheckHandles(selectHandleInfo, handle_);
-    ASSERT_FALSE(selectHandleInfo.isShow);
-#endif
-}
-
-/**
- * @tc.name: OnParentScrollStartOrEndCallback
- * @tc.desc: OnParentScrollStartOrEndCallback.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternWebTest, OnParentScrollStartOrEndCallback, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    TouchEventInfo event("touchstart");
-    std::list<OHOS::Ace::NG::WebPattern::TouchInfo> touchInfos;
-    TouchLocationInfo touchInfoL("touchstart", 1);
-    touchInfoL.SetGlobalLocation({ 100, 200 });
-    touchInfoL.SetLocalLocation({ 50, 150 });
-    event.AddChangedTouchLocationInfo(std::move(touchInfoL));
-    webPattern->ParseTouchInfo(event, touchInfos);
-    ASSERT_FALSE(event.GetChangedTouches().empty());
+    EXPECT_FALSE(selectHandleInfo.isShow);
 #endif
 }
 
@@ -761,7 +762,7 @@ HWTEST_F(WebPatternWebTest, ParseTouchInfo, TestSize.Level1)
     TouchEventInfo event("touchstart");
     std::list<OHOS::Ace::NG::WebPattern::TouchInfo> touchInfos;
     webPattern->ParseTouchInfo(event, touchInfos);
-    ASSERT_TRUE(event.GetChangedTouches().empty());
+    EXPECT_TRUE(event.GetChangedTouches().empty());
 #endif
 }
 
@@ -777,7 +778,7 @@ HWTEST_F(WebPatternWebTest, UpdateLayoutAfterKeyboardShow, TestSize.Level1)
     RefPtr<FrameNode> frameNode = nullptr;
     const std::string src = "web_pattern_focus_test";
     RefPtr<WebController> webController = AceType::MakeRefPtr<WebController>();
-    EXPECT_NE(webController, nullptr);
+    ASSERT_NE(webController, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
@@ -824,7 +825,7 @@ HWTEST_F(WebPatternWebTest, BeforeSyncGeometryProperties, TestSize.Level1)
     RefPtr<FrameNode> frameNode = nullptr;
     const std::string src = "web_pattern_focus_test";
     RefPtr<WebController> webController = AceType::MakeRefPtr<WebController>();
-    EXPECT_NE(webController, nullptr);
+    ASSERT_NE(webController, nullptr);
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
@@ -889,11 +890,11 @@ HWTEST_F(WebPatternWebTest, OnAreaChangedInner_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -904,7 +905,7 @@ HWTEST_F(WebPatternWebTest, OnAreaChangedInner_001, TestSize.Level1)
     OffsetT<float> Offset(1.0, 1.0);
     webPattern->webOffset_ = Offset;
     webPattern->OnAreaChangedInner();
-    ASSERT_NE(webPattern->webOffset_.GetX(), Offset.GetX());
+    EXPECT_NE(webPattern->webOffset_.GetX(), Offset.GetX());
 #endif
 }
 
@@ -917,11 +918,11 @@ HWTEST_F(WebPatternWebTest, OnAreaChangedInner_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -931,7 +932,7 @@ HWTEST_F(WebPatternWebTest, OnAreaChangedInner_002, TestSize.Level1)
     webPattern->renderMode_ = RenderMode::SYNC_RENDER;
     webPattern->isInWindowDrag_ = true;
     webPattern->OnAreaChangedInner();
-    ASSERT_EQ(webPattern->webOffset_.GetX(), 0);
+    EXPECT_EQ(webPattern->webOffset_.GetX(), 0);
 #endif
 }
 
@@ -944,11 +945,11 @@ HWTEST_F(WebPatternWebTest, OnAreaChangedInner_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -958,7 +959,7 @@ HWTEST_F(WebPatternWebTest, OnAreaChangedInner_003, TestSize.Level1)
     webPattern->isInWindowDrag_ = false;
     webPattern->renderMode_ = RenderMode::ASYNC_RENDER;
     webPattern->OnAreaChangedInner();
-    ASSERT_FALSE(webPattern->isKeyboardInSafeArea_);
+    EXPECT_FALSE(webPattern->isKeyboardInSafeArea_);
 #endif
 }
 
@@ -971,11 +972,11 @@ HWTEST_F(WebPatternWebTest, OnAreaChangedInner_004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -985,9 +986,9 @@ HWTEST_F(WebPatternWebTest, OnAreaChangedInner_004, TestSize.Level1)
     webPattern->isInWindowDrag_ = false;
     webPattern->renderMode_ = RenderMode::SYNC_RENDER;
     webPattern->OnAreaChangedInner();
-    ASSERT_NE(webPattern->layoutMode_, WebLayoutMode::NONE);
-    ASSERT_FALSE(webPattern->isInWindowDrag_);
-    ASSERT_EQ(webPattern->renderMode_, RenderMode::SYNC_RENDER);
+    EXPECT_NE(webPattern->layoutMode_, WebLayoutMode::NONE);
+    EXPECT_FALSE(webPattern->isInWindowDrag_);
+    EXPECT_EQ(webPattern->renderMode_, RenderMode::SYNC_RENDER);
 #endif
 }
 
@@ -1000,11 +1001,11 @@ HWTEST_F(WebPatternWebTest, OnZoomAccessEnabledUpdate, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1014,11 +1015,11 @@ HWTEST_F(WebPatternWebTest, OnZoomAccessEnabledUpdate, TestSize.Level1)
     webPattern->isEmbedModeEnabled_ = true;
     bool value = true;
     webPattern->OnZoomAccessEnabledUpdate(value);
-    ASSERT_EQ(webPattern->layoutMode_, WebLayoutMode::NONE);
-    ASSERT_TRUE(webPattern->isEmbedModeEnabled_);
+    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::NONE);
+    EXPECT_TRUE(webPattern->isEmbedModeEnabled_);
     webPattern->layoutMode_ = WebLayoutMode::FIT_CONTENT;
     webPattern->OnZoomAccessEnabledUpdate(value);
-    ASSERT_EQ(webPattern->layoutMode_, WebLayoutMode::FIT_CONTENT);
+    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::FIT_CONTENT);
 #endif
 }
 
@@ -1031,11 +1032,11 @@ HWTEST_F(WebPatternWebTest, OnInitialScaleUpdate, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
@@ -1045,11 +1046,11 @@ HWTEST_F(WebPatternWebTest, OnInitialScaleUpdate, TestSize.Level1)
     webPattern->isEmbedModeEnabled_ = true;
     float value = 1.0;
     webPattern->OnInitialScaleUpdate(value);
-    ASSERT_EQ(webPattern->layoutMode_, WebLayoutMode::NONE);
-    ASSERT_TRUE(webPattern->isEmbedModeEnabled_);
+    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::NONE);
+    EXPECT_TRUE(webPattern->isEmbedModeEnabled_);
     webPattern->layoutMode_ = WebLayoutMode::FIT_CONTENT;
     webPattern->OnInitialScaleUpdate(value);
-    ASSERT_EQ(webPattern->layoutMode_, WebLayoutMode::FIT_CONTENT);
+    EXPECT_EQ(webPattern->layoutMode_, WebLayoutMode::FIT_CONTENT);
 #endif
 }
 
@@ -1062,11 +1063,11 @@ HWTEST_F(WebPatternWebTest, WebPatternTest, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
+    ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto expand = std::make_unique<SafeAreaExpandOpts>();
     expand->type = SAFE_AREA_TYPE_SYSTEM;
@@ -1078,9 +1079,9 @@ HWTEST_F(WebPatternWebTest, WebPatternTest, TestSize.Level1)
     reder->retf = rec;
     frameNode->renderContext_ = reder;
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
+    ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
-    EXPECT_NE(webPattern->delegate_, nullptr);
+    ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->isInWindowDrag_ = true;
     webPattern->isKeyboardInSafeArea_ = true;
     Size size(1.0, 1.0);
@@ -1125,7 +1126,7 @@ HWTEST_F(WebPatternWebTest, UpdateWebLayoutSize, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     webPattern->UpdateWebLayoutSize(10, 10, true, true);
-    ASSERT_TRUE(webPattern->delegate_->ShouldVirtualKeyboardOverlay());
+    EXPECT_TRUE(webPattern->delegate_->ShouldVirtualKeyboardOverlay());
 #endif
 }
 
@@ -1151,8 +1152,9 @@ HWTEST_F(WebPatternWebTest, HandleTouchDown, TestSize.Level1)
     info.changedTouches_.push_back(touchInfo);
     webPattern->HandleTouchDown(info, false);
     webPattern->overlayCreating_ = true;
+    webPattern->UpdateNativeEmbedModeEnabled(true);
     webPattern->HandleTouchDown(info, true);
-    ASSERT_FALSE(webPattern->isTouchUpEvent_);
+    EXPECT_FALSE(webPattern->isTouchUpEvent_);
 #endif
 }
 
@@ -1181,7 +1183,7 @@ HWTEST_F(WebPatternWebTest, HandleTouchUp, TestSize.Level1)
     webPattern->HandleTouchUp(info, true);
     webPattern->imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::IMAGE);
     webPattern->HandleTouchUp(info, false);
-    ASSERT_FALSE(webPattern->overlayCreating_);
+    EXPECT_FALSE(webPattern->overlayCreating_);
 #endif
 }
 
@@ -1214,7 +1216,233 @@ HWTEST_F(WebPatternWebTest, HandleTouchMove, TestSize.Level1)
     webPattern->HandleTouchMove(info, true);
     manager->isDragged_ = true;
     webPattern->HandleTouchMove(info, true);
-    EXPECT_EQ(webPattern->imageAnalyzerManager_, nullptr);
+    ASSERT_EQ(webPattern->imageAnalyzerManager_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: OnSelectHandleStart
+ * @tc.desc: OnSelectHandleStart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnSelectHandleStart, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    MockPipelineContext::SetUp();
+    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(10);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto manager = pipeline->GetSelectOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    SelectOverlayInfo info;
+    info.isSingleHandle = false;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
+    auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    manager->selectOverlayItem_ = selectOverlayNode;
+    auto current = manager->selectOverlayItem_.Upgrade();
+    ASSERT_NE(current, nullptr);
+    webPattern->selectOverlayProxy_->selectOverlayId_ = current->GetId();
+    manager->selectContentManager_ = AceType::MakeRefPtr<SelectContentOverlayManager>(frameNode);
+    manager->GetSelectOverlayNode(webPattern->selectOverlayProxy_->GetSelectOverlayId());
+    webPattern->OnSelectHandleStart(true);
+    webPattern->overlayCreating_ = true;
+    webPattern->UpdateNativeEmbedModeEnabled(true);
+    webPattern->OnSelectHandleStart(false);
+    MockPipelineContext::TearDown();
+    ASSERT_EQ(webPattern->imageAnalyzerManager_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: HandleTouchCancel
+ * @tc.desc: HandleTouchCancel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, HandleTouchCancel, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    RefPtr<UINode> son = frameNode;
+    RefPtr<UINode> parent =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    RefPtr<UINode> grandParent =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    parent->exportTextureInfo_ = AceType::MakeRefPtr<ExportTextureInfo>();
+    grandParent->exportTextureInfo_ = AceType::MakeRefPtr<ExportTextureInfo>();
+    parent->exportTextureInfo_->SetCurrentRenderType(NodeRenderType::RENDER_TYPE_DISPLAY);
+    grandParent->exportTextureInfo_->SetCurrentRenderType(NodeRenderType::RENDER_TYPE_TEXTURE);
+    son->SetParent(parent);
+    parent->SetParent(grandParent);
+    TouchEventInfo info("info");
+    webPattern->HandleTouchCancel(info);
+    EXPECT_TRUE(webPattern->isTouchUpEvent_);
+#endif
+}
+
+/**
+ * @tc.name: CloseSelectOverlay
+ * @tc.desc: CloseSelectOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, CloseSelectOverlay, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
+    webPattern->CloseSelectOverlay();
+    ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: HandleKeyEvent_001
+ * @tc.desc: HandleKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, HandleKeyEvent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern, nullptr);
+    auto webEventhub = frameNode->GetEventHub<WebEventHub>();
+    webEventhub->SetOnKeyEvent([](KeyEventInfo& keyEventInfo) { std::cout << "onkeyevent" << std::endl; });
+    std::vector<KeyCode> code;
+    code.push_back(KeyCode::KEY_HOME);
+    std::vector<uint8_t> enhanceData;
+    enhanceData.push_back(100);
+    TimeStamp timeStamp;
+    KeyEvent keuEvent(KeyCode::KEY_HOME, KeyAction::DOWN, code, 1, timeStamp, 1, 1, SourceType::KEYBOARD, enhanceData);
+    bool flag = webPattern->HandleKeyEvent(keuEvent);
+    EXPECT_FALSE(flag);
+#endif
+}
+
+/**
+ * @tc.name: HandleKeyEvent_002
+ * @tc.desc: HandleKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, HandleKeyEvent_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern, nullptr);
+    auto webEventhub = frameNode->GetEventHub<WebEventHub>();
+    webEventhub->SetOnPreKeyEvent([](KeyEventInfo& keyEventInfo) {
+        std::cout << "onPrekeyevent" << std::endl;
+        return true;
+    });
+    std::vector<KeyCode> code;
+    code.push_back(KeyCode::KEY_HOME);
+    std::vector<uint8_t> enhanceData;
+    enhanceData.push_back(100);
+    TimeStamp timeStamp;
+    KeyEvent keuEvent(KeyCode::KEY_HOME, KeyAction::DOWN, code, 1, timeStamp, 1, 1, SourceType::KEYBOARD, enhanceData);
+    bool flag = webPattern->HandleKeyEvent(keuEvent);
+    EXPECT_TRUE(flag);
+#endif
+}
+
+/**
+ * @tc.name: HandleKeyEvent_003
+ * @tc.desc: HandleKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, HandleKeyEvent_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern, nullptr);
+    auto webEventhub = frameNode->GetEventHub<WebEventHub>();
+    webEventhub->SetOnPreKeyEvent([](KeyEventInfo& keyEventInfo) {
+        std::cout << "onPrekeyevent" << std::endl;
+        return false;
+    });
+    std::vector<KeyCode> code;
+    code.push_back(KeyCode::KEY_HOME);
+    std::vector<uint8_t> enhanceData;
+    enhanceData.push_back(100);
+    TimeStamp timeStamp;
+    KeyEvent keuEvent(KeyCode::KEY_HOME, KeyAction::DOWN, code, 1, timeStamp, 1, 1, SourceType::KEYBOARD, enhanceData);
+    bool flag = webPattern->HandleKeyEvent(keuEvent);
+    EXPECT_FALSE(flag);
+#endif
+}
+
+/**
+ * @tc.name: OnModifyDoneNodestatus
+ * @tc.desc: OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternWebTest, OnModifyDoneNodestatus, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    stack->SetIsBuilderNode(true);
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    RefPtr<UINode> son = frameNode;
+    son->SetParent(son);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern, nullptr);
+    EXPECT_TRUE(webPattern->offlineWebInited_);
 #endif
 }
 } // namespace OHOS::Ace::NG
