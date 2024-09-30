@@ -15,11 +15,6 @@
 
 #include "base/geometry/dimension.h"
 
-#include <array>
-#include <functional>
-
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {

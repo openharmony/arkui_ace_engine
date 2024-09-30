@@ -20,16 +20,7 @@
 #else
 #include "securec.h"
 #endif
-#include <algorithm>
-#include <functional>
 #include <regex>
-#include <string>
-#include <type_traits>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
-#include "base/log/log.h"
 #include "base/utils/string_utils.h"
 
 namespace OHOS::Ace {

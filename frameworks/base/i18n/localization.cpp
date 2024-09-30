@@ -15,43 +15,17 @@
 
 #include "base/i18n/localization.h"
 
-#include <cstddef>
-#include <cstring>
-#include <map>
-#include <type_traits>
-#include <unordered_map>
-#include <utility>
-
 #include "chnsecal.h"
-#include "unicode/calendar.h"
-#include "unicode/datefmt.h"
 #include "unicode/dtfmtsym.h"
 #include "unicode/dtptngen.h"
-#include "unicode/fieldpos.h"
-#include "unicode/fmtable.h"
-#include "unicode/locid.h"
 #include "unicode/measfmt.h"
-#include "unicode/measunit.h"
-#include "unicode/measure.h"
 #include "unicode/numberformatter.h"
-#include "unicode/plurrule.h"
 #include "unicode/reldatefmt.h"
 #include "unicode/smpdtfmt.h"
-#include "unicode/stringpiece.h"
-#include "unicode/ucal.h"
-#include "unicode/unistr.h"
-#include "unicode/upluralrules.h"
-#include "unicode/ureldatefmt.h"
-#include "unicode/utypes.h"
-#include "unicode/uversion.h"
-
 #include "date_time_sequence.h"
 #include "base/json/json_util.h"
-#include "base/log/log.h"
 #include "base/resource/internal_resource.h"
-#include "base/utils/linear_map.h"
 #include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 

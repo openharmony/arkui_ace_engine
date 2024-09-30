@@ -14,7 +14,6 @@
  */
 
 #include "core/common/ace_application_info.h"
-#include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 
 #define LIKELY(x) __builtin_expect(!!(x), 1)

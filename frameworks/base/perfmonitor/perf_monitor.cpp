@@ -12,16 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <sys/time.h>
 
 #include "base/perfmonitor/perf_monitor.h"
 
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
-#include "base/log/jank_frame_report.h"
-#include "base/log/log.h"
 #include "base/perfmonitor/perf_constants.h"
-#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
 
