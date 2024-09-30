@@ -77,16 +77,24 @@ void RowModelNG::SetIsReverse(FrameNode* frameNode, bool isReverse)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse, frameNode);
 }
 
-void RowModelNG::SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign)
+void RowModelNG::SetJustifyContent(FrameNode* frameNode, const std::optional<FlexAlign>& flexAlign)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign, frameNode);
+    if (flexAlign.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, frameNode);
+    }
 }
 
-void RowModelNG::SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign)
+void RowModelNG::SetAlignItems(FrameNode* frameNode, const std::optional<FlexAlign>& flexAlign)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign, frameNode);
+    if (flexAlign.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, frameNode);
+    }
 }
 
 FlexAlign RowModelNG::GetJustifyContent(FrameNode* frameNode)

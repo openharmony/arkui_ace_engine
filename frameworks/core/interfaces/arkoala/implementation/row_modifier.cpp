@@ -28,6 +28,30 @@ struct RowOptions {
 }
 
 namespace Converter {
+ template<>
+void AssignCast(std::optional<FlexAlign>& dst, const Ark_VerticalAlign& src)
+{
+    switch (src) {
+        case ARK_VERTICAL_ALIGN_TOP: dst = FlexAlign::FLEX_START; break;
+        case ARK_VERTICAL_ALIGN_CENTER: dst = FlexAlign::CENTER; break;
+        case ARK_VERTICAL_ALIGN_BOTTOM: dst = FlexAlign::FLEX_END; break;
+        default: LOGE("Unexpected enum value in Ark_VerticalAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src)
+{
+    switch (src) {
+        case ARK_FLEX_ALIGN_START: dst = FlexAlign::FLEX_START; break;
+        case ARK_FLEX_ALIGN_CENTER: dst = FlexAlign::CENTER; break;
+        case ARK_FLEX_ALIGN_END: dst = FlexAlign::FLEX_END; break;
+        case ARK_FLEX_ALIGN_SPACE_BETWEEN: dst = FlexAlign::SPACE_BETWEEN; break;
+        case ARK_FLEX_ALIGN_SPACE_AROUND: dst = FlexAlign::SPACE_AROUND; break;
+        case ARK_FLEX_ALIGN_SPACE_EVENLY: dst = FlexAlign::SPACE_EVENLY; break;
+        default: LOGE("Unexpected enum value in Ark_FlexAlign: %{public}d", src);
+    }
+}   
 template<>
 RowOptions Convert(const Ark_RowOptions& src)
 {
@@ -54,13 +78,19 @@ void AlignItemsImpl(Ark_NativePointer node,
                     Ark_VerticalAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    RowModelNG::SetAlignItems(frameNode, static_cast<FlexAlign>(value + 1));
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto flexAlign = Converter::OptConvert<FlexAlign>(value);
+    RowModelNG::SetAlignItems(frameNode, flexAlign);
 }
 void JustifyContentImpl(Ark_NativePointer node,
                         Ark_FlexAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    RowModelNG::SetJustifyContent(frameNode, static_cast<FlexAlign>(value));
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto flexAlign = Converter::OptConvert<FlexAlign>(value);
+    RowModelNG::SetJustifyContent(frameNode, flexAlign);
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)

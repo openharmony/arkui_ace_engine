@@ -1,0 +1,271 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <gtest/gtest.h>
+
+#include "modifier_test_base.h"
+#include "modifiers_test_utils.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "arkoala_api_generated.h"
+
+using namespace testing;
+using namespace testing::ext;
+
+namespace OHOS::Ace::NG {
+namespace  {
+    const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
+    const auto ATTRIBUTE_ALIGN_ITEMS_NAME = "alignItems";
+    const auto ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE = "VerticalAlign.Center";
+    const auto ATTRIBUTE_JUSTIFY_CONTENT_NAME = "justifyContent";
+    const auto ATTRIBUTE_JUSTIFY_CONTENT_DEFAULT_VALUE = "FlexAlign.Start";
+    const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_NAME = "lightSource";
+    const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME = "illuminated";
+    const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_POINT_LIGHT_BLOOM_NAME = "bloom";
+    const auto ATTRIBUTE_POINT_LIGHT_BLOOM_DEFAULT_VALUE = "";
+} // namespace
+
+class RowModifierTest : public ModifierTestBase<GENERATED_ArkUIRowModifier, &GENERATED_ArkUINodeModifiers::getRowModifier, GENERATED_ARKUI_ROW> {
+};
+
+// TODO: Process non-options argument in setOptions function
+
+/*
+ * @tc.name: setAlignItemsTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RowModifierTest, setAlignItemsTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE);
+}
+
+// Valid values for attribute 'alignItems' of method 'alignItems'
+static std::vector<std::tuple<std::string, enum Ark_VerticalAlign, std::string>> alignItemsAlignItemsValidValues = {
+    {"ARK_VERTICAL_ALIGN_TOP", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_TOP), "VerticalAlign.TOP"},
+    {"ARK_VERTICAL_ALIGN_CENTER", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_CENTER), "VerticalAlign.CENTER"},
+    {"ARK_VERTICAL_ALIGN_BOTTOM", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_BOTTOM), "VerticalAlign.BOTTOM"},
+};
+
+/*
+ * @tc.name: setAlignItemsTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RowModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    enum Ark_VerticalAlign inputValueAlignItems;
+    enum Ark_VerticalAlign initValueAlignItems;
+
+    // Initial setup
+    initValueAlignItems = std::get<1>(alignItemsAlignItemsValidValues[0]);
+
+
+    // Verifying attribute's  values
+    inputValueAlignItems = initValueAlignItems;
+    for (auto&& value: alignItemsAlignItemsValidValues) {
+        inputValueAlignItems = std::get<1>(value);
+        modifier_->setAlignItems(node_, inputValueAlignItems);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALIGN_ITEMS_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setAlignItemsTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RowModifierTest, setAlignItemsTestInvalidValues, TestSize.Level1)
+{
+}
+
+/*
+ * @tc.name: setJustifyContentTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RowModifierTest, setJustifyContentTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JUSTIFY_CONTENT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_JUSTIFY_CONTENT_DEFAULT_VALUE);
+}
+
+// Valid values for attribute 'justifyContent' of method 'justifyContent'
+static std::vector<std::tuple<std::string, enum Ark_FlexAlign, std::string>> justifyContentJustifyContentValidValues = {
+    {"ARK_FLEX_ALIGN_START", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_START), "FlexAlign.Start"},
+    {"ARK_FLEX_ALIGN_CENTER", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_CENTER), "FlexAlign.Center"},
+    {"ARK_FLEX_ALIGN_END", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_END), "FlexAlign.End"},
+    {"ARK_FLEX_ALIGN_SPACE_BETWEEN", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_SPACE_BETWEEN), "FlexAlign.SpaceBetween"},
+    {"ARK_FLEX_ALIGN_SPACE_AROUND", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_SPACE_AROUND), "FlexAlign.SpaceAround"},
+    {"ARK_FLEX_ALIGN_SPACE_EVENLY", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_SPACE_EVENLY), "FlexAlign.SpaceEvenly"},
+};
+
+/*
+ * @tc.name: setJustifyContentTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    enum Ark_FlexAlign inputValueJustifyContent;
+    enum Ark_FlexAlign initValueJustifyContent;
+
+    // Initial setup
+    initValueJustifyContent = std::get<1>(justifyContentJustifyContentValidValues[0]);
+
+
+    // Verifying attribute's  values
+    inputValueJustifyContent = initValueJustifyContent;
+    for (auto&& value: justifyContentJustifyContentValidValues) {
+        inputValueJustifyContent = std::get<1>(value);
+        modifier_->setJustifyContent(node_, inputValueJustifyContent);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_JUSTIFY_CONTENT_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setJustifyContentTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RowModifierTest, setJustifyContentTestInvalidValues, TestSize.Level1)
+{
+}
+
+/*
+ * @tc.name: setPointLightTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RowModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_DEFAULT_VALUE);
+
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_DEFAULT_VALUE);
+
+    resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_BLOOM_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_BLOOM_DEFAULT_VALUE);
+}
+
+// Valid values for attribute 'lightSource' of method 'pointLight'
+static std::vector<std::tuple<std::string, Opt_LightSource, std::string>> pointLightLightSourceValidValues = {
+};
+
+// Valid values for attribute 'illuminated' of method 'pointLight'
+static std::vector<std::tuple<std::string, Opt_IlluminatedType, std::string>> pointLightIlluminatedValidValues = {
+    {"ARK_ILLUMINATED_TYPE_NONE", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_NONE), "IlluminatedType.NONE"},
+    {"ARK_ILLUMINATED_TYPE_BORDER", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER), "IlluminatedType.BORDER"},
+    {"ARK_ILLUMINATED_TYPE_CONTENT", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_CONTENT), "IlluminatedType.CONTENT"},
+    {"ARK_ILLUMINATED_TYPE_BORDER_CONTENT", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER_CONTENT), "IlluminatedType.BORDER_CONTENT"},
+    {"ARK_ILLUMINATED_TYPE_BLOOM_BORDER", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BLOOM_BORDER), "IlluminatedType.BLOOM_BORDER"},
+    {"ARK_ILLUMINATED_TYPE_BLOOM_BORDER_CONTENT", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BLOOM_BORDER_CONTENT), "IlluminatedType.BLOOM_BORDER_CONTENT"},
+};
+
+// Valid values for attribute 'bloom' of method 'pointLight'
+static std::vector<std::tuple<std::string, Opt_Number, std::string>> pointLightBloomValidValues = {
+};
+
+/*
+ * @tc.name: setPointLightTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RowModifierTest, setPointLightTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultPointLight;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_PointLightStyle inputValuePointLight;
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    // TODO: Add processing for substructures!
+    initValuePointLight.illuminated = std::get<1>(pointLightIlluminatedValidValues[0]);
+    initValuePointLight.bloom = std::get<1>(pointLightBloomValidValues[0]);
+
+
+    // Verifying attribute's 'lightSource'  values
+    inputValuePointLight = initValuePointLight;
+    for (auto&& value: pointLightLightSourceValidValues) {
+        inputValuePointLight.lightSource = std::get<1>(value);
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        jsonValue = GetJsonValue(node_);
+        resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+
+    // Verifying attribute's 'illuminated'  values
+    inputValuePointLight = initValuePointLight;
+    for (auto&& value: pointLightIlluminatedValidValues) {
+        inputValuePointLight.illuminated = std::get<1>(value);
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        jsonValue = GetJsonValue(node_);
+        resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+
+    // Verifying attribute's 'bloom'  values
+    inputValuePointLight = initValuePointLight;
+    for (auto&& value: pointLightBloomValidValues) {
+        inputValuePointLight.bloom = std::get<1>(value);
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        jsonValue = GetJsonValue(node_);
+        resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_BLOOM_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setPointLightTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RowModifierTest, setPointLightTestInvalidValues, TestSize.Level1)
+{
+}
+} // namespace OHOS::Ace::NG
