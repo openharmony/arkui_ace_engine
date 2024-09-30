@@ -44,9 +44,16 @@ public:
         endPercent_ = endPercent;
     }
 
+protected:
     void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext);
 
-protected:
+    /**
+     * @brief Try to set content clip to render context.
+     *
+     * @return true if content clip is set up
+     */
+    static bool TryContentClip(PaintWrapper* wrapper);
+
     bool vertical_ = false;
     bool isReverse_ = false;
     bool isVerticalReverse_ = false;
