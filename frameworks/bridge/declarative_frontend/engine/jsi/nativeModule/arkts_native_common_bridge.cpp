@@ -7293,7 +7293,7 @@ ArkUINativeModuleValue CommonBridge::AddGestureGroup(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    int32_t mode = 2;
+    int32_t mode = 0;
     GetGestureModeValue(runtimeCallInfo, mode, NUM_2);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createGestureGroup(mode);
     SetGestureTag(runtimeCallInfo, NUM_0, gesture);
