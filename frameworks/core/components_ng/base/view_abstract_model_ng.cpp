@@ -656,23 +656,32 @@ void ViewAbstractModelNG::SetAccessibilityVirtualNode(std::function<void()>&& bu
     accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
 }
 
-void ViewAbstractModelNG::SetAccessibilitySelected(bool selected)
+void ViewAbstractModelNG::SetAccessibilitySelected(bool selected, bool resetValue)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetUserSelected(selected);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserSelected();
+    } else {
+        accessibilityProperty->SetUserSelected(selected);
+    }
 }
 
-void ViewAbstractModelNG::SetAccessibilityChecked(bool checked)
+void ViewAbstractModelNG::SetAccessibilityChecked(bool checked, bool resetValue)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetUserCheckedType(checked);
-    accessibilityProperty->SetUserCheckable(true);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserCheckedType();
+        accessibilityProperty->ResetUserCheckable();
+    } else {
+        accessibilityProperty->SetUserCheckedType(checked);
+        accessibilityProperty->SetUserCheckable(true);
+    }
 }
 
 void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
@@ -723,21 +732,30 @@ std::string ViewAbstractModelNG::GetAccessibilityImportance(FrameNode* frameNode
     return accessibilityProperty->GetAccessibilityLevel();
 }
 
-void ViewAbstractModelNG::SetAccessibilitySelected(FrameNode* frameNode, bool selected)
+void ViewAbstractModelNG::SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue)
 {
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetUserSelected(selected);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserSelected();
+    } else {
+        accessibilityProperty->SetUserSelected(selected);
+    }
 }
 
-void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool checked)
+void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue)
 {
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetUserCheckedType(checked);
-    accessibilityProperty->SetUserCheckable(true);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserCheckedType();
+        accessibilityProperty->ResetUserCheckable();
+    } else {
+        accessibilityProperty->SetUserCheckedType(checked);
+        accessibilityProperty->SetUserCheckable(true);
+    }
 }
 
 } // namespace OHOS::Ace::NG

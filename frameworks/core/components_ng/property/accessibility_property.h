@@ -688,10 +688,12 @@ public:
     void SetUserSelected(const bool& isSelected);
     bool HasUserSelected();
     bool IsUserSelected();
+    void ResetUserSelected();
 
     void SetUserCheckedType(const int32_t& checkedType);
     bool HasUserCheckedType();
     int32_t GetUserCheckedType();
+    void ResetUserCheckedType();
 
     void SetUserMinValue(const int32_t& minValue);
     bool HasUserMinValue();
@@ -712,6 +714,7 @@ public:
     void SetUserCheckable(const bool& checkable);
     bool HasUserCheckable();
     bool IsUserCheckable();
+    void ResetUserCheckable();
 
 private:
     // node should be not-null
