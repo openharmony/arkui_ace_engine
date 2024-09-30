@@ -1284,10 +1284,6 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
     if (dragDropManager->IsDragged()) {
         dragDropProxy_->OnDragMove(info);
     }
-    if (IsNeedSwitchToSubWindow()) {
-        PointerEvent pointerEvent = PointerEvent(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-        dragDropManager->DoDragMoveAnimate(pointerEvent);
-    }
 }
 
 void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
