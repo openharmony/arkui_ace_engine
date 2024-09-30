@@ -1106,7 +1106,21 @@ void VideoPattern::OnRebuildFrame()
     auto column = AceType::DynamicCast<FrameNode>(video->GetMediaColumn());
     CHECK_NULL_VOID(column);
     auto renderContext = column->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     renderContext->AddChild(renderContextForMediaPlayer_, 0);
+}
+
+void VideoPattern::RemoveMediaPlayerSurfaceNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto video = AceType::DynamicCast<VideoNode>(host);
+    CHECK_NULL_VOID(video);
+    auto column = AceType::DynamicCast<FrameNode>(video->GetMediaColumn());
+    CHECK_NULL_VOID(column);
+    auto renderContext = column->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->RemoveChild(renderContextForMediaPlayer_);
 }
 
 bool VideoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
