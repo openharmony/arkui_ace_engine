@@ -204,9 +204,9 @@ void SystemWindowScene::RegisterEventCallback()
     session_->SetNotifySystemSessionPointerEventFunc(std::move(pointerEventCallback));
     auto keyEventCallback = [weakThis = WeakClaim(this), instanceId = instanceId_](
         std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent) -> bool {
-        CHECK_NULL_RETURN(keyEvent,false);
+        CHECK_NULL_RETURN(keyEvent, false);
         auto self = weakThis.Upgrade();
-        CHECK_NULL_RETURN(self,false);
+        CHECK_NULL_RETURN(self, false);
         ContainerScope Scope(instanceId);
         return WindowSceneHelper::InjectKeyEvent(keyEvent, isPreImeEvent);
     };
