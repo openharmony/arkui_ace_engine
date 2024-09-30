@@ -1280,6 +1280,7 @@ private:
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     void UpdateImagePreviewParam();
     void UpdateImagePreviewParam(const RefPtr<ImageSpanNode>& imageNode);
+    void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
