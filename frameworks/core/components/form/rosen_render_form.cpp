@@ -15,8 +15,6 @@
 
 #include "core/components/form/rosen_render_form.h"
 
-#include "render_service_client/core/ui/rs_node.h"
-
 #include "core/components/form/render_form.h"
 #include "core/pipeline/base/render_node.h"
 

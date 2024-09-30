@@ -15,12 +15,6 @@
 
 #include "core/components/gesture_listener/render_gesture_listener.h"
 
-#include "base/geometry/rect.h"
-#include "core/components/box/render_box.h"
-#include "core/components/gesture_listener/gesture_listener_component.h"
-#include "core/components/root/render_root.h"
-#include "core/event/ace_event_helper.h"
-#include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 
 namespace OHOS::Ace {

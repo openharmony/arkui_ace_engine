@@ -18,7 +18,6 @@
 #include "core/components/list/list_element.h"
 #include "core/components/list/list_item_group_component.h"
 #include "core/components/proxy/render_item_proxy.h"
-#include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {
 

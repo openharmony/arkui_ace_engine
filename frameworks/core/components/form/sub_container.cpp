@@ -15,8 +15,6 @@
 
 #include "core/components/form/sub_container.h"
 
-#include <cstdint>
-
 #include "ashmem.h"
 
 #include "adapter/ohos/entrance/utils.h"
@@ -29,7 +27,6 @@
 #include "frameworks/core/components/form/form_element.h"
 #include "frameworks/core/components/form/form_window.h"
 #include "frameworks/core/components/form/render_form.h"
-#include "frameworks/core/components/transform/transform_element.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -15,8 +15,6 @@
 
 #include "core/components/remote_window/render_remote_window.h"
 
-#include "core/components/remote_window/remote_window_component.h"
-
 namespace OHOS::Ace {
 void RenderRemoteWindow::Update(const RefPtr<Component>& component)
 {

@@ -15,8 +15,6 @@
 
 #include "core/components/root/root_element.h"
 
-#include "base/log/log.h"
-#include "base/utils/utils.h"
 #include "core/components/container_modal/container_modal_element.h"
 #include "core/components/dialog_modal/dialog_modal_element.h"
 #include "core/components/root/render_root.h"

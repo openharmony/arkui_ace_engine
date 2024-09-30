@@ -15,15 +15,11 @@
 
 #include "core/components/navigation_bar/navigation_bar_component_v2.h"
 
-#include "base/utils/system_properties.h"
 #include "core/components/display/display_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/navigation_bar/navigation_bar_element.h"
 #include "core/components/padding/padding_component.h"
-#include "core/components/stack/stack_component.h"
 #include "core/components/transform/transform_component.h"
-#include "core/event/ace_event_helper.h"
-#include "core/gestures/click_recognizer.h"
 
 namespace OHOS::Ace {
 namespace {
