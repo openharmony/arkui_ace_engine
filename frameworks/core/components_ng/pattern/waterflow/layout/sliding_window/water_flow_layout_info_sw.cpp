@@ -614,7 +614,7 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
         // move old lanes_[prevSegIdx,...] to Lanes_[curSegIdx,...]
         if (n <= lanes_.size()) {
             // means curSegIdx <= prevSegIdx
-            for (size_t i = static_cast<size_t>(start); i < curSegIdx; ++i) {
+            for (size_t i = 0; i < curSegIdx; ++i) {
                 lanes_[i] = std::vector<Lane>(sections[i].crossCount.value_or(1));
             }
             for (size_t i = curSegIdx; i < n; ++i) {
@@ -628,12 +628,14 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
             for (size_t i = n - 1; i >= curSegIdx; i--) {
                 lanes_[i] = lanes_[oriSize--];
             }
-            for (size_t i = static_cast<size_t>(start); i < curSegIdx; ++i) {
+            for (size_t i = 0; i < curSegIdx; ++i) {
                 lanes_[i] = std::vector<Lane>(sections[i].crossCount.value_or(1));
             }
         }
         margins_.clear();
         return true;
+    } else {
+        newStartIndex_ = INVALID_NEW_START_INDEX;
     }
     return false;
 }
@@ -658,7 +660,8 @@ void WaterFlowLayoutInfoSW::NotifyDataChange(int32_t index, int32_t count)
         return;
     }
     // 更新的index是否在newStartIndex_上方、是否会影响newStartIndex_
-    if (index >= newStartIndex_ || (count < 0 && newStartIndex_ <= index - count - 1)) {
+    if ((count == 0 && newStartIndex_ <= index) || (count > 0 && newStartIndex_ < index) ||
+        (count < 0 && newStartIndex_ <= index - count - 1)) {
         newStartIndex_ = INVALID_NEW_START_INDEX;
         return;
     }
@@ -677,6 +680,8 @@ void WaterFlowLayoutInfoSW::UpdateLanesIndex(int32_t updateIdx)
             }
         }
     }
+    startIndex_ = StartIndex();
+    endIndex_ = EndIndex();
 }
 
 void WaterFlowLayoutInfoSW::BeginCacheUpdate()
