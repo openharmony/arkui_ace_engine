@@ -196,9 +196,12 @@ void PlatformPattern::HandleTouchEvent(const TouchEventInfo& info)
     CHECK_NULL_VOID(pipeline);
     Platform::CalculatePointerEvent(pointerEvent, host);
     AceExtraInputData::InsertInterpolatePoints(info);
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
+    const auto& changedTouches = info.GetChangedTouches();
+    if (!changedTouches.empty() && changedTouches.back().GetTouchType() == TouchType::DOWN) {
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocusImmediately();
+    }
     DispatchPointerEvent(pointerEvent);
 }
 
