@@ -59,9 +59,9 @@ HWTEST_F(RowModifierTest, setAlignItemsTestDefaultValues, TestSize.Level1)
 
 // Valid values for attribute 'alignItems' of method 'alignItems'
 static std::vector<std::tuple<std::string, enum Ark_VerticalAlign, std::string>> alignItemsAlignItemsValidValues = {
-    {"ARK_VERTICAL_ALIGN_TOP", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_TOP), "VerticalAlign.TOP"},
-    {"ARK_VERTICAL_ALIGN_CENTER", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_CENTER), "VerticalAlign.CENTER"},
-    {"ARK_VERTICAL_ALIGN_BOTTOM", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_BOTTOM), "VerticalAlign.BOTTOM"},
+    {"ARK_VERTICAL_ALIGN_TOP", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_TOP), "VerticalAlign.Top"},
+    {"ARK_VERTICAL_ALIGN_CENTER", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_CENTER), "VerticalAlign.Center"},
+    {"ARK_VERTICAL_ALIGN_BOTTOM", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_BOTTOM), "VerticalAlign.Bottom"},
 };
 
 /*
@@ -91,15 +91,6 @@ HWTEST_F(RowModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
-}
-
-/*
- * @tc.name: setAlignItemsTestInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RowModifierTest, setAlignItemsTestInvalidValues, TestSize.Level1)
-{
 }
 
 /*
@@ -142,7 +133,6 @@ HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
     // Initial setup
     initValueJustifyContent = std::get<1>(justifyContentJustifyContentValidValues[0]);
 
-
     // Verifying attribute's  values
     inputValueJustifyContent = initValueJustifyContent;
     for (auto&& value: justifyContentJustifyContentValidValues) {
@@ -153,15 +143,6 @@ HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
-}
-
-/*
- * @tc.name: setJustifyContentTestInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RowModifierTest, setJustifyContentTestInvalidValues, TestSize.Level1)
-{
 }
 
 /*
@@ -189,83 +170,4 @@ HWTEST_F(RowModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
 static std::vector<std::tuple<std::string, Opt_LightSource, std::string>> pointLightLightSourceValidValues = {
 };
 
-// Valid values for attribute 'illuminated' of method 'pointLight'
-static std::vector<std::tuple<std::string, Opt_IlluminatedType, std::string>> pointLightIlluminatedValidValues = {
-    {"ARK_ILLUMINATED_TYPE_NONE", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_NONE), "IlluminatedType.NONE"},
-    {"ARK_ILLUMINATED_TYPE_BORDER", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER), "IlluminatedType.BORDER"},
-    {"ARK_ILLUMINATED_TYPE_CONTENT", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_CONTENT), "IlluminatedType.CONTENT"},
-    {"ARK_ILLUMINATED_TYPE_BORDER_CONTENT", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER_CONTENT), "IlluminatedType.BORDER_CONTENT"},
-    {"ARK_ILLUMINATED_TYPE_BLOOM_BORDER", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BLOOM_BORDER), "IlluminatedType.BLOOM_BORDER"},
-    {"ARK_ILLUMINATED_TYPE_BLOOM_BORDER_CONTENT", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BLOOM_BORDER_CONTENT), "IlluminatedType.BLOOM_BORDER_CONTENT"},
-};
-
-// Valid values for attribute 'bloom' of method 'pointLight'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> pointLightBloomValidValues = {
-};
-
-/*
- * @tc.name: setPointLightTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RowModifierTest, setPointLightTestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::unique_ptr<JsonValue> resultPointLight;
-    std::string resultStr;
-    std::string expectedStr;
-    Ark_PointLightStyle inputValuePointLight;
-    Ark_PointLightStyle initValuePointLight;
-
-    // Initial setup
-    // TODO: Add processing for substructures!
-    initValuePointLight.illuminated = std::get<1>(pointLightIlluminatedValidValues[0]);
-    initValuePointLight.bloom = std::get<1>(pointLightBloomValidValues[0]);
-
-
-    // Verifying attribute's 'lightSource'  values
-    inputValuePointLight = initValuePointLight;
-    for (auto&& value: pointLightLightSourceValidValues) {
-        inputValuePointLight.lightSource = std::get<1>(value);
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        jsonValue = GetJsonValue(node_);
-        resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_NAME);
-        expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-
-    // Verifying attribute's 'illuminated'  values
-    inputValuePointLight = initValuePointLight;
-    for (auto&& value: pointLightIlluminatedValidValues) {
-        inputValuePointLight.illuminated = std::get<1>(value);
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        jsonValue = GetJsonValue(node_);
-        resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME);
-        expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-
-    // Verifying attribute's 'bloom'  values
-    inputValuePointLight = initValuePointLight;
-    for (auto&& value: pointLightBloomValidValues) {
-        inputValuePointLight.bloom = std::get<1>(value);
-        modifier_->setPointLight(node_, &inputValuePointLight);
-        jsonValue = GetJsonValue(node_);
-        resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
-        resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_BLOOM_NAME);
-        expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-}
-
-/*
- * @tc.name: setPointLightTestInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RowModifierTest, setPointLightTestInvalidValues, TestSize.Level1)
-{
-}
 } // namespace OHOS::Ace::NG

@@ -91,9 +91,9 @@ void RowModelNG::SetAlignItems(FrameNode* frameNode, const std::optional<FlexAli
 {
     CHECK_NULL_VOID(frameNode);
     if (flexAlign.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, flexAlign.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign.value(), frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, MainAxisAlign, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, frameNode);
     }
 }
 
