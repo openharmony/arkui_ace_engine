@@ -57,10 +57,10 @@ const auto EXPECTED_FONT_STYLE = "FontStyle.Italic";
 const auto SELECTED_INDEX = ArkUnion<Union_Number_Resource, Ark_Number>(1);
 const auto INVALID_INDEX = ArkUnion<Union_Number_Resource, Ark_Number>(-1);
 
-const std::vector<SelectParam> SELECT_PARAMS = {
-    { .text = "Option A" },
-    { .text = "Option B" },
-    { .text = "Option C" }
+const std::vector<Ark_SelectOption> SELECT_PARAMS = {
+    { .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option A") },
+    { .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option B") },
+    { .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option C") },
 };
 
 // length values
@@ -92,8 +92,16 @@ const auto FONT_FAMILY("family");
 const auto FONT_WEIGHT("weight");
 const auto FONT_STYLE("style");
 
-const auto RES_NAME = "Family resource name";
-const auto RES_VALUE = "FontFamilyA,FontFamilyB,FontFamilyC";
+const auto FONT_FAMILY_RES_NAME = "Family resource name";
+const auto FONT_FAMILY_RES_VALUE = "FontFamilyA,FontFamilyB,   FontFamilyC";
+
+const auto VALUE_RES_NAME = "Value resource name";
+const auto VALUE_RES_VALUE = "Select value";
+
+const auto OPTIONS_VALUE_RES_NAME = "SelectOption value resource name";
+const auto OPTIONS_VALUE_RES_VALUE = "SelectOption value";
+const auto OPTIONS_ICON_RES_NAME = "SelectOption icon resource name";
+const auto OPTIONS_ICON_RES_VALUE = "SelectOption icon";
 
 using FontTestStep = std::tuple<Ark_Font, std::string>;
 
@@ -165,13 +173,13 @@ std::vector<FontTestStep> getFontFamilyTestPlan()
     const auto familyStr1 = "Family string value";
 
     // static keyword is reqired because a pointer to this variable is stored in testPlan
-    static auto arkResName = ArkValue<Ark_String>(RES_NAME);
+    static auto arkResName = ArkValue<Ark_String>(FONT_FAMILY_RES_NAME);
 
     Ark_Resource familyResource = ArkRes(&arkResName, -1, NodeModifier::ResourceType::STRING);
 
     const std::vector<FontTestStep> testPlan = {
         { { .family = ArkUnion<Opt_Union_String_Resource, Ark_String>(familyStr1) }, familyStr1 },
-        { { .family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(familyResource) }, RES_VALUE },
+        { { .family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(familyResource) }, FONT_FAMILY_RES_VALUE },
         { { .family = ArkValue<Opt_Union_String_Resource>(Ark_Empty()) }, DEFAULT_FONT_FAMILY },
     };
     return testPlan;
@@ -216,6 +224,13 @@ const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
     static const GENERATED_ArkUIEventsAPI eventsImpl = { .getSelectEventsReceiver = getSelectEventsReceiverTest };
     return &eventsImpl;
 };
+
+float strToFloat(const std::string& str)
+{
+    char* ptr = nullptr;
+    float result = strtof(str.c_str(), &ptr);
+    return (ptr == str.c_str()) ? std::numeric_limits<float>::min() : result;
+}
 } // namespace
 
 class SelectModifierTest : public ModifierTestBase<GENERATED_ArkUISelectModifier,
@@ -237,7 +252,10 @@ public:
         SetupTheme<TextTheme>();
         SetupTheme<IconTheme>();
 
-        AddResource(RES_NAME, RES_VALUE);
+        AddResource(FONT_FAMILY_RES_NAME, FONT_FAMILY_RES_VALUE);
+        AddResource(VALUE_RES_NAME, VALUE_RES_VALUE);
+        AddResource(OPTIONS_VALUE_RES_NAME, OPTIONS_VALUE_RES_VALUE);
+        AddResource(OPTIONS_ICON_RES_NAME, OPTIONS_ICON_RES_VALUE);
 
         fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
@@ -245,13 +263,23 @@ public:
     void SetUp(void) override
     {
         ModifierTestBase::SetUp();
+
+        ASSERT_NE(modifier_->setSelectOptions, nullptr);
+        auto arrayHolder = ArkArrayHolder<Array_SelectOption>(SELECT_PARAMS);
+        auto arkArray = arrayHolder.ArkValue();
+        modifier_->setSelectOptions(node_, &arkArray);
+
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
-        if (frameNode) {
-            SelectModelNG::InitSelect(frameNode, SELECT_PARAMS);
-            auto selectPattern = frameNode->GetPatternPtr<SelectPattern>();
-            std::vector<RefPtr<FrameNode>> options = selectPattern->GetOptions();
-            options[0]->GetPattern()->OnModifyDone(); // Init selectTheme
-        }
+        ASSERT_TRUE(frameNode);
+        auto selectPattern = frameNode->GetPatternPtr<SelectPattern>();
+        ASSERT_TRUE(selectPattern);
+        std::vector<RefPtr<FrameNode>> options = selectPattern->GetOptions();
+        ASSERT_FALSE(options.empty());
+        auto optionFrameNode = options[0];
+        ASSERT_TRUE(optionFrameNode);
+        auto pattern = optionFrameNode->GetPattern();
+        ASSERT_TRUE(pattern);
+        pattern->OnModifyDone(); // Init selectTheme
     }
 };
 
@@ -740,7 +768,7 @@ HWTEST_F(SelectModifierTest, setOptionHeightTest, TestSize.Level1)
     for (const auto &[value, expectVal]: OPTION_HEIGHT_TEST_PLAN) {
         modifier_->setOptionHeight(node_, &value);
         auto checkVal = GetStringAttribute(node_, propName);
-        EXPECT_FLOAT_EQ(std::stof(checkVal), expectVal);
+        EXPECT_FLOAT_EQ(strToFloat(checkVal), expectVal);
     }
 }
 
@@ -1128,6 +1156,164 @@ HWTEST_F(SelectModifierTest, setOptionFontTestStyle, TestSize.Level1)
         modifier_->setOptionFont(node_, &font);
         TestFont actual(node_, OPTION_FONT_ATTR);
         EXPECT_EQ(actual.style, expected);
+    }
+}
+
+/**
+ * @tc.name: setValueTest
+ * @tc.desc: Test setValue function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setValueTest, TestSize.Level1)
+{
+    const auto propName = "value";
+    const auto valueStr = "Select value";
+
+    auto arkResName = ArkValue<Ark_String>(VALUE_RES_NAME);
+    Ark_Resource resource = ArkRes(&arkResName, -1, NodeModifier::ResourceType::STRING);
+
+    using TestStep = std::tuple<ResourceStr, std::string>;
+    std::vector<TestStep> testPlan = {
+        { ArkUnion<ResourceStr, Ark_String>(valueStr), valueStr },
+        { ArkUnion<ResourceStr, Ark_Resource>(resource), VALUE_RES_VALUE },
+    };
+
+    ASSERT_NE(modifier_->setValue, nullptr);
+
+    for (const auto &[value, expected]: testPlan) {
+        modifier_->setValue(node_, &value);
+        auto checkedValue = GetStringAttribute(node_, propName);
+        EXPECT_EQ(checkedValue, expected);
+    }
+}
+
+/**
+ * @tc.name: setOptionWidthTest
+ * @tc.desc: Test setOptionWidth function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionWidthTest, TestSize.Level1)
+{
+    const auto optionWidthPropName = "optionWidth";
+    const auto fitTriggerPropName = "optionWidthFitTrigger";
+
+    using LengthPair = std::pair<Ark_Length, float>;
+    const std::vector<LengthPair> testPlan = {
+        { ALEN_PX_POS, 1234.f },
+        { ALEN_PX_NEG, 0.f }, // check negative value
+        { ALEN_VP_NEG, 0.f }, // check negative value
+        { ALEN_VP_POS, 1.234f }
+    };
+
+    using ModePair = std::pair<Ark_OptionWidthMode, bool>;
+    const std::vector<ModePair> fitTriggerTestPlan = {
+        { ARK_OPTION_WIDTH_MODE_FIT_CONTENT, false },
+        { ARK_OPTION_WIDTH_MODE_FIT_TRIGGER, true },
+        { static_cast<Ark_OptionWidthMode>(INT_MIN), false }, // invalid value
+    };
+
+    ASSERT_NE(modifier_->setOptionWidth, nullptr);
+
+    for (const auto &[lengthValue, expectVal]: testPlan) {
+        auto value = ArkUnion<Union_Length_OptionWidthMode, Ark_Length>(lengthValue);
+        modifier_->setOptionWidth(node_, &value);
+        auto checkVal = GetStringAttribute(node_, optionWidthPropName);
+        EXPECT_FLOAT_EQ(strToFloat(checkVal), expectVal);
+    }
+
+    for (const auto &[mode, expectVal]: fitTriggerTestPlan) {
+        auto value = ArkUnion<Union_Length_OptionWidthMode, Ark_OptionWidthMode>(mode);
+        modifier_->setOptionWidth(node_, &value);
+        auto checkVal = GetAttrValue<bool>(node_, fitTriggerPropName);
+        EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setSelectOptionsTestEmpty
+ * @tc.desc: Test setSelectOptions function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectOptionsTestEmpty, TestSize.Level1)
+{
+    const auto propName = "options";
+    ASSERT_NE(modifier_->setSelectOptions, nullptr);
+
+    std::vector<Ark_SelectOption> emptyVec;
+    auto arrayHolder = ArkArrayHolder<Array_SelectOption>(emptyVec);
+    auto arkArray = arrayHolder.ArkValue();
+    modifier_->setSelectOptions(node_, &arkArray);
+
+    auto fullJson = GetJsonValue(node_);
+    auto optionsJson = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    ASSERT_NE(optionsJson, nullptr);
+    auto optionsArray = GetAttrValue<std::unique_ptr<JsonValue>>(optionsJson, propName);
+    ASSERT_NE(optionsArray, nullptr);
+    ASSERT_TRUE(optionsArray->IsArray());
+    ASSERT_EQ(optionsArray->GetArraySize(), 0);
+}
+
+/**
+ * @tc.name: setSelectOptionsTest
+ * @tc.desc: Test setSelectOptions function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectOptionsTest, TestSize.Level1)
+{
+    const auto propName = "options";
+    ASSERT_NE(modifier_->setSelectOptions, nullptr);
+
+    auto arkValueResourceName = ArkValue<Ark_String>(OPTIONS_VALUE_RES_NAME);
+    Ark_Resource valueResource = ArkRes(&arkValueResourceName, -1, NodeModifier::ResourceType::STRING);
+
+    auto arkIconResourceName = ArkValue<Ark_String>(OPTIONS_ICON_RES_NAME);
+    Ark_Resource iconResource = ArkRes(&arkIconResourceName, -1, NodeModifier::ResourceType::STRING);
+
+    const std::vector<Ark_SelectOption> selectOptions = {
+        {
+            .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option P"),
+            .icon = ArkUnion<Opt_ResourceStr, Ark_String>("Icon P")
+        },
+        {
+            .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option Q"),
+            .icon = ArkValue<Opt_ResourceStr>(Ark_Empty())
+        },
+        {
+            .value = ArkUnion<Ark_ResourceStr, Ark_Resource>(valueResource),
+            .icon = ArkUnion<Opt_ResourceStr, Ark_Resource>(iconResource)
+        }
+    };
+
+    auto arrayHolder = ArkArrayHolder<Array_SelectOption>(selectOptions);
+    auto arkArray = arrayHolder.ArkValue();
+    modifier_->setSelectOptions(node_, &arkArray);
+
+    auto fullJson = GetJsonValue(node_);
+    auto optionsJson = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    ASSERT_NE(optionsJson, nullptr);
+    auto optionsArray = GetAttrValue<std::unique_ptr<JsonValue>>(optionsJson, propName);
+    ASSERT_NE(optionsArray, nullptr);
+    ASSERT_TRUE(optionsArray->IsArray());
+    ASSERT_EQ(optionsArray->GetArraySize(), selectOptions.size());
+
+    const std::vector<std::string> aceValue = {
+        "Option P",
+        "Option Q",
+        OPTIONS_VALUE_RES_VALUE
+    };
+
+    const std::vector<std::string> aceIcon = {
+        "Icon P",
+        "",
+        OPTIONS_ICON_RES_VALUE
+    };
+
+    for (size_t i = 0; i < selectOptions.size(); i++) {
+        auto itemJson = optionsArray->GetArrayItem(i);
+        auto checkedValue = GetAttrValue<std::string>(itemJson, "value");
+        EXPECT_EQ(checkedValue, aceValue[i]);
+        auto checkedIcon = GetAttrValue<std::string>(itemJson, "icon");
+        EXPECT_EQ(checkedIcon, aceIcon[i]);
     }
 }
 

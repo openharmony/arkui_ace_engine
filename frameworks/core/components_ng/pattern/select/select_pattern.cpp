@@ -992,6 +992,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     CHECK_NULL_VOID(menuLayoutProps);
     std::string optionHeight =  std::to_string(menuLayoutProps->GetSelectModifiedHeightValue(0.0f));
     json->PutExtAttr("optionHeight", optionHeight.c_str(), filter);
+    json->PutExtAttr("optionWidthFitTrigger", isFitTrigger_, filter);
     ToJsonMenuBackgroundStyle(json, filter);
     ToJsonDivider(json, filter);
 }

@@ -95,7 +95,7 @@ public:
     static void SetArrowPosition(FrameNode* frameNode, const std::optional<ArrowPosition>& value);
     static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlign);
-    static void SetValue(FrameNode* frameNode, const std::string& value);
+    static void SetValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetSelected(FrameNode* frameNode, const std::optional<int32_t>& idx);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value);
@@ -114,10 +114,10 @@ public:
     static void SetSelectedOptionFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value);
     static void SetSelectedOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value);
-    static void SetOptionWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetOptionWidth(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth);
     static void SetOptionHeight(FrameNode* frameNode, const std::optional<Dimension>& value);
-    static void SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTrigger);
+    static void SetOptionWidthFitTrigger(FrameNode* frameNode, std::optional<bool> isFitTrigger);
     static void SetOnSelect(FrameNode* frameNode, NG::SelectEvent&& onSelect);
     static void SetMenuBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle);

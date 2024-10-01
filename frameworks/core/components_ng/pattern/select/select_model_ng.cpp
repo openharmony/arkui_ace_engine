@@ -553,11 +553,11 @@ void SelectModelNG::SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlig
     pattern->SetMenuAlign(menuAlign);
 }
 
-void SelectModelNG::SetValue(FrameNode* frameNode, const std::string& value)
+void SelectModelNG::SetValue(FrameNode* frameNode, const std::optional<std::string>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetValue(value);
+    pattern->SetValue(value.value_or(""));
 }
 
 void SelectModelNG::SetSelected(FrameNode* frameNode, const std::optional<int32_t>& idx)
@@ -726,11 +726,11 @@ void SelectModelNG::SetOptionFontColor(FrameNode* frameNode, const std::optional
     }
 }
 
-void SelectModelNG::SetOptionWidth(FrameNode* frameNode, const Dimension& value)
+void SelectModelNG::SetOptionWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetOptionWidth(value);
+    pattern->SetOptionWidth(value.value_or(Dimension()));
 }
 
 void SelectModelNG::SetOptionHeight(FrameNode* frameNode, const std::optional<Dimension>& value)
@@ -742,11 +742,11 @@ void SelectModelNG::SetOptionHeight(FrameNode* frameNode, const std::optional<Di
     }
 }
 
-void SelectModelNG::SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTrigger)
+void SelectModelNG::SetOptionWidthFitTrigger(FrameNode* frameNode, std::optional<bool> isFitTrigger)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetOptionWidthFitTrigger(isFitTrigger);
+    pattern->SetOptionWidthFitTrigger(isFitTrigger.value_or(false));
 }
 
 void SelectModelNG::SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth)

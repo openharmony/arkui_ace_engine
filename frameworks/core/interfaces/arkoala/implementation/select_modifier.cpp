@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <variant>
+
 #include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
@@ -23,6 +25,8 @@
 #include "core/interfaces/arkoala/utility/validators.h"
 
 namespace OHOS::Ace::NG {
+using DimensionOrOptBool = std::variant<Dimension, std::optional<bool>>;
+
 namespace Converter {
 template<>
 void AssignCast(std::optional<ArrowPosition>& dst, const Ark_ArrowPosition& src)
@@ -44,6 +48,43 @@ void AssignCast(std::optional<MenuAlignType>& dst, const Ark_MenuAlignType& src)
         default: LOGE("Unexpected enum value in Ark_MenuAlignType: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<bool>& dst, const Ark_OptionWidthMode& src)
+{
+    switch (src) {
+        case ARK_OPTION_WIDTH_MODE_FIT_CONTENT: dst = false; break;
+        case ARK_OPTION_WIDTH_MODE_FIT_TRIGGER: dst = true; break;
+        default: LOGE("Unexpected enum value in Ark_OptionWidthMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<DimensionOrOptBool>& dst, const Ark_OptionWidthMode& src)
+{
+    dst = Converter::OptConvert<bool>(src);
+}
+
+template<>
+void AssignCast(std::optional<DimensionOrOptBool>& dst, const Ark_Length& src)
+{
+    dst = Converter::Convert<Dimension>(src);
+}
+
+template<>
+SelectParam Convert(const Ark_SelectOption& src)
+{
+    SelectParam param;
+    auto text = OptConvert<std::string>(src.value);
+    if (text) {
+        param.text = text.value();
+    }
+    auto icon = OptConvert<std::string>(src.icon);
+    if (icon) {
+        param.icon = icon.value();
+    }
+    return param;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -52,6 +93,11 @@ namespace SelectInterfaceModifier {
 void SetSelectOptionsImpl(Ark_NativePointer node,
                           const Array_SelectOption* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    auto params = Converter::Convert<std::vector<SelectParam>>(*options);
+    SelectModelNG::InitSelect(frameNode, params);
 }
 } // SelectInterfaceModifier
 namespace SelectAttributeModifier {
@@ -70,6 +116,11 @@ void SelectedImpl(Ark_NativePointer node,
 void ValueImpl(Ark_NativePointer node,
                const ResourceStr* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto optValue = Converter::OptConvert<std::string>(*value);
+    SelectModelNG::SetValue(frameNode, optValue);
 }
 void FontImpl(Ark_NativePointer node,
               const Ark_Font* value)
@@ -219,6 +270,24 @@ void MenuAlignImpl(Ark_NativePointer node,
 void OptionWidthImpl(Ark_NativePointer node,
                      const Type_SelectAttribute_optionWidth_Arg0* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto converted = Converter::OptConvert<DimensionOrOptBool>(*value);
+    if (!converted.has_value()) {
+        LOGE("SelectAttributeModifier::OptionWidthImpl incorrect value");
+    }
+    if (auto widthPtr = std::get_if<Dimension>(&converted.value())) {
+        std::optional<Dimension> width = *widthPtr;
+        Validator::ValidateNonNegative(width);
+        SelectModelNG::SetHasOptionWidth(frameNode, true);
+        SelectModelNG::SetOptionWidth(frameNode, width);
+    } else if (auto fitTriggerPtr = std::get_if<std::optional<bool>>(&converted.value())) {
+        SelectModelNG::SetHasOptionWidth(frameNode, true);
+        SelectModelNG::SetOptionWidthFitTrigger(frameNode, *fitTriggerPtr);
+    } else {
+        LOGE("SelectAttributeModifier::OptionWidthImpl incorrect value");
+    }
 }
 void OptionHeightImpl(Ark_NativePointer node,
                       const Ark_Length* value)
