@@ -1674,4 +1674,9 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& po
     }
     return menuItem;
 }
+
+void MenuItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("selected", IsSelected(), filter);
+}
 } // namespace OHOS::Ace::NG
