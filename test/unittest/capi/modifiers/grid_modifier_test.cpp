@@ -22,7 +22,10 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/implementation/scroller_peer_impl.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
@@ -181,23 +184,40 @@ HWTEST_F(GridModifierTest, setGridOptionsTestInvalidLayoutOptionsValues, TestSiz
 }
 
 /*
- * @tc.name: DISABLED_setGridOptionsTestDefaultScrollerValues
+ * @tc.name: setGridOptionsTestValidScrollerValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestDefaultScrollerValues, TestSize.Level1)
+HWTEST_F(GridModifierTest, setGridOptionsTestValidScrollerValues, TestSize.Level1)
 {
-    // Scroller attribute is not handled by GridModifier yet
-}
+    Ark_NativePointer scrollerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(scrollerPtr);
+    EXPECT_NE(peerImplPtr, nullptr);
 
-/*
- * @tc.name: DISABLED_setGridOptionsTestValidScrollerValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestValidScrollerValues, TestSize.Level1)
-{
-    // Scroller attribute is not handled by GridModifier yet
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    Ark_Scroller arkScroller;
+    arkScroller.ptr = scrollerPtr;
+    Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(std::optional<Ark_Scroller>(arkScroller));
+    Opt_GridLayoutOptions inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(Ark_Empty());
+    modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
+
+    RefPtr<ScrollControllerBase> positionController = pattern->GetOrCreatePositionController();
+    EXPECT_NE(positionController, nullptr);
+    RefPtr<ScrollProxy> scrollBarProxy = pattern->GetScrollBarProxy();
+    EXPECT_NE(scrollBarProxy, nullptr);
+
+    EXPECT_EQ(peerImplPtr->GetController(), positionController);
+    EXPECT_EQ(peerImplPtr->GetScrollBarProxy(), scrollBarProxy);
+
+    Ark_NativePointer finalizerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
+    auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
+    finalyzer(reinterpret_cast<ScrollerPeer *>(scrollerPtr));
 }
 
 /*
@@ -207,7 +227,34 @@ HWTEST_F(GridModifierTest, DISABLED_setGridOptionsTestValidScrollerValues, TestS
  */
 HWTEST_F(GridModifierTest, setGridOptionsTestInvalidScrollerValues, TestSize.Level1)
 {
-    // Scroller attribute is not handled by GridModifier yet
+    Ark_NativePointer scrollerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->ctor();
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl*>(scrollerPtr);
+    EXPECT_NE(peerImplPtr, nullptr);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    Ark_Scroller arkScroller;
+    arkScroller.ptr = scrollerPtr;
+    Opt_Scroller inputValue0 = Converter::ArkValue<Opt_Scroller>(Ark_Empty());
+    Opt_GridLayoutOptions inputValue1 = Converter::ArkValue<Opt_GridLayoutOptions>(Ark_Empty());
+    modifier_->setGridOptions(node_, &inputValue0, &inputValue1);
+
+    RefPtr<ScrollControllerBase> positionController = pattern->GetOrCreatePositionController();
+    EXPECT_NE(positionController, nullptr);
+    RefPtr<ScrollProxy> scrollBarProxy = pattern->GetScrollBarProxy();
+    EXPECT_NE(scrollBarProxy, nullptr);
+
+    EXPECT_NE(peerImplPtr->GetController(), positionController);
+    EXPECT_NE(peerImplPtr->GetScrollBarProxy(), scrollBarProxy);
+
+    Ark_NativePointer finalizerPtr =
+        GeneratedModifier::GetFullAPI()->getAccessors()->getScrollerAccessor()->getFinalizer();
+    auto finalyzer = reinterpret_cast<void (*)(ScrollerPeer *)>(finalizerPtr);
+    finalyzer(reinterpret_cast<ScrollerPeer *>(scrollerPtr));
 }
 
 /*

@@ -19,6 +19,7 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/implementation/scroller_peer_impl.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -97,7 +98,19 @@ void SetGridOptionsImpl(Ark_NativePointer node,
         LOGE("ARKOALA onGetRectByIndex callback need to be supported");
         GridModelNG::SetLayoutOptions(frameNode, options);
     }
-    LOGE("ARKOALA Scroller attribute need to be supported");
+
+    // Scroller
+    CHECK_NULL_VOID(scroller);
+    RefPtr<ScrollControllerBase> positionController = GridModelNG::GetOrCreateController(frameNode);
+    RefPtr<ScrollProxy> scrollBarProxy = GridModelNG::GetOrCreateScrollBarProxy(frameNode);
+
+     // obtain the external SwiperController peer
+    auto abstPeerPtrOpt = Converter::OptConvert<Ark_NativePointer>(*scroller);
+    CHECK_NULL_VOID(abstPeerPtrOpt);
+    auto peerImplPtr = reinterpret_cast<GeneratedModifier::ScrollerPeerImpl *>(*abstPeerPtrOpt);
+    CHECK_NULL_VOID(peerImplPtr);
+    peerImplPtr->SetController(positionController);
+    peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
 } // GridInterfaceModifier
 namespace GridAttributeModifier {
