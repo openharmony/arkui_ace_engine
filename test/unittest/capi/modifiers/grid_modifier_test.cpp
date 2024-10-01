@@ -28,6 +28,7 @@
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Ace::NG::Converter;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -85,6 +86,23 @@ namespace {
     const auto ATTRIBUTE_ALIGN_ITEMS_ALIGNMENT_DEFAULT_VALUE = "GridItemAlignment.Default";
 
     const Color THEME_SCROLLBAR_COLOR(0x00FF00FF);
+
+    // resource names and id
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::FLOAT};
+    const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::FLOAT};
+
+    // resource values
+    const auto RESOURCE_OPACITY_BY_STRING = 0.4f;
+    const auto RESOURCE_OPACITY_BY_NUMBER = 0.5f;
+
+    using OneNumResStep = std::pair<Union_Number_Resource, float>;
+    static const std::vector<OneNumResStep> UNION_NUMBER_RES_TEST_PLAN = {
+        { CreateResourceUnion<Union_Number_Resource>(RES_NAME), RESOURCE_OPACITY_BY_STRING },
+        { CreateResourceUnion<Union_Number_Resource>(RES_ID), RESOURCE_OPACITY_BY_NUMBER },
+    };
+
+    const Ark_Int32 FAKE_RES_ID(1234);
+    const Ark_Length RES_ARK_LENGTH = { .type = ARK_TAG_RESOURCE, .resource = FAKE_RES_ID };
 } // namespace
 
 class GridModifierTest : public ModifierTestBase<GENERATED_ArkUIGridModifier,
@@ -99,6 +117,10 @@ public:
         themeStyle->SetAttr(PATTERN_FG_COLOR, { .value = THEME_SCROLLBAR_COLOR });
 
         SetupTheme<ScrollBarTheme>();
+
+        // set test values to Theme Pattern as data for the Theme building
+        AddResource(RES_NAME, RESOURCE_OPACITY_BY_STRING);
+        AddResource(RES_ID, RESOURCE_OPACITY_BY_NUMBER);
     }
 };
 
@@ -383,6 +405,19 @@ HWTEST_F(GridModifierTest, setColumnsGapTestValidValues, TestSize.Level1)
 }
 
 /*
+ * @tc.name: setColumnsGapTestValidResourceValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridModifierTest, setColumnsGapTestValidResourceValues, TestSize.Level1)
+{
+    Ark_Length inputValue = RES_ARK_LENGTH;
+    modifier_->setColumnsGap(node_, &inputValue);
+    auto strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
+    EXPECT_EQ(strResult, "10.00px");
+}
+
+/*
  * @tc.name: setColumnsGapTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -471,6 +506,19 @@ HWTEST_F(GridModifierTest, setRowsGapTestValidValues, TestSize.Level1)
     modifier_->setRowsGap(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
     EXPECT_EQ(strResult, "0.00vp");
+}
+
+/*
+ * @tc.name: setRowsGapTestValidResourceValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridModifierTest, setRowsGapTestValidResourceValues, TestSize.Level1)
+{
+    Ark_Length inputValue = RES_ARK_LENGTH;
+    modifier_->setRowsGap(node_, &inputValue);
+    auto strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
+    EXPECT_EQ(strResult, "10.00px");
 }
 
 /*
@@ -1496,8 +1544,21 @@ HWTEST_F(GridModifierTest, setFrictionTestValidValues, TestSize.Level1)
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
     EXPECT_NEAR(doubleResult, 123456.f, FLT_EPSILON);
+}
 
-    // add tests for Resources values
+/*
+ * @tc.name: setFrictionTestValidResourceValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridModifierTest, setFrictionTestValidResourceValues, TestSize.Level1)
+{
+    double doubleResult;
+    for (const auto &[value, expectVal]: UNION_NUMBER_RES_TEST_PLAN) {
+        modifier_->setFriction(node_, &value);
+        doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
+        EXPECT_NEAR(doubleResult, expectVal, FLT_EPSILON);
+    }
 }
 
 /*
