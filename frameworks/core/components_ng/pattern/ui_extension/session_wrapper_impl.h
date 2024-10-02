@@ -112,10 +112,10 @@ private:
     RefPtr<TaskExecutor> taskExecutor_;
     int32_t instanceId_;
     bool isTransferringCaller_;
+    bool isNotifyOccupiedAreaChange_ = true;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
     sptr<Rosen::ExtensionSession> session_;
-    bool isNotifyOccupiedAreaChange_ = true;
     Rect displayAreaWindow_;
     RectF displayArea_;
     uint32_t reason_ = (uint32_t)Rosen::SizeChangeReason::UNDEFINED;

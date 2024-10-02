@@ -17,18 +17,12 @@
 
 #include <optional>
 
-#include "core/event/key_event.h"
-#include "core/event/pointer_event.h"
-#include "session/host/include/extension_session.h"
-#include "session/host/include/session.h"
-#include "ui/rs_surface_node.h"
-
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
-#include "base/geometry/offset.h"
 #include "base/error/error_code.h"
+#include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -47,10 +41,15 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/event/ace_events.h"
+#include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/pointer_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "session/host/include/extension_session.h"
+#include "session/host/include/session.h"
+#include "ui/rs_surface_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -252,13 +251,15 @@ void UIExtensionPattern::MountPlaceholderNode(PlaceholderType type)
 
 void UIExtensionPattern::RemovePlaceholderNode()
 {
-    if (IsShowPlaceholder()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->RemoveChildAtIndex(0);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        SetCurPlaceholderType(PlaceholderType::NONE);
+    if (!IsShowPlaceholder()) {
+        return;
     }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    SetCurPlaceholderType(PlaceholderType::NONE);
 }
 
 bool UIExtensionPattern::CheckConstraint()
@@ -1164,10 +1165,9 @@ void UIExtensionPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int3
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    if (accessibilityProperty != nullptr) {
-        accessibilityProperty->SetChildWindowId(childWindowId);
-        accessibilityProperty->SetChildTreeId(childTreeId);
-    }
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetChildWindowId(childWindowId);
+    accessibilityProperty->SetChildTreeId(childTreeId);
 }
 
 void UIExtensionPattern::OnAccessibilityDumpChildInfo(
@@ -1227,13 +1227,13 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
         CHECK_NULL_VOID(uiExtension);
         uiExtension->OnVisibleChange(visible);
     };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     std::vector<double> ratioList = { 0.0 };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
@@ -1250,7 +1250,7 @@ void UIExtensionPattern::OnColorConfigurationUpdate()
     sessionWrapper_->NotifyConfigurationUpdate();
 }
 
-int32_t UIExtensionPattern::GetSessionId()
+int32_t UIExtensionPattern::GetSessionId() const
 {
     return sessionWrapper_ ? sessionWrapper_->GetSessionId() : 0;
 }
@@ -1260,13 +1260,13 @@ int32_t UIExtensionPattern::GetUiExtensionId()
     return uiExtensionId_;
 }
 
-int32_t UIExtensionPattern::GetNodeId()
+int32_t UIExtensionPattern::GetNodeId() const
 {
     auto host = GetHost();
     return host ? host->GetId() : -1;
 }
 
-int32_t UIExtensionPattern::GetInstanceId()
+int32_t UIExtensionPattern::GetInstanceId() const
 {
     return instanceId_;
 }
