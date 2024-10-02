@@ -1362,27 +1362,52 @@ void ImagePattern::DumpLayoutInfo()
 {
     auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProp);
+
+    DumpImageSourceInfo(layoutProp);
+    DumpAltSourceInfo(layoutProp);
+    DumpImageFit(layoutProp);
+    DumpFitOriginalSize(layoutProp);
+    DumpSourceSize(layoutProp);
+    DumpAutoResize(layoutProp);
+}
+
+inline void ImagePattern::DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp)
+{
     auto src = layoutProp->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     DumpLog::GetInstance().AddDesc(std::string("url: ").append(src.ToString()));
     DumpLog::GetInstance().AddDesc("SrcCacheKey: " + src.GetKey());
+}
 
+inline void ImagePattern::DumpAltSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp)
+{
     auto altSrc = layoutProp->GetAlt().value_or(ImageSourceInfo(""));
     DumpLog::GetInstance().AddDesc(std::string("altUrl: ").append(altSrc.ToString()));
+}
 
+inline void ImagePattern::DumpImageFit(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp)
+{
     auto imageFit = layoutProp->GetImageFit().value_or(ImageFit::COVER);
     DumpLog::GetInstance().AddDesc(std::string("objectFit: ").append(GetImageFitStr(imageFit)));
+}
 
+inline void ImagePattern::DumpFitOriginalSize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp)
+{
     auto fitOriginalSize = layoutProp->GetFitOriginalSize().value_or(false);
     DumpLog::GetInstance().AddDesc(std::string("fitOriginalSize: ").append(fitOriginalSize ? "true" : "false"));
+}
 
+inline void ImagePattern::DumpSourceSize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp)
+{
     const std::optional<SizeF>& sourceSize = layoutProp->GetSourceSize();
     if (sourceSize.has_value()) {
         DumpLog::GetInstance().AddDesc(std::string("sourceSize: ").append(sourceSize.value().ToString()));
     }
+}
 
+inline void ImagePattern::DumpAutoResize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp)
+{
     bool autoResize = layoutProp->GetAutoResize().value_or(autoResizeDefault_);
-    autoResize ? DumpLog::GetInstance().AddDesc("autoResize:true")
-                       : DumpLog::GetInstance().AddDesc("autoResize:false");
+    autoResize ? DumpLog::GetInstance().AddDesc("autoResize:true") : DumpLog::GetInstance().AddDesc("autoResize:false");
 }
 
 void ImagePattern::DumpRenderInfo()
@@ -1390,51 +1415,92 @@ void ImagePattern::DumpRenderInfo()
     auto renderProp = GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(renderProp);
 
+    DumpRenderMode(renderProp);
+    DumpImageRepeat(renderProp);
+    DumpImageColorFilter(renderProp);
+    DumpFillColor(renderProp);
+    DumpDynamicRangeMode(renderProp);
+    DumpMatchTextDirection(renderProp);
+    DumpSmoothEdge(renderProp);
+    DumpBorderRadiusProperties(renderProp);
+    DumpResizable(renderProp);
+}
+
+inline void ImagePattern::DumpRenderMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
     auto imageRenderMode = renderProp->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
     DumpLog::GetInstance().AddDesc(
         std::string("renderMode: ").append((imageRenderMode == ImageRenderMode::ORIGINAL) ? "Original" : "Template"));
+}
 
+inline void ImagePattern::DumpImageRepeat(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
     auto imageRepeat = renderProp->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     DumpLog::GetInstance().AddDesc(std::string("objectRepeat: ").append(GetImageRepeatStr(imageRepeat)));
+}
 
+inline void ImagePattern::DumpImageColorFilter(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
     auto imageColorFilter = renderProp->GetColorFilter();
     if (imageColorFilter.has_value()) {
         auto colorFilter = imageColorFilter.value();
         DumpLog::GetInstance().AddDesc(std::string("colorFilter: ").append(GetImageColorFilterStr(colorFilter)));
     }
+}
 
+inline void ImagePattern::DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
     auto fillColor = renderProp->GetSvgFillColor();
     if (fillColor.has_value()) {
         auto color = fillColor.value();
         DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
     }
+}
 
+inline void ImagePattern::DumpDynamicRangeMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
     if (renderProp->HasDynamicMode()) {
         dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
         DumpLog::GetInstance().AddDesc(std::string("dynamicRangeMode: ").append(GetDynamicModeString(dynamicMode)));
     }
+}
 
+inline void ImagePattern::DumpMatchTextDirection(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
     auto matchTextDirection = renderProp->GetMatchTextDirection().value_or(false);
     matchTextDirection ? DumpLog::GetInstance().AddDesc("matchTextDirection:true")
                        : DumpLog::GetInstance().AddDesc("matchTextDirection:false");
+}
 
+inline void ImagePattern::DumpSmoothEdge(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
     auto smoothEdge = renderProp->GetSmoothEdge();
     if (smoothEdge.has_value()) {
         DumpLog::GetInstance().AddDesc(std::string("edgeAntialiasing: ").append(std::to_string(smoothEdge.value())));
     }
+}
 
+inline void ImagePattern::DumpResizable(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
+    if (renderProp->HasImageResizableSlice() && renderProp->GetImageResizableSliceValue({}).Valid()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("resizable slice: ").append(renderProp->GetImageResizableSliceValue({}).ToString()));
+    }
+
+    auto resizableLattice = renderProp->GetImageResizableLatticeValue(nullptr);
+    DumpLog::GetInstance().AddDesc(
+        "resizableLattice:" + (resizableLattice ? resizableLattice->DumpToString() : "Lattice is null"));
+}
+
+void ImagePattern::DumpBorderRadiusProperties(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp)
+{
     auto needBorderRadius = renderProp->GetNeedBorderRadius().value_or(false);
     needBorderRadius ? DumpLog::GetInstance().AddDesc("needBorderRadius:true")
                      : DumpLog::GetInstance().AddDesc("needBorderRadius:false");
 
     auto borderRadius = renderProp->GetBorderRadius().value_or(BorderRadiusProperty());
-    DumpLog::GetInstance().AddDesc(borderRadius.ToString());
-
-    if (renderProp && renderProp->HasImageResizableSlice() && renderProp->GetImageResizableSliceValue({}).Valid()) {
-        DumpLog::GetInstance().AddDesc(
-            std::string("resizable slice: ").append(renderProp->GetImageResizableSliceValue({}).ToString()));
-    }
+    DumpLog::GetInstance().AddDesc("ImageBorderRadius:" + borderRadius.ToString());
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1447,6 +1513,7 @@ void ImagePattern::DumpRenderInfo()
         DumpLog::GetInstance().AddDesc("borderRadius: null");
     }
 }
+
 void ImagePattern::DumpSvgInfo()
 {
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
