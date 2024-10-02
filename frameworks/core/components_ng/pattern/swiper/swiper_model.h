@@ -76,6 +76,7 @@ struct AnimationCallbackInfo {
     std::optional<float> currentOffset;
     std::optional<float> targetOffset;
     std::optional<float> velocity;
+    bool isForceStop = false;
 };
 
 struct SwiperMarginOptions {
