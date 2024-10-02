@@ -110,6 +110,11 @@ void ContentFontImpl(Ark_NativePointer node,
         MenuItemModelNG::SetFontWeight(frameNode, fontOpt.value().fontWeight);
         MenuItemModelNG::SetFontStyle(frameNode, fontOpt.value().fontStyle);
         MenuItemModelNG::SetFontFamily(frameNode, fontOpt.value().fontFamilies);
+    } else {
+        MenuItemModelNG::SetFontSize(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontWeight(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontStyle(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontFamily(frameNode, std::nullopt);
     }
 }
 void ContentFontColorImpl(Ark_NativePointer node,
@@ -132,6 +137,11 @@ void LabelFontImpl(Ark_NativePointer node,
         MenuItemModelNG::SetLabelFontWeight(frameNode, fontOpt.value().fontWeight);
         MenuItemModelNG::SetLabelFontStyle(frameNode, fontOpt.value().fontStyle);
         MenuItemModelNG::SetLabelFontFamily(frameNode, fontOpt.value().fontFamilies);
+    } else {
+        MenuItemModelNG::SetLabelFontSize(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontWeight(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontStyle(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontFamily(frameNode, std::nullopt);
     }
 }
 void LabelFontColorImpl(Ark_NativePointer node,
