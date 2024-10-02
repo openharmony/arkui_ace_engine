@@ -80,7 +80,7 @@ public:
     void SetMenuBackgroundColor(const Color& color) override;
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
     void SetDivider(const NG::SelectDivider& divider) override;
-    static void SetDivider(FrameNode* frameNode, const NG::SelectDivider& divider);
+    static void SetDivider(FrameNode* frameNode, const std::optional<NG::SelectDivider>& divider);
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;
     void SetLayoutDirection(TextDirection value) override;
     static void SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&& makeFunc);

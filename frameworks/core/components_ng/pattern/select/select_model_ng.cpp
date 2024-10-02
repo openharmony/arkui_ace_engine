@@ -426,7 +426,7 @@ void SelectModelNG::SetDivider(const NG::SelectDivider& divider)
     pattern->SetDivider(divider);
 }
 
-void SelectModelNG::SetDivider(FrameNode* frameNode, const NG::SelectDivider& divider)
+void SelectModelNG::SetDivider(FrameNode* frameNode, const std::optional<NG::SelectDivider>& divider)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);

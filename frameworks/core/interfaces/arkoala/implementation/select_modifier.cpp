@@ -85,6 +85,29 @@ SelectParam Convert(const Ark_SelectOption& src)
     }
     return param;
 }
+
+template<>
+SelectDivider Convert(const Ark_DividerOptions& src)
+{
+    auto dst = SelectDivider{}; // this struct is initialized by default
+    auto strokeWidthOpt = OptConvert<Dimension>(src.strokeWidth);
+    if (strokeWidthOpt.has_value()) {
+        dst.strokeWidth = strokeWidthOpt.value();
+    }
+    auto colorOpt = OptConvert<Color>(src.color);
+    if (colorOpt.has_value()) {
+        dst.color = colorOpt.value();
+    }
+    auto startMarginOpt = OptConvert<Dimension>(src.startMargin);
+    if (startMarginOpt.has_value()) {
+        dst.startMargin = startMarginOpt.value();
+    }
+    auto endMarginOpt = OptConvert<Dimension>(src.endMargin);
+    if (endMarginOpt.has_value()) {
+        dst.endMargin = endMarginOpt.value();
+    }
+    return dst;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -333,6 +356,11 @@ void MenuItemContentModifierImpl(Ark_NativePointer node,
 void DividerImpl(Ark_NativePointer node,
                  const Type_SelectAttribute_divider_Arg0* options)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    auto divider = Converter::OptConvert<SelectDivider>(*options);
+    SelectModelNG::SetDivider(frameNode, divider);
 }
 } // SelectAttributeModifier
 const GENERATED_ArkUISelectModifier* GetSelectModifier()

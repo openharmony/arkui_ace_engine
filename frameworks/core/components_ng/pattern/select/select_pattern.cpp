@@ -1481,12 +1481,16 @@ ControlSize SelectPattern::GetControlSize()
     return controlSize_;
 }
 
-void SelectPattern::SetDivider(const SelectDivider& divider)
+void SelectPattern::SetDivider(const std::optional<SelectDivider>& divider)
 {
     for (auto&& option : options_) {
         auto props = option->GetPaintProperty<OptionPaintProperty>();
         CHECK_NULL_VOID(props);
-        props->UpdateDivider(divider);
+        if (divider) {
+            props->UpdateDivider(divider.value());
+        } else {
+            props->ResetDivider();
+        }
     }
 }
 } // namespace OHOS::Ace::NG

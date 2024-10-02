@@ -1317,4 +1317,124 @@ HWTEST_F(SelectModifierTest, setSelectOptionsTest, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: setDividerTest
+ * @tc.desc: Check the functionality of SelectModifier.setDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setDividerTest, TestSize.Level1)
+{
+    // default values
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerCheckValue = dividerObject->ToString();
+    EXPECT_EQ(dividerCheckValue, "");
+
+    // set valid values, color as Ark_Color aka int
+    Ark_DividerOptions dividerOptions = {
+        .strokeWidth = Converter::ArkValue<Opt_Length>(11),
+        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
+        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
+    };
+    Type_SelectAttribute_divider_Arg0 divider = {
+        .selector = 0,
+        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
+    };
+    modifier_->setDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
+    EXPECT_EQ(strokeWidthCheckValue, "11.00px");
+    auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
+    EXPECT_EQ(startMarginCheckValue, "55.50vp");
+    auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
+    EXPECT_EQ(endMarginCheckValue, "77.00px");
+    auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+    EXPECT_EQ(colorCheckValue, "#FFFFFFFF");
+
+    // set color as Ark_Number
+    dividerOptions = {
+        .strokeWidth = Converter::ArkValue<Opt_Length>(11),
+        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
+        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)}
+    };
+    divider = {
+        .selector = 0,
+        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
+    };
+    modifier_->setDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+    EXPECT_EQ(colorCheckValue, "#FF123456");
+}
+
+/**
+ * @tc.name: setDividerUndefinedTest
+ * @tc.desc: Check the functionality of SelectModifier.setDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setDividerUndefinedTest, TestSize.Level1)
+{
+    // set undefined values
+    Ark_DividerOptions dividerOptions = {
+        .strokeWidth = Converter::ArkValue<Opt_Length>(Ark_Empty()),
+        .startMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
+        .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
+        .color = {.tag = ARK_TAG_UNDEFINED}
+    };
+    Type_SelectAttribute_divider_Arg0 divider = {
+        .selector = 0,
+        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
+    };
+    modifier_->setDivider(node_, &divider);
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
+    EXPECT_EQ(strokeWidthCheckValue, "0.00vp");
+    auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
+    EXPECT_EQ(startMarginCheckValue, "0.00vp");
+    auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
+    EXPECT_EQ(endMarginCheckValue, "0.00vp");
+    auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+    EXPECT_EQ(colorCheckValue, "#00000000");
+
+    // set Ark_Undefined
+    divider = {
+        .selector = 1,
+        .value1 = Ark_Undefined()
+    };
+    modifier_->setDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    auto dividerCheckValue = GetAttrValue<std::string>(fullJson, "divider");
+    EXPECT_EQ(dividerCheckValue, "");
+}
+
+/**
+ * @tc.name: setDividerColorStringTest
+ * @tc.desc: Check the functionality of SelectModifier.setDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setDividerColorStringTest, TestSize.Level1)
+{
+    // set color as Ark_String
+    Ark_DividerOptions dividerOptions = {
+        .strokeWidth = Converter::ArkValue<Opt_Length>(11),
+        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
+        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
+    };
+    Type_SelectAttribute_divider_Arg0 divider = {
+        .selector = 0,
+        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
+    };
+    modifier_->setDivider(node_, &divider);
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+    EXPECT_EQ(colorCheckValue, "#11223344");
+}
+
 } // namespace OHOS::Ace::NG

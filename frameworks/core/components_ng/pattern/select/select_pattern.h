@@ -196,7 +196,7 @@ public:
     void SetOptionWidthFitTrigger(bool isFitTrigger);
     void SetHasOptionWidth(bool hasOptionWidth);
     void SetControlSize(const ControlSize& controlSize);
-    void SetDivider(const SelectDivider& divider);
+    void SetDivider(const std::optional<SelectDivider>& divider);
     ControlSize GetControlSize();
     void SetLayoutDirection(TextDirection value);
 
