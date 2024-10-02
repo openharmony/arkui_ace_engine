@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <variant>
 
 #include "core/components_ng/base/frame_node.h"
@@ -25,7 +26,17 @@
 #include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG {
+struct EdgesParamOptions {
+    EdgesParam value;
+    bool isLocalized;
+};
+
 using ColorOrStrategy = std::variant<std::monostate, std::optional<Color>, std::optional<ForegroundColorStrategy>>;
+using OffsetOrEdgesParam = std::variant<
+    std::monostate,
+    std::optional<OffsetT<Dimension>>,
+    std::optional<EdgesParamOptions>
+>;
 
 namespace Converter {
 template<>
@@ -98,6 +109,95 @@ OHOS::Ace::SharedTransitionOption Convert(const Ark_sharedTransitionOptions& src
         o.type = *opt;
     }
     return o;
+}
+
+template<>
+OffsetOrEdgesParam Convert(const Ark_Position& src)
+{
+    OffsetT<Dimension> offset;
+    std::optional<Dimension> x = Converter::OptConvert<Dimension>(src.x);
+    if (x) {
+        offset.SetX(x.value());
+    }
+    std::optional<Dimension> y = Converter::OptConvert<Dimension>(src.y);
+    if (y) {
+        offset.SetY(y.value());
+    }
+    return offset;
+}
+
+template<>
+OffsetOrEdgesParam Convert(const Ark_Edges& src)
+{
+    EdgesParamOptions edgesParamOptions;
+    edgesParamOptions.value = Converter::Convert<EdgesParam>(src);
+    edgesParamOptions.isLocalized = false;
+    return edgesParamOptions;
+}
+
+template<>
+OffsetOrEdgesParam Convert(const Ark_LocalizedEdges& src)
+{
+    // Ark_LocalizedEdges convertation need to be supported
+    EdgesParamOptions edgesParamOptions;
+    edgesParamOptions.isLocalized = false;
+    return edgesParamOptions;
+}
+
+template<>
+GradientColor Convert(const Tuple_Ark_ResourceColor_Number& src)
+{
+    GradientColor gradientColor;
+    gradientColor.SetHasValue(false);
+
+    // color
+    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
+    if (colorOpt) {
+        gradientColor.SetColor(colorOpt.value());
+        gradientColor.SetHasValue(true);
+    }
+
+    // stop value
+    float value = Converter::Convert<float>(src.value1);
+    value = std::clamp(value, 0.0f, 1.0f);
+    //  [0, 1] -> [0, 100.0];
+    gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
+
+    return gradientColor;
+}
+
+template<>
+Gradient Convert(const Type_CommonMethod_radialGradient_Arg0& src)
+{
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+
+    // center
+    gradient.GetRadialGradient()->radialCenterX = Converter::Convert<Dimension>(src.center.value0);
+    gradient.GetRadialGradient()->radialCenterY = Converter::Convert<Dimension>(src.center.value1);
+
+    // radius
+    std::optional<Dimension> radiusOpt = Converter::OptConvert<Dimension>(src.radius);
+    if (radiusOpt) {
+        // radius should be positive [0, +∞)
+        Dimension radius = radiusOpt.value().IsNonPositive() ? Dimension(0, DimensionUnit::VP) : radiusOpt.value();
+        gradient.GetRadialGradient()->radialVerticalSize = radius;
+        gradient.GetRadialGradient()->radialHorizontalSize = radius;
+    }
+
+    // repeating
+    std::optional<bool> repeating = Converter::OptConvert<bool>(src.repeating);
+    if (repeating) {
+        gradient.SetRepeat(repeating.value());
+    }
+
+    // color stops
+    std::vector<GradientColor> colorStops = Converter::Convert<std::vector<GradientColor>>(src.colors);
+    for (GradientColor gradientColor : colorStops) {
+        gradient.AddColor(gradientColor);
+    }
+
+    return gradient;
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -204,52 +304,20 @@ void LayoutWeightImpl(Ark_NativePointer node,
 void PaddingImpl(Ark_NativePointer node,
                  const Type_CommonMethod_padding_Arg0* value)
 {
+    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    PaddingProperty indents;
-    switch (value->selector) {
-        case CASE_0:
-            indents.left = Converter::OptConvert<CalcLength>(value->value0.left);
-            indents.top = Converter::OptConvert<CalcLength>(value->value0.top);
-            indents.right = Converter::OptConvert<CalcLength>(value->value0.right);
-            indents.bottom = Converter::OptConvert<CalcLength>(value->value0.bottom);
-            break;
-        case CASE_1:
-            indents = Converter::OptConvert<PaddingProperty>(value->value1).value();
-            break;
-        case CASE_2:
-            indents = Converter::Convert<PaddingProperty>(value->value2);
-            break;
-        default:
-            LOGE("ARKOALA: CommonMethod::PaddingImpl: Unexpected selector: %{public}d\n", value->selector);
-            return;
-    }
-    ViewAbstract::SetPadding(frameNode, indents);
+    LOGE("ARKOALA CommonMethod::PaddingImpl: LocalizedPadding is not supported yet!");
+    ViewAbstract::SetPadding(frameNode, Converter::OptConvert<PaddingProperty>(*value));
 }
 void MarginImpl(Ark_NativePointer node,
                 const Type_CommonMethod_margin_Arg0* value)
 {
+    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    PaddingProperty indents;
-    switch (value->selector) {
-        case CASE_0:
-            indents.left = Converter::OptConvert<CalcLength>(value->value0.left);
-            indents.top = Converter::OptConvert<CalcLength>(value->value0.top);
-            indents.right = Converter::OptConvert<CalcLength>(value->value0.right);
-            indents.bottom = Converter::OptConvert<CalcLength>(value->value0.bottom);
-            break;
-        case CASE_1:
-            indents = Converter::OptConvert<PaddingProperty>(value->value1).value();
-            break;
-        case CASE_2:
-            indents = Converter::OptConvert<PaddingProperty>(value->value2).value();
-            break;
-        default:
-            LOGE("ARKOALA: CommonMethod::MarginImpl: Unexpected selector: %{public}d\n", value->selector);
-            return;
-    }
-    ViewAbstract::SetMargin(frameNode, indents);
+    LOGE("ARKOALA CommonMethod::MarginImpl: LocalizedMargin is not supported yet!");
+    ViewAbstract::SetMargin(frameNode, Converter::OptConvert<PaddingProperty>(*value));
 }
 void BackgroundImpl(Ark_NativePointer node,
                     const CustomBuilder* builder,
@@ -388,6 +456,18 @@ void ForegroundColorImpl(Ark_NativePointer node,
 void OnClick0Impl(Ark_NativePointer node,
                   Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode](GestureEvent& info) {
+        Ark_ClickEvent onClick = Converter::ConvertClickEventInfo(info);
+        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onClick0(frameNode->GetId(), onClick);
+    };
+
+    if (frameNode->GetTag() == "Span") {
+        SpanModelNG::SetOnClick(reinterpret_cast<UINode *>(node), std::move(onEvent));
+    } else {
+        ViewAbstract::SetOnClick(frameNode, std::move(onEvent));
+    }
 }
 void OnClick1Impl(Ark_NativePointer node,
                   Ark_Function event,
@@ -396,50 +476,7 @@ void OnClick1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](GestureEvent& info) {
-        Ark_ClickEvent onClick;
-
-        Offset globalOffset = info.GetGlobalLocation();
-        Offset localOffset = info.GetLocalLocation();
-        Offset screenOffset = info.GetScreenLocation();
-
-        onClick.axisHorizontal.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onClick.axisVertical.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onClick.displayX = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-        onClick.displayY = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
-
-        onClick.pressure = Converter::ArkValue<Ark_Number>(0.0f);
-        onClick.preventDefault.id = 0;
-
-        onClick.screenX = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-        onClick.screenY = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-        onClick.source = static_cast<Ark_SourceType>(info.GetSourceDevice());
-
-        onClick.sourceTool = static_cast<Ark_SourceTool>(0);
-        onClick.deviceId = Converter::ArkValue<Opt_Number>();
-        onClick.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onClick.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onClick.target.area.height.type = 0;
-        onClick.target.area.height.unit = 1;
-        onClick.target.area.height.value = 0;
-        onClick.target.area.width.type = 0;
-        onClick.target.area.width.unit = 1;
-        onClick.target.area.width.value = 0;
-        onClick.target.area.position.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-        onClick.target.area.position.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-
-        onClick.tiltX = Converter::ArkValue<Ark_Number>(0);
-        onClick.tiltY = Converter::ArkValue<Ark_Number>(0);
-
-        onClick.timestamp = Converter::ArkValue<Ark_Number>(
-            static_cast<float>(info.GetTimeStamp().time_since_epoch().count()));
-
-        onClick.windowX = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-        onClick.windowY = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-        onClick.x = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-        onClick.y = Converter::ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-
+        Ark_ClickEvent onClick = Converter::ConvertClickEventInfo(info);
         GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onClick1(frameNode->GetId(), onClick);
     };
 
@@ -826,27 +863,30 @@ void MarkAnchorImpl(Ark_NativePointer node,
 void OffsetImpl(Ark_NativePointer node,
                 const Type_CommonMethod_offset_Arg0* value)
 {
+    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    switch (value->selector) {
-        case CASE_0: {
-            auto x = Converter::ConvertOrDefault(value->value0.x, Dimension());
-            auto y = Converter::ConvertOrDefault(value->value0.y, Dimension());
-            ViewAbstract::SetOffset(frameNode, { x, y });
-            break;
+    auto varOpt = Converter::OptConvert<OffsetOrEdgesParam>(*value);
+    if (!varOpt.has_value()) {
+        LOGE("ARKOALA CommonMethod::OffsetImpl: incorrect value");
+        return;
+    }
+    if (auto offset = std::get_if<std::optional<OffsetT<Dimension>>>(&varOpt.value())) {
+        if (offset) {
+            ViewAbstract::SetOffset(frameNode, offset->value());
+        } else {
+            LOGE("ARKOALA CommonMethod::OffsetImpl: offset is empty");
         }
-        case CASE_1: {
-            auto result = Converter::ConvertOrDefault(value->value1, EdgesParam());
-            ViewAbstract::SetOffsetEdges(frameNode, result);
-            break;
-        }
-        case CASE_2:
+    } else if (auto edges = std::get_if<std::optional<EdgesParamOptions>>(&varOpt.value())) {
+        if (edges) {
             LOGE("ARKOALA: LocalizedEdges is not fully support.");
-            ViewAbstract::SetOffsetLocalizedEdges(frameNode, true);
-            break;
-        default:
-            LOGE("ARKOALA:OffsetImpl: Unexpected value->selector: %{public}d\n", value->selector);
-            return;
+            ViewAbstract::SetOffsetEdges(frameNode, edges->value().value);
+            ViewAbstract::SetOffsetLocalizedEdges(frameNode, edges->value().isLocalized);
+        } else {
+            LOGE("ARKOALA CommonMethod::OffsetImpl: edgesParamOptions is empty");
+        }
+    } else {
+        LOGE("ARKOALA CommonMethod::OffsetImpl: incorrect value");
     }
 }
 void EnabledImpl(Ark_NativePointer node,
@@ -942,6 +982,11 @@ void SweepGradientImpl(Ark_NativePointer node,
 void RadialGradientImpl(Ark_NativePointer node,
                         const Type_CommonMethod_radialGradient_Arg0* value)
 {
+    CHECK_NULL_VOID(value);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Gradient gradient = Converter::Convert<Gradient>(*value);
+    ViewAbstract::SetRadialGradient(frameNode, gradient);
 }
 void MotionPathImpl(Ark_NativePointer node,
                     const Ark_MotionPathOptions* value)

@@ -176,6 +176,28 @@ void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src)
 }
 
 template<>
+void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src)
+{
+    switch (src) {
+        case ARK_LINE_CAP_STYLE_BUTT: dst = LineCapStyle::BUTT; break;
+        case ARK_LINE_CAP_STYLE_ROUND: dst = LineCapStyle::ROUND; break;
+        case ARK_LINE_CAP_STYLE_SQUARE: dst = LineCapStyle::SQUARE; break;
+        default: LOGE("Unexpected enum value in Ark_LineCapStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src)
+{
+    switch (src) {
+        case ARK_LINE_JOIN_STYLE_MITER: dst = LineJoinStyle::MITER; break;
+        case ARK_LINE_JOIN_STYLE_ROUND: dst = LineJoinStyle::ROUND; break;
+        case ARK_LINE_JOIN_STYLE_BEVEL: dst = LineJoinStyle::BEVEL; break;
+        default: LOGE("Unexpected enum value in Ark_LineJoinStyle: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src)
 {
     switch (src) {
@@ -551,6 +573,17 @@ void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src)
         case ARK_BAR_MODE_SCROLLABLE: dst = TabBarMode::SCROLLABLE; break;
         case ARK_BAR_MODE_FIXED: dst = TabBarMode::FIXED; break;
         default: LOGE("Unexpected enum value in Ark_BarMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src)
+{
+    switch (src) {
+        case ARK_SUB_MENU_EXPANDING_MODE_SIDE_EXPAND: dst = SubMenuExpandingMode::SIDE; break;
+        case ARK_SUB_MENU_EXPANDING_MODE_EMBEDDED_EXPAND: dst = SubMenuExpandingMode::EMBEDDED; break;
+        case ARK_SUB_MENU_EXPANDING_MODE_STACK_EXPAND: dst = SubMenuExpandingMode::STACK; break;
+        default: LOGE("Unexpected enum value in Ark_SubMenuExpandingMode: %{public}d", src);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

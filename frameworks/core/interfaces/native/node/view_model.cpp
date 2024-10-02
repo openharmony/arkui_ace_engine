@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
@@ -63,6 +64,7 @@
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
+#include "core/components_ng/pattern/shape/line_model_ng.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
@@ -698,7 +700,10 @@ void* createHyperlinkNode(ArkUI_Int32 nodeId)
 
 void* createLineNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = LineModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createLocationButtonNode(ArkUI_Int32 nodeId)
@@ -713,7 +718,10 @@ void* createMediaCachedImageNode(ArkUI_Int32 nodeId)
 
 void* createMenuNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = MenuModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createMenuItemNode(ArkUI_Int32 nodeId)

@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include "reverse_converter.h"
 #include "bridge/common/utils/utils.h"
 #include "base/geometry/axis.h"
 #include "base/geometry/calc_dimension.h"
@@ -31,6 +32,8 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/paint_state.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -39,7 +42,6 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/image/image_source_info.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/utility/generated/converter_generated.h"
 #include "ace_engine_types.h"
@@ -55,9 +57,10 @@ std::optional<int32_t> EnumToInt(const std::optional<T>& src)
 
 using StringArray = std::vector<std::string>;
 namespace Converter {
-    constexpr int32_t OFFSET_0 = 0;
-    constexpr int32_t OFFSET_1 = 1;
-    constexpr int32_t OFFSET_2 = 2;
+    template<typename To, typename From>
+    To Convert(const From& src);
+    template<typename To, typename From>
+    std::optional<To> OptConvert(const From& value);
 
      //Allow conversion for Ark_Xxx type to same Ark_Xxx type
     template<typename T>
@@ -70,6 +73,26 @@ namespace Converter {
     void AssignTo(std::variant<Types...>& dst, const T& src)
     {
         dst = src;
+    }
+
+    template<typename To, typename From, typename = decltype(From().array), typename = decltype(From().length)>
+    void AssignTo(std::vector<To>& dst, const From& src)
+    {
+        dst.clear();
+        dst.reserve(src.length);
+        for (Ark_Int32 i = 0; i < src.length; i++) {
+            dst.push_back(Convert<To>(src.array[i]));
+        }
+    }
+
+    template<typename To, typename From, typename = decltype(From().array), typename = decltype(From().length)>
+    void AssignTo(std::vector<std::optional<To>>& dst, const From& src)
+    {
+        dst.clear();
+        dst.reserve(src.length);
+        for (Ark_Int32 i = 0; i < src.length; i++) {
+            dst.push_back(OptConvert<To>(src.array[i]));
+        }
     }
 
     template<typename To, typename From>
@@ -191,6 +214,7 @@ namespace Converter {
 
     // Implementation is in cpp
     Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo &info);
+    Ark_ClickEvent ConvertClickEventInfo(OHOS::Ace::GestureEvent& info);
 
     template<>
     inline ImageSourceInfo Convert(const Ark_String& value)
@@ -227,8 +251,7 @@ namespace Converter {
         if (resourceString) {
             dst = ImageSourceInfo(resourceString.value(), converter.BundleName(), converter.ModuleName());
         } else {
-            LOGE("Not a string resource: %{public}s:%{public}s\n",
-                 converter.BundleName(), converter.ModuleName());
+            LOGE("Not a string resource: %{public}s:%{public}s\n", converter.BundleName(), converter.ModuleName());
         }
     }
 
@@ -298,11 +321,7 @@ namespace Converter {
     }
 
     template<>
-    inline Dimension Convert(const Ark_Length& src)
-    {
-        return src.type == Ark_Tag::ARK_TAG_RESOURCE ?
-               Dimension() : Dimension(src.value, static_cast<DimensionUnit>(src.unit));
-    }
+    Dimension Convert(const Ark_Length& src);
 
     template<>
     inline CalcDimension Convert(const Ark_Length& src)
@@ -420,20 +439,7 @@ namespace Converter {
         return Color::FromString(src.chars);
     }
 
-    template<>
-    inline CalcLength Convert(const Ark_Length& src)
-    {
-        if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
-            LOGE("Convert [Ark_Length] of type Resource to [CalcLength] is not supported.");
-            return CalcLength();
-        }
-        auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
-        auto value = src.value;
-        if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
-            value /= 100.0f; // percent is normalized [0..1]
-        }
-        return CalcLength(value, unit);
-    }
+    template<> CalcLength Convert(const Ark_Length& src);
 
     template<>
     inline std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src)
@@ -457,9 +463,11 @@ namespace Converter {
     inline PaddingProperty Convert(const Ark_Length& src)
     {
         auto value = OptConvert<CalcLength>(src);
-        return { .left = value, .top = value, .right = value, .bottom = value
+        return { .left = value, .right = value, .top = value, .bottom = value
         };
     }
+
+    template<> PaddingProperty Convert(const Ark_Padding& src);
 
     template<>
     inline PaddingProperty Convert(const Ark_LocalizedPadding& src)
@@ -510,7 +518,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
 
-    Shadow ToShadow(const Ark_ShadowOptions& src);
+    template<> Shadow Convert(const Ark_ShadowOptions& src);
 
     template<>
     inline ShadowType Convert(const Ark_ShadowType& src)
@@ -521,22 +529,14 @@ namespace Converter {
     template<>
     inline std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
     {
-        return { ToShadow(src) };
-    }
-
-    template<>
-    inline std::vector<Shadow> Convert(const Array_ShadowOptions& src)
-    {
-        std::vector<Shadow> result(src.length);
-        for (int i = 0; i < src.length; i++) {
-            result[i] = ToShadow(src.array[i]);
-        }
-        return result;
+        return { Convert<Shadow>(src) };
     }
 
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<Curve> Convert(const Ark_Curve& src);
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
+
+    template<> void AssignTo(std::optional<float>& dst, const Ark_String& src);
 
     // Enums specializations
     template<> void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src);
@@ -549,6 +549,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
+    template<> void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src);
+    template<> void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src);
     template<> void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
@@ -585,6 +587,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
     template<> void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src);
+    template<> void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

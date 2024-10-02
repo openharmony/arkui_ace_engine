@@ -3278,10 +3278,14 @@ void ViewAbstract::SetPadding(FrameNode* frameNode, const CalcLength& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, padding, frameNode);
 }
 
-void ViewAbstract::SetPadding(FrameNode* frameNode, const PaddingProperty& value)
+void ViewAbstract::SetPadding(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Padding, frameNode);
+    }
 }
 
 void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
@@ -3292,10 +3296,14 @@ void ViewAbstract::SetMargin(FrameNode* frameNode, const CalcLength& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, margin, frameNode);
 }
 
-void ViewAbstract::SetMargin(FrameNode* frameNode, const PaddingProperty& value)
+void ViewAbstract::SetMargin(FrameNode* frameNode, const std::optional<PaddingProperty>& value)
 {
     CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(LayoutProperty, Margin, frameNode);
+    }
 }
 
 void ViewAbstract::SetLayoutDirection(FrameNode* frameNode, TextDirection value)

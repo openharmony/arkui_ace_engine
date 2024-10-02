@@ -24,6 +24,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "core/interfaces/native/node/node_api.h"
 #include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -137,42 +138,6 @@ namespace OHOS::Ace::NG::Converter {
         dst.y = ArkValue<Ark_Number>(static_cast<float>(src.GetY()));
     }
 
-    inline void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src)
-    {
-        switch (src) {
-            case ListItemGroupArea::NONE_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_NONE; break;
-            case ListItemGroupArea::IN_LIST_ITEM_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_IN_LIST_ITEM_AREA; break;
-            case ListItemGroupArea::IN_HEADER_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_IN_HEADER_AREA; break;
-            case ListItemGroupArea::IN_FOOTER_AREA: dst = ARK_LIST_ITEM_GROUP_AREA_IN_FOOTER_AREA; break;
-            default: dst = static_cast<Ark_ListItemGroupArea>(-1);
-                LOGE("Unexpected enum value in ListItemGroupArea: %{public}d", src);
-        }
-    }
-
-    inline void AssignArkValue(Ark_Axis& dst, const Axis& src)
-    {
-        switch (src) {
-            case Axis::VERTICAL: dst = ARK_AXIS_VERTICAL; break;
-            case Axis::HORIZONTAL: dst = ARK_AXIS_HORIZONTAL; break;
-            default: dst = static_cast<Ark_Axis>(-1);
-                LOGE("Unexpected enum value in Axis: %{public}d", src);
-        }
-    }
-
-    inline void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src)
-    {
-        switch (src) {
-            case static_cast<int32_t>(ListItemGroupArea::NONE_AREA): dst = ARK_LIST_ITEM_GROUP_AREA_NONE; break;
-            case static_cast<int32_t>(ListItemGroupArea::IN_LIST_ITEM_AREA):
-                dst = ARK_LIST_ITEM_GROUP_AREA_IN_LIST_ITEM_AREA; break;
-            case static_cast<int32_t>(ListItemGroupArea::IN_HEADER_AREA):
-                dst = ARK_LIST_ITEM_GROUP_AREA_IN_HEADER_AREA; break;
-            case static_cast<int32_t>(ListItemGroupArea::IN_FOOTER_AREA):
-                dst = ARK_LIST_ITEM_GROUP_AREA_IN_FOOTER_AREA; break;
-            default: dst = static_cast<Ark_ListItemGroupArea>(-1); LOGE("Unexpected enum value: %{public}d", src);
-        }
-    }
-
     inline void AssignArkValue(Ark_VisibleListContentInfo& dst, const ListItemIndex& src)
     {
         dst.index = ArkValue<Ark_Number>(src.index);
@@ -182,152 +147,41 @@ namespace OHOS::Ace::NG::Converter {
             ArkValue<Opt_Number>(Ark_Empty{}) : ArkValue<Opt_Number>(src.indexInGroup);
     }
 
-    inline void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src)
-    {
-        switch (src) {
-            case ScrollState::IDLE: dst = ARK_SCROLL_STATE_IDLE; break;
-            case ScrollState::SCROLL: dst = ARK_SCROLL_STATE_SCROLL; break;
-            case ScrollState::FLING: dst = ARK_SCROLL_STATE_FLING; break;
-            default: dst = static_cast<Ark_ScrollState>(-1);
-                LOGE("Unexpected enum value in ScrollState: %{public}d", src);
-        }
-    }
-
-    inline void AssignArkValue(Ark_BarState& dst, const DisplayMode& src)
-    {
-        switch (src) {
-            case DisplayMode::OFF: dst = ARK_BAR_STATE_OFF; break;
-            case DisplayMode::AUTO: dst = ARK_BAR_STATE_AUTO; break;
-            case DisplayMode::ON: dst = ARK_BAR_STATE_ON; break;
-            default: dst = static_cast<Ark_BarState>(-1);
-                LOGE("Unexpected enum value in DisplayMode: %{public}d", src);
-        }
-    }
-
-    inline void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src)
-    {
-        switch (src) {
-            case EdgeEffect::SPRING: dst = ARK_EDGE_EFFECT_SPRING; break;
-            case EdgeEffect::FADE: dst = ARK_EDGE_EFFECT_FADE; break;
-            case EdgeEffect::NONE: dst = ARK_EDGE_EFFECT_NONE; break;
-            default: dst = static_cast<Ark_EdgeEffect>(-1);
-                LOGE("Unexpected enum value in EdgeEffect: %{public}d", src);
-        }
-    }
-
-    inline void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src)
-    {
-        switch (src) {
-            case NestedScrollMode::SELF_ONLY: dst = ARK_NESTED_SCROLL_MODE_SELF_ONLY; break;
-            case NestedScrollMode::SELF_FIRST: dst = ARK_NESTED_SCROLL_MODE_SELF_FIRST; break;
-            case NestedScrollMode::PARENT_FIRST: dst = ARK_NESTED_SCROLL_MODE_PARENT_FIRST; break;
-            case NestedScrollMode::PARALLEL: dst = ARK_NESTED_SCROLL_MODE_PARALLEL; break;
-            default: {
-                dst = static_cast<Ark_NestedScrollMode>(-1);
-                LOGE("Unexpected enum value in NestedScrollMode: %{public}d", src);
-            }
-        }
-    }
-
-    inline void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src)
-    {
-        dst.scrollForward = ArkValue<Ark_NestedScrollMode>(src.forward);
-        dst.scrollBackward = ArkValue<Ark_NestedScrollMode>(src.backward);
-    }
-
     inline void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src)
     {
         dst.alwaysEnabled = src;
     }
 
-    inline void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src)
+    inline void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
     {
-        switch (src) {
-            case V2::StickyStyle::NONE: dst = ARK_STICKY_STYLE_NONE; break;
-            case V2::StickyStyle::HEADER: dst = ARK_STICKY_STYLE_HEADER; break;
-            case V2::StickyStyle::FOOTER: dst = ARK_STICKY_STYLE_FOOTER; break;
-            default: dst = static_cast<Ark_StickyStyle>(-1);
-                LOGE("Unexpected enum value in V2::StickyStyle: %{public}d", src);
-        }
+        dst.id = ArkValue<Ark_Number>(src.resource);
+        dst.type = ArkValue<Ark_Number>(static_cast<Ark_Int32>(NodeModifier::ResourceType::FLOAT));
+        dst.params.tag = ARK_TAG_UNDEFINED;
     }
 
-    inline void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src)
-    {
-        switch (src) {
-            case V2::ListItemAlign::START: dst = ARK_LIST_ITEM_ALIGN_START; break;
-            case V2::ListItemAlign::CENTER: dst = ARK_LIST_ITEM_ALIGN_CENTER; break;
-            case V2::ListItemAlign::END: dst = ARK_LIST_ITEM_ALIGN_END; break;
-            default: dst = static_cast<Ark_ListItemAlign>(-1);
-                LOGE("Unexpected enum value in V2::ListItemAlign: %{public}d", src);
-        }
-    }
-
-    inline void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src)
-    {
-        switch (src) {
-            case V2::ScrollSnapAlign::NONE: dst = ARK_SCROLL_SNAP_ALIGN_NONE; break;
-            case V2::ScrollSnapAlign::START: dst = ARK_SCROLL_SNAP_ALIGN_START; break;
-            case V2::ScrollSnapAlign::CENTER: dst = ARK_SCROLL_SNAP_ALIGN_CENTER; break;
-            case V2::ScrollSnapAlign::END: dst = ARK_SCROLL_SNAP_ALIGN_END; break;
-            default: dst = static_cast<Ark_ScrollSnapAlign>(-1);
-                LOGE("Unexpected enum value in V2::ScrollSnapAlign: %{public}d", src);
-        }
-    }
-
-    inline void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src)
-    {
-        switch (src) {
-            case NavigationMode::STACK: dst = ARK_NAVIGATION_MODE_STACK; break;
-            case NavigationMode::SPLIT: dst = ARK_NAVIGATION_MODE_SPLIT; break;
-            case NavigationMode::AUTO: dst = ARK_NAVIGATION_MODE_AUTO; break;
-            default: {
-                dst = static_cast<Ark_NavigationMode>(-1);
-                LOGE("Unexpected enum value in NavigationMode: %{public}d", src);
-            }
-        }
-    }
-
-    void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
-    void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
-    void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
-
-    inline void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src)
-    {
-        switch (src) {
-            case V2::StickyMode::NONE: dst = ARK_STICKY_NONE; break;
-            case V2::StickyMode::NORMAL: dst = ARK_STICKY_NORMAL; break;
-            case V2::StickyMode::OPACITY: dst = ARK_STICKY_OPACITY; break;
-            default: dst = static_cast<Ark_Sticky>(-1);
-                LOGE("Unexpected enum value in V2::StickyMode: %{public}d", src);
-        }
-    }
-
-    inline void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src)
-    {
-        switch (src) {
-            case V2::ListItemStyle::NONE: dst = ARK_LIST_ITEM_STYLE_NONE; break;
-            case V2::ListItemStyle::CARD: dst = ARK_LIST_ITEM_STYLE_CARD; break;
-            default: dst = static_cast<Ark_ListItemStyle>(-1);
-                LOGE("Unexpected enum value in V2::ListItemStyle: %{public}d", src);
-        }
-    }
-
-    inline void AssignArkValue(Ark_ListItemGroupStyle& dst, const V2::ListItemGroupStyle& src)
-    {
-        switch (src) {
-            case V2::ListItemGroupStyle::NONE: dst = ARK_LIST_ITEM_GROUP_STYLE_NONE; break;
-            case V2::ListItemGroupStyle::CARD: dst = ARK_LIST_ITEM_GROUP_STYLE_CARD; break;
-            default: dst = static_cast<Ark_ListItemGroupStyle>(-1);
-                LOGE("Unexpected enum value in ListItemGroupStyle: %{public}d", src);
-        }
-    }
-
-    void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
-    void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
+    void AssignArkValue(Ark_Axis& dst, const Axis& src);
+    void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
-    void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
-    void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
-    void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
+    void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
+    void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src);
+    void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src);
+    void AssignArkValue(Ark_ListItemGroupStyle& dst, const V2::ListItemGroupStyle& src);
+    void AssignArkValue(Ark_ListItemStyle& dst, const V2::ListItemStyle& src);
+    void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src);
+    void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
+    void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src);
+    void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
+    void AssignArkValue(Ark_ScrollState& dst, const ScrollState& src);
+    void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src);
+    void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);
+    void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionEffectType& src);
+    void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
+    void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
+
+    inline void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src)
+    {
+        AssignArkValue(dst, static_cast<ListItemGroupArea>(src));
+    }
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 
@@ -384,100 +238,6 @@ namespace OHOS::Ace::NG::Converter {
         AssignArkValue(result, std::forward<From>(src));
         return result;
     }
-
-    /**
-     * Template class ArkArrayHolder should be used to prepare values of Array_... types.
-     *
-     * Arrays can be automatically converted from std::vector, std::array, C style array and initialization list.
-     *
-     * Examples:
-     *  std::vector<std::string> vec{"abc", "1234"};
-     *  Converter::ArkArrayHolder<Array_String> vecHolder(vec);
-     *  Array_String stringArrayResult = vecHolder.ArkValue();
-     *
-     *  Converter::ArkArrayHolder<Array_String> listHolder({"def", "5678"});
-     *  Array_String stringArrayResult = listHolder.ArkValue();
-     *
-     *  std::string_view svArray[] = {"ghi", "9012"};
-     *  Converter::ArkArrayHolder<Array_String> cArrayHolder(svArray, 2);
-     *  Array_String stringArrayResult = cArrayHolder.ArkValue();
-     *
-     *  auto asArray = std::array{Converter::ArkValue<Ark_String>("jkl"), Converter::ArkValue<Ark_String>("3456")};
-     *  Converter::ArkArrayHolder<Array_String> arrayHolder1(asArray);
-     *  Array_String stringArrayResult = arrayHolder1.ArkValue();
-     *
-     * ATTENTION!!! It is impossible to use temporary object of this type.
-     * Always store data in variable while it is used!
-     * Following is invalid and will not compile:
-     *
-     * Array_String stringArrayResult = Converter::ArkArrayHolder<Array_String>({"Error!"}).ArkValue()
-     */
-    template<typename T>
-    class ArkArrayHolder {
-        using Val = std::remove_pointer_t<decltype(T().array)>;
-        std::vector<Val> data_;
-    public:
-        template<typename P>
-        explicit ArkArrayHolder(const std::vector<P>& data)
-        {
-            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
-                return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
-            });
-        }
-        template<std::size_t N, typename P>
-        explicit ArkArrayHolder(const std::array<P, N>& data)
-        {
-            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
-                return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
-            });
-        }
-        template<typename P>
-        ArkArrayHolder(const P *data, std::size_t size)
-        {
-            std::transform(data, data + size, std::back_inserter(data_), [](const P& src) {
-                return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
-            });
-        }
-        template<typename P>
-        explicit ArkArrayHolder(std::initializer_list<P> data)
-        {
-            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
-                return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
-            });
-        }
-
-        T ArkValue() &
-        {
-            return {
-                .array = data_.data(),
-                .length = data_.size(),
-            };
-        }
-
-        void ArkValue() &&
-        {
-        }
-
-        template<typename O>
-        O OptValue() &
-        {
-            static_assert(std::is_same_v<T, decltype(O().value)>, "Opt_Array_XXX type should be same as Array_XXX");
-            T value = {
-                .array = data_.data(),
-                .length = data_.size(),
-            };
-            return {
-                .tag = ARK_TAG_OBJECT,
-                .value = value,
-            };
-        }
-
-        template<typename O>
-        void OptValue() &&
-        {
-            static_assert(std::is_same_v<T, decltype(O().value)>, "Opt_Array_XXX type should be same as Array_XXX");
-        }
-    };
 
     // Handle Union types
     /**
@@ -622,6 +382,116 @@ namespace OHOS::Ace::NG::Converter {
             .tag = ARK_TAG_UNDEFINED,
         };
     }
+
+    /**
+     * Template class ArkArrayHolder should be used to prepare values of Array_... types.
+     *
+     * Arrays can be automatically converted from std::vector, std::array, C style array and initialization list.
+     *
+     * Examples:
+     *  std::vector<std::string> vec{"abc", "1234"};
+     *  Converter::ArkArrayHolder<Array_String> vecHolder(vec);
+     *  Array_String stringArrayResult = vecHolder.ArkValue();
+     *
+     *  Converter::ArkArrayHolder<Array_String> listHolder({"def", "5678"});
+     *  Array_String stringArrayResult = listHolder.ArkValue();
+     *
+     *  std::string_view svArray[] = {"ghi", "9012"};
+     *  Converter::ArkArrayHolder<Array_String> cArrayHolder(svArray, 2);
+     *  Array_String stringArrayResult = cArrayHolder.ArkValue();
+     *
+     *  auto asArray = std::array{Converter::ArkValue<Ark_String>("jkl"), Converter::ArkValue<Ark_String>("3456")};
+     *  Converter::ArkArrayHolder<Array_String> arrayHolder1(asArray);
+     *  Array_String stringArrayResult = arrayHolder1.ArkValue();
+     *
+     * ATTENTION!!! It is impossible to use temporary object of this type.
+     * Always store data in variable while it is used!
+     * Following is invalid and will not compile:
+     *
+     * Array_String stringArrayResult = Converter::ArkArrayHolder<Array_String>({"Error!"}).ArkValue()
+     */
+    template<typename T, typename U = void>
+    class ArkArrayHolder {
+        using Val = std::remove_pointer_t<decltype(T().array)>;
+        std::vector<Val> data_;
+    public:
+        template<typename P>
+        explicit ArkArrayHolder(const std::vector<P>& data)
+        {
+            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
+                if constexpr (std::is_void_v<U>) {
+                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
+                } else {
+                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
+                }
+            });
+        }
+        template<std::size_t N, typename P>
+        explicit ArkArrayHolder(const std::array<P, N>& data)
+        {
+            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
+                if constexpr (std::is_void_v<U>) {
+                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
+                } else {
+                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
+                }
+            });
+        }
+        template<typename P>
+        ArkArrayHolder(const P *data, std::size_t size)
+        {
+            std::transform(data, data + size, std::back_inserter(data_), [](const P& src) {
+                if constexpr (std::is_void_v<U>) {
+                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
+                } else {
+                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
+                }
+            });
+        }
+        template<typename P>
+        explicit ArkArrayHolder(std::initializer_list<P> data)
+        {
+            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
+                if constexpr (std::is_void_v<U>) {
+                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
+                } else {
+                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
+                }
+            });
+        }
+
+        T ArkValue() &
+        {
+            return {
+                .array = data_.data(),
+                .length = data_.size(),
+            };
+        }
+
+        void ArkValue() &&
+        {
+        }
+
+        template<typename O>
+        O OptValue() &
+        {
+            static_assert(std::is_same_v<T, decltype(O().value)>, "Opt_Array_XXX type should be same as Array_XXX");
+            T value = {
+                .array = data_.data(),
+                .length = data_.size(),
+            };
+            return {
+                .tag = ARK_TAG_OBJECT,
+                .value = value,
+            };
+        }
+
+        template<typename O>
+        void OptValue() &&
+        {
+            static_assert(std::is_same_v<T, decltype(O().value)>, "Opt_Array_XXX type should be same as Array_XXX");
+        }
+    };
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_REVERSE_CONVERTER_H

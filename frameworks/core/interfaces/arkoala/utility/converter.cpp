@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/node/node_api.h"
 #include "converter.h"
+#include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
 Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
@@ -60,6 +60,50 @@ Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
     return touch;
 }
 
+Ark_ClickEvent ConvertClickEventInfo(OHOS::Ace::GestureEvent& info)
+{
+    Ark_ClickEvent onClick;
+    Offset globalOffset = info.GetGlobalLocation();
+    Offset localOffset = info.GetLocalLocation();
+    Offset screenOffset = info.GetScreenLocation();
+
+    onClick.axisHorizontal = ArkValue<Opt_Number>();
+    onClick.axisVertical = ArkValue<Opt_Number>();
+    onClick.displayX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+    onClick.displayY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
+
+    onClick.pressure = ArkValue<Ark_Number>(0.0f);
+    onClick.preventDefault.id = 0;
+
+    onClick.screenX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    onClick.screenY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+    onClick.source = static_cast<Ark_SourceType>(info.GetSourceDevice());
+
+    onClick.sourceTool = static_cast<Ark_SourceTool>(0);
+    onClick.deviceId = ArkValue<Opt_Number>();
+    onClick.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+    onClick.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+    onClick.target.area.position.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+    onClick.target.area.position.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+    onClick.target.area.height = ArkValue<Ark_Length>(0);
+    onClick.target.area.width = ArkValue<Ark_Length>(0);
+
+    onClick.tiltX = ArkValue<Ark_Number>(0);
+    onClick.tiltY = ArkValue<Ark_Number>(0);
+
+    onClick.timestamp = ArkValue<Ark_Number>(
+        static_cast<float>(info.GetTimeStamp().time_since_epoch().count()));
+
+    onClick.windowX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    onClick.windowY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+    onClick.x = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    onClick.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+
+    return onClick;
+}
+
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
@@ -77,8 +121,8 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
     if (resource.id.tag == ARK_TAG_INT32 && resource.type.tag == ARK_TAG_INT32) {
         id_ = resource.id.i32;
         type_ = static_cast<NodeModifier::ResourceType>(resource.type.i32);
-        bundleName_ = std::string(resource.bundleName.chars);
-        moduleName_ = std::string(resource.moduleName.chars);
+        bundleName_ = Convert<std::string>(resource.bundleName);
+        moduleName_ = Convert<std::string>(resource.moduleName);
         if (resource.params.tag != ARK_TAG_UNDEFINED) {
             for (int i = 0; i < resource.params.value.length; i++) {
                 params_.emplace_back(resource.params.value.array[i].chars);
@@ -140,7 +184,7 @@ std::optional<StringArray> ResourceConverter::ToStringArray()
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == NodeModifier::ResourceType::STRING) {
+    if (type_ == NodeModifier::ResourceType::FLOAT) {
         return themeConstants_->GetDimension(id_);
     }
     return std::nullopt;
@@ -148,11 +192,16 @@ std::optional<Dimension> ResourceConverter::ToDimension()
 
 std::optional<float> ResourceConverter::ToFloat()
 {
+    std::optional<float> optFloat = std::nullopt;
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
     if (type_ == NodeModifier::ResourceType::FLOAT) {
-        return static_cast<float>(themeConstants_->GetDouble(id_));
+        if (id_ == -1 && params_.size() > 0) {
+            optFloat = static_cast<float>(themeConstants_->GetDoubleByName(params_[0]));
+        } else {
+            optFloat = static_cast<float>(themeConstants_->GetDouble(id_));
+        }
     }
-    return std::nullopt;
+    return optFloat;
 }
 
 std::optional<int32_t> ResourceConverter::ToInt()
@@ -196,7 +245,8 @@ std::optional<Color> ResourceConverter::ToColor()
     return result;
 }
 
-Shadow ToShadow(const Ark_ShadowOptions& src)
+template<>
+Shadow Convert(const Ark_ShadowOptions& src)
 {
     Shadow shadow;
 
@@ -359,4 +409,48 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
     return nullptr;
 }
 
+template<>
+void AssignTo(std::optional<float>& dst, const Ark_String& src)
+{
+    auto value = Convert<std::string>(src);
+    double result;
+    if (StringUtils::StringToDouble(value, result)) {
+        dst = result;
+    }
+}
+
+template<>
+Dimension Convert(const Ark_Length& src)
+{
+    if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
+        auto resource = ArkValue<Ark_Resource>(src);
+        ResourceConverter converter(resource);
+        return converter.ToDimension().value_or(Dimension());
+    } else {
+        return Dimension(src.value, static_cast<DimensionUnit>(src.unit));
+    }
+}
+
+template<>
+PaddingProperty Convert(const Ark_Padding& src)
+{
+    PaddingProperty padding;
+    padding.left = Converter::OptConvert<CalcLength>(src.left);
+    padding.top = Converter::OptConvert<CalcLength>(src.top);
+    padding.right = Converter::OptConvert<CalcLength>(src.right);
+    padding.bottom = Converter::OptConvert<CalcLength>(src.bottom);
+    return padding;
+}
+
+template<>
+CalcLength Convert(const Ark_Length& src)
+{
+    if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
+        auto resource = ArkValue<Ark_Resource>(src);
+        ResourceConverter converter(resource);
+        Dimension value = converter.ToDimension().value_or(Dimension());
+        return CalcLength(value.Value(), value.Unit());
+    }
+    return CalcLength(src.value, static_cast<OHOS::Ace::DimensionUnit>(src.unit));
+}
 } // namespace OHOS::Ace::NG::Converter
