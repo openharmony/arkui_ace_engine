@@ -175,7 +175,7 @@ void RichEditorModelNG::SetAboutToDelete(std::function<bool(const RichEditorDele
 void RichEditorModelNG::SetAboutToDelete(FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetAboutToDelete(std::move(func));
 }
@@ -233,7 +233,7 @@ void RichEditorModelNG::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& f
 void RichEditorModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPaste(std::move(func));
 }
@@ -461,7 +461,7 @@ void RichEditorModelNG::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& fun
 void RichEditorModelNG::SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCut(std::move(func));
 }
@@ -476,7 +476,7 @@ void RichEditorModelNG::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& fu
 void RichEditorModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    auto eventHub = frameNode->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnCopy(std::move(func));
 }
@@ -553,5 +553,11 @@ void RichEditorModelNG::SetBarState(DisplayMode mode)
 void RichEditorModelNG::SetBarState(FrameNode* frameNode, DisplayMode mode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, mode, frameNode);
+}
+
+RefPtr<NG::FrameNode> RichEditorModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(
+        V2::RICH_EDITOR_DRAG_ETS_TAG, nodeId, AceType::MakeRefPtr<RichEditorPattern>());
 }
 } // namespace OHOS::Ace::NG
