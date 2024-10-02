@@ -1178,19 +1178,18 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
                 result = HandleDragUpdate(offset, velocity);
             }
         } else {
-            if (!parent || ((Negative(offset) && (nestedScroll.forward == NestedScrollMode::SELF_ONLY ||
-                                                     nestedScroll.forward == NestedScrollMode::PARALLEL)) ||
-                               (Positive(offset) && (nestedScroll.backward == NestedScrollMode::SELF_ONLY ||
-                                                        nestedScroll.backward == NestedScrollMode::PARALLEL)))) {
-                return result;
-            } else {
+            bool selfScroll = !parent || ((Negative(offset) && (nestedScroll.forward == NestedScrollMode::SELF_ONLY ||
+                                                             nestedScroll.forward == NestedScrollMode::PARALLEL)) ||
+                                       (Positive(offset) && (nestedScroll.backward == NestedScrollMode::SELF_ONLY ||
+                                                                nestedScroll.backward == NestedScrollMode::PARALLEL)));
+            if (!selfScroll) {
                 result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, velocity);
             }
         }
-        return result;
     } else if (state == NestedState::CHILD_OVER_SCROLL) {
-        if (parent && ((Negative(offset) && nestedScroll.forward == NestedScrollMode::SELF_FIRST) ||
-                          (Positive(offset) && nestedScroll.backward == NestedScrollMode::SELF_FIRST))) {
+        bool parentScroll = parent && ((Negative(offset) && nestedScroll.forward == NestedScrollMode::SELF_FIRST) ||
+                          (Positive(offset) && nestedScroll.backward == NestedScrollMode::SELF_FIRST));
+        if (parentScroll) {
             result = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL, velocity);
             if (!NearZero(result.remain)) {
                 result = HandleDragUpdate(result.remain, velocity);
