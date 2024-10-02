@@ -1167,6 +1167,7 @@ private:
     bool needResetCurrentIndex_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
+    bool prevFrameAnimationRunning_ = false;
     std::optional<bool> isSwipeByGroup_;
     std::set<WeakPtr<FrameNode>> groupedItems_;
 

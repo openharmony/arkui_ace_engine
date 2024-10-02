@@ -1026,6 +1026,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         if (!isInit) {
             OnIndexChange(true);
         }
+
+        if (SupportSwiperCustomAnimation() && prevFrameAnimationRunning_) {
+            indexsInAnimation_.insert(jumpIndex_.value());
+        }
+
         jumpIndex_.reset();
         pauseTargetIndex_.reset();
         auto delayTime = GetInterval() - GetDuration();
@@ -1101,6 +1106,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     oldChildrenSize_ = TotalCount();
     oldRealTotalCount_ = RealTotalCount();
     needFireCustomAnimationEvent_ = true;
+    prevFrameAnimationRunning_ = false;
 
     if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
         StartAutoPlay();
@@ -1988,6 +1994,7 @@ void SwiperPattern::StopTranslateAnimation()
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         translateAnimationIsRunning_ = false;
+        prevFrameAnimationRunning_ = true;
 
         if (NearZero(translateAnimationEndPos_ - currentOffset_)) {
             AnimationUtils::StopAnimation(translateAnimation_);
