@@ -69,6 +69,7 @@ void SetRowOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
     auto opts = Converter::OptConvert<RowOptions>(*options);
     auto space = opts ? opts->space : std::nullopt;
     RowModelNG::SetSpace(frameNode, space.value_or(0.0_px));
@@ -96,13 +97,13 @@ void JustifyContentImpl(Ark_NativePointer node,
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    CHECK_NULL_VOID(value);
     LOGW("ARKOALA RowAttribute_PointLightImpl -> Method is not FULLY implemented.");
     auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(
         LightIlluminated, (float)Converter::ConvertOrDefault(value->illuminated, 0),
         frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(
-        Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
 }
 void ReverseImpl(Ark_NativePointer node,
                  const Opt_Boolean* isReversed)                 

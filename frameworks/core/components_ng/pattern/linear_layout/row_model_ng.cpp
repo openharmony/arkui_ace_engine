@@ -38,6 +38,7 @@ void RowModelNG::Create(const std::optional<Dimension>& space, AlignDeclaration*
 
 void RowModelNG::SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(space);
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value(), frameNode);

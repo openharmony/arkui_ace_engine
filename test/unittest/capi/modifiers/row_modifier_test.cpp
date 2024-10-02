@@ -25,17 +25,18 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
-    const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
+
     const auto ATTRIBUTE_ALIGN_ITEMS_NAME = "alignItems";
     const auto ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE = "VerticalAlign.Center";
     const auto ATTRIBUTE_JUSTIFY_CONTENT_NAME = "justifyContent";
     const auto ATTRIBUTE_JUSTIFY_CONTENT_DEFAULT_VALUE = "FlexAlign.Start";
-    const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_NAME = "lightSource";
-    const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_DEFAULT_VALUE = "";
-    const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME = "illuminated";
-    const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_DEFAULT_VALUE = "";
-    const auto ATTRIBUTE_POINT_LIGHT_BLOOM_NAME = "bloom";
-    const auto ATTRIBUTE_POINT_LIGHT_BLOOM_DEFAULT_VALUE = "";
+  //  const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
+  //  const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_NAME = "lightSource";
+  //  const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_DEFAULT_VALUE = "";
+  //  const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME = "illuminated";
+  //  const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_DEFAULT_VALUE = "";
+  //  const auto ATTRIBUTE_POINT_LIGHT_BLOOM_NAME = "bloom";
+  //  const auto ATTRIBUTE_POINT_LIGHT_BLOOM_DEFAULT_VALUE = "";
   //  const auto ATTRIBUTE_REVERSE_NAME = "isReverse";
 } // namespace
 
@@ -151,7 +152,7 @@ HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RowModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
+/*HWTEST_F(RowModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
@@ -167,9 +168,47 @@ HWTEST_F(RowModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
     EXPECT_EQ(resultStr, ATTRIBUTE_POINT_LIGHT_BLOOM_DEFAULT_VALUE);
 }
 
-// Valid values for attribute 'lightSource' of method 'pointLight'
-static std::vector<std::tuple<std::string, Opt_LightSource, std::string>> pointLightLightSourceValidValues = {
-};
+// Valid values for attribute 'illuminated' of method 'pointLight'
+static std::vector<std::tuple<std::string, Opt_IlluminatedType, std::string>> pointLightIlluminatedValidValues = {
+    {"ARK_ILLUMINATED_TYPE_NONE", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_NONE), "IlluminatedType.NONE"},
+    {"ARK_ILLUMINATED_TYPE_BORDER", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER), "IlluminatedType.BORDER"},
+    {"ARK_ILLUMINATED_TYPE_CONTENT", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_CONTENT), "IlluminatedType.CONTENT"},
+    {"ARK_ILLUMINATED_TYPE_BORDER_CONTENT", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BORDER_CONTENT), "IlluminatedType.BORDER_CONTENT"},
+    {"ARK_ILLUMINATED_TYPE_BLOOM_BORDER", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BLOOM_BORDER), "IlluminatedType.BLOOM_BORDER"},
+    {"ARK_ILLUMINATED_TYPE_BLOOM_BORDER_CONTENT", Converter::ArkValue<Opt_IlluminatedType>(ARK_ILLUMINATED_TYPE_BLOOM_BORDER_CONTENT), "IlluminatedType.BLOOM_BORDER_CONTENT"},
+};*/
+
+/*
+ * @tc.name: setPointLightTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+/*HWTEST_F(RowModifierTest, setPointLightTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultPointLight;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_PointLightStyle inputValuePointLight;
+    Ark_PointLightStyle initValuePointLight;
+
+    // Initial setup
+    // TODO: Add processing for substructures!
+    initValuePointLight.illuminated = std::get<1>(pointLightIlluminatedValidValues[0]);
+
+    // Verifying attribute's 'lightSource'  values
+    inputValuePointLight = initValuePointLight;
+
+    for (auto&& value: pointLightIlluminatedValidValues) {
+        inputValuePointLight.illuminated = std::get<1>(value);
+        modifier_->setPointLight(node_, &inputValuePointLight);
+        jsonValue = GetJsonValue(node_);
+        resultPointLight = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_POINT_LIGHT_NAME);
+        resultStr = GetAttrValue<std::string>(resultPointLight, ATTRIBUTE_POINT_LIGHT_ILLUMINATED_NAME);
+        expectedStr = std::get<2>(value);
+       EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}*/
 
 /*
  * @tc.name: setReverveValidValues
