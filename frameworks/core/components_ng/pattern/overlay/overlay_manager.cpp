@@ -3865,10 +3865,12 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     if (!isAllowedBeCovered_) {
         TAG_LOGI(AceLogTag::ACE_OVERLAY,
             "modalNode->GetParent() %{public}d mark IsProhibitedAddChildNode when sessionId %{public}d,"
-            "prohibitedRemoveByRouter: %{public}d.",
-            modalNodeParent->GetId(), targetId, modalStyle.prohibitedRemoveByRouter);
+            "prohibitedRemoveByRouter: %{public}d, isAllowAddChildBelowModalUec: %{public}d.",
+            modalNodeParent->GetId(), targetId, modalStyle.prohibitedRemoveByRouter,
+            modalStyle.isAllowAddChildBelowModalUec);
         if (AddCurSessionId(targetId)) {
             modalNodeParent->UpdateModalUiextensionCount(true);
+            modalNode->SetIsAllowAddChildBelowModalUec(modalStyle.isAllowAddChildBelowModalUec);
         }
     }
 
@@ -5945,6 +5947,7 @@ int32_t OverlayManager::CreateModalUIExtension(
         modalStyle.modalTransition = NG::ModalTransition::NONE;
         modalStyle.isUIExtension = true;
         modalStyle.prohibitedRemoveByRouter = config.prohibitedRemoveByRouter;
+        modalStyle.isAllowAddChildBelowModalUec = config.isAllowAddChildBelowModalUec;
         SetIsAllowedBeCovered(config.isAllowedBeCovered);
         // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
         BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, nullptr,
@@ -5954,6 +5957,7 @@ int32_t OverlayManager::CreateModalUIExtension(
         auto bindModalCallback = [weak = WeakClaim(this), buildNodeFunc, sessionId, id = Container::CurrentId(),
             isAllowedBeCovered = config.isAllowedBeCovered,
             prohibitedRemoveByRouter = config.prohibitedRemoveByRouter,
+            isAllowAddChildBelowModalUec = config.isAllowAddChildBelowModalUec,
             doAfterAsyncModalBinding = std::move(config.doAfterAsyncModalBinding)]() {
             ContainerScope scope(id);
             auto overlayManager = weak.Upgrade();
@@ -5963,6 +5967,7 @@ int32_t OverlayManager::CreateModalUIExtension(
             modalStyle.modalTransition = NG::ModalTransition::NONE;
             modalStyle.isUIExtension = true;
             modalStyle.prohibitedRemoveByRouter = prohibitedRemoveByRouter;
+            modalStyle.isAllowAddChildBelowModalUec = isAllowAddChildBelowModalUec;
             overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr,
                 nullptr, nullptr, ContentCoverParam(), nullptr, -(sessionId));
             overlayManager->SetIsAllowedBeCovered(true);
