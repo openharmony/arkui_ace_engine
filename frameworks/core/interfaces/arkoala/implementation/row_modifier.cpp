@@ -68,6 +68,7 @@ void SetRowOptionsImpl(Ark_NativePointer node,
                        const Opt_RowOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     auto opts = Converter::OptConvert<RowOptions>(*options);
     auto space = opts ? opts->space : std::nullopt;
     RowModelNG::SetSpace(frameNode, space.value_or(0.0_px));
@@ -80,7 +81,7 @@ void AlignItemsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto flexAlign = Converter::OptConvert<FlexAlign>(value);
+    auto flexAlign = Converter::ConvertOrDefault(value, FlexAlign::CENTER);
     RowModelNG::SetAlignItems(frameNode, flexAlign);
 }
 void JustifyContentImpl(Ark_NativePointer node,
@@ -89,7 +90,7 @@ void JustifyContentImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto flexAlign = Converter::OptConvert<FlexAlign>(value);
+    auto flexAlign = Converter::ConvertOrDefault(value, FlexAlign::FLEX_START);
     RowModelNG::SetJustifyContent(frameNode, flexAlign);
 }
 void PointLightImpl(Ark_NativePointer node,
@@ -104,8 +105,12 @@ void PointLightImpl(Ark_NativePointer node,
         Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
 }
 void ReverseImpl(Ark_NativePointer node,
-                 const Opt_Boolean* isReversed)
+                 const Opt_Boolean* isReversed)                 
 {
+    CHECK_NULL_VOID(isReversed);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RowModelNG::SetIsReverse(frameNode, Converter::OptConvert<bool>(*isReversed));
 }
 } // RowAttributeModifier
 const GENERATED_ArkUIRowModifier* GetRowModifier()

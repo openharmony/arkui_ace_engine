@@ -32,7 +32,7 @@ public:
     static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetJustifyContent(FrameNode* frameNode, const std::optional<FlexAlign>& flexAlign);
     static void SetAlignItems(FrameNode* frameNode, const std::optional<FlexAlign>& flexAlign);
-    static void SetIsReverse(FrameNode* frameNode, bool isReverse);
+    static void SetIsReverse(FrameNode* frameNode, const std::optional<bool> isReverse);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static FlexAlign GetJustifyContent(FrameNode* frameNode);
     static FlexAlign GetAlignItems(FrameNode* frameNode);

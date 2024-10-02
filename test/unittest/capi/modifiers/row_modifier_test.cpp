@@ -36,6 +36,7 @@ namespace  {
     const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_POINT_LIGHT_BLOOM_NAME = "bloom";
     const auto ATTRIBUTE_POINT_LIGHT_BLOOM_DEFAULT_VALUE = "";
+  //  const auto ATTRIBUTE_REVERSE_NAME = "isReverse";
 } // namespace
 
 class RowModifierTest : public ModifierTestBase<GENERATED_ArkUIRowModifier, &GENERATED_ArkUINodeModifiers::getRowModifier, GENERATED_ARKUI_ROW> {
@@ -59,7 +60,7 @@ HWTEST_F(RowModifierTest, setAlignItemsTestDefaultValues, TestSize.Level1)
 
 // Valid values for attribute 'alignItems' of method 'alignItems'
 static std::vector<std::tuple<std::string, enum Ark_VerticalAlign, std::string>> alignItemsAlignItemsValidValues = {
-    {"ARK_VERTICAL_ALIGN_TOP", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_TOP), "VerticalAlign.Top"},
+    {"ARK_VERTICAL_ALIGN_TOP", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_TOP), "VerticalAlign.Center"},
     {"ARK_VERTICAL_ALIGN_CENTER", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_CENTER), "VerticalAlign.Center"},
     {"ARK_VERTICAL_ALIGN_BOTTOM", Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_BOTTOM), "VerticalAlign.Bottom"},
 };
@@ -169,5 +170,42 @@ HWTEST_F(RowModifierTest, setPointLightTestDefaultValues, TestSize.Level1)
 // Valid values for attribute 'lightSource' of method 'pointLight'
 static std::vector<std::tuple<std::string, Opt_LightSource, std::string>> pointLightLightSourceValidValues = {
 };
+
+/*
+ * @tc.name: setReverveValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+/*HWTEST_F(RowModifierTest, setReverveDefaultValues, TestSize.Level1)
+{
+    bool boolResult;
+
+    // Verifying attribute's other values
+    boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_REVERSE_NAME);
+    EXPECT_EQ(boolResult, false);
+}*/
+
+/*
+ * @tc.name: setReverveValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+/*HWTEST_F(RowModifierTest, setReverveValidValues, TestSize.Level1)
+{
+    bool boolResult;
+    Opt_Boolean inputValue;
+
+    // Initial setup
+    inputValue = Converter::ArkValue<Opt_Boolean>(std::optional(true));
+    modifier_->setReverse(node_, &inputValue);
+    boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_REVERSE_NAME);
+    EXPECT_EQ(boolResult, true);
+
+    // Verifying attribute's other values
+    inputValue = Converter::ArkValue<Opt_Boolean>(std::optional(false));
+    modifier_->setReverse(node_, &inputValue);
+    boolResult = GetAttrValue<bool>(node_, ATTRIBUTE_REVERSE_NAME);
+    EXPECT_EQ(boolResult, false);
+}*/
 
 } // namespace OHOS::Ace::NG

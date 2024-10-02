@@ -72,9 +72,14 @@ void RowModelNG::SetIsReverse(bool isReverse)
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse);
 }
 
-void RowModelNG::SetIsReverse(FrameNode* frameNode, bool isReverse)
+void RowModelNG::SetIsReverse(FrameNode* frameNode, const std::optional<bool> isReverse)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (isReverse.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, isReverse.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, IsReverse, frameNode);
+    }
 }
 
 void RowModelNG::SetJustifyContent(FrameNode* frameNode, const std::optional<FlexAlign>& flexAlign)
