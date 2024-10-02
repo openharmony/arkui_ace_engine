@@ -349,6 +349,7 @@ void CounterModelNG::SetWidth(FrameNode* frameNode, const CalcLength& width)
 
 void CounterModelNG::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
+    CHECK_NULL_VOID(frameNode);
     if (color) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color.value(), frameNode);
     } else {
