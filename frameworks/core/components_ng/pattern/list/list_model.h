@@ -54,7 +54,7 @@ public:
     virtual void SetLaneGutter(const Dimension& laneGutter) = 0;
     virtual void SetListItemAlign(V2::ListItemAlign listItemAlign) = 0;
     virtual void SetMultiSelectable(bool selectable) = 0;
-    virtual void SetCachedCount(int32_t cachedCount) = 0;
+    virtual void SetCachedCount(int32_t cachedCount, bool show = false) = 0;
     virtual void SetHasWidth(bool hasWidth) = 0;
     virtual void SetHasHeight(bool hasHeight) = 0;
     virtual void SetSticky(V2::StickyStyle stickyStyle) = 0;
