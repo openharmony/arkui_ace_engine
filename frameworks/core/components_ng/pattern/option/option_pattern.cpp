@@ -317,11 +317,15 @@ void OptionPattern::UpdateNextNodeDivider(bool needDivider)
     }
 }
 
-void OptionPattern::SetBgColor(const Color& color)
+void OptionPattern::SetBgColor(const std::optional<Color>& color)
 {
     auto renderContext = GetHost()->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(color);
+    if (color) {
+        renderContext->UpdateBackgroundColor(color.value());
+    } else {
+        renderContext->ResetBackgroundColor();
+    }
     bgColor_ = color;
 }
 
@@ -375,16 +379,22 @@ void OptionPattern::SetFontFamily(const std::vector<std::string>& value)
     props->UpdateFontFamily(value);
 }
 
-void OptionPattern::SetFontColor(const Color& color)
+void OptionPattern::SetFontColor(const std::optional<Color>& color)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateTextColor(color);
     auto context = text_->GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->UpdateForegroundColor(color);
+    if (color) {
+        auto value = color.value();
+        props->UpdateTextColor(value);
+        context->UpdateForegroundColor(value);
+    } else {
+        props->ResetTextColor();
+        context->ResetForegroundColor();
+    }
     context->UpdateForegroundColorFlag(false);
     context->ResetForegroundColorStrategy();
 }

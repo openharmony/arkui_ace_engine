@@ -624,18 +624,24 @@ void SelectPattern::SetFontFamily(const std::vector<std::string>& value)
     props->UpdateFontFamily(value);
 }
 
-void SelectPattern::SetFontColor(const Color& color)
+void SelectPattern::SetFontColor(const std::optional<Color>& color)
 {
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
-    props->UpdateTextColor(color);
     auto context = text_->GetRenderContext();
-    context->UpdateForegroundColor(color);
+    if (color) {
+        auto value = color.value();
+        props->UpdateTextColor(value);
+        context->UpdateForegroundColor(value);
+    } else {
+        props->ResetTextColor();
+        context->ResetForegroundColor();
+    }
     context->UpdateForegroundColorFlag(false);
     context->ResetForegroundColorStrategy();
 }
 
-void SelectPattern::SetOptionBgColor(const Color& color)
+void SelectPattern::SetOptionBgColor(const std::optional<Color>& color)
 {
     optionBgColor_ = color;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -700,7 +706,7 @@ void SelectPattern::SetOptionFontFamily(const std::vector<std::string>& value)
     }
 }
 
-void SelectPattern::SetOptionFontColor(const Color& color)
+void SelectPattern::SetOptionFontColor(const std::optional<Color>& color)
 {
     optionFont_.FontColor = color;
     for (size_t i = 0; i < options_.size(); ++i) {
@@ -714,7 +720,7 @@ void SelectPattern::SetOptionFontColor(const Color& color)
 }
 
 // set props of option node when selected
-void SelectPattern::SetSelectedOptionBgColor(const Color& color)
+void SelectPattern::SetSelectedOptionBgColor(const std::optional<Color>& color)
 {
     selectedBgColor_ = color;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
@@ -764,7 +770,7 @@ void SelectPattern::SetSelectedOptionFontFamily(const std::vector<std::string>& 
     }
 }
 
-void SelectPattern::SetSelectedOptionFontColor(const Color& color)
+void SelectPattern::SetSelectedOptionFontColor(const std::optional<Color>& color)
 {
     selectedFont_.FontColor = color;
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
@@ -1390,13 +1396,17 @@ void SelectPattern::SetOptionHeight(const Dimension& value)
     menuLayoutProps->UpdateSelectModifiedHeight(menuMaxHeight);
 }
 
-void SelectPattern::SetMenuBackgroundColor(const Color& color)
+void SelectPattern::SetMenuBackgroundColor(const std::optional<Color>& color)
 {
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto renderContext = menu->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(color);
+    if (color) {
+        renderContext->UpdateBackgroundColor(color.value());
+    } else {
+        renderContext->ResetBackgroundColor();
+    }
 }
 
 void SelectPattern::SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle)
