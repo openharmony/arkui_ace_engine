@@ -105,7 +105,7 @@ void PointLightImpl(Ark_NativePointer node,
         LightIlluminated, (float)Converter::ConvertOrDefault(value->illuminated, 0),
         frameNode);
 }
-void ReverseImpl(Ark_NativePointer node, const Opt_Boolean* isReversed)                 
+void ReverseImpl(Ark_NativePointer node, const Opt_Boolean* isReversed)
 {
     CHECK_NULL_VOID(isReversed);
     auto frameNode = reinterpret_cast<FrameNode*>(node);

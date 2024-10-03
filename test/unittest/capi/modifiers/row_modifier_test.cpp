@@ -25,7 +25,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
-
     const auto ATTRIBUTE_ALIGN_ITEMS_NAME = "alignItems";
     const auto ATTRIBUTE_ALIGN_ITEMS_DEFAULT_VALUE = "VerticalAlign.Center";
     const auto ATTRIBUTE_JUSTIFY_CONTENT_NAME = "justifyContent";
@@ -88,18 +87,18 @@ HWTEST_F(RowModifierTest, setJustifyContentTestDefaultValues, TestSize.Level1)
 // Valid values for attribute 'justifyContent' of method 'justifyContent'
 static std::vector<std::tuple<std::string, enum Ark_FlexAlign, std::string>> 
     justifyContentJustifyContentValidValues = {
-    {"ARK_FLEX_ALIGN_START", Converter::ArkValue<enum Ark_FlexAlign>
-        (ARK_FLEX_ALIGN_START), "FlexAlign.Start"},
-    {"ARK_FLEX_ALIGN_CENTER", Converter::ArkValue<enum Ark_FlexAlign>
-        (ARK_FLEX_ALIGN_CENTER), "FlexAlign.Center"},
-    {"ARK_FLEX_ALIGN_END", Converter::ArkValue<enum Ark_FlexAlign>
-        (ARK_FLEX_ALIGN_END), "FlexAlign.End"},
-    {"ARK_FLEX_ALIGN_SPACE_BETWEEN", Converter::ArkValue<enum Ark_FlexAlign>
-        (ARK_FLEX_ALIGN_SPACE_BETWEEN), "FlexAlign.SpaceBetween"},
-    {"ARK_FLEX_ALIGN_SPACE_AROUND", Converter::ArkValue<enum Ark_FlexAlign>
-        (ARK_FLEX_ALIGN_SPACE_AROUND), "FlexAlign.SpaceAround"},
-    {"ARK_FLEX_ALIGN_SPACE_EVENLY", Converter::ArkValue<enum Ark_FlexAlign>
-        (ARK_FLEX_ALIGN_SPACE_EVENLY), "FlexAlign.SpaceEvenly"},
+    {"ARK_FLEX_ALIGN_START", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_START),
+        "FlexAlign.Start"},
+    {"ARK_FLEX_ALIGN_CENTER", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_CENTER),
+        "FlexAlign.Center"},
+    {"ARK_FLEX_ALIGN_END", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_END),
+        "FlexAlign.End"},
+    {"ARK_FLEX_ALIGN_SPACE_BETWEEN", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_SPACE_BETWEEN),
+        "FlexAlign.SpaceBetween"},
+    {"ARK_FLEX_ALIGN_SPACE_AROUND", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_SPACE_AROUND),
+        "FlexAlign.SpaceAround"},
+    {"ARK_FLEX_ALIGN_SPACE_EVENLY", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_SPACE_EVENLY),
+        "FlexAlign.SpaceEvenly"},
 };
 
 /*
@@ -113,13 +112,9 @@ HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
     std::string resultStr;
     std::string expectedStr;
     enum Ark_FlexAlign inputValueJustifyContent;
-    enum Ark_FlexAlign initValueJustifyContent;
-
-    // Initial setup
-    initValueJustifyContent = std::get<1>(justifyContentJustifyContentValidValues[0]);
 
     // Verifying attribute's values
-    inputValueJustifyContent = initValueJustifyContent;
+    inputValueJustifyContent = std::get<1>(justifyContentJustifyContentValidValues[0]);
     for (auto&& value: justifyContentJustifyContentValidValues) {
         inputValueJustifyContent = std::get<1>(value);
         modifier_->setJustifyContent(node_, inputValueJustifyContent);
