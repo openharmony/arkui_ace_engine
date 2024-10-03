@@ -1603,7 +1603,10 @@ void GridPattern::SyncLayoutBeforeSpring()
 
     forceOverScroll_ = true;
     host->SetActive();
-    host->CreateLayoutTask();
+    auto context = host->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(host);
+    }
     forceOverScroll_ = false;
 }
 
