@@ -20,11 +20,73 @@
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/interfaces/arkoala/utility/validators.h"
 
+namespace OHOS::Ace::NG::Converter {
+template<>
+TabsItemDivider Convert(const Ark_DividerStyle& src)
+{
+    auto dst = TabsItemDivider{}; // this struct is initialized by default
+    dst.strokeWidth = Convert<Dimension>(src.strokeWidth);
+    auto colorOpt = OptConvert<Color>(src.color);
+    if (colorOpt.has_value()) {
+        dst.color = colorOpt.value();
+    }
+    auto startMarginOpt = OptConvert<Dimension>(src.startMargin);
+    if (startMarginOpt.has_value()) {
+        dst.startMargin = startMarginOpt.value();
+    }
+    auto endMarginOpt = OptConvert<Dimension>(src.endMargin);
+    if (endMarginOpt.has_value()) {
+        dst.endMargin = endMarginOpt.value();
+    }
+    return dst;
+}
+
+constexpr int32_t SM_COLUMN_NUM = 4;
+constexpr int32_t MD_COLUMN_NUM = 8;
+constexpr int32_t LG_COLUMN_NUM = 12;
+constexpr int32_t EVEN_NUM = 2;
+template<>
+BarGridColumnOptions Convert(const Ark_BarGridColumnOptions& src)
+{
+    auto dst = BarGridColumnOptions{}; // this struct is initialized by default
+    auto smOpt = OptConvert<int32_t>(src.sm);
+    if (smOpt.has_value() && (smOpt.value() >= 0) && (smOpt.value() <= SM_COLUMN_NUM) &&
+        (smOpt.value() % EVEN_NUM == 0)) {
+        dst.sm = smOpt.value();
+    }
+    auto mdOpt = OptConvert<int32_t>(src.md);
+    if (mdOpt.has_value() && (mdOpt.value() >= 0) && (mdOpt.value() <= MD_COLUMN_NUM) &&
+        (mdOpt.value() % EVEN_NUM == 0)) {
+        dst.md = mdOpt.value();
+    }
+    auto lgOpt = OptConvert<int32_t>(src.lg);
+    if (lgOpt.has_value() && (lgOpt.value() >= 0) && (lgOpt.value() <= LG_COLUMN_NUM) &&
+        (lgOpt.value() % EVEN_NUM == 0)) {
+        dst.lg = lgOpt.value();
+    }
+    auto marginOpt = OptConvert<Dimension>(src.margin);
+    Validator::ValidateNonNegative(marginOpt);
+    Validator::ValidateNonPercent(marginOpt);
+    if (marginOpt.has_value()) {
+        dst.margin = marginOpt.value();
+    }
+    auto gutterOpt = OptConvert<Dimension>(src.gutter);
+    Validator::ValidateNonNegative(gutterOpt);
+    Validator::ValidateNonPercent(gutterOpt);
+    if (gutterOpt.has_value()) {
+        dst.gutter = gutterOpt.value();
+    }
+    return dst;
+}
+}
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabsInterfaceModifier {
 void SetTabsOptionsImpl(Ark_NativePointer node,
                         const Opt_Type_TabsInterface_setTabsOptions_Arg0* value)
 {
+    //Depends on TabsControllerModifier. Not it is not implemented.
+    LOGE("ARKOALA TabsInterfaceModifier.SetTabsOptionsImpl -> Method is not fully implemented.");
 }
 } // TabsInterfaceModifier
 namespace TabsAttributeModifier {
@@ -93,10 +155,22 @@ void BarMode2Impl(Ark_NativePointer node,
 void BarWidthImpl(Ark_NativePointer node,
                   const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto valueOpt = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(valueOpt);
+    TabsModelNG::SetTabBarWidth(frameNode, valueOpt);
 }
 void BarHeightImpl(Ark_NativePointer node,
                    const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto valueOpt = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(valueOpt);
+    TabsModelNG::SetTabBarHeight(frameNode, valueOpt);
 }
 void AnimationDurationImpl(Ark_NativePointer node,
                            const Ark_Number* value)
@@ -217,6 +291,11 @@ void FadingEdgeImpl(Ark_NativePointer node,
 void DividerImpl(Ark_NativePointer node,
                  const Type_TabsAttribute_divider_Arg0* value)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto divider = Converter::OptConvert<TabsItemDivider>(*value);
+    TabsModelNG::SetDivider(frameNode, divider);
 }
 void BarOverlapImpl(Ark_NativePointer node,
                     Ark_Boolean value)
@@ -228,10 +307,18 @@ void BarOverlapImpl(Ark_NativePointer node,
 void BarBackgroundColorImpl(Ark_NativePointer node,
                             const ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    TabsModelNG::SetBarBackgroundColor(frameNode,  Converter::OptConvert<Color>(*value));
 }
 void BarGridAlignImpl(Ark_NativePointer node,
                       const Ark_BarGridColumnOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    TabsModelNG::SetBarGridAlign(frameNode, Converter::Convert<BarGridColumnOptions>(*value));
 }
 void CustomContentTransitionImpl(Ark_NativePointer node,
                                  Ark_Function delegate)
