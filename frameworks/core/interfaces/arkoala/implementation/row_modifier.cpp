@@ -28,7 +28,7 @@ struct RowOptions {
 }
 
 namespace Converter {
- template<>
+template<>
 void AssignCast(std::optional<FlexAlign>& dst, const Ark_VerticalAlign& src)
 {
     switch (src) {
@@ -51,7 +51,7 @@ void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src)
         case ARK_FLEX_ALIGN_SPACE_EVENLY: dst = FlexAlign::SPACE_EVENLY; break;
         default: LOGE("Unexpected enum value in Ark_FlexAlign: %{public}d", src);
     }
-}   
+}
 template<>
 RowOptions Convert(const Ark_RowOptions& src)
 {
@@ -105,8 +105,7 @@ void PointLightImpl(Ark_NativePointer node,
         LightIlluminated, (float)Converter::ConvertOrDefault(value->illuminated, 0),
         frameNode);
 }
-void ReverseImpl(Ark_NativePointer node,
-                 const Opt_Boolean* isReversed)                 
+void ReverseImpl(Ark_NativePointer node, const Opt_Boolean* isReversed)                 
 {
     CHECK_NULL_VOID(isReversed);
     auto frameNode = reinterpret_cast<FrameNode*>(node);
