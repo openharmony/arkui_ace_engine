@@ -50,6 +50,7 @@ void ScrollBarTestNg::SetUpTestSuite()
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockAnimationManager::Enable(true);
 }
 
 void ScrollBarTestNg::TearDownTestSuite()
@@ -70,6 +71,7 @@ void ScrollBarTestNg::TearDown()
     paintProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    MockAnimationManager::GetInstance().Reset();
 }
 
 void ScrollBarTestNg::GetScrollBar()

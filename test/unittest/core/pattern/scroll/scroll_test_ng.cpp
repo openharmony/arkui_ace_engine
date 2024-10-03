@@ -16,7 +16,6 @@
 #include "scroll_test_ng.h"
 
 #include "mock_task_executor.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
