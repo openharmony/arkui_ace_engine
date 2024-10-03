@@ -2845,8 +2845,9 @@ int32_t SwiperPattern::ComputeSwipePageNextIndex(float velocity, bool onlyDistan
 
 int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDistance) const
 {
-    auto swiperWidth = CalculateVisibleSize();
-    if (LessOrEqual(swiperWidth, 0)) {
+    auto firstItemInfo = GetFirstItemInfoInVisibleArea();
+    auto swiperWidthHalf = (firstItemInfo.second.endPos - firstItemInfo.second.startPos) / SWIPER_HALF;
+    if (LessOrEqual(swiperWidthHalf, 0)) {
         return currentIndex_;
     }
     // if direction is true, expected index to decrease by 1
@@ -2855,17 +2856,13 @@ int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDis
         !onlyDistance && (std::abs(velocity) > (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
                                                        ? NEW_MIN_TURN_PAGE_VELOCITY
                                                        : MIN_TURN_PAGE_VELOCITY));
-    auto iter = itemPosition_.find(currentIndex_);
-    if (iter == itemPosition_.end() || overTurnPageVelocity) {
-        return direction ? currentIndex_ - 1 : currentIndex_ + 1;
+
+    auto firstIndex = firstItemInfo.first;
+    auto baseIndex = -firstItemInfo.second.startPos < swiperWidthHalf ? firstIndex : firstIndex + 1;
+    if (overTurnPageVelocity) {
+        return direction ? baseIndex - 1 : baseIndex + 1;
     }
-    if (-iter->second.startPos > swiperWidth / SWIPER_HALF) {
-        return currentIndex_ + 1;
-    }
-    if (iter->second.startPos > swiperWidth / SWIPER_HALF) {
-        return currentIndex_ - 1;
-    }
-    return currentIndex_;
+    return baseIndex;
 }
 
 int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDistance) const
@@ -2902,7 +2899,8 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     auto props = GetLayoutProperty<SwiperLayoutProperty>();
     // don't run this in nested scroll. Parallel nested scroll can deviate > 1 page from currentIndex_
     if (!childScrolling_ && SwiperUtils::IsStretch(props) && GetDisplayCount() == 1) {
-        nextIndex = ComputeNextIndexInSinglePage(velocity, onlyDistance);
+        nextIndex =
+            std::clamp(ComputeNextIndexInSinglePage(velocity, onlyDistance), currentIndex_ - 1, currentIndex_ + 1);
     }
 
     if (!IsAutoLinear() && nextIndex > currentIndex_ + GetDisplayCount()) {
