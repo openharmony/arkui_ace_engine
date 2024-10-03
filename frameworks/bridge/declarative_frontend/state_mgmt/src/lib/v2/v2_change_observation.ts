@@ -86,6 +86,10 @@ class ObserveV2 {
   // reverse dependency map for quickly removing all dependencies of a bindId
   private id2targets_: { number: Set<WeakRef<Object>> } = {} as { number: Set<WeakRef<Object>> };
 
+  // Queue of tasks to run in next idle period (used for optimization)
+  private idleTasks_: (Array<[(...any: any[]) => any, ...any[]]> & { first: number, end: number }) =
+    Object.assign(Array(1000).fill([]), { first: 0, end: 0 });
+
   // queued up Set of bindId
   // elmtIds of UINodes need re-render
   // @monitor functions that need to execute
@@ -147,7 +151,7 @@ class ObserveV2 {
     }
   }
 
-    // At the start of observeComponentCreation or
+  // At the start of observeComponentCreation or
   // MonitorV2 observeObjectAccess
   public stopRecordDependencies(): void {
     const bound = this.stackOfRenderedComponents_.pop();
@@ -155,19 +159,27 @@ class ObserveV2 {
       stateMgmtConsole.error('stopRecordDependencies finds empty stack. Internal error!');
       return;
     }
-    let targetsSet: Set<WeakRef<Object>>;
-    if ((targetsSet = this.id2targets_[bound[0]]) !== undefined && targetsSet.size) {
-      // only add IView | MonitorV2 | ComputedV2 if at least one dependency was
-      // recorded when rendering this ViewPU/ViewV2/Monitor/ComputedV2
-      // ViewPU is the likely case where no dependecy gets recorded
-      // for others no dependencies are unlikely to happen
-      this.id2cmp_[bound[0]] = new WeakRef<Object>(bound[1]);
-    }
+
+    // only add IView | MonitorV2 | ComputedV2 if at least one dependency was
+    // recorded when rendering this ViewPU/ViewV2/Monitor/ComputedV2
+    // ViewPU is the likely case where no dependecy gets recorded
+    // for others no dependencies are unlikely to happen
+
+    // once set, the value remains unchanged
+    this.id2cmp_[bound[0]] ??= new WeakRef<Object>(bound[1]);
   }
 
   // clear any previously created dependency view model object to elmtId
   // find these view model objects with the reverse map id2targets_
   public clearBinding(id: number): void {
+    if (this.idleTasks_) {
+      this.idleTasks_[this.idleTasks_.end++] = [this.clearBindingInternal, id];
+    } else {
+      this.clearBindingInternal(id);
+    }
+  }
+
+  private clearBindingInternal(id: number): void {
     // multiple weakRefs might point to the same target - here we get Set of unique targets
     const targetSet = new Set<Object>();
     this.id2targets_[id]?.forEach((weak : WeakRef<Object>) => {
@@ -181,7 +193,9 @@ class ObserveV2 {
       const symRefs: Object = target[ObserveV2.SYMBOL_REFS];
 
       if (idRefs) {
-        idRefs[id]?.forEach(key => symRefs?.[key]?.delete(id));
+        idRefs[id]?.forEach(key =>
+          symRefs?.[key]?.delete(id)
+        );
         delete idRefs[id];
       } else {
         for (let key in symRefs) {
@@ -191,7 +205,7 @@ class ObserveV2 {
     });
 
     delete this.id2targets_[id];
-    delete this.id2cmp_[id];
+    //delete this.id2cmp_[id];
 
     stateMgmtConsole.propertyAccess(`clearBinding (at the end): id2cmp_ length=${Object.keys(this.id2cmp_).length}, entries=${JSON.stringify(Object.keys(this.id2cmp_))} `);
     stateMgmtConsole.propertyAccess(`... id2targets_ length=${Object.keys(this.id2targets_).length}, entries=${JSON.stringify(Object.keys(this.id2targets_))} `);
@@ -226,6 +240,30 @@ class ObserveV2 {
   public cleanUpDeadReferences(): void {
     this.cleanUpId2CmpDeadReferences();
     this.cleanUpId2TargetsDeadReferences();
+    // time slot is the max time until the next VSync (optimistic)
+    this.runIdleTasks(1000 / 60);
+  }
+
+  // runs idleTasks until empty or maxExecutionTimeMs is reached
+  public runIdleTasks(maxExecutionTimeMs: number = Infinity): void {
+    // fast check for early return
+    if (!this.idleTasks_ || this.idleTasks_.end === 0) {
+      return;
+    }
+
+    const deadline = Date.now() + maxExecutionTimeMs;
+
+    while (this.idleTasks_.first < this.idleTasks_.end) {
+      const [func, ...args] = this.idleTasks_[this.idleTasks_.first++] || [];
+      func?.apply(this, args);
+
+      if (Date.now() > deadline) {
+        return;
+      }
+    }
+
+    this.idleTasks_.first = 0;
+    this.idleTasks_.end = 0;
   }
 
   private cleanUpId2CmpDeadReferences(): void {
@@ -308,7 +346,14 @@ class ObserveV2 {
     }
 
     stateMgmtConsole.propertyAccess(`ObserveV2.addRef '${attrName}' for id ${bound[0]}...`);
-    this.addRef4IdInternal(bound[0], target, attrName);
+
+    // run in idle time or now
+    if (this.idleTasks_) {
+      this.idleTasks_[this.idleTasks_.end++] =
+        [this.addRef4IdInternal, bound[0], target, attrName];
+    } else {
+      this.addRef4IdInternal(bound[0], target, attrName);
+    }
   }
 
   // add dependency view model object 'target' property 'attrName' to current this.bindId
@@ -334,7 +379,14 @@ class ObserveV2 {
 
   public addRef4Id(id: number, target: object, attrName: string): void {
     stateMgmtConsole.propertyAccess(`ObserveV2.addRef4Id '${attrName}' for id ${id} ...`);
-    this.addRef4IdInternal(id, target, attrName);
+
+    // run in idle time or now
+    if (this.idleTasks_) {
+      this.idleTasks_[this.idleTasks_.end++] =
+        [this.addRef4IdInternal, id, target, attrName];
+    } else {
+      this.addRef4IdInternal(id, target, attrName);
+    }
   }
 
   private addRef4IdInternal(id: number, target: object, attrName: string): void {
@@ -437,6 +489,10 @@ class ObserveV2 {
   */
   public fireChange(target: object, attrName: string, excludeElmtIds?: Set<number>,
     ignoreOnProfiler: boolean = false): void {
+    // forcibly run idle time tasks if any
+    if (this.idleTasks_?.end) {
+      this.runIdleTasks();
+    }
     // enable to get more fine grained traces
     // including 2 (!) .end calls.
 
@@ -898,7 +954,6 @@ class ObserveV2 {
   }
 } // class ObserveV2
 
-
 const trackInternal = (
   target: any,
   propertyKey: string
@@ -918,9 +973,10 @@ const trackInternal = (
       // If the object has not been observed, you can directly assign a value to it. This improves performance.
       if (val !== this[storeProp]) {
         this[storeProp] = val;
-        if (this[ObserveV2.SYMBOL_REFS]) { // This condition can improve performance.
-          ObserveV2.getObserve().fireChange(this, propertyKey);
-        }
+
+        // the bindings <*, target, propertyKey> might not have been recorded yet (!)
+        // fireChange will run idleTasks to record pending bindings, if any
+        ObserveV2.getObserve().fireChange(this, propertyKey);
       }
     },
     enumerable: true
