@@ -22,8 +22,6 @@
 
 #include "arkoala_api.h"
 #include "arkoala_api_generated.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/node/view_model.h"
 
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
@@ -60,7 +58,9 @@ public:
 
     static void DisposeNode(ArkUINodeHandle &node)
     {
-        ViewModel::DisposeNode(node);
+        if (basicAPI_) {
+            basicAPI_->disposeNode(node);
+        }
         node = nullptr;
     }
 
@@ -142,6 +142,12 @@ public:
     static void AddResource(uint32_t key, const ResRawValue& value)
     {
         AddResource(std::to_string(key), value);
+    }
+
+    template<typename T, typename U>
+    static void AddResource(const std::tuple<T, U>& resId, const ResRawValue& value)
+    {
+        AddResource(std::get<0>(resId), value);
     }
 
     virtual void SetUp(void)

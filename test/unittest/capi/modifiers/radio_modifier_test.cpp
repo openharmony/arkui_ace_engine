@@ -49,28 +49,6 @@ inline Ark_Number ArkNum(int src)
         .i32 = static_cast<Ark_Int32>(src)
     };
 }
-inline Opt_Array_String ArkResParams(Ark_String* name)
-{
-    return {
-        .tag = ARK_TAG_OBJECT,
-        .value = {
-            .array = name,
-            .length = name ? 1 : 0
-        }
-    };
-}
-inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
-    const char* bundle = "")
-{
-    return {
-        .id = ArkNum(id),
-        .type = ArkNum(static_cast<int>(type)),
-        .moduleName = ArkStr(module),
-        .bundleName = ArkStr(bundle),
-        .params = ArkResParams(name)
-    };
-}
 
 // custom colors
 const auto CUSTOM_COLOR_STRING = "#FFFFFFFF";
@@ -315,8 +293,8 @@ HWTEST_F(RadioModifierTest, RadioModifierTest006, TestSize.Level1)
  */
 HWTEST_F(RadioModifierTest, RadioModifierTest007, TestSize.Level1)
 {
-    auto RES_NAME = ArkStr("aa.bb.cc");
-    const Ark_ResourceColor COLOR_RESOURCE = { .selector = 3, .value3 = ArkRes(&RES_NAME) };
+    const Ark_ResourceColor COLOR_RESOURCE = CreateResourceUnion<Ark_ResourceColor, NamedResourceId>(
+        {"aa.bb.cc", NodeModifier::ResourceType::COLOR});
     Opt_RadioStyle radioStyleColors;
     radioStyleColors.value.checkedBackgroundColor.value = COLOR_RESOURCE;
     radioStyleColors.value.indicatorColor.value = COLOR_RESOURCE;
