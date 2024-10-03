@@ -148,7 +148,7 @@ public:
         return direction_;
     }
 
-    void FireAnimationStartEvent(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) const
+    void FireAnimationStartEvent(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)
     {
         if (!animationStartEvents_.empty()) {
             std::for_each(animationStartEvents_.begin(), animationStartEvents_.end(),
@@ -160,10 +160,25 @@ public:
                     event(index, targetIndex, info);
                 });
         }
+        // animationEnd callback need to be fired after animationStart callback, use flag for protection.
+        isAnimationStartCalled_ = true;
+        if (delayCallback_) {
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "the timing of the animation callback has been corrected");
+            delayCallback_();
+            delayCallback_ = nullptr;
+        }
     }
 
-    void FireAnimationEndEvent(int32_t index, const AnimationCallbackInfo& info) const
+    void FireAnimationEndEvent(int32_t index, const AnimationCallbackInfo& info)
     {
+        if (!isAnimationStartCalled_) {
+            delayCallback_ = [weak = WeakClaim(this), index, info]() {
+                auto hub = weak.Upgrade();
+                CHECK_NULL_VOID(hub);
+                hub->FireAnimationEndEvent(index, info);
+            };
+            return;
+        }
         if (!animationEndEvents_.empty()) {
             std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
                 [index, info](const AnimationEndEventPtr& animationEndEvent) {
@@ -174,10 +189,19 @@ public:
                     event(index, info);
                 });
         }
+        isAnimationStartCalled_ = false;
     }
 
-    void FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info) const
+    void FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info)
     {
+        if (!isAnimationStartCalled_) {
+            delayCallback_ = [weak = WeakClaim(this), index, info]() {
+                auto hub = weak.Upgrade();
+                CHECK_NULL_VOID(hub);
+                hub->FireAnimationEndOnForceEvent(index, info);
+            };
+            return;
+        }
         if (animationEndEvents_.empty()) {
             return;
         }
@@ -193,6 +217,7 @@ public:
                     event(index, info);
                 });
         });
+        isAnimationStartCalled_ = false;
     }
 
     void FireGestureSwipeEvent(int32_t index, const AnimationCallbackInfo& info) const
@@ -228,6 +253,8 @@ private:
     std::list<AnimationStartEventPtr> animationStartEvents_;
     std::list<AnimationEndEventPtr> animationEndEvents_;
     GestureSwipeEvent gestureSwipeEvent_;
+    bool isAnimationStartCalled_ = false;
+    std::function<void()> delayCallback_;
 };
 
 } // namespace OHOS::Ace::NG
