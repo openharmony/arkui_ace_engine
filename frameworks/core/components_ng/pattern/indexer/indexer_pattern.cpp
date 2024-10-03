@@ -714,23 +714,6 @@ void IndexerPattern::ApplyIndexChanged(
     }
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
-    CHECK_NULL_VOID(indexerTheme);
-#ifndef ACE_UNITTEST
-    auto fontManager = pipelineContext->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    const std::vector<std::string> customFonts = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
-#else
-    const std::vector<std::string> customFonts;
-#endif
-    int32_t index = 0;
-    auto total = host->GetTotalChildCount();
-    auto childrenNode = host->GetChildren();
-    if (layoutProperty->GetIsPopupValue(false)) {
-        total -= 1;
-    }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto indexerRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(indexerRenderContext);
@@ -742,128 +725,177 @@ void IndexerPattern::ApplyIndexChanged(
             indexerRenderContext->UpdateBorderRadius({ indexerRadius, indexerRadius, indexerRadius, indexerRadius });
         }
     }
-    for (int32_t i = 0; i < total; i++) {
-        auto childNode = host->GetChildByIndex(i)->GetHostNode();
-        UpdateChildBoundary(childNode);
-        auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
-        auto childRenderContext = childNode->GetRenderContext();
-        childRenderContext->SetClipToBounds(true);
-        auto nodeStr = autoCollapse_ && arrayValue_[index].second ?
-            StringUtils::Str16ToStr8(INDEXER_STR_DOT) : arrayValue_[index].first;
-        nodeLayoutProperty->UpdateContent(nodeStr);
-        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        nodeLayoutProperty->UpdateMinFontScale(1.0f);
-        nodeLayoutProperty->UpdateMaxFontScale(1.0f);
-        nodeLayoutProperty->UpdateMaxLines(1);
-        if (index == childHoverIndex_ || index == childPressIndex_) {
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                auto radiusSize = paintProperty->GetItemBorderRadius().has_value()
-                                        ? paintProperty->GetItemBorderRadiusValue()
-                                        : Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
-                childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
-                childRenderContext->UpdateBackgroundColor(index == childHoverIndex_
-                                                            ? indexerTheme->GetHoverBgAreaColor()
-                                                            : indexerTheme->GetPressedBgAreaColor());
-            } else {
-                auto radiusSize = indexerTheme->GetHoverRadiusSize();
-                childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
-                childRenderContext->UpdateBackgroundColor(indexerTheme->GetHoverBgAreaColor());
-            }
-            if (selectChanged) {
-                host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
-            }
-        } else if (index == childFocusIndex_ || index == selected_) {
-            if (index == childFocusIndex_) {
-                auto borderWidth = indexerTheme->GetFocusBgOutlineSize();
-                nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
-                auto borderColor = indexerTheme->GetFocusBgOutlineColor();
-                childRenderContext->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor });
-                childRenderContext->UpdateBackgroundColor(
-                    paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColor()));
-            } else {
-                Dimension borderWidth;
-                nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
-                if (!fromTouchUp || animateSelected_ == lastSelected_) {
-                    childRenderContext->UpdateBackgroundColor(paintProperty->GetSelectedBackgroundColor().value_or(
-                        indexerTheme->GetSelectedBackgroundColor()));
-                }
-                childRenderContext->ResetBlendBorderColor();
-            }
-            nodeLayoutProperty->UpdateTextColor(
-                layoutProperty->GetSelectedColor().value_or(indexerTheme->GetSelectedTextColor()));
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                auto radius = paintProperty->GetItemBorderRadius().has_value()
-                                    ? paintProperty->GetItemBorderRadiusValue()
-                                    : Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
-                childRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
-            } else {
-                auto radius = indexerTheme->GetHoverRadiusSize();
-                childRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
-            }
-            auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
-            if ((!layoutProperty->GetSelectedFont().has_value() ||
-                    layoutProperty->GetSelectedFont().value().GetFontFamilies().empty()) &&
-                !customFonts.empty()) {
-                selectedFont.SetFontFamilies(customFonts);
-            }
-            nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
-            auto fontWeight = selectedFont.GetFontWeight();
-            nodeLayoutProperty->UpdateFontWeight(fontWeight);
-            nodeLayoutProperty->UpdateFontFamily(selectedFont.GetFontFamilies());
-            nodeLayoutProperty->UpdateItalicFontStyle(selectedFont.GetFontStyle());
-            childNode->MarkModifyDone();
-            if (isTextNodeInTree) {
-                childNode->MarkDirtyNode();
-            }
-            index++;
-            if (fromTouchUp) {
-                AccessibilityEventType type = AccessibilityEventType::SELECTED;
-                host->OnAccessibilityEvent(type);
-                auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-                CHECK_NULL_VOID(textAccessibilityProperty);
-                textAccessibilityProperty->SetSelected(true);
-            }
-            continue;
-        } else {
-            if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
-                childRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            }
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                auto radiusDefaultSize = Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
-                childRenderContext->UpdateBorderRadius({ radiusDefaultSize, radiusDefaultSize,
-                    radiusDefaultSize, radiusDefaultSize });
-            } else {
-                Dimension radiusZeroSize;
-                childRenderContext->UpdateBorderRadius(
-                    { radiusZeroSize, radiusZeroSize, radiusZeroSize, radiusZeroSize });
-            }
-        }
-        Dimension borderWidth;
-        nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
-        childRenderContext->ResetBlendBorderColor();
-        auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
-        if ((!layoutProperty->GetFont().has_value() || layoutProperty->GetFont().value().GetFontFamilies().empty()) &&
-            !customFonts.empty()) {
-            defaultFont.SetFontFamilies(customFonts);
-        }
-        nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
-        nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
-        nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
-        nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
-        nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
-        index++;
-        auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-        if (textAccessibilityProperty) textAccessibilityProperty->SetSelected(false);
-        childNode->MarkModifyDone();
-        if (isTextNodeInTree) childNode->MarkDirtyNode();
+    UpdateChildTextStyle(layoutProperty, paintProperty, isTextNodeInTree, fromTouchUp);
+
+    if (fromTouchUp) {
+        AccessibilityEventType type = AccessibilityEventType::SELECTED;
+        host->OnAccessibilityEvent(type);
     }
     if (selectChanged) {
-        ShowBubble();
+        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
         if (enableHapticFeedback_ && selectedChangedForHaptic_ && !fromTouchUp) {
             VibratorUtils::StartVibraFeedback();
         }
+        ShowBubble();
     }
+}
+
+void IndexerPattern::UpdateChildTextStyle(RefPtr<IndexerLayoutProperty>& layoutProperty,
+    RefPtr<IndexerPaintProperty>& paintProperty, bool isTextNodeInTree, bool fromTouchUp)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    TextStyle unselectedFontStyle, selectedFontStyle;
+    UpdateFontStyle(layoutProperty, indexerTheme, unselectedFontStyle, selectedFontStyle);
+    Color unselectedTextColor = layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor());
+    auto total = host->GetTotalChildCount();
+    if (layoutProperty->GetIsPopupValue(false)) total -= 1;
+    for (int32_t index = 0; index < total; index++) {
+        auto childNode = host->GetChildByIndex(index)->GetHostNode();
+        CHECK_NULL_VOID(childNode);
+        UpdateChildBoundary(childNode);
+        auto textRenderContext = childNode->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->SetClipToBounds(true);
+        Color textColor = unselectedTextColor;
+        TextStyle fontStyle = unselectedFontStyle;
+        Dimension borderWidth;
+        if (index == childHoverIndex_ || index == childPressIndex_) {
+            UpdateHoverAndPressStyle(paintProperty, textRenderContext, indexerTheme, index);
+        } else if (index == childFocusIndex_ || index == selected_) {
+            if (index == childFocusIndex_) borderWidth = indexerTheme->GetFocusBgOutlineSize();
+            textColor = layoutProperty->GetSelectedColor().value_or(indexerTheme->GetSelectedTextColor());
+            fontStyle = selectedFontStyle;
+            UpdateFocusAndSelectedStyle(paintProperty, textRenderContext, indexerTheme, index, fromTouchUp);
+        } else {
+            UpdateNormalStyle(textRenderContext, index, fromTouchUp);
+        }
+
+        UpdateTextLayoutProperty(childNode, index, borderWidth, fontStyle, textColor);
+        childNode->MarkModifyDone();
+        if (isTextNodeInTree) childNode->MarkDirtyNode();
+        auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+        if (textAccessibilityProperty) textAccessibilityProperty->SetSelected(index == selected_);
+    }
+}
+
+void IndexerPattern::UpdateFontStyle(RefPtr<IndexerLayoutProperty>& layoutProperty, RefPtr<IndexerTheme>& indexerTheme,
+    TextStyle& unselectedFontStyle, TextStyle& selectedFontStyle)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(indexerTheme);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+#ifndef ACE_UNITTEST
+    auto fontManager = pipelineContext->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    const std::vector<std::string> customFonts = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+#else
+    const std::vector<std::string> customFonts;
+#endif
+    unselectedFontStyle = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
+    if ((!layoutProperty->GetFont().has_value() || layoutProperty->GetFont().value().GetFontFamilies().empty()) &&
+        !customFonts.empty()) {
+        unselectedFontStyle.SetFontFamilies(customFonts);
+    }
+    selectedFontStyle = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
+    if ((!layoutProperty->GetSelectedFont().has_value() ||
+            layoutProperty->GetSelectedFont().value().GetFontFamilies().empty()) &&
+        !customFonts.empty()) {
+        selectedFontStyle.SetFontFamilies(customFonts);
+    }
+}
+
+void IndexerPattern::UpdateHoverAndPressStyle(RefPtr<IndexerPaintProperty>& paintProperty,
+    RefPtr<RenderContext>& textRenderContext, RefPtr<IndexerTheme>& indexerTheme, int32_t index) const
+{
+    CHECK_NULL_VOID(textRenderContext);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        CHECK_NULL_VOID(paintProperty);
+        auto radiusSize = paintProperty->GetItemBorderRadius().has_value()
+                              ? paintProperty->GetItemBorderRadiusValue()
+                              : Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
+        textRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
+        textRenderContext->UpdateBackgroundColor(
+            index == childHoverIndex_ ? indexerTheme->GetHoverBgAreaColor() : indexerTheme->GetPressedBgAreaColor());
+    } else {
+        CHECK_NULL_VOID(indexerTheme);
+        auto radiusSize = indexerTheme->GetHoverRadiusSize();
+        textRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
+        textRenderContext->UpdateBackgroundColor(indexerTheme->GetHoverBgAreaColor());
+    }
+}
+
+void IndexerPattern::UpdateFocusAndSelectedStyle(RefPtr<IndexerPaintProperty>& paintProperty,
+    RefPtr<RenderContext>& textRenderContext, RefPtr<IndexerTheme>& indexerTheme, int32_t index, bool fromTouchUp) const
+{
+    CHECK_NULL_VOID(textRenderContext);
+    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_VOID(indexerTheme);
+    if (index == childFocusIndex_) {
+        auto borderColor = indexerTheme->GetFocusBgOutlineColor();
+        textRenderContext->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor });
+        textRenderContext->UpdateBackgroundColor(
+            paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColor()));
+    } else if (!fromTouchUp || animateSelected_ == lastSelected_) {
+        textRenderContext->UpdateBackgroundColor(paintProperty->GetSelectedBackgroundColor().value_or(
+            indexerTheme->GetSelectedBackgroundColor()));
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto radius = paintProperty->GetItemBorderRadius().has_value()
+                            ? paintProperty->GetItemBorderRadiusValue()
+                            : Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
+        textRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
+    } else {
+        auto radius = indexerTheme->GetHoverRadiusSize();
+        textRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
+    }
+}
+
+void IndexerPattern::UpdateNormalStyle(RefPtr<RenderContext>& textRenderContext, int32_t index, bool fromTouchUp) const
+{
+    CHECK_NULL_VOID(textRenderContext);
+    if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
+        textRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto radiusDefaultSize = Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
+        textRenderContext->UpdateBorderRadius({ radiusDefaultSize, radiusDefaultSize,
+            radiusDefaultSize, radiusDefaultSize });
+    } else {
+        Dimension radiusZeroSize;
+        textRenderContext->UpdateBorderRadius(
+            { radiusZeroSize, radiusZeroSize, radiusZeroSize, radiusZeroSize });
+    }
+}
+
+void IndexerPattern::UpdateTextLayoutProperty(
+    RefPtr<FrameNode>& textNode, int32_t index, Dimension& borderWidth, TextStyle& fontStyle, Color& textColor) const
+{
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto nodeStr = autoCollapse_ && arrayValue_[index].second ?
+            StringUtils::Str16ToStr8(INDEXER_STR_DOT) : arrayValue_[index].first;
+    textLayoutProperty->UpdateContent(nodeStr);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    textLayoutProperty->UpdateMinFontScale(1.0f);
+    textLayoutProperty->UpdateMaxFontScale(1.0f);
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateBorderWidth({borderWidth, borderWidth, borderWidth, borderWidth});
+    textLayoutProperty->UpdateFontSize(fontStyle.GetFontSize());
+    textLayoutProperty->UpdateFontFamily(fontStyle.GetFontFamilies());
+    textLayoutProperty->UpdateFontWeight(fontStyle.GetFontWeight());
+    textLayoutProperty->UpdateItalicFontStyle(fontStyle.GetFontStyle());
+    textLayoutProperty->UpdateTextColor(textColor);
 }
 
 void IndexerPattern::ShowBubble()
