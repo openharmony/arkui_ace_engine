@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
@@ -735,7 +736,10 @@ void* createMenuItemNode(ArkUI_Int32 nodeId)
 
 void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = MenuItemGroupView::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createNavDestinationNode(ArkUI_Int32 nodeId)

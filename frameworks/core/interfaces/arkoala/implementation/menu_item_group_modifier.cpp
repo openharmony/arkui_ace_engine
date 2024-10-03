@@ -13,13 +13,80 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+
+namespace OHOS::Ace::NG {
+using MenuItemGroupType = std::variant<std::optional<std::string>, void*>;
+}
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+MenuItemGroupType Convert(const Ark_ResourceStr& src)
+{
+    return Converter::OptConvert<std::string>(src);
+}
+
+template<>
+MenuItemGroupType Convert(const Ark_Resource& src)
+{
+    return Converter::OptConvert<std::string>(src);
+}
+
+template<>
+MenuItemGroupType Convert(const Ark_String& src)
+{
+    return Converter::OptConvert<std::string>(src);
+}
+
+template<>
+MenuItemGroupType Convert(const Ark_CustomBuilder& src)
+{
+    return nullptr;
+}
+
+template<>
+MenuItemGroupType Convert(const Ark_Function& src)
+{
+    return nullptr;
+}
+
+struct MenuItemGroupOptions {
+    std::optional<MenuItemGroupType> header;
+    std::optional<MenuItemGroupType> footer;
+};
+
+template<>
+MenuItemGroupOptions Convert(const Ark_MenuItemGroupOptions& src)
+{
+    return {
+        .header = Converter::OptConvert<MenuItemGroupType>(src.header),
+        .footer = Converter::OptConvert<MenuItemGroupType>(src.footer)
+    };
+}
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemGroupInterfaceModifier {
 void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
                                  const Opt_MenuItemGroupOptions* value)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+
+    auto options = Converter::OptConvert<Converter::MenuItemGroupOptions>(*value);
+    if (options.has_value()) {
+        if (auto headerPtr = std::get_if<std::optional<std::string>>(&(*(options.value().header))); headerPtr) {
+            MenuItemGroupView::SetHeader(frameNode, *headerPtr);
+        }
+        if (auto footerPtr = std::get_if<std::optional<std::string>>(&(*(options.value().footer))); footerPtr) {
+            MenuItemGroupView::SetFooter(frameNode, *footerPtr);
+        }
+    }
+    LOGE("MenuItemGroupModifier::SetMenuItemGroupOptionsImpl isn't implemented, Ark_CustomBuilder isn't supported");
 }
 } // MenuItemGroupInterfaceModifier
 const GENERATED_ArkUIMenuItemGroupModifier* GetMenuItemGroupModifier()

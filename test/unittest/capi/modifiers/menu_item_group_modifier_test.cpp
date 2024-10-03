@@ -1,0 +1,115 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "modifier_test_base.h"
+#include "modifiers_test_utils.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "test/mock/core/common/mock_theme_style.h"
+
+namespace OHOS::Ace::NG {
+
+using namespace testing;
+using namespace testing::ext;
+
+namespace {
+inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
+    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
+    const char *module = "", const char *bundle = "")
+{
+    return {
+        .id = Converter::ArkValue<Ark_Number>(id),
+        .type = Converter::ArkValue<Ark_Number>(static_cast<int>(type)),
+        .moduleName = Converter::ArkValue<Ark_String>(module),
+        .bundleName = Converter::ArkValue<Ark_String>(bundle),
+        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
+    };
+}
+} // namespace
+
+class MenuItemGroupModifierTest : public ModifierTestBase<GENERATED_ArkUIMenuItemGroupModifier,
+    &GENERATED_ArkUINodeModifiers::getMenuItemGroupModifier, GENERATED_ARKUI_MENU_ITEM_GROUP> {
+public:
+    static void SetUpTestCase()
+    {
+        ModifierTestBase::SetUpTestCase();
+        SetupTheme<SelectTheme>();
+        AddResource("header", "Header");
+        AddResource("footer", "Footer");
+    }
+};
+
+/*
+ * @tc.name: setMenuItemGroupOptionsStringTest
+ * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemGroupOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsStringTest, TestSize.Level1)
+{
+    auto headerValue = GetAttrValue<std::string>(node_, "header");
+    auto footerValue = GetAttrValue<std::string>(node_, "footer");
+    EXPECT_EQ(headerValue, "");
+    EXPECT_EQ(footerValue, "");
+
+    auto headerStr = Converter::ArkValue<Ark_String>("Header");
+    auto headerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(headerStr);
+    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_Ark_CustomBuilder, Ark_ResourceStr>(headerResStr);
+    auto footerStr = Converter::ArkValue<Ark_String>("Footer");
+    auto footerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(footerStr);
+    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_Ark_CustomBuilder, Ark_ResourceStr>(footerResStr);
+    Ark_MenuItemGroupOptions options = {.header = header, .footer = footer};
+    auto optionsOpt = Converter::ArkValue<Opt_MenuItemGroupOptions>(options);
+    modifier_->setMenuItemGroupOptions(node_, &optionsOpt);
+    headerValue = GetAttrValue<std::string>(node_, "header");
+    footerValue = GetAttrValue<std::string>(node_, "footer");
+    EXPECT_EQ(headerValue, "Header");
+    EXPECT_EQ(footerValue, "Footer");
+}
+
+/*
+ * @tc.name: setMenuItemGroupOptionsResourceTest
+ * @tc.desc: Check the functionality of MenuItemModifier.setMenuItemGroupOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsResourceTest, TestSize.Level1)
+{
+    auto headerValue = GetAttrValue<std::string>(node_, "header");
+    auto footerValue = GetAttrValue<std::string>(node_, "footer");
+    EXPECT_EQ(headerValue, "");
+    EXPECT_EQ(footerValue, "");
+
+    const Ark_String headerResName = Converter::ArkValue<Ark_String>("header");
+    auto resourceHeader = ArkRes(const_cast<Ark_String*>(&headerResName), -1, NodeModifier::ResourceType::STRING);
+    Ark_ResourceStr headerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(resourceHeader);
+    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_Ark_CustomBuilder, Ark_ResourceStr>(headerResStr);
+
+    const Ark_String footerResName = Converter::ArkValue<Ark_String>("footer");
+    auto resourceFooter = ArkRes(const_cast<Ark_String*>(&footerResName), -1, NodeModifier::ResourceType::STRING);
+    Ark_ResourceStr footerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(resourceFooter);
+    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_Ark_CustomBuilder, Ark_ResourceStr>(footerResStr);
+
+    Ark_MenuItemGroupOptions options = {.header = header, .footer = footer};
+    auto optionsOpt = Converter::ArkValue<Opt_MenuItemGroupOptions>(options);
+    modifier_->setMenuItemGroupOptions(node_, &optionsOpt);
+    headerValue = GetAttrValue<std::string>(node_, "header");
+    footerValue = GetAttrValue<std::string>(node_, "footer");
+    EXPECT_EQ(headerValue, "Header");
+    EXPECT_EQ(footerValue, "Footer");
+}
+} // namespace OHOS::Ace::NG

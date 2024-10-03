@@ -117,10 +117,18 @@ RefPtr<FrameNode> MenuItemGroupPattern::GetMenu()
     return nullptr;
 }
 
-std::string MenuItemGroupPattern::GetHeaderContent()
+std::string MenuItemGroupPattern::GetHeaderContent() const
 {
     CHECK_NULL_RETURN(headerContent_, "");
     auto content = headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(content, "");
+    return content->GetContentValue("");
+}
+
+std::string MenuItemGroupPattern::GetFooterContent() const
+{
+    CHECK_NULL_RETURN(footerContent_, "");
+    auto content = footerContent_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(content, "");
     return content->GetContentValue("");
 }
@@ -207,5 +215,11 @@ void MenuItemGroupPattern::OnIntItemPressed(int32_t index, bool press)
             pattern->OnExtItemPressed(press, true); // hide common divider for 2 group if another group after
         }
     }
+}
+
+void MenuItemGroupPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("header", GetHeaderContent().c_str(), filter);
+    json->PutExtAttr("footer", GetFooterContent().c_str(), filter);
 }
 } // namespace OHOS::Ace::NG
