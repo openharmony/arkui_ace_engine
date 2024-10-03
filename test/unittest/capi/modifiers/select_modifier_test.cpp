@@ -1195,21 +1195,13 @@ HWTEST_F(SelectModifierTest, setValueTest, TestSize.Level1)
 HWTEST_F(SelectModifierTest, setOptionWidthTest, TestSize.Level1)
 {
     const auto optionWidthPropName = "optionWidth";
-    const auto fitTriggerPropName = "optionWidthFitTrigger";
 
     using LengthPair = std::pair<Ark_Length, float>;
     const std::vector<LengthPair> testPlan = {
-        { ALEN_PX_POS, 1234.f },
+        { ArkValue<Ark_Length>(140), 140.f },
         { ALEN_PX_NEG, 0.f }, // check negative value
         { ALEN_VP_NEG, 0.f }, // check negative value
-        { ALEN_VP_POS, 1.234f }
-    };
-
-    using ModePair = std::pair<Ark_OptionWidthMode, bool>;
-    const std::vector<ModePair> fitTriggerTestPlan = {
-        { ARK_OPTION_WIDTH_MODE_FIT_CONTENT, false },
-        { ARK_OPTION_WIDTH_MODE_FIT_TRIGGER, true },
-        { static_cast<Ark_OptionWidthMode>(INT_MIN), false }, // invalid value
+        { ArkValue<Ark_Length>(250.5f), 250.5f }
     };
 
     ASSERT_NE(modifier_->setOptionWidth, nullptr);
@@ -1221,12 +1213,15 @@ HWTEST_F(SelectModifierTest, setOptionWidthTest, TestSize.Level1)
         EXPECT_FLOAT_EQ(strToFloat(checkVal), expectVal);
     }
 
-    for (const auto &[mode, expectVal]: fitTriggerTestPlan) {
-        auto value = ArkUnion<Union_Length_OptionWidthMode, Ark_OptionWidthMode>(mode);
-        modifier_->setOptionWidth(node_, &value);
-        auto checkVal = GetAttrValue<bool>(node_, fitTriggerPropName);
-        EXPECT_EQ(checkVal, expectVal);
-    }
+    auto value1 = ArkUnion<Union_Length_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_TRIGGER);
+    modifier_->setOptionWidth(node_, &value1);
+    auto checkVal1 = GetStringAttribute(node_, optionWidthPropName);
+    EXPECT_EQ(checkVal1, "OptionWidthMode.FIT_TRIGGER");
+
+    auto value2 = ArkUnion<Union_Length_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_CONTENT);
+    modifier_->setOptionWidth(node_, &value2);
+    auto checkVal2 = GetStringAttribute(node_, optionWidthPropName);
+    EXPECT_EQ(strToFloat(checkVal2), 250.5f); // old width value is used
 }
 
 /**

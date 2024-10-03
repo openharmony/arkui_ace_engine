@@ -982,7 +982,8 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     for (size_t i = 0; i < options_.size(); ++i) {
         auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
-        std::string optionWidth = std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
+        std::string optionWidth = isFitTrigger_ ? "OptionWidthMode.FIT_TRIGGER" 
+            : std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
         json->PutExtAttr("optionWidth", optionWidth.c_str(), filter);
     }
     
@@ -992,7 +993,6 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     CHECK_NULL_VOID(menuLayoutProps);
     std::string optionHeight =  std::to_string(menuLayoutProps->GetSelectModifiedHeightValue(0.0f));
     json->PutExtAttr("optionHeight", optionHeight.c_str(), filter);
-    json->PutExtAttr("optionWidthFitTrigger", isFitTrigger_, filter);
     ToJsonMenuBackgroundStyle(json, filter);
     ToJsonDivider(json, filter);
 }
