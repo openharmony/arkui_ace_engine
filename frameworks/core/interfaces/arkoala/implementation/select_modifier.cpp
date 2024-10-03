@@ -303,6 +303,7 @@ void OptionWidthImpl(Ark_NativePointer node,
     if (auto widthPtr = std::get_if<Dimension>(&converted.value())) {
         std::optional<Dimension> width = *widthPtr;
         Validator::ValidateNonNegative(width);
+        Validator::ValidateNonPercent(width);
         SelectModelNG::SetHasOptionWidth(frameNode, true);
         SelectModelNG::SetOptionWidth(frameNode, width);
     } else if (auto fitTriggerPtr = std::get_if<std::optional<bool>>(&converted.value())) {

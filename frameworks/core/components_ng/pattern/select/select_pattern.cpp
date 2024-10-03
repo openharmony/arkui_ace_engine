@@ -982,7 +982,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     for (size_t i = 0; i < options_.size(); ++i) {
         auto optionPaintProperty = options_[i]->GetPaintProperty<OptionPaintProperty>();
         CHECK_NULL_VOID(optionPaintProperty);
-        std::string optionWidth = isFitTrigger_ ? "OptionWidthMode.FIT_TRIGGER" 
+        std::string optionWidth = isFitTrigger_ ? "OptionWidthMode.FIT_TRIGGER"
             : std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
         json->PutExtAttr("optionWidth", optionWidth.c_str(), filter);
     }
