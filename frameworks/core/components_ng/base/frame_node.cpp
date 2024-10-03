@@ -630,12 +630,14 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     node->SetActive();
     node->isLayoutDirtyMarked_ = true;
     auto pipeline = PipelineContext::GetCurrentContext();
-    node->CreateLayoutTask();
+    if (pipeline) {
+        pipeline->FlushUITaskWithSingleDirtyNode(node);
+    }
     auto predictLayoutNode = std::move(node->predictLayoutNode_);
     for (auto& node : predictLayoutNode) {
         auto frameNode = node.Upgrade();
-        if (frameNode) {
-            frameNode->CreateLayoutTask();
+        if (frameNode && pipeline) {
+            pipeline->FlushUITaskWithSingleDirtyNode(frameNode);
         }
     }
     if (pipeline) {

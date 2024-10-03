@@ -448,6 +448,7 @@ public:
     void FlushMessages() override;
 
     void FlushUITasks(bool triggeredByImplicitAnimation = false) override;
+    void FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& node);
 
     void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
