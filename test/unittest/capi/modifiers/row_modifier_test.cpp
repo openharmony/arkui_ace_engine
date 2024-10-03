@@ -31,7 +31,7 @@ namespace  {
     const auto ATTRIBUTE_JUSTIFY_CONTENT_DEFAULT_VALUE = "FlexAlign.Start";
 } // namespace
 
-class RowModifierTest : public ModifierTestBase<GENERATED_ArkUIRowModifier, 
+class RowModifierTest : public ModifierTestBase<GENERATED_ArkUIRowModifier,
     &GENERATED_ArkUINodeModifiers::getRowModifier, GENERATED_ARKUI_ROW> {
 };
 
@@ -59,7 +59,7 @@ HWTEST_F(RowModifierTest, setAlignItemsTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    enum Ark_VerticalAlign inputValueAlignItems;
+    Ark_VerticalAlign inputValueAlignItems;
 
     // Verifying attribute's  values
     inputValueAlignItems = Converter::ArkValue<enum Ark_VerticalAlign>(ARK_VERTICAL_ALIGN_BOTTOM);
@@ -85,7 +85,7 @@ HWTEST_F(RowModifierTest, setJustifyContentTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'justifyContent' of method 'justifyContent'
-static std::vector<std::tuple<std::string, enum Ark_FlexAlign, std::string>> 
+static std::vector<std::tuple<std::string, enum Ark_FlexAlign, std::string>>
     justifyContentJustifyContentValidValues = {
     {"ARK_FLEX_ALIGN_START", Converter::ArkValue<enum Ark_FlexAlign>(ARK_FLEX_ALIGN_START),
         "FlexAlign.Start"},
@@ -111,7 +111,7 @@ HWTEST_F(RowModifierTest, setJustifyContentTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    enum Ark_FlexAlign inputValueJustifyContent;
+    Ark_FlexAlign inputValueJustifyContent;
 
     // Verifying attribute's values
     inputValueJustifyContent = std::get<1>(justifyContentJustifyContentValidValues[0]);
