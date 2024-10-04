@@ -431,9 +431,29 @@ void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChan
     tabPattern->SetOnChangeEvent(std::move(onChange));
 }
 
+void TabsModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnChangeEvent(std::move(onChange));
+}
+
 void TabsModelNG::SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnTabBarClickEvent(std::move(onTabBarClick));
+}
+
+void TabsModelNG::SetOnTabBarClick(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onTabBarClick)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
@@ -449,6 +469,16 @@ void TabsModelNG::SetOnAnimationStart(AnimationStartEvent&& onAnimationStart)
     tabPattern->SetAnimationStartEvent(std::move(onAnimationStart));
 }
 
+void TabsModelNG::SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetAnimationStartEvent(std::move(onAnimationStart));
+}
+
 void TabsModelNG::SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -458,9 +488,31 @@ void TabsModelNG::SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd)
     tabPattern->SetAnimationEndEvent(std::move(onAnimationEnd));
 }
 
+void TabsModelNG::SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetAnimationEndEvent(std::move(onAnimationEnd));
+}
+
 void TabsModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetGestureSwipeEvent(std::move(onGestureSwipe));
+}
+
+void TabsModelNG::SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
@@ -967,9 +1019,34 @@ void TabsModelNG::SetIsCustomAnimation(bool isCustom)
     tabPattern->SetIsCustomAnimation(isCustom);
 }
 
+void TabsModelNG::SetIsCustomAnimation(FrameNode* frameNode, bool isCustom)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto swiperLayoutProperty = GetSwiperLayoutProperty(frameNode);
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateIsCustomAnimation(isCustom);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetIsCustomAnimation(isCustom);
+}
+
 void TabsModelNG::SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetTabsCustomContentTransition(std::move(onCustomAnimation));
+}
+
+void TabsModelNG::SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
@@ -995,6 +1072,18 @@ void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)
 void TabsModelNG::SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetInterceptStatus(true);
+    tabPattern->SetOnContentWillChange(std::move(callback));
+}
+
+void TabsModelNG::SetOnContentWillChange(FrameNode* frameNode,
+    std::function<bool(int32_t, int32_t)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);

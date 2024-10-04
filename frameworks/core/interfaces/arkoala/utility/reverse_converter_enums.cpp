@@ -23,6 +23,19 @@
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src)
+{
+    switch (src) {
+        case TabAnimateMode::CONTENT_FIRST: dst = ARK_ANIMATION_MODE_CONTENT_FIRST; break;
+        case TabAnimateMode::ACTION_FIRST: dst = ARK_ANIMATION_MODE_ACTION_FIRST; break;
+        case TabAnimateMode::NO_ANIMATION: dst = ARK_ANIMATION_MODE_NO_ANIMATION; break;
+        default:
+            dst = static_cast<Ark_AnimationMode>(-1);
+            LOGE("Unexpected enum value in TabAnimateMode: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_Axis& dst, const Axis& src)
 {
     switch (src) {
@@ -30,6 +43,30 @@ void AssignArkValue(Ark_Axis& dst, const Axis& src)
         case Axis::HORIZONTAL: dst = ARK_AXIS_HORIZONTAL; break;
         default: dst = static_cast<Ark_Axis>(-1);
             LOGE("Unexpected enum value in Axis: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src)
+{
+    switch (src) {
+        case TabBarMode::SCROLLABLE: dst = ARK_BAR_MODE_SCROLLABLE; break;
+        case TabBarMode::FIXED: dst = ARK_BAR_MODE_FIXED; break;
+        default:
+            dst = static_cast<Ark_BarMode>(-1);
+            LOGE("Unexpected enum value in TabBarMode: %{public}d", src);
+            break;
+    }
+}
+
+void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src)
+{
+    switch (src) {
+        case BarPosition::START: dst = ARK_BAR_POSITION_START; break;
+        case BarPosition::END: dst = ARK_BAR_POSITION_END; break;
+        default:
+            dst = static_cast<Ark_BarPosition>(-1);
+            LOGE("Unexpected enum value in BarPosition: %{public}d", src);
+            break;
     }
 }
 
@@ -41,6 +78,29 @@ void AssignArkValue(Ark_BarState& dst, const DisplayMode& src)
         case DisplayMode::ON: dst = ARK_BAR_STATE_ON; break;
         default: dst = static_cast<Ark_BarState>(-1);
             LOGE("Unexpected enum value in DisplayMode: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src)
+{
+    switch (src) {
+        case BlurStyle::THIN: dst = ARK_BLUR_STYLE_THIN; break;
+        case BlurStyle::REGULAR: dst = ARK_BLUR_STYLE_REGULAR; break;
+        case BlurStyle::THICK: dst = ARK_BLUR_STYLE_THICK; break;
+        case BlurStyle::BACKGROUND_THIN: dst = ARK_BLUR_STYLE_BACKGROUND_THIN; break;
+        case BlurStyle::BACKGROUND_REGULAR: dst = ARK_BLUR_STYLE_BACKGROUND_REGULAR; break;
+        case BlurStyle::BACKGROUND_THICK: dst = ARK_BLUR_STYLE_BACKGROUND_THICK; break;
+        case BlurStyle::BACKGROUND_ULTRA_THICK: dst = ARK_BLUR_STYLE_BACKGROUND_ULTRA_THICK; break;
+        case BlurStyle::NO_MATERIAL: dst = ARK_BLUR_STYLE_NONE; break;
+        case BlurStyle::COMPONENT_ULTRA_THIN: dst = ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN; break;
+        case BlurStyle::COMPONENT_THIN: dst = ARK_BLUR_STYLE_COMPONENT_THIN; break;
+        case BlurStyle::COMPONENT_REGULAR: dst = ARK_BLUR_STYLE_COMPONENT_REGULAR; break;
+        case BlurStyle::COMPONENT_THICK: dst = ARK_BLUR_STYLE_COMPONENT_THICK; break;
+        case BlurStyle::COMPONENT_ULTRA_THICK: dst = ARK_BLUR_STYLE_COMPONENT_ULTRA_THICK; break;
+        default:
+            dst = static_cast<Ark_BlurStyle>(-1);
+            LOGE("Unexpected enum value in BlurStyle: %{public}d", src);
+            break;
     }
 }
 
@@ -68,6 +128,19 @@ void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src)
         default:
             LOGE("Unexpected enum value in TextInputAction: %{public}d", src);
             dst = static_cast<Ark_EnterKeyType>(-1);
+    }
+}
+
+void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src)
+{
+    switch (src) {
+        case LayoutStyle::ALWAYS_CENTER: dst = ARK_LAYOUT_STYLE_ALWAYS_CENTER; break;
+        case LayoutStyle::ALWAYS_AVERAGE_SPLIT: dst = ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT; break;
+        case LayoutStyle::SPACE_BETWEEN_OR_CENTER: dst = ARK_LAYOUT_STYLE_SPACE_BETWEEN_OR_CENTER; break;
+        default:
+            dst = static_cast<Ark_LayoutStyle>(-1);
+            LOGE("Unexpected enum value in LayoutStyle: %{public}d", src);
+            break;
     }
 }
 
