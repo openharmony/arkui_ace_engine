@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_UTILITY_VALIDATORS_H
 
 #include <optional>
-#include <algorithm>
 
 #include "base/geometry/dimension.h"
 
