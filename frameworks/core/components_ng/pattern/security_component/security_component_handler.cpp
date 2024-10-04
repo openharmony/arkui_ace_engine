@@ -450,14 +450,12 @@ bool InitSCIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
         auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_RETURN(iconProp, false);
         CHECK_NULL_RETURN(iconProp->GetCalcLayoutConstraint(), false);
-        CHECK_EQUAL_RETURN(iconProp->GetCalcLayoutConstraint()->selfIdealSize.has_value(), false, false);
-        buttonInfo.iconSize_ =
-            iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ConvertToVp();
-        CHECK_EQUAL_RETURN(iconProp->GetImageSourceInfo().has_value(), false, false);
-        auto imageSourceInfo = iconProp->GetImageSourceInfo();
-        CHECK_EQUAL_RETURN(imageSourceInfo.value().GetFillColor().has_value(), false, false);
-        auto fillColor = imageSourceInfo.value().GetFillColor();
-        buttonInfo.iconColor_.value = fillColor.value().GetValue();
+        auto width = iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width();
+        CHECK_EQUAL_RETURN(width.has_value(), false, false);
+        buttonInfo.iconSize_ = width->GetDimension().ConvertToVp();
+        auto fillColor = iconProp->GetImageSourceInfo()->GetFillColor();
+        CHECK_EQUAL_RETURN(fillColor.has_value(), false, false);
+        buttonInfo.iconColor_.value = fillColor->GetValue();
     }
     return true;
 }
@@ -639,7 +637,6 @@ bool SecurityComponentHandler::CheckContainerTags(const RefPtr<FrameNode>& frame
     const RefPtr<RenderContext> renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     if (containerComponentTags.find(frameNode->GetTag()) != containerComponentTags.end() &&
-        renderContext->GetBackgroundColor().has_value() &&
         renderContext->GetBackgroundColor()->ColorToString().compare("#00000000") == 0) {
         return true;
     }
