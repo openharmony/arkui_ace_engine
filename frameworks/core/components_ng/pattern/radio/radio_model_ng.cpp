@@ -182,7 +182,6 @@ void RadioModelNG::SetIndicatorColor(FrameNode* frameNode, const std::optional<C
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, frameNode);
     }
-    
 }
 
 void RadioModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)

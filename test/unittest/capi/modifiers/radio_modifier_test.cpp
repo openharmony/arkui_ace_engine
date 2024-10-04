@@ -202,7 +202,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestValidEnumColorValues, TestSize.Leve
         { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
     };
 
-    for (const auto &[arkResColor, expected]: testPlan) {        
+    for (const auto &[arkResColor, expected]: testPlan) {
         Ark_RadioStyle arkRadioStyle = {
             .checkedBackgroundColor = arkResColor,
             .indicatorColor = arkResColor,
@@ -248,7 +248,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestValidNumberValues, TestSize.Level1)
         { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x00000000), "#00000000" },
     };
 
-    for (const auto &[arkResColor, expected]: testPlan) {        
+    for (const auto &[arkResColor, expected]: testPlan) {
         Ark_RadioStyle arkRadioStyle = {
             .checkedBackgroundColor = arkResColor,
             .indicatorColor = arkResColor,
@@ -294,7 +294,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestValidStringValues, TestSize.Level1)
         { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#00000000"), "#00000000" },
     };
 
-    for (const auto &[arkResColor, expected]: testPlan) {        
+    for (const auto &[arkResColor, expected]: testPlan) {
         Ark_RadioStyle arkRadioStyle = {
             .checkedBackgroundColor = arkResColor,
             .indicatorColor = arkResColor,
@@ -331,7 +331,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestInvalidNumberValues, TestSize.Level
         { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x00000000 - 1), "#FFFFFFFF" },
     };
 
-    for (const auto &[arkResColor, expected]: testPlan) {        
+    for (const auto &[arkResColor, expected]: testPlan) {
         Ark_RadioStyle arkRadioStyle = {
             .checkedBackgroundColor = arkResColor,
             .indicatorColor = arkResColor,
@@ -368,7 +368,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestInvalidStringValues, TestSize.Level
         { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("GGTTSSPP") },
     };
 
-    for (const auto &arkResColor: testPlan) {        
+    for (const auto &arkResColor: testPlan) {
         Ark_RadioStyle arkRadioStyle = {
             .checkedBackgroundColor = arkResColor,
             .indicatorColor = arkResColor,
@@ -409,7 +409,7 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestResourceColorValues, TestSize.Level
             RESOURCE_DEFAULT_COLOR_DEFAULT },
     };
 
-    for (const auto &[arkResColor, expected]: testPlan) {        
+    for (const auto &[arkResColor, expected]: testPlan) {
         Ark_RadioStyle arkRadioStyle = {
             .checkedBackgroundColor = arkResColor,
             .indicatorColor = arkResColor,
