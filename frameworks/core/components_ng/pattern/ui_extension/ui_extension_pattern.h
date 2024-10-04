@@ -143,9 +143,9 @@ public:
     void NotifyForeground();
     void NotifyBackground();
     void NotifyDestroy();
-    int32_t GetInstanceId();
-    int32_t GetSessionId();
-    int32_t GetNodeId();
+    int32_t GetInstanceId() const;
+    int32_t GetSessionId() const;
+    int32_t GetNodeId() const;
     int32_t GetUiExtensionId() override;
     RefPtr<SessionWrapper> GetSessionWrapper()
     {
@@ -295,6 +295,7 @@ private:
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
+    bool isKeyAsync_ = false;
     // Whether to send the focus to the UIExtension
     // No multi-threading problem due to run js thread
     bool canFocusSendToUIExtension_ = true;
@@ -302,7 +303,6 @@ private:
     int32_t surfacePositionCallBackId_ = -1;
     int32_t foldDisplayCallBackId_ = -1;
     RectF displayArea_;
-    bool isKeyAsync_ = false;
     // StartUIExtension should after mountToParent
     bool hasMountToParent_ = false;
     bool needReNotifyForeground_ = false;

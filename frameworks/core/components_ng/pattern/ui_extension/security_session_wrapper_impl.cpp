@@ -603,8 +603,8 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     PLATFORM_LOGI("DisplayArea: %{public}s, persistentId: %{public}d, reason: %{public}d",
         displayArea_.ToString().c_str(), persistentId, reason);
     if (reason == Rosen::SizeChangeReason::ROTATION) {
-        if (transaction_.lock()) {
-            transaction = transaction_.lock();
+        if (auto temp = transaction_.lock()) {
+            transaction = temp;
             transaction_.reset();
         } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
             transaction = transactionController->GetRSTransaction();
