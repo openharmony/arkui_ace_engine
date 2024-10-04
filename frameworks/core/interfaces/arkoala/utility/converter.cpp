@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/view_abstract.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "converter.h"
 #include "reverse_converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
@@ -27,16 +25,8 @@ std::optional<double> FloatToDouble(const std::optional<float>& src)
 }
 }
 namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
-{
-    dst.id = ArkValue<Ark_Number>(src.resource);
-    dst.type = ArkValue<Ark_Number>(static_cast<Ark_Int32>(NodeModifier::ResourceType::FLOAT));
-    dst.params = ArkValue<Opt_Array_String>();
-}
-
-void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& info)
-
-void AssignGradientColors(Gradient *gradient, const Array_Tuple_Ark_ResourceColor_Number *colors)
+void AssignGradientColors(Gradient *gradient,
+    const Ark_Type_CommonMethod_linearGradient_value *colors)
 {
     for (int32_t i = 0; i < colors->length; i++) {
         auto color = OptConvert<Color>(colors->array[i].value0);
@@ -51,7 +41,24 @@ void AssignGradientColors(Gradient *gradient, const Array_Tuple_Ark_ResourceColo
     }
 }
 
-void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear, const GradientDirection &direction)
+void AssignGradientColors(Gradient *gradient,
+    const Ark_Type_CommonMethod_sweepGradient_value *colors)
+{
+    for (int32_t i = 0; i < colors->length; i++) {
+        auto color = OptConvert<Color>(colors->array[i].value0);
+        auto position = Convert<float>(colors->array[i].value1);
+        if (color.has_value()) {
+            NG::GradientColor gradientColor;
+            gradientColor.SetColor(color.value());
+            gradientColor.SetHasValue(true);
+            gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
+            gradient->AddColor(gradientColor);
+        }
+    }
+}
+
+void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear,
+    const GradientDirection &direction)
 {
     switch (direction) {
         case GradientDirection::LEFT:
@@ -90,7 +97,14 @@ void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient
     }
 }
 
-Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
+void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
+{
+    dst.id = ArkValue<Ark_Number>(src.resource);
+    dst.type = ArkValue<Ark_Number>(static_cast<Ark_Int32>(NodeModifier::ResourceType::FLOAT));
+    dst.params = ArkValue<Opt_Array_String>();
+}
+
+void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& info)
 {
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
@@ -392,11 +406,12 @@ std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
     return { Convert<Shadow>(src) };
 }
 
+template<>
 Shadow Convert(const Ark_ShadowStyle& src)
 {
     ShadowStyle style;
 
-    switch(src) {
+    switch (src) {
         case ARK_SHADOW_STYLE_OUTER_DEFAULT_XS: style = ShadowStyle::OuterDefaultXS; break;
         case ARK_SHADOW_STYLE_OUTER_DEFAULT_SM: style = ShadowStyle::OuterDefaultSM; break;
         case ARK_SHADOW_STYLE_OUTER_DEFAULT_MD: style = ShadowStyle::OuterDefaultMD; break;

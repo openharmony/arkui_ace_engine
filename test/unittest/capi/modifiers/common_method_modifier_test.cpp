@@ -699,19 +699,19 @@ HWTEST_F(CommonMethodModifierTest, setSharedTransitionTestOptionsOtherArgs, Test
  */
 HWTEST_F(CommonMethodModifierTest, setBackgroundColorTest, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Ark_ResourceColor, std::string>;
+    using OneTestStep = std::pair<Union_Color_Number_String_Resource, std::string>;
     static const std::string PROP_NAME("backgroundColor");
     static Ark_String resName = ArkValue<Ark_String>("aa.bb.cc");
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName)), EXPECTED_RESOURCE_COLOR },
-        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234)), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Number>(0x123456), "#FF123456" },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Number>(0.5f), "#00000000" },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#11223344"), "#11223344" },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_String>("65535"), "#FF00FFFF" },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Resource>(ArkRes(&resName)), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Resource>(ArkRes(nullptr, 1234)), EXPECTED_RESOURCE_COLOR },
     };
 
     ASSERT_NE(modifier_->setBackgroundColor, nullptr);
@@ -1229,10 +1229,10 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientTestValidValues, TestSize.Le
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(std::optional(true));
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), ArkValue<Ark_Number>(0.1f) },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), ArkValue<Ark_Number>(0.25f) },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), ArkValue<Ark_Number>(0.5f) },
+    std::vector<std::pair<Union_Color_Number_String_Resource, Ark_Number>> colorSteps {
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Color>(ARK_COLOR_WHITE), ArkValue<Ark_Number>(0.1f) },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Number>(0x123456), ArkValue<Ark_Number>(0.25f) },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#11223344"), ArkValue<Ark_Number>(0.5f) },
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1279,9 +1279,11 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestValidValues, TestS
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
+    std::vector<std::pair<Union_Color_Number_String_Resource, Ark_Number>> colorSteps {
+        { Converter::ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#112233"),
+            Converter::ArkValue<Ark_Number>(0.5f) },
+        { Converter::ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#223344"),
+            Converter::ArkValue<Ark_Number>(0.9f) }
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1324,9 +1326,11 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestInvalidValues, Tes
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
+    std::vector<std::pair<Union_Color_Number_String_Resource, Ark_Number>> colorSteps {
+        { Converter::ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#112233"),
+            Converter::ArkValue<Ark_Number>(0.5f) },
+        { Converter::ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#223344"),
+            Converter::ArkValue<Ark_Number>(0.9f) }
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1378,9 +1382,11 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, Test
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
+    std::vector<std::pair<Union_Color_Number_String_Resource, Ark_Number>> colorSteps {
+        { Converter::ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#112233"),
+            Converter::ArkValue<Ark_Number>(0.5f) },
+        { Converter::ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#223344"),
+            Converter::ArkValue<Ark_Number>(0.9f) }
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1434,9 +1440,11 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, Test
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
+    std::vector<std::pair<Union_Color_Number_String_Resource, Ark_Number>> colorSteps {
+        { Converter::ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#112233"),
+            Converter::ArkValue<Ark_Number>(0.5f) },
+        { Converter::ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#223344"),
+            Converter::ArkValue<Ark_Number>(0.9f) }
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1469,9 +1477,11 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRepeatingTestValidValues, Te
     // radius
     inputValue.radius = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("4vp");
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
+    std::vector<std::pair<Union_Color_Number_String_Resource, Ark_Number>> colorSteps {
+        { Converter::ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#112233"),
+            Converter::ArkValue<Ark_Number>(0.5f) },
+        { Converter::ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#223344"),
+            Converter::ArkValue<Ark_Number>(0.9f) }
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
@@ -1519,9 +1529,10 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValid
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(std::optional(true));
     // color stops
-    std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
-        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName)), ArkValue<Ark_Number>(0.5f) },
-        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, FAKE_RES_ID)), ArkValue<Ark_Number>(0.9f)  },
+    std::vector<std::pair<Union_Color_Number_String_Resource, Ark_Number>> colorSteps {
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Resource>(ArkRes(&resName)), ArkValue<Ark_Number>(0.5f) },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Resource>(ArkRes(nullptr, FAKE_RES_ID)),
+            ArkValue<Ark_Number>(0.9f)  },
     };
     Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();

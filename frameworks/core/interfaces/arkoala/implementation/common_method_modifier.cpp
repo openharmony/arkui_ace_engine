@@ -794,7 +794,10 @@ void LayoutWeightImpl(Ark_NativePointer node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetLayoutWeight(frameNode, Converter::ConvertOrDefault(*value, 0));
+    auto weight = Converter::OptConvert<float>(*value);
+    if (weight) {
+        ViewAbstract::SetLayoutWeight(frameNode, weight.value());
+    }
 }
 void PaddingImpl(Ark_NativePointer node,
                  const Ark_Union_Padding_Length_LocalizedPadding* value)
@@ -1021,6 +1024,7 @@ void ForegroundBlurStyleImpl(Ark_NativePointer node,
         }
     }
     ViewAbstract::SetForegroundBlurStyle(frameNode, style);
+
 }
 void OpacityImpl(Ark_NativePointer node,
                  const Ark_Union_Number_Resource* value)
@@ -1218,7 +1222,6 @@ void BorderRadiusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto radiuses = Converter::ConvertOrDefault(*value, NG::BorderRadiusProperty());
     ViewAbstract::SetBorderRadius(frameNode, radiuses);
-
 }
 void BorderImageImpl(Ark_NativePointer node,
                      const Ark_BorderImageOption* value)
@@ -1486,8 +1489,10 @@ void HoverEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto hoverEffect = static_cast<OHOS::Ace::HoverEffectType>(value);
-    ViewAbstract::SetHoverEffect(frameNode, hoverEffect);
+    auto hoverEffect = Converter::OptConvert<OHOS::Ace::HoverEffectType>(value);
+    if (hoverEffect) {
+        ViewAbstract::SetHoverEffect(frameNode, hoverEffect.value());
+    }
 }
 void OnMouseImpl(Ark_NativePointer node,
                  Ark_Function event)
@@ -1765,9 +1770,9 @@ void BlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto blur = Converter::ConvertOrDefault(*value, 0.0f);
+    auto blur = Converter::OptConvert<float>(*value);
     BlurOption blurOptions = Converter::ConvertOrDefault(*options, BlurOption());
-    CalcDimension dimensionBlur(blur, DimensionUnit::PX);
+    CalcDimension dimensionBlur(blur ? blur.value() : 0, DimensionUnit::PX);
     ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOptions);
 }
 void LinearGradientBlurImpl(Ark_NativePointer node,
@@ -2115,12 +2120,15 @@ void AlignSelfImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetAlignSelf(frameNode, static_cast<FlexAlign>(value));
+    auto align = Converter::OptConvert<OHOS::Ace::FlexAlign>(value);
+    if (align) {
+        ViewAbstract::SetAlignSelf(frameNode, align.value());
+    }
 }
 void DisplayPriorityImpl(Ark_NativePointer node,
                          const Ark_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    aauto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetDisplayIndex(frameNode, static_cast<int32_t>(Converter::ConvertOrDefault(*value, 0)));
 }
@@ -2152,7 +2160,20 @@ void DirectionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetLayoutDirection(frameNode, static_cast<TextDirection>(value));
+    auto direction = Converter::OptConvert<TextDirection>(value);
+    if (direction) {
+        ViewAbstract::SetLayoutDirection(frameNode, direction.value());
+    }
+}
+void AlignImpl(Ark_NativePointer node,
+               Ark_Alignment value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto alignment = Converter::OptConvert<Alignment>(value);
+    if (alignment) {
+        ViewAbstract::SetAlign(frameNode, alignment.value());
+    }
 }
 void PositionImpl(Ark_NativePointer node,
                   const Ark_Union_Position_Edges_LocalizedEdges* value)
@@ -2172,25 +2193,14 @@ void PositionImpl(Ark_NativePointer node,
             ViewAbstract::SetPositionEdges(frameNode, result);
             break;
         }
-        case CASE_2: {
+        case CASE_2:
             LOGE("ARKOALA: LocalizedEdges is not fully support.");
             ViewAbstract::SetPositionLocalizedEdges(frameNode, true);
             break;
-        }
-        default: {
+
+        default:
             LOGE("ARKOALA:PositionImpl: Unexpected value->selector: %{public}d\n", value->selector);
             return;
-        }
-    }
-}
-void AlignImpl(Ark_NativePointer node,
-               enum Ark_Alignment value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto alignment = Converter::OptConvert<Alignment>(value);
-    if (alignment) {
-        ViewAbstract::SetAlign(frameNode, alignment.value());
     }
 }
 void MarkAnchorImpl(Ark_NativePointer node,
@@ -2394,7 +2404,7 @@ void OnPreDragImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnPreDrag(frameNode, convValue);
 }
 void OverlayImpl(Ark_NativePointer node,
-                 const Type_CommonMethod_overlay_Arg0* value,
+                 const Ark_Union_String_CustomBuilder_ComponentContent* value,
                  const Opt_OverlayOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

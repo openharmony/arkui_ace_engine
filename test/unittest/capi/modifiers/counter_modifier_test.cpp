@@ -223,19 +223,19 @@ HWTEST_F(CounterModifierTest, setOnDecTest, TestSize.Level1)
  */
 HWTEST_F(CounterModifierTest, setBackgroundColorTest, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Ark_ResourceColor, std::string>;
+    using OneTestStep = std::pair<Union_Color_Number_String_Resource, std::string>;
     static const std::string PROP_NAME("backgroundColor");
     static Ark_String resName = ArkValue<Ark_String>("aa.bb.cc");
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
-        { ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), "#00000000" },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
-        { ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName)), EXPECTED_RESOURCE_COLOR },
-        { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234)), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Number>(0x123456), "#FF123456" },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Number>(0.5f), "#00000000" },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_String>("#11223344"), "#11223344" },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_String>("65535"), "#FF00FFFF" },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Resource>(ArkRes(&resName)), EXPECTED_RESOURCE_COLOR },
+        { ArkUnion<Union_Color_Number_String_Resource, Ark_Resource>(ArkRes(nullptr, 1234)), EXPECTED_RESOURCE_COLOR },
     };
 
     ASSERT_NE(commonModifier_->setBackgroundColor, nullptr);

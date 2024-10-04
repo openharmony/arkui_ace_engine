@@ -244,9 +244,10 @@ namespace Converter {
     }
 
     // Implementation is in cpp
-    Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo &info);
-    Ark_ClickEvent ConvertClickEventInfo(OHOS::Ace::GestureEvent& info);
-    void AssignGradientColors(Gradient *gradient, const Array_Tuple_Ark_ResourceColor_Number *colors);
+    void AssignGradientColors(Gradient *gradient,
+        const Ark_Type_CommonMethod_linearGradient_value *colors);
+    void AssignGradientColors(Gradient *gradient,
+        const Ark_Type_CommonMethod_sweepGradient_value *colors);
     void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient> linear,
         const GradientDirection &direction);
 
@@ -384,6 +385,7 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
     template<> Shadow Convert(const Ark_ShadowOptions& src);
+    template<> Shadow Convert(const Ark_ShadowStyle& src);
     template<> StringArray Convert(const Ark_String& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);

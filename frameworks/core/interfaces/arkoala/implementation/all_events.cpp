@@ -119,7 +119,6 @@ namespace CommonMethod {
 void onChildTouchTestImpl(Ark_Int32 nodeId,
                           const Array_TouchTestInfo value)
 {
-    // GENERATED EMPTY IMPLEMENTATION
 }
 void onClickImpl(Ark_Int32 nodeId,
                  const Ark_ClickEvent event)
@@ -266,6 +265,16 @@ void onTouchInterceptImpl(Ark_Int32 nodeId,
 void onSizeChangeImpl(Ark_Int32 nodeId,
                       const Ark_SizeOptions oldValue,
                       const Ark_SizeOptions newValue)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onVisibleAreaChangeImpl(Ark_Int32 nodeId,
+                             const Ark_Boolean isExpanding,
+                             const Ark_Number currentRatio)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void keyboardShortcutImpl(Ark_Int32 nodeId)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1808,13 +1817,13 @@ const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver()
         CommonMethod::onDropImpl,
         CommonMethod::onDragEndImpl,
         CommonMethod::onPreDragImpl,
-        CommonMethod::onVisibleAreaChangeImpl,
-        CommonMethod::keyboardShortcutImpl,
         CommonMethod::onGestureJudgeBeginImpl,
         CommonMethod::onGestureRecognizerJudgeBeginImpl,
         CommonMethod::shouldBuiltInRecognizerParallelWithImpl,
         CommonMethod::onTouchInterceptImpl,
         CommonMethod::onSizeChangeImpl,
+        CommonMethod::onVisibleAreaChangeImpl,
+        CommonMethod::keyboardShortcutImpl,
     };
 
     return &GENERATED_ArkUICommonMethodEventsReceiverImpl;
