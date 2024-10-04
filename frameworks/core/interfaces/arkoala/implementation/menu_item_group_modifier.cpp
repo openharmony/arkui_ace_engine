@@ -75,9 +75,8 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 
-    auto options = Converter::OptConvert<Converter::MenuItemGroupOptions>(*value);
+    auto options = value ? Converter::OptConvert<Converter::MenuItemGroupOptions>(*value) : std::nullopt;
     if (options.has_value()) {
         if (auto headerPtr = std::get_if<std::optional<std::string>>(&(*(options.value().header))); headerPtr) {
             MenuItemGroupView::SetHeader(frameNode, *headerPtr);
@@ -85,6 +84,9 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
         if (auto footerPtr = std::get_if<std::optional<std::string>>(&(*(options.value().footer))); footerPtr) {
             MenuItemGroupView::SetFooter(frameNode, *footerPtr);
         }
+    } else {
+        MenuItemGroupView::SetHeader(frameNode, std::nullopt);
+        MenuItemGroupView::SetHeader(frameNode, std::nullopt);
     }
     LOGE("MenuItemGroupModifier::SetMenuItemGroupOptionsImpl isn't implemented, Ark_CustomBuilder isn't supported");
 }

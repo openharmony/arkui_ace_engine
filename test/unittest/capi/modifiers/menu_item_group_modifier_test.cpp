@@ -28,21 +28,6 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-namespace {
-inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-    const char *module = "", const char *bundle = "")
-{
-    return {
-        .id = Converter::ArkValue<Ark_Number>(id),
-        .type = Converter::ArkValue<Ark_Number>(static_cast<int>(type)),
-        .moduleName = Converter::ArkValue<Ark_String>(module),
-        .bundleName = Converter::ArkValue<Ark_String>(bundle),
-        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-    };
-}
-} // namespace
-
 class MenuItemGroupModifierTest : public ModifierTestBase<GENERATED_ArkUIMenuItemGroupModifier,
     &GENERATED_ArkUINodeModifiers::getMenuItemGroupModifier, GENERATED_ARKUI_MENU_ITEM_GROUP> {
 public:
@@ -94,14 +79,12 @@ HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsResourceTest, TestSiz
     EXPECT_EQ(headerValue, "");
     EXPECT_EQ(footerValue, "");
 
-    const Ark_String headerResName = Converter::ArkValue<Ark_String>("header");
-    auto resourceHeader = ArkRes(const_cast<Ark_String*>(&headerResName), -1, NodeModifier::ResourceType::STRING);
-    Ark_ResourceStr headerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(resourceHeader);
+    const auto RES_NAME_HEADER = NamedResourceId{"header", NodeModifier::ResourceType::STRING};
+    Ark_ResourceStr headerResStr = CreateResourceUnion<Ark_ResourceStr>(RES_NAME_HEADER);
     auto header = Converter::ArkUnion<Opt_Union_ResourceStr_Ark_CustomBuilder, Ark_ResourceStr>(headerResStr);
 
-    const Ark_String footerResName = Converter::ArkValue<Ark_String>("footer");
-    auto resourceFooter = ArkRes(const_cast<Ark_String*>(&footerResName), -1, NodeModifier::ResourceType::STRING);
-    Ark_ResourceStr footerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(resourceFooter);
+    const auto RES_NAME_FOOTER = NamedResourceId{"footer", NodeModifier::ResourceType::STRING};
+    Ark_ResourceStr footerResStr = CreateResourceUnion<Ark_ResourceStr>(RES_NAME_FOOTER);
     auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_Ark_CustomBuilder, Ark_ResourceStr>(footerResStr);
 
     Ark_MenuItemGroupOptions options = {.header = header, .footer = footer};
