@@ -505,40 +505,46 @@ void ButtonModelNG::SetStateEffect(FrameNode* frameNode, const bool stateEffect)
 
 void ButtonModelNG::SetLabelStyle(FrameNode* frameNode, const std::optional<ButtonParameters>& buttonParameters)
 {
+    if (buttonParameters && buttonParameters->textOverflow.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, TextOverflow, buttonParameters->textOverflow.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextOverflow, frameNode);
+    }
+    if (buttonParameters && buttonParameters->maxLines.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines,
+            buttonParameters->maxLines.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines, frameNode);
+    }
+    if (buttonParameters && buttonParameters->minFontSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, MinFontSize, buttonParameters->minFontSize.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontSize, frameNode);
+    }
+    if (buttonParameters && buttonParameters->maxFontSize.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, MaxFontSize, buttonParameters->maxFontSize.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontSize, frameNode);
+    }
+    if (buttonParameters && buttonParameters->heightAdaptivePolicy.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters->heightAdaptivePolicy.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, HeightAdaptivePolicy, frameNode);
+    }
     if (buttonParameters) {
-        if (buttonParameters->textOverflow.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ButtonLayoutProperty, TextOverflow, buttonParameters->textOverflow.value(), frameNode);
-        } else {
-            ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, TextOverflow, frameNode);
-        }
-        if (buttonParameters->maxLines.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines, buttonParameters->maxLines.value(), frameNode);
-        } else {
-            ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxLines, frameNode);
-        }
-        if (buttonParameters->minFontSize.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ButtonLayoutProperty, MinFontSize, buttonParameters->minFontSize.value(), frameNode);
-        } else {
-            ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontSize, frameNode);
-        }
-        if (buttonParameters->maxFontSize.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ButtonLayoutProperty, MaxFontSize, buttonParameters->maxFontSize.value(), frameNode);
-        } else {
-            ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontSize, frameNode);
-        }
-        if (buttonParameters->heightAdaptivePolicy.has_value()) {
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-                ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters->heightAdaptivePolicy.value(), frameNode);
-        } else {
-            ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, HeightAdaptivePolicy, frameNode);
-        }
         SetFontSize(frameNode, buttonParameters->fontSize);
         SetFontWeight(frameNode, buttonParameters->fontWeight);
         SetFontFamily(frameNode, buttonParameters->fontFamily);
         SetFontStyle(frameNode, buttonParameters->fontStyle);
+    } else {
+        SetFontSize(frameNode, std::nullopt);
+        SetFontWeight(frameNode, std::nullopt);
+        SetFontFamily(frameNode, std::nullopt);
+        SetFontStyle(frameNode, std::nullopt);
     }
 }
 
