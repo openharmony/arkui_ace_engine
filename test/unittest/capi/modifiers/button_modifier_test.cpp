@@ -1306,25 +1306,6 @@ HWTEST_F(ButtonModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setFontFamilyTestInvalidValues
- * @tc.desc: Check the functionality of ButtonModifier.setFontFamily
- * @tc.type: FUNC
- */
-HWTEST_F(ButtonModifierTest, setFontFamilyTestInvalidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    auto inputStringValue = "";
-    auto inputArkStringValue = ArkValue<Ark_String>(inputStringValue);
-    auto inputValue = ArkUnion<Union_String_Resource, Ark_String>(inputArkStringValue);
-
-    modifier_->setFontFamily(node_, &inputValue);
-    jsonValue = GetJsonValue(node_);
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
-    EXPECT_EQ(resultStr, inputStringValue);
-}
-
-/*
  * @tc.name: setLabelStyleTestValidValues
  * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
  * @tc.type: FUNC

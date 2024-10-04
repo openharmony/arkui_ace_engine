@@ -47,19 +47,21 @@ namespace {
 
     using ButtonLabelResourceTest = std::tuple<ResourceStr, std::string>;
 
+    // invalid id
+    const auto INVALID_ID_STRING = IntResourceId{-1, NodeModifier::ResourceType::STRING};
+    const auto INVALID_ID_COLOR = IntResourceId{-1, NodeModifier::ResourceType::COLOR};
+
     // resource names and id
     const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::STRING};
     const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::STRING};
 
-    const auto RES_COLOR_NAME = "color_name";
-    const auto RES_COLOR_ARK_NAME = Converter::ArkValue<Ark_String>(RES_COLOR_NAME);
-    const auto RES_COLOR_ID = 123456;
+    const auto RES_COLOR_NAME = NamedResourceId{"color_name", NodeModifier::ResourceType::COLOR};
+    const auto RES_COLOR_ID = IntResourceId{123456, NodeModifier::ResourceType::COLOR};
 
-    const auto RES_DIMENSION_ID = 654321;
+    const auto RES_DIMENSION_ID = 654321; // Ark_Length.Resource
 
-    const auto RES_FAMILY_NAME = "family_resource";
-    const auto RES_FAMILY_ARK_NAME = Converter::ArkValue<Ark_String>(RES_FAMILY_NAME);
-    const auto RES_FAMILY_ID = 22222;
+    const auto RES_FAMILY_NAME = NamedResourceId{"family_resource", NodeModifier::ResourceType::STRARRAY};
+    const auto RES_FAMILY_ID = IntResourceId{22222, NodeModifier::ResourceType::STRARRAY};
 
     // resource values
     const auto RESOURCE_BY_STRING = "ResourceByString";
@@ -76,7 +78,7 @@ namespace {
     const std::vector<ButtonLabelResourceTest> BUTTON_LABEL_RESOURCES_TEST_PLAN = {
         { CreateResourceUnion<ResourceStr>(RES_NAME), RESOURCE_BY_STRING },
         { CreateResourceUnion<ResourceStr>(RES_ID), RESOURCE_BY_NUMBER },
-        { CreateResourceUnion<ResourceStr>(-1), RESOURCE_BY_NUMBER },
+        { CreateResourceUnion<ResourceStr>(INVALID_ID_STRING), "" },
     };
 } // namespace
 
@@ -160,12 +162,12 @@ HWTEST_F(ButtonModifierResourcesTest, setFontColorTestResourceColorValues, TestS
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkResource(const_cast<Ark_String*>(&RES_COLOR_ARK_NAME),
-            -1, NodeModifier::ResourceType::COLOR)), COLOR_BY_STRING.ColorToString() },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkResource(nullptr,
-            RES_COLOR_ID, NodeModifier::ResourceType::COLOR)), COLOR_BY_NUMBER.ColorToString() },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkResource(nullptr,
-            -1, NodeModifier::ResourceType::COLOR)), "#FFFF0000" }, // this color is default in the themeConstants
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_NAME)),
+            COLOR_BY_STRING.ColorToString() },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_ID)),
+            COLOR_BY_NUMBER.ColorToString() },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(INVALID_ID_COLOR)),
+            "#FFFF0000" }
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {
@@ -212,12 +214,9 @@ HWTEST_F(ButtonModifierResourcesTest, setFontFamilyTestResources, TestSize.Level
 
     using ResourceTest = std::tuple<Union_String_Resource, std::string>;
     const std::vector<ResourceTest> testPlan = {
-        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(
-            ArkResource(const_cast<Ark_String*>(&RES_FAMILY_ARK_NAME),
-            -1, NodeModifier::ResourceType::STRARRAY)),
+        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_NAME)),
             FAMILY_BY_STRING },
-        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(ArkResource(nullptr, RES_FAMILY_ID,
-            NodeModifier::ResourceType::STRARRAY)),
+        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_ID)),
             FAMILY_BY_NUMBER },
     };
 
@@ -244,12 +243,11 @@ HWTEST_F(ButtonModifierResourcesTest, setLabelStyleTestResources, TestSize.Level
     using ResourceTest = std::tuple<Opt_Union_String_Resource, std::string>;
     const std::vector<ResourceTest> testPlan = {
         { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-            ArkResource(const_cast<Ark_String*>(&RES_FAMILY_ARK_NAME),
-            -1, NodeModifier::ResourceType::STRARRAY)),
+            CreateResourceUnion(RES_FAMILY_NAME)),
             FAMILY_BY_STRING },
-        { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(ArkResource(nullptr, RES_FAMILY_ID,
-            NodeModifier::ResourceType::STRARRAY)),
-            FAMILY_BY_NUMBER }
+        { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+            CreateResourceUnion(RES_FAMILY_ID)),
+            FAMILY_BY_NUMBER },
     };
 
     for (const auto& [family, expectValue] : testPlan) {

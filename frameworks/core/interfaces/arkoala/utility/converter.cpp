@@ -325,25 +325,32 @@ std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
+StringArray Convert(const Ark_String& src)
+{
+    auto familiesStr = Convert<std::string>(src);
+    return Framework::ConvertStrToFontFamilies(familiesStr);
+}
+
+template<>
 Font Convert(const Ark_Font& src)
 {
-        Font font;
-        auto fontFamalies = OptConvert<std::vector<std::string>>(src.family);
-        if (fontFamalies) {
-            font.fontFamilies = fontFamalies.value();
-        }
-        auto fontSize = OptConvert<Dimension>(src.size);
-        if (fontSize) {
-            Validator::ValidatePositive(fontSize);
-            Validator::ValidateNonPercent(fontSize);
-            font.fontSize = fontSize;
-        }
-        auto weight = OptConvert<FontWeight>(src.weight);
-        if (weight) {
-            font.fontWeight = weight;
-        }
-        font.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.style);
-        return font;
+    Font font;
+    auto fontFamalies = OptConvert<std::vector<std::string>>(src.family);
+    if (fontFamalies) {
+        font.fontFamilies = fontFamalies.value();
+    }
+    auto fontSize = OptConvert<Dimension>(src.size);
+    if (fontSize) {
+        Validator::ValidatePositive(fontSize);
+        Validator::ValidateNonPercent(fontSize);
+        font.fontSize = fontSize;
+    }
+    auto weight = OptConvert<FontWeight>(src.weight);
+    if (weight) {
+        font.fontWeight = weight;
+    }
+    font.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.style);
+    return font;
 }
 
 template<>
