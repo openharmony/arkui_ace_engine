@@ -16,6 +16,9 @@
 #include "modifiers_test_utils.h"
 
 namespace OHOS::Ace::NG {
+
+static std::vector<std::unique_ptr<Ark_String>> g_strCache;
+
 std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name)
 {
     static const InspectorFilter inspector;
@@ -42,4 +45,27 @@ std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node)
     return nullptr;
 }
 
+Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::NodeModifier::ResourceType type)
+{
+    return {
+        .id = Converter::ArkValue<Ark_Number>(id),
+        .type = Converter::ArkValue<Ark_Number>(static_cast<uint32_t>(type)),
+        .moduleName = Converter::ArkValue<Ark_String>(""),
+        .bundleName = Converter::ArkValue<Ark_String>(""),
+        .params = Converter::ArkValue<Opt_Array_String>(),
+    };
+}
+
+Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::NodeModifier::ResourceType type)
+{
+    g_strCache.emplace_back(std::make_unique<Ark_String>(Converter::ArkValue<Ark_String>(name)));
+    Array_String params = {.length = 1, .array = g_strCache.back().get()};
+    return {
+        .id = Converter::ArkValue<Ark_Number>(-1),
+        .type = Converter::ArkValue<Ark_Number>(static_cast<uint32_t>(type)),
+        .moduleName = Converter::ArkValue<Ark_String>(""),
+        .bundleName = Converter::ArkValue<Ark_String>(""),
+        .params = Converter::ArkValue<Opt_Array_String>(params),
+    };
+}
 }

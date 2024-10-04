@@ -31,20 +31,6 @@ using namespace testing::ext;
 using namespace Converter;
 
 namespace {
-    Ark_Resource ArkResource(Ark_String* name, int id = -1,
-        NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR)
-    {
-        return {
-            .id = Converter::ArkValue<Ark_Number>(id),
-            .type = Converter::ArkValue<Ark_Number>(static_cast<int>(type)),
-            .moduleName = Converter::ArkValue<Ark_String>(""),
-            .bundleName = Converter::ArkValue<Ark_String>(""),
-            .params = {
-                .tag = ARK_TAG_OBJECT,
-                .value = { .array = name, .length = name ? 1 : 0 }
-            }
-        };
-    }
     // attrs
     const auto ATTRIBUTE_LABEL_NAME("label");
     const auto ATTRIBUTE_TYPE_NAME("type");
@@ -56,21 +42,16 @@ namespace {
     using ButtonLabelResourceTest = std::tuple<ResourceStr, std::string>;
 
     // resource names and id
-    const auto RES_NAME = "aa.bb.cc";
-    const auto RES_ARK_NAME = Converter::ArkValue<Ark_String>(RES_NAME);
-    const auto RES_ID = 11111;
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::STRING};
+    const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::STRING};
 
     // resource values
     const auto RESOURCE_BY_STRING = "ResourceByString";
     const auto RESOURCE_BY_NUMBER = "ResourceByNumber";
 
     const std::vector<ButtonLabelResourceTest> BUTTON_LABEL_RESOURCES_TEST_PLAN = {
-        { Converter::ArkUnion<ResourceStr, Ark_Resource>(ArkResource(const_cast<Ark_String*>(&RES_ARK_NAME),
-            -1, NodeModifier::ResourceType::STRING)),
-            RESOURCE_BY_STRING },
-        { Converter::ArkUnion<ResourceStr, Ark_Resource>(ArkResource(nullptr, RES_ID,
-            NodeModifier::ResourceType::STRING)),
-            RESOURCE_BY_NUMBER }
+        { CreateResourceUnion<ResourceStr>(RES_NAME), RESOURCE_BY_STRING },
+        { CreateResourceUnion<ResourceStr>(RES_ID), RESOURCE_BY_NUMBER },
     };
 } // namespace
 
