@@ -150,7 +150,7 @@ void EnablePagingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScrollModelNG::SetEnablePaging(frameNode, value);
+    ScrollModelNG::SetEnablePaging(frameNode, Converter::Convert<bool>(value));
 }
 void InitialOffsetImpl(Ark_NativePointer node,
                        const Ark_OffsetOptions* value)
