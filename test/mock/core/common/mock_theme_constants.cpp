@@ -35,11 +35,17 @@ const ResValueWrapper* ThemeConstants::GetPlatformConstants(uint32_t key)
 
 Color ThemeConstants::GetColor(uint32_t key) const
 {
+    if (currentThemeStyle_) {
+        return currentThemeStyle_->GetAttr<Color>(std::to_string(key), Color::RED);
+    }
     return Color::RED;
 }
 
 Color ThemeConstants::GetColorByName(const std::string& resName) const
 {
+    if (currentThemeStyle_) {
+        return currentThemeStyle_->GetAttr<Color>(resName, Color::RED);
+    }
     return Color::RED;
 }
 

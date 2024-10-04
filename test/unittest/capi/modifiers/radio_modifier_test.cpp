@@ -26,44 +26,22 @@ namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+using namespace Converter;
 
 namespace {
-inline Ark_String ArkStr(const char* s)
-{
-    return {
-        .chars = s,
-        .length = strlen(s)
-    };
-}
-inline Ark_Number ArkNum(float src)
-{
-    return {
-        .tag = ARK_TAG_FLOAT32,
-        .f32 = static_cast<Ark_Float32>(src)
-    };
-}
-inline Ark_Number ArkNum(int src)
-{
-    return {
-        .tag = ARK_TAG_INT32,
-        .i32 = static_cast<Ark_Int32>(src)
-    };
-}
+// resource names and id
+const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR};
+const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::COLOR};
+const auto INVALID_ID = IntResourceId{-1, NodeModifier::ResourceType::COLOR};
 
-// custom colors
-const auto CUSTOM_COLOR_STRING = "#FFFFFFFF";
-const auto CUSTOM_COLOR = ARK_COLOR_WHITE;
-const auto CUSTOM_COLOR_INT_STRING = "#FF123456";
-const int CUSTOM_COLOR_INT = 0xFF123456;
-const float CUSTOM_COLOR_FLOAT = 0.1f;
-const auto CHECK_FLOAT_COLOR = "#00000000";
+const auto COLOR_BY_STRING = Color(0xFF123456);
+const auto COLOR_BY_NUMBER = Color(0xFF654321);
+
 //  default colors
 const auto CHECKED_COLOR_DEFAULT = "#FF000000";
 const auto UNCHECKED_COLOR_DEFAULT = "#FF000000";
 const auto INDICATOR_COLOR_DEFAULT = "#FF000000";
-const auto CHECKED_COLOR_THEME_DEFAULT = "#FFFF0000";
-const auto UNCHECKED_COLOR_THEME_DEFAULT = "#FFFF0000";
-const auto INDICATOR_COLOR_THEME_DEFAULT = "#FFFF0000";
+const auto RESOURCE_DEFAULT_COLOR_DEFAULT = "#FFFF0000";
 // attributes
 const std::string CHECKED_ATTR = "checked";
 const std::string RADIO_STYLE_ATTR = "radioStyle";
@@ -107,6 +85,9 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<RadioTheme>();
+
+        AddResource(RES_ID, COLOR_BY_NUMBER);
+        AddResource(RES_NAME, COLOR_BY_STRING);
 
         fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
@@ -182,10 +163,10 @@ HWTEST_F(RadioModifierTest, RadioModifierTest001, TestSize.Level1)
  * @tc.desc: Test Radio setRadioStyle default color.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioModifierTest002, TestSize.Level1)
+HWTEST_F(RadioModifierTest, RadioModifierTestDefautColor, TestSize.Level1)
 {
-    auto radioStyleJSON = GetStringAttribute(node_, RADIO_STYLE_ATTR);
-    auto radioStyle = JsonUtil::ParseJsonString(radioStyleJSON);
+    auto jsonValue = GetJsonValue(node_);
+    auto radioStyle = GetAttrValue< std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
     auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
     EXPECT_EQ(checkedBackgroundColor, CHECKED_COLOR_DEFAULT);
     auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
@@ -194,120 +175,258 @@ HWTEST_F(RadioModifierTest, RadioModifierTest002, TestSize.Level1)
     EXPECT_EQ(checkedBackgroundColor, INDICATOR_COLOR_DEFAULT);
 }
 
-/**
- * @tc.name: RadioModifierTest003
- * @tc.desc: Test Radio setRadioStyle custom color.
+/*
+ * @tc.name: setRadioStyleTestValidEnumColorValues
+ * @tc.desc: Check the functionality of ButtonModifier.setRadioStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioModifierTest003, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setRadioStyleTestValidEnumColorValues, TestSize.Level1)
 {
-    const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(CUSTOM_COLOR);
-    Opt_RadioStyle radioStyleColors;
-    radioStyleColors.value.checkedBackgroundColor.value = COLOR_COLOR;
-    radioStyleColors.value.indicatorColor.value = COLOR_COLOR;
-    radioStyleColors.value.uncheckedBorderColor.value = COLOR_COLOR;
-    modifier_->setRadioStyle(node_, &radioStyleColors);
-    auto customRadioStyleJSON = GetStringAttribute(node_, RADIO_STYLE_ATTR);
-    auto customRadioStyle = JsonUtil::ParseJsonString(customRadioStyleJSON);
-    auto customCheckedBackgroundColor = customRadioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CUSTOM_COLOR_STRING);
-    auto customUncheckedBackgroundColor = customRadioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CUSTOM_COLOR_STRING);
-    auto customIndicatorBackgroundColor = customRadioStyle->GetString(INDICATOR_COLOR_ATTR);
-    EXPECT_EQ(customIndicatorBackgroundColor, CUSTOM_COLOR_STRING);
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::unique_ptr<JsonValue> radioStyle;
+
+    using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
+    };
+
+    for (const auto &[arkResColor, expected]: testPlan) {        
+        Ark_RadioStyle arkRadioStyle = {
+            .checkedBackgroundColor = arkResColor,
+            .indicatorColor = arkResColor,
+            .uncheckedBorderColor = arkResColor
+        };
+        auto radioStyleColors = ArkValue<Opt_RadioStyle>(arkRadioStyle);
+
+        modifier_->setRadioStyle(node_, &radioStyleColors);
+        jsonValue = GetJsonValue(node_);
+        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+        auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+        auto indicatorBackgroundColor = radioStyle->GetString(INDICATOR_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+    }
 }
 
-/**
- * @tc.name: RadioModifierTest004
- * @tc.desc: Test Radio setRadioStyle custom int color.
+/*
+ * @tc.name: setRadioStyleTestValidNumberValues
+ * @tc.desc: Check the functionality of ButtonModifier.setRadioStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioModifierTest004, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setRadioStyleTestValidNumberValues, TestSize.Level1)
 {
-    const Ark_ResourceColor COLOR_INT = { .selector = 1, .value1 = ArkNum(CUSTOM_COLOR_INT) };
-    Opt_RadioStyle radioStyleColors;
-    radioStyleColors.value.checkedBackgroundColor.value = COLOR_INT;
-    radioStyleColors.value.indicatorColor.value = COLOR_INT;
-    radioStyleColors.value.uncheckedBorderColor.value = COLOR_INT;
-    modifier_->setRadioStyle(node_, &radioStyleColors);
-    auto customRadioStyleJSON = GetStringAttribute(node_, RADIO_STYLE_ATTR);
-    auto customRadioStyle = JsonUtil::ParseJsonString(customRadioStyleJSON);
-    auto customCheckedBackgroundColor = customRadioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CUSTOM_COLOR_INT_STRING);
-    auto customUncheckedBackgroundColor = customRadioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CUSTOM_COLOR_INT_STRING);
-    auto customIndicatorBackgroundColor = customRadioStyle->GetString(INDICATOR_COLOR_ATTR);
-    EXPECT_EQ(customIndicatorBackgroundColor, CUSTOM_COLOR_INT_STRING);
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::unique_ptr<JsonValue> radioStyle;
+
+    using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffffff), "#FFFFFFFF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xff000000), "#FF000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xff0000ff), "#FF0000FF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffa52a2a), "#FFA52A2A" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xff808080), "#FF808080" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xff008000), "#FF008000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffa500), "#FFFFA500" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffc0cb), "#FFFFC0CB" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffff0000), "#FFFF0000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffff00), "#FFFFFF00" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x00000000), "#00000000" },
+    };
+
+    for (const auto &[arkResColor, expected]: testPlan) {        
+        Ark_RadioStyle arkRadioStyle = {
+            .checkedBackgroundColor = arkResColor,
+            .indicatorColor = arkResColor,
+            .uncheckedBorderColor = arkResColor
+        };
+        auto radioStyleColors = ArkValue<Opt_RadioStyle>(arkRadioStyle);
+
+        modifier_->setRadioStyle(node_, &radioStyleColors);
+        jsonValue = GetJsonValue(node_);
+        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+        auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+        auto indicatorBackgroundColor = radioStyle->GetString(INDICATOR_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+    }
 }
 
-/**
- * @tc.name: RadioModifierTest005
- * @tc.desc: Test Radio setRadioStyle custom float color.
+/*
+ * @tc.name: setRadioStyleTestValidStringValues
+ * @tc.desc: Check the functionality of ButtonModifier.setRadioStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioModifierTest005, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setRadioStyleTestValidStringValues, TestSize.Level1)
 {
-    const Ark_ResourceColor COLOR_FLOAT = { .selector = 1, .value1 = ArkNum(CUSTOM_COLOR_FLOAT) };
-    Opt_RadioStyle radioStyleColors;
-    radioStyleColors.value.checkedBackgroundColor.value = COLOR_FLOAT;
-    radioStyleColors.value.indicatorColor.value = COLOR_FLOAT;
-    radioStyleColors.value.uncheckedBorderColor.value = COLOR_FLOAT;
-    modifier_->setRadioStyle(node_, &radioStyleColors);
-    auto customRadioStyleJSON = GetStringAttribute(node_, RADIO_STYLE_ATTR);
-    auto customRadioStyle = JsonUtil::ParseJsonString(customRadioStyleJSON);
-    auto customCheckedBackgroundColor = customRadioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CHECK_FLOAT_COLOR);
-    auto customUncheckedBackgroundColor = customRadioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CHECK_FLOAT_COLOR);
-    auto customIndicatorBackgroundColor = customRadioStyle->GetString(INDICATOR_COLOR_ATTR);
-    EXPECT_EQ(customIndicatorBackgroundColor, CHECK_FLOAT_COLOR);
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::unique_ptr<JsonValue> radioStyle;
+
+    using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#FFFFFFFF"), "#FFFFFFFF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#ff000000"), "#FF000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#ff0000ff"), "#FF0000FF" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#ffa52a2a"), "#FFA52A2A" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#ff808080"), "#FF808080" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#ff008000"), "#FF008000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#ffffa500"), "#FFFFA500" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#ffffc0cb"), "#FFFFC0CB" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#ffff0000"), "#FFFF0000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#ffffff00"), "#FFFFFF00" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#00000000"), "#00000000" },
+    };
+
+    for (const auto &[arkResColor, expected]: testPlan) {        
+        Ark_RadioStyle arkRadioStyle = {
+            .checkedBackgroundColor = arkResColor,
+            .indicatorColor = arkResColor,
+            .uncheckedBorderColor = arkResColor
+        };
+        auto radioStyleColors = ArkValue<Opt_RadioStyle>(arkRadioStyle);
+
+        modifier_->setRadioStyle(node_, &radioStyleColors);
+        jsonValue = GetJsonValue(node_);
+        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+        auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+        auto indicatorBackgroundColor = radioStyle->GetString(INDICATOR_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+    }
 }
 
-/**
- * @tc.name: RadioModifierTest006
- * @tc.desc: Test Radio setRadioStyle custom string color.
+/*
+ * @tc.name: setRadioStyleTestInvalidNumberValues
+ * @tc.desc: Check the functionality of ButtonModifier.setRadioStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioModifierTest006, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setRadioStyleTestInvalidNumberValues, TestSize.Level1)
 {
-    const Ark_ResourceColor COLOR_STRING = { .selector = 2, .value2 = ArkStr(CUSTOM_COLOR_STRING) };
-    Opt_RadioStyle radioStyleColors;
-    radioStyleColors.value.checkedBackgroundColor.value = COLOR_STRING;
-    radioStyleColors.value.indicatorColor.value = COLOR_STRING;
-    radioStyleColors.value.uncheckedBorderColor.value = COLOR_STRING;
-    modifier_->setRadioStyle(node_, &radioStyleColors);
-    auto customRadioStyleJSON = GetStringAttribute(node_, RADIO_STYLE_ATTR);
-    auto customRadioStyle = JsonUtil::ParseJsonString(customRadioStyleJSON);
-    auto customCheckedBackgroundColor = customRadioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CUSTOM_COLOR_STRING);
-    auto customUncheckedBackgroundColor = customRadioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CUSTOM_COLOR_STRING);
-    auto customIndicatorBackgroundColor = customRadioStyle->GetString(INDICATOR_COLOR_ATTR);
-    EXPECT_EQ(customIndicatorBackgroundColor, CUSTOM_COLOR_STRING);
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::unique_ptr<JsonValue> radioStyle;
+
+    using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffffff + 1), "#00000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x00000000 - 1), "#FFFFFFFF" },
+    };
+
+    for (const auto &[arkResColor, expected]: testPlan) {        
+        Ark_RadioStyle arkRadioStyle = {
+            .checkedBackgroundColor = arkResColor,
+            .indicatorColor = arkResColor,
+            .uncheckedBorderColor = arkResColor
+        };
+        auto radioStyleColors = ArkValue<Opt_RadioStyle>(arkRadioStyle);
+
+        modifier_->setRadioStyle(node_, &radioStyleColors);
+        jsonValue = GetJsonValue(node_);
+        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+        auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+        auto indicatorBackgroundColor = radioStyle->GetString(INDICATOR_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+    }
 }
 
-/**
- * @tc.name: RadioModifierTest007
- * @tc.desc: Test Radio setRadioStyle custom resource color.
+
+/*
+ * @tc.name: setRadioStyleTestInvalidStringValues
+ * @tc.desc: Check the functionality of ButtonModifier.setRadioStyle
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, RadioModifierTest007, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setRadioStyleTestInvalidStringValues, TestSize.Level1)
 {
-    const Ark_ResourceColor COLOR_RESOURCE = CreateResourceUnion<Ark_ResourceColor, NamedResourceId>(
-        {"aa.bb.cc", NodeModifier::ResourceType::COLOR});
-    Opt_RadioStyle radioStyleColors;
-    radioStyleColors.value.checkedBackgroundColor.value = COLOR_RESOURCE;
-    radioStyleColors.value.indicatorColor.value = COLOR_RESOURCE;
-    radioStyleColors.value.uncheckedBorderColor.value = COLOR_RESOURCE;
-    modifier_->setRadioStyle(node_, &radioStyleColors);
-    auto customRadioStyleJSON = GetStringAttribute(node_, RADIO_STYLE_ATTR);
-    auto customRadioStyle = JsonUtil::ParseJsonString(customRadioStyleJSON);
-    auto customCheckedBackgroundColor = customRadioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, CHECKED_COLOR_THEME_DEFAULT);
-    auto customUncheckedBackgroundColor = customRadioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
-    EXPECT_EQ(customCheckedBackgroundColor, UNCHECKED_COLOR_THEME_DEFAULT);
-    auto customIndicatorBackgroundColor = customRadioStyle->GetString(INDICATOR_COLOR_ATTR);
-    EXPECT_EQ(customIndicatorBackgroundColor, INDICATOR_COLOR_THEME_DEFAULT);
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::unique_ptr<JsonValue> radioStyle;
+
+    static const std::vector<Opt_ResourceColor> testPlan = {
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("undefined") },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_String>("GGTTSSPP") },
+    };
+
+    for (const auto &arkResColor: testPlan) {        
+        Ark_RadioStyle arkRadioStyle = {
+            .checkedBackgroundColor = arkResColor,
+            .indicatorColor = arkResColor,
+            .uncheckedBorderColor = arkResColor
+        };
+        auto radioStyleColors = ArkValue<Opt_RadioStyle>(arkRadioStyle);
+
+        modifier_->setRadioStyle(node_, &radioStyleColors);
+        jsonValue = GetJsonValue(node_);
+        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, CHECKED_COLOR_DEFAULT);
+        auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, UNCHECKED_COLOR_DEFAULT);
+        auto indicatorBackgroundColor = radioStyle->GetString(INDICATOR_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, INDICATOR_COLOR_DEFAULT);
+    }
+}
+
+/*
+ * @tc.name: setRadioStyleTestResourceColorValues
+ * @tc.desc: Check the functionality of ButtonModifier.setRadioStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioModifierTest, setRadioStyleTestResourceColorValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::unique_ptr<JsonValue> radioStyle;
+
+    typedef std::pair<Opt_ResourceColor, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_NAME)),
+            COLOR_BY_STRING.ColorToString() },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_ID)),
+            COLOR_BY_NUMBER.ColorToString() },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResourceUnion(INVALID_ID)),
+            RESOURCE_DEFAULT_COLOR_DEFAULT },
+    };
+
+    for (const auto &[arkResColor, expected]: testPlan) {        
+        Ark_RadioStyle arkRadioStyle = {
+            .checkedBackgroundColor = arkResColor,
+            .indicatorColor = arkResColor,
+            .uncheckedBorderColor = arkResColor
+        };
+        auto radioStyleColors = ArkValue<Opt_RadioStyle>(arkRadioStyle);
+
+        modifier_->setRadioStyle(node_, &radioStyleColors);
+        jsonValue = GetJsonValue(node_);
+        radioStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, RADIO_STYLE_ATTR);
+        auto checkedBackgroundColor = radioStyle->GetString(CHECKED_BACKGROUND_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+        auto uncheckedBackgroundColor = radioStyle->GetString(UNCHECKED_BORDER_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+        auto indicatorBackgroundColor = radioStyle->GetString(INDICATOR_COLOR_ATTR);
+        EXPECT_EQ(checkedBackgroundColor, expected);
+    }
 }
 
 /**

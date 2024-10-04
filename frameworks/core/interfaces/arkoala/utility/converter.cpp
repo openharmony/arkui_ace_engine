@@ -222,6 +222,7 @@ std::optional<Color> ResourceConverter::ToColor()
     if (id_ == -1 && params_.size() > 0) {
         CHECK_NULL_RETURN(themeConstants_, result);
         result = themeConstants_->GetColorByName(params_[0]);
+        return result;
     }
 
     switch (type_) {

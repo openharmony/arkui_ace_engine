@@ -72,18 +72,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         {
             auto frameNode = reinterpret_cast<FrameNode*>(node);
             CHECK_NULL_VOID(frameNode);
-            CHECK_NULL_VOID(value);
-            auto style = Converter::OptConvert<Converter::RadioStyle>(*value);
+            auto style = value ? Converter::OptConvert<Converter::RadioStyle>(*value) : std::nullopt;
             if (style) {
-                if (style->checkedBackgroundColor) {
-                    RadioModelNG::SetCheckedBackgroundColor(frameNode, style->checkedBackgroundColor.value());
-                }
-                if (style->uncheckedBorderColor) {
-                    RadioModelNG::SetUncheckedBorderColor(frameNode, style->uncheckedBorderColor.value());
-                }
-                if (style->indicatorColor) {
-                    RadioModelNG::SetIndicatorColor(frameNode, style->indicatorColor.value());
-                }
+                RadioModelNG::SetCheckedBackgroundColor(frameNode, style->checkedBackgroundColor);
+                RadioModelNG::SetUncheckedBorderColor(frameNode, style->uncheckedBorderColor);
+                RadioModelNG::SetIndicatorColor(frameNode, style->indicatorColor);
+            } else {
+                RadioModelNG::SetCheckedBackgroundColor(frameNode, std::nullopt);
+                RadioModelNG::SetUncheckedBorderColor(frameNode, std::nullopt);
+                RadioModelNG::SetIndicatorColor(frameNode, std::nullopt);
             }
         }
         void ContentModifierImpl(Ark_NativePointer node, const Ark_CustomObject* modifier)
