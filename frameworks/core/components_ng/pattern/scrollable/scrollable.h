@@ -167,6 +167,16 @@ public:
         friction_ = friction;
     }
 
+    double GetFriction() const
+    {
+        return friction_;
+    }
+
+    float GetRatio() const
+    {
+        return ratio_;
+    }
+
     void HandleTouchDown();
     void HandleTouchUp();
     void HandleTouchCancel();
