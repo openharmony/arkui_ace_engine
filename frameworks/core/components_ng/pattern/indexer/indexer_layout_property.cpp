@@ -78,8 +78,7 @@ std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextSt
 {
     auto fontJsonObject = JsonUtil::Create(true);
     fontJsonObject->Put("fontSize", textStyle.GetFontSize().ToString().c_str());
-    fontJsonObject->Put(
-        "fontStyle", textStyle.GetFontStyle() == FontStyle::NORMAL ? "FontStyle::NORMAL" : "FontStyle::ITALIC");
+    fontJsonObject->Put("fontStyle", V2::ConvertWrapFontStyleToStirng(textStyle.GetFontStyle()).c_str());
     fontJsonObject->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textStyle.GetFontWeight()).c_str());
     auto fontFamilyVector = textStyle.GetFontFamilies();
     std::string fontFamily;
