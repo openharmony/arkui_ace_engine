@@ -63,7 +63,7 @@ ButtonParameters Convert(const Ark_LabelStyle& src)
     parameters.minFontSize = minFontSize;
     auto maxFontSize = Converter::OptConvert<Dimension>(src.maxFontSize);
     Validator::ValidateNonNegative(maxFontSize);
-    Validator::ValidateNonPercent(minFontSize);
+    Validator::ValidateNonPercent(maxFontSize);
     parameters.maxFontSize = maxFontSize;
     auto labelFont = Converter::OptConvert<Font>(src.font);
     if (labelFont) {
