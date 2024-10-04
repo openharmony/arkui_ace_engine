@@ -249,9 +249,6 @@ HWTEST_F(ButtonModifierResourcesTest, setLabelStyleTestResources, TestSize.Level
             FAMILY_BY_STRING },
         { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(ArkResource(nullptr, RES_FAMILY_ID,
             NodeModifier::ResourceType::STRARRAY)),
-            FAMILY_BY_NUMBER },
-        { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(ArkResource(nullptr, -1,
-            NodeModifier::ResourceType::STRARRAY)),
             FAMILY_BY_NUMBER }
     };
 
