@@ -181,6 +181,9 @@ protected:
 
     inline static const Modifier *modifier_
         = nodeModifiers_ && GetModifierFunc ? (nodeModifiers_->*GetModifierFunc)() : nullptr;
+
+    inline static const GENERATED_ArkUICommonMethodModifier *commonModifier_
+        = nodeModifiers_ ? (nodeModifiers_->getCommonMethodModifier)() : nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_MODIFIER_TEST_BASE_H

@@ -19,6 +19,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/counter/counter_model_ng.h"
+#include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
@@ -211,18 +213,42 @@ namespace CommonMethodModifier {
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)
 {
+    CHECK_NULL_VOID(value);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto result = Converter::ConvertOrDefault(*value, CalcLength());
-    ViewAbstract::SetWidth(frameNode, result);
+    auto result = Converter::Convert<CalcLength>(*value);
+    if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
+        if (result.GetDimensionContainsNegative().IsNegative()) {
+            return;
+        }
+        CounterModelNG::SetWidth(frameNode, result);
+    } else {
+        if (result.GetDimensionContainsNegative().IsNegative()) {
+            ViewAbstract::ClearWidthOrHeight(frameNode, true);
+            return;
+        }
+        ViewAbstract::SetWidth(frameNode, result);
+    }
 }
 void HeightImpl(Ark_NativePointer node,
                 const Ark_Length* value)
 {
+    CHECK_NULL_VOID(value);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto result = Converter::ConvertOrDefault(*value, CalcLength());
-    ViewAbstract::SetHeight(frameNode, result);
+    auto result = Converter::Convert<CalcLength>(*value);
+    if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
+        if (result.GetDimensionContainsNegative().IsNegative()) {
+            return;
+        }
+        CounterModelNG::SetHeight(frameNode, result);
+    } else {
+        if (result.GetDimensionContainsNegative().IsNegative()) {
+            ViewAbstract::ClearWidthOrHeight(frameNode, false);
+            return;
+        }
+        ViewAbstract::SetHeight(frameNode, result);
+    }
 }
 void DrawModifierImpl(Ark_NativePointer node,
                       const Type_CommonMethod_drawModifier_Arg0* modifier)
@@ -249,15 +275,16 @@ void MouseResponseRegionImpl(Ark_NativePointer node,
 void SizeImpl(Ark_NativePointer node,
               const Ark_SizeOptions* value)
 {
+    CHECK_NULL_VOID(value);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto width = Converter::OptConvert<CalcLength>(value->width);
+    auto width = Converter::OptConvert<Ark_Length>(value->width);
     if (width) {
-        ViewAbstract::SetWidth(frameNode, width.value());
+        WidthImpl(node, &width.value());
     }
-    auto height = Converter::OptConvert<CalcLength>(value->height);
+    auto height = Converter::OptConvert<Ark_Length>(value->height);
     if (height) {
-        ViewAbstract::SetHeight(frameNode, height.value());
+        HeightImpl(node, &height.value());
     }
 }
 void ConstraintSizeImpl(Ark_NativePointer node,
@@ -330,7 +357,11 @@ void BackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    ViewAbstract::SetBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
+    if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
+        CounterModelNG::SetBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
+    } else {
+        ViewAbstract::SetBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
+    }
 }
 void PixelRoundImpl(Ark_NativePointer node,
                     const Ark_PixelRoundPolicy* value)
