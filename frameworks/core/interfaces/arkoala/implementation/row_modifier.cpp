@@ -82,7 +82,7 @@ void AlignItemsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto flexAlign = Converter::ConvertOrDefault(value, FlexAlign::CENTER);
+    auto flexAlign = Converter::OptConvert<FlexAlign>(value);
     RowModelNG::SetAlignItems(frameNode, flexAlign);
 }
 void JustifyContentImpl(Ark_NativePointer node,
@@ -91,7 +91,7 @@ void JustifyContentImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto flexAlign = Converter::ConvertOrDefault(value, FlexAlign::FLEX_START);
+    auto flexAlign = Converter::OptConvert<FlexAlign>(value);
     RowModelNG::SetJustifyContent(frameNode, flexAlign);
 }
 void PointLightImpl(Ark_NativePointer node,
