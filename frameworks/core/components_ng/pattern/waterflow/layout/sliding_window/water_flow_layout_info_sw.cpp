@@ -135,6 +135,10 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
         return res;
     }
     float disToBot = EndPosWithMargin() + footerHeight_ - std::min(lastMainSize_, maxHeight_);
+    if (Positive(disToBot) && LessNotEqual(maxHeight_, lastMainSize_)) {
+        res.end = std::min(0.0f, disToBot + delta);
+        return res;
+    }
     if (!offsetEnd_) {
         res.end = std::min(0.0f, disToBot + delta);
     } else if (Negative(delta)) {
