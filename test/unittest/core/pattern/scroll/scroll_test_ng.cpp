@@ -45,6 +45,7 @@ void ScrollTestNg::SetUpTestSuite()
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     MockAnimationManager::Enable(true);
+    testing::FLAGS_gmock_verbose = "error";
 }
 
 void ScrollTestNg::TearDownTestSuite()
