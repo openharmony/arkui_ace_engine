@@ -68,6 +68,11 @@ public:
     }
 
 private:
+    void ApplyDefaultContentClip(const RefPtr<RenderContext>& ctx, const RefPtr<GeometryNode>& geometryNode) override
+    {
+        ctx->SetContentClip(geometryNode->GetFrameRect());
+    }
+
     RefPtr<ScrollContentModifier> scrollContentModifier_;
     void PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
 

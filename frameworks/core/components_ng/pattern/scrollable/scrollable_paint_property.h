@@ -41,6 +41,7 @@ enum class ContentClipMode {
     BOUNDARY,     // corresponding to FrameRect, area excluding margin
     SAFE_AREA,    // CONTENT_ONLY area + SafeAreaPadding (which can stack up with ancestor's SafeAreaPadding)
     CUSTOM,       // inner enum, not present in JS. Custom shape's offset is relative to FrameOffset.
+    DEFAULT,      // Different scrollable components have different default clip values.
 };
 using ContentClip = std::pair<ContentClipMode, RefPtr<ShapeRect>>;
 

@@ -91,6 +91,9 @@ bool ScrollablePaintMethod::TryContentClip(PaintWrapper* wrapper)
             case ContentClipMode::BOUNDARY:
                 renderContext->SetContentClip(wrapper->GetGeometryNode()->GetFrameRect());
                 break;
+            case ContentClipMode::DEFAULT:
+                ApplyDefaultContentClip(renderContext, wrapper->GetGeometryNode());
+                break;
             default:
                 break;
         }
