@@ -939,39 +939,49 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
         GetFrameName().c_str(), GetFrameId(), moveStep);
     SetScopeFocusAlgorithm();
     if (!focusAlgorithm_.getNextFocusNode) {
-        if (focusAlgorithm_.scopeType == ScopeType::PROJECT_AREA) {
-            auto lastFocusNode = lastWeakFocusNode_.Upgrade();
-            CHECK_NULL_RETURN(lastFocusNode, false);
-            RefPtr<FocusHub> nextFocusHub = nullptr;
-            if (IsFocusStepTab(moveStep)) {
-                nextFocusHub = lastFocusNode->GetNearestNodeByProjectArea(
-                    GetChildren(), GetRealFocusStepByTab(moveStep, AceApplicationInfo::GetInstance().IsRightToLeft()));
-            }
-            if (!nextFocusHub) {
-                nextFocusHub = lastFocusNode->GetNearestNodeByProjectArea(GetChildren(), moveStep);
-            }
-            if (!nextFocusHub || nextFocusHub == lastFocusNode) {
-                TAG_LOGI(
-                    AceLogTag::ACE_FOCUS, "Request next focus failed becase cannot find next node by project area.");
-                return false;
-            }
-            auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
-            TAG_LOGI(AceLogTag::ACE_FOCUS,
-                "Request next focus by project area. Next focus node is %{public}s/%{public}d. Return %{public}d",
-                nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
-            return ret;
-        }
-        if (focusAlgorithm_.direction != ScopeFocusDirection::UNIVERSAL && !IsFocusStepTab(moveStep) &&
-            focusAlgorithm_.isVertical != IsFocusStepVertical(moveStep)) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS,
-                "Request next focus failed because direction of node(%{public}d) is different with step(%{public}d).",
-                focusAlgorithm_.isVertical, moveStep);
-            return IsArrowKeyStepOut(moveStep);
-        }
-        auto ret = GoToNextFocusLinear(moveStep, rect);
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request next focus by default linear algorithm. Return %{public}d.", ret);
-        return (ret || IsArrowKeyStepOut(moveStep));
+        return RequestNextFocusByDefaultAlgorithm(moveStep, rect);
     }
+    return RequestNextFocusByCustomAlgorithm(moveStep, rect);
+}
+
+bool FocusHub::RequestNextFocusByDefaultAlgorithm(FocusStep moveStep, const RectF& rect)
+{
+    if (focusAlgorithm_.scopeType == ScopeType::PROJECT_AREA) {
+        auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+        CHECK_NULL_RETURN(lastFocusNode, false);
+        RefPtr<FocusHub> nextFocusHub = nullptr;
+        if (IsFocusStepTab(moveStep)) {
+            nextFocusHub = lastFocusNode->GetNearestNodeByProjectArea(
+                GetChildren(), GetRealFocusStepByTab(moveStep, AceApplicationInfo::GetInstance().IsRightToLeft()));
+        }
+        if (!nextFocusHub) {
+            nextFocusHub = lastFocusNode->GetNearestNodeByProjectArea(GetChildren(), moveStep);
+        }
+        if (!nextFocusHub || nextFocusHub == lastFocusNode) {
+            TAG_LOGI(
+                AceLogTag::ACE_FOCUS, "Request next focus failed becase cannot find next node by project area.");
+            return false;
+        }
+        auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Request next focus by project area. Next focus node is %{public}s/%{public}d. Return %{public}d",
+            nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
+        return ret;
+    }
+    if (focusAlgorithm_.direction != ScopeFocusDirection::UNIVERSAL && !IsFocusStepTab(moveStep) &&
+        focusAlgorithm_.isVertical != IsFocusStepVertical(moveStep)) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Request next focus failed because direction of node(%{public}d) is different with step(%{public}d).",
+            focusAlgorithm_.isVertical, moveStep);
+        return IsArrowKeyStepOut(moveStep);
+    }
+    auto ret = GoToNextFocusLinear(moveStep, rect);
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Request next focus by default linear algorithm. Return %{public}d.", ret);
+    return (ret || IsArrowKeyStepOut(moveStep));
+}
+
+bool FocusHub::RequestNextFocusByCustomAlgorithm(FocusStep moveStep, const RectF& rect)
+{
     if (!lastWeakFocusNode_.Upgrade()) {
         return IsArrowKeyStepOut(moveStep);
     }
