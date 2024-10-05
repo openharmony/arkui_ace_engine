@@ -748,6 +748,9 @@ void ListItemPattern::UpdateClickJudgeCallback()
         auto clickJudgeCallback = [weak = WeakClaim(this)](const PointF& localPoint) -> bool {
             auto item = weak.Upgrade();
             CHECK_NULL_RETURN(item, false);
+            if (item->swipeActionState_ == SwipeActionState::COLLAPSED) {
+                return false;
+            }
             return item->ClickJudge(localPoint);
         };
         TAG_LOGI(AceLogTag::ACE_LIST, "List:%{public}d AddClickJudgeCallback", frameNode->GetId());
@@ -1209,6 +1212,7 @@ void ListItemPattern::OnDetachFromMainTree()
     auto listPattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(listPattern);
     listPattern->SetSwiperItemEnd(AceType::WeakClaim(this));
+    swipeActionState_ = SwipeActionState::COLLAPSED;
 }
 
 bool ListItemPattern::RenderCustomChild(int64_t deadline)
