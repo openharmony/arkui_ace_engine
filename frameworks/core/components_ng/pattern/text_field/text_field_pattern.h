@@ -1526,6 +1526,10 @@ public:
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
     void StopContentScroll();
     void UpdateContentScroller(const Offset& localOffset);
+    void SetIsInitTextRect(bool isInitTextRect)
+    {
+        initTextRect_ = isInitTextRect;
+    }
 
 protected:
     virtual void InitDragEvent();

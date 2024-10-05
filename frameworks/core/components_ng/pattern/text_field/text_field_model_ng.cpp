@@ -738,6 +738,11 @@ void TextFieldModelNG::SetPadding(const NG::PaddingProperty& newPadding, Edge ol
     }
     NG::ViewAbstract::SetPadding(newPadding);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsInitTextRect(false);
 }
 
 void TextFieldModelNG::SetDefaultPadding()
@@ -756,6 +761,9 @@ void TextFieldModelNG::SetDefaultPadding()
     paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
     ViewAbstract::SetPadding(paddings);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsInitTextRect(false);
 }
 
 void TextFieldModelNG::SetHoverEffect(HoverEffectType hoverEffect)
@@ -1912,6 +1920,9 @@ void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& new
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetPadding(newPadding);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsInitTextRect(false);
 }
 
 RefPtr<UINode> TextFieldModelNG::GetCustomKeyboard(FrameNode* frameNode)
@@ -1972,6 +1983,9 @@ void TextFieldModelNG::SetBorderWidth(FrameNode* frameNode, NG::BorderWidthPrope
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBorderWidth(frameNode, borderWidth);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderWidthFlagByUser, borderWidth, frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsInitTextRect(false);
 }
 
 void TextFieldModelNG::SetBorderRadius(FrameNode* frameNode, NG::BorderRadiusProperty borderRadius)
