@@ -875,9 +875,6 @@ void ListPattern::OnScrollEndCallback()
     if (AnimateStoped()) {
         scrollStop_ = true;
         MarkDirtyNodeSelf();
-        if (chainAnimation_) {
-            chainAnimation_->SetOverDrag(false);
-        }
     }
 }
 
@@ -1881,7 +1878,6 @@ void ListPattern::SetChainAnimationCallback()
         auto list = weak.Upgrade();
         CHECK_NULL_VOID(list);
         if (!list->dragFromSpring_ && list->chainAnimation_) {
-            list->chainAnimation_->SetOverDrag(false);
             auto delta = list->chainAnimation_->SetControlIndex(list->IsAtTop() ? 0 : list->maxListItemIndex_);
             list->currentDelta_ -= delta;
             list->dragFromSpring_ = true;
@@ -2004,17 +2000,12 @@ void ListPattern::ProcessDragStart(float startPosition)
     float delta = chainAnimation_->SetControlIndex(index);
     currentDelta_ -= delta;
     chainAnimation_->SetMaxIndex(maxListItemIndex_);
-    if (IsOutOfBoundary()) {
-        chainAnimation_->SetOverDrag(true);
-    }
 }
 
 void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
 {
     CHECK_NULL_VOID(chainAnimation_);
     if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR_FLING) {
-        bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
-        chainAnimation_->SetOverDrag(overDrag);
         return;
     }
     if (NeedScrollSnapAlignEffect()) {
@@ -2034,8 +2025,18 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
             currentDelta_ -= delta;
         }
     }
-    bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
-    chainAnimation_->SetDelta(-dragOffset, overDrag);
+    float overOffset = 0.0f;
+    if (!itemPosition_.empty()) {
+        auto res = GetOutBoundaryOffset(false);
+        overOffset = std::max(res.start, res.end);
+        if (!NearZero(res.end)) {
+            overOffset = -overOffset;
+        }
+    }
+    if (source == SCROLL_FROM_UPDATE && !NearZero(overOffset)) {
+        dragOffset = 0.0f;
+    }
+    chainAnimation_->SetDelta(-dragOffset, overOffset);
     if (source == SCROLL_FROM_UPDATE && GetCanOverScroll()) {
         float tempDelta = currentDelta_;
         currentDelta_ -= dragOffset;
