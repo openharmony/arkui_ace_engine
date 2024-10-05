@@ -54,6 +54,7 @@ constexpr double MAX_VELOCITY = 12000.0;
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
 #endif
+constexpr float SPRING_ACCURACY = 0.1f;
 enum class ModalSheetCoordinationMode : char {
     UNKNOWN = 0,
     SHEET_SCROLL = 1,
