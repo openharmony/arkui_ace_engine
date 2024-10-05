@@ -1405,6 +1405,7 @@ float GridPattern::GetTotalHeight() const
 
 void GridPattern::UpdateScrollBarOffset()
 {
+    CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
