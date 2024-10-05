@@ -107,6 +107,14 @@ RefPtr<FocusHub> FocusHub::GetParentFocusHub() const
     return parentNode ? parentNode->GetFocusHub() : nullptr;
 }
 
+RefPtr<FocusHub> FocusHub::GetParentFocusHubWithBoundary() const
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto parentNode = frameNode->GetFocusParentWithBoundary();
+    return parentNode ? parentNode->GetFocusHub() : nullptr;
+}
+
 RefPtr<FocusHub> FocusHub::GetRootFocusHub()
 {
     RefPtr<FocusHub> parent = AceType::Claim(this);
@@ -1866,12 +1874,12 @@ bool FocusHub::IsFocusableScopeByTab()
 
 bool FocusHub::IsFocusableWholePath()
 {
-    auto parent = GetParentFocusHub();
+    auto parent = GetParentFocusHubWithBoundary();
     while (parent) {
         if (!parent->IsFocusableNode()) {
             return false;
         }
-        parent = parent->GetParentFocusHub();
+        parent = parent->GetParentFocusHubWithBoundary();
     }
     return IsFocusable();
 }
@@ -1881,24 +1889,24 @@ WeakPtr<FocusHub> FocusHub::GetUnfocusableParentFocusNode()
     if (!IsFocusable()) {
         return AceType::WeakClaim(this);
     }
-    auto parent = GetParentFocusHub();
+    auto parent = GetParentFocusHubWithBoundary();
     while (parent) {
         if (!parent->IsFocusableNode()) {
             return AceType::WeakClaim(AceType::RawPtr(parent));
         }
-        parent = parent->GetParentFocusHub();
+        parent = parent->GetParentFocusHubWithBoundary();
     }
     return nullptr;
 }
 
 bool FocusHub::IsSelfFocusableWholePath()
 {
-    auto parent = GetParentFocusHub();
+    auto parent = GetParentFocusHubWithBoundary();
     while (parent) {
         if (!parent->IsFocusableNode()) {
             return false;
         }
-        parent = parent->GetParentFocusHub();
+        parent = parent->GetParentFocusHubWithBoundary();
     }
     return IsFocusableNode();
 }

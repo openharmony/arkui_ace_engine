@@ -536,6 +536,30 @@ RefPtr<FrameNode> UINode::GetFocusParent() const
     return nullptr;
 }
 
+RefPtr<FrameNode> UINode::GetFocusParentWithBoundary() const
+{
+    auto parentUi = GetParent();
+    while (parentUi) {
+        if (parentUi->GetTag() == V2::SCREEN_ETS_TAG) {
+            return nullptr;
+        }
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUi);
+        if (!parentFrame) {
+            parentUi = parentUi->GetParent();
+            continue;
+        }
+        auto type = parentFrame->GetFocusType();
+        if (type == FocusType::SCOPE) {
+            return parentFrame;
+        }
+        if (type == FocusType::NODE) {
+            return nullptr;
+        }
+        parentUi = parentUi->GetParent();
+    }
+    return nullptr;
+}
+
 RefPtr<FocusHub> UINode::GetFirstFocusHubChild() const
 {
     const auto* frameNode = AceType::DynamicCast<FrameNode>(this);
