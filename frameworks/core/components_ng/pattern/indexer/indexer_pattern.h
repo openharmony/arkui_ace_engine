@@ -118,11 +118,24 @@ private:
     bool MoveIndexByStep(int32_t step);
     bool KeyIndexByStep(int32_t step);
     bool MoveIndexBySearch(const std::string& searchStr);
-    void ApplyIndexChanged(
-        bool isTextNodeInTree, bool selectChanged = true, bool fromTouchUp = false, bool indexerSizeChanged = false);
     void OnSelect();
     int32_t GetSkipChildIndex(int32_t step);
     int32_t GetFocusChildIndex(const std::string& searchStr);
+
+    void ApplyIndexChanged(
+        bool isTextNodeInTree, bool selectChanged = true, bool fromTouchUp = false, bool indexerSizeChanged = false);
+    void UpdateChildTextStyle(RefPtr<IndexerLayoutProperty>& layoutProperty,
+        RefPtr<IndexerPaintProperty>& paintProperty, bool isTextNodeInTree, bool fromTouchUp);
+    void UpdateFontStyle(RefPtr<IndexerLayoutProperty>& layoutProperty, RefPtr<IndexerTheme>& indexerTheme,
+        TextStyle& unselectedFontStyle, TextStyle& selectedFontStyle);
+    void UpdateHoverAndPressStyle(RefPtr<IndexerPaintProperty>& paintProperty, RefPtr<RenderContext>& textRenderContext,
+        RefPtr<IndexerTheme>& indexerTheme, int32_t index) const;
+    void UpdateFocusAndSelectedStyle(RefPtr<IndexerPaintProperty>& paintProperty,
+        RefPtr<RenderContext>& textRenderContext, RefPtr<IndexerTheme>& indexerTheme, int32_t index,
+        bool fromTouchUp) const;
+    void UpdateNormalStyle(RefPtr<RenderContext>& textRenderContext, int32_t index, bool fromTouchUp) const;
+    void UpdateTextLayoutProperty(RefPtr<FrameNode>& textNode, int32_t index, Dimension& borderWidth,
+        TextStyle& fontStyle, Color& textColor) const;
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitInputEvent();
