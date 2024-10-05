@@ -138,19 +138,24 @@ class ModifierWithKey {
       this.applyPeer(node, true, component);
       return true;
     }
-    const stageTypeInfo = typeof this.stageValue;
-    const valueTypeInfo = typeof this.value;
-    let different = false;
-    if (stageTypeInfo !== valueTypeInfo) {
-      different = true;
-    }
-    else if (stageTypeInfo === 'number' || stageTypeInfo === 'string' || stageTypeInfo === 'boolean') {
-      different = (this.stageValue !== this.value);
-    }
-    else {
-      different = this.checkObjectDiff();
-    }
-    if (different) {
+    if (component._needDiff) {
+      const stageTypeInfo = typeof this.stageValue;
+      const valueTypeInfo = typeof this.value;
+      let different = false;
+      if (stageTypeInfo !== valueTypeInfo) {
+        different = true;
+      }
+      else if (stageTypeInfo === 'number' || stageTypeInfo === 'string' || stageTypeInfo === 'boolean') {
+        different = (this.stageValue !== this.value);
+      }
+      else {
+        different = this.checkObjectDiff();
+      }
+      if (different) {
+        this.value = this.stageValue;
+        this.applyPeer(node, false, component);
+      }
+    } else {
       this.value = this.stageValue;
       this.applyPeer(node, false, component);
     }
@@ -3075,6 +3080,7 @@ class ArkComponent {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    this._needDiff = true;
     if (classType === ModifierType.FRAME_NODE) {
       this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
