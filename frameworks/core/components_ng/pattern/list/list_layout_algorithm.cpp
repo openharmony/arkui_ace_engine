@@ -1011,9 +1011,6 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     float endMainPos = overScrollFeature_ ?
         std::max(startPos + contentMainSize_ - contentStartOffset_, endMainPos_) : endMainPos_;
     layoutEndMainPos_ = endMainPos;
-    if (forwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
-        endMainPos = Infinity<float>();
-    }
 
     auto currentIndex = startIndex - 1;
     auto chainOffset = 0.0f;
@@ -1032,7 +1029,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessOrEqual(currentEndPos + chainOffset, endMainPos));
+    } while (LessOrEqual(currentEndPos + chainOffset, endMainPos) || forwardFeature_);
     currentEndPos += chainOffset;
 
     while (!itemPosition_.empty() && !targetIndex_) {
@@ -1098,9 +1095,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     float startMainPos = overScrollFeature_ ?
         std::min(endPos - contentMainSize_ + contentEndOffset_, startMainPos_) : startMainPos_;
     layoutStartMainPos_ = startMainPos;
-    if (backwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
-        startMainPos = -Infinity<float>();
-    }
+
     auto currentIndex = endIndex + 1;
     auto chainOffset = 0.0f;
     do {
@@ -1118,7 +1113,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
             startMainPos = layoutStartMainPos_.value_or(startMainPos_);
             backwardFeature_ = false;
         }
-    } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos));
+    } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos) || backwardFeature_);
 
     currentStartPos += chainOffset;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
