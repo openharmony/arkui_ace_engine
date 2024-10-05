@@ -587,22 +587,25 @@ int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
 
 bool IndexerPattern::KeyIndexByStep(int32_t step)
 {
-    auto nextSected = GetSkipChildIndex(step);
-    if (childFocusIndex_ == nextSected || nextSected == -1) {
+    auto nextSelected = GetSkipChildIndex(step);
+    if (nextSelected == -1) {
+        OnKeyEventDisappear();
+        return false;
+    } else if (childFocusIndex_ == nextSelected) {
         return false;
     }
-    childFocusIndex_ = nextSected;
-    auto refreshBubble = nextSected >= 0 && nextSected < itemCount_;
+    childFocusIndex_ = nextSelected;
+    auto refreshBubble = nextSelected >= 0 && nextSelected < itemCount_;
     if (refreshBubble) {
-        selected_ = nextSected;
+        selected_ = nextSelected;
         selectedChangedForHaptic_ = lastSelected_ != selected_;
-        lastSelected_ = nextSected;
+        lastSelected_ = nextSelected;
     }
     childPressIndex_ = -1;
     childHoverIndex_ = -1;
     ApplyIndexChanged(true, refreshBubble);
     OnSelect();
-    return nextSected >= 0;
+    return nextSelected >= 0;
 }
 
 int32_t IndexerPattern::GetSkipChildIndex(int32_t step)
@@ -616,15 +619,15 @@ int32_t IndexerPattern::GetSkipChildIndex(int32_t step)
 
 bool IndexerPattern::MoveIndexByStep(int32_t step)
 {
-    auto nextSected = GetSkipChildIndex(step);
-    if (selected_ == nextSected || nextSected == -1) {
+    auto nextSelected = GetSkipChildIndex(step);
+    if (selected_ == nextSelected || nextSelected == -1) {
         return false;
     }
-    selected_ = nextSected;
+    selected_ = nextSelected;
     ResetStatus();
     ApplyIndexChanged(true, true);
     OnSelect();
-    return nextSected >= 0;
+    return nextSelected >= 0;
 }
 
 bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
@@ -1701,11 +1704,11 @@ bool IndexerPattern::OnKeyEvent(const KeyEvent& event)
     if (!event.IsCombinationKey() && (event.IsLetterKey() || event.IsNumberKey())) {
         return MoveIndexBySearch(event.ConvertCodeToString());
     }
-    OnKeyEventDisapear();
+    OnKeyEventDisappear();
     return false;
 }
 
-void IndexerPattern::OnKeyEventDisapear()
+void IndexerPattern::OnKeyEventDisappear()
 {
     ResetStatus();
     ApplyIndexChanged(true, false);

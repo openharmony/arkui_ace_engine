@@ -149,7 +149,7 @@ private:
     void OnChildHover(int32_t index, bool isHover);
     void OnPopupHover(bool isHover);
     void ResetStatus();
-    void OnKeyEventDisapear();
+    void OnKeyEventDisappear();
     void UpdateBubbleListItem(std::vector<std::string>& currentListData, const RefPtr<FrameNode>& parentNode,
         RefPtr<IndexerTheme>& indexerTheme);
     void AddPopupTouchListener(RefPtr<FrameNode> popupNode);
