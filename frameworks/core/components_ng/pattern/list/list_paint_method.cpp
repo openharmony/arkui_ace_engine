@@ -83,8 +83,9 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         .laneGutter = laneGutter_,
         .mainSize = size };
     float checkMargin = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
-    if (NearZero(checkMargin))
+    if (NearZero(checkMargin)) {
         return;
+    }
     if (LessNotEqual(checkMargin, 0.0f)) {
         dividerInfo.startMargin = 0.0f;
         dividerInfo.endMargin = 0.0f;
