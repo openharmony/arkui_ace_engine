@@ -675,6 +675,8 @@ public:
         return registerComponents_;
     }
 
+    void UpdateResourceOrientation(int32_t orientation);
+    void UpdateResourceDensity(double density);
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

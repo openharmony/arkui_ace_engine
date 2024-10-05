@@ -84,6 +84,7 @@
       OHOS::Ace::Dimension::*;
       OHOS::Ace::Matrix4::*;
       OHOS::Ace::NG::DragDropFuncWrapper::*;
+      OHOS::Ace::WindowUtils::*;
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
