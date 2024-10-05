@@ -1678,4 +1678,37 @@ HWTEST_F(ScrollEventTestNg, EnablePaging004, TestSize.Level1)
     EXPECT_TRUE(VerifyTickPosition((delta - intervalSize) / TICK));
     EXPECT_TRUE(VerifyTickPosition(-intervalSize));
 }
+
+/**
+ * @tc.name: CAPIScrollPage001
+ * @tc.desc: Test CAPI ScrollPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, CAPIScrollPage001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollNode
+     * @tc.expected: scrollNode create successfully
+     */
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step2. scroll to next page without animation
+     */
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.f);
+    pattern_->ScrollPage(false, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -SCROLL_HEIGHT);
+
+    /**
+     * @tc.steps: step3. scroll to previous page with animation
+     */
+    pattern_->ScrollPage(true, true);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.f);
+}
 } // namespace OHOS::Ace::NG

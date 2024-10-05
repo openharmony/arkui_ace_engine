@@ -231,33 +231,34 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag003, TestSize.Level1)
      * @tc.expected: Scroll left
      */
     float delta = SCROLL_BAR_CHILD_HEIGHT;
-    info.SetMainDelta(delta);
+    info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(delta, 0.f)));
 
     /**
      * @tc.steps: step3. HandleDragUpdate, drag left continue
      * @tc.expected: Scroll left
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
 
     /**
      * @tc.steps: step4. HandleDragUpdate, drag right
      * @tc.expected: Scroll right
      */
-    info.SetMainDelta(-delta);
+    info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
 
     /**
      * @tc.steps: step5. HandleDragEnd, drag end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
+    FlushLayoutTask(stackNode_, true);
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
 }
 
@@ -854,5 +855,54 @@ HWTEST_F(ScrollBarEventTestNg, HandleOnHover001, TestSize.Level1)
     }
     EXPECT_EQ(pattern_->opacity_, UINT8_MAX);
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: HandleDragEnd001
+ * @tc.desc: Test ScrollBar about HandleDragEnd in HORIZONTAL Layout and RTL Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarEventTestNg, HandleDragEnd001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    CreateStack(Alignment::BOTTOM_CENTER);
+    CreateScroll(CONTENT_MAIN_SIZE, Axis::HORIZONTAL);
+    CreateScrollBar(true, true, Axis::HORIZONTAL, DisplayMode::ON);
+    CreateScrollBarChild();
+    CreateDone(stackNode_);
+    EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 0), RectF(0, 0, SCROLL_WIDTH, SCROLL_HEIGHT)));
+    EXPECT_TRUE(IsEqual(GetChildRect(stackNode_, 1), RectF(0.f, 780.f, SCROLL_WIDTH, SCROLL_BAR_CHILD_WIDTH)));
+    float controlDistance = pattern_->GetControlDistance();
+    float scrollableDistance = pattern_->GetScrollableDistance();
+    EXPECT_EQ(controlDistance, CONTENT_MAIN_SIZE - SCROLL_WIDTH);          // 520.f
+    EXPECT_EQ(scrollableDistance, SCROLL_WIDTH - SCROLL_BAR_CHILD_HEIGHT); // 320.f
+    EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance);
+
+    /**
+     * @tc.steps: step1. HandleDragStart, drag on scrollBar
+     */
+    GestureEvent info;
+    info.SetGlobalPoint(Point(1.f, SCROLL_HEIGHT - 1.f));
+    HandleDragStart(info);
+
+    /**
+     * @tc.steps: step2. HandleDragEnd, drag left
+     * @tc.expected: Scroll left
+     */
+    info.SetMainVelocity(-1000.f);
+    HandleDragEnd(info);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(stackNode_, true);
+    EXPECT_LE(pattern_->GetCurrentPosition(), 60.f);
+
+    /**
+     * @tc.steps: step2. HandleDragEnd, drag right
+     * @tc.expected: Scroll right
+     */
+    info.SetMainVelocity(1000.f);
+    HandleDragEnd(info);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(stackNode_, true);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance);
 }
 } // namespace OHOS::Ace::NG
