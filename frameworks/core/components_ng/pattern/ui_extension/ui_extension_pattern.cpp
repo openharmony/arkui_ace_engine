@@ -58,6 +58,13 @@ constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
+<<<<<<< HEAD
+=======
+constexpr char PID_FLAG[] = "pidflag";
+constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
+constexpr double SHOW_START = 0.0;
+constexpr double SHOW_FULL = 1.0;
+>>>>>>> a270bbad57 (HandleVisibleAreaChange)
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -1179,12 +1186,27 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
         CHECK_NULL_VOID(uiExtension);
-        uiExtension->OnVisibleChange(visible);
+        uiExtension->HandleVisibleAreaChange(visible, ratio);
     };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    std::vector<double> ratioList = { 0.0 };
+    std::vector<double> ratioList = { SHOW_START, SHOW_FULL };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+}
+
+void UIExtensionPattern::HandleVisibleAreaChange(bool visible, double ratio)
+{
+    UIEXT_LOGI("HandleVisibleAreaChange visible: %{public}d, curVisible: %{public}d, "
+        "ratio: %{public}f, displayArea: %{public}s.", visible, curVisible_,
+        ratio, displayArea_.ToString().c_str());
+    bool needCheckDisplayArea = NearEqual(ratio, SHOW_FULL) && curVisible_ && visible;
+    bool curVisible = !NearEqual(ratio, SHOW_START);
+    if (curVisible_ != curVisible) {
+        curVisible_ = curVisible;
+        OnVisibleChange(curVisible_);
+    }
+
+    if (needCheckDisplayArea) {
+        DispatchDisplayArea(false);
+    }
 }
 
 void UIExtensionPattern::OnLanguageConfigurationUpdate()
