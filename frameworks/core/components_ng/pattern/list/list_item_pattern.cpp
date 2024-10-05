@@ -799,7 +799,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
     }
 
-    if (GreatNotEqual(curOffset_, 0.0) && HasStartNode()) {
+    if ((GreatNotEqual(curOffset_, 0.0) || !HasEndNode()) && HasStartNode()) {
         float width = startNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachLeftSpeed) {
             StartSpringMotion(curOffset_, 0, velocity * friction);
@@ -823,7 +823,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
             FireSwipeActionStateChange(ListItemSwipeIndex::ITEM_CHILD);
         }
         end = width * static_cast<int32_t>(swiperIndex_);
-    } else if (LessNotEqual(curOffset_, 0.0) && HasEndNode()) {
+    } else if ((LessNotEqual(curOffset_, 0.0) || !HasStartNode()) && HasEndNode()) {
         float width = endNodeSize_;
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && reachRightSpeed) {
             StartSpringMotion(curOffset_, 0, velocity * friction);
