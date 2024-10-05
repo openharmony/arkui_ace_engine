@@ -654,10 +654,6 @@ RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node,
 #endif
         if (frameNode->GetRenderContext()->GetAccessibilityFocus().value_or(false)) {
             auto node = GetFramenodeByAccessibilityId(frameNode, currentFocusNodeId);
-            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
-                "FindAccessibilityFocus frameNode accessiblityId: %{public}" PRId64
-                ", currentFocusNodeId: %{public}" PRId64 ", node is: %{public}" PRId64,
-                frameNode->GetAccessibilityId(), currentFocusNodeId, node->GetAccessibilityId());
             return node;
         }
     }
