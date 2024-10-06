@@ -125,6 +125,6 @@ void JSScrollableBase::JSClipContent(const JSCallbackInfo& info)
         }
     }
     // default
-    NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::CONTENT_ONLY, nullptr);
+    NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::DEFAULT, nullptr);
 }
 } // namespace OHOS::Ace::Framework

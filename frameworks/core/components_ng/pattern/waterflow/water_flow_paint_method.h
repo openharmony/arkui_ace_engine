@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 #include "core/components_ng/pattern/waterflow/water_flow_content_modifier.h"
 
-
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WaterFlowPaintMethod : public ScrollablePaintMethod {
     DECLARE_ACE_TYPE(WaterFlowPaintMethod, ScrollablePaintMethod)
@@ -71,6 +70,11 @@ public:
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
+    void ApplyDefaultContentClip(const RefPtr<RenderContext>& ctx, const RefPtr<GeometryNode>& geometryNode) override
+    {
+        ctx->SetContentClip(geometryNode->GetPaddingRect());
+    }
+
     RefPtr<WaterFlowContentModifier> contentModifier_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;

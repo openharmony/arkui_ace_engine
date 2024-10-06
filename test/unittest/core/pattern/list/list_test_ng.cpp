@@ -57,6 +57,7 @@ void ListTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
     MockAnimationManager::Enable(true);
+    testing::FLAGS_gmock_verbose = "error";
 }
 
 void ListTestNg::TearDownTestSuite()

@@ -14,8 +14,8 @@
  */
 
 #include "scrollable_test_ng.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -25,7 +25,7 @@
 
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 class ScrollableCoverTestNg : public ScrollableTestNg {
@@ -155,7 +156,7 @@ HWTEST_F(ScrollableCoverTestNg, SetScrollBarWidthTest001, TestSize.Level1)
     ScrollableModelNG::SetScrollBarWidth(SCROLLBAR_WIDTH_PERCENT);
     EXPECT_EQ(scrollablePn->GetBarWidth().Value(), SCROLLBAR_WIDTH_VALUE_PERCENT);
     EXPECT_EQ(scrollablePn->GetBarWidth().Unit(), DimensionUnit::PERCENT);
-    
+
     /**
      * @tc.steps: step4. Set ScrollBarWidth to vp width with frameNode
      * @tc.expected: ScrollablePaintProperty ScrollBarWidth is updated to vp width
@@ -223,25 +224,25 @@ HWTEST_F(ScrollableCoverTestNg, ToJsonValueTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create a ScrollablePaintProperty object and set Property
-    */
+     */
     ScrollableModelNG::SetScrollBarColor(SCROLLBAR_COLOR_BLUE);
     ScrollableModelNG::SetScrollBarWidth(SCROLLBAR_WIDTH_PX);
     auto scrollablePn = scroll_->GetPaintProperty<ScrollablePaintProperty>();
 
     /**
      * @tc.steps: step2. Set properties
-    */
+     */
     scrollablePn->UpdateScrollBarMode(DisplayMode::AUTO);
     /**
      * @tc.steps: step3. Convert to JSON
-    */
+     */
     auto json = JsonUtil::Create(true);
     InspectorFilter filter;
     scrollablePn->ToJsonValue(json, filter);
 
     /**
      * @tc.steps: step4. Convert to JSON
-    */
+     */
     EXPECT_EQ(json->GetString("scrollBar"), BAR_STATE_AUTO);
     EXPECT_EQ(json->GetString("scrollBarColor"), SCROLLBAR_COLOR_BLUE);
     EXPECT_EQ(json->GetString("scrollBarWidth"), SCROLLBAR_WIDTH_PX);
@@ -262,10 +263,8 @@ HWTEST_F(ScrollableCoverTestNg, AllocateTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create a ScrollableItem object and set ScrollableItemPool
-    */
-    auto patternCreator = []() -> RefPtr<Pattern> {
-        return AceType::MakeRefPtr<Pattern>();
-    };
+     */
+    auto patternCreator = []() -> RefPtr<Pattern> { return AceType::MakeRefPtr<Pattern>(); };
     auto tag = "testTag";
     auto nodeFirst = 1;
     auto nodeSecond = 2;
@@ -275,11 +274,11 @@ HWTEST_F(ScrollableCoverTestNg, AllocateTest001, TestSize.Level1)
     scrollableItemPool->pool_[tag].push_back(Referenced::RawPtr(existingItem));
     /**
      * @tc.steps: step2. Call Allocate
-    */
+     */
     auto result = scrollableItemPool->Allocate(tag, nodeSecond, patternCreator);
     /**
      * @tc.steps: step3. Verify that the Allocate function was triggered
-    */
+     */
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetTag(), tag);
     EXPECT_EQ(result->GetId(), nodeSecond);
@@ -294,19 +293,17 @@ HWTEST_F(ScrollableCoverTestNg, DeallocateTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create a ScrollableItem object and set ScrollableItemPool
-    */
+     */
     auto tag = "testTag";
     auto nodeFirst = 1;
     auto nodeSecond = 2;
     auto poolSize = 2;
-    auto patternCreator = []() -> RefPtr<Pattern> {
-        return AceType::MakeRefPtr<Pattern>();
-    };
+    auto patternCreator = []() -> RefPtr<Pattern> { return AceType::MakeRefPtr<Pattern>(); };
     auto item1 = ScrollableItem::GetOrCreateScrollableItem(tag, nodeFirst, patternCreator);
     auto item2 = ScrollableItem::GetOrCreateScrollableItem(tag, nodeSecond, patternCreator);
     /**
      * @tc.steps: step2. Call Deallocate
-    */
+     */
     auto scrollableItemPool = std::make_shared<ScrollableItemPool>(poolSize);
     scrollableItemPool->Deallocate(Referenced::RawPtr(item1));
     scrollableItemPool->Deallocate(Referenced::RawPtr(item2));
@@ -390,9 +387,7 @@ HWTEST_F(ScrollableCoverTestNg, HandleTouchCancel001, TestSize.Level1)
      */
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     bool isCalled = false;
-    auto scrollOverCallback = [&isCalled](double velocity) {
-        isCalled = true;
-    };
+    auto scrollOverCallback = [&isCalled](double velocity) { isCalled = true; };
     scrollable->state_ = Scrollable::AnimationState::IDLE;
     scrollable->scrollOverCallback_ = scrollOverCallback;
     /**
@@ -439,9 +434,7 @@ HWTEST_F(ScrollableCoverTestNg, GetGainTest001, TestSize.Level1)
      * @tc.steps: step1. Create a Scrollable object and initalizes the parameters
      */
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
-    auto continuousSlidingCallback = []() {
-        return 100.0;
-    };
+    auto continuousSlidingCallback = []() { return 100.0; };
     scrollable->continuousSlidingCallback_ = continuousSlidingCallback;
     scrollable->dragCount_ = 5;
     scrollable->preGain_ = 1.0;
@@ -467,9 +460,7 @@ HWTEST_F(ScrollableCoverTestNg, GetGainTest002, TestSize.Level1)
      * @tc.steps: step1. Create a Scrollable object and initalizes the parameters
      */
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
-    auto continuousSlidingCallback = []() {
-        return 100.0;
-    };
+    auto continuousSlidingCallback = []() { return 100.0; };
     scrollable->continuousSlidingCallback_ = continuousSlidingCallback;
     scrollable->dragCount_ = 5;
     scrollable->preGain_ = 1.0;
@@ -626,17 +617,13 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
     scrollable->needScrollSnapChange_ = true;
     scrollable->isDragUpdateStop_ = false;
     scrollable->scrollPause_ = false;
-    scrollable->calcPredictSnapOffsetCallback_ = [](float delta, float dragDistance, float velocity) {
-        return 0.0f;
-    };
+    scrollable->calcPredictSnapOffsetCallback_ = [](float delta, float dragDistance, float velocity) { return 0.0f; };
     scrollable->currentVelocity_ = 10.0f;
     auto propertyCallback = [](float offset) {};
-    scrollable->frictionOffsetProperty_  =
+    scrollable->frictionOffsetProperty_ =
         AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     bool scrollEndCalled = false;
-    scrollable->scrollEnd_ = [&scrollEndCalled]() {
-        scrollEndCalled = true;
-    };
+    scrollable->scrollEnd_ = [&scrollEndCalled]() { scrollEndCalled = true; };
     /**
      * @tc.steps: step2. Call ProcessScrollMotionStop
      * @tc.expected: Verify that the scroll snap change is processed correctly
@@ -810,7 +797,7 @@ HWTEST_F(ScrollableCoverTestNg, OnScrollStartEndTest001, TestSize.Level1)
     auto refreshNode = FrameNode::CreateFrameNode("Refresh", -1, AceType::MakeRefPtr<RefreshPattern>());
     scroll_->MountToParent(refreshNode);
     refreshNode->MarkModifyDone();
-    scrollPn->refreshCoordination_= AceType::MakeRefPtr<RefreshCoordination>(scrollPn->GetHost());
+    scrollPn->refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(scrollPn->GetHost());
     bool isDragTest = false;
     float mainVelocityTest = 0.0f;
     auto startCallBack = [&isDragTest, &mainVelocityTest](bool isDrag, float mainVelocity) {
@@ -855,7 +842,7 @@ HWTEST_F(ScrollableCoverTestNg, IsRefreshInScroll001, TestSize.Level1)
     auto refreshNode = FrameNode::CreateFrameNode("Refresh", -1, AceType::MakeRefPtr<RefreshPattern>());
     scroll_->MountToParent(refreshNode);
     refreshNode->MarkModifyDone();
-    scrollPn->refreshCoordination_= AceType::MakeRefPtr<RefreshCoordination>(scrollPn->GetHost());
+    scrollPn->refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(scrollPn->GetHost());
     auto refreshPn = refreshNode->GetPattern<RefreshPattern>();
     refreshPn->scrollOffset_ = 50.0;
     /**
@@ -934,11 +921,9 @@ HWTEST_F(ScrollableCoverTestNg, OnWindowHide001, TestSize.Level1)
      */
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
     auto propertyCallback = [](float offset) {};
-    const std::function<bool(double, int32_t)> scrollCallback = [](double offset, int32_t source) {
-        return true;
-    };
+    const std::function<bool(double, int32_t)> scrollCallback = [](double offset, int32_t source) { return true; };
     auto scrollable = AceType::MakeRefPtr<Scrollable>(scrollCallback, scrollPn->GetAxis());
-    scrollable->frictionOffsetProperty_  =
+    scrollable->frictionOffsetProperty_ =
         AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     scrollable->state_ = Scrollable::AnimationState::FRICTION;
     ASSERT_NE(scrollPn->scrollableEvent_, nullptr);
@@ -1833,7 +1818,7 @@ HWTEST_F(ScrollableCoverTestNg, UpdateFadingEdgeTest001, TestSize.Level1)
     scroll_->overlayNode_ = overlayNode;
     scroll_->GetGeometryNode()->SetFrameSize(SizeF(700.0, 800.0));
     auto paintProperty = scroll_->GetPaintProperty<ScrollablePaintProperty>();
-    auto paint = AceType::MakeRefPtr<ScrollablePaintMethod>(false, false);
+    auto paint = AceType::MakeRefPtr<GridPaintMethod>(false, false, nullptr);
     /**
      * @tc.steps: step1. call UpdateFadingEdge with UpdateFadingEdge false.
      */

@@ -58,13 +58,17 @@ public:
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
-
     void SetContentModifier(const RefPtr<GridContentModifier>& modify)
     {
         gridContentModifier_ = modify;
     }
 
 private:
+    void ApplyDefaultContentClip(const RefPtr<RenderContext>& ctx, const RefPtr<GeometryNode>& geometryNode) override
+    {
+        ctx->SetContentClip(geometryNode->GetFrameRect());
+    }
+
     RefPtr<GridContentModifier> gridContentModifier_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;

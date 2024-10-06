@@ -17,6 +17,8 @@
 #include "scroll_test_ng.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "test/unittest/core/pattern/scrollable/scrollable_test_utils.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
@@ -656,5 +658,27 @@ HWTEST_F(ScrollEffectTestNg, EdgeEffectOption004, TestSize.Level1)
     CreateScrollDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());
+}
+
+/**
+ * @tc.name: ContentClip001
+ * @tc.desc: Test ContentClip
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, ContentClip001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent(2000.f);
+    CreateScrollDone();
+
+    paintProperty_->UpdateContentClip({ ContentClipMode::DEFAULT, nullptr });
+    auto ctx = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    ASSERT_TRUE(ctx);
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetPaddingRect()))).Times(1);
+    FlushLayoutTask(frameNode_);
+
+    paintProperty_->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(1);
+    FlushLayoutTask(frameNode_);
 }
 } // namespace OHOS::Ace::NG
