@@ -43,12 +43,14 @@ bool ChainAnimationNode::TickAnimation(float duration)
     return spring_->IsCompleted();
 }
 
-void ChainAnimationNode::SetDelta(float delta, float duration)
+void ChainAnimationNode::SetDelta(float delta, float spaceDelta, float duration)
 {
+    spaceDelta = std::clamp(spaceDelta, minSpace_ - space_, maxSpace_ - space_);
     spring_->OnTimestampChanged(duration, 0.0f, false);
     curPosition_ = spring_->GetCurrentPosition();
-    curPosition_ = std::clamp(curPosition_ + delta, minSpace_, maxSpace_);
+    curPosition_ = std::clamp(curPosition_ + delta, minSpace_ - spaceDelta, maxSpace_ - spaceDelta);
     spring_->Reset(curPosition_, space_, curVelocity_, springProperty_);
+    spaceDelta_ = spaceDelta;
 }
 
 float ChainAnimationNode::GetDeltaPredict(float delta, float duration)
@@ -61,7 +63,7 @@ float ChainAnimationNode::GetDeltaPredict(float delta, float duration)
 
 float ChainAnimationNode::GetDelta() const
 {
-    return curPosition_ - space_;
+    return curPosition_ - space_ + spaceDelta_;
 }
 
 ChainAnimation::ChainAnimation(float space, float maxSpace, float minSpace, RefPtr<SpringProperty> springProperty)
@@ -75,47 +77,38 @@ ChainAnimation::ChainAnimation(float space, float maxSpace, float minSpace, RefP
         ACE_SCOPED_TRACE("ChainAnimation");
         auto chain = weak.Upgrade();
         CHECK_NULL_VOID(chain);
-        if (!chain->isOverDrag_) {
-            chain->TickAnimation();
-        } else if (chain->scheduler_) {
-            chain->scheduler_->Stop();
-        }
+        chain->TickAnimation();
     };
     scheduler_ = AceType::MakeRefPtr<Scheduler>(callback, PipelineBase::GetCurrentContext());
 }
 
-void ChainAnimation::SetDelta(float delta, bool isOverDrag)
+void ChainAnimation::SetDelta(float delta, float overOffset)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto timestamp = context->GetTimeFromExternalTimer();
-    double duration = 0.0;
-    if (!isOverDrag) {
-        duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);
-    }
+    double duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);
     float factor = (1 - conductivity_) * intensity_;
-    if (isOverDrag) {
-        factor *= edgeEffectIntensity_;
-    }
-    if (edgeEffect_ == ChainEdgeEffect::STRETCH && isOverDrag) {
+    if (edgeEffect_ == ChainEdgeEffect::STRETCH) {
+        float spaceDelta = std::abs(overOffset) * edgeEffectIntensity_;
         for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
-            auto value = delta > 0 ? delta * factor : -delta * factor;
-            nodes_[i]->SetDelta(value, static_cast<float>(duration));
-            nodes_[-i]->SetDelta(value, static_cast<float>(duration));
+            nodes_[i]->SetDelta(delta * factor, spaceDelta, static_cast<float>(duration));
+            nodes_[-i]->SetDelta(-delta * factor, spaceDelta, static_cast<float>(duration));
             factor *= conductivity_;
         }
     } else {
+        float spaceDelta = overOffset * edgeEffectIntensity_;
         for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
-            nodes_[i]->SetDelta(delta * factor, static_cast<float>(duration));
-            nodes_[-i]->SetDelta(-delta * factor, static_cast<float>(duration));
+            nodes_[i]->SetDelta(delta * factor, -spaceDelta, static_cast<float>(duration));
+            nodes_[-i]->SetDelta(-delta * factor, spaceDelta, static_cast<float>(duration));
             factor *= conductivity_;
+            spaceDelta *= conductivity_;
         }
     }
-    if (!scheduler_->IsActive()) {
+    if (!scheduler_->IsActive() && !NearZero(delta)) {
         scheduler_->Start();
     }
     timestamp_ = timestamp;
-    isOverDrag_ = isOverDrag;
 }
 
 void ChainAnimation::TickAnimation()
@@ -215,22 +208,6 @@ void ChainAnimation::SetSpace(float space, float maxSpace, float minSpace)
     for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
         nodes_[i]->SetSpace(space, maxSpace, minSpace);
         nodes_[-i]->SetSpace(space, maxSpace, minSpace);
-    }
-}
-
-void ChainAnimation::SetOverDrag(bool isOverDrag)
-{
-    if (isOverDrag_ == isOverDrag) {
-        return;
-    }
-    isOverDrag_ = isOverDrag;
-    if (!isOverDrag) {
-        if (scheduler_ && !scheduler_->IsActive()) {
-            scheduler_->Start();
-        }
-        auto context = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        timestamp_ = context->GetTimeFromExternalTimer();
     }
 }
 } // namespace OHOS::Ace
