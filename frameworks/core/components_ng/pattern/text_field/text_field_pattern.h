@@ -1963,6 +1963,7 @@ private:
     int32_t previewTextEnd_ = -1;
     std::string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
+    std::string lastTextValue_ = "";
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
