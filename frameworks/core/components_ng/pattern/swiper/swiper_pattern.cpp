@@ -308,6 +308,7 @@ void SwiperPattern::ResetOnForceMeasure()
     jumpIndex_ = currentIndex_;
 
     SetLazyForEachFlag();
+    MarkDirtyNodeSelf();
 }
 
 void SwiperPattern::UpdateTabBarIndicatorCurve()
