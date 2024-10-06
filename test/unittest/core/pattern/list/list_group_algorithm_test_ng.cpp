@@ -68,21 +68,30 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem001, Te
 {
     /**
      * @tc.steps: step1. Create ListItemGroup with header
+     * @tc.expected: currentOffset is 260
      */
     auto model = CreateList();
     model.SetInitialIndex(1);
     CreateGroupWithFooter(4, V2::ListItemGroupStyle::NONE);
     CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->currentOffset_, 260);
 
     /**
-     * @tc.steps: step2. Scroll -25px and 0px
+     * @tc.steps: step2. Scroll -25px, first group footer at top edge
      * @tc.expected: Group1 Offset is 25
      */
     pattern_->UpdateCurrentOffset(25, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 1), OffsetF(0, 25)));
+    EXPECT_EQ(pattern_->currentOffset_, 235);
+
+    /**
+     * @tc.steps: step3. Scroll 0px, first group footer at top edge
+     * @tc.expected: Group1 Offset is 25
+     */
     FlushLayoutTask(frameNode_, true);
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 1), OffsetF(0, 25)));
+    EXPECT_EQ(pattern_->currentOffset_, 235);
 }
 
 /**
@@ -93,19 +102,20 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem001, Te
 HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create ListItemGroup with header
+     * @tc.steps: step1. Create ListItemGroup with header, second group header is at bottom edge.
      */
     auto model = CreateList();
     CreateGroupWithHeader(3, V2::ListItemGroupStyle::NONE, 3);
     CreateDone(frameNode_);
 
     /**
-     * @tc.steps: step2. Scroll -25px and 0px
-     * @tc.expected: Group1 Offset is 25
+     * @tc.steps: step2. Scroll 450px, second group header is at top edge.
+     * @tc.expected: Group2 Offset is 290
      */
     pattern_->UpdateCurrentOffset(-450, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 2), OffsetF(0, 290)));
+    EXPECT_EQ(pattern_->currentOffset_, 450);
 }
 
 /**
@@ -1151,5 +1161,43 @@ HWTEST_F(ListGroupAlgTestNg, SetHeaderFooter001, TestSize.Level1)
     EXPECT_EQ(groupNode->GetTotalChildCount(), 2);
     // pop frameNode
     CreateDone(frameNode_);
+}
+
+/*
+ * @tc.name: ListItemGroupOffsetTest001
+ * @tc.desc: Test the scroll offset for ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ListItemGroupOffsetTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemGroup with header, second group header is at bottom edge.
+     * @tc.expected: current offset is 370
+     */
+    auto model = CreateList();
+    model.SetInitialIndex(1);
+    CreateGroupWithHeader(4, V2::ListItemGroupStyle::NONE, 3);
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->currentOffset_, 370);
+
+    /**
+     * @tc.steps: step2. Scroll -50px, first group load 1 item.
+     * @tc.expected: current offset is 320
+     */
+    pattern_->UpdateCurrentOffset(50, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentOffset_, 320);
+
+    /**
+     * @tc.steps: step3. Scroll 445px, 3th group head at top edge.
+     * @tc.expected: current offset is 765, group0 and group1 layoutAlgorithm_ is nullptr.
+     */
+    pattern_->UpdateCurrentOffset(-445, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->currentOffset_, 765);
+    auto group0 = GetChildFrameNode(frameNode_, 0);
+    EXPECT_EQ(group0->layoutAlgorithm_, nullptr);
+    auto group1 = GetChildFrameNode(frameNode_, 1);
+    EXPECT_EQ(group1->layoutAlgorithm_, nullptr);
 }
 } // namespace OHOS::Ace::NG
