@@ -145,7 +145,6 @@ std::optional<std::string> ResourceConverter::ToString()
 {
     std::optional<std::string> result;
     CHECK_NULL_RETURN(themeConstants_, result);
-
     switch (type_) {
         case NodeModifier::ResourceType::STRING:
             if (id_ != -1) {
@@ -159,7 +158,7 @@ std::optional<std::string> ResourceConverter::ToString()
 
         case NodeModifier::ResourceType::RAWFILE:
             if (params_.size() > 0) {
-                result = themeConstants_->GetRawfile(params_[0]);
+                result = themeConstants_->GetRawfile(params_.front());
             }
             break;
 
@@ -167,7 +166,7 @@ std::optional<std::string> ResourceConverter::ToString()
             if (id_ != -1) {
                 result = themeConstants_->GetMediaPath(id_);
             } else if (params_.size() > 0) {
-                result = themeConstants_->GetMediaPathByName(params_[0]);
+                result = themeConstants_->GetMediaPathByName(params_.front());
             }
             break;
 
@@ -219,7 +218,11 @@ std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
     if (type_ == NodeModifier::ResourceType::FLOAT) {
-        return themeConstants_->GetDimension(id_);
+        if (id_ == -1 && params_.size() > 0) {
+            return themeConstants_->GetDimensionByName(params_.front());
+        } else {
+            return themeConstants_->GetDimension(id_);
+        }
     }
     return std::nullopt;
 }

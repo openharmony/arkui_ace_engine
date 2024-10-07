@@ -1437,6 +1437,11 @@ void SearchModelNG::SetCancelImageIcon(FrameNode *frameNode, const std::optional
     if (iconOptions) {
         options = iconOptions.value();
         pattern->SetCancelImageIcon(options);
+        auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+        CHECK_NULL_VOID(cancelImageFrameNode);
+        auto textLayoutProperty = cancelImageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+        ImageSourceInfo info(options.GetSrc().value_or(""), "", "");
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info, cancelImageFrameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize,
             pattern->ConvertImageIconSizeValue(options.GetSize().value_or(ICON_HEIGHT)), frameNode);
     } else {

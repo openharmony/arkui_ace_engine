@@ -38,16 +38,16 @@ namespace {
 const auto CANCEL_BUTTON_ATTR("cancelButton");
 const auto CANCEL_BUTTON_ICON_ATTR("icon");
 const auto CANCEL_BUTTON_ICON_COLOR_ATTR("color");
-// const auto CANCEL_BUTTON_ICON_SRC_ATTR("src");
+const auto CANCEL_BUTTON_ICON_SRC_ATTR("src");
 // const auto DECORATION_ATTRS("decoration");
 // const auto DECORATION_TYPE_ATTR("type");
 // const auto DECORATION_STYLE_ATTR("style");
 // const auto DECORATION_COLOR_ATTR("color");
 const auto FONT_COLOR_ATTR("fontColor");
-// const auto LETTER_SPACING_ATTR("letterSpacing");
+const auto LETTER_SPACING_ATTR("letterSpacing");
 // const auto LINE_HEIGHT_ATTR("lineHeight");
-// const auto MAX_FONT_SIZE_ATTR("maxFontSize");
-// const auto MIN_FONT_SIZE_ATTR("minFontSize");
+const auto MAX_FONT_SIZE_ATTR("maxFontSize");
+const auto MIN_FONT_SIZE_ATTR("minFontSize");
 // const auto PLACEHOLDER_FONT_ATTRS("placeholderFont");
 // const auto PLACEHOLDER_FONT_SIZE("size");
 // const auto PLACEHOLDER_FONT_FAMILY("fontFamily");
@@ -113,7 +113,8 @@ const auto SELECTED_BACKGROUND_COLOR_ATTR("selectedBackgroundColor");
 // typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
 // typedef std::pair<Type_SearchAttribute_searchIcon_Arg0, TripleCheckValues> SearchIconTest;
 // typedef std::pair<Opt_Type_SearchInterface_setSearchOptions_Arg0, TripleCheckValues> OptionsTest;
-// typedef std::pair<Union_Number_String_Resource, std::string> OneUnionNumStrResStep;
+using OneUnionNumStrResStep = std::pair<Union_Number_String_Resource, std::string>;
+using StringResourceTest = std::tuple<ResourceStr, std::string>;
 // typedef std::pair<Ark_TextDecorationType, std::string> DecorationTypeTest;
 // typedef std::pair<Ark_TextDecorationStyle, std::string> DecorationStyleTest;
 
@@ -144,27 +145,35 @@ const auto SELECTED_BACKGROUND_COLOR_ATTR("selectedBackgroundColor");
 // };
 
 // resource names and id
-// const auto RES_STRING_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::STRING};
-// const auto RES_STRING_ID = IntResourceId{11111, NodeModifier::ResourceType::STRING};
-// const auto INVALID_STRING_ID = IntResourceId{-1, NodeModifier::ResourceType::STRING};
+const auto RES_STRING_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::STRING};
+const auto RES_STRING_ID = IntResourceId{01234, NodeModifier::ResourceType::STRING};
+const auto INVALID_STRING_ID = IntResourceId{-1, NodeModifier::ResourceType::STRING};
 
-const auto RES_COLOR_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::COLOR};
+const auto RES_COLOR_NAME = NamedResourceId{"color_resource", NodeModifier::ResourceType::COLOR};
 const auto RES_COLOR_ID = IntResourceId{11111, NodeModifier::ResourceType::COLOR};
 const auto INVALID_COLOR_ID = IntResourceId{-1, NodeModifier::ResourceType::COLOR};
 // resource values
-// const auto RESOURCE_BY_STRING = "ResourceByString";
-// const auto RESOURCE_BY_NUMBER = "ResourceByNumber";
+const auto RESOURCE_BY_STRING = "ResourceByString";
+const auto RESOURCE_BY_NUMBER = "ResourceByNumber";
 const auto COLOR_BY_STRING = Color(0xFF123456);
 const auto COLOR_BY_NUMBER = Color(0xFF654321);
 const auto RESOURCE_DEFAULT_COLOR_DEFAULT = "#FFFF0000";
 
-// using StringResourceTest = std::tuple<ResourceStr, std::string>;
+const auto RES_DIMENSION_ID = 22222; // Ark_Length.Resource
+const auto RES_NUMBER_ID = IntResourceId{RES_DIMENSION_ID, NodeModifier::ResourceType::FLOAT};
+const auto RES_NUMBER_NAME = NamedResourceId{"number_resource", NodeModifier::ResourceType::FLOAT};
+const auto RES_NUMBER_INVALID = IntResourceId{-1, NodeModifier::ResourceType::FLOAT};
 
-// const std::vector<StringResourceTest> BUTTON_LABEL_RESOURCES_TEST_PLAN = {
-//     { CreateResourceUnion<ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
-//     { CreateResourceUnion<ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
-//     { CreateResourceUnion<ResourceStr>(INVALID_STRING_ID), "" },
-// };
+const auto DIMENSION_BY_ID = Dimension(5, DimensionUnit::VP);
+const auto DIMENSION_BY_NAME = Dimension(4, DimensionUnit::VP);
+const auto DIMENSION_BY_INVALID = Dimension(10, DimensionUnit::PX);
+
+const std::vector<StringResourceTest> SRC_RESOURCES_TEST_PLAN = {
+    { CreateResourceUnion<ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
+    { CreateResourceUnion<ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
+    { CreateResourceUnion<ResourceStr>(INVALID_STRING_ID), "" },
+};
+
 using ResourceColorTestPlan = std::pair<ResourceColor, std::string>;
 static const std::vector<ResourceColorTestPlan> COLOR_RESOURCE_TEST_PLAN = {
     { Converter::ArkUnion<ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_NAME)),
@@ -186,19 +195,17 @@ static const std::vector<ResourceColorTestPlan> COLOR_RESOURCE_TEST_PLAN = {
 //         "FontWeight.Lighter" },
 // };
 
-// const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_RESOURCES = {
-//     { ArkUnion<Union_Number_String_Resource, Ark_Resource>(ArkRes(const_cast<Ark_String*>(&STR_NAME),
-//         1234, NodeModifier::ResourceType::STRING)),
-//       "0.00px"
-//     }
-// };
-
-// const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_WITH_PERCENT_RESOURCES = {
-//     { ArkUnion<Union_Number_String_Resource, Ark_Resource>(ArkRes(const_cast<Ark_String*>(&STR_NAME), 1234,
-//         NodeModifier::ResourceType::STRING)),
-//       "0.00px"
-//     }
-// };
+const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_RESOURCES = {
+    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResourceUnion(RES_NUMBER_ID)),
+      DIMENSION_BY_ID.ToString()
+    },
+    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResourceUnion(RES_NUMBER_NAME)),
+      DIMENSION_BY_NAME.ToString()
+    },
+    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResourceUnion(RES_NUMBER_INVALID)),
+      DIMENSION_BY_INVALID.ToString()
+    }
+};
 
 // const std::vector<DecorationTypeTest> TEXT_DECORATION_TYPE_TEST_PLAN = {
 //     { Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE, "TextDecorationType.None" },
@@ -222,6 +229,12 @@ public:
 
         AddResource(RES_COLOR_NAME, COLOR_BY_STRING);
         AddResource(RES_COLOR_ID, COLOR_BY_NUMBER);
+
+        AddResource(RES_NUMBER_ID, DIMENSION_BY_ID);
+        AddResource(RES_NUMBER_NAME, DIMENSION_BY_NAME);
+
+        AddResource(RES_STRING_NAME, RESOURCE_BY_STRING);
+        AddResource(RES_STRING_ID, RESOURCE_BY_NUMBER);
     }
 };
 
@@ -235,7 +248,6 @@ HWTEST_F(SearchModifierResourcesTest, setCancelButtonTestIconColorResource, Test
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    std::unique_ptr<JsonValue> radioStyle;
     Type_SearchAttribute_cancelButton_Arg0 attrs;
     attrs.selector = 0;
     for (const auto &[color, expected] : COLOR_RESOURCE_TEST_PLAN) {
@@ -255,19 +267,21 @@ HWTEST_F(SearchModifierResourcesTest, setCancelButtonTestIconColorResource, Test
  * Disabled: Only Icon.size and style options available for test
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setCancelButtonTestIconSrc, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setCancelButtonTestIconSrc, TestSize.Level1)
 {
-    // Type_SearchAttribute_cancelButton_Arg0 attrs;
-    // attrs.selector = 0;
-    // for (auto testSrc : BUTTON_LABEL_RESOURCES_TEST_PLAN) {
-    //     attrs.value0.icon.value.src = testSrc.first;
-    //     modifier_->setCancelButton(node_, &attrs);
-    //     auto fullJson = GetJsonValue(node_);
-    //     auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, CANCEL_BUTTON_ATTR);
-    //     auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
-    //     auto customCancelButtonIconSrc = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SRC_ATTR);
-    //     EXPECT_EQ(customCancelButtonIconSrc, testSrc.second);
-    // }
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    attrs.selector = 0;
+    for (const auto &[src, expected] : SRC_RESOURCES_TEST_PLAN) {
+        attrs.value0.icon.value.src = ArkValue<Opt_ResourceStr>(src);
+        modifier_->setCancelButton(node_, &attrs);
+        auto jsonValue = GetJsonValue(node_);
+        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SRC_ATTR);
+        EXPECT_EQ(resultStr, expected);
+    }
 }
 
 /**
@@ -294,7 +308,7 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setSearchIconTestResources, TestS
     // std::vector<SearchIconTest> testSearchIcon;
     // for (auto testLength : TEST_PLAN_OPT_LENGTH_PX) {
     //     for (auto ColorTest : COLOR_RESOURCE_TEST_PLAN) {
-    //         for (auto testSrc : BUTTON_LABEL_RESOURCES_TEST_PLAN) {
+    //         for (auto testSrc : SRC_RESOURCES_TEST_PLAN) {
     //             Type_SearchAttribute_searchIcon_Arg0 attrs = {
     //                 .selector = 0,
     //                 .value0 = {
@@ -396,7 +410,7 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setSearchButtonTestResources, Tes
  */
 HWTEST_F(SearchModifierResourcesTest, DISABLED_setTextIndentTestResources, TestSize.Level1)
 {
-    // implement test resources
+
 }
 
 /**
@@ -450,18 +464,16 @@ HWTEST_F(SearchModifierResourcesTest, selectedBackgroundColorTestResource, TestS
  * @tc.desc: Check the functionality of setMaxFontSize
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setMaxFontSizeTestResource, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setMaxFontSizeTestResource, TestSize.Level1)
 {
-    // ASSERT_NE(modifier_->setMaxFontSize, nullptr);
-
-    // auto checkVal = GetStringAttribute(node_, MAX_FONT_SIZE_ATTR);
-    // EXPECT_EQ(checkVal, "0.00px");
-
-    // for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN_RESOURCES) {
-    //     modifier_->setMaxFontSize(node_, &value);
-    //     checkVal = GetStringAttribute(node_, MAX_FONT_SIZE_ATTR);
-    //     EXPECT_EQ(checkVal, expectVal);
-    // }
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string result;
+    for (const auto &[arkLength, expected]: UNION_NUM_STR_RES_TEST_PLAN_RESOURCES) {
+        modifier_->setMaxFontSize(node_, &arkLength);
+        jsonValue = GetJsonValue(node_);
+        result = GetAttrValue<std::string>(jsonValue, MAX_FONT_SIZE_ATTR);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 /**
@@ -469,18 +481,16 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setMaxFontSizeTestResource, TestS
  * @tc.desc: Check the functionality of setMinFontSize
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setMinFontSizeTestResource, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setMinFontSizeTestResource, TestSize.Level1)
 {
-    // ASSERT_NE(modifier_->setMinFontSize, nullptr);
-
-    // auto checkVal = GetStringAttribute(node_, MIN_FONT_SIZE_ATTR);
-    // EXPECT_EQ(checkVal, "0.00px");
-
-    // for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN_RESOURCES) {
-    //     modifier_->setMinFontSize(node_, &value);
-    //     checkVal = GetStringAttribute(node_, MIN_FONT_SIZE_ATTR);
-    //     EXPECT_EQ(checkVal, expectVal);
-    // }
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string result;
+    for (const auto &[arkLength, expected]: UNION_NUM_STR_RES_TEST_PLAN_RESOURCES) {
+        modifier_->setMinFontSize(node_, &arkLength);
+        jsonValue = GetJsonValue(node_);
+        result = GetAttrValue<std::string>(jsonValue, MIN_FONT_SIZE_ATTR);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 /**
@@ -488,18 +498,16 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setMinFontSizeTestResource, TestS
  * @tc.desc: Check the functionality of setLetterSpacing
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setLetterSpacingTestResource, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setLetterSpacingTestResource, TestSize.Level1)
 {
-    // ASSERT_NE(modifier_->setLetterSpacing, nullptr);
-
-    // auto checkVal = GetStringAttribute(node_, LETTER_SPACING_ATTR);
-    // EXPECT_EQ(checkVal, "0.00px");
-
-    // for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN_RESOURCES) {
-    //     modifier_->setLetterSpacing(node_, &value);
-    //     checkVal = GetStringAttribute(node_, LETTER_SPACING_ATTR);
-    //     EXPECT_EQ(checkVal, expectVal);
-    // }
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string result;
+    for (const auto &[arkLength, expected]: UNION_NUM_STR_RES_TEST_PLAN_RESOURCES) {
+        modifier_->setLetterSpacing(node_, &arkLength);
+        jsonValue = GetJsonValue(node_);
+        result = GetAttrValue<std::string>(jsonValue, LETTER_SPACING_ATTR);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 /**

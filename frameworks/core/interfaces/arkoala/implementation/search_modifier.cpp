@@ -64,14 +64,21 @@ NG::IconOptions Convert(const Ark_IconOptions& src)
     auto iconSize = Converter::OptConvert<Dimension>(src.size);
     auto iconSrc = Converter::OptConvert<UnionStringResource>(src.src);
     if (iconSrc) {
-        auto srcArkStr = std::get_if<Ark_String>(&iconSrc.value());
-        if (srcArkStr != nullptr) {
+        if (auto srcArkStr = std::get_if<Ark_String>(&iconSrc.value());
+            srcArkStr != nullptr) {
             auto srcStr = Converter::Convert<std::string>(*srcArkStr);
             if (!srcStr.empty()) {
                 options.UpdateSrc(srcStr, "", "");
             }
-        } else {
-            LOGE("ARKOALA SearchAttributeModifier.IconResource not implemented.");
+        } else if (auto srcArkStr = std::get_if<Ark_Resource>(&iconSrc.value());
+            srcArkStr != nullptr) {
+            auto srcStr = Converter::OptConvert<std::string>(*srcArkStr);
+            std::cout << *srcStr << std::endl;
+            auto moduleName = Converter::Convert<std::string>(srcArkStr->moduleName);
+            auto bundleName = Converter::Convert<std::string>(srcArkStr->bundleName);
+            if (!srcStr->empty()) {
+                options.UpdateSrc(*srcStr, moduleName, bundleName);
+            }
         }
     }
     if (iconColor) {
