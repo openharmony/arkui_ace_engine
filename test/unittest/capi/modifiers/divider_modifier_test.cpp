@@ -138,7 +138,7 @@ HWTEST_F(DividerModifierTest, DividerModifierTest001, TestSize.Level1)
     strNumber = { .selector = 2, .value2 = ArkStr("") };
     modifier_->setColor(node_, &strNumber);
     auto checkVal11 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal11, "#00000000");
+    EXPECT_EQ(checkVal11, "#FF000000");
 }
 
 /**

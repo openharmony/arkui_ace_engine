@@ -379,7 +379,7 @@ namespace OHOS::Ace::NG::Converter {
     template<typename To, typename Which,
         std::enable_if_t<std::is_same_v<Which, Ark_Empty> && std::is_same_v<Ark_Int32, decltype(To().selector)>,
             int> = -1>
-    To ArkUnion(std::nullptr_t&& src)
+    To ArkUnion(const std::nullptr_t& src)
     {
         return {
             .selector = -1,

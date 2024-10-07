@@ -301,6 +301,24 @@ namespace Converter {
         dst = converter.ToInt();
     }
 
+    // Converter declarations should be here, because they can be used in other converters!
+    // SORTED_SECTION: Converter's specializations. No multiline declarations, please!
+    template<> CalcLength Convert(const Ark_Length& src);
+    template<> CaretStyle Convert(const Ark_CaretStyle& src);
+    template<> Dimension Convert(const Ark_Length& src);
+    template<> Font Convert(const Ark_Font& src);
+    template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
+    template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
+    template<> PaddingProperty Convert(const Ark_Padding& src);
+    template<> RefPtr<Curve> Convert(const Ark_Curve& src);
+    template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
+    template<> RefPtr<Curve> Convert(const Ark_String& src);
+    template<> Shadow Convert(const Ark_ShadowOptions& src);
+    template<> StringArray Convert(const Ark_String& src);
+    template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
+    template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
+    template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
+
     // Converter implementations
     template<>
     inline TextOverflow Convert(const Ark_TextOverflow& src)
@@ -319,9 +337,6 @@ namespace Converter {
     {
         return Dimension::FromString(src.chars);
     }
-
-    template<>
-    Dimension Convert(const Ark_Length& src);
 
     template<>
     inline CalcDimension Convert(const Ark_Length& src)
@@ -378,9 +393,6 @@ namespace Converter {
     }
 
     template<>
-    StringArray Convert(const Ark_String& src);
-
-    template<>
     inline StringArray Convert(const Ark_CustomObject& src)
     {
         LOGE("Convert [Ark_CustomObject] to [StringArray] is not supported");
@@ -393,14 +405,6 @@ namespace Converter {
         uint32_t value = static_cast<uint32_t>(Convert<int>(src));
         return Color((value <= 0xFFFFFF && value > 0) ? value + 0xFF000000U : value);
     }
-
-    template<>
-    inline Color Convert(const Ark_String& src)
-    {
-        return Color::FromString(src.chars);
-    }
-
-    template<> CalcLength Convert(const Ark_Length& src);
 
     template<>
     inline EdgesParam Convert(const Ark_Edges& src)
@@ -421,14 +425,13 @@ namespace Converter {
         };
     }
 
-    template<> PaddingProperty Convert(const Ark_Padding& src);
-
     template<>
     inline PaddingProperty Convert(const Ark_LocalizedPadding& src)
     {
         LOGE("Convert [Ark_LocalizedPadding] to [PaddingProperty] is not supported.");
         return PaddingProperty();
     }
+
     template<>
     inline RadioStyle Convert(const Ark_RadioStyle& src)
     {
@@ -463,27 +466,14 @@ namespace Converter {
         return src.ptr;
     }
 
-
     template<>
     inline ShadowType Convert(const Ark_ShadowType& src)
     {
         return static_cast<ShadowType>(src);
     }
 
-    // SORTED_SECTION: Converter's specializations. No multiline declarations, please!
-    template<> CaretStyle Convert(const Ark_CaretStyle& src);
-    template<> Font Convert(const Ark_Font& src);
-    template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
-    template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
-    template<> RefPtr<Curve> Convert(const Ark_Curve& src);
-    template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
-    template<> RefPtr<Curve> Convert(const Ark_String& src);
-    template<> Shadow Convert(const Ark_ShadowOptions& src);
-    template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
-    template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
-    template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
-
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
+    template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
@@ -536,6 +526,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src);
     template<> void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src);
     template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
+
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
 } // namespace OHOS::Ace::NG::Converter
