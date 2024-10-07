@@ -35,6 +35,7 @@
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -529,6 +530,7 @@ namespace Converter {
 
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
+    template<> void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

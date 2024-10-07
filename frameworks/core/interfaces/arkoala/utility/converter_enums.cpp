@@ -597,4 +597,14 @@ void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
         default: LOGE("Unexpected enum value in Ark_LayoutStyle: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
+{
+    switch (src) {
+        case ARK_DATA_PANEL_TYPE_LINE: dst = DataPanelType::CIRCLE; break;
+        case ARK_DATA_PANEL_TYPE_CIRCLE: dst = DataPanelType::LINE; break;
+        default: LOGE("Unexpected enum value in Ark_DataPanelType: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
