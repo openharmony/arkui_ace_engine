@@ -372,10 +372,7 @@ namespace Converter {
     }
 
     template<>
-    inline StringArray Convert(const Ark_String& src)
-    {
-        return (src.chars != nullptr)  ? StringArray(1, src.chars) : StringArray();
-    }
+    StringArray Convert(const Ark_String& src);
 
     template<>
     inline StringArray Convert(const Ark_CustomObject& src)

@@ -15,6 +15,7 @@
 
 #include "converter.h"
 #include "reverse_converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 
 #include "core/interfaces/native/node/node_api.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -180,7 +181,13 @@ std::optional<StringArray> ResourceConverter::ToStringArray()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
     if (type_ == NodeModifier::ResourceType::STRARRAY) {
-        return themeConstants_->GetStringArray(id_);
+        if (id_ != -1) {
+            return themeConstants_->GetStringArray(id_);
+        } else if (params_.size() > 0) {
+            return themeConstants_->GetStringArrayByName(params_.front());
+        } else {
+            LOGE("Unknown STRARRAY value OHOS::Ace::NG::Converter::ResourceConverter");
+        }
     }
     return std::nullopt;
 }
@@ -246,6 +253,7 @@ std::optional<Color> ResourceConverter::ToColor()
     CHECK_NULL_RETURN(themeConstants_, result);
     if (id_ == -1 && params_.size() > 0) {
         result = themeConstants_->GetColorByName(params_[0]);
+        return result;
     }
 
     switch (type_) {
@@ -317,35 +325,32 @@ std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
+StringArray Convert(const Ark_String& src)
+{
+    auto familiesStr = Convert<std::string>(src);
+    return Framework::ConvertStrToFontFamilies(familiesStr);
+}
+
+template<>
 Font Convert(const Ark_Font& src)
 {
-        Font font;
-        // cannot be moved to the ace_engine_types
-        using UnionStringResource = std::variant<Ark_String, Ark_Resource>;
-        auto familiesResStr = OptConvert<UnionStringResource>(src.family);
-        if (familiesResStr) {
-            if (auto srcArkStr = std::get_if<Ark_String>(&familiesResStr.value()); srcArkStr) {
-                auto familiesStr = Converter::Convert<std::string>(*srcArkStr);
-                font.fontFamilies = Framework::ConvertStrToFontFamilies(familiesStr);
-            } else if (auto srcArkRes = std::get_if<Ark_Resource>(&familiesResStr.value()); srcArkRes) {
-                ResourceConverter resConverter(*srcArkRes);
-                auto optValue = resConverter.ToFontFamilies();
-                if (optValue) {
-                    font.fontFamilies = optValue.value();
-                }
-            }
-        }
-        auto fontSize = OptConvert<Dimension>(src.size);
-        if (fontSize) {
-            if (fontSize->IsNegative()) fontSize.reset();
-            font.fontSize = fontSize;
-        }
-        auto weight = OptConvert<FontWeight>(src.weight);
-        if (weight) {
-            font.fontWeight = weight;
-        }
-        font.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.style);
-        return font;
+    Font font;
+    auto fontFamalies = OptConvert<std::vector<std::string>>(src.family);
+    if (fontFamalies) {
+        font.fontFamilies = fontFamalies.value();
+    }
+    auto fontSize = OptConvert<Dimension>(src.size);
+    if (fontSize) {
+        Validator::ValidatePositive(fontSize);
+        Validator::ValidateNonPercent(fontSize);
+        font.fontSize = fontSize;
+    }
+    auto weight = OptConvert<FontWeight>(src.weight);
+    if (weight) {
+        font.fontWeight = weight;
+    }
+    font.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.style);
+    return font;
 }
 
 template<>
