@@ -47,6 +47,13 @@ void MenuItemGroupView::Create()
     stack->Push(menuItemGroup);
 }
 
+RefPtr<FrameNode> MenuItemGroupView::CreateFrameNode(int32_t nodeId)
+{
+    const std::function<RefPtr<Pattern>(void)>& patternCreator =
+        []() { return AceType::MakeRefPtr<MenuItemGroupPattern>(); };
+    return FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, nodeId, patternCreator);
+}
+
 void MenuItemGroupView::SetHeader(const RefPtr<UINode>& header)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -63,6 +70,11 @@ void MenuItemGroupView::SetHeader(const RefPtr<UINode>& header)
 void MenuItemGroupView::SetHeader(const std::string& headerStr)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetHeader(frameNode, headerStr);
+}
+
+void MenuItemGroupView::SetHeader(FrameNode* frameNode, const std::optional<std::string>& header)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
@@ -74,7 +86,7 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
     UpdateRowPadding(row);
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
-    layoutProps->UpdateContent(headerStr);
+    layoutProps->UpdateContent(header.value_or(""));
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -109,6 +121,11 @@ void MenuItemGroupView::SetFooter(const RefPtr<UINode>& footer)
 void MenuItemGroupView::SetFooter(const std::string& footerStr)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetFooter(frameNode, footerStr);
+}
+
+void MenuItemGroupView::SetFooter(FrameNode* frameNode, const std::optional<std::string>& footer)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
@@ -120,7 +137,7 @@ void MenuItemGroupView::SetFooter(const std::string& footerStr)
     UpdateRowPadding(row);
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
-    layoutProps->UpdateContent(footerStr);
+    layoutProps->UpdateContent(footer.value_or(""));
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
