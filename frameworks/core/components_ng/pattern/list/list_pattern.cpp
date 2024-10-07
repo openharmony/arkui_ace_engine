@@ -1782,9 +1782,31 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     bool groupAtStart = (!groupInfo || groupInfo.value().atStart);
     if (startIndex == 0 && groupAtStart) {
         currentOffset_ = -startPos;
-    } else {
-        posMap_->UpdatePosMapStart(delta, currentOffset_, spaceWidth_, startIndex, startPos, groupAtStart);
+        UpdatePosMap(itemPos);
+        return;
     }
+    currentOffset_ += delta;
+    auto res = posMap_->GetStartIndexAndPos();
+    if (res.first >= 0) {
+        auto iter = itemPos.lower_bound(res.first);
+        // skip same line for lanes
+        if (iter->first == res.first && iter != itemPos.end()) {
+            do {
+                startPos = iter->second.startPos;
+                iter++;
+            } while (iter != itemPos.end() && NearEqual(iter->second.startPos, startPos));
+        }
+        if (iter != itemPos.end()) {
+            groupAtStart = iter->second.groupInfo ? iter->second.groupInfo.value().atStart : true;
+            startPos = iter->second.startPos;
+            posMap_->UpdatePosMapStart(delta, currentOffset_, spaceWidth_, iter->first, startPos, groupAtStart);
+        }
+    }
+    UpdatePosMap(itemPos);
+}
+
+void ListPattern::UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos)
+{
     for (auto& [index, pos] : itemPos) {
         float height = pos.endPos - pos.startPos;
         if (pos.groupInfo) {
