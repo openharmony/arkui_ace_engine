@@ -117,6 +117,7 @@ namespace Converter {
 
             std::optional<std::string> ToString();
             std::optional<StringArray> ToStringArray();
+            std::optional<StringArray> ToFontFamilies();
             std::optional<Dimension> ToDimension();
             std::optional<float> ToFloat();
             std::optional<int32_t> ToInt();
