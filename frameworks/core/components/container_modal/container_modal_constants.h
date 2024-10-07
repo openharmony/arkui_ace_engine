@@ -21,17 +21,16 @@
 
 namespace OHOS::Ace {
 
-const Dimension CONTAINER_INNER_RADIUS = 14.0_vp;
 const Dimension CONTAINER_OUTER_RADIUS = 16.0_vp;
-const Dimension CONTAINER_BORDER_WIDTH = 1.0_vp;
+const Dimension CONTAINER_BORDER_WIDTH = 0.0_vp;
 const Dimension CONTAINER_TITLE_HEIGHT = 37.0_vp;
 const Dimension TITLE_PADDING_START = 20.0_vp;
 const Dimension TITLE_PADDING_END = 24.0_vp;
 const Dimension ZERO_PADDING = 0.0_vp;
-const Dimension TITLE_ELEMENT_MARGIN_HORIZONTAL = 18.0_vp;
+const Dimension TITLE_ELEMENT_MARGIN_HORIZONTAL = 12.0_vp;
 const Dimension TITLE_ELEMENT_MARGIN_HORIZONTAL_ACCESS_DEVICE = 8.0_vp;
-const Dimension TITLE_ICON_SIZE = 24.0_vp;
-const Dimension TITLE_BUTTON_SIZE = 24.0_vp;
+const Dimension TITLE_ICON_SIZE = 28.0_vp;
+const Dimension TITLE_BUTTON_SIZE = 28.0_vp;
 const Dimension TITLE_BUTTON_RESPONSE_REGIOIN_WIDTH = 40.0_vp;
 const Dimension TITLE_BUTTON_RESPONSE_REGIOIN_HEIGHT = 40.0_vp;
 const Dimension TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_X = -8.0_vp;
