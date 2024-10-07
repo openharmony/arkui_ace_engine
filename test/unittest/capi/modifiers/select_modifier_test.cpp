@@ -175,7 +175,7 @@ std::vector<FontTestStep> getFontFamilyTestPlan()
     // static keyword is reqired because a pointer to this variable is stored in testPlan
     static auto arkResName = ArkValue<Ark_String>(FONT_FAMILY_RES_NAME);
 
-    Ark_Resource familyResource = ArkRes(&arkResName, -1, NodeModifier::ResourceType::STRING);
+    Ark_Resource familyResource = ArkRes(&arkResName, -1, NodeModifier::ResourceType::STRARRAY);
 
     const std::vector<FontTestStep> testPlan = {
         { { .family = ArkUnion<Opt_Union_String_Resource, Ark_String>(familyStr1) }, familyStr1 },
