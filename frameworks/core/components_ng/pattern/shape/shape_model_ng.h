@@ -54,11 +54,13 @@ public:
     static void SetStrokeDashOffset(FrameNode* frameNode, const std::optional<Ace::Dimension>& dashOffset);
     static void SetStrokeLineCap(FrameNode* frameNode, const std::optional<int>& lineCapStyle);
     static void SetStrokeLineJoin(FrameNode* frameNode, const std::optional<int>& lineJoinStyle);
-    static void SetViewPort(FrameNode* frameNode, const Dimension& dimLeft, const Dimension& dimTop,
-        const Dimension& dimWidth, const Dimension& dimHeight);
+    static void SetViewPort(FrameNode* frameNode,
+        const std::optional<Dimension>& dimLeft, const std::optional<Dimension>& dimTop,
+        const std::optional<Dimension>& dimWidth, const std::optional<Dimension>& dimHeight);
     static void SetBitmapMesh(FrameNode* frameNode, std::vector<double>& mesh, int32_t column, int32_t row);
     static void SetWidth(FrameNode* frameNode) {}
     static void SetHeight(FrameNode* frameNode) {}
+    static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
 };
 
 } // namespace OHOS::Ace::NG
