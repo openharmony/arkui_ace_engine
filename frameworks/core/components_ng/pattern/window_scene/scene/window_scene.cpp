@@ -256,6 +256,10 @@ void WindowScene::BufferAvailableCallback()
         CHECK_NULL_VOID(self);
 
         CHECK_NULL_VOID(self->startingWindow_);
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        if (!self->IsWindowSizeEqual(true) || surfaceNode == nullptr || ! surfaceNode->IsBufferAvailable()) {
+            return;
+        }
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
         if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
@@ -500,6 +504,9 @@ void WindowScene::OnLayoutFinished()
         CHECK_NULL_VOID(self);
 
         CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
+        if (self->startingWindow_) {
+            self->BufferAvailableCallback();
+        }
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("WindowScene::OnLayoutFinished[id:%d][self:%d][enabled:%d]",
@@ -547,7 +554,7 @@ void WindowScene::OnDrawingCompleted()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDrawingCompleted", TaskExecutor::TaskType::UI);
 }
 
-bool WindowScene::IsWindowSizeEqual()
+bool WindowScene::IsWindowSizeEqual(bool allowEmpty)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -557,6 +564,7 @@ bool WindowScene::IsWindowSizeEqual()
     ACE_SCOPED_TRACE("WindowScene::IsWindowSizeEqual[id:%d][self:%d][%s][%s]",
         session_->GetPersistentId(), host->GetId(),
         frameSize.ToString().c_str(), session_->GetLayoutRect().ToString().c_str());
+    CHECK_EQUAL_RETURN(allowEmpty && session_->GetLayoutRect().IsEmpty(), true, true);
     if (NearEqual(frameSize.Width(), session_->GetLayoutRect().width_, 1.0f) &&
         NearEqual(frameSize.Height(), session_->GetLayoutRect().height_, 1.0f)) {
         return true;
