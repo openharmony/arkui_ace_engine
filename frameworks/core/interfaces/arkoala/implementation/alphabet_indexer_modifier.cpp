@@ -45,6 +45,7 @@ void ColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     IndexerModelNG::SetColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void SelectedColorImpl(Ark_NativePointer node,
@@ -52,6 +53,7 @@ void SelectedColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     IndexerModelNG::SetSelectedColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PopupColorImpl(Ark_NativePointer node,
@@ -59,6 +61,7 @@ void PopupColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     IndexerModelNG::SetPopupColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
@@ -66,6 +69,7 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     IndexerModelNG::SetSelectedBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PopupBackgroundImpl(Ark_NativePointer node,
@@ -73,6 +77,7 @@ void PopupBackgroundImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     IndexerModelNG::SetPopupBackground(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PopupSelectedColorImpl(Ark_NativePointer node,
@@ -80,6 +85,7 @@ void PopupSelectedColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     IndexerModelNG::SetPopupSelectedColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PopupUnselectedColorImpl(Ark_NativePointer node,
@@ -87,6 +93,7 @@ void PopupUnselectedColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     IndexerModelNG::SetPopupUnselectedColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PopupItemBackgroundColorImpl(Ark_NativePointer node,
@@ -94,6 +101,7 @@ void PopupItemBackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     IndexerModelNG::SetPopupItemBackground(frameNode, Converter::OptConvert<Color>(*value));
 }
 void UsingPopupImpl(Ark_NativePointer node,
