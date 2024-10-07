@@ -225,6 +225,7 @@ public:
     RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
     void OnHover(bool isHover);
     void NotifyPressStatus(bool isPress);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 protected:
     void RegisterOnKeyEvent();

@@ -202,14 +202,20 @@ void ShapeModelNG::SetAntiAlias(FrameNode* frameNode, bool antiAlias)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, AntiAlias, antiAlias, frameNode);
 }
 
-void ShapeModelNG::SetViewPort(FrameNode* frameNode, const Dimension& dimLeft, const Dimension& dimTop,
-    const Dimension& dimWidth, const Dimension& dimHeight)
+void ShapeModelNG::SetViewPort(FrameNode* frameNode,
+    const std::optional<Dimension>& dimLeft, const std::optional<Dimension>& dimTop,
+    const std::optional<Dimension>& dimWidth, const std::optional<Dimension>& dimHeight)
 {
+    if (!dimLeft && !dimTop && !dimWidth && !dimHeight) {
+        ACE_RESET_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, frameNode);
+        return;
+    }
+    Dimension defaultVal(0.0);
     ShapeViewBox shapeViewBox;
-    shapeViewBox.SetLeft(dimLeft);
-    shapeViewBox.SetTop(dimTop);
-    shapeViewBox.SetWidth(dimWidth);
-    shapeViewBox.SetHeight(dimHeight);
+    shapeViewBox.SetLeft(dimLeft.value_or(defaultVal));
+    shapeViewBox.SetTop(dimTop.value_or(defaultVal));
+    shapeViewBox.SetWidth(dimWidth.value_or(defaultVal));
+    shapeViewBox.SetHeight(dimHeight.value_or(defaultVal));
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, shapeViewBox, frameNode);
 }
 
@@ -217,5 +223,11 @@ void ShapeModelNG::SetBitmapMesh(FrameNode* frameNode, std::vector<double>& mesh
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(
         ShapeContainerPaintProperty, ImageMesh, ImageMesh(mesh, (int32_t)column, (int32_t)row), frameNode);
+}
+
+RefPtr<NG::FrameNode> ShapeModelNG::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(
+        V2::SHAPE_ETS_TAG, nodeId, AceType::MakeRefPtr<ShapeContainerPattern>());
 }
 } // namespace OHOS::Ace::NG

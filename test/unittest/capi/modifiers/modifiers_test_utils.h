@@ -17,11 +17,19 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_COMMON_MODIFIERS_TEST_UTILS_H
 
 #include <string>
+#include <tuple>
 
-#include "arkoala_api.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 
+#include "arkoala_api.h"
+#include "arkoala_api_generated.h"
+#include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+
+
 namespace OHOS::Ace::NG {
+
+// Json functions
 
 std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name);
 std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node);
@@ -96,5 +104,36 @@ inline T GetAttrValue(const std::string &jsonObjAsStr, const std::string &attrKe
 {
     return GetAttrValue<T>(JsonUtil::ParseJsonData(jsonObjAsStr.c_str()), attrKey);
 }
+
+// Resource functions
+
+using NamedResourceId = std::tuple<const char *, OHOS::Ace::NG::NodeModifier::ResourceType>;
+using IntResourceId = std::tuple<uint32_t, OHOS::Ace::NG::NodeModifier::ResourceType>;
+
+Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::NodeModifier::ResourceType type);
+Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::NodeModifier::ResourceType type);
+
+inline Ark_Resource CreateResource(NamedResourceId id)
+{
+    return CreateResource(std::get<0>(id), std::get<1>(id));
+}
+
+inline Ark_Resource CreateResource(IntResourceId id)
+{
+    return CreateResource(std::get<0>(id), std::get<1>(id));
+}
+
+template<typename T, typename U>
+T CreateResourceUnion(const U& resId)
+{
+    return Converter::ArkUnion<T, Ark_Resource>(CreateResource(resId));
+}
+
+template<typename U>
+Ark_Resource CreateResourceUnion(const U& resId)
+{
+    return CreateResource(resId);
+}
+
 } // namespace OHOS::Ace::NG
 #endif

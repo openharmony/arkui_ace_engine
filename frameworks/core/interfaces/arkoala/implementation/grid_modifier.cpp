@@ -123,7 +123,6 @@ void ColumnsGapImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA ColumnsGapImpl: check convertion from Resource");
     GridModelNG::SetColumnsGap(frameNode, Converter::Convert<Dimension>(*value));
 }
 void RowsGapImpl(Ark_NativePointer node,
@@ -132,7 +131,6 @@ void RowsGapImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA RowsGapImpl: check convertion from Resource");
     GridModelNG::SetRowsGap(frameNode, Converter::Convert<Dimension>(*value));
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
@@ -350,7 +348,6 @@ void FrictionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA GridModifier::FrictionImpl Converter -> Resource support (float) is not implemented.");
     GridModelNG::SetFriction(frameNode, Converter::OptConvert<float>(*value));
 }
 void AlignItemsImpl(Ark_NativePointer node,

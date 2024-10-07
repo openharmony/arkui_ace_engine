@@ -29,13 +29,16 @@
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
@@ -726,12 +729,18 @@ void* createMenuNode(ArkUI_Int32 nodeId)
 
 void* createMenuItemNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = MenuItemModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = MenuItemGroupView::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createNavDestinationNode(ArkUI_Int32 nodeId)
@@ -848,7 +857,10 @@ void* createSecurityComponentMethodNode(ArkUI_Int32 nodeId)
 
 void* createShapeNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = ShapeModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createBaseSpanNode(ArkUI_Int32 nodeId)

@@ -15,11 +15,21 @@
 
 #include "converter.h"
 #include "reverse_converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
+
+#include "core/interfaces/native/node/node_api.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG::Converter {
-Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
+void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
 {
-    Ark_TouchObject touch;
+    dst.id = ArkValue<Ark_Number>(src.resource);
+    dst.type = ArkValue<Ark_Number>(static_cast<Ark_Int32>(NodeModifier::ResourceType::FLOAT));
+    dst.params = ArkValue<Opt_Array_String>();
+}
+
+void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& info)
+{
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
@@ -56,13 +66,10 @@ Ark_TouchObject ConvertTouchInfo(OHOS::Ace::TouchLocationInfo& info)
     touch.y.tag = Ark_Tag::ARK_TAG_FLOAT32;
     touch.y.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-
-    return touch;
 }
 
-Ark_ClickEvent ConvertClickEventInfo(OHOS::Ace::GestureEvent& info)
+void AssignArkValue(Ark_ClickEvent& onClick, OHOS::Ace::GestureEvent& info)
 {
-    Ark_ClickEvent onClick;
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
@@ -100,8 +107,6 @@ Ark_ClickEvent ConvertClickEventInfo(OHOS::Ace::GestureEvent& info)
 
     onClick.x = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
     onClick.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-
-    return onClick;
 }
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
@@ -176,7 +181,36 @@ std::optional<StringArray> ResourceConverter::ToStringArray()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
     if (type_ == NodeModifier::ResourceType::STRARRAY) {
-        return themeConstants_->GetStringArray(id_);
+        if (id_ != -1) {
+            return themeConstants_->GetStringArray(id_);
+        } else if (params_.size() > 0) {
+            return themeConstants_->GetStringArrayByName(params_.front());
+        } else {
+            LOGE("Unknown STRARRAY value OHOS::Ace::NG::Converter::ResourceConverter");
+        }
+    }
+    return std::nullopt;
+}
+
+std::optional<StringArray> ResourceConverter::ToFontFamilies()
+{
+    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    if (type_ == NodeModifier::ResourceType::STRING) {
+        std::optional<std::string> str;
+        if (id_ != -1) {
+            str = themeConstants_->GetString(id_);
+        } else if (!params_.empty()) {
+            str = themeConstants_->GetStringByName(params_.front());
+        } else {
+            LOGE("ResourceConverter::ToFontFamilies Unknown resource value");
+        }
+        if (str.has_value()) {
+            return Framework::ConvertStrToFontFamilies(str.value());
+        }
+    } else if (type_ == NodeModifier::ResourceType::STRARRAY) {
+        LOGE("ResourceConverter::ToFontFamilies Support of ResourceType::STRARRAY type is not implemented");
+    } else {
+        LOGE("ResourceConverter::ToFontFamilies Resource type is not supported");
     }
     return std::nullopt;
 }
@@ -216,9 +250,10 @@ std::optional<int32_t> ResourceConverter::ToInt()
 std::optional<Color> ResourceConverter::ToColor()
 {
     std::optional<Color> result;
+    CHECK_NULL_RETURN(themeConstants_, result);
     if (id_ == -1 && params_.size() > 0) {
-        CHECK_NULL_RETURN(themeConstants_, result);
         result = themeConstants_->GetColorByName(params_[0]);
+        return result;
     }
 
     switch (type_) {
@@ -284,39 +319,38 @@ Shadow Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
+std::vector<Shadow> Convert(const Ark_ShadowOptions& src)
+{
+    return { Convert<Shadow>(src) };
+}
+
+template<>
+StringArray Convert(const Ark_String& src)
+{
+    auto familiesStr = Convert<std::string>(src);
+    return Framework::ConvertStrToFontFamilies(familiesStr);
+}
+
+template<>
 Font Convert(const Ark_Font& src)
 {
-        Font font;
-        // cannot be moved to the ace_engine_types
-        using UnionStringResource = std::variant<Ark_String, Ark_Resource>;
-        auto familiesResStr = OptConvert<UnionStringResource>(src.family);
-        std::string familiesStr;
-        if (familiesResStr) {
-            if (auto srcArkStr = std::get_if<Ark_String>(&familiesResStr.value());
-                srcArkStr != nullptr) {
-                familiesStr = Converter::Convert<std::string>(*srcArkStr);
-            } else {
-                LOGE("ARKOALA SearchAttributeModifier.FonFamilyResource not implemented.");
-            }
-        }
-        std::istringstream families(familiesStr);
-        std::vector<std::string> fontFamilies;
-        for (std::string family; std::getline(families, family, ',');) {
-            StringUtils::TrimStr(family);
-            fontFamilies.push_back(family);
-        }
-        font.fontFamilies = fontFamilies;
-        auto fontSize = OptConvert<Dimension>(src.size);
-        if (fontSize) {
-            if (fontSize->IsNegative()) fontSize.reset();
-            font.fontSize = fontSize;
-        }
-        auto weight = OptConvert<FontWeight>(src.weight);
-        if (weight) {
-            font.fontWeight = weight;
-        }
-        font.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.style);
-        return font;
+    Font font;
+    auto fontFamalies = OptConvert<std::vector<std::string>>(src.family);
+    if (fontFamalies) {
+        font.fontFamilies = fontFamalies.value();
+    }
+    auto fontSize = OptConvert<Dimension>(src.size);
+    if (fontSize) {
+        Validator::ValidatePositive(fontSize);
+        Validator::ValidateNonPercent(fontSize);
+        font.fontSize = fontSize;
+    }
+    auto weight = OptConvert<FontWeight>(src.weight);
+    if (weight) {
+        font.fontWeight = weight;
+    }
+    font.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.style);
+    return font;
 }
 
 template<>
@@ -410,7 +444,7 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
 }
 
 template<>
-void AssignTo(std::optional<float>& dst, const Ark_String& src)
+void AssignCast(std::optional<float>& dst, const Ark_String& src)
 {
     auto value = Convert<std::string>(src);
     double result;

@@ -38,8 +38,10 @@ public:
     static void SetEnableDec(FrameNode* frameNode, bool enableDec);
     static void SetEnableInc(FrameNode* frameNode, bool enableInc);
     static void SetHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetHeight(FrameNode* frameNode, const CalcLength& height);
     static void SetWidth(FrameNode* frameNode, const Dimension& value);
-    static void SetBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void SetWidth(FrameNode* frameNode, const CalcLength& width);
+    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetOnInc(FrameNode* frameNode, CounterEventFunc&& onInc);
     static void SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec);
 

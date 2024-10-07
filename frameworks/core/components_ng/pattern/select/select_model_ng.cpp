@@ -426,7 +426,7 @@ void SelectModelNG::SetDivider(const NG::SelectDivider& divider)
     pattern->SetDivider(divider);
 }
 
-void SelectModelNG::SetDivider(FrameNode* frameNode, const NG::SelectDivider& divider)
+void SelectModelNG::SetDivider(FrameNode* frameNode, const std::optional<NG::SelectDivider>& divider)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
@@ -553,11 +553,11 @@ void SelectModelNG::SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlig
     pattern->SetMenuAlign(menuAlign);
 }
 
-void SelectModelNG::SetValue(FrameNode* frameNode, const std::string& value)
+void SelectModelNG::SetValue(FrameNode* frameNode, const std::optional<std::string>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetValue(value);
+    pattern->SetValue(value.value_or(""));
 }
 
 void SelectModelNG::SetSelected(FrameNode* frameNode, const std::optional<int32_t>& idx)
@@ -567,14 +567,14 @@ void SelectModelNG::SetSelected(FrameNode* frameNode, const std::optional<int32_
     pattern->SetSelected(idx.value_or(-1));
 }
 
-void SelectModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
+void SelectModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetFontSize(value);
 }
 
-void SelectModelNG::SetFontWeight(FrameNode* frameNode, const FontWeight& value)
+void SelectModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
@@ -588,7 +588,7 @@ void SelectModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::s
     pattern->SetFontFamily(value);
 }
 
-void SelectModelNG::SetItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value)
+void SelectModelNG::SetItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
@@ -599,40 +599,24 @@ void SelectModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    if (color) {
-        pattern->SetFontColor(color.value());
-    } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(theme);
-        pattern->SetFontColor(theme->GetFontColor());
-    }
+    pattern->SetFontColor(color);
 }
 
 void SelectModelNG::SetSelectedOptionBgColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    if (color) {
-        pattern->SetSelectedOptionBgColor(color.value());
-    } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(theme);
-        pattern->SetSelectedOptionBgColor(theme->GetSelectedColor());
-    }
+    pattern->SetSelectedOptionBgColor(color);
 }
 
-void SelectModelNG::SetOptionFontSize(FrameNode* frameNode, const Dimension& value)
+void SelectModelNG::SetOptionFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionFontSize(value);
 }
 
-void SelectModelNG::SetOptionFontWeight(FrameNode* frameNode, const FontWeight& value)
+void SelectModelNG::SetOptionFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
@@ -646,7 +630,7 @@ void SelectModelNG::SetOptionFontFamily(FrameNode* frameNode, const std::vector<
     pattern->SetOptionFontFamily(value);
 }
 
-void SelectModelNG::SetOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value)
+void SelectModelNG::SetOptionItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
@@ -657,40 +641,24 @@ void SelectModelNG::SetOptionBgColor(FrameNode* frameNode, const std::optional<C
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    if (color) {
-        pattern->SetOptionBgColor(color.value());
-    } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(theme);
-        pattern->SetOptionBgColor(theme->GetBackgroundColor());
-    }
+    pattern->SetOptionBgColor(color);
 }
 
 void SelectModelNG::SetSelectedOptionFontColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    if (color) {
-        pattern->SetSelectedOptionFontColor(color.value());
-    } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(theme);
-        pattern->SetSelectedOptionFontColor(theme->GetSelectedColorText());
-    }
+    pattern->SetSelectedOptionFontColor(color);
 }
 
-void SelectModelNG::SetSelectedOptionFontSize(FrameNode* frameNode, const Dimension& value)
+void SelectModelNG::SetSelectedOptionFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionFontSize(value);
 }
 
-void SelectModelNG::SetSelectedOptionFontWeight(FrameNode* frameNode, const FontWeight& value)
+void SelectModelNG::SetSelectedOptionFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
@@ -704,7 +672,7 @@ void SelectModelNG::SetSelectedOptionFontFamily(FrameNode* frameNode, const std:
     pattern->SetSelectedOptionFontFamily(value);
 }
 
-void SelectModelNG::SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value)
+void SelectModelNG::SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
@@ -715,22 +683,14 @@ void SelectModelNG::SetOptionFontColor(FrameNode* frameNode, const std::optional
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    if (color) {
-        pattern->SetOptionFontColor(color.value());
-    } else {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(theme);
-        pattern->SetOptionFontColor(theme->GetMenuFontColor());
-    }
+    pattern->SetOptionFontColor(color);
 }
 
-void SelectModelNG::SetOptionWidth(FrameNode* frameNode, const Dimension& value)
+void SelectModelNG::SetOptionWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetOptionWidth(value);
+    pattern->SetOptionWidth(value.value_or(Dimension()));
 }
 
 void SelectModelNG::SetOptionHeight(FrameNode* frameNode, const std::optional<Dimension>& value)
@@ -742,11 +702,11 @@ void SelectModelNG::SetOptionHeight(FrameNode* frameNode, const std::optional<Di
     }
 }
 
-void SelectModelNG::SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTrigger)
+void SelectModelNG::SetOptionWidthFitTrigger(FrameNode* frameNode, std::optional<bool> isFitTrigger)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetOptionWidthFitTrigger(isFitTrigger);
+    pattern->SetOptionWidthFitTrigger(isFitTrigger.value_or(false));
 }
 
 void SelectModelNG::SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth)
@@ -814,7 +774,7 @@ void SelectModelNG::SetMenuBackgroundColor(FrameNode* frameNode, const std::opti
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetMenuBackgroundColor(color.value_or(Color::TRANSPARENT));
+    pattern->SetMenuBackgroundColor(color);
 }
 
 void SelectModelNG::SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle)

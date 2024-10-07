@@ -89,6 +89,14 @@ public:
     static void SetClipEdge(FrameNode* frameNode, bool clipEdge);
     static void SetAnimateMode(FrameNode* frameNode, const std::optional<TabAnimateMode>& modeOpt);
     static void SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_t>& edgeEffect);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChange);
+    static void SetOnTabBarClick(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onTabBarClick);
+    static void SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart);
+    static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
+    static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
+    static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
+    static void SetOnContentWillChange(FrameNode* frameNode, std::function<bool(int32_t, int32_t)>&& callback);
+    static void SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

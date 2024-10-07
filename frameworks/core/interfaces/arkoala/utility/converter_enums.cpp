@@ -586,4 +586,15 @@ void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpan
         default: LOGE("Unexpected enum value in Ark_SubMenuExpandingMode: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
+{
+    switch (src) {
+        case ARK_LAYOUT_STYLE_ALWAYS_CENTER: dst = LayoutStyle::ALWAYS_CENTER; break;
+        case ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT: dst = LayoutStyle::ALWAYS_AVERAGE_SPLIT; break;
+        case ARK_LAYOUT_STYLE_SPACE_BETWEEN_OR_CENTER: dst = LayoutStyle::SPACE_BETWEEN_OR_CENTER; break;
+        default: LOGE("Unexpected enum value in Ark_LayoutStyle: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

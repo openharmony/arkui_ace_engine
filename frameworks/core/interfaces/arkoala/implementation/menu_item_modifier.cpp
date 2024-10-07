@@ -13,43 +13,144 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
+
+namespace OHOS::Ace::NG {
+using SelectIconType = std::variant<bool, std::optional<std::string>, void*>;
+}
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+SelectIconType Convert(const Ark_Boolean& src)
+{
+    return Converter::Convert<bool>(src);
+}
+
+template<>
+SelectIconType Convert(const Ark_ResourceStr& src)
+{
+    return Converter::OptConvert<std::string>(src);
+}
+
+template<>
+SelectIconType Convert(const Ark_Resource& src)
+{
+    return Converter::OptConvert<std::string>(src);
+}
+
+template<>
+SelectIconType Convert(const Ark_String& src)
+{
+    return Converter::OptConvert<std::string>(src);
+}
+
+template<>
+SelectIconType Convert(const Ark_CustomObject& src)
+{
+    return nullptr;
+}
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemInterfaceModifier {
 void SetMenuItemOptionsImpl(Ark_NativePointer node,
                             const Opt_Type_MenuItemInterface_setMenuItemOptions_Arg0* value)
 {
+    LOGE("MenuItemModifier::SetMenuItemOptionsImpl is not implemented, Ark_CustomObject is not supported!");
 }
 } // MenuItemInterfaceModifier
 namespace MenuItemAttributeModifier {
 void SelectedImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MenuItemModelNG::SetSelected(frameNode, Converter::Convert<bool>(value));
 }
 void SelectIconImpl(Ark_NativePointer node,
                     const Type_MenuItemAttribute_selectIcon_Arg0* value)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto iconOpt = Converter::OptConvert<SelectIconType>(*value);
+    if (iconOpt.has_value()) {
+        if (auto iconPtr = std::get_if<bool>(&(*iconOpt)); iconPtr) {
+            MenuItemModelNG::SetSelectIcon(frameNode, *iconPtr);
+        }
+        if (auto iconStrPtr = std::get_if<std::optional<std::string>>(&(*iconOpt)); iconStrPtr) {
+            MenuItemModelNG::SetSelectIcon(frameNode, true);
+            MenuItemModelNG::SetSelectIconSrc(frameNode, *iconStrPtr);
+        }
+        LOGE("MenuItemModifier::SelectIconImpl is not implemented, Ark_CustomObject is not supported!");
+    }
 }
 void OnChangeImpl(Ark_NativePointer node,
                   Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [frameNode](bool selected) {
+        GetFullAPI()->getEventsAPI()->getMenuItemEventsReceiver()->onChange(frameNode->GetId(), selected);
+    };
+    MenuItemModelNG::SetOnChange(frameNode, onChange);
 }
 void ContentFontImpl(Ark_NativePointer node,
                      const Ark_Font* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto fontOpt = Converter::OptConvert<Font>(*value);
+    if (fontOpt.has_value()) {
+        MenuItemModelNG::SetFontSize(frameNode, fontOpt.value().fontSize);
+        MenuItemModelNG::SetFontWeight(frameNode, fontOpt.value().fontWeight);
+        MenuItemModelNG::SetFontStyle(frameNode, fontOpt.value().fontStyle);
+        MenuItemModelNG::SetFontFamily(frameNode, fontOpt.value().fontFamilies);
+    } else {
+        MenuItemModelNG::SetFontSize(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontWeight(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontStyle(frameNode, std::nullopt);
+        MenuItemModelNG::SetFontFamily(frameNode, std::nullopt);
+    }
 }
 void ContentFontColorImpl(Ark_NativePointer node,
                           const ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    MenuItemModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void LabelFontImpl(Ark_NativePointer node,
                    const Ark_Font* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto fontOpt = Converter::OptConvert<Font>(*value);
+    if (fontOpt.has_value()) {
+        MenuItemModelNG::SetLabelFontSize(frameNode, fontOpt.value().fontSize);
+        MenuItemModelNG::SetLabelFontWeight(frameNode, fontOpt.value().fontWeight);
+        MenuItemModelNG::SetLabelFontStyle(frameNode, fontOpt.value().fontStyle);
+        MenuItemModelNG::SetLabelFontFamily(frameNode, fontOpt.value().fontFamilies);
+    } else {
+        MenuItemModelNG::SetLabelFontSize(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontWeight(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontStyle(frameNode, std::nullopt);
+        MenuItemModelNG::SetLabelFontFamily(frameNode, std::nullopt);
+    }
 }
 void LabelFontColorImpl(Ark_NativePointer node,
                         const ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    MenuItemModelNG::SetLabelFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 } // MenuItemAttributeModifier
 const GENERATED_ArkUIMenuItemModifier* GetMenuItemModifier()

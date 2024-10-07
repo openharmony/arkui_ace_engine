@@ -31,20 +31,6 @@ using namespace testing::ext;
 using namespace Converter;
 
 namespace {
-    Ark_Resource ArkResource(Ark_String* name, int id = -1,
-        NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR)
-    {
-        return {
-            .id = Converter::ArkValue<Ark_Number>(id),
-            .type = Converter::ArkValue<Ark_Number>(static_cast<int>(type)),
-            .moduleName = Converter::ArkValue<Ark_String>(""),
-            .bundleName = Converter::ArkValue<Ark_String>(""),
-            .params = {
-                .tag = ARK_TAG_OBJECT,
-                .value = { .array = name, .length = name ? 1 : 0 }
-            }
-        };
-    }
     // attrs
     const auto ATTRIBUTE_LABEL_NAME("label");
     const auto ATTRIBUTE_TYPE_NAME("type");
@@ -52,25 +38,47 @@ namespace {
     const auto ATTRIBUTE_STATE_EFFECT_NAME("stateEffect");
     const auto ATTRIBUTE_CONTROL_SIZE_NAME("controlSize");
     const auto ATTRIBUTE_BUTTON_STYLE_NAME("buttonStyle");
+    const auto ATTRIBUTE_FONT_COLOR_NAME("fontColor");
+    const auto ATTRIBUTE_FONT_SIZE_NAME("fontSize");
+    const auto ATTRIBUTE_FONT_FAMILY_NAME("fontFamily");
+    const auto ATTRIBUTE_LABEL_STYLE_NAME = "labelStyle";
+    const auto ATTRIBUTE_LABEL_STYLE_FONT_NAME = "font";
+    const auto ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_NAME("family");
 
     using ButtonLabelResourceTest = std::tuple<ResourceStr, std::string>;
 
+    // invalid id
+    const auto INVALID_ID_STRING = IntResourceId{-1, NodeModifier::ResourceType::STRING};
+    const auto INVALID_ID_COLOR = IntResourceId{-1, NodeModifier::ResourceType::COLOR};
+
     // resource names and id
-    const auto RES_NAME = "aa.bb.cc";
-    const auto RES_ARK_NAME = Converter::ArkValue<Ark_String>(RES_NAME);
-    const auto RES_ID = 11111;
+    const auto RES_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::STRING};
+    const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::STRING};
+
+    const auto RES_COLOR_NAME = NamedResourceId{"color_name", NodeModifier::ResourceType::COLOR};
+    const auto RES_COLOR_ID = IntResourceId{123456, NodeModifier::ResourceType::COLOR};
+
+    const auto RES_DIMENSION_ID = 654321; // Ark_Length.Resource
+
+    const auto RES_FAMILY_NAME = NamedResourceId{"family_resource", NodeModifier::ResourceType::STRARRAY};
+    const auto RES_FAMILY_ID = IntResourceId{22222, NodeModifier::ResourceType::STRARRAY};
 
     // resource values
     const auto RESOURCE_BY_STRING = "ResourceByString";
     const auto RESOURCE_BY_NUMBER = "ResourceByNumber";
 
+    const auto COLOR_BY_STRING = Color(0xFF123456);
+    const auto COLOR_BY_NUMBER = Color(0xFF654321);
+
+    const auto DIMENSION_BY_NUMBER = Dimension(5, DimensionUnit::VP);
+
+    const auto FAMILY_BY_STRING = "first";
+    const auto FAMILY_BY_NUMBER = "second";
+
     const std::vector<ButtonLabelResourceTest> BUTTON_LABEL_RESOURCES_TEST_PLAN = {
-        { Converter::ArkUnion<ResourceStr, Ark_Resource>(ArkResource(const_cast<Ark_String*>(&RES_ARK_NAME),
-            -1, NodeModifier::ResourceType::STRING)),
-            RESOURCE_BY_STRING },
-        { Converter::ArkUnion<ResourceStr, Ark_Resource>(ArkResource(nullptr, RES_ID,
-            NodeModifier::ResourceType::STRING)),
-            RESOURCE_BY_NUMBER }
+        { CreateResourceUnion<ResourceStr>(RES_NAME), RESOURCE_BY_STRING },
+        { CreateResourceUnion<ResourceStr>(RES_ID), RESOURCE_BY_NUMBER },
+        { CreateResourceUnion<ResourceStr>(INVALID_ID_STRING), "" },
     };
 } // namespace
 
@@ -86,6 +94,14 @@ public:
         // set test values to Theme Pattern as data for the Theme building
         AddResource(RES_ID, RESOURCE_BY_NUMBER);
         AddResource(RES_NAME, RESOURCE_BY_STRING);
+
+        AddResource(RES_COLOR_ID, COLOR_BY_NUMBER);
+        AddResource(RES_COLOR_NAME, COLOR_BY_STRING);
+
+        AddResource(RES_DIMENSION_ID, DIMENSION_BY_NUMBER);
+
+        AddResource(RES_FAMILY_ID, FAMILY_BY_NUMBER);
+        AddResource(RES_FAMILY_NAME, FAMILY_BY_STRING);
     }
 };
 
@@ -97,6 +113,7 @@ public:
 HWTEST_F(ButtonModifierResourcesTest, SetButtonOptions2TestLabelResource, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
     // Initial setup
     Ark_ButtonOptions inputValueOptions;
     inputValueOptions.type = Converter::ArkValue<Opt_ButtonType>(ARK_BUTTON_TYPE_CAPSULE);
@@ -125,9 +142,123 @@ HWTEST_F(ButtonModifierResourcesTest, SetButtonOptions2TestLabelResource, TestSi
     EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
     EXPECT_EQ(checkLabel, expectValue);
 
-    for (const auto& [label, expectValue] : BUTTON_LABEL_RESOURCES_TEST_PLAN) {
+    for (const auto& [label, expected] : BUTTON_LABEL_RESOURCES_TEST_PLAN) {
         modifier_->setButtonOptions2(node_, &label, &optInputValueOptions);
-        checkLabel = GetAttrValue<std::string>(jsonValue, expectValue);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_NAME);
+        EXPECT_EQ(resultStr, expected);
+    }
+}
+
+/*
+ * @tc.name: setFontColorTestResourceColorValues
+ * @tc.desc: Check the functionality of ButtonModifier.setFontColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierResourcesTest, setFontColorTestResourceColorValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_NAME)),
+            COLOR_BY_STRING.ColorToString() },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_ID)),
+            COLOR_BY_NUMBER.ColorToString() },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(INVALID_ID_COLOR)),
+            "#FFFF0000" }
+    };
+
+    for (const auto &[arkResColor, expected]: testPlan) {
+        modifier_->setFontColor(node_, &arkResColor);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_COLOR_NAME);
+        EXPECT_EQ(resultStr, expected);
+    }
+}
+
+/*
+ * @tc.name: setFontSizeTestResources
+ * @tc.desc: check setFontSize from resource
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResources, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string result;
+
+    using OneTestStep = std::pair<Ark_Length, std::string>;
+    const std::vector<OneTestStep> testPlan = {
+        { { .type = ARK_TAG_RESOURCE, .resource = RES_DIMENSION_ID }, "5.00vp" },
+        { { .type = ARK_TAG_RESOURCE, .resource = -1 }, "10.00px" }
+    };
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        modifier_->setFontSize(node_, &arkLength);
+        jsonValue = GetJsonValue(node_);
+        result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
+        EXPECT_EQ(result, expected);
+    }
+}
+
+/*
+ * @tc.name: setFontFamilyTestResources
+ * @tc.desc: Check the functionality of ButtonModifier.setFontFamily
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierResourcesTest, setFontFamilyTestResources, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    using ResourceTest = std::tuple<Union_String_Resource, std::string>;
+    const std::vector<ResourceTest> testPlan = {
+        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_NAME)),
+            FAMILY_BY_STRING },
+        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_ID)),
+            FAMILY_BY_NUMBER },
+    };
+
+    for (const auto& [family, expectValue] : testPlan) {
+        modifier_->setFontFamily(node_, &family);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
+        EXPECT_EQ(resultStr, expectValue);
+    }
+}
+
+/*
+ * @tc.name: setLabelStyleTestResources
+ * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierResourcesTest, setLabelStyleTestResources, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    Ark_Font fontLabel;
+    Ark_LabelStyle inputValueLabelStyle;
+
+    using ResourceTest = std::tuple<Opt_Union_String_Resource, std::string>;
+    const std::vector<ResourceTest> testPlan = {
+        { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+            CreateResourceUnion(RES_FAMILY_NAME)),
+            FAMILY_BY_STRING },
+        { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+            CreateResourceUnion(RES_FAMILY_ID)),
+            FAMILY_BY_NUMBER },
+    };
+
+    for (const auto& [family, expectValue] : testPlan) {
+        fontLabel.family = family;
+        inputValueLabelStyle.font = ArkValue<Opt_Font>(fontLabel);
+        modifier_->setLabelStyle(node_, &inputValueLabelStyle);
+        jsonValue = GetJsonValue(node_);
+        auto resultLabelStyle = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_LABEL_STYLE_NAME);
+        auto font = GetAttrValue<std::unique_ptr<JsonValue>>(resultLabelStyle, ATTRIBUTE_LABEL_STYLE_FONT_NAME);
+        auto familyString = GetAttrValue<std::string>(font, ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_NAME);
+        EXPECT_EQ(familyString, expectValue);
     }
 }
 } // namespace OHOS::Ace::NG

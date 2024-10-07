@@ -38,10 +38,29 @@ const Color THEME_BACKGROUND_COLOR(0xFFAABBC1);
 const Color THEME_FONT_COLOR(0xFFAABBC3);
 const Color THEME_SELECTED_OPTION_FONT_COLOR(0xFFAABBC4);
 
-const std::vector<SelectParam> SELECT_PARAMS = {
-    { .text = "Option A" },
-    { .text = "Option B" },
-    { .text = "Option C" }
+const auto DEFAULT_FONT_SIZE = "14.00px";
+const auto DEFAULT_FONT_WEIGHT = "FontWeight.Normal";
+const auto DEFAULT_FONT_FAMILY = "";
+const auto DEFAULT_FONT_STYLE = "FontStyle.Normal";
+
+const Ark_Font TEST_ARK_FONT = {
+    .size = ArkValue<Opt_Length>(12),
+    .weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
+    .family = ArkUnion<Opt_Union_String_Resource, Ark_String>("TestFontFamily"),
+    .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC),
+};
+const auto EXPECTED_FONT_SIZE = "12.00px";
+const auto EXPECTED_FONT_WEIGHT = "FontWeight.Bold";
+const auto EXPECTED_FONT_FAMILY = "TestFontFamily";
+const auto EXPECTED_FONT_STYLE = "FontStyle.Italic";
+
+const auto SELECTED_INDEX = ArkUnion<Union_Number_Resource, Ark_Number>(1);
+const auto INVALID_INDEX = ArkUnion<Union_Number_Resource, Ark_Number>(-1);
+
+const std::vector<Ark_SelectOption> SELECT_PARAMS = {
+    { .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option A") },
+    { .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option B") },
+    { .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option C") },
 };
 
 // length values
@@ -53,6 +72,10 @@ const auto ALEN_PX_POS = ArkValue<Ark_Length>(AINT32_POS);
 const auto ALEN_PX_NEG = ArkValue<Ark_Length>(AINT32_NEG);
 const auto ALEN_VP_POS = ArkValue<Ark_Length>(AFLT32_POS);
 const auto ALEN_VP_NEG = ArkValue<Ark_Length>(AFLT32_NEG);
+static const auto OPT_LEN_PX_POS = ArkValue<Opt_Length>(AINT32_POS);
+static const auto OPT_LEN_PX_NEG = ArkValue<Opt_Length>(AINT32_NEG);
+static const auto OPT_LEN_VP_POS = ArkValue<Opt_Length>(AFLT32_POS);
+static const auto OPT_LEN_VP_NEG = ArkValue<Opt_Length>(AFLT32_NEG);
 
 // check length
 const std::string CHECK_POSITIVE_VALUE_INT("1234.00px");
@@ -60,6 +83,27 @@ const std::string CHECK_NEGATIVE_VALUE_INT("-2147483648.00px");
 const std::string CHECK_POSITIVE_VALUE_FLOAT("1.23vp");
 const std::string CHECK_POSITIVE_VALUE_FLOAT_PX("1.23px");
 const std::string CHECK_NEGATIVE_VALUE_FLOAT("-5.68vp");
+
+const auto FONT_ATTR("font");
+const auto SELECTED_OPTION_FONT_ATTR("selectedOptionFont");
+const auto OPTION_FONT_ATTR("optionFont");
+const auto FONT_SIZE("size");
+const auto FONT_FAMILY("family");
+const auto FONT_WEIGHT("weight");
+const auto FONT_STYLE("style");
+
+const auto FONT_FAMILY_RES_NAME = "Family resource name";
+const auto FONT_FAMILY_RES_VALUE = "FontFamilyA,FontFamilyB,   FontFamilyC";
+
+const auto VALUE_RES_NAME = "Value resource name";
+const auto VALUE_RES_VALUE = "Select value";
+
+const auto OPTIONS_VALUE_RES_NAME = "SelectOption value resource name";
+const auto OPTIONS_VALUE_RES_VALUE = "SelectOption value";
+const auto OPTIONS_ICON_RES_NAME = "SelectOption icon resource name";
+const auto OPTIONS_ICON_RES_VALUE = "SelectOption icon";
+
+using FontTestStep = std::tuple<Ark_Font, std::string>;
 
 struct MenuAlignTest {
     Ark_MenuAlignType menuAlignType;
@@ -82,6 +126,84 @@ inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
     };
 }
 
+std::vector<FontTestStep> getFontSizeTestPlan(const std::string& defaultValue)
+{
+    const std::vector<FontTestStep> testPlan = {
+        {{ .size = OPT_LEN_VP_POS }, CHECK_POSITIVE_VALUE_FLOAT },
+        {{ .size = OPT_LEN_PX_POS }, CHECK_POSITIVE_VALUE_INT },
+        {{ .size = OPT_LEN_VP_NEG }, defaultValue },
+        {{ .size = OPT_LEN_PX_NEG }, defaultValue },
+        {{ .size = ArkValue<Opt_Dimension>(Ark_Empty()) }, defaultValue },
+    };
+    return testPlan;
+}
+
+std::vector<FontTestStep> getFontWeightTestPlan(const std::string& defaultValue)
+{
+    using FontWeightT = Opt_Union_FontWeight_Number_String;
+    const std::vector<FontTestStep> testPlan = {
+        { {.weight = ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD)}, "FontWeight.Bold" },
+        { {.weight = ArkUnion<FontWeightT, Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR)}, "FontWeight.Regular" },
+        { {.weight = ArkUnion<FontWeightT, Ark_Number>(100)}, "100" },
+        { {.weight = ArkUnion<FontWeightT, Ark_Number>(-111)}, defaultValue },
+        { {.weight = ArkUnion<FontWeightT, Ark_Number>(300.00f)}, "300" },
+        { {.weight = ArkUnion<FontWeightT, Ark_Number>(-123.456f)}, defaultValue },
+        { {.weight = ArkUnion<FontWeightT, Ark_String>("700")}, "700" },
+        { {.weight = ArkUnion<FontWeightT, Ark_String>("bold")}, "FontWeight.Bold" },
+        { {.weight = ArkUnion<FontWeightT, Ark_String>("InvalidData!")}, defaultValue },
+        { {.weight = ArkValue<FontWeightT>(Ark_Empty())}, defaultValue },
+    };
+    return testPlan;
+}
+
+std::vector<FontTestStep> getFontStyleTestPlan()
+{
+    const std::vector<FontTestStep> testPlan = {
+        { { .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL) }, "FontStyle.Normal" },
+        { { .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC) }, "FontStyle.Italic" },
+        { { .style = ArkValue<Opt_FontStyle>(static_cast<Ark_FontStyle>(INT_MIN)) }, DEFAULT_FONT_STYLE },
+        { { .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC) }, "FontStyle.Italic" },
+        { { .style = ArkValue<Opt_FontStyle>(Ark_Empty()) }, DEFAULT_FONT_STYLE },
+    };
+    return testPlan;
+}
+
+std::vector<FontTestStep> getFontFamilyTestPlan()
+{
+    const auto familyStr1 = "Family string value";
+
+    // static keyword is reqired because a pointer to this variable is stored in testPlan
+    static auto arkResName = ArkValue<Ark_String>(FONT_FAMILY_RES_NAME);
+
+    Ark_Resource familyResource = ArkRes(&arkResName, -1, NodeModifier::ResourceType::STRARRAY);
+
+    const std::vector<FontTestStep> testPlan = {
+        { { .family = ArkUnion<Opt_Union_String_Resource, Ark_String>(familyStr1) }, familyStr1 },
+        { { .family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(familyResource) }, FONT_FAMILY_RES_VALUE },
+        { { .family = ArkValue<Opt_Union_String_Resource>(Ark_Empty()) }, DEFAULT_FONT_FAMILY },
+    };
+    return testPlan;
+}
+
+struct TestFont {
+    std::string size;
+    std::string weight;
+    std::string family;
+    std::string style;
+
+    TestFont(ArkUINodeHandle node, std::string propName)
+    {
+        auto fontStr = GetStringAttribute(node, propName);
+        auto fontJson = JsonUtil::ParseJsonString(fontStr);
+        if (fontJson) {
+            size = fontJson->GetString(FONT_SIZE);
+            weight = fontJson->GetString(FONT_WEIGHT);
+            family = fontJson->GetString(FONT_FAMILY);
+            style = fontJson->GetString(FONT_STYLE);
+        }
+    }
+};
+
 int g_eventOnSelectIndex;
 std::string g_eventOnSelectValue;
 
@@ -102,6 +224,13 @@ const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
     static const GENERATED_ArkUIEventsAPI eventsImpl = { .getSelectEventsReceiver = getSelectEventsReceiverTest };
     return &eventsImpl;
 };
+
+float strToFloat(const std::string& str)
+{
+    char* ptr = nullptr;
+    float result = strtof(str.c_str(), &ptr);
+    return (ptr == str.c_str()) ? std::numeric_limits<float>::min() : result;
+}
 } // namespace
 
 class SelectModifierTest : public ModifierTestBase<GENERATED_ArkUISelectModifier,
@@ -123,19 +252,34 @@ public:
         SetupTheme<TextTheme>();
         SetupTheme<IconTheme>();
 
+        AddResource(FONT_FAMILY_RES_NAME, FONT_FAMILY_RES_VALUE);
+        AddResource(VALUE_RES_NAME, VALUE_RES_VALUE);
+        AddResource(OPTIONS_VALUE_RES_NAME, OPTIONS_VALUE_RES_VALUE);
+        AddResource(OPTIONS_ICON_RES_NAME, OPTIONS_ICON_RES_VALUE);
+
         fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 
     void SetUp(void) override
     {
         ModifierTestBase::SetUp();
+
+        ASSERT_NE(modifier_->setSelectOptions, nullptr);
+        auto arrayHolder = ArkArrayHolder<Array_SelectOption>(SELECT_PARAMS);
+        auto arkArray = arrayHolder.ArkValue();
+        modifier_->setSelectOptions(node_, &arkArray);
+
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
-        if (frameNode) {
-            SelectModelNG::InitSelect(frameNode, SELECT_PARAMS);
-            auto selectPattern = frameNode->GetPatternPtr<SelectPattern>();
-            std::vector<RefPtr<FrameNode>> options = selectPattern->GetOptions();
-            options[0]->GetPattern()->OnModifyDone(); // Init selectTheme
-        }
+        ASSERT_TRUE(frameNode);
+        auto selectPattern = frameNode->GetPatternPtr<SelectPattern>();
+        ASSERT_TRUE(selectPattern);
+        std::vector<RefPtr<FrameNode>> options = selectPattern->GetOptions();
+        ASSERT_FALSE(options.empty());
+        auto optionFrameNode = options[0];
+        ASSERT_TRUE(optionFrameNode);
+        auto pattern = optionFrameNode->GetPattern();
+        ASSERT_TRUE(pattern);
+        pattern->OnModifyDone(); // Init selectTheme
     }
 };
 
@@ -451,13 +595,17 @@ HWTEST_F(SelectModifierTest, setControlSizeTest, TestSize.Level1)
     const auto propName("controlSize");
     ASSERT_NE(modifier_->setControlSize, nullptr);
 
-    modifier_->setControlSize(node_, ARK_CONTROL_SIZE_NORMAL);
-    auto checkVal1 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal1, "ControlSize.NORMAL");
+    // check default value
+    auto checkVal0 = GetStringAttribute(node_, propName);
+    EXPECT_EQ(checkVal0, "ControlSize.NORMAL");
 
     modifier_->setControlSize(node_, ARK_CONTROL_SIZE_SMALL);
+    auto checkVal1 = GetStringAttribute(node_, propName);
+    EXPECT_EQ(checkVal1, "ControlSize.SMALL");
+
+    modifier_->setControlSize(node_, ARK_CONTROL_SIZE_NORMAL);
     auto checkVal2 = GetStringAttribute(node_, propName);
-    EXPECT_EQ(checkVal2, "ControlSize.SMALL");
+    EXPECT_EQ(checkVal2, "ControlSize.NORMAL");
 }
 
 /**
@@ -620,7 +768,7 @@ HWTEST_F(SelectModifierTest, setOptionHeightTest, TestSize.Level1)
     for (const auto &[value, expectVal]: OPTION_HEIGHT_TEST_PLAN) {
         modifier_->setOptionHeight(node_, &value);
         auto checkVal = GetStringAttribute(node_, propName);
-        EXPECT_FLOAT_EQ(std::stof(checkVal), expectVal);
+        EXPECT_FLOAT_EQ(strToFloat(checkVal), expectVal);
     }
 }
 
@@ -683,6 +831,605 @@ HWTEST_F(SelectModifierTest, setOnSelectTest, TestSize.Level1)
     EXPECT_EQ(g_eventOnSelectValue, value);
 
     ASSERT_NE(&recv, nullptr);
+}
+
+/**
+ * @tc.name: setFontTest
+ * @tc.desc: Test setFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setFontTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFont, nullptr);
+
+    modifier_->setFont(node_, &TEST_ARK_FONT);
+    TestFont checkedVal(node_, FONT_ATTR);
+
+    EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
+    EXPECT_EQ(checkedVal.weight, EXPECTED_FONT_WEIGHT);
+    EXPECT_EQ(checkedVal.family, EXPECTED_FONT_FAMILY);
+    EXPECT_EQ(checkedVal.style, EXPECTED_FONT_STYLE);
+}
+
+/**
+ * @tc.name: setFontTestSize
+ * @tc.desc: Test setFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setFontTestSize, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFont, nullptr);
+
+    auto testPlan = getFontSizeTestPlan(DEFAULT_FONT_SIZE);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setFont(node_, &font);
+        TestFont actual(node_, FONT_ATTR);
+        EXPECT_EQ(actual.size, expected);
+    }
+
+    modifier_->setControlSize(node_, ARK_CONTROL_SIZE_SMALL);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setFont(node_, &font);
+        TestFont actual(node_, FONT_ATTR);
+        EXPECT_EQ(actual.size, expected);
+    }
+}
+
+/**
+ * @tc.name: setFontTestWeight
+ * @tc.desc: Test setFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setFontTestWeight, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFont, nullptr);
+
+    auto testPlan = getFontWeightTestPlan(DEFAULT_FONT_WEIGHT);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setFont(node_, &font);
+        TestFont actual(node_, FONT_ATTR);
+        EXPECT_EQ(actual.weight, expected);
+    }
+}
+
+/**
+ * @tc.name: setFontTestFamily
+ * @tc.desc: Test setFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setFontTestFamily, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFont, nullptr);
+
+    for (const auto &[font, expected]: getFontFamilyTestPlan()) {
+        modifier_->setFont(node_, &font);
+        TestFont actual(node_, FONT_ATTR);
+        EXPECT_EQ(actual.family, expected);
+    }
+}
+
+/**
+ * @tc.name: setFontTestStyle
+ * @tc.desc: Test setFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setFontTestStyle, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setFont, nullptr);
+
+    for (const auto &[font, expected]: getFontStyleTestPlan()) {
+        modifier_->setFont(node_, &font);
+        TestFont actual(node_, FONT_ATTR);
+        EXPECT_EQ(actual.style, expected);
+    }
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTest
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    modifier_->setSelectedOptionFont(node_, &TEST_ARK_FONT);
+    TestFont checkedVal(node_, SELECTED_OPTION_FONT_ATTR);
+
+    EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
+    EXPECT_EQ(checkedVal.weight, EXPECTED_FONT_WEIGHT);
+    EXPECT_EQ(checkedVal.family, EXPECTED_FONT_FAMILY);
+    EXPECT_EQ(checkedVal.style, EXPECTED_FONT_STYLE);
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTestNothingSelected
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestNothingSelected, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &INVALID_INDEX);
+
+    modifier_->setSelectedOptionFont(node_, &TEST_ARK_FONT);
+    TestFont checkedVal(node_, SELECTED_OPTION_FONT_ATTR);
+
+    EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
+    EXPECT_EQ(checkedVal.weight, EXPECTED_FONT_WEIGHT);
+    EXPECT_EQ(checkedVal.family, EXPECTED_FONT_FAMILY);
+    EXPECT_EQ(checkedVal.style, EXPECTED_FONT_STYLE);
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTestSize
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestSize, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    auto testPlan = getFontSizeTestPlan(DEFAULT_FONT_SIZE);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setSelectedOptionFont(node_, &font);
+        TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.size, expected);
+    }
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTestWeight
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestWeight, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    auto testPlan = getFontWeightTestPlan(DEFAULT_FONT_WEIGHT);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setSelectedOptionFont(node_, &font);
+        TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.weight, expected);
+    }
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTestFamily
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestFamily, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: getFontFamilyTestPlan()) {
+        modifier_->setSelectedOptionFont(node_, &font);
+        TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.family, expected);
+    }
+}
+
+/**
+ * @tc.name: setSelectedOptionFontTestStyle
+ * @tc.desc: Test setSelectedOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectedOptionFontTestStyle, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSelectedOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: getFontStyleTestPlan()) {
+        modifier_->setSelectedOptionFont(node_, &font);
+        TestFont actual(node_, SELECTED_OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.style, expected);
+    }
+}
+
+/**
+ * @tc.name: setOptionFontTest
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    modifier_->setOptionFont(node_, &TEST_ARK_FONT);
+    TestFont checkedVal(node_, OPTION_FONT_ATTR);
+
+    EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
+    EXPECT_EQ(checkedVal.weight, EXPECTED_FONT_WEIGHT);
+    EXPECT_EQ(checkedVal.family, EXPECTED_FONT_FAMILY);
+    EXPECT_EQ(checkedVal.style, EXPECTED_FONT_STYLE);
+}
+
+/**
+ * @tc.name: setOptionFontTestNothingSelected
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTestNothingSelected, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &INVALID_INDEX);
+
+    modifier_->setOptionFont(node_, &TEST_ARK_FONT);
+    TestFont checkedVal(node_, OPTION_FONT_ATTR);
+
+    EXPECT_EQ(checkedVal.size, EXPECTED_FONT_SIZE);
+    EXPECT_EQ(checkedVal.weight, EXPECTED_FONT_WEIGHT);
+    EXPECT_EQ(checkedVal.family, EXPECTED_FONT_FAMILY);
+    EXPECT_EQ(checkedVal.style, EXPECTED_FONT_STYLE);
+}
+
+/**
+ * @tc.name: setOptionFontTestSize
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTestSize, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    auto testPlan = getFontSizeTestPlan(DEFAULT_FONT_SIZE);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setOptionFont(node_, &font);
+        TestFont actual(node_, OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.size, expected);
+    }
+}
+
+/**
+ * @tc.name: setOptionFontTestWeight
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTestWeight, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    auto testPlan = getFontWeightTestPlan(DEFAULT_FONT_WEIGHT);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: testPlan) {
+        modifier_->setOptionFont(node_, &font);
+        TestFont actual(node_, OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.weight, expected);
+    }
+}
+
+/**
+ * @tc.name: setOptionFontTestFamily
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTestFamily, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: getFontFamilyTestPlan()) {
+        modifier_->setOptionFont(node_, &font);
+        TestFont actual(node_, OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.family, expected);
+    }
+}
+
+/**
+ * @tc.name: setOptionFontTestStyle
+ * @tc.desc: Test setOptionFont function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionFontTestStyle, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOptionFont, nullptr);
+
+    modifier_->setSelected(node_, &SELECTED_INDEX);
+
+    for (const auto &[font, expected]: getFontStyleTestPlan()) {
+        modifier_->setOptionFont(node_, &font);
+        TestFont actual(node_, OPTION_FONT_ATTR);
+        EXPECT_EQ(actual.style, expected);
+    }
+}
+
+/**
+ * @tc.name: setValueTest
+ * @tc.desc: Test setValue function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setValueTest, TestSize.Level1)
+{
+    const auto propName = "value";
+    const auto valueStr = "Select value";
+
+    auto arkResName = ArkValue<Ark_String>(VALUE_RES_NAME);
+    Ark_Resource resource = ArkRes(&arkResName, -1, NodeModifier::ResourceType::STRING);
+
+    using TestStep = std::tuple<ResourceStr, std::string>;
+    std::vector<TestStep> testPlan = {
+        { ArkUnion<ResourceStr, Ark_String>(valueStr), valueStr },
+        { ArkUnion<ResourceStr, Ark_Resource>(resource), VALUE_RES_VALUE },
+    };
+
+    ASSERT_NE(modifier_->setValue, nullptr);
+
+    for (const auto &[value, expected]: testPlan) {
+        modifier_->setValue(node_, &value);
+        auto checkedValue = GetStringAttribute(node_, propName);
+        EXPECT_EQ(checkedValue, expected);
+    }
+}
+
+/**
+ * @tc.name: setOptionWidthTest
+ * @tc.desc: Test setOptionWidth function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setOptionWidthTest, TestSize.Level1)
+{
+    const auto optionWidthPropName = "optionWidth";
+
+    using LengthPair = std::pair<Ark_Length, float>;
+    const std::vector<LengthPair> testPlan = {
+        { ArkValue<Ark_Length>(140), 140.f },
+        { ALEN_PX_NEG, 0.f }, // check negative value
+        { ALEN_VP_NEG, 0.f }, // check negative value
+        { ArkValue<Ark_Length>(250.5f), 250.5f }
+    };
+
+    ASSERT_NE(modifier_->setOptionWidth, nullptr);
+
+    for (const auto &[lengthValue, expectVal]: testPlan) {
+        auto value = ArkUnion<Union_Length_OptionWidthMode, Ark_Length>(lengthValue);
+        modifier_->setOptionWidth(node_, &value);
+        auto checkVal = GetStringAttribute(node_, optionWidthPropName);
+        EXPECT_FLOAT_EQ(strToFloat(checkVal), expectVal);
+    }
+
+    auto value1 = ArkUnion<Union_Length_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_TRIGGER);
+    modifier_->setOptionWidth(node_, &value1);
+    auto checkVal1 = GetStringAttribute(node_, optionWidthPropName);
+    EXPECT_EQ(checkVal1, "OptionWidthMode.FIT_TRIGGER");
+
+    auto value2 = ArkUnion<Union_Length_OptionWidthMode, Ark_OptionWidthMode>(ARK_OPTION_WIDTH_MODE_FIT_CONTENT);
+    modifier_->setOptionWidth(node_, &value2);
+    auto checkVal2 = GetStringAttribute(node_, optionWidthPropName);
+    EXPECT_EQ(strToFloat(checkVal2), 250.5f); // old width value is used
+}
+
+/**
+ * @tc.name: setSelectOptionsTestEmpty
+ * @tc.desc: Test setSelectOptions function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectOptionsTestEmpty, TestSize.Level1)
+{
+    const auto propName = "options";
+    ASSERT_NE(modifier_->setSelectOptions, nullptr);
+
+    std::vector<Ark_SelectOption> emptyVec;
+    auto arrayHolder = ArkArrayHolder<Array_SelectOption>(emptyVec);
+    auto arkArray = arrayHolder.ArkValue();
+    modifier_->setSelectOptions(node_, &arkArray);
+
+    auto fullJson = GetJsonValue(node_);
+    auto optionsJson = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    ASSERT_NE(optionsJson, nullptr);
+    auto optionsArray = GetAttrValue<std::unique_ptr<JsonValue>>(optionsJson, propName);
+    ASSERT_NE(optionsArray, nullptr);
+    ASSERT_TRUE(optionsArray->IsArray());
+    ASSERT_EQ(optionsArray->GetArraySize(), 0);
+}
+
+/**
+ * @tc.name: setSelectOptionsTest
+ * @tc.desc: Test setSelectOptions function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setSelectOptionsTest, TestSize.Level1)
+{
+    const auto propName = "options";
+    ASSERT_NE(modifier_->setSelectOptions, nullptr);
+
+    auto arkValueResourceName = ArkValue<Ark_String>(OPTIONS_VALUE_RES_NAME);
+    Ark_Resource valueResource = ArkRes(&arkValueResourceName, -1, NodeModifier::ResourceType::STRING);
+
+    auto arkIconResourceName = ArkValue<Ark_String>(OPTIONS_ICON_RES_NAME);
+    Ark_Resource iconResource = ArkRes(&arkIconResourceName, -1, NodeModifier::ResourceType::STRING);
+
+    const std::vector<Ark_SelectOption> selectOptions = {
+        {
+            .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option P"),
+            .icon = ArkUnion<Opt_ResourceStr, Ark_String>("Icon P")
+        },
+        {
+            .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option Q"),
+            .icon = ArkValue<Opt_ResourceStr>(Ark_Empty())
+        },
+        {
+            .value = ArkUnion<Ark_ResourceStr, Ark_Resource>(valueResource),
+            .icon = ArkUnion<Opt_ResourceStr, Ark_Resource>(iconResource)
+        }
+    };
+
+    auto arrayHolder = ArkArrayHolder<Array_SelectOption>(selectOptions);
+    auto arkArray = arrayHolder.ArkValue();
+    modifier_->setSelectOptions(node_, &arkArray);
+
+    auto fullJson = GetJsonValue(node_);
+    auto optionsJson = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, propName);
+    ASSERT_NE(optionsJson, nullptr);
+    auto optionsArray = GetAttrValue<std::unique_ptr<JsonValue>>(optionsJson, propName);
+    ASSERT_NE(optionsArray, nullptr);
+    ASSERT_TRUE(optionsArray->IsArray());
+    ASSERT_EQ(optionsArray->GetArraySize(), selectOptions.size());
+
+    const std::vector<std::string> aceValue = {
+        "Option P",
+        "Option Q",
+        OPTIONS_VALUE_RES_VALUE
+    };
+
+    const std::vector<std::string> aceIcon = {
+        "Icon P",
+        "",
+        OPTIONS_ICON_RES_VALUE
+    };
+
+    for (size_t i = 0; i < selectOptions.size(); i++) {
+        auto itemJson = optionsArray->GetArrayItem(i);
+        auto checkedValue = GetAttrValue<std::string>(itemJson, "value");
+        EXPECT_EQ(checkedValue, aceValue[i]);
+        auto checkedIcon = GetAttrValue<std::string>(itemJson, "icon");
+        EXPECT_EQ(checkedIcon, aceIcon[i]);
+    }
+}
+
+/**
+ * @tc.name: setDividerTest
+ * @tc.desc: Check the functionality of SelectModifier.setDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setDividerTest, TestSize.Level1)
+{
+    // default values
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto dividerCheckValue = dividerObject->ToString();
+    EXPECT_EQ(dividerCheckValue, "");
+
+    // set valid values, color as Ark_Color aka int
+    Ark_DividerOptions dividerOptions = {
+        .strokeWidth = Converter::ArkValue<Opt_Length>(11),
+        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
+        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
+    };
+    Type_SelectAttribute_divider_Arg0 divider = {
+        .selector = 0,
+        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
+    };
+    modifier_->setDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
+    EXPECT_EQ(strokeWidthCheckValue, "11.00px");
+    auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
+    EXPECT_EQ(startMarginCheckValue, "55.50vp");
+    auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
+    EXPECT_EQ(endMarginCheckValue, "77.00px");
+    auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+    EXPECT_EQ(colorCheckValue, "#FFFFFFFF");
+
+    // set color as Ark_Number
+    dividerOptions = {
+        .strokeWidth = Converter::ArkValue<Opt_Length>(11),
+        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
+        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)}
+    };
+    divider = {
+        .selector = 0,
+        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
+    };
+    modifier_->setDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+    EXPECT_EQ(colorCheckValue, "#FF123456");
+}
+
+/**
+ * @tc.name: setDividerUndefinedTest
+ * @tc.desc: Check the functionality of SelectModifier.setDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setDividerUndefinedTest, TestSize.Level1)
+{
+    // set undefined values
+    Ark_DividerOptions dividerOptions = {
+        .strokeWidth = Converter::ArkValue<Opt_Length>(Ark_Empty()),
+        .startMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
+        .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
+        .color = {.tag = ARK_TAG_UNDEFINED}
+    };
+    Type_SelectAttribute_divider_Arg0 divider = {
+        .selector = 0,
+        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
+    };
+    modifier_->setDivider(node_, &divider);
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
+    EXPECT_EQ(strokeWidthCheckValue, "0.00vp");
+    auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
+    EXPECT_EQ(startMarginCheckValue, "0.00vp");
+    auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
+    EXPECT_EQ(endMarginCheckValue, "0.00vp");
+    auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+    EXPECT_EQ(colorCheckValue, "#00000000");
+
+    // set Ark_Undefined
+    divider = {
+        .selector = 1,
+        .value1 = Ark_Undefined()
+    };
+    modifier_->setDivider(node_, &divider);
+    fullJson = GetJsonValue(node_);
+    auto dividerCheckValue = GetAttrValue<std::string>(fullJson, "divider");
+    EXPECT_EQ(dividerCheckValue, "");
+}
+
+/**
+ * @tc.name: setDividerColorStringTest
+ * @tc.desc: Check the functionality of SelectModifier.setDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectModifierTest, setDividerColorStringTest, TestSize.Level1)
+{
+    // set color as Ark_String
+    Ark_DividerOptions dividerOptions = {
+        .strokeWidth = Converter::ArkValue<Opt_Length>(11),
+        .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
+        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
+    };
+    Type_SelectAttribute_divider_Arg0 divider = {
+        .selector = 0,
+        .value0 = ArkValue<Opt_DividerOptions>(dividerOptions)
+    };
+    modifier_->setDivider(node_, &divider);
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+    EXPECT_EQ(colorCheckValue, "#11223344");
 }
 
 } // namespace OHOS::Ace::NG

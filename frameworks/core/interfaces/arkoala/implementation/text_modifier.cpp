@@ -74,7 +74,7 @@ static void FontImplInternal(Ark_NativePointer node,
 
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    
+
     Font font;
     font.fontSize = Converter::ConvertOrDefault(value->size, DEFAULT_FONT_SIZE);
     font.fontStyle = Converter::ConvertOrDefault(value->style, DEFAULT_FONT_STYLE);
@@ -295,7 +295,10 @@ void DecorationImpl(Ark_NativePointer node,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    TextModelNG::SetTextDecoration(frameNode, Converter::Convert<TextDecoration>(value->type));
+    auto decoration = Converter::OptConvert<TextDecoration>(value->type);
+    if (decoration) {
+        TextModelNG::SetTextDecoration(frameNode, decoration.value());
+    }
 
     auto color = Converter::OptConvert<Color>(value->color);
     if (color) {
@@ -421,7 +424,7 @@ void SelectionImpl(Ark_NativePointer node,
 
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    
+
     auto startIndex = Converter::Convert<int>(*selectionStart);
     auto endIndex = Converter::Convert<int>(*selectionEnd);
     TextModelNG::SetTextSelection(frameNode, startIndex, endIndex);
