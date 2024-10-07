@@ -209,9 +209,8 @@ public:
         return lanes_;
     }
 
-    void UpdatePosMapStart(float delta);
-    void UpdatePosMapEnd();
     void CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition);
+    void UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos);
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
