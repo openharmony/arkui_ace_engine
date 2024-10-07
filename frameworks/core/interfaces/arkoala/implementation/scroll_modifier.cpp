@@ -20,16 +20,8 @@
 
 #include "arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
-namespace ScrollInterfaceModifier {
-void SetScrollOptionsImpl(Ark_NativePointer node,
-                          const Opt_Scroller* scroller)
-{
-}
-} // ScrollInterfaceModifier
-namespace ScrollAttributeModifier {
-
-namespace {
+namespace OHOS::Ace::NG::Converter {
+template<>
 inline OffsetT<CalcDimension> Convert(const Ark_OffsetOptions& value)
 {
     auto xOffset = Converter::OptConvert<CalcDimension>(value.xOffset);
@@ -44,6 +36,15 @@ inline OffsetT<CalcDimension> Convert(const Ark_OffsetOptions& value)
     return dst;
 }
 }
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+namespace ScrollInterfaceModifier {
+void SetScrollOptionsImpl(Ark_NativePointer node,
+                          const Opt_Scroller* scroller)
+{
+}
+} // ScrollInterfaceModifier
+namespace ScrollAttributeModifier {
 
 void ScrollableImpl(Ark_NativePointer node,
                     enum Ark_ScrollDirection value)
@@ -158,7 +159,7 @@ void InitialOffsetImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    OffsetT<CalcDimension> offset = Convert(*value);
+    OffsetT<CalcDimension> offset = Converter::Convert<OffsetT<CalcDimension>>(*value);
     ScrollModelNG::SetInitialOffset(frameNode, offset);
 }
 } // ScrollAttributeModifier
