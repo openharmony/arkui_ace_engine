@@ -1158,4 +1158,15 @@ bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& nod
     }
     return true;
 }
+
+void BaseTextSelectOverlay::MarkOverlayDirty()
+{
+    if (SelectOverlayIsOn()) {
+        auto host = GetOwner();
+        CHECK_NULL_VOID(host);
+        auto overlayNode = host->GetOverlayNode();
+        CHECK_NULL_VOID(overlayNode);
+        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
 } // namespace OHOS::Ace::NG
