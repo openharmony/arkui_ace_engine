@@ -134,8 +134,30 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
         });
 }
 
+void SwiperIndicatorPattern::UpdateFocusable() const
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto focusable = swiperPattern->TotalCount() != 0;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(focusable);
+
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto level = focusable ? "auto" : "no";
+    accessibilityProperty->SetAccessibilityLevel(level);
+}
+
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    UpdateFocusable();
+
     CHECK_NULL_RETURN(config.frameSizeChange, false);
     return true;
 }

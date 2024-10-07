@@ -303,6 +303,8 @@ private:
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCountDefault() const;
     void ResetDotModifier();
+    void UpdateFocusable() const;
+
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
