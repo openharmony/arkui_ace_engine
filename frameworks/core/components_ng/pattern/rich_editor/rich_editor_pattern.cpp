@@ -2707,11 +2707,13 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     AdjustCursorPosition(position);
     if (auto focusHub = GetFocusHub(); focusHub) {
         SetCaretPosition(position);
-        if (focusHub->RequestFocusImmediately()) {
+        if (focusHub->IsCurrentFocus()) {
             StartTwinkling();
             RequestKeyboard(false, true, true);
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "focusHub: set HandleOnEditChanged to 1");
             HandleOnEditChanged(true);
+        } else {
+            focusHub->RequestFocusImmediately();
         }
     }
     UseHostToUpdateTextFieldManager();
