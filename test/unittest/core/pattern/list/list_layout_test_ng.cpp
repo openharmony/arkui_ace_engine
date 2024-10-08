@@ -1076,14 +1076,21 @@ HWTEST_F(ListLayoutTestNg, Pattern011, TestSize.Level1)
 
 /**
  * @tc.name: Pattern014
- * @tc.desc:
+ * @tc.desc: Test add a listItem and scroll to the added listItem within the same frame
  * @tc.type: FUNC
  */
 HWTEST_F(ListLayoutTestNg, Pattern014, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create an empty list
+     */
     ListModelNG model = CreateList();
     CreateDone(frameNode_);
 
+    /**
+     * @tc.steps: step2. add a listItem and scroll to the added listItem within the same frame.
+     * @tc.expected: layoutDirection = LayoutDirection::NONE
+     */
     ViewStackProcessor::GetInstance()->Push(frameNode_);
     CreateListItems(1);
     auto startIndex = pattern_->GetStartIndex();
