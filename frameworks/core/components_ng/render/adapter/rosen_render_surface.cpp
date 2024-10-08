@@ -463,11 +463,15 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
         auto lastSurfaceNode = availableBufferList_.back();
         if (lastSurfaceNode && lastSurfaceNode->sendTimes_ <= 0) {
+            ACE_SCOPED_TRACE("ReleaseXComponentBuffer[id:%u][sendTimes:%d]", lastSurfaceNode->bufferId_,
+                lastSurfaceNode->sendTimes_);
             consumerSurface_->ReleaseBuffer(lastSurfaceNode->buffer_, SyncFence::INVALID_FENCE);
             availableBufferList_.pop_back();
         }
         availableBufferList_.emplace_back(surfaceNode);
     }
+    ACE_SCOPED_TRACE("ConsumeXComponentBuffer[id:%u][sendTimes:%d][size:%u]", surfaceNode->bufferId_,
+        surfaceNode->sendTimes_, static_cast<uint32_t>(availableBufferList_.size()));
 #endif
 }
 
@@ -514,7 +518,7 @@ void RosenRenderSurface::DrawBufferForXComponent(
         }
         ++surfaceNode->sendTimes_;
     }
-    ACE_SCOPED_TRACE("XComponent DrawBuffer");
+    ACE_SCOPED_TRACE("DrawXComponentBuffer[id:%u][sendTimes:%d]", surfaceNode->bufferId_, surfaceNode->sendTimes_);
 #ifndef USE_ROSEN_DRAWING
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_VOID(rsCanvas);
@@ -560,7 +564,10 @@ void RosenRenderSurface::ReleaseSurfaceBufferById(uint32_t bufferId)
             iter = availableBufferList_.erase(iter);
         } else if (surfaceNode->bufferId_ == bufferId) {
             // at least reserve one buffer
-            if (--surfaceNode->sendTimes_ <= 0 && (iter != std::prev(availableBufferList_.end()))) {
+            auto isLast = (iter == std::prev(availableBufferList_.end()));
+            ACE_SCOPED_TRACE(
+                "ReleaseXComponentBuffer[id:%u][sendTimes:%d][isLast:%d]", bufferId, surfaceNode->sendTimes_, isLast);
+            if (--surfaceNode->sendTimes_ <= 0 && !isLast) {
                 consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
                 availableBufferList_.erase(iter);
             }
