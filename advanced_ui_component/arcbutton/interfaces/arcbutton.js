@@ -36,6 +36,7 @@ export var ArcButtonPosition;
     ArcButtonPosition[ArcButtonPosition["TOP_EDGE"] = 0] = "TOP_EDGE";
     ArcButtonPosition[ArcButtonPosition["BOTTOM_EDGE"] = 1] = "BOTTOM_EDGE";
 })(ArcButtonPosition || (ArcButtonPosition = {}));
+
 export var ArcButtonStyleMode;
 (function (ArcButtonStyleMode) {
     ArcButtonStyleMode[ArcButtonStyleMode["EMPHASIZED_LIGHT"] = 0] = "EMPHASIZED_LIGHT";
@@ -44,14 +45,17 @@ export var ArcButtonStyleMode;
     ArcButtonStyleMode[ArcButtonStyleMode["NORMAL_DEEP"] = 3] = "NORMAL_DEEP";
     ArcButtonStyleMode[ArcButtonStyleMode["CUSTOM"] = 4] = "CUSTOM";
 })(ArcButtonStyleMode || (ArcButtonStyleMode = {}));
+
 export var ArcButtonStatus;
 (function (ArcButtonStatus) {
     ArcButtonStatus[ArcButtonStatus["NORMAL"] = 0] = "NORMAL";
     ArcButtonStatus[ArcButtonStatus["PRESSED"] = 1] = "PRESSED";
     ArcButtonStatus[ArcButtonStatus["DISABLED"] = 2] = "DISABLED";
 })(ArcButtonStatus || (ArcButtonStatus = {}));
+
 class Constants {
 }
+
 /**
  * 最大文字大小
  */
@@ -98,7 +102,6 @@ Constants.EMPHASIZEWARN_TEXT_COLOR = '#FFFFFF';
 Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR = '#9E342F';
 Constants.EMPHASIZEWARN_DISABLE_BTN_COLOR = '#3E0d0c';
 Constants.EMPHASIZEWARN_DISABLE_TEXT_COLOR = '#99FFFFFF';
-
 const arcButtonTheme = {
     BUTTON_HEIGHT: LengthMetrics.resource({
         "id": -1,
@@ -207,7 +210,9 @@ __decorate([
 ArcButtonOptions = __decorate([
     ObservedV2
 ], ArcButtonOptions);
+
 export { ArcButtonOptions };
+
 export class ArcButton extends ViewV2 {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
         super(parent, elmtId, extraInfo);
@@ -234,10 +239,12 @@ export class ArcButton extends ViewV2 {
         this.pathString = '';
         this.finalizeConstruction();
     }
+
     optionsChange() {
         this.judgeTextWidth();
         this.changeStatus();
     }
+
     changeStatus() {
         switch (this.options.styleMode) {
             case ArcButtonStyleMode.EMPHASIZED_LIGHT:
@@ -288,6 +295,7 @@ export class ArcButton extends ViewV2 {
             this.fontColor = this.textNormalColor;
         }
     }
+
     /**
      * 初始化数据
      */
@@ -299,6 +307,7 @@ export class ArcButton extends ViewV2 {
         this.scaleValue = 0.95;
         this.changeStatus();
     }
+
     /**
      * 判断是否超出文本框宽度
      */
@@ -329,6 +338,7 @@ export class ArcButton extends ViewV2 {
         const pathData = this.dataProcessUtil.calculate();
         this.generatePath(pathData);
     }
+
     generatePath(data) {
         if (data == null) {
             return;
@@ -373,13 +383,16 @@ export class ArcButton extends ViewV2 {
        ${rightBottomPointY} L ${leftBottomPointX} ${leftBottomPointY} L ${mLeftTopPointX} ${mLeftTopPointY}`;
         this.pathString = pathStr;
     }
+
     buttonVp2px(valueX, valueY) {
         const num = valueX - valueY;
         return this.getUIContext().vp2px(num);
     }
+
     buildLog() {
         return true;
     }
+
     textBuilderIsExceed(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.options.label);
@@ -402,6 +415,7 @@ export class ArcButton extends ViewV2 {
         }, Text);
         Text.pop();
     }
+
     textBuilderNormal(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.options.label);
@@ -425,6 +439,7 @@ export class ArcButton extends ViewV2 {
         }, Text);
         Text.pop();
     }
+
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Stack.create({ alignContent: Alignment.TopStart });
@@ -475,6 +490,7 @@ export class ArcButton extends ViewV2 {
         If.pop();
         Stack.pop();
     }
+
     dealTouchEvent(event) {
         const x = event.touches[0].windowX;
         const y = event.touches[0].windowY;
@@ -502,6 +518,7 @@ export class ArcButton extends ViewV2 {
                 break;
         }
     }
+
     updateStateVars(params) {
         if (params === undefined) {
             return;
@@ -510,6 +527,7 @@ export class ArcButton extends ViewV2 {
             this.updateParam("options", params.options);
         }
     }
+
     rerender() {
         this.updateDirtyElements();
     }
@@ -550,6 +568,7 @@ __decorate([
 __decorate([
     Monitor('options.label', 'options.type', 'options.fontSize', 'options.styleMode', 'options.status', 'options.backgroundColor', 'options.fontColor')
 ], ArcButton.prototype, "optionsChange", null);
+
 class DataProcessUtil {
     constructor() {
         this.dial = new ArcButtonCircle(0, 0, 0);
@@ -557,6 +576,7 @@ class DataProcessUtil {
         this.height = 0;
         this.width = 0;
     }
+
     initData() {
         const dialRadius = arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2;
         this.dial = new ArcButtonCircle(dialRadius, dialRadius, dialRadius);
@@ -566,6 +586,7 @@ class DataProcessUtil {
         const arcY = this.dial.center.y + dialRadius + arcRadius - this.height;
         this.arc = new ArcButtonCircle(arcRadius, arcX, arcY);
     }
+
     calculate() {
         const chamferCircleR = arcButtonTheme.CHAMFER_CIRCLE_RADIUS;
         const innerDial = new ArcButtonCircle(this.dial.radius - chamferCircleR, this.dial.center.x, this.dial.center.y);
@@ -580,6 +601,7 @@ class DataProcessUtil {
         this.dial.radius - this.height);
         return new AllPoints(this.width, this.height, tp2, tp1, tp3, tp4, canvasLeftTop);
     }
+
     /**
      * 判断点是否在上弧圆内
      * @param x 触摸点X
@@ -591,6 +613,7 @@ class DataProcessUtil {
         const distance = this.calculateDistance(pointTouch, this.arc.center);
         return distance <= this.arc.radius;
     }
+
     /**
      * 计算两点间距离
      * @param point1 点1
@@ -600,6 +623,7 @@ class DataProcessUtil {
     calculateDistance(point1, point2) {
         return Math.sqrt((point2.x - point1.x) ** 2 + (point2.y - point1.y) ** 2);
     }
+
     calculateIntersection(circleCenter, circleRadius, point) {
         const h = circleCenter.x;
         const k = circleCenter.y;
@@ -642,6 +666,7 @@ class DataProcessUtil {
             return resultPoint[1];
         }
     }
+
     /**
      * 查找两圆的交点
      * @param C1 第一个圆
@@ -690,18 +715,21 @@ class DataProcessUtil {
         return [intersection1, intersection2];
     }
 }
+
 class ArcButtonCircle {
     constructor(radius, x, y) {
         this.radius = radius;
         this.center = new ArcButtonPoint(x, y);
     }
 }
+
 class ArcButtonPoint {
     constructor(x, y) {
         this.x = x;
         this.y = y;
     }
 }
+
 class AllPoints {
     constructor(btnWidth, btnHeight, leftTopPoint, rightTopPoint, leftBottomPoint, rightBottomPoint, canvasLeftTop) {
         this.btnWidth = btnWidth;
@@ -713,5 +741,6 @@ class AllPoints {
         this.canvasLeftTop = canvasLeftTop;
     }
 }
+
 //# sourceMappingURL=MainPage.js.map
 export default { ArcButton, ArcButtonOptions, ArcButtonPosition, ArcButtonStyleMode, ArcButtonStatus }
