@@ -319,6 +319,9 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
+        if (!isInitialized_) {
+            FireObserverOnReachEnd();
+        }
         auto finalOffset = gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_;
         if (!NearZero(finalOffset)) {
             bool scrollDownToEnd = LessNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
