@@ -961,6 +961,8 @@ public:
         return barDisplayMode_.value_or(DisplayMode::AUTO);
     }
 
+    Color GetUrlSpanColor() override;
+
 protected:
     bool CanStartAITask() override;
 
@@ -1344,8 +1346,6 @@ private:
     RefPtr<OverlayManager> keyboardOverlay_;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     Offset selectionMenuOffset_;
-    // has urlspan
-    bool hasUrlSpan_ = false;
     // add for scroll
     RectF richTextRect_;
     float scrollOffset_ = 0.0f;
