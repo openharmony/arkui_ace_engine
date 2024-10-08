@@ -95,6 +95,7 @@ public:
             theme->secondaryFontColor_ =
                 pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_)
                     .BlendOpacity(pattern->GetAttr<double>("menu_text_secondary_alpha", defaultSecondaryColorAlpha));
+            theme->menuFontColor_ = pattern->GetAttr<Color>("text_color", theme->menuFontColor_);
             theme->disabledMenuFontColor_ = theme->menuFontColor_.BlendOpacity(
                 pattern->GetAttr<double>("menu_text_tertiary_alpha", defaultTertiaryColorAlpha));
             theme->selectedColor_ =
@@ -164,7 +165,6 @@ public:
         void ParsePartOne(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
         {
             theme->disabledFontColor_ = theme->fontColor_.BlendOpacity(theme->disabledFontColorAlpha_);
-            theme->menuFontColor_ = pattern->GetAttr<Color>("text_color", theme->menuFontColor_);
             theme->clickedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_CLICKED, theme->clickedColor_);
             theme->selectedColorText_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_SELECTED, theme->selectedColorText_);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);

@@ -37,10 +37,13 @@ public:
 private:
     void CheckNeedMatchParent(LayoutWrapper* layoutWrapper,
         std::optional<LayoutConstraintF>& layoutConstraint);
+    void CheckUserHeight(LayoutWrapper* layoutWrapper);
     void MeasureItemViews(LayoutConstraintF& childConstraint,
         std::optional<LayoutConstraintF>& layoutConstraint,
         PaddingPropertyF padding, LayoutWrapper* layoutWrapper);
-    void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
+    void MeasureLeftRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
+    void MeasureRightRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint,
+        LayoutWrapper* layoutWrapper);
     void CheckNeedExpandContent(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight, float expandableHeight);
     float GetDividerStroke(LayoutWrapper* layoutWrapper);
@@ -50,7 +53,7 @@ private:
     float horInterval_ = 0.0f;
     float verInterval_ = 0.0f;
     float idealWidth_ = 0.0f;
-    float idealHeight_ = 0.0f;
+    float userHeight_ = 0.0f;
     float emptyWidth_ = 0.0f;
     float maxRowWidth_ = 0.0f;
     float middleSpace_ = 0.0f;
