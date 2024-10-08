@@ -3309,6 +3309,10 @@ void TextPattern::DumpScaleInfo()
     dumpLog.AddDesc(std::string("ConfigHalfLeading: ").append(std::to_string(halfLeading)));
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
+    auto minFontScale = textLayoutProp->GetMinFontScale().value_or(0.0f);
+    dumpLog.AddDesc(std::string("minFontScale: ").append(std::to_string(minFontScale)));
+    auto maxfontScale = textLayoutProp->GetMaxFontScale().value_or(static_cast<float>(INT32_MAX));
+    dumpLog.AddDesc(std::string("maxFontScale1: ").append(std::to_string(maxfontScale)));
     auto flag = textLayoutProp->HasHalfLeading();
     dumpLog.AddDesc(
         std::string("HalfLeading: ").append(flag ? std::to_string(textLayoutProp->GetHalfLeadingValue(false)) : "NA"));
@@ -3341,7 +3345,9 @@ void TextPattern::DumpTextEngineInfo()
                             .append(std::to_string(pManager_->GetLongestLine())));
     }
     dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
-    DumpParagraphsInfo();
+    if (!IsSetObscured()) {
+        DumpParagraphsInfo();
+    }
 }
 
 void TextPattern::DumpParagraphsInfo()

@@ -38,6 +38,7 @@ void RosenFontLoader::AddFont(
     const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
 {
     if (context == nullptr || familySrc_.empty()) {
+        TAG_LOGW(AceLogTag::ACE_FONT, "AddFont familySrc is empty:%{public}d", familySrc_.empty());
         return;
     }
 
@@ -240,6 +241,7 @@ void RosenFontLoader::LoadFromResource(
                 rawFile = matches[1].str();
             }
             if (rawFile.empty()) {
+                TAG_LOGW(AceLogTag::ACE_FONT, "LoadFromResource rawFile is empty");
                 return;
             }
 
