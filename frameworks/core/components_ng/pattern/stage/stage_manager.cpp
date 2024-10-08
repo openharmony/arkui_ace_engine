@@ -20,8 +20,8 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_checker.h"
 #include "base/log/ace_performance_check.h"
-#include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "base/memory/referenced.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
@@ -35,9 +35,10 @@
 #include "core/components_ng/base/transparent_node_detector.h"
 #endif
 
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
+
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -164,6 +165,7 @@ void StageManager::PageChangeCloseKeyboard()
 {
     // close keyboard
 #if defined (ENABLE_STANDARD_INPUT)
+    // If pushpage, close it
     if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "StageManager FrameNode notNeedSoftKeyboard.");
         auto container = Container::Current();
@@ -197,7 +199,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         CHECK_NULL_RETURN(pageInfo, false);
         auto pagePath = pageInfo->GetFullPath();
         ACE_SCOPED_TRACE_COMMERCIAL("Router Main Page: %s", pagePath.c_str());
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST)
         UiSessionManager::GetInstance().OnRouterChange(pagePath, "routerPushPage");
 #endif
     }
@@ -237,7 +239,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
             auto stage = weakStage.Upgrade();
             CHECK_NULL_VOID(stage);
             auto pageNode = weakNode.Upgrade();
-            CHECK_NULL_VOID(pageNode);
             int64_t endTime = GetSysTimestamp();
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
             CHECK_NULL_VOID(pagePattern);
