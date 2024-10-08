@@ -752,8 +752,10 @@ bool FocusHub::OnKeyEventNodeInternal(const KeyEvent& keyEvent)
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     auto retInternal = false;
     if ((GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG ||
-        GetFrameName() == V2::ISOLATED_COMPONENT_ETS_TAG) && !IsCurrentFocus()) {
+        GetFrameName() == V2::ISOLATED_COMPONENT_ETS_TAG)
+        && (!IsCurrentFocus() || forceProcessOnKeyEventInternal_)) {
         isBypassInner = false;
+        forceProcessOnKeyEventInternal_ = false;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);

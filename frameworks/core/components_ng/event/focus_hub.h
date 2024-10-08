@@ -463,6 +463,10 @@ public:
     bool HasBackwardFocusMovementInChildren();
     bool HasForwardFocusMovementInChildren();
     void ClearFocusMovementFlagsInChildren();
+    void SetForceProcessOnKeyEventInternal(bool forceProcessOnKeyEventInternal)
+    {
+        forceProcessOnKeyEventInternal_ = forceProcessOnKeyEventInternal;
+    }
 
     Dimension GetFocusPadding() const
     {
@@ -1155,6 +1159,7 @@ private:
     bool hasBackwardMovement_ { false };
     bool isFocusActiveWhenFocused_ { false };
     bool isRaisedZIndex_ { false };
+    bool forceProcessOnKeyEventInternal_ { false }; // extension use only
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
