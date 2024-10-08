@@ -56,4 +56,49 @@ HWTEST_F(WaterFlowTestNg, Clip001, TestSize.Level1)
     props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
     FlushLayoutTask(frameNode_);
 }
+
+/**
+ * @tc.name: Clip002
+ * @tc.desc: Test contentClip with relative offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Clip002, TestSize.Level1)
+{
+    RefPtr<UINode> col;
+    CreateColumn([&](ColumnModelNG colModel) {
+        ViewAbstract::SetMargin(CalcLength(5.0f));
+        col = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    
+        WaterFlowModelNG model = CreateWaterFlow();
+        ViewAbstract::SetMargin(CalcLength(5.0f));
+        ViewAbstract::SetPadding(CalcLength(5.0f));
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateWaterFlowItems();
+        CreateDone();
+    });
+    ASSERT_TRUE(col);
+    auto ctx = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    ASSERT_TRUE(ctx);
+    auto props = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+
+    auto rect = AceType::MakeRefPtr<ShapeRect>();
+    rect->SetWidth(Dimension(200.0f));
+    rect->SetHeight(Dimension(200.0f));
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect))).Times(1);
+    props->UpdateContentClip({ ContentClipMode::CUSTOM, rect });
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetPaddingSize(true), SizeF(470.0f, 790.0f));
+    auto rect1 = frameNode_->GetGeometryNode()->GetPaddingRect();
+    rect1.SetOffset(OffsetF(5.0f, 5.0f)); // padding offset
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect1))).Times(1);
+    props->UpdateContentClip({ ContentClipMode::CONTENT_ONLY, nullptr });
+    FlushLayoutTask(frameNode_);
+
+    auto rect2 = frameNode_->GetGeometryNode()->GetFrameRect();
+    rect2.SetOffset(OffsetF(0.0f, 0.0f));
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect2))).Times(1);
+    props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
+    FlushLayoutTask(frameNode_);
+}
 } // namespace OHOS::Ace::NG
