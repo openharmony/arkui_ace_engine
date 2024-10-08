@@ -296,7 +296,7 @@ public:
     void UpdateSpringMotion(double mainPosition, const ExtentPair& extent, const ExtentPair& initExtent);
 
     void UpdateScrollSnapStartOffset(double offset);
-    void StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity);
+    void StartListSnapAnimation(float predictSnapOffset, float scrollSnapVelocity);
     void UpdateScrollSnapEndWithOffset(double offset);
 
     bool IsAnimationNotRunning() const;
@@ -417,7 +417,7 @@ public:
         needScrollSnapToSideCallback_ = std::move(needScrollSnapToSideCallback);
     }
 
-    void ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity);
+    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
 
     void StopSnapController()
     {
@@ -507,10 +507,17 @@ public:
     }
 
 private:
+    void InitPanRecognizerNG();
+    void SetOnActionStart();
+    void SetOnActionUpdate();
+    void SetOnActionEnd();
+    void SetOnActionCancel();
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
     void ProcessScrollMotion(double position);
     void ProcessListSnapMotion(double position);
+    void TriggerFrictionAnimation(float mainPosition, float friction, float correctVelocity);
+    bool TriggerScrollSnap(float delta, float dragDistance, float velocity, double mainPosition);
     void FixScrollMotion(float position, float initVelocity);
     void ExecuteScrollBegin(double& mainDelta);
     double ComputeCap(int dragCount);
@@ -520,6 +527,7 @@ private:
     float GetFrictionVelocityByFinalPosition(
         float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
     void InitFriction(double friction);
+    void CalcOverScrollVelocity();
 
     /**
      * @brief Checks if the scroll event is caused by a mouse wheel.
@@ -576,7 +584,7 @@ private:
     double lastPos_ = 0.0;
     double dragStartPosition_ = 0.0;
     double dragEndPosition_ = 0.0;
-    double lastVelocity_ = 0.0;
+    double lastGestureVelocity_ = 0.0;
     double friction_ = -1.0;
     double preGain_ = 1.0;
 #ifdef OHOS_PLATFORM

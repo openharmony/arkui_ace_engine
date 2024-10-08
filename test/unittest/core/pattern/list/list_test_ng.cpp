@@ -422,7 +422,7 @@ void ListTestNg::ScrollSnap(double offset, double endVelocity)
         scrollable->StopSpringAnimation();
         FlushLayoutTask(frameNode_);
     } else if (scrollable->state_ == Scrollable::AnimationState::SNAP) {
-        // StartScrollSnapMotion, for condition that equal item height.
+        // StartListSnapAnimation, for condition that equal item height.
         float endValue = scrollable->GetSnapFinalPosition();
         scrollable->ProcessListSnapMotion(endValue);
         scrollable->ProcessScrollSnapStop();
