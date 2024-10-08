@@ -78,22 +78,34 @@ bool ScrollablePaintMethod::TryContentClip(PaintWrapper* wrapper)
         auto renderContext = wrapper->GetRenderContext();
         renderContext->SetClipToFrame(false);
         renderContext->SetClipToBounds(false);
-        switch (clip->first) {
+
+        auto mode = clip->first;
+        if (mode == ContentClipMode::DEFAULT) {
+            mode = GetDefaultContentClip();
+        }
+        auto&& geo = wrapper->GetGeometryNode();
+        switch (mode) {
             case ContentClipMode::CUSTOM:
                 renderContext->SetContentClip(clip->second);
                 break;
-            case ContentClipMode::CONTENT_ONLY:
-                renderContext->SetContentClip(wrapper->GetGeometryNode()->GetPaddingRect());
+            case ContentClipMode::CONTENT_ONLY: {
+                auto rect = geo->GetPaddingRect();
+                rect.SetOffset(rect.GetOffset() - geo->GetFrameOffset());
+                renderContext->SetContentClip(rect);
                 break;
-            case ContentClipMode::SAFE_AREA:
-                renderContext->SetContentClip(wrapper->GetGeometryNode()->GetPaddingRect(true));
+            }
+            case ContentClipMode::SAFE_AREA: {
+                auto rect = geo->GetPaddingRect(true);
+                rect.SetOffset(rect.GetOffset() - geo->GetFrameOffset());
+                renderContext->SetContentClip(rect);
                 break;
-            case ContentClipMode::BOUNDARY:
-                renderContext->SetContentClip(wrapper->GetGeometryNode()->GetFrameRect());
+            }
+            case ContentClipMode::BOUNDARY: {
+                auto rect = geo->GetFrameRect();
+                rect.SetOffset({ 0.0f, 0.0f });
+                renderContext->SetContentClip(rect);
                 break;
-            case ContentClipMode::DEFAULT:
-                ApplyDefaultContentClip(renderContext, wrapper->GetGeometryNode());
-                break;
+            }
             default:
                 break;
         }
