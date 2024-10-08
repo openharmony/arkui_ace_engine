@@ -51,7 +51,6 @@ constexpr float SINGLE_PAGE_MAXIMUM_WIDTH = 720.0f;
 constexpr Dimension MAX_TITLE_FONT_SIZE = 30.0_vp;
 constexpr Dimension MIN_TITLE_FONT_SIZE = 20.0_vp;
 constexpr Dimension MIN_ADAPT_TITLE_FONT_SIZE = 14.0_vp;
-constexpr Dimension DISTANCE_FROM_SIDE_BAR_BUTTON = 8.0_vp;
 constexpr const char* TITLE_MAIN = "MainOnly";
 constexpr const char* TITLE_MAIN_WITH_SUB = "MainWithSub";
 

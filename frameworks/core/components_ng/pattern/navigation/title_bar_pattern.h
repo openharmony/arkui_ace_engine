@@ -81,19 +81,9 @@ public:
         return tempTitleOffsetY_;
     }
 
-    float GetTempTitleOffsetX() const
-    {
-        return tempTitleOffsetX_;
-    }
-
     float GetTempSubTitleOffsetY() const
     {
         return tempSubTitleOffsetY_;
-    }
-
-    float GetTempSubTitleOffsetX() const
-    {
-        return tempSubTitleOffsetX_;
     }
 
     float GetMaxTitleBarHeight() const
@@ -214,11 +204,6 @@ public:
         currentTitleOffsetY_ = currentTitleOffsetY;
     }
 
-    void SetCurrentTitleOffsetX(float currentTitleOffsetX)
-    {
-        currentTitleOffsetX_ = currentTitleOffsetX;
-    }
-
     void SetCurrentTitleBarHeight(float currentTitleBarHeight);
 
     void SetIsTitleChanged(bool isTitleChanged)
@@ -260,10 +245,6 @@ public:
     void UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& hostNode);
     void UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode);
 
-    void UpdateOffsetXToAvoidSideBar();
-    void ResetSideBarControlButtonInfo();
-    void UpdateSideBarControlButtonInfo(bool needToAvoidSideBar, OffsetF offset, SizeF size);
-
     bool IsFontSizeSettedByDeveloper() const
     {
         return isFontSizeSettedByDeveloper_;
@@ -277,18 +258,6 @@ public:
     {
         shouldResetSubTitleProperty_ = reset;
     }
-
-    RectF GetControlButtonInfo() const
-    {
-        return controlButtonRect_;
-    }
-
-    bool IsNecessaryToAvoidSideBar() const
-    {
-        return needToAvoidSideBar_;
-    }
-
-    void InitSideBarButtonUpdateCallbackIfNeeded();
 
     void OnLanguageConfigurationUpdate() override;
 
@@ -339,9 +308,7 @@ private:
     void SetMaxTitleBarHeight();
     void SetTempTitleBarHeight(float offsetY);
     void SetTempTitleOffsetY();
-    void SetTempTitleOffsetX();
     void SetTempSubTitleOffsetY();
-    void SetTempSubTitleOffsetX();
     void SetDefaultTitleFontSize();
     void SetDefaultSubtitleOpacity();
 
@@ -377,10 +344,6 @@ private:
         const TextStyleApplyFunc& applyFunc, bool needCheckFontSizeIsSetted);
     void DumpInfo() override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
-
-    RefPtr<FrameNode> GetParentSideBarContainerNode(const RefPtr<TitleBarNode>& titleBarNode);
-    void UpdateTitlePositionInfo();
-    float GetNavLeftPadding(float parentWidth);
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
@@ -438,17 +401,7 @@ private:
     bool isFontSizeSettedByDeveloper_ = false;
     bool shouldResetMainTitleProperty_ = true;
     bool shouldResetSubTitleProperty_ = true;
-    float moveRatioX_ = 0.0f;
-    float minTitleOffsetX_ = 0.0f;
-    float maxTitleOffsetX_ = 0.0f;
-    float defaultTitleOffsetX_ = 0.0f;
-    float currentTitleOffsetX_ = 0.0f;
-    float tempTitleOffsetX_ = 0.0f;
-    float tempSubTitleOffsetX_ = 0.0f;
-    float titleMoveDistanceX_ = 0.0f;
-    bool needToAvoidSideBar_ = false;
-    RectF controlButtonRect_;
-    bool isScrolling_ = false;
+
     std::optional<int32_t> halfFoldHoverChangedCallbackId_;
     std::vector<Rect> currentFoldCreaseRegion_;
 };
