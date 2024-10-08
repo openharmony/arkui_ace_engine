@@ -109,18 +109,19 @@ void SliderPattern::HandleEnabled()
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
-    if (enabled) {
-        return;
-    }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto originalOpacity = renderContext->GetOpacityValue(1.0f);
+    if (enabled) {
+        renderContext->OnOpacityUpdate(originalOpacity);
+        return;
+    }
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
     auto alpha = theme->GetDisabledAlpha();
-    auto originalOpacity = renderContext->GetOpacityValue(1.0f);
-    renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
+    renderContext->OnOpacityUpdate(alpha * originalOpacity);
 }
 
 void SliderPattern::InitAccessibilityHoverEvent()
