@@ -106,6 +106,14 @@ void ScrollModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& 
     eventHub->SetOnScrollStart(std::move(event));
 }
 
+void ScrollModelNG::SetOnScrollEnd(FrameNode* frameNode, ScrollEndEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollEnd(std::move(event));
+}
+
 void ScrollModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& event)
 {
     CHECK_NULL_VOID(frameNode);
