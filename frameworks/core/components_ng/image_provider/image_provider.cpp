@@ -126,7 +126,11 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
             ctx->FailCallback(errorMsg);
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyLoadFailTask = [ctx, errorMsg] { ctx->FailCallback(errorMsg); };
+            auto notifyLoadFailTask = [it, errorMsg] {
+                auto ctx = it.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                ctx->FailCallback(errorMsg);
+            };
             ImageUtils::PostToUI(std::move(notifyLoadFailTask), "ArkUIImageProviderFail", ctx->GetContainerId());
         }
     }
@@ -146,7 +150,11 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
             ctx->SuccessCallback(canvasImage->Clone());
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyLoadSuccess = [ctx, canvasImage] { ctx->SuccessCallback(canvasImage->Clone()); };
+            auto notifyLoadSuccess = [it, canvasImage] {
+                auto ctx = it.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                ctx->SuccessCallback(canvasImage->Clone());
+            };
             ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", ctx->GetContainerId());
         }
     }
@@ -201,7 +209,11 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
             ctx->DataReadyCallback(imageObj);
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyDataReadyTask = [ctx, imageObj, src] { ctx->DataReadyCallback(imageObj); };
+            auto notifyDataReadyTask = [it, imageObj, src] {
+                auto ctx = it.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                ctx->DataReadyCallback(imageObj);
+            };
             ImageUtils::PostToUI(std::move(notifyDataReadyTask), "ArkUIImageProviderDataReady", ctx->GetContainerId());
         }
     }
@@ -265,7 +277,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
         std::scoped_lock<std::mutex> lock(taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
-        task.Reset([src, ctxWp] { ImageProvider::CreateImageObjHelper(src); });
+        task.Reset([src] { ImageProvider::CreateImageObjHelper(src); });
         tasks_[src.GetKey()].bgTask_ = task;
         auto ctx = ctxWp.Upgrade();
         CHECK_NULL_VOID(ctx);
