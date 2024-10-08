@@ -5371,16 +5371,27 @@ CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<F
     auto pipeline = customKeyboard->GetContext();
     CHECK_NULL_RETURN(pipeline, keyboardOffsetInfo);
     auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    CHECK_NULL_RETURN(pageNode, keyboardOffsetInfo);
-    auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
-    auto keyboardHeight = customKeyboard->GetGeometryNode()->GetFrameSize().Height();
+    auto pageHeight = pageNode && pageNode->GetGeometryNode() ?
+        pageNode->GetGeometryNode()->GetFrameSize().Height() : 0.0f;
+    auto keyboardGeo = customKeyboard->GetGeometryNode();
+    CHECK_NULL_RETURN(keyboardGeo, keyboardOffsetInfo);
+    auto keyboardHeight = keyboardGeo->GetFrameSize().Height();
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, keyboardOffsetInfo);
     auto finalOffset = 0.0f;
     if (rootNode->GetTag() == V2::STACK_ETS_TAG) {
         auto rootNd = AceType::DynamicCast<FrameNode>(rootNode);
-        pageHeight = rootNd->GetGeometryNode()->GetFrameSize().Height();
+        CHECK_NULL_RETURN(rootNd, keyboardOffsetInfo);
+        auto rootGeo = rootNd->GetGeometryNode();
+        CHECK_NULL_RETURN(rootGeo, keyboardOffsetInfo);
+        pageHeight = rootGeo->GetFrameSize().Height();
         finalOffset = (pageHeight - keyboardHeight) - (pageHeight - keyboardHeight) / NUM_FLOAT_2;
+    } else if (!pageNode) {
+        auto fatherNode = customKeyboard->GetAncestorNodeOfFrame();
+        CHECK_NULL_RETURN(fatherNode, keyboardOffsetInfo);
+        auto fatherGeoNode = fatherNode->GetGeometryNode();
+        CHECK_NULL_RETURN(fatherGeoNode, keyboardOffsetInfo);
+        pageHeight = fatherGeoNode->GetFrameSize().Height();
     }
     keyboardOffsetInfo.finalOffset = finalOffset;
     keyboardOffsetInfo.inAniStartOffset = pageHeight;
