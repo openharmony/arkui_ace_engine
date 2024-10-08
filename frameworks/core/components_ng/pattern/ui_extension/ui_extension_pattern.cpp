@@ -755,7 +755,8 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     bool ret = true;
-    if (pipeline->IsWindowFocused() && !focusHub->IsCurrentFocus()) {
+    focusState_ = pipeline->IsWindowFocused();
+    if (focusState_ && !focusHub->IsCurrentFocus()) {
         canFocusSendToUIExtension_ = false;
         ret = focusHub->RequestFocusImmediately();
         if (!ret) {
@@ -763,12 +764,13 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
         }
     }
-    focusState_ = pipeline->IsWindowFocused();
     DispatchPointerEvent(newPointerEvent);
-    if (pipeline->IsWindowFocused() && needReSendFocusToUIExtension_ &&
-        newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
-        HandleFocusEvent();
-        needReSendFocusToUIExtension_ = false;
+    if (focusState_ && newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
+        if (needReSendFocusToUIExtension_) {
+            HandleFocusEvent();
+            needReSendFocusToUIExtension_ = false;
+        }
+        focusHub->SetForceProcessOnKeyEventInternal(true);
     }
 }
 
@@ -792,6 +794,7 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
         auto hub = host->GetFocusHub();
         CHECK_NULL_VOID(hub);
         hub->RequestFocusImmediately();
+        hub->SetForceProcessOnKeyEventInternal(true);
     }
     DispatchPointerEvent(pointerEvent);
 }
