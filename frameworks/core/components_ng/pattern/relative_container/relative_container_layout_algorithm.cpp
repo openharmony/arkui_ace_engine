@@ -72,7 +72,7 @@ bool RelativeContainerLayoutAlgorithm::TopologicalResultHit(LayoutWrapper* layou
     CHECK_NULL_RETURN(node, false);
     auto pattern = node->GetPattern<RelativeContainerPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    if (pattern->GetChildAlignRulesChanged()) {
+    if (pattern->GetChildAlignRulesChanged() || renderList_.size() != idNodeMap_.size()) {
         return false;
     }
     auto cache = std::move(pattern->GetTopologicalResultCache());
