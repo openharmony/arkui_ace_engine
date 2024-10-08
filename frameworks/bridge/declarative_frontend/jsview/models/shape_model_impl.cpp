@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,12 +29,12 @@ void ShapeModelImpl::Create()
     ViewStackProcessor::GetInstance()->Push(component);
 }
 
-void ShapeModelImpl::SetBitmapMesh(std::vector<double>& mesh, int32_t column, int32_t row)
+void ShapeModelImpl::SetBitmapMesh(const std::vector<float>& mesh, int32_t column, int32_t row)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::ShapeContainerComponent>(stack->GetMainComponent());
     if (component) {
-        component->SetBitmapMesh(mesh, column, row);
+        component->SetBitmapMesh(std::vector<double>(mesh.begin(), mesh.end()), column, row);
     }
 }
 
@@ -88,7 +88,7 @@ void ShapeModelImpl::SetHeight()
     }
 }
 
-void ShapeModelImpl::InitBox(RefPtr<PixelMap>& pixMap)
+void ShapeModelImpl::InitBox(const RefPtr<PixelMap>& pixMap)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetOverflow(Overflow::FORCE_CLIP);

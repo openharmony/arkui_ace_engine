@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ const float LEFT = -20.0f;
 const float TOP = -30.0f;
 const int32_t COLUMN = 2;
 const int32_t ROW = 3;
-std::vector<double> MESH = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
+std::vector<float> MESH = { 1, 2, 4, 6, 4, 2, 1, 3, 5, 1, 3, 5, 6, 3, 2, 2, 4, 5, 5, 3, 2, 2, 2, 4 };
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
 const float FIRST_ITEM_WIDTH = 150.0f;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,10 +23,10 @@ namespace OHOS::Ace::Framework {
 class ShapeModelImpl : public OHOS::Ace::ShapeModel {
 public:
     void Create() override;
-    void SetBitmapMesh(std::vector<double>& mesh, int32_t column, int32_t row) override;
+    void SetBitmapMesh(const std::vector<float>& mesh, int32_t column, int32_t row) override;
     void SetViewPort(const Dimension& dimLeft, const Dimension& dimTop, const Dimension& dimWidth,
         const Dimension& dimHeight) override;
-    void InitBox(RefPtr<PixelMap>& pixMap) override;
+    void InitBox(const RefPtr<PixelMap>& pixMap) override;
     void SetStroke(const Color& color) override;
     void SetFill(const Color& color) override;
     void SetStrokeDashOffset(const Ace::Dimension& dashOffset) override;
