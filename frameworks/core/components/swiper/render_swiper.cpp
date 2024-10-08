@@ -17,18 +17,9 @@
 
 #include "base/log/jank_frame_report.h"
 #include "base/ressched/ressched_report.h"
-#include "base/utils/system_properties.h"
-#include "base/utils/time_util.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/friction_motion.h"
-#include "core/animation/keyframe.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/frontend.h"
-#include "core/components/align/render_align.h"
 #include "core/components/display/render_display.h"
 #include "core/components/swiper/swiper_component.h"
 #include "core/event/ace_event_helper.h"
-#include "core/pipeline/base/multi_child.h"
 
 namespace OHOS::Ace {
 namespace {

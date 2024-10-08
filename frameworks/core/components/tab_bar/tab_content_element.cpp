@@ -15,8 +15,6 @@
 
 #include "core/components/tab_bar/tab_content_element.h"
 
-#include <algorithm>
-
 #include "core/components/tab_bar/render_tab_content.h"
 
 namespace OHOS::Ace {

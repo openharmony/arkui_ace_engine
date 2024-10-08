@@ -15,11 +15,6 @@
 
 #include "core/components/tab_bar/tab_bar_size_animation.h"
 
-#include <algorithm>
-
-#include "core/animation/animator.h"
-#include "core/components/tab_bar/render_tab_bar.h"
-
 namespace OHOS::Ace {
 namespace {
 

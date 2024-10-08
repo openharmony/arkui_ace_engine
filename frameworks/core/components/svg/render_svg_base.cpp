@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components/svg/render_svg_base.h"
 
-#include "frameworks/core/animation/curve_animation.h"
 #include "frameworks/core/components/svg/render_svg.h"
 #include "frameworks/core/components/svg/render_svg_mask.h"
 #include "frameworks/core/components/transform/render_transform.h"

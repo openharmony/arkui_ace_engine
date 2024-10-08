@@ -15,8 +15,6 @@
 
 #include "core/components/split_container/split_container_element.h"
 
-#include "core/pipeline/base/component_group.h"
-
 namespace OHOS::Ace {
 
 void SplitContainerElement::Update()

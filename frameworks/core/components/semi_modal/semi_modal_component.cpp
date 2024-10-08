@@ -15,12 +15,10 @@
 
 #include "core/components/semi_modal/semi_modal_component.h"
 
-#include "core/components/box/box_component.h"
 #include "core/components/clip/clip_component.h"
 #include "core/components/drag_bar/drag_bar_component.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/flex/flex_item_component.h"
-#include "core/components/padding/padding_component.h"
 #include "core/components/semi_modal/render_semi_modal.h"
 #include "core/components/semi_modal/semi_modal_element.h"
 
