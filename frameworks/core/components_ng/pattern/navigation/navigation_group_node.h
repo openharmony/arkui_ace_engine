@@ -200,7 +200,7 @@ public:
 
     float CheckLanguageDirection();
 
-    void RemoveDialogDestination();
+    void RemoveDialogDestination(bool isReplace = false);
 
     void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
