@@ -26,7 +26,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int SIZE_OF_TEXT_CASES = 2;
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
-constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 const std::string DEFAULT_FONT_WEIGHT = "400";
 constexpr int NUM_0 = 0;
@@ -252,7 +251,8 @@ ArkUINativeModuleValue SpanBridge::SetFontSize(ArkUIRuntimeCallInfo *runtimeCall
 
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false) || fontSize.IsNegative()) {
-        fontSize = theme->GetTextStyle().GetFontSize();
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontSize(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontSize(nativeNode, fontSize.Value(),
         static_cast<int8_t>(fontSize.Unit()));
@@ -349,7 +349,8 @@ ArkUINativeModuleValue SpanBridge::SetFontColor(ArkUIRuntimeCallInfo *runtimeCal
 
     Color textColor = theme->GetTextStyle().GetTextColor();
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, textColor)) {
-        textColor = theme->GetTextStyle().GetTextColor();
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontColor(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontColor(nativeNode, textColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
@@ -435,46 +436,49 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
     Local<JSValueRef> familyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    ArkUIFontStruct fontInfo;
     auto theme = GetTheme<TextTheme>();
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
-
-    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (sizeArg->IsNull() || !ArkTSUtils::ParseJsDimensionFpNG(vm, sizeArg, fontSize, false) || fontSize.IsNegative()) {
-        fontSize = theme->GetTextStyle().GetFontSize();
+    CalcDimension fontSize;
+    if (ArkTSUtils::ParseJsDimensionFpNG(vm, sizeArg, fontSize, false) && !fontSize.IsNegative()) {
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanFontSize(
+            nativeNode, fontSize.Value(), static_cast<int8_t>(fontSize.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontSize(nativeNode);
     }
-    fontInfo.fontSizeNumber = fontSize.Value();
-    fontInfo.fontSizeUnit = static_cast<int8_t>(fontSize.Unit());
 
     std::string weight = DEFAULT_FONT_WEIGHT;
-    if (!weightArg->IsNull()) {
+    if (weightArg->IsNull() || weightArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontWeight(nativeNode);
+    } else {
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
         } else if (weightArg->IsString(vm)) {
             weight = weightArg->ToString(vm)->ToString(vm);
         }
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(
+            nativeNode, static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)));
     }
-    fontInfo.fontWeight = static_cast<uint8_t>(Framework::ConvertStrToFontWeight(weight));
-    int32_t style = static_cast<int32_t>(DEFAULT_FONT_STYLE);
     if (styleArg->IsInt()) {
-        style = styleArg->Int32Value(vm);
-        if (style <= 0 || style > static_cast<int32_t>(FONT_STYLES.size())) {
-            style = static_cast<int32_t>(DEFAULT_FONT_STYLE);
+        int32_t style = styleArg->Int32Value(vm);
+        if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+            GetArkUINodeModifiers()->getSpanModifier()->setSpanFontStyle(nativeNode, style);
+        } else {
+            GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontStyle(nativeNode);
         }
+    } else {
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontStyle(nativeNode);
     }
-    fontInfo.fontStyle = static_cast<uint8_t>(style);
     std::vector<std::string> fontFamilies;
-    fontInfo.fontFamilies = nullptr;
-    if (!familyArg->IsNull() && ArkTSUtils::ParseJsFontFamilies(vm, familyArg, fontFamilies)) {
-        fontInfo.familyLength = fontFamilies.size();
-        auto families = std::make_unique<const char* []>(fontInfo.familyLength);
+    if (ArkTSUtils::ParseJsFontFamilies(vm, familyArg, fontFamilies)) {
+        uint32_t familyLength = fontFamilies.size();
+        auto families = std::make_unique<const char* []>(familyLength);
         for (uint32_t i = 0; i < fontFamilies.size(); i++) {
             families[i] = fontFamilies[i].c_str();
         }
-        fontInfo.fontFamilies = families.get();
-        GetArkUINodeModifiers()->getSpanModifier()->setSpanFont(nativeNode, &fontInfo);
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanFontFamily(
+            nativeNode, const_cast<const char**>(families.get()), fontFamilies.size());
     } else {
-        GetArkUINodeModifiers()->getSpanModifier()->setSpanFont(nativeNode, &fontInfo);
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanFontFamily(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
