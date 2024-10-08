@@ -67,15 +67,13 @@ void ScrollTestNg::TearDown()
     contentChildren_.clear();
     scrollBar_ = nullptr;
     scrollable_ = nullptr;
-    ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     MockAnimationManager::GetInstance().Reset();
 }
 
 void ScrollTestNg::GetScroll()
 {
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    frameNode_ = AceType::DynamicCast<FrameNode>(element);
+    frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     pattern_ = frameNode_->GetPattern<ScrollPattern>();
     eventHub_ = frameNode_->GetEventHub<ScrollEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<ScrollLayoutProperty>();
@@ -94,8 +92,6 @@ RefPtr<PaintWrapper> ScrollTestNg::CreateScrollDone(const RefPtr<FrameNode>& fra
 
 ScrollModelNG ScrollTestNg::CreateScroll()
 {
-    ResetElmtId();
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     ScrollModelNG model;
     model.Create();
     auto proxy = model.CreateScrollBarProxy();
@@ -108,7 +104,6 @@ ScrollModelNG ScrollTestNg::CreateScroll()
 
 void ScrollTestNg::CreateContent(float mainSize)
 {
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     auto axis = layoutProperty_->GetAxis();
     if (axis.has_value() && axis.value() == Axis::HORIZONTAL) {
         RowModelNG rowModel;
@@ -150,10 +145,42 @@ void ScrollTestNg::ScrollBy(float pixelX, float pixelY)
     FlushLayoutTask(frameNode_);
 }
 
-AssertionResult ScrollTestNg::VerifyTickPosition(float expectOffset)
+AssertionResult ScrollTestNg::Position(const RefPtr<FrameNode>& frameNode, float expectOffset)
+{
+    auto scrollablePattern = frameNode->GetPattern<ScrollablePattern>();
+    if (scrollablePattern->GetAxis() == Axis::HORIZONTAL) {
+        return IsEqual(GetChildX(frameNode, 0), expectOffset);
+    }
+    return IsEqual(GetChildY(frameNode, 0), expectOffset);
+}
+
+AssertionResult ScrollTestNg::TickPosition(const RefPtr<FrameNode>& frameNode, float expectOffset)
 {
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
-    return IsEqual(GetChildY(frameNode_, 0), expectOffset);
+    FlushLayoutTask(frameNode);
+    return Position(frameNode, expectOffset);
+}
+
+AssertionResult ScrollTestNg::TickByVelocityPosition(
+    const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset)
+{
+    MockAnimationManager::GetInstance().TickByVelocity(velocity);
+    FlushLayoutTask(frameNode);
+    return Position(frameNode, expectOffset);
+}
+
+AssertionResult ScrollTestNg::Position(float expectOffset)
+{
+    return Position(frameNode_, expectOffset);
+}
+
+AssertionResult ScrollTestNg::TickPosition(float expectOffset)
+{
+    return TickPosition(frameNode_, expectOffset);
+}
+
+AssertionResult ScrollTestNg::TickByVelocityPosition(float velocity, float expectOffset)
+{
+    return TickByVelocityPosition(frameNode_, velocity, expectOffset);
 }
 } // namespace OHOS::Ace::NG
