@@ -68,7 +68,7 @@ void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& 
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 }
 
-void AssignArkValue(Ark_ClickEvent& onClick, OHOS::Ace::GestureEvent& info)
+void AssignArkValue(Ark_ClickEvent& onClick, const OHOS::Ace::GestureEvent& info)
 {
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();

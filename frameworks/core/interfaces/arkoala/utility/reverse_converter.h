@@ -40,7 +40,16 @@
 namespace OHOS::Ace::NG::Converter {
     // Forward declaration for use in custom AssignArkValue() functions
     template<typename To, typename From = Ark_Empty>
-    To ArkValue(From&& src = Ark_Empty());
+    To ArkValue(const From& src = Ark_Empty());
+    template<typename To, typename From,
+        std::enable_if_t<std::is_trivially_copyable_v<From> && std::is_rvalue_reference_v<From>, bool> = true>
+    To ArkValue(From&& src)
+    {
+        return ArkValue<To>(src);
+    }
+    template<typename To, typename From,
+        std::enable_if_t<!std::is_trivially_copyable_v<From> && std::is_rvalue_reference_v<From>, bool> = false>
+    To ArkValue(From&& src) = delete; // Constructing Ark_ values from r-value is prohibited
 
     // Basic types
     inline void AssignArkValue(Ark_Boolean& dst, const bool& src)
@@ -162,7 +171,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
-    void AssignArkValue(Ark_ClickEvent& dst, OHOS::Ace::GestureEvent& src);
+    void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
@@ -190,13 +199,6 @@ namespace OHOS::Ace::NG::Converter {
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 
-    // Handle enum types
-    template<typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
-    void AssignArkValue(Ark_Int32& dst, const T& src)
-    {
-        dst = static_cast<Ark_Int32>(src);
-    }
-
     // Passthrough version
     template<typename T>
     void AssignArkValue(T &dst, const T& src)
@@ -206,19 +208,24 @@ namespace OHOS::Ace::NG::Converter {
 
     // Handle optional types
     template<typename To, typename From, typename = std::void_t<decltype(To().tag), decltype(To().value)>>
-    void AssignArkValue(To& dst, From&& src)
+    void AssignArkValue(To& dst, const From& src)
     {
-        using ClearedFrom = std::remove_cv_t<std::remove_reference_t<From>>;
-        if constexpr (std::is_same_v<ClearedFrom, Ark_Empty> || std::is_same_v<ClearedFrom, std::nullopt_t>) {
+        if constexpr (std::is_same_v<From, Ark_Empty> || std::is_same_v<From, std::nullopt_t>) {
             dst.tag = ARK_TAG_UNDEFINED;
         } else {
-            std::optional arg(std::forward<From>(src));
-            if (arg.has_value()) {
-                dst.tag = ARK_TAG_OBJECT;
-                AssignArkValue(dst.value, arg.value());
-            } else {
-                dst.tag = ARK_TAG_UNDEFINED;
-            }
+            dst.tag = ARK_TAG_OBJECT;
+            AssignArkValue(dst.value, src);
+        }
+    }
+
+    template<typename To, typename From, typename = std::void_t<decltype(To().tag), decltype(To().value)>>
+    void AssignArkValue(To& dst, const std::optional<From>& src)
+    {
+        if (src.has_value()) {
+            dst.tag = ARK_TAG_OBJECT;
+            AssignArkValue(dst.value, src.value());
+        } else {
+            dst.tag = ARK_TAG_UNDEFINED;
         }
     }
 
@@ -237,10 +244,10 @@ namespace OHOS::Ace::NG::Converter {
      *  Opt_Number emptyNumber = Converter::ArkValue<Opt_Number>(Ark_Empty());
      */
     template<typename To, typename From>
-    To ArkValue(From&& src)
+    To ArkValue(const From& src)
     {
         To result;
-        AssignArkValue(result, std::forward<From>(src));
+        AssignArkValue(result, src);
         return result;
     }
 
@@ -263,7 +270,7 @@ namespace OHOS::Ace::NG::Converter {
      */
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value0)>, int> = SELECTOR_ID_0>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_0,
@@ -272,7 +279,7 @@ namespace OHOS::Ace::NG::Converter {
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value1)>, int> = SELECTOR_ID_1>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_1,
@@ -281,7 +288,7 @@ namespace OHOS::Ace::NG::Converter {
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value2)>, int> = SELECTOR_ID_2>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_2,
@@ -290,7 +297,7 @@ namespace OHOS::Ace::NG::Converter {
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value3)>, int> = SELECTOR_ID_3>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_3,
@@ -299,7 +306,7 @@ namespace OHOS::Ace::NG::Converter {
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value4)>, int> = SELECTOR_ID_4>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_4,
@@ -308,7 +315,7 @@ namespace OHOS::Ace::NG::Converter {
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value5)>, int> = SELECTOR_ID_5>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_5,
@@ -317,7 +324,7 @@ namespace OHOS::Ace::NG::Converter {
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value6)>, int> = SELECTOR_ID_6>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_6,
@@ -326,7 +333,7 @@ namespace OHOS::Ace::NG::Converter {
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value7)>, int> = SELECTOR_ID_7>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_7,
@@ -335,7 +342,7 @@ namespace OHOS::Ace::NG::Converter {
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value8)>, int> = SELECTOR_ID_8>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_8,
@@ -344,7 +351,7 @@ namespace OHOS::Ace::NG::Converter {
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value9)>, int> = SELECTOR_ID_9>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_9,
@@ -353,7 +360,7 @@ namespace OHOS::Ace::NG::Converter {
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value10)>, int> = SELECTOR_ID_10>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_10,
@@ -362,7 +369,7 @@ namespace OHOS::Ace::NG::Converter {
     }
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Which, decltype(To().value11)>, int> = SELECTOR_ID_11>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .selector = SELECTOR_ID_11,
@@ -381,11 +388,11 @@ namespace OHOS::Ace::NG::Converter {
 
     template<typename To, typename Which, typename From,
         std::enable_if_t<std::is_same_v<Ark_Tag, decltype(To().tag)>, bool> = true>
-    To ArkUnion(From&& src)
+    To ArkUnion(const From& src)
     {
         return {
             .tag = ARK_TAG_OBJECT,
-            .value = ArkUnion<decltype(To().value), Which>(std::forward<From>(src)),
+            .value = ArkUnion<decltype(To().value), Which>(src),
         };
     }
 
