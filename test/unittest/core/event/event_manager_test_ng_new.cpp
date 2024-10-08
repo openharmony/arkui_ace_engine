@@ -1728,7 +1728,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest085, TestSize.Level1)
     EXPECT_CALL(*MockContainer::Current(), GetFrontend()).WillRepeatedly(Return(nullptr));
     MockContainer::Current()->pipelineContext_ = nullptr;
     MockPipelineContext::TearDown();
-    SUCCEED();
+    EXPECT_EQ(touchPoint.isFalsified, false);
 }
 
 /**
@@ -1764,7 +1764,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest086, TestSize.Level1)
     eventManager->DispatchTouchEvent(touchPoint);
     touchPoint.isRotationEvent = true;
     eventManager->DispatchTouchEvent(touchPoint);
-    SUCCEED();
+    EXPECT_EQ(touchPoint.isRotationEvent, true);
 }
 
 /**
@@ -1781,7 +1781,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest087, TestSize.Level1)
     ASSERT_NE(container, nullptr);
     container->uIContentType_ = UIContentType::SECURITY_UI_EXTENSION;
     eventManager->DispatchKeyboardShortcut(touchPoint);
-    SUCCEED();
+    EXPECT_EQ(eventManager->DispatchKeyboardShortcut(touchPoint), false);
 }
 
 /**
@@ -1818,6 +1818,6 @@ HWTEST_F(EventManagerTestNg, EventManagerTest088, TestSize.Level1)
     hitTestResult.emplace_back(panHorizontal);
     eventManager->touchTestResults_[1000] = std::move(hitTestResult);
     eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, true);
-    SUCCEED();
+    EXPECT_EQ(touchPoint.isFalsified, false);
 }
 } // namespace OHOS::Ace::NG

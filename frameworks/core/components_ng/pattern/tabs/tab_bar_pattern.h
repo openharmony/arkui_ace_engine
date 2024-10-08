@@ -174,7 +174,7 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         FocusPaintParam focusPaintParams;
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, FocusPattern());
         auto focusTheme = pipeline->GetTheme<FocusAnimationTheme>();
         CHECK_NULL_RETURN(focusTheme, FocusPattern());
@@ -254,6 +254,17 @@ public:
     {
         changeByClick_ = changeByClick;
     }
+
+    bool GetClickRepeat() const
+    {
+        return clickRepeat_;
+    }
+
+    void SetClickRepeat(bool clickRepeat)
+    {
+        clickRepeat_ = clickRepeat;
+    }
+
     void SetSelectedMode(SelectedMode selectedMode, uint32_t position)
     {
         if (selectedModes_.size() <= position) {
@@ -627,6 +638,7 @@ private:
     std::vector<bool> gradientRegions_ = {false, false, false, false};
     bool isAnimating_ = false;
     bool changeByClick_ = false;
+    bool clickRepeat_ = false;
     float scrollMargin_ = 0.0f;
     bool isFirstLayout_ = true;
     std::optional<int32_t> animationTargetIndex_;

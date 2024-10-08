@@ -17,18 +17,12 @@
 
 #include <optional>
 
-#include "core/event/key_event.h"
-#include "core/event/pointer_event.h"
-#include "session/host/include/extension_session.h"
-#include "session/host/include/session.h"
-#include "ui/rs_surface_node.h"
-
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
-#include "base/geometry/offset.h"
 #include "base/error/error_code.h"
+#include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -47,10 +41,15 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/event/ace_events.h"
+#include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/pointer_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "session/host/include/extension_session.h"
+#include "session/host/include/session.h"
+#include "ui/rs_surface_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -60,6 +59,10 @@ constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
+constexpr char PID_FLAG[] = "pidflag";
+constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
+constexpr double SHOW_START = 0.0;
+constexpr double SHOW_FULL = 1.0;
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -250,13 +253,15 @@ void UIExtensionPattern::MountPlaceholderNode(PlaceholderType type)
 
 void UIExtensionPattern::RemovePlaceholderNode()
 {
-    if (IsShowPlaceholder()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->RemoveChildAtIndex(0);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        SetCurPlaceholderType(PlaceholderType::NONE);
+    if (!IsShowPlaceholder()) {
+        return;
     }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    SetCurPlaceholderType(PlaceholderType::NONE);
 }
 
 bool UIExtensionPattern::CheckConstraint()
@@ -740,10 +745,11 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto rsWindow = window->GetRSWindow();
     auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
+    std::shared_ptr<MMI::PointerEvent> newPointerEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
     if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
-        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
+        Platform::CalculateWindowCoordinate(selfGlobalOffset, newPointerEvent, scale, udegree);
     } else {
-        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
+        Platform::CalculatePointerEvent(selfGlobalOffset, newPointerEvent, scale, udegree);
     }
     AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
@@ -758,9 +764,9 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
         }
     }
     focusState_ = pipeline->IsWindowFocused();
-    DispatchPointerEvent(pointerEvent);
+    DispatchPointerEvent(newPointerEvent);
     if (pipeline->IsWindowFocused() && needReSendFocusToUIExtension_ &&
-        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
+        newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
         HandleFocusEvent();
         needReSendFocusToUIExtension_ = false;
     }
@@ -1046,7 +1052,7 @@ void UIExtensionPattern::SetSyncCallbacks(
 
 void UIExtensionPattern::FireSyncCallbacks()
 {
-    UIEXT_LOGD("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    UIEXT_LOGI("The size of sync callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onSyncOnCallbackList_) {
         if (callback) {
@@ -1063,7 +1069,7 @@ void UIExtensionPattern::SetAsyncCallbacks(
 
 void UIExtensionPattern::FireAsyncCallbacks()
 {
-    UIEXT_LOGD("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
+    UIEXT_LOGI("The size of async callbacks = %{public}zu.", onSyncOnCallbackList_.size());
     ContainerScope scope(instanceId_);
     for (const auto& callback : onAsyncOnCallbackList_) {
         if (callback) {
@@ -1161,10 +1167,9 @@ void UIExtensionPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int3
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
-    if (accessibilityProperty != nullptr) {
-        accessibilityProperty->SetChildWindowId(childWindowId);
-        accessibilityProperty->SetChildTreeId(childTreeId);
-    }
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetChildWindowId(childWindowId);
+    accessibilityProperty->SetChildTreeId(childTreeId);
 }
 
 void UIExtensionPattern::OnAccessibilityDumpChildInfo(
@@ -1224,15 +1229,32 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
         CHECK_NULL_VOID(uiExtension);
-        uiExtension->OnVisibleChange(visible);
+        uiExtension->HandleVisibleAreaChange(visible, ratio);
     };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    std::vector<double> ratioList = { 0.0 };
+    std::vector<double> ratioList = { SHOW_START, SHOW_FULL };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+}
+
+void UIExtensionPattern::HandleVisibleAreaChange(bool visible, double ratio)
+{
+    UIEXT_LOGI("HandleVisibleAreaChange visible: %{public}d, curVisible: %{public}d, "
+        "ratio: %{public}f, displayArea: %{public}s.", visible, curVisible_,
+        ratio, displayArea_.ToString().c_str());
+    bool needCheckDisplayArea = NearEqual(ratio, SHOW_FULL) && curVisible_ && visible;
+    bool curVisible = !NearEqual(ratio, SHOW_START);
+    if (curVisible_ != curVisible) {
+        curVisible_ = curVisible;
+        OnVisibleChange(curVisible_);
+    }
+
+    if (needCheckDisplayArea) {
+        DispatchDisplayArea(false);
+    }
 }
 
 void UIExtensionPattern::OnLanguageConfigurationUpdate()
@@ -1247,7 +1269,7 @@ void UIExtensionPattern::OnColorConfigurationUpdate()
     sessionWrapper_->NotifyConfigurationUpdate();
 }
 
-int32_t UIExtensionPattern::GetSessionId()
+int32_t UIExtensionPattern::GetSessionId() const
 {
     return sessionWrapper_ ? sessionWrapper_->GetSessionId() : 0;
 }
@@ -1257,13 +1279,13 @@ int32_t UIExtensionPattern::GetUiExtensionId()
     return uiExtensionId_;
 }
 
-int32_t UIExtensionPattern::GetNodeId()
+int32_t UIExtensionPattern::GetNodeId() const
 {
     auto host = GetHost();
     return host ? host->GetId() : -1;
 }
 
-int32_t UIExtensionPattern::GetInstanceId()
+int32_t UIExtensionPattern::GetInstanceId() const
 {
     return instanceId_;
 }
@@ -1307,6 +1329,7 @@ const char* UIExtensionPattern::ToString(AbilityState state)
 void UIExtensionPattern::DumpInfo()
 {
     CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("Dump UIE Info In String Format");
     DumpLog::GetInstance().AddDesc(std::string("focusWindowId: ").append(std::to_string(focusWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("realHostWindowId: ").append(std::to_string(realHostWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("want: ").append(want_));
@@ -1318,10 +1341,50 @@ void UIExtensionPattern::DumpInfo()
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     std::vector<std::string> params = container->GetUieParams();
-    std::vector<std::string> dumpInfo;
-    sessionWrapper_->NotifyUieDump(params, dumpInfo);
-    for (std::string info : dumpInfo) {
-        DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
+    // Use -nouie to choose not dump extra uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        UIEXT_LOGI("Not Support Dump Extra UIE Info");
+    } else {
+        if (!container->IsUIExtensionWindow()) {
+            params.push_back(PID_FLAG);
+        }
+        params.push_back(std::to_string(getpid()));
+        std::vector<std::string> dumpInfo;
+        sessionWrapper_->NotifyUieDump(params, dumpInfo);
+        for (std::string info : dumpInfo) {
+            DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
+        }
+    }
+}
+
+void UIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("Dump UIE Info In Json Format");
+    json->Put("focusWindowId: ", std::to_string(focusWindowId_).c_str());
+    json->Put("realHostWindowId: ", std::to_string(realHostWindowId_).c_str());
+    json->Put("want: ", want_.c_str());
+    json->Put("displayArea: ", displayArea_.ToString().c_str());
+    json->Put("reason: ", std::to_string(sessionWrapper_->GetReasonDump()).c_str());
+    json->Put("focusStatus: ", std::to_string(focusState_).c_str());
+    json->Put("abilityState: ", ToString(state_));
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    // Use -nouie to choose not dump extra uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        UIEXT_LOGI("Not Support Dump Extra UIE Info");
+    } else {
+        if (!container->IsUIExtensionWindow()) {
+            params.push_back(PID_FLAG);
+        }
+        params.push_back(std::to_string(getpid()));
+        std::vector<std::string> dumpInfo;
+        sessionWrapper_->NotifyUieDump(params, dumpInfo);
+        for (std::string info : dumpInfo) {
+            json->Put("UI Extension info: ", info.c_str());
+        }
     }
 }
 } // namespace OHOS::Ace::NG

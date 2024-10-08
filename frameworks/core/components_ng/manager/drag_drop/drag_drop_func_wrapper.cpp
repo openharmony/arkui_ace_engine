@@ -122,7 +122,6 @@ bool ConfirmCurPointerEventInfo(
     } else if (dragAction->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
         dragAction->pointer = PEN_POINTER_ID;
     }
-    dragAction->toolType = sourceTool;
     return getPointSuccess;
 }
 
@@ -171,8 +170,7 @@ void EnvelopedDragData(
     arkExtraInfoJson->Put("dip_scale", dragAction->dipScale);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
     dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(), dragAction->sourceType,
-        recordSize, pointerId, dragAction->toolType, dragAction->x, dragAction->y, dragAction->displayId, windowId,
-        true, false, summary };
+        recordSize, pointerId, dragAction->x, dragAction->y, dragAction->displayId, windowId, true, false, summary };
 }
 
 void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -223,6 +221,7 @@ int32_t CheckStartAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> 
 
 int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction)
 {
+    CHECK_NULL_RETURN(dragAction, -1);
     auto pipelineContext = PipelineContext::GetContextByContainerId(dragAction->instanceId);
     CHECK_NULL_RETURN(pipelineContext, -1);
     auto manager = pipelineContext->GetDragDropManager();
@@ -266,7 +265,6 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     if (dragAction->dragState == DragAdapterState::SENDING) {
         dragAction->dragState = DragAdapterState::SUCCESS;
         InteractionInterface::GetInstance()->SetDragWindowVisible(true);
-        auto pipelineContext = container->GetPipelineContext();
         pipelineContext->OnDragEvent(
             { dragAction->x, dragAction->y }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
         NG::DragDropFuncWrapper::DecideWhetherToStopDragging(

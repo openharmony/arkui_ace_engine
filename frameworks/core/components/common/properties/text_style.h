@@ -882,6 +882,17 @@ inline std::string ToString(const FontWeight& fontWeight)
     return FontWeightToString(fontWeight);
 }
 
+inline std::string SymbolColorListToString(const std::vector<Color>& colorList)
+{
+    std::string symbolColorList = "";
+    if (!colorList.empty()) {
+        symbolColorList = colorList[0].ColorToString();
+        for (uint32_t i = 1; i < colorList.size(); ++i) {
+            symbolColorList += ", " + colorList[i].ColorToString();
+        }
+    }
+    return symbolColorList;
+}
 } // namespace StringUtils
 } // namespace OHOS::Ace
 

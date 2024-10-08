@@ -75,11 +75,9 @@ function setFile(flieData) {
 
     fs.writeFile(filePathData, data, (err) => {
         if (err) throw err;
-        console.log('数据已被写入到文件');
     });
     try {
         fs.writeFileSync(filePathData, data);
-        console.log('数据已被写入到文件');
         return filePathData;
     } catch (err) {
         throw err;

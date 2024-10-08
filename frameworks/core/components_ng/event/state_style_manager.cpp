@@ -65,8 +65,8 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
             int32_t sourceType = static_cast<int32_t>(touches.front().GetSourceDevice());
             if (stateStyleMgr->IsOutOfPressedRegion(sourceType, lastPoint.GetGlobalLocation())) {
                 auto frameNode = stateStyleMgr->GetFrameNode();
-                TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Move out of node pressed region: %{public}s/%{public}d",
-                    frameNode->GetTag().c_str(), frameNode->GetId());
+                TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Move out of node pressed region: %{public}s",
+                    frameNode->GetTag().c_str());
                 stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
                 if (stateStyleMgr->pointerId_.size() == 0) {
                     stateStyleMgr->ResetPressedState();
@@ -81,8 +81,12 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
 
 void StateStyleManager::HandleTouchDown()
 {
+#ifdef IS_RELEASE_VERSION
+    TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchDown event node: %{public}s", GetFrameNode()->GetTag().c_str());
+#else
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchDown event node: %{public}s/%{public}d",
         GetFrameNode()->GetTag().c_str(), GetFrameNode()->GetId());
+#endif
     HandleScrollingParent();
     if (!hasScrollingParent_) {
         UpdateCurrentUIState(UI_STATE_PRESSED);
@@ -98,8 +102,13 @@ void StateStyleManager::HandleTouchDown()
 
 void StateStyleManager::HandleTouchUp()
 {
+#ifdef IS_RELEASE_VERSION
+    TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchUp or Cancel event node: %{public}s",
+        GetFrameNode()->GetTag().c_str());
+#else
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Handle TouchUp or Cancel event node: %{public}s/%{public}d",
         GetFrameNode()->GetTag().c_str(), GetFrameNode()->GetId());
+#endif
     if (IsPressedStatePending()) {
         DeletePressStyleTask();
         ResetPressedPendingState();
@@ -120,8 +129,13 @@ void StateStyleManager::FireStateFunc(bool isReset)
     auto node = GetFrameNode();
     CHECK_NULL_VOID(node);
     auto nodeId = node->GetId();
+#ifdef IS_RELEASE_VERSION
+    TAG_LOGI(AceLogTag::ACE_STATE_STYLE,"Start execution, node is %{public}s, "
+        "reset is %{public}d", node->GetTag().c_str(), isReset);
+#else
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Start execution, node is %{public}s/%{public}d, "
         "reset is %{public}d", node->GetTag().c_str(), nodeId, isReset);
+#endif
     RefPtr<CustomNodeBase> customNode;
     GetCustomNode(customNode, node);
     if (!customNode) {

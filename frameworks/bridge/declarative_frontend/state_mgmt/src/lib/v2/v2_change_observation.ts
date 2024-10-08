@@ -94,7 +94,7 @@ class ObserveV2 {
   // Map bindId to WeakRef<ViewPU> | MonitorV2
   private id2cmp_: { number: WeakRef<Object> } = {} as { number: WeakRef<Object> };
 
-  // Map bindId -> Set of @observed class objects
+  // Map bindId -> Set of @ObservedV2 class objects
   // reverse dependency map for quickly removing all dependencies of a bindId
   private id2targets_: { number: Set<WeakRef<Object>> } = {} as { number: Set<WeakRef<Object>> };
 
@@ -126,9 +126,14 @@ class ObserveV2 {
     return this.obsInstance_;
   }
 
-  // return true given value is @observed object
+  // return true given value is @ObservedV2 object
   public static IsObservedObjectV2(value: any): boolean {
     return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
+  }
+
+  // return true if given value is proxied observed object, either makeObserved or autoProxyObject
+  public static IsProxiedObservedV2(value: any): boolean {
+    return (value && typeof value === 'object' && value[ObserveV2.SYMBOL_PROXY_GET_TARGET]);
   }
 
   // return true given value is the return value of makeObserved
@@ -323,8 +328,8 @@ class ObserveV2 {
     if (!bound) {
       return;
     }
-    if (bound[0] === UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
-      const error = `${attrName}: ObserveV2.addRef: trying to use V3 state '${attrName}' to init/update child V2 @Component. Application error`;
+    if (bound[0] === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
+      const error = `${attrName}: ObserveV2.addRef: trying to use V2 state '${attrName}' to init/update child V2 @Component. Application error`;
       stateMgmtConsole.applicationError(error);
       throw new TypeError(error);
     }
@@ -366,7 +371,7 @@ class ObserveV2 {
   public setUnmonitored<Z>(target: object, attrName: string, newValue: Z): void {
     const storeProp = ObserveV2.OB_PREFIX + attrName;
     if (storeProp in target) {
-      // @track attrName
+      // @Track attrName
       stateMgmtConsole.propertyAccess(`setUnmonitored '${attrName}' - tracked but unchanged. Doing nothing.`);
       target[storeProp] = newValue;
     } else {
@@ -639,7 +644,7 @@ class ObserveV2 {
       if (viewWeak && 'deref' in viewWeak && (view = viewWeak.deref()) &&
         ((view instanceof ViewV2) || (view instanceof ViewPU))) {
         if (view.isViewActive()) {
-          view.uiNodeNeedUpdateV3(elmtId);
+          view.uiNodeNeedUpdateV2(elmtId);
         } else if (view instanceof ViewV2) {
           // schedule delayed update once the view gets active
           view.scheduleDelayedUpdate(elmtId);
@@ -722,7 +727,7 @@ class ObserveV2 {
    * Helper function to add meta data about decorator to ViewPU or ViewV2
    * @param proto prototype object of application class derived from  ViewPU or ViewV2
    * @param varName decorated variable
-   * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
+   * @param deco '@Local', '@Event', etc 
    */
   public static addVariableDecoMeta(proto: Object, varName: string, deco: string): void {
     // add decorator meta data
@@ -731,10 +736,10 @@ class ObserveV2 {
     meta[varName].deco = deco;
 
     // FIXME
-    // when splitting ViewPU and ViewV3
+    // when splitting ViewPU and ViewV2
     // use instanceOf. Until then, this is a workaround.
-    // any @state, @track, etc V3 event handles this function to return false
-    Reflect.defineProperty(proto, 'isViewV3', {
+    // any @Local, @Trace, etc V2 event handles this function to return false
+    Reflect.defineProperty(proto, 'isViewV2', {
       get() { return true; },
       enumerable: false
     }
@@ -754,10 +759,10 @@ class ObserveV2 {
     }
 
     // FIXME
-    // when splitting ViewPU and ViewV3
+    // when splitting ViewPU and ViewV2
     // use instanceOf. Until then, this is a workaround.
-    // any @state, @track, etc V3 event handles this function to return false
-    Reflect.defineProperty(proto, 'isViewV3', {
+    // any @Local, @Trace, etc V2 event handles this function to return false
+    Reflect.defineProperty(proto, 'isViewV2', {
       get() { return true; },
       enumerable: false
     }
@@ -765,7 +770,7 @@ class ObserveV2 {
   }
 
 
-  public static usesV3Variables(proto: Object): boolean {
+  public static usesV2Variables(proto: Object): boolean {
     return (proto && typeof proto === 'object' && proto[ObserveV2.V2_DECO_META]);
   }
 } // class ObserveV2
@@ -797,7 +802,7 @@ const trackInternal = (
     },
     enumerable: true
   });
-  // this marks the proto as having at least one @track property inside
+  // this marks the proto as having at least one @Trace property inside
   // used by IsObservedObjectV2
   target[ObserveV2.V2_DECO_META] ??= {};
 }; // trackInternal

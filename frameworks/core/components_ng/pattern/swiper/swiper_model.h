@@ -76,6 +76,7 @@ struct AnimationCallbackInfo {
     std::optional<float> currentOffset;
     std::optional<float> targetOffset;
     std::optional<float> velocity;
+    bool isForceStop = false;
 };
 
 struct SwiperMarginOptions {
@@ -143,6 +144,7 @@ public:
     virtual void SetSwipeByGroup(bool swipeByGroup) {}
     virtual void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) {}
     virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
+    virtual void SetBindIndicator(bool bind) {}
 private:
     static std::unique_ptr<SwiperModel> instance_;
     static std::mutex mutex_;

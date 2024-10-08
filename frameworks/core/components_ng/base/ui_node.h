@@ -770,6 +770,16 @@ public:
         return isFreeze_;
     }
 
+    bool IsCNode() const
+    {
+        return isCNode_;
+    }
+
+    void setIsCNode(bool createByCapi)
+    {
+        isCNode_ = createByCapi;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -813,7 +823,7 @@ protected:
     virtual void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
 
-    virtual void onFreezeStateChange() {}
+    virtual void OnFreezeStateChange() {}
     virtual void UpdateChildrenFreezeState(bool isFreeze);
 
     // run offscreen process.
@@ -885,6 +895,8 @@ private:
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;
+
+    bool isCNode_ = false;
 
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;

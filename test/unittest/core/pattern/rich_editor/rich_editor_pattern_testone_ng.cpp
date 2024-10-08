@@ -379,6 +379,10 @@ HWTEST_F(RichEditorPatternTestOneNg, ResetAfterPaste001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->previewLongPress_ = true;
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = false;
     richEditorPattern->ResetAfterPaste();
     ASSERT_NE(richEditorPattern->previewLongPress_, true);
 }

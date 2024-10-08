@@ -533,6 +533,7 @@ void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps, s
 void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto iter = subwindowMap_.begin();
     while (iter != subwindowMap_.end()) {
         auto overlay = iter->second->GetOverlayManager();
@@ -547,6 +548,7 @@ void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
 void SubwindowManager::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto iter = subwindowMap_.begin();
     while (iter != subwindowMap_.end()) {
         auto overlay = iter->second->GetOverlayManager();
@@ -571,6 +573,7 @@ void SubwindowManager::UpdateCustomDialogNG(
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto iter = subwindowMap_.begin();
     while (iter != subwindowMap_.end()) {
         auto overlay = iter->second->GetOverlayManager();
@@ -581,13 +584,15 @@ void SubwindowManager::UpdateCustomDialogNG(
 
 void SubwindowManager::HideDialogSubWindow(int32_t instanceId)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide dialog subwindow enter");
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide dialog subwindow enter");
     auto subwindow = GetSubwindow(instanceId >= MIN_SUBCONTAINER_ID ? GetParentContainerId(instanceId) : instanceId);
     CHECK_NULL_VOID(subwindow);
     auto overlay = subwindow->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     if (overlay->GetDialogMap().size() == 0) {
         subwindow->HideSubWindowNG();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "fail to hide dialog subwindow, instanceId is %{public}d.", instanceId);
     }
 }
 
@@ -659,12 +664,18 @@ void SubwindowManager::ShowToastNG(const NG::ToastInfo& toastInfo, std::function
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show toast ng enter");
     auto containerId = Container::CurrentId();
     auto windowType = GetToastWindowType(containerId);
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_VOID(container);
+    auto windowId = container->GetWindowId();
+    // Get the parent window ID before the asynchronous operation
+    auto mainWindowId = container->GetParentMainWindowId(windowId);
     // for ability
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [containerId, toastInfo, callbackParam = std::move(callback), windowType] {
-            auto subwindow = SubwindowManager::GetInstance()->GetOrCreateToastWindowNG(containerId, windowType);
+        [containerId, toastInfo, callbackParam = std::move(callback), windowType, mainWindowId] {
+            auto subwindow = SubwindowManager::GetInstance()->GetOrCreateToastWindowNG(
+                containerId, windowType, mainWindowId);
             CHECK_NULL_VOID(subwindow);
             TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
             subwindow->ShowToast(toastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
@@ -715,7 +726,11 @@ void SubwindowManager::ShowToast(const NG::ToastInfo& toastInfo, std::function<v
     } else {
         // for ability
         auto parentContainer = Container::GetContainer(containerId);
-        if (toastInfo.showMode == NG::ToastShowMode::TOP_MOST || parentContainer->IsScenceBoardWindow()) {
+        // in scenceboard, system_top_most needs to go the old way,
+        // default and top_most need to go showToastNG
+        if (toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
+            (parentContainer && parentContainer->IsScenceBoardWindow() &&
+            toastInfo.showMode != NG::ToastShowMode::SYSTEM_TOP_MOST)) {
             ShowToastNG(toastInfo, std::move(callback));
             return;
         }
@@ -792,7 +807,8 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindow(int32_t containerId, 
     return subwindow;
 }
 
-RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType)
+RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId,
+    const ToastWindowType& windowType, uint32_t mainWindowId)
 {
     RefPtr<Subwindow> subwindow = GetToastSubwindow(containerId, windowType);
     if (!subwindow) {
@@ -802,6 +818,7 @@ RefPtr<Subwindow> SubwindowManager::GetOrCreateToastWindowNG(int32_t containerId
             return nullptr;
         }
         subwindow->SetToastWindowType(windowType);
+        subwindow->SetMainWindowId(mainWindowId);
         AddToastSubwindow(containerId, subwindow, windowType);
     }
     return subwindow;
@@ -929,6 +946,7 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get dialog subwindow failed.");
         return;
     }
+    std::lock_guard<std::mutex> lock(parentMutex_);
     for (auto& containerMap : parentContainerMap_) {
         if (containerMap.second == instanceId) {
             subwindow->CloseDialog(containerMap.first);
@@ -1104,6 +1122,7 @@ void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, 
 
 RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node)
 {
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
     auto iter = subwindowMap_.begin();
     while (iter != subwindowMap_.end()) {
         auto overlay = iter->second->GetOverlayManager();

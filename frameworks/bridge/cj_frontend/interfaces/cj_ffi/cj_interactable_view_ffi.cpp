@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_interactable_view_ffi.h"
 
-
 #include "cj_lambda.h"
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -183,34 +182,34 @@ void FfiOHOSAceFrameworkInteractableViewOnHover(void (*callback)(bool))
 void FfiOHOSAceFrameworkInteractableViewOnAreaChanged(void (*callback)(CJArea, CJArea))
 {
     auto onAreaChanged = CJLambda::Create(callback);
-    ViewAbstractModel::GetInstance()->SetOnAreaChanged(
-        [onAreaChanged](const Rect& lastRect, const Offset& lastOrigin, const Rect& rect, const Offset& origin) {
-            CJArea lastCjArea {};
-            lastCjArea.width = lastRect.Width();
-            lastCjArea.height = lastRect.Height();
-            CJPosition lastCjPosition {};
-            CJPosition lastCjGlobalPosition {};
-            lastCjPosition.x = lastRect.GetOffset().GetX();
-            lastCjPosition.y = lastRect.GetOffset().GetY();
-            lastCjGlobalPosition.x = lastRect.GetOffset().GetX() + lastOrigin.GetX();
-            lastCjGlobalPosition.y = lastRect.GetOffset().GetY() + lastOrigin.GetY();
-            lastCjArea.position = &lastCjPosition;
-            lastCjArea.globalPosition = &lastCjGlobalPosition;
+    ViewAbstractModel::GetInstance()->SetOnAreaChanged([onAreaChanged](const Rect& lastRect, const Offset& lastOrigin,
+                                                           const Rect& rect, const Offset& origin) {
+        CJArea lastCjArea {};
+        lastCjArea.width = PipelineBase::Px2VpWithCurrentDensity(lastRect.Width());
+        lastCjArea.height = PipelineBase::Px2VpWithCurrentDensity(lastRect.Height());
+        CJPosition lastCjPosition {};
+        CJPosition lastCjGlobalPosition {};
+        lastCjPosition.x = PipelineBase::Px2VpWithCurrentDensity(lastRect.GetOffset().GetX());
+        lastCjPosition.y = PipelineBase::Px2VpWithCurrentDensity(lastRect.GetOffset().GetY());
+        lastCjGlobalPosition.x = PipelineBase::Px2VpWithCurrentDensity(lastRect.GetOffset().GetX() + lastOrigin.GetX());
+        lastCjGlobalPosition.y = PipelineBase::Px2VpWithCurrentDensity(lastRect.GetOffset().GetY() + lastOrigin.GetY());
+        lastCjArea.position = &lastCjPosition;
+        lastCjArea.globalPosition = &lastCjGlobalPosition;
 
-            CJArea cjArea {};
-            cjArea.width = rect.Width();
-            cjArea.height = rect.Height();
-            CJPosition cjPosition {};
-            CJPosition cjGlobalPosition {};
-            cjPosition.x = rect.GetOffset().GetX();
-            cjPosition.y = rect.GetOffset().GetY();
-            cjGlobalPosition.x = rect.GetOffset().GetX() + origin.GetX();
-            cjGlobalPosition.y = rect.GetOffset().GetY() + origin.GetY();
-            cjArea.position = &cjPosition;
-            cjArea.globalPosition = &cjGlobalPosition;
+        CJArea cjArea {};
+        cjArea.width = PipelineBase::Px2VpWithCurrentDensity(rect.Width());
+        cjArea.height = PipelineBase::Px2VpWithCurrentDensity(rect.Height());
+        CJPosition cjPosition {};
+        CJPosition cjGlobalPosition {};
+        cjPosition.x = PipelineBase::Px2VpWithCurrentDensity(rect.GetOffset().GetX());
+        cjPosition.y = PipelineBase::Px2VpWithCurrentDensity(rect.GetOffset().GetY());
+        cjGlobalPosition.x = PipelineBase::Px2VpWithCurrentDensity(rect.GetOffset().GetX() + origin.GetX());
+        cjGlobalPosition.y = PipelineBase::Px2VpWithCurrentDensity(rect.GetOffset().GetY() + origin.GetY());
+        cjArea.position = &cjPosition;
+        cjArea.globalPosition = &cjGlobalPosition;
 
-            onAreaChanged(lastCjArea, cjArea);
-        });
+        onAreaChanged(lastCjArea, cjArea);
+    });
 }
 
 void FfiOHOSAceFrameworkInteractableViewOnVisibleAreaChange(

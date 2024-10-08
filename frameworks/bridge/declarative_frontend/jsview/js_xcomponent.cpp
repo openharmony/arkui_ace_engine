@@ -177,6 +177,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("linearGradientBlur", &JSXComponent::JsLinearGradientBlur);
     JSClass<JSXComponent>::StaticMethod("enableAnalyzer", &JSXComponent::JsEnableAnalyzer);
     JSClass<JSXComponent>::StaticMethod("renderFit", &JSXComponent::JsRenderFit);
+    JSClass<JSXComponent>::StaticMethod("enableSecure", &JSXComponent::JsEnableSecure);
 
     JSClass<JSXComponent>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -687,5 +688,18 @@ void JSXComponent::JsRenderFit(const JSCallbackInfo& args)
         }
     }
     XComponentModel::GetInstance()->SetRenderFit(renderFit);
+}
+
+void JSXComponent::JsEnableSecure(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::SURFACE || args.Length() != 1) {
+        return;
+    }
+    // set isSecure on SurfaceNode when type is SURFACE
+    if (args[0]->IsBoolean()) {
+        bool isSecure = args[0]->ToBoolean();
+        XComponentModel::GetInstance()->EnableSecure(isSecure);
+    }
 }
 } // namespace OHOS::Ace::Framework

@@ -608,6 +608,7 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         auto iconNode = DynamicCast<FrameNode>(linearLayoutNode->GetFirstChild());
         auto iconPattern = iconNode->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(iconPattern);
+        iconPattern->SetSyncLoad(true);
         auto iconLayoutProperty = iconPattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(iconLayoutProperty);
         auto iconLayoutDirection = iconLayoutProperty->GetNonAutoLayoutDirection();
@@ -1562,6 +1563,7 @@ bool TextPickerColumnPattern::InnerHandleScroll(
     HandleEventCallback(true);
 
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
     return true;
 }
 
@@ -1644,16 +1646,16 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
     }
     int32_t middleIndex = static_cast<int32_t>(GetShowOptionCount()) / HALF_NUMBER;
     int32_t step = param->itemIndex - middleIndex;
-    auto overFirst = static_cast<int32_t>(currentIndex_) + step < 0 && step < 0;
-    auto overLast =
-        (static_cast<int32_t>(currentIndex_) + step > static_cast<int32_t>(GetOptionCount()) - 1) && step > 0;
-    if (NotLoopOptions() && (overscroller_.IsOverScroll() || overFirst || overLast)) {
-        return;
-    }
     if (step != 0) {
         if (animation_) {
             AnimationUtils::StopAnimation(animation_);
             yOffset_ = 0.0;
+        }
+        auto overFirst = static_cast<int32_t>(currentIndex_) + step < 0 && step < 0;
+        auto overLast =
+            (static_cast<int32_t>(currentIndex_) + step > static_cast<int32_t>(GetOptionCount()) - 1) && step > 0;
+        if (NotLoopOptions() && (overscroller_.IsOverScroll() || overFirst || overLast)) {
+            return;
         }
         double distance =
             (step > 0 ? optionProperties_[middleIndex].prevDistance : optionProperties_[middleIndex].nextDistance) *

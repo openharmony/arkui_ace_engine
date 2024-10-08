@@ -169,7 +169,7 @@ void SelectOverlayPattern::UpdateHandleHotZone()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto firstHandle = info_->GetFirstHandlePaintRect();
     auto secondHandle = info_->GetSecondHandlePaintRect();
@@ -364,7 +364,7 @@ void SelectOverlayPattern::HandlePanMove(GestureEvent& info)
     } else {
         LOGW("the move point is not in drag area");
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     if (host->IsLayoutDirtyMarked()) {
         context->AddDirtyLayoutNode(host);
@@ -499,8 +499,8 @@ bool SelectOverlayPattern::IsHandlesInSameLine()
 bool SelectOverlayPattern::IsFirstHandleMoveStart(const Offset& touchOffset)
 {
     if (isFirstHandleTouchDown_ && isSecondHandleTouchDown_) {
-        auto firstHandleCenter = Offset{ firstHandleRegion_.Center().GetX(), firstHandleRegion_.Center().GetX() };
-        auto secondHandleCenter = Offset{ secondHandleRegion_.Center().GetX(), secondHandleRegion_.Center().GetX() };
+        auto firstHandleCenter = Offset{ firstHandleRegion_.Center().GetX(), firstHandleRegion_.Center().GetY() };
+        auto secondHandleCenter = Offset{ secondHandleRegion_.Center().GetX(), secondHandleRegion_.Center().GetY() };
         auto distanceToFirstHandle = (firstHandleCenter - touchOffset).GetDistance();
         auto distanceToSecondHandle = (secondHandleCenter - touchOffset).GetDistance();
         return GreatNotEqual(distanceToSecondHandle, distanceToFirstHandle);

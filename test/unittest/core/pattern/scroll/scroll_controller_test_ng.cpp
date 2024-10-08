@@ -17,10 +17,6 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr float FRICTION_SCALE = -4.2f;
-} // namespace
-
 class ScrollControllerTestNg : public ScrollTestNg {
 public:
 };
@@ -43,7 +39,7 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo001, TestSize.Level1)
      */
     positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -ITEM_MAIN_SIZE);
+    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. AnimateTo the position over the scroll
@@ -51,7 +47,7 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo001, TestSize.Level1)
      */
     positionController_->AnimateTo(Dimension(CONTENT_MAIN_SIZE), 0, nullptr, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step3. AnimateTo the top
@@ -59,7 +55,7 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo001, TestSize.Level1)
      */
     positionController_->AnimateTo(Dimension(0), 0, nullptr, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(Position(0));
 }
 
 /**
@@ -82,8 +78,8 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo002, TestSize.Level1)
     bool smooth = true;
     positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, smooth);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyTickPosition(-ITEM_MAIN_SIZE / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-ITEM_MAIN_SIZE));
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE / TICK));
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. AnimateTo the position over the scroll
@@ -91,8 +87,8 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo002, TestSize.Level1)
      */
     positionController_->AnimateTo(Dimension(CONTENT_MAIN_SIZE), 0, nullptr, smooth);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyTickPosition(-(CONTENT_MAIN_SIZE + ITEM_MAIN_SIZE) / 2));
-    EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(-(CONTENT_MAIN_SIZE + ITEM_MAIN_SIZE) / 2));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step3. AnimateTo the top
@@ -100,8 +96,8 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo002, TestSize.Level1)
      */
     positionController_->AnimateTo(Dimension(0), 0, nullptr, smooth);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -123,8 +119,8 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo003, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(TICK);
     positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 1000.f, Curves::EASE, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyTickPosition(-ITEM_MAIN_SIZE / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-ITEM_MAIN_SIZE));
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE / TICK));
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. AnimateTo the position over the scroll
@@ -132,8 +128,8 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo003, TestSize.Level1)
      */
     positionController_->AnimateTo(Dimension(CONTENT_MAIN_SIZE), 1000.f, Curves::EASE, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyTickPosition(-(CONTENT_MAIN_SIZE + ITEM_MAIN_SIZE) / 2));
-    EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(-(CONTENT_MAIN_SIZE + ITEM_MAIN_SIZE) / 2));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step3. AnimateTo the top
@@ -141,8 +137,8 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo003, TestSize.Level1)
      */
     positionController_->AnimateTo(Dimension(0), 1000.f, Curves::EASE, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -166,15 +162,81 @@ HWTEST_F(ScrollControllerTestNg, AnimateTo004, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(5);
     positionController_->AnimateTo(Dimension(1000.f), 1000.f, Curves::EASE, false, canOverScroll);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyTickPosition(-200.f));
-    EXPECT_TRUE(VerifyTickPosition(-400.f));
-    EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
-    EXPECT_TRUE(VerifyTickPosition(-800.f)); // Tick doesn't advance new animations created within the same tick
-    EXPECT_TRUE(VerifyTickPosition(-760.f));
-    EXPECT_TRUE(VerifyTickPosition(-720.f));
-    EXPECT_TRUE(VerifyTickPosition(-680.f));
-    EXPECT_TRUE(VerifyTickPosition(-640.f));
-    EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(-200.f));
+    EXPECT_TRUE(TickPosition(-400.f));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(-800.f)); // Tick doesn't advance new animations created within the same tick
+    EXPECT_TRUE(TickPosition(-760.f));
+    EXPECT_TRUE(TickPosition(-720.f));
+    EXPECT_TRUE(TickPosition(-680.f));
+    EXPECT_TRUE(TickPosition(-640.f));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
+}
+
+/**
+ * @tc.name: AnimateTo005
+ * @tc.desc: Test AnimateTo in Horizontal Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, AnimateTo005, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->GetScrollableDistance(), HORIZONTAL_SCROLLABLE_DISTANCE);
+
+    /**
+     * @tc.steps: step1. AnimateTo the position without animation
+     * @tc.expected: AnimateTo the position
+     */
+    positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
+
+    /**
+     * @tc.steps: step2. AnimateTo the position with animation
+     * @tc.expected: AnimateTo the bottom, can not over scroll
+     */
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    positionController_->AnimateTo(Dimension(0), 0, nullptr, true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE / TICK));
+    EXPECT_TRUE(TickPosition(0));
+}
+
+/**
+ * @tc.name: AnimateTo006
+ * @tc.desc: Test AnimateTo in Horizontal and RTL Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, AnimateTo006, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->GetScrollableDistance(), HORIZONTAL_SCROLLABLE_DISTANCE);
+    EXPECT_TRUE(Position(-HORIZONTAL_SCROLLABLE_DISTANCE));
+
+    /**
+     * @tc.steps: step1. AnimateTo the position without animation
+     * @tc.expected: AnimateTo the position
+     */
+    positionController_->AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(Position(ITEM_MAIN_SIZE - HORIZONTAL_SCROLLABLE_DISTANCE));
+
+    /**
+     * @tc.steps: step2. AnimateTo the position with animation
+     * @tc.expected: AnimateTo the bottom, can not over scroll
+     */
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    positionController_->AnimateTo(Dimension(0), 0, nullptr, true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(TickPosition(ITEM_MAIN_SIZE / TICK - HORIZONTAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(-HORIZONTAL_SCROLLABLE_DISTANCE));
 }
 
 /**
@@ -195,7 +257,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollBy001, TestSize.Level1)
      */
     positionController_->ScrollBy(0, ITEM_MAIN_SIZE, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -ITEM_MAIN_SIZE);
+    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
 
     /**
      * @tc.steps: step2. ScrollBy the position over the scroll
@@ -203,7 +265,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollBy001, TestSize.Level1)
      */
     positionController_->ScrollBy(0, CONTENT_MAIN_SIZE, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step3. ScrollBy the position 0
@@ -211,7 +273,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollBy001, TestSize.Level1)
      */
     positionController_->ScrollBy(0, 0, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step4. ScrollBy the position to top
@@ -219,7 +281,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollBy001, TestSize.Level1)
      */
     positionController_->ScrollBy(0, -CONTENT_MAIN_SIZE, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(Position(0));
 }
 
 /**
@@ -240,7 +302,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollToEdge001, TestSize.Level1)
      */
     positionController_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 200.f);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step2. SCROLL_TOP
@@ -248,7 +310,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollToEdge001, TestSize.Level1)
      */
     positionController_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, 200.f);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(Position(0));
 }
 
 /**
@@ -272,8 +334,8 @@ HWTEST_F(ScrollControllerTestNg, Fling001, TestSize.Level1)
     const float flingVelocity = finalPosition * FRICTION * FRICTION_SCALE;
     positionController_->Fling(flingVelocity);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyTickPosition(-finalPosition / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-finalPosition));
+    EXPECT_TRUE(TickPosition(-finalPosition / TICK));
+    EXPECT_TRUE(TickPosition(-finalPosition));
 
     /**
      * @tc.steps: step2. Fling, the flingVelocity less than 0
@@ -281,8 +343,8 @@ HWTEST_F(ScrollControllerTestNg, Fling001, TestSize.Level1)
      */
     positionController_->Fling(-flingVelocity);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyTickPosition(-finalPosition / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(-finalPosition / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -303,7 +365,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollPage001, TestSize.Level1)
      */
     positionController_->ScrollPage(false, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -SCROLL_HEIGHT);
+    EXPECT_TRUE(Position(-SCROLL_HEIGHT));
 
     /**
      * @tc.steps: step2. ScrollPage up
@@ -311,7 +373,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollPage001, TestSize.Level1)
      */
     positionController_->ScrollPage(true, false);
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(Position(0));
 }
 
 /**
@@ -334,8 +396,8 @@ HWTEST_F(ScrollControllerTestNg, ScrollPage002, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(TICK);
     positionController_->ScrollPage(false, smooth);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT));
 
     /**
      * @tc.steps: step1. ScrollPage up with animation
@@ -343,8 +405,8 @@ HWTEST_F(ScrollControllerTestNg, ScrollPage002, TestSize.Level1)
      */
     positionController_->ScrollPage(true, smooth);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**

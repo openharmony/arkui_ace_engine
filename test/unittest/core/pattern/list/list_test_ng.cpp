@@ -51,9 +51,13 @@ void ListTestNg::SetUpTestSuite()
     listItemTheme->defaultLeftMargin_ = GROUP_MARGIN;
     listItemTheme->defaultRightMargin_ = GROUP_MARGIN;
     listItemTheme->defaultPadding_ = Edge(0.0_vp);
+    auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
+    auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
     MockAnimationManager::Enable(true);
+    testing::FLAGS_gmock_verbose = "error";
 }
 
 void ListTestNg::TearDownTestSuite()
@@ -110,6 +114,17 @@ void ListTestNg::CreateListItems(int32_t itemNumber, V2::ListItemStyle listItemS
         CreateListItem(listItemStyle);
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+void ListTestNg::AddItems(int32_t itemNumber, V2::ListItemStyle listItemStyle)
+{
+    for (int i = 0; i < itemNumber; ++i) {
+        auto child = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, -1,
+            [listItemStyle]() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, listItemStyle); });
+        child->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(LIST_WIDTH), CalcLength(Dimension(ITEM_HEIGHT))));
+        frameNode_->AddChild(child);
     }
 }
 
@@ -406,10 +421,10 @@ void ListTestNg::ScrollSnap(double offset, double endVelocity)
         scrollable->ProcessSpringMotion(endValue);
         scrollable->StopSpringAnimation();
         FlushLayoutTask(frameNode_);
-    } else if (!(scrollable->isSnapScrollAnimationStop_)) {
-        // StartScrollSnapMotion, for condition that equal item height.
+    } else if (scrollable->state_ == Scrollable::AnimationState::SNAP) {
+        // StartListSnapAnimation, for condition that equal item height.
         float endValue = scrollable->GetSnapFinalPosition();
-        scrollable->ProcessScrollSnapMotion(endValue);
+        scrollable->ProcessListSnapMotion(endValue);
         scrollable->ProcessScrollSnapStop();
         FlushLayoutTask(frameNode_);
     }
@@ -551,7 +566,8 @@ void ListTestNg::FlushIdleTask(const RefPtr<ListPattern>& listPattern)
     auto predictParam = listPattern->GetPredictLayoutParamV2();
     while (predictParam && tryCount > 0) {
         const int64_t time = GetSysTimestamp();
-        PipelineContext::GetCurrentContext()->OnIdle(time + 16 * 1000000); // 16 * 1000000: 16ms
+        auto pipeline = listPattern->GetContext();
+        pipeline->OnIdle(time + 16 * 1000000); // 16 * 1000000: 16ms
         FlushLayoutTask(frameNode_);
         predictParam = listPattern->GetPredictLayoutParamV2();
         tryCount--;

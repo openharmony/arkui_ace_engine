@@ -369,6 +369,7 @@ public:
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override {}
 };
+
 class UrlSpan : public SpanBase {
     DECLARE_ACE_TYPE(UrlSpan, SpanBase);
 

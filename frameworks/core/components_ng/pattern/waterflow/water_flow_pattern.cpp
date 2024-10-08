@@ -54,7 +54,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         // over scroll in drag update from normal to over scroll.
         float overScroll = layoutInfo_->CalcOverScroll(GetMainContentSize(), delta);
         if (source == SCROLL_FROM_UPDATE) {
-            auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
+            auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             delta *= friction;
         }
     } else {
@@ -113,6 +113,7 @@ void WaterFlowPattern::UpdateScrollBarOffset()
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
         return;
     }
+    CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
@@ -139,6 +140,10 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
         OnSectionChanged(start);
     }
     sectionChangeStartPos_.clear();
+
+    if (sections_ && layoutInfo_->segmentTails_.empty()) {
+        layoutInfo_->InitSegments(sections_->GetSectionInfo(), 0);
+    }
 
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         return;
@@ -627,7 +632,8 @@ bool WaterFlowPattern::NeedRender()
     needRender = property->GetPaddingProperty() != nullptr || needRender;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, needRender);
-    needRender = needRender || paintProperty->GetFadingEdge().value_or(false);
+    needRender |= paintProperty->GetFadingEdge().value_or(false);
+    needRender |= paintProperty->GetContentClip().has_value();
     return needRender;
 }
 
@@ -728,7 +734,10 @@ WeakPtr<FocusHub> WaterFlowPattern::GetNextFocusNode(FocusStep step, const WeakP
         if (itemIdx >= layoutInfo_->endIndex_ || itemIdx <= layoutInfo_->startIndex_) {
             ScrollToIndex(itemIdx, false, ScrollAlign::AUTO);
             host->SetActive();
-            host->CreateLayoutTask();
+            auto context = host->GetContext();
+            if (context) {
+                context->FlushUITaskWithSingleDirtyNode(host);
+            }
         }
         auto next = host->GetChildByIndex(idx);
         CHECK_NULL_RETURN(next, nullptr);

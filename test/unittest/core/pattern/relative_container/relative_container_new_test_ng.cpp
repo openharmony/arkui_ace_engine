@@ -377,4 +377,151 @@ HWTEST_F(RelativeContainerNewTestNG, BarrierAttrTest001, TestSize.Level1)
     // expect: text3 is next to the right of text2
     EXPECT_EQ(frameNode->GetChildByIndex(2)->GetGeometryNode()->GetFrameOffset().GetX(), 200.0f);
 }
+
+/**
+ * @tc.name: Example
+ * @tc.desc: Test functionality of relativeContainer when it has loop dependent nodes.
+ * @tc.type: ETS
+ */
+HWTEST_F(RelativeContainerNewTestNG, LoopDependentTest001, TestSize.Level1)
+{
+    /**
+      corresponding ets code:
+         RelativeContainer() {
+          Text('text1')
+          .width(100).height(100)
+          .backgroundColor("#FFCC00")
+          .alignRules({
+            top: {anchor: "__container__", align: VerticalAlign.Top},
+            left: {anchor: "__container__", align: HorizontalAlign.Start}
+          })
+          .id("text1")
+
+          Text('text2')
+          .width(100).height(100)
+          .backgroundColor("#FFCC00")
+          .alignRules({
+            top: {anchor: "__container__", align: VerticalAlign.Top},
+            right: {anchor: "__container__", align: HorizontalAlign.End}
+          })
+          .id("text2")
+
+          Text('text3')
+          .height(100)
+          .backgroundColor("#FFCC00")
+          .alignRules({
+            top: {anchor: "text1", align: VerticalAlign.Bottom},
+            left: {anchor: "text1", align: HorizontalAlign.End},
+            right: {anchor: "text2", align: HorizontalAlign.Start}
+          })
+          .id("text3")
+
+          Text('text4')
+          .backgroundColor("#FFCC00")
+          .alignRules({
+            top: {anchor: "text3", align: VerticalAlign.Bottom},
+            bottom: {anchor: "__container__", align: VerticalAlign.Bottom},
+            left: {anchor: "__container__", align: HorizontalAlign.Start},
+            right: {anchor: "text5", align: HorizontalAlign.End}
+          })
+          .id("text4")
+
+          Text('text5')
+          .backgroundColor("#FFCC00")
+          .alignRules({
+            top: {anchor: "text3", align: VerticalAlign.Bottom},
+            bottom: {anchor: "__container__", align: VerticalAlign.Bottom},
+            left: {anchor: "text4", align: HorizontalAlign.Start},
+            right: {anchor: "__container__", align: HorizontalAlign.End}
+          })
+          .id("text5")
+        }
+      */
+    auto frameNode = CreateRelativeContainer([this](RelativeContainerModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(CONTAINER_WIDTH));
+        ViewAbstract::SetHeight(CalcLength(CONTAINER_HEIGHT));
+        ViewAbstract::SetInspectorId(CONTAINER_ID);
+        auto text1 = CreateText("text1", [](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(100.0f));
+            ViewAbstract::SetInspectorId("text1");
+            std::map<AlignDirection, AlignRule> firstTextAlignRules;
+            AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, firstTextAlignRules);
+            AddAlignRule(CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, firstTextAlignRules);
+            ViewAbstract::SetAlignRules(firstTextAlignRules);
+        });
+        auto text2 = CreateText("text2", [](TextModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0f));
+            ViewAbstract::SetHeight(CalcLength(100.0f));
+            ViewAbstract::SetInspectorId("text2");
+            std::map<AlignDirection, AlignRule> secondTextAlignRules;
+            AddAlignRule(CONTAINER_ID, AlignDirection::TOP, VerticalAlign::TOP, secondTextAlignRules);
+            AddAlignRule(CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, secondTextAlignRules);
+            ViewAbstract::SetAlignRules(secondTextAlignRules);
+        });
+        auto text3 = CreateText("text3", [](TextModelNG model) {
+            ViewAbstract::SetInspectorId("text3");
+            ViewAbstract::SetHeight(CalcLength(100.0f));
+            std::map<AlignDirection, AlignRule> thirdTextAlignRules;
+            AddAlignRule("text1", AlignDirection::TOP, VerticalAlign::BOTTOM, thirdTextAlignRules);
+            AddAlignRule("text1", AlignDirection::LEFT, HorizontalAlign::END, thirdTextAlignRules);
+            AddAlignRule("text2", AlignDirection::RIGHT, HorizontalAlign::START, thirdTextAlignRules);
+            ViewAbstract::SetAlignRules(thirdTextAlignRules);
+        });
+        auto text4 = CreateText("text4", [](TextModelNG model) {
+            ViewAbstract::SetInspectorId("text4");
+            std::map<AlignDirection, AlignRule> forthTextAlignRules;
+            AddAlignRule("text3", AlignDirection::TOP, VerticalAlign::BOTTOM, forthTextAlignRules);
+            AddAlignRule(CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, forthTextAlignRules);
+            AddAlignRule(CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, forthTextAlignRules);
+            AddAlignRule("text5", AlignDirection::RIGHT, HorizontalAlign::END, forthTextAlignRules);
+            ViewAbstract::SetAlignRules(forthTextAlignRules);
+        });
+        auto text5 = CreateText("text5", [](TextModelNG model) {
+            ViewAbstract::SetInspectorId("text5");
+            std::map<AlignDirection, AlignRule> fifthTextAlignRules;
+            AddAlignRule("text3", AlignDirection::TOP, VerticalAlign::BOTTOM, fifthTextAlignRules);
+            AddAlignRule(CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, fifthTextAlignRules);
+            AddAlignRule("text4", AlignDirection::LEFT, HorizontalAlign::START, fifthTextAlignRules);
+            AddAlignRule(CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, fifthTextAlignRules);
+            ViewAbstract::SetAlignRules(fifthTextAlignRules);
+        });
+    });
+    ASSERT_EQ(frameNode->GetChildren().size(), 5);
+    CreateLayoutTask(frameNode);
+    auto pattern = frameNode->GetPattern<RelativeContainerPattern>();
+    EXPECT_NE(pattern, nullptr);
+    auto loopDependentNodes1 = pattern->GetLoopDependentNodes();
+    EXPECT_TRUE(loopDependentNodes1);
+    auto text5 = frameNode->GetChildren().rbegin();
+    EXPECT_NE(text5, frameNode->GetChildren().rend());
+    auto textNode5 = AceType::DynamicCast<FrameNode>(*text5);
+    EXPECT_NE(textNode5, nullptr);
+    auto textLayoutProperty5 = textNode5->GetLayoutProperty();
+    EXPECT_NE(textLayoutProperty5, nullptr);
+    std::map<AlignDirection, AlignRule> fifthTextAlignRules;
+    AddAlignRule("text3", AlignDirection::TOP, VerticalAlign::BOTTOM, fifthTextAlignRules);
+    AddAlignRule(CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, fifthTextAlignRules);
+    AddAlignRule("text2", AlignDirection::LEFT, HorizontalAlign::START, fifthTextAlignRules);
+    AddAlignRule(CONTAINER_ID, AlignDirection::RIGHT, HorizontalAlign::END, fifthTextAlignRules);
+    textLayoutProperty5->UpdateAlignRules(fifthTextAlignRules);
+    auto text4 = ++text5;
+    EXPECT_NE(text4, frameNode->GetChildren().rend());
+    auto textNode4 = AceType::DynamicCast<FrameNode>(*text4);
+    EXPECT_NE(textNode4, nullptr);
+    auto textLayoutProperty4 = textNode4->GetLayoutProperty();
+    EXPECT_NE(textLayoutProperty4, nullptr);
+    std::map<AlignDirection, AlignRule> forthTextAlignRules;
+    AddAlignRule("text3", AlignDirection::TOP, VerticalAlign::BOTTOM, forthTextAlignRules);
+    AddAlignRule(CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, forthTextAlignRules);
+    AddAlignRule(CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::START, forthTextAlignRules);
+    AddAlignRule("text1", AlignDirection::RIGHT, HorizontalAlign::END, forthTextAlignRules);
+    textLayoutProperty4->UpdateAlignRules(forthTextAlignRules);
+    pattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(pattern->GetChildAlignRulesChanged());
+    frameNode->layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    CreateLayoutTask(frameNode);
+    auto loopDependentNodes2 = pattern->GetLoopDependentNodes();
+    EXPECT_FALSE(loopDependentNodes2);
+}
 } // namespace OHOS::Ace::NG

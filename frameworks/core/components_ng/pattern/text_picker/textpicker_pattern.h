@@ -334,7 +334,8 @@ public:
         isPicker_ = isPicker;
     }
 
-    void CheckAndUpdateColumnSize(SizeF& size);
+    void CheckAndUpdateColumnSize(SizeF& size, bool isNeedAdaptForAging = false);
+    bool NeedAdaptForAging();
 
     void SetDivider(const ItemDivider& divider)
     {

@@ -20,6 +20,8 @@
 #include <unordered_map>
 
 #include "core/components/form/resource/form_utils.h"
+#include "form_provider_data_proxy.h"
+#include "nlohmann/json.hpp"
 #include "want.h"
 
 namespace OHOS::Ace {
@@ -37,6 +39,10 @@ public:
 
     int32_t BackgroundEvent(
         int64_t formId, const std::string& action, int32_t containerId, const std::string& defaultBundleName) override;
+
+private:
+    bool SetFormBindingDataObj(const std::string& formBindingDataStr, nlohmann::json &jsonData);
+    void ParseProxies(std::vector<AppExecFwk::FormDataProxy> &formDataProxies, nlohmann::json &jsonData);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_FORM_UTILS_IMPL_H

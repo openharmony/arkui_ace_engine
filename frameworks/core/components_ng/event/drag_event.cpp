@@ -175,7 +175,7 @@ bool DragEventActuator::IsCurrentNodeStatusSuitableForDragging(
         touchRestrict.inputEventType == InputEventType::AXIS || IsBelongToMultiItemNode(frameNode)) {
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "No need to collect drag gestures result, drag forbidden set is %{public}d,"
-            "frameNode draggable is %{public}d, custom set is %{public}d,",
+            "frameNode draggable is %{public}d, custom set is %{public}d",
             gestureHub->IsDragForbidden(), frameNode->IsDraggable(), frameNode->IsCustomerSet());
         return false;
     }
@@ -249,7 +249,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
-        auto renderContext = frameNode->GetRenderContext();
         if (info.GetSourceDevice() != SourceType::MOUSE) {
             if (gestureHub->GetTextDraggable()) {
                 auto pattern = frameNode->GetPattern<TextBase>();
@@ -267,15 +266,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 }
             } else {
                 HideEventColumn();
-                if (gestureHub->GetTextDraggable()) {
-                    HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-                } else {
-                    HideFilter();
-                    RecordMenuWrapperNodeForDrag(frameNode->GetId());
-                    SubwindowManager::GetInstance()->HideMenuNG(false, true);
-                }
-            }
-            if (!gestureHub->GetTextDraggable()) {
+                HideFilter();
+                RecordMenuWrapperNodeForDrag(frameNode->GetId());
+                SubwindowManager::GetInstance()->HideMenuNG(false, true);
                 frameNode->SetOptionsAfterApplied(actuator->GetOptionsAfterApplied());
             }
         }
@@ -467,15 +460,15 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         actuator->ResetResponseRegion();
-        if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview() || !actuator->GetGatherNode()) {
-            return;
-        }
-        actuator->SetGatherNode(nullptr);
-        actuator->ClearGatherNodeChildrenInfo();
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto manager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(manager);
+        if (manager->IsGatherWithMenu() || !actuator->GetGatherNode()) {
+            return;
+        }
+        actuator->SetGatherNode(nullptr);
+        actuator->ClearGatherNodeChildrenInfo();
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         auto preDragStatus = dragDropManager->GetPreDragStatus();
@@ -998,7 +991,10 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
     imageNode->SetActive(true);
-    imageNode->CreateLayoutTask();
+    auto context = imageNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(imageNode);
+    }
     FlushSyncGeometryNodeTasks();
 }
 
@@ -1040,7 +1036,10 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
     columnNode->SetActive(true);
-    columnNode->CreateLayoutTask();
+    auto context = columnNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(columnNode);
+    }
     FlushSyncGeometryNodeTasks();
 }
 
@@ -1178,7 +1177,10 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
     imageNode->SetActive(true);
-    imageNode->CreateLayoutTask();
+    auto context = imageNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(imageNode);
+    }
     FlushSyncGeometryNodeTasks();
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenu = focusHub == nullptr
@@ -1618,7 +1620,8 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         TAG_LOGD(AceLogTag::ACE_DRAG, "In removeColumnNode callback, set DragWindowVisible true.");
         auto gestureHub = weakEvent.Upgrade();
         CHECK_NULL_VOID(gestureHub);
-        if (!gestureHub->IsPixelMapNeedScale()) {
+        auto dragDropManager = pipeline->GetDragDropManager();
+        if (!gestureHub->IsPixelMapNeedScale() && dragDropManager && dragDropManager->IsDragging()) {
             InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         }
         gestureHub->SetPixelMap(nullptr);
@@ -1911,7 +1914,10 @@ void DragEventActuator::MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode)
     CHECK_NULL_VOID(gatherNode);
     gatherNode->MarkModifyDone();
     gatherNode->SetLayoutDirtyMarked(true);
-    gatherNode->CreateLayoutTask();
+    auto context = gatherNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(gatherNode);
+    }
 
     auto children = gatherNode->GetChildren();
     for (const auto& child : children) {
@@ -1920,7 +1926,9 @@ void DragEventActuator::MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode)
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkModifyDone();
         imageNode->SetLayoutDirtyMarked(true);
-        imageNode->CreateLayoutTask();
+        if (context) {
+            context->FlushUITaskWithSingleDirtyNode(imageNode);
+        }
     }
 }
 
@@ -2327,7 +2335,10 @@ RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
     textNode->MarkModifyDone();
     textNode->SetLayoutDirtyMarked(true);
     textNode->SetActive(true);
-    textNode->CreateLayoutTask();
+    auto context = textNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(textNode);
+    }
     FlushSyncGeometryNodeTasks();
     return textNode;
 }

@@ -824,6 +824,7 @@ HWTEST_F(WaterFlowSegmentTest, Segmented001, TestSize.Level1)
         AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
 
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(algo->info_);
+    pattern_->BeforeCreateLayoutWrapper();
     algo->Measure(AceType::RawPtr(frameNode_));
 
     EXPECT_EQ(info->endIndex_, 12);
@@ -873,6 +874,7 @@ HWTEST_F(WaterFlowSegmentTest, Segmented005, TestSize.Level1)
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     info->jumpIndex_ = 50;
     info->align_ = ScrollAlign::END;
+    pattern_->BeforeCreateLayoutWrapper();
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 47);
     EXPECT_EQ(info->endIndex_, 50);
@@ -912,6 +914,7 @@ HWTEST_F(WaterFlowSegmentTest, Segmented002, TestSize.Level1)
         AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
 
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    pattern_->BeforeCreateLayoutWrapper();
     algo->Measure(AceType::RawPtr(frameNode_));
 
     EXPECT_EQ(info->startIndex_, 0);
@@ -936,6 +939,7 @@ HWTEST_F(WaterFlowSegmentTest, Segmented002, TestSize.Level1)
     EXPECT_EQ(info->segmentStartPos_.size(), 4);
 
     info->Reset();
+    pattern_->BeforeCreateLayoutWrapper();
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->currentOffset_, -305.0f);
     EXPECT_EQ(info->startIndex_, 5);
@@ -956,6 +960,7 @@ HWTEST_F(WaterFlowSegmentTest, Segmented003, TestSize.Level1)
         AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
 
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    pattern_->BeforeCreateLayoutWrapper();
     algo->Measure(AceType::RawPtr(frameNode_));
 
     info->currentOffset_ = -800.0f;
@@ -1178,6 +1183,7 @@ HWTEST_F(WaterFlowSegmentTest, TargetIndex001, TestSize.Level1)
 
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     info->targetIndex_ = 50;
+    pattern_->BeforeCreateLayoutWrapper();
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->currentOffset_, 0.0f);
     EXPECT_EQ(info->segmentStartPos_.size(), 5);
@@ -1212,10 +1218,11 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount001, TestSize.Level1)
     // cause layout abort
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     info->targetIndex_ = 50;
+    pattern_->BeforeCreateLayoutWrapper();
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->endIndex_, -1);
     EXPECT_EQ(info->currentOffset_, 0.0f);
-    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_EQ(info->segmentStartPos_.size(), 0);
     EXPECT_EQ(info->itemInfos_.size(), 0);
 
     algo->Layout(AceType::RawPtr(frameNode_));
@@ -1224,12 +1231,12 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount001, TestSize.Level1)
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, -1);
-    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_EQ(info->segmentStartPos_.size(), 0);
 
     info->currentOffset_ = -10000.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     // as long as no crash happens
-    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_EQ(info->segmentStartPos_.size(), 0);
     EXPECT_EQ(info->itemInfos_.size(), 0);
 }
 
@@ -1257,16 +1264,17 @@ HWTEST_F(WaterFlowSegmentTest, ChildrenCount002, TestSize.Level1)
         AceType::MakeRefPtr<WaterFlowSegmentedLayout>(AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_));
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
 
+    pattern_->BeforeCreateLayoutWrapper();
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, -1);
-    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_EQ(info->segmentStartPos_.size(), 0);
 
     info->currentOffset_ = -10000.0f;
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, -1);
-    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_EQ(info->segmentStartPos_.size(), 0);
     EXPECT_EQ(info->itemInfos_.size(), 0);
     algo->Layout(AceType::RawPtr(frameNode_));
 
@@ -1323,6 +1331,60 @@ HWTEST_F(WaterFlowSegmentTest, Illegal002, TestSize.Level1)
     EXPECT_EQ(info->itemInfos_[0].mainSize, 0.0f);
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 9);
+}
+
+/**
+ * @tc.name: Illegal003
+ * @tc.desc: Update Section with empty sections.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Illegal003, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(45);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_10);
+    CreateDone();
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info->currentOffset_, -300.0f);
+    EXPECT_EQ(info->startIndex_, 3);
+    EXPECT_EQ(info->endIndex_, 12);
+
+    /**
+     * @tc.steps: step1. update [sections_] with empty section, without changing the dataSource.
+     * @tc.expected: currentOffset_ is set to 0.0f, cache information is reset.
+     */
+    auto sectionLength = secObj->GetSectionInfo().size();
+    secObj->ChangeData(0, sectionLength, {});
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(info->currentOffset_, 0.0f);
+    EXPECT_TRUE(info->itemInfos_.empty());
+    EXPECT_EQ(info->segmentStartPos_.size(), 1);
+    EXPECT_TRUE(info->endPosArray_.empty());
+    EXPECT_TRUE(info->segmentTails_.empty());
+    EXPECT_TRUE(info->segmentCache_.empty());
+    EXPECT_TRUE(info->margins_.empty());
+
+    /**
+     * @tc.steps: step2. recover [sections_].
+     * @tc.expected: layout at 0.0f.
+     */
+    secObj->ChangeData(0, 0, SECTION_10);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->currentOffset_, 0.0f);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 7);
+    EXPECT_EQ(info->itemInfos_.size(), 8);
+    EXPECT_EQ(info->segmentStartPos_.size(), 4);
+    EXPECT_EQ(info->endPosArray_.size(), 4);
+    EXPECT_EQ(info->segmentTails_.size(), 7);
+    EXPECT_EQ(info->segmentCache_.size(), 9);
+    EXPECT_EQ(info->margins_.size(), 7);
 }
 
 /**

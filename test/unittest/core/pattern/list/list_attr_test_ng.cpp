@@ -274,7 +274,7 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("sticky"), "Sticky.Opacity");
     EXPECT_EQ(json->GetString("editable"), "EditMode.Movable");
     swipeAction = json->GetObject("swipeAction");
-    EXPECT_EQ(swipeAction->GetString("edgeEffect"), "SwipeEdgeEffect.Node");
+    EXPECT_EQ(swipeAction->GetString("edgeEffect"), "SwipeEdgeEffect.None");
 
     /**
      * @tc.steps: step4. Change some property, Call ToJsonValue()
@@ -1251,6 +1251,31 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign010, TestSize.Level1)
     pattern_->OnScrollSnapCallback(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
+}
+
+/**
+ * @tc.name: AttrScrollSnapAlign010
+ * @tc.desc: Test FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign::END
+     * @tc.expected: not contentStartOffset
+     */
+    CreateSnapList(V2::ScrollSnapAlign::END);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+
+    /**
+     * @tc.steps: step2. change ListItem height
+     * @tc.expected: The item(index:2) align to end
+     */
+    
+    SetListItemHeight(0, 200.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 20.0f);
 }
 
 /**

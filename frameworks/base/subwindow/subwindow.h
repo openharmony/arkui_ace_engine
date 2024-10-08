@@ -94,6 +94,10 @@ public:
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
     virtual Rect GetUIExtensionHostWindowRect() const = 0;
+    virtual NG::RectF GetWindowRect() const
+    {
+        return NG::RectF();
+    }
     virtual bool IsFreeMultiWindow() const = 0;
     virtual void OnFreeMultiWindowSwitch(bool enable) = 0;
     virtual int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) = 0;
@@ -133,6 +137,16 @@ public:
     {
         toastWindowType_ = type;
         SetAboveApps(true);
+    }
+
+    void SetMainWindowId(uint32_t mainWindowId)
+    {
+        mainWindowId_ = mainWindowId;
+    }
+
+    uint32_t GetMainWindowId() const
+    {
+        return mainWindowId_;
     }
 
     ToastWindowType GetToastWindowType() const
@@ -178,6 +192,8 @@ private:
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
     ToastWindowType toastWindowType_ = ToastWindowType::TOAST_IN_TYPE_TOAST;
+    // toast main window ID
+    uint32_t mainWindowId_ = 0;
 };
 
 } // namespace OHOS::Ace

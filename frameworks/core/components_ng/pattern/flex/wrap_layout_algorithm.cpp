@@ -51,6 +51,15 @@ bool IsColumnReverse(WrapDirection direction)
     }
 }
 
+void WrapLayoutAlgorithm::UpdatePercentSensitive(LayoutWrapper *layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper && layoutWrapper->GetHostTag() == V2::FLEX_ETS_TAG);
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    layoutAlgorithmWrapper->SetPercentWidth(true);
+    layoutAlgorithmWrapper->SetPercentHeight(true);
+}
+
 void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -62,6 +71,7 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     outOfLayoutChildren_.clear();
     auto flexProp = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(flexProp);
+    UpdatePercentSensitive(layoutWrapper);
     direction_ = flexProp->GetWrapDirection().value_or(WrapDirection::HORIZONTAL);
     // alignment for alignContent, alignment when cross axis has extra space
     alignment_ = flexProp->GetAlignment().value_or(WrapAlignment::START);

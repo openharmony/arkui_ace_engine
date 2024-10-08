@@ -38,7 +38,9 @@ public:
         auto copy = MakeRefPtr<NavDestinationLayoutPropertyBase>();
         copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         copy->propHideTitleBar_ = CloneHideTitleBar();
+        copy->propIsAnimatedTitleBar_ = CloneIsAnimatedTitleBar();
         copy->propHideToolBar_ = CloneHideToolBar();
+        copy->propIsAnimatedToolBar_ = CloneIsAnimatedToolBar();
         return copy;
     }
 
@@ -46,19 +48,25 @@ public:
     {
         LayoutProperty::Reset();
         ResetHideTitleBar();
+        ResetIsAnimatedTitleBar();
         ResetHideToolBar();
+        ResetIsAnimatedToolBar();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideTitleBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideToolBar, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IgnoreLayoutSafeArea, SafeAreaExpandOpts, PROPERTY_UPDATE_MEASURE);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimatedTitleBar, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimatedToolBar, bool, PROPERTY_UPDATE_MEASURE);
 protected:
     void UpdateBaseLayoutProperty(const NavDestinationLayoutPropertyBase* layoutProperty)
     {
         LayoutProperty::UpdateLayoutProperty(layoutProperty);
-        propHideTitleBar_ = CloneHideTitleBar();
-        propHideToolBar_ = CloneHideToolBar();
+        propHideTitleBar_ = layoutProperty->GetHideTitleBar();
+        propIsAnimatedTitleBar_ = layoutProperty->GetIsAnimatedTitleBar();
+        propHideToolBar_ = layoutProperty->GetHideToolBar();
+        propIsAnimatedToolBar_ = layoutProperty->GetIsAnimatedToolBar();
     }
 };
 

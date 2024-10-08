@@ -766,6 +766,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest015, TestSize.Level1)
     safeAreamanager->SetIsAtomicService(true);
     pipeline->safeAreaManager_ = safeAreamanager;
 
+    node->SetActive(true);
     EXPECT_TRUE(layoutWrapper->AvoidKeyboard());
     EXPECT_FALSE(layoutWrapper->AvoidKeyboard(false));
     EXPECT_TRUE(node->GetFocusHub());
@@ -963,6 +964,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest021, TestSize.Level1)
     safeAreamanager->SetIsAtomicService(true);
     pipeline->safeAreaManager_ = safeAreamanager;
 
+    node->SetActive(true);
     EXPECT_TRUE(layoutWrapper->AvoidKeyboard());
     EXPECT_FALSE(layoutWrapper->AvoidKeyboard(false));
     EXPECT_TRUE(LessNotEqual(safeAreamanager->GetKeyboardOffset(), 0.0));

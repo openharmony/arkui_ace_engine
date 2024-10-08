@@ -50,7 +50,7 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test001, TestSize.Level1)
     clicRecognizerFirst->InitGlobalValue(SourceType::MOUSE);
     clicRecognizerSecond->InitGlobalValue(SourceType::MOUSE);
     clicRecognizerThird->InitGlobalValue(SourceType::MOUSE);
-    SUCCEED();
+    EXPECT_NE(clicRecognizerFirst, clicRecognizerSecond);
 }
 
 /**
@@ -217,7 +217,7 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test006, TestSize.Level1)
     event.sourceTool = SourceTool::PEN;
     event.originalId = 1;
     fingersRecognizer->UpdateTouchPointWithAxisEvent(event);
-    SUCCEED();
+    EXPECT_EQ(event.originalId, 1);
 }
 
 /**
@@ -232,18 +232,15 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test007, TestSize.Level1)
     fingersRecognizer->refereeState_ = RefereeState::SUCCEED;
     fingersRecognizer->currentFingers_ = 0;
     fingersRecognizer->MultiFingersRecognizer::CleanRecognizerState();
-    SUCCEED();
     fingersRecognizer->refereeState_ = RefereeState::FAIL;
     fingersRecognizer->currentFingers_ = 0;
     fingersRecognizer->MultiFingersRecognizer::CleanRecognizerState();
-    SUCCEED();
     fingersRecognizer->refereeState_ = RefereeState::DETECTING;
     fingersRecognizer->currentFingers_ = 0;
     fingersRecognizer->MultiFingersRecognizer::CleanRecognizerState();
-    SUCCEED();
     fingersRecognizer->refereeState_ = RefereeState::SUCCEED;
     fingersRecognizer->currentFingers_ = 1;
     fingersRecognizer->MultiFingersRecognizer::CleanRecognizerState();
-    SUCCEED();
+    EXPECT_EQ(fingersRecognizer->currentFingers_, 1);
 }
 }; // namespace OHOS::Ace::NG

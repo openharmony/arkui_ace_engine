@@ -20,6 +20,8 @@
 #define protected public
 #define private public
 
+#include "test/mock/core/render/mock_render_context.h"
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
@@ -28,7 +30,6 @@
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -169,6 +170,7 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest002, TestSize.Level
     srcPage_->AddChild(srcNodeShareId1);
     srcPage_->GetPattern<PagePattern>()->sharedTransitionMap_.emplace(SHARE_ID1, srcNodeShareId1);
     auto destNodeShareId1 = CreateSharedNode(SHARE_ID1, DEST_DURATION, DEST_SIZE);
+    destNodeShareId1->GetRenderContext()->UpdatePaintRect(RectF(1.0, 1.0, 1.0, 1.0));
     destPage_->AddChild(destNodeShareId1);
     destPage_->GetPattern<PagePattern>()->sharedTransitionMap_.emplace(SHARE_ID1, destNodeShareId1);
 
@@ -373,6 +375,7 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest008, TestSize.Level
     auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
     auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
     destNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 1.0));
+    destNode->GetRenderContext()->UpdatePaintRect(RectF(1.0, 1.0, 1.0, 1.0));
     srcNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 1.0));
     auto option = std::make_shared<SharedTransitionOption>();
     SharedTransitionExchange test("test", option);
@@ -392,6 +395,7 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest009, TestSize.Level
     auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
     auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
     destNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 1.0));
+    destNode->GetRenderContext()->UpdatePaintRect(RectF(1.0, 1.0, 1.0, 1.0));
     srcNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 0.0));
     auto width = CalcLength::FromString("1px");
     auto height = CalcLength::FromString("1px");
@@ -425,6 +429,7 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest010, TestSize.Level
     auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
     auto srcNode = FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
     destNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 1.0));
+    destNode->GetRenderContext()->UpdatePaintRect(RectF(1.0, 1.0, 1.0, 1.0));
     srcNode->GetGeometryNode()->SetFrameSize(SizeF(1.0, 0.0));
     auto width = CalcLength::FromString("1px");
     auto height = CalcLength::FromString("1px");

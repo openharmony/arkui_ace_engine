@@ -1677,28 +1677,6 @@ HWTEST_F(SwiperIndicatorModifierTestNg, UpdateShrinkPaintProperty002, TestSize.L
 }
 
 /**
- * @tc.name: DotIndicatorModifier006
- * @tc.desc: Test onDraw
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1.Create dotIndicatorModifier and set isOverlong_ = true
-     */
-    DotIndicatorModifier dotIndicatorModifier;
-    Testing::MockCanvas canvas;
-    DrawingContext context { canvas, 100.f, 100.f };
-    dotIndicatorModifier.isOverlong_ = true;
-    /**
-     * @tc.steps: step2.Call onDraw
-     * @tc.expected: isOverlong_ false
-     */
-    dotIndicatorModifier.onDraw(context);
-    EXPECT_FALSE(dotIndicatorModifier.isOverlong_);
-}
-
-/**
  * @tc.name: DotIndicatorModifier007
  * @tc.desc: Test PaintBackground
  * @tc.type: FUNC

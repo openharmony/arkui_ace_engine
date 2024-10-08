@@ -1420,6 +1420,14 @@
         "name": "OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen"
     },
     {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_AddCustomProperty"
+    },
+    {
+        "first_introduced": "14",
+        "name": "OH_ArkUI_NodeUtils_RemoveCustomProperty"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_ArkUI_ListChildrenMainSizeOption_Create"
     },

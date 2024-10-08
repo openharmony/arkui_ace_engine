@@ -87,9 +87,11 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetSelectedFont(ArkUIRuntimeCallIn
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> styleValArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if ((fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) && (weightArg->IsNull() || weightArg->IsUndefined()) &&
-        (fontFamilyArg->IsNull() || fontFamilyArg->IsUndefined()) &&
-        (styleValArg->IsNull() || styleValArg->IsUndefined())) {
+    bool isUndefinedValue = (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) &&
+                            (weightArg->IsNull() || weightArg->IsUndefined()) &&
+                            (fontFamilyArg->IsNull() || fontFamilyArg->IsUndefined()) &&
+                            (styleValArg->IsNull() || styleValArg->IsUndefined());
+    if (isUndefinedValue) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetSelectedFont(nativeNode);
     }
     CalcDimension fontSizeData(DEFAULT_FONT_SIZE_VAL);
@@ -137,9 +139,11 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupFont(ArkUIRuntimeCallInfo*
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> styleValArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if ((fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) && (weightArg->IsNull() || weightArg->IsUndefined()) &&
-        (fontFamilyArg->IsNull() || fontFamilyArg->IsUndefined()) &&
-        (styleValArg->IsNull() || styleValArg->IsUndefined())) {
+    bool isUndefinedValue = (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) &&
+                            (weightArg->IsNull() || weightArg->IsUndefined()) &&
+                            (fontFamilyArg->IsNull() || fontFamilyArg->IsUndefined()) &&
+                            (styleValArg->IsNull() || styleValArg->IsUndefined());
+    if (isUndefinedValue) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetPopupFont(nativeNode);
     }
     CalcDimension fontSizeData(Dimension(DEFAULT_POPUP_ITEM_FONT_SIZE, DimensionUnit::FP));
@@ -187,9 +191,11 @@ ArkUINativeModuleValue AlphabetIndexerBridge::SetFont(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> styleValArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if ((fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) && (weightArg->IsNull() || weightArg->IsUndefined()) &&
-        (fontFamilyArg->IsNull() || fontFamilyArg->IsUndefined()) &&
-        (styleValArg->IsNull() || styleValArg->IsUndefined())) {
+    bool isUndefinedValue = (fontSizeArg->IsNull() || fontSizeArg->IsUndefined()) &&
+                            (weightArg->IsNull() || weightArg->IsUndefined()) &&
+                            (fontFamilyArg->IsNull() || fontFamilyArg->IsUndefined()) &&
+                            (styleValArg->IsNull() || styleValArg->IsUndefined());
+    if (isUndefinedValue) {
         GetArkUINodeModifiers()->getAlphabetIndexerModifier()->resetAlphabetIndexerFont(nativeNode);
     }
     CalcDimension fontSizeData(DEFAULT_FONT_SIZE_VAL);

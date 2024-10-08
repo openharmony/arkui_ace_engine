@@ -45,15 +45,17 @@ public:
     void SetAdaptiveWidth(bool state);
     void SetAdaptiveHeight(bool state);
 
-    virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
+    void SearchExtensionElementInfoByAccessibilityId(
+        int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+    void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+    void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
-    virtual void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+    void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
-    virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+    bool TransferExecuteAction(
+        int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t offset) override;
 
     void DumpInfo() override;

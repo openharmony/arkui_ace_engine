@@ -551,9 +551,12 @@ void HandleGestureEvent(ArkUINodeEvent* event)
         return;
     }
     ArkUI_UIInputEvent uiEvent;
-    if (gestureEvent->eventData.source == static_cast<int32_t>(UI_INPUT_EVENTT_SOURCE_TYPE_MOUSE)) {
+    if (gestureEvent->eventData.inputEventType == static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_MOUSE)) {
         uiEvent.eventTypeId = C_MOUSE_EVENT_ID;
         uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
+    } else if (gestureEvent->eventData.inputEventType == static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_AXIS)) {
+        uiEvent.eventTypeId = C_AXIS_EVENT_ID;
+        uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_AXIS;
     } else {
         uiEvent.eventTypeId = C_TOUCH_EVENT_ID;
         uiEvent.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;

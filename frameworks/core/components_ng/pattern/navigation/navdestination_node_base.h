@@ -32,6 +32,56 @@ public:
         : GroupNode(tag, nodeId, pattern) {}
     ~NavDestinationNodeBase() override = default;
 
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    void SetMenu(const RefPtr<UINode>& menu)
+    {
+        menu_ = menu;
+    }
+
+    const RefPtr<UINode>& GetMenu() const
+    {
+        return menu_;
+    }
+
+    void SetToolbarContainer(const RefPtr<UINode>& menu)
+    {
+        toolbarMenu_ = menu;
+    }
+
+    const RefPtr<UINode>& GetToolbarContainer() const
+    {
+        return toolbarMenu_;
+    }
+
+    void SetMenuNode(const RefPtr<UINode>& menuNode)
+    {
+        moreMenuNode_ = menuNode;
+    }
+
+    void SetToolbarMenuNode(const RefPtr<UINode>& menuNode)
+    {
+        toolbarMoreMenuNode_ = menuNode;
+    }
+
+    void SetLandscapeMenuNode(const RefPtr<UINode>& moreLandscapeMenuNode)
+    {
+        moreLandscapeMenuNode_ = moreLandscapeMenuNode;
+    }
+
+    void SetLandscapeMenu(const RefPtr<UINode>& menu)
+    {
+        landscapeMenu_ = menu;
+    }
+
+    const RefPtr<UINode>& GetLandscapeMenu() const
+    {
+        return landscapeMenu_;
+    }
+
     void SetContentNode(const RefPtr<UINode>& contentNode)
     {
         contentNode_ = contentNode;
@@ -52,9 +102,61 @@ public:
         return titleBarNode_;
     }
 
+    void SetToolBarNode(const RefPtr<UINode>& toolBarNode)
+    {
+        toolBarNode_ = toolBarNode;
+    }
+
+    const RefPtr<UINode>& GetToolBarNode() const
+    {
+        return toolBarNode_;
+    }
+
+    void SetPreToolBarNode(const RefPtr<UINode>& preToolBarNode)
+    {
+        preToolBarNode_ = preToolBarNode;
+    }
+
+    const RefPtr<UINode>& GetPreToolBarNode() const
+    {
+        return preToolBarNode_;
+    }
+
+    void SetToolBarDividerNode(const RefPtr<UINode>& toolBarDividerNode)
+    {
+        toolBarDividerNode_ = toolBarDividerNode;
+    }
+
+    const RefPtr<UINode>& GetToolBarDividerNode() const
+    {
+        return toolBarDividerNode_;
+    }
+
+    void SetIsUseToolbarConfiguration(bool isNewToolbar)
+    {
+        isNewToolbar_ = isNewToolbar;
+    }
+
+    bool IsUseToolbarConfiguration() const
+    {
+        return isNewToolbar_;
+    }
+
+    std::string GetBarItemsString(bool isMenu) const;
+
     // custom node checking
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevTitleIsCustom, bool);
     void OnPrevTitleIsCustomUpdate(bool value) {}
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevMenuIsCustom, bool);
+    void OnPrevMenuIsCustomUpdate(bool value) {}
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PrevToolBarIsCustom, bool);
+    void OnPrevToolBarIsCustomUpdate(bool value) {}
+
+    // node operation related
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(MenuNodeOperation, ChildNodeOperation);
+    void OnMenuNodeOperationUpdate(ChildNodeOperation value) {}
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ToolBarNodeOperation, ChildNodeOperation);
+    void OnToolBarNodeOperationUpdate(ChildNodeOperation value) {}
 
     void SetTransitionType(PageTransitionType type)
     {
@@ -73,7 +175,17 @@ public:
 
 protected:
     RefPtr<UINode> contentNode_;
+    RefPtr<UINode> menu_;
+    RefPtr<UINode> toolbarMenu_;
+    RefPtr<UINode> landscapeMenu_;
+    RefPtr<UINode> moreMenuNode_;
+    RefPtr<UINode> toolbarMoreMenuNode_;
+    RefPtr<UINode> moreLandscapeMenuNode_;
     RefPtr<UINode> titleBarNode_;
+    RefPtr<UINode> toolBarNode_;
+    RefPtr<UINode> preToolBarNode_;
+    RefPtr<UINode> toolBarDividerNode_;
+    bool isNewToolbar_ = false;
     PageTransitionType transitionType_ = PageTransitionType::NONE;
 };
 } // namespace OHOS::Ace::NG

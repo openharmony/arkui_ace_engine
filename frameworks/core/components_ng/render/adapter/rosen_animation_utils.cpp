@@ -48,7 +48,6 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
     if (rateRange) {
         timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_ });
     }
-    timingProtocol.SetInstanceId(Container::CurrentIdSafelyWithCheck());
     return timingProtocol;
 }
 std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
@@ -59,7 +58,10 @@ std::function<void()> GetWrappedCallback(const std::function<void()>& callback)
     auto wrappedOnFinish = [onFinish = callback, instanceId = Container::CurrentIdSafelyWithCheck()]() {
         ContainerScope scope(instanceId);
         auto taskExecutor = Container::CurrentTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
+        if (!taskExecutor) {
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "taskExecutor is nullptr");
+            return;
+        }
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             onFinish();
             return;

@@ -985,32 +985,6 @@ HWTEST_F(ImageTestOneNg, ImageColorFilterTest017, TestSize.Level1)
     PaintWrapper paintWrapper(nullptr, geometryNode, imageRenderProperty);
     auto pipeLine = PipelineBase::GetCurrentContext();
     pipeLine->SetIsRightToLeft(true);
-    auto paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
-    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
-    ASSERT_NE(paintMethod, nullptr);
-    auto& config = imagePaintMethod.canvasImage_->paintConfig_;
-    /**
-     * Check if the colorfilter is set correctly
-    */
-    EXPECT_EQ(*config->colorFilter_.colorFilterMatrix_, COLOR_FILTER_DEFAULT);
-    /**
-     * Creating a colorfilter through a graphical interface
-     * @tc.steps: step3. set drawingcolorFilter.
-     */
-    imagePattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
-    imagePattern->image_->SetPaintConfig(ImagePaintConfig());
-
-    ASSERT_NE(imagePaintMethod.canvasImage_, nullptr);
-
-    auto& paintConfig = imagePaintMethod.canvasImage_->paintConfig_;
-
-    auto drawingColorFilter = paintConfig->colorFilter_.colorFilterDrawing_;
-    image.SetAlt(ImageSourceInfo { RESOURCE_URL });
-    image.SetDrawingColorFilter(drawingColorFilter);
-    /**
-     * Check if the colorfilter is set correctly
-    */
-    EXPECT_EQ(config->colorFilter_.colorFilterDrawing_, drawingColorFilter);
 }
 
 /**

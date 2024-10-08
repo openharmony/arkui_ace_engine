@@ -21,6 +21,8 @@
 #include <sstream>
 
 #include "form_info_base.h"
+#include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_transaction.h"
 
 #include "base/log/log.h"
 #include "core/common/container.h"
@@ -726,7 +728,21 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height, float b
         TAG_LOGE(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
         return;
     }
-    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
+    WindowSizeChangeReason sizeChangeReason = WindowSizeChangeReason::UNDEFINED;
+    if (FormManager::GetInstance().IsSizeChangeByRotate()) {
+        sizeChangeReason = WindowSizeChangeReason::ROTATION;
+    }
+    std::shared_ptr<Rosen::RSTransaction> transaction;
+    if (sizeChangeReason != WindowSizeChangeReason::UNDEFINED) {
+        if (FormManager::GetInstance().GetRSTransaction().lock()) {
+            transaction = FormManager::GetInstance().GetRSTransaction().lock();
+        } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+            transaction = transactionController->GetRSTransaction();
+        }
+    }
+
+    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height,
+        static_cast<uint32_t>(sizeChangeReason), transaction, borderWidth);
 }
 
 void FormManagerDelegate::OnFormSurfaceChange(float width, float height, float borderWidth)

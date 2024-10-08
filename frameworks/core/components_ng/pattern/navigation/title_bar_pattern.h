@@ -81,19 +81,9 @@ public:
         return tempTitleOffsetY_;
     }
 
-    float GetTempTitleOffsetX() const
-    {
-        return tempTitleOffsetX_;
-    }
-
     float GetTempSubTitleOffsetY() const
     {
         return tempSubTitleOffsetY_;
-    }
-
-    float GetTempSubTitleOffsetX() const
-    {
-        return tempSubTitleOffsetX_;
     }
 
     float GetMaxTitleBarHeight() const
@@ -214,11 +204,6 @@ public:
         currentTitleOffsetY_ = currentTitleOffsetY;
     }
 
-    void SetCurrentTitleOffsetX(float currentTitleOffsetX)
-    {
-        currentTitleOffsetX_ = currentTitleOffsetX;
-    }
-
     void SetCurrentTitleBarHeight(float currentTitleBarHeight);
 
     void SetIsTitleChanged(bool isTitleChanged)
@@ -226,40 +211,6 @@ public:
         isTitleChanged_ = isTitleChanged;
     }
 
-    void SetTitleBarMenuItems(const std::vector<NG::BarItem>& menuItems)
-    {
-        titleBarMenuItems_ = menuItems;
-    }
-
-    const std::vector<NG::BarItem>& GetTitleBarMenuItems() const
-    {
-        return titleBarMenuItems_;
-    }
-
-    int32_t GetMenuNodeId() const
-    {
-        return menuNodeId_.value();
-    }
-
-    void SetMenuNodeId(const int32_t menuNodeId)
-    {
-        menuNodeId_ = menuNodeId;
-    }
-
-    bool HasMenuNodeId() const
-    {
-        return menuNodeId_.has_value();
-    }
-
-    int32_t GetMaxMenuNum() const
-    {
-        return maxMenuNums_;
-    }
-
-    void SetMaxMenuNum(int32_t maxMenu)
-    {
-        maxMenuNums_ = maxMenu;
-    }
     void OnCoordScrollStart();
     float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
@@ -294,10 +245,6 @@ public:
     void UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& hostNode);
     void UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode);
 
-    void UpdateOffsetXToAvoidSideBar();
-    void ResetSideBarControlButtonInfo();
-    void UpdateSideBarControlButtonInfo(bool needToAvoidSideBar, OffsetF offset, SizeF size);
-
     bool IsFontSizeSettedByDeveloper() const
     {
         return isFontSizeSettedByDeveloper_;
@@ -312,19 +259,33 @@ public:
         shouldResetSubTitleProperty_ = reset;
     }
 
-    RectF GetControlButtonInfo() const
-    {
-        return controlButtonRect_;
-    }
-
-    bool IsNecessaryToAvoidSideBar() const
-    {
-        return needToAvoidSideBar_;
-    }
-
-    void InitSideBarButtonUpdateCallbackIfNeeded();
-
     void OnLanguageConfigurationUpdate() override;
+
+    void UpdateHalfFoldHoverChangedCallbackId(std::optional<int32_t> id)
+    {
+        halfFoldHoverChangedCallbackId_ = id;
+    }
+
+    bool HasHalfFoldHoverChangedCallbackId()
+    {
+        return halfFoldHoverChangedCallbackId_.has_value();
+    }
+
+    void InitFoldCreaseRegion();
+
+    std::vector<Rect> GetFoldCreaseRects()
+    {
+        return currentFoldCreaseRegion_;
+    }
+
+    void OnAttachToMainTree() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        InitFoldCreaseRegion();
+    }
+
+    float GetTitleBarHeightLessThanMaxBarHeight() const;
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -339,7 +300,6 @@ private:
 
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
@@ -348,9 +308,7 @@ private:
     void SetMaxTitleBarHeight();
     void SetTempTitleBarHeight(float offsetY);
     void SetTempTitleOffsetY();
-    void SetTempTitleOffsetX();
     void SetTempSubTitleOffsetY();
-    void SetTempSubTitleOffsetX();
     void SetDefaultTitleFontSize();
     void SetDefaultSubtitleOpacity();
 
@@ -360,7 +318,6 @@ private:
     void UpdateSubTitleOpacity(const double &value);
     void UpdateTitleModeChange();
     void MountTitle(const RefPtr<TitleBarNode>& hostNode);
-    void MountMenu(const RefPtr<TitleBarNode>& hostNode, bool isWindowSizeChange = false);
 
     void UpdateTitleBarByCoordScroll(float offset);
     void SetTitleStyleByCoordScrollOffset(float offset);
@@ -380,15 +337,13 @@ private:
     void ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty,
         NavigationTitleMode titleMode, bool hasSubTitle, bool parentIsNavDest);
+    void ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
+        NavigationTitleMode titleMode, bool parentIsNavDest);
     void ApplyTitleModifierIfNeeded(const RefPtr<TitleBarNode>& hostNode);
     void ApplyTitleModifier(const RefPtr<FrameNode>& textNode,
         const TextStyleApplyFunc& applyFunc, bool needCheckFontSizeIsSetted);
     void DumpInfo() override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
-
-    RefPtr<FrameNode> GetParentSideBarContainerNode(const RefPtr<TitleBarNode>& titleBarNode);
-    void UpdateTitlePositionInfo();
-    float GetNavLeftPadding(float parentWidth);
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
@@ -440,27 +395,15 @@ private:
 
     NavigationTitlebarOptions options_;
 
-    std::vector<NG::BarItem> titleBarMenuItems_;
-    std::optional<int32_t> menuNodeId_;
-    int32_t maxMenuNums_ = -1;
-
     WeakPtr<FrameNode> largeFontPopUpDialogNode_;
     std::optional<int32_t> moveIndex_;
 
     bool isFontSizeSettedByDeveloper_ = false;
     bool shouldResetMainTitleProperty_ = true;
     bool shouldResetSubTitleProperty_ = true;
-    float moveRatioX_ = 0.0f;
-    float minTitleOffsetX_ = 0.0f;
-    float maxTitleOffsetX_ = 0.0f;
-    float defaultTitleOffsetX_ = 0.0f;
-    float currentTitleOffsetX_ = 0.0f;
-    float tempTitleOffsetX_ = 0.0f;
-    float tempSubTitleOffsetX_ = 0.0f;
-    float titleMoveDistanceX_ = 0.0f;
-    bool needToAvoidSideBar_ = false;
-    RectF controlButtonRect_;
-    bool isScrolling_ = false;
+
+    std::optional<int32_t> halfFoldHoverChangedCallbackId_;
+    std::vector<Rect> currentFoldCreaseRegion_;
 };
 
 } // namespace OHOS::Ace::NG

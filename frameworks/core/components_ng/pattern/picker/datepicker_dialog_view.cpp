@@ -460,23 +460,9 @@ void DatePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &monthAn
     auto monthAndDayLayoutProperty = monthAndDayPickerNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(monthAndDayLayoutProperty);
     monthAndDayLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
+    monthAndDayLayoutProperty->UpdateLayoutWeight(switchTimePickerFlag_ ? RATIO_FOUR : 0);
     monthAndDayPickerNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto ampmNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(0));
-    CHECK_NULL_VOID(ampmNode);
-    auto ampmLayoutProperty = ampmNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(ampmLayoutProperty);
-    ampmLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
-    ampmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto hourNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(1));
-    CHECK_NULL_VOID(hourNode);
-    auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
-    hourLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
-    auto minuteNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(2));
-    CHECK_NULL_VOID(minuteNode);
-    auto minuteLayoutProperty = minuteNode->GetLayoutProperty<LayoutProperty>();
-    minuteLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
-    hourNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    minuteNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    UpdateTimePickerChildrenStatus(timePickerNode);
     auto buttonCancelNode = AceType::DynamicCast<FrameNode>(contentRow->GetChildAtIndex(0));
     CHECK_NULL_VOID(buttonCancelNode);
     auto cancelButtonLayoutProperty = buttonCancelNode->GetLayoutProperty<LayoutProperty>();
@@ -506,32 +492,52 @@ void DatePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &monthAn
 
 void DatePickerDialogView::SwitchDatePickerPage(const RefPtr<FrameNode>& dateNode, bool IsSwitchByTitle)
 {
-    auto yearNode = AceType::DynamicCast<FrameNode>(dateNode->GetChildAtIndex(0));
-    CHECK_NULL_VOID(yearNode);
-    auto yearLayoutProperty = yearNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(yearLayoutProperty);
-    auto monthNode = AceType::DynamicCast<FrameNode>(dateNode->GetChildAtIndex(1));
-    CHECK_NULL_VOID(monthNode);
-    auto monthLayoutProperty = monthNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(monthLayoutProperty);
-    auto dayNode = AceType::DynamicCast<FrameNode>(dateNode->GetLastChild());
-    CHECK_NULL_VOID(dayNode);
-    auto dayLayoutProperty = dayNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(dayLayoutProperty);
-    if (!switchDatePickerFlag_ || IsSwitchByTitle) {
-        yearLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        monthLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        dayLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        if (IsSwitchByTitle) {
-            switchDatePickerFlag_ = false;
+    for (uint32_t index = 0; index < dateNode->GetChildren().size(); index++) {
+        auto dateStackNode = AceType::DynamicCast<FrameNode>(dateNode->GetChildAtIndex(index));
+        CHECK_NULL_VOID(dateStackNode);
+        auto layoutProperty = dateStackNode->GetLayoutProperty<LayoutProperty>();
+        for (auto k = 0; k < dateStackNode->GetChildren().size(); k++) {
+            auto dateChildNode = AceType::DynamicCast<FrameNode>(dateStackNode->GetChildAtIndex(k));
+            CHECK_NULL_VOID(dateChildNode);
+            auto dateChildNodeLayoutProperty = dateChildNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_VOID(dateChildNodeLayoutProperty);
+            if ((!switchDatePickerFlag_ || IsSwitchByTitle)) {
+                dateChildNodeLayoutProperty->UpdateVisibility((0 == index) ? VisibleType::VISIBLE : VisibleType::GONE);
+                switchDatePickerFlag_ = false;
+                layoutProperty->UpdateLayoutWeight((0 == index) ? RATIO_TWO : 0);
+            } else {
+                dateChildNodeLayoutProperty->UpdateVisibility((0 == index) ? VisibleType::GONE : VisibleType::VISIBLE);
+                layoutProperty->UpdateLayoutWeight((0 == index) ? 0 : 1);
+            }
+            dateChildNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         }
-    } else {
-        yearLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        monthLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        dayLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     }
     switchDatePickerFlag_ = !switchDatePickerFlag_;
     dateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void DatePickerDialogView::UpdateTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode)
+{
+    for (uint32_t i = 0; i < timePickerNode->GetChildren().size(); i++) {
+        auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
+        CHECK_NULL_VOID(childStackNode);
+        auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
+            auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
+            CHECK_NULL_VOID(childNode);
+            auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_VOID(childLayoutProperty);
+            if (i == 0) {
+                childLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
+                layoutProperty->UpdateLayoutWeight(switchTimePickerFlag_ ? RATIO_THREE : 0);
+            } else {
+                childLayoutProperty->UpdateVisibility(switchTimePickerFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
+                layoutProperty->UpdateLayoutWeight(switchTimePickerFlag_ ? 0 : RATIO_TWO);
+            }
+            childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        }
+    }
 }
 
 void DatePickerDialogView::HideContentChildrenButton(const RefPtr<FrameNode>& contentRow)
@@ -1072,6 +1078,7 @@ void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNod
         } else {
             layoutProperty->UpdateVisibility(VisibleType::GONE);
         }
+        layoutProperty->UpdateLayoutWeight(0);
         stackYearNode->MountToParent(dateNode);
     }
 }
@@ -1623,21 +1630,29 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     SetTimeNodeColumnWeight(timeNode, settingData);
     timeNode->MountToParent(pickerRow);
     if (NeedAdaptForAging() && (!settingData.useMilitary)) {
-        auto hourNode = AceType::DynamicCast<FrameNode>(timeNode->GetChildAtIndex(1));
-        CHECK_NULL_RETURN(hourNode, nullptr);
-        auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_RETURN(hourLayoutProperty, nullptr);
-        hourLayoutProperty->UpdateVisibility(VisibleType::GONE);
-
-        auto minuteNode = AceType::DynamicCast<FrameNode>(timeNode->GetChildAtIndex(2));
-        CHECK_NULL_RETURN(minuteNode, nullptr);
-        auto minuteLayoutProperty = minuteNode->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_RETURN(minuteLayoutProperty, nullptr);
-        minuteLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        hourNode->MarkModifyDone();
-        minuteNode->MarkModifyDone();
+        CHECK_NULL_RETURN(InitTimePickerChildrenStatus(timeNode), nullptr);
     }
     return timeNode;
+}
+
+bool DatePickerDialogView::InitTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode)
+{
+    for (uint32_t index = 1; index < timePickerNode->GetChildren().size(); index++) {
+        auto timeStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(index));
+        CHECK_NULL_RETURN(timeStackNode, false);
+        auto layoutProperty = timeStackNode->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        for (uint32_t k = 0; k < timeStackNode->GetChildren().size(); k++) {
+            auto timeChildNode = AceType::DynamicCast<FrameNode>(timeStackNode->GetChildAtIndex(k));
+            CHECK_NULL_RETURN(timeChildNode, false);
+            auto timeChildNodeLayoutProperty = timeChildNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_RETURN(timeChildNodeLayoutProperty, false);
+            timeChildNodeLayoutProperty->UpdateVisibility(VisibleType::GONE);
+            timeChildNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        }
+        layoutProperty->UpdateLayoutWeight(0);
+    }
+    return true;
 }
 
 std::function<void()> DatePickerDialogView::CreateAndSetDialogSwitchEvent(const RefPtr<FrameNode>& pickerStack,
@@ -2055,8 +2070,7 @@ const Dimension DatePickerDialogView::ConvertFontScaleValue(
     Dimension fontSizeValueResultVp(fontSizeLimit.Value(), DimensionUnit::VP);
 
     if (fontSizeValue.Unit() == DimensionUnit::VP) {
-        fontSizeValueResultVp = std::min(fontSizeValueResultVp, fontSizeValue);
-        return fontSizeValueResultVp;
+        return isUserSetFont ? std::min(fontSizeValueResultVp, fontSizeValue) : fontSizeValue;
     }
 
     if (NeedAdaptForAging()) {
