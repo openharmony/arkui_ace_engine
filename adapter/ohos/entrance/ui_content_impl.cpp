@@ -2142,7 +2142,7 @@ void UIContentImpl::SetBackgroundColor(uint32_t color)
         TaskExecutor::TaskType::UI, "ArkUISetAppBackgroundColor");
 }
 
-void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintrect)
+void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintRect)
 {
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2155,12 +2155,30 @@ void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintrect)
     CHECK_NULL_VOID(stageNode);
     auto renderContext = stageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto paintRectf = renderContext->GetPaintRectWithoutTransform();
+    auto rect = renderContext->GetPaintRectWithoutTransform();
     auto offset = stageNode->GetPaintRectOffset(false);
-    paintrect.posX_ = static_cast<int>(offset.GetX());
-    paintrect.posY_ = static_cast<int>(offset.GetY());
-    paintrect.width_ = static_cast<uint32_t>(paintRectf.Width());
-    paintrect.height_ = static_cast<uint32_t>(paintRectf.Height());
+    paintRect.posX_ = static_cast<int32_t>(offset.GetX());
+    paintRect.posY_ = static_cast<int32_t>(offset.GetY());
+    paintRect.width_ = static_cast<uint32_t>(rect.Width());
+    paintRect.height_ = static_cast<uint32_t>(rect.Height());
+}
+
+void UIContentImpl::GetWindowPaintSize(OHOS::Rosen::Rect& paintRect)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(window_);
+    auto windowRect = window_->GetRect();
+    NG::RectInt rect;
+    rect.SetRect(0, 0, windowRect.width_, windowRect.height_);
+    pipelineContext->GetWindowPaintRectWithoutMeasureAndLayout(rect);
+    paintRect.posX_ = static_cast<int32_t>(rect.GetX());
+    paintRect.posY_ = static_cast<int32_t>(rect.GetY());
+    paintRect.width_ = static_cast<uint32_t>(rect.Width());
+    paintRect.height_ = static_cast<uint32_t>(rect.Height());
 }
 
 bool UIContentImpl::ProcessBackPressed()
@@ -2452,14 +2470,18 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [container, visible, hasDeco]() {
-           auto pipelineContext = container->GetPipelineContext();
-           CHECK_NULL_VOID(pipelineContext);
-           pipelineContext->ShowContainerTitle(visible, hasDeco);
-           pipelineContext->ChangeDarkModeBrightness();
-        },
-        TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
+    auto task = [container, visible, hasDeco]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->ShowContainerTitle(visible, hasDeco);
+        pipelineContext->ChangeDarkModeBrightness();
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
+    }
 }
 
 void UIContentImpl::SetUIContentType(UIContentType uIContentType)
@@ -2472,23 +2494,27 @@ void UIContentImpl::SetUIContentType(UIContentType uIContentType)
 
 void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateMaximizeMode: %{public}d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, mode);
+    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateMaximizeMode: %{public}d", bundleName_.c_str(),
+        moduleName_.c_str(), instanceId_, mode);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [container, mode]() {
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto windowManager = pipelineContext->GetWindowManager();
-            CHECK_NULL_VOID(windowManager);
-            windowManager->SetCurrentWindowMaximizeMode(static_cast<OHOS::Ace::MaximizeMode>(mode));
-            pipelineContext->ShowContainerTitle(true, true, true);
-        },
-        TaskExecutor::TaskType::UI, "ArkUIUpdateMaximizeMode");
+    auto task = [container, mode]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto windowManager = pipelineContext->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        windowManager->SetCurrentWindowMaximizeMode(static_cast<OHOS::Ace::MaximizeMode>(mode));
+        pipelineContext->ShowContainerTitle(true, true, true);
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateMaximizeMode");
+    }
 }
 
 bool UIContentImpl::NeedSoftKeyboard()
@@ -3392,13 +3418,17 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [customTitleSettedShow, floatingTitleSettedShow]() {
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
-        },
-        TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleVisible");
+    auto task = [customTitleSettedShow, floatingTitleSettedShow]() {
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleVisible");
+    }
 }
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
@@ -3406,13 +3436,17 @@ void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [height]() {
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetContainerModalTitleHeight(height);
-        },
-        TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleHeight");
+    auto task = [height]() {
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetContainerModalTitleHeight(height);
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleHeight");
+    }
 }
 
 int32_t UIContentImpl::GetContainerModalTitleHeight()
