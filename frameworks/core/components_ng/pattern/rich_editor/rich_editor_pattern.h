@@ -1276,7 +1276,7 @@ private:
     void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
     void EnableOneStepDrag(const RefPtr<ImageSpanNode>& imageNode);
     void SetImageSelfResponseEvent(bool isEnable);
-    void CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub);
+    void CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode);
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     void UpdateImagePreviewParam();
     void UpdateImagePreviewParam(const RefPtr<ImageSpanNode>& imageNode);
