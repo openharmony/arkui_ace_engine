@@ -603,6 +603,7 @@ public:
         return isTouchDownOnOverlong_;
     }
 
+    bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
