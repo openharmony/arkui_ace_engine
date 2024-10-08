@@ -191,9 +191,10 @@ void ListModelNG::SetListItemAlign(V2::ListItemAlign listItemAlign)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign);
 }
 
-void ListModelNG::SetCachedCount(int32_t cachedCount)
+void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount);
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show);
 }
 
 int32_t ListModelNG::GetSticky(FrameNode* frameNode)
