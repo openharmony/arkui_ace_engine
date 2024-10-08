@@ -55,7 +55,7 @@ private:
     void BufferAvailableCallbackForSnapshot();
     void DisposeSnapshotAndBlankWindow();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
-    bool IsWindowSizeEqual();
+    bool IsWindowSizeEqual(bool allowEmpty = false);
     void RegisterResponseRegionCallback();
     void RegisterFocusCallback();
     void CleanBlankWindow();
