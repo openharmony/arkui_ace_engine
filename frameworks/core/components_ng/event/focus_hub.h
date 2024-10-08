@@ -1063,6 +1063,8 @@ protected:
 
     bool CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const;
     bool RequestNextFocus(FocusStep moveStep, const RectF& rect);
+    bool RequestNextFocusByDefaultAlgorithm(FocusStep moveStep, const RectF& rect);
+    bool RequestNextFocusByCustomAlgorithm(FocusStep moveStep, const RectF& rect);
 
     void OnFocus();
     void OnFocusNode();
