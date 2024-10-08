@@ -47,6 +47,7 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
 constexpr float ROUND_VALUE = 0.5f;
 constexpr Dimension DEFAULT_FADEOUT_VP = 16.0_vp;
 constexpr double MAX_TEXTFADEOUT_PERCENT = 0.5;
+constexpr double MIN_TEXTFADEOUT_DELTA = 1.0;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
@@ -80,7 +81,10 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (textFieldPattern->IsInlineMode() || !textFadeoutEnabled_) {
+    auto paragraph = textFieldPattern->GetParagraph();
+    CHECK_NULL_VOID(paragraph);
+    if (textFieldPattern->IsInlineMode() || TextOverflow::ELLIPSIS == paragraph->GetParagraphStyle().textOverflow ||
+        !textFadeoutEnabled_) {
         DoNormalDraw(context);
     } else {
         DoTextFadeoutDraw(context);
@@ -708,8 +712,8 @@ void TextFieldContentModifier::DrawTextFadeout(DrawingContext& context)
 
     auto textIndent = std::max(textFieldPattern->GetTextParagraphIndent(), 0.0f);
     if (GreatNotEqual(textWidth + textIndent, contentRect.Width())) {
-        leftFadeOn = LessNotEqual(textRectX, contentRectX);
-        rigthFadeOn = GreatNotEqual((textRectX + textWidth + textIndent), contentRect.Right());
+        leftFadeOn = LessNotEqual(textRectX + MIN_TEXTFADEOUT_DELTA, contentRectX);
+        rigthFadeOn = GreatNotEqual((textRectX + textWidth + textIndent - MIN_TEXTFADEOUT_DELTA), contentRect.Right());
     }
     UpdateTextFadeout(canvas, textFadeRect, gradientPercent, leftFadeOn, rigthFadeOn);
 }
