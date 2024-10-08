@@ -502,6 +502,7 @@ void TextFieldPattern::BeforeCreateLayoutWrapper()
                 break;
         }
     }
+    selectOverlay_->MarkOverlayDirty();
 }
 
 bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

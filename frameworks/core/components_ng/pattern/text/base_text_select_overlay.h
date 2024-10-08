@@ -252,6 +252,7 @@ public:
         selectInfo.onCreateCallback.textRangeCallback = textRange;
     }
     bool GetClipHandleViewPort(RectF& rect);
+    void MarkOverlayDirty();
 
 protected:
     RectF MergeSelectedBoxes(
