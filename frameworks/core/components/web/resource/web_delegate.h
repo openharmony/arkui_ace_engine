@@ -1024,6 +1024,11 @@ public:
 
     void StartVibraFeedback(const std::string& vibratorType);
 
+    RefPtr<TaskExecutor> GetTaskExecutor() const
+    {
+        return taskExecutor_;
+    }
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1105,8 +1110,8 @@ private:
     void ratioStrToFloat(const std::string& str);
     // Return canonical encoding name according to the encoding alias name.
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
-    void RegisterAvoidAreaChangeListener();
-    void UnregisterAvoidAreaChangeListener();
+    void RegisterAvoidAreaChangeListener(int32_t instanceId);
+    void UnregisterAvoidAreaChangeListener(int32_t instanceId);
     void OnSafeInsetsChange();
 #endif
 
@@ -1233,6 +1238,7 @@ private:
     std::string sharedRenderProcessToken_;
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
+    RefPtr<TaskExecutor> taskExecutor_;
 #endif
 };
 
