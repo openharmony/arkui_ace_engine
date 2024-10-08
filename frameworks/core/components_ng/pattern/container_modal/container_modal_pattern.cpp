@@ -21,8 +21,8 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -273,8 +273,7 @@ void ContainerModalPattern::InitContainerEvent()
                     floatingContext->OnTransformTranslateUpdate(
                         { 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
                 },
-                [floatingLayoutProperty, id = Container::CurrentId()]() {
-                    ContainerScope scope(id);
+                [floatingLayoutProperty]() {
                     floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
                 });
         }
