@@ -274,7 +274,7 @@ void RosenRenderContext::DetachModifiers()
     auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     if (pipeline) {
         if (densityChangedCallbackId_ != -1) {
-        pipeline->UnregisterDensityChangedCallback(densityChangedCallbackId_);
+            pipeline->UnregisterDensityChangedCallback(densityChangedCallbackId_);
         }
         pipeline->RequestFrame();
     }
