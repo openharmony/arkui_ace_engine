@@ -707,7 +707,7 @@ private:
     void HandleBlurEvent();
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
-    void GetInnerFocusButtonPaintRect(RoundRect& paintRect);
+    void GetInnerFocusButtonPaintRect(RoundRect& paintRect, float focusButtonXOffset);
     void UpdateFocusButtonState();
     void SetHaveFocus(bool haveFocus);
     void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);

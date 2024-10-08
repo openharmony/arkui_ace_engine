@@ -228,7 +228,7 @@ void DatePickerPattern::UpdateColumnButtonStyles(
     datePickerColumnPattern->UpdateColumnButtonFocusState(haveFocus, needMarkDirty);
 }
 
-void DatePickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect)
+void DatePickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect, float focusButtonXOffset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -242,11 +242,10 @@ void DatePickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect)
     auto buttonNode = DynamicCast<FrameNode>(stackNode->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
     auto focusButtonRect = buttonNode->GetGeometryNode()->GetFrameRect();
-    auto columnWidth = stackNode->GetGeometryNode()->GetFrameSize().Width();
     auto focusSpace = pickerTheme->GetFocusPadding().ConvertToPx();
     focusButtonRect -= OffsetF(focusSpace, focusSpace);
     focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
-    focusButtonRect += OffsetF(columnWidth * focusKeyID_, 0);
+    focusButtonRect += OffsetF(focusButtonXOffset, 0);
 
     paintRect.SetRect(focusButtonRect);
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
@@ -559,7 +558,7 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     if (useButtonFocusArea_) {
-        return GetInnerFocusButtonPaintRect(paintRect);
+        return GetInnerFocusButtonPaintRect(paintRect, leftTotalColumnWith);
     }
     auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
     auto pickerThemeWidth = dividerSpacing * 2;

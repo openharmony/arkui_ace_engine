@@ -366,6 +366,10 @@ void TextPickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect)
     auto focusButtonRect = buttonNode->GetGeometryNode()->GetFrameRect();
     auto columnWidth = stackNode->GetGeometryNode()->GetFrameSize().Width();
     auto focusSpace = pickerTheme->GetFocusPadding().ConvertToPx();
+    if (isShowInDialog_) {
+        auto stackTopMargin = pickerTheme->GetContentMarginVertical().ConvertToPx();
+        focusButtonRect += OffsetF(0, stackTopMargin);
+    }
     focusButtonRect -= OffsetF(focusSpace, focusSpace);
     focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
     focusButtonRect += OffsetF(columnWidth * focusKeyID_, 0);
