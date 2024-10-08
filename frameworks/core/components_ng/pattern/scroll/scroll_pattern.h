@@ -61,29 +61,7 @@ public:
         return layoutAlgorithm;
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-        CHECK_NULL_RETURN(layoutProperty, nullptr);
-        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-        auto drawDirection = (layoutDirection == TextDirection::RTL);
-        auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
-        paint->SetScrollBar(GetScrollBar());
-        CreateScrollBarOverlayModifier();
-        paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
-        auto scrollEffect = GetScrollEdgeEffect();
-        if (scrollEffect && scrollEffect->IsFadeEffect()) {
-            paint->SetEdgeEffect(scrollEffect);
-        }
-        if (!scrollContentModifier_) {
-            scrollContentModifier_ = AceType::MakeRefPtr<ScrollContentModifier>();
-        }
-        paint->SetContentModifier(scrollContentModifier_);
-        UpdateFadingEdge(paint);
-        return paint;
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     OPINC_TYPE_E OpIncType() override
     {

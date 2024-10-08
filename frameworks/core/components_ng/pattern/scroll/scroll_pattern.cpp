@@ -59,6 +59,30 @@ void ScrollPattern::OnModifyDone()
     }
 }
 
+RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+    auto drawDirection = (layoutDirection == TextDirection::RTL);
+    auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
+    paint->SetScrollBar(GetScrollBar());
+    CreateScrollBarOverlayModifier();
+    paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
+    auto scrollEffect = GetScrollEdgeEffect();
+    if (scrollEffect && scrollEffect->IsFadeEffect()) {
+        paint->SetEdgeEffect(scrollEffect);
+    }
+    if (!scrollContentModifier_) {
+        scrollContentModifier_ = AceType::MakeRefPtr<ScrollContentModifier>();
+    }
+    paint->SetContentModifier(scrollContentModifier_);
+    UpdateFadingEdge(paint);
+    return paint;
+}
+
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -148,7 +172,7 @@ bool ScrollPattern::ScrollSnapTrigger()
     if (ScrollableIdle() && !AnimateRunning()) {
         auto predictSnapOffset = CalcPredictSnapOffset(0.0);
         if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value(), SPRING_ACCURACY)) {
-            StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
+            StartScrollSnapAnimation(predictSnapOffset.value(), 0.0f);
             FireOnScrollStart();
             return true;
         }

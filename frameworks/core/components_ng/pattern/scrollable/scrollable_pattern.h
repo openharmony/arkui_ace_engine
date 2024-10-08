@@ -248,12 +248,12 @@ public:
         scrollable->StopScrollable();
     }
 
-    void StartScrollSnapMotion(float scrollSnapDelta, float scrollSnapVelocity)
+    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
     {
         CHECK_NULL_VOID(scrollableEvent_);
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);
-        scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
+        scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
     }
 
     bool IsScrollableSpringEffect() const
@@ -846,6 +846,20 @@ private:
     void OnScrollEnd();
     void ProcessSpringEffect(float velocity, bool needRestart = false);
     void SetEdgeEffect(EdgeEffect edgeEffect);
+    void SetHandleScrollCallback(const RefPtr<Scrollable>& scrollable);
+    void SetOverScrollCallback(const RefPtr<Scrollable>& scrollable);
+    void SetIsReverseCallback(const RefPtr<Scrollable>& scrollable);
+    void SetOnScrollStartRec(const RefPtr<Scrollable>& scrollable);
+    void SetOnScrollEndRec(const RefPtr<Scrollable>& scrollable);
+    void SetScrollEndCallback(const RefPtr<Scrollable>& scrollable);
+    void SetRemainVelocityCallback(const RefPtr<Scrollable>& scrollable);
+    void SetDragEndCallback(const RefPtr<Scrollable>& scrollable);
+    void SetScrollSnapListCallback(const RefPtr<Scrollable>& scrollable);
+    void SetCalcPredictSnapOffsetCallback(const RefPtr<Scrollable>& scrollable);
+    void SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>& scrollable);
+    void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
+    void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);
+    void SetPanActionEndEvent(const RefPtr<Scrollable>& scrollable);
 
     // Scrollable::UpdateScrollPosition
     bool HandleScrollImpl(float offset, int32_t source);

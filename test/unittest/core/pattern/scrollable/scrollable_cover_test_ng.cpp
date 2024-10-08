@@ -552,11 +552,11 @@ HWTEST_F(ScrollableCoverTestNg, GetFrictionVelocityByFinalPositionTest001, TestS
 }
 
 /**
- * @tc.name: ProcessScrollSnapSpringMotionTest001
- * @tc.desc: Test the behavior of the ProcessScrollSnapSpringMotion method
+ * @tc.name: StartScrollSnapAnimationTest001
+ * @tc.desc: Test the behavior of the StartScrollSnapAnimation method
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollableCoverTestNg, ProcessScrollSnapSpringMotionTest001, TestSize.Level1)
+HWTEST_F(ScrollableCoverTestNg, StartScrollSnapAnimationTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create a Scrollable object and initalizes the parameters
@@ -568,9 +568,9 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollSnapSpringMotionTest001, TestSize.L
     scrollable->currentPos_ = 0.0;
 
     /**
-     * @tc.steps: step2. Call ProcessScrollSnapSpringMotion
+     * @tc.steps: step2. Call StartScrollSnapAnimation
      */
-    scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
+    scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
 
     /**
      * @tc.expected: The end position should be initialPos + scrollSnapDelta
@@ -1467,21 +1467,21 @@ HWTEST_F(ScrollableCoverTestNg, HandleDragUpdate001, TestSize.Level1)
     GestureEvent info;
     info.SetMainVelocity(10.0);
     scrollable->dragCount_ = 5;
-    scrollable->lastVelocity_ = -1;
+    scrollable->lastGestureVelocity_ = -1;
     /**
-     * @tc.steps: step1.Set (Negative(lastVelocity_ / info.GetMainVelocity())).
+     * @tc.steps: step1.Set (Negative(lastGestureVelocity_ / info.GetMainVelocity())).
      */
     scrollable->HandleDragUpdate(info);
     EXPECT_EQ(scrollable->dragCount_, 1);
     /**
-     * @tc.steps: step2.Set positive(lastVelocity_ / info.GetMainVelocity()) and isFrictionAnimationStop_ false.
+     * @tc.steps: step2.Set positive(lastGestureVelocity_ / info.GetMainVelocity()) and isFrictionAnimationStop_ false.
      */
     auto propertyCallback = [](float offset) {};
     scrollable->frictionOffsetProperty_ =
         AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     scrollable->dragCount_ = 5;
     info.SetMainVelocity(10.0);
-    scrollable->lastVelocity_ = 10;
+    scrollable->lastGestureVelocity_ = 10;
     scrollable->isDragUpdateStop_ = false;
     scrollable->state_ = Scrollable::AnimationState::FRICTION;
     scrollable->HandleDragUpdate(info);
@@ -1601,7 +1601,7 @@ HWTEST_F(ScrollableCoverTestNg, StartScrollAnimationTest002, TestSize.Level1)
     auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, scrollPn->GetAxis());
     ASSERT_NE(scrollable, nullptr);
     /**
-     * @tc.steps: step1. Call StartScrollAnimation and verify ProcessScrollSnapSpringMotion is called.
+     * @tc.steps: step1. Call StartScrollAnimation and verify StartScrollSnapAnimation is called.
      */
     scrollable->calcPredictSnapOffsetCallback_ = [](float delta, float dragDistance, float velocity) { return 100.0f; };
     scrollable->StartScrollAnimation(100.0f, 200.0f);
