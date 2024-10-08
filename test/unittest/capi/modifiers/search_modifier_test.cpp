@@ -860,8 +860,8 @@ HWTEST_F(SearchModifierTest, setSearchIconTest, TestSize.Level1)
                     }
                 };
                 modifier_->setSearchIcon(node_, &attrs);
-                auto fullJson = GetJsonValue(node_);
-                auto customSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, SEARCH_ICON_ATTR);
+                auto jsonValue = GetJsonValue(node_);
+                auto customSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, SEARCH_ICON_ATTR);
                 auto customSearchIconSrc = customSearchIconAttrs->GetString(SEARCH_ICON_SRC_ATTR);
                 auto customSearchIconColor = customSearchIconAttrs->GetString(SEARCH_ICON_COLOR_ATTR);
                 auto customSearchIconSize = customSearchIconAttrs->GetString(SEARCH_ICON_SIZE_ATTR);
