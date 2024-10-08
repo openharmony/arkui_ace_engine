@@ -75,7 +75,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     if (!hasDeco_) {
         isShow = false;
     }
-
+    isTitleShow_ = isShow;
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -112,9 +112,6 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     stageBorderRadius.SetRadius(contentBorderRadius);
     stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
-
-    // set container window show state to RS
-    pipelineContext->SetContainerWindow(isShow, isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
 
     auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
@@ -670,13 +667,13 @@ void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& r
         rect.Height() - padding.Height() - titleHeight);
 }
 
-void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect, bool isContainerModal)
+void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(Rect& rect, bool isContainerModal)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto titleHeight = round(GetCustomTitleHeight().ConvertToPx());
+    auto titleHeight = GetCustomTitleHeight().ConvertToPx();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     rect.SetRect(
         padding.Offset().GetX(),
@@ -916,5 +913,47 @@ void ContainerModalPattern::TrimFloatingWindowLayout()
             CalcLength(CONTENT_PADDING) };
     }
     hostProp->UpdatePadding(padding);
+}
+
+bool ContainerModalPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty,
+    const DirtySwapConfig& config)
+{
+    CallButtonsRectChange();
+
+    auto considerFloatingWindow = false;
+    CallSetContainerWindow(considerFloatingWindow);
+    
+    return false;
+}
+
+void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto curWindowRect = pipelineContext->GetCurrentWindowRect();
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;
+    GetWindowPaintRectWithoutMeasureAndLayout(curWindowRect, isContainerModal);
+
+    auto borderRadius = 0.0_vp;
+    if (considerFloatingWindow) {
+        auto windowManager = pipelineContext->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+        borderRadius = (isFloatingWindow && isTitleShow_) ? CONTAINER_OUTER_RADIUS : 0.0_vp;
+    } else {
+        borderRadius = isTitleShow_ ? CONTAINER_OUTER_RADIUS : 0.0_vp;
+    }
+    auto borderRadiusValue = borderRadius.ConvertToPx();
+
+    auto expectRect = RRect::MakeRect(curWindowRect);
+    expectRect.SetRectWithSimpleRadius(curWindowRect, borderRadiusValue, borderRadiusValue);
+    if (windowPaintRect_ == expectRect) {
+        return;
+    }
+
+    // set container window show state to RS
+    pipelineContext->SetContainerWindow(isTitleShow_, expectRect);
+    windowPaintRect_ = expectRect;
 }
 } // namespace OHOS::Ace::NG

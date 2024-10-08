@@ -384,7 +384,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height) {}
 
-void PipelineContext::SetContainerWindow(bool isShow, Dimension contentBorderRadius) {}
+void PipelineContext::SetContainerWindow(bool isShow, RRect& rRect) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
