@@ -1044,6 +1044,14 @@ bool NG::PipelineContext::CheckThreadSafe()
 {
     return false;
 }
+
+#ifdef NEED_PIPELINE_CONTEXT_BE_NULLPTR
+PipelineContext* TextPattern::GetContext()
+{
+    return nullptr;
+}
+#endif
+
 void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
