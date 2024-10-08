@@ -59,7 +59,7 @@ HWTEST_F(WaterFlowTestNg, OffsetEnd001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info->endIndex_, 29);
     EXPECT_TRUE(info->offsetEnd_);
-    EXPECT_TRUE(info->ReachEnd(50.0f));
+    EXPECT_TRUE(info->ReachEnd(50.0f, false));
 
     UpdateCurrentOffset(1.0f);
     FlushLayoutTask(frameNode_);

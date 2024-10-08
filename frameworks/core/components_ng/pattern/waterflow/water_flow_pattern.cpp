@@ -276,12 +276,16 @@ void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && layoutInfo_->ReachEnd(prevOffset_));
-    FireObserverOnReachEnd();
-    CHECK_NULL_VOID(onReachEnd);
-    ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
-    onReachEnd();
-    AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+    CHECK_NULL_VOID(host);
+    if (layoutInfo_->ReachEnd(prevOffset_, false)) {
+        FireObserverOnReachEnd();
+        CHECK_NULL_VOID(onReachEnd);
+        ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
+        onReachEnd();
+        AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+    } else if (!isInitialized_ && layoutInfo_->ReachEnd(prevOffset_, true)) {
+        FireObserverOnReachEnd();
+    }
 }
 
 void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)

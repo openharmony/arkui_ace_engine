@@ -63,7 +63,7 @@ public:
 
     bool ReachStart(float prevPos, bool firstLayout) const override;
 
-    bool ReachEnd(float prevPos) const override;
+    bool ReachEnd(float prevPos, bool firstLayout) const override;
 
     bool OutOfBounds() const override;
 

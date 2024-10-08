@@ -218,13 +218,13 @@ bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
     return firstLayout || Negative(prevPos);
 }
 
-bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos) const
+bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos, bool firstLayout) const
 {
     if (!offsetEnd_ || lanes_.empty()) {
         return false;
     }
     float prevEndPos = EndPos() - (totalOffset_ - prevPos);
-    return GreatNotEqual(prevEndPos + footerHeight_, lastMainSize_);
+    return firstLayout || GreatNotEqual(prevEndPos + footerHeight_, lastMainSize_);
 }
 
 float WaterFlowLayoutInfoSW::GetContentHeight() const
