@@ -572,7 +572,7 @@ HWTEST_F(GridIrregularLayoutTest, TestReset004, TestSize.Level1)
 
     auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
     algo->wrapper_ = AceType::RawPtr(frameNode_);
-    frameNode_->GetLayoutProperty()->propertyChangeFlag_ = PROPERTY_UPDATE_BY_CHILD_REQUEST;
+    frameNode_->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 
     algo->Measure(AceType::RawPtr(frameNode_));
 

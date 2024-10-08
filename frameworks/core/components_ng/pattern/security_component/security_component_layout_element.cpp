@@ -109,7 +109,9 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
 
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_VOID(textProp);
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<SecurityComponentTheme>();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
     minFontSize_ = theme->GetMinFontSize();
     if (property->GetFontSize().has_value()) {
@@ -123,7 +125,9 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     SizeT<float> maxSize { textConstraint.maxSize.Width(), Infinity<float>() };
     textConstraint.maxSize = maxSize;
     textWrap_->Measure(std::optional<LayoutConstraintF>(textConstraint));
-    auto textSizeF = textWrap->GetGeometryNode()->GetFrameSize();
+    auto geometryNode = textWrap->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto textSizeF = geometryNode->GetFrameSize();
     width_ = textSizeF.Width();
     height_ = textSizeF.Height();
 }
@@ -212,7 +216,9 @@ void TextLayoutElement::UpdateSize(bool isWidth)
     }
 
     textWrap_->Measure(textConstraint);
-    auto textSizeF = textWrap_->GetGeometryNode()->GetFrameSize();
+    auto geometryNode = textWrap_->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto textSizeF = geometryNode->GetFrameSize();
     width_ = textSizeF.Width();
     height_ = textSizeF.Height();
 }

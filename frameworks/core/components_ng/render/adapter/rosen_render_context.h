@@ -239,6 +239,7 @@ public:
     void ClipWithCircle(const Circle& circle) override;
     void RemoveClipWithRRect() override;
     void UpdateWindowFocusState(bool isFocused) override;
+    void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
@@ -304,6 +305,8 @@ public:
     void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;
+
+    void RemoveContentModifier(const RefPtr<ContentModifier>& modifier) override;
 
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
     void ScaleAnimation(const AnimationOption& option, double begin, double end) override;

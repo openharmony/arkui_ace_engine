@@ -81,11 +81,6 @@ public:
         return isFocus_;
     }
 
-    void SetIsFocus(bool isFocus)
-    {
-        isFocus_ = isFocus;
-    }
-
     std::string GetAppLabel()
     {
         return appLabel_;
@@ -162,6 +157,7 @@ public:
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
     void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
+    void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect, bool isContainerModal);
     void CallButtonsRectChange();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&, const DirtySwapConfig&) override
     {
@@ -172,11 +168,6 @@ public:
     void OnLanguageConfigurationUpdate() override;
 
     void InitColumnTouchTestFunc();
-
-    void SetIsHoveredMenu(bool isHoveredMenu)
-    {
-        isHoveredMenu_ = isHoveredMenu;
-    }
 
     bool GetIsHoveredMenu()
     {
@@ -221,7 +212,7 @@ protected:
     Color activeColor_;
     Color inactiveColor_;
     void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
-private:
+protected:
     void WindowFocus(bool isFocus);
     void SetTitleButtonHide(
         const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize,

@@ -25,6 +25,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/page_transition_common.h"
 #include "core/components/common/layout/constants.h"
@@ -298,6 +299,10 @@ public:
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
     virtual void UpdateWindowFocusState(bool isFocused) {}
+    /**
+     * @brief Only clip the content & foreground layer by @c rect.
+     */
+    virtual void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
@@ -401,6 +406,8 @@ public:
     virtual void FromJson(const std::unique_ptr<JsonValue>& json);
 
     virtual void ClearDrawCommands() {}
+
+    virtual void RemoveContentModifier(const RefPtr<ContentModifier>& ContentModifier) {}
 
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}

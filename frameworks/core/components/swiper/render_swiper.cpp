@@ -640,7 +640,7 @@ void RenderSwiper::HandleTouchDown(const TouchEventInfo& info)
         touchContentType_ = TouchContentType::TOUCH_INDICATOR;
     } else {
         touchContentType_ = TouchContentType::TOUCH_CONTENT;
-        if (controller_ && hasDragAction_ && swiper_->GetSlideContinue()) {
+        if (controller_ && hasDragAction_ && swiper_ && swiper_->GetSlideContinue()) {
             controller_->Finish();
             return;
         }
@@ -689,7 +689,7 @@ void RenderSwiper::HandleTouchUp(const TouchEventInfo& info)
     }
 
     // content zone
-    if (swiper_->GetSlideContinue()) {
+    if (swiper_ && swiper_->GetSlideContinue()) {
         return;
     }
     if (hasDragAction_) {
@@ -891,7 +891,7 @@ void RenderSwiper::HandleDragUpdate(const DragUpdateInfo& info)
     }
     JankFrameReport::GetInstance().RecordFrameUpdate();
     if (touchContentType_ == TouchContentType::TOUCH_CONTENT || rotationStatus_ == RotationStatus::ROTATION_UPDATE) {
-        EdgeEffect edgeEffect = swiper_->GetEdgeEffect();
+        EdgeEffect edgeEffect = swiper_ ? swiper_->GetEdgeEffect() : EdgeEffect::SPRING;
         if (edgeEffect == EdgeEffect::SPRING && (!loop_) && currentIndex_ == targetIndex_
             && (currentIndex_ == 0 || currentIndex_ == itemCount_ - 1)) {
             dragOffset_ += info.GetMainDelta();
@@ -906,7 +906,7 @@ void RenderSwiper::HandleDragUpdate(const DragUpdateInfo& info)
 
 bool RenderSwiper::SpringItems(const DragEndInfo& info)
 {
-    EdgeEffect edgeEffect = swiper_->GetEdgeEffect();
+    EdgeEffect edgeEffect = swiper_ ? swiper_->GetEdgeEffect() : EdgeEffect::SPRING;
     if (edgeEffect == EdgeEffect::SPRING) {
         int32_t toIndex = 0;
         toIndex = GreatNotEqual(scrollOffset_, 0.0) ? GetPrevIndex() : GetNextIndex();
@@ -1227,6 +1227,9 @@ void RenderSwiper::SwipeTo(int32_t index, bool reverse)
 
 void RenderSwiper::InitSwipeToAnimation(double start, double end)
 {
+    if (!swiper_) {
+        return;
+    }
     auto animationCurve = swiper_->GetAnimationCurve();
     auto curStartTranslateKeyframe = AceType::MakeRefPtr<Keyframe<double>>(CUR_START_TRANSLATE_TIME, start);
     auto curEndTranslateKeyframe = AceType::MakeRefPtr<Keyframe<double>>(CUR_END_TRANSLATE_TIME, end);
@@ -1666,7 +1669,7 @@ void RenderSwiper::UpdateScrollPosition(double dragDelta)
 
 void RenderSwiper::SetSwiperEffect(double dragOffset)
 {
-    EdgeEffect edgeEffect = swiper_->GetEdgeEffect();
+    EdgeEffect edgeEffect = swiper_ ? swiper_->GetEdgeEffect() : EdgeEffect::SPRING;
     bool isFade = edgeEffect == EdgeEffect::FADE;
     bool isSpring = edgeEffect == EdgeEffect::SPRING;
     if (!isFade && !isSpring && !loop_) {
@@ -3092,6 +3095,7 @@ void RenderSwiper::UpdateItemCount(int32_t itemCount)
 
 void RenderSwiper::BuildLazyItems()
 {
+    int32_t totalCount = swiper_ ? swiper_->GetCachedSize() + swiper_->GetDisplayCount() : 0;
     if (itemCount_ <= lazyLoadCacheSize_) {
         cacheStart_ = 0;
         cacheEnd_ = itemCount_;
@@ -3103,10 +3107,10 @@ void RenderSwiper::BuildLazyItems()
         } else {
             if (currentIndex_ < halfLazy) {
                 cacheStart_ = 0;
-                cacheEnd_ = swiper_->GetCachedSize() + swiper_->GetDisplayCount() - 1;
+                cacheEnd_ = totalCount - 1;
             } else if (currentIndex_ >= itemCount_ - halfLazy - 1) {
                 cacheEnd_ = itemCount_ - 1;
-                cacheStart_ = cacheEnd_ - swiper_->GetCachedSize() - swiper_->GetDisplayCount();
+                cacheStart_ = cacheEnd_ - totalCount;
             } else {
                 cacheStart_ = currentIndex_ - halfLazy;
                 cacheEnd_ = cacheStart_ + lazyLoadCacheSize_ - 1;
@@ -3247,7 +3251,7 @@ void RenderSwiper::ResetCachedChildren()
         return;
     }
 
-    int32_t cachedSize = swiper_->GetCachedSize();
+    int32_t cachedSize = swiper_ ? swiper_->GetCachedSize() : 0;
     int32_t childrenSize = itemCount_;
     int32_t forwardNum = 0;
     int32_t backNum = 0;

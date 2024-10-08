@@ -360,46 +360,6 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         return;
     }
 }
-
-void ResetSubTitleProperty(const RefPtr<FrameNode>& textNode, NavigationTitleMode titleMode, bool parentIsNavDest)
-{
-    CHECK_NULL_VOID(textNode);
-    auto titleLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(titleLayoutProperty);
-    std::string contentStr;
-    if (titleLayoutProperty->HasContent()) {
-        contentStr = titleLayoutProperty->GetContentValue(std::string());
-    }
-    titleLayoutProperty->Reset();
-    titleLayoutProperty->UpdateContent(contentStr);
-
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    auto subTitleSize = theme->GetSubTitleFontSize();
-    Color color = theme->GetSubTitleColor();
-    auto textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        subTitleSize = theme->GetSubTitleFontSizeS();
-        color = theme->GetSubTitleFontColor();
-        textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
-    }
-    if (parentIsNavDest) {
-        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
-    } else if (titleMode == NavigationTitleMode::MINI) {
-        titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
-    }
-    titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-    titleLayoutProperty->UpdateAdaptMaxFontSize(subTitleSize);
-    titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
-    titleLayoutProperty->UpdateMaxLines(1);
-    titleLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
-    titleLayoutProperty->UpdateFontSize(subTitleSize);
-    titleLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    SetTextColor(textNode, color);
-
-    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    textNode->MarkModifyDone();
-}
 } // namespace
 
 void TitleBarPattern::MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
@@ -424,6 +384,9 @@ void TitleBarPattern::MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
         ResetSubTitleProperty(subtitleNode, titleMode, parentType == TitleBarParentType::NAV_DESTINATION);
         shouldResetSubTitleProperty_ = false;
     }
+
+    subtitleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    subtitleNode->MarkModifyDone();
 }
 
 void TitleBarPattern::InitTitleParam()
@@ -480,6 +443,9 @@ void TitleBarPattern::UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& host
         ResetMainTitleProperty(titleNode, titleBarLayoutProperty, titleMode, hostNode->GetSubtitle() != nullptr, false);
         shouldResetMainTitleProperty_ = false;
     }
+
+    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    titleNode->MarkModifyDone();
 }
 
 void TitleBarPattern::UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode)
@@ -506,6 +472,9 @@ void TitleBarPattern::UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& host
         ResetMainTitleProperty(titleNode, titleBarLayoutProperty, titleMode, hostNode->GetSubtitle() != nullptr, true);
         shouldResetMainTitleProperty_ = false;
     }
+
+    titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    titleNode->MarkModifyDone();
 }
 
 void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
@@ -586,11 +555,49 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
             UpdateSubTitleOpacity(1.0);
         }
     }
-
-    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    textNode->MarkModifyDone();
 }
 
+void TitleBarPattern::ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
+    NavigationTitleMode titleMode, bool parentIsNavDest)
+{
+    CHECK_NULL_VOID(textNode);
+    auto titleLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(titleLayoutProperty);
+    std::string contentStr;
+    if (titleLayoutProperty->HasContent()) {
+        contentStr = titleLayoutProperty->GetContentValue(std::string());
+    }
+    titleLayoutProperty->Reset();
+    titleLayoutProperty->UpdateContent(contentStr);
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto subTitleSize = theme->GetSubTitleFontSize();
+    Color color = theme->GetSubTitleColor();
+    auto textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        subTitleSize = theme->GetSubTitleFontSizeS();
+        color = theme->GetSubTitleFontColor();
+        textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+    }
+    if (parentIsNavDest) {
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    } else if (titleMode == NavigationTitleMode::MINI) {
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
+    } else if (titleMode == NavigationTitleMode::FREE) {
+        UpdateSubTitleOpacity(opacity_.value_or(1.0f));
+    } else {
+        UpdateSubTitleOpacity(1.0);
+    }
+    titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
+    titleLayoutProperty->UpdateAdaptMaxFontSize(subTitleSize);
+    titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
+    titleLayoutProperty->UpdateMaxLines(1);
+    titleLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
+    titleLayoutProperty->UpdateFontSize(subTitleSize);
+    titleLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    SetTextColor(textNode, color);
+}
 
 void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
 {
@@ -1413,5 +1420,22 @@ void TitleBarPattern::SetCurrentTitleBarHeight(float currentTitleBarHeight)
     paddingProperty.bottom = CalcLength(safeAreaPaddingF.bottom.value_or(0.0f));
 
     contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
+}
+
+float TitleBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_RETURN(titleBarNode, 0.f);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_RETURN(titleBarLayoutProperty, 0.f);
+    auto titleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    if (titleMode != NavigationTitleMode::FREE) {
+        return 0.f;
+    }
+    auto barStyle = options_.brOptions.barStyle.value_or(BarStyle::STANDARD);
+    if (barStyle != BarStyle::STACK) {
+        return 0.f;
+    }
+    return maxTitleBarHeight_ - currentTitleBarHeight_;
 }
 } // namespace OHOS::Ace::NG

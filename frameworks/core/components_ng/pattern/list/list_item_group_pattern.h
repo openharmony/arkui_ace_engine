@@ -244,7 +244,7 @@ public:
 
     float GetEstimateOffset(float height, const std::pair<float, float>& targetPos,
         float headerMainSize, float footerMainSize) const;
-    float GetEstimateHeight(float& averageHeight, float headerMainSize, float footerMainSize) const;
+    float GetEstimateHeight(float& averageHeight, float headerMainSize, float footerMainSize, float spaceWidth) const;
     bool HasLayoutedItem() const
     {
         return layouted_ && (layoutedItemInfo_.has_value() || itemTotalCount_ == 0);

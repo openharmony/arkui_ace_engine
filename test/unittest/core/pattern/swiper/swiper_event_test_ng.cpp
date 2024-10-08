@@ -414,6 +414,122 @@ HWTEST_F(SwiperEventTestNg, HandleDrag009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDrag010
+ * @tc.desc: HandleDrag to left with different drag distances and velocities
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, HandleDrag010, TestSize.Level1)
+{
+    // HandleDragUpdate abs(delta) > SWIPER_WIDTH / 2 and velocity > threshold included in the HandleDrag003 case
+    /**
+     * @tc.steps: step1. HandleDragUpdate abs(delta) > SWIPER_WIDTH / 2 and velocity < threshold
+     * @tc.expected: Item index is equal to -1
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    MockPaintRect(frameNode_);
+    GestureEvent info = CreateDragInfo(false);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    info.SetMainVelocity(0);
+    HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
+
+    /**
+     * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH / 2 and velocity > threshold
+     * @tc.expected: Item index is equal to -1
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    MockPaintRect(frameNode_);
+    info = CreateDragInfo(false);
+    info.SetMainDelta(DRAG_DELTA / 2);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
+
+    /**
+     * @tc.steps: step3. HandleDragUpdate abs(delta) < SWIPER_WIDTH / 2 and velocity < threshold
+     * @tc.expected: Item index is equal to 0
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    MockPaintRect(frameNode_);
+    info = CreateDragInfo(false);
+    info.SetMainDelta(DRAG_DELTA / 2);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    info.SetMainVelocity(0);
+    HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+}
+
+/**
+ * @tc.name: HandleDrag011
+ * @tc.desc: HandleDrag to right with different drag distances and velocities
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, HandleDrag011, TestSize.Level1)
+{
+    // HandleDragUpdate abs(delta) > SWIPER_WIDTH / 2 and velocity > threshold included in the HandleDrag004 case
+    /**
+     * @tc.steps: step1. HandleDragUpdate abs(delta) > SWIPER_WIDTH / 2 and velocity < threshold
+     * @tc.expected: Item index is equal to 4
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetIndex(3);
+    });
+    MockPaintRect(frameNode_);
+    GestureEvent info = CreateDragInfo(true);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    info.SetMainVelocity(0);
+    HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
+
+    /**
+     * @tc.steps: step2. HandleDragUpdate abs(delta) < SWIPER_WIDTH / 2 and velocity > threshold
+     * @tc.expected: Item index is equal to 4
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetIndex(3);
+    });
+    MockPaintRect(frameNode_);
+    info = CreateDragInfo(true);
+    info.SetMainDelta(-DRAG_DELTA / 2);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
+
+    /**
+     * @tc.steps: step3. HandleDragUpdate abs(delta) < SWIPER_WIDTH / 2 and velocity < threshold
+     * @tc.expected: Item index is equal to 3
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetIndex(3);
+    });
+    MockPaintRect(frameNode_);
+    info = CreateDragInfo(true);
+    info.SetMainDelta(-DRAG_DELTA / 2);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushLayoutTask(frameNode_);
+    info.SetMainVelocity(0);
+    HandleDragEnd(info);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+}
+
+/**
  * @tc.name: SwiperPatternHandleScroll001
  * @tc.desc: test HandleScroll SELF_ONLY
  * @tc.type: FUNC

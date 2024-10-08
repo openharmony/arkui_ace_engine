@@ -561,9 +561,10 @@ HWTEST_F(WaterFlowSegmentCommonTest, InsertAndJump001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 10), 0.0f);
 
-    AddItems(2);
+    AddItemsAtSlot(2, 100.0f, 4);
     secObj->ChangeData(0, 1, SECTION_9);
     frameNode_->ChildrenUpdatedFrom(4);
+    info_->NotifyDataChange(4, 2);
     pattern_->ScrollToIndex(12, false, ScrollAlign::START, 20.0f);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 12), -20.0f);
@@ -939,6 +940,48 @@ HWTEST_F(WaterFlowSegmentCommonTest, Illegal003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->endIndex_, -1);
     EXPECT_GT(info_->startIndex_, info_->endIndex_);
+}
+
+/**
+ * @tc.name: Illegal004
+ * @tc.desc: Recover section will layout at original currentOffset_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, Illegal004, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(45);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_10);
+    CreateDone();
+    auto info = pattern_->layoutInfo_;
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info->startIndex_, 3);
+    EXPECT_EQ(info->endIndex_, 12);
+
+    /**
+     * @tc.steps: step1. update [sections_] with mismatching section.
+     * @tc.expected: stop layout, currentOffset_ is unchanged.
+     */
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+        .itemsCount = 1, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 1, .margin = MARGIN_1 } };
+    secObj->ChangeData(0, 0, newSection);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(info->startIndex_, 3);
+    EXPECT_EQ(info->endIndex_, 12);
+
+    /**
+     * @tc.steps: step2. recover [sections_].
+     * @tc.expected: layout at original currentOffset_.
+     */
+    AddItems(1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 3);
+    EXPECT_EQ(info->endIndex_, 12);
 }
 
 /**

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+
 namespace OHOS::Ace::NG {
 
 constexpr double PERCENT_100 = 100.0;
@@ -64,5 +66,39 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
         overlayRenderContext_->UpdateBackBlendMode(BlendMode::DST_IN);
     }
     overlayRenderContext_->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+}
+
+bool ScrollablePaintMethod::TryContentClip(PaintWrapper* wrapper)
+{
+    CHECK_NULL_RETURN(wrapper, false);
+    auto props = DynamicCast<ScrollablePaintProperty>(wrapper->GetPaintProperty());
+    CHECK_NULL_RETURN(props, false);
+    auto&& clip = props->GetContentClip();
+    if (clip.has_value()) {
+        auto renderContext = wrapper->GetRenderContext();
+        renderContext->SetClipToFrame(false);
+        renderContext->SetClipToBounds(false);
+        switch (clip->first) {
+            case ContentClipMode::CUSTOM:
+                renderContext->SetContentClip(clip->second);
+                break;
+            case ContentClipMode::CONTENT_ONLY:
+                renderContext->SetContentClip(wrapper->GetGeometryNode()->GetPaddingRect());
+                break;
+            case ContentClipMode::SAFE_AREA:
+                renderContext->SetContentClip(wrapper->GetGeometryNode()->GetPaddingRect(true));
+                break;
+            case ContentClipMode::BOUNDARY:
+                renderContext->SetContentClip(wrapper->GetGeometryNode()->GetFrameRect());
+                break;
+            case ContentClipMode::DEFAULT:
+                ApplyDefaultContentClip(renderContext, wrapper->GetGeometryNode());
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

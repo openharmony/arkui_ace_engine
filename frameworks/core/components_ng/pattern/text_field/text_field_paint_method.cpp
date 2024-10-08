@@ -148,8 +148,9 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(textFieldPattern);
     auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
-
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);

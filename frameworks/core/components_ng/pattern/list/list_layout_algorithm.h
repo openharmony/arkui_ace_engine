@@ -39,6 +39,7 @@ struct ListItemGroupLayoutInfo {
     float averageHeight = -1;
     float headerSize = 0.0f;
     float footerSize = 0.0f;
+    float spaceWidth = 0.0f;
 };
 
 struct ListItemInfo {
@@ -300,6 +301,11 @@ public:
     void SetChainOffsetCallback(std::function<float(int32_t)> func)
     {
         chainOffsetFunc_ = std::move(func);
+    }
+
+    float GetChainOffset(int32_t index) const
+    {
+        return chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
     }
 
     void SetChainInterval(float interval)

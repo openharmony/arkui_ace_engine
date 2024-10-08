@@ -822,7 +822,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
     } else {
         jumpIndexInGroup_.reset();
-        bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, contentStartOffset_);
+        bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos + GetChainOffset(0), contentStartOffset_);
         float midItemHeight = 0.0f;
         if (IsScrollSnapAlignCenter(layoutWrapper)) {
             midItemHeight = childrenSize_ ?
@@ -830,8 +830,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             startIndex = midIndex;
             endIndex = midIndex;
         }
-        if ((NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
-            (overScrollFeature_ && overScrollTop) || (canOverScroll_ &&
+        if ((NonNegative(currentOffset_) || overScrollFeature_ || (canOverScroll_ &&
             LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_))) &&
             !needLayoutBackward) {
             startIndex = GetLanesFloor(layoutWrapper, startIndex);
@@ -840,6 +839,10 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
                 startPos = midItemMidPos - midItemHeight / 2.0f;
+            }
+            if (overScrollFeature_ && !overScrollTop && GreatNotEqual(contentMainSize_, prevContentMainSize_) &&
+                GreatNotEqual(itemTotalSize, contentMainSize_)) {
+                startPos += contentMainSize_ - prevContentMainSize_;
             }
             if (childrenSize_) {
                 CheckAndMeasureStartItem(layoutWrapper, startIndex, startPos, startItemIsGroup, true);
@@ -851,7 +854,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             }
         } else {
             endIndex = GetLanesCeil(layoutWrapper, endIndex);
-            if (needLayoutBackward || (overScrollFeature_ && !overScrollTop && !NearZero(prevContentMainSize_))) {
+            if (needLayoutBackward) {
                 endPos += contentMainSize_ - prevContentMainSize_;
             }
             if (IsScrollSnapAlignCenter(layoutWrapper)) {
@@ -1008,9 +1011,6 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     float endMainPos = overScrollFeature_ ?
         std::max(startPos + contentMainSize_ - contentStartOffset_, endMainPos_) : endMainPos_;
     layoutEndMainPos_ = endMainPos;
-    if (forwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
-        endMainPos = Infinity<float>();
-    }
 
     auto currentIndex = startIndex - 1;
     auto chainOffset = 0.0f;
@@ -1029,7 +1029,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessOrEqual(currentEndPos + chainOffset, endMainPos));
+    } while (LessOrEqual(currentEndPos + chainOffset, endMainPos) || forwardFeature_);
     currentEndPos += chainOffset;
 
     while (!itemPosition_.empty() && !targetIndex_) {
@@ -1095,9 +1095,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     float startMainPos = overScrollFeature_ ?
         std::min(endPos - contentMainSize_ + contentEndOffset_, startMainPos_) : startMainPos_;
     layoutStartMainPos_ = startMainPos;
-    if (backwardFeature_ && targetIndex_ && NonNegative(targetIndex_.value())) {
-        startMainPos = -Infinity<float>();
-    }
+
     auto currentIndex = endIndex + 1;
     auto chainOffset = 0.0f;
     do {
@@ -1115,7 +1113,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
             startMainPos = layoutStartMainPos_.value_or(startMainPos_);
             backwardFeature_ = false;
         }
-    } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos));
+    } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos) || backwardFeature_);
 
     currentStartPos += chainOffset;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
@@ -1166,7 +1164,19 @@ void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, b
     if (forwardFeature_ || backwardFeature_) {
         return;
     }
-    if (forwardLayout) {
+    if (!forwardLayout) {
+        for (auto pos = itemPosition_.begin(); pos != itemPosition_.end(); pos++) {
+            float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
+            if (GreatOrEqual(pos->second.startPos + chainOffset, endMainPos_)) {
+                break;
+            } else if (!pos->second.isGroup) {
+                continue;
+            }
+            AdjustPostionForListItemGroup(layoutWrapper, axis_, pos->first, forwardLayout);
+        }
+        return;
+    }
+    if (isNeedCheckOffset_ && GreatNotEqual(std::abs(currentDelta_), contentMainSize_ * 2.0f)) {
         for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); pos++) {
             float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
             if (LessOrEqual(pos->second.endPos + chainOffset, startMainPos_)) {
@@ -1178,14 +1188,8 @@ void ListLayoutAlgorithm::ReMeasureListItemGroup(LayoutWrapper* layoutWrapper, b
         }
         return;
     }
-    for (auto pos = itemPosition_.begin(); pos != itemPosition_.end(); pos++) {
-        float chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (GreatOrEqual(pos->second.startPos + chainOffset, endMainPos_)) {
-            break;
-        } else if (!pos->second.isGroup) {
-            continue;
-        }
-        AdjustPostionForListItemGroup(layoutWrapper, axis_, pos->first, forwardLayout);
+    if (itemPosition_.begin()->second.isGroup) {
+        AdjustPostionForListItemGroup(layoutWrapper, axis_, GetStartIndex(), forwardLayout);
     }
 }
 
@@ -1432,16 +1436,16 @@ void ListLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
 {
     for (auto& pos : recycledItemPosition_) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
-        auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(wrapper);
-        if (wrapperFrameNode) {
-            wrapperFrameNode->ClearSubtreeLayoutAlgorithm();
-        }
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
         if (pos.second.isGroup) {
             pos.second.groupInfo = GetListItemGroupLayoutInfo(wrapper);
         } else {
             pos.second.groupInfo.reset();
+        }
+        auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(wrapper);
+        if (wrapperFrameNode) {
+            wrapperFrameNode->ClearSubtreeLayoutAlgorithm();
         }
     }
 }
@@ -1542,7 +1546,7 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
     if (!focusHub->IsCurrentFocus()) {
         return;
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
@@ -1833,7 +1837,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
         return;
     }
     pattern->SetPredictLayoutParam(param);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode))](int64_t deadline, bool canUseLongPredictTask) {
         ACE_SCOPED_TRACE("List predict");
@@ -2115,7 +2119,7 @@ void ListLayoutAlgorithm::PostIdleTaskV2(
         return;
     }
     pattern->SetPredictLayoutParamV2(param);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask(
         [weak = WeakClaim(RawPtr(frameNode)), value = listMainSizeValues](int64_t deadline,

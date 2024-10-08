@@ -90,10 +90,12 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
     const RefPtr<OverlayManager>& overlayManager)
 {
     CHECK_NULL_VOID(actuator);
+    CHECK_NULL_VOID(overlayManager);
     AnimationOption option;
     option.SetDuration(BEFORE_LIFTING_TIME);
     option.SetCurve(Curves::SHARP);
     auto frameNode = actuator->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto gatherNodeCenter = frameNode->GetPaintRectCenter();
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
 
@@ -245,8 +247,12 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
         frameNodeSize.Height(), gatherNodeCenter, renderContext->GetBorderRadius() };
     AnimationUtils::Animate(
         option,
-        [overlayManager, gatherAnimationInfo]() {
+        [weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager)), gatherAnimationInfo,
+            weak = AceType::WeakClaim(AceType::RawPtr(frameNode))]() {
+            auto overlayManager = weakOverlayManager.Upgrade();
+            auto frameNode = weak.Upgrade();
             DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
+            DragDropManager::UpdateGatherNodePosition(overlayManager, frameNode);
         },
         option.GetOnFinishEvent());
 }
@@ -322,7 +328,10 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     textNode->MarkModifyDone();
     textNode->SetLayoutDirtyMarked(true);
     textNode->SetActive(true);
-    textNode->CreateLayoutTask();
+    auto context = textNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(textNode);
+    }
     pipeline->FlushSyncGeometryNodeTasks();
 }
 

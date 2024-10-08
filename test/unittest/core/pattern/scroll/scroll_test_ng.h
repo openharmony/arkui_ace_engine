@@ -22,6 +22,7 @@
 #define protected public
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -50,23 +51,13 @@ public:
     void TearDown() override;
     void GetScroll();
     RefPtr<PaintWrapper> CreateScrollDone(const RefPtr<FrameNode>& frameNode = nullptr);
-
     ScrollModelNG CreateScroll();
-    void CreateSnapScroll(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
-        const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide);
     void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
     void CreateContentChild(int32_t childNumber = 10);
-    bool OnScrollCallback(float offset, int32_t source);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     void ScrollTo(float offset);
     void ScrollBy(float pixelX, float pixelY);
-    Axis GetAxis();
-    AssertionResult UpdateAndVerifyPosition(float delta, int32_t source, float expectOffset);
-    AssertionResult ScrollToNode(const RefPtr<FrameNode>& focusFrameNode, float expectOffset);
     AssertionResult VerifyTickPosition(float expectOffset);
-    void DragStart(GestureEvent& gesture);
-    void DragUpdate(GestureEvent& gesture);
-    void DragEnd(GestureEvent& gesture);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ScrollPattern> pattern_;

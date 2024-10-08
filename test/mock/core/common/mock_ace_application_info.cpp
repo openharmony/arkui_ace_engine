@@ -67,6 +67,11 @@ int32_t AceApplicationInfo::GetUid() const
     return uid_;
 }
 
+void AceApplicationInfo::SetPackageName(const std::string& packageName)
+{
+    packageName_ = packageName;
+}
+
 const std::string& AceApplicationInfo::GetPackageName() const
 {
     return packageName_;

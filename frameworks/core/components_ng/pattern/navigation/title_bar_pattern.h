@@ -285,6 +285,8 @@ public:
         InitFoldCreaseRegion();
     }
 
+    float GetTitleBarHeightLessThanMaxBarHeight() const;
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -335,6 +337,8 @@ private:
     void ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty,
         NavigationTitleMode titleMode, bool hasSubTitle, bool parentIsNavDest);
+    void ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
+        NavigationTitleMode titleMode, bool parentIsNavDest);
     void ApplyTitleModifierIfNeeded(const RefPtr<TitleBarNode>& hostNode);
     void ApplyTitleModifier(const RefPtr<FrameNode>& textNode,
         const TextStyleApplyFunc& applyFunc, bool needCheckFontSizeIsSetted);

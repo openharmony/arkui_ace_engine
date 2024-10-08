@@ -130,7 +130,7 @@ class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
 public:
-    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController) : swiperController_(swiperController) {};
+    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController);
     ~TabBarPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -174,7 +174,7 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         FocusPaintParam focusPaintParams;
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, FocusPattern());
         auto focusTheme = pipeline->GetTheme<FocusAnimationTheme>();
         CHECK_NULL_RETURN(focusTheme, FocusPattern());
@@ -254,6 +254,17 @@ public:
     {
         changeByClick_ = changeByClick;
     }
+
+    bool GetClickRepeat() const
+    {
+        return clickRepeat_;
+    }
+
+    void SetClickRepeat(bool clickRepeat)
+    {
+        clickRepeat_ = clickRepeat;
+    }
+
     void SetSelectedMode(SelectedMode selectedMode, uint32_t position)
     {
         if (selectedModes_.size() <= position) {
@@ -556,6 +567,16 @@ private:
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
 
+    void StartShowTabBar(int32_t delay);
+    void StopShowTabBar();
+    void InitTabBarProperty();
+    void UpdateTabBarHiddenRatio(float ratio);
+    void SetTabBarTranslate(const TranslateOptions& options);
+    void SetTabBarOpacity(float opacity);
+
+    RefPtr<NodeAnimatablePropertyFloat> showTabBarProperty_;
+    bool isTabBarShowing_ = false;
+
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -617,6 +638,7 @@ private:
     std::vector<bool> gradientRegions_ = {false, false, false, false};
     bool isAnimating_ = false;
     bool changeByClick_ = false;
+    bool clickRepeat_ = false;
     float scrollMargin_ = 0.0f;
     bool isFirstLayout_ = true;
     std::optional<int32_t> animationTargetIndex_;

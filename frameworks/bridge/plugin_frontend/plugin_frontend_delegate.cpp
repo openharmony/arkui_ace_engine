@@ -102,7 +102,7 @@ PluginFrontendDelegate::PluginFrontendDelegate(const RefPtr<TaskExecutor>& taskE
 PluginFrontendDelegate::~PluginFrontendDelegate()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "Plugin delegate destroyed");
 }
 
 int32_t PluginFrontendDelegate::GetMinPlatformVersion()

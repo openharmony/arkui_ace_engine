@@ -48,61 +48,29 @@ const std::string THIRD_CHILD_FRAME_NODE = "thirdChildFrameNode";
 
 } // namespace
 class RelativeContainerNewTestNG : public RelativeContainerBaseTestNG {};
-RefPtr<LayoutWrapperNode> CreateLayoutWrapper(const std::string& tag, int32_t nodeId)
-{
-    auto rowFrameNode = FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
-
-    return layoutWrapper;
-}
-
-RefPtr<LayoutWrapperNode> CreateChildLayoutWrapper(const std::string& tag, int32_t nodeId)
-{
-    auto frameNode = FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>());
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-
-    return layoutWrapper;
-}
-
-RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm(LayoutWrapperNode*& pLayoutWrapper)
+RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm(RefPtr<FrameNode>& frameNode)
 {
     auto relativeContainerFrameNode = FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, 0,
         []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     std::optional<CalcLength> width = CalcLength(CONTAINER_WIDTH);
     std::optional<CalcLength> height = CalcLength(CONTAINER_HEIGHT);
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = CalcSize(width, height);
     relativeContainerFrameNode->UpdateLayoutConstraint(layoutConstraint);
-    pLayoutWrapper = new LayoutWrapperNode(
-        relativeContainerFrameNode, geometryNode, relativeContainerFrameNode->GetLayoutProperty());
-    auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
-    auto relativeContainerLayoutProperty = pLayoutWrapper->GetLayoutProperty();
     relativeContainerFrameNode->UpdateInspectorId(CONTAINER_ID);
-    auto relativeContainerLayoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
-    pLayoutWrapper->SetLayoutAlgorithm(
-        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(relativeContainerLayoutAlgorithm));
+
+    auto relativeContainerPattern = relativeContainerFrameNode->GetPattern<RelativeContainerPattern>();
+    auto layoutAlgorithm = relativeContainerPattern->CreateLayoutAlgorithm();
+
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.selfIdealSize.SetSize(CONTAINER_SIZE);
-    pLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
-    pLayoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
-    auto childLayoutConstraint = pLayoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    relativeContainerFrameNode->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    relativeContainerFrameNode->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = relativeContainerFrameNode->GetLayoutProperty()->CreateChildConstraint();
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
-    auto firstFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    firstGeometryNode->Reset();
-    RefPtr<LayoutWrapperNode> firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(firstFrameNode, firstGeometryNode, firstFrameNode->GetLayoutProperty());
-    firstLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
-    auto boxLayoutAlgorithm = firstFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
-    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
-    firstLayoutWrapper->SetLayoutAlgorithm(
-        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+
     std::map<AlignDirection, AlignRule> firstAlignRules;
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::LEFT, HorizontalAlign::CENTER, firstAlignRules);
@@ -112,11 +80,17 @@ RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm(LayoutWrapperNode*& pLayoutWrapper
         CONTAINER_ID, AlignDirection::TOP, VerticalAlign::CENTER, firstAlignRules);
     RelativeContainerTestUtilsNG::AddAlignRule(
         CONTAINER_ID, AlignDirection::BOTTOM, VerticalAlign::BOTTOM, firstAlignRules);
+
+    auto firstFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    firstFrameNode->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    firstFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
     firstFrameNode->UpdateInspectorId(FIRST_ITEM_ID);
     firstFrameNode->GetLayoutProperty()->UpdateAlignRules(firstAlignRules);
+
     relativeContainerFrameNode->AddChild(firstFrameNode);
-    pLayoutWrapper->AppendChild(firstLayoutWrapper);
-    return relativeContainerLayoutAlgorithm;
+    frameNode = relativeContainerFrameNode;
+
+    return layoutAlgorithm;
 }
 /**
  * @tc.name: RelativeContainerLayoutAlgorithm001
@@ -130,17 +104,17 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm001, TestSi
     float containerWidth = 200.0f;
     GuidelineInfo guidelineInfo;
     relativeContainerLayoutAlgorithm->CalcHorizontalGuideline(selfIdealSize, containerWidth, guidelineInfo);
-    guidelineInfo.id = 10;
+    guidelineInfo.id = "TOP";
     guidelineInfo.direction = LineDirection::VERTICAL;
     guidelineInfo.start = DIMENSIONS[0];
     relativeContainerLayoutAlgorithm->CalcHorizontalGuideline(selfIdealSize, containerWidth, guidelineInfo);
     guidelineInfo.start = Dimension(2.0f, DimensionUnit::PERCENT);
     relativeContainerLayoutAlgorithm->CalcHorizontalGuideline(selfIdealSize, containerWidth, guidelineInfo);
-    EXPECT_EQ(guidelineInfo.start.has_value(), true);
     guidelineInfo.start.reset();
     guidelineInfo.end = Dimension(2.0f, DimensionUnit::PERCENT);
     relativeContainerLayoutAlgorithm->CalcHorizontalGuideline(selfIdealSize, containerWidth, guidelineInfo);
-    EXPECT_EQ(guidelineInfo.start.has_value(), false);
+    EXPECT_NE(relativeContainerLayoutAlgorithm->guidelines_.find("TOP"),
+        relativeContainerLayoutAlgorithm->guidelines_.end());
 }
 
 /**
@@ -155,17 +129,17 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm002, TestSi
     float containerWidth = 200.0f;
     GuidelineInfo guidelineInfo;
     relativeContainerLayoutAlgorithm->CalcVerticalGuideline(selfIdealSize, containerWidth, guidelineInfo);
-    guidelineInfo.id = 10;
+    guidelineInfo.id = "TOP";
     guidelineInfo.direction = LineDirection::VERTICAL;
     guidelineInfo.start = DIMENSIONS[0];
     relativeContainerLayoutAlgorithm->CalcVerticalGuideline(selfIdealSize, containerWidth, guidelineInfo);
     guidelineInfo.start = Dimension(2.0f, DimensionUnit::PERCENT);
-    EXPECT_EQ(guidelineInfo.end.has_value(), false);
     relativeContainerLayoutAlgorithm->CalcVerticalGuideline(selfIdealSize, containerWidth, guidelineInfo);
     guidelineInfo.start.reset();
     guidelineInfo.end = Dimension(2.0f, DimensionUnit::PERCENT);
     relativeContainerLayoutAlgorithm->CalcVerticalGuideline(selfIdealSize, containerWidth, guidelineInfo);
-    EXPECT_EQ(guidelineInfo.end.has_value(), true);
+    EXPECT_NE(relativeContainerLayoutAlgorithm->guidelines_.find("TOP"),
+        relativeContainerLayoutAlgorithm->guidelines_.end());
 }
 /**
  * @tc.name: RelativeContainerLayoutAlgorithm003
@@ -177,8 +151,16 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm003, TestSi
     auto relativeContainerLayoutAlgorithm = std::make_shared<RelativeContainerLayoutAlgorithm>();
     std::vector<std::string> referencedIds = { "test", "vertical", "TOP", "BOTTOM", "RIGHT" };
     relativeContainerLayoutAlgorithm->versionGreatorOrEqualToEleven_ = true;
-    relativeContainerLayoutAlgorithm->guidelines_["test"] = std::make_pair(LineDirection::HORIZONTAL, 0.0f);
-    relativeContainerLayoutAlgorithm->guidelines_["vertical"] = std::make_pair(LineDirection::VERTICAL, 0.0f);
+    relativeContainerLayoutAlgorithm->guidelines_["test"] = std::make_pair(LineDirection::HORIZONTAL, 10.0f);
+    relativeContainerLayoutAlgorithm->guidelines_["vertical"] = std::make_pair(LineDirection::VERTICAL, 10.0f);
+    relativeContainerLayoutAlgorithm->guidelines_["LEFT"] = std::make_pair(LineDirection::HORIZONTAL, 10.0f);
+    relativeContainerLayoutAlgorithm->guidelines_["RIGHT"] = std::make_pair(LineDirection::VERTICAL, 50.0f);
+    relativeContainerLayoutAlgorithm->guidelines_["TOP"] = std::make_pair(LineDirection::HORIZONTAL, 10.0f);
+    relativeContainerLayoutAlgorithm->guidelines_["BOTTOM"] = std::make_pair(LineDirection::VERTICAL, 50.0f);
+    relativeContainerLayoutAlgorithm->recordOffsetMap_["LEFT"] = OffsetF(50, 10);
+    relativeContainerLayoutAlgorithm->recordOffsetMap_["RIGHT"] = OffsetF(100, 50);
+    relativeContainerLayoutAlgorithm->recordOffsetMap_["TOP"] = OffsetF(50, 10);
+    relativeContainerLayoutAlgorithm->recordOffsetMap_["BOTTOM"] = OffsetF(50, 100);
     BarrierParams bp1(BarrierDirection::LEFT, referencedIds);
     relativeContainerLayoutAlgorithm->barriers_["test"] = bp1;
     relativeContainerLayoutAlgorithm->barriers_["vertical"] = std::make_pair(BarrierDirection::RIGHT, referencedIds);
@@ -187,8 +169,11 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm003, TestSi
     relativeContainerLayoutAlgorithm->barriers_["RIGHT"] = std::make_pair(BarrierDirection::RIGHT, referencedIds);
     relativeContainerLayoutAlgorithm->barriers_["DEFAULT"] = std::make_pair(BarrierDirection::END, referencedIds);
     relativeContainerLayoutAlgorithm->MeasureBarrier("DEFAULT");
-    relativeContainerLayoutAlgorithm->GetBarrierRectByReferencedIds(referencedIds);
-    EXPECT_NE(referencedIds.size(), 0);
+    auto barrierRect = relativeContainerLayoutAlgorithm->GetBarrierRectByReferencedIds(referencedIds);
+    EXPECT_EQ(barrierRect.minLeft, 0);
+    EXPECT_EQ(barrierRect.maxRight, 100);
+    EXPECT_EQ(barrierRect.minTop, 0);
+    EXPECT_EQ(barrierRect.maxBottom, 10);
 }
 
 /**
@@ -210,8 +195,8 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm004, TestSi
     auto retf = relativeContainerLayoutAlgorithm->GetHorizontalAnchorValueByAlignRule(alignRule);
     EXPECT_EQ(retf, 0);
     alignRule.anchor = "TOP";
-    RefPtr<LayoutWrapperNode> layoutWrapper = CreateLayoutWrapper(ROW_FRAME_NODE, 0);
-    RefPtr<LayoutWrapper> testWrapper = layoutWrapper->GetOrCreateChildByIndex(0, false);
+    auto frameNode = FrameNode::CreateFrameNode(ROW_FRAME_NODE, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto testWrapper = frameNode->GetOrCreateChildByIndex(0, false);
     relativeContainerLayoutAlgorithm->CalcSizeParam(AceType::RawPtr(testWrapper), "test");
     retf = relativeContainerLayoutAlgorithm->GetHorizontalAnchorValueByAlignRule(alignRule);
     EXPECT_EQ(retf, 0);
@@ -236,7 +221,6 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm005, TestSi
     auto retf = relativeContainerLayoutAlgorithm->GetVerticalAnchorValueByAlignRule(alignRule);
     EXPECT_EQ(retf, 0);
     alignRule.anchor = "TOP";
-    RefPtr<LayoutWrapperNode> layoutWrapper = CreateLayoutWrapper(ROW_FRAME_NODE, 0);
     retf = relativeContainerLayoutAlgorithm->GetVerticalAnchorValueByAlignRule(alignRule);
     EXPECT_EQ(retf, 0);
 }
@@ -292,10 +276,10 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm006, TestSi
  */
 HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm007, TestSize.Level1)
 {
-    LayoutWrapperNode* pLayoutWrapper = nullptr;
-    auto relativeContainerLayoutAlgorithm = CreateLayoutAlgorithm(pLayoutWrapper);
-    auto layoutProperty =
-        AccessibilityManager::DynamicCast<RelativeContainerLayoutProperty>(pLayoutWrapper->GetLayoutProperty());
+    RefPtr<FrameNode> relativeContainerFrameNode = nullptr;
+    auto relativeContainerLayoutAlgorithm = CreateLayoutAlgorithm(relativeContainerFrameNode);
+    auto layoutProperty = AccessibilityManager::DynamicCast<RelativeContainerLayoutProperty>(
+        relativeContainerFrameNode->GetLayoutProperty());
     std::vector<GuidelineInfo> guidelineInfos;
     GuidelineInfo guidelineInfoItem;
     guidelineInfoItem.id = std::string("guideline.id");
@@ -317,14 +301,13 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm007, TestSi
     relativeContainerLayoutAlgorithm2->CalcHorizontalLayoutParam(
         AlignDirection::RIGHT, alignRule, layoutWrapper, "test");
     relativeContainerLayoutAlgorithm2->CalcVerticalLayoutParam(AlignDirection::RIGHT, alignRule, layoutWrapper, "test");
-    relativeContainerLayoutAlgorithm2->CalcGuideline(pLayoutWrapper);
+    relativeContainerLayoutAlgorithm2->CalcGuideline(AceType::RawPtr(relativeContainerFrameNode));
     TwoAlignedValues twoAlignedValues = { 3.14f, 2.71f };
     relativeContainerLayoutAlgorithm2->UpdateTwoAlignValues(twoAlignedValues, alignRule, LineDirection::HORIZONTAL);
     RelativeContainerLayoutAlgorithm::ChainParam chainParam;
     relativeContainerLayoutAlgorithm2->horizontalChains_["test"] = chainParam;
     std::string chainName;
-    relativeContainerLayoutAlgorithm2->IsNodeInHorizontalChain("testnode", chainName);
-    EXPECT_NE(pLayoutWrapper->GetLayoutProperty(), nullptr);
+    EXPECT_EQ(relativeContainerLayoutAlgorithm2->IsNodeInHorizontalChain("testnode", chainName), false);
 }
 
 /**
@@ -339,6 +322,8 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm008, TestSi
     relativeContainerLayoutAlgorithm->versionGreatorOrEqualToEleven_ = true;
     relativeContainerLayoutAlgorithm->guidelines_["test"] = std::make_pair(LineDirection::HORIZONTAL, 0.0f);
     relativeContainerLayoutAlgorithm->guidelines_["vertical"] = std::make_pair(LineDirection::VERTICAL, 0.0f);
+    relativeContainerLayoutAlgorithm->guidelines_["LEFT"] = std::make_pair(LineDirection::VERTICAL, 10.0f);
+    relativeContainerLayoutAlgorithm->recordOffsetMap_["LEFT"] = OffsetF(50, 10);
     relativeContainerLayoutAlgorithm->barriers_["LEFT"] = std::make_pair(BarrierDirection::LEFT, referencedIds);
     relativeContainerLayoutAlgorithm->barriers_["vertical"] = std::make_pair(BarrierDirection::RIGHT, referencedIds);
     relativeContainerLayoutAlgorithm->barriers_["TOP"] = std::make_pair(BarrierDirection::TOP, referencedIds);
@@ -346,8 +331,11 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm008, TestSi
     relativeContainerLayoutAlgorithm->barriers_["RIGHT"] = std::make_pair(BarrierDirection::RIGHT, referencedIds);
     relativeContainerLayoutAlgorithm->barriers_["DEFAULT"] = std::make_pair(BarrierDirection::END, referencedIds);
     relativeContainerLayoutAlgorithm->MeasureBarrier("DEFAULT");
-    relativeContainerLayoutAlgorithm->GetBarrierRectByReferencedIds(referencedIds);
-    EXPECT_NE(referencedIds.size(), 0);
+    auto barrierRect = relativeContainerLayoutAlgorithm->GetBarrierRectByReferencedIds(referencedIds);
+    EXPECT_EQ(barrierRect.minLeft, 0);
+    EXPECT_EQ(barrierRect.maxRight, 50);
+    EXPECT_EQ(barrierRect.minTop, 0);
+    EXPECT_EQ(barrierRect.maxBottom, 0);
 }
 
 /**
@@ -426,9 +414,7 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm010, TestSi
     layoutProperty->flexItemProperty_ = std::make_unique<FlexItemProperty>();
     alignRule.anchor = "LEFT";
     std::map<AlignDirection, AlignRule> tempMap = { { AlignDirection::LEFT, alignRule } };
-    std::cout << "RelativeContainerLayoutAlgorithm010  3" << nextNode << std::endl;
     nextNodeFlexItem->propAlignRules_ = tempMap;
-    std::cout << "RelativeContainerLayoutAlgorithm010  4" << nextNode << std::endl;
     relativeContainerLayoutAlgorithm->CheckNodeInHorizontalChain(
         currentNode, nextNode, currentAlignRules, chainNodes, rightAnchor);
     EXPECT_NE(currentAlignRules.size(), 0);
@@ -591,53 +577,57 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm015, TestSi
  */
 HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm016, TestSize.Level1)
 {
-    LayoutWrapperNode* pLayoutWrapper = nullptr;
-    auto relativeContainerLayoutAlgorithm = CreateLayoutAlgorithm(pLayoutWrapper);
-    auto layoutProperty =
-        AccessibilityManager::DynamicCast<RelativeContainerLayoutProperty>(pLayoutWrapper->GetLayoutProperty());
+    RefPtr<FrameNode> relativeContainerFrameNode = nullptr;
+    auto relativeContainerLayoutAlgorithm = CreateLayoutAlgorithm(relativeContainerFrameNode);
+
     std::vector<GuidelineInfo> guidelineInfos;
     GuidelineInfo guidelineInfoItem;
     guidelineInfoItem.id = std::string("guideline.id");
     guidelineInfoItem.direction = LineDirection::HORIZONTAL;
     guidelineInfos.emplace_back(guidelineInfoItem);
+    auto layoutProperty = AccessibilityManager::DynamicCast<RelativeContainerLayoutProperty>(
+        relativeContainerFrameNode->GetLayoutProperty());
     layoutProperty->UpdateGuideline(guidelineInfos);
     layoutProperty->UpdateVisibility(VisibleType::GONE);
+
+    auto frameNode = FrameNode::CreateFrameNode("tag", 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    layoutWrapper->SetActive(true);
+
+    RelativeContainerLayoutAlgorithm::ChildMeasureWrapper currMeasureWrapper;
+    RelativeContainerLayoutAlgorithm::ChildMeasureWrapper childMeasureWrapper;
+    currMeasureWrapper.id = "currentNode";
+    childMeasureWrapper.id = "nextNode";
     auto relativeAlg2 =
         AccessibilityManager::DynamicCast<RelativeContainerLayoutAlgorithm>(relativeContainerLayoutAlgorithm);
     relativeAlg2->versionGreatorOrEqualToEleven_ = true;
+    relativeAlg2->idNodeMap_["nextNode"] = childMeasureWrapper;
+    relativeAlg2->idNodeMap_["currentNode"] = currMeasureWrapper;
+    relativeAlg2->idNodeMap_["nextNode"].layoutWrapper = layoutWrapper;
+
+    auto childLayoutProperty = layoutWrapper->GetLayoutProperty();
+    childLayoutProperty->flexItemProperty_ = std::make_unique<FlexItemProperty>();
+
     AlignRule alignRule;
     alignRule.anchor = "nextNode";
     alignRule.horizontal = HorizontalAlign::START;
-    LayoutWrapper* layoutWrapper2 = nullptr;
-    auto frameNode = FrameNode::CreateFrameNode("tag", 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
-    layoutWrapper->SetActive(true);
-    RelativeContainerLayoutAlgorithm::ChildMeasureWrapper currMeasureWrapper;
-    currMeasureWrapper.id = "currentNode";
-    RelativeContainerLayoutAlgorithm::ChildMeasureWrapper childMeasureWrapper;
-    childMeasureWrapper.id = "nextNode";
-    relativeAlg2->idNodeMap_["nextNode"] = childMeasureWrapper;
-    relativeAlg2->idNodeMap_["currentNode"] = currMeasureWrapper;
-    std::string nextNode = "nextNode";
-    AlignRulesItem currentAlignRules;
-    currentAlignRules[AlignDirection::RIGHT] = alignRule;
-    relativeAlg2->idNodeMap_[nextNode].layoutWrapper = layoutWrapper;
-    auto childLayoutProperty = layoutWrapper->GetLayoutProperty();
-    childLayoutProperty->flexItemProperty_ = std::make_unique<FlexItemProperty>();
     std::map<AlignDirection, AlignRule> firstItemAlignRules;
     firstItemAlignRules[AlignDirection::LEFT] = alignRule;
     childLayoutProperty->UpdateAlignRules(firstItemAlignRules);
     childLayoutProperty->flexItemProperty_->propFlexGrow = 1.0f;
+
     std::vector<std::string> referencedIds = { "nextNode", "vertical", "TOP", "BOTTOM", "RIGHT" };
-    relativeAlg2->guidelines_["nextNode"] = std::make_pair(LineDirection::HORIZONTAL, 0.0f);
+    relativeAlg2->guidelines_["nextNode"] = std::make_pair(LineDirection::HORIZONTAL, 10.0f);
     relativeAlg2->guidelines_["vertical"] = std::make_pair(LineDirection::VERTICAL, 0.0f);
     relativeAlg2->barriers_["nextNode"] = std::make_pair(BarrierDirection::RIGHT, referencedIds);
     relativeAlg2->barriers_["RIGHT"] = std::make_pair(BarrierDirection::RIGHT, referencedIds);
-    relativeAlg2->CalcHorizontalLayoutParam(AlignDirection::RIGHT, alignRule, layoutWrapper2, nextNode);
-    relativeAlg2->CalcVerticalLayoutParam(AlignDirection::RIGHT, alignRule, layoutWrapper2, nextNode);
-    relativeAlg2->CalcGuideline(layoutWrapper.GetRawPtr());
-    relativeAlg2->Measure(layoutWrapper.GetRawPtr());
-    EXPECT_NE(pLayoutWrapper->GetLayoutProperty(), nullptr);
+    relativeAlg2->recordOffsetMap_["nextNode"] = OffsetF(100, 100);
+
+    const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
+    relativeAlg2->CalcHorizontalLayoutParam(AlignDirection::RIGHT, alignRule, nullptr, "nextNode");
+    EXPECT_EQ(childFlexItemProperty->GetAlignRight(), 0);
+    relativeAlg2->CalcVerticalLayoutParam(AlignDirection::RIGHT, alignRule, nullptr, "nextNode");
+    EXPECT_EQ(childFlexItemProperty->GetAlignRight(), 100);
 }
 
 /**
@@ -647,52 +637,57 @@ HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm016, TestSi
  */
 HWTEST_F(RelativeContainerNewTestNG, RelativeContainerLayoutAlgorithm017, TestSize.Level1)
 {
-    LayoutWrapperNode* pLayoutWrapper = nullptr;
-    auto relativeContainerLayoutAlgorithm = CreateLayoutAlgorithm(pLayoutWrapper);
-    auto layoutProperty =
-        AccessibilityManager::DynamicCast<RelativeContainerLayoutProperty>(pLayoutWrapper->GetLayoutProperty());
+    RefPtr<FrameNode> relativeContainerFrameNode = nullptr;
+    auto relativeContainerLayoutAlgorithm = CreateLayoutAlgorithm(relativeContainerFrameNode);
+
     std::vector<GuidelineInfo> guidelineInfos;
     GuidelineInfo guidelineInfoItem;
     guidelineInfoItem.id = std::string("guideline.id");
     guidelineInfoItem.direction = LineDirection::HORIZONTAL;
     guidelineInfos.emplace_back(guidelineInfoItem);
+    auto layoutProperty = AccessibilityManager::DynamicCast<RelativeContainerLayoutProperty>(
+        relativeContainerFrameNode->GetLayoutProperty());
     layoutProperty->UpdateGuideline(guidelineInfos);
     layoutProperty->UpdateVisibility(VisibleType::GONE);
+
+    auto frameNode = FrameNode::CreateFrameNode("tag", 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    layoutWrapper->SetActive(true);
+
+    RelativeContainerLayoutAlgorithm::ChildMeasureWrapper currMeasureWrapper;
+    RelativeContainerLayoutAlgorithm::ChildMeasureWrapper childMeasureWrapper;
+    currMeasureWrapper.id = "currentNode";
+    childMeasureWrapper.id = "nextNode";
+
     auto relativeAlg2 =
         AccessibilityManager::DynamicCast<RelativeContainerLayoutAlgorithm>(relativeContainerLayoutAlgorithm);
     relativeAlg2->versionGreatorOrEqualToEleven_ = true;
+    relativeAlg2->idNodeMap_["nextNode"] = childMeasureWrapper;
+    relativeAlg2->idNodeMap_["currentNode"] = currMeasureWrapper;
+    relativeAlg2->idNodeMap_["nextNode"].layoutWrapper = layoutWrapper;
+
+    auto childLayoutProperty = layoutWrapper->GetLayoutProperty();
+    childLayoutProperty->flexItemProperty_ = std::make_unique<FlexItemProperty>();
+
+    std::map<AlignDirection, AlignRule> firstItemAlignRules;
     AlignRule alignRule;
     alignRule.anchor = "nextNode";
     alignRule.horizontal = HorizontalAlign::START;
-    LayoutWrapper* layoutWrapper2 = nullptr;
-    auto frameNode = FrameNode::CreateFrameNode("tag", 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
-    layoutWrapper->SetActive(true);
-    RelativeContainerLayoutAlgorithm::ChildMeasureWrapper currMeasureWrapper;
-    currMeasureWrapper.id = "currentNode";
-    RelativeContainerLayoutAlgorithm::ChildMeasureWrapper childMeasureWrapper;
-    childMeasureWrapper.id = "nextNode";
-    relativeAlg2->idNodeMap_["nextNode"] = childMeasureWrapper;
-    relativeAlg2->idNodeMap_["currentNode"] = currMeasureWrapper;
-    std::string nextNode = "nextNode";
-    AlignRulesItem currentAlignRules;
-    currentAlignRules[AlignDirection::RIGHT] = alignRule;
-    relativeAlg2->idNodeMap_[nextNode].layoutWrapper = layoutWrapper;
-    auto childLayoutProperty = layoutWrapper->GetLayoutProperty();
-    childLayoutProperty->flexItemProperty_ = std::make_unique<FlexItemProperty>();
-    std::map<AlignDirection, AlignRule> firstItemAlignRules;
     firstItemAlignRules[AlignDirection::LEFT] = alignRule;
     childLayoutProperty->UpdateAlignRules(firstItemAlignRules);
     childLayoutProperty->flexItemProperty_->propFlexGrow = 1.0f;
+
     std::vector<std::string> referencedIds = { "nextNode", "vertical", "TOP", "BOTTOM", "RIGHT" };
     relativeAlg2->guidelines_["nextNode"] = std::make_pair(LineDirection::VERTICAL, 0.0f);
     relativeAlg2->guidelines_["vertical"] = std::make_pair(LineDirection::VERTICAL, 0.0f);
     relativeAlg2->barriers_["nextNode"] = std::make_pair(BarrierDirection::RIGHT, referencedIds);
     relativeAlg2->barriers_["RIGHT"] = std::make_pair(BarrierDirection::RIGHT, referencedIds);
-    relativeAlg2->CalcHorizontalLayoutParam(AlignDirection::RIGHT, alignRule, layoutWrapper2, nextNode);
-    relativeAlg2->CalcVerticalLayoutParam(AlignDirection::RIGHT, alignRule, layoutWrapper2, nextNode);
-    relativeAlg2->CalcGuideline(layoutWrapper.GetRawPtr());
-    relativeAlg2->Measure(layoutWrapper.GetRawPtr());
-    EXPECT_NE(pLayoutWrapper->GetLayoutProperty(), nullptr);
+    relativeAlg2->recordOffsetMap_["nextNode"] = OffsetF(100, 100);
+
+    const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
+    relativeAlg2->CalcHorizontalLayoutParam(AlignDirection::RIGHT, alignRule, nullptr, "nextNode");
+    EXPECT_EQ(childFlexItemProperty->GetAlignRight(), 100);
+    relativeAlg2->CalcVerticalLayoutParam(AlignDirection::RIGHT, alignRule, nullptr, "nextNode");
+    EXPECT_EQ(childFlexItemProperty->GetAlignRight(), 0);
 }
 } // namespace OHOS::Ace::NG

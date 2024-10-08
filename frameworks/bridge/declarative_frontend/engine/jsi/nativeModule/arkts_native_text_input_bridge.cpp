@@ -2049,4 +2049,31 @@ ArkUINativeModuleValue TextInputBridge::ResetSelectionMenuOptions(ArkUIRuntimeCa
     GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputSelectionMenuOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TextInputBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto value = widthArg->ToString(vm)->ToString(vm);
+    if (value.empty()) {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputWidth(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputWidth(
+        nativeNode, value.c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputWidth(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

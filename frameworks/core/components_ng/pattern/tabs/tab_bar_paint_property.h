@@ -39,7 +39,8 @@ public:
         paintProperty->propIndicator_ = CloneIndicator();
         paintProperty->propFadingEdge_ = CloneFadingEdge();
         paintProperty->propBarBackgroundColor_ = CloneBarBackgroundColor();
-        paintProperty->propTabBarBlurStyle_ = CloneTabBarBlurStyle();
+        paintProperty->propTabBarBlurStyleOption_ = CloneTabBarBlurStyleOption();
+        paintProperty->propTabBarEffectOption_ = CloneTabBarEffectOption();
         return paintProperty;
     }
 
@@ -70,7 +71,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Indicator, RectF, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FadingEdge, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarBlurStyle, BlurStyle, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarBlurStyleOption, BlurStyleOption, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarEffectOption, EffectOption, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

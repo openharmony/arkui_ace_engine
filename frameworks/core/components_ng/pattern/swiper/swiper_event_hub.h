@@ -94,20 +94,28 @@ public:
         }
     }
 
-    void FireChangeEvent(int32_t preIndex, int32_t currentIndex)
+    void FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout)
     {
-        auto frameNode = GetFrameNode();
-        CHECK_NULL_VOID(frameNode);
-        auto pipeline = frameNode->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->AddAfterLayoutTask([weak = WeakClaim(this), currentIndex]() {
-            auto eventHub = weak.Upgrade();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireJSChangeEvent(currentIndex);
-        });
+        if (isInLayout) {
+            auto frameNode = GetFrameNode();
+            CHECK_NULL_VOID(frameNode);
+            auto pipeline = frameNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->AddAfterLayoutTask([weak = WeakClaim(this), currentIndex]() {
+                auto eventHub = weak.Upgrade();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->FireJSChangeEvent(currentIndex);
+            });
+        } else {
+            FireJSChangeEvent(currentIndex);
+        }
+
         if (!changeEventsWithPreIndex_.empty()) {
             std::for_each(changeEventsWithPreIndex_.begin(), changeEventsWithPreIndex_.end(),
                 [preIndex, currentIndex](const ChangeEventWithPreIndexPtr& changeEventWithPreIndex) {
+                    if (!changeEventWithPreIndex || !(*changeEventWithPreIndex)) {
+                        return;
+                    }
                     auto event = *changeEventWithPreIndex;
                     event(preIndex, currentIndex);
                 });
@@ -140,41 +148,76 @@ public:
         return direction_;
     }
 
-    void FireAnimationStartEvent(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) const
+    void FireAnimationStartEvent(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)
     {
         if (!animationStartEvents_.empty()) {
             std::for_each(animationStartEvents_.begin(), animationStartEvents_.end(),
                 [index, targetIndex, info](const AnimationStartEventPtr& animationStartEvent) {
+                    if (!animationStartEvent || !(*animationStartEvent)) {
+                        return;
+                    }
                     auto event = *animationStartEvent;
                     event(index, targetIndex, info);
                 });
         }
+        // animationEnd callback need to be fired after animationStart callback, use flag for protection.
+        isAnimationStartCalled_ = true;
+        if (delayCallback_) {
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "the timing of the animation callback has been corrected");
+            delayCallback_();
+            delayCallback_ = nullptr;
+        }
     }
 
-    void FireAnimationEndEvent(int32_t index, const AnimationCallbackInfo& info) const
+    void FireAnimationEndEvent(int32_t index, const AnimationCallbackInfo& info)
     {
+        if (!isAnimationStartCalled_) {
+            delayCallback_ = [weak = WeakClaim(this), index, info]() {
+                auto hub = weak.Upgrade();
+                CHECK_NULL_VOID(hub);
+                hub->FireAnimationEndEvent(index, info);
+            };
+            return;
+        }
         if (!animationEndEvents_.empty()) {
             std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
                 [index, info](const AnimationEndEventPtr& animationEndEvent) {
+                    if (!animationEndEvent || !(*animationEndEvent)) {
+                        return;
+                    }
                     auto event = *animationEndEvent;
                     event(index, info);
                 });
         }
+        isAnimationStartCalled_ = false;
     }
 
-    void FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info) const
+    void FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info)
     {
-        if (!animationEndEvents_.empty()) {
-            auto context = GetFrameNode()->GetContext();
-            CHECK_NULL_VOID(context);
-            context->AddBuildFinishCallBack([this, index, info]() {
-                std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
-                    [index, info](const AnimationEndEventPtr& animationEndEvent) {
-                        auto event = *animationEndEvent;
-                        event(index, info);
-                    });
-            });
+        if (!isAnimationStartCalled_) {
+            delayCallback_ = [weak = WeakClaim(this), index, info]() {
+                auto hub = weak.Upgrade();
+                CHECK_NULL_VOID(hub);
+                hub->FireAnimationEndOnForceEvent(index, info);
+            };
+            return;
         }
+        if (animationEndEvents_.empty()) {
+            return;
+        }
+        auto context = GetFrameNode()->GetContext();
+        CHECK_NULL_VOID(context);
+        context->AddBuildFinishCallBack([this, index, info]() {
+            std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
+                [index, info](const AnimationEndEventPtr& animationEndEvent) {
+                    if (!animationEndEvent || !(*animationEndEvent)) {
+                        return;
+                    }
+                    auto event = *animationEndEvent;
+                    event(index, info);
+                });
+        });
+        isAnimationStartCalled_ = false;
     }
 
     void FireGestureSwipeEvent(int32_t index, const AnimationCallbackInfo& info) const
@@ -194,6 +237,9 @@ private:
             return;
         }
         std::for_each(changeEvents_.begin(), changeEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
+            if (!changeEvent || !(*changeEvent)) {
+                return;
+            }
             auto event = *changeEvent;
             event(index);
         });
@@ -207,6 +253,8 @@ private:
     std::list<AnimationStartEventPtr> animationStartEvents_;
     std::list<AnimationEndEventPtr> animationEndEvents_;
     GestureSwipeEvent gestureSwipeEvent_;
+    bool isAnimationStartCalled_ = false;
+    std::function<void()> delayCallback_;
 };
 
 } // namespace OHOS::Ace::NG

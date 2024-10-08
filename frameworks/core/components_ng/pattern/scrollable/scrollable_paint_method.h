@@ -28,7 +28,6 @@ public:
     {}
     ~ScrollablePaintMethod() override = default;
 
-
     void SetOverlayRenderContext(const RefPtr<RenderContext>& overlayRenderContext)
     {
         overlayRenderContext_ = overlayRenderContext;
@@ -44,21 +43,33 @@ public:
         endPercent_ = endPercent;
     }
 
+protected:
     void UpdateFadingGradient(const RefPtr<RenderContext>& renderContext);
 
-protected:
+    /**
+     * @brief Try to set content clip to render context.
+     *
+     * @return true if content clip is set up
+     */
+    bool TryContentClip(PaintWrapper* wrapper);
+
     bool vertical_ = false;
     bool isReverse_ = false;
     bool isVerticalReverse_ = false;
 
 private:
+    /**
+     * @brief Apply Scrollable's default content clip area
+     */
+    virtual void ApplyDefaultContentClip(
+        const RefPtr<RenderContext>& ctx, const RefPtr<GeometryNode>& geometryNode) = 0;
+
     RefPtr<RenderContext> overlayRenderContext_;
     bool isFadingTop_ = false;
     bool isFadingBottom_ = false;
     float percentFading_ = 0.0f;
     float startPercent_ = 0.0f;
     float endPercent_ = 1.0f;
-    
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_PAINT_METHOD_H

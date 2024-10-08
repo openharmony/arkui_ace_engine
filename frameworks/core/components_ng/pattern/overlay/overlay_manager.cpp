@@ -143,6 +143,8 @@ constexpr int32_t UIEXTNODE_ANGLE_90 = 90;
 constexpr int32_t UIEXTNODE_ANGLE_180 = 180;
 constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
+constexpr double DISTANCE_THRESHOLD = 20.0;
+
 RefPtr<FrameNode> GetLastPage()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -1068,6 +1070,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
         if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
             SetPreviewFirstShow(menu);
         }
+        SetPatternFirstShow(menu);
         return;
     }
     AnimationOption option;
@@ -1381,6 +1384,13 @@ void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::functi
         callback(callbackToastId);
     }
     OpenToastAnimation(toastNode, toastInfo.duration);
+    if (toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast DEFAULT");
+    } else if (toastInfo.showMode == NG::ToastShowMode::TOP_MOST) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast TOP_MOST");
+    } else if (toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast SYSTEM_TOP_MOST");
+    }
 }
 
 void OverlayManager::CloseToast(int32_t toastId, const std::function<void(int32_t)>& callback)
@@ -1585,16 +1595,8 @@ void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, cons
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     if (popupPattern->GetHasTransition()) {
         if (!popupNode->GetRenderContext()->HasDisappearTransition()) {
-            popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
-            popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
-            RemoveChildWithService(rootNode, popupNode);
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
-            CHECK_NULL_VOID(layoutProp);
-            auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-            if (isShowInSubWindow) {
-                auto subwindowMgr = SubwindowManager::GetInstance();
-                subwindowMgr->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
+            if (finish) {
+                finish();
             }
         } else {
             popupPattern->StartExitingTransitionEffects(popupNode, finish);
@@ -3160,6 +3162,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
             return true;
         } while (0);
         if (!modalStack_.empty()) {
+            TAG_LOGI(AceLogTag::ACE_SHEET, "Modal consumed backpressed event");
             if (isPageRouter) {
                 return RemoveAllModalInOverlay();
             } else {
@@ -3824,7 +3827,9 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     const NG::ContentCoverParam& contentCoverParam, int32_t targetId, std::optional<ModalTransition> modalTransition)
 {
     // builder content
-    auto builder = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+    auto buildNode = buildNodeFunc();
+    CHECK_NULL_VOID(buildNode);
+    auto builder = AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
     CHECK_NULL_VOID(builder);
     builder->GetRenderContext()->SetIsModalRootNode(true);
 
@@ -4179,7 +4184,7 @@ void OverlayManager::InitSheetMask(
             });
         auto maskNodeId = maskNode->GetId();
         sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
-        eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
+        eventConfirmHub->AddClickEvent(sheetMaskClickEvent, DISTANCE_THRESHOLD);
         if (!sheetStyle.interactive.has_value()) {
             if (sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetType() == SheetType::SHEET_POPUP) {
                 maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
@@ -4416,7 +4421,9 @@ void OverlayManager::PlaySheetTransition(
     if (isTransitionIn) {
         sheetPattern->SetCurrentHeight(sheetHeight_);
         float offset = 0.0f;
-        if (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) {
+        auto sheetType = sheetPattern->GetSheetType();
+        if (sheetType == SheetType::SHEET_POPUP ||
+            sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
             offset = sheetPattern->GetSheetOffset();
         } else {
             offset = sheetMaxHeight - sheetHeight_;
@@ -4452,6 +4459,7 @@ void OverlayManager::PlaySheetTransition(
                 pattern->FireOnDetentsDidChange(overlay->sheetHeight_);
                 pattern->FireOnHeightDidChange(overlay->sheetHeight_);
             });
+        ACE_SCOPED_TRACE("Sheet start admission");
         AnimationUtils::Animate(
             option,
             [context, offset]() {
@@ -4653,6 +4661,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
         layoutProperty->UpdateSheetStyle(sheetStyle);
         UpdateSheetProperty(sheetNode, sheetStyle, isPartialUpdate);
     }
+    sheetNodePattern->SetBottomOffset(sheetStyle);
     sheetNode->MarkModifyDone();
     auto sheetType = sheetNodePattern->GetSheetType();
     if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess()) {
@@ -4763,6 +4772,7 @@ void OverlayManager::SetSheetProperty(
     UpdateSheetRender(sheetPageNode, sheetStyle, true);
     auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
+    sheetNodePattern->SetBottomOffset(sheetStyle);
     sheetNodePattern->UpdateOnAppear(std::move(onAppear));
     sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
     sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
@@ -4891,7 +4901,7 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
                     sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
                 });
             sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
-            eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
+            eventConfirmHub->AddClickEvent(sheetMaskClickEvent, DISTANCE_THRESHOLD);
             return;
         }
 
@@ -5059,6 +5069,7 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
             }
         case SheetType::SHEET_BOTTOM:
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
+        case SheetType::SHEET_BOTTOM_OFFSET:
             if (!sheetStyle.detents.empty()) {
                 ComputeDetentsSheetOffset(sheetStyle, sheetNode);
             } else {
@@ -5638,7 +5649,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y,
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED);
-        if (!dragDropManager->IsNeedDisplayInSubwindow() && !isSubwindowOverlay) {
+        if (!dragDropManager->IsNeedDisplayInSubwindow() && !isSubwindowOverlay && dragDropManager->IsDragging()) {
             InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         }
         auto overlayManager = weak.Upgrade();

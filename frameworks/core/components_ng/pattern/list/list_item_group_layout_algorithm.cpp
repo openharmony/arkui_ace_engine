@@ -292,7 +292,10 @@ bool ListItemGroupLayoutAlgorithm::NeedMeasureItem(LayoutWrapper* layoutWrapper)
             return false;
         }
         if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
-            if (totalItemCount_ > 0 &&
+            auto listPadding = listLayoutProperty_->CreatePaddingAndBorder().Offset();
+            auto offset = layoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+            bool atStart = GreatNotEqual(GetMainAxisOffset(offset, axis_), GetMainAxisOffset(listPadding, axis_));
+            if (atStart && totalItemCount_ > 0 &&
                 (!layoutedItemInfo_ || layoutedItemInfo_.value().endIndex < totalItemCount_ - 1)) {
                 return true;
             } else {
@@ -935,12 +938,14 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
     const auto& end = *itemPosition_.rbegin();
     if (layoutedItemInfo_.has_value()) {
         auto& itemInfo = layoutedItemInfo_.value();
-        if (start.first <= itemInfo.startIndex || LessNotEqual(start.second.startPos, itemInfo.startPos)) {
+        auto prevStartIndex = itemInfo.startIndex;
+        if (start.first <= itemInfo.startIndex || LessNotEqual(start.second.startPos, itemInfo.startPos) ||
+            start.first > itemInfo.endIndex) {
             itemInfo.startIndex = start.first;
             itemInfo.startPos = start.second.startPos;
         }
         if (end.first >= itemInfo.endIndex || GreatNotEqual(end.second.endPos, itemInfo.endPos) ||
-            itemInfo.endIndex > totalItemCount_ - 1) {
+            itemInfo.endIndex > totalItemCount_ - 1 || end.first < prevStartIndex) {
             itemInfo.endIndex = end.first;
             itemInfo.endPos = end.second.endPos;
         }
@@ -1208,6 +1213,7 @@ ListItemGroupLayoutInfo ListItemGroupLayoutAlgorithm::GetLayoutInfo() const
     ListItemGroupLayoutInfo info;
     info.headerSize = headerMainSize_;
     info.footerSize = footerMainSize_;
+    info.spaceWidth = spaceWidth_;
     if (totalItemCount_ == 0 || childrenSize_) {
         info.atStart = true;
         info.atEnd = true;

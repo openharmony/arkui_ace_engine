@@ -712,4 +712,26 @@ HWTEST_F(ScrollInnerEventTestNg, RegisterEventByClick001, TestSize.Level1)
     // reset useNewPipeline_
     MockContainer::Current()->useNewPipeline_ = false;
 }
+
+/**
+ * @tc.name: HandleDragEndScrollBar001
+ * @tc.desc: Test handleDragEnd in Horizontal and RTL layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleDragEndScrollBar001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->GetScrollableDistance(), HORIZONTAL_SCROLLABLE_DISTANCE);
+
+    /**
+     * @tc.steps: step1. Drag end with velocity
+     * @tc.expected: Continue scroll after end
+     */
+    DragScrollBarAction(Offset(239, 398), 0.f, -1000.f);
+    EXPECT_LE(GetChildX(frameNode_, 0), 60.f);
+}
 } // namespace OHOS::Ace::NG

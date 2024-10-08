@@ -112,6 +112,7 @@ void DotIndicatorPaintMethod::GetLongPointAnimationStateSecondCenter(
 void DotIndicatorPaintMethod::UpdateNormalIndicator(
     LinearVector<float>& itemHalfSizes, const PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         std::vector<std::pair<float, float>> pointCenterX({ longPointCenterX_ });
@@ -126,6 +127,7 @@ void DotIndicatorPaintMethod::UpdateNormalIndicator(
 
 void DotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     auto [longPointCenterX, itemHalfSizes] = CalculateLongPointCenterX(paintWrapper);
     longPointCenterX_ = longPointCenterX;
 
@@ -142,6 +144,7 @@ void DotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrap
 
 void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     CHECK_NULL_VOID(paintWrapper);
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
@@ -206,6 +209,7 @@ int32_t DotIndicatorPaintMethod::CalculateMouseClickIndexOnRTL()
 
 void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfSizes, const Dimension paddingSide)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     if (mouseClickIndex_) {
         if (currentIndex_ == totalItemCount_ - displayCount_ && !isLoop_ && mouseClickIndex_ > currentIndex_ &&
             mouseClickIndex_ < totalItemCount_) {
@@ -230,6 +234,7 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(LinearVector<float>& itemHalfS
 
 void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     CHECK_NULL_VOID(paintWrapper);
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
@@ -423,6 +428,7 @@ std::pair<float, float> DotIndicatorPaintMethod::CalculatePointCenterX(
 
 void DotIndicatorPaintMethod::CalculateHoverIndex(const LinearVector<float>& itemHalfSizes)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     if (!isHover_) {
         hoverIndex_ = std::nullopt;
         longPointIsHover_ = false;
@@ -463,6 +469,7 @@ bool DotIndicatorPaintMethod::isHoverPoint(
 
 void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(dotIndicatorModifier_);
     CHECK_NULL_VOID(paintWrapper);
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);

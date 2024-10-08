@@ -180,7 +180,7 @@ float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<floa
 {
     if (layoutedItemInfo_.has_value() && layoutedItemInfo_.value().startIndex > 0) {
         float averageHeight = 0.0f;
-        float estimateHeight = GetEstimateHeight(averageHeight, headerMainSize, footerMainSize);
+        float estimateHeight = GetEstimateHeight(averageHeight, headerMainSize, footerMainSize, spaceWidth_);
         if (layoutedItemInfo_.value().endIndex >= itemTotalCount_ - 1) {
             return height + estimateHeight - targetPos.second;
         } else {
@@ -191,7 +191,7 @@ float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<floa
 }
 
 float ListItemGroupPattern::GetEstimateHeight(float& averageHeight,
-    float headerMainSize, float footerMainSize) const
+    float headerMainSize, float footerMainSize, float spaceWidth) const
 {
     auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
@@ -223,7 +223,7 @@ float ListItemGroupPattern::GetEstimateHeight(float& averageHeight,
         totalItem -= 1;
         totalHeight += footerMainSize;
     }
-    return totalHeight + averageHeight * totalItem + paddingAndMargin;
+    return totalHeight + averageHeight * totalItem + paddingAndMargin - spaceWidth;
 }
 
 void ListItemGroupPattern::CheckListDirectionInCardStyle()
@@ -270,7 +270,7 @@ RefPtr<ListChildrenMainSize> ListItemGroupPattern::GetOrCreateListChildrenMainSi
     auto callback = [weakPattern = WeakClaim(this)](std::tuple<int32_t, int32_t, int32_t> change, ListChangeFlag flag) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = pattern->GetContext();
         CHECK_NULL_VOID(context);
         context->AddBuildFinishCallBack([weakPattern, change, flag]() {
             auto pattern = weakPattern.Upgrade();

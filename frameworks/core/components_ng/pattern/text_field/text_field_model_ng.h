@@ -100,6 +100,7 @@ public:
     void SetCanacelIconSrc(
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) override;
     void SetCancelIconColor(const Color& iconColor) override;
+    void SetCancelButtonSymbol(bool isShowSymbol) override;
     void SetIsShowCancelButton(bool isShowCancelButton) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
@@ -189,6 +190,7 @@ public:
     static void SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize);
     static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);
+    static void SetCancelButtonSymbol(FrameNode* frameNode, bool isShowSymbol);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static std::string GetPlaceholderText(FrameNode* frameNode);
     static std::string GetTextFieldText(FrameNode* frameNode);
@@ -223,6 +225,9 @@ public:
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
     static void ResetTextInputPadding(FrameNode* frameNode);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
+    static void SetAutoWidth(FrameNode* frameNode);
+    static void SetWidth(FrameNode* frameNode, const std::string& value);
+    static void ClearWidth(FrameNode* frameNode);
     static void SetWordBreak(FrameNode* frameNode, Ace::WordBreak value);
     static void SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value);
     static void SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue);
@@ -282,6 +287,7 @@ private:
     void SetDraggable(bool draggable);
     void SetTextRectWillChange();
     void SetDefaultPadding();
+    void SetBackBorderRadius();
 };
 
 } // namespace OHOS::Ace::NG

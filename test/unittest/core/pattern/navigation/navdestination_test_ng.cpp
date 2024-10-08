@@ -247,7 +247,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest001, TestSize.Level1)
     MockPipelineContextGetTheme();
     NavDestinationModelNG NavDestinationModelNG;
     NavDestinationModelNG.Create();
-    NavDestinationModelNG.SetHideTitleBar(true);
+    NavDestinationModelNG.SetHideTitleBar(true, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, true);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -271,7 +271,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest003, TestSize.Level1)
     NavDestinationModelNG NavDestinationModelNG;
     auto builderFunc = []() {};
     NavDestinationModelNG.Create(std::move(builderFunc));
-    NavDestinationModelNG.SetHideTitleBar(false);
+    NavDestinationModelNG.SetHideTitleBar(false, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, false);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -292,7 +292,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest004, TestSize.Level1)
     auto builderFunc = []() {};
     auto onBackPressed = []() -> bool { return true; };
     NavDestinationModelNG.Create(std::move(builderFunc));
-    NavDestinationModelNG.SetHideTitleBar(false);
+    NavDestinationModelNG.SetHideTitleBar(false, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, false);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     NavDestinationModelNG.SetOnShown(std::move(builderFunc));
@@ -390,7 +390,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationOnLanguageConfigurationUpdateTest00
     MockPipelineContextGetTheme();
     NavDestinationModelNG NavDestinationModelNG;
     NavDestinationModelNG.Create();
-    NavDestinationModelNG.SetHideTitleBar(true);
+    NavDestinationModelNG.SetHideTitleBar(true, false);
     NavDestinationModelNG.SetTitle(NAVIGATION_TITLE, true);
     NavDestinationModelNG.SetSubtitle(NAVIGATION_SUBTITLE);
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());

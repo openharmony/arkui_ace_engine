@@ -34,6 +34,7 @@
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
+#include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
@@ -200,6 +201,10 @@ ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 flags)
     if (flags == ARKUI_NODE_FLAG_C) {
         ContainerScope Scope(Container::CurrentIdSafelyWithCheck());
         node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
+        auto* uiNode = reinterpret_cast<UINode*>(node);
+        if (uiNode) {
+            uiNode->setIsCNode(true);
+        }
     } else {
         node = reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
     }
@@ -410,6 +415,11 @@ const ComponentAsyncEventHandler imageNodeAsyncEventHandlers[] = {
     NodeModifier::SetImageOnError,
     NodeModifier::SetImageOnSvgPlayFinish,
     NodeModifier::SetImageOnDownloadProgress,
+};
+
+const ComponentAsyncEventHandler IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetImageSpanOnCompleteEvent,
+    NodeModifier::SetImageSpanOnErrorEvent,
 };
 
 const ComponentAsyncEventHandler DATE_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -715,6 +725,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = imageNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_IMAGE_SPAN: {
+            if (subKind >= sizeof(IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = IMAGE_SPAN_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_SCROLL: {

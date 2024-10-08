@@ -106,7 +106,7 @@ void GradientStyleModifier::SetGradient(const Gradient& gradient)
         AttachProperty(colors_);
     } else {
         auto colors = ColorAnimatableArithmetic(gradient);
-        PaddingColors(colors);
+        PaddingColors(colors, gradient.GetRepeat());
         colors_->Set(colors);
     }
     if (!colorStops_) {
@@ -115,7 +115,7 @@ void GradientStyleModifier::SetGradient(const Gradient& gradient)
         AttachProperty(colorStops_);
     } else {
         auto colorStops = ColorStopAnimatableArithmetic(gradient);
-        PaddingColorStops(colorStops);
+        PaddingColorStops(colorStops, gradient.GetRepeat());
         colorStops_->Set(colorStops);
     }
     if (!gradient_) {
@@ -126,8 +126,11 @@ void GradientStyleModifier::SetGradient(const Gradient& gradient)
     }
 }
 
-void GradientStyleModifier::PaddingColors(ColorAnimatableArithmetic& colors)
+void GradientStyleModifier::PaddingColors(ColorAnimatableArithmetic& colors, bool repeat)
 {
+    if (repeat) {
+        return;
+    }
     if (colors_->Get().GetColors().size() <= colors.GetColors().size()) {
         return;
     }
@@ -135,8 +138,11 @@ void GradientStyleModifier::PaddingColors(ColorAnimatableArithmetic& colors)
     colors.PaddingColors(paddingSize, Color::TRANSPARENT);
 }
 
-void GradientStyleModifier::PaddingColorStops(ColorStopAnimatableArithmetic& colorStops)
+void GradientStyleModifier::PaddingColorStops(ColorStopAnimatableArithmetic& colorStops, bool repeat)
 {
+    if (repeat) {
+        return;
+    }
     if (colorStops_->Get().GetColorStops().size() <= colorStops.GetColorStops().size()) {
         return;
     }

@@ -14,7 +14,6 @@
  */
 
 #include "list_test_ng.h"
-#include "test/mock/base/mock_drag_window.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
@@ -992,12 +991,8 @@ HWTEST_F(ListCommonTestNg, FRCCallback001, TestSize.Level1)
 HWTEST_F(ListCommonTestNg, EventHub001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. EXPECT_CALL DrawFrameNode, HandleOnItemDragStart will trigger it
+     * @tc.steps: step1. EXPECT_CALL GetWindowId, HandleOnItemDragStart will trigger it
      */
-    auto mockDragWindow = MockDragWindow::CreateDragWindow({"", 0, 0, 0, 0, 0});
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), DrawFrameNode(_)).Times(2);
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), MoveTo).Times(AnyNumber());
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(mockDragWindow)), Destroy).Times(AnyNumber());
     auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
     EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
 

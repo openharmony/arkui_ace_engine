@@ -81,7 +81,6 @@ void SliderPattern::OnModifyDone()
     sliderInteractionMode_ =
         sliderPaintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK);
     minResponse_ = sliderPaintProperty->GetMinResponsiveDistance().value_or(0.0f);
-    InitWindowSizeChanged(host);
     if (!panMoveFlag_) {
         UpdateToValidValue();
     }
@@ -476,13 +475,6 @@ void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
             pattern->FireChangeEvent(SliderChangeMode::End);
         });
     }
-}
-
-void SliderPattern::InitWindowSizeChanged(const RefPtr<FrameNode>& host)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
 
 bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
@@ -1716,12 +1708,6 @@ void SliderPattern::OnAttachToFrameNode()
     RegisterVisibleAreaChange();
 }
 
-void SliderPattern::OnVisibleChange(bool isVisible)
-{
-    isVisible_ = isVisible;
-    isVisible_ ? StartAnimation() : StopAnimation();
-}
-
 void SliderPattern::StartAnimation()
 {
     CHECK_NULL_VOID(sliderContentModifier_);
@@ -1767,6 +1753,7 @@ void SliderPattern::RegisterVisibleAreaChange()
     std::vector<double> ratioList = {0.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1787,7 +1774,7 @@ void SliderPattern::OnWindowShow()
 
 bool SliderPattern::IsSliderVisible()
 {
-    return isVisibleArea_ && isVisible_ && isShow_;
+    return isVisibleArea_ && isShow_;
 }
 
 void SliderPattern::UpdateTipState()
@@ -1896,6 +1883,7 @@ void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
+    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     hasVisibleChangeRegistered_ = false;
 }
 } // namespace OHOS::Ace::NG

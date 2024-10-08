@@ -27,19 +27,6 @@ constexpr int32_t COLUMN_NUM = 2;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 constexpr int32_t SCROLL_LAYOUT_INFO_COUNT = 30;
 constexpr int32_t SCROLL_MEASURE_INFO_COUNT = 30;
-
-float CalculateOffsetByFriction(float extentOffset, float delta, float friction)
-{
-    if (NearZero(friction)) {
-        return delta;
-    }
-    float deltaToLimit = extentOffset / friction;
-    if (delta < deltaToLimit) {
-        return delta * friction;
-    }
-    return extentOffset + delta - deltaToLimit;
-}
-
 } // namespace
 
 void ScrollPattern::OnModifyDone()
@@ -160,7 +147,7 @@ bool ScrollPattern::ScrollSnapTrigger()
     }
     if (ScrollableIdle() && !AnimateRunning()) {
         auto predictSnapOffset = CalcPredictSnapOffset(0.0);
-        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
+        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value(), SPRING_ACCURACY)) {
             StartScrollSnapMotion(predictSnapOffset.value(), 0.0f);
             FireOnScrollStart();
             return true;
@@ -297,17 +284,12 @@ void ScrollPattern::AdjustOffset(float& delta, int32_t source)
     } else {
         overScrollPastEnd = std::abs(std::min(currentOffset_, 0.0f));
     }
-    // do not adjust offset if direction opposite from the overScroll direction when out of boundary
-    if ((overScrollPastStart > 0.0f && delta < 0.0f) || (overScrollPastEnd > 0.0f && delta > 0.0f)) {
-        return;
-    }
     overScrollPast = std::max(overScrollPastStart, overScrollPastEnd);
     if (overScrollPast == 0.0f) {
         return;
     }
-    float friction = ScrollablePattern::CalculateFriction((overScrollPast - std::abs(delta)) / viewPortLength_);
-    float direction = delta > 0.0f ? 1.0f : -1.0f;
-    delta = direction * CalculateOffsetByFriction(overScrollPast, std::abs(delta), friction);
+    float friction = CalculateFriction((overScrollPast - std::abs(delta)) / viewPortLength_);
+    delta = delta * friction;
 }
 
 float ScrollPattern::ValidateOffset(int32_t source, float willScrollOffset)
@@ -400,6 +382,7 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
 
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
+    FireObserverOnDidScroll(scroll);
     auto eventHub = GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnDidScrollEvent();
@@ -429,8 +412,10 @@ void ScrollPattern::FireOnDidScroll(float scroll)
 void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart);
+    CHECK_NULL_VOID(host);
     if (ReachStart()) {
+        FireObserverOnReachStart();
+        CHECK_NULL_VOID(onReachStart);
         ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         onReachStart();
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
@@ -440,8 +425,10 @@ void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd);
+    CHECK_NULL_VOID(host);
     if (ReachEnd()) {
+        FireObserverOnReachEnd();
+        CHECK_NULL_VOID(onReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         onReachEnd();
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
@@ -669,6 +656,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 
 void ScrollPattern::UpdateScrollBarOffset()
 {
+    CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }

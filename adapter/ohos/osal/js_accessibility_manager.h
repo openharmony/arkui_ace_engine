@@ -211,6 +211,8 @@ public:
     bool DeregisterWebInteractionOperationAsChildTree(int32_t treeID) override;
     bool RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
         const WeakPtr<NG::WebPattern>& webPattern) override;
+    void GetWebCursorPosition(const int64_t elementId, const int32_t requestId,
+        AccessibilityElementOperatorCallback& callback, const RefPtr<NG::WebPattern>& webPattern);
 #endif //WEB_SUPPORTED
     void GetResultOfFocusMoveSearchNG(
         int64_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info);
@@ -453,7 +455,7 @@ private:
     void DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent,
         int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
-
+    bool CheckDumpHandleEventParams(const std::vector<std::string> &params);
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext);
 
@@ -467,6 +469,9 @@ private:
 
     void UpdateAccessibilityElementInfo(
         const RefPtr<NG::FrameNode>& node, Accessibility::AccessibilityElementInfo& nodeInfo);
+
+    void UpdateAccessibilityVisible(
+        const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo);
 
     void UpdateVirtualNodeInfo(std::list<Accessibility::AccessibilityElementInfo>& infos,
         Accessibility::AccessibilityElementInfo& nodeInfo,

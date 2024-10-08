@@ -42,13 +42,14 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension TITLEBAR_VERTICAL_PADDING = 56.0_vp;
-constexpr int32_t TITLEBAR_OPACITY_ANIMATION_DURATION = 180;
+constexpr int32_t TITLEBAR_OPACITY_ANIMATION_DURATION = 120;
 const RefPtr<CubicCurve> TITLEBAR_OPACITY_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.4, 0.0, 0.4, 1.0);
 }
 
 bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme,
     const RefPtr<NavDestinationNodeBase>& nodeBase, const RefPtr<FrameNode>& menuNode,
-    std::vector<OptionParam>&& params, const std::string& field, const std::string& parentId)
+    std::vector<OptionParam>&& params, const std::string& field, const std::string& parentId,
+    bool isCreateLandscapeMenu)
 {
     auto barItemNode = CreateBarItemNode(isButtonEnabled);
     CHECK_NULL_RETURN(barItemNode, false);
@@ -76,13 +77,17 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     CHECK_NULL_RETURN(menuNode, false);
     menuNode->AddChild(menuItemNode);
     CHECK_NULL_RETURN(nodeBase, false);
-    nodeBase->SetMenuNode(barMenuNode);
+    if (isCreateLandscapeMenu) {
+        nodeBase->SetLandscapeMenuNode(barMenuNode);
+    } else {
+        nodeBase->SetMenuNode(barMenuNode);
+    }
     return true;
 }
 
 RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     const std::vector<NG::BarItem>& menuItems, const RefPtr<NavDestinationNodeBase>& navDestinationNodeBase,
-    bool isButtonEnabled, const std::string& field, const std::string& parentId)
+    bool isButtonEnabled, const std::string& field, const std::string& parentId, bool isCreateLandscapeMenu)
 {
     auto menuNode = FrameNode::GetOrCreateFrameNode(
         V2::NAVIGATION_MENU_ETS_TAG, menuNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
@@ -122,8 +127,8 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
 
     // build more button
     if (needMoreButton) {
-        bool buildMoreButtonResult = BuildMoreButton(
-            isButtonEnabled, theme, navDestinationNodeBase, menuNode, std::move(params), field, parentId);
+        bool buildMoreButtonResult = BuildMoreButton(isButtonEnabled, theme, navDestinationNodeBase,
+            menuNode, std::move(params), field, parentId, isCreateLandscapeMenu);
         if (!buildMoreButtonResult) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "build more button node failed");
             return nullptr;
@@ -237,6 +242,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<Navigat
         menuItemLayoutProperty->UpdatePadding(padding);
         MarginProperty margin;
         margin.right = CalcLength(theme->GetCompPadding());
+        margin.end = CalcLength(theme->GetCompPadding());
         menuItemLayoutProperty->UpdateMargin(margin);
     } else {
         menuItemLayoutProperty->UpdateUserDefinedIdealSize(
@@ -370,6 +376,9 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
     auto buttonEvent = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isButtonEnabled);
+    auto focusHub = buttonNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetEnabled(isButtonEnabled);
 }
 
 void NavigationTitleUtil::UpdateBarItemNodeWithItem(

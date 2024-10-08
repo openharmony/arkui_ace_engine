@@ -237,7 +237,7 @@ public:
 
     float CheckLanguageDirection();
 
-    void RemoveDialogDestination();
+    void RemoveDialogDestination(bool isReplace = false);
     void AddDestinationNode(const RefPtr<UINode>& parent);
     WeakPtr<NavDestinationGroupNode> GetParentDestinationNode() const
     {

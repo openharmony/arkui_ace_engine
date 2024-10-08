@@ -22,7 +22,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
@@ -35,12 +37,12 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    auto direction = swiperPattern->GetDirection();
+    auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto direction = indicatorPattern->GetDirection();
 
     auto paintProperty = frameNode->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -98,7 +100,9 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     } while (false);
 
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(frameSize);
 }
 
 void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -106,18 +110,16 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
-    CHECK_NULL_VOID(swiperNode);
 
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    auto indicatorlayoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    CHECK_NULL_VOID(indicatorlayoutProperty);
-
-    auto currentOffset = SwiperIndicatorUtils::CalcIndicatrFrameOffSet(swiperLayoutProperty,
-                                                                       indicatorlayoutProperty,
-                                                                       indicatorWidth_, indicatorHeight_);
-    layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
+    auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    OffsetF currentOffset = OffsetF(0.0f, 0.0f);
+    auto needSet = indicatorPattern->GetDotCurrentOffset(currentOffset, indicatorWidth_, indicatorHeight_);
+    if (needSet) {
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        geometryNode->SetMarginFrameOffset(currentOffset);
+    }
 }
 
 double DotIndicatorLayoutAlgorithm::GetValidEdgeLength(

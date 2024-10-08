@@ -21,6 +21,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -42,7 +43,9 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         titleBarNode->SetMenu(navDestinationGroupNode->GetMenu());
         titleBarNode->AddChild(titleBarNode->GetMenu());
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
     } else {
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
         auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
         auto titleBarMenuItems = navDestinationPattern->GetTitleBarMenuItems();
@@ -56,14 +59,15 @@ void BuildMenu(const RefPtr<NavDestinationGroupNode>& navDestinationGroupNode, c
         if (navDestinationPattern->HasMenuNodeId()) {
             auto menuNode = NavigationTitleUtil::CreateMenuItems(navDestinationPattern->GetMenuNodeId(),
                 titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD,
-                titleBarNode->GetInnerParentId());
+                titleBarNode->GetInnerParentId(), false);
             CHECK_NULL_VOID(menuNode);
             navDestinationGroupNode->SetMenu(menuNode);
         }
 
         titleBarMenuItems.insert(titleBarMenuItems.end(), toolBarMenuItems.begin(), toolBarMenuItems.end());
         auto landscapeMenuNode = NavigationTitleUtil::CreateMenuItems(navDestinationPattern->GetLandscapeMenuNodeId(),
-            titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD, titleBarNode->GetInnerParentId());
+            titleBarMenuItems, navDestinationGroupNode, isButtonEnabled, DES_FIELD, titleBarNode->GetInnerParentId(),
+            true);
         CHECK_NULL_VOID(landscapeMenuNode);
         navDestinationGroupNode->SetLandscapeMenu(landscapeMenuNode);
     }
@@ -137,7 +141,11 @@ void NavDestinationPattern::OnModifyDone()
 
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
-    MountTitleBar(hostNode);
+    bool needRunTitleBarAnimation = false;
+    MountTitleBar(hostNode, needRunTitleBarAnimation);
+    bool needRunToolBarAnimation = false;
+    NavigationToolbarUtil::MountToolBar(hostNode, needRunToolBarAnimation);
+    HandleTitleBarAndToolBarAnimation(hostNode, needRunTitleBarAnimation, needRunToolBarAnimation);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
@@ -209,8 +217,10 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
         renderContext->GetBackgroundColor()->ColorToString().c_str());
 }
 
-void NavDestinationPattern::MountTitleBar(RefPtr<NavDestinationGroupNode>& hostNode)
+void NavDestinationPattern::MountTitleBar(
+    RefPtr<NavDestinationGroupNode>& hostNode, bool& needRunTitleBarAnimation)
 {
+    needRunTitleBarAnimation = false;
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
@@ -227,17 +237,19 @@ void NavDestinationPattern::MountTitleBar(RefPtr<NavDestinationGroupNode>& hostN
         }
         titleBarLayoutProperty->UpdateNoPixMap(navDestinationLayoutProperty->GetNoPixMapValue());
     }
-
-    if (isHideTitlebar_) {
-        titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        titleBarNode->SetJSViewActive(false);
-    } else {
-        titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        titleBarNode->SetJSViewActive(true);
-        auto&& opts = navDestinationLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts) {
-            titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
-        }
+    bool hideTitleBar = navDestinationLayoutProperty->GetHideTitleBarValue(false);
+    BuildMenu(hostNode, titleBarNode);
+    /**
+     * if titlebar is the first time to hide/display,
+     * doesn't require animation or isn't currently being animated and the
+     * hidden/display status hasn't changed.
+     */
+    if (!currHideTitleBar_.has_value() ||
+        !navDestinationLayoutProperty->GetIsAnimatedTitleBarValue(false) ||
+        (titleBarAnimationCount_ <= 0 && currHideTitleBar_.value() == hideTitleBar)) {
+        currHideTitleBar_ = hideTitleBar;
+        HideOrShowTitleBarImmediately(hostNode, hideTitleBar);
+        return;
     }
 
     auto navDesIndex = hostNode->GetIndex();
@@ -246,10 +258,11 @@ void NavDestinationPattern::MountTitleBar(RefPtr<NavDestinationGroupNode>& hostN
         titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 
-    BuildMenu(hostNode, titleBarNode);
-
     titleBarNode->MarkModifyDone();
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+
+    currHideTitleBar_ = hideTitleBar;
+    needRunTitleBarAnimation = true;
 }
 
 bool NavDestinationPattern::GetBackButtonState()
@@ -258,7 +271,7 @@ bool NavDestinationPattern::GetBackButtonState()
     CHECK_NULL_RETURN(hostNode, false);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_RETURN(navDestinationLayoutProperty, false);
-    if (navDestinationLayoutProperty->GetHideTitleBarValue(false)) {
+    if (navDestinationLayoutProperty->GetHideTitleBarValue(false) && !ForceMeasureTitleBar()) {
         return false;
     }
     // get navigation node
@@ -324,6 +337,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(id);
+    pipeline->AddWindowSizeChangeCallback(id);
 }
 
 void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -333,6 +347,7 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
+    pipeline->RemoveWindowSizeChangeCallback(id);
 }
 
 void NavDestinationPattern::DumpInfo()

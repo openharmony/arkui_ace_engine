@@ -404,7 +404,7 @@ thread_local bool isDynamicModulePreloaded_ = false;
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("Declarative instance destroyed");
 
     if (runningPage_) {
         runningPage_->OnJsEngineDestroy();
@@ -1166,7 +1166,7 @@ thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("Declarative engine destroyed");
 }
 
 void JsiDeclarativeEngine::Destroy()
@@ -2197,6 +2197,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         auto objXComp = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName().value(), true, arguments,
             OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent.get()), soPath);
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
+            napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
             return;
         }
         auto objContext = JsiObject(objXComp);
@@ -2282,6 +2283,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
     auto objXComp = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, arguments,
         OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_), soPath);
     if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
+        napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
         return;
     }
 

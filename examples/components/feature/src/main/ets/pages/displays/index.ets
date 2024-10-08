@@ -17,6 +17,7 @@ import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { BindPopupBootcamp } from './BindPopupBootcamp';
 import { ToastBootcamp } from './ToastBootcamp';
 import { ImageboxGroupBootcamp } from '../displays/ImageBootcamp';
+import { ScrollBarBootcamp } from './ScrollBarBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
@@ -25,6 +26,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'bindpopup', label: '气泡/BindPopup' },
     { name: 'toast', label: '即时反馈/Toast' },
     { name: 'image', label: '图片/Image' },
+    { name: 'scrollbar', label: '滚动条/ScrollBar' },
   ]
 };
 
@@ -36,6 +38,8 @@ export function DisplaysDestination(name: string, route: Route) {
     ToastBootcamp({ title: route.label })
   } else if (name === 'displays/image') {
     ImageboxGroupBootcamp({ title: route.label })
+  } else if (name === 'displays/scrollbar') {
+    ScrollBarBootcamp({ title: route.label })
   }
 }
 

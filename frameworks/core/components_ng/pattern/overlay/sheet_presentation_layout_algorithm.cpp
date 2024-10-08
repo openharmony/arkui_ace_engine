@@ -73,18 +73,6 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         sheetMaxWidth_ = maxSize.Width();
         sheetWidth_ = GetWidthByScreenSizeType(maxSize, layoutWrapper);
         sheetHeight_ = GetHeightByScreenSizeType(maxSize);
-        if (sheetStyle_.width.has_value()) {
-            float width = 0.0f;
-            if (sheetStyle_.width->Unit() == DimensionUnit::PERCENT) {
-                width = sheetStyle_.width->ConvertToPxWithSize(maxSize.Width());
-            } else {
-                width = sheetStyle_.width->ConvertToPx();
-            }
-            if (width > maxSize.Width() || width < 0.0f) {
-                width = sheetWidth_;
-            }
-            sheetWidth_ = width;
-        }
         SizeF idealSize(sheetWidth_, sheetHeight_);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
@@ -97,7 +85,8 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(scrollNode);
         childConstraint.selfIdealSize.SetWidth(childConstraint.maxSize.Width());
         scrollNode->Measure(childConstraint);
-        if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP)
+        if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP ||
+            (sheetType_ == SheetType::SHEET_BOTTOM_OFFSET))
             && (sheetStyle_.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
             auto&& children = layoutWrapper->GetAllChildrenWithBuild();
             auto secondIter = std::next(children.begin(), 1);
@@ -146,11 +135,7 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const auto& pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
-    if (sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE) {
-        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
-    } else if (sheetType_ == SheetType::SHEET_CENTER) {
-        sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
-    } else if (sheetType_ == SheetType::SHEET_POPUP) {
+    if (sheetType_ == SheetType::SHEET_POPUP) {
         auto frameNode = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(frameNode);
         auto parent = DynamicCast<FrameNode>(frameNode->GetParent());
@@ -161,6 +146,8 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         // which is the offset of the upper left corner of the bubble relative to the SheetWrapper
         sheetOffsetX_ = popupStyleSheetOffset.GetX() - parentOffset.GetX();
         sheetOffsetY_ = popupStyleSheetOffset.GetY() - parentOffset.GetY();
+    } else if (sheetType_ == SheetType::SHEET_BOTTOM_OFFSET) {
+        sheetOffsetY_ = (sheetMaxHeight_ - sheetHeight_ + sheetStyle_.bottomOffset->GetY());
     }
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet layout info, sheetOffsetX_ is: %{public}f, sheetOffsetY_ is: %{public}f",
         sheetOffsetX_, sheetOffsetY_);
@@ -341,6 +328,7 @@ float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& m
         case SheetType::SHEET_BOTTOMLANDSPACE:
             height = maxSize.Height();
             break;
+        case SheetType::SHEET_BOTTOM_OFFSET:
         case SheetType::SHEET_CENTER:
             height = GetHeightBySheetStyle();
             break;
@@ -358,6 +346,17 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& ma
     LayoutWrapper* layoutWrapper) const
 {
     float width = maxSize.Width();
+    if (sheetStyle_.width.has_value()) {
+        if (sheetStyle_.width->Unit() == DimensionUnit::PERCENT) {
+            width = sheetStyle_.width->ConvertToPxWithSize(maxSize.Width());
+        } else {
+            width = sheetStyle_.width->ConvertToPx();
+        }
+        if (width > maxSize.Width() || width < 0.0f) {
+            width = sheetWidth_;
+        }
+        return width;
+    }
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, width);
     auto sheetPattern = host->GetPattern<SheetPresentationPattern>();

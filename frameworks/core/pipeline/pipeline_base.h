@@ -1029,7 +1029,6 @@ public:
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
-    virtual void SetContainerWindow(bool isShow) = 0;
 
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
@@ -1416,10 +1415,11 @@ public:
         isOpenInvisibleFreeze_ = isOpenInvisibleFreeze;
     }
 
-    bool IsOpenInvisibleFreeze()
+    bool IsOpenInvisibleFreeze() const
     {
         return isOpenInvisibleFreeze_;
     }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

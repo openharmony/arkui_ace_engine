@@ -2065,6 +2065,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetSelectionMenuOptions));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextAreaInitialize"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetTextAreaInitialize));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetWidth));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetWidth));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 
     auto video = panda::ObjectRef::New(vm);
@@ -2488,6 +2492,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetSelectionMenuOptions));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectionMenuOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetSelectionMenuOptions));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetWidth));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetWidth));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textInput"), textInput);
 
     auto navDestination = panda::ObjectRef::New(vm);
@@ -2495,6 +2503,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetHideTitleBar));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideTitleBar"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetHideTitleBar));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideToolBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetHideToolBar));
+    navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHideToolBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::ResetHideToolBar));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackButtonIcon"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavDestinationBridge::SetBackButtonIcon));
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackButtonIcon"),
@@ -3756,6 +3768,10 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveFrameNodeFromNodeContent));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFirstUINode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetFirstUINode));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCustomPropertyCapiByKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetCustomPropertyCapiByKey));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCustomPropertyModiferByKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetCustomPropertyModiferByKey));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
 }
 

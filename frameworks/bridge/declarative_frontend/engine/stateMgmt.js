@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 /**
- * ConfigureStateMgmt keeps track if V2 @Observed and @Track are used.
- * If yes, it enables object deep observation mechanisms need with ObservedV3.
+ * ConfigureStateMgmt keeps track if V2 @ObservedV2 and @Trace are used.
+ * If yes, it enables object deep observation mechanisms need with @ObservedV2.
  */
 class ConfigureStateMgmt {
     constructor() {
@@ -27,10 +27,10 @@ class ConfigureStateMgmt {
             : (ConfigureStateMgmt.instance__ = new ConfigureStateMgmt());
     }
     /**
-     * framework code call this function when it sees use of a stateMgmt V2 @Observed @Track
+     * framework code call this function when it sees use of a stateMgmt V2 @ObservedV2 @Trace
      *
      * @param feature specify feature separately from context of use, so that in future decision can be made
-     *                for individual features, not use permit either use of V2 or V3.
+     *                for individual features, not use permit either use of V1 or V2.
      * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
      * @returns true if no mix of features detected, false if mix is detected
      */
@@ -42,7 +42,7 @@ class ConfigureStateMgmt {
  * framework code call this function when it sees use of a stateMgmt PU Observed / @Track
  *
  * @param feature specify feature separately from context of use, so that in future decision can be made
- *                for individual features, not use permit either use of V2 or V3.
+ *                for individual features, not use permit either use of V1 or V2.
  * @param contextOfUse purely for error messages. Give enough info that use is able to local the feature use in source code.
  * @returns true if no mix of features detected, false if mix is detected
  */
@@ -52,7 +52,7 @@ class ConfigureStateMgmt {
     }
     /**
       * Return true if object deep observation mechanisms need to be enabled
-      * that is when seen V3 @observe, @track, or @monitor decorator used in at least one class
+      * that is when seen V2 @ObservedV2, @Trace, or @Monitor decorator used in at least one class
       * (we could but we do not check for class object instance creation for performance reasons)
       * @returns
       */
@@ -60,7 +60,7 @@ class ConfigureStateMgmt {
         return this.v2ObservedTrackInUse_;
     }
 } // ConfigureStateMgmt
-ConfigureStateMgmt.HOW_TO_SAY = `Your application uses both state management V2 and V3 features! - It is strongly recommended not to mix V2 and V3. Consult the rules how state management V2 and V3 can be mixed in the same app.`;
+ConfigureStateMgmt.HOW_TO_SAY = `Your application uses both state management V1 and V2 features! - It is strongly recommended not to mix V1 and V2. Consult the rules how state management V1 and V2 can be mixed in the same app.`;
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2238,9 +2238,9 @@ class errorReport {
 const __IS_OBSERVED_PROXIED = Symbol('_____is_observed_proxied__');
 function Observed(BaseClass) {
     
-    // prevent use of V3 @track inside V2 @Observed class
+    // prevent use of V1 @Track inside V2 @ObservedV2 class
     if (BaseClass.prototype && Reflect.has(BaseClass.prototype, ObserveV2.SYMBOL_REFS)) {
-        const error = `'@Observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V3 @track decorator inside V2 @Observed class. Need to fix class definition to use @Track.`;
+        const error = `'@Observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V1 @Track decorator inside V2 @ObservedV2 class. Need to fix class definition to use @Track.`;
         stateMgmtConsole.error(error);
         throw new Error(error);
     }
@@ -4893,9 +4893,16 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
       FIXME this expects the Map, Set patch to go in
      */
     checkIsSupportedValue(value) {
-        let res = ((typeof value === 'object' && typeof value !== 'function' && !ObserveV2.IsObservedObjectV2(value) &&
-            !ObserveV2.IsMakeObserved(value)) || typeof value === 'number' || typeof value === 'string' ||
-            typeof value === 'boolean' || value === undefined || value === null);
+        let res = ((typeof value === 'object' && typeof value !== 'function'
+            && !ObserveV2.IsObservedObjectV2(value)
+            && !ObserveV2.IsMakeObserved(value))
+            // FIXME enable the check when V1-V2 interoperability is forbidden
+            // && !ObserveV2.IsProxiedObservedV2(value)) 
+            || typeof value === 'number'
+            || typeof value === 'string'
+            || typeof value === 'boolean'
+            || value === undefined
+            || value === null);
         if (!res) {
             errorReport.varValueCheckFailed({
                 customComponent: this.debugInfoOwningView(),
@@ -4921,7 +4928,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
                 customComponent: this.debugInfoOwningView(),
                 variableDeco: this.debugInfoDecorator(),
                 variableName: this.info(),
-                expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract and excluding function and V3 @observed/@track object`,
+                expectedType: `undefined, null, Object including Array and instance of SubscribableAbstract, excluding function and V2 @Observed/@Trace object`,
                 value: value
             });
         }
@@ -4994,8 +5001,8 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
             // not access recording 
             return;
         }
-        if (elmtId === UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
-            const error = `${this.debugInfo()}: recordPropertyDependentUpdate trying to use V2 state to init/update child V3 @Component. Application error`;
+        if (elmtId === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
+            const error = `${this.debugInfo()}: recordPropertyDependentUpdate trying to use V1 state to init/update child V2 @Component. Application error`;
             stateMgmtConsole.applicationError(error);
             throw new TypeError(error);
         }
@@ -5378,6 +5385,7 @@ class ObservedPropertySimplePU extends ObservedPropertyPU {
 class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
     constructor(source, owningChildView, thisPropertyName) {
         super(owningChildView, thisPropertyName);
+        this.setDecoratorInfo("@Prop");
         if (source && (typeof (source) === 'object') && ('subscribeMe' in source)) {
             // code path for @(Local)StorageProp, the source is a ObservedPropertyObject<C> in a LocalStorage)
             this.source_ = source;
@@ -5400,7 +5408,6 @@ class SynchedPropertyOneWayPU extends ObservedPropertyAbstractPU {
         if (this.source_ !== undefined) {
             this.resetLocalValue(this.source_.get(), /* needCopyObject */ true);
         }
-        this.setDecoratorInfo("@Prop");
         
     }
     /*
@@ -6124,7 +6131,6 @@ class UINodeRegisterProxy {
             else {
                 
             }
-            // FIXME: only do this if app uses V3
             ObserveV2.getObserve().clearBinding(elmtId);
         });
         this.removeElementsInfo_.length = 0;
@@ -6135,7 +6141,7 @@ class UINodeRegisterProxy {
     }
 }
 UINodeRegisterProxy.notRecordingDependencies = -1;
-UINodeRegisterProxy.monitorIllegalV2V3StateAccess = -2;
+UINodeRegisterProxy.monitorIllegalV1V2StateAccess = -2;
 UINodeRegisterProxy.instance_ = new UINodeRegisterProxy();
 UINodeRegisterProxy.ElementIdToOwningViewPU_ = new Map();
 /*
@@ -6253,9 +6259,9 @@ class ViewPU extends PUV2ViewBase {
                 
             }
         });
-        if (this.isViewV3 === true) {
+        if (this.isViewV2 === true) {
             if (usesStateMgmtVersion === 2) {
-                const error = `${this.debugInfo__()}: mixed use of stateMgmt V2 and V3 variable decorators. Application error!`;
+                const error = `${this.debugInfo__()}: mixed use of stateMgmt V1 and V2 variable decorators. Application error!`;
                 stateMgmtConsole.applicationError(error);
                 throw new Error(error);
             }
@@ -6284,14 +6290,14 @@ class ViewPU extends PUV2ViewBase {
         this.localStoragebackStore_ = instance;
     }
     // FIXME
-    // indicate if this is  V2 or a V3 component
-    // V2 by default, changed to V3 by the first V3 decorated variable
-    // when splitting ViewPU and ViewV3
+    // indicate if this is  V1 or a V2 component
+    // V1 by default, changed to V2 by the first V2 decorated variable
+    // when splitting ViewPU and ViewV2
     // use instanceOf. Until then, this is a workaround.
-    // @state, @track, etc V3 decorator functions modify isViewV3 to return true
+    // @Local, @Param, @Trace, etc V2 decorator functions modify isViewV2 to return true
     // (decorator can modify functions in prototype)
     // FIXME
-    get isViewV3() {
+    get isViewV2() {
         return false;
     }
     onGlobalThemeChanged() {
@@ -6553,11 +6559,11 @@ class ViewPU extends PUV2ViewBase {
     /**
    *  inform that UINode with given elmtId needs rerender
    *  does NOT exec @Watch function.
-   *  only used on V3 code path from ObserveV2.fireChange.
+   *  only used on V2 code path from ObserveV2.fireChange.
    *
    * FIXME will still use in the future?
    */
-    uiNodeNeedUpdateV3(elmtId) {
+    uiNodeNeedUpdateV2(elmtId) {
         if (this.isFirstRender()) {
             return;
         }
@@ -6758,7 +6764,7 @@ class ViewPU extends PUV2ViewBase {
             
             (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            if (!this.isViewV3) {
+            if (!this.isViewV2) {
                 // Enable PU state tracking only in PU @Components
                 this.currentlyRenderedElmtIdStack_.push(elmtId);
                 stateMgmtDFX.inRenderingElementId.push(elmtId);
@@ -6766,7 +6772,7 @@ class ViewPU extends PUV2ViewBase {
             // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
             // enable V2 object deep observation
             // FIXME: A @Component should only use PU or V2 state, but ReactNative dynamic viewer uses both.
-            if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
+            if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
                 // FIXME: like in V2 setting bindId_ in ObserveV2 does not work with 'stacked'
                 // update + initial render calls, like in if and ForEach case, convert to stack as well
                 ObserveV2.getObserve().startRecordDependencies(this, elmtId);
@@ -6779,10 +6785,10 @@ class ViewPU extends PUV2ViewBase {
             if (node !== undefined) {
                 node.cleanStageValue();
             }
-            if (this.isViewV3 || ConfigureStateMgmt.instance.needsV2Observe()) {
+            if (this.isViewV2 || ConfigureStateMgmt.instance.needsV2Observe()) {
                 ObserveV2.getObserve().stopRecordDependencies();
             }
-            if (!this.isViewV3) {
+            if (!this.isViewV2) {
                 this.currentlyRenderedElmtIdStack_.pop();
                 stateMgmtDFX.inRenderingElementId.pop();
             }
@@ -6900,7 +6906,7 @@ class ViewPU extends PUV2ViewBase {
                     }
                 }
                 else {
-                    // FIXME fix for mixed V2 - V3 Hierarchies
+                    // FIXME fix for mixed V1 - V2 Hierarchies
                     throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
                 }
             } // if child
@@ -6928,7 +6934,7 @@ class ViewPU extends PUV2ViewBase {
                     }
                 }
                 else {
-                    // FIXME fix for mixed V2 - V3 Hierarchies
+                    // FIXME fix for mixed V1 - V2 Hierarchies
                     throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
                 }
             } // if child
@@ -7631,9 +7637,8 @@ class SetMapProxyHandler {
                     }
                     return receiver;
                 } : (typeof ret === 'function') ?
-                // SendableSet can't be bound -> functions not observed
-                ret.bind(SendableType.isSet(target) ? target : receiver) :
-                ret;
+                // Bind to target ==> functions not observed
+                ret.bind(target) : ret;
         }
         if (target instanceof Map || (this.isMakeObserved_ && SendableType.isMap(target))) {
             if (key === 'get') {
@@ -7663,9 +7668,8 @@ class SetMapProxyHandler {
             }
         }
         return (typeof ret === 'function') ?
-            // SendableMap can't be bound -> functions not observed
-            ret.bind(SendableType.isMap(target) ? target : receiver) :
-            ret;
+            // Bind to target ==> functions not observed
+            ret.bind(target) : ret;
     }
     set(target, key, value) {
         if (typeof key === 'symbol') {
@@ -7746,7 +7750,7 @@ class ObserveV2 {
         this.stackOfRenderedComponents_ = new StackOfRenderedComponents();
         // Map bindId to WeakRef<ViewPU> | MonitorV2
         this.id2cmp_ = {};
-        // Map bindId -> Set of @observed class objects
+        // Map bindId -> Set of @ObservedV2 class objects
         // reverse dependency map for quickly removing all dependencies of a bindId
         this.id2targets_ = {};
         // queued up Set of bindId
@@ -7772,9 +7776,13 @@ class ObserveV2 {
         }
         return this.obsInstance_;
     }
-    // return true given value is @observed object
+    // return true given value is @ObservedV2 object
     static IsObservedObjectV2(value) {
         return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
+    }
+    // return true if given value is proxied observed object, either makeObserved or autoProxyObject
+    static IsProxiedObservedV2(value) {
+        return (value && typeof value === 'object' && value[ObserveV2.SYMBOL_PROXY_GET_TARGET]);
     }
     // return true given value is the return value of makeObserved
     static IsMakeObserved(value) {
@@ -7956,8 +7964,8 @@ class ObserveV2 {
         if (!bound) {
             return;
         }
-        if (bound[0] === UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
-            const error = `${attrName}: ObserveV2.addRef: trying to use V3 state '${attrName}' to init/update child V2 @Component. Application error`;
+        if (bound[0] === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
+            const error = `${attrName}: ObserveV2.addRef: trying to use V2 state '${attrName}' to init/update child V2 @Component. Application error`;
             stateMgmtConsole.applicationError(error);
             throw new TypeError(error);
         }
@@ -7995,7 +8003,7 @@ class ObserveV2 {
     setUnmonitored(target, attrName, newValue) {
         const storeProp = ObserveV2.OB_PREFIX + attrName;
         if (storeProp in target) {
-            // @track attrName
+            // @Track attrName
             
             target[storeProp] = newValue;
         }
@@ -8251,7 +8259,7 @@ class ObserveV2 {
             if (viewWeak && 'deref' in viewWeak && (view = viewWeak.deref()) &&
                 ((view instanceof ViewV2) || (view instanceof ViewPU))) {
                 if (view.isViewActive()) {
-                    view.uiNodeNeedUpdateV3(elmtId);
+                    view.uiNodeNeedUpdateV2(elmtId);
                 }
                 else if (view instanceof ViewV2) {
                     // schedule delayed update once the view gets active
@@ -8331,7 +8339,7 @@ class ObserveV2 {
      * Helper function to add meta data about decorator to ViewPU or ViewV2
      * @param proto prototype object of application class derived from  ViewPU or ViewV2
      * @param varName decorated variable
-     * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
+     * @param deco '@Local', '@Event', etc
      */
     static addVariableDecoMeta(proto, varName, deco) {
         var _a;
@@ -8341,10 +8349,10 @@ class ObserveV2 {
         meta[varName] = {};
         meta[varName].deco = deco;
         // FIXME
-        // when splitting ViewPU and ViewV3
+        // when splitting ViewPU and ViewV2
         // use instanceOf. Until then, this is a workaround.
-        // any @state, @track, etc V3 event handles this function to return false
-        Reflect.defineProperty(proto, 'isViewV3', {
+        // any @Local, @Trace, etc V2 event handles this function to return false
+        Reflect.defineProperty(proto, 'isViewV2', {
             get() { return true; },
             enumerable: false
         });
@@ -8362,15 +8370,15 @@ class ObserveV2 {
             meta[varName].deco2 = deco2;
         }
         // FIXME
-        // when splitting ViewPU and ViewV3
+        // when splitting ViewPU and ViewV2
         // use instanceOf. Until then, this is a workaround.
-        // any @state, @track, etc V3 event handles this function to return false
-        Reflect.defineProperty(proto, 'isViewV3', {
+        // any @Local, @Trace, etc V2 event handles this function to return false
+        Reflect.defineProperty(proto, 'isViewV2', {
             get() { return true; },
             enumerable: false
         });
     }
-    static usesV3Variables(proto) {
+    static usesV2Variables(proto) {
         return (proto && typeof proto === 'object' && proto[ObserveV2.V2_DECO_META]);
     }
 } // class ObserveV2
@@ -8416,7 +8424,7 @@ const trackInternal = (target, propertyKey) => {
         },
         enumerable: true
     });
-    // this marks the proto as having at least one @track property inside
+    // this marks the proto as having at least one @Trace property inside
     // used by IsObservedObjectV2
     (_a = target[_b = ObserveV2.V2_DECO_META]) !== null && _a !== void 0 ? _a : (target[_b] = {});
 }; // trackInternal
@@ -8442,7 +8450,7 @@ const trackInternal = (target, propertyKey) => {
  *
  * Helper class for handling V2 decorated variables
  */
-class VariableUtilV3 {
+class VariableUtilV2 {
     /**
        * setReadOnlyAttr - helper function used to update @param
        * from parent @Component. Not allowed for @param @once .
@@ -8481,7 +8489,7 @@ class VariableUtilV3 {
             throw new Error(error);
         }
         const storeProp = ObserveV2.OB_PREFIX + attrName;
-        // @observed class and @track attrName
+        // @Observed class and @Track attrName
         if (newValue === target[storeProp]) {
             
             return;
@@ -8511,7 +8519,7 @@ class ProviderConsumerUtilV2 {
      * similar to @see addVariableDecoMeta, but adds the alias to allow search from @Consumer for @Provider counterpart
      * @param proto prototype object of application class derived from ViewV2
      * @param varName decorated variable
-     * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
+     * @param deco '@Local', '@Event', etc
      */
     static addProvideConsumeVariableDecoMeta(proto, varName, aliasName, deco) {
         var _a;
@@ -8646,15 +8654,15 @@ function ObservedV2_Internal(BaseClass) {
   @ObservedV2 decorator function uses this in v2_decorators.ts
 */
 function observedV2Internal(BaseClass) {
-    // prevent @Track inside @observed class
+    // prevent @Track inside @ObservedV2 class
     if (BaseClass.prototype && Reflect.has(BaseClass.prototype, TrackedObject.___IS_TRACKED_OPTIMISED)) {
-        const error = `'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V2 @Track decorator inside V3 @observed class. Need to fix class definition to use @track.`;
+        const error = `'@Observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': invalid use of V1 @Track decorator inside V2 @ObservedV2 class. Need to fix class definition to use @Track.`;
         stateMgmtConsole.applicationError(error);
         throw new Error(error);
     }
     if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
         // not an error, suspicious of developer oversight
-        stateMgmtConsole.warn(`'@observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @track property inside. Is this intended? Check our application.`);
+        stateMgmtConsole.warn(`'@Observed class ${BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name}': no @Track property inside. Is this intended? Check our application.`);
     }
     // Use ID_REFS only if number of observed attrs is significant
     const attrList = Object.getOwnPropertyNames(BaseClass.prototype);
@@ -8730,7 +8738,7 @@ class MonitorValueV2 {
 }
 /**
  * MonitorV2
- * one MonitorV2 object per @monitor function
+ * one MonitorV2 object per @Monitor function
  * watchId - similar to elmtId, identify one MonitorV2 in Observe.idToCmp Map
  * observeObjectAccess = get each object on the 'path' to create dependency and add them with Observe.addRef
  * fireChange - exec @Monitor function and re-new dependencies with observeObjectAccess
@@ -8748,7 +8756,7 @@ class MonitorV2 {
         paths.forEach(path => this.values_.push(new MonitorValueV2(path, ++MonitorV2.nextWatchId_)));
         // add watchId to owning ViewV2 or view model data object
         // ViewV2 uses to call clearBinding(id)
-        // FIXME data object leave data inside ObservedV3, because they can not 
+        // FIXME data object leave data inside ObservedV2, because they can not 
         // call clearBinding(id) before they get deleted.
         const meta = (_a = target[_b = MonitorV2.WATCH_INSTANCE_PREFIX]) !== null && _a !== void 0 ? _a : (target[_b] = {});
         meta[pathsString] = this.watchId_;
@@ -9140,7 +9148,7 @@ class ViewV2 extends PUV2ViewBase {
     debugInfo__() {
         return `@ComponentV2 '${this.constructor.name}'[${this.id__()}]`;
     }
-    get isViewV3() {
+    get isViewV2() {
         return true;
     }
     /**
@@ -9257,7 +9265,7 @@ class ViewV2 extends PUV2ViewBase {
    */
     initParam(paramVariableName, newValue) {
         this.checkIsV1Proxy(paramVariableName, newValue);
-        VariableUtilV3.initParam(this, paramVariableName, newValue);
+        VariableUtilV2.initParam(this, paramVariableName, newValue);
     }
     /**
    *
@@ -9270,7 +9278,7 @@ class ViewV2 extends PUV2ViewBase {
    */
     updateParam(paramVariableName, newValue) {
         this.checkIsV1Proxy(paramVariableName, newValue);
-        VariableUtilV3.updateParam(this, paramVariableName, newValue);
+        VariableUtilV2.updateParam(this, paramVariableName, newValue);
     }
     checkIsV1Proxy(paramVariableName, value) {
         if (ObservedObject.IsObservedObject(value)) {
@@ -9280,11 +9288,11 @@ class ViewV2 extends PUV2ViewBase {
     /**
    *  inform that UINode with given elmtId needs rerender
    *  does NOT exec @Watch function.
-   *  only used on V3 code path from ObserveV2.fireChange.
+   *  only used on V2 code path from ObserveV2.fireChange.
    *
    * FIXME will still use in the future?
    */
-    uiNodeNeedUpdateV3(elmtId) {
+    uiNodeNeedUpdateV2(elmtId) {
         if (this.isFirstRender()) {
             return;
         }
@@ -9540,7 +9548,7 @@ class ViewV2 extends PUV2ViewBase {
  * limitations under the License.
  */
 function ObservedV2(BaseClass) {
-    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@observed`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
+    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@ObservedV2`, BaseClass === null || BaseClass === void 0 ? void 0 : BaseClass.name);
     return observedV2Internal(BaseClass);
 }
 /**
@@ -9553,7 +9561,7 @@ function ObservedV2(BaseClass) {
  * @from 12
  */
 const Trace = (target, propertyKey) => {
-    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
+    ConfigureStateMgmt.instance.usingV2ObservedTrack(`@Trace`, propertyKey);
     return trackInternal(target, propertyKey);
 };
 /**
@@ -9570,7 +9578,7 @@ const Trace = (target, propertyKey) => {
  *
  */
 const Local = (target, propertyKey) => {
-    ObserveV2.addVariableDecoMeta(target, propertyKey, '@state');
+    ObserveV2.addVariableDecoMeta(target, propertyKey, '@Local');
     return trackInternal(target, propertyKey);
 };
 /**
@@ -10127,8 +10135,9 @@ class JSONCoder {
  */
 class RefInfo {
     static get(target) {
-        if (typeof (target) !== 'object') {
-            throw new Error('target must be a object');
+        if (!target || typeof target !== 'object') {
+            stateMgmtConsole.warn(`makeObserved target is not a valid object, return target directly`);
+            return { proxy: target };
         }
         // makeObserved does not support @Observed, @ObservedV2/@Trace class or makeObserved proxy, will return target directly
         if (ObservedObject.IsObservedObject(target) || ObserveV2.IsObservedObjectV2(target) || ObserveV2.IsMakeObserved(target)) {
@@ -10701,6 +10710,10 @@ class __RepeatVirtualScrollImpl {
             
             // make sparse copy of this.arr_
             this.lastActiveRangeData_ = new Array(this.arr_.length);
+            from = Math.min(this.arr_.length - 1, from);
+            to = Math.min(this.arr_.length - 1, to);
+            from = Math.max(0, from);
+            to = Math.max(0, to);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
                 const item = this.arr_[i];
                 const ttype = this.typeGenFunc_(this.arr_[i], i);
