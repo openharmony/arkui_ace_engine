@@ -20,6 +20,8 @@
 #include "arkoala_api.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/node/view_model.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,6 +32,8 @@ class AccessorTestBase : public testing::Test {
 public:
     static void SetUpTestCase()
     {
+        MockPipelineContext::SetUp();
+        MockContainer::SetUp(MockPipelineContext::GetCurrent());
         ASSERT_NE(accessor_, nullptr);
         ASSERT_NE(accessor_->ctor, nullptr);
         ASSERT_NE(accessor_->getFinalizer, nullptr);
@@ -39,6 +43,8 @@ public:
 
     static void TearDownTestCase()
     {
+        MockPipelineContext::TearDown();
+        MockContainer::TearDown();
         finalyzer_ = nullptr;
     }
 

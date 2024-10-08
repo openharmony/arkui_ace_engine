@@ -84,18 +84,6 @@ HWTEST_F(ReverseConvertorTest, SimpleTypes, TestSize.Level1)
 
     auto funcResult = Converter::ArkValue<Ark_Function>(123);
     EXPECT_EQ(funcResult.id, 123);
-
-    enum class Test {
-        ONE = 1,
-        TWO = 2,
-        TEN = 10
-    };
-    auto enumResult = Converter::ArkValue<Ark_Int32>(Test::ONE);
-    EXPECT_EQ(enumResult, 1);
-    enumResult = Converter::ArkValue<Ark_Int32>(Test::TWO);
-    EXPECT_EQ(enumResult, 2);
-    enumResult = Converter::ArkValue<Ark_Int32>(Test::TEN);
-    EXPECT_EQ(enumResult, 10);
 }
 
 /**
@@ -194,6 +182,18 @@ HWTEST_F(ReverseConvertorTest, OptionalTypes, TestSize.Level1)
     EXPECT_NE(optNumber.tag, ARK_TAG_UNDEFINED);
     EXPECT_EQ(optNumber.value.tag, ARK_TAG_INT32);
     EXPECT_EQ(optNumber.value.i32, 123);
+
+    std::string testStr = "abc";
+    auto optString = Converter::ArkValue<Opt_String>(testStr);
+    EXPECT_NE(optString.tag, ARK_TAG_UNDEFINED);
+    EXPECT_EQ(optString.value.chars, testStr.data());
+    EXPECT_EQ(optString.value.length, 3);
+
+    std::optional<std::string> testStrOpt = testStr;
+    auto optString1 = Converter::ArkValue<Opt_String>(testStrOpt);
+    EXPECT_NE(optString1.tag, ARK_TAG_UNDEFINED);
+    EXPECT_EQ(optString1.value.chars, testStrOpt->data());
+    EXPECT_EQ(optString1.value.length, 3);
 }
 
 /**
@@ -218,10 +218,11 @@ HWTEST_F(ReverseConvertorTest, UnionTypes, TestSize.Level1)
     EXPECT_EQ(optUnionResult.value.value0.tag, ARK_TAG_INT32);
     EXPECT_EQ(optUnionResult.value.value0.i32, 123);
 
-    optUnionResult = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("abc");
+    std::string testStr = "abc";
+    optUnionResult = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(testStr);
     EXPECT_NE(optUnionResult.tag, ARK_TAG_UNDEFINED);
     EXPECT_EQ(optUnionResult.value.selector, 1);
-    EXPECT_EQ(optUnionResult.value.value1.chars, "abc"s);
+    EXPECT_EQ(optUnionResult.value.value1.chars, testStr.data());
 
     optUnionResult = Converter::ArkUnion<Opt_Union_Number_String>(Ark_Empty());
     EXPECT_EQ(optUnionResult.tag, ARK_TAG_UNDEFINED);

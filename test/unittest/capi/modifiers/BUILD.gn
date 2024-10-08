@@ -22,6 +22,7 @@ ace_unittest("capi_all_modifiers_test") {
   module_output = "capi"
   sources = [
     # place here your UT source code
+    "alphabet_indexer_modifier_test.cpp",
     "blank_modifier_test.cpp",
     "button_modifier_resources_test.cpp",
     "button_modifier_test.cpp",
@@ -52,6 +53,7 @@ ace_unittest("capi_all_modifiers_test") {
     "radio_modifier_test.cpp",
     "rect_modifier_test.cpp",
     "relative_container_modifier_test.cpp",
+    "row_modifier_test.cpp",
     "scroll_modifier_test.cpp",
     "search_modifier_resources_test.cpp",
     "search_modifier_test.cpp",
