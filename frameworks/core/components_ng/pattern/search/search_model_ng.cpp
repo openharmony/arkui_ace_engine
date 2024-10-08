@@ -1187,8 +1187,14 @@ void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, IconOptions &iconOp
     pattern->SetSearchImageIcon(iconOptions);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
         pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)), frameNode);
+    auto searchIconFrameNode =  AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    CHECK_NULL_VOID(searchIconFrameNode);
+    ImageSourceInfo info(iconOptions.GetSrc().value_or(""), 
+        iconOptions.GetBundleName().value_or(""),
+        iconOptions.GetModuleName().value_or(""));
+        info.SetFillColor(iconOptions.GetColor().value_or(Color::WHITE));
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info, searchIconFrameNode);
 }
-
 void SearchModelNG::SetSearchButton(FrameNode* frameNode, const std::string& text)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1437,16 +1443,21 @@ void SearchModelNG::SetCancelImageIcon(FrameNode *frameNode, const std::optional
     if (iconOptions) {
         options = iconOptions.value();
         pattern->SetCancelImageIcon(options);
-        auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-        CHECK_NULL_VOID(cancelImageFrameNode);
-        auto textLayoutProperty = cancelImageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-        ImageSourceInfo info(options.GetSrc().value_or(""), "", "");
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info, cancelImageFrameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize,
             pattern->ConvertImageIconSizeValue(options.GetSize().value_or(ICON_HEIGHT)), frameNode);
+        auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+        CHECK_NULL_VOID(cancelImageFrameNode);        
+        ImageSourceInfo info(options.GetSrc().value_or(""), 
+            options.GetBundleName().value_or(""),
+            options.GetModuleName().value_or(""));
+        info.SetFillColor(options.GetColor().value_or(Color::WHITE));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info, cancelImageFrameNode);
     } else {
         pattern->SetCancelImageIcon(options);
         ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, frameNode);
+        auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+        CHECK_NULL_VOID(cancelImageFrameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, cancelImageFrameNode);
     }
 }
 
@@ -1965,4 +1976,15 @@ const Dimension SearchModelNG::ConvertTextFontScaleValue(const Dimension& fontSi
     }
     return fontSizeValue;
 }
+
+void SearchModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
+}
+
 } // namespace OHOS::Ace::NG

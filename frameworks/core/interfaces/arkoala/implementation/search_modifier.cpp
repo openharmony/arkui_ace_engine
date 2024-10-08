@@ -73,7 +73,6 @@ NG::IconOptions Convert(const Ark_IconOptions& src)
         } else if (auto srcArkStr = std::get_if<Ark_Resource>(&iconSrc.value());
             srcArkStr != nullptr) {
             auto srcStr = Converter::OptConvert<std::string>(*srcArkStr);
-            std::cout << *srcStr << std::endl;
             auto moduleName = Converter::Convert<std::string>(srcArkStr->moduleName);
             auto bundleName = Converter::Convert<std::string>(srcArkStr->bundleName);
             if (!srcStr->empty()) {
@@ -537,6 +536,9 @@ void EnablePreviewTextImpl(Ark_NativePointer node,
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               Ark_Boolean isEnabled)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetEnableHapticFeedback(frameNode, Converter::Convert<bool>(isEnabled));
 }
 } // SearchAttributeModifier
 const GENERATED_ArkUISearchModifier* GetSearchModifier()

@@ -39,110 +39,35 @@ const auto CANCEL_BUTTON_ATTR("cancelButton");
 const auto CANCEL_BUTTON_ICON_ATTR("icon");
 const auto CANCEL_BUTTON_ICON_COLOR_ATTR("color");
 const auto CANCEL_BUTTON_ICON_SRC_ATTR("src");
-// const auto DECORATION_ATTRS("decoration");
-// const auto DECORATION_TYPE_ATTR("type");
-// const auto DECORATION_STYLE_ATTR("style");
-// const auto DECORATION_COLOR_ATTR("color");
+const auto CARET_STYLE_ATTR("caretStyle");
+const auto CARET_STYLE_COLOR_ATTR("color");
+const auto CARET_STYLE_WIDTH_ATTR("width");
+const auto DECORATION_ATTRS("decoration");
+const auto DECORATION_COLOR_ATTR("color");
 const auto FONT_COLOR_ATTR("fontColor");
+const auto INPUT_FILTER_ATTR("inputFilter");
 const auto LETTER_SPACING_ATTR("letterSpacing");
-// const auto LINE_HEIGHT_ATTR("lineHeight");
+const auto LINE_HEIGHT_ATTR("lineHeight");
 const auto MAX_FONT_SIZE_ATTR("maxFontSize");
 const auto MIN_FONT_SIZE_ATTR("minFontSize");
-// const auto PLACEHOLDER_FONT_ATTRS("placeholderFont");
-// const auto PLACEHOLDER_FONT_SIZE("size");
-// const auto PLACEHOLDER_FONT_FAMILY("fontFamily");
-// const auto PLACEHOLDER_FONT_WEIGHT_ENUM("fontWeight");
-// const auto PLACEHOLDER_FONT_WEIGHT("weight");
-// const auto PLACEHOLDER_FONT_STYLE("style");
+const auto PLACEHOLDER_FONT_ATTRS("placeholderFont");
+const auto PLACEHOLDER_FONT_FAMILY("fontFamily");
+const auto PLACEHOLDER_FONT_SIZE("size");
 const auto PLACEHOLDER_COLOR_ATTR("placeholderColor");
-// const auto SEARCH_ICON_ATTR("searchIcon");
-// const auto SEARCH_ICON_SRC_ATTR("src");
-// const auto SEARCH_ICON_COLOR_ATTR("color");
-// const auto SEARCH_ICON_SIZE_ATTR("size");
+const auto SEARCH_ICON_ATTR("searchIcon");
+const auto SEARCH_ICON_SRC_ATTR("src");
+const auto SEARCH_ICON_COLOR_ATTR("color");
+const auto SEARCH_ICON_SIZE_ATTR("size");
 const auto SELECTED_BACKGROUND_COLOR_ATTR("selectedBackgroundColor");
-// const auto TEXT_FONT_ATTRS("textFont");
-// const auto TEXT_FONT_SIZE_ATTR("fontSize");
-// const auto TEXT_FONT_FAMILY_ATTR("fontFamily");
-// const auto TEXT_FONT_WEIGHT_ATTR("fontWeight");
-// const auto TEXT_FONT_STYLE_ATTR("fontStyle");
-
-// length values
-// const Ark_Int32 AINT32_POS(1234);
-// const Ark_Int32 AINT32_NEG(INT_MIN);
-// const Ark_Float32 AFLT32_POS(1.234f);
-// const Ark_Float32 AFLT32_NEG(-5.6789f);
-// const auto ALEN_PX_POS = ArkValue<Ark_Length>(AINT32_POS);
-// const auto ALEN_PX_NEG = ArkValue<Ark_Length>(AINT32_NEG);
-// const auto ALEN_VP_POS = ArkValue<Ark_Length>(AFLT32_POS);
-// const auto ALEN_VP_NEG = ArkValue<Ark_Length>(AFLT32_NEG);
-// const auto OPT_LEN_PX_POS = ArkValue<Opt_Length>(AINT32_POS);
-// const auto OPT_LEN_PX_NEG = ArkValue<Opt_Length>(AINT32_NEG);
-// const auto OPT_LEN_VP_POS = ArkValue<Opt_Length>(AFLT32_POS);
-// const auto OPT_LEN_VP_NEG = ArkValue<Opt_Length>(AFLT32_NEG);
-
-// default length
-// const std::string CHECK_DEFAULT_PX("0.00px");
-// const std::string CHECK_DEFAULT_VP("0.00vp");
-
-// check length
-// const std::string CHECK_POSITIVE_VALUE_INT("1234.00px");
-// const std::string CHECK_NEGATIVE_VALUE_INT("-2147483648.00px");
-// const std::string CHECK_POSITIVE_VALUE_FLOAT("1.23vp");
-// const std::string CHECK_POSITIVE_VALUE_FLOAT_PX("1.23px");
-// const std::string CHECK_NEGATIVE_VALUE_FLOAT("-5.68vp");
-
-// check text
-// const auto CHECK_TEXT("test_text");
-// PreviewText PREVIEW_TEXT = { .offset = 1234, .value = "test_offset" };
-// const auto EMPTY_TEXT("");
-
-// // check resource
-// const Ark_String STR_NAME = ArkValue<Ark_String>("min_font_size");
-// const std::string CHECK_RESOURCE_STR("aa.bb.cc");
+const auto TEXT_FONT_ATTRS("textFont");
+const auto TEXT_FONT_SIZE_ATTR("fontSize");
+const auto TEXT_FONT_FAMILY_ATTR("fontFamily");
+const auto TEXT_INDENT_ATTR("textIndent");
 
 // test types
-// typedef std::pair<Ark_Length, std::string> LengthTest;
-// typedef std::pair<Opt_Length, std::string> OptLengthTest;
-// typedef std::pair<Opt_ResourceColor, std::string> ColorTest;
-// typedef std::pair<std::string, std::string> CheckSearchButtonOptions;
-// typedef std::pair<Opt_SearchButtonOptions, CheckSearchButtonOptions> TestSearchButtonOption;
-// typedef std::tuple<std::string, std::string, std::string> TripleCheckValues;
-// typedef std::pair<Opt_ResourceStr, std::string> ResourceSRC;
-// typedef std::pair<Opt_Union_String_Resource, std::string> UnionResourceString;
-// typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTest;
-// typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
-// typedef std::pair<Type_SearchAttribute_searchIcon_Arg0, TripleCheckValues> SearchIconTest;
-// typedef std::pair<Opt_Type_SearchInterface_setSearchOptions_Arg0, TripleCheckValues> OptionsTest;
 using OneUnionNumStrResStep = std::pair<Union_Number_String_Resource, std::string>;
 using StringResourceTest = std::tuple<ResourceStr, std::string>;
-// typedef std::pair<Ark_TextDecorationType, std::string> DecorationTypeTest;
-// typedef std::pair<Ark_TextDecorationStyle, std::string> DecorationStyleTest;
-
-// // common testPlans
-// const std::vector<OptLengthTest> OPT_LENGTH_TEST_PLAN = {
-//     { OPT_LEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
-//     { OPT_LEN_PX_NEG, CHECK_DEFAULT_PX },
-//     { OPT_LEN_VP_NEG, CHECK_DEFAULT_PX },
-//     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT }
-// };
-// const std::vector<OptLengthTest> TEST_PLAN_OPT_LENGTH_PX = {
-//     { OPT_LEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
-//     { OPT_LEN_PX_NEG, CHECK_DEFAULT_PX },
-//     { OPT_LEN_VP_NEG, CHECK_DEFAULT_PX },
-//     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT_PX }
-// };
-// const std::vector<LengthTest> INDENT_LENGTH_TEST_PLAN = {
-//     { ALEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
-//     { ALEN_PX_NEG, CHECK_NEGATIVE_VALUE_INT },
-//     { ALEN_VP_NEG, CHECK_NEGATIVE_VALUE_FLOAT },
-//     { ALEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT }
-// };
-// const std::vector<ColorTest> COLOR_TEST_PLAN = {
-//     { OPT_COLOR_COLOR, CHECK_COLOR_COLOR },
-//     { OPT_COLOR_INT, CUSTOM_COLOR_STRING },
-//     { OPT_COLOR_FLOAT, CHECK_FLOAT_COLOR },
-//     { OPT_COLOR_STRING, CUSTOM_COLOR_STRING },
-// };
+using ArkResourceTest = std::tuple<Ark_ResourceStr, std::string>;
 
 // resource names and id
 const auto RES_STRING_NAME = NamedResourceId{"aa.bb.cc", NodeModifier::ResourceType::STRING};
@@ -152,6 +77,9 @@ const auto INVALID_STRING_ID = IntResourceId{-1, NodeModifier::ResourceType::STR
 const auto RES_COLOR_NAME = NamedResourceId{"color_resource", NodeModifier::ResourceType::COLOR};
 const auto RES_COLOR_ID = IntResourceId{11111, NodeModifier::ResourceType::COLOR};
 const auto INVALID_COLOR_ID = IntResourceId{-1, NodeModifier::ResourceType::COLOR};
+
+const auto RES_FAMILY_NAME = NamedResourceId{"family_resource", NodeModifier::ResourceType::STRARRAY};
+const auto RES_FAMILY_ID = IntResourceId{3333, NodeModifier::ResourceType::STRARRAY};
 // resource values
 const auto RESOURCE_BY_STRING = "ResourceByString";
 const auto RESOURCE_BY_NUMBER = "ResourceByNumber";
@@ -168,52 +96,74 @@ const auto DIMENSION_BY_ID = Dimension(5, DimensionUnit::VP);
 const auto DIMENSION_BY_NAME = Dimension(4, DimensionUnit::VP);
 const auto DIMENSION_BY_INVALID = Dimension(10, DimensionUnit::PX);
 
+const auto FAMILY_BY_STRING = "first";
+const auto FAMILY_BY_NUMBER = "second";
+
 const std::vector<StringResourceTest> SRC_RESOURCES_TEST_PLAN = {
     { CreateResourceUnion<ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
     { CreateResourceUnion<ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
     { CreateResourceUnion<ResourceStr>(INVALID_STRING_ID), "" },
 };
 
+const std::vector<ArkResourceTest> ARK_RESOURCES_TEST_PLAN = {
+    { ArkUnion<Ark_ResourceStr, Ark_Resource>(CreateResource(RES_STRING_NAME)),
+        RESOURCE_BY_STRING },
+    { ArkUnion<Ark_ResourceStr, Ark_Resource>(CreateResource(RES_STRING_ID)),
+        RESOURCE_BY_NUMBER },
+    { ArkUnion<Ark_ResourceStr, Ark_Resource>(CreateResource(INVALID_STRING_ID)),
+        "" },
+};
+
 using ResourceColorTestPlan = std::pair<ResourceColor, std::string>;
 static const std::vector<ResourceColorTestPlan> COLOR_RESOURCE_TEST_PLAN = {
-    { Converter::ArkUnion<ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_NAME)),
+    { Converter::ArkUnion<ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
         COLOR_BY_STRING.ColorToString() },
-    { Converter::ArkUnion<ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_ID)),
+    { Converter::ArkUnion<ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_ID)),
         COLOR_BY_NUMBER.ColorToString() },
-    { Converter::ArkUnion<ResourceColor, Ark_Resource>(CreateResourceUnion(INVALID_COLOR_ID)),
+    { Converter::ArkUnion<ResourceColor, Ark_Resource>(CreateResource(INVALID_COLOR_ID)),
         RESOURCE_DEFAULT_COLOR_DEFAULT },
 };
 
+using OneTestStep = std::pair<Ark_Length, std::string>;
+const std::vector<OneTestStep> ARK_LENGTH_TEST_PLAN = {
+    { { .type = ARK_TAG_RESOURCE, .resource = RES_DIMENSION_ID }, "5.00vp" },
+    { { .type = ARK_TAG_RESOURCE, .resource = -1 }, "10.00px" }
+};
 
-// const std::vector<ArkFontStyleTest> FONT_STYLE_TEST_PLAN = {
-//     { ArkValue<Opt_FontStyle>(Ark_FontStyle::ARK_FONT_STYLE_NORMAL), "FontStyle.Normal" },
-// };
-
-// // Font.fontWeight apply only FontWeight enum values
-// const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN = {
-//     { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER),
-//         "FontWeight.Lighter" },
-// };
+const std::vector<OneTestStep> ARK_SIZE_TEST_PLAN = {
+    { { .type = ARK_TAG_RESOURCE, .resource = RES_DIMENSION_ID }, "5.00px" },
+    { { .type = ARK_TAG_RESOURCE, .resource = -1 }, "10.00px" }
+};
 
 const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_RESOURCES = {
-    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResourceUnion(RES_NUMBER_ID)),
+    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_ID)),
       DIMENSION_BY_ID.ToString()
     },
-    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResourceUnion(RES_NUMBER_NAME)),
+    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_NAME)),
       DIMENSION_BY_NAME.ToString()
     },
-    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResourceUnion(RES_NUMBER_INVALID)),
+    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_INVALID)),
       DIMENSION_BY_INVALID.ToString()
     }
 };
 
-// const std::vector<DecorationTypeTest> TEXT_DECORATION_TYPE_TEST_PLAN = {
-//     { Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE, "TextDecorationType.None" },
-// };
+using ResourceTest = std::tuple<Opt_Union_String_Resource, std::string>;
+const std::vector<ResourceTest> FONT_FAMILY_TEST_PLAN_RESOURCES = {
+    { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(CreateResource(RES_FAMILY_NAME)),
+        FAMILY_BY_STRING },
+    { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(CreateResource(RES_FAMILY_ID)),
+        FAMILY_BY_NUMBER },
+};
 
-// const std::vector<DecorationStyleTest> TEXT_DECORATION_STYLE_TEST_PLAN = {
-//     { Ark_TextDecorationStyle::ARK_TEXT_DECORATION_STYLE_SOLID, "TextDecorationStyle.SOLID" },
-// };
+struct EventsTracker {
+        static inline GENERATED_ArkUISearchEventsReceiver getSearchEventsReceiver {};
+
+        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
+            .getSearchEventsReceiver = [] () -> const GENERATED_ArkUISearchEventsReceiver* {
+                return &getSearchEventsReceiver;
+            }
+        };
+    }; // EventsTracker
 } // namespace
 
 class SearchModifierResourcesTest : public ModifierTestBase<GENERATED_ArkUISearchModifier,
@@ -235,13 +185,17 @@ public:
 
         AddResource(RES_STRING_NAME, RESOURCE_BY_STRING);
         AddResource(RES_STRING_ID, RESOURCE_BY_NUMBER);
+
+        AddResource(RES_FAMILY_ID, FAMILY_BY_NUMBER);
+        AddResource(RES_FAMILY_NAME, FAMILY_BY_STRING);
+
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
 /**
  * @tc.name: setCancelButtonTestIconColorResource
  * @tc.desc: Check set color functionality of setCancelButton
- * Disabled: Only Icon.size and style options available for test
  * @tc.type: FUNC
  */
 HWTEST_F(SearchModifierResourcesTest, setCancelButtonTestIconColorResource, TestSize.Level1)
@@ -264,7 +218,6 @@ HWTEST_F(SearchModifierResourcesTest, setCancelButtonTestIconColorResource, Test
 /**
  * @tc.name: setCancelButtonTestIconSrc
  * @tc.desc: Check set src functionality of setCancelButton
- * Disabled: Only Icon.size and style options available for test
  * @tc.type: FUNC
  */
 HWTEST_F(SearchModifierResourcesTest, setCancelButtonTestIconSrc, TestSize.Level1)
@@ -288,63 +241,37 @@ HWTEST_F(SearchModifierResourcesTest, setCancelButtonTestIconSrc, TestSize.Level
  * @tc.name: setSearchIconTest
  * @tc.desc: Check the functionality of setSearchIcon
  *
- * This test disabled because set icon src and icon color doesn't correspond in JSON after set it in SearchPattern
- *
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setSearchIconTestResources, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setSearchIconTestResources, TestSize.Level1)
 {
-    // ASSERT_NE(modifier_->setSearchIcon, nullptr);
-    // // default
-    // auto fullJson = GetJsonValue(node_);
-    // auto defaultSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, SEARCH_ICON_ATTR);
-    // auto defaultSearchIconSrc = defaultSearchIconAttrs->GetString(SEARCH_ICON_SRC_ATTR);
-    // auto defaultSearchIconColor = defaultSearchIconAttrs->GetString(SEARCH_ICON_COLOR_ATTR);
-    // auto defaultSearchIconSize = defaultSearchIconAttrs->GetString(SEARCH_ICON_SIZE_ATTR);
-    // EXPECT_EQ(defaultSearchIconSrc, EMPTY_TEXT);
-    // EXPECT_EQ(defaultSearchIconColor, CHECK_DEFAULT_BLACK_COLOR);
-    // EXPECT_EQ(defaultSearchIconSize, CHECK_DEFAULT_PX);
-    // // custom
-    // std::vector<SearchIconTest> testSearchIcon;
-    // for (auto testLength : TEST_PLAN_OPT_LENGTH_PX) {
-    //     for (auto ColorTest : COLOR_RESOURCE_TEST_PLAN) {
-    //         for (auto testSrc : SRC_RESOURCES_TEST_PLAN) {
-    //             Type_SearchAttribute_searchIcon_Arg0 attrs = {
-    //                 .selector = 0,
-    //                 .value0 = {
-    //                     .color = ColorTest.first,
-    //                     .size = testLength.first,
-    //                     .src = testSrc.first
-    //                 }
-    //             };
-    //             TripleCheckValues checkIconValues = {
-    //                 testSrc.second,
-    //                 ColorTest.second,
-    //                 testLength.second
-    //             };
-    //             SearchIconTest searchIconTest = {
-    //                 attrs, checkIconValues
-    //             };
-    //             testSearchIcon.push_back(searchIconTest);
-    //         }
-    //     }
-    // }
-
-    // for (auto iconAttrs : testSearchIcon) {
-    //     modifier_->setSearchIcon(node_, &iconAttrs.first);
-    //     fullJson = GetJsonValue(node_);
-    //     auto customSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, SEARCH_ICON_ATTR);
-    //     auto customSearchIconSrc = customSearchIconAttrs->GetString(SEARCH_ICON_SRC_ATTR);
-    //     auto customSearchIconColor = customSearchIconAttrs->GetString(SEARCH_ICON_COLOR_ATTR);
-    //     auto customSearchIconSize = customSearchIconAttrs->GetString(SEARCH_ICON_SIZE_ATTR);
-    //     std::string checkSrc;
-    //     std::string checkColor;
-    //     std::string checkSize;
-    //     std::tie(checkSrc, checkColor, checkSize) = iconAttrs.second;
-    //     EXPECT_EQ(customSearchIconSrc, checkSrc);
-    //     EXPECT_EQ(customSearchIconColor, checkColor);
-    //     EXPECT_EQ(customSearchIconSize, checkSize);
-    // }
+    ASSERT_NE(modifier_->setSearchIcon, nullptr);
+    // default
+    std::unique_ptr<JsonValue> fullJson;
+    // custom
+    for (const auto &[testLength, resultLength] : ARK_SIZE_TEST_PLAN) {
+        for (const auto &[colorTest, resultColor] : COLOR_RESOURCE_TEST_PLAN) {
+            for (const auto &[testSrc, resultSrc] : ARK_RESOURCES_TEST_PLAN) {
+                Type_SearchAttribute_searchIcon_Arg0 attrs = {
+                    .selector = 0,
+                    .value0 = {
+                        .color = ArkValue<Opt_ResourceColor>(colorTest),
+                        .size = ArkValue<Opt_Length>(testLength),
+                        .src = ArkValue<Opt_ResourceStr>(testSrc)
+                    }
+                };
+                modifier_->setSearchIcon(node_, &attrs);
+                fullJson = GetJsonValue(node_);
+                auto customSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, SEARCH_ICON_ATTR);
+                auto customSearchIconSrc = customSearchIconAttrs->GetString(SEARCH_ICON_SRC_ATTR);
+                auto customSearchIconColor = customSearchIconAttrs->GetString(SEARCH_ICON_COLOR_ATTR);
+                auto customSearchIconSize = customSearchIconAttrs->GetString(SEARCH_ICON_SIZE_ATTR);
+                EXPECT_EQ(customSearchIconSrc, resultSrc);
+                EXPECT_EQ(customSearchIconColor, resultColor);
+                EXPECT_EQ(customSearchIconSize, resultLength);
+            }
+        }
+    }
 }
 
 /**
@@ -408,9 +335,15 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setSearchButtonTestResources, Tes
  * @tc.desc: Check the functionality of setTextIndent
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setTextIndentTestResources, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setTextIndentTestResources, TestSize.Level1)
 {
-
+    std::unique_ptr<JsonValue> jsonValue;
+    for (const auto &[value, expected]: ARK_LENGTH_TEST_PLAN) {
+        modifier_->setTextIndent(node_, &value);
+        jsonValue = GetJsonValue(node_);
+        auto result = GetAttrValue<std::string>(jsonValue, TEXT_INDENT_ATTR);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 /**
@@ -436,9 +369,67 @@ HWTEST_F(SearchModifierResourcesTest, setPlaceholderColorTestResource, TestSize.
  * @tc.desc: Check the functionality of setCaretStyle
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setCaretStyleTestResources, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setCaretStyleTestResources, TestSize.Level1)
 {
-    // implement test resources
+    for (const auto &[testLength, resultLength] : ARK_LENGTH_TEST_PLAN) {
+        for (const auto &[testColor, resultColor] : COLOR_RESOURCE_TEST_PLAN) {
+            Ark_CaretStyle arkCaretStyle = { 
+                .color = ArkValue<Opt_ResourceColor>(testColor),
+                .width = ArkValue<Opt_Length>(testLength)
+            };
+            modifier_->setCaretStyle(node_, &arkCaretStyle);
+            auto value = GetStringAttribute(node_, CARET_STYLE_ATTR);
+            auto fullJson = GetJsonValue(node_);
+            auto customCaretStyle = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, CARET_STYLE_ATTR);
+            auto caretColor = customCaretStyle->GetString(CARET_STYLE_COLOR_ATTR);
+            auto caretWidth = customCaretStyle->GetString(CARET_STYLE_WIDTH_ATTR);
+            EXPECT_EQ(caretColor, resultColor);
+            EXPECT_EQ(caretWidth, resultLength);
+        }
+    }
+}
+
+/**
+ * @tc.name: setInputFilterTestResoruces
+ * @tc.desc: Check the functionality of setInputFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierResourcesTest, setInputFilterTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setInputFilter, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        std::string data;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::getSearchEventsReceiver.inputFilter =
+        [](Ark_Int32 nodeId, const Ark_String data) {
+            checkEvent = {
+            .nodeId = nodeId,
+            .data = Convert<std::string>(data),
+        };
+    };
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    Opt_Callback func = {};
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+
+    std::unique_ptr<JsonValue> jsonValue;
+    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    attrs.selector = 0;
+    for (const auto &[src, expected] : ARK_RESOURCES_TEST_PLAN) {
+        auto sendResource = src;
+        modifier_->setInputFilter(node_, &sendResource, &func);
+        textFieldEventHub->FireOnInputFilterError(expected);
+        EXPECT_TRUE(checkEvent.has_value());
+        auto jsonValue = GetJsonValue(node_);
+        auto filterValue = GetAttrValue<std::string>(jsonValue, INPUT_FILTER_ATTR);
+        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+        EXPECT_EQ(checkEvent->data, expected);
+        EXPECT_EQ(filterValue, expected);
+    }
 }
 
 /**
@@ -515,39 +506,39 @@ HWTEST_F(SearchModifierResourcesTest, setLetterSpacingTestResource, TestSize.Lev
  * @tc.desc: Check the functionality of setPlaceholderFont.
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setPlaceholderFontTestFamily, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setPlaceholderFontTestFamily, TestSize.Level1)
 {
-    // ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
+    Ark_Font font;
+    std::unique_ptr<JsonValue> jsonValue;
+    for (const auto &[family, expected] : FONT_FAMILY_TEST_PLAN_RESOURCES) {
+        font.family = family;
+        auto fontOpt = ArkValue<Opt_Font>(font);
+        modifier_->setPlaceholderFont(node_, &fontOpt);
+        jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PLACEHOLDER_FONT_ATTRS);
+        auto checkFamily = placeholderFont->GetString(PLACEHOLDER_FONT_FAMILY);
+        EXPECT_EQ(checkFamily, expected);
+    }
+}
 
-    // Ark_Font font = {
-    //     .family = UNION_RESOURCE_STRING_PLAN[0].first,
-    //     .size = OPT_LENGTH_TEST_PLAN[0].first,
-    //     .style = FONT_STYLE_TEST_PLAN[0].first,
-    //     .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    // };
-    // auto fontOpt = ArkValue<Opt_Font>(font);
-    // auto sizeStr = OPT_LENGTH_TEST_PLAN[0].second;
-    // auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
-    // auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
-
-    // for (auto family : UNION_RESOURCE_STRING_PLAN) {
-    //     font.family = family.first;
-    //     fontOpt = ArkValue<Opt_Font>(font);
-    //     modifier_->setPlaceholderFont(node_, &fontOpt);
-    //     auto placeholderFontJSON = GetStringAttribute(node_, PLACEHOLDER_FONT_ATTRS);
-    //     auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
-    //     auto checkSize = placeholderFont->GetString(PLACEHOLDER_FONT_SIZE);
-    //     auto checkFamily = placeholderFont->GetString(PLACEHOLDER_FONT_FAMILY);
-    //     auto checkWeight = placeholderFont->GetString(PLACEHOLDER_FONT_WEIGHT);
-    //     if (checkWeight.empty()) {
-    //         checkWeight = placeholderFont->GetString(PLACEHOLDER_FONT_WEIGHT_ENUM);
-    //     }
-    //     auto checkStyle = placeholderFont->GetString(PLACEHOLDER_FONT_STYLE);
-    //     EXPECT_EQ(checkSize, sizeStr);
-    //     EXPECT_EQ(checkFamily, family.second);
-    //     EXPECT_EQ(checkStyle, styleStr);
-    //     EXPECT_EQ(checkWeight, weightStr);
-    // }
+/**
+ * @tc.name: setPlaceholderFontTestSize
+ * @tc.desc: Check the functionality of setPlaceholderFont.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierResourcesTest, setPlaceholderFontTestSize, TestSize.Level1)
+{
+    Ark_Font font;
+    std::unique_ptr<JsonValue> jsonValue;
+    for (const auto &[arkLength, expected]: ARK_LENGTH_TEST_PLAN) {
+        font.size = ArkValue<Opt_Length>(arkLength);
+        auto fontOpt = ArkValue<Opt_Font>(font);
+        modifier_->setPlaceholderFont(node_, &fontOpt);
+        jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, PLACEHOLDER_FONT_ATTRS);
+        auto result = placeholderFont->GetString(PLACEHOLDER_FONT_SIZE);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 /**
@@ -555,36 +546,19 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setPlaceholderFontTestFamily, Tes
  * @tc.desc: Check the functionality of setTextFont.
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setTextFontTestFontFamily, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setTextFontTestFontFamily, TestSize.Level1)
 {
-    // ASSERT_NE(modifier_->setTextFont, nullptr);
-
-    // Ark_Font font = {
-    //     .family = UNION_RESOURCE_STRING_PLAN[0].first,
-    //     .size = OPT_LENGTH_TEST_PLAN[0].first,
-    //     .style = FONT_STYLE_TEST_PLAN[0].first,
-    //     .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    // };
-    // auto fontOpt = ArkValue<Opt_Font>(font);
-    // auto sizeStr = OPT_LENGTH_TEST_PLAN[0].second;
-    // auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
-    // auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
-
-    // for (auto family : UNION_RESOURCE_STRING_PLAN) {
-    //     font.family = family.first;
-    //     fontOpt = ArkValue<Opt_Font>(font);
-    //     modifier_->setTextFont(node_, &fontOpt);
-    //     auto textFontJSON = GetStringAttribute(node_, TEXT_FONT_ATTRS);
-    //     auto textFont = JsonUtil::ParseJsonString(textFontJSON);
-    //     auto checkSize = textFont->GetString(TEXT_FONT_SIZE_ATTR);
-    //     auto checkFamily = textFont->GetString(TEXT_FONT_FAMILY_ATTR);
-    //     auto checkWeight = textFont->GetString(TEXT_FONT_WEIGHT_ATTR);
-    //     auto checkStyle = textFont->GetString(TEXT_FONT_STYLE_ATTR);
-    //     EXPECT_EQ(checkSize, sizeStr);
-    //     EXPECT_EQ(checkFamily, family.second);
-    //     EXPECT_EQ(checkStyle, styleStr);
-    //     EXPECT_EQ(checkWeight, weightStr);
-    // }
+    Ark_Font font;
+    std::unique_ptr<JsonValue> jsonValue;
+    for (const auto &[family, expected] : FONT_FAMILY_TEST_PLAN_RESOURCES) {
+        font.family = family;
+        auto fontOpt = ArkValue<Opt_Font>(font);
+        modifier_->setTextFont(node_, &fontOpt);
+        jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, TEXT_FONT_ATTRS);
+        auto result = placeholderFont->GetString(TEXT_FONT_FAMILY_ATTR);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 /**
@@ -592,9 +566,19 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setTextFontTestFontFamily, TestSi
  * @tc.desc: Check the functionality of setTextFont.
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setTextFontTestFontSizeResource, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setTextFontTestFontSizeResource, TestSize.Level1)
 {
-    // implement check resources
+    Ark_Font font;
+    std::unique_ptr<JsonValue> jsonValue;
+    for (const auto &[arkLength, expected]: ARK_LENGTH_TEST_PLAN) {
+        font.size = ArkValue<Opt_Length>(arkLength);
+        auto fontOpt = ArkValue<Opt_Font>(font);
+        modifier_->setTextFont(node_, &fontOpt);
+        jsonValue = GetJsonValue(node_);
+        auto placeholderFont = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, TEXT_FONT_ATTRS);
+        auto result = placeholderFont->GetString(TEXT_FONT_SIZE_ATTR);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 /**
@@ -602,18 +586,16 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setTextFontTestFontSizeResource, 
  * @tc.desc: Check the functionality of setLineHeight
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setLineHeightTestResource, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setLineHeightTestResource, TestSize.Level1)
 {
-    // ASSERT_NE(modifier_->setLineHeight, nullptr);
-
-    // auto checkVal = GetStringAttribute(node_, LINE_HEIGHT_ATTR);
-    // EXPECT_EQ(checkVal, "0.00vp");
-
-    // for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN_WITH_PERCENT_RESOURCES) {
-    //     modifier_->setLineHeight(node_, &value);
-    //     checkVal = GetStringAttribute(node_, LINE_HEIGHT_ATTR);
-    //     EXPECT_EQ(checkVal, expectVal);
-    // }
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string result;
+    for (const auto &[value, expected]: UNION_NUM_STR_RES_TEST_PLAN_RESOURCES) {
+        modifier_->setLineHeight(node_, &value);
+        jsonValue = GetJsonValue(node_);
+        result = GetAttrValue<std::string>(jsonValue, LINE_HEIGHT_ATTR);
+        EXPECT_EQ(result, expected);
+    }
 }
 
 /**
@@ -621,37 +603,19 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setLineHeightTestResource, TestSi
  * @tc.desc: Check the functionality of setDecoration
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setDecorationTestResource, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setDecorationTestResource, TestSize.Level1)
 {
-    // ASSERT_NE(modifier_->setDecoration, nullptr);
-    // auto defaultDecorationJSON = GetStringAttribute(node_, DECORATION_ATTRS);
-    // auto defaultDecoration = JsonUtil::ParseJsonString(defaultDecorationJSON);
-    // auto defaultType = defaultDecoration->GetString(DECORATION_TYPE_ATTR);
-    // auto defaultStyle = defaultDecoration->GetString(DECORATION_STYLE_ATTR);
-    // auto defaultColor = defaultDecoration->GetString(DECORATION_COLOR_ATTR);
-    // EXPECT_EQ(defaultType, "TextDecorationType.None");
-    // EXPECT_EQ(defaultStyle, "TextDecorationStyle.SOLID");
-    // EXPECT_EQ(defaultColor, CHECK_DEFAULT_BLACK_COLOR);
-
-    // for (const auto &[decorationType, expectDecorationType]: TEXT_DECORATION_TYPE_TEST_PLAN) {
-    //     for (const auto &[decorationStyle, expectDecorationStyle]: TEXT_DECORATION_STYLE_TEST_PLAN) {
-    //         for (const auto &[decorationColor, expectColor] : COLOR_RESOURCE_TEST_PLAN) {
-    //             Ark_TextDecorationOptions options = {
-    //                 .color = decorationColor,
-    //                 .type = decorationType,
-    //                 .style = ArkValue<Opt_TextDecorationStyle>(decorationStyle)
-    //             };
-    //             modifier_->setDecoration(node_, &options);
-    //             auto decorationJSON = GetStringAttribute(node_, DECORATION_ATTRS);
-    //             auto decoration = JsonUtil::ParseJsonString(decorationJSON);
-    //             auto type = decoration->GetString(DECORATION_TYPE_ATTR);
-    //             auto style = decoration->GetString(DECORATION_STYLE_ATTR);
-    //             auto color = decoration->GetString(DECORATION_COLOR_ATTR);
-    //             EXPECT_EQ(type, expectDecorationType);
-    //             EXPECT_EQ(style, expectDecorationStyle);
-    //             EXPECT_EQ(color, expectColor);
-    //         }
-    //     }
-    // }
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string result;
+    for (const auto &[decorationColor, expectColor] : COLOR_RESOURCE_TEST_PLAN) {
+        Ark_TextDecorationOptions options = {
+            .color = ArkValue<Opt_ResourceColor>(decorationColor),
+        };
+        modifier_->setDecoration(node_, &options);
+        auto decorationJSON = GetStringAttribute(node_, DECORATION_ATTRS);
+        auto decoration = JsonUtil::ParseJsonString(decorationJSON);
+        auto result = decoration->GetString(DECORATION_COLOR_ATTR);
+        EXPECT_EQ(result, expectColor);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -162,11 +162,11 @@ HWTEST_F(ButtonModifierResourcesTest, setFontColorTestResourceColorValues, TestS
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_NAME)),
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
             COLOR_BY_STRING.ColorToString() },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_ID)),
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_ID)),
             COLOR_BY_NUMBER.ColorToString() },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(INVALID_ID_COLOR)),
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(INVALID_ID_COLOR)),
             "#FFFF0000" }
     };
 
@@ -214,9 +214,9 @@ HWTEST_F(ButtonModifierResourcesTest, setFontFamilyTestResources, TestSize.Level
 
     using ResourceTest = std::tuple<Union_String_Resource, std::string>;
     const std::vector<ResourceTest> testPlan = {
-        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_NAME)),
+        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResource(RES_FAMILY_NAME)),
             FAMILY_BY_STRING },
-        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_ID)),
+        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResource(RES_FAMILY_ID)),
             FAMILY_BY_NUMBER },
     };
 
@@ -243,10 +243,10 @@ HWTEST_F(ButtonModifierResourcesTest, setLabelStyleTestResources, TestSize.Level
     using ResourceTest = std::tuple<Opt_Union_String_Resource, std::string>;
     const std::vector<ResourceTest> testPlan = {
         { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-            CreateResourceUnion(RES_FAMILY_NAME)),
+            CreateResource(RES_FAMILY_NAME)),
             FAMILY_BY_STRING },
         { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-            CreateResourceUnion(RES_FAMILY_ID)),
+            CreateResource(RES_FAMILY_ID)),
             FAMILY_BY_NUMBER },
     };
 

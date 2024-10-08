@@ -338,9 +338,9 @@ template<>
 Font Convert(const Ark_Font& src)
 {
     Font font;
-    auto fontFamalies = OptConvert<std::vector<std::string>>(src.family);
-    if (fontFamalies) {
-        font.fontFamilies = fontFamalies.value();
+    auto fontFamilies = OptConvert<std::vector<std::string>>(src.family);
+    if (fontFamilies) {
+        font.fontFamilies = fontFamilies.value();
     }
     auto fontSize = OptConvert<Dimension>(src.size);
     if (fontSize) {
