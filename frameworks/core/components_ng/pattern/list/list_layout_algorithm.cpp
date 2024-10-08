@@ -1092,7 +1092,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             }
         }
         recycledItemPosition_.emplace(pos->first, pos->second);
-        itemPosition_.erase(pos++);
+        pos = itemPosition_.erase(pos);
     }
 }
 
@@ -1874,7 +1874,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
                 break;
             }
             needMarkDirty = PredictBuildItem(wrapper, param.layoutConstraint) || needMarkDirty;
-            param.items.erase(it++);
+            it = param.items.erase(it);
         }
         if (needMarkDirty) {
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -2131,7 +2131,7 @@ void ListLayoutAlgorithm::PredictBuildV2(
         ACE_SCOPED_TRACE("predict Item:%d", (*it).index);
         auto wrapper = frameNode->GetOrCreateChildByIndex((*it).index, show, true);
         if (!wrapper) {
-            param.items.erase(it++);
+            it = param.items.erase(it);
             continue;
         }
         if (wrapper->GetHostNode() && !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
@@ -2150,7 +2150,7 @@ void ListLayoutAlgorithm::PredictBuildV2(
                 (*it).forwardCacheCount, listMainSizeValues);
         }
         needMarkDirty = true;
-        param.items.erase(it++);
+        it = param.items.erase(it);
     }
     if (needMarkDirty) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);

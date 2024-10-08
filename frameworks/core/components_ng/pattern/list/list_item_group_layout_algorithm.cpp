@@ -1040,7 +1040,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
             if (GreatOrEqual(pos->second.endPos, startPos - referencePos)) {
                 break;
             }
-            itemPosition_.erase(pos++);
+            pos = itemPosition_.erase(pos);
         }
         return;
     }
