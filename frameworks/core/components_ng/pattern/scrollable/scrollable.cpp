@@ -17,6 +17,7 @@
 
 #include "base/log/jank_frame_report.h"
 #include "base/ressched/ressched_report.h"
+#include "base/utils/system_properties.h"
 #include "core/common/layout_inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -515,11 +516,9 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
     StopSnapController();
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of scroll motion is %{public}f, velocity is %{public}f",
         mainPosition, correctVelocity);
-    if (friction_ != -1) {
+    if (friction_ == -1.0) {
         double ret = SystemProperties::GetSrollableFriction();
-        friction_ = !NearZero(ret) ? ret : friction_;
-    } else {
-        friction_ = defaultFriction_;
+        friction_ = !NearZero(ret) ? ret : defaultFriction_;
     }
     float friction = sFriction_.value_or(friction_);
     initVelocity_ = correctVelocity;
