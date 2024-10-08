@@ -16,13 +16,16 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t MAX_RENDER_GROUP_TEXT_NODE_COUNT = 50;
 
 NavDestinationGroupNode::~NavDestinationGroupNode()
 {
@@ -143,5 +146,85 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     json->PutExtAttr("mode", mode_ == NavDestinationMode::DIALOG
         ? "NavDestinationMode::DIALOG"
         : "NavDestinationMode::STANDARD", filter);
+}
+
+void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(
+    bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy)
+{
+    if (isPopPage) {
+        CollectTextNodeAsRenderGroup();
+    } else {
+        CHECK_NULL_VOID(proxy);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterLayoutTask([weakNavDestiniation = WeakClaim(this),
+            weakProxy = WeakPtr<NavigationTransitionProxy>(proxy)] () {
+            auto navDestination = weakNavDestiniation.Upgrade();
+            CHECK_NULL_VOID(navDestination);
+            auto proxy = weakProxy.Upgrade();
+            if (proxy && proxy->GetIsFinished()) {
+                return;
+            }
+            navDestination->CollectTextNodeAsRenderGroup();
+        });
+        pipeline->RequestFrame();
+    }
+}
+
+void NavDestinationGroupNode::CollectTextNodeAsRenderGroup()
+{
+    ReleaseTextNodeList();
+    std::queue<RefPtr<UINode>> childrenLoopQueue;
+    childrenLoopQueue.push(contentNode_);
+
+    // only the first 50 text nodes will be marked, avoid too much time for traversal
+    // and off-screen drawing at first few frames
+    int32_t remainTextNodeNeedRenderGroup = MAX_RENDER_GROUP_TEXT_NODE_COUNT;
+    while (!childrenLoopQueue.empty() && remainTextNodeNeedRenderGroup > 0) {
+        auto currentNode = childrenLoopQueue.front();
+        childrenLoopQueue.pop();
+        if (!currentNode) {
+            continue;
+        }
+        for (auto& child : currentNode->GetChildren()) {
+            if (remainTextNodeNeedRenderGroup <= 0) {
+                break;
+            }
+            if (!child) {
+                continue;
+            }
+            childrenLoopQueue.push(child);
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (!frameNode || (frameNode->GetTag() != V2::TEXT_ETS_TAG)) {
+                continue;
+            }
+            auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+            if (!layoutProperty ||
+                (layoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE)) {
+                continue;
+            }
+            auto renderContext = frameNode->GetRenderContext();
+            if (renderContext && (renderContext->GetRenderGroupValue(false) != true)) {
+                renderContext->SetMarkNodeGroup(true);
+                textNodeList_.emplace_back(WeakPtr<UINode>(child));
+                --remainTextNodeNeedRenderGroup;
+            }
+        }
+    }
+}
+
+void NavDestinationGroupNode::ReleaseTextNodeList()
+{
+    for (auto& child : textNodeList_) {
+        auto textNode = AceType::DynamicCast<FrameNode>(child.Upgrade());
+        if (!textNode) {
+            continue;
+        }
+        auto renderContext = textNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetMarkNodeGroup(renderContext->GetRenderGroupValue(false));
+        }
+    }
+    textNodeList_.clear();
 }
 } // namespace OHOS::Ace::NG
