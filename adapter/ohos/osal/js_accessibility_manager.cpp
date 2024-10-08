@@ -614,10 +614,10 @@ RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node,
     if (frameNode) {
         if (frameNode->GetRenderContext()->GetAccessibilityFocus().value_or(false)) {
             auto node = GetFramenodeByAccessibilityId(frameNode, currentFocusNodeId);
+            std::string finalNodeId = node ? std::to_string(node->GetAccessibilityId()) : "nullptr";
             TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
-                "FindAccessibilityFocus frameNode accessiblityId: %{public}" PRId64
-                ", currentFocusNodeId: %{public}" PRId64 ", node is: %{public}" PRId64,
-                frameNode->GetAccessibilityId(), currentFocusNodeId, node->GetAccessibilityId());
+                "currentFocusNodeId: %{public}" PRId64 ", result accessiblityId: %s",
+                currentFocusNodeId, finalNodeId.c_str());
             return node;
         }
     }
@@ -3826,7 +3826,10 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elemen
 
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "commonProperty.windowId: %{public}d", commonProperty.windowId);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "windowId: %{public}d, windowLeft: %{public}d, "
+        "windowTop: %{public}d",
+        commonProperty.windowId, commonProperty.windowLeft, commonProperty.windowTop);
     auto node = GetFramenodeByAccessibilityId(rootNode, nodeId);
     CHECK_NULL_VOID(node);
     UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
