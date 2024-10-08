@@ -682,6 +682,14 @@ private:
     float GetItemSpace() const;
     float GetPrevMargin() const;
     float GetNextMargin() const;
+    float GetPrevMarginWithItemSpace() const
+    {
+        return Positive(GetPrevMargin()) ? GetPrevMargin() + GetItemSpace() : 0.0f;
+    }
+    float GetNextMarginWithItemSpace() const
+    {
+        return Positive(GetNextMargin()) ? GetNextMargin() + GetItemSpace() : 0.0f;
+    }
     float CalculateVisibleSize() const;
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
@@ -909,6 +917,7 @@ private:
     void UpdateIgnoreBlankOffsetWithIndex();
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
+    void UpdateIgnoreBlankOffsetInMap(float lastIgnoreBlankOffset);
 
     std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 
