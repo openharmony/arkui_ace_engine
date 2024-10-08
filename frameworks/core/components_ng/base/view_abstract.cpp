@@ -1312,7 +1312,7 @@ void ViewAbstract::SetDragPreviewOptions(const DragPreviewOption& previewOption)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreviewOptions(previewOption);
+    frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
 void ViewAbstract::SetOnDragStart(
@@ -3577,7 +3577,7 @@ void ViewAbstract::SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen:
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreviewOptions(previewOption);
+    frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
 void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo)
