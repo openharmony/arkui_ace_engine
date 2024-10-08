@@ -648,10 +648,10 @@ void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent)
     UpdateDragListener(Point(-1, -1));
     if (preTargetFrameNode_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Leave the current window, windowId is %{public}d,"
-            "drag Position is (%{private}f, %{private}f),"
-            "PreTargetFrameNode is %{public}s, depth is %{public}d, id is %{public}s",
-            container->GetWindowId(), static_cast<float>(point.GetX()), static_cast<float>(point.GetY()),
-            preTargetFrameNode_->GetTag().c_str(), preTargetFrameNode_->GetDepth(),
+            " pointerEventId is %{public}d, drag Position is (%{private}f, %{private}f),"
+            " PreTargetFrameNode is %{public}s, depth is %{public}d, id is %{public}s",
+            container->GetWindowId(), pointerEvent.pointerEventId, static_cast<float>(point.GetX()),
+            static_cast<float>(point.GetY()), preTargetFrameNode_->GetTag().c_str(), preTargetFrameNode_->GetDepth(),
             preTargetFrameNode_->GetInspectorId()->c_str());
         FireOnDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE, extraInfo_);
         preTargetFrameNode_ = nullptr;

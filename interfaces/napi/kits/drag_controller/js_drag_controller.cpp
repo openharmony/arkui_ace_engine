@@ -784,6 +784,14 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     };
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(asyncCtx->pointerId, asyncCtx->instanceId);
     NG::DragDropFuncWrapper::SetExtraInfo(asyncCtx->instanceId, asyncCtx->extraParams);
+    auto pixelMap = dragData.value().shadowInfos[0].pixelMap;
+    std::string summarys = NG::DragDropFuncWrapper::GetSummaryString(dragData.value().summarys);
+    TAG_LOGI(AceLogTag::ACE_DRAG,
+        "dragData, pixelMap width %{public}d height %{public}d, udkey %{public}s, recordSize %{public}d, "
+        "extraParams length %{public}d, pointerId %{public}d, summary %{public}s.",
+        pixelMap->GetWidth(), pixelMap->GetHeight(),
+        NG::DragDropFuncWrapper::GetAnonyString(dragData.value().udKey).c_str(), dragData.value().dragNum,
+        static_cast<int32_t>(asyncCtx->extraParams.length()), asyncCtx->pointerId, summarys.c_str());
     int32_t ret = Msdp::DeviceStatus::InteractionManager::GetInstance()->StartDrag(dragData.value(),
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
     if (ret != 0) {
