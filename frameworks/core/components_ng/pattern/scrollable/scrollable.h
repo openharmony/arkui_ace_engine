@@ -627,6 +627,7 @@ private:
     uint32_t springAnimationCount_ = 0;
     double flingVelocityScale_ = 1.5;
     double springVelocityScale_ = 1.5;
+    double defaultFriction_ = 0;
     float ratio_ = 1.848f;
     float springResponse_ = 0.416f;
     float touchPadVelocityScaleRate_ = 1.0f;

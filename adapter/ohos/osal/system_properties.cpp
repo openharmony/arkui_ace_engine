@@ -894,4 +894,16 @@ std::string SystemProperties::GetWebDebugRenderMode()
 {
     return OHOS::system::GetParameter("web.debug.renderMode", "");
 }
+
+double SystemProperties::GetSrollableVelocityScale()
+{
+    auto ret = system::GetParameter("persist.scrollable.velocityScale", "");
+    return StringUtils::StringToDouble(ret);
+}
+
+double SystemProperties::GetSrollableFriction()
+{
+    auto ret = system::GetParameter("persist.scrollable.friction", "");
+    return StringUtils::StringToDouble(ret);
+}
 } // namespace OHOS::Ace

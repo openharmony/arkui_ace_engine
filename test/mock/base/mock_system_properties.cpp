@@ -199,4 +199,14 @@ bool SystemProperties::IsSmallFoldProduct()
 {
     return false;
 }
+
+double SystemProperties::GetSrollableVelocityScale()
+{
+    return 0.0;
+}
+
+double SystemProperties::GetSrollableFriction()
+{
+    return 0.0;
+}
 } // namespace OHOS::Ace
