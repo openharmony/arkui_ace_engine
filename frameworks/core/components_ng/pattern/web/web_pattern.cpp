@@ -3111,23 +3111,10 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
     }
 }
 
-void WebPattern::OnSelectHandleStart(const GestureEvent& event, bool isFirst)
+RectF WebPattern::ChangeHandleHeight(
+    const std::shared_ptr<SelectOverlayInfo>& info, const GestureEvent& event, bool isFirst)
 {
-    CHECK_NULL_VOID(selectOverlayProxy_);
-    CHECK_NULL_VOID(delegate_);
-    SetCurrentStartHandleDragging(isFirst);
-    SetSelectOverlayDragging(true);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto manager = pipeline->GetSelectOverlayManager();
-    CHECK_NULL_VOID(manager);
-    auto node = manager->GetSelectOverlayNode(selectOverlayProxy_->GetSelectOverlayId());
-    CHECK_NULL_VOID(node);
-    auto pattern = node->GetPattern<SelectOverlayPattern>();
-    CHECK_NULL_VOID(pattern);
     auto touchOffset = event.GetLocalLocation();
-    const std::shared_ptr<SelectOverlayInfo>& info = pattern->GetSelectOverlayInfo();
     auto handle = isFirst ? info->firstHandle : info->secondHandle;
     auto handleHeight = SELECT_HANDLE_DEFAULT_HEIGHT.ConvertToPx();
     handleHeight = std::min(static_cast<float>(handleHeight), handle.paintRect.Height());
@@ -3152,7 +3139,27 @@ void WebPattern::OnSelectHandleStart(const GestureEvent& event, bool isFirst)
         info->secondHandle = handle;
         info->secondHandle.isCircleShow = false;
     }
-    RectF handleRect = handle.paintRect;
+    return handle.paintRect;
+}
+
+void WebPattern::OnSelectHandleStart(const GestureEvent& event, bool isFirst)
+{
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    CHECK_NULL_VOID(delegate_);
+    SetCurrentStartHandleDragging(isFirst);
+    SetSelectOverlayDragging(true);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSelectOverlayManager();
+    CHECK_NULL_VOID(manager);
+    auto node = manager->GetSelectOverlayNode(selectOverlayProxy_->GetSelectOverlayId());
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    const std::shared_ptr<SelectOverlayInfo>& info = pattern->GetSelectOverlayInfo();
+    RectF handleRect = ChangeHandleHeight(info, event, isFirst);
+    
     TouchInfo touchPoint;
     touchPoint.id = 0;
     touchPoint.x = handleRect.GetX() - webOffset_.GetX();
