@@ -2054,12 +2054,12 @@ void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const
     }
     panda::Local<panda::FunctionRef> func = jsValueOnCreateMenu->ToObject(vm);
     auto containerId = Container::CurrentId();
-    auto jsCallback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), containerId](
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
                           const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
         ContainerScope scope(containerId);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         std::vector<NG::MenuOptionsParam> menuParams;
         auto textMenuItemArrayObj = CreateJsSystemMenuItems(vm, systemMenuItems);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { textMenuItemArrayObj };
@@ -2113,12 +2113,12 @@ void ArkTSUtils::ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,
     }
     panda::Local<panda::FunctionRef> func = jsValueOnMenuItemClick->ToObject(vm);
     auto containerId = Container::CurrentId();
-    auto jsCallback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), containerId](
+    auto jsCallback = [vm, node = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func), containerId](
                           const NG::MenuItemParam& menuOptionsParam) -> bool {
         ContainerScope scope(containerId);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         auto paramArrayObj = CreateJsOnMenuItemClick(vm, menuOptionsParam);
         if (paramArrayObj->Length(vm) != PARAM_ARR_LENGTH_2) {
             return false;
