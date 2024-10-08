@@ -396,6 +396,8 @@ public:
         posMap_ = posMap;
     }
 
+    void ResetLayoutItem(LayoutWrapper* layoutWrapper);
+
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();

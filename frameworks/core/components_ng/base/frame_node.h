@@ -1006,6 +1006,8 @@ public:
         return changeInfoFlag_;
     }
 
+    void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false) override;
+
     void ClearChangeInfoFlag()
     {
         changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
@@ -1022,6 +1024,11 @@ public:
     void ResetLayoutAlgorithm()
     {
         layoutAlgorithm_.Reset();
+    }
+
+    bool HasLayoutAlgorithm()
+    {
+        return layoutAlgorithm_ != nullptr;
     }
 
     bool GetDragHitTestBlock() const
