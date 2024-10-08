@@ -63,6 +63,7 @@ const InspectorFilter filter;
 
 namespace {
     constexpr float MAX_ROTATE = 360.0f;
+    constexpr float TEST_FONT_SIZE = 2.0;
 class TestNode : public UINode {
     DECLARE_ACE_TYPE(TestNode, UINode);
 
@@ -1511,5 +1512,200 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmFillBlank
     EXPECT_EQ(buttonAlgorithm2.right_.width_, 1.0);
     EXPECT_EQ(buttonAlgorithm2.top_.height_, 1.0);
     EXPECT_EQ(buttonAlgorithm2.bottom_.height_, 1.0);
+}
+
+void SecurityComponentModelTestNg::InitLayoutAlgorithm(RefPtr<SecurityComponentLayoutAlgorithm>& buttonAlgorithm)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textGeometryNode = textNode->geometryNode_;
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateContent("Security component");
+    textLayoutProperty->UpdateFontSize(Dimension(TEST_FONT_SIZE));
+    auto textWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(textNode)), textGeometryNode, textLayoutProperty);
+    auto secCompProperty = AceType::MakeRefPtr<SecurityComponentLayoutProperty>();
+    secCompProperty->UpdateSecurityComponentDescription(1);
+
+    buttonAlgorithm->text_ = TextLayoutElement();
+    RefPtr<LayoutWrapper> textWrapper = textWrapperNode;
+    buttonAlgorithm->text_.Init(secCompProperty, textWrapper);
+    buttonAlgorithm->text_.width_ = 4.0; // set width 4.0
+    buttonAlgorithm->isVertical_ = true;
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCircle001
+ * @tc.desc: Test security component IsTextOutOfRangeInCircle
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCircle001, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    InitLayoutAlgorithm(buttonAlgorithm);
+
+    buttonAlgorithm->componentWidth_ = 10.0;
+    buttonAlgorithm->componentHeight_ = 10.0;
+    buttonAlgorithm->currentFontSize_ = Dimension(2.0);
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(4, 4);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(6, 4);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(4, 6);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(6, 6);
+    EXPECT_FALSE(buttonAlgorithm->IsTextOutOfRangeInCircle());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCircle());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCircle());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(8, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(10, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(8, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(10, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCircle());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(8, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(10, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(8, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(10, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCircle());
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule001
+ * @tc.desc: Test security component IsTextOutOfRangeInCapsule
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule001, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    InitLayoutAlgorithm(buttonAlgorithm);
+
+    buttonAlgorithm->componentWidth_ = 15.0;
+    buttonAlgorithm->componentHeight_ = 10.0;
+    buttonAlgorithm->currentFontSize_ = Dimension(2.0);
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(4, 4);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(6, 4);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(4, 6);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(6, 6);
+    EXPECT_FALSE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(13, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(15, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(13, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(15, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(13, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(15, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(13, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(15, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule002
+ * @tc.desc: Test security component IsTextOutOfRangeInCapsule
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInCapsule002, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    InitLayoutAlgorithm(buttonAlgorithm);
+
+    buttonAlgorithm->componentWidth_ = 10.0;
+    buttonAlgorithm->componentHeight_ = 15.0;
+    buttonAlgorithm->currentFontSize_ = Dimension(2.0);
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(4, 4);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(6, 4);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(4, 6);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(6, 6);
+    EXPECT_FALSE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 13);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 13);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 15);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 15);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(8, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(10, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(8, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(10, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(8, 13);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(10, 13);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(8, 15);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(10, 15);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInCapsule());
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsTextOutOfRangeInNormal001
+ * @tc.desc: Test security component IsTextOutOfRangeInNormal
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsTextOutOfRangeInNormal001, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    InitLayoutAlgorithm(buttonAlgorithm);
+    auto buttonNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->SetInternal();
+    buttonAlgorithm->buttonLayoutProperty_ = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonAlgorithm->buttonLayoutProperty_);
+    buttonAlgorithm->buttonLayoutProperty_->UpdateBorderRadius(BorderRadiusProperty(Dimension(5.0)));
+
+    buttonAlgorithm->componentWidth_ = 15.0;
+    buttonAlgorithm->componentHeight_ = 10.0;
+    buttonAlgorithm->currentFontSize_ = Dimension(2.0);
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(4, 4);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(6, 4);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(4, 6);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(6, 6);
+    EXPECT_FALSE(buttonAlgorithm->IsTextOutOfRangeInNormal());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInNormal());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(0, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(2, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(0, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(2, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInNormal());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(13, 0);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(15, 0);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(13, 2);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(15, 2);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInNormal());
+    buttonAlgorithm->textLeftTopPoint_ = SizeF(13, 8);
+    buttonAlgorithm->textRightTopPoint_ = SizeF(15, 8);
+    buttonAlgorithm->textLeftBottomPoint_ = SizeF(13, 10);
+    buttonAlgorithm->textRightBottomPoint_ = SizeF(15, 10);
+    EXPECT_TRUE(buttonAlgorithm->IsTextOutOfRangeInNormal());
 }
 } // namespace OHOS::Ace::NG
