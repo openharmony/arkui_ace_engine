@@ -1350,6 +1350,9 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 bool TextFieldPattern::HandleOnEscape()
 {
     CloseSelectOverlay(true);
+    if (!IsSelected() && HasFocus()) {
+        StartTwinkling();
+    }
     return false;
 }
 
@@ -1624,6 +1627,7 @@ void TextFieldPattern::HandleOnCameraInput()
         inputMethod->ShowTextInput();
     }
     CloseSelectOverlay(true);
+    StartTwinkling();
 #endif
 #endif
 }
@@ -7333,6 +7337,7 @@ void TextFieldPattern::OnObscuredChanged(bool isObscured)
     obscuredChange_ = textObscured_ != isObscured;
     textObscured_ = isObscured;
     CloseSelectOverlay(false);
+    StartTwinkling();
     if (obscuredChange_) {
         selectController_->UpdateCaretIndex(static_cast<int32_t>(contentController_->GetWideText().length()));
     }
