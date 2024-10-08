@@ -169,6 +169,9 @@ void ImagePattern::OnCompleteInDataReady()
 
 void ImagePattern::TriggerFirstVisibleAreaChange()
 {
+    if (isComponentSnapshotNode_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RectF frameRect;

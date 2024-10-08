@@ -38,6 +38,10 @@ public:
     static std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSync(const std::string& componentId,
         const SnapshotOptions& options);
 
+    // create pixelMap in sync, this method only for drag.
+    static std::shared_ptr<Media::PixelMap> CreateSync(
+        const RefPtr<AceType>& customNode, const SnapshotParam& param);
+
 private:
     static std::shared_ptr<Rosen::RSNode> GetRsNode(const RefPtr<FrameNode>& node);
     static void PostDelayedTaskOfBuiler(const RefPtr<TaskExecutor>& executor, JsCallback&& callback,
