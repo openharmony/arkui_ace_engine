@@ -68,6 +68,8 @@ public:
 
     virtual std::string GetGroupText(bool forceGetChildren = false) const;
 
+    virtual std::string GetGroupPreferAccessibilityText(bool forceGetChildren = false) const;
+
     virtual void SetText(const std::string& text)
     {
         propText_ = text;
@@ -265,7 +267,7 @@ public:
     {
         actionSetCursorIndexImpl_ = actionSetCursorIndexImpl;
     }
-    
+
     bool ActActionSetIndex(int32_t index)
     {
         if (actionSetCursorIndexImpl_) {
@@ -661,7 +663,7 @@ public:
     {
         getRelatedElementInfoImpl_ = getRelatedElementInfoImpl;
     }
-    
+
     void GetAllExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
     {
         if (getRelatedElementInfoImpl_) {
@@ -748,7 +750,7 @@ private:
     */
     static std::tuple<bool, bool, bool> GetSearchStrategy(const RefPtr<FrameNode>& node, bool& ancestorGroupFlag);
 
-    void GetGroupTextRecursive(bool forceGetChildren, std::string& text) const;
+    void GetGroupTextRecursive(bool forceGetChildren, std::string& text, bool preferAccessibilityText) const;
 
     bool HasAccessibilityTextOrDescription() const;
 
