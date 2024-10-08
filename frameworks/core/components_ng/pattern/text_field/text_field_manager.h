@@ -272,6 +272,21 @@ public:
         return isImeAttached_;
     }
 
+    void AddAvoidKeyboardCallback(const std::function<void()>&& callback)
+    {
+        afterAvoidKeyboardCallbacks_.emplace_back(std::move(callback));
+    }
+
+    void OnAfterAvoidKeyboard()
+    {
+        auto callbacks = std::move(afterAvoidKeyboardCallbacks_);
+        for (auto&& callback : callbacks) {
+            if (callback) {
+                callback();
+            }
+        }
+    }
+
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
@@ -302,6 +317,7 @@ private:
     double laterAvoidHeight_ = 0.0;
     bool isScrollableChild_ = false;
     bool isImeAttached_ = false;
+    std::list<std::function<void()>> afterAvoidKeyboardCallbacks_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -5009,7 +5009,14 @@ void PipelineContext::DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyb
 {
     if (isDoKeyboardAvoidAnimate_) {
         AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
-        Animate(option, option.GetCurve(), func);
+        Animate(option, option.GetCurve(), func, [weak = WeakClaim(this)]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            CHECK_NULL_VOID(pipeline->textFieldManager_);
+            auto textFieldManagerNg = DynamicCast<TextFieldManagerNG>(pipeline->textFieldManager_);
+            CHECK_NULL_VOID(textFieldManagerNg);
+            textFieldManagerNg->OnAfterAvoidKeyboard();
+        });
     } else {
         func();
     }
