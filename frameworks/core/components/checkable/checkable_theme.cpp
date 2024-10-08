@@ -30,6 +30,7 @@ void CheckboxTheme::Builder::SetCheckboxFocus(const RefPtr<ThemeConstants>& them
     theme->focusedBGColorUnselected_ =
         checkboxPattern->GetAttr<Color>("focused_bg_color_unselected", Color(0xffff0000));
     theme->roundFocusBoardSize_ = checkboxPattern->GetAttr<Dimension>("round_size_focused_bg", 2.0_vp);
+    theme->whiteBorderRadius_ = checkboxPattern->GetAttr<Dimension>("focus_white_border_radius", 0.0_vp);
     theme->focusLineColor_ = checkboxPattern->GetAttr<Color>("checkbox_focus_color_sys", Color(0xff007dff));
 }
 

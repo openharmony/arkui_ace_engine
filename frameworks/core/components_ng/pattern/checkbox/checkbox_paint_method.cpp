@@ -89,6 +89,7 @@ void CheckBoxModifier::InitializeParam()
     CHECK_NULL_VOID(checkBoxTheme);
     borderWidth_ = checkBoxTheme->GetBorderWidth().ConvertToPx();
     borderRadius_ = checkBoxTheme->GetBorderRadius().ConvertToPx();
+    whiteBorderRadius_ = checkBoxTheme->GetWhiteBorderRadius().ConvertToPx();
     pointColor_ = checkBoxTheme->GetPointColor();
     activeColor_ = checkBoxTheme->GetActiveColor();
     inactiveColor_ = checkBoxTheme->GetInactiveColor();
@@ -165,7 +166,8 @@ void CheckBoxModifier::DrawFocusBoard(RSCanvas& canvas, const SizeF& size, const
     float originY = offset.GetY() - bgSizeOffset;
     float endX = offset.GetX() + bgSizeOffset + size.Width();
     float endY = offset.GetY() + bgSizeOffset + size.Height();
-    auto rrect = RSRoundRect({ originX, originY, endX, endY }, borderRadius_, borderRadius_);
+    float useFocusBoardRadoius = whiteBorderRadius_ + bgSizeOffset;
+    auto rrect = RSRoundRect({ originX, originY, endX, endY }, useFocusBoardRadoius, useFocusBoardRadoius);
 
     canvas.AttachBrush(brush);
     DrawRectOrCircle(canvas, rrect);
