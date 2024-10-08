@@ -43,7 +43,6 @@ void HoverEventTarget::HandleAccessibilityHoverEvent(bool isHovered, const Touch
     hoverInfo.SetDeviceId(event.deviceId);
     hoverInfo.SetSourceDevice(event.sourceType);
     hoverInfo.SetSourceTool(event.sourceTool);
-    hoverInfo.SetPressedKeyCodes(event.pressedKeyCodes_);
     NG::PointF lastLocalPoint(event.x, event.y);
     NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
         isPostEventResult_, event.postEventNodeId);

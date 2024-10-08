@@ -516,6 +516,8 @@ public:
 
     void AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback);
 
+    void RemoveInnerOnAreaChangedCallback(int32_t id);
+
     void ClearOnAreaChangedInnerCallbacks();
 
     bool HasImmediatelyVisibleCallback();
@@ -607,6 +609,8 @@ public:
     void SetOnDetach(std::function<void()>&& onDetach);
     void ClearOnDetach();
     void FireOnDetach();
+    void ClearStateStyle();
+    void OnDetachClear();
 
 protected:
     virtual void OnModifyDone() {}
