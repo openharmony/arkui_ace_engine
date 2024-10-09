@@ -145,6 +145,7 @@ std::optional<std::string> ResourceConverter::ToString()
 {
     std::optional<std::string> result;
     CHECK_NULL_RETURN(themeConstants_, result);
+
     switch (type_) {
         case NodeModifier::ResourceType::STRING:
             if (id_ != -1) {
@@ -158,7 +159,7 @@ std::optional<std::string> ResourceConverter::ToString()
 
         case NodeModifier::ResourceType::RAWFILE:
             if (params_.size() > 0) {
-                result = themeConstants_->GetRawfile(params_.front());
+                result = themeConstants_->GetRawfile(params_[0]);
             }
             break;
 

@@ -1179,23 +1179,34 @@ void SearchModelNG::SetSearchIconColor(FrameNode* frameNode, const Color& color)
     pattern->SetSearchIconColor(color);
 }
 
-void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, IconOptions &iconOptions)
+void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, const std::optional<IconOptions> &iconOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetSearchImageIcon(iconOptions);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
-        pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)), frameNode);
-    auto searchIconFrameNode =  AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
-    CHECK_NULL_VOID(searchIconFrameNode);
-    ImageSourceInfo info(iconOptions.GetSrc().value_or(""));
-    auto color = iconOptions.GetColor();
-    if (color) {
-        info.SetFillColor(color.value());
+    IconOptions options;
+    if (iconOptions) {
+        options = iconOptions.value();
+        pattern->SetSearchImageIcon(options);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
+            pattern->ConvertImageIconSizeValue(options.GetSize().value_or(ICON_HEIGHT)), frameNode);
+        auto searchIconFrameNode =  AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+        CHECK_NULL_VOID(searchIconFrameNode);
+        ImageSourceInfo info(options.GetSrc().value_or(""));
+        auto color = options.GetColor();
+        if (color) {
+            info.SetFillColor(color.value());
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info, searchIconFrameNode);
+    } else {
+        pattern->SetCancelImageIcon(options);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize, frameNode);
+        auto searchIconFrameNode =  AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+        CHECK_NULL_VOID(searchIconFrameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, searchIconFrameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info, searchIconFrameNode);
 }
+
 void SearchModelNG::SetSearchButton(FrameNode* frameNode, const std::string& text)
 {
     CHECK_NULL_VOID(frameNode);

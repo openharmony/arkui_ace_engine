@@ -148,7 +148,7 @@ void SearchIconImpl(Ark_NativePointer node,
     if (iconObjOpt) {
         auto arkIconOpt = std::get_if<Ark_IconOptions>(&iconObjOpt.value());
         if (arkIconOpt != nullptr) {
-            auto options = Converter::Convert<IconOptions>(*arkIconOpt);
+            auto options = Converter::OptConvert<NG::IconOptions>(*arkIconOpt);
             SearchModelNG::SetSearchImageIcon(frameNode, options);
         } else {
             LOGE("ARKOALA SearchAttributeModifier.SearchIcon -> handling CustomObject not implemented.");
