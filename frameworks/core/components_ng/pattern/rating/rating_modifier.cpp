@@ -126,7 +126,7 @@ void RatingModifier::PaintStar(DrawingContext& context)
     canvas.Save();
     auto offsetTemp = offset;
     CHECK_NULL_VOID(ratingTheme_);
-    auto distance = indicator_ ? 0.0 : ratingTheme_->GetIconBoardDistance().ConvertToPx();
+    auto distance = indicator_ ? 0.0 : (ratingTheme_->GetIconBoardDistance() - distance_).ConvertToPx();
     offsetTemp.SetX((static_cast<float>(offsetTemp.GetX() + distance)));
     offsetTemp.SetY((static_cast<float>(offsetTemp.GetY() + distance)));
     auto size = distance * 2;

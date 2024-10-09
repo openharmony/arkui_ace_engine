@@ -237,6 +237,7 @@ private:
     RatingAnimationType state_ = RatingAnimationType::NONE;
     bool isFocus_ = false;
     bool indicator_ = false;
+    Dimension distance_ = 4.0_vp;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
