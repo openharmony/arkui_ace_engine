@@ -72,6 +72,18 @@ void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_ColoringStrategy&
 }
 
 template<>
+void AssignCast(std::optional<BackgroundImageSizeType>& dst, const Ark_ImageSize& src)
+{
+    switch (src) {
+        case ARK_IMAGE_SIZE_AUTO: dst = BackgroundImageSizeType::AUTO; break;
+        case ARK_IMAGE_SIZE_COVER: dst = BackgroundImageSizeType::COVER; break;
+        case ARK_IMAGE_SIZE_CONTAIN: dst = BackgroundImageSizeType::CONTAIN; break;
+        case ARK_IMAGE_SIZE_FILL: dst = BackgroundImageSizeType::FILL; break;
+        default: LOGE("Unexpected enum value in Ark_ImageSize: %{public}d", src);
+    }
+}
+
+template<>
 MotionPathOption Convert(const Ark_MotionPathOptions& src)
 {
     MotionPathOption p;
@@ -200,6 +212,49 @@ Gradient Convert(const Type_CommonMethod_radialGradient_Arg0& src)
     }
 
     return gradient;
+}
+
+template<>
+BackgroundImageSize Convert(const Ark_SizeOptions& src)
+{
+    BackgroundImageSize imageSize;
+    CalcDimension width;
+    CalcDimension height;
+    auto widthOpt = Converter::OptConvert<Dimension>(src.width);
+    if (widthOpt) {
+        width = widthOpt.value();
+    }
+    auto heightOpt = Converter::OptConvert<Dimension>(src.height);
+    if (heightOpt) {
+        height = heightOpt.value();
+    }
+    double valueWidth = width.ConvertToPx();
+    double valueHeight = height.ConvertToPx();
+    BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
+    BackgroundImageSizeType typeHeight = BackgroundImageSizeType::LENGTH;
+    if (width.Unit() == DimensionUnit::PERCENT) {
+        typeWidth = BackgroundImageSizeType::PERCENT;
+        valueWidth = width.Value();
+    }
+    if (height.Unit() == DimensionUnit::PERCENT) {
+        typeHeight = BackgroundImageSizeType::PERCENT;
+        valueHeight = height.Value();
+    }
+    imageSize.SetSizeTypeX(typeWidth);
+    imageSize.SetSizeValueX(valueWidth);
+    imageSize.SetSizeTypeY(typeHeight);
+    imageSize.SetSizeValueY(valueHeight);
+    return imageSize;
+}
+
+template<>
+BackgroundImageSize Convert(const Ark_ImageSize& src)
+{
+    auto sizeType = OptConvert<BackgroundImageSizeType>(src).value_or(BackgroundImageSizeType::AUTO);
+    BackgroundImageSize imageSize;
+    imageSize.SetSizeTypeX(sizeType);
+    imageSize.SetSizeTypeY(sizeType);
+    return imageSize;
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -375,6 +430,10 @@ void BackgroundImageImpl(Ark_NativePointer node,
 void BackgroundImageSizeImpl(Ark_NativePointer node,
                              const Type_CommonMethod_backgroundImageSize_Arg0* value)
 {
+    CHECK_NULL_VOID(value);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundImageSize(frameNode, Converter::OptConvert<BackgroundImageSize>(*value));
 }
 void BackgroundImagePositionImpl(Ark_NativePointer node,
                                  const Type_CommonMethod_backgroundImagePosition_Arg0* value)

@@ -206,8 +206,12 @@ std::string BackgroundImageSize::ToString() const
         return "ImageSize.FILL";
     }
     auto jsonValue = JsonUtil::Create(true);
-    Dimension width = Dimension((GetSizeValueX()), DimensionUnit::PX);
-    Dimension height = Dimension((GetSizeValueY()), DimensionUnit::PX);
+    DimensionUnit unitX = GetSizeTypeX() ==
+        BackgroundImageSizeType::PERCENT ? DimensionUnit::PERCENT : DimensionUnit::PX;
+    Dimension width = Dimension((GetSizeValueX()), unitX);
+    DimensionUnit unitY = GetSizeTypeY() ==
+        BackgroundImageSizeType::PERCENT ? DimensionUnit::PERCENT : DimensionUnit::PX;
+    Dimension height = Dimension((GetSizeValueY()), unitY);
     jsonValue->Put("width", width.ToString().c_str());
     jsonValue->Put("height", height.ToString().c_str());
     return jsonValue->ToString();

@@ -65,6 +65,8 @@ const auto ATTRIBUTE_CENTER_NAME = "center";
 const auto ATTRIBUTE_RADIUS_NAME = "radius";
 const auto ATTRIBUTE_COLORS_NAME = "colors";
 const auto ATTRIBUTE_REPEATING_NAME = "repeating";
+const auto ATTRIBUTE_BACKGROUND_IMAGE_SIZE_NAME = "backgroundImageSize";
+const auto ATTRIBUTE_BACKGROUND_IMAGE_SIZE_DEFAULT_VALUE = "ImageSize.Auto";
 
 typedef std::pair<Ark_Length, std::string> MarginPaddingOneTestStep;
 static const std::vector<MarginPaddingOneTestStep> LENGTH_TEST_PLAN = {
@@ -1476,4 +1478,92 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValid
     auto colResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_COLORS_NAME);
     EXPECT_EQ(colResult, "[[\"#FFFF0000\",\"0.500000\"],[\"#FFFF0000\",\"0.900000\"]]");
 }
+
+/*
+ * @tc.name: setBackgroundImageSizeDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeDefaultValues, TestSize.Level1)
+{
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_SIZE_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_BACKGROUND_IMAGE_SIZE_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setBackgroundImageSizeValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setBackgroundImageSizeValidValues, TestSize.Level1)
+{
+    std::string strResult;
+    Type_CommonMethod_backgroundImageSize_Arg0 inputValue;
+
+    typedef std::pair<Ark_ImageSize, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { ARK_IMAGE_SIZE_COVER, "ImageSize.Cover" },
+        { ARK_IMAGE_SIZE_CONTAIN, "ImageSize.Contain" },
+        { ARK_IMAGE_SIZE_FILL, "ImageSize.FILL" },
+        { ARK_IMAGE_SIZE_AUTO, "ImageSize.Auto" },
+    };
+
+    for (const auto &[arkImageSize, expected]: testPlan) {
+        inputValue = Converter::ArkUnion<Type_CommonMethod_backgroundImageSize_Arg0, Ark_ImageSize>(arkImageSize);
+        modifier_->setBackgroundImageSize(node_, &inputValue);
+        strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_SIZE_NAME);
+        EXPECT_EQ(strResult, expected);
+    }
+
+    typedef std::pair<Ark_Length, std::string> OneTestStep2;
+    static const std::vector<OneTestStep2> testPlan2 = {
+        { Converter::ArkValue<Ark_Length>(1), "{\"width\":\"1.00px\",\"height\":\"0.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(0), "{\"width\":\"0.00px\",\"height\":\"0.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(2.45f), "{\"width\":\"2.45px\",\"height\":\"0.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(5.0_px), "{\"width\":\"5.00px\",\"height\":\"0.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(22.35_px), "{\"width\":\"22.35px\",\"height\":\"0.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(7.0_vp), "{\"width\":\"7.00px\",\"height\":\"0.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(1.65_vp), "{\"width\":\"1.65px\",\"height\":\"0.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(65.0_fp), "{\"width\":\"65.00px\",\"height\":\"0.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(4.3_fp), "{\"width\":\"4.30px\",\"height\":\"0.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(0.12_pct), "{\"width\":\"12.00%\",\"height\":\"0.00px\"}" },
+        { RES_ARK_LENGTH, "{\"width\":\"10.00px\",\"height\":\"0.00px\"}" },
+    };
+
+    for (const auto &[arkLength, expected]: testPlan2) {
+        Ark_SizeOptions arkSizeOptions;
+        arkSizeOptions.width = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(arkLength));
+        arkSizeOptions.height = Converter::ArkValue<Opt_Length>(Ark_Empty());
+        inputValue = Converter::ArkUnion<Type_CommonMethod_backgroundImageSize_Arg0, Ark_SizeOptions>(arkSizeOptions);
+        modifier_->setBackgroundImageSize(node_, &inputValue);
+        strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_SIZE_NAME);
+        EXPECT_EQ(strResult, expected);
+    }
+
+    typedef std::pair<Ark_Length, std::string> OneTestStep3;
+    static const std::vector<OneTestStep3> testPlan3 = {
+        { Converter::ArkValue<Ark_Length>(1), "{\"width\":\"0.00px\",\"height\":\"1.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(0), "{\"width\":\"0.00px\",\"height\":\"0.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(2.45f), "{\"width\":\"0.00px\",\"height\":\"2.45px\"}" },
+        { Converter::ArkValue<Ark_Length>(5.0_px), "{\"width\":\"0.00px\",\"height\":\"5.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(22.35_px), "{\"width\":\"0.00px\",\"height\":\"22.35px\"}" },
+        { Converter::ArkValue<Ark_Length>(7.0_vp), "{\"width\":\"0.00px\",\"height\":\"7.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(1.65_vp), "{\"width\":\"0.00px\",\"height\":\"1.65px\"}" },
+        { Converter::ArkValue<Ark_Length>(65.0_fp), "{\"width\":\"0.00px\",\"height\":\"65.00px\"}" },
+        { Converter::ArkValue<Ark_Length>(4.3_fp), "{\"width\":\"0.00px\",\"height\":\"4.30px\"}" },
+        { Converter::ArkValue<Ark_Length>(0.12_pct), "{\"width\":\"0.00px\",\"height\":\"12.00%\"}" },
+        { RES_ARK_LENGTH, "{\"width\":\"0.00px\",\"height\":\"10.00px\"}" },
+    };
+
+    for (const auto &[arkLength, expected]: testPlan3) {
+        Ark_SizeOptions arkSizeOptions;
+        arkSizeOptions.height = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(arkLength));
+        arkSizeOptions.width = Converter::ArkValue<Opt_Length>(Ark_Empty());
+        inputValue = Converter::ArkUnion<Type_CommonMethod_backgroundImageSize_Arg0, Ark_SizeOptions>(arkSizeOptions);
+        modifier_->setBackgroundImageSize(node_, &inputValue);
+        strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_SIZE_NAME);
+        EXPECT_EQ(strResult, expected);
+    }
+}
+
 } // namespace OHOS::Ace::NG
