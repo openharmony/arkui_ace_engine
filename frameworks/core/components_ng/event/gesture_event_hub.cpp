@@ -1752,6 +1752,7 @@ void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
         dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), originalDragEventActuator->GetDirection(),
             originalDragEventActuator->GetFingers(), originalDragEventActuator->GetDistance());
         dragEventActuator_->CopyDragEvent(originalDragEventActuator);
+        InitDragDropEvent();
     }
     auto originalShowMenu = gestureEventHub->showMenu_;
     if (originalShowMenu) {
