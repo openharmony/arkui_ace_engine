@@ -487,4 +487,14 @@ CalcLength Convert(const Ark_Length& src)
     }
     return CalcLength(src.value, static_cast<OHOS::Ace::DimensionUnit>(src.unit));
 }
+
+template<>
+void AssignCast(std::optional<Color>& dst, const Ark_String& src)
+{
+    Color result;
+    auto color = Convert<std::string>(src);
+    if (Color::ParseColorString(color, result)) {
+        dst = result;
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

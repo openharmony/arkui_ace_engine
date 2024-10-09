@@ -74,7 +74,16 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_BLACK },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_TRANSPARENT }
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_BLACK }
+};
+const std::vector<ColorTestStep> COLOR_TEST_PLAN1 = {
+    { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_GRAY },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_GRAY }
 };
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
     { Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(ArkRes(const_cast<Ark_String*>(&COLOR_NAME))),
@@ -312,7 +321,7 @@ HWTEST_F(MenuItemModifierTest, setLabelFontColorTest, TestSize.Level1)
     auto checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
     EXPECT_EQ(checkVal, COLOR_GRAY);
 
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN1) {
         modifier_->setLabelFontColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, "labelFontColor");
         EXPECT_EQ(checkVal, expectVal);
