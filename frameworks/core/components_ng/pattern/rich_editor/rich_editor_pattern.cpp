@@ -6470,7 +6470,9 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
             HandleUrlSpanForegroundClear();
         }
     } else if (touchType == TouchType::MOVE) {
-        HandleTouchMove(info.GetTouches().front().GetLocalLocation());
+        auto originalLocaloffset = info.GetTouches().front().GetLocalLocation();
+        auto localOffset = AdjustLocalOffsetOnMoveEvent(originalLocaloffset);
+        HandleTouchMove(localOffset);
     }
 }
 
@@ -6485,6 +6487,7 @@ void RichEditorPattern::HandleTouchDown(const TouchEventInfo& info)
     auto sourceTool = info.GetSourceTool();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Touch down longPressState=[%{public}d, %{public}d], source=%{public}d",
         previewLongPress_, editingLongPress_, sourceTool);
+    globalOffsetOnMoveStart_ = GetParentGlobalOffset();
     moveCaretState_.Reset();
     isMoveCaretAnywhere_ = false;
     previewLongPress_ = false;
@@ -6497,7 +6500,6 @@ void RichEditorPattern::HandleTouchDown(const TouchEventInfo& info)
         moveCaretState_.isTouchCaret = true;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        moveCaretState_.touchDownPaintOffset = host->GetOffsetInScreen();
     }
 }
 
@@ -6567,19 +6569,23 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
         selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     }
     auto preCaretPosition = caretPosition_;
-    auto caretMoveOffset =
-        offset - Offset(0, host->GetOffsetInScreen().GetY() - moveCaretState_.touchDownPaintOffset.GetY());
-    Offset textOffset = ConvertTouchOffsetToTextOffset(caretMoveOffset);
+    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
     SetCaretPositionWithAffinity(positionWithAffinity);
     MoveCaretToContentRect();
     StartVibratorByIndexChange(caretPosition_, preCaretPosition);
     CalcAndRecordLastClickCaretInfo(textOffset);
-    auto localOffset = OffsetF(caretMoveOffset.GetX(), caretMoveOffset.GetY());
+    auto localOffset = OffsetF(offset.GetX(), offset.GetY());
     if (magnifierController_) {
         magnifierController_->SetLocalOffset(localOffset);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+Offset RichEditorPattern::AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset)
+{
+    auto deltaOffset = GetParentGlobalOffset() - globalOffsetOnMoveStart_;
+    return { originalOffset.GetX() - deltaOffset.GetX(), originalOffset.GetY() - deltaOffset.GetY() };
 }
 
 void RichEditorPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex)
@@ -6607,9 +6613,8 @@ void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
     }
     CHECK_NULL_VOID(leftMousePress_);
 
-    auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    auto localOffset = AdjustLocalOffsetOnMoveEvent(info.GetLocalLocation());
+    Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     if (dataDetectorAdapter_->pressedByLeftMouse_) {
         dataDetectorAdapter_->pressedByLeftMouse_ = false;
         MoveCaretAndStartFocus(textOffset);
@@ -6672,6 +6677,7 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     int32_t extend = paragraphs_.GetIndex(textOffset);
     textSelector_.Update(extend);
     leftMousePress_ = true;
+    globalOffsetOnMoveStart_ = GetParentGlobalOffset();
     mouseStatus_ = MouseStatus::PRESSED;
     blockPress_ = false;
     caretUpdateType_ = CaretUpdateType::PRESSED;

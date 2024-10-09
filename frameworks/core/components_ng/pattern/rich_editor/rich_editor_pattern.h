@@ -190,7 +190,6 @@ public:
         bool isTouchCaret = false;
         bool isMoveCaret = false;
         Offset touchDownOffset;
-        OffsetF touchDownPaintOffset;
         const Dimension minDistance = 5.0_vp;
 
         void Reset()
@@ -198,7 +197,6 @@ public:
             isTouchCaret = false;
             isMoveCaret = false;
             touchDownOffset.Reset();
-            touchDownPaintOffset.Reset();
         }
     };
 
@@ -1053,6 +1051,7 @@ private:
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
     void UpdateCaretByTouchMove(const Offset& offset);
+    Offset AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset);
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
@@ -1366,6 +1365,8 @@ private:
     bool isShowPlaceholder_ = false;
     bool isSingleHandle_ = false;
     TouchAndMoveCaretState moveCaretState_;
+    // Recorded when touch down or mouse left button press.
+    OffsetF globalOffsetOnMoveStart_;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
