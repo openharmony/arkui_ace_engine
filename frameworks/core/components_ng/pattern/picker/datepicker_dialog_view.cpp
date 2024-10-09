@@ -1243,6 +1243,8 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
     auto checkboxPaintProps = checkbox->GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_VOID(checkboxPaintProps);
     UpdateCheckboxPaintProperty(checkboxPaintProps, isLunar, checkboxSettingData);
+    auto checkboxPattern = checkbox->GetPattern<CheckBoxPattern>();
+    checkboxPattern->SaveCheckboxSettingData(checkboxSettingData);
     auto checkboxLayoutProps = checkbox->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(checkboxLayoutProps);
     MarginProperty marginCheckbox;
