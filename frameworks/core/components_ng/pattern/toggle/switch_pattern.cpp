@@ -198,6 +198,18 @@ void SwitchPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
     CHECK_NULL_VOID(switchModifier);
     switchModifier->SetIsFocused(isFocusAcitve);
     isFocus_ = isFocusAcitve;
+
+    CHECK_NULL_VOID(pipeline_);
+    auto switchTheme = pipeline_->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
+    Color color;
+    if (isFocus_) {
+        color = isOn_.value_or(false) ? switchTheme->GetActiveColor() : switchTheme->GetFocusedBGColorUnselected();
+    } else {
+        color = isOn_.value_or(false) ? switchTheme->GetActiveColor() : switchTheme->GetInactiveColor();
+    }
+    switchModifier->SetIsFocusOrBlur(true);
+    switchModifier->SetBoardColor(color);
 }
 
 void SwitchPattern::UpdateSwitchPaintProperty()
