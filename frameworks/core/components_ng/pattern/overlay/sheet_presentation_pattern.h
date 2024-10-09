@@ -784,6 +784,7 @@ private:
 
     Color sheetMaskColor_ = Color::TRANSPARENT;
     SheetKeyboardAvoidMode keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+    float resizeDecreasedHeight_ = 0.f;
 };
 } // namespace OHOS::Ace::NG
 
