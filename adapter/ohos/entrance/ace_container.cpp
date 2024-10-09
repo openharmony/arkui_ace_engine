@@ -2564,6 +2564,8 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);
+    // change color mode and theme to clear image cache
+    pipelineContext_->ClearImageCache();
 }
 
 void AceContainer::NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration)

@@ -206,11 +206,7 @@ std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& u
     return nullptr;
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
-#else
 std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
-#endif
 {
     ACE_LAYOUT_SCOPED_TRACE("QueryImageDataFromImageCache[%s]", sourceInfo.ToString().c_str());
     auto pipelineCtx = PipelineContext::GetCurrentContext();
@@ -219,14 +215,9 @@ std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSou
     CHECK_NULL_RETURN(imageCache, nullptr);
     auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetKey());
     CHECK_NULL_RETURN(cacheData, nullptr);
-#ifndef USE_ROSEN_DRAWING
-    const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(cacheData->GetDataWrapper());
-    return *skData;
-#else
     auto rosenCachedImageData = AceType::DynamicCast<NG::DrawingImageData>(cacheData);
     CHECK_NULL_RETURN(rosenCachedImageData, nullptr);
     return rosenCachedImageData->GetRSData();
-#endif
 }
 
 void ImageLoader::CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& imageData)
@@ -247,21 +238,10 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 // NG ImageLoader entrance
 RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
 {
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("GetImageData %s", src.ToString().c_str());
     if (src.IsPixmap()) {
         return LoadDecodedImageData(src, context);
     }
-#ifndef USE_ROSEN_DRAWING
-    auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
-    if (cachedData) {
-        return NG::ImageData::MakeFromDataWrapper(&cachedData);
-    }
-    auto skData = LoadImageData(src, context);
-    CHECK_NULL_RETURN(skData, nullptr);
-    auto data = NG::ImageData::MakeFromDataWrapper(&skData);
-    ImageLoader::CacheImageData(src.GetKey(), data);
-    return data;
-#else
     std::shared_ptr<RSData> rsData = nullptr;
     do {
         rsData = ImageLoader::QueryImageDataFromImageCache(src);
@@ -271,9 +251,8 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
         rsData = LoadImageData(src, context);
         CHECK_NULL_RETURN(rsData, nullptr);
         ImageLoader::CacheImageData(src.GetKey(), AceType::MakeRefPtr<NG::DrawingImageData>(rsData));
-    } while (0);
+    } while (false);
     return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
-#endif
 }
 
 // NG ImageLoader entrance
