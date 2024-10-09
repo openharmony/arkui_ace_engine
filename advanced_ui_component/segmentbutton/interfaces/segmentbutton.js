@@ -1600,6 +1600,10 @@ class q6 extends ViewPU {
                         Button.hoverEffect(HoverEffect.None);
                         Button.backgroundColor(Color.Transparent);
                         Button.accessibilityLevel(item.accessibilityLevel);
+                        Button.accessibilitySelected(this.options.multiply ? undefined :
+                        this.selectedIndexes.includes(index));
+                        Button.accessibilityChecked(this.options.multiply ?
+                        this.selectedIndexes.includes(index) : undefined);
                         Button.accessibilityDescription(
                           this.getAccessibilityDescription(
                             item.accessibilityDescription
