@@ -734,23 +734,10 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
-    if (!window) {
-        UIEXT_LOGE("The pipline window is empty.");
-        return;
-    }
-    auto rsWindow = window->GetRSWindow();
-    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
     std::shared_ptr<MMI::PointerEvent> newPointerEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
-    if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
-        Platform::CalculateWindowCoordinate(selfGlobalOffset, newPointerEvent, scale, udegree);
-    } else {
-        Platform::CalculatePointerEvent(selfGlobalOffset, newPointerEvent, scale, udegree);
-    }
+    Platform::CalculatePointerEvent(newPointerEvent, host);
     AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -785,9 +772,7 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
     lastPointerEvent_ = pointerEvent;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
-    Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
+    Platform::CalculatePointerEvent(pointerEvent, host);
     if (info.GetAction() == MouseAction::PRESS) {
         auto hub = host->GetFocusHub();
         CHECK_NULL_VOID(hub);
@@ -881,19 +866,9 @@ void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
-    CHECK_NULL_VOID(window);
-    auto rsWindow = window->GetRSWindow();
-    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
-    if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
-        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
-    } else {
-        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
-    }
+    Platform::CalculatePointerEvent(pointerEvent, host);
     Platform::UpdatePointerAction(pointerEvent, info.action);
     DispatchPointerEvent(pointerEvent);
 }
