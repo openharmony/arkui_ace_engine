@@ -27,10 +27,31 @@
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "base/log/log_wrapper.h"
 
+namespace {
+constexpr double FULL_DIMENSION = 100.0;
+constexpr double HALF_DIMENSION = 50.0;
+constexpr double VISIBLE_RATIO_MIN = 0.0;
+constexpr double VISIBLE_RATIO_MAX = 1.0;
+}
+
 namespace OHOS::Ace::NG {
 struct EdgesParamOptions {
     EdgesParam value;
     bool isLocalized;
+};
+
+struct ScaleOpt {
+    std::optional<float> x;
+    std::optional<float> y;
+    std::optional<float> z;
+    std::optional<Dimension> centerX;
+    std::optional<Dimension> centerY;
+};
+
+struct TranslateOpt {
+    std::optional<Dimension> x;
+    std::optional<Dimension> y;
+    std::optional<Dimension> z;
 };
 
 using ColorOrStrategy = std::variant<std::monostate, std::optional<Color>, std::optional<ForegroundColorStrategy>>;
@@ -38,6 +59,17 @@ using OffsetOrEdgesParam = std::variant<
     std::monostate,
     std::optional<OffsetT<Dimension>>,
     std::optional<EdgesParamOptions>
+>;
+using BackgroundImagePositionType = std::variant<
+    Ark_Position,
+    Ark_Alignment
+>;
+using ClipType = std::variant<
+    Ark_Boolean,
+    Ark_CircleAttribute,
+    Ark_EllipseAttribute,
+    Ark_PathAttribute,
+    Ark_RectAttribute
 >;
 
 namespace Converter {
@@ -69,6 +101,35 @@ template<>
 void AssignCast(std::optional<ColorOrStrategy>& dst, const Ark_ColoringStrategy& src)
 {
     dst = OptConvert<ForegroundColorStrategy>(src);
+}
+
+template<>
+void AssignCast(std::optional<BackgroundImageSizeType>& dst, const Ark_ImageSize& src)
+{
+    switch (src) {
+        case ARK_IMAGE_SIZE_AUTO: dst = BackgroundImageSizeType::AUTO; break;
+        case ARK_IMAGE_SIZE_COVER: dst = BackgroundImageSizeType::COVER; break;
+        case ARK_IMAGE_SIZE_CONTAIN: dst = BackgroundImageSizeType::CONTAIN; break;
+        case ARK_IMAGE_SIZE_FILL: dst = BackgroundImageSizeType::FILL; break;
+        default: LOGE("Unexpected enum value in Ark_ImageSize: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<std::pair<double, double>>& dst, const Ark_Alignment& src)
+{
+    switch (src) {
+        case ARK_ALIGNMENT_TOP_START: dst = { 0.0, 0.0 }; break;
+        case ARK_ALIGNMENT_TOP: dst = { HALF_DIMENSION, 0.0 }; break;
+        case ARK_ALIGNMENT_TOP_END: dst = { FULL_DIMENSION, 0.0 }; break;
+        case ARK_ALIGNMENT_START: dst = { 0.0, HALF_DIMENSION }; break;
+        case ARK_ALIGNMENT_CENTER: dst = { HALF_DIMENSION, HALF_DIMENSION }; break;
+        case ARK_ALIGNMENT_END: dst = { FULL_DIMENSION, HALF_DIMENSION }; break;
+        case ARK_ALIGNMENT_BOTTOM_START: dst = { 0.0, FULL_DIMENSION }; break;
+        case ARK_ALIGNMENT_BOTTOM: dst = { HALF_DIMENSION, FULL_DIMENSION }; break;
+        case ARK_ALIGNMENT_BOTTOM_END: dst = { FULL_DIMENSION, FULL_DIMENSION }; break;
+        default: LOGE("Unexpected enum value in Ark_Alignment: %{public}d", src);
+    }
 }
 
 template<>
@@ -200,6 +261,79 @@ Gradient Convert(const Type_CommonMethod_radialGradient_Arg0& src)
     }
 
     return gradient;
+}
+
+template<>
+BackgroundImageSize Convert(const Ark_SizeOptions& src)
+{
+    BackgroundImageSize imageSize;
+    CalcDimension width;
+    CalcDimension height;
+    auto widthOpt = Converter::OptConvert<Dimension>(src.width);
+    if (widthOpt) {
+        width = widthOpt.value();
+    }
+    auto heightOpt = Converter::OptConvert<Dimension>(src.height);
+    if (heightOpt) {
+        height = heightOpt.value();
+    }
+    double valueWidth = width.ConvertToPx();
+    double valueHeight = height.ConvertToPx();
+    BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
+    BackgroundImageSizeType typeHeight = BackgroundImageSizeType::LENGTH;
+    if (width.Unit() == DimensionUnit::PERCENT) {
+        typeWidth = BackgroundImageSizeType::PERCENT;
+        valueWidth = width.Value();
+    }
+    if (height.Unit() == DimensionUnit::PERCENT) {
+        typeHeight = BackgroundImageSizeType::PERCENT;
+        valueHeight = height.Value();
+    }
+    imageSize.SetSizeTypeX(typeWidth);
+    imageSize.SetSizeValueX(valueWidth);
+    imageSize.SetSizeTypeY(typeHeight);
+    imageSize.SetSizeValueY(valueHeight);
+    return imageSize;
+}
+
+template<>
+BackgroundImageSize Convert(const Ark_ImageSize& src)
+{
+    auto sizeType = OptConvert<BackgroundImageSizeType>(src).value_or(BackgroundImageSizeType::AUTO);
+    BackgroundImageSize imageSize;
+    imageSize.SetSizeTypeX(sizeType);
+    imageSize.SetSizeTypeY(sizeType);
+    return imageSize;
+}
+
+template<>
+std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src)
+{
+    auto x = OptConvert<Dimension>(src.x);
+    auto y = OptConvert<Dimension>(src.y);
+    return {x, y};
+}
+
+template<>
+ScaleOpt Convert(const Ark_ScaleOptions& src)
+{
+    ScaleOpt scaleOptions;
+    scaleOptions.x = OptConvert<float>(src.x);
+    scaleOptions.y = OptConvert<float>(src.y);
+    scaleOptions.z = OptConvert<float>(src.z);
+    scaleOptions.centerX = OptConvert<Dimension>(src.centerX);
+    scaleOptions.centerY = OptConvert<Dimension>(src.centerY);
+    return scaleOptions;
+}
+
+template<>
+TranslateOpt Convert(const Ark_TranslateOptions& src)
+{
+    TranslateOpt translateOptions;
+    translateOptions.x = OptConvert<Dimension>(src.x);
+    translateOptions.y = OptConvert<Dimension>(src.y);
+    translateOptions.z = OptConvert<Dimension>(src.z);
+    return translateOptions;
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -375,10 +509,60 @@ void BackgroundImageImpl(Ark_NativePointer node,
 void BackgroundImageSizeImpl(Ark_NativePointer node,
                              const Type_CommonMethod_backgroundImageSize_Arg0* value)
 {
+    CHECK_NULL_VOID(value);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundImageSize(frameNode, Converter::OptConvert<BackgroundImageSize>(*value));
 }
 void BackgroundImagePositionImpl(Ark_NativePointer node,
                                  const Type_CommonMethod_backgroundImagePosition_Arg0* value)
 {
+    CHECK_NULL_VOID(value);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto varValue = Converter::OptConvert<BackgroundImagePositionType>(*value);
+    BackgroundImagePosition bgImgPosition;
+    AnimationOption option = ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    double valueX = 0.0;
+    double valueY = 0.0;
+    DimensionUnit typeX = DimensionUnit::PX;
+    DimensionUnit typeY = DimensionUnit::PX;
+    if (varValue) {
+        if (auto arkPosition = std::get_if<Ark_Position>(&varValue.value()); arkPosition) {
+            auto position =
+                Converter::Convert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(*arkPosition);
+            CalcDimension x;
+            CalcDimension y;
+            if (position.first) {
+                x = position.first.value();
+            }
+            if (position.second) {
+                y = position.second.value();
+            }
+            valueX = x.ConvertToPx();
+            valueY = y.ConvertToPx();
+            if (x.Unit() == DimensionUnit::PERCENT) {
+                valueX = x.Value();
+                typeX = DimensionUnit::PERCENT;
+            }
+            if (y.Unit() == DimensionUnit::PERCENT) {
+                valueY = y.Value();
+                typeY = DimensionUnit::PERCENT;
+            }
+        } else if (auto arkAlign = std::get_if<Ark_Alignment>(&varValue.value()); arkAlign) {
+            auto alignment = Converter::OptConvert<std::pair<double, double>>(*arkAlign);
+            if (alignment) {
+                bgImgPosition.SetIsAlign(true);
+                typeX = DimensionUnit::PERCENT;
+                typeY = DimensionUnit::PERCENT;
+                valueX = alignment.value().first;
+                valueY = alignment.value().second;
+            }
+        }
+    }
+    bgImgPosition.SetSizeX(AnimatableDimension(valueX, typeX, option));
+    bgImgPosition.SetSizeY(AnimatableDimension(valueY, typeY, option));
+    ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition);
 }
 void BackgroundBlurStyleImpl(Ark_NativePointer node,
                              enum Ark_BlurStyle value,
@@ -752,10 +936,33 @@ void FreezeImpl(Ark_NativePointer node,
 void TranslateImpl(Ark_NativePointer node,
                    const Ark_TranslateOptions* value)
 {
+    CHECK_NULL_VOID(value);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    TranslateOpt options = Converter::Convert<TranslateOpt>(*value);
+
+    CalcDimension x = options.x.value_or(CalcDimension(0.0));
+    CalcDimension y = options.y.value_or(CalcDimension(0.0));
+    CalcDimension z = options.z.value_or(CalcDimension(0.0));
+    ViewAbstract::SetTranslate(frameNode, TranslateOptions(x, y, z));
 }
 void ScaleImpl(Ark_NativePointer node,
                const Ark_ScaleOptions* value)
 {
+    CHECK_NULL_VOID(value);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    ScaleOpt scaleOptions = Converter::Convert<ScaleOpt>(*value);
+
+    float scaleX = scaleOptions.x.value_or(1.0f);
+    float scaleY = scaleOptions.y.value_or(1.0f);
+    ViewAbstract::SetScale(frameNode, VectorF(scaleX, scaleY));
+
+    CalcDimension centerX = scaleOptions.centerX.value_or(0.5_pct);
+    CalcDimension centerY = scaleOptions.centerY.value_or(0.5_pct);
+    ViewAbstract::SetPivot(frameNode, DimensionOffset(centerX, centerY));
 }
 void GridSpanImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -1040,10 +1247,36 @@ void AdvancedBlendModeImpl(Ark_NativePointer node,
 void Clip0Impl(Ark_NativePointer node,
                Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetClipEdge(frameNode, Converter::Convert<bool>(value));
 }
 void Clip1Impl(Ark_NativePointer node,
                const Type_CommonMethod_clip1_Arg0* value)
 {
+    LOGE("ARKOALA CommonMethod::Clip1Impl: Deprecated interface!");
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value) {
+        ViewAbstract::SetClipEdge(frameNode, false);
+        return;
+    }
+    auto clipTypeOpt = Converter::OptConvert<ClipType>(*value);
+    if (clipTypeOpt) {
+        if (auto arkBool = std::get_if<Ark_Boolean>(&clipTypeOpt.value()); arkBool) {
+            ViewAbstract::SetClipEdge(frameNode, Converter::Convert<bool>(*arkBool));
+            return;
+        } else if (auto arkCircle = std::get_if<Ark_CircleAttribute>(&clipTypeOpt.value()); arkCircle) {
+            LOGE("ARKOALA CommonMethod::Clip1Impl: Ark_CircleAttribute is not supported yet!");
+        } else if (auto arkEllipse = std::get_if<Ark_EllipseAttribute>(&clipTypeOpt.value()); arkEllipse) {
+            LOGE("ARKOALA CommonMethod::Clip1Impl: Ark_EllipseAttribute is not supported yet!");
+        } else if (auto arkPath = std::get_if<Ark_PathAttribute>(&clipTypeOpt.value()); arkPath) {
+            LOGE("ARKOALA CommonMethod::Clip1Impl: Ark_PathAttribute is not supported yet!");
+        } else if (auto arkRect = std::get_if<Ark_RectAttribute>(&clipTypeOpt.value()); arkRect) {
+            LOGE("ARKOALA CommonMethod::Clip1Impl: Ark_RectAttribute is not supported yet!");
+        }
+    }
+    ViewAbstract::SetClipEdge(frameNode, false);
 }
 void ClipShapeImpl(Ark_NativePointer node,
                    const Type_CommonMethod_clipShape_Arg0* value)
@@ -1068,6 +1301,14 @@ void KeyImpl(Ark_NativePointer node,
 void IdImpl(Ark_NativePointer node,
             const Ark_String* value)
 {
+    CHECK_NULL_VOID(value);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string id = Converter::Convert<std::string>(*value);
+    if (id.empty()) {
+        return;
+    }
+    ViewAbstract::SetInspectorId(frameNode, id);
 }
 void GeometryTransition0Impl(Ark_NativePointer node,
                              const Ark_String* id)
@@ -1136,6 +1377,34 @@ void OnVisibleAreaChangeImpl(Ark_NativePointer node,
                              const Array_Number* ratios,
                              Ark_Function event)
 {
+    CHECK_NULL_VOID(ratios);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    std::vector<float> rawRatioVec = Converter::Convert<std::vector<float>>(*ratios);
+    size_t size = rawRatioVec.size();
+    std::vector<double> ratioVec;
+    for (size_t i = 0; i < size; i++) {
+        double ratio = static_cast<double>(rawRatioVec[i]);
+        if (LessOrEqual(ratio, VISIBLE_RATIO_MIN)) {
+            ratio = VISIBLE_RATIO_MIN;
+        }
+
+        if (GreatOrEqual(ratio, VISIBLE_RATIO_MAX)) {
+            ratio = VISIBLE_RATIO_MAX;
+        }
+        ratioVec.push_back(ratio);
+    }
+
+    auto onVisibleAreaChange = [frameNode](bool visible, double ratio) {
+        Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
+        Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onVisibleAreaChange(
+            frameNode->GetId(), isExpanding, currentRatio);
+    };
+
+    ViewAbstract::SetOnVisibleChange(frameNode, std::move(onVisibleAreaChange), ratioVec);
 }
 void SphericalEffectImpl(Ark_NativePointer node,
                          const Ark_Number* value)
