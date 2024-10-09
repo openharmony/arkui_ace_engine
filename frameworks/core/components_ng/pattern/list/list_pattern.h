@@ -177,6 +177,10 @@ public:
         return positionController_;
     }
 
+    int32_t ProcessAreaVertical(double& x, double& y, Rect& groupRect, int32_t& index,
+        RefPtr<ListItemGroupPattern> groupItemPattern) const;
+    int32_t ProcessAreaHorizontal(double& x, double& y, Rect& groupRect, int32_t& index,
+        RefPtr<ListItemGroupPattern> groupItemPattern) const;
     void TriggerModifyDone();
 
     float GetTotalHeight() const override;
