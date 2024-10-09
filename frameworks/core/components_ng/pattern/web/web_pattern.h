@@ -966,7 +966,7 @@ private:
     void SetSurfaceDensity(double density);
     void InitInOfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
-    bool FilterScrollEventHandleOffset(const float offset);
+    bool FilterScrollEventHandleOffset(float offset);
     bool CheckParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool CheckOverParentScroll(const float &directValue, const NestedScrollMode &scrollMode);
     bool FilterScrollEventHandlevVlocity(const float velocity);
