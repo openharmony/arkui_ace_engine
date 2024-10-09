@@ -220,7 +220,7 @@ export struct TipsDialog {
           Row() {
             Text(this.title)
               .fontSize(`${TITLE_S}fp`)
-              .fontWeight(FontWeight.Medium)
+              .fontWeight(FontWeight.Bold)
               .fontColor(this.fontColorWithTheme)
               .textAlign(TextAlign.Center)
               .maxLines(CONTENT_MAX_LINES)
@@ -461,14 +461,14 @@ export struct SelectDialog {
                 .borderRadius($r('sys.float.corner_radius_level8'))
                 .buttonStyle(ButtonStyleMode.TEXTUAL)
                 .paddingStyle()
-                .focusBox({
-                  margin: { value: -2, unit: LengthUnit.VP }
-                })
                 if (index < this.radioContent.length - 1) {
                   Divider().color(this.dividerColorWithTheme).paddingStyle();
                 }
               }
-              .paddingStyle()
+              .borderRadius($r('sys.float.corner_radius_level8'))
+              .focusBox({
+                margin: { value: -2, unit: LengthUnit.VP }
+              })
               .accessibilityText(getAccessibilityText(item.title, this.selectedIndex === index))
               .onClick(() => {
                 this.selectedIndex = index;
@@ -476,6 +476,7 @@ export struct SelectDialog {
                 this.controller?.close();
               })
             }
+            .paddingStyle()
             .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
               this.itemHeight = Number(newValue.height)
             })
