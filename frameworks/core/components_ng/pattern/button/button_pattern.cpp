@@ -611,7 +611,7 @@ void ButtonPattern::HandleBorderAndShadow()
             buttonTheme_->GetBorderColor() : buttonTheme_->GetBorderColorSmall();
         if (!renderContext_->HasBorderColor() ||
             IsDynamicSwitchButtonStyle(renderContext_->GetBorderColorValue(borderColorProperty))) {
-            borderColorProperty.SetColor(buttonStyle == ButtonStyleMode::NORMAL ? borderColor : Color());
+            borderColorProperty.SetColor(borderColor);
             renderContext_->UpdateBorderColor(borderColorProperty);
         }
         return;
