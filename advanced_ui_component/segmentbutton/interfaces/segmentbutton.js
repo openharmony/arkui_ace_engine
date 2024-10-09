@@ -2961,7 +2961,13 @@ export class SegmentButton extends ViewPU {
     if (!resourceManager) {
       return g6;
     }
-    return resourceManager.getNumber(this.maxFontScale.id);
+    try {
+      return resourceManager.getNumber(this.maxFontScale.id);
+    }
+    catch (error) {
+      console.error(`Ace SegmentButton getMaxFontSize, error: ${error.toString()}`);
+      return g6;
+    }
   }
   getSelectedChangeCurve() {
     if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
