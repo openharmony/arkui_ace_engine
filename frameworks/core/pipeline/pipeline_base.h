@@ -197,6 +197,8 @@ public:
     // Called by ohos AceContainer when mouse event received.
     virtual void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {}
 
+    virtual void OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {};
+
     // Called by view when axis event received.
     virtual void OnAxisEvent(const AxisEvent& event) = 0;
 
