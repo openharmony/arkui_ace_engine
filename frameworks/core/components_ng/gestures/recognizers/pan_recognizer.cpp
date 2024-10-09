@@ -32,7 +32,9 @@ constexpr float MIN_SPEED_THRESHOLD = 500.0f;
 void PanRecognizer::ForceCleanRecognizer()
 {
     MultiFingersRecognizer::ForceCleanRecognizer();
-    OnResetStatus();
+    averageDistance_.Reset();
+    touchPointsDistance_.clear();
+    isStartTriggered_ = false;
 }
 
 PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance)
