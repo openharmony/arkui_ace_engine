@@ -807,6 +807,8 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     node->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     DeleteDialogHotAreas(node);
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove DialogNode/%{public}d from RootNode/%{public}d",
+        node->GetId(), root->GetId());
     root->RemoveChild(node, node->GetIsUseTransitionAnimator());
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
@@ -2898,6 +2900,8 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
             parentOverlayManager->GetDialog(parentOverlayManager->GetMaskNodeIdWithDialogId(dialogNode->GetId()));
         if (maskNode) {
             parentOverlayManager->CloseDialog(maskNode);
+        } else {
+            TAG_LOGD(AceLogTag::ACE_OVERLAY, "no maskNode in currentDialog/%{public}d", dialogNode->GetId());
         }
     }
     CloseDialogInner(dialogNode);
