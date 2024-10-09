@@ -167,7 +167,7 @@ std::optional<std::string> ResourceConverter::ToString()
             if (id_ != -1) {
                 result = themeConstants_->GetMediaPath(id_);
             } else if (params_.size() > 0) {
-                result = themeConstants_->GetMediaPathByName(params_.front());
+                result = themeConstants_->GetMediaPathByName(params_[0]);
             }
             break;
 
