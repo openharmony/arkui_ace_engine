@@ -322,7 +322,7 @@ public:
     void SetIlluminatedBorderWidth(const Dimension& value) override {};
     void SetBloom(const float value) override {};
     void SetPositionLocalizedEdges(bool needLocalized) override {};
-    void SetLocalizedMarkAnchor(bool needLocalized) override {};
+    void SetMarkAnchorStart(Dimension& markAnchorStart) override {};
     void SetOffsetLocalizedEdges(bool needLocalized) override {};
 };
 

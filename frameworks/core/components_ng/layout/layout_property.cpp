@@ -1372,24 +1372,29 @@ void LayoutProperty::CheckPositionLocalizedEdges(TextDirection layoutDirection)
     CHECK_NULL_VOID(target);
     EdgesParam edges;
     auto positionEdges = target->GetPositionEdgesValue(EdgesParam {});
+    if (!positionEdges.start.has_value() && !positionEdges.end.has_value()) {
+        return;
+    }
     if (positionEdges.top.has_value()) {
         edges.SetTop(positionEdges.top.value_or(Dimension(0.0)));
     }
     if (positionEdges.bottom.has_value()) {
         edges.SetBottom(positionEdges.bottom.value_or(Dimension(0.0)));
     }
-    if (positionEdges.left.has_value()) {
+    if (positionEdges.start.has_value()) {
+        edges.start = positionEdges.start.value();
         if (layoutDirection == TextDirection::RTL) {
-            edges.SetRight(positionEdges.left.value_or(Dimension(0.0)));
+            edges.SetRight(positionEdges.start.value_or(Dimension(0.0)));
         } else {
-            edges.SetLeft(positionEdges.left.value_or(Dimension(0.0)));
+            edges.SetLeft(positionEdges.start.value_or(Dimension(0.0)));
         }
     }
-    if (positionEdges.right.has_value()) {
+    if (positionEdges.end.has_value()) {
+        edges.end = positionEdges.end.value();
         if (layoutDirection == TextDirection::RTL) {
-            edges.SetLeft(positionEdges.right.value_or(Dimension(0.0)));
+            edges.SetLeft(positionEdges.end.value_or(Dimension(0.0)));
         } else {
-            edges.SetRight(positionEdges.right.value_or(Dimension(0.0)));
+            edges.SetRight(positionEdges.end.value_or(Dimension(0.0)));
         }
     }
     target->UpdatePositionEdges(edges);
@@ -1404,9 +1409,16 @@ void LayoutProperty::CheckMarkAnchorPosition(TextDirection layoutDirection)
     CalcDimension x;
     CalcDimension y;
     auto anchor = target->GetAnchorValue({});
-    x = layoutDirection == TextDirection::RTL ? -anchor.GetX() : anchor.GetX();
-    y = anchor.GetY();
-    target->UpdateAnchor({ x, y });
+    if (!markAnchorStart_.has_value()) {
+        return;
+    }
+    OffsetT<Dimension> offset(Dimension(0.0), Dimension(0.0));
+    if (markAnchorStart_.has_value()) {
+        x = layoutDirection == TextDirection::RTL ? -markAnchorStart_.value() : markAnchorStart_.value();
+        offset.SetX(x);
+    }
+    offset.SetY(anchor.GetY());
+    target->UpdateAnchor(offset);
 }
 
 void LayoutProperty::CheckOffsetLocalizedEdges(TextDirection layoutDirection)
@@ -1417,24 +1429,29 @@ void LayoutProperty::CheckOffsetLocalizedEdges(TextDirection layoutDirection)
     CHECK_NULL_VOID(target);
     EdgesParam edges;
     auto offsetEdges = target->GetOffsetEdgesValue(EdgesParam {});
+    if (!offsetEdges.start.has_value() && !offsetEdges.end.has_value()) {
+        return;
+    }
     if (offsetEdges.top.has_value()) {
         edges.SetTop(offsetEdges.top.value_or(Dimension(0.0)));
     }
     if (offsetEdges.bottom.has_value()) {
         edges.SetBottom(offsetEdges.bottom.value_or(Dimension(0.0)));
     }
-    if (offsetEdges.left.has_value()) {
+    if (offsetEdges.start.has_value()) {
+        edges.start = offsetEdges.start.value();
         if (layoutDirection == TextDirection::RTL) {
-            edges.SetRight(offsetEdges.left.value_or(Dimension(0.0)));
+            edges.SetRight(offsetEdges.start.value_or(Dimension(0.0)));
         } else {
-            edges.SetLeft(offsetEdges.left.value_or(Dimension(0.0)));
+            edges.SetLeft(offsetEdges.start.value_or(Dimension(0.0)));
         }
     }
-    if (offsetEdges.right.has_value()) {
+    if (offsetEdges.end.has_value()) {
+        edges.end = offsetEdges.end.value();
         if (layoutDirection == TextDirection::RTL) {
-            edges.SetLeft(offsetEdges.right.value_or(Dimension(0.0)));
+            edges.SetLeft(offsetEdges.end.value_or(Dimension(0.0)));
         } else {
-            edges.SetRight(offsetEdges.right.value_or(Dimension(0.0)));
+            edges.SetRight(offsetEdges.end.value_or(Dimension(0.0)));
         }
     }
     target->UpdateOffsetEdges(edges);

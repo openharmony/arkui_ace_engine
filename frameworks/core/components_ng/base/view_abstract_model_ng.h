@@ -1510,9 +1510,9 @@ private:
         ViewAbstract::SetPositionLocalizedEdges(needLocalized);
     }
 
-    void SetLocalizedMarkAnchor(bool needLocalized) override
+    void SetMarkAnchorStart(Dimension& markAnchorStart) override
     {
-        ViewAbstract::SetLocalizedMarkAnchor(needLocalized);
+        ViewAbstract::SetMarkAnchorStart(markAnchorStart);
     }
 
     void SetOffsetLocalizedEdges(bool needLocalized) override

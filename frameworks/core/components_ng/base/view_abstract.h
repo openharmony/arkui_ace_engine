@@ -762,7 +762,7 @@ public:
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);
-    static void SetLocalizedMarkAnchor(bool needLocalized);
+    static void SetMarkAnchorStart(Dimension& markAnchorStart);
     static void SetOffsetLocalizedEdges(bool needLocalized);
     static void AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(FrameNode* frameNode, const std::string& key);
