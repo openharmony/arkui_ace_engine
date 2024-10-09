@@ -673,6 +673,20 @@ void SwiperPattern::InitSurfaceChangedCallback()
     }
 }
 
+bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub)
+{
+    for (const auto& item : itemPosition_) {
+        if (!item.second.node) {
+            continue;
+        }
+        auto focusHub = item.second.node->GetFirstFocusHubChild();
+        if (focusHub == targetFocusHub) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
 {
     CHECK_NULL_VOID(curShowFrame);
@@ -700,10 +714,10 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
             ++iter;
             continue;
         }
-        if (child != showChildFocusHub) {
-            child->SetParentFocusable(false);
-        } else {
+        if (IsFocusNodeInItemPosition(child)) {
             child->SetParentFocusable(true);
+        } else {
+            child->SetParentFocusable(false);
         }
         ++iter;
     }
