@@ -1379,7 +1379,12 @@ export struct SegmentButton {
     if (!resourceManager) {
       return DEFAULT_MAX_FONT_SCALE;
     }
-    return resourceManager.getNumber(this.maxFontScale.id);
+    try {
+      return resourceManager.getNumber(this.maxFontScale.id);
+    } catch (error) {
+      console.error(`Ace SegmentButton getMaxFontSize, error: ${error.toString()}`);
+      return DEFAULT_MAX_FONT_SCALE;
+    }
   }
 
   getSelectedChangeCurve(): ICurve | null {
