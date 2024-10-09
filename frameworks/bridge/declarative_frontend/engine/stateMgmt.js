@@ -2985,10 +2985,13 @@ class Utils {
 class stateMgmtDFX {
     static getObservedPropertyInfo(observedProp, isProfiler, changedTrackPropertyName) {
         return {
-            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(), changedTrackPropertyName: changedTrackPropertyName,
+            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+            changedTrackPropertyName: changedTrackPropertyName,
             value: stateMgmtDFX.getRawValue(observedProp),
-            inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
-            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
+            inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ?
+                -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ?
+                !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
             owningView: observedProp.getOwningView(),
             length: stateMgmtDFX.getRawValueLength(observedProp),
             syncPeers: observedProp.dumpSyncPeers(isProfiler, changedTrackPropertyName)
@@ -3000,7 +3003,7 @@ class stateMgmtDFX {
         }
         catch (e) {
             stateMgmtConsole.warn(`Cannot get the type of current value, error message is: ${e.message}`);
-            return "unknown type";
+            return 'unknown type';
         }
     }
     /**
@@ -3038,7 +3041,7 @@ class stateMgmtDFX {
         }
         catch (e) {
             stateMgmtConsole.warn(`can not dump Obj, error msg ${e.message}`);
-            return "unknown type";
+            return 'unknown type';
         }
         return tempObj;
     }
@@ -4092,12 +4095,14 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
         return this.isDeleting_;
     }
     setDeleting() {
+        
         this.isDeleting_ = true;
     }
     setDeleteStatusRecursively() {
         if (!this.childrenWeakrefMap_.size) {
             return;
         }
+        
         this.childrenWeakrefMap_.forEach((value) => {
             let child = value.deref();
             if (child) {
@@ -4214,11 +4219,7 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
                     child.forceCompleteRerender(true);
                 }
                 else {
-<<<<<<< HEAD
-                    child.delayCompleteRerender (deep);
-=======
                     child.delayCompleteRerender(deep);
->>>>>>> 329c683d3f... Add missing V2 force complete rerender fix to BZ. Already in YZ
                 }
             }
             else {
@@ -7647,8 +7648,8 @@ class SetMapProxyHandler {
             };
         }
         if (target instanceof Set || (this.isMakeObserved_ && SendableType.isSet(target))) {
-            return key === 'add' ?
-                (val) => {
+            if (key === 'add') {
+                return (val) => {
                     ObserveV2.getObserve().fireChange(conditionalTarget, val.toString());
                     ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
                     if (!target.has(val)) {
@@ -7656,9 +7657,20 @@ class SetMapProxyHandler {
                         target.add(val);
                     }
                     return receiver;
-                } : (typeof ret === 'function') ?
-                // Bind to target ==> functions not observed
-                ret.bind(target) : ret;
+                };
+            }
+            if (key === 'forEach') {
+                ObserveV2.getObserve().addRef(conditionalTarget, ObserveV2.OB_LENGTH);
+                return function (callbackFn) {
+                    // need to execute it target because it is the internal function for build-in type, and proxy does not have such slot.
+                    // if necessary, addref for each item in Set and also wrap proxy for makeObserved if it is Object.
+                    // currently, just execute it in target because there is no Component need to iterate Set, only Array
+                    const result = ret.call(target, callbackFn);
+                    return result;
+                };
+            }
+            // Bind to receiver ==> functions are observed
+            return (typeof ret === 'function') ? ret.bind(receiver) : ret;
         }
         if (target instanceof Map || (this.isMakeObserved_ && SendableType.isMap(target))) {
             if (key === 'get') {
@@ -7686,10 +7698,19 @@ class SetMapProxyHandler {
                     return receiver;
                 };
             }
+            if (key === 'forEach') {
+                ObserveV2.getObserve().addRef(conditionalTarget, ObserveV2.OB_LENGTH);
+                return function (callbackFn) {
+                    // need to execute it target because it is the internal function for build-in type, and proxy does not have such slot.
+                    // if necessary, addref for each item in Map and also wrap proxy for makeObserved if it is Object.
+                    // currently, just execute it in target because there is no Component need to iterate Map, only Array
+                    const result = ret.call(target, callbackFn);
+                    return result;
+                };
+            }
         }
-        return (typeof ret === 'function') ?
-            // Bind to target ==> functions not observed
-            ret.bind(target) : ret;
+        // Bind to receiver ==> functions are observed
+        return (typeof ret === 'function') ? ret.bind(receiver) : ret;
     }
     set(target, key, value) {
         if (typeof key === 'symbol') {
@@ -9025,6 +9046,29 @@ class ViewV2 extends PUV2ViewBase {
     get isViewV3() {
         return true;
     }
+    /**
+     * Virtual function implemented in ViewPU and ViewV2
+     * Unregisters and purges all child elements associated with the specified Element ID in ViewV2.
+     *
+     * @param rmElmtId - The Element ID to be purged and deleted
+     * @returns {boolean} - Returns `true` if the Element ID was successfully deleted, `false` otherwise.
+    */
+    purgeDeleteElmtId(rmElmtId) {
+        
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            const childOpt = this.getChildViewV2ForElmtId(rmElmtId);
+            if (childOpt) {
+                childOpt.setDeleting();
+                childOpt.setDeleteStatusRecursively();
+            }
+            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+        // Needed only for V2
+        ObserveV2.getObserve().clearBinding(rmElmtId);
+        return result;
+    }
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
@@ -9057,29 +9101,6 @@ class ViewV2 extends PUV2ViewBase {
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
-    }
-    /**
-    * Virtual function implemented in ViewPU and ViewV2
-    * Unregisters and purges all child elements associated with the specified Element ID in ViewV2.
-    *
-    * @param rmElmtId - The Element ID to be purged and deleted
-    * @returns {boolean} - Returns `true` if the Element ID was successfully deleted, `false` otherwise.
-   */
-    purgeDeleteElmtId(rmElmtId) {
-        
-        const result = this.updateFuncByElmtId.delete(rmElmtId);
-        if (result) {
-            const childOpt = this.getChildViewV2ForElmtId(rmElmtId);
-            if (childOpt) {
-                childOpt.setDeleting();
-                childOpt.setDeleteStatusRecursively();
-            }
-            // it means rmElmtId has finished all the unregistration from the js side, ElementIdToOwningViewPU_  does not need to keep it
-            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
-        }
-        // Needed only for V2
-        ObserveV2.getObserve().clearBinding(rmElmtId);
-        return result;
     }
     initialRenderView() {
         
@@ -9581,7 +9602,7 @@ const Consumer = (aliasName) => {
         // and @Consumer gets connected to @provide counterpart
         ProviderConsumerUtilV2.addProvideConsumeVariableDecoMeta(proto, varName, searchForProvideWithName, '@Consumer');
         const providerName = (aliasName === undefined || aliasName === null ||
-            (typeof aliasName === "string" && aliasName.trim() === "")) ? varName : aliasName;
+            (typeof aliasName === 'string' && aliasName.trim() === '')) ? varName : aliasName;
         Reflect.defineProperty(proto, varName, {
             get() {
                 // this get function should never be called,
@@ -10124,7 +10145,7 @@ class __RepeatDefaultKeyGen {
     }
     static funcImpl(item) {
         // fast keygen logic can be used with objects/symbols only
-        if (typeof item != 'object' && typeof item !== 'symbol') {
+        if (typeof item !== 'object' && typeof item !== 'symbol') {
             return JSON.stringify(item);
         }
         // generate a numeric key, store mappings in WeakMap
@@ -10287,7 +10308,7 @@ class __RepeatImpl {
             key2Item.set(key, { key, index });
         });
         if (key2Item.size < this.arr_.length) {
-            stateMgmtConsole.warn("__RepeatImpl: Duplicates detected, fallback to index-based keyGen.");
+            stateMgmtConsole.warn('__RepeatImpl: Duplicates detected, fallback to index-based keyGen.');
             // Causes all items to be re-rendered
             this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
             return this.genKeys();
@@ -10338,14 +10359,6 @@ class __RepeatImpl {
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldIndex);
                 // TBD moveChild() only when item types are same
-                //const type0 = this.typeGenFunc_(oldItemInfo.repeatItem.item, oldIndex);
-                //const type1 = this.typeGenFunc_(itemInfo.repeatItem.item, index);
-                //if (type0 == type1) {
-                //    // C++ mv from tempChildren[oldIndex] to end of children_
-                //    RepeatNative.moveChild(oldIndex);
-                //} else {
-                //    this.initialRenderItem(key, itemInfo.repeatItem);
-                //}
             }
             else if (deletedKeysAndIndex.length) {
                 // case #2:
