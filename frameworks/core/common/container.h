@@ -603,6 +603,11 @@ public:
 
     virtual void CheckAndSetFontFamily() {};
 
+    virtual bool IsFreeMultiWindow() const
+    {
+        return false;
+    }
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);

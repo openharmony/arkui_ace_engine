@@ -639,6 +639,10 @@ public:
 
 private:
     static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result);
+    static bool ParseResourceToDoubleByName(
+        const JSRef<JSObject>& jsObj, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
+    static bool ParseResourceToDoubleById(
+        int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
 
     static void ParseOnCreateMenu(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback);

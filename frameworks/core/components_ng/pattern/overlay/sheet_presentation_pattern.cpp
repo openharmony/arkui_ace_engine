@@ -626,7 +626,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
 
 void SheetPresentationPattern::ChangeSheetPage(float height)
 {
-    if (IsAvoidingKeyboard()) {
+    if (IsAvoidingKeyboard() && keyboardAvoidMode_ == SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL) {
         return;
     }
     ChangeScrollHeight(height);
@@ -790,8 +790,6 @@ float SheetPresentationPattern::GetSheetHeightChange()
     auto inputH = textFieldManager ? (pipelineContext->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
                                          textFieldManager->GetHeight())
                                    : .0;
-    TAG_LOGD(AceLogTag::ACE_SHEET,
-        "TextField's clickPositionY is %{public}f", textFieldManager->GetClickPosition().GetY());
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
@@ -1029,12 +1027,12 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
     CHECK_NULL_VOID(scrollNode);
     auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(scrollProps);
-    auto scrollHeight = height - operationHeight;
+    auto scrollHeight = height - operationHeight - resizeDecreasedHeight_;
     auto sheetType = GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP || sheetType == SheetType::SHEET_CENTER ||
         sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         auto sheetHeight = geometryNode->GetFrameSize().Height();
-        scrollHeight = sheetHeight - operationHeight;
+        scrollHeight = sheetHeight - operationHeight - resizeDecreasedHeight_;
     }
     scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollHeight)));
     scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2690,6 +2688,7 @@ void SheetPresentationPattern::DecreaseScrollHeightInSheet(float decreaseHeight)
 
     TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, Scroll Height reduces by height %{public}f.", decreaseHeight);
     layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(GetScrollHeight() - decreaseHeight)));
+    resizeDecreasedHeight_ = decreaseHeight;
     scroll->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

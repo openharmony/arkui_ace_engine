@@ -267,6 +267,7 @@ RectF TextSelectOverlay::GetSelectArea()
     if (selectRects.empty()) {
         res.SetOffset(res.GetOffset() + textPaintOffset);
         GetSelectAreaFromHandle(res);
+        ApplySelectAreaWithKeyboard(res);
         return res;
     }
     auto contentRect = pattern->GetTextContentRect();
@@ -281,6 +282,7 @@ RectF TextSelectOverlay::GetSelectArea()
         intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
         GetGlobalRectWithTransform(intersectRect);
     }
+    ApplySelectAreaWithKeyboard(intersectRect);
     return intersectRect;
 }
 

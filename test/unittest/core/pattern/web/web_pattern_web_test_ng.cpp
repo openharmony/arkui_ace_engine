@@ -1252,10 +1252,11 @@ HWTEST_F(WebPatternWebTest, OnSelectHandleStart, TestSize.Level1)
     webPattern->selectOverlayProxy_->selectOverlayId_ = current->GetId();
     manager->selectContentManager_ = AceType::MakeRefPtr<SelectContentOverlayManager>(frameNode);
     manager->GetSelectOverlayNode(webPattern->selectOverlayProxy_->GetSelectOverlayId());
-    webPattern->OnSelectHandleStart(true);
+    GestureEvent event;
+    webPattern->OnSelectHandleStart(event, true);
     webPattern->overlayCreating_ = true;
     webPattern->UpdateNativeEmbedModeEnabled(true);
-    webPattern->OnSelectHandleStart(false);
+    webPattern->OnSelectHandleStart(event, false);
     MockPipelineContext::TearDown();
     ASSERT_EQ(webPattern->imageAnalyzerManager_, nullptr);
 #endif

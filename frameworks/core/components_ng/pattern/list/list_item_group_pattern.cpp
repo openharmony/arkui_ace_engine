@@ -617,22 +617,58 @@ void ListItemGroupPattern::SetListItemGroupStyle(V2::ListItemGroupStyle style)
     }
 }
 
+float ListItemGroupPattern::GetListPaddingOffset(const RefPtr<FrameNode>& listNode) const
+{
+    float offset = 0;
+    CHECK_NULL_RETURN(listNode, offset);
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offset);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    return GetMainAxisOffset(padding.Offset(), axis_);
+}
+
+bool ListItemGroupPattern::FirstItemFullVisible(const RefPtr<FrameNode>& listNode) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+    OffsetF selfOffset = geometryNode->GetPaddingOffset();
+    float mainPos = GetMainAxisOffset(selfOffset, axis_) + headerMainSize_;
+    float listPadding = GetListPaddingOffset(listNode);
+    return GreatNotEqual(mainPos, listPadding);
+}
+
+bool ListItemGroupPattern::CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex)
+{
+    if (count == 0 || (count > 0 && index > startIndex) ||
+        (count < 0 && index >= startIndex)) {
+        return false;
+    }
+
+    RefPtr<FrameNode> listNode = GetListFrameNode();
+    CHECK_NULL_RETURN(listNode, false);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(listPattern, false);
+    if (!listPattern->GetMaintainVisibleContentPosition()) {
+        return false;
+    }
+
+    if (startIndex == 0 && index == 0 && count > 0 && FirstItemFullVisible(listNode)) {
+        return false;
+    }
+    listPattern->MarkNeedReEstimateOffset();
+    return true;
+}
+
 void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
 {
     if (itemPosition_.empty()) {
         return;
     }
-    auto startIndex = itemPosition_.begin()->first;
-    if (count == 0 || (count > 0 && index > startIndex) ||
-        (count < 0 && index >= startIndex)) {
-        return;
-    }
-
-    RefPtr<FrameNode> listNode = GetListFrameNode();
-    CHECK_NULL_VOID(listNode);
-    auto listPattern = listNode->GetPattern<ListPattern>();
-    CHECK_NULL_VOID(listPattern);
-    if (!listPattern->GetMaintainVisibleContentPosition()) {
+    index -= itemStartIndex_;
+    int32_t startIndex = itemPosition_.begin()->first;
+    if (!CheckDataChangeOutOfStart(index, count, startIndex)) {
         return;
     }
 
@@ -661,7 +697,6 @@ void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
             }
         }
     }
-    listPattern->MarkNeedReEstimateOffset();
 }
 
 void ListItemGroupPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)

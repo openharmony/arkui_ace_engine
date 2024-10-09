@@ -351,17 +351,9 @@ void JSNavigation::SetSubTitle(const std::string& subTitle)
     NavigationModel::GetInstance()->SetSubtitle(subTitle);
 }
 
-void JSNavigation::SetHideTitleBar(const JSCallbackInfo& info)
+void JSNavigation::SetHideTitleBar(bool isHide, bool animated)
 {
-    if (info.Length() < 1 || !info[0]->IsBoolean()) {
-        return;
-    }
-
-    bool animated = false;
-    if (info.Length() > 1 && info[1]->IsBoolean()) {
-        animated = info[1]->ToBoolean();
-    }
-    NavigationModel::GetInstance()->SetHideTitleBar(info[0]->ToBoolean(), animated);
+    NavigationModel::GetInstance()->SetHideTitleBar(isHide, animated);
 }
 
 void JSNavigation::SetHideNavBar(bool hide)
@@ -408,17 +400,9 @@ void JSNavigation::SetHideBackButton(bool hide)
     NavigationModel::GetInstance()->SetHideBackButton(hide);
 }
 
-void JSNavigation::SetHideToolBar(const JSCallbackInfo& info)
+void JSNavigation::SetHideToolBar(bool isHide, bool animated)
 {
-    if (info.Length() < 1 || !info[0]->IsBoolean()) {
-        return;
-    }
-
-    bool animated = false;
-    if (info.Length() > 1 && info[1]->IsBoolean()) {
-        animated = info[1]->ToBoolean();
-    }
-    NavigationModel::GetInstance()->SetHideToolBar(info[0]->ToBoolean(), animated);
+    NavigationModel::GetInstance()->SetHideToolBar(isHide, animated);
 }
 
 void JSNavigation::SetToolBar(const JSCallbackInfo& info)

@@ -70,9 +70,9 @@ public:
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    void ApplyDefaultContentClip(const RefPtr<RenderContext>& ctx, const RefPtr<GeometryNode>& geometryNode) override
+    ContentClipMode GetDefaultContentClip() const override
     {
-        ctx->SetContentClip(geometryNode->GetPaddingRect());
+        return ContentClipMode::CONTENT_ONLY;
     }
 
     RefPtr<WaterFlowContentModifier> contentModifier_;

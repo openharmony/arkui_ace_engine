@@ -1037,4 +1037,34 @@ HWTEST_F(RichEditorStyledStringTestNg, DeleteValueInStyledString001, TestSize.Le
     richEditorPattern->DeleteValueInStyledString(0, 10, false);
     ASSERT_EQ(!richEditorPattern->BeforeStyledStringChange(0, 10, ""), false);
 }
+
+/**
+ * @tc.name: GetUrlSpanString001
+ * @tc.desc: Test basic function of UrlSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, GetUrlSpanString001, TestSize.Level1)
+{
+    // 0: Create MutableSpanString
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+
+    // 1: Create UrlSpan and add to spanString
+    std::string address = "https://www.example.com";
+    spanString->AddSpan(AceType::MakeRefPtr<UrlSpan>(address, 8, 10));
+
+    // 2: Test subSpanString and spanString is equal
+    auto subSpanString  = spanString->GetSubSpanString(0, 10);
+    EXPECT_TRUE(subSpanString->IsEqualToSpanString(spanString));
+
+    // 3: Test get urlspan first position size
+    auto firstSpans = spanString->GetSpans(8, 1);
+    EXPECT_EQ(firstSpans.size(), 1);
+
+    // 4: Test get urlSpan start and end position, and url address
+    auto urlSpan = AceType::DynamicCast<UrlSpan>(firstSpans[0]);
+    ASSERT_NE(urlSpan, nullptr);
+    EXPECT_EQ(urlSpan->GetStartIndex(), 8);
+    EXPECT_EQ(urlSpan->GetEndIndex(), 9);
+    EXPECT_EQ(urlSpan->GetUrlSpanAddress(), address);
+}
 } // namespace OHOS::Ace::NG

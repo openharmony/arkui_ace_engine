@@ -30,6 +30,7 @@ public:
     void UpdateTitleInTargetPos(bool isShow, int32_t height);
     void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&, const DirtySwapConfig&) override;
     RefPtr<FrameNode> GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode);
     /* event */
     void SetTapGestureEvent(RefPtr<FrameNode>& gestureRow);

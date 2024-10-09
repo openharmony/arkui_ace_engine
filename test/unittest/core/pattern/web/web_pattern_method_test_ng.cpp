@@ -16,15 +16,36 @@
 #include <gmock/gmock.h>
 
 #include "gtest/gtest.h"
+
+#define private public
+#include "frameworks/core/event/touch_event.h"
+#undef private
+
+#define protected public
+#include "core/components_ng/gestures/gesture_info.h"
+#define private public
+#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+#undef private
+#undef protected
 #define private public
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_image_analyzer_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "core/common/ai/image_analyzer_manager.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/base/utils/system_properties.h"
+#include "frameworks/core/components_ng/event/touch_event.h"
 #undef private
 
 #include "test/mock/base/mock_mouse_style.h"
+#include "test/unittest/core/pattern/web/mock_web_delegate.h"
+
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -969,6 +990,924 @@ HWTEST_F(WebPatternMethodTestNg, OnTooltip_008, TestSize.Level1)
     webPattern->mouseHoveredY_ = -1;
     webPattern->OnTooltip(tooltip);
     EXPECT_NE(webPattern->tooltipTimestamp_, -1);
+#endif
+}
+
+/**
+ * @tc.name: InitPanEvent_001
+ * @tc.desc: InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPanEvent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    RefPtr<GestureEventHub> gestureHub2 = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    PanDirection direction;
+    PanDirection direction2;
+    direction.type = PanDirection::ALL;
+    gestureHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(gestureHub2, direction, 1, 0.1);
+    auto panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(1, direction2, 2.0);
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo = nullptr;
+    gestureHub->panEventActuator_->panRecognizer_ = panRecognizer_;
+    gestureHub->panEventActuator_->panRecognizer_->SetGestureInfo(gestureInfo);
+    webPattern->panEvent_ = nullptr;
+
+    webPattern->InitPanEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+    GestureEvent event;
+    webPattern->SetIsFixedNestedScrollMode(true);
+    webPattern->parent_ = nullptr;
+    gestureHub->panEventActuator_->panEvents_.back()->GetActionStartEventFunc()(event);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitPanEvent_002
+ * @tc.desc: InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPanEvent_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    RefPtr<GestureEventHub> gestureHub2 = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    PanDirection direction;
+    PanDirection direction2;
+    direction.type = PanDirection::ALL;
+    gestureHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(gestureHub2, direction, 1, 0.1);
+    auto panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(1, direction2, 2.0);
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo = nullptr;
+    gestureHub->panEventActuator_->panRecognizer_ = panRecognizer_;
+    gestureHub->panEventActuator_->panRecognizer_->SetGestureInfo(gestureInfo);
+    webPattern->panEvent_ = nullptr;
+
+    gestureHub->panEventActuator_->panEvents_.clear();
+    webPattern->InitPanEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+    GestureEvent event;
+    gestureHub->panEventActuator_->panEvents_.back()->GetActionUpdateEventFunc()(event);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitPanEvent_003
+ * @tc.desc: InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPanEvent_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    RefPtr<GestureEventHub> gestureHub2 = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    PanDirection direction;
+    PanDirection direction2;
+    direction.type = PanDirection::ALL;
+    gestureHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(gestureHub2, direction, 1, 0.1);
+    auto panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(1, direction2, 2.0);
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo = nullptr;
+    gestureHub->panEventActuator_->panRecognizer_ = panRecognizer_;
+    gestureHub->panEventActuator_->panRecognizer_->SetGestureInfo(gestureInfo);
+    webPattern->panEvent_ = nullptr;
+
+    webPattern->InitPanEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+    GestureEvent event;
+    auto parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->SetNestedScrollParent(parent);
+    EXPECT_CALL(*parent, OnScrollDragEndRecursive()).Times(1);
+    gestureHub->panEventActuator_->panEvents_.back()->GetActionEndEventFunc()(event);
+    webPattern->parent_ = nullptr;
+    gestureHub->panEventActuator_->panEvents_.back()->GetActionEndEventFunc()(event);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitPanEvent_004
+ * @tc.desc: InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPanEvent_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    RefPtr<GestureEventHub> gestureHub2 = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    PanDirection direction;
+    PanDirection direction2;
+    direction.type = PanDirection::ALL;
+    gestureHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(gestureHub2, direction, 1, 0.1);
+    auto panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(1, direction2, 2.0);
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo = nullptr;
+    gestureHub->panEventActuator_->panRecognizer_ = panRecognizer_;
+    gestureHub->panEventActuator_->panRecognizer_->SetGestureInfo(gestureInfo);
+    webPattern->panEvent_ = nullptr;
+
+    webPattern->InitPanEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto gestureInfo2 = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo2 = nullptr;
+    auto info = std::make_shared<BaseGestureEvent>();
+    auto ret = gestureHub->gestureJudgeNativeFunc_(gestureInfo2, info);
+    EXPECT_EQ(ret, OHOS::Ace::GestureJudgeResult::CONTINUE);
+#endif
+}
+
+/**
+ * @tc.name: InitPanEvent_005
+ * @tc.desc: InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPanEvent_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    RefPtr<GestureEventHub> gestureHub2 = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    PanDirection direction;
+    PanDirection direction2;
+    direction.type = PanDirection::ALL;
+    gestureHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(gestureHub2, direction, 1, 0.1);
+    auto panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(1, direction2, 2.0);
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo = nullptr;
+    gestureHub->panEventActuator_->panRecognizer_ = panRecognizer_;
+    gestureHub->panEventActuator_->panRecognizer_->SetGestureInfo(gestureInfo);
+    webPattern->panEvent_ = nullptr;
+
+    webPattern->InitPanEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto gestureInfo2 = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo2->SetType(OHOS::Ace::GestureTypeName::UNKNOWN);
+    auto info = std::make_shared<BaseGestureEvent>();
+    auto ret = gestureHub->gestureJudgeNativeFunc_(gestureInfo2, info);
+    EXPECT_EQ(ret, OHOS::Ace::GestureJudgeResult::CONTINUE);
+#endif
+}
+
+/**
+ * @tc.name: InitPanEvent_006
+ * @tc.desc: InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPanEvent_006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    RefPtr<GestureEventHub> gestureHub2 = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    PanDirection direction;
+    PanDirection direction2;
+    direction.type = PanDirection::ALL;
+    gestureHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(gestureHub2, direction, 1, 0.1);
+    auto panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(1, direction2, 2.0);
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo = nullptr;
+    gestureHub->panEventActuator_->panRecognizer_ = panRecognizer_;
+    gestureHub->panEventActuator_->panRecognizer_->SetGestureInfo(gestureInfo);
+    webPattern->panEvent_ = nullptr;
+
+    webPattern->InitPanEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto gestureInfo2 = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo2->SetType(OHOS::Ace::GestureTypeName::WEBSCROLL);
+    gestureInfo2->SetInputEventType(OHOS::Ace::InputEventType::AXIS);
+    auto info = std::make_shared<BaseGestureEvent>();
+    auto ret = gestureHub->gestureJudgeNativeFunc_(gestureInfo2, info);
+    EXPECT_EQ(ret, OHOS::Ace::GestureJudgeResult::CONTINUE);
+#endif
+}
+
+/**
+ * @tc.name: InitPanEvent_007
+ * @tc.desc: InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPanEvent_007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    RefPtr<GestureEventHub> gestureHub2 = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    PanDirection direction;
+    PanDirection direction2;
+    direction.type = PanDirection::ALL;
+    gestureHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(gestureHub2, direction, 1, 0.1);
+    auto panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(1, direction2, 2.0);
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo = nullptr;
+    gestureHub->panEventActuator_->panRecognizer_ = panRecognizer_;
+    gestureHub->panEventActuator_->panRecognizer_->SetGestureInfo(gestureInfo);
+    webPattern->panEvent_ = nullptr;
+
+    webPattern->InitPanEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto gestureInfo2 = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo2->SetType(OHOS::Ace::GestureTypeName::WEBSCROLL);
+    gestureInfo2->SetInputEventType(OHOS::Ace::InputEventType::MOUSE_BUTTON);
+    auto info = std::make_shared<BaseGestureEvent>();
+    auto ret = gestureHub->gestureJudgeNativeFunc_(gestureInfo2, info);
+    EXPECT_EQ(ret, OHOS::Ace::GestureJudgeResult::REJECT);
+#endif
+}
+
+/**
+ * @tc.name: InitPanEvent_008
+ * @tc.desc: InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPanEvent_008, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    RefPtr<GestureEventHub> gestureHub2 = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    PanDirection direction;
+    PanDirection direction2;
+    direction.type = PanDirection::ALL;
+    gestureHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(gestureHub2, direction, 1, 0.1);
+    auto panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(1, direction2, 2.0);
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo = nullptr;
+    gestureHub->panEventActuator_->panRecognizer_ = panRecognizer_;
+    gestureHub->panEventActuator_->panRecognizer_->SetGestureInfo(gestureInfo);
+    webPattern->panEvent_ = nullptr;
+
+    webPattern->InitPanEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto gestureInfo2 = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo2->SetType(OHOS::Ace::GestureTypeName::WEBSCROLL);
+    gestureInfo2->SetInputEventType(OHOS::Ace::InputEventType::TOUCH_PAD);
+    auto info = std::make_shared<BaseGestureEvent>();
+    auto ret = gestureHub->gestureJudgeNativeFunc_(gestureInfo2, info);
+    EXPECT_EQ(ret, OHOS::Ace::GestureJudgeResult::CONTINUE);
+#endif
+}
+
+/**
+ * @tc.name: InitPanEvent_009
+ * @tc.desc: InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPanEvent_009, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    RefPtr<GestureEventHub> gestureHub2 = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    PanDirection direction;
+    PanDirection direction2;
+    direction.type = PanDirection::ALL;
+    gestureHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(gestureHub2, direction, 1, 0.1);
+    auto panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(1, direction2, 2.0);
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo = nullptr;
+    gestureHub->panEventActuator_->panRecognizer_ = panRecognizer_;
+    gestureHub->panEventActuator_->panRecognizer_->SetGestureInfo(gestureInfo);
+    webPattern->panEvent_ = nullptr;
+
+    webPattern->InitPanEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+    GestureEvent event;
+    webPattern->SetIsFixedNestedScrollMode(true);
+    auto parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->SetNestedScrollParent(parent);
+    EXPECT_CALL(*parent, GetAxis()).Times(1);
+    gestureHub->panEventActuator_->panEvents_.back()->GetActionStartEventFunc()(event);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitPanEvent_010
+ * @tc.desc: InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPanEvent_010, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    RefPtr<GestureEventHub> gestureHub2 = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    PanDirection direction;
+    PanDirection direction2;
+    direction.type = PanDirection::ALL;
+    gestureHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(gestureHub2, direction, 1, 0.1);
+    auto panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(1, direction2, 2.0);
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo = nullptr;
+    gestureHub->panEventActuator_->panRecognizer_ = panRecognizer_;
+    gestureHub->panEventActuator_->panRecognizer_->SetGestureInfo(gestureInfo);
+    webPattern->panEvent_ = nullptr;
+
+    webPattern->InitPanEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+    GestureEvent event;
+    webPattern->SetIsFixedNestedScrollMode(false);
+    auto parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->SetNestedScrollParent(parent);
+    gestureHub->panEventActuator_->panEvents_.back()->GetActionStartEventFunc()(event);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitPanEvent_011
+ * @tc.desc: InitPanEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPanEvent_011, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<GestureEventHub> gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    RefPtr<GestureEventHub> gestureHub2 = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    PanDirection direction;
+    PanDirection direction2;
+    direction.type = PanDirection::ALL;
+    gestureHub->panEventActuator_ = AceType::MakeRefPtr<PanEventActuator>(gestureHub2, direction, 1, 0.1);
+    auto panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(1, direction2, 2.0);
+    auto gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo = nullptr;
+    gestureHub->panEventActuator_->panRecognizer_ = panRecognizer_;
+    gestureHub->panEventActuator_->panRecognizer_->SetGestureInfo(gestureInfo);
+    webPattern->panEvent_ = nullptr;
+
+    webPattern->InitPanEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+    GestureEvent event;
+    webPattern->SetIsFixedNestedScrollMode(false);
+    webPattern->parent_ = nullptr;
+    gestureHub->panEventActuator_->panEvents_.back()->GetActionStartEventFunc()(event);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitHoverEvent_001
+ * @tc.desc: InitHoverEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitHoverEvent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    WeakPtr<EventHub> eventHub = nullptr;
+    auto inputHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
+    webPattern->hoverEvent_ = nullptr;
+
+    webPattern->InitHoverEvent(inputHub);
+    EXPECT_NE(webPattern, nullptr);
+    inputHub->hoverEventActuator_->inputEvents_.back()->GetOnHoverEventFunc()(true);
+    inputHub->hoverEventActuator_->inputEvents_.back()->GetOnHoverEventFunc()(false);
+#endif
+}
+
+/**
+ * @tc.name: InitEvent_001
+ * @tc.desc: InitEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitEvent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    OHOS::Ace::SetReturnStatus("8");
+    webPattern->InitEvent();
+    OHOS::Ace::SetReturnStatus("");
+    webPattern->InitEvent();
+    EXPECT_NE(webPattern, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitPinchEvent_001
+ * @tc.desc: InitPinchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPinchEvent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    webPattern->pinchGesture_ = nullptr;
+
+    webPattern->InitPinchEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto gestureEvent = std::make_shared<GestureEvent>();
+    gestureEvent->SetSourceTool(SourceTool::TOUCHPAD);
+    auto& gestureStartFunc = gestureHub->gestures_.back()->onActionStartId_;
+    (*gestureStartFunc)(*gestureEvent);
+    EXPECT_NE(gestureEvent, nullptr);
+
+    auto gestureEvent2 = std::make_shared<GestureEvent>();
+    gestureEvent2->SetSourceTool(SourceTool::TOUCHPAD);
+    auto& gestureUpdateFunc = gestureHub->gestures_.back()->onActionUpdateId_;
+    (*gestureUpdateFunc)(*gestureEvent2);
+    EXPECT_NE(gestureEvent2, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitPinchEvent_002
+ * @tc.desc: InitPinchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitPinchEvent_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    webPattern->pinchGesture_ = nullptr;
+
+    webPattern->InitPinchEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto gestureEvent = std::make_shared<GestureEvent>();
+    gestureEvent->SetSourceTool(SourceTool::UNKNOWN);
+    auto& gestureStartFunc = gestureHub->gestures_.back()->onActionStartId_;
+    (*gestureStartFunc)(*gestureEvent);
+    EXPECT_NE(gestureEvent, nullptr);
+
+    auto gestureEvent2 = std::make_shared<GestureEvent>();
+    gestureEvent2->SetSourceTool(SourceTool::UNKNOWN);
+    auto& gestureUpdateFunc = gestureHub->gestures_.back()->onActionUpdateId_;
+    (*gestureUpdateFunc)(*gestureEvent2);
+    EXPECT_NE(gestureEvent2, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitTouchEvent_001
+ * @tc.desc: InitTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitTouchEvent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->touchEvent_ = nullptr;
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    gestureHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
+
+    webPattern->InitTouchEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto info = std::make_shared<TouchEventInfo>(".");
+    info->changedTouches_.clear();
+    gestureHub->touchEventActuator_->touchEvents_.back()->callback_(*info);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitTouchEvent_002
+ * @tc.desc: InitTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitTouchEvent_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->touchEvent_ = nullptr;
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    gestureHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
+
+    webPattern->InitTouchEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto info = std::make_shared<TouchEventInfo>(".");
+    info->changedTouches_.push_back(OHOS::Ace::TouchLocationInfo(1));
+    info->SetSourceDevice(OHOS::Ace::SourceType::NONE);
+    gestureHub->touchEventActuator_->touchEvents_.back()->callback_(*info);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitTouchEvent_003
+ * @tc.desc: InitTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitTouchEvent_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->touchEvent_ = nullptr;
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    gestureHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
+
+    webPattern->InitTouchEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto info = std::make_shared<TouchEventInfo>(".");
+    auto touchInfo = std::make_shared<OHOS::Ace::TouchLocationInfo>(2);
+    touchInfo->SetTouchType(TouchType::DOWN);
+    info->changedTouches_.push_front(*touchInfo);
+    info->SetSourceDevice(OHOS::Ace::SourceType::TOUCH);
+    gestureHub->touchEventActuator_->touchEvents_.back()->callback_(*info);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitTouchEvent_004
+ * @tc.desc: InitTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitTouchEvent_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->touchEvent_ = nullptr;
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    gestureHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
+
+    webPattern->InitTouchEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto info = std::make_shared<TouchEventInfo>(".");
+    auto touchInfo = std::make_shared<OHOS::Ace::TouchLocationInfo>(2);
+    touchInfo->SetTouchType(TouchType::UP);
+    info->changedTouches_.push_front(*touchInfo);
+    info->SetSourceDevice(OHOS::Ace::SourceType::TOUCH);
+    gestureHub->touchEventActuator_->touchEvents_.back()->callback_(*info);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitTouchEvent_005
+ * @tc.desc: InitTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitTouchEvent_005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->touchEvent_ = nullptr;
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    gestureHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
+
+    webPattern->InitTouchEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto info = std::make_shared<TouchEventInfo>(".");
+    auto touchInfo = std::make_shared<OHOS::Ace::TouchLocationInfo>(2);
+    touchInfo->SetTouchType(TouchType::MOVE);
+    info->changedTouches_.push_front(*touchInfo);
+    info->SetSourceDevice(OHOS::Ace::SourceType::TOUCH);
+    gestureHub->touchEventActuator_->touchEvents_.back()->callback_(*info);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitTouchEvent_006
+ * @tc.desc: InitTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitTouchEvent_006, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->touchEvent_ = nullptr;
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    gestureHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
+
+    webPattern->InitTouchEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto info = std::make_shared<TouchEventInfo>(".");
+    auto touchInfo = std::make_shared<OHOS::Ace::TouchLocationInfo>(2);
+    touchInfo->SetTouchType(TouchType::CANCEL);
+    info->changedTouches_.push_front(*touchInfo);
+    info->SetSourceDevice(OHOS::Ace::SourceType::TOUCH);
+    gestureHub->touchEventActuator_->touchEvents_.back()->callback_(*info);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitTouchEvent_007
+ * @tc.desc: InitTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, InitTouchEvent_007, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->touchEvent_ = nullptr;
+    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(WeakPtr<EventHub>());
+    gestureHub->touchEventActuator_ = AceType::MakeRefPtr<TouchEventActuator>();
+
+    webPattern->InitTouchEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+
+    auto info = std::make_shared<TouchEventInfo>(".");
+    auto touchInfo = std::make_shared<OHOS::Ace::TouchLocationInfo>(2);
+    touchInfo->SetTouchType(TouchType::PULL_DOWN);
+    info->changedTouches_.push_front(*touchInfo);
+    info->SetSourceDevice(OHOS::Ace::SourceType::TOUCH);
+    gestureHub->touchEventActuator_->touchEvents_.back()->callback_(*info);
+    EXPECT_NE(gestureHub, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: StartVibraFeedback_001
+ * @tc.desc: StartVibraFeedback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, StartVibraFeedback_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->isEnabledHapticFeedback_ = true;
+    webPattern->StartVibraFeedback("");
+    EXPECT_NE(webPattern, nullptr);
+
+    webPattern->isEnabledHapticFeedback_ = false;
+    webPattern->StartVibraFeedback("");
+    EXPECT_NE(webPattern, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: CloseImageOverlaySelection_001
+ * @tc.desc: CloseImageOverlaySelection.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternMethodTestNg, CloseImageOverlaySelection_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->imageOverlayIsSelected_ = true;
+    auto ret = webPattern->CloseImageOverlaySelection();
+    EXPECT_EQ(ret, true);
+
+    webPattern->imageOverlayIsSelected_ = false;
+    ret = webPattern->CloseImageOverlaySelection();
+    EXPECT_EQ(ret, false);
 #endif
 }
 } // namespace OHOS::Ace::NG

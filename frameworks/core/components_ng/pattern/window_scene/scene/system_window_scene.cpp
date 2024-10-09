@@ -142,6 +142,7 @@ void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     if (session_->NeedCheckContextTransparent()) {
         checkContextTransparentTask_.Cancel();
     }
+    session_->SetNotifySystemSessionKeyEventFunc(nullptr);
 }
 
 void SystemWindowScene::OnAttachToMainTree()
@@ -201,11 +202,13 @@ void SystemWindowScene::RegisterEventCallback()
                 TaskExecutor::TaskType::UI, "ArkUIWindowInjectPointerEvent", PriorityType::VIP);
     };
     session_->SetNotifySystemSessionPointerEventFunc(std::move(pointerEventCallback));
-
-    auto keyEventCallback = [instanceId = instanceId_](std::shared_ptr<MMI::KeyEvent> KeyEvent,
-        bool isPreImeEvent) -> bool {
+    auto keyEventCallback = [weakThis = WeakClaim(this), instanceId = instanceId_](
+        std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent) -> bool {
+        CHECK_NULL_RETURN(keyEvent, false);
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_RETURN(self, false);
         ContainerScope Scope(instanceId);
-        return WindowSceneHelper::InjectKeyEvent(KeyEvent, isPreImeEvent);
+        return WindowSceneHelper::InjectKeyEvent(keyEvent, isPreImeEvent);
     };
     session_->SetNotifySystemSessionKeyEventFunc(std::move(keyEventCallback));
 }

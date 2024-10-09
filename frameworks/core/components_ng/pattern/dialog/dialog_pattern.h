@@ -310,6 +310,8 @@ public:
         return true;
     }
 
+    bool IsShowInFreeMultiWindow();
+
 private:
     bool AvoidKeyboard() const override
     {

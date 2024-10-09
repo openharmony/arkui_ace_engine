@@ -19,16 +19,17 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "test/mock/core/common/mock_udmf.h"
+#include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 #include "base/memory/ace_type.h"
 
 #define private public
+#include "core/common/ai/image_analyzer_manager.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #undef private
 
-#include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -113,7 +114,11 @@ public:
 void WebPatternTouchTestNg::SetUpTestCase() {}
 void WebPatternTouchTestNg::TearDownTestCase() {}
 void WebPatternTouchTestNg::SetUp() {}
-void WebPatternTouchTestNg::TearDown() {}
+void WebPatternTouchTestNg::TearDown()
+{
+    OHOS::Ace::SetReturnStatus("");
+    OHOS::Ace::SetComponentType("");
+}
 
 /**
  * @tc.name: CheckSafeAreaIsExpand_001
@@ -379,6 +384,8 @@ HWTEST_F(WebPatternTouchTestNg, Backward_002, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     auto ret = webPattern->Backward();
     EXPECT_EQ(ret, false);
+    ret = webPattern->Backward();
+    EXPECT_EQ(ret, true);
 #endif
 }
 
@@ -511,7 +518,21 @@ HWTEST_F(WebPatternTouchTestNg, GetWebInfoType_001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
-    webPattern->GetWebInfoType();
+    OHOS::Ace::SetReturnStatus("8");
+    auto ret = webPattern->GetWebInfoType();
+    EXPECT_EQ(ret, WebInfoType::TYPE_2IN1);
+
+    OHOS::Ace::SetReturnStatus("4");
+    ret = webPattern->GetWebInfoType();
+    EXPECT_EQ(ret, WebInfoType::TYPE_TABLET);
+
+    OHOS::Ace::SetReturnStatus("2");
+    ret = webPattern->GetWebInfoType();
+    EXPECT_EQ(ret, WebInfoType::TYPE_MOBILE);
+
+    OHOS::Ace::SetReturnStatus("1");
+    ret = webPattern->GetWebInfoType();
+    EXPECT_EQ(ret, WebInfoType::TYPE_MOBILE);
 #endif
 }
 
@@ -649,11 +670,13 @@ HWTEST_F(WebPatternTouchTestNg, JsonNodePutDefaultValue_005, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    std::unique_ptr<OHOS::Ace::JsonValue> jsonNode = nullptr;
+    EXPECT_NE(webPattern->delegate_, nullptr);
+    auto jsonNode = std::make_unique<OHOS::Ace::JsonValue>();
     auto key = WebPattern::WebAccessibilityType::SEL_END;
+    int32_t value = 1;
     int32_t defaultValue = 0;
-    webPattern->JsonNodePutDefaultValue(jsonNode, key, defaultValue);
+    webPattern->JsonNodePutDefaultValue(jsonNode, key, value, defaultValue);
+    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -674,38 +697,13 @@ HWTEST_F(WebPatternTouchTestNg, JsonNodePutDefaultValue_006, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    std::unique_ptr<OHOS::Ace::JsonValue> jsonNode = std::make_unique<OHOS::Ace::JsonValue>();
-    auto key = WebPattern::WebAccessibilityType::SEL_END;
-    int32_t defaultValue = 1;
-    webPattern->JsonNodePutDefaultValue(jsonNode, key, defaultValue);
-#endif
-}
-
-/**
- * @tc.name: JsonNodePutDefaultValue_007
- * @tc.desc: JsonNodePutDefaultValue.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTouchTestNg, JsonNodePutDefaultValue_007, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
+    EXPECT_NE(webPattern->delegate_, nullptr);
     std::unique_ptr<OHOS::Ace::JsonValue> jsonNode = std::make_unique<OHOS::Ace::JsonValue>();
     auto key = WebPattern::WebAccessibilityType::SEL_END;
     int32_t value = 1;
     int32_t defaultValue = 1;
     webPattern->JsonNodePutDefaultValue(jsonNode, key, value, defaultValue);
-    EXPECT_EQ(value, defaultValue);
+    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -931,6 +929,7 @@ HWTEST_F(WebPatternTouchTestNg, GetWebAllInfosImpl_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->delegate_ = nullptr;
     int32_t webId = 123;
     auto callback = [](std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int32_t receivedWebId) {};
     webPattern->GetWebAllInfosImpl(callback, webId);
@@ -956,9 +955,16 @@ HWTEST_F(WebPatternTouchTestNg, GetWebAllInfosImpl_002, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+    OHOS::Ace::SetReturnStatus("true");
+    OHOS::Ace::SetComponentType("none");
     int32_t webId = 123;
     auto callback = [](std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int32_t receivedWebId) {};
     webPattern->GetWebAllInfosImpl(callback, webId);
+
+    OHOS::Ace::SetReturnStatus("true");
+    OHOS::Ace::SetComponentType("genericContainer");
+    webPattern->GetWebAllInfosImpl(callback, webId);
+    EXPECT_NE(webPattern, nullptr);
 #endif
 }
 
@@ -1108,7 +1114,9 @@ HWTEST_F(WebPatternTouchTestNg, CreateOverlay_001, TestSize.Level1)
     int pointX = 5;
     int pointY = 6;
     webPattern->CreateOverlay(pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
-    EXPECT_NE(webPattern, nullptr);
+    EXPECT_NE(webPattern->imageAnalyzerManager_->analyzerUIConfig_.onNotifySelectedStatus, nullptr);
+    webPattern->imageAnalyzerManager_->analyzerUIConfig_.onNotifySelectedStatus(true);
+    webPattern->imageAnalyzerManager_->analyzerUIConfig_.onNotifySelectedStatus(false);
 #endif
 }
 

@@ -68,9 +68,9 @@ public:
     }
 
 private:
-    void ApplyDefaultContentClip(const RefPtr<RenderContext>& ctx, const RefPtr<GeometryNode>& geometryNode) override
+    ContentClipMode GetDefaultContentClip() const override
     {
-        ctx->SetContentClip(geometryNode->GetFrameRect());
+        return ContentClipMode::BOUNDARY;
     }
 
     RefPtr<ScrollContentModifier> scrollContentModifier_;

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_PAINT_METHOD_H
 
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -59,10 +60,9 @@ protected:
 
 private:
     /**
-     * @brief Apply Scrollable's default content clip area
+     * @brief Return the default content clip mode.
      */
-    virtual void ApplyDefaultContentClip(
-        const RefPtr<RenderContext>& ctx, const RefPtr<GeometryNode>& geometryNode) = 0;
+    virtual ContentClipMode GetDefaultContentClip() const = 0;
 
     RefPtr<RenderContext> overlayRenderContext_;
     bool isFadingTop_ = false;
