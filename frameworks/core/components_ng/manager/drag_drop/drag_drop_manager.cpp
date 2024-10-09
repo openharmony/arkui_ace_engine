@@ -982,6 +982,7 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     summaryMap_.clear();
     parentHitNodes_.clear();
     dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
+    pipeline->RequestFrame();
 }
 
 void DragDropManager::RequireSummary()
@@ -1572,7 +1573,7 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
 }
 
 bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
-    DragPreviewInfo& dragPreviewInfo)
+    DragPreviewInfo& dragPreviewInfo, const RefPtr<GestureEventHub>& gestureHub)
 {
     if (!overlayManager->GetHasPixelMap()) {
         return false;
@@ -1583,14 +1584,22 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     if (badgeNode) {
         dragPreviewInfo.textNode = badgeNode;
     }
-    double maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(imageNode->GetContextRefPtr());
+    CHECK_NULL_RETURN(gestureHub, false);
+    auto frameNode = gestureHub->GetFrameNode();
+    double maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(frameNode->GetContextRefPtr());
     auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
-    dragPreviewInfo.scale = static_cast<float>(imageNode->GetPreviewScaleVal());
+    auto previewOption = imageNode->GetDragPreviewOption();
+    if (imageNode->GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption.isScaleEnabled) {
+        dragPreviewInfo.scale = maxWidth / width;
+    } else {
+        dragPreviewInfo.scale = 1.0f;
+    }
+    
     if (!isMouseDragged_ && dragPreviewInfo.scale == 1.0f) {
         dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
     }
     // set menu preview scale only for no scale menu preview.
-    if (isDragWithContextMenu_) {
+    if (isDragWithContextMenu_ && (!previewOption.isScaleEnabled || width < maxWidth)) {
         auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
         if (imageGestureEventHub) {
             auto menuPreviewScale = imageGestureEventHub->GetMenuPreviewScale();
@@ -1613,11 +1622,6 @@ bool DragDropManager::IsNeedDoDragMoveAnimate(const PointerEvent& pointerEvent)
     auto x = pointerEvent.GetPoint().GetX();
     auto y = pointerEvent.GetPoint().GetY();
     curPointerOffset_ = { x, y };
-    auto distanceToPrePointer = sqrt(pow(prePointerOffset_.GetX() - x, 2) + pow(prePointerOffset_.GetY() - y, 2));
-    if (distanceToPrePointer < MAX_DISTANCE_TO_PRE_POINTER) {
-        return false;
-    }
-    prePointerOffset_ = { x, y };
     return true;
 }
 
@@ -1786,8 +1790,8 @@ void DragDropManager::UpdateDragPreviewScale()
     renderContext->UpdateTransformScale({ info_.scale, info_.scale });
 }
 
-void DragDropManager::DoDragStartAnimation(
-    const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event, bool isSubwindowOverlay)
+void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager,
+    const GestureEvent& event, const RefPtr<GestureEventHub>& gestureHub, bool isSubwindowOverlay)
 {
     auto containerId = Container::CurrentId();
     auto deviceId = static_cast<int32_t>(event.GetDeviceId());
@@ -1798,7 +1802,8 @@ void DragDropManager::DoDragStartAnimation(
         return;
     }
     CHECK_NULL_VOID(overlayManager);
-    if (!(GetDragPreviewInfo(overlayManager, info_))
+    CHECK_NULL_VOID(gestureHub);
+    if (!(GetDragPreviewInfo(overlayManager, info_, gestureHub))
         || (!IsNeedDisplayInSubwindow() && !isSubwindowOverlay && !isDragWithContextMenu_)) {
         if (isDragWithContextMenu_) {
             UpdateDragPreviewScale();
@@ -1824,7 +1829,6 @@ void DragDropManager::DoDragStartAnimation(
         static_cast<int32_t>(event.GetGlobalLocation().GetY()) };
     Offset newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(event.GetGlobalLocation().GetX()),
         static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
-    prePointerOffset_ = { newOffset.GetX(), newOffset.GetY() };
     curPointerOffset_ = { newOffset.GetX(), newOffset.GetY() };
     currentAnimationCnt_ = 0;
     allAnimationCnt_ = 0;

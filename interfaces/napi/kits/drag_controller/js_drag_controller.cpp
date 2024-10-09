@@ -119,6 +119,7 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx);
 bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value customBuilder, int arrayLength);
 ParameterType getParameterType(DragControllerAsyncCtx* asyncCtx);
 void SetMouseDragMonitorState(DragControllerAsyncCtx *asyncCtx, bool state);
+void HandleExecuteDrag(napi_env env, DragControllerAsyncCtx *asyncCtx);
 
 class DragAction {
 public:
@@ -555,6 +556,18 @@ void SetMouseDragMonitorState(DragControllerAsyncCtx *asyncCtx, bool state)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Set mouse drag monitor state %{public}d success", state);
+}
+
+void HandleExecuteDrag(napi_env env, DragControllerAsyncCtx *asyncCtx)
+{
+    ParameterType parameterType = getParameterType(asyncCtx);
+    if (parameterType == ParameterType::DRAGITEMINFO) {
+        OnComplete(asyncCtx);
+    } else if (parameterType == ParameterType::CUSTOMBUILDER) {
+        GetPixelMapByCustom(asyncCtx);
+    } else {
+        NapiThrow(env, "parameter parsing error.", ERROR_CODE_PARAM_INVALID);
+    }
 }
 
 void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNotifyMsg,
@@ -1024,11 +1037,18 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
     }
     auto callback = [asyncCtx](std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode,
         std::function<void()> finishCallback) {
-        if (finishCallback) {
-            finishCallback();
-        }
-        CHECK_NULL_VOID(pixelMap);
         CHECK_NULL_VOID(asyncCtx);
+        auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [finishCallback]() {
+                CHECK_NULL_VOID(finishCallback);
+                finishCallback();
+            },
+            TaskExecutor::TaskType::JS, "ArkUIGetPixelMapByCustom");
+        CHECK_NULL_VOID(pixelMap);
         asyncCtx->errCode = errCode;
         asyncCtx->pixelMap = std::move(pixelMap);
         OnComplete(asyncCtx);
@@ -1056,11 +1076,18 @@ bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value custo
     }
     auto callback = [asyncCtx, arrayLength](
         std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode, std::function<void()> finishCallback) {
-        if (finishCallback) {
-            finishCallback();
-        }
-        CHECK_NULL_VOID(pixelMap);
         CHECK_NULL_VOID(asyncCtx);
+        auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [finishCallback]() {
+                CHECK_NULL_VOID(finishCallback);
+                finishCallback();
+            },
+            TaskExecutor::TaskType::JS, "ArkUIGetPixelMapArrayByCustom");
+        CHECK_NULL_VOID(pixelMap);
         asyncCtx->errCode = errCode;
         asyncCtx->pixelMapList.push_back(std::move(pixelMap));
         asyncCtx->parseBuilderCount++;
@@ -1555,6 +1582,8 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     if (!CheckAndParseParams(dragAsyncContext, errMsg)) {
         NapiThrow(env, errMsg, ERROR_CODE_PARAM_INVALID);
         napi_close_escapable_handle_scope(env, scope);
+        delete dragAsyncContext;
+        dragAsyncContext = nullptr;
         return nullptr;
     }
     napi_value result = nullptr;
@@ -1563,6 +1592,8 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
     if (!container) {
         NapiThrow(env, "get container failed.", ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
+        delete dragAsyncContext;
+        dragAsyncContext = nullptr;
         return nullptr;
     }
     if (CheckDragging(container)) {
@@ -1581,14 +1612,7 @@ static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
         return result;
     }
     SetMouseDragMonitorState(dragAsyncContext, true);
-    ParameterType parameterType = getParameterType(dragAsyncContext);
-    if (parameterType == ParameterType::DRAGITEMINFO) {
-        OnComplete(dragAsyncContext);
-    } else if (parameterType == ParameterType::CUSTOMBUILDER) {
-        GetPixelMapByCustom(dragAsyncContext);
-    } else {
-        NapiThrow(env, "parameter parsing error.", ERROR_CODE_PARAM_INVALID);
-    }
+    HandleExecuteDrag(env, dragAsyncContext);
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
     return result;
