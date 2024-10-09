@@ -2423,4 +2423,46 @@ HWTEST_F(TitleBarTestNg, OnLanguageConfigurationUpdate001, TestSize.Level1)
     auto isAccessibilityGroup = accessibilityProperty->IsAccessibilityGroup();
     ASSERT_EQ(isAccessibilityGroup, true);
 }
+
+/**
+ * @tc.name: TitleBarPatternLongPress
+ * @tc.desc: Test TitleBarPattern back button long press event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set backButton to TitleBarNode.
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    titleBarNode->SetBackButton(backButton);
+
+    /**
+     * @tc.steps: step2. Set fontScale to aging scale.
+     */
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 2.0f;
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialogNode != nullptr
+     */
+    titleBarPattern->HandleLongPress(backButton);
+    auto dialogNode = titleBarPattern->dialogNode_;
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialogNode = nullptr
+     */
+    titleBarPattern->HandleLongPressActionEnd();
+    ASSERT_EQ(dialogNode, nullptr);
+}
 } // namespace OHOS::Ace::NG
