@@ -3290,6 +3290,7 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     }
     if (info.GetFingerList().size() > 1) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "More than one finger detected, ignoring this long press event");
+        return;
     }
     if (sourceType_ == SourceType::MOUSE && hasUrlSpan_) {
         HandleUrlSpanShowShadow(info.GetLocalLocation(), info.GetGlobalLocation(), GetUrlPressColor());
