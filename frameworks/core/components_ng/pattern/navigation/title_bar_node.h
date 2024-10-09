@@ -92,6 +92,8 @@ public:
 
     void MarkIsInitialTitle(bool isInitialTitle);
 
+    void OnAttachToMainTree(bool recursive) override;
+
 private:
     RefPtr<UINode> backButton_;
     RefPtr<UINode> title_;
