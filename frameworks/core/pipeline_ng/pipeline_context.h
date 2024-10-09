@@ -157,6 +157,8 @@ public:
 
     void HandlePenHoverOut(const TouchEvent& point) override;
 
+    void OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
+
     void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
     void DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
