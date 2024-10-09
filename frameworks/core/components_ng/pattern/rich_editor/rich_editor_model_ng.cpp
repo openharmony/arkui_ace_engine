@@ -460,4 +460,19 @@ void RichEditorModelNG::SetRequestKeyboardOnFocus(FrameNode* frameNode, bool nee
     richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);
 }
 
+void RichEditorModelNG::SetImagePreviewMenuParam(std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+}
+
+void RichEditorModelNG::SetImagePreviewMenuParam(FrameNode* frameNode,
+    std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+}
 } // namespace OHOS::Ace::NG

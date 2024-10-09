@@ -206,6 +206,15 @@ public:
         WeakPtr<RichEditorPattern> pattern_;
     };
 
+    struct OneStepDragParam {
+        std::function<void()> menuBuilder = nullptr;
+        std::function<void()> previewBuilder = nullptr;
+        std::function<void(int32_t, int32_t)> onAppear = nullptr;
+        MenuParam menuParam;
+        OneStepDragParam(const std::function<void()>& builder, const SelectMenuParam& selectMenuParam);
+        MenuParam GetMenuParam(const RefPtr<ImageSpanNode>& imageNode);
+    };
+
     int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
 
     bool InitPreviewText(const std::string& previewTextValue, const PreviewRange range);
@@ -462,8 +471,6 @@ public:
     std::optional<struct UpdateSpanStyle> GetTypingStyle();
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool updateCaret = true);
-    void DisableDrag(RefPtr<ImageSpanNode> imageNode);
-    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     int32_t AddTextSpan(TextSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
@@ -861,6 +868,8 @@ public:
     NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     bool IsTextEditableForStylus() const override;
 
+    void SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam);
+
 protected:
     bool CanStartAITask() override;
     template<typename T>
@@ -952,6 +961,7 @@ private:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
+    void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
     void ResetSelectionAfterAddSpan(bool isPaste);
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
@@ -1148,6 +1158,13 @@ private:
     }
 
     OffsetF GetGlobalOffset() const;
+    void EnableImageDrag(const RefPtr<ImageSpanNode>& imageNode, bool isEnable);
+    void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
+    void EnableOneStepDrag(const RefPtr<ImageSpanNode>& imageNode);
+    void SetImageSelfResponseEvent(bool isEnable);
+    void CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub);
+    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
+    void UpdateImagePreviewParam();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1259,6 +1276,9 @@ private:
     bool isModifyingContent_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
     std::unordered_map<std::string, RefPtr<SpanItem>> placeholderSpansMap_;
+    std::shared_ptr<OneStepDragParam> oneStepDragParam_ = nullptr;
+    std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
+    bool isImageSelfResponseEvent_ = true;
 };
 } // namespace OHOS::Ace::NG
 
