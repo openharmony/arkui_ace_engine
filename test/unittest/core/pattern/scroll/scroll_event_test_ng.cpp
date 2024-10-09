@@ -517,10 +517,9 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll004, TestSize.Level1)
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_EQ(pattern_->GetScrollableDistance(), 0);
 
-    Offset startOffset = Offset();
     float dragDelta = 10.f;
     MockAnimationManager::GetInstance().SetTicks(TICK);
-    DragAction(frameNode_, startOffset, dragDelta, DRAG_VELOCITY);
+    DragAction(frameNode_, Offset(), dragDelta, DRAG_VELOCITY);
     EXPECT_TRUE(Position(dragDelta));
     EXPECT_TRUE(TickByVelocityPosition(DRAG_VELOCITY, dragDelta + DRAG_VELOCITY));
     EXPECT_TRUE(TickPosition((dragDelta + DRAG_VELOCITY) / TICK));
@@ -529,7 +528,7 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll004, TestSize.Level1)
 
 /**
  * @tc.name: HandleDragOverScroll005
- * @tc.desc: Handle drag over top in EdgeEffect::FADE, can not drag over
+ * @tc.desc: Handle drag over edge in EdgeEffect::FADE, can not drag over
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollEventTestNg, HandleDragOverScroll005, TestSize.Level1)
@@ -542,89 +541,50 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll005, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
 
-    Offset startOffset = Offset();
-    float dragDelta = 10.f;
-    MockAnimationManager::GetInstance().SetTicks(1);
-    DragAction(frameNode_, startOffset, dragDelta, DRAG_VELOCITY);
-    EXPECT_TRUE(TickPosition(0));
+    /**
+     * @tc.steps: step2. Drag over the top
+     * @tc.expected: Can not drag over
+     */
+    DragAction(frameNode_, Offset(), 10, DRAG_VELOCITY);
+    EXPECT_TRUE(Position(0));
+
+    /**
+     * @tc.steps: step2. Scroll to bottom and drag over the bottom
+     * @tc.expected: Can not drag over
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    DragAction(frameNode_, Offset(), -10, -DRAG_VELOCITY);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 }
 
 /**
  * @tc.name: HandleDragOverScroll006
- * @tc.desc: Handle drag over bottom in EdgeEffect::FADE, can not drag over
+ * @tc.desc: Handle drag over edge in EdgeEffect::NONE, can not drag over
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollEventTestNg, HandleDragOverScroll006, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. EdgeEffect::FADE
-     */
-    ScrollModelNG model = CreateScroll();
-    model.SetEdgeEffect(EdgeEffect::FADE, true);
-    CreateContent();
-    CreateScrollDone();
-    EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
-
-    /**
-     * @tc.steps: step2. Scroll to bottom and drag
-     */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
-
-    Offset startOffset = Offset();
-    float dragDelta = -10.f;
-    MockAnimationManager::GetInstance().SetTicks(TICK);
-    DragAction(frameNode_, startOffset, dragDelta, -DRAG_VELOCITY);
-    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
-}
-
-/**
- * @tc.name: HandleDragOverScroll007
- * @tc.desc: Handle drag over top in EdgeEffect::NONE, can not drag over
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollEventTestNg, HandleDragOverScroll007, TestSize.Level1)
-{
-    /**
      * @tc.steps: step1. EdgeEffect::NONE
      */
     CreateScroll();
     CreateContent();
     CreateScrollDone();
 
-    Offset startOffset = Offset();
-    float dragDelta = 10.f;
-    MockAnimationManager::GetInstance().SetTicks(TICK);
-    DragAction(frameNode_, startOffset, dragDelta, DRAG_VELOCITY);
-    EXPECT_TRUE(TickPosition(0));
-}
-
-/**
- * @tc.name: HandleDragOverScroll008
- * @tc.desc: Handle drag over bottom in EdgeEffect::NONE, can not drag over
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollEventTestNg, HandleDragOverScroll008, TestSize.Level1)
-{
     /**
-     * @tc.steps: step1. EdgeEffect::NONE
+     * @tc.steps: step2. Drag over the top
+     * @tc.expected: Can not drag over
      */
-    CreateScroll();
-    CreateContent();
-    CreateScrollDone();
-    EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
+    DragAction(frameNode_, Offset(), 10, DRAG_VELOCITY);
+    EXPECT_TRUE(Position(0));
 
     /**
-     * @tc.steps: step2. Scroll to bottom and drag
+     * @tc.steps: step2. Scroll to bottom and drag over the bottom
+     * @tc.expected: Can not drag over
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    DragAction(frameNode_, Offset(), -10, -DRAG_VELOCITY);
     EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
-
-    Offset startOffset = Offset();
-    float dragDelta = -10.f;
-    MockAnimationManager::GetInstance().SetTicks(TICK);
-    DragAction(frameNode_, startOffset, dragDelta, -DRAG_VELOCITY);
-    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 }
 
 /**
