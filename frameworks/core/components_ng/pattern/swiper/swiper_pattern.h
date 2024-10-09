@@ -859,6 +859,8 @@ private:
      */
     void CloseTheGap(float& offset);
 
+    ScrollResult HandleOutBoundary(float offset, int32_t source, float velocity);
+
     ScrollResult HandleScroll(
         float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
 

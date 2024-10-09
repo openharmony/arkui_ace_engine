@@ -36,6 +36,7 @@ enum class NestedState {
     GESTURE = 0,
     CHILD_SCROLL,
     CHILD_OVER_SCROLL,
+    CHILD_CHECK_OVER_SCROLL,
 };
 
 struct OverScrollOffset {
