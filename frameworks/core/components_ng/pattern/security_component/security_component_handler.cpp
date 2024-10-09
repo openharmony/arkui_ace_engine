@@ -291,7 +291,7 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
 {
     RefPtr<RenderContext> renderContext = node->GetRenderContext();
     auto frameRect = renderContext->GetPaintRectWithTransform();
-    frameRect.SetOffset(node->GetOffsetRelativeToWindow());
+    frameRect.SetOffset(node->GetPositionToScreenWithTransform());
     auto visibleRect = frameRect;
     auto parent = node->GetParent();
     while (parent != nullptr) {
@@ -308,8 +308,8 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
             continue;
         }
         GetVisibleRect(parentNode, visibleRect);
-        double currentVisibleRatio = CalculateCurrentVisibleRatio(visibleRect, frameRect);
-        if (!NearEqual(currentVisibleRatio, 1) && (visibleRect.IsValid() || frameRect.IsValid())) {
+        bool isClipped = IsOutOfParentWithRound(visibleRect, frameRect);
+        if (isClipped && (visibleRect.IsValid() || frameRect.IsValid())) {
             LOGW("SecurityComponentCheckFail: Parents clip is set, security component is not completely displayed.");
             LOGW("visibleWidth: %{public}f, visibleHeight: %{public}f, frameWidth: %{public}f, frameHeight: %{public}f",
                 visibleRect.Width(), visibleRect.Height(), frameRect.Width(), frameRect.Height());
@@ -323,16 +323,25 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node)
 void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect)
 {
     RectF parentRect = node->GetRenderContext()->GetPaintRectWithTransform();
-    parentRect.SetOffset(node->GetOffsetRelativeToWindow());
+    parentRect.SetOffset(node->GetPositionToScreenWithTransform());
     visibleRect = visibleRect.Constrain(parentRect);
 }
 
-double SecurityComponentHandler::CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect)
+bool SecurityComponentHandler::IsOutOfParentWithRound(const RectF& visibleRect, const RectF& renderRect)
 {
     if (!visibleRect.IsValid() || !renderRect.IsValid()) {
-        return 0.0;
+        return true;
     }
-    return visibleRect.Width() * visibleRect.Height() / (renderRect.Width() * renderRect.Height());
+
+    if (NearEqual(visibleRect.Width(), 0.0) || NearEqual(visibleRect.Height(), 0.0) ||
+        NearEqual(renderRect.Width(), 0.0) || NearEqual(renderRect.Height(), 0.0)) {
+        return true;
+    }
+
+    return LessNotEqual(renderRect.Left() + 1.0, visibleRect.Left()) ||
+        GreatNotEqual(renderRect.Right(), visibleRect.Right() + 1.0) ||
+        LessNotEqual(renderRect.Top() + 1.0, visibleRect.Top()) ||
+        GreatNotEqual(renderRect.Bottom(), visibleRect.Bottom() + 1.0);
 }
 
 bool SecurityComponentHandler::GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId)
