@@ -885,6 +885,7 @@ private:
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const;
+    void SetSurfaceDensity(double density);
     void InitInOfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
     bool FilterScrollEventHandleOffset(const float offset);
@@ -1079,6 +1080,7 @@ private:
     bool clickEventInitialized_ = false;
     bool clickedFromOverlay_ = false;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    int32_t densityCallbackId_ = 0;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
