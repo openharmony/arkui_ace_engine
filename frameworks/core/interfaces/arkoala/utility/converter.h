@@ -421,7 +421,7 @@ namespace Converter {
     inline PaddingProperty Convert(const Ark_Length& src)
     {
         auto value = OptConvert<CalcLength>(src);
-        return { .left = value, .top = value, .right = value, .bottom = value
+        return { .left = value, .right = value, .top = value, .bottom = value
         };
     }
 
