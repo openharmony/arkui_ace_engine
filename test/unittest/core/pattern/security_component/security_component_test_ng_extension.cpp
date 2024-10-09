@@ -469,17 +469,17 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCalculateCurrentVisibleRatio001
- * @tc.desc: Test security component CalculateCurrentVisibleRatio
+ * @tc.name: SecurityComponentIsOutOfParentWithRound001
+ * @tc.desc: Test security component IsOutOfParentWithRound
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCalculateCurrentVisibleRatio001, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentIsOutOfParentWithRound001, TestSize.Level1)
 {
-    RectF invalidRect(-1.0, -1.0, -1.0, -1.0);
-    RectF validRect(1.0, 1.0, 1.0, 1.0);
-    EXPECT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(invalidRect, validRect), 0.0);
-    EXPECT_EQ(SecurityComponentHandler::CalculateCurrentVisibleRatio(validRect, invalidRect), 0.0);
+    RectF smallRect(1.0, 1.0, 10.0, 10.0);
+    RectF largerRect(1.0, 1.0, 12.0, 12.0);
+    EXPECT_EQ(SecurityComponentHandler::IsOutOfParentWithRound(smallRect, largerRect), true);
+    EXPECT_EQ(SecurityComponentHandler::IsOutOfParentWithRound(largerRect, smallRect), false);
 }
 
 /**
