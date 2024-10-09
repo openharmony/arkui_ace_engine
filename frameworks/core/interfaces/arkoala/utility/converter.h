@@ -407,7 +407,8 @@ namespace Converter {
     template<>
     inline Dimension Convert(const Ark_String& src)
     {
-        return Dimension::FromString(src.chars);
+        auto str = std::string(src.chars, src.chars == nullptr ? 0 : src.length);
+        return Dimension::FromString(str);
     }
 
     template<>
@@ -451,7 +452,8 @@ namespace Converter {
     template<>
     inline Color Convert(const Ark_String& src)
     {
-        return Color::FromString(src.chars);
+        auto str = std::string(src.chars, src.chars == nullptr ? 0 : src.length);
+        return Color::FromString(str);
     }
 
     template<> CalcLength Convert(const Ark_Length& src);

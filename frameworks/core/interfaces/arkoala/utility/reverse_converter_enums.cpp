@@ -23,6 +23,20 @@
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
+void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src)
+{
+    switch (src) {
+        case ScrollEdge::TOP:
+        case ScrollEdge::LEFT: dst = Ark_Edge::ARK_EDGE_TOP;
+            break;
+        case ScrollEdge::BOTTOM:
+        case ScrollEdge::RIGHT: dst = Ark_Edge::ARK_EDGE_BOTTOM;
+            break;
+        default: dst = static_cast<Ark_Edge>(-1);
+            LOGE("Unexpected enum value in ScrollEdge: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src)
 {
     switch (src) {

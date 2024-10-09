@@ -30,7 +30,11 @@
 #include "core/common/ime/text_input_action.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+<<<<<<< HEAD
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+=======
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+>>>>>>> c72a57c109 (add implementation and tests for modfier methods)
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
@@ -197,7 +201,11 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src);
+<<<<<<< HEAD
     void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
+=======
+    void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
+>>>>>>> c72a57c109 (add implementation and tests for modfier methods)
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);

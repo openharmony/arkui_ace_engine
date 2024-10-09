@@ -37,6 +37,17 @@ inline OffsetT<CalcDimension> Convert(const Ark_OffsetOptions& value)
     }
     return dst;
 }
+template<>
+void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
+{
+    switch (src) {
+    case ARK_SCROLL_DIRECTION_VERTICAL: dst = Axis::VERTICAL; break;
+    case ARK_SCROLL_DIRECTION_HORIZONTAL: dst = Axis::HORIZONTAL; break;
+    case ARK_SCROLL_DIRECTION_FREE: dst = Axis::FREE; break;
+    case ARK_SCROLL_DIRECTION_NONE: dst = Axis::NONE; break;
+    default: LOGE("Unexpected enum value in Ark_ScrollDirection: %{public}d", src);
+    }
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -55,11 +66,20 @@ namespace ScrollAttributeModifier {
 void ScrollableImpl(Ark_NativePointer node,
                     Ark_ScrollDirection value)
 {
+<<<<<<< HEAD
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //ScrollModelNG::SetScrollable(frameNode, convValue);
+=======
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto direction = Converter::OptConvert<Axis>(value);
+    if (direction) {
+        ScrollModelNG::SetAxis(frameNode, direction.value());
+    }
+>>>>>>> c72a57c109 (add implementation and tests for modfier methods)
 }
 void OnScrollImpl(Ark_NativePointer node,
                   const Callback_Number_Number_Void* value)
@@ -79,6 +99,7 @@ void OnScrollImpl(Ark_NativePointer node,
 void OnWillScrollImpl(Ark_NativePointer node,
                       const Ark_CustomObject* value)
 {
+<<<<<<< HEAD
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
@@ -92,15 +113,38 @@ void OnDidScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
+=======
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode](Dimension xOffset, Dimension yOffset, ScrollState state) {
+        auto _xOffset = Converter::ArkValue<Ark_Number>(xOffset);
+        auto _yOffset = Converter::ArkValue<Ark_Number>(yOffset);
+        auto scrollState = Converter::ArkValue<Ark_ScrollState>(state);
+        GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
+            onDidScroll(frameNode->GetId(), _xOffset, _yOffset, scrollState);
+    };
+    ScrollModelNG::SetOnDidScroll(frameNode, onEvent);
+>>>>>>> c72a57c109 (add implementation and tests for modfier methods)
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,
                       const OnScrollEdgeCallback* value)
 {
+<<<<<<< HEAD
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetOnScrollEdge(frameNode, convValue);
+=======
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [frameNode, event](ScrollEdge edge) {
+        auto scrollEdge = Converter::ArkValue<Ark_Edge>(edge);
+        GetFullAPI()->getEventsAPI()->getScrollEventsReceiver()->
+            onScrollEdge(frameNode->GetId(), scrollEdge);
+    };
+    ScrollModelNG::SetOnScrollEdge(frameNode, onEvent);
+>>>>>>> c72a57c109 (add implementation and tests for modfier methods)
 }
 void OnScrollStartImpl(Ark_NativePointer node,
                        const VoidCallback* value)
@@ -141,29 +185,61 @@ void OnScrollStopImpl(Ark_NativePointer node,
 void ScrollBarImpl(Ark_NativePointer node,
                    Ark_BarState value)
 {
+<<<<<<< HEAD
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //ScrollModelNG::SetScrollBar(frameNode, convValue);
+=======
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto displayMode = Converter::OptConvert<DisplayMode>(barState);
+    if (displayMode.has_value()) {
+        ScrollModelNG::SetScrollBar(frameNode, displayMode.value());
+    }
+>>>>>>> c72a57c109 (add implementation and tests for modfier methods)
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
                         const Ark_Union_Color_Number_String* value)
 {
+<<<<<<< HEAD
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetScrollBarColor(frameNode, convValue);
+=======
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(color);
+    auto colorVal = Converter::OptConvert<Color>(*color);
+    if (colorVal)
+    {
+        ScrollModelNG::SetScrollBarColor(frameNode, colorVal.value());
+    }
+>>>>>>> c72a57c109 (add implementation and tests for modfier methods)
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
                         const Ark_Union_Number_String* value)
 {
+<<<<<<< HEAD
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetScrollBarWidth(frameNode, convValue);
+=======
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+
+    auto width = Converter::OptConvert<Dimension>(*value);
+    if (width)
+    {
+        ScrollModelNG::SetScrollBarWidth(frameNode, width.value());
+    }
+>>>>>>> c72a57c109 (add implementation and tests for modfier methods)
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
                             const OnScrollFrameBeginCallback* value)
@@ -194,11 +270,22 @@ void EnableScrollInteractionImpl(Ark_NativePointer node,
 void FrictionImpl(Ark_NativePointer node,
                   const Ark_Union_Number_Resource* value)
 {
+<<<<<<< HEAD
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetFriction(frameNode, convValue);
+=======
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto frictionVal = Converter::OptConvert<float>(*value);
+    if (frictionVal)
+    {
+        ScrollModelNG::SetFriction(frameNode, frictionVal.value());
+    }
+>>>>>>> c72a57c109 (add implementation and tests for modfier methods)
 }
 void ScrollSnapImpl(Ark_NativePointer node,
                     const Ark_ScrollSnapOptions* value)
