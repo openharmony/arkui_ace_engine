@@ -352,7 +352,7 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
     circleStatePen.SetAntiAlias(true);
     // add animate color
     circleStatePen.SetColor(ToRSColor(boardColor_->Get()));
-    circleStatePen.SetWidth(hotCircleShadowWidth_);
+    circleStatePen.SetWidth(isEnlarge_ ? hotCircleShadowWidth_ * scaleValue_ : hotCircleShadowWidth_);
     canvas.AttachPen(circleStatePen);
     auto blockSize = blockSize_->Get();
     float diameter = std::min(blockSize.Width(), blockSize.Height());
