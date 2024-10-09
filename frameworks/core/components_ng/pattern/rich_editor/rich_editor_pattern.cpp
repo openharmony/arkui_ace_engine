@@ -10438,17 +10438,16 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     // While previewing + long press and move, then shall select content.
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
-    Offset textOffset = ConvertTouchOffsetToTextOffset(touchOffset);
+    Offset localOffset = AdjustLocalOffsetOnMoveEvent(touchOffset);
+    Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
     SetCaretPositionWithAffinity(positionWithAffinity);
     MoveCaretToContentRect();
     int32_t currentPosition = GreatNotEqual(textOffset.GetY(), paragraphs_.GetHeight())
                                 ? GetTextContentLength()
                                 : caretPosition_;
-    auto localOffset = OffsetF(touchOffset.GetX(), touchOffset.GetY());
     if (magnifierController_ && GetTextContentLength() > 0) {
-        magnifierController_->SetLocalOffset(localOffset);
+        magnifierController_->SetLocalOffset(OffsetF(localOffset.GetX(), localOffset.GetY()));
     }
     auto [initSelectStart, initSelectEnd] = initSelector_;
     int32_t start = std::min(initSelectStart, currentPosition);
