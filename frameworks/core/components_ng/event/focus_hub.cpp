@@ -887,7 +887,7 @@ bool FocusHub::RequestNextFocusOfKeyTab(const KeyEvent& keyEvent)
                         ContainerScope scope(instanceId);
                         auto focusHub = weak.Upgrade();
                         CHECK_NULL_VOID(focusHub);
-                        focusHub->FocusToHeadOrTailChild(true);
+                        focusHub->HandleLastFocusNodeInFocusWindow();
                     }, TaskExecutor::TaskType::UI,
                     DELAY_TIME_FOR_RESET_UEC, "FocusToHeadOrTailChildInUEC");
                 return false;
@@ -913,6 +913,18 @@ bool FocusHub::RequestNextFocusOfKeyTab(const KeyEvent& keyEvent)
         context->SetIsFocusingByTab(false);
     }
     return ret;
+}
+
+void FocusHub::HandleLastFocusNodeInFocusWindow()
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto* context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    FocusToHeadOrTailChild(true);
+    if (!context->IsWindowFocused()) {
+        LostFocus(BlurReason::WINDOW_BLUR);
+    }
 }
 
 void FocusHub::RequestFocus() const

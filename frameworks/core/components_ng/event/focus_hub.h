@@ -514,6 +514,7 @@ public:
     bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
+    void HandleLastFocusNodeInFocusWindow();
 
     static void LostFocusToViewRoot();
 
