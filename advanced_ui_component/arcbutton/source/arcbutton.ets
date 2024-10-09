@@ -211,7 +211,7 @@ export class ArcButtonOptions {
   @Trace public pressedTextColor: ColorMetrics
   @Trace public fontStyle: FontStyle
   @Trace public fontFamily: string | Resource
-  @Trace public fontMargin: LocalizedMargi
+  @Trace public fontMargin: LocalizedMargin
   @Trace public onTouch?: Callback<TouchEvent>
   @Trace public onClick?: Callback<ClickEvent>
 
@@ -351,10 +351,10 @@ export struct ArcButton {
   }
 
   private checkTheme() {
-    if(arcButtonTheme.ARC_CIRCLE_DIAMETER < arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2) {
+    if (arcButtonTheme.ARC_CIRCLE_DIAMETER < arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2) {
       arcButtonTheme.ARC_CIRCLE_DIAMETER = arcButtonTheme.DIAL_CIRCLE_DIAMETER / 2
     }
-    if(arcButtonTheme.BUTTON_HEIGHT > arcButtonTheme.DIAL_CIRCLE_DIAMETER / 4) {
+    if (arcButtonTheme.BUTTON_HEIGHT > arcButtonTheme.DIAL_CIRCLE_DIAMETER / 4) {
       arcButtonTheme.BUTTON_HEIGHT = arcButtonTheme.DIAL_CIRCLE_DIAMETER / 4
     }
     if (arcButtonTheme.CHAMFER_CIRCLE_RADIUS > arcButtonTheme.BUTTON_HEIGHT / 2) {
@@ -589,7 +589,7 @@ class DataProcessUtil {
    * @returns 距离
    */
   calculateDistance(point1: ArcButtonPoint, point2: ArcButtonPoint): number {
-    return Math.sqrt((point2.x - point1.x)**2 + (point2.y - point1.y)**2)
+    return Math.sqrt((point2.x - point1.x) ** 2 + (point2.y - point1.y) ** 2)
   }
 
   calculateIntersection(circleCenter: ArcButtonPoint, circleRadius: number, point: ArcButtonPoint): ArcButtonPoint {
@@ -614,18 +614,18 @@ class DataProcessUtil {
     if (m != -1) {
       const A = Math.pow(m, 2) + 1
       const B = 2 * (m * b - m * k - h)
-      const C = k**2 - circleRadius**2 + h**2 - 2 * b * k + b**2
+      const C = k ** 2 - circleRadius ** 2 + h ** 2 - 2 * b * k + b ** 2
 
-      const x1 = (-B + (B**2 - 4 * A * C)**0.5) / (2 * A)
-      const x2 = (-B - (B**2 - 4 * A * C)**0.5) / (2 * A)
+      const x1 = (-B + (B ** 2 - 4 * A * C) ** 0.5) / (2 * A)
+      const x2 = (-B - (B ** 2 - 4 * A * C) ** 0.5) / (2 * A)
       const y1: number = m * x1 + b
       const y2: number = m * x2 + b
 
       resultPoint = [new ArcButtonPoint(x1, y1), new ArcButtonPoint(x2, y2)]
     } else {
       const x1 = h
-      const y1 = k + (circleRadius**2 - (x1 - h)**2)**0.5
-      const y2 = k - (circleRadius**2 - (x1 - h)**2)**0.5
+      const y1 = k + (circleRadius ** 2 - (x1 - h) ** 2) ** 0.5
+      const y2 = k - (circleRadius ** 2 - (x1 - h) ** 2) ** 0.5
       resultPoint = [new ArcButtonPoint(x1, y1), new ArcButtonPoint(x1, y2)]
     }
 
@@ -654,8 +654,8 @@ class DataProcessUtil {
     const secondCircusCenterY = secondCircus.center.y
 
     // 计算两个圆心之间的距离
-    const distance = Math.sqrt((firstCircusCenterX - secondCircusCenterX)**2 + (firstCircusCenterY -
-      secondCircusCenterY)**2)
+    const distance = Math.sqrt((firstCircusCenterX - secondCircusCenterX) ** 2 + (firstCircusCenterY -
+      secondCircusCenterY) ** 2)
 
     // 检查异常情况
     if (distance > firstCircusR + secondCircusR) {
@@ -670,8 +670,8 @@ class DataProcessUtil {
     }
 
     // 计算交点
-    const a = (firstCircusR**2 - secondCircusR**2 + distance**2) / (2 * distance)
-    const h = Math.sqrt(firstCircusR**2 - a**2)
+    const a = (firstCircusR ** 2 - secondCircusR ** 2 + distance ** 2) / (2 * distance)
+    const h = Math.sqrt(firstCircusR ** 2 - a ** 2)
 
     // 中间变量
     const x2 = firstCircusCenterX + a * (secondCircusCenterX - firstCircusCenterX) / distance
