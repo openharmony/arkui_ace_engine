@@ -51,7 +51,6 @@ const auto ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_NAME = "margin";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_MARGIN_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_NAME = "gutter";
 const auto ATTRIBUTE_BAR_GRID_ALIGN_GUTTER_DEFAULT_VALUE = "0.00px";
-const auto COLOR_BLACK = "#FF000000";
 const auto COLOR_BLUE = "#FF0000FF";
 const auto COLOR_GREEN = "#FF00FF00";
 const auto COLOR_RED = "#FFFF0000";
@@ -59,7 +58,7 @@ const auto COLOR_TRANSPARENT = "#00000000";
 const auto RES_NAME = NamedResourceId{"RES_NAME", NodeModifier::ResourceType::COLOR};
 const auto RES_ID = IntResourceId{11111, NodeModifier::ResourceType::COLOR};
 const auto RES_STRING_FAKE_ID = IntResourceId{22222, NodeModifier::ResourceType::STRING};
-const auto RES_STRING_REGISTRED_ID = IntResourceId{33333, NodeModifier::ResourceType::STRING};
+const auto RES_STRING_REGISTERED_ID = IntResourceId{33333, NodeModifier::ResourceType::STRING};
 
 Opt_ScrollableBarModeOptions CreateScrollableMode(Opt_Length margin, Ark_LayoutStyle layoutStyle)
 {
@@ -194,7 +193,7 @@ public:
         SetupTheme<TabTheme>();
         fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
         EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks(_)).Times(AnyNumber());
-        AddResource(RES_STRING_REGISTRED_ID, "#FF00FF00");
+        AddResource(RES_STRING_REGISTERED_ID, "#FF00FF00");
     }
 };
 
@@ -436,7 +435,7 @@ HWTEST_F(TabsModifierTest, setBarMode0Test, TestSize.Level1)
     };
     std::string scrollableMode =
         "BarMode.Scrollable,{\"margin\":\"0.00vp\",\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_CENTER\"}";
-  
+
     for (const auto& [value, expectVal] : BarMode0TestPlan) {
         modifier_->setBarMode1(node_, ARK_BAR_MODE_SCROLLABLE, nullptr);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
@@ -474,7 +473,7 @@ HWTEST_F(TabsModifierTest, setBarMode1Test, TestSize.Level1)
         modifier_->setBarMode1(node_, value, nullptr);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
         EXPECT_EQ(checkVal, expectVal);
-    
+
         modifier_->setBarMode0(node_, ARK_BAR_MODE_FIXED);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
         EXPECT_EQ(checkVal, "BarMode.Fixed");
@@ -508,7 +507,7 @@ HWTEST_F(TabsModifierTest, setBarMode2Test, TestSize.Level1)
         modifier_->setBarMode2(node_, ARK_BAR_MODE_SCROLLABLE, &value);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
         EXPECT_EQ(checkVal, expectVal);
-    
+
         modifier_->setBarMode2(node_, ARK_BAR_MODE_FIXED, &value);
         checkVal = GetAttrValue<std::string>(GetJsonValue(node_), PROP_NAME);
         EXPECT_EQ(checkVal, "BarMode.Fixed");
@@ -1078,7 +1077,7 @@ static std::vector<std::tuple<std::string, ResourceColor, std::string>> barBackg
     {"0.5f", Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT},
     {"#11223344", Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344"},
     {"65535", Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF"},
-    {"incorrect_color", Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_BLACK},
+    {"incorrect_color", Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_TRANSPARENT},
     {"empty string", Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_TRANSPARENT}
 };
 
@@ -1111,7 +1110,7 @@ static std::vector<std::tuple<std::string, ResourceColor, std::string>> barBackg
         COLOR_TRANSPARENT},
     {"RED2", Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(CreateResource(RES_ID)),
         COLOR_RED}, // Color::RED is result of mocked ThemeConstants::GetColor(int)
-    {"GREEN", Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(CreateResource(RES_STRING_REGISTRED_ID)),
+    {"GREEN", Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(CreateResource(RES_STRING_REGISTERED_ID)),
         COLOR_GREEN}
 };
 
