@@ -56,7 +56,7 @@ private:
     void HandleTouchPullDown(const TouchEvent& touchEvent);
     void HandleTouchPullUp(const TouchEvent& touchEvent);
     void HandleTouchPullMove(const TouchEvent& touchEvent);
-    float GetUpVelocity(const TouchEvent& lastMoveInfo,
+    double GetUpVelocity(const TouchEvent& lastMoveInfo,
         const TouchEvent& upEventInfo);
     void RecordTouchEvent(const TouchEvent& touchEvent, bool enforce = false);
 
