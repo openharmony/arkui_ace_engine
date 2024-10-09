@@ -2606,7 +2606,6 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         targetComponent_ = targetComponent;
     }
     targetComponent->SetNode(WeakClaim(this));
-    AddJudgeToTargetComponent(targetComponent);
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
@@ -2708,6 +2707,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             break;
         }
     }
+
+    AddJudgeToTargetComponent(targetComponent);
 
     // first update HitTestResult by children status.
     if (consumed) {
