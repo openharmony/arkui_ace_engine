@@ -2147,7 +2147,7 @@ void ListLayoutAlgorithm::PredictBuildV2(
             listMainSizeValues.forward = (*it).forwardCacheCount > -1;
             listMainSizeValues.backward = (*it).backwardCacheCount > -1;
             PredictBuildGroup(wrapper, param.groupLayoutConstraint, deadline, (*it).forwardCacheCount,
-                (*it).forwardCacheCount, listMainSizeValues);
+                (*it).backwardCacheCount, listMainSizeValues);
         }
         needMarkDirty = true;
         it = param.items.erase(it);
