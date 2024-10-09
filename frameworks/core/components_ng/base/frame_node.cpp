@@ -2592,7 +2592,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
         bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent);
-        AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList);
+        AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList, touchRestrict.touchTestType);
         if ((!isDispatch) && isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
         }
@@ -4602,7 +4602,8 @@ void FrameNode::RecordExposureInner()
     exposureProcessor_->SetListenState(true);
 }
 
-void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList)
+void FrameNode::AddFrameNodeSnapshot(
+    bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -4617,7 +4618,7 @@ void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<R
         .isHit = isHit,
         .hitTestMode = static_cast<int32_t>(GetHitTestMode()),
         .responseRegionList = responseRegionList };
-    eventMgr->GetEventTreeRecord().AddFrameNodeSnapshot(std::move(info));
+    eventMgr->GetEventTreeRecord(type).AddFrameNodeSnapshot(std::move(info));
 }
 
 int32_t FrameNode::GetUiExtensionId()
