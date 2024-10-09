@@ -7900,6 +7900,9 @@ class ArkRichEditorComponent extends ArkComponent {
     return this;
   }
   dataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
     let detectorConfig = new TextDataDetectorConfig();
     detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
@@ -11146,6 +11149,9 @@ class ArkTextComponent extends ArkComponent {
     return this;
   }
   dataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
     let detectorConfig = new TextDataDetectorConfig();
     detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
@@ -11159,6 +11165,9 @@ class ArkTextComponent extends ArkComponent {
     return this;
   }
   font(value, options) {
+    if (value === undefined || value === null) {
+      return this;
+    }
     let arkTextFont = new ArkTextFont();
     arkTextFont.value = value;
     arkTextFont.enableVariableFontWeight = options?.enableVariableFontWeight;
