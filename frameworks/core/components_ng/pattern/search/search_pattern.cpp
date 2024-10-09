@@ -971,15 +971,11 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
 void SearchPattern::HandleFocusChoiceSearch(const RefPtr<TextFieldPattern>& textFieldPattern, bool recoverFlag)
 {
     PaintSearchFocusState();
-    if (!recoverFlag && !textFieldPattern->GetTextValue().empty()) {
+    if (!recoverFlag && !textFieldPattern->GetTextValue().empty() && !directionKeysMoveFocusOut_) {
         textFieldPattern->NeedRequestKeyboard();
         textFieldPattern->SearchRequestKeyboard();
-        if (directionKeysMoveFocusOut_) {
-            textFieldPattern->HandleFocusEvent();
-        } else {
-            textFieldPattern->HandleOnSelectAll(true); // Select all text
-            textFieldPattern->StopTwinkling();         // Hide caret
-        }
+        textFieldPattern->HandleOnSelectAll(true); // Select all text
+        textFieldPattern->StopTwinkling();         // Hide caret
         return;
     }
     textFieldPattern->HandleFocusEvent();
