@@ -1043,6 +1043,8 @@ public:
         return childrenUpdatedFrom_;
     }
 
+    LayoutConstraintF GetLayoutConstraint() const;
+
 protected:
     void DumpInfo() override;
 
@@ -1066,7 +1068,6 @@ private:
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
-    LayoutConstraintF GetLayoutConstraint() const;
     OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
