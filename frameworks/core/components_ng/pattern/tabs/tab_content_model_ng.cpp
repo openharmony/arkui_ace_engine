@@ -247,6 +247,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         } else {
             tabBarNode->ReplaceChild(oldColumnNode, columnNode);
         }
+        columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         tabBarPattern->AddTabBarItemType(columnNode->GetId(), true);
         tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return;
