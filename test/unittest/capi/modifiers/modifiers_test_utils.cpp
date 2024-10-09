@@ -43,6 +43,22 @@ std::unique_ptr<JsonValue> GetJsonValue(ArkUINodeHandle node)
     return nullptr;
 }
 
+std::unique_ptr<JsonValue> GetLayoutJsonValue(ArkUINodeHandle node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto layout = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layout, nullptr);
+
+    static const InspectorFilter inspector;
+
+    if (auto jsonVal = JsonUtil::Create(true); jsonVal) {
+        layout->ToJsonValue(jsonVal, inspector);
+        return jsonVal;
+    }
+    return nullptr;
+}
+
 Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::NodeModifier::ResourceType type)
 {
     return {
