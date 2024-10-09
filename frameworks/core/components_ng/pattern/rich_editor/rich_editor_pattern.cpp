@@ -6450,7 +6450,7 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
             HandleUrlSpanForegroundClear();
         }
     } else if (touchType == TouchType::MOVE) {
-        auto originalLocaloffset =info.GetTouches().front().GetLocalLocation();
+        auto originalLocaloffset = info.GetTouches().front().GetLocalLocation();
         auto localOffset = AdjustLocalOffsetOnMoveEvent(originalLocaloffset);
         HandleTouchMove(localOffset);
     }
