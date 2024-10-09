@@ -223,6 +223,13 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
 
 bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 {
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "node %{public}s/%{public}d RequestFocusImmediately",
+        GetFrameName().c_str(), GetFrameId());
+    return RequestFocusImmediatelyInner(isJudgeRootTree);
+}
+
+bool FocusHub::RequestFocusImmediatelyInner(bool isJudgeRootTree)
+{
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(context, false);
     auto focusManager = context->GetOrCreateFocusManager();
@@ -1685,6 +1692,18 @@ bool FocusHub::IsFocusableWholePath()
         parent = parent->GetParentFocusHub();
     }
     return IsFocusable();
+}
+
+bool FocusHub::IsSelfFocusableWholePath()
+{
+    auto parent = GetParentFocusHub();
+    while (parent) {
+        if (!parent->IsFocusableNode()) {
+            return false;
+        }
+        parent = parent->GetParentFocusHub();
+    }
+    return IsFocusableNode();
 }
 
 bool FocusHub::IsOnRootTree() const
