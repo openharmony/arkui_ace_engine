@@ -9112,6 +9112,7 @@ AsyncAddComputedV2.computedVars = new Array();
  */
 class ViewV2 extends PUV2ViewBase {
     constructor(parent, elmtId = UINodeRegisterProxy.notRecordingDependencies, extraInfo = undefined) {
+        var _a;
         super(parent, elmtId, extraInfo);
         // Set of elmtIds that need re-render
         this.dirtDescendantElementIds_ = new Set();
@@ -9139,8 +9140,26 @@ class ViewV2 extends PUV2ViewBase {
             return repeat;
         };
         this.setIsV2(true);
-        
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUCreate(this);
     }
+    onGlobalThemeChanged() {
+        this.onWillApplyThemeInternally();
+        this.forceCompleteRerender(false);
+        this.childrenWeakrefMap_.forEach((weakRefChild) => {
+            const child = weakRefChild.deref();
+            if (child) {
+                child.onGlobalThemeChanged();
+            }
+        });
+    }
+    onWillApplyThemeInternally() {
+        var _a;
+        const theme = (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.getFinalTheme(this.id__());
+        if (theme) {
+            this.onWillApplyTheme(theme);
+        }
+    }
+    onWillApplyTheme(theme) { }
     /**
      * The `freezeState` parameter determines whether this @ComponentV2 is allowed to freeze, when inactive
      * Its called with value of the `freezeWhenInactive` parameter from the @ComponentV2 decorator,
@@ -9191,6 +9210,7 @@ class ViewV2 extends PUV2ViewBase {
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
+        var _a;
         
         // if this isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
         // to set and resursively set its children any more
@@ -9220,9 +9240,11 @@ class ViewV2 extends PUV2ViewBase {
         if (this.parent_) {
             this.parent_.removeChild(this);
         }
+        (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onViewPUDelete(this);
     }
     initialRenderView() {
         
+        this.onWillApplyThemeInternally();
         this.initialRender();
         
     }
@@ -9234,8 +9256,10 @@ class ViewV2 extends PUV2ViewBase {
         const _componentName = (classObject && ('name' in classObject)) ? Reflect.get(classObject, 'name') : 'unspecified UINode';
         const _popFunc = (classObject && 'pop' in classObject) ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
+            var _a, _b;
             this.syncInstanceId();
             
+            (_a = PUV2ViewBase.arkThemeScopeManager) === null || _a === void 0 ? void 0 : _a.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             ObserveV2.getObserve().startRecordDependencies(this, elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
@@ -9248,6 +9272,7 @@ class ViewV2 extends PUV2ViewBase {
             }
             ObserveV2.getObserve().stopRecordDependencies();
             ViewStackProcessor.StopGetAccessRecording();
+            (_b = PUV2ViewBase.arkThemeScopeManager) === null || _b === void 0 ? void 0 : _b.onComponentCreateExit(elmtId);
             
             this.restoreInstanceId();
         };
