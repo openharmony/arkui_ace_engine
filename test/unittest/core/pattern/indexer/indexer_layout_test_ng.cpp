@@ -796,6 +796,72 @@ HWTEST_F(IndexerLayoutTestNg, AutoCollapse004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AutoCollapse005
+ * @tc.desc: Test autoCollapse with enough and insufficient height
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerLayoutTestNg, AutoCollapse005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. AutoCollapse is true
+     * @tc.expected: Not fold
+     */
+    std::vector arrayValue = GetMidArrayValue();
+    IndexerModelNG model = CreateIndexer(arrayValue, 0);
+    model.SetAutoCollapse(true);
+    CreateDone();
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
+    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLM");
+
+    /**
+     * @tc.steps: step2. Set Height more than the height of all item
+     * @tc.expected: item height is equal with item size
+     */
+    ViewAbstract::SetHeight(
+        AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT + INDEXER_THIRTEEN_CHARACTERS_CHECK));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::NONE);
+    EXPECT_EQ(GetArrayValueTexts(), "ABCDEFGHIJKLM");
+    EXPECT_EQ(pattern_->maxContentHeight_, (INDEXER_ITEM_SIZE + 1) * INDEXER_THIRTEEN_CHARACTERS_CHECK);
+    EXPECT_EQ(pattern_->itemHeight_, INDEXER_ITEM_SIZE);
+
+    /**
+     * @tc.steps: step3. Set Height less than the height of all item but more than the height of five mode
+     * @tc.expected: item height is equal with item size
+     */
+    ViewAbstract::SetHeight(
+        AceType::RawPtr(frameNode_), CalcLength(LONG_INDEXER_HEIGHT - INDEXER_THIRTEEN_CHARACTERS_CHECK));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->maxContentHeight_, (INDEXER_ITEM_SIZE - 1) * INDEXER_THIRTEEN_CHARACTERS_CHECK);
+    EXPECT_EQ(pattern_->itemHeight_, INDEXER_ITEM_SIZE - 1);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
+    EXPECT_EQ(GetArrayValueTexts(), "A.D.G.J.M");
+    EXPECT_EQ(pattern_->maxContentHeight_, (INDEXER_ITEM_SIZE - 1) * INDEXER_THIRTEEN_CHARACTERS_CHECK);
+    EXPECT_EQ(pattern_->itemHeight_, INDEXER_ITEM_SIZE);
+
+    /**
+     * @tc.steps: step4. Set Height less than the height of five mode
+     * @tc.expected: item height is the average of the height without padding
+     */
+    ViewAbstract::SetHeight(
+        AceType::RawPtr(frameNode_), CalcLength(SHORT_INDEXER_HEIGHT - INDEXER_NINE_CHARACTERS_CHECK));
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->lastCollapsingMode_, IndexerCollapsingMode::FIVE);
+    EXPECT_EQ(GetArrayValueTexts(), "A.D.G.J.M");
+    EXPECT_EQ(pattern_->maxContentHeight_, (INDEXER_ITEM_SIZE - 1) * INDEXER_NINE_CHARACTERS_CHECK);
+    EXPECT_EQ(pattern_->itemHeight_, INDEXER_ITEM_SIZE - 1);
+}
+
+/**
  * @tc.name: InitializingSelected001
  * @tc.desc: Test the initializing Selected in diff IndexerCollapsingMode
  * @tc.type: FUNC
