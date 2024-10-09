@@ -6450,7 +6450,9 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
             HandleUrlSpanForegroundClear();
         }
     } else if (touchType == TouchType::MOVE) {
-        HandleTouchMove(info.GetTouches().front().GetLocalLocation());
+        auto originalLocaloffset =info.GetTouches().front().GetLocalLocation();
+        auto localOffset = AdjustLocalOffsetOnMoveEvent(originalLocaloffset);
+        HandleTouchMove(localOffset);
     }
 }
 
@@ -6547,15 +6549,15 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
         selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     }
     auto preCaretPosition = caretPosition_;
-    auto localOffset = AdjustLocalOffsetOnMoveEvent(offset);
-    Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
+    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
     SetCaretPositionWithAffinity(positionWithAffinity);
     MoveCaretToContentRect();
     StartVibratorByIndexChange(caretPosition_, preCaretPosition);
     CalcAndRecordLastClickCaretInfo(textOffset);
+    auto localOffset = OffsetF(offset.GetX(), offset.GetY());
     if (magnifierController_) {
-        magnifierController_->SetLocalOffset(OffsetF(localOffset.GetX(), localOffset.GetY()));
+        magnifierController_->SetLocalOffset(localOffset);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -10438,16 +10440,17 @@ void RichEditorPattern::UpdateSelectionByTouchMove(const Offset& touchOffset)
     // While previewing + long press and move, then shall select content.
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    Offset localOffset = AdjustLocalOffsetOnMoveEvent(touchOffset);
-    Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
+
+    Offset textOffset = ConvertTouchOffsetToTextOffset(touchOffset);
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
     SetCaretPositionWithAffinity(positionWithAffinity);
     MoveCaretToContentRect();
     int32_t currentPosition = GreatNotEqual(textOffset.GetY(), paragraphs_.GetHeight())
                                 ? GetTextContentLength()
                                 : caretPosition_;
+    auto localOffset = OffsetF(touchOffset.GetX(), touchOffset.GetY());
     if (magnifierController_ && GetTextContentLength() > 0) {
-        magnifierController_->SetLocalOffset(OffsetF(localOffset.GetX(), localOffset.GetY()));
+        magnifierController_->SetLocalOffset(localOffset);
     }
     auto [initSelectStart, initSelectEnd] = initSelector_;
     int32_t start = std::min(initSelectStart, currentPosition);
