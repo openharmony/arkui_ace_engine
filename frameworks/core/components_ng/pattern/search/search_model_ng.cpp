@@ -1458,8 +1458,8 @@ void SearchModelNG::SetCancelImageIcon(FrameNode *frameNode, const std::optional
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize,
             pattern->ConvertImageIconSizeValue(options.GetSize().value_or(ICON_HEIGHT)), frameNode);
         auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-        CHECK_NULL_VOID(cancelImageFrameNode);        
-        ImageSourceInfo info(options.GetSrc().value_or(""), 
+        CHECK_NULL_VOID(cancelImageFrameNode);
+        ImageSourceInfo info(options.GetSrc().value_or(""),
             options.GetBundleName().value_or(""),
             options.GetModuleName().value_or(""));
         auto color = options.GetColor();

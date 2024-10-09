@@ -289,7 +289,7 @@ HWTEST_F(SearchModifierResourcesTest, setFontColorTestResources, TestSize.Level1
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, FONT_COLOR_ATTR);
         EXPECT_EQ(resultStr, expected);
-    }   
+    }
 }
 
 /**
@@ -361,7 +361,7 @@ HWTEST_F(SearchModifierResourcesTest, setCaretStyleTestResources, TestSize.Level
 {
     for (const auto &[testLength, resultLength] : ARK_LENGTH_TEST_PLAN) {
         for (const auto &[testColor, resultColor] : COLOR_RESOURCE_TEST_PLAN) {
-            Ark_CaretStyle arkCaretStyle = { 
+            Ark_CaretStyle arkCaretStyle = {
                 .color = ArkValue<Opt_ResourceColor>(testColor),
                 .width = ArkValue<Opt_Length>(testLength)
             };
