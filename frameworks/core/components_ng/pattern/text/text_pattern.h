@@ -726,6 +726,7 @@ public:
     }
 
     virtual Color GetUrlSpanColor();
+    void DoTextSelectionTouchCancel() override;
 
 protected:
     int32_t GetClickedSpanPosition()
