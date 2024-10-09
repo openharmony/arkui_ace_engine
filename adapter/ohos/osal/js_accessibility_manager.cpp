@@ -1213,7 +1213,14 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     } else {
         nodeInfo.SetContent(accessibilityProperty->GetGroupText());
     }
-    nodeInfo.SetAccessibilityText(accessibilityProperty->GetAccessibilityText());
+
+    if (!accessibilityProperty->HasUserTextValue() && accessibilityProperty->GetAccessibilityText().empty() &&
+        accessibilityProperty->IsAccessibilityGroup()) {
+        nodeInfo.SetAccessibilityText(accessibilityProperty->GetGroupPreferAccessibilityText());
+    } else {
+        nodeInfo.SetAccessibilityText(accessibilityProperty->GetAccessibilityText());
+    }
+
     if (accessibilityProperty->HasRange()) {
         RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
         nodeInfo.SetRange(rangeInfo);
