@@ -35,6 +35,7 @@ public:
 
     void AddOnFinishCallBack(const std::function<void()>& onFinishCallback)
     {
+        CHECK_NULL_VOID(animator_);
         animator_->AddStopListener(onFinishCallback);
     }
 
