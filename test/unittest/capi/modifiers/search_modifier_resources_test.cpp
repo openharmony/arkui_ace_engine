@@ -32,9 +32,9 @@ using namespace Converter;
 
 namespace {
 // attrs
-// const auto BUTTON_OPTIONS_ATTR("searchButtonOption");
-// const auto BUTTON_OPTIONS_COLOR_ATTR("fontColor");
-// const auto BUTTON_OPTIONS_SIZE_ATTR("fontSize");
+const auto BUTTON_OPTIONS_ATTR("searchButtonOption");
+const auto BUTTON_OPTIONS_COLOR_ATTR("fontColor");
+const auto BUTTON_OPTIONS_SIZE_ATTR("fontSize");
 const auto CANCEL_BUTTON_ATTR("cancelButton");
 const auto CANCEL_BUTTON_ICON_ATTR("icon");
 const auto CANCEL_BUTTON_ICON_COLOR_ATTR("color");
@@ -297,37 +297,25 @@ HWTEST_F(SearchModifierResourcesTest, setFontColorTestResources, TestSize.Level1
  * @tc.desc: Check the functionality of setSearchButton with Resources
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, DISABLED_setSearchButtonTestResources, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setSearchButtonTestResources, TestSize.Level1)
 {
-    // ASSERT_NE(modifier_->setSearchButton, nullptr);
-    // // default
-    // auto fullJson = GetJsonValue(node_);
-    // auto defaultCaretStyle = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUTTON_OPTIONS_ATTR);
-    // auto defaultCaretColor = defaultCaretStyle->GetString(BUTTON_OPTIONS_COLOR_ATTR);
-    // auto defaultCaretWidth = defaultCaretStyle->GetString(BUTTON_OPTIONS_SIZE_ATTR);
-    // EXPECT_EQ(defaultCaretColor, CHECK_DEFAULT_BLACK_COLOR);
-    // EXPECT_EQ(defaultCaretWidth, CHECK_DEFAULT_VP);
-    // // custom
-    // std::vector<TestSearchButtonOption> testSearchButton;
-    // for (auto testLength : OPT_LENGTH_TEST_PLAN) {
-    //     for (auto ColorTest : COLOR_RESOURCE_TEST_PLAN) {
-    //         Ark_SearchButtonOptions buttonOptions = { .fontColor = ColorTest.first, .fontSize = testLength.first };
-    //         Opt_SearchButtonOptions options = { .tag = ARK_TAG_OBJECT, .value = buttonOptions };
-    //         CheckSearchButtonOptions checkSearchButtonOptions = { ColorTest.second, testLength.second };
-    //         TestSearchButtonOption testSearchButtonOption = { options, checkSearchButtonOptions };
-    //         testSearchButton.push_back(testSearchButtonOption);
-    //     }
-    // }
-    // auto checkText = ArkValue<Ark_String>(CHECK_TEXT);
-    // for (auto buttonOptions : testSearchButton) {
-    //     modifier_->setSearchButton(node_, &checkText, &buttonOptions.first);
-    //     auto fullJson = GetJsonValue(node_);
-    //     auto customButtonOptions = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUTTON_OPTIONS_ATTR);
-    //     auto searchButtonColor = customButtonOptions->GetString(BUTTON_OPTIONS_COLOR_ATTR);
-    //     auto searchButtonSize = customButtonOptions->GetString(BUTTON_OPTIONS_SIZE_ATTR);
-    //     EXPECT_EQ(searchButtonColor, buttonOptions.second.first);
-    //     EXPECT_EQ(searchButtonSize, buttonOptions.second.second);
-    // }
+    auto checkText = ArkValue<Ark_String>(RESOURCE_BY_STRING);
+    for (const auto &[testLength, expectLength] : ARK_LENGTH_TEST_PLAN) {
+        for (const auto &[testColor, expectColor] : COLOR_RESOURCE_TEST_PLAN) {
+            Ark_SearchButtonOptions buttonOptions = {
+                .fontColor = ArkValue<Opt_ResourceColor>(testColor),
+                .fontSize = ArkValue<Opt_Length>(testLength)
+            };
+            auto options = ArkValue<Opt_SearchButtonOptions>(buttonOptions);
+            modifier_->setSearchButton(node_, &checkText, &options);
+            auto fullJson = GetJsonValue(node_);
+            auto customButtonOptions = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, BUTTON_OPTIONS_ATTR);
+            auto searchButtonColor = customButtonOptions->GetString(BUTTON_OPTIONS_COLOR_ATTR);
+            auto searchButtonSize = customButtonOptions->GetString(BUTTON_OPTIONS_SIZE_ATTR);
+            EXPECT_EQ(searchButtonColor, expectColor);
+            EXPECT_EQ(searchButtonSize, expectLength);
+        }
+    }
 }
 
 /**

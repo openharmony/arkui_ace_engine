@@ -108,7 +108,7 @@ const int CUSTOM_COLOR_INT(0xFF123456);
 const float CUSTOM_COLOR_FLOAT(0.1f);
 const auto CHECK_FLOAT_COLOR("#00000000");
 const auto CHECK_COLOR_COLOR("#FF008000");
-const auto RES_NAME(ArkValue<Ark_String>("aa.bb.cc"));
+const auto RES_NAME(ArkValue<Ark_String>("testString"));
 
 const Ark_ResourceColor COLOR_COLOR = { .selector = 0, .value0 = Ark_Color::ARK_COLOR_GREEN };
 const Ark_ResourceColor COLOR_INT = { .selector = 1, .value1 = ArkValue<Ark_Number>(CUSTOM_COLOR_INT) };
@@ -121,12 +121,6 @@ const Opt_ResourceColor OPT_COLOR_FLOAT = { .tag = ARK_TAG_OBJECT, .value = COLO
 const Opt_ResourceColor OPT_COLOR_STRING = { .tag = ARK_TAG_OBJECT, .value = COLOR_STRING };
 
 //  default colors
-const Opt_ResourceStr OPT_RESOURCE_STR = { .tag = ARK_TAG_OBJECT,
-    .value = {
-        .selector = 0,
-        .value0 = RES_NAME
-    }
-};
 const Opt_ResourceStr OPT_RESOURCE_RESOURCE = {
     .tag = ARK_TAG_OBJECT,
     .value = {
@@ -190,7 +184,7 @@ const auto ICON_DEFAULT_SRC("resource:///ohos_test_image.svg");
 
 // check resource
 const Ark_String STR_NAME = ArkValue<Ark_String>("min_font_size");
-const std::string CHECK_RESOURCE_STR("aa.bb.cc");
+const std::string CHECK_RESOURCE_STR("testString");
 
 // check styles
 const std::string BUTTON_STYLE_INPUT("CancelButtonStyle.INPUT");
@@ -273,7 +267,8 @@ const std::vector<ColorTest> COLOR_TEST_PLAN = {
 };
 
 const std::vector<ResourceSRC> RESOURCE_TEST_PLAN = {
-    { OPT_RESOURCE_STR, CHECK_RESOURCE_STR }
+    { ArkUnion<Opt_ResourceStr, Ark_String>(""), "" },
+    { ArkUnion<Opt_ResourceStr, Ark_String>("test/string/2"), "test/string/2" }
 };
 const std::vector<UnionResourceString> UNION_RESOURCE_STRING_PLAN = {
     { OPT_UNION_RESOURCE_STR, CHECK_RESOURCE_STR }
@@ -847,6 +842,7 @@ HWTEST_F(SearchModifierTest, setSearchIconTest, TestSize.Level1)
     EXPECT_EQ(defaultSearchIconSrc, ICON_DEFAULT_SRC);
     EXPECT_EQ(defaultSearchIconColor, CHECK_DEFAULT_BLACK_COLOR);
     EXPECT_EQ(defaultSearchIconSize, CHECK_DEFAULT_PX);
+
     // custom
     for (const auto &[testLength, expectLength] : TEST_PLAN_OPT_LENGTH_PX) {
         for (const auto &[testColor, expectColor] : COLOR_TEST_PLAN) {
