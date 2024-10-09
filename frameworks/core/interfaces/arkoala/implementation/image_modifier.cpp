@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "frameworks/core/components/common/layout/constants.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageInterfaceModifier {
@@ -73,7 +74,9 @@ void FillColorImpl(Ark_NativePointer node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetImageFill(frameNode, Converter::ConvertOrDefault(*value, Color()));
+    ImageModelNG::SetImageFill(frameNode, Converter::OptConvert<Color>(*value));
+
+    // TODO: TEST it
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    Ark_ImageFit value)
@@ -103,7 +106,9 @@ void AutoResizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetAutoResize(frameNode, Converter::ConvertOrDefault(value, false));
+    ImageModelNG::SetAutoResize(frameNode, Converter::Convert<bool>(value));
+
+    // TODO: test it
 }
 void RenderModeImpl(Ark_NativePointer node,
                     Ark_ImageRenderMode value)
@@ -229,16 +234,14 @@ void OnErrorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](const LoadImageFailEvent& info) {
         Ark_ImageError event;
-        event.componentWidth.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.componentWidth.f32 = info.GetComponentWidth();
-        event.componentHeight.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.componentHeight.f32 = info.GetComponentHeight();
-        std::string message = info.GetErrorMessage();
-        event.message.chars = message.c_str();
-        event.message.length = message.length();
+        event.componentWidth = Converter::ArkValue<Ark_Number>(info.GetComponentWidth());
+        event.componentHeight = Converter::ArkValue<Ark_Number>(info.GetComponentHeight());
+        event.message = Converter::ArkValue<Ark_String>(info.GetErrorMessage());
         GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onError(frameNode->GetId(), event);
     };
     ImageModelNG::SetOnError(frameNode, std::move(onEvent));
+
+    // TODO: fix code and test it
 }
 void OnFinishImpl(Ark_NativePointer node,
                   Ark_Function event)
@@ -249,6 +252,8 @@ void OnFinishImpl(Ark_NativePointer node,
         GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onFinish(frameNode->GetId());
     };
     ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onEvent));
+
+    // TODO: fix code and test it
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
                         Ark_Boolean enable)

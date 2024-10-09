@@ -719,10 +719,15 @@ void ImageModelNG::SetMatchTextDirection(FrameNode *frameNode, bool value)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, value, frameNode);
 }
 
-void ImageModelNG::SetImageFill(FrameNode *frameNode, const Color &color)
+void ImageModelNG::SetImageFill(FrameNode *frameNode, const std::optional<Color> &color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color, frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
+    if (color) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color.value(), frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, frameNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    }
 }
 
 void ImageModelNG::SetAlt(FrameNode *frameNode, const ImageSourceInfo &src)

@@ -93,7 +93,7 @@ public:
     static void SetFitOriginSize(FrameNode *framNode, bool value);
     static void SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size);
     static void SetMatchTextDirection(FrameNode *frameNode, bool value);
-    static void SetImageFill(FrameNode *frameNode, const Color &color);
+    static void SetImageFill(FrameNode *frameNode, const std::optional<Color> &color);
     static void SetAlt(FrameNode *frameNode, const ImageSourceInfo &src);
     static void SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation);
     static void ResetImageInterpolation(FrameNode *frameNode);
