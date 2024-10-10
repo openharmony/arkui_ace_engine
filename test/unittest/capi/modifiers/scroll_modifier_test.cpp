@@ -94,7 +94,7 @@ public:
  */
 HWTEST_F(ScrollModifierTest, Scrollable_SetDirectionOnSlide, testing::ext::TestSize.Level1)
 {
-     auto findString = [](std::unique_ptr<JsonValue>& json, std::string&& name, 
+     auto findString = [](std::unique_ptr<JsonValue>& json, std::string&& name,
         std::function<bool(std::unique_ptr<JsonValue>&)> isExpectedType) -> std::string {
         for(auto object = json->GetChild(); object && object->IsValid(); object = object->GetNext()) {
             auto key = object->GetKey();
@@ -432,7 +432,6 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorEnum, testing::ext::TestSize
  */
 HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorFloat, testing::ext::TestSize.Level1)
 {
-
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
