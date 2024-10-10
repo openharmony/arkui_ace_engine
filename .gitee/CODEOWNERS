@@ -160,6 +160,8 @@ adapter/ohos/osal/view_data_wrap_ohos.cpp @huawei_g_five
 adapter/ohos/osal/view_data_wrap_ohos.h @huawei_g_five
 adapter/ohos/osal/want_wrap_ohos.cpp @arkui_superman
 adapter/ohos/osal/want_wrap_ohos.h @arkui_superman
+adapter/ohos/osal/window_utils.cpp @arkuiframework
+adapter/ohos/osal/window_utils.h @arkuiframework
 adapter/ohos/sa_profile/ @arkuiframework
 adapter/ohos/services/ @arkuiframework
 adapter/ohos/tools/raw_input_injector/ @arkuievent
