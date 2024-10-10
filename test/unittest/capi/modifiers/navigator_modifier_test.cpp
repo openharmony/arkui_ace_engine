@@ -68,8 +68,13 @@ HWTEST_F(NavigatorModifierTest, setNavigatorOptions0TestValidValues, TestSize.Le
     ASSERT_NE(modifier_->setNavigatorOptions0, nullptr);
 
     // Initial setup
+<<<<<<< HEAD
     Ark_Literal_String_target_NavigationType_type inputValueOptions = {
         .target = {"abc"},
+=======
+    Type_NavigatorInterface_setNavigatorOptions_Arg0 inputValueOptions = {
+        .target = {.chars = "abc", .length = sizeof("abc")},
+>>>>>>> 0c47493497 (add missing length)
         .type = Converter::ArkValue<Opt_NavigationType>(ARK_NAVIGATION_TYPE_REPLACE)
     };
     auto realInputValue = Converter::ArkValue<Opt_Literal_String_target_NavigationType_type>(inputValueOptions);

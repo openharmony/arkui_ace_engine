@@ -105,8 +105,8 @@ HWTEST_F(RadioModifierTest, RadioOptionsTest001, TestSize.Level1)
     EXPECT_EQ(groupDefault, "");
     EXPECT_EQ(groupDefault, "");
     Ark_RadioOptions radioOptions = {
-        .group = { .chars = RADIO_GROUP_VALUE },
-        .value = { .chars = RADIO_VALUE_VALUE }
+        .group = { .chars = RADIO_GROUP_VALUE, .length = strlen(RADIO_GROUP_VALUE) },
+        .value = { .chars = RADIO_VALUE_VALUE, .length = strlen(RADIO_VALUE_VALUE) }
     };
     modifier_->setRadioOptions(node_, &radioOptions);
     auto group = GetStringAttribute(node_, RADIO_GROUP_ATTR);
