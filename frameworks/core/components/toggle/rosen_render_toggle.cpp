@@ -15,16 +15,10 @@
 
 #include "core/components/toggle/rosen_render_toggle.h"
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkRRect.h"
-#endif
-
 #ifdef OHOS_PLATFORM
 #include "core/components/common/painter/rosen_svg_painter.h"
 #else
-#ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
-#endif
 #endif
 
 namespace OHOS::Ace {
@@ -54,13 +48,8 @@ void RosenRenderToggle::Paint(RenderContext& context, const Offset& offset)
     }
     UpdateLayer();
 #ifdef OHOS_PLATFORM
-#ifndef USE_ROSEN_DRAWING
-    auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
-    recordingCanvas->concat(RosenSvgPainter::ToSkMatrix(transformLayer_));
-#else
     auto recordingCanvas = static_cast<RSRecordingCanvas*>(canvas);
     recordingCanvas->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(transformLayer_));
-#endif
 #endif
     DrawToggle(canvas, offset);
     RenderNode::Paint(context, offset);
@@ -75,21 +64,6 @@ Size RosenRenderToggle::Measure()
     return toggleSize_;
 }
 
-#ifndef USE_ROSEN_DRAWING
-void RosenRenderToggle::DrawToggle(SkCanvas* canvas, const Offset& offset) const
-{
-    SkPaint paint;
-    paint.setColor(GetStatusColor().GetValue());
-    paint.setStyle(SkPaint::Style::kFill_Style);
-    paint.setAntiAlias(true);
-
-    SkRRect rRect;
-    double radius = toggleSize_.Height() / 2;
-    rRect.setRectXY(SkRect::MakeIWH(toggleSize_.Width(), toggleSize_.Height()), radius, radius);
-    rRect.offset(offset.GetX(), offset.GetY());
-    canvas->drawRRect(rRect, paint);
-}
-#else
 void RosenRenderToggle::DrawToggle(RSCanvas* canvas, const Offset& offset) const
 {
     RSBrush brush;
@@ -106,7 +80,6 @@ void RosenRenderToggle::DrawToggle(RSCanvas* canvas, const Offset& offset) const
     canvas->DrawRoundRect(rRect);
     canvas->DetachBrush();
 }
-#endif
 
 Color RosenRenderToggle::GetStatusColor() const
 {
