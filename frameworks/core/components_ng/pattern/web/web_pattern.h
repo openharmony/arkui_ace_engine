@@ -1133,6 +1133,8 @@ private:
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
+    bool isLayoutModeInit_ = false;
+    bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
@@ -1146,6 +1148,7 @@ private:
     };
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
     bool imageOverlayIsSelected_ = false;
+    bool isLayoutModeChanged = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
