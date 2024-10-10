@@ -32,6 +32,8 @@ struct SecurityComponentElementStyle {
 
 class ACE_EXPORT SecurityComponentModelNG {
 public:
+    typedef bool (*GetIconResourceFuncType) (int32_t iconStyle, InternalResource::ResourceId& id);
+    typedef bool (*GetTextResourceFuncType) (int32_t textStyle, std::string& text);
     virtual ~SecurityComponentModelNG() = default;
     virtual void Create(int32_t text, int32_t icon,
         int32_t backgroundType, bool isArkuiComponent) = 0;
@@ -42,8 +44,10 @@ public:
         SecurityComponentElementStyle& style,
         const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent);
     static void SetIconSize(const Dimension& value);
+    static void SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetIconColor(const Color& value);
     static void SetFontSize(const Dimension& value);
+    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetFontStyle(const Ace::FontStyle& value);
     static void SetFontWeight(const FontWeight& value);
     static void SetFontFamily(const std::vector<std::string>& fontFamilies);
@@ -52,12 +56,15 @@ public:
     static void SetBackgroundBorderWidth(const Dimension& value);
     static void SetBackgroundBorderColor(const Color& value);
     static void SetBackgroundBorderStyle(const BorderStyle& value);
+    static void SetBackgroundBorderStyle(FrameNode* frameNode, const std::optional<BorderStyle>& value);
     static void SetBackgroundBorderRadius(const Dimension& value);
     static void SetBackgroundPadding(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom);
     static void SetBackgroundPadding(const std::optional<Dimension>& padding);
     static void SetTextIconSpace(const Dimension& value);
+    static void SetTextIconSpace(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetTextIconLayoutDirection(const SecurityComponentLayoutDirection& value);
+    static void SetTextIconLayoutDirection(FrameNode* frameNode, const std::optional<SecurityComponentLayoutDirection>& value);
 
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
     {
@@ -86,12 +93,16 @@ public:
 
 protected:
     static RefPtr<SecurityComponentTheme> GetTheme();
+    static bool InitSecurityComponent(FrameNode* frameNode,
+        const SecurityComponentElementStyle& style, bool isArkuiComponent,
+        GetIconResourceFuncType getIconResource, GetTextResourceFuncType getTextResource);
 
 private:
     static void SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id,
         bool isButtonVisible);
     static void SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode);
     static bool IsBackgroundVisible();
+    static bool IsBackgroundVisible(FrameNode* frameNode);
     static bool IsArkuiComponent();
     static bool IsBelowThreshold(const Color& value);
     static bool IsInReleaseList(uint32_t value);

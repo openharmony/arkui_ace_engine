@@ -63,4 +63,39 @@ bool SaveButtonModelNG::GetTextResource(int32_t textStyle, std::string& text)
     text = theme->GetSaveDescriptions(textStyle);
     return true;
 }
+
+bool SaveButtonModelNG::GetIconResourceStatic(int32_t iconStyle, InternalResource::ResourceId& id)
+{
+    if ((iconStyle < 0) || (static_cast<uint32_t>(iconStyle) >= ICON_RESOURCE_TABLE.size())) {
+        return false;
+    }
+    id = static_cast<InternalResource::ResourceId>(ICON_RESOURCE_TABLE[iconStyle]);
+    return true;
+}
+
+bool SaveButtonModelNG::GetTextResourceStatic(int32_t textStyle, std::string& text)
+{
+    auto theme = GetTheme();
+    if (theme == nullptr) {
+        return false;
+    }
+    text = theme->GetSaveDescriptions(textStyle);
+    return true;
+}
+
+RefPtr<FrameNode> SaveButtonModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SAVE_BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SecurityComponentPattern>(); });
+
+    return frameNode;
+}
+
+bool SaveButtonModelNG::InitSaveButton(FrameNode* frameNode,
+    const SecurityComponentElementStyle& style, bool isArkuiComponent)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return SecurityComponentModelNG::InitSecurityComponent(frameNode, style, isArkuiComponent,
+        SaveButtonModelNG::GetIconResourceStatic, SaveButtonModelNG::GetTextResourceStatic);
+}
 } // namespace OHOS::Ace::NG

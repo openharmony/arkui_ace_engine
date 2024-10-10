@@ -14,11 +14,16 @@
  */
 
 #include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SaveButtonInterfaceModifier {
 void SetSaveButtonOptions0Impl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SaveButtonModelNG::InitSaveButton(frameNode, SecurityComponentElementStyle(), false);
 }
 void SetSaveButtonOptions1Impl(Ark_NativePointer node,
                                const Ark_SaveButtonOptions* options)

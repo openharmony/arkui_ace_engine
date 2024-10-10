@@ -13,17 +13,53 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/security_component/security_component_model_ng.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<SecurityComponentLayoutDirection>& dst, const Ark_SecurityComponentLayoutDirection& src)
+{
+    switch (src) {
+        case ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_HORIZONTAL: dst = SecurityComponentLayoutDirection::HORIZONTAL; break;
+        case ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_VERTICAL: dst = SecurityComponentLayoutDirection::VERTICAL; break;
+        default: LOGE("Unexpected enum value in Ark_SecurityComponentLayoutDirection: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src)
+{
+    switch (src) {
+        case ARK_BORDER_STYLE_DOTTED: dst = BorderStyle::DOTTED; break;
+        case ARK_BORDER_STYLE_DASHED: dst = BorderStyle::DASHED; break;
+        case ARK_BORDER_STYLE_SOLID: dst = BorderStyle::SOLID; break;
+        default: LOGE("Unexpected enum value in Ark_BorderStyle: %{public}d", src);
+    }
+}
+} //namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SecurityComponentMethodModifier {
 void IconSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto valueOpt = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(valueOpt);
+    SecurityComponentModelNG::SetIconSize(frameNode, valueOpt);
 }
 void LayoutDirectionImpl(Ark_NativePointer node,
                          enum Ark_SecurityComponentLayoutDirection value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutDirection = Converter::OptConvert<SecurityComponentLayoutDirection>(value);
+    SecurityComponentModelNG::SetTextIconLayoutDirection(frameNode, layoutDirection);
 }
 void PositionImpl(Ark_NativePointer node,
                   const Ark_Position* value)
@@ -40,6 +76,13 @@ void OffsetImpl(Ark_NativePointer node,
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto fontSize = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidatePositive(fontSize);
+    Validator::ValidateNonPercent(fontSize);
+    SecurityComponentModelNG::SetFontSize(frameNode, fontSize);
 }
 void FontStyleImpl(Ark_NativePointer node,
                    enum Ark_FontStyle value)
@@ -68,6 +111,10 @@ void BackgroundColorImpl(Ark_NativePointer node,
 void BorderStyleImpl(Ark_NativePointer node,
                      enum Ark_BorderStyle value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::OptConvert<BorderStyle>(value);
+    SecurityComponentModelNG::SetBackgroundBorderStyle(frameNode, optValue);
 }
 void BorderWidthImpl(Ark_NativePointer node,
                      const Ark_Length* value)
@@ -88,6 +135,12 @@ void PaddingImpl(Ark_NativePointer node,
 void TextIconSpaceImpl(Ark_NativePointer node,
                        const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto valueOpt = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(valueOpt);
+    SecurityComponentModelNG::SetTextIconSpace(frameNode, valueOpt);
 }
 void KeyImpl(Ark_NativePointer node,
              const Ark_String* value)

@@ -69,6 +69,58 @@ void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32
     property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::HORIZONTAL);
 }
 
+bool SecurityComponentModelNG::InitSecurityComponent(FrameNode* frameNode,
+    const SecurityComponentElementStyle& style, bool isArkuiComponent,
+    GetIconResourceFuncType getIconResource, GetTextResourceFuncType getTextResource)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    if (frameNode->GetChildren().empty()) {
+        bool isButtonVisible = (style.backgroundType != BUTTON_TYPE_NULL);
+        auto buttonNode = FrameNode::CreateFrameNode(
+            V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<ButtonPattern>());
+        buttonNode->SetInternal();
+
+        if (isButtonVisible) {
+            SetDefaultBackgroundButton(buttonNode, style.backgroundType);
+        } else {
+            SetInvisibleBackgroundButton(buttonNode);
+        }
+        frameNode->AddChild(buttonNode);
+
+        if (style.icon != static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
+            auto imageIcon = FrameNode::CreateFrameNode(
+                V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+            imageIcon->SetInternal();
+            InternalResource::ResourceId iconId;
+            if (getIconResource(style.icon, iconId)) {
+                SetDefaultIconStyle(imageIcon, iconId, isButtonVisible);
+            }
+            frameNode->AddChild(imageIcon);
+        }
+
+        if (style.text != static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) {
+            auto textNode = FrameNode::CreateFrameNode(
+                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            textNode->SetInternal();
+            std::string textStr = "";
+            getTextResource(style.text, textStr);
+            SetDefaultTextStyle(textNode, textStr, isButtonVisible);
+            frameNode->AddChild(textNode);
+        }
+        auto refPtr = AceType::Claim(frameNode);
+        InitLayoutProperty(refPtr, style.text, style.icon, style.backgroundType);
+    }
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_RETURN(property, false);
+    property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    property->UpdateIsArkuiComponent(isArkuiComponent);
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->AddWindowStateChangedCallback(frameNode->GetId());
+    return true;
+}
+
 RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, int32_t nodeId,
     SecurityComponentElementStyle& style,
     const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent)
@@ -237,6 +289,15 @@ bool SecurityComponentModelNG::IsBackgroundVisible()
     return false;
 }
 
+bool SecurityComponentModelNG::IsBackgroundVisible(FrameNode* frameNode)
+{
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    if (prop) {
+        return (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
+    }
+    return false;
+}
+
 bool SecurityComponentModelNG::IsArkuiComponent()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -263,6 +324,15 @@ void SecurityComponentModelNG::SetIconSize(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconSize, value);
 }
 
+void SecurityComponentModelNG::SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconSize, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconSize, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetIconColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, IconColor, value);
@@ -271,6 +341,15 @@ void SecurityComponentModelNG::SetIconColor(const Color& value)
 void SecurityComponentModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontSize, value);
+}
+
+void SecurityComponentModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontSize, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontSize, frameNode);
+    }
 }
 
 void SecurityComponentModelNG::SetFontStyle(const Ace::FontStyle& value)
@@ -339,6 +418,19 @@ void SecurityComponentModelNG::SetBackgroundBorderStyle(const BorderStyle& value
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundBorderStyle, value);
 }
 
+void SecurityComponentModelNG::SetBackgroundBorderStyle(FrameNode* frameNode, const std::optional<BorderStyle>& value)
+{
+    if (!IsBackgroundVisible(frameNode)) {
+        SC_LOG_WARN("background is not exist");
+        return;
+    }
+    BorderStyle borderStyle = BorderStyle::NONE;
+    if (value) {
+        borderStyle = value.value();
+    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundBorderStyle, borderStyle, frameNode);
+}
+
 void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
 {
     if (!IsBackgroundVisible()) {
@@ -395,8 +487,32 @@ void SecurityComponentModelNG::SetTextIconSpace(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconSpace, value);
 }
 
+void SecurityComponentModelNG::SetTextIconSpace(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    auto refPtr = AceType::Claim(frameNode);
+    if ((GetSecCompChildNode(refPtr, V2::TEXT_ETS_TAG) == nullptr) ||
+        (GetSecCompChildNode(refPtr, V2::IMAGE_ETS_TAG) == nullptr)) {
+        SC_LOG_WARN("Can not set text icon padding without text and icon");
+        return;
+    }
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconSpace, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconSpace, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetTextIconLayoutDirection(const SecurityComponentLayoutDirection& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconLayoutDirection, value);
+}
+
+void SecurityComponentModelNG::SetTextIconLayoutDirection(FrameNode* frameNode, const std::optional<SecurityComponentLayoutDirection>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconLayoutDirection, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconLayoutDirection, frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

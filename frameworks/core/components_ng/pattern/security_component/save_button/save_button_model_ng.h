@@ -26,9 +26,15 @@ public:
         int32_t backgroundType, bool isArkuiComponent) override;
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id) override;
     virtual bool GetTextResource(int32_t textStyle, std::string& text) override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static bool InitSaveButton(FrameNode* frameNode,
+        const SecurityComponentElementStyle& style, bool isArkuiComponent);
 private:
     static std::unique_ptr<SaveButtonModelNG> instance_;
     static std::mutex mutex_;
+
+    static bool GetIconResourceStatic(int32_t iconStyle, InternalResource::ResourceId& id);
+    static bool GetTextResourceStatic(int32_t textStyle, std::string& text);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SAVE_BUTTON_SAVE_BUTTON_MODEL_NG_H
