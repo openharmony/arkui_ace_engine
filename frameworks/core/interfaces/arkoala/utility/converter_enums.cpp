@@ -254,6 +254,20 @@ void AssignCast(std::optional<V2::ListItemAlign>& dst, const Ark_ListItemAlign& 
 }
 
 template<>
+void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src)
+{
+    switch (src) {
+        case ARK_FLEX_ALIGN_START: dst = FlexAlign::FLEX_START; break;
+        case ARK_FLEX_ALIGN_CENTER: dst = FlexAlign::CENTER; break;
+        case ARK_FLEX_ALIGN_END: dst = FlexAlign::FLEX_END; break;
+        case ARK_FLEX_ALIGN_SPACE_BETWEEN: dst = FlexAlign::SPACE_BETWEEN; break;
+        case ARK_FLEX_ALIGN_SPACE_AROUND: dst = FlexAlign::SPACE_AROUND; break;
+        case ARK_FLEX_ALIGN_SPACE_EVENLY: dst = FlexAlign::SPACE_EVENLY; break;
+        default: LOGE("Unexpected enum value in Ark_FlexAlign: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src)
 {
     switch (src) {
