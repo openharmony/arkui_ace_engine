@@ -239,6 +239,8 @@ export struct ListBootcamp {
         }
       }
     }
+    .align(Alignment.Top)
+    .height('50%')
   }
 }
 
