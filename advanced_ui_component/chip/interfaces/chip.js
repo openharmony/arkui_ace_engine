@@ -1370,8 +1370,6 @@ export class ChipComponent extends ViewPU {
             Button.type(ButtonType.Normal);
             Button.clip(false);
             Button.backgroundColor(this.getChipNodeBackGroundColor());
-            Button.borderWidth(this.getChipNodeBorderWidth());
-            Button.borderColor(this.getChipNodeBorderColor());
             Button.borderRadius(this.getChipNodeRadius());
             Button.enabled(this.getChipEnable());
             Button.scale(ObservedObject.GetRawObject(this.chipScale));
@@ -1414,6 +1412,9 @@ export class ChipComponent extends ViewPU {
             Row.justifyContent(FlexAlign.Center);
             Row.padding(this.getChipNodePadding());
             Row.constraintSize(this.getChipConstraintWidth());
+            Row.borderWidth(this.getChipNodeBorderWidth());
+            Row.borderColor(this.getChipNodeBorderColor());
+            Row.borderRadius(this.getChipNodeRadius())
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
