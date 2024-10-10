@@ -12,15 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 /// <reference path='./import.ts' />
-
-class MeidaCachedImageImageSrcModifier
-  extends ModifierWithKey<PixelMap | ResourceStr | DrawableDescriptor | ASTCResource> {
+ 
+class MeidaCachedImageImageSrcModifier extends ModifierWithKey<PixelMap | ResourceStr | DrawableDescriptor | ASTCResource> {
   constructor(value: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource) {
     super(value);
   }
-
   static identity: Symbol = Symbol('mediaCachedImageShowSrc');
 
   applyPeer(node: KNode, reset: boolean): void {
@@ -41,7 +39,6 @@ class MeidaCachedImageImageSrcModifier
 
 class MediaCachedImageAltModifier extends ModifierWithKey<ResourceStr | PixelMap> {
   static identity: Symbol = Symbol('mediaCachedImageAlt');
-
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().mediaCachedImage.resetAlt(node);
@@ -49,23 +46,20 @@ class MediaCachedImageAltModifier extends ModifierWithKey<ResourceStr | PixelMap
       getUINativeModule().mediaCachedImage.setAlt(node, this.value!);
     }
   }
-
   checkObjectDiff(): boolean {
     return true;
   }
 }
 
-class ArkMeidaCachedImageComponent extends ArkImageComponent implements ImageAttribute {
+class ArkMeidaCachedImageComponent extends ArkImageComponent implements ImageAttribute
+{
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-
   initialize(value: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource): this {
-    modifierWithKey(this._modifiersWithKeys, MeidaCachedImageImageSrcModifier.identity,
-      MeidaCachedImageImageSrcModifier, value);
+    modifierWithKey(this._modifiersWithKeys, MeidaCachedImageImageSrcModifier.identity, MeidaCachedImageImageSrcModifier, value);
     return this;
   }
-
   alt(value: ResourceStr | PixelMap): this {
     modifierWithKey(this._modifiersWithKeys, MediaCachedImageAltModifier.identity, MediaCachedImageAltModifier, value);
     return this;
