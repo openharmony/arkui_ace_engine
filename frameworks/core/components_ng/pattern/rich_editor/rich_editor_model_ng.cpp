@@ -307,7 +307,7 @@ void RichEditorModelNG::SetTextDetectEnable(FrameNode* frameNode, bool value)
     richEditorPattern->SetTextDetectEnable(value);
 }
 
-void RichEditorModelNG::SetSelectedBackgroundColor(const Color& selectedColor)
+void RichEditorModelNG::SetSelectedBackgroundColor(const DynamicColor& selectedColor)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -316,14 +316,14 @@ void RichEditorModelNG::SetSelectedBackgroundColor(const Color& selectedColor)
     pattern->SetSelectedBackgroundColor(selectedColor);
 }
 
-void RichEditorModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor)
+void RichEditorModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const DynamicColor& selectedColor)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedBackgroundColor(selectedColor);
 }
 
-void RichEditorModelNG::SetCaretColor(const Color& color)
+void RichEditorModelNG::SetCaretColor(const DynamicColor& color)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -332,7 +332,7 @@ void RichEditorModelNG::SetCaretColor(const Color& color)
     pattern->SetCaretColor(color);
 }
 
-void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
+void RichEditorModelNG::SetCaretColor(FrameNode* frameNode, const DynamicColor& color)
 {
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);

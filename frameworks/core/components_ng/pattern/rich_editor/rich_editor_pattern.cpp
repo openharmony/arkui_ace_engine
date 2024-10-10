@@ -923,7 +923,6 @@ void RichEditorPattern::OnAttachToFrameNode()
     richEditorInstanceId_ = Container::CurrentIdSafely();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    frameId_ = frameNode->GetId();
     StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode);
 }
 
@@ -1038,7 +1037,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     spanNode->UpdateContent(options.value);
     spanNode->AddPropertyInfo(PropertyInfo::NONE);
     if (options.style.has_value()) {
-        spanNode->UpdateTextColor(options.style.value().GetTextColor());
+        spanNode->UpdateTextColor(options.style.value().GetDynamicTextColor());
         spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
         spanNode->UpdateFontSize(options.style.value().GetFontSize());
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
@@ -1050,7 +1049,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         spanNode->AddPropertyInfo(PropertyInfo::FONTFAMILY);
         spanNode->UpdateTextDecoration(options.style.value().GetTextDecoration());
         spanNode->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
-        spanNode->UpdateTextDecorationColor(options.style.value().GetTextDecorationColor());
+        spanNode->UpdateTextDecorationColor(options.style.value().GetDynamicTextDecorationColor());
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
         spanNode->UpdateTextDecorationStyle(options.style.value().GetTextDecorationStyle());
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
@@ -1755,11 +1754,6 @@ void RichEditorPattern::SetTypingStyle(std::optional<struct UpdateSpanStyle> typ
     presetParagraph_ = nullptr;
 }
 
-std::optional<struct UpdateSpanStyle> RichEditorPattern::GetTypingStyle()
-{
-    return typingStyle_;
-}
-
 void RichEditorPattern::UpdateFontFeatureTextStyle(
     RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle& updateSpanStyle, TextStyle& textStyle)
 {
@@ -1778,8 +1772,7 @@ void RichEditorPattern::UpdateTextStyle(
     CHECK_NULL_VOID(host);
     UpdateFontFeatureTextStyle(spanNode, updateSpanStyle, textStyle);
     if (updateSpanStyle.updateTextColor.has_value()) {
-        spanNode->UpdateTextColor(textStyle.GetTextColor());
-        spanNode->GetSpanItem()->useThemeFontColor = false;
+        spanNode->UpdateTextColor(textStyle.GetDynamicTextColor());
         spanNode->AddPropertyInfo(PropertyInfo::FONTCOLOR);
     }
     if (updateSpanStyle.updateLineHeight.has_value()) {
@@ -1820,11 +1813,10 @@ void RichEditorPattern::UpdateDecoration(
 {
     if (updateSpanStyle.updateTextDecoration.has_value()) {
         spanNode->UpdateTextDecoration(textStyle.GetTextDecoration());
-        spanNode->GetSpanItem()->useThemeDecorationColor = false;
         spanNode->AddPropertyInfo(PropertyInfo::TEXTDECORATION);
     }
     if (updateSpanStyle.updateTextDecorationColor.has_value()) {
-        spanNode->UpdateTextDecorationColor(textStyle.GetTextDecorationColor());
+        spanNode->UpdateTextDecorationColor(textStyle.GetDynamicTextDecorationColor());
         spanNode->AddPropertyInfo(PropertyInfo::NONE);
     }
     if (updateSpanStyle.updateTextDecorationStyle.has_value()) {
@@ -2678,7 +2670,7 @@ BlurReason RichEditorPattern::GetBlurReason()
 
 void RichEditorPattern::HandleBlurEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent/%{public}d", frameId_);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleBlurEvent");
     isLongPress_ = false;
     previewLongPress_ = false;
     editingLongPress_ = false;
@@ -2704,7 +2696,7 @@ void RichEditorPattern::HandleBlurEvent()
 
 void RichEditorPattern::HandleFocusEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent/%{public}d", frameId_);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent");
     UseHostToUpdateTextFieldManager();
     if (previewLongPress_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "if preview and longpress: keep preview state");
@@ -3962,36 +3954,23 @@ void RichEditorPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto theme = GetTheme<RichEditorTheme>();
+    const auto& spans = host->GetChildren();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    const auto& themeTextStyle = theme->GetTextStyle();
-    auto themeTextColor = themeTextStyle.GetTextColor();
-    auto themeTextDecorationColor = themeTextStyle.GetTextDecorationColor();
+    const Color& themeTextColor = theme->GetTextStyle().GetTextColor();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "themeTextColor=%{public}s", themeTextColor.ToString().c_str());
     textLayoutProperty->UpdateTextColor(themeTextColor);
-    textLayoutProperty->UpdateTextDecorationColor(themeTextDecorationColor);
-
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "theme, TextColor=%{public}s, DecorationColor=%{public}s",
-        themeTextColor.ToString().c_str(), themeTextDecorationColor.ToString().c_str());
-
-    const auto& spans = host->GetChildren();
-    for (const auto& uiNode : spans) {
-        auto spanNode = DynamicCast<SpanNode>(uiNode);
-        if (!spanNode) {
-            continue;
+    textLayoutProperty->UpdateTextDecorationColor(themeTextColor);
+    for (auto span : spans) {
+        auto spanNode = DynamicCast<SpanNode>(span);
+        if (spanNode) {
+            spanNode->UpdateColorByResourceId();
         }
-        auto spanItem = spanNode->GetSpanItem();
-        if (!spanItem) {
-            continue;
-        }
-        IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColor(themeTextColor));
-        IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(themeTextDecorationColor));
-        spanNode->UpdateColorByResourceId();
     }
-    IF_PRESENT(typingTextStyle_, UpdateColorByResourceId());
-    IF_PRESENT(typingStyle_, UpdateColorByResourceId());
-
     auto scrollbarTheme = GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(scrollbarTheme);
     auto scrollBar = GetScrollBar();
@@ -4574,7 +4553,7 @@ void RichEditorPattern::CreateTextSpanNode(
     spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
     spanNode->MountToParent(host, info.GetSpanIndex());
     auto spanItem = spanNode->GetSpanItem();
-
+    spanNode->UpdateContent(insertValue);
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
         spanItem->useThemeFontColor = typingStyle_->useThemeFontColor;
         spanItem->useThemeDecorationColor = typingStyle_->useThemeDecorationColor;
@@ -8097,9 +8076,6 @@ void RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
     }
     if (layoutProperty->HasPlaceholderTextColor()) {
         placeholderNode->UpdateTextColor(layoutProperty->GetPlaceholderTextColor().value());
-    } else {
-        auto theme = GetTheme<RichEditorTheme>();
-        placeholderNode->UpdateTextColor(theme ? theme->GetPlaceholderColor() : Color());
     }
 
     auto spanItem = placeholderNode->GetSpanItem();
@@ -8111,7 +8087,7 @@ void RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
     isShowPlaceholder_ = true;
 }
 
-Color RichEditorPattern::GetCaretColor()
+DynamicColor RichEditorPattern::GetCaretColor()
 {
     if (caretColor_.has_value()) {
         return caretColor_.value();
@@ -8123,9 +8099,9 @@ Color RichEditorPattern::GetCaretColor()
     return richEditorTheme->GetCaretColor();
 }
 
-Color RichEditorPattern::GetSelectedBackgroundColor()
+DynamicColor RichEditorPattern::GetSelectedBackgroundColor()
 {
-    Color selectedBackgroundColor;
+    DynamicColor selectedBackgroundColor;
     if (selectedBackgroundColor_.has_value()) {
         selectedBackgroundColor = selectedBackgroundColor_.value();
     } else {
