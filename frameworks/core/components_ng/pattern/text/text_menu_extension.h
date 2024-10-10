@@ -35,7 +35,6 @@ struct MenuOptionsParam {
         result.append("id: ");
         result.append(id);
         result.append(", content: ");
-        result.append("content: ");
         result.append(content.value_or("na"));
         result.append(", icon: ");
         result.append(icon.value_or("na"));
