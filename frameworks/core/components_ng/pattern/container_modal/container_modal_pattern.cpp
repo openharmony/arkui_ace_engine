@@ -524,14 +524,16 @@ void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, co
     // update container modal background
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     activeColor_ = activeColor;
     inactiveColor_ = inactiveColor;
+    isCustomColor_ = true;
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
 }
 
 Color ContainerModalPattern::GetContainerColor(bool isFocus)
 {
-    return isFocus ? activeColor_ : inactiveColor_;
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    return isCustomColor_ ? (isFocus ? activeColor_ : inactiveColor_) : theme->GetBackGroundColor(isFocus);
 }
 
 void ContainerModalPattern::UpdateGestureRowVisible()
