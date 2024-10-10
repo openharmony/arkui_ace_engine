@@ -902,6 +902,10 @@ abstract class ViewPU extends PUV2ViewBase
     }
   }
 
+  public isRecycled() : boolean {
+    return this.hasBeenRecycled_;
+  }
+
   public UpdateLazyForEachElements(elmtIds: Array<number>): void {
     if (!Array.isArray(elmtIds)) {
       return;
