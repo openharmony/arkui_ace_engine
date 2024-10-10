@@ -47,6 +47,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
 constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
+constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
+constexpr char KEY_MENU[] = "Menu";
 } // namespace
 
 void ViewAbstractModelNG::BindMenuGesture(
@@ -129,7 +131,7 @@ void ViewAbstractModelNG::BindMenu(
             CHECK_NULL_VOID(overlayManager);
             overlayManager->DeleteMenu(id);
         };
-        targetNode->PushDestroyCallback(destructor);
+        targetNode->PushDestroyCallbackWithTag(destructor, KEY_MENU);
     } else {
         auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId(), params]() mutable {
             params.clear();
@@ -144,7 +146,7 @@ void ViewAbstractModelNG::BindMenu(
             CHECK_NULL_VOID(overlayManager);
             overlayManager->DeleteMenu(id);
         };
-        targetNode->PushDestroyCallback(destructor);
+        targetNode->PushDestroyCallbackWithTag(destructor, KEY_MENU);
     }
 }
 
@@ -323,7 +325,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteMenu(id);
     };
-    targetNode->PushDestroyCallback(destructor);
+    targetNode->PushDestroyCallbackWithTag(destructor, KEY_CONTEXT_MENU);
 }
 
 void ViewAbstractModelNG::BindDragWithContextMenuParams(const NG::MenuParam& menuParam)
