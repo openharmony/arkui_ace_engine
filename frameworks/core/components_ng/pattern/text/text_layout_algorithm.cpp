@@ -455,7 +455,7 @@ std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeLD(TextStyle& textSt
         return {false, 0.0};
     }
     double suitableSize = maxFontSize;
-    while (GreatOrEqual(suitableSize, maxFontSize)) {
+    while (GreatOrEqual(suitableSize, minFontSize)) {
         textStyle.SetFontSize(Dimension(suitableSize));
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
             return {false, 0.0};
