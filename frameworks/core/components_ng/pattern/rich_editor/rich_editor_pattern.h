@@ -866,6 +866,8 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
     OffsetF GetPaintRectGlobalOffset() const;
+    // original local point to transformed global point.
+    void HandlePointWithTransform(OffsetF& point);
 
     float GetCrossOverHeight() const;
 
