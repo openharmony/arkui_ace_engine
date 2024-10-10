@@ -205,7 +205,7 @@ namespace Converter {
     template<>
     inline std::string Convert(const Ark_String& src)
     {
-        return (src.chars != nullptr) ? src.chars : "";
+        return (src.chars != nullptr) ? std::string(src.chars, src.length) : "";
     }
 
     template<>
@@ -407,7 +407,7 @@ namespace Converter {
     template<>
     inline Dimension Convert(const Ark_String& src)
     {
-        auto str = std::string(src.chars, src.chars == nullptr ? 0 : src.length);
+        auto str = Convert<std::string>(src);
         return Dimension::FromString(str);
     }
 

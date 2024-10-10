@@ -455,7 +455,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetBadColorString, testing::ext::Tes
     std::string jsonKey = "scrollBarColor";
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    std::string before = "#00000000";
+    std::string before = "#FF000000";
     // empty color string
     std::string testColor = "";
     Ark_String str = {.length = testColor.size(), .chars = testColor.data()};
