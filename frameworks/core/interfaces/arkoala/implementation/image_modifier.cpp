@@ -20,6 +20,17 @@
 #include "frameworks/core/components/common/layout/constants.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
+namespace OHOS::Ace::NG::Converter {
+template<>
+Ark_ImageError ArkValue(const LoadImageFailEvent& event) {
+    Ark_ImageError arkEvent;
+    arkEvent.componentWidth = Converter::ArkValue<Ark_Number>(event.GetComponentWidth());
+    arkEvent.componentHeight = Converter::ArkValue<Ark_Number>(event.GetComponentHeight());
+    arkEvent.message = Converter::ArkValue<Ark_String>(event.GetErrorMessage());
+    return arkEvent;
+}
+} // OHOS::Ace::NG::Converter
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
@@ -233,11 +244,8 @@ void OnErrorImpl(Ark_NativePointer node,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](const LoadImageFailEvent& info) {
-        Ark_ImageError event;
-        event.componentWidth = Converter::ArkValue<Ark_Number>(info.GetComponentWidth());
-        event.componentHeight = Converter::ArkValue<Ark_Number>(info.GetComponentHeight());
-        event.message = Converter::ArkValue<Ark_String>(info.GetErrorMessage());
-        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onError(frameNode->GetId(), event);
+        auto arkInfo = Converter::ArkValue<Ark_ImageError>(info);
+        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onError(frameNode->GetId(), arkInfo);
     };
     ImageModelNG::SetOnError(frameNode, std::move(onEvent));
 

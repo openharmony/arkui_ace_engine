@@ -18,7 +18,9 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/components_ng/pattern/image/image_event_hub.h"
 #include "generated/test_fixtures.h"
 #include "arkoala_api_generated.h"
 
@@ -26,34 +28,45 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace Converter {
+template<>
+LoadImageFailEvent Convert(const Ark_ImageError& info) {
+    auto width = Convert<float>(info.componentWidth);
+    auto height = Convert<float>(info.componentHeight);
+    auto error = Convert<std::string>(info.message);
+    LoadImageFailEvent event(width, height, error);
+    return event;
+}
+} // OHOS::Ace::NG::Converter
+
 namespace  {
     const auto ATTRIBUTE_FILL_COLOR_NAME = "fillColor";
     const auto ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE = "#FF000000";
-    // const auto OPACITY_COLOR = "#FF000000";
+    const auto OPACITY_COLOR = "#FF000000";
     const auto ATTRIBUTE_AUTO_RESIZE_NAME = "autoResize";
     const auto ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE = "false";
+
+     struct EventsTracker {
+        static inline GENERATED_ArkUIImageEventsReceiver getImageEventsReceiver {};
+
+        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
+            .getImageEventsReceiver = [] () -> const GENERATED_ArkUIImageEventsReceiver* {
+                return &getImageEventsReceiver;
+            }
+        };
+    }; // EventsTracker
 } // namespace
-
-inline constexpr auto COLORS_RES_0_STR = "COLORS_RES_0_STR";
-
-enum ResID {
-    COLORS_RES_0_ID,
-};
-
-// Valid values for attribute 'fillColor' of method 'fillColor'
-std::vector<std::tuple<ResID, std::string, ResRawValue>> resourceInitTable = {
-    { COLORS_RES_0_ID, COLORS_RES_0_STR, Color(0xA1FAC0DE) },
-};
 
 class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier, &GENERATED_ArkUINodeModifiers::getImageModifier, GENERATED_ARKUI_IMAGE> {
 public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();    
-        for (auto&& res : resourceInitTable) {
+        for (auto&& res : Fixtures::resourceInitTable) {
             AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
             AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
         }
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 /*
@@ -87,21 +100,21 @@ HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
         checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
     }
-    // for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-    //     checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)), OPACITY_COLOR);
-    // }
-    // for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-    //     checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
-    // }
-    // for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-    //     checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Resource>(std::get<1>(value)), std::get<2>(value));
-    // }
-    // for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-    //     checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
-    // }
-    // for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-    //     checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)), ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE);
-    // }
+    for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)), OPACITY_COLOR);
+    }
+    for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Resource>(std::get<1>(value)), std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)), ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE);
+    }
 }
 
 /*
@@ -157,18 +170,72 @@ HWTEST_F(ImageModifierTest, setAutoResizeTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, DISABLED_setOnErrorTest, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
 {
-    // TODO: Implement callback tests!
+    Ark_Function func = {};
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    const auto width = 0.5f;
+    const auto height = 0.6f;
+    const auto error = "error_test";
+    LoadImageFailEvent event(width, height, error);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        double width;
+        double height;
+        std::string error;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::getImageEventsReceiver.onError = [](
+        Ark_Int32 nodeId, const Ark_ImageError error)
+    {
+        auto event = Converter::Convert<LoadImageFailEvent>(error);
+        checkEvent = {
+            .nodeId = nodeId,
+            .width = event.GetComponentWidth(),
+            .height = event.GetComponentHeight(),
+            .error = event.GetErrorMessage()
+        };
+    };
+
+    EXPECT_FALSE(checkEvent.has_value());
+    modifier_->setOnError(node_, func);
+    eventHub->FireErrorEvent(event);
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_NEAR(checkEvent->width, width, FLT_EPSILON);
+    EXPECT_NEAR(checkEvent->height, height, FLT_EPSILON);
+    EXPECT_EQ(checkEvent->error, error);
 }
 
 /*
- * @tc.name: DISABLED_setOnFinishTest
+ * @tc.name: setOnFinishTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, DISABLED_setOnFinishTest, TestSize.Level1)
+HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
 {
-    // TODO: Implement callback tests!
+    Ark_Function func = {};
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::getImageEventsReceiver.onFinish = [](
+        Ark_Int32 nodeId)
+    {
+        checkEvent = {
+            .nodeId = nodeId,
+        };
+    };
+
+    EXPECT_FALSE(checkEvent.has_value());
+    modifier_->setOnFinish(node_, func);
+    eventHub->FireFinishEvent();
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 } // namespace OHOS::Ace::NG
