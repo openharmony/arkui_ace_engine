@@ -79,6 +79,7 @@ UINode::~UINode()
 
 void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
+    CHECK_NULL_VOID(context);
     context_ = context;
     instanceId_ = context->GetInstanceId();
     if (updateJSInstanceCallback_) {
