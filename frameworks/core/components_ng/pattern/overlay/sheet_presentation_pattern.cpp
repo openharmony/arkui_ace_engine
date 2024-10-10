@@ -554,7 +554,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     //record the drag position
     uint32_t detentsLowerPos = 0;
     uint32_t detentsUpperPos = 0;
-    if (lowerIter == sheetDetentHeight_.end()) {
+    if (lowerIter == sheetDetentHeight_.end() || upperIter == sheetDetentHeight_.end()) {
         //when drag over the highest sheet page
         upHeight = sheetDetentHeight_[sheetDetentsSize - 1];
         downHeight = sheetDetentHeight_[sheetDetentsSize - 1];
