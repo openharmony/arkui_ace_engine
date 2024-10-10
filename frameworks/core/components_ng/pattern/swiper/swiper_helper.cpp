@@ -227,6 +227,10 @@ void DumpIndicatorType(const std::optional<SwiperIndicatorType>& type)
                 DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
                 break;
             }
+            case SwiperIndicatorType::ARC_DOT: {
+                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:ARC_DOT");
+                break;
+            }
             default: {
                 break;
             }

@@ -104,6 +104,8 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
+    virtual std::string GetArcDotIndicatorStyle() const { return ""; }
+
     int32_t GetCurrentShownIndex() const
     {
         return IsLoop() ? currentIndex_ : GetLoopIndex(currentIndex_);
@@ -277,6 +279,8 @@ public:
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
 
+    virtual void SetSwiperArcDotParameters(const SwiperArcDotParameters& swiperArcDotParameters) {}
+
     void ShowNext();
     void ShowPrevious();
     void SwipeTo(int32_t index);
@@ -420,6 +424,7 @@ public:
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
+    virtual std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const { return nullptr; }
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
     void ArrowHover(bool hoverFlag);
@@ -571,6 +576,7 @@ public:
     void UpdateNodeRate();
     int32_t GetMaxDisplayCount() const;
 
+    virtual void SaveCircleDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode) {}
     bool GetPrevMarginIgnoreBlank()
     {
         return prevMarginIgnoreBlank_;
@@ -625,6 +631,9 @@ public:
     {
         return isTouchDownOnOverlong_;
     }
+
+protected:
+    void MarkDirtyNodeSelf();
 
 private:
     void OnModifyDone() override;
@@ -779,7 +788,6 @@ private:
     void OnLoopChange();
     void StopSpringAnimationAndFlushImmediately();
     void UpdateItemRenderGroup(bool itemRenderGroup);
-    void MarkDirtyNodeSelf();
     void ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex);
     int32_t GetLoopIndex(int32_t index, int32_t childrenSize) const;
     bool IsAutoLinear() const;

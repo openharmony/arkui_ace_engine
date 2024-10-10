@@ -2043,6 +2043,8 @@ void SwiperPattern::InitIndicator()
     CHECK_NULL_VOID(props);
     if (props->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
         SwiperHelper::SaveDotIndicatorProperty(indicatorNode, *this);
+    } else if (props->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
+        SwiperPattern::SaveCircleDotIndicatorProperty(indicatorNode);
     } else {
         SwiperHelper::SaveDigitIndicatorProperty(indicatorNode, *this);
     }
@@ -5973,11 +5975,14 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     }
 
     auto indicatorType = GetIndicatorType();
+    const char* indicator = "indicator";
     if (indicatorType == SwiperIndicatorType::DOT) {
-        json->PutExtAttr("indicator", SwiperHelper::GetDotIndicatorStyle(GetSwiperParameters()).c_str(), filter);
+        json->PutExtAttr(indicator, SwiperHelper::GetDotIndicatorStyle(GetSwiperParameters()).c_str(), filter);
+    } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {
+            json->PutExtAttr(indicator, SwiperPattern::GetArcDotIndicatorStyle().c_str(), filter);
     } else {
         json->PutExtAttr(
-            "indicator", SwiperHelper::GetDigitIndicatorStyle(GetSwiperDigitalParameters()).c_str(), filter);
+            indicator, SwiperHelper::GetDigitIndicatorStyle(GetSwiperDigitalParameters()).c_str(), filter);
     }
 }
 
