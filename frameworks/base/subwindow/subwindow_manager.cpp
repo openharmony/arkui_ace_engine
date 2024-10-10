@@ -533,28 +533,20 @@ void SubwindowManager::OpenCustomDialogNG(const DialogProperties& dialogProps, s
 void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
-    std::lock_guard<std::mutex> lock(subwindowMutex_);
-    auto iter = subwindowMap_.begin();
-    while (iter != subwindowMap_.end()) {
-        auto overlay = iter->second->GetOverlayManager();
+    for (auto &overlay : GetAllSubOverlayManager()) {
         CHECK_NULL_VOID(overlay);
         if (overlay->GetDialogMap().find(dialogId) != overlay->GetDialogMap().end()) {
             return overlay->CloseCustomDialog(dialogId);
         }
-        iter++;
     }
 }
 
 void SubwindowManager::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
-    std::lock_guard<std::mutex> lock(subwindowMutex_);
-    auto iter = subwindowMap_.begin();
-    while (iter != subwindowMap_.end()) {
-        auto overlay = iter->second->GetOverlayManager();
+    for (auto &overlay : GetAllSubOverlayManager()) {
         CHECK_NULL_VOID(overlay);
         overlay->CloseCustomDialog(node, std::move(callback));
-        iter++;
     }
 }
 
@@ -573,12 +565,10 @@ void SubwindowManager::UpdateCustomDialogNG(
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
-    std::lock_guard<std::mutex> lock(subwindowMutex_);
-    auto iter = subwindowMap_.begin();
-    while (iter != subwindowMap_.end()) {
-        auto overlay = iter->second->GetOverlayManager();
-        overlay->UpdateCustomDialog(node, dialogProperties, std::move(callback));
-        iter++;
+    for (auto &overlay : GetAllSubOverlayManager()) {
+        if (overlay) {
+            overlay->UpdateCustomDialog(node, dialogProperties, std::move(callback));
+        }
     }
 }
 
@@ -946,11 +936,9 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get dialog subwindow failed.");
         return;
     }
-    std::lock_guard<std::mutex> lock(parentMutex_);
-    for (auto& containerMap : parentContainerMap_) {
-        if (containerMap.second == instanceId) {
-            subwindow->CloseDialog(containerMap.first);
-        }
+    auto subContainerId = GetSubContainerId(instanceId);
+    if (subContainerId > -1) {
+        subwindow->CloseDialog(subContainerId);
     }
 }
 
@@ -1122,16 +1110,12 @@ void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, 
 
 RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node)
 {
-    std::lock_guard<std::mutex> lock(subwindowMutex_);
-    auto iter = subwindowMap_.begin();
-    while (iter != subwindowMap_.end()) {
-        auto overlay = iter->second->GetOverlayManager();
+    for (auto &overlay : GetAllSubOverlayManager()) {
         CHECK_NULL_RETURN(overlay, nullptr);
         auto dialogNode = overlay->GetDialogNodeWithExistContent(node);
         if (dialogNode) {
             return dialogNode;
         }
-        ++iter;
     }
     return nullptr;
 }
@@ -1162,5 +1146,21 @@ bool SubwindowManager::IsFreeMultiWindow(int32_t instanceId) const
     auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(parentContainerId);
     CHECK_NULL_RETURN(subWindow, false);
     return subWindow->IsFreeMultiWindow();
+}
+
+const std::vector<RefPtr<NG::OverlayManager>> SubwindowManager::GetAllSubOverlayManager()
+{
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
+    std::vector<RefPtr<NG::OverlayManager>> subOverlayManager;
+    subOverlayManager.reserve(subwindowMap_.size());
+    auto iter = subwindowMap_.begin();
+    while (iter != subwindowMap_.end()) {
+        auto subwindow = iter->second;
+        if (subwindow) {
+            subOverlayManager.push_back(subwindow->GetOverlayManager());
+        }
+        iter++;
+    }
+    return subOverlayManager;
 }
 } // namespace OHOS::Ace
