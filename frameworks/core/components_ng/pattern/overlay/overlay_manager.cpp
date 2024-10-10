@@ -633,7 +633,8 @@ OverlayManager::~OverlayManager()
     popupMap_.clear();
 }
 
-void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
+void OverlayManager::UpdateContextMenuDisappearPosition(
+    const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -646,20 +647,22 @@ void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offse
     if (menuMap_.empty()) {
         return;
     }
-    
+
+    RefPtr<FrameNode> menuWrapper = nullptr;
+    for (auto [targetId, node] : menuMap_) {
+        if (node && node->GetId() == menuWrapperId) {
+            menuWrapper = node;
+        }
+    }
+
+    CHECK_NULL_VOID(menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG);
     overlayManager->UpdateDragMoveVector(offset);
 
     if (overlayManager->IsOriginDragMoveVector() || !overlayManager->IsUpdateDragMoveVector()) {
         return;
     }
 
-    auto rootNode = rootNodeWeak_.Upgrade();
-    for (const auto& child : rootNode->GetChildren()) {
-        auto node = DynamicCast<FrameNode>(child);
-        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            UpdateContextMenuDisappearPositionAnimation(node, overlayManager->GetUpdateDragMoveVector(), menuScale);
-        }
-    }
+    UpdateContextMenuDisappearPositionAnimation(menuWrapper, overlayManager->GetUpdateDragMoveVector(), menuScale);
 }
 
 OffsetF OverlayManager::CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset)

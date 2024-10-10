@@ -288,11 +288,12 @@ void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag)
     }
 }
 
-void SubwindowManager::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
+void SubwindowManager::UpdateHideMenuOffsetNG(
+    const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
     auto subwindow = GetCurrentWindow();
     if (subwindow) {
-        subwindow->UpdateHideMenuOffsetNG(offset, menuScale, isRedragStart);
+        subwindow->UpdateHideMenuOffsetNG(offset, menuScale, isRedragStart, menuWrapperId);
     }
 }
 
@@ -871,9 +872,9 @@ void SubwindowManager::ShowDialog(const PromptDialogAttr& dialogAttr, const std:
     }
     // for pa service
     if (containerId >= MIN_PA_SERVICE_ID || containerId < 0) {
-        auto subWindow = GetOrCreateSubWindow(true);
-        CHECK_NULL_VOID(subWindow);
-        subWindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
+        auto subwindow = GetOrCreateSubWindow(true);
+        CHECK_NULL_VOID(subwindow);
+        subwindow->ShowDialog(dialogAttr, buttons, std::move(napiCallback), dialogCallbacks);
         // for ability
     } else {
         auto subWindow = GetSubwindow(containerId);

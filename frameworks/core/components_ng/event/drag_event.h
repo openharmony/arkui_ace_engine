@@ -291,6 +291,7 @@ private:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
+    void RecordMenuWrapperNodeForDrag(int32_t targetId);
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
