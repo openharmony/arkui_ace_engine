@@ -459,7 +459,6 @@ public:
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);
-    std::optional<struct UpdateSpanStyle> GetTypingStyle();
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool updateCaret = true);
     void DisableDrag(RefPtr<ImageSpanNode> imageNode);
@@ -727,19 +726,19 @@ public:
 
     void SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
-    void SetCaretColor(const Color& caretColor)
+    void SetCaretColor(const DynamicColor& caretColor)
     {
         caretColor_ = caretColor;
     }
 
-    Color GetCaretColor();
+    DynamicColor GetCaretColor();
 
-    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
+    void SetSelectedBackgroundColor(const DynamicColor& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
-    Color GetSelectedBackgroundColor();
+    DynamicColor GetSelectedBackgroundColor();
 
     void SetCustomKeyboardOption(bool supportAvoidance);
 
@@ -1202,8 +1201,8 @@ private:
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
     std::list<ResultObject> dragResultObjects_;
-    std::optional<Color> caretColor_;
-    std::optional<Color> selectedBackgroundColor_;
+    std::optional<DynamicColor> caretColor_;
+    std::optional<DynamicColor> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
