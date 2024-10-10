@@ -324,7 +324,7 @@ bool TextContentModifier::DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas
     }
     if (AceType::InstanceOf<AnimatedImage>(canvasImage)) {
         auto animatedImage = DynamicCast<AnimatedImage>(canvasImage);
-        if (animatedImage->GetAnimatorStatus() == Animator::Status::PAUSED) {
+        if (!animatedImage->GetIsAnimating()) {
             animatedImage->ControlAnimation(true);
         }
     }
