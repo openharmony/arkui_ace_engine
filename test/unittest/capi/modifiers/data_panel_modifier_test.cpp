@@ -101,8 +101,10 @@ static std::vector<std::tuple<std::string, Opt_Number, std::string>> setDataPane
 // Valid values for attribute 'type' of method 'setDataPanelOptions'
 // see the converter AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
 static std::vector<std::tuple<std::string, Opt_DataPanelType, std::string>> setDataPanelOptionsTypeValidValues = {
-    {"DataPanelType.Circle", Converter::ArkValue<Opt_DataPanelType>(ARK_DATA_PANEL_TYPE_CIRCLE), "DataPanelType.Circle"},
-    {"DataPanelType.Line", Converter::ArkValue<Opt_DataPanelType>(ARK_DATA_PANEL_TYPE_LINE), "DataPanelType.Line"},
+    {"DataPanelType.Circle", Converter::ArkValue<Opt_DataPanelType>(ARK_DATA_PANEL_TYPE_CIRCLE),
+        "DataPanelType.Circle"},
+    {"DataPanelType.Line", Converter::ArkValue<Opt_DataPanelType>(ARK_DATA_PANEL_TYPE_LINE),
+        "DataPanelType.Line"},
 };
 
 /*
