@@ -99,7 +99,7 @@ void Scrollable::Initialize(PipelineContext* context)
     Initialize(weakContext);
 }
 
-void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
+void Scrollable::Initialize(const WeakPtr<PipelineContext>& context)
 {
     context_ = context;
     InitPanRecognizerNG();
@@ -576,7 +576,7 @@ void Scrollable::TriggerFrictionAnimation(float mainPosition, float friction, fl
 void Scrollable::SetDelayedTask()
 {
     SetContinuousDragStatus(true);
-    auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+    auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     task_.Reset([weak = WeakClaim(this)] {
@@ -591,7 +591,7 @@ void Scrollable::SetDelayedTask()
 
 void Scrollable::MarkNeedFlushAnimationStartTime()
 {
-    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     context->MarkNeedFlushAnimationStartTime();
 }
@@ -979,7 +979,7 @@ void Scrollable::ProcessScrollMotionStop(bool stopFriction)
 void Scrollable::ProcessSpringMotion(double position)
 {
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}f, position is %{public}f", currentPos_, position);
-    auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+    auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     uint64_t currentVsync = context->GetVsyncTime();
     uint64_t diff = currentVsync - lastVsyncTime_;
@@ -1158,7 +1158,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         if (NearEqual(scroll->finalPosition_, position, 1.0)) {
             scroll->StopFrictionAnimation();
         }
-        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+        auto context = scroll->context_.Upgrade();
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context->GetVsyncTime();
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
@@ -1213,9 +1213,9 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
         if (scroll->state_ != AnimationState::SNAP) {
             return;
         }
-        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+        auto context = scroll->context_.Upgrade();
         CHECK_NULL_VOID(context);
-        uint64_t currentVsync = context->GetVsyncTime();
+        uint64_t currentVsync = scroll->context_.Upgrade();
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
         if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
             scroll->snapVelocity_ = (position - scroll->currentPos_) / diff * MILLOS_PER_NANO_SECONDS;

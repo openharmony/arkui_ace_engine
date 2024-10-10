@@ -395,7 +395,7 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
     }
     auto scrollRes =
         onScroll(scrollX, scrollY, GetScrollState(), ScrollablePattern::ConvertScrollSource(GetScrollSource()));
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = GetContext();
     CHECK_NULL_RETURN(context, scroll);
     if (GetAxis() == Axis::HORIZONTAL) {
         return context->NormalizeToPx(scrollRes.xOffset);

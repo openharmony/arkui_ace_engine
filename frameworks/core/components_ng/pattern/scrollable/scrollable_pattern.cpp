@@ -437,7 +437,7 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
 
 void ScrollablePattern::SetUiDvsyncSwitch(bool on)
 {
-    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     if (on && inScrollingStatus_) {
         inScrollingStatus_ = false;
@@ -754,14 +754,14 @@ void ScrollablePattern::RegisterWindowStateChangedCallback()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->AddWindowStateChangedCallback(host->GetId());
 }
 
 void ScrollablePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     context->RemoveWindowStateChangedCallback(frameNode->GetId());
 }
@@ -1318,7 +1318,7 @@ void ScrollablePattern::AnimateTo(
     }
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_LIST_FLING, false);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
 }
@@ -1481,7 +1481,7 @@ void ScrollablePattern::InitCurveOffsetProperty()
             if (pattern->isAnimateOverScroll_) {
                 pattern->isAnimateOverScroll_ = false;
                 auto pauseVelocity = -pattern->currentVelocity_;
-                auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+                auto context = pattern->GetContext();
                 CHECK_NULL_VOID(context);
                 context->MarkNeedFlushAnimationStartTime();
                 pattern->PauseAnimation(pattern->curveAnimation_);
@@ -1721,7 +1721,11 @@ void ScrollablePattern::SelectWithScroll()
     }
 
     if (!animator_) {
-        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        animator_ = CREATE_ANIMATOR(context);
         animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -2348,7 +2352,7 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
 
 void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState state)
 {
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = GetContext();
     auto eventHub = GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto scrollFrameBeginCallback = eventHub->GetOnScrollFrameBegin();
@@ -2723,7 +2727,7 @@ float ScrollablePattern::FireOnWillScroll(float offset) const
     auto offsetPX = Dimension(offset);
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
     auto scrollRes = onScroll(offsetVP, GetScrollState(), ConvertScrollSource(scrollSource_));
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, offset);
     return context->NormalizeToPx(scrollRes.offset);
 }
@@ -2736,7 +2740,7 @@ void ScrollablePattern::Register2DragDropManager()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -2837,8 +2841,7 @@ bool ScrollablePattern::isVertical() const
 void ScrollablePattern::HotZoneScroll(const float offsetPct)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(IsScrollable());
-    CHECK_NULL_VOID(!NearZero(offsetPct));
+    CHECK_NULL_VOID(host && IsScrollable() && !NearZero(offsetPct));
 
     // There are three types of situations to consider.
     // 1. Enter the hot zone for the first time.
@@ -2857,7 +2860,9 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
     }
 
     if (!animator_) {
-        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        animator_ = CREATE_ANIMATOR(context);
         animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -2996,7 +3001,7 @@ void ScrollablePattern::UnRegister2DragDropManager()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -3143,7 +3148,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
     }
 
     if (!animator_) {
-        animator_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        animator_ = CREATE_ANIMATOR(context);
         animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);

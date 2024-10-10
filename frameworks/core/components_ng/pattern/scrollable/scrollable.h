@@ -92,7 +92,7 @@ public:
     static double GetVelocityScale();
     static void SetFriction(double sFriction);
 
-    void Initialize(const WeakPtr<PipelineBase>& context);
+    void Initialize(const WeakPtr<PipelineContext>& context);
 
     void Initialize(PipelineContext* context);
 
@@ -322,7 +322,7 @@ public:
         available_ = available;
     }
 
-    WeakPtr<PipelineBase> GetContext() const
+    WeakPtr<PipelineContext> GetContext() const
     {
         return context_;
     }
@@ -558,7 +558,7 @@ private:
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
 
-    WeakPtr<PipelineBase> context_;
+    WeakPtr<PipelineContext> context_;
     double currentPos_ = 0.0;
     double currentVelocity_ = 0.0;
     double maxFlingVelocity_ = 0.0;
