@@ -71,7 +71,7 @@ public:
 };
 /*
  * @tc.name: setFillColorTestDefaultValues
- * @tc.desc:
+ * @tc.desc: Check functionality of ImageModifier.setFillColor
  * @tc.type: FUNC
  */
 HWTEST_F(ImageModifierTest, setFillColorTestDefaultValues, TestSize.Level1)
@@ -85,7 +85,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestDefaultValues, TestSize.Level1)
 
 /*
  * @tc.name: setFillColorTestValidValues
- * @tc.desc:
+ * @tc.desc: Check functionality of ImageModifier.setFillColor
  * @tc.type: FUNC
  */
 HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
@@ -119,7 +119,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
 
 /*
  * @tc.name: setAutoResizeTestDefaultValues
- * @tc.desc: 
+ * @tc.desc: Check functionality of ImageModifier.setAutoResize
  * @tc.type: FUNC
  */
 HWTEST_F(ImageModifierTest, DISABLED_setAutoResizeTestDefaultValues, TestSize.Level1)
@@ -139,7 +139,7 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> autoResize
 
 /*
  * @tc.name: setAutoResizeTestValidValues
- * @tc.desc:
+ * @tc.desc: Check set color functionality of setCancelButton
  * @tc.type: FUNC
  */
 HWTEST_F(ImageModifierTest, setAutoResizeTestValidValues, TestSize.Level1)
@@ -166,8 +166,38 @@ HWTEST_F(ImageModifierTest, setAutoResizeTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setOnErrorTest
- * @tc.desc:
+ * @tc.name: setOnFinishTest
+ * @tc.desc: Check functionality of ImageModifier.setOnFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
+{
+    Ark_Function func = {};
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::getImageEventsReceiver.onFinish = [](
+        Ark_Int32 nodeId)
+    {
+        checkEvent = {
+            .nodeId = nodeId,
+        };
+    };
+
+    EXPECT_FALSE(checkEvent.has_value());
+    modifier_->setOnFinish(node_, func);
+    eventHub->FireFinishEvent();
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+}
+
+/*
+ * @tc.name: setOnErrorTest
+ * @tc.desc: Check functionality of ImageModifier.setOnError
  * @tc.type: FUNC
  */
 HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
@@ -207,35 +237,5 @@ HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
     EXPECT_NEAR(checkEvent->width, width, FLT_EPSILON);
     EXPECT_NEAR(checkEvent->height, height, FLT_EPSILON);
     EXPECT_EQ(checkEvent->error, error);
-}
-
-/*
- * @tc.name: setOnFinishTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
-{
-    Ark_Function func = {};
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
-
-    struct CheckEvent {
-        int32_t nodeId;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::getImageEventsReceiver.onFinish = [](
-        Ark_Int32 nodeId)
-    {
-        checkEvent = {
-            .nodeId = nodeId,
-        };
-    };
-
-    EXPECT_FALSE(checkEvent.has_value());
-    modifier_->setOnFinish(node_, func);
-    eventHub->FireFinishEvent();
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
 }
 } // namespace OHOS::Ace::NG
