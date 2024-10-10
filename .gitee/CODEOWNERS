@@ -162,6 +162,7 @@ adapter/ohos/osal/want_wrap_ohos.cpp @arkui_superman
 adapter/ohos/osal/want_wrap_ohos.h @arkui_superman
 adapter/ohos/sa_profile/ @arkuiframework
 adapter/ohos/services/ @arkuiframework
+adapter/ohos/tools/raw_input_injector/ @arkuievent
 
 [Preview adapter]
 adapter/preview/ @arkuistatemgmt
