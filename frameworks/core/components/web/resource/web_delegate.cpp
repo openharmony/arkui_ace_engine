@@ -5666,6 +5666,12 @@ void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, c
     }
 }
 
+void WebDelegate::WebOnMouseEvent(const std::shared_ptr<OHOS::NWeb::NWebMouseEvent>& mouseEvent)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->WebSendMouseEvent(mouseEvent);
+}
+
 void WebDelegate::OnFocus(const OHOS::NWeb::FocusReason& reason)
 {
     ACE_DCHECK(nweb_ != nullptr);

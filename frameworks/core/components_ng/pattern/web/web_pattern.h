@@ -812,6 +812,7 @@ private:
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
+    void WebSendMouseEvent(const MouseInfo& info, int32_t clickNum);
     bool HandleDoubleClickEvent(const MouseInfo& info);
     void SendDoubleClickEvent(const MouseClickInfo& info);
     int32_t HandleMouseClickEvent(const MouseInfo& info);

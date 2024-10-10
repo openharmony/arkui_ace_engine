@@ -621,6 +621,54 @@ private:
     uint8_t theme_flags_ = static_cast<uint8_t>(NWeb::SystemThemeFlags::NONE);
 };
 
+class NWebMouseEventImpl : public OHOS::NWeb::NWebMouseEvent {
+public:
+    NWebMouseEventImpl(int32_t x, int32_t y,
+        int32_t buttton, int32_t action,
+        int32_t clickNum, std::vector<int32_t> pressedCodes)
+        : x_(x), y_(y), buttton_(buttton), action_(action),
+        clickNum_(clickNum), pressedCodes_(pressedCodes) {}
+    ~NWebMouseEventImpl() = default;
+
+    int32_t GetX() override
+    {
+        return x_;
+    }
+
+    int32_t GetY() override
+    {
+        return y_;
+    }
+
+    int32_t GetButton() override
+    {
+        return buttton_;
+    }
+
+    int32_t GetAction() override
+    {
+        return action_;
+    }
+
+    int32_t GetClickNum() override
+    {
+        return clickNum_;
+    }
+
+    std::vector<int32_t> GetPressKeyCodes() override
+    {
+        return pressedCodes_;
+    }
+
+private:
+    int32_t x_ = 0;
+    int32_t y_ = 0;
+    int32_t buttton_ = 0;
+    int32_t action_ = 0;
+    int32_t clickNum_ = 0;
+    std::vector<int32_t> pressedCodes_ {};
+};
+
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -755,6 +803,7 @@ public:
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
+    void WebOnMouseEvent(const std::shared_ptr<OHOS::NWeb::NWebMouseEvent>& mouseEvent);
     void OnFocus(const OHOS::NWeb::FocusReason& reason = OHOS::NWeb::FocusReason::EVENT_REQUEST);
     bool NeedSoftKeyboard();
     void OnBlur();
