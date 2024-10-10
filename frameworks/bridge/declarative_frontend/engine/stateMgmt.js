@@ -4214,7 +4214,11 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
                     child.forceCompleteRerender(true);
                 }
                 else {
+<<<<<<< HEAD
                     child.delayCompleteRerender (deep);
+=======
+                    child.delayCompleteRerender(deep);
+>>>>>>> 329c683d3f... Add missing V2 force complete rerender fix to BZ. Already in YZ
                 }
             }
             else {
@@ -6957,6 +6961,9 @@ class ViewPU extends PUV2ViewBase {
         else {
             this.resetRecycleCustomNode();
         }
+    }
+    isRecycled() {
+        return this.hasBeenRecycled_;
     }
     UpdateLazyForEachElements(elmtIds) {
         if (!Array.isArray(elmtIds)) {
