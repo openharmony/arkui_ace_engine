@@ -1036,4 +1036,28 @@ HWTEST_F(SwiperArrowTestNg, ArrowVisiblity001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(VerifyArrowVisible(false, false));
 }
+
+/**
+ * @tc.name: ArrowButtonType001
+ * @tc.desc: Test arrow button type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, ArrowButtonType001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayArrow(true);
+        model.SetHoverShow(false);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    });
+
+    auto leftButtonNode = AceType::DynamicCast<FrameNode>(leftArrowNode_->GetFirstChild());
+    ASSERT_EQ(leftButtonNode->GetTag(), V2::BUTTON_ETS_TAG);
+    auto leftButtonType = leftButtonNode->GetLayoutProperty<ButtonLayoutProperty>()->GetType();
+    EXPECT_EQ(leftButtonType, ButtonType::CIRCLE);
+
+    auto rightButtonNode = AceType::DynamicCast<FrameNode>(rightArrowNode_->GetFirstChild());
+    ASSERT_EQ(rightButtonNode->GetTag(), V2::BUTTON_ETS_TAG);
+    auto rightButtonType = rightButtonNode->GetLayoutProperty<ButtonLayoutProperty>()->GetType();
+    EXPECT_EQ(rightButtonType, ButtonType::CIRCLE);
+}
 } // namespace OHOS::Ace::NG
