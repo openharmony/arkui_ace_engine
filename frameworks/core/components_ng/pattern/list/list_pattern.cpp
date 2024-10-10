@@ -321,12 +321,12 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
     }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, paint);
+    const auto& geometryNode = host->GetGeometryNode();
     if (!listContentModifier_) {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, paint);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, paint);
-        const auto& geometryNode = host->GetGeometryNode();
         auto size = renderContext->GetPaintRectWithoutTransform().GetSize();
         auto& padding = geometryNode->GetPadding();
         if (padding) {
@@ -338,6 +338,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetLaneGutter(laneGutter_);
     paint->SetItemsPosition(itemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
+    paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
     UpdateFadingEdge(paint);
     return paint;
 }
