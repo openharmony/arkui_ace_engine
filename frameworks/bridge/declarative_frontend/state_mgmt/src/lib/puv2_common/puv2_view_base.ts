@@ -204,7 +204,8 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   public getChildViewV2ForElmtId(elmtId: number): ViewV2 | undefined {
     const optComp = this.childrenWeakrefMap_.get(elmtId);
-    return optComp?.deref() && (optComp.deref() instanceof ViewV2) ? optComp?.deref() as ViewV2 : undefined;
+    return optComp?.deref() && (optComp.deref() instanceof ViewV2) ?
+      optComp?.deref() as ViewV2 : undefined;
   }
 
   protected purgeVariableDependenciesOnElmtIdOwnFunc(elmtId: number): void {

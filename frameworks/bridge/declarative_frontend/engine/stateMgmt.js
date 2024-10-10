@@ -2985,10 +2985,13 @@ class Utils {
 class stateMgmtDFX {
     static getObservedPropertyInfo(observedProp, isProfiler, changedTrackPropertyName) {
         return {
-            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(), changedTrackPropertyName: changedTrackPropertyName,
+            decorator: observedProp.debugInfoDecorator(), propertyName: observedProp.info(), id: observedProp.id__(),
+            changedTrackPropertyName: changedTrackPropertyName,
             value: stateMgmtDFX.getRawValue(observedProp),
-            inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ? -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
-            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ? !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
+            inRenderingElementId: stateMgmtDFX.inRenderingElementId.length === 0 ?
+                -1 : stateMgmtDFX.inRenderingElementId[stateMgmtDFX.inRenderingElementId.length - 1],
+            dependentElementIds: observedProp.dumpDependentElmtIdsObj(typeof observedProp.getUnmonitored() === 'object' ?
+                !TrackedObject.isCompatibilityMode(observedProp.getUnmonitored()) : false, isProfiler),
             owningView: observedProp.getOwningView(),
             length: stateMgmtDFX.getRawValueLength(observedProp),
             syncPeers: observedProp.dumpSyncPeers(isProfiler, changedTrackPropertyName)
@@ -3000,7 +3003,7 @@ class stateMgmtDFX {
         }
         catch (e) {
             stateMgmtConsole.warn(`Cannot get the type of current value, error message is: ${e.message}`);
-            return "unknown type";
+            return 'unknown type';
         }
     }
     /**
@@ -4113,7 +4116,8 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     getChildViewV2ForElmtId(elmtId) {
         const optComp = this.childrenWeakrefMap_.get(elmtId);
-        return (optComp === null || optComp === void 0 ? void 0 : optComp.deref()) && (optComp.deref() instanceof ViewV2) ? optComp === null || optComp === void 0 ? void 0 : optComp.deref() : undefined;
+        return (optComp === null || optComp === void 0 ? void 0 : optComp.deref()) && (optComp.deref() instanceof ViewV2) ?
+            optComp === null || optComp === void 0 ? void 0 : optComp.deref() : undefined;
     }
     purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
         // ViewPU overrides to unregister ViewPU from variables, 
@@ -4893,16 +4897,14 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
       FIXME this expects the Map, Set patch to go in
      */
     checkIsSupportedValue(value) {
-        let res = ((typeof value === 'object' && typeof value !== 'function'
-            && !ObserveV2.IsObservedObjectV2(value)
-            && !ObserveV2.IsMakeObserved(value))
-            // FIXME enable the check when V1-V2 interoperability is forbidden
-            // && !ObserveV2.IsProxiedObservedV2(value)) 
-            || typeof value === 'number'
-            || typeof value === 'string'
-            || typeof value === 'boolean'
-            || value === undefined
-            || value === null);
+        let res = ((typeof value === 'object' && typeof value !== 'function' &&
+            !ObserveV2.IsObservedObjectV2(value) &&
+            !ObserveV2.IsMakeObserved(value)) ||
+            typeof value === 'number' ||
+            typeof value === 'string' ||
+            typeof value === 'boolean' ||
+            value === undefined ||
+            value === null);
         if (!res) {
             errorReport.varValueCheckFailed({
                 customComponent: this.debugInfoOwningView(),
@@ -7510,7 +7512,7 @@ class ArrayProxyHandler {
                     // so we must call "target" here to deal with the collections situations.
                     // But we also need to addref for each index.
                     ObserveV2.getObserve().addRef(conditionalTarget, index.toString());
-                    callbackFn(typeof value == 'object' ? RefInfo.get(value).proxy : value, index, receiver);
+                    callbackFn(typeof value === 'object' ? RefInfo.get(value).proxy : value, index, receiver);
                 });
                 return result;
             };
@@ -10257,7 +10259,7 @@ class __RepeatDefaultKeyGen {
     }
     static funcImpl(item) {
         // fast keygen logic can be used with objects/symbols only
-        if (typeof item != 'object' && typeof item !== 'symbol') {
+        if (typeof item !== 'object' && typeof item !== 'symbol') {
             return JSON.stringify(item);
         }
         // generate a numeric key, store mappings in WeakMap
@@ -10420,7 +10422,7 @@ class __RepeatImpl {
             key2Item.set(key, { key, index });
         });
         if (key2Item.size < this.arr_.length) {
-            stateMgmtConsole.warn("__RepeatImpl: Duplicates detected, fallback to index-based keyGen.");
+            stateMgmtConsole.warn('__RepeatImpl: Duplicates detected, fallback to index-based keyGen.');
             // Causes all items to be re-rendered
             this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
             return this.genKeys();
@@ -10471,14 +10473,6 @@ class __RepeatImpl {
                 // C++ mv from tempChildren[oldIndex] to end of children_
                 RepeatNative.moveChild(oldIndex);
                 // TBD moveChild() only when item types are same
-                //const type0 = this.typeGenFunc_(oldItemInfo.repeatItem.item, oldIndex);
-                //const type1 = this.typeGenFunc_(itemInfo.repeatItem.item, index);
-                //if (type0 == type1) {
-                //    // C++ mv from tempChildren[oldIndex] to end of children_
-                //    RepeatNative.moveChild(oldIndex);
-                //} else {
-                //    this.initialRenderItem(key, itemInfo.repeatItem);
-                //}
             }
             else if (deletedKeysAndIndex.length) {
                 // case #2:

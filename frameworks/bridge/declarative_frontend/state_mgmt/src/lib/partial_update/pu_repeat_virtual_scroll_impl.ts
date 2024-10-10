@@ -310,7 +310,7 @@ class __RepeatVirtualScrollImpl<T> {
     }
 
     private purgeKeyCache(): void {
-        this.key4Index_.clear()
+        this.key4Index_.clear();
         this.index4Key_.clear();
     }
 };
