@@ -376,12 +376,13 @@ void RosenRenderSurface::ConsumeWebBuffer()
     OHOS::Rect damage;
 
     SurfaceError surfaceErr = consumerSurface_->AcquireBuffer(surfaceBuffer, fence, timestamp, damage);
-    auto errorCode = fence->Wait(WAIT_FENCE_TIME);
-    LOGD("RosenRenderSurface::ConsumeWebBuffer, wait Fence ,errorCode : %{public}d", errorCode);
     if (surfaceErr != SURFACE_ERROR_OK) {
         LOGE("cannot acquire buffer error = %{public}d", surfaceErr);
         return;
     }
+    CHECK_NULL_VOID(fence);
+    auto errorCode = fence->Wait(WAIT_FENCE_TIME);
+    LOGD("RosenRenderSurface::ConsumeWebBuffer, wait Fence ,errorCode : %{public}d", errorCode);
     PostRenderOnlyTaskToUI();
 
     int32_t bufferWidth = surfaceBuffer->GetSurfaceBufferWidth();
