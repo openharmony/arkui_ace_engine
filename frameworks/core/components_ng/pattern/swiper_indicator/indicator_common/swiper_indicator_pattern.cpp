@@ -1154,11 +1154,10 @@ void SwiperIndicatorPattern::IndicatorOnChange()
     pipeline->RequestFrame();
 }
 
-bool SwiperIndicatorPattern::GetDigitFrameSize(SizeF& frameSize) const
+bool SwiperIndicatorPattern::GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& frameSize) const
 {
-    auto indicatorNode = GetHost();
-    CHECK_NULL_RETURN(indicatorNode, false);
-    frameSize = indicatorNode->GetGeometryNode()->GetMarginFrameSize();
+    CHECK_NULL_RETURN(geoNode, false);
+    frameSize = geoNode->GetMarginFrameSize();
     return true;
 }
 
