@@ -306,12 +306,6 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                         CHECK_NULL_VOID(targetNode);
                         auto pipelineContext = NG::PipelineContext::GetCurrentContext();
                         CHECK_NULL_VOID(pipelineContext);
-                        auto dragDropManager = pipelineContext->GetDragDropManager();
-                        CHECK_NULL_VOID(dragDropManager);
-                        if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
-                            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag is in progress, return");
-                            return;
-                        }
                         if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
                             auto context = targetNode->GetRenderContext();
                             CHECK_NULL_VOID(context);
