@@ -714,6 +714,8 @@ protected:
 
     void Register2DragDropManager();
 
+    void CheckScrollBarOff();
+
 private:
     virtual void OnScrollEndCallback() {};
 
