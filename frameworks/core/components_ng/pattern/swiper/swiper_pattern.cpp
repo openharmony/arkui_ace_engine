@@ -1091,11 +1091,14 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 float SwiperPattern::AdjustIgnoreBlankOverScrollOffSet(bool isStartOverScroll) const
 {
+    if (IsLoop() || !(prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_)) {
+        return 0.0f;
+    }
     if (isStartOverScroll && NonNegative(ignoreBlankOffset_)) {
-        return prevMarginIgnoreBlank_ ? GetPrevMargin() + ignoreBlankOffset_ : ignoreBlankOffset_;
+        return prevMarginIgnoreBlank_ ? GetPrevMarginWithItemSpace() + ignoreBlankOffset_ : ignoreBlankOffset_;
     }
     if (!isStartOverScroll && NonPositive(ignoreBlankOffset_)) {
-        return nextMarginIgnoreBlank_ ? -GetNextMargin() + ignoreBlankOffset_ : ignoreBlankOffset_;
+        return nextMarginIgnoreBlank_ ? -GetNextMarginWithItemSpace() + ignoreBlankOffset_ : ignoreBlankOffset_;
     }
     return 0.0f;
 }
@@ -1103,35 +1106,30 @@ float SwiperPattern::AdjustIgnoreBlankOverScrollOffSet(bool isStartOverScroll) c
 void SwiperPattern::UpdateIgnoreBlankOffsetWithIndex()
 {
     if (IsLoop() || !(prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_)) {
-        return;
+        auto lastIgnoreBlankOffset = ignoreBlankOffset_;
+        ignoreBlankOffset_ = 0.0f;
+        UpdateIgnoreBlankOffsetInMap(lastIgnoreBlankOffset);
     }
     if (jumpIndex_.has_value()) {
         if (prevMarginIgnoreBlank_ && jumpIndex_.value() == 0) {
-            ignoreBlankOffset_ = -GetPrevMargin();
+            ignoreBlankOffset_ = -GetPrevMarginWithItemSpace();
         } else if (nextMarginIgnoreBlank_ && jumpIndex_.value() >= (TotalCount() - GetDisplayCount())) {
-            ignoreBlankOffset_ = GetNextMargin();
+            ignoreBlankOffset_ = GetNextMarginWithItemSpace();
         } else {
             ignoreBlankOffset_ = 0.0f;
         }
         return;
     }
     if (targetIndex_.has_value()) {
-        float ignoreBlankOffset = ignoreBlankOffset_;
+        float lastIgnoreBlankOffset = ignoreBlankOffset_;
         if (prevMarginIgnoreBlank_ && targetIndex_.value() == 0) {
-            ignoreBlankOffset_ = -GetPrevMargin();
+            ignoreBlankOffset_ = -GetPrevMarginWithItemSpace();
         } else if (nextMarginIgnoreBlank_ && targetIndex_.value() >= (TotalCount() - GetDisplayCount())) {
-            ignoreBlankOffset_ = GetNextMargin();
+            ignoreBlankOffset_ = GetNextMarginWithItemSpace();
         } else {
             ignoreBlankOffset_ = 0.0f;
         }
-        if (NearEqual(ignoreBlankOffset_, ignoreBlankOffset)) {
-            return;
-        }
-        float adjustOffset = ignoreBlankOffset_ - ignoreBlankOffset;
-        for (auto& item : itemPosition_) {
-            item.second.startPos -= adjustOffset;
-            item.second.endPos -= adjustOffset;
-        }
+        UpdateIgnoreBlankOffsetInMap(lastIgnoreBlankOffset);
     }
 }
 
@@ -1140,16 +1138,23 @@ void SwiperPattern::UpdateIgnoreBlankOffsetWithDrag(bool overScrollDirection)
     if (IsLoop() || !(prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_)) {
         return;
     }
-    float ignoreBlankOffset = ignoreBlankOffset_;
+    float lastIgnoreBlankOffset = ignoreBlankOffset_;
     if (prevMarginIgnoreBlank_ && overScrollDirection) {
-        ignoreBlankOffset_ = -GetPrevMargin();
+        ignoreBlankOffset_ = -GetPrevMarginWithItemSpace();
     } else if (nextMarginIgnoreBlank_ && !overScrollDirection) {
-        ignoreBlankOffset_ = GetNextMargin();
+        ignoreBlankOffset_ = GetNextMarginWithItemSpace();
     }
-    if (NearEqual(ignoreBlankOffset_, ignoreBlankOffset)) {
+
+    UpdateIgnoreBlankOffsetInMap(lastIgnoreBlankOffset);
+}
+
+void SwiperPattern::UpdateIgnoreBlankOffsetInMap(float lastIgnoreBlankOffset)
+{
+    if (NearEqual(ignoreBlankOffset_, lastIgnoreBlankOffset)) {
         return;
     }
-    float adjustOffset = ignoreBlankOffset_ - ignoreBlankOffset;
+
+    float adjustOffset = ignoreBlankOffset_ - lastIgnoreBlankOffset;
     for (auto& item : itemPosition_) {
         item.second.startPos -= adjustOffset;
         item.second.endPos -= adjustOffset;
