@@ -876,4 +876,51 @@ void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirecti
         default: LOGE("Unexpected enum value in Ark_GradientDirection: %{public}d", src);
     }
 }
+template<>
+void AssignCast(std::optional<HoverEffectType>& dst, const Ark_HoverEffect& src)
+{
+    switch (src) {
+        case ARK_HOVER_EFFECT_AUTO: dst = HoverEffectType::AUTO; break;
+        case ARK_HOVER_EFFECT_SCALE: dst = HoverEffectType::SCALE; break;
+        case ARK_HOVER_EFFECT_HIGHLIGHT: dst = HoverEffectType::BOARD; break;
+        case ARK_HOVER_EFFECT_NONE: dst = HoverEffectType::NONE; break;
+        default: LOGE("Unexpected enum value in Ark_HoverEffect: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<FlexAlign>& dst, const Ark_ItemAlign& src)
+{
+    switch (src) {
+        case ARK_ITEM_ALIGN_AUTO: dst = FlexAlign::AUTO; break;
+        case ARK_ITEM_ALIGN_START: dst = FlexAlign::FLEX_START; break;
+        case ARK_ITEM_ALIGN_CENTER: dst = FlexAlign::CENTER; break;
+        case ARK_ITEM_ALIGN_END: dst = FlexAlign::FLEX_END; break;
+        case ARK_ITEM_ALIGN_BASELINE: dst = FlexAlign::BASELINE; break;
+        case ARK_ITEM_ALIGN_STRETCH: dst = FlexAlign::STRETCH; break;
+        default: LOGE("Unexpected enum value in Ark_ItemAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextDirection>& dst, const Ark_Direction& src)
+{
+    switch (src) {
+        case ARK_DIRECTION_LTR: dst = TextDirection::LTR; break;
+        case ARK_DIRECTION_RTL: dst = TextDirection::RTL; break;
+        case ARK_DIRECTION_AUTO: dst = TextDirection::AUTO; break;
+        default: LOGE("Unexpected enum value in Ark_Direction: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src)
+{
+    switch (src) {
+        case ARK_BORDER_STYLE_DOTTED: dst = BorderStyle::DOTTED; break;
+        case ARK_BORDER_STYLE_DASHED: dst = BorderStyle::DASHED; break;
+        case ARK_BORDER_STYLE_SOLID: dst = BorderStyle::SOLID; break;
+        default: LOGE("Unexpected enum value in Ark_BorderStyle: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

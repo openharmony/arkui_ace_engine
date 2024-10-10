@@ -589,16 +589,13 @@ namespace Converter {
     }
 
     template<>
-    inline BorderStyle Convert(const Ark_BorderStyle& src)
-    {
-        return static_cast<BorderStyle>(src);
-    }
-
-    template<>
     inline BorderStyleProperty Convert(const Ark_BorderStyle& src)
     {
         BorderStyleProperty property;
-        property.SetBorderStyle(static_cast<BorderStyle>(src));
+        auto style = OptConvert<BorderStyle>(src);
+        if (style) {
+            property.SetBorderStyle(style.value());
+        }
         return property;
     }
 
@@ -724,6 +721,10 @@ namespace Converter {
     template<> void AssignCast(std::optional<BorderImageRepeat>& dst, const Ark_RepeatMode& src);
     template<> void AssignCast(std::optional<ThemeColorMode>& dst, const Ark_ThemeColorMode& src);
     template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
+    template<> void AssignCast(std::optional<HoverEffectType>& dst, const Ark_HoverEffect& src);
+    template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_ItemAlign& src);
+    template<> void AssignCast(std::optional<TextDirection>& dst, const Ark_Direction& src);
+    template<> void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

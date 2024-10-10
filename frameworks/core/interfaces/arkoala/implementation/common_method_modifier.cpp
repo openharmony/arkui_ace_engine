@@ -2382,8 +2382,300 @@ void DragPreviewImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+<<<<<<< HEAD
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetDragPreview(frameNode, convValue);
+=======
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Gradient gradient = Converter::Convert<Gradient>(*value);
+    ViewAbstract::SetRadialGradient(frameNode, gradient);
+}
+void MotionPathImpl(Ark_NativePointer node,
+                    const Ark_MotionPathOptions* value)
+{
+}
+void ShadowImpl(Ark_NativePointer node,
+                const Union_ShadowOptions_ShadowStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto shadow = Converter::OptConvert<Shadow>(*value);
+    if (shadow) {
+        ViewAbstract::SetBackShadow(frameNode, shadow.value());
+    }
+}
+void Clip0Impl(Ark_NativePointer node,
+               Ark_Boolean value)
+{
+}
+void Clip1Impl(Ark_NativePointer node,
+               const Union_Boolean_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute* value)
+{
+}
+void ClipShapeImpl(Ark_NativePointer node,
+                   const Union_CircleShape_EllipseShape_PathShape_RectShape* value)
+{
+}
+void Mask0Impl(Ark_NativePointer node,
+               const Ark_Materialized* value)
+{
+}
+void Mask1Impl(Ark_NativePointer node,
+               const Union_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute_ProgressMask* value)
+{
+}
+void MaskShapeImpl(Ark_NativePointer node,
+                   const Union_CircleShape_EllipseShape_PathShape_RectShape* value)
+{
+}
+void KeyImpl(Ark_NativePointer node,
+             const Ark_String* value)
+{
+}
+void IdImpl(Ark_NativePointer node,
+            const Ark_String* value)
+{
+}
+void GeometryTransition0Impl(Ark_NativePointer node,
+                             const Ark_String* value)
+{
+}
+void StateStylesImpl(Ark_NativePointer node,
+                     const Ark_StateStyles* value)
+{
+}
+void RestoreIdImpl(Ark_NativePointer node,
+                   const Ark_Number* value)
+{
+}
+void SphericalEffectImpl(Ark_NativePointer node,
+                         const Ark_Number* value)
+{
+}
+void LightUpEffectImpl(Ark_NativePointer node,
+                       const Ark_Number* value)
+{
+}
+void PixelStretchEffectImpl(Ark_NativePointer node,
+                            const Ark_PixelStretchEffectOptions* value)
+{
+}
+void AccessibilityGroupImpl(Ark_NativePointer node,
+                            Ark_Boolean value)
+{
+}
+void AccessibilityText0Impl(Ark_NativePointer node,
+                            const Ark_String* value)
+{
+}
+void AccessibilityText1Impl(Ark_NativePointer node,
+                            const Ark_Resource* value)
+{
+}
+void AccessibilityTextHintImpl(Ark_NativePointer node,
+                               const Ark_String* value)
+{
+}
+void AccessibilityDescription0Impl(Ark_NativePointer node,
+                                   const Ark_String* value)
+{
+}
+void AccessibilityDescription1Impl(Ark_NativePointer node,
+                                   const Ark_Resource* value)
+{
+}
+void AccessibilityLevelImpl(Ark_NativePointer node,
+                            const Ark_String* value)
+{
+}
+void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
+                                  const Union_CustomBuilder_0_Callback_void* value)
+{
+}
+void ObscuredImpl(Ark_NativePointer node,
+                  const Array_ObscuredReasons* value)
+{
+}
+void ReuseIdImpl(Ark_NativePointer node,
+                 const Ark_String* value)
+{
+}
+void RenderFitImpl(Ark_NativePointer node,
+                   Ark_RenderFit value)
+{
+}
+void GestureModifierImpl(Ark_NativePointer node,
+                         const Ark_Materialized* value)
+{
+}
+void BackgroundBrightnessImpl(Ark_NativePointer node,
+                              const Ark_BackgroundBrightnessOptions* value)
+{
+}
+void OnGestureJudgeBeginImpl(Ark_NativePointer node,
+                             Ark_Function value)
+{
+}
+void OnGestureRecognizerJudgeBeginImpl(Ark_NativePointer node,
+                                       Ark_Function value)
+{
+}
+void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
+                                             Ark_Function value)
+{
+}
+void MonopolizeEventsImpl(Ark_NativePointer node,
+                          Ark_Boolean value)
+{
+}
+void OnTouchInterceptImpl(Ark_NativePointer node,
+                          Ark_Function value)
+{
+}
+void OnSizeChangeImpl(Ark_NativePointer node,
+                      Ark_Function value)
+{
+}
+void CustomPropertyImpl(Ark_NativePointer node,
+                        const Ark_String* name,
+                        const Opt_CustomObject* value)
+{
+}
+void ExpandSafeAreaImpl(Ark_NativePointer node,
+                        const Opt_Array_SafeAreaType* types,
+                        const Opt_Array_SafeAreaEdge* edges)
+{
+}
+void BackgroundImpl(Ark_NativePointer node,
+                    const Union_CustomBuilder_0_Callback_void* builder,
+                    const Opt_CommonMethod_background_options_Object* options)
+{
+}
+void BackgroundImageImpl(Ark_NativePointer node,
+                         const Union_ResourceStr_PixelMap* src,
+                         const Opt_ImageRepeat* repeat)
+{
+}
+void BackgroundBlurStyleImpl(Ark_NativePointer node,
+                             Ark_BlurStyle value,
+                             const Opt_BackgroundBlurStyleOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::BlurStyleOption style;
+    style.blurStyle = static_cast<BlurStyle>(value);
+    if (options->tag != Ark_Tag::ARK_TAG_UNDEFINED) {
+        style.blurOption = Converter::ConvertOrDefault(options->value.blurOptions, BlurOption());
+        style.scale = Converter::ConvertOrDefault(options->value.scale, 0.0f);
+        auto adaptiveColor = Converter::OptConvert<AdaptiveColor>(options->value.adaptiveColor);
+        if (adaptiveColor) {
+            style.adaptiveColor = adaptiveColor.value();
+        }
+        auto colorMode = Converter::OptConvert<OHOS::Ace::ThemeColorMode>(options->value.colorMode);
+        if (colorMode) {
+            style.colorMode = colorMode.value();
+        }
+    }
+    ViewAbstract::SetBackgroundBlurStyle(frameNode, style);
+}
+void ForegroundBlurStyleImpl(Ark_NativePointer node,
+                             Ark_BlurStyle value,
+                             const Opt_ForegroundBlurStyleOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::BlurStyleOption style;
+    style.blurStyle = static_cast<BlurStyle>(value);
+    if (options->tag != Ark_Tag::ARK_TAG_UNDEFINED) {
+        style.blurOption = Converter::ConvertOrDefault(options->value.blurOptions, BlurOption());
+        style.scale = Converter::ConvertOrDefault(options->value.scale, 0.0f);
+        auto adaptiveColor = Converter::OptConvert<AdaptiveColor>(options->value.adaptiveColor);
+        if (adaptiveColor) {
+            style.adaptiveColor = adaptiveColor.value();
+        }
+        auto colorMode = Converter::OptConvert<OHOS::Ace::ThemeColorMode>(options->value.colorMode);
+        if (colorMode) {
+            style.colorMode = colorMode.value();
+        }
+    }
+    ViewAbstract::SetForegroundBlurStyle(frameNode, style);
+}
+void FocusScopeIdImpl(Ark_NativePointer node,
+                      const Ark_String* id,
+                      const Opt_Boolean* isGroup)
+{
+}
+void FocusScopePriorityImpl(Ark_NativePointer node,
+                            const Ark_String* scopeId,
+                            const Opt_FocusPriority* priority)
+{
+}
+void Transition1Impl(Ark_NativePointer node,
+                     const Ark_TransitionEffect* effect,
+                     const Opt_Function* onFinish)
+{
+}
+void GestureImpl(Ark_NativePointer node,
+                 const Union_TapGestureInterface_LongPressGestureInterface_PanGestureInterface_PinchGestureInterface_SwipeGestureInterface_RotationGestureInterface_GestureGroupInterface* gesture,
+                 const Opt_GestureMask* mask)
+{
+}
+void PriorityGestureImpl(Ark_NativePointer node,
+                         const Union_TapGestureInterface_LongPressGestureInterface_PanGestureInterface_PinchGestureInterface_SwipeGestureInterface_RotationGestureInterface_GestureGroupInterface* gesture,
+                         const Opt_GestureMask* mask)
+{
+}
+void ParallelGestureImpl(Ark_NativePointer node,
+                         const Union_TapGestureInterface_LongPressGestureInterface_PanGestureInterface_PinchGestureInterface_SwipeGestureInterface_RotationGestureInterface_GestureGroupInterface* gesture,
+                         const Opt_GestureMask* mask)
+{
+}
+void BlurImpl(Ark_NativePointer node,
+              const Ark_Number* value,
+              const Opt_BlurOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto blur = Converter::OptConvert<float>(*value);
+    BlurOption blurOptions = Converter::ConvertOrDefault(*options, BlurOption());
+    CalcDimension dimensionBlur(blur ? blur.value() : 0, DimensionUnit::PX);
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOptions);
+}
+void LinearGradientBlurImpl(Ark_NativePointer node,
+                            const Ark_Number* value,
+                            const Ark_LinearGradientBlurOptions* options)
+{
+}
+void SystemBarEffectImpl(Ark_NativePointer node)
+{
+}
+void BackdropBlurImpl(Ark_NativePointer node,
+                      const Ark_Number* value,
+                      const Opt_BlurOptions* options)
+{
+}
+void SharedTransitionImpl(Ark_NativePointer node,
+                          const Ark_String* id,
+                          const Opt_sharedTransitionOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(id);
+    auto modelId = Converter::Convert<std::string>(*id);
+    auto modelOptions = std::make_shared<SharedTransitionOption>();
+    if (options) {
+        if (auto transOpt = Converter::OptConvert<SharedTransitionOption>(*options); transOpt) {
+            *modelOptions = std::move(*transOpt);
+        }
+    }
+    ViewAbstract::SetSharedTransition(frameNode, modelId, modelOptions);
+}
+void ChainModeImpl(Ark_NativePointer node,
+                   Ark_Axis direction,
+                   Ark_ChainStyle style)
+{
+>>>>>>> e3b895f77c (Unit tests)
 }
 void DragPreviewOptionsImpl(Ark_NativePointer node,
                             const Ark_DragPreviewOptions* value,
