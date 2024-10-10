@@ -997,7 +997,17 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
     NG::SelectMenuParam menuParam;
     int32_t requiredParamCount = 3;
     if (info.Length() > requiredParamCount && info[requiredParamCount]->IsObject()) {
-        JSText::ParseMenuParam(info, info[requiredParamCount], menuParam);
+        JSRef<JSObject> menuOptions = info[requiredParamCount];
+        JSText::ParseMenuParam(info, menuOptions, menuParam);
+        auto menuType = menuOptions->GetProperty("menuType");
+        bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
+        bool bindImagePreviewMenu = isPreviewMenu
+            && responseType == NG::TextResponseType::LONG_PRESS
+            && editorType == NG::TextSpanType::IMAGE;
+        if (bindImagePreviewMenu) {
+            RichEditorModel::GetInstance()->SetImagePreviewMenuParam(buildFunc, menuParam);
+            return;
+        }
     }
     RichEditorModel::GetInstance()->BindSelectionMenu(editorType, responseType, buildFunc, menuParam);
 }

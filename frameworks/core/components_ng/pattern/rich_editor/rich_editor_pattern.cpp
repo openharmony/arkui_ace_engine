@@ -251,6 +251,7 @@ void RichEditorPattern::SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, 
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
+    IF_TRUE(oneStepDragParam_, dirtyImageNodes.push(WeakClaim(RawPtr(imageNode))));
 }
 
 void RichEditorPattern::InsertValueInStyledString(const std::string& insertValue)
@@ -586,6 +587,7 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         }
     }
     caretUpdateType_ = CaretUpdateType::NONE;
+    UpdateImagePreviewParam();
     return ret;
 }
 
@@ -672,9 +674,24 @@ int32_t RichEditorPattern::GetTextContentLength()
     return 0;
 }
 
-void RichEditorPattern::DisableDrag(RefPtr<ImageSpanNode> imageNode)
+void RichEditorPattern::SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetImagePreviewMenuParam");
+    oneStepDragParam_ = std::make_shared<OneStepDragParam>(builder, menuParam);
+}
+
+void RichEditorPattern::EnableImageDrag(const RefPtr<ImageSpanNode>& imageNode, bool isEnable)
 {
     CHECK_NULL_VOID(imageNode);
+    if (isEnable) {
+        EnableOneStepDrag(imageNode);
+    } else {
+        DisableDrag(imageNode);
+    }
+}
+
+void RichEditorPattern::DisableDrag(const RefPtr<ImageSpanNode>& imageNode)
+{
     // Disable the image itself event
     imageNode->SetDraggable(false);
     auto gesture = imageNode->GetOrCreateGestureEventHub();
@@ -682,15 +699,140 @@ void RichEditorPattern::DisableDrag(RefPtr<ImageSpanNode> imageNode)
     gesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
 }
  
-void RichEditorPattern::SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem)
+void RichEditorPattern::SetImageSelfResponseEvent(bool isEnable)
 {
-    if (userGestureOptions.onClick) {
-        spanItem->SetOnClickEvent(std::move(userGestureOptions.onClick));
+    CHECK_NULL_VOID(oneStepDragParam_);
+    CHECK_NULL_VOID(isImageSelfResponseEvent_ != isEnable);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    for (const auto& spanNode : host->GetChildren()) {
+        if (spanNode->GetTag() != V2::IMAGE_ETS_TAG) {
+            continue;
+        }
+        auto imageNode = DynamicCast<ImageSpanNode>(spanNode);
+        if (auto hub = imageNode->GetOrCreateGestureEventHub(); hub) {
+            hub->SetHitTestMode(isEnable ? HitTestMode::HTMDEFAULT : HitTestMode::HTMNONE);
+        }
     }
- 
-    if (userGestureOptions.onLongPress) {
-        spanItem->SetLongPressEvent(std::move(userGestureOptions.onLongPress));
+    isImageSelfResponseEvent_ = isEnable;
+}
+
+void RichEditorPattern::EnableOneStepDrag(const RefPtr<ImageSpanNode>& imageNode)
+{
+    CHECK_NULL_VOID(oneStepDragParam_);
+    imageNode->SetDraggable(true);
+    auto imageGestureHub = imageNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(imageGestureHub);
+    imageGestureHub->InitDragDropEvent();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostEventHub = host->GetEventHub<EventHub>();
+    auto imageEventHub = imageNode->GetEventHub<EventHub>();
+    CopyDragCallback(hostEventHub, imageEventHub);
+}
+
+RichEditorPattern::OneStepDragParam::OneStepDragParam(const std::function<void()>& builder,
+    const SelectMenuParam& selectMenuParam)
+{
+    menuBuilder = builder;
+    onAppear = selectMenuParam.onAppear;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.onDisappear = selectMenuParam.onDisappear;
+    menuParam.previewAnimationOptions.scaleFrom = 1.0f;
+    menuParam.previewBorderRadius = BorderRadiusProperty(Dimension(0, DimensionUnit::VP));
+    menuParam.backgroundColor = Color::WHITE;
+    menuParam.backgroundBlurStyle = static_cast<int>(BlurStyle::NO_MATERIAL);
+}
+
+MenuParam RichEditorPattern::OneStepDragParam::GetMenuParam(const RefPtr<ImageSpanNode>& imageNode)
+{
+    CHECK_NULL_RETURN(imageNode, menuParam);
+    auto res = menuParam;
+    res.onAppear = [weak = WeakClaim(RawPtr(imageNode)), onAppear = this->onAppear]() {
+        CHECK_NULL_VOID(onAppear);
+        auto imageNode = weak.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        auto& imageSpanItem = imageNode->GetSpanItem();
+        onAppear(imageSpanItem->rangeStart, imageSpanItem->position);
+    };
+
+    auto dispSize = imageNode->GetGeometryNode()->GetMarginFrameSize();
+    CHECK_NULL_RETURN(dispSize.IsPositive(), res);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(imageLayoutProperty, res);
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfoValue();
+    CHECK_NULL_RETURN(imageSourceInfo.IsPixmap(), res);
+    auto pixelMap = imageSourceInfo.GetPixmap();
+    CHECK_NULL_RETURN(pixelMap, res);
+
+    auto realWidth = pixelMap->GetWidth();
+    auto realHeight = pixelMap->GetHeight();
+    float scale = std::max((float) realWidth / dispSize.Width(), (float) realHeight / dispSize.Height());
+    scale = std::max(scale, 1.1f);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "realSize=[%{public}d,%{public}d], scale=%{public}.2f",
+        realWidth, realHeight, scale);
+    res.previewAnimationOptions.scaleTo = scale;
+    return res;
+}
+
+void RichEditorPattern::UpdateImagePreviewParam()
+{
+    CHECK_NULL_VOID(oneStepDragParam_);
+    while (!dirtyImageNodes.empty()) {
+        auto weakImageNode = dirtyImageNodes.front();
+        dirtyImageNodes.pop();
+        auto imageNode = weakImageNode.Upgrade();
+        if (!imageNode) {
+            continue;
+        }
+
+#ifndef ACE_UNITTEST
+        auto& menuBuilder = oneStepDragParam_->menuBuilder;
+        auto& previewBuilder = oneStepDragParam_->previewBuilder;
+        auto resType = ResponseType::LONG_PRESS;
+        auto menuParam = oneStepDragParam_->GetMenuParam(imageNode);
+        ViewStackProcessor::GetInstance()->Push(imageNode);
+        ViewAbstractModel::GetInstance()->BindContextMenu(resType, menuBuilder, menuParam, previewBuilder);
+        ViewAbstractModel::GetInstance()->BindDragWithContextMenuParams(menuParam);
+        ViewStackProcessor::GetInstance()->Finish();
+#endif
     }
+}
+
+void RichEditorPattern::CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub)
+{
+    CHECK_NULL_VOID(hostEventHub && imageEventHub);
+    // start
+    auto start = hostEventHub->GetOnDragStart();
+    IF_TRUE(start, imageEventHub->SetOnDragStart(std::move(start)));
+
+    // end
+    auto end = hostEventHub->GetCustomerOnDragEndFunc();
+    IF_TRUE(end, imageEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(end)));
+
+    // enter
+    auto enter = hostEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_ENTER);
+    IF_TRUE(enter, imageEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_ENTER, std::move(enter)));
+
+    // move
+    auto move = hostEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_MOVE);
+    IF_TRUE(move, imageEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_MOVE, std::move(move)));
+
+    // leave
+    auto leave = hostEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE);
+    IF_TRUE(leave, imageEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, std::move(leave)));
+
+    // drop
+    auto drop = hostEventHub->GetCustomerOnDragFunc(DragFuncType::DRAG_DROP);
+    IF_TRUE(drop, imageEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_DROP, std::move(drop)));
+}
+
+void RichEditorPattern::SetGestureOptions(UserGestureOptions options, RefPtr<SpanItem> spanItem)
+{
+    IF_TRUE(options.onClick, spanItem->SetOnClickEvent(std::move(options.onClick)));
+    IF_TRUE(options.onLongPress, spanItem->SetLongPressEvent(std::move(options.onLongPress)));
 }
 
 int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool isPaste, int32_t index,
@@ -712,7 +854,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     RichEditorChangeValue changeValue;
     CHECK_NULL_RETURN(BeforeAddImage(changeValue, options, insertIndex), -1);
 
-    DisableDrag(imageNode);
+    EnableImageDrag(imageNode, oneStepDragParam_ != nullptr);
 
     OperationRecord record;
     record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
@@ -1771,6 +1913,7 @@ void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, const Ima
     UpdateImageAttribute(imageNode, imageStyle);
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
+    IF_TRUE(oneStepDragParam_, dirtyImageNodes.push(WeakClaim((ImageSpanNode*) RawPtr(imageNode))));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
 }
@@ -2934,6 +3077,7 @@ void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
         if (!selector.SelectNothing()) {
             pattern->StopTwinkling();
         }
+        pattern->SetImageSelfResponseEvent(selector.SelectNothing());
         pattern->FireOnSelectionChange(selector);
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
@@ -7795,6 +7939,17 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     jsonValue->Put("types", "");
     json->PutExtAttr("dataDetectorConfig", jsonValue->ToString().c_str(), filter);
     json->PutExtAttr("placeholder", GetPlaceHolderInJson().c_str(), filter);
+    json->PutExtAttr("bindSelectionMenu", GetBindSelectionMenuInJson().c_str(), filter);
+}
+
+void RichEditorPattern::FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const
+{
+    CHECK_NULL_VOID(jsonValue && oneStepDragParam_);
+    auto jsonItem = JsonUtil::Create(true);
+    jsonItem->Put("spanType", static_cast<int32_t>(TextSpanType::IMAGE));
+    jsonItem->Put("responseType", static_cast<int32_t>(TextResponseType::LONG_PRESS));
+    jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType::PREVIEW_MENU));
+    jsonValue->Put(jsonItem);
 }
 
 std::string RichEditorPattern::GetPlaceHolderInJson() const
