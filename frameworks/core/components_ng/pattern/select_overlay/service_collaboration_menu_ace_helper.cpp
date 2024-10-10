@@ -575,10 +575,10 @@ void ServiceCollaborationAceCallback::CreateEndIcon(const std::string& icon, con
             CalcLength(static_cast<float>(ENDICON_SIZE), DimensionUnit::VP)
         )
     );
-    iconProperty->UpdatePadding({ .right = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP),
+    iconProperty->UpdatePadding({ .left = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP),
+        .right = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP),
         .top = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP),
-        .left = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP),
-        .bottom = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP)});
+        .bottom = CalcLength(static_cast<float>(ICON_PADDING), DimensionUnit::VP) });
     iconProperty->UpdateAlignment(Alignment::CENTER_LEFT);
     MarginProperty margin;
     margin.right = CalcLength(static_cast<float>(ENDICON_MARGIN));
