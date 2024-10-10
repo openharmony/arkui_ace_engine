@@ -971,6 +971,70 @@ HWTEST_F(RichEditorEditTestNg, RichEditorDelete003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorDelete004
+ * @tc.desc: test delete backforward
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, RichEditorDelete004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1); // add hello1
+    ASSERT_EQ(richEditorPattern->caretPosition_, 6);
+
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 5);
+    richEditorPattern->DeleteBackward(2);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 3);
+    richEditorPattern->DeleteBackward(3);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+}
+
+/**
+ * @tc.name: RichEditorDelete005
+ * @tc.desc: test delete backforward
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, RichEditorDelete005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1); // add hello1
+    ASSERT_EQ(richEditorPattern->caretPosition_, 6);
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 7);
+    ASSERT_EQ(richEditorNode_->GetChildren().size(), 2);
+
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+}
+
+/**
+ * @tc.name: RichEditorDelete006
+ * @tc.desc: test delete backforward
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, RichEditorDelete006, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1); // add hello1
+    ASSERT_EQ(richEditorPattern->caretPosition_, 6);
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+    ASSERT_EQ(richEditorPattern->caretPosition_, 8);
+    ASSERT_EQ(richEditorNode_->GetChildren().size(), 2);
+
+    richEditorPattern->DeleteBackward(1);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+}
+
+/**
  * @tc.name: RichEditorDeleteForwardEmoji
  * @tc.desc: test DeleteForward Emoji And Emoji Selected
  * @tc.type: FUNC

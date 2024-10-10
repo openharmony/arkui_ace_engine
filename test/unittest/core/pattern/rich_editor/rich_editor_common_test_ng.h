@@ -149,6 +149,7 @@ auto& onWillReplacedImageSpans = onWillChangeValue.replacedImageSpans_;
 auto& onWillReplacedSymbolSpans = onWillChangeValue.replacedSymbolSpans_;
 auto& onDidRangeBefore = onDidChangeValue.rangeBefore_;
 auto& onDidRangeAfter = onDidChangeValue.rangeAfter_;
+RichEditorDeleteValue aboutToDeleteValue;
 const TextStyle TEXT_STYLE_1(10.0);
 const TextStyle TEXT_STYLE_2(20.0);
 const TextStyle TEXT_STYLE_3(30.0);
@@ -171,7 +172,7 @@ const ImageSpanOptions IMAGE_SPAN_OPTIONS_1 = {
 };
 const SymbolSpanOptions SYMBOL_SPAN_OPTIONS_1 = {
     .offset = std::nullopt,
-    .symbolId = 0,
+    .symbolId = 1,
     .style = TEXT_STYLE_1,
     .resourceObject = nullptr
 };
