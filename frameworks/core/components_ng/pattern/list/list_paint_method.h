@@ -123,6 +123,11 @@ public:
 
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
+    void SetAdjustOffset(float adjustOffset)
+    {
+        adjustOffset_ = adjustOffset;
+    }
+
 private:
     ContentClipMode GetDefaultContentClip() const override
     {
@@ -135,6 +140,7 @@ private:
     float space_;
     float laneGutter_ = 0.0f;
     PositionMap itemPosition_;
+    float adjustOffset_ = 0.0f;
     RefPtr<ListContentModifier> listContentModifier_;
 
     WeakPtr<ScrollBar> scrollBar_;

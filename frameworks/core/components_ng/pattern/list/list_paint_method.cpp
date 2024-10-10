@@ -142,12 +142,13 @@ ListDivider ListPaintMethod::HandleDividerList(
         (dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
     float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
     float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-    float mainPos = itemPosition_.at(index).startPos - divOffset + dividerInfo.mainPadding;
+    float mainPos = itemPosition_.at(index).startPos - divOffset + dividerInfo.mainPadding + adjustOffset_;
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
     if (isReverse_) {
         if (dividerInfo.isVertical) {
             float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-            mainPos = dividerInfo.mainSize - itemPosition_.at(index).startPos + divOffset - dividerInfo.mainPadding;
+            mainPos = dividerInfo.mainSize - itemPosition_.at(index).startPos + divOffset - dividerInfo.mainPadding +
+                      adjustOffset_;
         } else {
             crossPos = dividerInfo.endMargin + dividerInfo.crossPadding;
         }
