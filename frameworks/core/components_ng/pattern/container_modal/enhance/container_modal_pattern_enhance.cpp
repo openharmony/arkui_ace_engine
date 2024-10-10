@@ -230,15 +230,14 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool h
     ContainerModalViewEnhance::SetEnableSplit(!hideSplit);
 
     auto maximizeBtn =
-            AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
+        AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
     CHECK_NULL_VOID(maximizeBtn);
     maximizeBtn->GetLayoutProperty()->UpdateVisibility(hideMaximize ? VisibleType::GONE : VisibleType::VISIBLE);
     maximizeBtn->MarkDirtyNode();
 
-    auto minimizeBtn =
-            AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
+    auto minimizeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
     CHECK_NULL_VOID(minimizeBtn);
-    minimizeBtn->GetLayoutProperty()->UpdateVisibility(hideMaximize ? VisibleType::GONE : VisibleType::VISIBLE);
+    minimizeBtn->GetLayoutProperty()->UpdateVisibility(minimizeBtn ? VisibleType::GONE : VisibleType::VISIBLE);
     minimizeBtn->MarkDirtyNode();
 
     auto closeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
