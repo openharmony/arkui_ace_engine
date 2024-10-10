@@ -65,6 +65,7 @@ void SetDataPanelOptionsImpl(Ark_NativePointer node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
     auto panelOptions = Converter::OptConvert<Converter::DataPanelOptions>(*options);
     if (panelOptions.has_value()) {
         DataPanelModelNG::SetValues(frameNode, panelOptions.value().values);
@@ -95,6 +96,7 @@ void TrackBackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto color = value ? Converter::OptConvert<Color>(*value) : std::nullopt;
     DataPanelModelNG::SetTrackBackground(frameNode, color);
 }
@@ -103,6 +105,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto width = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(width);
     DataPanelModelNG::SetStrokeWidth(frameNode, width);

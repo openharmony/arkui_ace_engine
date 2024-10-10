@@ -602,8 +602,8 @@ template<>
 void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
 {
     switch (src) {
-        case ARK_DATA_PANEL_TYPE_LINE: dst = DataPanelType::CIRCLE; break;
-        case ARK_DATA_PANEL_TYPE_CIRCLE: dst = DataPanelType::LINE; break;
+        case ARK_DATA_PANEL_TYPE_LINE: dst = DataPanelType::LINE; break;
+        case ARK_DATA_PANEL_TYPE_CIRCLE: dst = DataPanelType::CIRCLE; break;
         default: LOGE("Unexpected enum value in Ark_DataPanelType: %{public}d", src);
     }
 }
