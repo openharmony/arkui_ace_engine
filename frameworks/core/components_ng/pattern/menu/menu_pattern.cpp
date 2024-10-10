@@ -1084,10 +1084,11 @@ void MenuPattern::ShowPreviewMenuScaleAnimation()
 void MenuPattern::ShowPreviewMenuAnimation()
 {
     CHECK_NULL_VOID(isFirstShow_ && previewMode_ != MenuPreviewMode::NONE);
-    ShowPreviewMenuScaleAnimation();
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    MenuView::CalcHoverScaleInfo(host);
+    ShowPreviewMenuScaleAnimation();
+
     MenuView::ShowPixelMapAnimation(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
