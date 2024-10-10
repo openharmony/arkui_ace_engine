@@ -1620,8 +1620,8 @@ void SelectPattern::ResetParams()
         paddings.left = NG::CalcLength(SELECT_SMALL_PADDING_VP);
         paddings.right = NG::CalcLength(SELECT_SMALL_PADDING_VP);
     } else {
-        paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
-        paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
+        paddings.left = NG::CalcLength(selectTheme->GetSelectNormalLeftRightMargin());
+        paddings.right = NG::CalcLength(selectTheme->GetSelectNormalLeftRightMargin());
     }
     ViewAbstract::SetPadding(paddings);
 }
