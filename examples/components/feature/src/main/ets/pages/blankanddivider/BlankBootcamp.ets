@@ -14,8 +14,7 @@
  */
 
 
-
-import { ColorBlock, RadioBlock, SliderBlock } from 'common';
+import { ColorBlock, SliderBlock, useEnabled } from 'common';
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { promptAction } from '@kit.ArkUI';
 
@@ -23,18 +22,16 @@ import { promptAction } from '@kit.ArkUI';
 export struct BlankBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
-  @State enableRating: boolean = false;
-  @State stars: number = 100;
   @State enableBackgroundColor: boolean = false;
   @State blankBackgroundColor: Color = 0xFF000000;
-  @State blankWidth: number = 30;
-  @State blankHeight: number = 30;
+  @State blankWidth: number = 20;
+  @State enableBlankWidth: boolean = false;
+  @State blankHeight: number = 20;
+  @State enableBlankHeight: boolean = false;
   @State blankMargin: number = 0;
+  @State enableBlankMargin: boolean = false;
   @State blankPadding: number = 0;
-  @State enableMargin: boolean = false;
-  @State enablePadding: boolean = false;
-  @State marginPaddingMax: number = 5;
-  @State enableControlSize: boolean = false;
+  @State enableBlankPadding: boolean = false;
 
   build() {
     NavDestination() {
@@ -55,64 +52,73 @@ export struct BlankBootcamp {
 
   @Builder
   Content() {
-    Column() {
-      Row() {
-        Text('Hello')
-          .fontSize(18)
-        Blank(this.blankWidth)
-          .color(this.blankBackgroundColor)
-          .margin(this.blankMargin)
-          .padding(this.blankPadding)
-          .onClick(() => {
-            promptAction.showToast({
-              message: '空白被点击！'
-            });
-          })
-        Text('world')
-          .fontSize(18)
-      }
-      .backgroundColor(0xEFEFEF)
-      .borderRadius(15)
+    Row() {
+      Text('Hello')
+      Blank()
+        .color(useEnabled(this.enableBackgroundColor, this.blankBackgroundColor))
+        .margin(useEnabled(this.enableBlankMargin, this.blankMargin))
+        .padding(useEnabled(this.enableBlankPadding, this.blankPadding))
+        .width(useEnabled(this.enableBlankWidth, this.blankWidth))
+        .height(useEnabled(this.enableBlankHeight, this.blankHeight))
+      Toggle({ type: ToggleType.Switch })
     }
   }
 
   @Builder
   Parameters() {
     Scroll() {
-      Column({ space: 0 }) {
+      Column() {
         SliderBlock({
-          title: '当前宽度',
-          isEnabled: this.enableRating,
-          value: this.blankWidth,
-          min: 0,
-          max: this.stars
+          title: '宽度',
+          isEnabled: $enableBlankWidth,
+          value: $blankWidth,
+          min: 10,
+          max: 100
+        })
+
+        SliderBlock({
+          title: '高度',
+          isEnabled: $enableBlankHeight,
+          value: $blankHeight,
+          min: 10,
+          max: 100
         })
 
         ColorBlock({
           title: 'backgroundColor',
-          isEnabled: this.enableBackgroundColor,
-          color: this.blankBackgroundColor
+          isEnabled: $enableBackgroundColor,
+          color: $blankBackgroundColor
         })
 
         SliderBlock({
           title: '当前外边距',
-          isEnabled: this.enableMargin,
-          value: this.blankMargin,
+          isEnabled: $enableBlankMargin,
+          value: $blankMargin,
           min: 0,
-          max: this.marginPaddingMax
+          max: 5
         })
 
         SliderBlock({
           title: '当前内边距',
-          isEnabled: this.enablePadding,
-          value: this.blankPadding,
+          isEnabled: $enableBlankPadding,
+          value: $blankPadding,
           min: 0,
-          max: this.marginPaddingMax
+          max: 5
         })
       }.width('100%')
     }.height('52%')
-    .onDisAppear(()=>{
+    .onAppear(()=>{
       AppStorage.setOrCreate('Block', []);
+    })
+  }
+}
+
+@Preview
+@Component
+struct BlankBootcampPreviewer {
+  build() {
+    BlankBootcamp({
+      title: '空白/blank'
     })
   }
 }

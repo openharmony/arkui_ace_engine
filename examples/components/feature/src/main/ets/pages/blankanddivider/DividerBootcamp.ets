@@ -15,7 +15,7 @@
 
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { ColorBlock, RadioBlock, SliderBlock, SliderOpacityBlock } from 'common';
+import { ColorBlock, RadioBlock, SliderBlock, SliderOpacityBlock, useEnabled } from 'common';
 import { promptAction } from '@kit.ArkUI';
 
 @Component
@@ -23,17 +23,18 @@ export struct DividerBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State dividerBackgroundColor: Color = 0xFF000000;
-  @State dividerMargin: number = 0;
-  @State dividerPadding: number = 0;
-  @State dividerStrokeWidth: number = 3;
   @State enableDividerBackgroundColor: boolean = false;
+  @State dividerMargin: number = 0;
   @State enableDividerMargin: boolean = false;
+  @State dividerPadding: number = 0;
   @State enableDividerPadding: boolean = false;
-  @State max: number = 10;
-  @State dividerWidth: number = 20;
+  @State dividerWidth: number = 1;
   @State enableDividerWidth: boolean = false;
-  @State dividerWidthMax: number = 100;
-  @State dividerStrokeWidthMax: number = 8;
+  @State dividerHeight: number = 1;
+  @State enableDividerHeight: boolean = false;
+  @State dividerOpacity: number = 1;
+  @State enableDividerOpacity: boolean = false;
+  @State dividerStrokeWidth: number = 1;
   @State enableDividerStrokeWidth: boolean = false;
   @State vertical: boolean = false;
   @State enableVertical: boolean = false;
@@ -42,10 +43,7 @@ export struct DividerBootcamp {
   @State dividerVisibility: Visibility = Visibility.Visible;
   @State enableDividerVisibility: boolean = false;
   @State dividerEnabled: boolean = true;
-  @State enableEnabled: boolean = false;
-  @State enableOpacity: boolean = false;
-  @State dividerOpacity: number = 1;
-  @State opacityMax: number = 1;
+  @State enableDividerEnabled: boolean = false;
 
   build() {
     NavDestination() {
@@ -67,54 +65,47 @@ export struct DividerBootcamp {
   @Builder
   Content() {
     Column() {
-      Row() {
-        Text('Hello')
-          .fontSize(18)
-        Divider()
-          .color(this.enableDividerBackgroundColor ? this.dividerBackgroundColor : undefined)
-          .margin(this.enableDividerMargin ? this.dividerMargin : undefined)
-          .padding(this.enableDividerPadding ? this.dividerPadding : undefined)
-          .strokeWidth(this.enableDividerStrokeWidth ? this.dividerStrokeWidth : undefined)
-          .width(this.enableDividerWidth ? this.dividerWidth : 20)
-          .vertical(this.enableVertical ? this.vertical : undefined)
-          .lineCap(this.enableLineCapStyle ? this.lineCapStyle : undefined)
-          .visibility(this.enableDividerVisibility ? this.dividerVisibility : undefined)
-          .enabled(this.enableEnabled ? this.dividerEnabled : undefined)
-          .opacity(this.enableOpacity ? this.dividerOpacity : undefined)
-          .onClick(() => {
-            promptAction.showToast({
-              message: '分割线被点击！'
-            });
-          })
-        Text('world')
-          .fontSize(18)
-      }
-      .justifyContent(FlexAlign.Center)
-      .width(300)
-      .height(150)
-      .backgroundColor(0xEFEFEF)
-      .borderRadius(15)
+      Divider()
+        .color(useEnabled(this.enableDividerBackgroundColor, this.dividerBackgroundColor))
+        .margin(useEnabled(this.enableDividerMargin, this.dividerMargin))
+        .padding(useEnabled(this.enableDividerPadding, this.dividerPadding))
+        .strokeWidth(useEnabled(this.enableDividerStrokeWidth, this.dividerStrokeWidth))
+        .width(useEnabled(this.enableDividerWidth, this.dividerWidth))
+        .height(useEnabled(this.enableDividerHeight, this.dividerHeight))
+        .vertical(useEnabled(this.enableVertical, this.vertical))
+        .lineCap(useEnabled(this.enableLineCapStyle, this.lineCapStyle))
+        .visibility(useEnabled(this.enableDividerVisibility, this.dividerVisibility))
+        .enabled(useEnabled(this.enableDividerEnabled, this.dividerEnabled))
+        .opacity(useEnabled(this.enableDividerOpacity, this.dividerOpacity))
     }
   }
 
   @Builder
   Parameters() {
     Scroll() {
-      Column({ space: 0 }) {
+      Column() {
         SliderBlock({
-          title: '分割线当前宽度',
+          title: '水平分割线长度',
           isEnabled: $enableDividerWidth,
           value: $dividerWidth,
-          min: 0,
-          max: this.dividerWidthMax
+          min: 50,
+          max: 100
+        })
+
+        SliderBlock({
+          title: '垂直分割线高度',
+          isEnabled: $enableDividerHeight,
+          value: $dividerHeight,
+          min: 50,
+          max: 100
         })
 
         SliderOpacityBlock({
           title: '透明度设置',
-          isEnabled: $enableOpacity,
+          isEnabled: $enableDividerOpacity,
           value: $dividerOpacity,
           min: 0,
-          max: this.opacityMax
+          max: 1
         })
 
         ColorBlock({
@@ -128,7 +119,7 @@ export struct DividerBootcamp {
           isEnabled: $enableDividerMargin,
           value: $dividerMargin,
           min: 0,
-          max: this.max
+          max: 10
         })
 
         SliderBlock({
@@ -136,7 +127,7 @@ export struct DividerBootcamp {
           isEnabled: $enableDividerPadding,
           value: $dividerPadding,
           min: 0,
-          max: this.max
+          max: 10
         })
 
         SliderBlock({
@@ -144,7 +135,7 @@ export struct DividerBootcamp {
           isEnabled: $enableDividerStrokeWidth,
           value: $dividerStrokeWidth,
           min: 0,
-          max: this.dividerStrokeWidthMax
+          max: 8
         })
 
         RadioBlock({
@@ -169,7 +160,7 @@ export struct DividerBootcamp {
 
         RadioBlock({
           title: '禁用控制',
-          isEnabled: $enableEnabled,
+          isEnabled: $enableDividerEnabled,
           value: $dividerEnabled,
           dataSource: [
             { label: '组件可交互', value: true },
@@ -191,8 +182,18 @@ export struct DividerBootcamp {
       }.width('100%')
     }
     .height('52%')
-    .onDisAppear(()=>{
+    .onAppear(()=>{
       AppStorage.setOrCreate('Block', []);
+    })
+  }
+}
+
+@Preview
+@Component
+struct DividerBootcampPreviewer {
+  build() {
+    DividerBootcamp({
+      title: '分割/divider'
     })
   }
 }

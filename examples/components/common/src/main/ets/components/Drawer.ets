@@ -14,8 +14,10 @@
  */
 
 import curves from '@ohos.curves';
-import { ItemRestriction, SegmentButton, SegmentButtonOptions, SegmentButtonTextItem } from '@kit.ArkUI';
+import { SegmentButton, SegmentButtonOptions } from '@kit.ArkUI';
 import { BlockTag } from '../model/BlockTag';
+import { MyFullDrawModifier } from '../model/DrawFullModifier';
+
 
 @Builder
 function IconButton(icon: Resource, action: () => void) {
@@ -38,17 +40,14 @@ export struct Drawer {
   @BuilderParam content: () => void;
   @BuilderParam parameters: () => void;
   @Consume('router') router: NavPathStack;
-  @State tags: boolean = true;
-  @State currentIndex: number = 0;
   @State tabSelectedIndexes: number[] = [0];
-  @State tabSelectedIndexes1: number[] = [0];
   @State tabOptions: SegmentButtonOptions = SegmentButtonOptions.tab({
     buttons: [{ text: '参数列表' }, { text: '日志' }],
     textPadding: { top: 8, bottom: 8 },
   });
-  @State listBlockTags: Array<BlockTag> = [];
-  @State listSliderBlockTags: Array<BlockTag> = [];
+  @StorageProp('Block') listBlockTags: Array<BlockTag> = [];
   @State dividerHeight: number = 1;
+  @State circleModifier: DrawModifier = new MyFullDrawModifier();
 
   build() {
     Column() {
@@ -92,7 +91,7 @@ export struct Drawer {
               .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
               .height(40)
               .width(40)
-              .margin({ left: 12 })
+              .margin({ left: 38 })
               .onClick(() => {
                 animateTo({ curve: curves.interpolatingSpring(0, 1, 328, 36) }, () => {
                   this.showParameters = false;
@@ -112,78 +111,61 @@ export struct Drawer {
           } else {
             Scroll() {
               Stack() {
-                if (this.listBlockTags) {
-                  Row() {
-                    Divider()
-                      .vertical(true)
-                      .strokeWidth(1)
-                      .width(1)
-                      .height(this.dividerHeight)
-                      .margin({ left: 8, top: 4 })
-                      .zIndex(1)
-                  }
-                  .width('100%')
-                  .align(Alignment.Start)
-                }
+                List() {
+                  ForEach(this.listBlockTags, (item: BlockTag) => {
+                    ListItem() {
+                      Column() {
+                        Row() {
+                          // Circle()
+                          //   .width(8)
+                          //   .height(8)
+                          //   .strokeWidth(1)
+                          //   .stroke($r('sys.color.brand'))
+                          //   .margin({ left: 5 })
+                          //   .fill(Color.White)
 
-                Column({ space: 8 }) {
-                  List({ space: 10 }) {
-                    ForEach(this.listBlockTags, (item: BlockTag) => {
-                      ListItem() {
-                        Column() {
-                          Row() {
-                            Circle()
-                              .width(8)
-                              .height(8)
-                              .strokeWidth(1)
-                              .stroke($r('sys.color.brand'))
-                              .margin({ left: 5 })
-                              .fill(Color.White)
+                          Text(item.nowTime)
+                            .fontSize($r('sys.float.Body_S'))
+                            .fontWeight(FontWeight.Medium)
+                            .fontColor($r('sys.color.font_secondary'))
+                        }
+                        .justifyContent(FlexAlign.Start)
+                        .width('100%')
 
-                            Text(item.nowTime)
-                              .fontSize($r('sys.float.Body_S'))
-                              .fontWeight(FontWeight.Medium)
-                              .fontColor($r('sys.color.font_secondary'))
-                              .margin({ left: 12 })
-                          }
-                          .justifyContent(FlexAlign.Start)
-                          .width('100%')
-
-                          Row() {
-                            Text(item.tagDes)
-                              .fontSize($r('sys.float.Body_L'))
-                              .fontWeight(FontWeight.Medium)
-                              .fontColor($r('sys.color.font_primary'))
-                              .margin({ left: 16 })
-                              .maxLines(2)
-                          }
-                          .align(Alignment.Top)
-                          .width('100%')
-                          .margin({ left: 48, right: 32, top: 12 })
+                        Row() {
+                          Text(item.tagDes)
+                            .fontSize($r('sys.float.Body_L'))
+                            .fontWeight(FontWeight.Medium)
+                            .fontColor($r('sys.color.font_primary'))
+                            .maxLines(2)
                         }
                         .margin({ top: 12 })
+                        .align(Alignment.Top)
                         .width('100%')
-                        .justifyContent(FlexAlign.Start)
                       }
-                    }, (item: string) => JSON.stringify(item))
-                  }
-                  .onAreaChange((oldValue: Area, newValue: Area) => {
-                    console.info(`Ace: on area change, oldValue is ${JSON.stringify(oldValue)} value is ${JSON.stringify(newValue)}`)
-                    this.dividerHeight = newValue.height as number
-                    this.dividerHeight = this.dividerHeight + 16
-                    console.info('Ace: on area change, dividerHeight is' + this.dividerHeight)
-                  })
+                      .padding({ left: 24, bottom: 12 })
+                      .margin({ top: 12 })
+                      .width('100%')
+                      .justifyContent(FlexAlign.Start)
+                    }
+                    .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                      console.info(`Ace: ListItem on item change, oldValue is ${JSON.stringify(oldValue)} value is ${JSON.stringify(newValue)}`)
+                    })
+                    .drawModifier(this.circleModifier)
+                  }, (item: string) => JSON.stringify(item))
                 }
+                .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                  console.info(`Ace: List on area change, oldValue is ${JSON.stringify(oldValue)} value is ${JSON.stringify(newValue)}`)
+                  this.dividerHeight = newValue.height as number
+                  this.dividerHeight = this.dividerHeight + 16
+                  console.info('Ace: on area change, dividerHeight is' + this.dividerHeight)
+                })
                 .width('100%')
                 .zIndex(2)
                 .align(Alignment.Start)
               }
               .width('100%')
-              .onAppear(() => {
-                this.listBlockTags = AppStorage.get('Block') as Array<BlockTag>;
-                console.log('Drawer this.listBlockTags == ' + JSON.stringify(this.listBlockTags));
-              })
-              .onDisAppear(()=>{
+              .onDisAppear(() => {
                 AppStorage.setOrCreate('Block', []);
               })
             }

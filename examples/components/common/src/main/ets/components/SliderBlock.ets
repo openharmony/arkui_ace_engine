@@ -35,7 +35,7 @@ export struct SliderBlock {
         Row({ space: 0 }) {
           Text(`${this.value}`)
             .fontSize(16)
-            .width(24)
+            .width(28)
           Slider({
             value: this.value,
             min: this.min,

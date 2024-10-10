@@ -14,8 +14,8 @@
  */
 
 import { Route, RouteGroup } from 'common/src/main/ets/common/route';
-import { DividerBootcamp } from './Dividercamp';
-import { BlankBootcamp } from './Blankcamp';
+import { DividerBootcamp } from './DividerBootcamp';
+import { BlankBootcamp } from './BlankBootcamp';
 
 export const blankAndDividerRoute: RouteGroup = {
   name: 'blankanddivider',

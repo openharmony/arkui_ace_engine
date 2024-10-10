@@ -52,7 +52,7 @@ export struct SliderOpacityBlock {
               console.log(`SliderOpacityBlock onChange: ${this.value}`);
               if (mode.toString() === '2') {
                 let time = formatDate(new Date(Date.now()))
-                this.listSliderOpacityTagsTemp.push(new BlockTag(time, tagDesRule(this.title, value.toString())))
+                this.listSliderOpacityTagsTemp.push(new BlockTag(time, tagDesRule(this.title, this.value.toString())))
                 console.log('Block  =====>>>>>' + JSON.stringify(this.listSliderOpacityTagsTemp));
                 setTimeout(() => {
                   if (AppStorage.get('Block')) {
