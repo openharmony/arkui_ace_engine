@@ -652,7 +652,6 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
         miscTextConfig.value().range.end
     };
     if (lastCursorRange_ == miscTextConfigRange && !forceUpdate) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "UpdateCaretInfoToController, same to update caretInfo");
         return;
     }
     lastCursorRange_.Set(miscTextConfig.value().range.start, miscTextConfig.value().range.end);
@@ -894,6 +893,7 @@ void TextFieldPattern::HandleFocusEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField %{public}d on focus", host->GetId());
+    ACE_LAYOUT_SCOPED_TRACE("[TextField:%d] on focus", host->GetId());
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
@@ -2555,8 +2555,6 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
         needToResetKeyboard = action_ != GetTextInputActionValue(GetDefaultTextInputAction());
     }
     action_ = GetTextInputActionValue(GetDefaultTextInputAction());
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Keyboard action is %{public}d",
-        tmpHost->GetId(), action_);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (needToResetKeyboard && HasFocus()) {
         if (isCustomKeyboardAttached_) {
@@ -2567,6 +2565,8 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         CHECK_NULL_VOID(inputMethod);
         MiscServices::Configuration config;
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Keyboard action is %{public}d",
+            tmpHost->GetId(), action_);
         config.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>(action_));
         config.SetTextInputType(static_cast<MiscServices::TextInputType>(keyboard_));
         inputMethod->OnConfigurationChange(config);
@@ -3571,6 +3571,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     }
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "inputMethod is null");
         return false;
     }
     auto optionalTextConfig = GetMiscTextConfig();
@@ -3810,6 +3811,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
     ACE_LAYOUT_SCOPED_TRACE("RequestCustomKeyboard[id:%d]", frameNode->GetId());
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "RequestCustomKeyboard, id:%{public}d", frameNode->GetId());
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();

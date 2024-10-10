@@ -889,6 +889,7 @@ void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOv
             return AceType::MakeRefPtr<MenuPattern>(id, V2::MENU_ETS_TAG, MenuType::SELECT_OVERLAY_CUSTOM_MENU);
         });
     selectMenu_->MountToParent(Claim(this));
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "CreateCustomSelectOverlay by menu:%{public}d", selectMenu_->GetId());
     auto eventHub = selectMenu_->GetEventHub<EventHub>();
     if (eventHub && info->menuCallback.onAppear) {
         eventHub->SetOnAppear(std::move(info->menuCallback.onAppear));
@@ -1392,7 +1393,7 @@ void SelectOverlayNode::CreateToolBar()
         selectMenu_->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         selectMenuStatus_ = FrameNodeStatus::GONE;
     }
-
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "CreateSelectOverlay default, id:%{public}d", selectMenu_->GetId());
     selectMenuInner_->MountToParent(selectMenu_);
 
     auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
