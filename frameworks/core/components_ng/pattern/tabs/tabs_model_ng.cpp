@@ -799,7 +799,7 @@ void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, BlurStyle tabB
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
     CHECK_NULL_VOID(tabBarPaintProperty);
-    BlurStyleOption styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value();
+    auto styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value_or(BlurStyleOption{});
     styleOption.blurStyle = tabBarBlurStyle;
     tabBarPaintProperty->UpdateTabBarBlurStyleOption(styleOption);
 }
