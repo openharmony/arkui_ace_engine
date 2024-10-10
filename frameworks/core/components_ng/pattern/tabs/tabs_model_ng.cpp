@@ -806,12 +806,22 @@ void TabsModelNG::SetDivider(FrameNode* frameNode, const std::optional<TabsItemD
     auto dividerRenderContext = dividerNode->GetRenderContext();
     CHECK_NULL_VOID(dividerRenderContext);
 
-    if (!dividerOpt.has_value() || dividerOpt.value().isNull) {
+    if (!dividerOpt.has_value()) {
         dividerRenderContext->UpdateOpacity(0.0f);
         ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, frameNode);
     } else {
-        dividerRenderContext->UpdateOpacity(1.0f);
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, dividerOpt.value(), frameNode);
+        if (dividerOpt.value().isNull) {
+            dividerRenderContext->UpdateOpacity(0.0f);
+            auto tabsLayoutProperty = frameNode->GetLayoutProperty<TabsLayoutProperty>();
+            CHECK_NULL_VOID(tabsLayoutProperty);
+            auto currentDivider = tabsLayoutProperty->GetDivider().value_or(TabsItemDivider());
+            currentDivider.strokeWidth = Dimension(1.0f);
+            currentDivider.isNull = true;
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, currentDivider, frameNode);
+        } else {
+            dividerRenderContext->UpdateOpacity(1.0f);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, Divider, dividerOpt.value(), frameNode);
+        }
     }
 }
 
