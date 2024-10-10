@@ -171,11 +171,11 @@ void OptionPattern::ClearFocusStyle()
         return;
     }
     if (!isBGColorSetByUser_) {
-        renderContext->UpdateBackgroundColor(
-            rowSelected_ == index_ ? selectTheme_->GetSelectedColor() : Color::TRANSPARENT);
+        renderContext->UpdateBackgroundColor(rowSelected_ == index_ ? selectTheme_->GetSelectedColor() :
+         (isOptionBgColorSetByUser_ ? optionBgColor_.value() : Color::TRANSPARENT));
     } else {
-        renderContext->UpdateBackgroundColor(
-            rowSelected_ == index_ ? bgColor_.value() : Color::TRANSPARENT);
+        renderContext->UpdateBackgroundColor(rowSelected_ == index_ ? bgColor_.value() :
+         (isOptionBgColorSetByUser_ ? optionBgColor_.value() : Color::TRANSPARENT));
     }
 
     if (isFocusShadowSet_) {
