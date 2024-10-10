@@ -2183,76 +2183,22 @@ bool ScrollablePattern::HandleOutBoundary(float& offset, int32_t source, NestedS
 {
     auto overOffsets = GetOverScrollOffset(offset);
     auto backOverOffset = Negative(offset) ? overOffsets.start : overOffsets.end;
-    auto oppositeOverOffset = Negative(offset) ? overOffsets.end : overOffsets.start;
-    if (state != NestedState::GESTURE) {
-        if (NearZero(backOverOffset)) {
-            return false;
-        }
-        result = {offset - backOverOffset, true};
-        offset = backOverOffset;
-        return true;
+    float selfOffset = 0.0f;
+    if (!NearZero(backOverOffset)) {
+        selfOffset = backOverOffset;
+        offset -= backOverOffset;
+        HandleScrollImpl(selfOffset, source);
     }
-    auto nestedScroll = GetNestedScroll();
-    auto isAtTopOrBottom = !NearZero(backOverOffset) || !NearZero(oppositeOverOffset);
-    if (!NestedScrollOutOfBoundary() && nestedScroll.NeedParent()) {
-        for (auto ancestor = GetNestedScrollParent(); ancestor != nullptr;
-            ancestor = ancestor->GetNestedScrollParent()) {
-            if (ancestor->NestedScrollOutOfBoundary()) {
-                auto ancestorResult = ancestor->HandleScroll(offset, source,
-                    isAtTopOrBottom ? NestedState::CHILD_OVER_SCROLL : NestedState::CHILD_SCROLL,
-                    GetVelocity());
-                offset = ancestorResult.remain;
-                SetCanOverScroll(NearZero(offset));
-                return true;
-            }
-            auto ancestorNestedScroll = ancestor->GetNestedScroll();
-            if (!ancestorNestedScroll.NeedParent()) {
-                break;
-            }
-        }
-        return false;
-    }
-    return HandleSelfOutBoundary(offset, source, backOverOffset, oppositeOverOffset);
-}
-
-bool ScrollablePattern::HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset,
-    const float oppositeOverOffset)
-{
-    if (NearZero(backOverOffset)) {
-        return false;
-    }
-    offset -= backOverOffset;
-    ScrollResult result = { 0.f, false};
     auto parent = GetNestedScrollParent();
     if (!NearZero(offset) && parent) {
-        auto nestedScrollOptions = GetNestedScroll();
-        auto nestedScroll = Positive(offset) ? nestedScrollOptions.backward : nestedScrollOptions.forward;
-        switch (nestedScroll) {
-            case NestedScrollMode::SELF_FIRST: {
-                offset -= oppositeOverOffset;
-                result = parent->HandleScroll(oppositeOverOffset, source, NestedState::CHILD_SCROLL, GetVelocity());
-                if (!NearZero(result.remain)) {
-                    result = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL, GetVelocity());
-                }
-                break;
-            }
-            case NestedScrollMode::PARENT_FIRST: {
-                result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, GetVelocity());
-                offset = 0.f;
-                break;
-            }
-            case NestedScrollMode::PARALLEL: {
-                parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, GetVelocity());
-                break;
-            }
-            default:
-                break;
-        }
+        auto res = parent->HandleScroll(offset, source, NestedState::CHILD_CHECK_OVER_SCROLL, GetVelocity());
+        offset = res.remain;
     }
-    offset += result.remain;
-    SetCanOverScroll(NearZero(offset));
-    offset += backOverOffset;
-    return true;
+    if (state == NestedState::CHILD_CHECK_OVER_SCROLL) {
+        result = { offset, true };
+        offset = 0.0f;
+    }
+    return NearZero(offset);
 }
 
 ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
@@ -2280,6 +2226,8 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
         } else {
             result = HandleScrollSelfOnly(offset, source, state);
         }
+    } else if (state == NestedState::CHILD_CHECK_OVER_SCROLL) {
+        return result;
     }
     ACE_SCOPED_TRACE("HandleScroll, initOffset:%f, processedOffset:%f, "
                      "source:%d, nestedState:%d, canOverScroll:%u, id:%d, tag:%s",
