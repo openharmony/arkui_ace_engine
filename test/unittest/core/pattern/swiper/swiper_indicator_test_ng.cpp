@@ -176,6 +176,9 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick002, TestSize.Level1)
         model.SetIndicatorType(SwiperIndicatorType::DOT);
     }, 6);
     EXPECT_EQ(pattern_->TotalCount(), 6);
+    int32_t settingApiVersion = 14;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
 
     /**
@@ -191,6 +194,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick002, TestSize.Level1)
      */
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
     EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -774,7 +778,11 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternDisplayIndicatorTotalCount001, Test
         model.SetLoop(false);
     }, 6);
     EXPECT_EQ(pattern_->TotalCount(), 6);
+    int32_t settingApiVersion = 14;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 4);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -790,7 +798,11 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternDisplayIndicatorTotalCount002, Test
         model.SetLoop(false);
     }, 6);
     EXPECT_EQ(pattern_->TotalCount(), 8);
+    int32_t settingApiVersion = 14;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
