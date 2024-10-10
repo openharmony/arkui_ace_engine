@@ -609,6 +609,7 @@ void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
         (!NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()) ||
             !NearEqual(lastFontSize_, fontSizeFloat_->Get()))) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        lastFontSize_ = fontSizeFloat_->Get();
     }
 }
 
