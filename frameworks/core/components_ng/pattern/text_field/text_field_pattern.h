@@ -176,6 +176,7 @@ struct TouchAndMoveCaretState {
     bool isMoveCaret = false;
     Offset touchDownOffset;
     Dimension minDinstance = 5.0_vp;
+    int32_t touchFingerId = -1;
 };
 
 class TextFieldPattern : public ScrollablePattern,
@@ -1456,8 +1457,8 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
-    void HandleTouchMove(const TouchEventInfo& info);
-    void UpdateCaretByTouchMove(const TouchEventInfo& info);
+    void HandleTouchMove(const TouchLocationInfo& info);
+    void UpdateCaretByTouchMove(const TouchLocationInfo& info);
     void InitDisableColor();
     void InitFocusEvent();
     void InitTouchEvent();
@@ -1662,6 +1663,7 @@ private:
     bool IsContentRectNonPositive();
     bool IsHandleDragging();
     void ReportEvent();
+    std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
 
     RectF frameRect_;
     RectF textRect_;

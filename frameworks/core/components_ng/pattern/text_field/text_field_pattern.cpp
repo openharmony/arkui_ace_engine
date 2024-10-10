@@ -1628,10 +1628,12 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (selectOverlay_->IsTouchAtHandle(info)) {
         return;
     }
+    auto touchInfo = GetAcceptedTouchLocationInfo(info);
+    CHECK_NULL_VOID(touchInfo);
     DoGestureSelection(info);
-    auto touchType = info.GetTouches().front().GetTouchType();
+    auto touchType = touchInfo->GetTouchType();
     if (touchType == TouchType::DOWN) {
-        HandleTouchDown(info.GetTouches().front().GetLocalLocation());
+        HandleTouchDown(touchInfo->GetLocalLocation());
     } else if (touchType == TouchType::UP) {
         OnCaretMoveDone(info);
         RequestKeyboardAfterLongPress();
@@ -1651,7 +1653,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
             return;
         }
         if (!IsUsingMouse()) {
-            HandleTouchMove(info);
+            HandleTouchMove(touchInfo.value());
         }
     }
 }
@@ -1692,12 +1694,15 @@ void TextFieldPattern::HandleTouchUp()
     ScheduleDisappearDelayTask();
 }
 
-void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
+void TextFieldPattern::HandleTouchMove(const TouchLocationInfo& info)
 {
     if (moveCaretState_.isTouchCaret && !moveCaretState_.isMoveCaret) {
-        auto offset = info.GetTouches().front().GetLocalLocation();
+        auto offset = info.GetLocalLocation();
         auto moveDistance = (offset - moveCaretState_.touchDownOffset).GetDistance();
         moveCaretState_.isMoveCaret = GreatNotEqual(moveDistance, moveCaretState_.minDinstance.ConvertToPx());
+        if (moveCaretState_.isMoveCaret) {
+            moveCaretState_.touchFingerId = info.GetFingerId();
+        }
     }
     if (SelectOverlayIsOn() && moveCaretState_.isMoveCaret) {
         CloseSelectOverlay(false);
@@ -1714,12 +1719,12 @@ void TextFieldPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t 
     VibratorUtils::StartVibraFeedback("slide");
 }
 
-void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
+void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
 {
     scrollable_ = false;
     SetScrollEnabled(scrollable_);
     // limit move when preview text is shown
-    auto touchOffset = info.GetTouches().front().GetLocalLocation();
+    auto touchOffset = info.GetLocalLocation();
     int32_t preCaretIndex = selectController_->GetCaretIndex();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
@@ -7994,5 +7999,22 @@ void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vect
     SetCaretPosition(start + spanString->GetLength());
     StartTwinkling();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+std::optional<TouchLocationInfo> TextFieldPattern::GetAcceptedTouchLocationInfo(const TouchEventInfo& info)
+{
+    auto touchInfos = info.GetChangedTouches();
+    if (touchInfos.empty()) {
+        return std::nullopt;
+    }
+    if (!moveCaretState_.isMoveCaret) {
+        return touchInfos.front();
+    }
+    for (auto touchInfo : touchInfos) {
+        if (touchInfo.GetFingerId() == moveCaretState_.touchFingerId) {
+            return touchInfo;
+        }
+    }
+    return std::nullopt;
 }
 } // namespace OHOS::Ace::NG
