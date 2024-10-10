@@ -107,6 +107,7 @@ def run_tests_parallel(test_directory, path, output):
         "execute_time": 0,
         "total_execute_tests": 0,
         "failed_tests_count": 0,
+        "crashed_tests_count": 0,
         "unavailable": [],
         "failed": []
     }
@@ -125,6 +126,7 @@ def run_tests_parallel(test_directory, path, output):
     test_result["execute_time"] = "{} seconds".format(round(end - start, 2))
     test_result['total_execute_tests'] = total_tests_count
     test_result['failed_tests_count'] = failed_tests_count
+    test_result['crashed_tests_count'] = len(test_result["unavailable"])
     json_file_path = output if output else os.path.join(test_directory, "test_result.json")
     flags = os.O_CREAT | os.O_WRONLY | os.O_TRUNC
     mode = stat.S_IRUSR | stat.S_IWUSR
