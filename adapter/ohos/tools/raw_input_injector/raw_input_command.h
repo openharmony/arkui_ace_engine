@@ -227,7 +227,7 @@ public:
 private:
     std::vector<std::shared_ptr<BaseCommand>> commands_;
     int32_t pointerID_ = 0;
-    int32_t currentConsumingIndex_ = 0;
+    size_t currentConsumingIndex_ = 0;
 };
 
 } // namespace Ace
