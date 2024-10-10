@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import { ColorBlock, RadioBlock, SliderBlock } from 'common';
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 
@@ -20,6 +20,14 @@ import { Drawer } from 'common/src/main/ets/components/Drawer';
 export struct CalendarPickerBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
+  @State enableEdgeAlign: boolean = false;
+  @State edgeAlign: CalendarAlign = CalendarAlign.CENTER;
+  @State enableAlignItems: boolean = false;
+  @State alignItems: HorizontalAlign = HorizontalAlign.Center;
+  @State enableTextColor: boolean = false;
+  @State textColor: ResourceColor = 'rgb(255, 0, 0, 0.9)';
+  @State hintRadius: number = 10;
+  @State enableHintRadius: boolean = false;
   @State duration : number = 2000;
   private selectedDate: Date = new Date();
 
@@ -56,10 +64,42 @@ export struct CalendarPickerBootcamp {
   Parameters() {
     Scroll() {
       Column({ space: 8 }) {
+        RadioBlock({
+          title: '选择器与入口组件的对齐方式',
+          isEnabled: this.enableAlignItems,
+          value: this.edgeAlign,
+          dataSource: [
+            { label: 'START', value: CalendarAlign.START },
+            { label: 'CENTER', value: CalendarAlign.CENTER },
+            { label: 'END', value: CalendarAlign.END }
+          ]
+        })
+        RadioBlock({
+          title: '选择器在容器内的对齐方式',
+          isEnabled: this.enableEdgeAlign,
+          value: this.alignItems,
+          dataSource: [
+            { label: 'START', value: HorizontalAlign.Start },
+            { label: 'CENTER', value: HorizontalAlign.Center },
+            { label: 'END', value: HorizontalAlign.End }
+          ]
+        })
+        ColorBlock({
+          title: '字体颜色',
+          isEnabled: this.enableTextColor,
+          color: this.textColor
+        })
+        SliderBlock({
+          title: '日期选中态底板样式',
+          isEnabled: this.enableHintRadius,
+          value: this.hintRadius,
+          min: 0,
+          max: 16
+        })
       }.width('100%')
     }
     .height('52%')
-    .onAppear(()=>{
+    .onAppear(() => {
       AppStorage.setOrCreate('Block', []);
     })
   }

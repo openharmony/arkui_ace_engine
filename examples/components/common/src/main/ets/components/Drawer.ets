@@ -116,14 +116,6 @@ export struct Drawer {
                     ListItem() {
                       Column() {
                         Row() {
-                          // Circle()
-                          //   .width(8)
-                          //   .height(8)
-                          //   .strokeWidth(1)
-                          //   .stroke($r('sys.color.brand'))
-                          //   .margin({ left: 5 })
-                          //   .fill(Color.White)
-
                           Text(item.nowTime)
                             .fontSize($r('sys.float.Body_S'))
                             .fontWeight(FontWeight.Medium)
