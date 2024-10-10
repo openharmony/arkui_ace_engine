@@ -199,4 +199,9 @@ bool SystemProperties::IsSmallFoldProduct()
 {
     return false;
 }
+
+std::string SystemProperties::GetDebugInspectorId()
+{
+    return "N/A";
+}
 } // namespace OHOS::Ace
