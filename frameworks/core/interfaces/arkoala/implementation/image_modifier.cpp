@@ -86,8 +86,6 @@ void FillColorImpl(Ark_NativePointer node,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageFill(frameNode, Converter::OptConvert<Color>(*value));
-
-    // TODO: TEST it
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    Ark_ImageFit value)
@@ -118,8 +116,6 @@ void AutoResizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetAutoResize(frameNode, Converter::Convert<bool>(value));
-
-    // TODO: test it
 }
 void RenderModeImpl(Ark_NativePointer node,
                     Ark_ImageRenderMode value)
@@ -248,8 +244,6 @@ void OnErrorImpl(Ark_NativePointer node,
         GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onError(frameNode->GetId(), arkInfo);
     };
     ImageModelNG::SetOnError(frameNode, std::move(onEvent));
-
-    // TODO: fix code and test it
 }
 void OnFinishImpl(Ark_NativePointer node,
                   Ark_Function event)
@@ -260,8 +254,6 @@ void OnFinishImpl(Ark_NativePointer node,
         GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onFinish(frameNode->GetId());
     };
     ImageModelNG::SetOnSvgPlayFinish(frameNode, std::move(onEvent));
-
-    // TODO: fix code and test it
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
                         Ark_Boolean enable)
