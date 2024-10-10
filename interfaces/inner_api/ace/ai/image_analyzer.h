@@ -107,7 +107,8 @@ struct ImageAnalyzerInnerConfig {
     void* pixelmapNapiVal = nullptr;
     OHOS::Ace::TouchInfo touchInfo;
     OnNotifySelectedStatusCallback onNotifySelectedStatus = nullptr;
-
+    bool createAIEngine = false;
+    
     void UpdateFromInfo(const PixelMapInfo& info)
     {
         contentWidth = info.width;
