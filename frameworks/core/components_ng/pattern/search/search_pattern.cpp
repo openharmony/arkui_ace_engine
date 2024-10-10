@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include <cstdint>
+#include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -1733,6 +1734,10 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
         index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconSize() : GetSearchNode()->GetCancelSymbolIconSize());
     layoutProperty->UpdateSymbolColorList({index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
                                                                 : GetSearchNode()->GetCancelSymbolIconColor()});
+    float maxFontScale = MAX_FONT_SCALE;
+    if (layoutProperty->GetFontSize()->Unit() != DimensionUnit::VP) {
+        maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
+    }
     layoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
     iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
@@ -2034,7 +2039,7 @@ void SearchPattern::UpdateIconChangeEvent()
 const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSizeValue)
 {
     if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
-        return ConvertImageIconScaleLimit(ICON_MAX_SIZE);
+        return ICON_MAX_SIZE;
     }
     return ConvertImageIconScaleLimit(iconSizeValue);
 }
@@ -2051,10 +2056,10 @@ const Dimension SearchPattern::ConvertImageIconScaleLimit(const Dimension& iconS
         return iconSizeValue;
     }
 
-    if (GreatOrEqualCustomPrecision(fontScale, MAX_FONT_SCALE)) {
-        if (iconSizeValue.Unit() != DimensionUnit::VP) {
-            return Dimension(iconSizeValue / fontScale * MAX_FONT_SCALE);
-        }
+    if (iconSizeValue.Unit() != DimensionUnit::VP) {
+        float maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
+        fontScale = std::clamp(fontScale, 0.0f, maxFontScale);
+        return iconSizeValue * fontScale;
     }
     return iconSizeValue;
 }

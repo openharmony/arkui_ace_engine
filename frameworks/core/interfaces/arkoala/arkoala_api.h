@@ -2056,6 +2056,7 @@ struct ArkUITextModifier {
     void (*resetTextMaxFontScale)(ArkUINodeHandle node);
     void (*setTextHalfLeading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetTextHalfLeading)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextHalfLeading)(ArkUINodeHandle node);
     void (*setTextOnClick)(ArkUINodeHandle node, void* callback);
     void (*resetTextOnClick)(ArkUINodeHandle node);
     void (*setTextResponseRegion)(
