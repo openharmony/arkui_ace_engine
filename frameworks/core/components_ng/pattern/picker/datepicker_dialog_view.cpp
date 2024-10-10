@@ -496,7 +496,7 @@ void DatePickerDialogView::SwitchDatePickerPage(const RefPtr<FrameNode>& dateNod
         auto dateStackNode = AceType::DynamicCast<FrameNode>(dateNode->GetChildAtIndex(index));
         CHECK_NULL_VOID(dateStackNode);
         auto layoutProperty = dateStackNode->GetLayoutProperty<LayoutProperty>();
-        for (auto k = 0; k < dateStackNode->GetChildren().size(); k++) {
+        for (uint32_t k = 0; k < dateStackNode->GetChildren().size(); k++) {
             auto dateChildNode = AceType::DynamicCast<FrameNode>(dateStackNode->GetChildAtIndex(k));
             CHECK_NULL_VOID(dateChildNode);
             auto dateChildNodeLayoutProperty = dateChildNode->GetLayoutProperty<LayoutProperty>();
