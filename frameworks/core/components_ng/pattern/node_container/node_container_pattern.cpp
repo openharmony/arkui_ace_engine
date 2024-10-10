@@ -73,7 +73,10 @@ bool NodeContainerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
     if (config.frameSizeChange) {
         auto geometryNode = dirty->GetGeometryNode();
         auto size = geometryNode->GetFrameSize();
@@ -83,7 +86,7 @@ bool NodeContainerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
             pattern->FireOnResize(size);
         });
     }
-    if (context && surfaceId_ != 0U && !exportTextureNode_.Invalid()) {
+    if (surfaceId_ != 0U && !exportTextureNode_.Invalid()) {
         context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
