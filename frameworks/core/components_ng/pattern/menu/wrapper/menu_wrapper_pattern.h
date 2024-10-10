@@ -371,6 +371,7 @@ public:
         dumpInfo_.targetNode = dumpInfo.targetNode;
         dumpInfo_.targetOffset = dumpInfo.targetOffset;
         dumpInfo_.targetSize = dumpInfo.targetSize;
+        dumpInfo_.menuWindowRect = dumpInfo.menuWindowRect;
         dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
         dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
         dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
@@ -378,6 +379,7 @@ public:
         dumpInfo_.bottom = dumpInfo.bottom;
         dumpInfo_.globalLocation = dumpInfo.globalLocation;
         dumpInfo_.originPlacement = dumpInfo.originPlacement;
+        dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
         dumpInfo_.finalPosition = dumpInfo.finalPosition;
         dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
     }
