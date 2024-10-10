@@ -512,6 +512,7 @@ export class d1 extends ViewPU {
       onConfigurationUpdated: (configuration) => {
         this.fontSizeScale = configuration.fontSizeScale;
         this.fontWeightScale = configuration.fontWeightScale;
+        this.isClipable = (this.toVp(this.fontSizeScale) >= this.theme.q1.s1) ? true : false;
       },
       onMemoryLevel() {},
     };
@@ -544,6 +545,7 @@ export class d1 extends ViewPU {
     );
     this.setInitiallyProvidedValue(params);
     this.finalizeConstruction();
+    this.c4 = new ObservedPropertySimplePU(false, this, "isClipable");
   }
   setInitiallyProvidedValue(params) {
     if (params.theme !== undefined) {
@@ -651,6 +653,9 @@ export class d1 extends ViewPU {
     if (params.symbolEffect !== undefined) {
       this.symbolEffect = params.symbolEffect;
     }
+    if (params.isClipable !== undefined) {
+      this.isClipable = params.isClipable;
+    }
   }
   updateStateVars(params) {
     this.n2.reset(params.chipSize);
@@ -707,6 +712,7 @@ export class d1 extends ViewPU {
     this.z3.purgeDependencyOnElmtId(rmElmtId);
     this.a4.purgeDependencyOnElmtId(rmElmtId);
     this.b4.purgeDependencyOnElmtId(rmElmtId);
+    this.c4.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
     this.n2.aboutToBeDeleted();
@@ -743,6 +749,7 @@ export class d1 extends ViewPU {
     this.z3.aboutToBeDeleted();
     this.a4.aboutToBeDeleted();
     this.b4.aboutToBeDeleted();
+    this.c4.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
   }
@@ -949,6 +956,12 @@ export class d1 extends ViewPU {
   }
   set symbolEffect(newValue) {
     this.b4.set(newValue);
+  }
+  get isClipable() {
+    return this.c4.get();
+  }
+  set isClipable(newValue) {
+    this.c4.set(newValue);
   }
   isChipSizeEnum() {
     return typeof this.chipSize === 'string';
@@ -1519,6 +1532,7 @@ export class d1 extends ViewPU {
     }
     return constraintSize;
   }
+
   focusOverlay(parent = null) {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Stack.create();
@@ -1550,6 +1564,7 @@ export class d1 extends ViewPU {
   aboutToAppear() {
     let e1 = this.getUIContext();
     this.fontSizeScale = e1.getHostContext()?.config?.fontSizeScale ?? 1;
+    this.isClipable = (this.toVp(this.fontSizeScale) >= this.theme.q1.s1) ? true : false;
     this.smListener.on('change', (h1) => {
       if (h1.matches) {
         this.chipBreakPoints = a1.SM;
@@ -1595,7 +1610,7 @@ export class d1 extends ViewPU {
       Button.constraintSize(this.getChipConstraintWidth());
       Button.direction(this.chipDirection);
       Button.type(ButtonType.Normal);
-      Button.clip(false);
+      Button.clip(this.isClipable);
       Button.backgroundColor(this.getChipNodeBackGroundColor());
       Button.borderRadius(this.getChipNodeRadius());
       Button.enabled(this.getChipEnable());
