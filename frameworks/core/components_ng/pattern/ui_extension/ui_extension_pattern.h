@@ -102,6 +102,7 @@ public:
 
     void OnWindowShow() override;
     void OnWindowHide() override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnVisibleChange(bool visible) override;
     void OnMountToParentDone() override;
     void AfterMountToParent() override;
@@ -159,6 +160,10 @@ public:
     bool IsShowPlaceholder()
     {
         return (curPlaceholderType_ != PlaceholderType::NONE);
+    }
+    bool IsCanMountPlaceholder(PlaceholderType type)
+    {
+        return (static_cast<int32_t>(type) > static_cast<int32_t>(curPlaceholderType_));
     }
     void SetCurPlaceholderType(PlaceholderType type)
     {
@@ -257,6 +262,14 @@ private:
     {
         return isFoldStatusChanged_;
     }
+    void SetRotateStatusChanged(bool isChanged)
+    {
+        isRotateStatusChanged_ = isChanged;
+    }
+    bool IsRotateStatusChanged()
+    {
+        return isRotateStatusChanged_;
+    }
     PlaceholderType GetSizeChangeReason();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
@@ -292,6 +305,7 @@ private:
     bool isAsyncModalBinding_ = false;
     PlaceholderType curPlaceholderType_ = PlaceholderType::NONE;
     bool isFoldStatusChanged_ = false;
+    bool isRotateStatusChanged_ = false;
     bool densityDpi_ = false;
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;
