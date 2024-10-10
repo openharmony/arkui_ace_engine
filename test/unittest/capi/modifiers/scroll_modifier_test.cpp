@@ -60,8 +60,9 @@ inline void AssignArkValue(Ark_OffsetOptions& dst, const OffsetT<CalcDimension>&
     AssignArkValue(dst.yOffset, src.GetY());
 }
 
-inline Ark_Resource ArkResource(Ark_String* name, int id = -1,
-NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR)
+inline Ark_Resource ArkResource(Ark_String* name,
+                                int id = -1,
+                                NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR)
 {
     return {
         .id = Converter::ArkValue<Ark_Number>(id),
