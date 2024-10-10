@@ -49,8 +49,8 @@ public:
         napi_value storage) override {
         return UIContentErrorCode::NO_ERRORS;
     }
-    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
-        const std::vector<std::string>& registerComponents) override {}
+    void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
+        const std::string& entryPoint, const std::vector<std::string>& registerComponents) override {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}
