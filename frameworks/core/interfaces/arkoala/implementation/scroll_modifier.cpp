@@ -37,17 +37,6 @@ inline OffsetT<CalcDimension> Convert(const Ark_OffsetOptions& value)
     }
     return dst;
 }
-template<>
-void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
-{
-    switch (src) {
-    case ARK_SCROLL_DIRECTION_VERTICAL: dst = Axis::VERTICAL; break;
-    case ARK_SCROLL_DIRECTION_HORIZONTAL: dst = Axis::HORIZONTAL; break;
-    case ARK_SCROLL_DIRECTION_FREE: dst = Axis::FREE; break;
-    case ARK_SCROLL_DIRECTION_NONE: dst = Axis::NONE; break;
-    default: LOGE("Unexpected enum value in Ark_ScrollDirection: %{public}d", src);
-    }
-}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -195,7 +184,7 @@ void ScrollBarImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto displayMode = Converter::OptConvert<DisplayMode>(barState);
-    if (displayMode.has_value()) {
+    if (displayMode) {
         ScrollModelNG::SetScrollBar(frameNode, displayMode.value());
     }
 >>>>>>> c72a57c109 (add implementation and tests for modfier methods)
@@ -214,8 +203,7 @@ void ScrollBarColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(color);
     auto colorVal = Converter::OptConvert<Color>(*color);
-    if (colorVal)
-    {
+    if (colorVal) {
         ScrollModelNG::SetScrollBarColor(frameNode, colorVal.value());
     }
 >>>>>>> c72a57c109 (add implementation and tests for modfier methods)
@@ -233,10 +221,8 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-
     auto width = Converter::OptConvert<Dimension>(*value);
-    if (width)
-    {
+    if (width) {
         ScrollModelNG::SetScrollBarWidth(frameNode, width.value());
     }
 >>>>>>> c72a57c109 (add implementation and tests for modfier methods)
@@ -281,8 +267,7 @@ void FrictionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto frictionVal = Converter::OptConvert<float>(*value);
-    if (frictionVal)
-    {
+    if (frictionVal) {
         ScrollModelNG::SetFriction(frameNode, frictionVal.value());
     }
 >>>>>>> c72a57c109 (add implementation and tests for modfier methods)

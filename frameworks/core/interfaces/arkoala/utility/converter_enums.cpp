@@ -747,6 +747,7 @@ void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
 }
 
 template<>
+<<<<<<< HEAD
 void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
 {
     switch (src) {
@@ -992,6 +993,16 @@ void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_Symbo
         case ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL:
             dst = OHOS::Ace::SymbolEffectType::HIERARCHICAL; break;
         default: LOGE("Unexpected enum value in Ark_SymbolEffectStrategy: %{public}d", src);
+=======
+void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src)
+{
+    switch (src) {
+    case ARK_SCROLL_DIRECTION_VERTICAL: dst = Axis::VERTICAL; break;
+    case ARK_SCROLL_DIRECTION_HORIZONTAL: dst = Axis::HORIZONTAL; break;
+    case ARK_SCROLL_DIRECTION_FREE: dst = Axis::FREE; break;
+    case ARK_SCROLL_DIRECTION_NONE: dst = Axis::NONE; break;
+    default: LOGE("Unexpected enum value in Ark_ScrollDirection: %{public}d", src);
+>>>>>>> 92d86f5f0d (refactor for readability)
     }
 }
 } // namespace OHOS::Ace::NG::Converter
