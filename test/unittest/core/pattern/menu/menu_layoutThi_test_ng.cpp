@@ -419,9 +419,9 @@ HWTEST_F(MenuLayout3TestNg, InitWrapperRect001, TestSize.Level1)
 
     int32_t backApiVersion = context->GetMinPlatformVersion();
     context->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    menuAlgorithm->hierarchicalParameters_ = true;
+    menuAlgorithm->canExpandCurrentWindow_ = true;
     menuAlgorithm->InitWrapperRect(props, menuPattern);
-    menuAlgorithm->hierarchicalParameters_ = false;
+    menuAlgorithm->canExpandCurrentWindow_ = false;
     menuAlgorithm->InitWrapperRect(props, menuPattern);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), FULL_SCREEN_WIDTH);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), FULL_SCREEN_HEIGHT - KEYBOARD_HEIGHT);

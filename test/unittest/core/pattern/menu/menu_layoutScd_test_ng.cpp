@@ -1341,7 +1341,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5910, TestSize.Level1)
     ASSERT_NE(menuNode, nullptr);
 
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
+    layoutAlgorithm->canExpandCurrentWindow_ = true;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -1392,7 +1392,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5920, TestSize.Level1)
     ASSERT_NE(menuNode, nullptr);
 
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
+    layoutAlgorithm->canExpandCurrentWindow_ = true;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -1547,7 +1547,7 @@ HWTEST_F(MenuLayout2TestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
      * @tc.steps: step3. call the InitializePaddingAPI12 method.
      * @tc.expected: padding is not zero
      */
-    algorithm->hierarchicalParameters_ = true;
+    algorithm->canExpandCurrentWindow_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->menuMediumMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI12(wrapper);
@@ -1624,7 +1624,7 @@ HWTEST_F(MenuLayout2TestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
      * @tc.cases: case2. layering parameter is false.
      * @tc.expected: padding is not zero
      */
-    algorithm->hierarchicalParameters_ = false;
+    algorithm->canExpandCurrentWindow_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->menuLargeMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI12(wrapper);
@@ -1668,7 +1668,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5900, TestSize.Level1)
      * @tc.expected: no exception in the method return value.
      */
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
+    layoutAlgorithm->canExpandCurrentWindow_ = true;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -1720,7 +1720,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg6000, TestSize.Level1)
      * @tc.expected: no exception in the method return value.
      */
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
-    layoutAlgorithm->hierarchicalParameters_ = false;
+    layoutAlgorithm->canExpandCurrentWindow_ = false;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
