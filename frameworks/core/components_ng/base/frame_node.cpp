@@ -4524,6 +4524,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheS
             SetActive(false);
             SetJSViewActive(false);
         } else {
+            SetActive(true);
             SetJSViewActive(true);
         }
     } else {
@@ -4531,6 +4532,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheS
             SetActive(false);
             SetJSViewActive(false);
         } else {
+            SetActive(true);
             SetJSViewActive(true);
         }
     }
