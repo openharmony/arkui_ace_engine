@@ -24,13 +24,23 @@ namespace OHOS::Ace::NG {
 
 void FocusView::FocusViewShow(bool isTriggerByStep)
 {
+    if (GetFrameName() == V2::NAVBAR_ETS_TAG ||
+        GetFrameName() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        if (!GetFocusViewFocusable()) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d is not focusable, cannot be shown",
+                GetFrameName().c_str(), GetFrameId());
+            return;
+        }
+    }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d show", GetFrameName().c_str(), GetFrameId());
     auto viewRootScope = GetViewRootScope();
     if (viewRootScope && GetIsViewRootScopeFocused()) {
         viewRootScope->SetFocusDependence(FocusDependence::SELF);
     }
     isViewHasFocused_ = false;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto focusManager = pipeline->GetFocusManager();
     CHECK_NULL_VOID(focusManager);
@@ -41,7 +51,9 @@ void FocusView::FocusViewShow(bool isTriggerByStep)
 void FocusView::FocusViewHide()
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d hide", GetFrameName().c_str(), GetFrameId());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto node = GetFrameNode();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto focusManager = pipeline->GetFocusManager();
     CHECK_NULL_VOID(focusManager);
@@ -115,7 +127,7 @@ RefPtr<FocusHub> FocusView::GetFocusHub()
 
 RefPtr<FocusView> FocusView::GetCurrentFocusView()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto focusManager = pipeline->GetFocusManager();
     CHECK_NULL_RETURN(focusManager, nullptr);
@@ -171,7 +183,9 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
         rootScope = *iter;
     }
     CHECK_NULL_RETURN(rootScope, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto node = GetFrameNode();
+    CHECK_NULL_RETURN(node, nullptr);
+    auto pipeline = node->GetContextRefPtr();
     auto screenNode = pipeline ? pipeline->GetScreenNode() : nullptr;
     auto screenFocusHub = screenNode ? screenNode->GetFocusHub() : nullptr;
     if (rootScope->GetFocusType() != FocusType::SCOPE || (screenFocusHub && rootScope == screenFocusHub)) {
