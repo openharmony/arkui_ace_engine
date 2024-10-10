@@ -529,6 +529,7 @@ private:
     void PlayTabBarTranslateAnimation(AnimationOption option, float targetCurrentOffset);
     void PlayIndicatorTranslateAnimation(AnimationOption option, RectF originalPaintRect, RectF targetPaintRect,
         float targetOffset);
+    void CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& host, const std::string& propertyName);
     void StopTranslateAnimation();
     float CalculateTargetOffset(int32_t targetIndex);
     void UpdateIndicatorCurrentOffset(float offset);
