@@ -351,7 +351,7 @@ void ImageLoadingContext::OnMakeCanvasImage()
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->SetImageDfxConfig(imageDfxConfig_);
-    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
+    imageObj_->MakeCanvasImage(WeakClaim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
 }
 
 void ImageLoadingContext::ResizableCalcDstSize()
