@@ -1081,7 +1081,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             }
         }
         auto childSize = badgeNumber.has_value() ? badgeNumber.value() : GetSelectItemSize();
-        if (childSize > 1) {
+        if (childSize >= 1) {
             recordsSize = childSize;
         }
         textNode = DragEventActuator::CreateBadgeTextNode(frameNode, childSize, previewScale, true);
