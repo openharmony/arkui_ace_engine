@@ -17,8 +17,6 @@
 
 namespace OHOS::Ace::NG {
 
-static std::vector<std::unique_ptr<Ark_String>> g_strCache;
-
 std::string GetStringAttribute(ArkUINodeHandle node, const std::string &name)
 {
     static const InspectorFilter inspector;
@@ -58,8 +56,9 @@ Ark_Resource CreateResource(uint32_t id, OHOS::Ace::NG::NodeModifier::ResourceTy
 
 Ark_Resource CreateResource(const char *name, OHOS::Ace::NG::NodeModifier::ResourceType type)
 {
-    g_strCache.emplace_back(std::make_unique<Ark_String>(Converter::ArkValue<Ark_String>(name)));
-    Array_String params = {.length = 1, .array = g_strCache.back().get()};
+    static std::vector<std::unique_ptr<Ark_String>> s_strCache;
+    s_strCache.emplace_back(std::make_unique<Ark_String>(Converter::ArkValue<Ark_String>(name)));
+    Array_String params = {.length = 1, .array = s_strCache.back().get()};
     return {
         .id = Converter::ArkValue<Ark_Number>(-1),
         .type = Converter::ArkValue<Ark_Number>(static_cast<uint32_t>(type)),

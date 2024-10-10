@@ -137,14 +137,19 @@ def run_tests_parallel(test_directory, path, output):
     return failed_tests_count + len(test_result["unavailable"])
 
 
-def get_tests_out_path():
+def get_tests_out_path(debug):
     """
     Obtain the output directory of test cases
     """
-    code_path = os.path.dirname(os.path.realpath(__file__))
+    base_path = os.path.dirname(os.path.realpath(__file__))
     for _ in range(6):
-        code_path = os.path.dirname(code_path)
-    code_path = os.path.join(code_path, "out/rk3568/clang_x64/tests/unittest/ace_engine")
+        base_path = os.path.dirname(base_path)
+    code_path = os.path.join(base_path, "out/rk3568/clang_x64")
+    if debug:
+        code_path = os.path.join(code_path, "exe.unstripped/clang_x64")
+        os.environ["ASAN_SYMBOLIZER_PATH"] = os.path.join(base_path,
+            "prebuilts/clang/ohos/linux-x86_64/llvm/bin/llvm-symbolizer")
+    code_path = os.path.join(code_path, "tests/unittest/ace_engine")
     return code_path
 
 
@@ -156,8 +161,9 @@ def main():
     parser.add_argument("-t", "--target", nargs='+', type=str, default=None)
     parser.add_argument("-p", "--path", type=str, default=None)
     parser.add_argument("-o", "--output", type=str, default=None)
-    tests_out_path = get_tests_out_path()
+    parser.add_argument("-d", "--debug", action='store_true')
     args = parser.parse_args()
+    tests_out_path = get_tests_out_path(args.debug)
     targets = args.target
     if targets is not None:
         for target in targets:
