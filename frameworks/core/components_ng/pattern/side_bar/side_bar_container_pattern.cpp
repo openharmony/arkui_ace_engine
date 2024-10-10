@@ -102,7 +102,7 @@ void SideBarContainerPattern::OnAttachToFrameNode()
 void SideBarContainerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
+    auto pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowFocusChangedCallback(frameNode->GetId());
