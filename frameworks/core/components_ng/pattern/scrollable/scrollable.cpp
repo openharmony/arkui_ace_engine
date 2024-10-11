@@ -17,7 +17,6 @@
 
 #include "base/log/jank_frame_report.h"
 #include "base/ressched/ressched_report.h"
-#include "base/utils/system_properties.h"
 #include "core/common/layout_inspector.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"

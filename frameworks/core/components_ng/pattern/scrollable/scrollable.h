@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/geometry/dimension.h"
+#include "base/utils/system_properties.h"
 #include "core/animation/animator.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
@@ -170,7 +171,12 @@ public:
 
     double GetFriction() const
     {
-        return friction_;
+        double friction = friction_;
+        if (friction == -1.0) {
+            double ret = SystemProperties::GetSrollableFriction();
+            friction = !NearZero(ret) ? ret : defaultFriction_;
+        }
+        return friction;
     }
 
     float GetRatio() const

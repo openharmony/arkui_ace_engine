@@ -23,7 +23,6 @@ namespace OHOS::Ace::NG {
 
 namespace {
 const InspectorFilter filter;
-constexpr double UNSTATIC_DEFAULT_FRICTION = -1.0;
 } // namespace
 
 class ListScrollerTestNg : public ListTestNg {
@@ -1715,7 +1714,7 @@ HWTEST_F(ListScrollerTestNg, Pattern012, TestSize.Level1)
     EXPECT_EQ(json->GetBool("multiSelectable"), false);
     EXPECT_EQ(json->GetInt("startIndex"), 0);
     EXPECT_EQ(json->GetDouble("itemStartPos"), 0.0);
-    EXPECT_EQ(json->GetDouble("friction"), UNSTATIC_DEFAULT_FRICTION);
+    EXPECT_EQ(json->GetDouble("friction"), DEFAULT_FRICTION);
     pattern_->FromJson(json);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }

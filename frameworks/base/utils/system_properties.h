@@ -596,7 +596,7 @@ public:
     static std::string GetDebugInspectorId();
 
     static double GetSrollableVelocityScale();
-    
+
     static double GetSrollableFriction();
 
 private:
