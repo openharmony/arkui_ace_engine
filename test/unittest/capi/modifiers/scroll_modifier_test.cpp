@@ -95,18 +95,6 @@ public:
  */
 HWTEST_F(ScrollModifierTest, Scrollable_SetDirectionOnSlide, testing::ext::TestSize.Level1)
 {
-     auto findString = [](std::unique_ptr<JsonValue>& json, std::string&& name,
-        std::function<bool(std::unique_ptr<JsonValue>&)> isExpectedType) -> std::string {
-        for(auto object = json->GetChild(); object && object->IsValid(); object = object->GetNext()) {
-            auto key = object->GetKey();
-            if (key == name) {
-                if (isExpectedType(object)) {
-                    return object->GetString();
-                }
-            }
-        }
-        return std::string();
-    };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
@@ -116,8 +104,15 @@ HWTEST_F(ScrollModifierTest, Scrollable_SetDirectionOnSlide, testing::ext::TestS
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     // json has 2 values with the key "scrollable" one is boolean and one is string (we need the later one)
-    auto afterState = findString(json, "scrollable", 
-        [](std::unique_ptr<JsonValue>& v) { return v->IsString();});
+    std::string afterState;
+    for(auto object = json->GetChild(); object->IsValid(); object = object->GetNext()) {
+        auto key = object->GetKey();
+        if (key == "scrollable") {
+            if (object->IsString()) {
+                afterState = object->GetString();
+            }
+        }
+    }
     ASSERT_EQ("ScrollDirection.Free", afterState);
 }
 
@@ -240,7 +235,7 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetCallback, testing::ext::TestSize.Le
 
     struct ScrollEdgeState {
         Ark_Int32 nodeId;
-        Ark_Edge edge; 
+        Ark_Edge edge;
     };
     static std::optional<ScrollEdgeState> state;
     EventsTracker::eventsReceiver.onScrollEdge = [] (Ark_Int32 nodeId, Ark_Edge edge)
@@ -540,7 +535,6 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::Tes
     testVal = GetStringAttribute(node_, jsonKey);
     testValDim = Dimension::FromString(testVal);
     ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
-
 }
 
 /**
