@@ -371,9 +371,15 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             auto selectedInfo = selectOverlayHolder_->GetSelectedText();
             menuPattern->SetSelectInfo(selectedInfo);
         }
-        if ((dirty & DIRTY_VIEWPORT) == DIRTY_VIEWPORT) {
-            auto viewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+    }
+    if ((dirty & DIRTY_VIEWPORT) == DIRTY_VIEWPORT) {
+        auto viewPort = selectOverlayHolder_->GetAncestorNodeViewPort();
+        if (menuPattern) {
             menuPattern->UpdateViewPort(viewPort);
+        }
+        auto handlePattern = GetSelectHandlePattern(WeakClaim(this));
+        if (handlePattern) {
+            handlePattern->UpdateViewPort(viewPort);
         }
     }
     UpdateHandleInfosWithFlag(dirty);

@@ -721,6 +721,7 @@ protected:
     bool adjustRSFrameByContentRect_ = false;
 
     RectF paintRect_;
+    RectF contentClipRect_;
 
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 
