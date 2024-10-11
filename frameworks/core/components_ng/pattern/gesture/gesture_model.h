@@ -36,6 +36,7 @@ public:
     virtual void SetOnGestureEvent(const GestureEventNoParameter& gestureEventNoParameter) = 0;
     virtual void SetOnActionFunc(const GestureEventFunc& gestureEventFunc, const Ace::GestureEventAction& action) = 0;
     virtual void SetTag(const std::string& tag) = 0;
+    virtual void SetAllowedTypes(const std::set<SourceTool>& allowedTypes) = 0;
 
 private:
     static std::unique_ptr<GestureModel> instance_;

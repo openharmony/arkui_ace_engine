@@ -112,4 +112,29 @@ void MultiFingersRecognizer::UpdateTouchPointWithAxisEvent(const AxisEvent& even
     touchPoints_[event.id].sourceTool = event.sourceTool;
     touchPoints_[event.id].originalId = event.originalId;
 }
+
+std::string MultiFingersRecognizer::DumpGestureInfo() const
+{
+    std::string infoStr;
+    infoStr.append("allowedTypes: [");
+    std::set<SourceTool> allowedTypes = {};
+    if (gestureInfo_) {
+        allowedTypes = gestureInfo_->GetAllowedTypes();
+    }
+    if (allowedTypes.empty()) {
+        infoStr.append("all]");
+        return infoStr;
+    }
+
+    auto it = allowedTypes.begin();
+    while (it != allowedTypes.end()) {
+        infoStr.append(std::to_string(static_cast<int32_t>(*it)));
+        it++;
+        if (it != allowedTypes.end()) {
+            infoStr.append(", ");
+        }
+    }
+    infoStr.append("]");
+    return infoStr;
+}
 } // namespace OHOS::Ace::NG

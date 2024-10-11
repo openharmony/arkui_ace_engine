@@ -78,6 +78,14 @@ protected:
         touchPoints_[touchId] = {};
     }
 
+    void RemoveUnsupportEvent(int32_t touchId) override
+    {
+        if (touchPoints_.empty() || touchPoints_.find(touchId) == touchPoints_.end()) {
+            return;
+        }
+        touchPoints_.erase(touchId);
+    }
+
     void UpdateTouchPointWithAxisEvent(const AxisEvent& event);
 
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked) override;
@@ -100,6 +108,8 @@ protected:
     {
         return std::find(activeFingers_.begin(), activeFingers_.end(), touchId) != activeFingers_.end();
     }
+
+    std::string DumpGestureInfo() const;
 
     std::map<int32_t, TouchEvent> touchPoints_;
     std::list<FingerInfo> fingerList_;
