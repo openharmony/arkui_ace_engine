@@ -15,8 +15,6 @@
 
 #include "inspect_input.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectInput::InspectInput(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

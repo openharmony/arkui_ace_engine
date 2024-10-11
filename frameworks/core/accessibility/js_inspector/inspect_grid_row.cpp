@@ -15,8 +15,6 @@
 
 #include "inspect_grid_row.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectGridRow::InspectGridRow(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

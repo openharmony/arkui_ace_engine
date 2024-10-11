@@ -15,8 +15,6 @@
 
 #include "inspect_qrcode.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectQRcode::InspectQRcode(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

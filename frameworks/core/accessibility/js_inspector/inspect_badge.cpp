@@ -15,8 +15,6 @@
 
 #include "inspect_badge.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectBadge::InspectBadge(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

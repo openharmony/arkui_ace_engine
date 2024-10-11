@@ -15,8 +15,6 @@
 
 #include "inspect_camera.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectCamera::InspectCamera(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

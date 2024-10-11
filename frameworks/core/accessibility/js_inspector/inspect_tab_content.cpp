@@ -15,8 +15,6 @@
 
 #include "inspect_tab_content.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectTabContent::InspectTabContent(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

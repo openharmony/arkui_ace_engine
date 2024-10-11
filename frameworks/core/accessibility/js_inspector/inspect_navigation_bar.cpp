@@ -15,8 +15,6 @@
 
 #include "inspect_navigation_bar.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectNavigationBar::InspectNavigationBar(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

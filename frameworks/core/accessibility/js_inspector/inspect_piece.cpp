@@ -15,8 +15,6 @@
 
 #include "inspect_piece.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectPiece::InspectPiece(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }
