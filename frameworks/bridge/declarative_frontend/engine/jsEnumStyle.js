@@ -2120,6 +2120,8 @@ class NavPathInfo {
     this.needBuildNewInstance = false;
     this.navDestinationId = undefined;
     this.promise = undefined;
+    this.replacedDestinationInfo = undefined;
+    this.recoveryFromReplaceDestination = undefined;
     this.isEntry = isEntry;
     this.fromRecovery = false;
     this.mode = undefined;
@@ -2321,7 +2323,7 @@ class NavPathStack {
       }
     });
   }
-  replacePath(info, optionParam) {
+  replacePath(info, optionParam, isReplaceDestination) {
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let index = -1;
     if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON || launchMode === LaunchMode.POP_TO_SINGLETON) {
@@ -2339,11 +2341,19 @@ class NavPathStack {
           }
           this.pathArray.push(targetInfo[0]);
         }
+        if (isReplaceDestination) {
+          return new Promise((resolve, reject) => {
+            resolve();
+          });
+        }
       }
     }
     if (index === -1) {
       if (this.pathArray.length !== 0) {
-        this.pathArray.pop();
+        let popInfo = this.pathArray.pop();
+        if (isReplaceDestination) {
+          info.replacedDestinationInfo = popInfo;
+        }
       }
       this.pathArray.push(info);
       this.pathArray[this.pathArray.length - 1].index = -1;
@@ -2351,6 +2361,21 @@ class NavPathStack {
     this.isReplace = 1;
     this.animated = animated;
     this.nativeStack?.onStateChanged();
+  }
+  replaceDestination(info, navigationOptions) {
+    let promiseWithLaunchMode = this.replacePath(info, navigationOptions, true);
+    if (promiseWithLaunchMode !== undefined) {
+      return promiseWithLaunchMode;
+    }
+    return new Promise((resolve, reject) => {
+      info.promise = (errorCode, errorMessage) => {
+        if (errorCode == 0) {
+          resolve(0);
+          return;
+        }
+        reject({code: errorCode, message: errorMessage});
+      }
+    });
   }
   replacePathByName(name, param, animated) {
     if (this.pathArray.length !== 0) {
@@ -2535,6 +2560,14 @@ class NavPathStack {
     this.nativeStack?.onStateChanged();
   }
   removeInvalidPage(index) {
+    if (index >= this.pathArray.length || index < 0) {
+      return;
+    }
+    if (this.pathArray[index].replacedDestinationInfo !== undefined) {
+      this.pathArray[index] = this.pathArray[index].replacedDestinationInfo;
+      this.pathArray[index].recoveryFromReplaceDestination = true;
+      return;
+    }
     this.pathArray.splice(index, 1);
   }
   getAllPathName() {

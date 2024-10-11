@@ -655,6 +655,15 @@ void NavigationPattern::UpdateNavPathList()
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find in nowhere, navigation stack create new node, "
             "index: %{public}d, removeSize: %{public}d, name: %{public}s.", index, removeSize, pathName.c_str());
         if (!GenerateUINodeByIndex(arrayIndex, uiNode)) {
+            std::string replacedName = "";
+            int32_t replacedIndex = -1;
+            if (navigationStack_->CheckIsReplacedDestination(arrayIndex, replacedName, replacedIndex)) {
+                navigationStack_->SetRecoveryFromReplaceDestination(arrayIndex, false);
+                pathNames[index] = replacedName;
+                indexes[index] = replacedIndex;
+                index--;
+                continue;
+            }
             removeSize++;
             continue;
         }
@@ -733,7 +742,7 @@ void NavigationPattern::CheckTopNavPathChange(
         UpdateSystemBarStyleOnTopNavPathChange(newTopNavPath);
     }
     auto replaceValue = navigationStack_->GetReplaceValue();
-    if (preTopNavPath == newTopNavPath && replaceValue != 1) {
+    if (preTopNavPath == newTopNavPath) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "page is not change. don't transition");
         auto currentProxy = GetTopNavigationProxy();
         if (currentProxy) {

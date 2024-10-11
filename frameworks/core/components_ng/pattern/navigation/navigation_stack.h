@@ -214,6 +214,11 @@ public:
     virtual void RecoveryNavigationStack() {}
     virtual bool NeedBuildNewInstance(int32_t index) { return false; }
     virtual void SetNeedBuildNewInstance(int32_t index, bool need) {}
+    virtual void SetRecoveryFromReplaceDestination(int32_t index, bool value) {}
+    virtual bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex)
+    {
+        return false;
+    }
 
     void UpdateRecoveryList()
     {
