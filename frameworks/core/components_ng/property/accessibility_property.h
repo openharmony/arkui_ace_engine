@@ -506,13 +506,7 @@ public:
 
     void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl);
 
-    void GetAllExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
-    {
-        if (getRelatedElementInfoImpl_) {
-            getRelatedElementInfoImpl_(extraElementInfo);
-        }
-        GetExtraElementInfo(extraElementInfo);
-    }
+    void GetAllExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo);
 
     void SetAccessibilityActions(uint32_t actions);
     void ResetAccessibilityActions();
