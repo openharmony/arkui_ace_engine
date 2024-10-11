@@ -31,7 +31,7 @@ namespace Converter {
         }
     }
 }
-namespace GeneratedModifier { 
+namespace GeneratedModifier {
 namespace CheckboxInterfaceModifier {
 void SetCheckboxOptionsImpl(Ark_NativePointer node,
                             const Opt_CheckboxOptions* options)

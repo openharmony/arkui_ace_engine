@@ -17,7 +17,7 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/interfaces/arkoala/utility/reverse_converter.h" 
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;
@@ -35,7 +35,8 @@ namespace  {
     const auto ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE = "#FF000000";
 } // namespace
 
-class CheckboxModifierTest : public ModifierTestBase<GENERATED_ArkUICheckboxModifier, &GENERATED_ArkUINodeModifiers::getCheckboxModifier, GENERATED_ARKUI_CHECKBOX> {
+class CheckboxModifierTest : public ModifierTestBase<GENERATED_ArkUICheckboxModifier,
+    &GENERATED_ArkUINodeModifiers::getCheckboxModifier, GENERATED_ARKUI_CHECKBOX> {
 };
 
 /*
@@ -167,8 +168,12 @@ HWTEST_F(CheckboxModifierTest, setShapeTestDefaultValues, TestSize.Level1)
 
 // Valid values for attribute 'shape' of method 'shape'
 static std::vector<std::tuple<std::string, enum Ark_CheckBoxShape, std::string>> shapeShapeValidValues = {
-    {"ARK_CHECK_BOX_SHAPE_CIRCLE", Converter::ArkValue<enum Ark_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_CIRCLE), "CheckBoxShape.CIRCLE"},
-    {"ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE", Converter::ArkValue<enum Ark_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE), "CheckBoxShape.ROUNDED_SQUARE"},
+    {"ARK_CHECK_BOX_SHAPE_CIRCLE",
+        Converter::ArkValue<enum Ark_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_CIRCLE),
+        "CheckBoxShape.CIRCLE"},
+    {"ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE",
+        Converter::ArkValue<enum Ark_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE),
+        "CheckBoxShape.ROUNDED_SQUARE"},
 };
 
 /*
@@ -201,7 +206,8 @@ HWTEST_F(CheckboxModifierTest, setShapeTestValidValues, TestSize.Level1)
 
 // Invalid values for attribute 'shape' of method 'shape'
 static std::vector<std::tuple<std::string, enum Ark_CheckBoxShape>> shapeShapeInvalidValues = {
-    {"static_cast<enum Ark_CheckBoxShape>(-1)", Converter::ArkValue<enum Ark_CheckBoxShape>(static_cast<enum Ark_CheckBoxShape>(-1))},
+    {"static_cast<enum Ark_CheckBoxShape>(-1)",
+        Converter::ArkValue<enum Ark_CheckBoxShape>(static_cast<enum Ark_CheckBoxShape>(-1))},
 };
 
 /*

@@ -206,20 +206,20 @@ public:
         CHECK_NULL_VOID(paintProperty);
         auto select = paintProperty->GetCheckBoxSelectValue(false);
         json->PutExtAttr("select", select ? "true" : "false", filter);
-        json->PutExtAttr("selectedColor", 
+        json->PutExtAttr("selectedColor",
             paintProperty->GetCheckBoxSelectedColorValue(Color::BLACK).ColorToString().c_str(), filter);
-        json->PutExtAttr("unselectedColor", 
+        json->PutExtAttr("unselectedColor",
             paintProperty->GetCheckBoxUnSelectedColorValue(Color::BLACK).ColorToString().c_str(), filter);
 
         auto style = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
         auto styleStr = "";
         switch (style) {
-        case CheckBoxStyle::CIRCULAR_STYLE:
-            styleStr = "CheckBoxShape.CIRCLE";
-            break;
-        case CheckBoxStyle::SQUARE_STYLE:
-            styleStr = "CheckBoxShape.ROUNDED_SQUARE";
-            break;
+            case CheckBoxStyle::CIRCULAR_STYLE:
+                styleStr = "CheckBoxShape.CIRCLE";
+                break;
+            case CheckBoxStyle::SQUARE_STYLE:
+                styleStr = "CheckBoxShape.ROUNDED_SQUARE";
+                break;
         }
         json->PutExtAttr("shape", styleStr, filter);
     }
