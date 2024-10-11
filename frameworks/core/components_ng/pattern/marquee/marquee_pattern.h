@@ -119,6 +119,8 @@ private:
     double GetScrollAmount();
     void CheckTextDirectionChange(TextDirection direction);
     TextDirection GetCurrentTextDirection();
+    void UpdateTextDirection(
+        const RefPtr<MarqueeLayoutProperty>& layoutProperty, const RefPtr<TextLayoutProperty>& textLayoutProperty);
     void ActionAnimation(AnimationOption& option, float end, int32_t playCount, bool needSecondPlay);
     bool IsRunMarquee();
     bool measureChanged_ = false;
