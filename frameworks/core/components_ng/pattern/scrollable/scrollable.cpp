@@ -873,12 +873,13 @@ void Scrollable::StartSpringMotion(
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
             scroll->springAnimationCount_--;
-            // avoid current animation being interrupted by the prev animation's finish callback
-            if (scroll->springAnimationCount_ > 0) {
-                return;
-            }
             ACE_SCOPED_TRACE(
                 "Scrollable spring animation finish, id:%d, tag:%s", scroll->nodeId_, scroll->nodeTag_.c_str());
+            // avoid current animation being interrupted by the prev animation's finish callback
+            // and triggering onScrollStop when spring animation turns to friction animation.
+            if (scroll->springAnimationCount_ > 0 || scroll->scrollPause_) {
+                return;
+            }
             scroll->state_ = AnimationState::IDLE;
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
