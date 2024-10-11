@@ -32,6 +32,7 @@ public:
     void InitDragEvent() override;
     void ApplyNormalTheme() override;
     bool IsTextEditableForStylus() const override;
+    int32_t GetRequestKeyboardId() override;
 };
 } // namespace OHOS::Ace::NG
 
