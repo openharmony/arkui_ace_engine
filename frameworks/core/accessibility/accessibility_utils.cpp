@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#define AVERAGE_BASE 2
+
 #include "core/accessibility/accessibility_utils.h"
 
 namespace OHOS::Ace {
@@ -147,11 +149,13 @@ static double MinorAxisDistance(const Rect& nodeRect, const Rect& itemRect, cons
     switch (direction) {
         case FOCUS_DIRECTION_LEFT:
         case FOCUS_DIRECTION_RIGHT:
-            distance = fabs((nodeRect.Top() + nodeRect.Bottom()) / 2 - (itemRect.Top() + itemRect.Bottom()) / 2);
+            distance = fabs((nodeRect.Top() + nodeRect.Bottom()) / AVERAGE_BASE -
+                (itemRect.Top() + itemRect.Bottom()) / AVERAGE_BASE);
             break;
         case FOCUS_DIRECTION_UP:
         case FOCUS_DIRECTION_DOWN:
-            distance = fabs((nodeRect.Left() + nodeRect.Right()) / 2 - (itemRect.Left() + itemRect.Right()) / 2);
+            distance = fabs((nodeRect.Left() + nodeRect.Right()) / AVERAGE_BASE -
+                (itemRect.Left() + itemRect.Right()) / AVERAGE_BASE);
             break;
         default:
             break;
