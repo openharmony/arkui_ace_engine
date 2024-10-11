@@ -105,12 +105,9 @@ HWTEST_F(ScrollModifierTest, Scrollable_SetDirectionOnSlide, testing::ext::TestS
     ASSERT_TRUE(json);
     // json has 2 values with the key "scrollable" one is boolean and one is string (we need the later one)
     std::string afterState;
-    for(auto object = json->GetChild(); object->IsValid(); object = object->GetNext()) {
-        auto key = object->GetKey();
-        if (key == "scrollable") {
-            if (object->IsString()) {
-                afterState = object->GetString();
-            }
+    for (auto object = json->GetChild(); object->IsValid(); object = object->GetNext()) {
+        if (object->IsString() && object->GetKey() == "scrollable") {
+            afterState = object->GetString();
         }
     }
     ASSERT_EQ("ScrollDirection.Free", afterState);
