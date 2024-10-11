@@ -154,7 +154,7 @@ static std::vector<std::tuple<std::string, enum Ark_SecurityComponentLayoutDirec
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setLayoutDirectionTestInvalidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setLayoutDirectionTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     int32_t result;

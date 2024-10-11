@@ -509,10 +509,7 @@ void SecurityComponentModelNG::SetTextIconLayoutDirection(const SecurityComponen
 
 void SecurityComponentModelNG::SetTextIconLayoutDirection(FrameNode* frameNode, const std::optional<SecurityComponentLayoutDirection>& value)
 {
-    if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconLayoutDirection, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconLayoutDirection, frameNode);
-    }
+    auto layoutDirection = value ? value.value() : SecurityComponentLayoutDirection::HORIZONTAL;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconLayoutDirection, layoutDirection, frameNode);
 }
 } // namespace OHOS::Ace::NG
