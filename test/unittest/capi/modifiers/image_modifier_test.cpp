@@ -129,6 +129,7 @@ HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
 /*
  * @tc.name: setAutoResizeTestDefaultValues
  * @tc.desc: Check functionality of ImageModifier.setAutoResize
+ * Disabled because the default value should be false, but the returned value is true.
  * @tc.type: FUNC
  */
 HWTEST_F(ImageModifierTest, DISABLED_setAutoResizeTestDefaultValues, TestSize.Level1)
