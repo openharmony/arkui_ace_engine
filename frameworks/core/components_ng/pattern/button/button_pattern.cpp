@@ -201,6 +201,17 @@ void ButtonPattern::InitButtonLabel()
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
     textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto buttonTheme = context->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    if (buttonTheme->GetIsApplyTextFontSize()) {
+        ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
+        ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+        Dimension fontSize = buttonStyle == ButtonStyleMode::TEXT ?
+            buttonTheme->GetTextButtonFontSize() : buttonTheme->GetTextSize(controlSize);
+        textLayoutProperty->UpdateFontSize(fontSize);
+    }
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 
@@ -611,7 +622,7 @@ void ButtonPattern::HandleBorderAndShadow()
             buttonTheme_->GetBorderColor() : buttonTheme_->GetBorderColorSmall();
         if (!renderContext_->HasBorderColor() ||
             IsDynamicSwitchButtonStyle(renderContext_->GetBorderColorValue(borderColorProperty))) {
-            borderColorProperty.SetColor(buttonStyle == ButtonStyleMode::NORMAL ? borderColor : Color());
+            borderColorProperty.SetColor(borderColor);
             renderContext_->UpdateBorderColor(borderColorProperty);
         }
         return;

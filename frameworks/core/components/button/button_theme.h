@@ -133,6 +133,9 @@ public:
             theme->agingSmallPadding_ = buttonPattern->GetAttr<Dimension>("button_aging_small_padding", 0.0_vp);
             theme->agingTextMaxLines_ =
                 static_cast<uint32_t>(buttonPattern->GetAttr<double>("button_aging_text_max_lines", 0.0));
+            theme->textButtonFontSize_ = buttonPattern->GetAttr<Dimension>("text_button_font_size", 0.0_fp);
+            theme->isApplyFontSize_ =
+                static_cast<bool>(buttonPattern->GetAttr<double>("apply_text_font_size", 0.0));
             ParseSubStylePattern(buttonPattern, theme);
         }
 
@@ -502,6 +505,16 @@ public:
         return agingTextMaxLines_;
     }
 
+    const Dimension& GetTextButtonFontSize() const
+    {
+        return textButtonFontSize_;
+    }
+
+    bool GetIsApplyTextFontSize() const
+    {
+        return isApplyFontSize_;
+    }
+
 protected:
     ButtonTheme() = default;
 
@@ -548,6 +561,7 @@ private:
     Dimension focusBorderWidth_;
     Dimension borderWidthSmall_;
     Dimension paddingText_;
+    Dimension textButtonFontSize_;
     std::unordered_map<ButtonRole, std::unordered_map<ButtonStyleMode, Color>> bgColorMap_;
     std::unordered_map<ButtonRole, Color> textColorByRoleMap_;
     std::unordered_map<ButtonStyleMode, Color> textColorMap_;
@@ -566,6 +580,7 @@ private:
     Dimension agingNormalPadding_;
     Dimension agingSmallPadding_;
     uint32_t agingTextMaxLines_ = 2;
+    bool isApplyFontSize_ = false;
 };
 
 } // namespace OHOS::Ace
