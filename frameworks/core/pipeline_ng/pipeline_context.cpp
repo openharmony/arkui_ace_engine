@@ -2278,8 +2278,9 @@ bool PipelineContext::OnBackPressed()
         auto lastRequestKeyboardNodeId = textfieldMgr->GetLastRequestKeyboardId();
         auto lastRequestKeyboardNode = DynamicCast<FrameNode>(
             ElementRegister::GetInstance()->GetUINodeById(lastRequestKeyboardNodeId));
-        if (lastRequestKeyboardNode && lastRequestKeyboardNode->GetPageId() == -1 &&
-            textfieldMgr->OnBackPressed()) {
+        auto hasContainerModal = windowModal_ == WindowModal::CONTAINER_MODAL;
+        if (lastRequestKeyboardNode && (lastRequestKeyboardNode->GetPageId() == -1 || (hasContainerModal &&
+            lastRequestKeyboardNode->GetPageId() == 0)) && textfieldMgr->OnBackPressed()) {
             LOGI("textfield consumed backpressed event");
             return true;
         }

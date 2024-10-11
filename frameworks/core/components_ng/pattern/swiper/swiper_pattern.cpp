@@ -86,6 +86,10 @@ constexpr char APP_TABS_SCROLL[] = "APP_TABS_SCROLL";
 constexpr char APP_TABS_NO_ANIMATION_SWITCH[] = "APP_TABS_NO_ANIMATION_SWITCH";
 constexpr char APP_TABS_FRAME_ANIMATION[] = "APP_TABS_FRAME_ANIMATION";
 
+constexpr int32_t COMPONENT_SWIPER_FLING = 1;
+const RefPtr<FrameRateRange> SWIPER_DEFAULT_FRAME_RATE =
+    AceType::MakeRefPtr<FrameRateRange>(0, 0, 0, COMPONENT_SWIPER_FLING);
+
 } // namespace
 
 SwiperPattern::SwiperPattern()
@@ -3191,7 +3195,10 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         TAG_LOGI(AceLogTag::ACE_SWIPER,
             "Property translate animation frame rate range: {min: %{public}d, max: %{public}d, expected: %{public}d}",
             iter->second->min_, iter->second->max_, iter->second->preferred_);
+        iter->second->componentScene_ = COMPONENT_SWIPER_FLING;
         option.SetFrameRateRange(iter->second);
+    } else {
+        option.SetFrameRateRange(SWIPER_DEFAULT_FRAME_RATE);
     }
     motionVelocity_ = velocity / translate;
     auto curve = GetCurveIncludeMotion();
@@ -3529,7 +3536,10 @@ void SwiperPattern::PlayTranslateAnimation(
         TAG_LOGI(AceLogTag::ACE_SWIPER,
             "Translate animation frame rate range: {min: %{public}d, max: %{public}d, expected: %{public}d}",
             iter->second->min_, iter->second->max_, iter->second->preferred_);
+        iter->second->componentScene_ = COMPONENT_SWIPER_FLING;
         option.SetFrameRateRange(iter->second);
+    } else {
+        option.SetFrameRateRange(SWIPER_DEFAULT_FRAME_RATE);
     }
     host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, startPos);
     translateAnimationIsRunning_ = true;
@@ -5046,9 +5056,12 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         currentFirstIndex_ = GetLoopIndex(nextIndex);
         turnPageRate_ = 0.0f;
         currentIndexOffset_ = 0.0f;
-
-        pipeline->FlushUITasks();
-        pipeline->FlushMessages();
+        if (pipeline->IsLayouting()) {
+            pipeline->FlushUITaskWithSingleDirtyNode(host);
+        } else {
+            pipeline->FlushUITasks();
+            pipeline->FlushMessages();
+        }
 
         FireChangeEvent(tempOldIndex, GetLoopIndex(currentIndex_));
         // lazyBuild feature.
