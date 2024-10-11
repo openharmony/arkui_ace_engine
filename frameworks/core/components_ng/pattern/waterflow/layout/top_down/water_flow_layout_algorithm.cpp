@@ -396,7 +396,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         return;
     }
 
-    if (LessOrEqual(layoutInfo_->currentOffset_ + maxItemHeight, mainSize)) {
+    if (LessOrEqualCustomPrecision(layoutInfo_->currentOffset_ + maxItemHeight, mainSize, 0.1f)) {
         layoutInfo_->offsetEnd_ = true;
         if (!canOverScroll_) {
             layoutInfo_->currentOffset_ = mainSize - maxItemHeight;
