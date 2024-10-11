@@ -166,4 +166,36 @@ HWTEST_F(WaterFlowTestNg, Clip004, TestSize.Level1)
     props->UpdateContentClip({ ContentClipMode::SAFE_AREA, nullptr });
     FlushLayoutTask(frameNode_);
 }
+
+/**
+ * @tc.name: Clip005
+ * @tc.desc: Test contentClip with SafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Clip005, TestSize.Level1)
+{
+    RefPtr<UINode> col;
+    CreateColumn([&](ColumnModelNG colModel) {
+        ViewAbstract::SetSafeAreaPadding(CalcLength(2.0f));
+        ViewAbstract::SetMargin(CalcLength(5.0f));
+        col = ViewStackProcessor::GetInstance()->GetMainElementNode();
+
+        WaterFlowModelNG model = CreateWaterFlow();
+        ViewAbstract::SetSafeAreaPadding(CalcLength(5.0f));
+        ViewAbstract::SetMargin(CalcLength(1.0f));
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateWaterFlowItems();
+        CreateDone();
+    });
+    ASSERT_TRUE(col);
+    auto ctx = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    ASSERT_TRUE(ctx);
+    auto props = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameRect().ToString(), "RectT (3.00, 3.00) - [480.00 x 800.00]");
+
+    ASSERT_TRUE(frameNode_->GetGeometryNode()->GetResolvedSingleSafeAreaPadding());
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(RectF(0, 0, 480, 800)))).Times(1);
+    props->UpdateContentClip({ ContentClipMode::SAFE_AREA, nullptr });
+    FlushLayoutTask(frameNode_);
+}
 } // namespace OHOS::Ace::NG
