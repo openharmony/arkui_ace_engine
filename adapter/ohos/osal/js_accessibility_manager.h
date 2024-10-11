@@ -537,7 +537,9 @@ private:
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
     void SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent);
     int64_t GetDelayTimeBeforeSendEvent(const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node);
-
+    void UpdateChildrenNodeInCache(std::list<AccessibilityElementInfo>& infos,
+        const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
+        const SearchParameter& searchParam, std::list<RefPtr<NG::FrameNode>>& children);
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::shared_ptr<JsAccessibilityStateObserver> stateObserver_ = nullptr;
