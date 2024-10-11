@@ -694,7 +694,7 @@ HWTEST_F(ImageProviderTestNg, MakeCanvasImage, TestSize.Level1)
     pixmap = nullptr;
     pixmapObj = AceType::MakeRefPtr<PixelMapImageObject>(pixmap, src, size);
     pixmapObj->MakeCanvasImage(ctx, size, true, true);
-    EXPECT_EQ(ctx->canvasImage_, nullptr);
+    EXPECT_NE(ctx->canvasImage_, nullptr);
 }
 
 /**
