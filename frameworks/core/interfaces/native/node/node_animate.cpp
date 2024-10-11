@@ -203,7 +203,7 @@ void KeyframeAnimateTo(ArkUIContext* context, ArkUIKeyframeAnimateOption* animat
             keyframe.event(keyframe.userData);
             pipelineContext->FlushBuild();
             if (!pipelineContext->IsLayouting()) {
-                pipelineContext->FlushUITasks();
+                pipelineContext->FlushUITasks(true);
             }
         };
         if (keyframe.curve) {
@@ -214,6 +214,7 @@ void KeyframeAnimateTo(ArkUIContext* context, ArkUIKeyframeAnimateOption* animat
         }
     }
     pipelineContext->CloseImplicitAnimation();
+    pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
 }
 
 RefPtr<Animation<double>> ParseAnimatorAnimation(const ArkUIAnimatorOption* option)

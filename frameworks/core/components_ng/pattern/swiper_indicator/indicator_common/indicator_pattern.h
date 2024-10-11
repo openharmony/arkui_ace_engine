@@ -70,7 +70,7 @@ public:
     }
 
     void SetSwiperDigitalParameters(const SwiperDigitalParameters& swiperDigitalParameters);
-    bool GetDigitFrameSize(SizeF& frameSize) const override;
+    bool GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& frameSize) const override;
     bool GetDotCurrentOffset(OffsetF& offset, float indicatorWidth, float indicatorHeight) override;
 
     RefPtr<FrameNode> WeakUINode2RefFrameNode(WeakPtr<NG::UINode>& weakUINode) const

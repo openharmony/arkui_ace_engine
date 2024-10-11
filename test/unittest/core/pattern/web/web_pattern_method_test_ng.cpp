@@ -741,7 +741,7 @@ HWTEST_F(WebPatternMethodTestNg, OnCursorChange_006, TestSize.Level1)
     webPattern->isHoverExit_ = false;
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
-    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(0));
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillRepeatedly(Return(0));
     bool result = webPattern->OnCursorChange(type, info);
     EXPECT_TRUE(result);
 #endif
@@ -771,7 +771,7 @@ HWTEST_F(WebPatternMethodTestNg, OnCursorChange_007, TestSize.Level1)
     webPattern->isHoverExit_ = false;
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     auto mockMouseStyle = AceType::DynamicCast<MockMouseStyle>(mouseStyle);
-    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillOnce(Return(0));
+    EXPECT_CALL(*mockMouseStyle, GetPointerStyle(::testing::_, ::testing::_)).WillRepeatedly(Return(0));
     bool result = webPattern->OnCursorChange(type, info);
     EXPECT_TRUE(result);
 #endif

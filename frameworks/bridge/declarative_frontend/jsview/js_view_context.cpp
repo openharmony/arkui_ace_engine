@@ -745,7 +745,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
             keyframe.animationClosure();
             pipelineContext->FlushBuild();
             if (!pipelineContext->IsLayouting()) {
-                pipelineContext->FlushUITasks();
+                pipelineContext->FlushUITasks(true);
             } else {
                 TAG_LOGI(AceLogTag::ACE_ANIMATION, "isLayouting, maybe some layout keyframe animation not generated");
             }
@@ -753,6 +753,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
         AceTraceEnd();
     }
     pipelineContext->CloseImplicitAnimation();
+    pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
 }
 
 void JSViewContext::SetDynamicDimming(const JSCallbackInfo& info)
