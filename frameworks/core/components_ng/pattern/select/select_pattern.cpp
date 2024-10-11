@@ -832,6 +832,8 @@ void SelectPattern::SetOptionBgColor(const Color& color)
         CHECK_NULL_VOID(pattern);
         pattern->SetBgColor(color);
         pattern->SetIsBGColorSetByUser(true);
+        pattern->SetOptionBgColor(color);
+        pattern->SetIsOptionBgColorSetByUser(true);
     }
 }
 
@@ -989,6 +991,10 @@ void SelectPattern::ResetOptionProps()
         pattern->SetFontWeight(optionFont_.FontWeight.value_or(textTheme->GetTextStyle().GetFontWeight()));
         pattern->SetFontFamily(optionFont_.FontFamily.value_or(textTheme->GetTextStyle().GetFontFamilies()));
         pattern->SetFontColor(optionFont_.FontColor.value_or(selectTheme->GetMenuFontColor()));
+        pattern->SetIsBGColorSetByUser(false);
+        pattern->SetIsTextColorSetByUser(false);
+        pattern->SetIsOptionFontColorSetByUser(false);
+        pattern->SetIsOptionBgColorSetByUser(false);
     }
 }
 
@@ -1013,6 +1019,29 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
         lastSelected->SetBgColor(newSelected->GetBgColor());
         lastSelected->SetSelected(false);
         lastSelected->UpdateNextNodeDivider(true);
+        lastSelected->SetIsBGColorSetByUser(false);
+        lastSelected->SetIsTextColorSetByUser(false);
+        lastSelected->SetIsOptionFontColorSetByUser(false);
+        lastSelected->SetIsOptionBgColorSetByUser(false);
+
+        if (selectedBgColor_.has_value()) {
+            newSelected->SetIsBGColorSetByUser(true);
+            newSelected->SetBgColor(selectedBgColor_.value());
+        }
+        if (selectedFont_.FontColor.has_value()) {
+            newSelected->SetIsTextColorSetByUser(true);
+            newSelected->SetSelectFontColor(selectedFont_.FontColor.value());
+        }
+        if (optionFont_.FontColor.has_value()) {
+            lastSelected->SetIsOptionFontColorSetByUser(true);
+            lastSelected->SetOptionFontColor(optionFont_.FontColor.value());
+            newSelected->SetIsOptionFontColorSetByUser(false);
+        }
+        if (optionBgColor_.has_value()) {
+            lastSelected->SetIsOptionBgColorSetByUser(true);
+            lastSelected->SetOptionBgColor(optionBgColor_.value());
+            newSelected->SetIsOptionBgColorSetByUser(false);
+        }
         if (selected_ != 0) {
             auto lastSelectedNode = lastSelected->GetHost();
             CHECK_NULL_VOID(lastSelectedNode);
