@@ -30,7 +30,8 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace Converter {
 template<>
-LoadImageFailEvent Convert(const Ark_ImageError& info) {
+LoadImageFailEvent Convert(const Ark_ImageError& info)
+{
     auto width = Convert<float>(info.componentWidth);
     auto height = Convert<float>(info.componentHeight);
     auto error = Convert<std::string>(info.message);
@@ -46,7 +47,7 @@ namespace  {
     const auto ATTRIBUTE_AUTO_RESIZE_NAME = "autoResize";
     const auto ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE = "false";
 
-     struct EventsTracker {
+    struct EventsTracker {
         static inline GENERATED_ArkUIImageEventsReceiver getImageEventsReceiver {};
 
         static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
@@ -57,11 +58,13 @@ namespace  {
     }; // EventsTracker
 } // namespace
 
-class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier, &GENERATED_ArkUINodeModifiers::getImageModifier, GENERATED_ARKUI_IMAGE> {
+class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier,
+    &GENERATED_ArkUINodeModifiers::getImageModifier,
+    GENERATED_ARKUI_IMAGE> {
 public:
     static void SetUpTestCase()
     {
-        ModifierTestBase::SetUpTestCase();    
+        ModifierTestBase::SetUpTestCase();
         for (auto&& res : Fixtures::resourceInitTable) {
             AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
             AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
@@ -98,22 +101,28 @@ HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
     };
 
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)),
+            std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)), OPACITY_COLOR);
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor,
+            Ark_String>(std::get<1>(value)), OPACITY_COLOR);
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Number>(std::get<1>(value)),
+            std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Resource>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Resource>(std::get<1>(value)),
+            std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)),
+            std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)), ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE);
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)),
+            ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE);
     }
 }
 

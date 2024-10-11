@@ -22,7 +22,8 @@
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-Ark_ImageError ArkValue(const LoadImageFailEvent& event) {
+Ark_ImageError ArkValue(const LoadImageFailEvent& event)
+{
     Ark_ImageError arkEvent;
     arkEvent.componentWidth = Converter::ArkValue<Ark_Number>(event.GetComponentWidth());
     arkEvent.componentHeight = Converter::ArkValue<Ark_Number>(event.GetComponentHeight());
