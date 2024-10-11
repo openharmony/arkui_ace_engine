@@ -358,4 +358,15 @@ void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src
         default: dst = static_cast<Ark_TextDeleteDirection>(-1);
     }
 }
+
+void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src)
+{
+    switch (src) {
+        case SliderModel::SliderChangeMode::BEGIN: dst = ARK_SLIDER_CHANGE_MODE_BEGIN; break;
+        case SliderModel::SliderChangeMode::MOVING: dst = ARK_SLIDER_CHANGE_MODE_MOVING; break;
+        case SliderModel::SliderChangeMode::END: dst = ARK_SLIDER_CHANGE_MODE_END; break;
+        case SliderModel::SliderChangeMode::CLICK: dst = ARK_SLIDER_CHANGE_MODE_CLICK; break;
+        default: dst = static_cast<Ark_SliderChangeMode>(-1);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

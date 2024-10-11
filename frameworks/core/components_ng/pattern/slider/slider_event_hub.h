@@ -71,6 +71,11 @@ public:
         onChangeEvent_ = std::move(onChangeEvent);
     }
 
+    std::function<void(float, int32_t)>&& GetOnChange()
+    {
+        return std::move(changeEvent_);
+    }
+
 private:
     bool inAction_ = false;
     SliderOnChangeEvent changeEvent_;
