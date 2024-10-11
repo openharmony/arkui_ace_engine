@@ -568,7 +568,7 @@ private:
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
 
-    void StartShowTabBar(int32_t delay);
+    void StartShowTabBar(int32_t delay = 0);
     void StopShowTabBar();
     void InitTabBarProperty();
     void UpdateTabBarHiddenRatio(float ratio);
