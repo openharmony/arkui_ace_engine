@@ -700,6 +700,7 @@ public:
 
     bool IsFreeMultiWindow() const override
     {
+        CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
 
