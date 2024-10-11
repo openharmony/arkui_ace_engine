@@ -625,7 +625,6 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, co
     CHECK_NULL_VOID(callback);
     callback(false, 0.0);
     callback(true, ratio[0]);
-    callback(false, ratio[1]);
 }
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
