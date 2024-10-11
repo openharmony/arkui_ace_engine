@@ -2203,32 +2203,55 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
+bool MenuLayoutAlgorithm::SkipUpdateTargetNodeSize(
+    const RefPtr<FrameNode>& targetNode, const RefPtr<MenuPattern>& menuPattern)
+{
+    CHECK_NULL_RETURN(menuPattern, false);
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, false);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+
+    auto isMenuHide = menuWrapperPattern->IsHide();
+    auto isTargetEmpty = !targetNode && menuPattern->GetTargetSize().IsPositive();
+    if (isMenuHide || isTargetEmpty) {
+        TAG_LOGI(AceLogTag::ACE_MENU,
+            "targetNode empty: %{public}d, menu hidden: %{public}d, update targetNode to last size and position",
+            isMenuHide, isTargetEmpty);
+        targetSize_ = menuPattern->GetTargetSize();
+        targetOffset_ = menuPattern->GetTargetOffset();
+        return true;
+    }
+    return false;
+}
+
 void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     const LayoutWrapper* layoutWrapper, bool isContextMenu, const RefPtr<MenuPattern>& menuPattern)
 {
     CHECK_NULL_VOID(layoutWrapper && menuPattern);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
-    CHECK_NULL_VOID(targetNode);
-    dumpInfo_.targetNode = targetNode->GetTag();
-    auto geometryNode = targetNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(props);
-    bool expandDisplay = menuPattern->GetMenuExpandDisplay();
-    if (props->GetIsRectInTargetValue(false)) {
-        targetSize_ = props->GetTargetSizeValue(SizeF());
-        targetOffset_ = props->GetMenuOffsetValue(OffsetF());
-    } else {
-        targetSize_ = targetNode->GetPaintRectWithTransform().GetSize();
-        targetOffset_ = targetNode->GetPaintRectOffset();
+    if (!SkipUpdateTargetNodeSize(targetNode, menuPattern)) {
+        CHECK_NULL_VOID(targetNode);
+        dumpInfo_.targetNode = targetNode->GetTag();
+        auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(props);
+        if (props->GetIsRectInTargetValue(false)) {
+            targetSize_ = props->GetTargetSizeValue(SizeF());
+            targetOffset_ = props->GetMenuOffsetValue(OffsetF());
+        } else {
+            targetSize_ = targetNode->GetPaintRectWithTransform().GetSize();
+            targetOffset_ = targetNode->GetPaintRectOffset();
+        }
     }
     dumpInfo_.targetSize = targetSize_;
     dumpInfo_.targetOffset = targetOffset_;
     menuPattern->SetTargetSize(targetSize_);
+    menuPattern->SetTargetOffset(targetOffset_);
     TAG_LOGI(AceLogTag::ACE_MENU, "targetNode: %{public}s, targetSize: %{public}s, targetOffset: %{public}s",
-        targetNode->GetTag().c_str(), targetSize_.ToString().c_str(), targetOffset_.ToString().c_str());
+        targetTag_.c_str(), targetSize_.ToString().c_str(), targetOffset_.ToString().c_str());
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
+    bool expandDisplay = menuPattern->GetMenuExpandDisplay();
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         expandDisplay = true;
     }
