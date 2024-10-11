@@ -181,6 +181,15 @@ public:
         isControlButtonSizeCustomed_ = isControlButtonSizeCustomed;
     }
 
+    void SetImageInfo(ImageSourceInfo imageInfo)
+    {
+        imageInfo_ = imageInfo;
+    }
+
+    void UpdateSideBarVisibility(VisibleType type);
+
+    void UpdateControlButtonIcon();
+
 private:
     void WindowFocus(bool isFocus);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -192,7 +201,6 @@ private:
     void DoAnimation();
     void CreateAnimation();
     void FireChangeEvent(bool isShow);
-    void UpdateControlButtonIcon();
     void CreateAndMountNodes();
     void CreateAndMountDivider(const RefPtr<NG::FrameNode>& parentNode);
     void CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode);
@@ -231,6 +239,7 @@ private:
     void SetAccessibilityEvent();
     void UpdateControlButtonInfo();
     void UpdateControlButtonImageSize();
+    void InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme, const RefPtr<FrameNode>& imgNode);
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;
