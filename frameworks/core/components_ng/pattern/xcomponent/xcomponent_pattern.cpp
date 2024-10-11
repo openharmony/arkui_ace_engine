@@ -361,6 +361,7 @@ void XComponentPattern::OnAttachToFrameNode()
 
 void XComponentPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     // if surface has been reset by pip, do not set backgourndColor
     if (handlingSurfaceRenderContext_ != renderContextForSurface_) {
         return;
