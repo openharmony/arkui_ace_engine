@@ -757,7 +757,7 @@ ArkUINativeModuleValue TextBridge::SetTextIndent(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension indent;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, indent) || indent.IsNegative()) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, indent) || indent.IsNegative()) {
         indent.Reset();
     }
     
