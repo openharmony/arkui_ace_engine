@@ -42,7 +42,10 @@ public:
  */
 HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
 {
-    modifier_->setObjectFit(node_, Ark_ImageFit::ARK_IMAGE_FIT_SCALE_DOWN);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    modifier_->setObjectFit(frameNode, Ark_ImageFit::ARK_IMAGE_FIT_SCALE_DOWN);
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ("ImageFit.FitHeight", GetAttrValue<std::string>(json, "objectFit"));
@@ -55,18 +58,46 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, ObjectFit_SetDefaultedFitType, testing::ext::TestSize.Level1)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
     std::string key = "objectFit";
     std::string defaultedFit = "ImageFit.Cover";
 
-    modifier_->setObjectFit(node_, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::FILL) - 1));
+    modifier_->setObjectFit(frameNode, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::FILL) - 1));
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
 
-    modifier_->setObjectFit(node_, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::SCALE_DOWN) + 1));
+    modifier_->setObjectFit(frameNode, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::SCALE_DOWN) + 1));
     json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
+}
+
+/**
+ * @tc.name: Ctor_InitWithUrl
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, Ctor_InitWithUrl, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::string urlString = "https://www.example.com/xxx.png";
+    Union_CustomObject_Ark_ResourceStr_CustomObject url = {
+        .selector = 1,
+        .value1 = {
+            .selector = 0,
+            .value0 = {.chars = urlString.c_str(), .length = urlString.size()}
+        }
+    };
+    modifier_->setImageOptions0(node_, &url);
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
 }
 
 } // namespace OHOS::Ace::NG
