@@ -24,29 +24,21 @@
 #include "frameworks/core/components_ng/pattern/flex/flex_model_ng.h"
 
 namespace OHOS::Ace {
-
-std::unique_ptr<FlexModel> FlexModel::instance_ = nullptr;
-std::mutex FlexModel::mutex_;
-
 FlexModel* FlexModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::FlexModelNG());
+    static NG::FlexModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::FlexModelNG());
-            } else {
-                instance_.reset(new Framework::FlexModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::FlexModelNG instance;
+        return &instance;
+    } else {
+        static Framework::FlexModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 

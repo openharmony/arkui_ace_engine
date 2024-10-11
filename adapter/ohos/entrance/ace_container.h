@@ -383,6 +383,14 @@ public:
         return windowScale_;
     }
 
+    double GetWindowDensity() const
+    {
+        if (!uiWindow_) {
+            return 0.0;
+        }
+        return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
+    }
+
     int32_t GetParentId() const
     {
         return parentId_;
@@ -539,6 +547,8 @@ public:
     sptr<IRemoteObject> GetToken();
     void SetParentToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetParentToken();
+    uint32_t GetParentWindowType() const;
+    uint32_t GetWindowType() const;
 
     std::string GetWebHapPath() const override
     {
@@ -683,6 +693,14 @@ public:
     const std::vector<std::string>& GetUieParams() const
     {
         return paramUie_;
+    }
+
+    void UpdateResourceOrientation(int32_t orientation);
+    void UpdateResourceDensity(double density);
+
+    bool IsFreeMultiWindow() const override
+    {
+        return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
 
 private:

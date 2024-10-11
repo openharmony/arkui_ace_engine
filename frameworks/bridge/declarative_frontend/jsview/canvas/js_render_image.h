@@ -24,16 +24,6 @@
 #include "frameworks/core/components_ng/image_provider/image_loading_context.h"
 
 namespace OHOS::Ace::Framework {
-class JSCanvasRenderer;
-
-#define DELETE_RETURN_NULL(var) \
-    do {                        \
-        if ((var)) {             \
-            delete var;         \
-            var = nullptr;      \
-        }                       \
-        return nullptr;         \
-    } while (0)                 \
 
 void BindNativeFunction(napi_env env, napi_value object, const char* name, napi_callback func);
 void* GetNapiCallbackInfoAndThis(napi_env env, napi_callback_info info);
@@ -131,19 +121,6 @@ public:
         return bindingSize_;
     }
 
-    void AddNativeRef()
-    {
-        ++nativeRefCount_;
-    }
-
-    void Release()
-    {
-        --nativeRefCount_;
-        if (nativeRefCount_ == 0) {
-            delete this;
-        }
-    }
-
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderImage);
 private:
     napi_value OnClose();
@@ -181,7 +158,6 @@ private:
     int32_t instanceId_ = 0;
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     size_t bindingSize_ = 0;
-    uint32_t nativeRefCount_ = 0;
 };
 
 } // namespace OHOS::Ace::Framework

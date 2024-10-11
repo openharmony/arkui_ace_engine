@@ -947,19 +947,11 @@ void JSTextField::ParseBorderRadius(const JSRef<JSVal>& args)
     if (ParseJsDimensionVp(args, borderRadius)) {
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
-        auto textFieldTheme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(textFieldTheme);
-        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
-        NG::BorderRadiusProperty defaultBorderRadius {
-            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
-            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
-        };
-
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
-        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
-        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
-        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
+        CalcDimension topLeft;
+        CalcDimension topRight;
+        CalcDimension bottomLeft;
+        CalcDimension bottomRight;
         if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
             ViewAbstractModel::GetInstance()->SetBorderRadius(
                 JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
@@ -1527,6 +1519,8 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
+
+    // set style
     std::string styleStr;
     CleanNodeStyle cleanNodeStyle;
     auto styleProp = param->GetProperty("style");
@@ -1537,17 +1531,14 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetCleanNodeStyle(cleanNodeStyle);
     TextFieldModel::GetInstance()->SetIsShowCancelButton(true);
+
+    // set default icon
     auto iconJsVal = param->GetProperty("icon");
     if (iconJsVal->IsUndefined() || iconJsVal->IsNull() || !iconJsVal->IsObject()) {
-        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
-            TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
-        } else {
-            TextFieldModel::GetInstance()->SetCancelIconColor(Color());
-        }
-        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
-        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
+        SetCancelDefaultIcon();
         return;
     }
+
     auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
     // set icon size
     CalcDimension iconSize;
@@ -1561,6 +1552,19 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     SetCancelIconColorAndIconSrc(iconParam);
+}
+
+void JSTextField::SetCancelDefaultIcon()
+{
+    auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModel::GetInstance()->SetCancelIconColor(Color());
+    }
+    TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
+    TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
 }
 
 void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
@@ -1577,6 +1581,7 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
     }
     GetJsMediaBundleInfo(iconSrcProp, bundleName, moduleName);
     TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc, bundleName, moduleName);
+    TextFieldModel::GetInstance()->SetCancelButtonSymbol(false);
     // set icon color
     Color iconColor;
     auto iconColorProp = iconParam->GetProperty("color");

@@ -1458,6 +1458,8 @@ struct CJUIPluginModifier {
 struct CJUINavDestinationModifier {
     void (*setHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle);
     void (*resetHideTitleBar)(ArkUINodeHandle node);
+    void (*setNavDestinationHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide);
+    void (*resetNavDestinationHideToolBar)(ArkUINodeHandle node);
     void (*setNavDestinationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
     void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);

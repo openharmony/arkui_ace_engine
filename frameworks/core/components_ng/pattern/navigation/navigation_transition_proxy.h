@@ -22,12 +22,19 @@
 #include "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h"
 namespace OHOS::Ace::NG {
 
+namespace {
+std::atomic<uint64_t> g_proxyNextAutoGenId = 0;
+}
+
 using namespace Framework;
 class NavigationTransitionProxy : public AceType {
     DECLARE_ACE_TYPE(NavigationTransitionProxy, AceType);
 
 public:
-    NavigationTransitionProxy() = default;
+    NavigationTransitionProxy()
+    {
+        proxyId_ = g_proxyNextAutoGenId.fetch_add(1);
+    }
     ~NavigationTransitionProxy() = default;
 
     RefPtr<NG::NavDestinationContext> GetPreDestinationContext() const
@@ -213,7 +220,13 @@ public:
         AnimationUtils::AddInteractiveAnimation(interactiveAnimation_, callback);
     }
 
+    uint64_t GetProxyId() const
+    {
+        return proxyId_;
+    }
+
 private:
+    uint64_t proxyId_ = 0;
     RefPtr<NavDestinationContext> preContext_;
     RefPtr<NavDestinationContext> topContext_;
     std::function<void()> finishCallback_; // finish transition callback to continue animation

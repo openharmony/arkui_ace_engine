@@ -214,7 +214,6 @@ void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<
     container->MarkModifyDone();
 }
 
-
 void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
 {
     CHECK_NULL_VOID(titleBarNode);
@@ -673,7 +672,7 @@ void NavigationModelNG::SetSubtitle(const std::string& subtitle)
     ParseCommonTitle(true, false, subtitle, "", true);
 }
 
-void NavigationModelNG::SetHideTitleBar(bool hideTitleBar)
+void NavigationModelNG::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -683,6 +682,7 @@ void NavigationModelNG::SetHideTitleBar(bool hideTitleBar)
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideTitleBar(hideTitleBar);
+    navBarLayoutProperty->UpdateIsAnimatedTitleBar(animated);
 }
 
 void NavigationModelNG::SetHideNavBar(bool hideNavBar)
@@ -736,7 +736,7 @@ void NavigationModelNG::SetHideBackButton(bool hideBackButton)
     navBarLayoutProperty->UpdateHideBackButton(hideBackButton);
 }
 
-void NavigationModelNG::SetHideToolBar(bool hideToolBar)
+void NavigationModelNG::SetHideToolBar(bool hideToolBar, bool animated)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -746,6 +746,7 @@ void NavigationModelNG::SetHideToolBar(bool hideToolBar)
     auto navBarLayoutProperty = navBarNode->GetLayoutPropertyPtr<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideToolBar(hideToolBar);
+    navBarLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
 void NavigationModelNG::SetCustomToolBar(const RefPtr<AceType>& customNode)

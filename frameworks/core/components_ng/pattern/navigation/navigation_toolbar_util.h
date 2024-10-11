@@ -35,7 +35,8 @@ public:
         std::vector<NG::BarItem>&& toolBarItems, bool enabled, const FieldProperty& fieldProperty);
     static void SetCustomToolBar(const RefPtr<NavDestinationNodeBase>& nodeBase, const RefPtr<AceType>& customNode);
     static void SetToolbarOptions(const RefPtr<NavDestinationNodeBase>& nodeBase, NavigationToolbarOptions&& opt);
-    static void MountToolBar(const RefPtr<NavDestinationNodeBase>& nodeBase);
+    static void MountToolBar(
+        const RefPtr<NavDestinationNodeBase>& nodeBase, bool& needRunToolBarAnimation);
 };
 
 } // namespace OHOS::Ace::NG

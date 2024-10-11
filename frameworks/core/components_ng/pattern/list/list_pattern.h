@@ -177,6 +177,10 @@ public:
         return positionController_;
     }
 
+    int32_t ProcessAreaVertical(double& x, double& y, Rect& groupRect, int32_t& index,
+        RefPtr<ListItemGroupPattern> groupItemPattern) const;
+    int32_t ProcessAreaHorizontal(double& x, double& y, Rect& groupRect, int32_t& index,
+        RefPtr<ListItemGroupPattern> groupItemPattern) const;
     void TriggerModifyDone();
 
     float GetTotalHeight() const override;
@@ -209,9 +213,8 @@ public:
         return lanes_;
     }
 
-    void UpdatePosMapStart(float delta);
-    void UpdatePosMapEnd();
     void CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition);
+    void UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos);
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
@@ -337,6 +340,7 @@ public:
         }
         return canOverScroll;
     }
+    void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 private:
 
     bool IsNeedInitClickEventRecorder() const override

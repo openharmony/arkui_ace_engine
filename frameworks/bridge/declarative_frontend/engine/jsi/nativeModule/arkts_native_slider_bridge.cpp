@@ -667,42 +667,17 @@ static void GetValue(SliderOptions& options)
     }
 }
 
-static void ParseOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, SliderOptions& options)
+static void ParseStyleOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, SliderOptions& options)
 {
-    static const double valueMin = -1000000.0f;
-    options.value = valueMin;
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
-    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
-    Local<JSValueRef> minArg = runtimeCallInfo->GetCallArgRef(2);
-    Local<JSValueRef> maxArg = runtimeCallInfo->GetCallArgRef(3);
-    Local<JSValueRef> stepArg = runtimeCallInfo->GetCallArgRef(4);
-    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(5);
-    Local<JSValueRef> directionArg = runtimeCallInfo->GetCallArgRef(6);
-    Local<JSValueRef> reverseArg = runtimeCallInfo->GetCallArgRef(7);
-    if (!valueArg.IsNull() && !valueArg->IsUndefined() && valueArg->IsNumber()) {
-        options.value = valueArg->ToNumber(vm)->Value();
-    }
-    if (!minArg.IsNull() && !minArg->IsUndefined() && minArg->IsNumber()) {
-        options.min = minArg->ToNumber(vm)->Value();
-    }
-    if (!maxArg.IsNull() && !maxArg->IsUndefined() && maxArg->IsNumber()) {
-        options.max = maxArg->ToNumber(vm)->Value();
-    }
-    if (!stepArg.IsNull() && !stepArg->IsUndefined() && stepArg->IsNumber()) {
-        options.step = stepArg->ToNumber(vm)->Value();
-    }
+    Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(5);     // 5: parameter index
+    Local<JSValueRef> directionArg = runtimeCallInfo->GetCallArgRef(6); // 6: parameter index
+    Local<JSValueRef> reverseArg = runtimeCallInfo->GetCallArgRef(7);   // 7: parameter index
+
     if (!reverseArg.IsNull() && !reverseArg->IsUndefined() && reverseArg->IsBoolean()) {
         options.reverse = reverseArg->ToBoolean(vm)->Value();
     }
-    if (GreatOrEqual(options.min, options.max)) {
-        options.min = SLIDER_MIN;
-        options.max = SLIDER_MAX;
-    }
-
-    GetStep(options);
-    GetValue(options);
-
     if (!styleArg.IsNull() && !styleArg->IsUndefined() && styleArg->IsNumber()) {
         auto tempStyle = styleArg->Int32Value(vm);
         if (tempStyle >= static_cast<int32_t>(SliderMode::OUTSET) &&
@@ -717,6 +692,39 @@ static void ParseOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, SliderOptions& o
             options.direction = tempDirection;
         }
     }
+}
+
+static void ParseOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, SliderOptions& options)
+{
+    static const double valueMin = -1000000.0f;
+    options.value = valueMin;
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1); // 1: parameter index
+    Local<JSValueRef> minArg = runtimeCallInfo->GetCallArgRef(2);   // 2: parameter index
+    Local<JSValueRef> maxArg = runtimeCallInfo->GetCallArgRef(3);   // 3: parameter index
+    Local<JSValueRef> stepArg = runtimeCallInfo->GetCallArgRef(4);  // 4: parameter index
+    if (!valueArg.IsNull() && !valueArg->IsUndefined() && valueArg->IsNumber()) {
+        options.value = valueArg->ToNumber(vm)->Value();
+    }
+    if (!minArg.IsNull() && !minArg->IsUndefined() && minArg->IsNumber()) {
+        options.min = minArg->ToNumber(vm)->Value();
+    }
+    if (!maxArg.IsNull() && !maxArg->IsUndefined() && maxArg->IsNumber()) {
+        options.max = maxArg->ToNumber(vm)->Value();
+    }
+    if (!stepArg.IsNull() && !stepArg->IsUndefined() && stepArg->IsNumber()) {
+        options.step = stepArg->ToNumber(vm)->Value();
+    }
+
+    if (GreatOrEqual(options.min, options.max)) {
+        options.min = SLIDER_MIN;
+        options.max = SLIDER_MAX;
+    }
+
+    GetStep(options);
+    GetValue(options);
+    ParseStyleOptions(runtimeCallInfo, options);
 }
 
 ArkUINativeModuleValue SliderBridge::SetSliderOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)

@@ -22,6 +22,7 @@
 #define protected public
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

@@ -22,6 +22,7 @@
 #include "core/components_ng/render/image_painter.h"
 #include "core/image/image_file_cache.h"
 #include "core/image/image_loader.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
@@ -351,7 +352,7 @@ void ImageLoadingContext::OnMakeCanvasImage()
     // step4: [MakeCanvasImage] according to [targetSize]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->SetImageDfxConfig(imageDfxConfig_);
-    imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
+    imageObj_->MakeCanvasImage(WeakClaim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
 }
 
 void ImageLoadingContext::ResizableCalcDstSize()
@@ -397,8 +398,7 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg)
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
     CHECK_NULL_VOID(measureFinish_);
-    TAG_LOGW(AceLogTag::ACE_IMAGE,
-        "Image LoadFail, src = %{private}s, reason: %{public}s, [%{public}d]-[%{public}lld]",
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, src = %{private}s, reason: %{public}s, [%{public}d]-[%{public}lld]",
         src_.ToString().c_str(), errorMsg.c_str(), imageDfxConfig_.nodeId_,
         static_cast<long long>(imageDfxConfig_.accessibilityId_));
     if (Downloadable()) {

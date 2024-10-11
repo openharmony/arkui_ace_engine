@@ -536,6 +536,30 @@ RefPtr<FrameNode> UINode::GetFocusParent() const
     return nullptr;
 }
 
+RefPtr<FrameNode> UINode::GetFocusParentWithBoundary() const
+{
+    auto parentUi = GetParent();
+    while (parentUi) {
+        if (parentUi->GetTag() == V2::SCREEN_ETS_TAG) {
+            return nullptr;
+        }
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUi);
+        if (!parentFrame) {
+            parentUi = parentUi->GetParent();
+            continue;
+        }
+        auto type = parentFrame->GetFocusType();
+        if (type == FocusType::SCOPE) {
+            return parentFrame;
+        }
+        if (type == FocusType::NODE) {
+            return nullptr;
+        }
+        parentUi = parentUi->GetParent();
+    }
+    return nullptr;
+}
+
 RefPtr<FocusHub> UINode::GetFirstFocusHubChild() const
 {
     const auto* frameNode = AceType::DynamicCast<FrameNode>(this);
@@ -913,7 +937,7 @@ void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current
                 array->PutRef(std::move(child));
             }
         }
-        if (!disappearingChildren_.size()) {
+        if (!disappearingChildren_.empty()) {
             for (const auto& [item, index, branch] : disappearingChildren_) {
                 auto child = JsonUtil::Create();
                 item->DumpSimplifyTree(depth + 1, child);
@@ -1593,8 +1617,13 @@ bool UINode::GetIsRootBuilderNode() const
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
 {
+    auto greatOrEqualApi13 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
     for (auto const& child : children) {
-        if (!child->IsDisappearing() && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
+        bool needByTransition = child->IsDisappearing();
+        if (greatOrEqualApi13) {
+            needByTransition = isEntry && child->IsDisappearing() && child->GetInspectorIdValue("") != "";
+        }
+        if (!needByTransition && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
             CollectRemovedChild(child, removedElmtId);
         }
     }

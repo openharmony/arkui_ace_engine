@@ -222,7 +222,7 @@ export struct PopupComponent {
   @State buttonHeight: number = 0;
   @State messageMaxWeight: number | undefined = 0;
   @State beforeScreenStatus: boolean | undefined = undefined;
-  @State screenChanged: boolean = false;
+  @State currentScreenStatus: boolean = true;
   @State applySizeOptions: ConstraintSizeOptions | undefined = undefined;
   @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
@@ -459,13 +459,7 @@ export struct PopupComponent {
 
   aboutToAppear() {
     this.listener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
-      if (mediaQueryResult.matches !== this.beforeScreenStatus) {
-        this.applySizeOptions = this.getApplyMaxSize();
-        this.beforeScreenStatus = mediaQueryResult.matches;
-        this.screenChanged = true;
-      } else {
-        this.screenChanged = false;
-      }
+      this.currentScreenStatus = mediaQueryResult.matches
     })
   }
 
@@ -475,7 +469,9 @@ export struct PopupComponent {
 
   getScrollMaxHeight(): number | undefined {
     let scrollMaxHeight: number | undefined = undefined;
-    if (this.screenChanged) {
+    if (this.currentScreenStatus !== this.beforeScreenStatus) {
+      this.applySizeOptions = this.getApplyMaxSize();
+      this.beforeScreenStatus = this.currentScreenStatus
       return scrollMaxHeight;
     }
     scrollMaxHeight = this.applyHeight

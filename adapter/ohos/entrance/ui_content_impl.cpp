@@ -184,16 +184,16 @@ void AddResConfigInfo(
     aceResCfg.SetAppHasDarkRes(resConfig->GetAppDarkRes());
     auto preferredLocaleInfo = resConfig->GetPreferredLocaleInfo();
     if (preferredLocaleInfo != nullptr) {
-        std::string preferredlanguage = preferredLocaleInfo->getLanguage();
+        std::string preferredLanguage = preferredLocaleInfo->getLanguage();
         std::string script = preferredLocaleInfo->getScript();
         std::string country = preferredLocaleInfo->getCountry();
         if (!script.empty()) {
-            preferredlanguage += "-" + script;
+            preferredLanguage += "-" + script;
         }
         if (!country.empty()) {
-            preferredlanguage += "-" + country;
+            preferredLanguage += "-" + country;
         }
-        aceResCfg.SetPreferredLanguage(preferredlanguage);
+        aceResCfg.SetPreferredLanguage(preferredLanguage);
     }
 }
 
@@ -314,7 +314,6 @@ void AddAlarmLogFunc()
 
     OHOS::Rosen::RSTransactionData::AddAlarmLog(logFunc);
 }
-
 
 void DeduplicateAvoidAreas(const RefPtr<NG::PipelineContext>& context,
     std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
@@ -467,9 +466,10 @@ private:
         auto context = container->GetPipelineContext();
         CHECK_NULL_RETURN(context, false);
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+        CHECK_NULL_RETURN(pipeline, false);
         bool isRotate = false;
         auto displayInfo = container->GetDisplayInfo();
-        uint32_t lastKeyboardHeight = pipeline && pipeline->GetSafeAreaManager() ?
+        uint32_t lastKeyboardHeight = pipeline->GetSafeAreaManager() ?
             pipeline->GetSafeAreaManager()->GetKeyboardInset().Length() : 0;
         if (displayInfo) {
             auto dmRotation = static_cast<int32_t>(displayInfo->GetRotation());
@@ -478,16 +478,22 @@ private:
         } else {
             lastRotation = -1;
         }
-        // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
-        if (pipeline && isRotate && !NearZero(lastKeyboardHeight) && !NearZero(keyboardRect.Height())) {
-            auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
-            if (textFieldManager) {
-                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
-                    "later avoid %{public}s %{public}f %{public}f",
-                    lastRotation, keyboardRect.ToString().c_str(), positionY, height);
-                textFieldManager->SetLaterAvoidArgs(keyboardRect, positionY, height);
+        auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        CHECK_NULL_RETURN(textFieldManager, false);
+        if (textFieldManager->GetLaterAvoid()) {
+            auto laterRect = textFieldManager->GetLaterAvoidKeyboardRect();
+            if (NearEqual(laterRect.Height(), keyboardRect.Height())) {
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "will trigger avoid later, ignore this notify");
                 return true;
             }
+        }
+        // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
+        if (isRotate && !NearZero(lastKeyboardHeight) && !NearZero(keyboardRect.Height())) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
+                "later avoid %{public}s %{public}f %{public}f",
+                lastRotation, keyboardRect.ToString().c_str(), positionY, height);
+            textFieldManager->SetLaterAvoidArgs(keyboardRect, positionY, height);
+            return true;
         }
         return false;
     }
@@ -593,7 +599,11 @@ public:
         auto displayAvailableRect = ConvertDMRect2Rect(availableArea);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, displayAvailableRect] { pipeline->UpdateDisplayAvailableRect(displayAvailableRect); },
+            [pipeline, displayAvailableRect] {
+                pipeline->UpdateDisplayAvailableRect(displayAvailableRect);
+                TAG_LOGI(AceLogTag::ACE_WINDOW, "UpdateDisplayAvailableRect : %{public}s",
+                    displayAvailableRect.ToString().c_str());
+            },
             TaskExecutor::TaskType::UI, "ArkUIUpdateDisplayAvailableRect");
     }
 
@@ -834,7 +844,7 @@ UIContentErrorCode UIContentImpl::InitializeInner(
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, errorCode);
     auto rootNode = pipelineContext->GetRootElement();
-    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode);
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
 #endif
     return errorCode;
 }
@@ -950,7 +960,7 @@ void UIContentImpl::Initialize(
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto rootNode = pipelineContext->GetRootElement();
-    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode);
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
 #endif
 }
 
@@ -2069,11 +2079,11 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     auto defaultDisplay = DMManager.GetDefaultDisplay();
     if (pipeline && defaultDisplay) {
         Rosen::DMError ret = defaultDisplay->GetAvailableArea(availableArea);
-        TAG_LOGI(AceLogTag::ACE_WINDOW,
-            "DisplayAvailableRect info: %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
-            availableArea.posX_, availableArea.width_, availableArea.height_);
         if (ret == Rosen::DMError::DM_OK) {
             pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
+            TAG_LOGI(AceLogTag::ACE_WINDOW,
+                "InitializeDisplayAvailableRect : %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
+                availableArea.posY_, availableArea.width_, availableArea.height_);
         }
     }
 }
@@ -2438,8 +2448,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    PerfMonitor::GetPerfMonitor()->RecordWindowRectResize(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason),
-                                                          bundleName_);
+    if (SystemProperties::GetWindowRectResizeEnabled()) {
+        PerfMonitor::GetPerfMonitor()->RecordWindowRectResize(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason),
+            bundleName_);
+    }
     UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction, avoidAreas);
 }
 
@@ -2459,8 +2471,10 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     if (container->IsSubContainer()) {
-        SubwindowManager::GetInstance()->SetRect(NG::RectF(config.Left(), config.Top(),
-            config.Width(), config.Height()), instanceId_);
+        auto rect = NG::RectF(config.Left(), config.Top(), config.Width(), config.Height());
+        SubwindowManager::GetInstance()->SetRect(rect, instanceId_);
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "UpdateViewportConfig for subContainer: %{public}s",
+            rect.ToString().c_str());
     }
     // The density of sub windows related to dialog needs to be consistent with the main window.
     auto modifyConfig = config;
@@ -2478,10 +2492,18 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SetViewportMetrics(aceView, modifyConfig); // update density into pipeline
     };
+    auto updateDeviceOrientationTask = [container, modifyConfig, reason]() {
+        if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
+            container->UpdateResourceOrientation(modifyConfig.Orientation());
+        }
+    };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         updateDensityTask(); // ensure density has been updated before load first page
+        updateDeviceOrientationTask();
     } else {
         taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
+        taskExecutor->PostTask(
+            std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI, "ArkUIDeviceOrientation");
     }
     RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
     auto pipelineContext = container->GetPipelineContext();
@@ -2511,7 +2533,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             UpdateSafeArea(pipelineContext, updatingInsets, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect to : %{public}s",
+            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(
@@ -2752,6 +2774,13 @@ void UIContentImpl::NotifyRotationAnimationEnd()
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    std::string currentPid = std::to_string(getpid());
+    for (auto param : params) {
+        if (param == currentPid) {
+            LOGE("DumpInfo pid has appeared");
+            return;
+        }
+    }
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();

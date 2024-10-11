@@ -166,6 +166,7 @@ public:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpTextStyleInfo();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
     void DumpParagraphsInfo();
@@ -723,6 +724,9 @@ public:
     {
         return true;
     }
+
+    virtual Color GetUrlSpanColor();
+
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -861,6 +865,7 @@ protected:
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     bool ShowShadow(const PointF& textOffset, const Color& color);
+    bool hasUrlSpan_ = false;
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);

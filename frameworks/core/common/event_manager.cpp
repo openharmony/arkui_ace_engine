@@ -162,10 +162,11 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
     }
     std::string resultInfo = std::string("fingerId: ").append(std::to_string(touchPoint.id));
     for (const auto& item : touchTestResultInfo) {
-        resultInfo.append("{ ")
-            .append("tag: ")
-            .append(item.second.tag)
-            .append(", frameRect: ")
+        resultInfo.append("{ ").append("tag: ").append(item.second.tag);
+#ifndef IS_RELEASE_VERSION
+        resultInfo.append(", inspectorId: ").append(item.second.inspectorId);
+#endif
+        resultInfo.append(", frameRect: ")
             .append(item.second.frameRect)
             .append(", depth: ")
             .append(std::to_string(item.second.depth))
@@ -303,10 +304,11 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
     for (const auto& item : hittedRecognizerInfo) {
         hittedRecognizerTypeInfo.append("recognizer type ").append(item.first).append(" node info:");
         for (const auto& nodeInfo : item.second) {
-            hittedRecognizerTypeInfo.append(" { ")
-                .append("tag: ")
-                .append(nodeInfo.tag)
-                .append(" };");
+            hittedRecognizerTypeInfo.append(" { ").append("tag: ").append(nodeInfo.tag);
+#ifndef IS_RELEASE_VERSION
+            hittedRecognizerTypeInfo.append(", inspectorId: ").append(nodeInfo.inspectorId);
+#endif
+            hittedRecognizerTypeInfo.append(" };");
         }
     }
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "%{public}s", hittedRecognizerTypeInfo.c_str());
@@ -380,6 +382,7 @@ void EventManager::TouchTest(
     if (axisTouchTestResults_.empty() && refereeNG_->QueryAllDone()) {
         responseCtrl_->Reset();
     }
+    touchRestrict.touchEvent = ConvertAxisEventToTouchEvent(event);
     // collect
     const NG::PointF point { event.x, event.y };
     // For root node, the parent local point is the same as global point.
@@ -389,6 +392,51 @@ void EventManager::TouchTest(
     SetResponseLinkRecognizers(hitTestResult, responseLinkResult);
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
     LogTouchTestResultRecognizers(axisTouchTestResults_[event.id], event.touchEventId);
+}
+
+TouchEvent EventManager::ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent)
+{
+    TouchType type = TouchType::UNKNOWN;
+    if (axisEvent.action == AxisAction::BEGIN) {
+        type = TouchType::DOWN;
+    } else if (axisEvent.action == AxisAction::END) {
+        type = TouchType::UP;
+    } else if (axisEvent.action == AxisAction::UPDATE) {
+        type = TouchType::MOVE;
+    } else if (axisEvent.action == AxisAction::CANCEL) {
+        type = TouchType::CANCEL;
+    } else {
+        type = TouchType::UNKNOWN;
+    }
+    TouchPoint point { .id = axisEvent.id,
+        .x = axisEvent.x,
+        .y = axisEvent.y,
+        .screenX = axisEvent.screenX,
+        .screenY = axisEvent.screenY,
+        .downTime = axisEvent.time,
+        .size = 0.0,
+        .isPressed = (type == TouchType::DOWN),
+        .originalId = axisEvent.id };
+    TouchEvent event;
+    event.SetId(axisEvent.id)
+        .SetX(axisEvent.x)
+        .SetY(axisEvent.y)
+        .SetScreenX(axisEvent.screenX)
+        .SetScreenY(axisEvent.screenY)
+        .SetType(type)
+        .SetTime(axisEvent.time)
+        .SetSize(0.0)
+        .SetDeviceId(axisEvent.deviceId)
+        .SetTargetDisplayId(axisEvent.targetDisplayId)
+        .SetSourceType(axisEvent.sourceType)
+        .SetSourceTool(axisEvent.sourceTool)
+        .SetPointerEvent(axisEvent.pointerEvent)
+        .SetTouchEventId(axisEvent.touchEventId)
+        .SetOriginalId(axisEvent.originalId)
+        .SetIsInjected(axisEvent.isInjected);
+    event.pointers.emplace_back(std::move(point));
+    event.pressedKeyCodes_ = axisEvent.pressedCodes;
+    return event;
 }
 
 bool EventManager::HasDifferentDirectionGesture()
@@ -702,7 +750,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
         refereeNG_->CleanGestureRefereeState(event.id);
         // add gesture snapshot to dump
         for (const auto& target : iter->second) {
-            AddGestureSnapshot(point.id, 0, target);
+            AddGestureSnapshot(point.id, 0, target, NG::EventTreeType::TOUCH);
         }
     }
 
@@ -849,7 +897,7 @@ bool EventManager::PostEventDispatchTouchEvent(const TouchEvent& event)
         postEventRefereeNG_->AddGestureToScope(point.id, iter->second);
         // add gesture snapshot to dump
         for (const auto& target : iter->second) {
-            AddGestureSnapshot(point.id, 0, target);
+            AddGestureSnapshot(point.id, 0, target, NG::EventTreeType::POST_EVENT);
         }
     }
 
@@ -868,13 +916,13 @@ bool EventManager::PostEventDispatchTouchEvent(const TouchEvent& event)
             auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
             if (recognizer) {
                 entry->HandleMultiContainerEvent(point);
-                eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point,
+                postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point,
                     NG::TransRefereeState(recognizer->GetRefereeState()),
                     NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
             }
             if (!recognizer && !isStopTouchEvent) {
                 isStopTouchEvent = !entry->HandleMultiContainerEvent(point);
-                eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)),
+                postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)),
                     std::string("Handle").append(GestureSnapshot::TransTouchType(point.type)), "", "");
             }
         }
@@ -1989,24 +2037,26 @@ EventManager::EventManager()
     refereeNG_->SetQueryStateFunc(std::move(cleanReferee));
 }
 
-void EventManager::DumpEvent(bool hasJson) const
+void EventManager::DumpEvent(NG::EventTreeType type, bool hasJson)
 {
+    auto& eventTree = GetEventTreeRecord(type);
     if (hasJson) {
         std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
         std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
-        eventTree_.Dump(children, 0);
+        eventTree.Dump(children, 0);
         json->Put("DumpEvent", children);
         DumpLog::GetInstance().PrintJson(json->ToString());
     } else {
         std::list<std::pair<int32_t, std::string>> dumpList;
-        eventTree_.Dump(dumpList, 0);
+        eventTree.Dump(dumpList, 0);
         for (auto& item : dumpList) {
             DumpLog::GetInstance().Print(item.first, item.second);
         }
     }
 }
 
-void EventManager::AddGestureSnapshot(int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target)
+void EventManager::AddGestureSnapshot(
+    int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type)
 {
     if (!target) {
         return;
@@ -2017,13 +2067,14 @@ void EventManager::AddGestureSnapshot(int32_t finger, int32_t depth, const RefPt
         info->nodeId = frameNode->GetId();
     }
     info->depth = depth;
-    eventTree_.AddGestureSnapshot(finger, std::move(info));
+    auto& eventTree = GetEventTreeRecord(type);
+    eventTree.AddGestureSnapshot(finger, std::move(info));
 
     // add child gesture if target is group
     auto group = AceType::DynamicCast<NG::RecognizerGroup>(target);
     if (group) {
         for (const auto& child : group->GetGroupRecognizer()) {
-            AddGestureSnapshot(finger, depth + 1, child);
+            AddGestureSnapshot(finger, depth + 1, child, type);
         }
     }
 }

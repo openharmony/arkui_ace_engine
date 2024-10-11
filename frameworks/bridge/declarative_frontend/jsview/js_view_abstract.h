@@ -436,8 +436,8 @@ public:
     static void JsAccessibilityDescription(const JSCallbackInfo& info);
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
-    static void JsAccessibilitySelected(bool selected);
-    static void JsAccessibilityChecked(bool checked);
+    static void JsAccessibilitySelected(const JSCallbackInfo& info);
+    static void JsAccessibilityChecked(const JSCallbackInfo& info);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
@@ -639,6 +639,10 @@ public:
 
 private:
     static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result);
+    static bool ParseResourceToDoubleByName(
+        const JSRef<JSObject>& jsObj, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
+    static bool ParseResourceToDoubleById(
+        int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
 
     static void ParseOnCreateMenu(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback);

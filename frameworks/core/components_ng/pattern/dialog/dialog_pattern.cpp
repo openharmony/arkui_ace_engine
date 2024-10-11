@@ -1061,19 +1061,19 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         RefPtr<FrameNode> button;
         uint32_t val = size > 0 ? size - 1 : 0;
         if (i != val) {
-            button = CreateButton(buttons[i], i);
+            button = CreateButton(buttons[i], i, false, true, size);
         } else {
-            button = CreateButton(buttons[i], i, true);
+            button = CreateButton(buttons[i], i, true, true, size);
         }
         CHECK_NULL_RETURN(button, nullptr);
         auto props = DynamicCast<FrameNode>(button)->GetLayoutProperty();
         auto buttonRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(false));
+            AceType::MakeRefPtr<LinearLayoutPattern>(isSuitableForElderly_));
         CHECK_NULL_RETURN(buttonRow, nullptr);
         auto buttonRowProps = buttonRow->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_RETURN(buttonRowProps, nullptr);
-        buttonRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-        buttonRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        buttonRowProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
+        buttonRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
 
         button->MountToParent(buttonRow);
         button->MarkModifyDone();
@@ -1762,5 +1762,24 @@ void DialogPattern::DumpObjectProperty(std::unique_ptr<JsonValue>& json)
     if (dialogProperties_.maskRect.has_value()) {
         json->Put("MaskRect", dialogProperties_.maskRect.value().ToString().c_str());
     }
+}
+
+bool DialogPattern::IsShowInFreeMultiWindow()
+{
+    auto currentId = Container::CurrentId();
+    auto container = Container::Current();
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "parent container is null");
+            return false;
+        }
+    }
+    return container->IsFreeMultiWindow();
 }
 } // namespace OHOS::Ace::NG

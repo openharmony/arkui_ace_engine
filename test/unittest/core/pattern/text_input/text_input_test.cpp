@@ -120,6 +120,7 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -129,6 +130,7 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
     auto stackNode = cleanNodeResponseArea->cleanNode_;
     auto iconFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
     auto iconLayoutProperty = iconFrameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(iconLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step5. create text icon size
@@ -163,6 +165,7 @@ HWTEST_F(TextFieldUXTest, CleanNode002, TestSize.Level1)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -248,6 +251,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward002, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -277,6 +281,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward003, TestSize.Level1)
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -355,6 +360,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward002, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -410,6 +416,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward004, TestSize.Level1)
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -1744,6 +1751,7 @@ HWTEST_F(TextFieldUXTest, HandleOnTab001, TestSize.Level1)
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**

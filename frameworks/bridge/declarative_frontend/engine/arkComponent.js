@@ -138,19 +138,24 @@ class ModifierWithKey {
       this.applyPeer(node, true, component);
       return true;
     }
-    const stageTypeInfo = typeof this.stageValue;
-    const valueTypeInfo = typeof this.value;
-    let different = false;
-    if (stageTypeInfo !== valueTypeInfo) {
-      different = true;
-    }
-    else if (stageTypeInfo === 'number' || stageTypeInfo === 'string' || stageTypeInfo === 'boolean') {
-      different = (this.stageValue !== this.value);
-    }
-    else {
-      different = this.checkObjectDiff();
-    }
-    if (different) {
+    if (component._needDiff) {
+      const stageTypeInfo = typeof this.stageValue;
+      const valueTypeInfo = typeof this.value;
+      let different = false;
+      if (stageTypeInfo !== valueTypeInfo) {
+        different = true;
+      }
+      else if (stageTypeInfo === 'number' || stageTypeInfo === 'string' || stageTypeInfo === 'boolean') {
+        different = (this.stageValue !== this.value);
+      }
+      else {
+        different = this.checkObjectDiff();
+      }
+      if (different) {
+        this.value = this.stageValue;
+        this.applyPeer(node, false, component);
+      }
+    } else {
       this.value = this.stageValue;
       this.applyPeer(node, false, component);
     }
@@ -2844,8 +2849,7 @@ class CustomPropertyModifier extends ModifierWithKey {
     const nodeId = getUINativeModule().frameNode.getIdByNodePtr(node);
     if (reset) {
       __removeCustomProperty__(nodeId, this.value.key);
-    }
-    else {
+    } else {
       __setValidCustomProperty__(nodeId, this.value.key, this.value.value);
     }
   }
@@ -3076,6 +3080,7 @@ class ArkComponent {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    this._needDiff = true;
     if (classType === ModifierType.FRAME_NODE) {
       this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
@@ -8434,87 +8439,6 @@ class RowSpaceModifier extends ModifierWithKey {
   }
 }
 RowSpaceModifier.identity = Symbol('rowSpace');
-
-class LinearIndicatorIndicatorStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().linearIndicator.resetIndicatorStyle(node);
-    }
-    else {
-      getUINativeModule().linearIndicator.setIndicatorStyle(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-LinearIndicatorIndicatorStyleModifier.identity = Symbol('linearIndicatorIndicatorStyle');
-
-class LinearIndicatorIndicatorLoopModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().linearIndicator.resetIndicatorLoop(node);
-    }
-    else {
-      getUINativeModule().linearIndicator.setIndicatorLoop(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-LinearIndicatorIndicatorLoopModifier.identity = Symbol('linearIndicatorIndicatorLoop');
-
-class LinearIndicatorOnChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().linearIndicator.resetOnChange(node);
-    } else {
-      getUINativeModule().linearIndicator.setOnChange(node, this.value);
-    }
-  }
-}
-LinearIndicatorOnChangeModifier.identity = Symbol('linearIndicatorOnChange');
-
-class ArkLinearIndicatorComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-
-  indicatorStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorStyleModifier.identity, LinearIndicatorIndicatorStyleModifier, value);
-    return this;
-  }
-
-  indicatorLoop(value) {
-    modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorLoopModifier.identity, LinearIndicatorIndicatorLoopModifier, value);
-    return this;
-  }
-
-  onChange(value) {
-    modifierWithKey(this._modifiersWithKeys, LinearIndicatorOnChangeModifier.identity, LinearIndicatorOnChangeModifier, value);
-    return this;
-  }
-}
-// @ts-ignore
-if (globalThis.LinearIndicator !== undefined) {
-  globalThis.LinearIndicator.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkLinearIndicatorComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.LinearIndicatorModifier(nativePtr, classType);
-    });
-  };
-}
 
 class RowPointLightModifier extends ModifierWithKey {
   constructor(value) {
@@ -20402,6 +20326,14 @@ class ArkNavDestinationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
     return this;
   }
+  hideToolBar(value) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationHideToolBarModifier.identity,
+      NavDestinationHideToolBarModifier, value);
+    return this;
+  }
+  toolbarConfiguration(value) {
+    throw new Error('Method not implemented.');
+  }
   backButtonIcon(value) {
     modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
       NavDestinationBackButtonIconModifier, value);
@@ -20484,6 +20416,21 @@ class HideTitleBarModifier extends ModifierWithKey {
   }
 }
 HideTitleBarModifier.identity = Symbol('hideTitleBar');
+
+class NavDestinationHideToolBarModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetHideToolBar(node);
+    }
+    else {
+      getUINativeModule().navDestination.setHideToolBar(node, this.value);
+    }
+  }
+}
+NavDestinationHideToolBarModifier.identity = Symbol('hideToolBar');
 
 class IgnoreLayoutSafeAreaModifier extends ModifierWithKey {
   constructor(value) {

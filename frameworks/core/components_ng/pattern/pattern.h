@@ -92,6 +92,8 @@ public:
 
     virtual void ProcessSafeAreaPadding() {}
 
+    virtual void UpdateAttributes() {}
+
     virtual bool IsNeedPercent() const
     {
         return false;
@@ -652,6 +654,9 @@ public:
     {
         return false;
     }
+
+    virtual void AddInnerOnGestureRecognizerJudgeBegin(
+        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
 
 protected:
     virtual void OnAttachToFrameNode() {}

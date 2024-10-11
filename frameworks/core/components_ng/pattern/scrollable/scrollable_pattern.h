@@ -54,6 +54,7 @@ constexpr double MAX_VELOCITY = 12000.0;
 constexpr double FRICTION = 0.9;
 constexpr double MAX_VELOCITY = 5000.0;
 #endif
+constexpr float SPRING_ACCURACY = 0.1f;
 enum class ModalSheetCoordinationMode : char {
     UNKNOWN = 0,
     SHEET_SCROLL = 1,
@@ -247,12 +248,12 @@ public:
         scrollable->StopScrollable();
     }
 
-    void StartScrollSnapMotion(float scrollSnapDelta, float scrollSnapVelocity)
+    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
     {
         CHECK_NULL_VOID(scrollableEvent_);
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);
-        scrollable->ProcessScrollSnapSpringMotion(scrollSnapDelta, scrollSnapVelocity);
+        scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
     }
 
     bool IsScrollableSpringEffect() const
@@ -694,6 +695,14 @@ protected:
 
     virtual void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const;
 
+    void FireObserverOnTouch(const TouchEventInfo& info);
+    void FireObserverOnPanActionEnd(GestureEvent& info);
+    void FireObserverOnReachStart();
+    void FireObserverOnReachEnd();
+    void FireObserverOnScrollStart();
+    void FireObserverOnScrollStop();
+    void FireObserverOnDidScroll(float finalOffset);
+
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
 
     float FireOnWillScroll(float offset) const;
@@ -763,6 +772,8 @@ protected:
     void SetCanOverScroll(bool val);
     bool GetCanOverScroll() const;
 
+    void CheckScrollBarOff();
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -827,13 +838,27 @@ private:
     ScrollResult HandleScrollSelfOnly(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollParallel(float& offset, int32_t source, NestedState state);
     bool HandleOutBoundary(float& offset, int32_t source, NestedState state, ScrollResult& result);
-    bool HandleSelfOutBoundary(float& offset, int32_t source, const float backOverOffset, float oppositeOverOffset);
+    bool HasEdgeEffect(float offset) const;
 
     void ExecuteScrollFrameBegin(float& mainDelta, ScrollState state);
 
     void OnScrollEnd();
     void ProcessSpringEffect(float velocity, bool needRestart = false);
     void SetEdgeEffect(EdgeEffect edgeEffect);
+    void SetHandleScrollCallback(const RefPtr<Scrollable>& scrollable);
+    void SetOverScrollCallback(const RefPtr<Scrollable>& scrollable);
+    void SetIsReverseCallback(const RefPtr<Scrollable>& scrollable);
+    void SetOnScrollStartRec(const RefPtr<Scrollable>& scrollable);
+    void SetOnScrollEndRec(const RefPtr<Scrollable>& scrollable);
+    void SetScrollEndCallback(const RefPtr<Scrollable>& scrollable);
+    void SetRemainVelocityCallback(const RefPtr<Scrollable>& scrollable);
+    void SetDragEndCallback(const RefPtr<Scrollable>& scrollable);
+    void SetScrollSnapListCallback(const RefPtr<Scrollable>& scrollable);
+    void SetCalcPredictSnapOffsetCallback(const RefPtr<Scrollable>& scrollable);
+    void SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>& scrollable);
+    void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
+    void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);
+    void SetPanActionEndEvent(const RefPtr<Scrollable>& scrollable);
 
     // Scrollable::UpdateScrollPosition
     bool HandleScrollImpl(float offset, int32_t source);
@@ -863,6 +888,7 @@ private:
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
     void SetUiDvsyncSwitch(bool on);
     void SetNestedScrolling(bool nestedScrolling);
+    void InitRatio();
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;

@@ -535,7 +535,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractGestureRecognizerJudge001, TestSize.Lev
     ASSERT_NE(frameNode, nullptr);
     
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc;
-    ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+    ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc), false);
 
     /**
      * @tc.steps: step2. Verify that the touch intercept function has been set.

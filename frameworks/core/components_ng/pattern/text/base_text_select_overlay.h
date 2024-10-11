@@ -252,6 +252,7 @@ public:
         selectInfo.onCreateCallback.textRangeCallback = textRange;
     }
     bool GetClipHandleViewPort(RectF& rect);
+    void MarkOverlayDirty();
 
 protected:
     RectF MergeSelectedBoxes(
@@ -297,6 +298,7 @@ protected:
     {
         return false;
     }
+    void ApplySelectAreaWithKeyboard(RectF& selectArea);
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;

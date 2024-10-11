@@ -139,19 +139,23 @@ void SwiperArrowPattern::InitButtonEvent()
     CHECK_NULL_VOID(buttonNode);
 
     auto arrowGestureHub = buttonNode->GetOrCreateGestureEventHub();
-
-    auto touchCallback = [weak = WeakClaim(this), buttonNode](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this), weakButton = WeakClaim(RawPtr(buttonNode))](
+                             const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto buttonNode = weakButton.Upgrade();
+        CHECK_NULL_VOID(buttonNode);
         pattern->ButtonTouchEvent(buttonNode, info.GetTouches().front().GetTouchType());
     };
     buttonTouchListenr_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     arrowGestureHub->AddTouchEvent(buttonTouchListenr_);
     arrowGestureHub->SetHitTestMode(HitTestMode::HTMBLOCK);
 
-    auto hoverCallback = [weak = WeakClaim(this), buttonNode](bool isHovered) {
+    auto hoverCallback = [weak = WeakClaim(this), weakButton = WeakClaim(RawPtr(buttonNode))](bool isHovered) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto buttonNode = weakButton.Upgrade();
+        CHECK_NULL_VOID(buttonNode);
         pattern->ButtonOnHover(buttonNode, isHovered);
     };
     buttonOnHoverListenr_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
@@ -323,7 +327,8 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     auto displayCount = swiperPattern->GetDisplayCount();
     bool leftArrowIsHidden = (index_ == 0);
     bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount);
-    if (swiperPattern->IsSwipeByGroup()) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        swiperPattern->IsSwipeByGroup()) {
         leftArrowIsHidden = (index_ < displayCount);
         rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displayCount);
     }

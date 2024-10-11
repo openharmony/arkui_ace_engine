@@ -604,6 +604,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest011, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
     clickRecognizer.AttachFrameNode(frameNode);
     clickRecognizer.responseRegionBuffer_.emplace_back(RectF(0, 0, 200, 200));
+    clickRecognizer.SetDistanceThreshold(200);
     TouchEvent touchEvent;
 
     /**

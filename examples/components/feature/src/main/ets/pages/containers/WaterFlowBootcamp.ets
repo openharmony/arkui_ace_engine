@@ -137,7 +137,8 @@ export struct WaterFlowBootcamp {
       }
       .width('100%')
     }
-    .height('70%')
+    .align(Alignment.Top)
+    .height('50%')
   }
 }
 

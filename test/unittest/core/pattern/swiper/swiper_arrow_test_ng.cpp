@@ -972,4 +972,68 @@ HWTEST_F(SwiperArrowTestNg, TotalCount001, TestSize.Level1)
      */
     EXPECT_EQ(leftArrowPattern->TotalCount(), 3);
 }
+
+/**
+ * @tc.name: ChangeLoop001
+ * @tc.desc: Test arrow visiblity when change loop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, ChangeLoop001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayArrow(true);
+        model.SetHoverShow(false);
+        model.SetLoop(true);
+        model.SetDisplayCount(2);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    }, 6);
+
+    EXPECT_TRUE(VerifyArrowVisible(true, true));
+
+    controller_->ChangeIndex(5, false);
+    FlushLayoutTask(frameNode_);
+
+    layoutProperty_->UpdateLoop(false);
+    pattern_->OnModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyArrowVisible(true, false));
+}
+
+/**
+ * @tc.name: ArrowVisiblity001
+ * @tc.desc: Test arrow visiblity when displayCount >= totalCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, ArrowVisiblity001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayArrow(true);
+        model.SetHoverShow(false);
+        model.SetLoop(true);
+        model.SetDisplayCount(1);
+        model.SetArrowStyle(ARROW_PARAMETERS);
+    }, 3);
+
+    EXPECT_TRUE(VerifyArrowVisible(true, true));
+
+    layoutProperty_->UpdateDisplayCount(3);
+    pattern_->OnModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    layoutProperty_->UpdateDisplayCount(5);
+    pattern_->OnModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+
+    layoutProperty_->UpdateDisplayCount(1);
+    pattern_->OnModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyArrowVisible(true, true));
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->RemoveChildAtIndex(0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(VerifyArrowVisible(false, false));
+}
 } // namespace OHOS::Ace::NG

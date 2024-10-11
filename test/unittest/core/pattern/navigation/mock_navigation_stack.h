@@ -127,7 +127,8 @@ public:
     void FireNavigationInterception(bool isBefore, const RefPtr<NavDestinationContext>& from,
         const RefPtr<NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) override;
 
-    RefPtr<UINode> CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode) override;
+    bool CreateNodeByIndex(int32_t index, const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode>& customNode,
+        OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode>& node) override;
 
     std::vector<std::string> GetAllPathName() override;
 

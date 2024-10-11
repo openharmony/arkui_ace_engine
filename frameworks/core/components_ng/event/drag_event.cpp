@@ -249,7 +249,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
-        auto renderContext = frameNode->GetRenderContext();
         if (info.GetSourceDevice() != SourceType::MOUSE) {
             if (gestureHub->GetTextDraggable()) {
                 auto pattern = frameNode->GetPattern<TextBase>();
@@ -267,15 +266,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 }
             } else {
                 HideEventColumn();
-                if (gestureHub->GetTextDraggable()) {
-                    HideTextAnimation(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-                } else {
-                    HideFilter();
-                    RecordMenuWrapperNodeForDrag(frameNode->GetId());
-                    SubwindowManager::GetInstance()->HideMenuNG(false, true);
-                }
-            }
-            if (!gestureHub->GetTextDraggable()) {
+                HideFilter();
+                RecordMenuWrapperNodeForDrag(frameNode->GetId());
+                SubwindowManager::GetInstance()->HideMenuNG(false, true);
                 frameNode->SetOptionsAfterApplied(actuator->GetOptionsAfterApplied());
             }
         }
@@ -395,7 +388,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         dragDropManager->SetHasGatherNode(false);
-        dragDropManager->SetBadgeNumber(-1);
         auto actuator = weak.Upgrade();
         if (!actuator) {
             DragEventActuator::ResetDragStatus();
@@ -467,15 +459,15 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         actuator->ResetResponseRegion();
-        if (gestureHub->GetBindMenuStatus().IsNotNeedShowPreview() || !actuator->GetGatherNode()) {
-            return;
-        }
-        actuator->SetGatherNode(nullptr);
-        actuator->ClearGatherNodeChildrenInfo();
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto manager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(manager);
+        if (manager->IsGatherWithMenu() || !actuator->GetGatherNode()) {
+            return;
+        }
+        actuator->SetGatherNode(nullptr);
+        actuator->ClearGatherNodeChildrenInfo();
         auto dragDropManager = pipelineContext->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         auto preDragStatus = dragDropManager->GetPreDragStatus();
@@ -578,11 +570,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             actuator->isReceivedLongPress_ = true;
             TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop long press and info received");
             return;
-        }
-        auto dragPreviewOptions = frameNode->GetDragPreviewOption();
-        auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
-        if (badgeNumber.has_value()) {
-            dragDropManager->SetBadgeNumber(badgeNumber.value());
         }
         dragDropManager->SetPrepareDragFrameNode(frameNode);
         if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
@@ -998,7 +985,10 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OH
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
     imageNode->SetActive(true);
-    imageNode->CreateLayoutTask();
+    auto context = imageNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(imageNode);
+    }
     FlushSyncGeometryNodeTasks();
 }
 
@@ -1040,7 +1030,10 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
     columnNode->SetActive(true);
-    columnNode->CreateLayoutTask();
+    auto context = columnNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(columnNode);
+    }
     FlushSyncGeometryNodeTasks();
 }
 
@@ -1178,7 +1171,10 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     imageNode->MarkModifyDone();
     imageNode->SetLayoutDirtyMarked(true);
     imageNode->SetActive(true);
-    imageNode->CreateLayoutTask();
+    auto context = imageNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(imageNode);
+    }
     FlushSyncGeometryNodeTasks();
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenu = focusHub == nullptr
@@ -1530,6 +1526,7 @@ void DragEventActuator::SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHu
     auto pixelMap = dragNode->GetRenderContext()->GetThumbnailPixelMap();
     if (textPixelMap_) {
         gestureHub->SetPixelMap(textPixelMap_);
+        textPixelMap_ = nullptr;
     } else if (pixelMap) {
         gestureHub->SetPixelMap(pixelMap);
     } else {
@@ -1837,7 +1834,7 @@ RefPtr<FrameNode> DragEventActuator::CreateGatherNode(const RefPtr<DragEventActu
     auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(scrollPattern, nullptr);
     auto children = scrollPattern->GetVisibleSelectedItems();
-    if (children.size() <= 1) {
+    if (children.size() < 1) {
         return nullptr;
     }
     auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -1912,7 +1909,10 @@ void DragEventActuator::MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode)
     CHECK_NULL_VOID(gatherNode);
     gatherNode->MarkModifyDone();
     gatherNode->SetLayoutDirtyMarked(true);
-    gatherNode->CreateLayoutTask();
+    auto context = gatherNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(gatherNode);
+    }
 
     auto children = gatherNode->GetChildren();
     for (const auto& child : children) {
@@ -1921,7 +1921,9 @@ void DragEventActuator::MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode)
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkModifyDone();
         imageNode->SetLayoutDirtyMarked(true);
-        imageNode->CreateLayoutTask();
+        if (context) {
+            context->FlushUITaskWithSingleDirtyNode(imageNode);
+        }
     }
 }
 
@@ -2061,7 +2063,7 @@ bool DragEventActuator::IsNeedGather() const
     auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(scrollPattern, false);
     auto children = scrollPattern->GetVisibleSelectedItems();
-    if (!isSelectedItemNode_ || children.size() <= 1) {
+    if (!isSelectedItemNode_ || children.size() < 1) {
         return false;
     }
     return true;
@@ -2303,7 +2305,7 @@ void DragEventActuator::ShowPreviewBadgeAnimation(
 RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
     const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset)
 {
-    if (childSize <= 1) {
+    if (childSize < 1) {
         return nullptr;
     }
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -2328,7 +2330,10 @@ RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
     textNode->MarkModifyDone();
     textNode->SetLayoutDirtyMarked(true);
     textNode->SetActive(true);
-    textNode->CreateLayoutTask();
+    auto context = textNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(textNode);
+    }
     FlushSyncGeometryNodeTasks();
     return textNode;
 }

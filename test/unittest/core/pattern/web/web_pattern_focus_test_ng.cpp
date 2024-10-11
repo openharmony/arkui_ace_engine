@@ -17,11 +17,14 @@
 
 #include "gtest/gtest.h"
 #define private public
+#include "test/mock/core/common/mock_image_analyzer_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/event/touch_event.h"
 #undef private
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -427,11 +430,11 @@ HWTEST_F(WebPatternFocusTestNg, OnTextSelected_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DestroyAnalyzerOverlay
+ * @tc.name: DestroyAnalyzerOverlay_001
  * @tc.desc: DestroyAnalyzerOverlay.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternFocusTestNg, DestroyAnalyzerOverlay, TestSize.Level1)
+HWTEST_F(WebPatternFocusTestNg, DestroyAnalyzerOverlay_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -446,6 +449,62 @@ HWTEST_F(WebPatternFocusTestNg, DestroyAnalyzerOverlay, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->DestroyAnalyzerOverlay();
     ASSERT_EQ(webPattern->imageAnalyzerManager_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: DestroyAnalyzerOverlay_002
+ * @tc.desc: DestroyAnalyzerOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, DestroyAnalyzerOverlay_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto imageAnalyzerManager = std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::WEB);
+    webPattern->imageAnalyzerManager_ = imageAnalyzerManager;
+    imageAnalyzerManager->SetOverlayCreated(true);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->DestroyAnalyzerOverlay();
+    EXPECT_FALSE(webPattern->overlayCreating_);
+#endif
+}
+
+/**
+ * @tc.name: DestroyAnalyzerOverlay_003
+ * @tc.desc: DestroyAnalyzerOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, DestroyAnalyzerOverlay_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    auto imageAnalyzerManager = std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::WEB);
+    webPattern->imageAnalyzerManager_ = imageAnalyzerManager;
+    imageAnalyzerManager->SetOverlayCreated(false);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->DestroyAnalyzerOverlay();
+    EXPECT_FALSE(webPattern->overlayCreating_);
 #endif
 }
 
@@ -541,16 +600,19 @@ HWTEST_F(WebPatternFocusTestNg, InitAiEngine, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
     webPattern->InitAiEngine();
+    webPattern->InitAiEngine();
+    MockPipelineContext::TearDown();
 #endif
 }
 
 /**
- * @tc.name: InitializeAccessibility
+ * @tc.name: InitializeAccessibility_001
  * @tc.desc: InitializeAccessibility.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternFocusTestNg, InitializeAccessibility, TestSize.Level1)
+HWTEST_F(WebPatternFocusTestNg, InitializeAccessibility_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -564,41 +626,50 @@ HWTEST_F(WebPatternFocusTestNg, InitializeAccessibility, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
 
+    MockPipelineContext::SetUp();
+    webPattern->instanceId_ = 1;
+    OHOS::Ace::SetBoolStatus(true);
     webPattern->InitializeAccessibility();
-    ASSERT_EQ(webPattern->accessibilityChildTreeCallback_[webPattern->instanceId_], nullptr);
-#endif
-}
-
-/**
- * @tc.name: UninitializeAccessibility
- * @tc.desc: UninitializeAccessibility.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternFocusTestNg, UninitializeAccessibility, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-
+    webPattern->InitializeAccessibility();
+    webPattern->UninitializeAccessibility();
+    OHOS::Ace::SetBoolStatus(false);
+    webPattern->InitializeAccessibility();
     webPattern->UninitializeAccessibility();
     ASSERT_EQ(webPattern->accessibilityChildTreeCallback_[webPattern->instanceId_], nullptr);
+    MockPipelineContext::TearDown();
 #endif
 }
 
 /**
- * @tc.name: OnSetAccessibilityChildTree
+ * @tc.name: OnSetAccessibilityChildTree_001
  * @tc.desc: OnSetAccessibilityChildTree.
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternFocusTestNg, OnSetAccessibilityChildTree, TestSize.Level1)
+HWTEST_F(WebPatternFocusTestNg, OnSetAccessibilityChildTree_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    frameNode->accessibilityProperty_ = nullptr;
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnSetAccessibilityChildTree(33, 33);
+    EXPECT_EQ(frameNode->accessibilityProperty_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: OnSetAccessibilityChildTree_002
+ * @tc.desc: OnSetAccessibilityChildTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, OnSetAccessibilityChildTree_002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -612,9 +683,9 @@ HWTEST_F(WebPatternFocusTestNg, OnSetAccessibilityChildTree, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->OnSetAccessibilityChildTree(33, 33);
+    EXPECT_EQ(frameNode->accessibilityProperty_->GetChildTreeId(), 33);
 #endif
 }
-
 /**
  * @tc.name: OnAccessibilityChildTreeRegister
  * @tc.desc: OnAccessibilityChildTreeRegister.
@@ -1039,7 +1110,6 @@ HWTEST_F(WebPatternFocusTestNg, UpdateLayoutAfterKeyboardShow_003, TestSize.Leve
  * @tc.desc: HandleTouchDown
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, HandleTouchDownTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1066,7 +1136,6 @@ HWTEST_F(WebPatternFocusTestNg, HandleTouchDownTest001, TestSize.Level1)
  * @tc.desc: HandleTouchDown
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, HandleTouchDownTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1095,7 +1164,6 @@ HWTEST_F(WebPatternFocusTestNg, HandleTouchDownTest002, TestSize.Level1)
  * @tc.desc: HandleTouchUp
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, HandleTouchUpTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1122,7 +1190,6 @@ HWTEST_F(WebPatternFocusTestNg, HandleTouchUpTest001, TestSize.Level1)
  * @tc.desc: HandleTouchUp
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, HandleTouchUpTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1152,7 +1219,6 @@ HWTEST_F(WebPatternFocusTestNg, HandleTouchUpTest002, TestSize.Level1)
  * @tc.desc: HandleTouchMove
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, HandleTouchMoveTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1179,7 +1245,6 @@ HWTEST_F(WebPatternFocusTestNg, HandleTouchMoveTest001, TestSize.Level1)
  * @tc.desc: HandleTouchMove
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, HandleTouchMoveTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1208,7 +1273,6 @@ HWTEST_F(WebPatternFocusTestNg, HandleTouchMoveTest002, TestSize.Level1)
  * @tc.desc: HandleTouchMove
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, HandleTouchMoveTest003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1238,7 +1302,6 @@ HWTEST_F(WebPatternFocusTestNg, HandleTouchMoveTest003, TestSize.Level1)
  * @tc.desc: HandleTouchMove
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, HandleTouchMoveTest004, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1269,7 +1332,6 @@ HWTEST_F(WebPatternFocusTestNg, HandleTouchMoveTest004, TestSize.Level1)
  * @tc.desc: HandleTouchCancel
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, HandleTouchCancelTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1296,7 +1358,6 @@ HWTEST_F(WebPatternFocusTestNg, HandleTouchCancelTest001, TestSize.Level1)
  * @tc.desc: HandleTouchCancel
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, HandleTouchCancelTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1325,7 +1386,6 @@ HWTEST_F(WebPatternFocusTestNg, HandleTouchCancelTest002, TestSize.Level1)
  * @tc.desc: ParseTouchInfo
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, ParseTouchInfoTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1348,7 +1408,6 @@ HWTEST_F(WebPatternFocusTestNg, ParseTouchInfoTest001, TestSize.Level1)
  * @tc.desc: RequestFullScreen
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, RequestFullScreenTest, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1370,7 +1429,6 @@ HWTEST_F(WebPatternFocusTestNg, RequestFullScreenTest, TestSize.Level1)
  * @tc.desc: ExitFullScreen
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, ExitFullScreenTest, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1392,7 +1450,6 @@ HWTEST_F(WebPatternFocusTestNg, ExitFullScreenTest, TestSize.Level1)
  * @tc.desc: IsTouchHandleValid
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, IsTouchHandleValidTest, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1415,7 +1472,6 @@ HWTEST_F(WebPatternFocusTestNg, IsTouchHandleValidTest, TestSize.Level1)
  * @tc.desc: CheckHandles
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, CheckHandlesTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1444,7 +1500,6 @@ HWTEST_F(WebPatternFocusTestNg, CheckHandlesTest001, TestSize.Level1)
  * @tc.desc: CheckHandles
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, CheckHandlesTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1472,7 +1527,6 @@ HWTEST_F(WebPatternFocusTestNg, CheckHandlesTest002, TestSize.Level1)
  * @tc.desc: GetCoordinatePoint
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, GetCoordinatePointTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1495,7 +1549,6 @@ HWTEST_F(WebPatternFocusTestNg, GetCoordinatePointTest001, TestSize.Level1)
  * @tc.desc: GetCoordinatePoint
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, GetCoordinatePointTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1523,7 +1576,6 @@ HWTEST_F(WebPatternFocusTestNg, GetCoordinatePointTest002, TestSize.Level1)
  * @tc.desc: CloseSelectOverlay
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, CloseSelectOverlayTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1547,7 +1599,6 @@ HWTEST_F(WebPatternFocusTestNg, CloseSelectOverlayTest001, TestSize.Level1)
  * @tc.desc: CloseSelectOverlay
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, CloseSelectOverlayTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1575,7 +1626,6 @@ HWTEST_F(WebPatternFocusTestNg, CloseSelectOverlayTest002, TestSize.Level1)
  * @tc.desc: OnParentScrollStartOrEndCallback
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, WebPatternOnParentScrollStartOrEndCallbackTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1597,7 +1647,6 @@ HWTEST_F(WebPatternFocusTestNg, WebPatternOnParentScrollStartOrEndCallbackTest00
  * @tc.desc: OnParentScrollStartOrEndCallback
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, WebPatternOnParentScrollStartOrEndCallbackTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1609,7 +1658,7 @@ HWTEST_F(WebPatternFocusTestNg, WebPatternOnParentScrollStartOrEndCallbackTest00
     auto g_webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(g_webPattern, nullptr);
 
-    g_webPattern->selectOverlayProxy_ = new SelectOverlayProxy(1);
+    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
     g_webPattern->OnParentScrollStartOrEndCallback(false);
 #endif
 }
@@ -1619,7 +1668,6 @@ HWTEST_F(WebPatternFocusTestNg, WebPatternOnParentScrollStartOrEndCallbackTest00
  * @tc.desc: RegisterSelectOverlayParentScrollCallback
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, RegisterSelectOverlayParentScrollCallbackTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1663,7 +1711,6 @@ HWTEST_F(WebPatternFocusTestNg, RegisterSelectOverlayParentScrollCallbackTest001
  * @tc.desc: RegisterSelectOverlayParentScrollCallback
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, RegisterSelectOverlayParentScrollCallbackTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1686,7 +1733,6 @@ HWTEST_F(WebPatternFocusTestNg, RegisterSelectOverlayParentScrollCallbackTest002
  * @tc.desc: RegisterSelectOverlayParentScrollCallback
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, RegisterSelectOverlayParentScrollCallbackTest003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1709,7 +1755,6 @@ HWTEST_F(WebPatternFocusTestNg, RegisterSelectOverlayParentScrollCallbackTest003
  * @tc.desc: ComputeTouchHandleRect
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, ComputeTouchHandleRectTest, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1739,7 +1784,6 @@ HWTEST_F(WebPatternFocusTestNg, ComputeTouchHandleRectTest, TestSize.Level1)
  * @tc.desc: DelTouchOverlayInfoByTouchId
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, DelTouchOverlayInfoByTouchIdTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1758,6 +1802,8 @@ HWTEST_F(WebPatternFocusTestNg, DelTouchOverlayInfoByTouchIdTest001, TestSize.Le
 
     webPattern->DelTouchOverlayInfoByTouchId(2);
     EXPECT_EQ(webPattern->touchOverlayInfo_.size(), 2);
+    webPattern->DelTouchOverlayInfoByTouchId(4);
+    EXPECT_EQ(webPattern->touchOverlayInfo_.size(), 2);
 #endif
 }
 
@@ -1766,35 +1812,7 @@ HWTEST_F(WebPatternFocusTestNg, DelTouchOverlayInfoByTouchIdTest001, TestSize.Le
  * @tc.desc: DelTouchOverlayInfoByTouchId
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, DelTouchOverlayInfoByTouchIdTest002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-
-    webPattern->touchOverlayInfo_.push_back(WebPattern::TouchInfo { 1, 10.0, 1 });
-    webPattern->touchOverlayInfo_.push_back(WebPattern::TouchInfo { 2, 30.0, 2 });
-    webPattern->touchOverlayInfo_.push_back(WebPattern::TouchInfo { 3, 50.0, 3 });
-
-    webPattern->DelTouchOverlayInfoByTouchId(4);
-    EXPECT_EQ(webPattern->touchOverlayInfo_.size(), 3);
-#endif
-}
-
-/**
- * @tc.name: DelTouchOverlayInfoByTouchIdTest003
- * @tc.desc: DelTouchOverlayInfoByTouchId
- * @tc.type: FUNC
- */
-
-HWTEST_F(WebPatternFocusTestNg, DelTouchOverlayInfoByTouchIdTest003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1821,7 +1839,6 @@ HWTEST_F(WebPatternFocusTestNg, DelTouchOverlayInfoByTouchIdTest003, TestSize.Le
  * @tc.desc: StartListenSelectOverlayParentScroll
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, StartListenSelectOverlayParentScrollTest001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1850,7 +1867,6 @@ HWTEST_F(WebPatternFocusTestNg, StartListenSelectOverlayParentScrollTest001, Tes
  * @tc.desc: StartListenSelectOverlayParentScroll
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, StartListenSelectOverlayParentScrollTest002, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
@@ -1890,7 +1906,6 @@ HWTEST_F(WebPatternFocusTestNg, StartListenSelectOverlayParentScrollTest002, Tes
  * @tc.desc: StartListenSelectOverlayParentScroll
  * @tc.type: FUNC
  */
-
 HWTEST_F(WebPatternFocusTestNg, StartListenSelectOverlayParentScrollTest003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM

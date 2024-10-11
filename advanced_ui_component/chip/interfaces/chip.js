@@ -1454,6 +1454,8 @@ export class c1 extends ViewPU {
     Stack.pop();
   }
   aboutToAppear() {
+    let m2 = this.getUIContext();
+    this.fontSizeScale = m2.getHostContext()?.config?.fontSizeScale ?? 1;
     this.smListener.on('change', (v2) => {
       if (v2.matches) {
         this.chipBreakPoints = u.SM;
@@ -1507,11 +1509,6 @@ export class c1 extends ViewPU {
       Button.focusable(true);
       Button.opacity(this.getChipNodeOpacity());
       Button.padding(0);
-      Button.focusBox({
-        margin: LengthMetrics.vp(this.theme.o1.w1),
-        strokeColor: ColorMetrics.resourceColor(this.theme.o1.v1),
-        strokeWidth: LengthMetrics.vp(this.theme.o1.borderWidth),
-      });
       Button.onFocus(() => {
         this.chipNodeOnFocus = true;
       });

@@ -36,6 +36,7 @@ enum class NestedState {
     GESTURE = 0,
     CHILD_SCROLL,
     CHILD_OVER_SCROLL,
+    CHILD_CHECK_OVER_SCROLL,
 };
 
 struct OverScrollOffset {
@@ -91,7 +92,7 @@ public:
     static double GetVelocityScale();
     static void SetFriction(double sFriction);
 
-    void Initialize(const WeakPtr<PipelineBase>& context);
+    void Initialize(const WeakPtr<PipelineContext>& context);
 
     void Initialize(PipelineContext* context);
 
@@ -165,6 +166,16 @@ public:
     void SetUnstaticFriction(double friction)
     {
         friction_ = friction;
+    }
+
+    double GetFriction() const
+    {
+        return friction_;
+    }
+
+    float GetRatio() const
+    {
+        return ratio_;
     }
 
     void HandleTouchDown();
@@ -286,7 +297,7 @@ public:
     void UpdateSpringMotion(double mainPosition, const ExtentPair& extent, const ExtentPair& initExtent);
 
     void UpdateScrollSnapStartOffset(double offset);
-    void StartScrollSnapMotion(float predictSnapOffset, float scrollSnapVelocity);
+    void StartListSnapAnimation(float predictSnapOffset, float scrollSnapVelocity);
     void UpdateScrollSnapEndWithOffset(double offset);
 
     bool IsAnimationNotRunning() const;
@@ -311,7 +322,7 @@ public:
         available_ = available;
     }
 
-    WeakPtr<PipelineBase> GetContext() const
+    WeakPtr<PipelineContext> GetContext() const
     {
         return context_;
     }
@@ -407,7 +418,7 @@ public:
         needScrollSnapToSideCallback_ = std::move(needScrollSnapToSideCallback);
     }
 
-    void ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity);
+    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
 
     void StopSnapController()
     {
@@ -428,7 +439,7 @@ public:
 
     void AddPreviewMenuHandleDragEnd(GestureEventFunc&& actionEnd)
     {
-        actionEnd_ = std::move(actionEnd);
+        AddPanActionEndEvent(std::move(actionEnd));
     }
 
     bool GetIsDragging() const
@@ -491,11 +502,23 @@ public:
         overScrollOffsetCallback_ = overScrollOffsetCallback;
     }
 
+    void AddPanActionEndEvent(GestureEventFunc&& event)
+    {
+        panActionEndEvents_.emplace_back(event);
+    }
+
 private:
+    void InitPanRecognizerNG();
+    void SetOnActionStart();
+    void SetOnActionUpdate();
+    void SetOnActionEnd();
+    void SetOnActionCancel();
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
     void ProcessScrollMotion(double position);
     void ProcessListSnapMotion(double position);
+    void TriggerFrictionAnimation(float mainPosition, float friction, float correctVelocity);
+    bool TriggerScrollSnap(float delta, float dragDistance, float velocity, double mainPosition);
     void FixScrollMotion(float position, float initVelocity);
     void ExecuteScrollBegin(double& mainDelta);
     double ComputeCap(int dragCount);
@@ -505,6 +528,7 @@ private:
     float GetFrictionVelocityByFinalPosition(
         float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
     void InitFriction(double friction);
+    void CalcOverScrollVelocity();
 
     /**
      * @brief Checks if the scroll event is caused by a mouse wheel.
@@ -534,7 +558,7 @@ private:
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
 
-    WeakPtr<PipelineBase> context_;
+    WeakPtr<PipelineContext> context_;
     double currentPos_ = 0.0;
     double currentVelocity_ = 0.0;
     double maxFlingVelocity_ = 0.0;
@@ -561,7 +585,7 @@ private:
     double lastPos_ = 0.0;
     double dragStartPosition_ = 0.0;
     double dragEndPosition_ = 0.0;
-    double lastVelocity_ = 0.0;
+    double lastGestureVelocity_ = 0.0;
     double friction_ = -1.0;
     double preGain_ = 1.0;
 #ifdef OHOS_PLATFORM
@@ -586,7 +610,7 @@ private:
     bool needScrollSnapChange_ = false;
     CalcPredictSnapOffsetCallback calcPredictSnapOffsetCallback_;
     NeedScrollSnapToSideCallback needScrollSnapToSideCallback_;
-    GestureEventFunc actionEnd_;
+    std::list<GestureEventFunc> panActionEndEvents_;
 
     DragFRCSceneCallback dragFRCSceneCallback_;
 

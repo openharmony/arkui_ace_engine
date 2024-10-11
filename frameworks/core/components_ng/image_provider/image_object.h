@@ -69,7 +69,7 @@ public:
     }
 
     virtual void MakeCanvasImage(
-        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) = 0;
+        const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& resizeTarget, bool forceResize, bool syncLoad) = 0;
 
 protected:
     const ImageSourceInfo src_;

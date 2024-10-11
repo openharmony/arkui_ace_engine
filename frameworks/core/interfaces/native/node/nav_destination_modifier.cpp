@@ -33,6 +33,20 @@ void ResetHideTitleBar(ArkUINodeHandle node)
     NavDestinationModelNG::SetHideTitleBar(frameNode, false);
 }
 
+void SetNavDestinationHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetHideToolBar(frameNode, hide);
+}
+
+void ResetNavDestinationHideToolBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::SetHideToolBar(frameNode, false);
+}
+
 void SetNavDestinationMode(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -211,6 +225,8 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
     static const ArkUINavDestinationModifier modifier = {
         SetHideTitleBar,
         ResetHideTitleBar,
+        SetNavDestinationHideToolBar,
+        ResetNavDestinationHideToolBar,
         SetNavDestinationMode,
         ResetNavDestinationMode,
         SetIgnoreLayoutSafeArea,
@@ -233,6 +249,8 @@ const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
     static const CJUINavDestinationModifier modifier = {
         SetHideTitleBar,
         ResetHideTitleBar,
+        SetNavDestinationHideToolBar,
+        ResetNavDestinationHideToolBar,
         SetNavDestinationMode,
         ResetNavDestinationMode,
         SetIgnoreLayoutSafeArea,

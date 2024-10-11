@@ -69,11 +69,19 @@ std::string AccessibilityProperty::GetText() const
 std::string AccessibilityProperty::GetGroupText(bool forceGetChildren) const
 {
     std::string text;
-    GetGroupTextRecursive(forceGetChildren, text);
+    GetGroupTextRecursive(forceGetChildren, text, false);
     return text;
 }
 
-void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::string& text) const
+std::string AccessibilityProperty::GetGroupPreferAccessibilityText(bool forceGetChildren) const
+{
+    std::string text;
+    GetGroupTextRecursive(forceGetChildren, text, true);
+    return text;
+}
+
+void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::string& text,
+                                                  bool preferAccessibilityText) const
 {
     auto node = host_.Upgrade();
     CHECK_NULL_VOID(node);
@@ -82,7 +90,8 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
     }
     auto level = GetAccessibilityLevel();
     if (level == Level::AUTO || level == Level::YES_STR) {
-        auto nodeText = GetText();
+        std::string accessibilityText = GetAccessibilityText();
+        auto nodeText = preferAccessibilityText && !accessibilityText.empty() ? accessibilityText : GetText();
         if (!text.empty() && !nodeText.empty()) {
             text += ", ";
         }
@@ -101,7 +110,8 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
         if (child == nullptr) {
             continue;
         }
-        child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text);
+        child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text,
+                                                                                        preferAccessibilityText);
     }
 }
 
@@ -289,6 +299,22 @@ void UpdateSearchStrategyByHitTestMode(HitTestMode hitTestMode, bool& shouldSear
     }
 }
 
+static const std::set<std::string> TAGS_SUBTREE_COMPONENT = {
+    V2::XCOMPONENT_ETS_TAG,
+    V2::UI_EXTENSION_COMPONENT_ETS_TAG,
+    V2::EMBEDDED_COMPONENT_ETS_TAG,
+    V2::FORM_ETS_TAG,
+    V2::ISOLATED_COMPONENT_ETS_TAG
+};
+
+bool AccessibilityProperty::IsTagInSubTreeComponent(const std::string& tag)
+{
+    if (TAGS_SUBTREE_COMPONENT.find(tag) != TAGS_SUBTREE_COMPONENT.end()) {
+        return true;
+    }
+    return false;
+}
+
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
     bool& ancestorGroupFlag)
 {
@@ -331,7 +357,7 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
             shouldSearchChildren = true;
         }
     } while (0);
-
+    shouldSearchSelf = IsTagInSubTreeComponent(node->GetTag()) ? true : shouldSearchSelf;
     if (ancestorGroupFlag == true) {
         if (level != AccessibilityProperty::Level::YES_STR) {
             shouldSearchSelf = false;
@@ -459,6 +485,9 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
             break;
         }
     } while (0);
+    if (IsTagInSubTreeComponent(node->GetTag())) {
+        focusable = true;
+    }
     return focusable;
 }
 
@@ -564,6 +593,11 @@ bool AccessibilityProperty::IsUserSelected()
     return isSelected_.value_or(false);
 }
 
+void AccessibilityProperty::ResetUserSelected()
+{
+    isSelected_.reset();
+}
+
 void AccessibilityProperty::SetUserCheckedType(const int32_t& checkedType)
 {
     checkedType_ = checkedType;
@@ -577,6 +611,31 @@ bool AccessibilityProperty::HasUserCheckedType()
 int32_t AccessibilityProperty::GetUserCheckedType()
 {
     return checkedType_.value_or(0);
+}
+
+void AccessibilityProperty::ResetUserCheckedType()
+{
+    checkedType_.reset();
+}
+
+void AccessibilityProperty::SetUserCheckable(const bool& checkable)
+{
+    isUserCheckable_ = checkable;
+}
+
+bool AccessibilityProperty::HasUserCheckable()
+{
+    return isUserCheckable_.has_value();
+}
+
+bool AccessibilityProperty::IsUserCheckable()
+{
+    return isUserCheckable_.value_or(false);
+}
+
+void AccessibilityProperty::ResetUserCheckable()
+{
+    isUserCheckable_.reset();
 }
 
 void AccessibilityProperty::SetUserMinValue(const int32_t& minValue)

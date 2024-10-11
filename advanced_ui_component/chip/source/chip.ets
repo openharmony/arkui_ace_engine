@@ -22,6 +22,7 @@ import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
+import common from '@ohos.app.ability.common';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -910,6 +911,8 @@ export struct ChipComponent {
   }
 
   aboutToAppear() {
+    let uiContent: UIContext = this.getUIContext();
+    this.fontSizeScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     this.smListener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
       if (mediaQueryResult.matches) {
         this.chipBreakPoints = BreakPointsType.SM
@@ -1089,11 +1092,6 @@ export struct ChipComponent {
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
     .padding(0)
-    .focusBox({
-      margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
-      strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
-      strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
-    })
     .onFocus(() => {
       this.chipNodeOnFocus = true
     })

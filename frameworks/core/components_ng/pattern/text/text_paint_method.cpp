@@ -83,10 +83,6 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (renderContext->GetClipEdge().has_value()) {
         textContentModifier_->SetClip(renderContext->GetClipEdge().value());
     }
-    PropertyChangeFlag flag = 0;
-    if (textContentModifier_->NeedMeasureUpdate(flag)) {
-        frameNode->MarkDirtyNode(flag);
-    }
 }
 
 void TextPaintMethod::UpdateObscuredRects()

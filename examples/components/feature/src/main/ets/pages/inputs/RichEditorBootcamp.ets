@@ -209,7 +209,7 @@ export struct RichEditorBootcamp {
                   return;
                 }
                 let richEditorSelection = this.controller.getSelection();
-                this.PopDataFromPasteboard(richEditorSelection)
+                this.popDataFromPasteboard(richEditorSelection)
 
               } else if (index as number == 3) {
                 if (!this.controller) {
@@ -356,7 +356,7 @@ export struct RichEditorBootcamp {
     })
   }
 
-  PopDataFromPasteboard(richEditorSeletion: RichEditorSelection) {
+  popDataFromPasteboard(richEditorSeletion: RichEditorSelection) {
     let start = richEditorSeletion.selection[0];
     let end = richEditorSeletion.selection[1];
 

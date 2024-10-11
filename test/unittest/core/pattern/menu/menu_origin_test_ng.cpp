@@ -1990,7 +1990,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest1, TestSize.Level1)
      * @tc.steps: step3. call the InitializePaddingAPI12 method.
      * @tc.expected: padding is not zero
      */
-    algorithm->hierarchicalParameters_ = true;
+    algorithm->canExpandCurrentWindow_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->menuMediumMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI12(wrapper);
@@ -2058,7 +2058,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest2, TestSize.Level1)
      * @tc.steps: step3. call the InitializePaddingAPI12 method.
      * @tc.expected: padding is not zero
      */
-    algorithm->hierarchicalParameters_ = false;
+    algorithm->canExpandCurrentWindow_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
     selectTheme->menuLargeMargin_ = 10.0_vp;

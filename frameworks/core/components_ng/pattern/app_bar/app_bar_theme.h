@@ -321,7 +321,7 @@ private:
         theme->focusedOutlineColorDark_ = appBarPattern->GetAttr<Color>("focused_outline_color_dark",
             Color(0xff3f97e9));
         theme->blurColorLight_ = appBarPattern->GetAttr<Color>("blur_color_light", Color(0x99FFFFFF));
-        theme->blurColorDark_ = appBarPattern->GetAttr<Color>("blur_color_dark", Color(0x99000000));
+        theme->blurColorDark_ = appBarPattern->GetAttr<Color>("blur_color_dark", Color(0x33000000));
         theme->dividerColorLight_ = appBarPattern->GetAttr<Color>("divider_color_light", Color(0x33000000));
         theme->dividerColorDark_ = appBarPattern->GetAttr<Color>("divider_color_dark", Color(0x33FFFFFF));
         theme->borderColorLight_ = appBarPattern->GetAttr<Color>("border_color_light", Color(0x33182431));

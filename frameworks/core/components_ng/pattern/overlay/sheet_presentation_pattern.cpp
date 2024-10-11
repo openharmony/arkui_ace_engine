@@ -554,7 +554,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     //record the drag position
     uint32_t detentsLowerPos = 0;
     uint32_t detentsUpperPos = 0;
-    if (lowerIter == sheetDetentHeight_.end()) {
+    if (lowerIter == sheetDetentHeight_.end() || upperIter == sheetDetentHeight_.end()) {
         //when drag over the highest sheet page
         upHeight = sheetDetentHeight_[sheetDetentsSize - 1];
         downHeight = sheetDetentHeight_[sheetDetentsSize - 1];
@@ -626,7 +626,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
 
 void SheetPresentationPattern::ChangeSheetPage(float height)
 {
-    if (IsAvoidingKeyboard()) {
+    if (IsAvoidingKeyboard() && keyboardAvoidMode_ == SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL) {
         return;
     }
     ChangeScrollHeight(height);
@@ -790,8 +790,6 @@ float SheetPresentationPattern::GetSheetHeightChange()
     auto inputH = textFieldManager ? (pipelineContext->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
                                          textFieldManager->GetHeight())
                                    : .0;
-    TAG_LOGD(AceLogTag::ACE_SHEET,
-        "TextField's clickPositionY is %{public}f", textFieldManager->GetClickPosition().GetY());
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
@@ -848,7 +846,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto offset = GetPageHeight() - (height_ + sheetHeightUp_) + bottomOffsetY_;
+    auto offset = UpdateSheetTransitionOffset();
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     renderContext->AttachNodeAnimatableProperty(property_);
@@ -867,6 +865,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         ref->isNeedProcessHeight_ = false;
         ref->FireOnDetentsDidChange(ref->height_);
         ref->preDidHeight_ = ref->height_;
+        ref->isSpringBack_ = false;
     };
 
     isAnimationProcess_ = true;
@@ -1029,12 +1028,12 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
     CHECK_NULL_VOID(scrollNode);
     auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(scrollProps);
-    auto scrollHeight = height - operationHeight;
+    auto scrollHeight = height - operationHeight - resizeDecreasedHeight_;
     auto sheetType = GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP || sheetType == SheetType::SHEET_CENTER ||
         sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         auto sheetHeight = geometryNode->GetFrameSize().Height();
-        scrollHeight = sheetHeight - operationHeight;
+        scrollHeight = sheetHeight - operationHeight - resizeDecreasedHeight_;
     }
     scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollHeight)));
     scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1120,7 +1119,7 @@ void SheetPresentationPattern::UpdateTitlePadding()
     auto titleLayoutProperty = DynamicCast<LinearLayoutProperty>(titleNode->GetLayoutProperty());
     CHECK_NULL_VOID(titleLayoutProperty);
     auto showCloseIcon = true;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
         showCloseIcon = IsShowCloseIcon();
     }
     PaddingProperty padding;
@@ -1557,7 +1556,7 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
         auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
         auto sheetStyle = layoutProperty->GetSheetStyleValue();
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN) &&
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN) &&
             sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_POPUP) {
             sheetType = SheetType::SHEET_POPUP;
         }
@@ -1832,6 +1831,17 @@ void SheetPresentationPattern::ClipSheetNode()
     }
 }
 
+bool SheetPresentationPattern::IsWindowSizeChangedWithUndefinedReason(
+    int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    bool isWindowChanged = false;
+    if (windowSize_.has_value()) {
+        isWindowChanged = (type == WindowSizeChangeReason::UNDEFINED &&
+                           (windowSize_->Width() != width || windowSize_->Height() != height));
+    }
+    return isWindowChanged;
+}
+
 void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet WindowSizeChangeReason type is: %{public}d", type);
@@ -1847,8 +1857,12 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
             ScrollTo(.0f);
         }
     }
-    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED ||
-        type == WindowSizeChangeReason::DRAG || type == WindowSizeChangeReason::RESIZE) {
+    if (IsWindowSizeChangedWithUndefinedReason(width, height, type)) {
+        windowChanged_ = true;
+    }
+    windowSize_ = SizeT<int32_t>(width, height);
+    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::DRAG ||
+        type == WindowSizeChangeReason::RESIZE) {
         windowChanged_ = true;
     }
 
@@ -2675,6 +2689,7 @@ void SheetPresentationPattern::DecreaseScrollHeightInSheet(float decreaseHeight)
 
     TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, Scroll Height reduces by height %{public}f.", decreaseHeight);
     layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(GetScrollHeight() - decreaseHeight)));
+    resizeDecreasedHeight_ = decreaseHeight;
     scroll->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

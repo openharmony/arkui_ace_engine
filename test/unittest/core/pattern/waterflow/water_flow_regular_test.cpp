@@ -59,7 +59,7 @@ HWTEST_F(WaterFlowTestNg, OffsetEnd001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info->endIndex_, 29);
     EXPECT_TRUE(info->offsetEnd_);
-    EXPECT_TRUE(info->ReachEnd(50.0f));
+    EXPECT_TRUE(info->ReachEnd(50.0f, false));
 
     UpdateCurrentOffset(1.0f);
     FlushLayoutTask(frameNode_);
@@ -458,5 +458,51 @@ HWTEST_F(WaterFlowTestNg, ShowCachedItems001, TestSize.Level1)
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 12)->IsActive());
     EXPECT_EQ(GetChildY(frameNode_, 12), 800.0f);
+}
+
+/**
+ * @tc.name: ScrollToIndex001
+ * @tc.desc: Test the range of ScrollToIndex when has footer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ScrollToIndex001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    pattern_->ScrollToIndex(29, false, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 25);
+    EXPECT_EQ(GetChildY(frameNode_, 26), 0.0f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+
+    pattern_->ScrollToIndex(0, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
+
+    /**
+     * @tc.steps: step1. jump to 30, which is out of [0, 29].
+     * @tc.expected: fail to jump.
+     */
+    pattern_->ScrollToIndex(30, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 1), 0.0f);
+
+    /**
+     * @tc.steps: step2. jump to LAST_ITEM, which will be used in scrollEdge.
+     * @tc.expected: jump successfully, if has footer, jump to footer.
+     */
+    pattern_->ScrollToIndex(LAST_ITEM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 25);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 26), -50.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), WATER_FLOW_HEIGHT - 50.0f);
 }
 } // namespace OHOS::Ace::NG

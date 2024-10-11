@@ -37,7 +37,13 @@ constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 void ClickRecognizer::ForceCleanRecognizer()
 {
     MultiFingersRecognizer::ForceCleanRecognizer();
-    OnResetStatus();
+    tappedCount_ = 0;
+    equalsToFingers_ = false;
+    focusPoint_ = {};
+    fingerDeadlineTimer_.Cancel();
+    tapDeadlineTimer_.Cancel();
+    currentTouchPointsNum_ = 0;
+    responseRegionBuffer_.clear();
 }
 
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
@@ -468,6 +474,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
 #endif
     info.SetPointerEvent(lastPointEvent_);
     info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
+    info.SetInputEventType(inputEventType_);
     return info;
 }
 

@@ -31,15 +31,32 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/web/web_pattern.cpp"
+#include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
+#include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
+class WebContextMenuParamShow : public WebContextMenuParam {
+public:
+    MOCK_METHOD(int32_t, GetXCoord, (), (const, override));
+    MOCK_METHOD(int32_t, GetYCoord, (), (const, override));
+    MOCK_METHOD(std::string, GetLinkUrl, (), (const, override));
+    MOCK_METHOD(std::string, GetUnfilteredLinkUrl, (), (const, override));
+    MOCK_METHOD(std::string, GetSourceUrl, (), (const, override));
+    MOCK_METHOD(bool, HasImageContents, (), (const, override));
+    MOCK_METHOD(bool, IsEditable, (), (const, override));
+    MOCK_METHOD(int, GetEditStateFlags, (), (const, override));
+    MOCK_METHOD(int, GetSourceType, (), (const, override));
+    MOCK_METHOD(int, GetMediaType, (), (const, override));
+    MOCK_METHOD(int, GetInputFieldType, (), (const, override));
+    MOCK_METHOD(std::string, GetSelectionText, (), (const, override));
+};
 class WebPatternTestNgSupplement : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -59,88 +76,7 @@ void WebPatternTestNgSupplement::SetUp()
 void WebPatternTestNgSupplement::TearDown()
 {
     MockPipelineContext::TearDown();
-}
-
-/**
- * @tc.name: ParseDateTimeJson_001
- * @tc.desc: ParseDateTimeJson.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseDateTimeJson_001, TestSize.Level1)
-{
-    NWeb::DateTime result;
-    std::string testJson = R"({"year":2023,"month":10,"day":5,"hour":12,"minute":30})";
-
-    bool ret = ParseDateTimeJson(testJson, result);
-
-    ASSERT_TRUE(ret);
-    ASSERT_EQ(result.year, 2023);
-    ASSERT_EQ(result.month, 10);
-    ASSERT_EQ(result.day, 5);
-    ASSERT_EQ(result.hour, 12);
-    ASSERT_EQ(result.minute, 30);
-}
-
-/**
- * @tc.name: ParseDateTimeJson_002
- * @tc.desc: ParseDateTimeJson.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseDateTimeJson_002, TestSize.Level1)
-{
-    NWeb::DateTime result;
-    std::string testJson = "";
-
-    bool ret = ParseDateTimeJson(testJson, result);
-    ASSERT_FALSE(ret);
-}
-
-/**
- * @tc.name: ParseDateTimeJson_003
- * @tc.desc: ParseDateTimeJson.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseDateTimeJson_003, TestSize.Level1)
-{
-    NWeb::DateTime result;
-    std::string testJson = R"({"year":"","month":"","day":"","hour":"","minute":""})";
-    bool ret = ParseDateTimeJson(testJson, result);
-    ASSERT_TRUE(ret);
-}
-
-/**
- * @tc.name: ParseTextJsonValue_001
- * @tc.desc: ParseTextJsonValue.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseTextJsonValue_001, TestSize.Level1)
-{
-    std::string jsonInput = R"({"value": "testString"})";
-    std::string expectedOutput = "testString";
-
-    EXPECT_EQ(ParseTextJsonValue(jsonInput), expectedOutput);
-}
-
-/**
- * @tc.name: ParseTextJsonValue_002
- * @tc.desc: ParseTextJsonValue.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseTextJsonValue_002, TestSize.Level1)
-{
-    std::string jsonInput = R"({"value": null})";
-    EXPECT_EQ(ParseTextJsonValue(jsonInput), "");
-}
-
-/**
- * @tc.name: ParseTextJsonValue_003
- * @tc.desc: ParseTextJsonValue.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNgSupplement, ParseTextJsonValue_003, TestSize.Level1)
-{
-    std::string jsonInput = "";
-    EXPECT_EQ(ParseTextJsonValue(jsonInput), "");
+    OHOS::Ace::SetReturnStatus("");
 }
 
 /**
@@ -172,6 +108,32 @@ HWTEST_F(WebPatternTestNgSupplement, OnAttachToFrameNode_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnAttachToFrameNode_002
+ * @tc.desc: OnAttachToFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, OnAttachToFrameNode_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->renderContextForSurface_ = RenderContext::Create();
+    webPattern->renderContextForPopupSurface_ = RenderContext::Create();
+    webPattern->OnAttachToFrameNode();
+    EXPECT_TRUE(webPattern->transformHintChangedCallbackId_.has_value());
+#endif
+}
+
+/**
  * @tc.name: OnDetachFromFrameNode_001
  * @tc.desc: OnDetachFromFrameNode.
  * @tc.type: FUNC
@@ -188,13 +150,18 @@ HWTEST_F(WebPatternTestNgSupplement, OnDetachFromFrameNode_001, TestSize.Level1)
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
-    webPattern->delegate_ = nullptr;
-
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->textBlurAccessibilityEnable_ = true;
     auto pattern = AceType::MakeRefPtr<Pattern>();
     FrameNode node("exampleTag", 1, pattern, true, false);
+    webPattern->transformHintChangedCallbackId_ = 1;
+    webPattern->OnDetachFromFrameNode(&node);
+    EXPECT_TRUE(webPattern->transformHintChangedCallbackId_.has_value());
     webPattern->transformHintChangedCallbackId_.reset();
     webPattern->OnDetachFromFrameNode(&node);
-    EXPECT_EQ(webPattern->delegate_, nullptr);
+    EXPECT_FALSE(webPattern->transformHintChangedCallbackId_.has_value());
+    
 #endif
 }
 
@@ -618,6 +585,10 @@ HWTEST_F(WebPatternTestNgSupplement, GetAccessibilityNodeById001, TestSize.Level
     webPattern->accessibilityState_ = false;
     auto ret = webPattern->GetAccessibilityNodeById(accessibilityId);
     EXPECT_EQ(ret, nullptr);
+    webPattern->accessibilityState_ = true;
+    OHOS::Ace::SetReturnStatus("true");
+    ret = webPattern->GetAccessibilityNodeById(accessibilityId);
+    EXPECT_NE(ret, nullptr);
 #endif
 }
 
@@ -644,6 +615,10 @@ HWTEST_F(WebPatternTestNgSupplement, GetFocusedAccessibilityNode001, TestSize.Le
     webPattern->accessibilityState_ = false;
     auto ret = webPattern->GetFocusedAccessibilityNode(accessibilityId, isAccessibilityFocus);
     EXPECT_EQ(ret, nullptr);
+    webPattern->accessibilityState_ = true;
+    OHOS::Ace::SetReturnStatus("true");
+    ret = webPattern->GetFocusedAccessibilityNode(accessibilityId, isAccessibilityFocus);
+    EXPECT_NE(ret, nullptr);
 #endif
 }
 
@@ -670,6 +645,10 @@ HWTEST_F(WebPatternTestNgSupplement, GetAccessibilityNodeByFocusMove001, TestSiz
     webPattern->accessibilityState_ = false;
     auto ret = webPattern->GetAccessibilityNodeByFocusMove(accessibilityId, direction);
     EXPECT_EQ(ret, nullptr);
+    webPattern->accessibilityState_ = true;
+    OHOS::Ace::SetReturnStatus("true");
+    ret = webPattern->GetAccessibilityNodeByFocusMove(accessibilityId, direction);
+    EXPECT_NE(ret, nullptr);
 #endif
 }
 
@@ -693,7 +672,12 @@ HWTEST_F(WebPatternTestNgSupplement, SetAccessibilityState001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     webPattern->accessibilityState_ = false;
+    webPattern->SetAccessibilityState(false);
+    EXPECT_FALSE(webPattern->accessibilityState_);
     webPattern->SetAccessibilityState(true);
+    EXPECT_TRUE(webPattern->accessibilityState_);
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    webPattern->SetAccessibilityState(false);
     EXPECT_TRUE(webPattern->accessibilityState_);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
     webPattern->inspectorAccessibilityEnable_ = false;
@@ -893,12 +877,19 @@ HWTEST_F(WebPatternTestNgSupplement, OnVisibleAreaChangeTest001, TestSize.Level1
     stack->Push(webPatternFrameNode);
     auto webPattern = webPatternFrameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->OnVisibleAreaChange(true);
     EXPECT_TRUE(webPattern->isVisible_);
     webPattern->isVisible_ = false;
-    webPattern->isVisibleActiveEnable_ = true;
+    webPattern->isVisibleActiveEnable_ = false;
     webPattern->OnVisibleAreaChange(true);
     ASSERT_EQ(webPattern->isVisible_, true);
+    webPattern->isVisible_ = false;
+    webPattern->isActive_ = false;
+    webPattern->isVisibleActiveEnable_ = true;
+    webPattern->OnVisibleAreaChange(true);
+    EXPECT_TRUE(webPattern->isActive_);
 #endif
 }
 
@@ -919,11 +910,27 @@ HWTEST_F(WebPatternTestNgSupplement, OnVisibleAreaChangeTest002, TestSize.Level1
     stack->Push(webPatternFrameNode);
     auto webPattern = webPatternFrameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    RefPtr<FrameNode> node = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr); });
+    webPatternFrameNode->SetParent(node);
     webPattern->isVisible_ = true;
     webPattern->isVisibleActiveEnable_ = true;
     webPattern->isFocus_ = false;
+    webPattern->isActive_ = true;
     webPattern->OnVisibleAreaChange(false);
+    EXPECT_FALSE(webPattern->isActive_);
     EXPECT_FALSE(webPattern->isDragEndMenuShow_);
+    webPattern->isActive_ = true;
+    webPattern->isFocus_ = true;
+    webPattern->isVisible_ = true;
+    webPattern->OnVisibleAreaChange(false);
+    EXPECT_TRUE(webPattern->isActive_);
+    webPattern->isVisibleActiveEnable_ = false;
+    webPattern->isVisible_ = true;
+    webPattern->OnVisibleAreaChange(false);
+    EXPECT_TRUE(webPattern->isActive_);
 #endif
 }
 
@@ -1206,12 +1213,16 @@ HWTEST_F(WebPatternTestNgSupplement, OnOverScrollFlingVelocityHandlerTest002, Te
     RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
     webPattern->parentsMap_ = { { Axis::HORIZONTAL, parent } };
     webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
-    webPattern->nestedScroll_.scrollDown = NestedScrollMode::SELF_FIRST;
     webPattern->scrollState_ = true;
+    webPattern->nestedScroll_.scrollDown = NestedScrollMode::SELF_ONLY;
+    webPattern->OnOverScrollFlingVelocityHandler(1.0f, false);
+    webPattern->nestedScroll_.scrollDown = NestedScrollMode::SELF_FIRST;
     webPattern->OnOverScrollFlingVelocityHandler(1.0f, false);
     ASSERT_TRUE(webPattern->isFirstFlingScrollVelocity_);
     webPattern->OnOverScrollFlingVelocityHandler(1.0f, true);
     webPattern->isFirstFlingScrollVelocity_ = true;
+    webPattern->nestedScroll_.scrollLeft = NestedScrollMode::SELF_ONLY;
+    webPattern->OnOverScrollFlingVelocityHandler(1.0f, true);
     webPattern->nestedScroll_.scrollLeft = NestedScrollMode::SELF_FIRST;
     EXPECT_CALL(*parent, HandleScrollVelocity).Times(1).WillOnce(Return(false));
     webPattern->OnOverScrollFlingVelocityHandler(1.0f, true);
@@ -1392,6 +1403,9 @@ HWTEST_F(WebPatternTestNgSupplement, OnRootLayerChangedTest001, TestSize.Level1)
     webPattern->OnRootLayerChanged(100, 100);
     EXPECT_EQ(webPattern->rootLayerWidth_, 100);
     EXPECT_EQ(webPattern->rootLayerHeight_, 100);
+    webPattern->OnRootLayerChanged(100, 300);
+    EXPECT_EQ(webPattern->rootLayerWidth_, 100);
+    EXPECT_EQ(webPattern->rootLayerHeight_, 300);
     webPattern->layoutMode_ = WebLayoutMode::NONE;
     webPattern->OnRootLayerChanged(200, 300);
     EXPECT_EQ(webPattern->rootLayerWidth_, 200);
@@ -1604,6 +1618,7 @@ HWTEST_F(WebPatternTestNgSupplement, UpdateFocusedAccessibilityId_001, TestSize.
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     webPattern->accessibilityState_ = true;
+    OHOS::Ace::SetReturnStatus("true");
     webPattern->UpdateFocusedAccessibilityId(100);
     EXPECT_EQ(webPattern->focusedAccessibilityId_, 100);
 #endif
@@ -1630,6 +1645,7 @@ HWTEST_F(WebPatternTestNgSupplement, UpdateFocusedAccessibilityId_002, TestSize.
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     webPattern->accessibilityState_ = true;
+    OHOS::Ace::SetReturnStatus("");
     webPattern->UpdateFocusedAccessibilityId(101);
     EXPECT_EQ(webPattern->focusedAccessibilityId_, 101);
 #endif
@@ -1658,6 +1674,7 @@ HWTEST_F(WebPatternTestNgSupplement, UpdateFocusedAccessibilityId_003, TestSize.
     webPattern->focusedAccessibilityId_ = -1;
     webPattern->accessibilityState_ = true;
     webPattern->UpdateFocusedAccessibilityId(-1);
+    OHOS::Ace::SetReturnStatus("");
     RectT<int32_t> rect;
     EXPECT_FALSE(webPattern->GetAccessibilityFocusRect(rect, -1));
 #endif
@@ -1686,6 +1703,7 @@ HWTEST_F(WebPatternTestNgSupplement, UpdateFocusedAccessibilityId_004, TestSize.
     webPattern->focusedAccessibilityId_ = -1;
     webPattern->accessibilityState_ = true;
     webPattern->UpdateFocusedAccessibilityId(-2);
+    OHOS::Ace::SetReturnStatus("true");
     RectT<int32_t> rect;
     EXPECT_TRUE(webPattern->GetAccessibilityFocusRect(rect, -2));
 #endif
@@ -2038,6 +2056,35 @@ HWTEST_F(WebPatternTestNgSupplement, FilterScrollEvent_001, TestSize.Level1)
     EXPECT_FALSE(webPattern->FilterScrollEvent(1.0f, 0.5f, 1.0f, 2.0f));
     EXPECT_FALSE(webPattern->isNeedUpdateScrollAxis_);
     EXPECT_EQ(webPattern->expectedScrollAxis_, Axis::HORIZONTAL);
+#endif
+}
+
+/**
+ * @tc.name: OnContextMenuShow_001
+ * @tc.desc: OnContextMenuShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, OnContextMenuShow_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    RefPtr<WebContextMenuParam> menuParam = AceType::MakeRefPtr<WebContextMenuParamShow>();
+    RefPtr<ContextMenuResult> menuResult = nullptr;
+    std::shared_ptr<BaseEventInfo> eventInfo = std::make_shared<ContextMenuEvent>(menuParam, menuResult);
+    webPattern->contextSelectOverlay_ = nullptr;
+    webPattern->OnContextMenuShow(eventInfo);
+    EXPECT_NE(webPattern->contextSelectOverlay_, nullptr);
 #endif
 }
 } // namespace OHOS::Ace::NG

@@ -54,10 +54,6 @@ public:
     virtual void EnableAnalyzer(bool enable) {}
     virtual void SetImageAnalyzerConfig(void* config) {}
     virtual void SetImageAIOptions(void* options) {}
-private:
-    static std::unique_ptr<VideoModel> instance_;
-    static std::mutex mutex_;
 };
-
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_H

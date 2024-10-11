@@ -597,12 +597,14 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     node->SetActive();
     node->isLayoutDirtyMarked_ = true;
     auto pipeline = PipelineContext::GetCurrentContext();
-    node->CreateLayoutTask();
+    if (pipeline) {
+        pipeline->FlushUITaskWithSingleDirtyNode(node);
+    }
     auto predictLayoutNode = std::move(node->predictLayoutNode_);
     for (auto& node : predictLayoutNode) {
         auto frameNode = node.Upgrade();
-        if (frameNode) {
-            frameNode->CreateLayoutTask();
+        if (frameNode && pipeline) {
+            pipeline->FlushUITaskWithSingleDirtyNode(frameNode);
         }
     }
     if (pipeline) {
@@ -887,8 +889,8 @@ void FrameNode::DumpPadding(const std::unique_ptr<NG::PaddingProperty>& padding,
     CHECK_NULL_VOID(padding);
     NG::CalcLength defaultValue = NG::CalcLength(
         Dimension(0, padding->left.value_or(CalcLength()).GetDimension().Unit()));
-    if (padding->left.value_or(defaultValue) != defaultValue && padding->right.value_or(defaultValue) != defaultValue &&
-        padding->top.value_or(defaultValue) != defaultValue && padding->bottom.value_or(defaultValue) != defaultValue) {
+    if (padding->left.value_or(defaultValue) != defaultValue || padding->right.value_or(defaultValue) != defaultValue ||
+        padding->top.value_or(defaultValue) != defaultValue || padding->bottom.value_or(defaultValue) != defaultValue) {
         json->Put(label.c_str(), padding->ToString().c_str());
     }
 }
@@ -898,9 +900,9 @@ void FrameNode::DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& borde
 {
     CHECK_NULL_VOID(border);
     Dimension defaultValue(0, border->leftDimen.value_or(Dimension()).Unit());
-    if (border->leftDimen.value_or(defaultValue) != defaultValue &&
-        border->rightDimen.value_or(defaultValue) != defaultValue &&
-        border->topDimen.value_or(defaultValue) != defaultValue &&
+    if (border->leftDimen.value_or(defaultValue) != defaultValue ||
+        border->rightDimen.value_or(defaultValue) != defaultValue ||
+        border->topDimen.value_or(defaultValue) != defaultValue ||
         border->bottomDimen.value_or(defaultValue) != defaultValue) {
         json->Put(label.c_str(), border->ToString().c_str());
     }
@@ -909,7 +911,7 @@ void FrameNode::DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& borde
 void FrameNode::DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json)
 {
     auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
-    if (opts && opts->type != NG::SAFE_AREA_TYPE_NONE && opts->edges != NG::SAFE_AREA_EDGE_NONE) {
+    if (opts && (opts->type != NG::SAFE_AREA_TYPE_NONE || opts->edges != NG::SAFE_AREA_EDGE_NONE)) {
         json->Put("SafeAreaExpandOpts", opts->ToString().c_str());
     }
     if (layoutProperty_->GetSafeAreaInsets()) {
@@ -966,6 +968,9 @@ void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
     DumpSimplifyCommonInfo(json);
     DumpSimplifySafeAreaInfo(json);
     DumpSimplifyOverlayInfo(json);
+    if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
+        pattern_->DumpInfo(json);
+    }
 }
 
 void FrameNode::DumpInfo()
@@ -1462,6 +1467,10 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
 {
     if (!IsActive()) {
+        if (IsDebugInspectorId()) {
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnAreaChange Node(%{public}s/%{public}d) is inActive", GetTag().c_str(),
+                GetId());
+        }
         return;
     }
     if ((eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
@@ -1475,7 +1484,20 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
                     { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
             }
         }
-        auto currParentOffsetToWindow = CalculateOffsetRelativeToWindow(nanoTimestamp) - currFrameRect.GetOffset();
+        bool logFlag = IsDebugInspectorId();
+        auto currParentOffsetToWindow =
+            CalculateOffsetRelativeToWindow(nanoTimestamp, logFlag) - currFrameRect.GetOffset();
+        if (logFlag) {
+            TAG_LOGD(AceLogTag::ACE_UIEVENT,
+                "OnAreaChange Node(%{public}s/%{public}d) rect:%{public}s lastRect:%{public}s "
+                "parentRectToWindow:%{public}s lastParentRectToWindow:%{public}s",
+                GetTag().c_str(), GetId(), currFrameRect.ToString().c_str(), (*lastFrameRect_).ToString().c_str(),
+                currParentOffsetToWindow.ToString().c_str(), (*lastParentOffsetToWindow_).ToString().c_str());
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnAreaChange End of calculation %{public}s",
+                currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_
+                    ? "non-execution"
+                    : "execution");
+        }
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
             if (eventHub_->HasInnerOnAreaChanged()) {
                 eventHub_->FireInnerOnAreaChanged(
@@ -1567,7 +1589,7 @@ void FrameNode::TriggerOnSizeChangeCallback()
     }
 }
 
-bool FrameNode::IsFrameDisappear()
+bool FrameNode::IsFrameDisappear() const
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
@@ -1637,20 +1659,24 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(eventHub_);
-
     ProcessThrottledVisibleCallback();
     auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
     auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
     if (!hasInnerCallback && !hasUserCallback) {
         return;
     }
-
     auto& visibleAreaUserRatios = eventHub_->GetVisibleAreaRatios(true);
     auto& visibleAreaUserCallback = eventHub_->GetVisibleAreaCallback(true);
     auto& visibleAreaInnerRatios = eventHub_->GetVisibleAreaRatios(false);
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
-
     if (forceDisappear || IsFrameDisappear(timestamp)) {
+        if (IsDebugInspectorId()) {
+            TAG_LOGD(AceLogTag::ACE_UIEVENT,
+                "OnVisibleAreaChange Node(%{public}s/%{public}d) lastRatio(User:%{public}s/Inner:%{public}s) "
+                "forceDisappear:%{public}d frameDisappear:%{public}d ",
+                GetTag().c_str(), GetId(), std::to_string(lastVisibleRatio_).c_str(),
+                std::to_string(lastInnerVisibleRatio_).c_str(), forceDisappear, IsFrameDisappear(timestamp));
+        }
         if (!NearEqual(lastInnerVisibleRatio_, VISIBLE_RATIO_MIN)) {
             ProcessAllVisibleCallback(visibleAreaInnerRatios, visibleAreaInnerCallback, VISIBLE_RATIO_MIN,
                 lastInnerVisibleCallbackRatio_, false, true);
@@ -1663,24 +1689,20 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
         }
         return;
     }
-
+    bool logFlag = IsDebugInspectorId();
+    auto visibleResult = GetCacheVisibleRect(timestamp, logFlag);
     if (hasInnerCallback) {
-        auto visibleResult = GetCacheVisibleRect(timestamp);
         if (isCalculateInnerVisibleRectClip_) {
             ProcessVisibleAreaChangeEvent(visibleResult.innerVisibleRect, visibleResult.frameRect,
                 visibleAreaInnerRatios, visibleAreaInnerCallback, false);
         } else {
-            ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect,
-                visibleAreaInnerRatios, visibleAreaInnerCallback, false);
+            ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect, visibleAreaInnerRatios,
+                visibleAreaInnerCallback, false);
         }
-        if (hasUserCallback) {
-            ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect,
-                visibleAreaUserRatios, visibleAreaUserCallback, true);
-        }
-    } else {
-        auto visibleResult = GetCacheVisibleRect(timestamp);
-        ProcessVisibleAreaChangeEvent(visibleResult.visibleRect, visibleResult.frameRect,
-            visibleAreaUserRatios, visibleAreaUserCallback, true);
+    }
+    if (hasUserCallback) {
+        ProcessVisibleAreaChangeEvent(
+            visibleResult.visibleRect, visibleResult.frameRect, visibleAreaUserRatios, visibleAreaUserCallback, true);
     }
 }
 
@@ -1689,6 +1711,13 @@ void FrameNode::ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const Re
 {
     double currentVisibleRatio =
         std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect), VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
+    if (IsDebugInspectorId()) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT,
+            "OnVisibleAreaChange Node(%{public}s/%{public}d) Ratio(cur:%{public}s/last:%{public}s)", GetTag().c_str(),
+            GetId(), std::to_string(currentVisibleRatio).c_str(), std::to_string(lastVisibleRatio_).c_str());
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnVisibleAreaChange End of calculation %{public}s",
+            NearEqual(currentVisibleRatio, lastVisibleRatio_) ? "non-execution" : "execution");
+    }
     if (isUser) {
         if (!NearEqual(currentVisibleRatio, lastVisibleRatio_)) {
             auto lastVisibleCallbackRatio = lastVisibleCallbackRatio_;
@@ -2067,6 +2096,9 @@ RefPtr<PaintWrapper> FrameNode::CreatePaintWrapper()
         // It is necessary to copy the layoutProperty property to prevent the paintProperty_ property from being
         // modified during the paint process, resulting in the problem of judging whether the front-end setting value
         // changes the next time js is executed.
+        if (!paintMethod) {
+            paintMethod = pattern_->CreateDefaultNodePaintMethod();
+        }
 
         auto paintWrapper = MakeRefPtr<PaintWrapper>(
             renderContext_, geometryNode_->Clone(), paintProperty_->Clone(), extensionHandler_);
@@ -2512,8 +2544,19 @@ void FrameNode::AddJudgeToTargetComponent(RefPtr<TargetComponent>& targetCompone
         if (callbackNative) {
             targetComponent->SetOnGestureJudgeNativeBegin(std::move(callbackNative));
         }
-        auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
-        targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+
+        if (!targetComponent->IsInnerNodeGestureRecognizerJudgeSet()) {
+            auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+            targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+        }
+
+        if (GetExposeInnerGestureFlag()) {
+            auto pattern = GetPattern();
+            if (pattern) {
+                auto gestureRecognizerJudgeCallback = gestureHub->GetOnGestureRecognizerJudgeBegin();
+                pattern->AddInnerOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeCallback));
+            }
+        }
     }
 }
 
@@ -2573,7 +2616,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
         bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, touchRestrict.touchEvent);
-        AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList);
+        AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList, touchRestrict.touchTestType);
         if ((!isDispatch) && isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
         }
@@ -3082,6 +3125,12 @@ OffsetF FrameNode::GetPositionToScreen()
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        offsetCurrent = offsetCurrent * windowScale;
+    }
     OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
     return offset;
 }
@@ -3107,6 +3156,12 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     OffsetF nodeOffset = GetPositionToWindowWithTransform();
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        nodeOffset = nodeOffset * windowScale;
+    }
     OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
     return offset;
 }
@@ -3826,12 +3881,12 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
 void FrameNode::GetPercentSensitive()
 {
     auto res = layoutProperty_->GetPercentSensitive();
-    if (res.first || pattern_->IsNeedPercent()) {
+    if (res.first) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentWidth(true);
         }
     }
-    if (res.second || pattern_->IsNeedPercent()) {
+    if (res.second) {
         if (layoutAlgorithm_) {
             layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -3862,6 +3917,10 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 {
     ACE_LAYOUT_TRACE_BEGIN("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
+
+    // Update attributes for measure
+    pattern_->UpdateAttributes();
+
     ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
@@ -4493,6 +4552,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheS
             SetActive(false);
             SetJSViewActive(false);
         } else {
+            SetActive(true);
             SetJSViewActive(true);
         }
     } else {
@@ -4500,6 +4560,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheS
             SetActive(false);
             SetJSViewActive(false);
         } else {
+            SetActive(true);
             SetJSViewActive(true);
         }
     }
@@ -4571,7 +4632,8 @@ void FrameNode::RecordExposureInner()
     exposureProcessor_->SetListenState(true);
 }
 
-void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList)
+void FrameNode::AddFrameNodeSnapshot(
+    bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -4586,7 +4648,7 @@ void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<R
         .isHit = isHit,
         .hitTestMode = static_cast<int32_t>(GetHitTestMode()),
         .responseRegionList = responseRegionList };
-    eventMgr->GetEventTreeRecord().AddFrameNodeSnapshot(std::move(info));
+    eventMgr->GetEventTreeRecord(type).AddFrameNodeSnapshot(std::move(info));
 }
 
 int32_t FrameNode::GetUiExtensionId()
@@ -4746,7 +4808,7 @@ OffsetF FrameNode::CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp
     return offset;
 }
 
-OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp)
+OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag)
 {
     auto currOffset = geometryNode_->GetFrameOffset();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
@@ -4762,18 +4824,20 @@ OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp)
     if (parent) {
         auto parentTimestampOffset = parent->GetCachedGlobalOffset();
         if (parentTimestampOffset.first == nanoTimestamp) {
-            auto result = currOffset + parentTimestampOffset.second;
-            SetCachedGlobalOffset({ nanoTimestamp, result });
-            return result;
+            currOffset = currOffset + parentTimestampOffset.second;
+            SetCachedGlobalOffset({ nanoTimestamp, currOffset });
         } else {
-            auto result = currOffset + parent->CalculateOffsetRelativeToWindow(nanoTimestamp);
-            SetCachedGlobalOffset({ nanoTimestamp, result });
-            return result;
+            currOffset = currOffset + parent->CalculateOffsetRelativeToWindow(nanoTimestamp, logFlag);
+            SetCachedGlobalOffset({ nanoTimestamp, currOffset });
         }
     } else {
         SetCachedGlobalOffset({ nanoTimestamp, currOffset });
-        return currOffset;
     }
+    if (logFlag) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnAreaChange Node(%{public}s/%{public}d) offsetToWindow:%{public}s",
+            GetTag().c_str(), GetId(), currOffset.ToString().c_str());
+    }
+    return currOffset;
 }
 
 RefPtr<FrameNode> FrameNode::GetNodeContainer()
@@ -4989,7 +5053,7 @@ bool FrameNode::AllowVisibleAreaCheck() const
     return IsOnMainTree() || (pattern_ && pattern_->AllowVisibleAreaCheck());
 }
 
-void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect)
+void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const
 {
     visibleRect = GetPaintRectWithTransform();
     frameRect = visibleRect;
@@ -5032,7 +5096,7 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
     }
 }
 
-CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp)
+CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool logFlag)
 {
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
     auto rectToParent = GetPaintRectWithTransform();
@@ -5044,13 +5108,23 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp)
         return cachedVisibleRectResult_.second;
     }
 
+    CacheVisibleRectResult result;
     if (parentUi->cachedVisibleRectResult_.first == timestamp) {
         auto parentCacheVisibleRectResult = parentUi->cachedVisibleRectResult_.second;
-        return CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+        result = CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+    } else {
+        CacheVisibleRectResult parentCacheVisibleRectResult = parentUi->GetCacheVisibleRect(timestamp, logFlag);
+        result = CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
     }
-
-    CacheVisibleRectResult parentCacheVisibleRectResult = parentUi->GetCacheVisibleRect(timestamp);
-    return CalculateCacheVisibleRect(parentCacheVisibleRectResult, parentUi, rectToParent, scale, timestamp);
+    if (logFlag) {
+        TAG_LOGD(AceLogTag::ACE_UIEVENT,
+            "OnVisibleAreaChange Node(%{public}s/%{public}d) windowOffset:%{public}s visibleRect:%{public}s "
+            "innerVisibleRect:%{public}s frameRect:%{public}s innerBoundaryRect:%{public}s",
+            GetTag().c_str(), GetId(), result.windowOffset.ToString().c_str(), result.visibleRect.ToString().c_str(),
+            result.innerVisibleRect.ToString().c_str(), result.frameRect.ToString().c_str(),
+            result.innerBoundaryRect.ToString().c_str());
+    }
+    return result;
 }
 
 CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
@@ -5745,28 +5819,29 @@ void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<st
 {
     std::lock_guard<std::mutex> lock(mutex_);
     bool result = func();
-    if (isCNode_) {
+    if (IsCNode()) {
         return;
     }
     if (result) {
-        customPropertyMap_[UPDATE_FLAG_KEY] = true;
+        customPropertyMap_[UPDATE_FLAG_KEY] = "1";
     }
     if (!getCustomProperty_) {
         getCustomProperty_ = getFunc;
     }
 }
 
-std::string FrameNode::GetJSCustomProperty(const std::string& key)
+bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
 {
     if (getCustomProperty_) {
-        return getCustomProperty_(key);
+        value = getCustomProperty_(key);
+        return true;
     }
-    return nullptr;
+    return false;
 }
 
 bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)
 {
-    if (!isCNode_) {
+    if (!IsCNode()) {
         return false;
     }
     std::lock_guard<std::mutex> lock(mutex_);
@@ -5791,5 +5866,14 @@ void FrameNode::RemoveCustomProperty(const std::string& key)
     if (iter != customPropertyMap_.end()) {
         customPropertyMap_.erase(iter);
     }
+}
+
+bool FrameNode::IsDebugInspectorId()
+{
+    if (!SystemProperties::GetDebugEnabled()) {
+        return false;
+    }
+    auto debugInspectorId = SystemProperties::GetDebugInspectorId();
+    return debugInspectorId == GetInspectorId().value_or("");
 }
 } // namespace OHOS::Ace::NG

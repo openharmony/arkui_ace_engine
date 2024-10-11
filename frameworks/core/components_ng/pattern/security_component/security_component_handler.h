@@ -70,8 +70,7 @@ private:
     static bool CheckRenderEffect(RefPtr<FrameNode>& node);
     static bool CheckParentNodesEffect(RefPtr<FrameNode>& node,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
-    static void GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect, RectF& visibleRectWithPosition);
-    static bool IsOutOfParent(const RectF& visibleRect, const RectF& renderRect);
+    static void GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect);
     static bool IsOutOfParentWithRound(const RectF& visibleRect, const RectF& renderRect,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static bool GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId);
@@ -90,6 +89,8 @@ private:
     static bool IsInModalPage(const RefPtr<UINode>& node);
     static int32_t GetNodeZIndex(const RefPtr<UINode>& root);
     static void UpdateAllZindex(const RefPtr<UINode>& root, std::unordered_map<int32_t, int32_t>& nodeId2Zindex);
+    static void WriteButtonInfo(const RefPtr<OHOS::Ace::NG::SecurityComponentLayoutProperty>& layoutProperty,
+        RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H

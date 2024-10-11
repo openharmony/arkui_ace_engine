@@ -940,7 +940,7 @@ public:
     }
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
-    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect);
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
 
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
@@ -1090,15 +1090,27 @@ public:
     void OnForegroundColorUpdate(const Color& value);
 
     void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
-    std::string GetJSCustomProperty(const std::string& key);
+    bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
     void AddCustomProperty(const std::string& key, const std::string& value);
     void RemoveCustomProperty(const std::string& key);
 
-    void setIsCNode(bool createByCapi)
+    LayoutConstraintF GetLayoutConstraint() const;
+
+    WeakPtr<TargetComponent> GetTargetComponent() const
     {
-        isCNode_ = createByCapi;
+        return targetComponent_;
+    }
+
+    void SetExposeInnerGestureFlag(bool exposeInnerGestureFlag)
+    {
+        exposeInnerGestureFlag_ = exposeInnerGestureFlag;
+    }
+
+    bool GetExposeInnerGestureFlag() const
+    {
+        return exposeInnerGestureFlag_;
     }
 
 protected:
@@ -1127,7 +1139,6 @@ private:
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
-    LayoutConstraintF GetLayoutConstraint() const;
     OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
@@ -1188,7 +1199,7 @@ private:
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback();
-    bool IsFrameDisappear();
+    bool IsFrameDisappear() const;
     bool IsFrameDisappear(uint64_t timestamp);
     bool IsFrameAncestorDisappear(uint64_t timestamp);
     void ThrottledVisibleTask();
@@ -1203,13 +1214,13 @@ private:
     void GetPercentSensitive();
     void UpdatePercentSensitive();
 
-    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList);
+    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type);
 
     int32_t GetNodeExpectedRate();
 
     void RecordExposureInner();
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
+    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
 
     const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const;
 
@@ -1230,7 +1241,7 @@ private:
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
 
-    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp);
+    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
@@ -1243,6 +1254,8 @@ private:
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
     void ResetPredictNodes();
+
+    bool IsDebugInspectorId();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -1339,7 +1352,7 @@ private:
 
     bool isUseTransitionAnimator_ = false;
 
-    bool isCNode_ = false;
+    bool exposeInnerGestureFlag_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

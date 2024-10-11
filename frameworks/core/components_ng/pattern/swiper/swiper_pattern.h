@@ -296,7 +296,7 @@ public:
 
     bool HasIndicatorNode() const
     {
-        return indicatorId_.has_value();
+        return indicatorId_.has_value() || GetIndicatorNode() != nullptr;
     }
 
     bool HasLeftButtonNode() const
@@ -626,6 +626,40 @@ public:
         return isTouchDownOnOverlong_;
     }
 
+    bool IsBindIndicator() const
+    {
+        return isBindIndicator_;
+    }
+
+    void SetBindIndicator(bool bind)
+    {
+        isBindIndicator_ = bind;
+    }
+ 
+    void SetIndicatorNode(WeakPtr<NG::UINode>& indicatorNode)
+    {
+        if (isBindIndicator_) {
+            indicatorNode_ = indicatorNode;
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
+            auto frameIndicatorNode = GetIndicatorNode();
+            CHECK_NULL_VOID(frameIndicatorNode);
+            frameIndicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
+
+    RefPtr<FrameNode> GetIndicatorNode() const
+    {
+        auto refUINode = indicatorNode_.Upgrade();
+        CHECK_NULL_RETURN(refUINode, nullptr);
+        auto frameNode = DynamicCast<FrameNode>(refUINode);
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode;
+    }
+
+    bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -825,6 +859,8 @@ private:
      */
     void CloseTheGap(float& offset);
 
+    ScrollResult HandleOutBoundary(float offset, int32_t source, float velocity);
+
     ScrollResult HandleScroll(
         float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
 
@@ -961,6 +997,7 @@ private:
 
     bool IsItemOverlay() const;
     void UpdateIndicatorOnChildChange();
+    void UpdateDigitalIndicator();
 
     void CheckSpecialItemCount() const;
     int32_t CheckIndexRange(int32_t index) const;
@@ -1073,6 +1110,7 @@ private:
     std::optional<int32_t> preTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;
+    std::optional<int32_t> oldRealTotalCount_;
     std::optional<float> placeItemWidth_;
     float currentDelta_ = 0.0f;
     // cumulated delta in a single drag event
@@ -1131,12 +1169,21 @@ private:
     bool needResetCurrentIndex_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
+    // Indicates whether previous frame animation is running, only used on swiper custom animation.
+    bool prevFrameAnimationRunning_ = false;
     std::optional<bool> isSwipeByGroup_;
     std::set<WeakPtr<FrameNode>> groupedItems_;
 
     std::set<int32_t> cachedItems_;
     LayoutConstraintF layoutConstraint_;
     bool requestLongPredict_ = false;
+    WeakPtr<NG::UINode> indicatorNode_;
+    bool isBindIndicator_ = false;
+    RefPtr<FrameNode> GetCommonIndicatorNode();
+    bool IsIndicator(const std::string& tag) const
+    {
+        return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
+    }
 };
 } // namespace OHOS::Ace::NG
 

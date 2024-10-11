@@ -1035,8 +1035,13 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
-void ViewAbstract::SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
+    GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetExposeInnerGestureFlag(exposeInnerGestureFlag);
+
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
@@ -2661,6 +2666,7 @@ void ViewAbstract::SetForegroundColor(const Color& color)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetForegroundColorStrategy().has_value()) {
         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
         renderContext->ResetForegroundColorStrategy();
@@ -3787,7 +3793,7 @@ void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEven
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
-    auto focusHub = frameNode->GetFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(true, false);
 }
@@ -4454,6 +4460,9 @@ void ViewAbstract::SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetJSFrameNodeOnClick(std::move(clickEventFunc));
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(true, false);
 }
 
 void ViewAbstract::ClearJSFrameNodeOnClick(FrameNode* frameNode)

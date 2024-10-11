@@ -274,6 +274,7 @@ void GridPattern::FireOnScrollStart()
         scrollBar->PlayScrollBarAppearAnimation();
     }
     StopScrollBarAnimatorByProxy();
+    FireObserverOnScrollStart();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<GridEventHub>();
@@ -286,11 +287,14 @@ void GridPattern::FireOnScrollStart()
 void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart);
+    CHECK_NULL_VOID(host);
     if (gridLayoutInfo_.startIndex_ == 0) {
         if (!isInitialized_) {
-            onReachStart();
-            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+            FireObserverOnReachStart();
+            if (onReachStart) {
+                onReachStart();
+                AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+            }
         }
         auto finalOffset = gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_;
         if (!NearZero(finalOffset)) {
@@ -299,6 +303,8 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart)
             bool scrollDownToStart =
                 LessNotEqual(gridLayoutInfo_.prevHeight_, 0.0) && GreatOrEqual(gridLayoutInfo_.currentHeight_, 0.0);
             if (scrollUpToStart || scrollDownToStart) {
+                FireObserverOnReachStart();
+                CHECK_NULL_VOID(onReachStart);
                 ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:Grid",
                     scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
                 onReachStart();
@@ -311,8 +317,11 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd);
+    CHECK_NULL_VOID(host);
     if (gridLayoutInfo_.endIndex_ == (gridLayoutInfo_.childrenCount_ - 1)) {
+        if (!isInitialized_) {
+            FireObserverOnReachEnd();
+        }
         auto finalOffset = gridLayoutInfo_.currentHeight_ - gridLayoutInfo_.prevHeight_;
         if (!NearZero(finalOffset)) {
             bool scrollDownToEnd = LessNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
@@ -320,6 +329,8 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
             bool scrollUpToEnd = GreatNotEqual(gridLayoutInfo_.prevHeight_, endHeight_) &&
                                  LessOrEqual(gridLayoutInfo_.currentHeight_, endHeight_);
             if (scrollDownToEnd || scrollUpToEnd) {
+                FireObserverOnReachEnd();
+                CHECK_NULL_VOID(onReachEnd);
                 ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, id:%d, tag:Grid", scrollUpToEnd,
                     scrollDownToEnd, static_cast<int32_t>(host->GetAccessibilityId()));
                 onReachEnd();
@@ -478,7 +489,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     isInitialized_ = true;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
-    return paintProperty->GetFadingEdge().value_or(false);
+    return paintProperty->GetFadingEdge().value_or(false) || paintProperty->HasContentClip();
 }
 
 void GridPattern::CheckScrollable()
@@ -517,6 +528,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     if (onScroll) {
         FireOnScroll(finalOffset, onScroll);
     }
+    FireObserverOnDidScroll(finalOffset);
     auto onDidScroll = gridEventHub->GetOnDidScroll();
     if (onDidScroll) {
         FireOnScroll(finalOffset, onDidScroll);
@@ -1428,10 +1440,8 @@ float GridPattern::GetTotalHeight() const
 
 void GridPattern::UpdateScrollBarOffset()
 {
-    if (!GetScrollBar() && !GetScrollBarProxy()) {
-        return;
-    }
-    if (!isConfigScrollable_) {
+    CheckScrollBarOff();
+    if ((!GetScrollBar() && !GetScrollBarProxy()) || !isConfigScrollable_) {
         return;
     }
     auto host = GetHost();
@@ -1632,7 +1642,10 @@ void GridPattern::SyncLayoutBeforeSpring()
 
     forceOverScroll_ = true;
     host->SetActive();
-    host->CreateLayoutTask();
+    auto context = host->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(host);
+    }
     forceOverScroll_ = false;
 }
 
@@ -1735,6 +1748,12 @@ void GridPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(gridLayoutInfo_.childrenCount_));
     DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
     DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
+    property->GetRowsGap().has_value()
+        ? DumpLog::GetInstance().AddDesc("RowsGap:" + std::to_string(property->GetRowsGap().value().Value()))
+        : DumpLog::GetInstance().AddDesc("RowsGap:null");
+    property->GetColumnsGap().has_value()
+        ? DumpLog::GetInstance().AddDesc("ColumnsGap:" + std::to_string(property->GetColumnsGap().value().Value()))
+        : DumpLog::GetInstance().AddDesc("ColumnsGap:null");
     property->GetCachedCount().has_value()
         ? DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value()))
         : DumpLog::GetInstance().AddDesc("CachedCount:null");

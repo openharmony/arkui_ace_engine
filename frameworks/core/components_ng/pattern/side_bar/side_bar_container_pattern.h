@@ -231,7 +231,6 @@ private:
     void SetAccessibilityEvent();
     void UpdateControlButtonInfo();
     void UpdateControlButtonImageSize();
-    void UpdateControlButtonImage(std::optional<ImageSourceInfo>& info);
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;

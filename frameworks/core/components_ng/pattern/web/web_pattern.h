@@ -40,7 +40,6 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
@@ -813,6 +812,7 @@ private:
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
+    void WebSendMouseEvent(const MouseInfo& info, int32_t clickNum);
     bool HandleDoubleClickEvent(const MouseInfo& info);
     void SendDoubleClickEvent(const MouseClickInfo& info);
     int32_t HandleMouseClickEvent(const MouseInfo& info);
@@ -865,9 +865,10 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleTouchClickEvent(const GestureEvent& info, bool fromOverlay);
-    void OnSelectHandleStart(bool isFirst);
+    RectF ChangeHandleHeight(
+        const std::shared_ptr<SelectOverlayInfo>& info, const GestureEvent& event, bool isFirst);
+    void HandleTouchClickEventFromOverlay(const GestureEvent& info);
+    void OnSelectHandleStart(const GestureEvent& event, bool isFirst);
     void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
     void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
 
@@ -1134,6 +1135,8 @@ private:
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
+    bool isLayoutModeInit_ = false;
+    bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
@@ -1147,9 +1150,7 @@ private:
     };
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
     bool imageOverlayIsSelected_ = false;
-    bool clickEventInitialized_ = false;
-    bool clickedFromOverlay_ = false;
-    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    bool isLayoutModeChanged = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

@@ -106,6 +106,8 @@ private:
     void FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateSnapshotWindowProperty();
     bool IsSnapshotSizeChanged();
+    void UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
+        Color &color, ImageSourceInfo &sourceInfo);
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     RefPtr<TouchEventImpl> touchEvent_;

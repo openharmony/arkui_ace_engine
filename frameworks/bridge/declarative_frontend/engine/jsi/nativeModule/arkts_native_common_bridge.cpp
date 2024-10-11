@@ -889,14 +889,14 @@ void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim
     }
 }
 
-void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values)
+void ParseOuterBorderWidth(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values, bool needLocalized = false)
 {
     Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
-    Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(25);  //25: index of BorderWidth.start
-    Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(26);    //26: index of BorderWidth.end
+
     std::optional<CalcDimension> leftDim;
     std::optional<CalcDimension> rightDim;
     std::optional<CalcDimension> topDim;
@@ -908,8 +908,12 @@ void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, st
     ArkTSUtils::ParseOuterBorder(vm, rightArgs, rightDim);
     ArkTSUtils::ParseOuterBorder(vm, topArgs, topDim);
     ArkTSUtils::ParseOuterBorder(vm, bottomArgs, bottomDim);
-    ArkTSUtils::ParseOuterBorderForDashParams(vm, startArgs, startDim);
-    ArkTSUtils::ParseOuterBorderForDashParams(vm, endArgs, endDim);
+    if (needLocalized) {
+        Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(25); // 25: index of BorderWidth.start
+        Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(26);   // 26: index of BorderWidth.end
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, startArgs, startDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, endArgs, endDim);
+    }
 
     if (startDim.has_value() || endDim.has_value()) {
         PushOuterBorderDimensionVector(startDim, values);
@@ -931,15 +935,13 @@ void PushOuterBorderColorVector(const std::optional<Color>& valueColor, std::vec
         options.push_back(0);
     }
 }
-void ParseOuterBorderColor(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex)
+void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values,
+    int32_t argsIndex, bool needLocalized = false)
 {
     Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
     Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
     Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
     Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
-    Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(27); //27: index of BorderColor.startColor
-    Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(28);   //28: index of BorderColor.endColor
 
     std::optional<Color> leftColor;
     std::optional<Color> rightColor;
@@ -964,13 +966,17 @@ void ParseOuterBorderColor(
     if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom)) {
         bottomColor = bottom;
     }
-    Color start;
-    if (!startArgs->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, startArgs, start)) {
-        startColor = start;
-    }
-    Color end;
-    if (!endArgs->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, endArgs, end)) {
-        endColor = end;
+    if (needLocalized) {
+        Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(27); // 27: index of BorderColor.startColor
+        Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(28);   // 28: index of BorderColor.endColor
+        Color start;
+        if (!startArgs->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, startArgs, start)) {
+            startColor = start;
+        }
+        Color end;
+        if (!endArgs->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, endArgs, end)) {
+            endColor = end;
+        }
     }
     if (startColor.has_value() || endColor.has_value()) {
         PushOuterBorderColorVector(startColor, values);
@@ -994,21 +1000,38 @@ bool ParseLocalizedBorderRadius(const EcmaVM* vm, const Local<JSValueRef>& value
     return false;
 }
 
-void ParseOuterBorderRadius(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex)
+void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values,
+    int32_t argsIndex, bool needLocalized = false)
 {
     Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
     Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
     Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
-    Local<JSValueRef> topStartArgs = runtimeCallInfo->GetCallArgRef(29);    // 29: index of BorderRadius.topStart
-    Local<JSValueRef> topEndArgs = runtimeCallInfo->GetCallArgRef(30);      // 30: index of BorderRadius.topEnd
-    Local<JSValueRef> bottomStartArgs = runtimeCallInfo->GetCallArgRef(31); // 31: index of BorderRadius.bottomStart
-    Local<JSValueRef> bottomEndArgs = runtimeCallInfo->GetCallArgRef(32);   // 32: index of BorderRadius.bottomEnd
-    // 35: index of is LocalizedBorderRadius or not
-    Local<JSValueRef> isLocalizedBorderRadiusArg = runtimeCallInfo->GetCallArgRef(35);
-    bool isLocalizedBorderRadius =
-        (isLocalizedBorderRadiusArg->IsBoolean()) ? isLocalizedBorderRadiusArg->ToBoolean(vm)->Value() : false;
+    if (needLocalized) {
+        Local<JSValueRef> topStartArgs = runtimeCallInfo->GetCallArgRef(29);    // 29: index of BorderRadius.topStart
+        Local<JSValueRef> topEndArgs = runtimeCallInfo->GetCallArgRef(30);      // 30: index of BorderRadius.topEnd
+        Local<JSValueRef> bottomStartArgs = runtimeCallInfo->GetCallArgRef(31); // 31: index of BorderRadius.bottomStart
+        Local<JSValueRef> bottomEndArgs = runtimeCallInfo->GetCallArgRef(32);   // 32: index of BorderRadius.bottomEnd
+        // 35: index of is LocalizedBorderRadius or not
+        Local<JSValueRef> isLocalizedBorderRadiusArg = runtimeCallInfo->GetCallArgRef(35);
+        bool isLocalizedBorderRadius =
+            (isLocalizedBorderRadiusArg->IsBoolean()) ? isLocalizedBorderRadiusArg->ToBoolean(vm)->Value() : false;
+        if (isLocalizedBorderRadius) {
+            CalcDimension topStartOptional;
+            CalcDimension topEndOptional;
+            CalcDimension bottomStartOptional;
+            CalcDimension bottomEndOptional;
+            ParseLocalizedBorderRadius(vm, topStartArgs, topStartOptional);
+            ParseLocalizedBorderRadius(vm, topEndArgs, topEndOptional);
+            ParseLocalizedBorderRadius(vm, bottomStartArgs, bottomStartOptional);
+            ParseLocalizedBorderRadius(vm, bottomEndArgs, bottomEndOptional);
+            PushOuterBorderDimensionVector(topStartOptional, values);
+            PushOuterBorderDimensionVector(topEndOptional, values);
+            PushOuterBorderDimensionVector(bottomStartOptional, values);
+            PushOuterBorderDimensionVector(bottomEndOptional, values);
+            return;
+        }
+    }
 
     std::optional<CalcDimension> topLeftOptional;
     std::optional<CalcDimension> topRightOptional;
@@ -1020,21 +1043,6 @@ void ParseOuterBorderRadius(
     ArkTSUtils::ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
     ArkTSUtils::ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
 
-    if (isLocalizedBorderRadius) {
-        CalcDimension topStartOptional;
-        CalcDimension topEndOptional;
-        CalcDimension bottomStartOptional;
-        CalcDimension bottomEndOptional;
-        ParseLocalizedBorderRadius(vm, topStartArgs, topStartOptional);
-        ParseLocalizedBorderRadius(vm, topEndArgs, topEndOptional);
-        ParseLocalizedBorderRadius(vm, bottomStartArgs, bottomStartOptional);
-        ParseLocalizedBorderRadius(vm, bottomEndArgs, bottomEndOptional);
-        PushOuterBorderDimensionVector(topStartOptional, values);
-        PushOuterBorderDimensionVector(topEndOptional, values);
-        PushOuterBorderDimensionVector(bottomStartOptional, values);
-        PushOuterBorderDimensionVector(bottomEndOptional, values);
-        return;
-    }
     PushOuterBorderDimensionVector(topLeftOptional, values);
     PushOuterBorderDimensionVector(topRightOptional, values);
     PushOuterBorderDimensionVector(bottomLeftOptional, values);
@@ -2916,6 +2924,26 @@ ArkUINativeModuleValue CommonBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCall
     ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5);  // Border Color args start index
     ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Style args start index
 
+    GetArkUINodeModifiers()->getCommonModifier()->setBorder(nativeNode, options.data(), options.size(),
+        colorAndStyleOptions.data(), colorAndStyleOptions.size(), false, false, false);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetLocalizedBorder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    std::vector<ArkUI_Float32> options;
+    ParseOuterBorderWidth(runtimeCallInfo, vm, options, true);         // Border Width args start index from 1
+    ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9, true); // Border Radius args start index
+
+    std::vector<uint32_t> colorAndStyleOptions;
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, true);  // Border Color args start index
+    ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Style args start index
+
     int32_t isLocalizedBorderWidth = 0;
     int32_t isLocalizedBorderColor = 0;
     int32_t isLocalizedBorderRadius = 0;
@@ -2948,7 +2976,15 @@ void CommonBridge::ParseLocalizedBorder(ArkUIRuntimeCallInfo* runtimeCallInfo, i
 
 ArkUINativeModuleValue CommonBridge::SetBorderWithDashParams(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    CommonBridge::SetBorder(runtimeCallInfo);
+    int32_t isLocalizedBorderWidth = 0;
+    int32_t isLocalizedBorderColor = 0;
+    int32_t isLocalizedBorderRadius = 0;
+    ParseLocalizedBorder(runtimeCallInfo, isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius);
+    if (isLocalizedBorderWidth || isLocalizedBorderWidth || isLocalizedBorderWidth) {
+        CommonBridge::SetLocalizedBorder(runtimeCallInfo);
+    } else {
+        CommonBridge::SetBorder(runtimeCallInfo);
+    }
 
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -5524,10 +5560,11 @@ ArkUINativeModuleValue CommonBridge::ResetBlendMode(ArkUIRuntimeCallInfo *runtim
 ArkUINativeModuleValue CommonBridge::SetAdvancedBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);      // 0: index of parameter frameNode
     Local<JSValueRef> blendModeArg = runtimeCallInfo->GetCallArgRef(1);      // 1: index of parameter blendMode
     Local<JSValueRef> blendApplyTypeArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of parameter blendApplyType
+    CHECK_NULL_RETURN(frameNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     int32_t blendModeValue = static_cast<int32_t>(OHOS::Ace::BlendMode::NONE);
     int32_t blendApplyTypeValue = static_cast<int32_t>(OHOS::Ace::BlendApplyType::FAST);
@@ -5561,8 +5598,9 @@ ArkUINativeModuleValue CommonBridge::SetAdvancedBlendMode(ArkUIRuntimeCallInfo *
 ArkUINativeModuleValue CommonBridge::ResetAdvancedBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(frameNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetBlendMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -7291,7 +7329,7 @@ ArkUINativeModuleValue CommonBridge::AddGestureGroup(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    int32_t mode = 2;
+    int32_t mode = 0;
     GetGestureModeValue(runtimeCallInfo, mode, NUM_2);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createGestureGroup(mode);
     SetGestureTag(runtimeCallInfo, NUM_0, gesture);

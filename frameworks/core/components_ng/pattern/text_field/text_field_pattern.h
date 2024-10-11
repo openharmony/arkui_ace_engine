@@ -287,6 +287,7 @@ public:
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::string insertValue, int32_t maxLength);
     void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
     float MeasureCounterNodeHeight();
+    double CalcCounterBoundHeight();
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
@@ -379,6 +380,8 @@ public:
     }
     void UpdateCaretPositionByTouch(const Offset& offset);
     bool IsReachedBoundary(float offset);
+
+    virtual int32_t GetRequestKeyboardId();
 
     virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboardCrossPlatForm(bool isFocusViewChanged);
@@ -1526,9 +1529,14 @@ public:
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
     void StopContentScroll();
     void UpdateContentScroller(const Offset& localOffset);
+    void SetIsInitTextRect(bool isInitTextRect)
+    {
+        initTextRect_ = isInitTextRect;
+    }
 
 protected:
     virtual void InitDragEvent();
+    void UpdateAttributes() override;
     void OnAttachToMainTree() override;
 
     void OnDetachFromMainTree() override;
@@ -1963,6 +1971,7 @@ private:
     int32_t previewTextEnd_ = -1;
     std::string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
+    std::string lastTextValue_ = "";
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;

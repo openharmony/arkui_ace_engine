@@ -49,13 +49,13 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    expandDisplay_ = dialogTheme->GetExpandDisplay();
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(dialogProp);
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
+    expandDisplay_ = dialogTheme->GetExpandDisplay() || dialogPattern->IsShowInFreeMultiWindow();
     keyboardAvoidMode_ = dialogPattern->GetDialogProperties().keyboardAvoidMode;
     isUIExtensionSubWindow_ = dialogPattern->IsUIExtensionSubWindow();
     hostWindowRect_ = dialogPattern->GetHostWindowRect();
@@ -542,7 +542,9 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // is PcDevice MultipleDialog Offset to the bottom right
     if (dialogTheme->GetMultipleDialogDisplay() != "stack" && !dialogProp->GetIsModal().value_or(true) &&
         dialogProp->GetShowInSubWindowValue(false)) {
-        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(subWindowId_);
+        auto currentId = Container::CurrentIdSafely();
+        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(currentId >= MIN_SUBCONTAINER_ID ?
+            SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId);
         CHECK_NULL_VOID(subWindow);
         auto subOverlayManager = subWindow->GetOverlayManager();
         CHECK_NULL_VOID(subOverlayManager);

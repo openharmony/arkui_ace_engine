@@ -834,7 +834,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         } else {
             frameNodeSize_ = SizeF(0.0f, 0.0f);
         }
-        auto rectCenter = frameNode->GetPaintRectCenter();
+        auto rectCenter = frameNode->GetPaintRectCenter(false);
         frameNodeOffset_ = OffsetF(rectCenter.GetX() - frameNodeSize_.Width() / 2.0f,
             rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
 #ifdef WEB_SUPPORTED
@@ -1007,7 +1007,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f)) {
             frameNodeOffset_ = menuPreviewRect.GetOffset();
         }
-        auto originPixelMapWidth = pixelMap->GetWidth();
+        int32_t originPixelMapWidth = pixelMap ? pixelMap->GetWidth() : 0;
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(originPixelMapWidth, 0.0f) &&
             menuPreviewRect.Width() < originPixelMapWidth * menuPreviewScale_) {
             defaultPixelMapScale = menuPreviewRect.Width() / originPixelMapWidth;
@@ -1025,6 +1025,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (IsNeedSwitchToSubWindow() || isMenuShow) {
         imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
+        CHECK_NULL_VOID(imageNode);
         auto originPoint = imageNode->GetPositionToWindowWithTransform();
         if (hasContextMenu || isMenuShow) {
             auto previewDragMovePosition = dragDropManager->GetUpdateDragMovePosition();
@@ -1080,7 +1081,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             }
         }
         auto childSize = badgeNumber.has_value() ? badgeNumber.value() : GetSelectItemSize();
-        if (childSize > 1) {
+        if (childSize >= 1) {
             recordsSize = childSize;
         }
         textNode = DragEventActuator::CreateBadgeTextNode(frameNode, childSize, previewScale, true);
@@ -1104,6 +1105,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
     }
     RefPtr<PixelMap> pixelMapDuplicated = GetPreScaledPixelMapIfExist(scale, pixelMap);
+    CHECK_NULL_VOID(dragEventActuator_);
     dragEventActuator_->ResetPreScaledPixelMapForDragThroughTouch();
     dragPreviewPixelMap_ = nullptr;
     CHECK_NULL_VOID(pixelMapDuplicated);
@@ -1133,8 +1135,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
-        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
-        static_cast<int32_t>(info.GetSourceTool()), info.GetScreenLocation().GetX(),
+        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
     std::string summarys;
     for (const auto& [udkey, recordSize] : summary) {
@@ -1284,10 +1285,6 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
     auto dragDropManager = pipeline->GetDragDropManager();
     if (dragDropManager->IsDragged()) {
         dragDropProxy_->OnDragMove(info);
-    }
-    if (IsNeedSwitchToSubWindow()) {
-        PointerEvent pointerEvent = PointerEvent(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
-        dragDropManager->DoDragMoveAnimate(pointerEvent);
     }
 }
 
@@ -1757,6 +1754,7 @@ void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
         dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), originalDragEventActuator->GetDirection(),
             originalDragEventActuator->GetFingers(), originalDragEventActuator->GetDistance());
         dragEventActuator_->CopyDragEvent(originalDragEventActuator);
+        InitDragDropEvent();
     }
     auto originalShowMenu = gestureEventHub->showMenu_;
     if (originalShowMenu) {

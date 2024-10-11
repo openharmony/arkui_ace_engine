@@ -1158,4 +1158,32 @@ bool BaseTextSelectOverlay::GetFrameNodeContentRect(const RefPtr<FrameNode>& nod
     }
     return true;
 }
+
+void BaseTextSelectOverlay::MarkOverlayDirty()
+{
+    if (SelectOverlayIsOn()) {
+        auto host = GetOwner();
+        CHECK_NULL_VOID(host);
+        auto overlayNode = host->GetOverlayNode();
+        CHECK_NULL_VOID(overlayNode);
+        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+void BaseTextSelectOverlay::ApplySelectAreaWithKeyboard(RectF& selectArea)
+{
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto keyboardInset = safeAreaManager->GetKeyboardInset();
+    if (keyboardInset.Length() <= 0) {
+        return;
+    }
+    if (GreatOrEqual(selectArea.Top(), keyboardInset.start)) {
+        selectArea.SetHeight(0.0f);
+    }
+}
 } // namespace OHOS::Ace::NG

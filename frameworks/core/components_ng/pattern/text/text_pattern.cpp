@@ -375,7 +375,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
 bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)
 {
     CHECK_NULL_RETURN(overlayMod_, false);
-    CHECK_NULL_RETURN(urlMouseEventInitialized_, false);
+    CHECK_NULL_RETURN(hasUrlSpan_, false);
     CHECK_NULL_RETURN(!spans_.empty() && pManager_, false);
     int32_t start = 0;
     for (const auto& item : spans_) {
@@ -2494,10 +2494,10 @@ bool TextPattern::SetActionExecSubComponent()
     CHECK_NULL_RETURN(host, false);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
-    accessibilityProperty->SetActionExecSubComponent([weakPtr = WeakClaim(this)](int32_t spanId) {
+    accessibilityProperty->SetActionExecSubComponent([weakPtr = WeakClaim(this)](int32_t spanId) -> bool {
             const auto& pattern = weakPtr.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->ExecSubComponent(spanId);
+            CHECK_NULL_RETURN(pattern, false);
+            return pattern->ExecSubComponent(spanId);
         });
     return true;
 }
@@ -2774,6 +2774,25 @@ Color TextPattern::GetUrlPressColor()
     return theme->GetUrlPressColor();
 }
 
+Color TextPattern::GetUrlSpanColor()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, Color());
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, Color());
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Color());
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, Color());
+
+    if (eventHub && !eventHub->IsEnabled()) {
+        return theme->GetUrlDisabledColor();
+    } else {
+        return theme->GetUrlDefaultColor();
+    }
+}
+
 // Deprecated: Use the TextSelectOverlay::ProcessOverlay() instead.
 // It is currently used by RichEditorPattern.
 void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo& selectInfo, bool animation)
@@ -2960,6 +2979,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (!isSpanStringMode_) {
         PreCreateLayoutWrapper();
     }
+    selectOverlay_->MarkOverlayDirty();
 }
 
 void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick)
@@ -3240,6 +3260,26 @@ void TextPattern::DumpInfo()
     if (!IsSetObscured()) {
         dumpLog.AddDesc(std::string("Content: ").append(textLayoutProp->GetContent().value_or(" ")));
     }
+    DumpTextStyleInfo();
+    dumpLog.AddDesc(
+        std::string("HeightAdaptivePolicy: ")
+            .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
+                textLayoutProp->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
+    if (pManager_) {
+        auto num = static_cast<int32_t>(pManager_->GetParagraphs().size());
+        dumpLog.AddDesc(std::string("Paragraphs num: ").append(std::to_string(num)));
+        dumpLog.AddDesc(std::string("PaintInfo: ").append(paintInfo_));
+    }
+    DumpScaleInfo();
+    DumpTextEngineInfo();
+    if (SystemProperties::GetDebugEnabled()) {
+        DumpAdvanceInfo();
+    }
+}
+
+void TextPattern::DumpTextStyleInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(std::string("FontColor: ")
                         .append((textStyle_.has_value() ? textStyle_->GetTextColor() : Color::BLACK).ColorToString()));
     dumpLog.AddDesc(
@@ -3264,20 +3304,8 @@ void TextPattern::DumpInfo()
         dumpLog.AddDesc(std::string("EllipsisMode: ").append(StringUtils::ToString(textStyle_->GetEllipsisMode())));
         dumpLog.AddDesc(
             std::string("LineBreakStrategy: ").append(GetLineBreakStrategyInJson(textStyle_->GetLineBreakStrategy())));
-    }
-    dumpLog.AddDesc(
-        std::string("HeightAdaptivePolicy: ")
-            .append(V2::ConvertWrapTextHeightAdaptivePolicyToString(
-                textLayoutProp->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST))));
-    if (pManager_) {
-        auto num = static_cast<int32_t>(pManager_->GetParagraphs().size());
-        dumpLog.AddDesc(std::string("Paragraphs num: ").append(std::to_string(num)));
-        dumpLog.AddDesc(std::string("PaintInfo: ").append(paintInfo_));
-    }
-    DumpScaleInfo();
-    DumpTextEngineInfo();
-    if (SystemProperties::GetDebugEnabled()) {
-        DumpAdvanceInfo();
+        dumpLog.AddDesc(std::string("SymbolColorList: ")
+            .append(StringUtils::SymbolColorListToString(textStyle_->GetSymbolColorList())));
     }
 }
 
@@ -3301,6 +3329,10 @@ void TextPattern::DumpScaleInfo()
     dumpLog.AddDesc(std::string("ConfigHalfLeading: ").append(std::to_string(halfLeading)));
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
+    auto minFontScale = textLayoutProp->GetMinFontScale().value_or(0.0f);
+    dumpLog.AddDesc(std::string("minFontScale: ").append(std::to_string(minFontScale)));
+    auto maxfontScale = textLayoutProp->GetMaxFontScale().value_or(static_cast<float>(INT32_MAX));
+    dumpLog.AddDesc(std::string("maxFontScale1: ").append(std::to_string(maxfontScale)));
     auto flag = textLayoutProp->HasHalfLeading();
     dumpLog.AddDesc(
         std::string("HalfLeading: ").append(flag ? std::to_string(textLayoutProp->GetHalfLeadingValue(false)) : "NA"));
@@ -3333,7 +3365,9 @@ void TextPattern::DumpTextEngineInfo()
                             .append(std::to_string(pManager_->GetLongestLine())));
     }
     dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
-    DumpParagraphsInfo();
+    if (!IsSetObscured()) {
+        DumpParagraphsInfo();
+    }
 }
 
 void TextPattern::DumpParagraphsInfo()
@@ -3964,6 +3998,7 @@ void TextPattern::ProcessSpanString()
     dataDetectorAdapter_->textForAI_.clear();
     host->Clean();
     hasSpanStringLongPressEvent_ = false;
+    hasUrlSpan_ = false;
 
     // 适配AI&&挂载image节点
     for (const auto& span : spans_) {
@@ -3984,6 +4019,7 @@ void TextPattern::ProcessSpanString()
             hasSpanStringLongPressEvent_ = true;
         }
         if (span->urlOnRelease) {
+            hasUrlSpan_ = true;
             InitUrlMouseEvent();
             InitUrlTouchEvent();
         }

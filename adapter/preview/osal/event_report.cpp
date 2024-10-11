@@ -86,4 +86,8 @@ void EventReport::ReportPageShowMsg(const std::string& pageUrl, const std::strin
 void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
     const std::string& abilityName, const std::string& moduleName, int32_t dimension)
 {}
+
+void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
+    const std::string& moduleName)
+{}
 } // namespace OHOS::Ace

@@ -18,6 +18,8 @@
 #include <sstream>
 
 #include "base/i18n/localization.h"
+#include "core/common/agingadapation/aging_adapation_dialog_theme.h"
+#include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -362,43 +364,6 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         return;
     }
 }
-
-void ResetSubTitleProperty(const RefPtr<FrameNode>& textNode, NavigationTitleMode titleMode, bool parentIsNavDest)
-{
-    CHECK_NULL_VOID(textNode);
-    auto titleLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(titleLayoutProperty);
-    std::string contentStr;
-    if (titleLayoutProperty->HasContent()) {
-        contentStr = titleLayoutProperty->GetContentValue(std::string());
-    }
-    titleLayoutProperty->Reset();
-    titleLayoutProperty->UpdateContent(contentStr);
-
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    auto subTitleSize = theme->GetSubTitleFontSize();
-    Color color = theme->GetSubTitleColor();
-    auto textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        subTitleSize = theme->GetSubTitleFontSizeS();
-        color = theme->GetSubTitleFontColor();
-        textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
-    }
-    if (parentIsNavDest) {
-        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
-    } else if (titleMode == NavigationTitleMode::MINI) {
-        titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
-    }
-    titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
-    titleLayoutProperty->UpdateAdaptMaxFontSize(subTitleSize);
-    titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
-    titleLayoutProperty->UpdateMaxLines(1);
-    titleLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
-    titleLayoutProperty->UpdateFontSize(subTitleSize);
-    titleLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    SetTextColor(textNode, color);
-}
 } // namespace
 
 void TitleBarPattern::MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
@@ -596,6 +561,47 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
     }
 }
 
+void TitleBarPattern::ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
+    NavigationTitleMode titleMode, bool parentIsNavDest)
+{
+    CHECK_NULL_VOID(textNode);
+    auto titleLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(titleLayoutProperty);
+    std::string contentStr;
+    if (titleLayoutProperty->HasContent()) {
+        contentStr = titleLayoutProperty->GetContentValue(std::string());
+    }
+    titleLayoutProperty->Reset();
+    titleLayoutProperty->UpdateContent(contentStr);
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto subTitleSize = theme->GetSubTitleFontSize();
+    Color color = theme->GetSubTitleColor();
+    auto textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        subTitleSize = theme->GetSubTitleFontSizeS();
+        color = theme->GetSubTitleFontColor();
+        textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+    }
+    if (parentIsNavDest) {
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    } else if (titleMode == NavigationTitleMode::MINI) {
+        titleLayoutProperty->UpdateHeightAdaptivePolicy(textHeightAdaptivePolicy);
+    } else if (titleMode == NavigationTitleMode::FREE) {
+        UpdateSubTitleOpacity(opacity_.value_or(1.0f));
+    } else {
+        UpdateSubTitleOpacity(1.0);
+    }
+    titleLayoutProperty->UpdateAdaptMinFontSize(MIN_ADAPT_SUBTITLE_FONT_SIZE);
+    titleLayoutProperty->UpdateAdaptMaxFontSize(subTitleSize);
+    titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
+    titleLayoutProperty->UpdateMaxLines(1);
+    titleLayoutProperty->UpdateFontWeight(FontWeight::REGULAR); // ohos_id_text_font_family_regular
+    titleLayoutProperty->UpdateFontSize(subTitleSize);
+    titleLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    SetTextColor(textNode, color);
+}
 
 void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
 {
@@ -616,6 +622,13 @@ void TitleBarPattern::OnModifyDone()
     MountTitle(hostNode);
     MountSubTitle(hostNode);
     ApplyTitleModifierIfNeeded(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+        auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
+        CHECK_NULL_VOID(backButtonNode);
+        InitBackButtonLongPressEvent(backButtonNode);
+    }
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
@@ -1429,6 +1442,135 @@ void TitleBarPattern::DumpInfo()
     }
 }
 
+void TitleBarPattern::OnLanguageConfigurationUpdate()
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+}
+
+void TitleBarPattern::SetCurrentTitleBarHeight(float currentTitleBarHeight)
+{
+    currentTitleBarHeight_ = currentTitleBarHeight;
+    auto navBarNode = DynamicCast<NavBarNode>(GetHost()->GetParent());
+    if (!navBarNode || options_.brOptions.barStyle.value_or(BarStyle::STANDARD) != BarStyle::SAFE_AREA_PADDING) {
+        return;
+    }
+    auto navBarContentNode = DynamicCast<FrameNode>(navBarNode->GetContentNode());
+    CHECK_NULL_VOID(navBarContentNode);
+    auto contentLayoutProperty = navBarContentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProperty);
+    auto safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
+    PaddingProperty paddingProperty;
+    paddingProperty.left = CalcLength(0.0f);
+    paddingProperty.right = CalcLength(0.0f);
+    paddingProperty.top = CalcLength(currentTitleBarHeight);
+    paddingProperty.bottom = CalcLength(safeAreaPaddingF.bottom.value_or(0.0f));
+
+    contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
+}
+
+float TitleBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_RETURN(titleBarNode, 0.f);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_RETURN(titleBarLayoutProperty, 0.f);
+    auto titleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+    if (titleMode != NavigationTitleMode::FREE) {
+        return 0.f;
+    }
+    auto barStyle = options_.brOptions.barStyle.value_or(BarStyle::STANDARD);
+    if (barStyle != BarStyle::STACK) {
+        return 0.f;
+    }
+    return maxTitleBarHeight_ - currentTitleBarHeight_;
+}
+
+void TitleBarPattern::HandleLongPress(const RefPtr<FrameNode>& backButtonNode)
+{
+    auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto message = accessibilityProperty->GetAccessibilityText();
+    if (dialogNode_ != nullptr) {
+        HandleLongPressActionEnd();
+    }
+
+    auto backButtonIconNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetFirstChild());
+    CHECK_NULL_VOID(backButtonIconNode);
+    if (backButtonIconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolProperty);
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue(),
+            symbolProperty->GetSymbolColorListValue({}), symbolProperty->GetFontWeightValue(FontWeight::NORMAL));
+        return;
+    }
+    auto imageProperty = backButtonIconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageProperty);
+    ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
+    dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
+}
+
+void TitleBarPattern::HandleLongPressActionEnd()
+{
+    CHECK_NULL_VOID(dialogNode_);
+    auto hostNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->CloseDialog(dialogNode_);
+    dialogNode_ = nullptr;
+}
+
+void TitleBarPattern::InitBackButtonLongPressEvent(const RefPtr<FrameNode>& backButtonNode)
+{
+    auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    auto longPressCallback = [weak = WeakClaim(this), backButtonNode](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleLongPress(backButtonNode);
+    };
+    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+    gestureHub->SetLongPressEvent(longPressEvent_);
+
+    auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
+    CHECK_NULL_VOID(longPressRecognizer);
+
+    auto longPressEndCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleLongPressActionEnd();
+    };
+    longPressRecognizer->SetOnActionEnd(longPressEndCallback);
+}
+
+void TitleBarPattern::OnFontScaleConfigurationUpdate()
+{
+    auto hostNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    if (LessNotEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+        auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetLongPressEvent(nullptr);
+        auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
+        CHECK_NULL_VOID(longPressRecognizer);
+        longPressRecognizer->SetOnActionEnd(nullptr);
+        return;
+    }
+    InitBackButtonLongPressEvent(backButtonNode);
+}
+
 void TitleBarPattern::InitSideBarButtonUpdateCallbackIfNeeded()
 {
     auto titleBarNode = DynamicCast<TitleBarNode>(GetHost());
@@ -1593,53 +1735,5 @@ float TitleBarPattern::GetNavLeftPadding(float parentWidth)
         }
     }
     return navLeftPadding;
-}
-
-void TitleBarPattern::OnLanguageConfigurationUpdate()
-{
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
-    CHECK_NULL_VOID(backButtonNode);
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
-    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
-}
-
-void TitleBarPattern::SetCurrentTitleBarHeight(float currentTitleBarHeight)
-{
-    currentTitleBarHeight_ = currentTitleBarHeight;
-    auto navBarNode = DynamicCast<NavBarNode>(GetHost()->GetParent());
-    if (!navBarNode || options_.brOptions.barStyle.value_or(BarStyle::STANDARD) != BarStyle::SAFE_AREA_PADDING) {
-        return;
-    }
-    auto navBarContentNode = DynamicCast<FrameNode>(navBarNode->GetContentNode());
-    CHECK_NULL_VOID(navBarContentNode);
-    auto contentLayoutProperty = navBarContentNode->GetLayoutProperty();
-    CHECK_NULL_VOID(contentLayoutProperty);
-    auto safeAreaPaddingF = contentLayoutProperty->GetOrCreateSafeAreaPadding();
-    PaddingProperty paddingProperty;
-    paddingProperty.left = CalcLength(0.0f);
-    paddingProperty.right = CalcLength(0.0f);
-    paddingProperty.top = CalcLength(currentTitleBarHeight);
-    paddingProperty.bottom = CalcLength(safeAreaPaddingF.bottom.value_or(0.0f));
-
-    contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
-}
-
-float TitleBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
-{
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_RETURN(titleBarNode, 0.f);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_RETURN(titleBarLayoutProperty, 0.f);
-    auto titleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    if (titleMode != NavigationTitleMode::FREE) {
-        return 0.f;
-    }
-    auto barStyle = options_.brOptions.barStyle.value_or(BarStyle::STANDARD);
-    if (barStyle != BarStyle::STACK) {
-        return 0.f;
-    }
-    return maxTitleBarHeight_ - currentTitleBarHeight_;
 }
 } // namespace OHOS::Ace::NG
