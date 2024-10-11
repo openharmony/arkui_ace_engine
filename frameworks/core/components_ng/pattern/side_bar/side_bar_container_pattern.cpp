@@ -596,6 +596,7 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
     auto buttonRadius = sideBarTheme->GetControlButtonRadius();
     buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
+    buttonLayoutProperty->UpdateCreateWithLabel(false);
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
