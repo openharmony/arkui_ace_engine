@@ -100,7 +100,12 @@ HWTEST_F(SecurityComponentMethodModifierTest, setLayoutDirectionTestDefaultValue
 }
 
 // Valid values for attribute 'layoutDirection' of method 'layoutDirection'
-static std::vector<std::tuple<std::string, enum Ark_SecurityComponentLayoutDirection, enum SecurityComponentLayoutDirection>> layoutDirectionLayoutDirectionValidValues = {
+using ValidValuesStep = std::tuple<
+    std::string,
+    Ark_SecurityComponentLayoutDirection,
+    SecurityComponentLayoutDirection
+>;
+static std::vector<ValidValuesStep> layoutDirectionLayoutDirectionValidValues = {
     {
         "ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_HORIZONTAL",
         ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_HORIZONTAL,
@@ -123,8 +128,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setLayoutDirectionTestValidValues,
     std::unique_ptr<JsonValue> jsonValue;
     int32_t result;
     int32_t expected;
-    enum Ark_SecurityComponentLayoutDirection inputValueLayoutDirection;
-    enum Ark_SecurityComponentLayoutDirection initValueLayoutDirection;
+    Ark_SecurityComponentLayoutDirection inputValueLayoutDirection;
+    Ark_SecurityComponentLayoutDirection initValueLayoutDirection;
 
     // Initial setup
     initValueLayoutDirection = std::get<1>(layoutDirectionLayoutDirectionValidValues[0]);
@@ -142,10 +147,11 @@ HWTEST_F(SecurityComponentMethodModifierTest, setLayoutDirectionTestValidValues,
 }
 
 // Invalid values for attribute 'layoutDirection' of method 'layoutDirection'
-static std::vector<std::tuple<std::string, enum Ark_SecurityComponentLayoutDirection>> layoutDirectionLayoutDirectionInvalidValues = {
+using InvalidValuesStep = std::tuple<std::string, Ark_SecurityComponentLayoutDirection>;
+static std::vector<InvalidValuesStep> layoutDirectionLayoutDirectionInvalidValues = {
     {
-        "static_cast<enum Ark_SecurityComponentLayoutDirection>(-1)",
-        static_cast<enum Ark_SecurityComponentLayoutDirection>(-1)
+        "static_cast<Ark_SecurityComponentLayoutDirection>(-1)",
+        static_cast<Ark_SecurityComponentLayoutDirection>(-1)
     },
 };
 
@@ -159,8 +165,8 @@ HWTEST_F(SecurityComponentMethodModifierTest, setLayoutDirectionTestInvalidValue
     std::unique_ptr<JsonValue> jsonValue;
     int32_t result;
     int32_t expected;
-    enum Ark_SecurityComponentLayoutDirection inputValueLayoutDirection;
-    enum Ark_SecurityComponentLayoutDirection initValueLayoutDirection;
+    Ark_SecurityComponentLayoutDirection inputValueLayoutDirection;
+    Ark_SecurityComponentLayoutDirection initValueLayoutDirection;
 
     // Initial setup
     initValueLayoutDirection = std::get<1>(layoutDirectionLayoutDirectionValidValues[0]);

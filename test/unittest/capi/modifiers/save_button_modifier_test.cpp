@@ -49,7 +49,8 @@ public:
 };
 
 // Valid values for attribute 'icon' of method 'setSaveButtonOptions'
-static std::vector<std::tuple<std::string, Opt_SaveIconStyle, SaveButtonIconStyle>> setSaveButtonOptionsIconValidValues = {
+using IconValidValuesStep = std::tuple<std::string, Opt_SaveIconStyle, SaveButtonIconStyle>;
+static std::vector<IconValidValuesStep> setSaveButtonOptionsIconValidValues = {
     {
         "ARK_SAVE_ICON_STYLE_FULL_FILLED",
         Converter::ArkValue<Opt_SaveIconStyle>(ARK_SAVE_ICON_STYLE_FULL_FILLED),
@@ -68,7 +69,8 @@ static std::vector<std::tuple<std::string, Opt_SaveIconStyle, SaveButtonIconStyl
 };
 
 // Valid values for attribute 'text' of method 'setSaveButtonOptions'
-static std::vector<std::tuple<std::string, Opt_SaveDescription, SaveButtonSaveDescription>> setSaveButtonOptionsTextValidValues = {
+using TextValidValuesStep = std::tuple<std::string, Opt_SaveDescription, SaveButtonSaveDescription>;
+static std::vector<TextValidValuesStep> setSaveButtonOptionsTextValidValues = {
     {
         "ARK_SAVE_DESCRIPTION_DOWNLOAD",
         Converter::ArkValue<Opt_SaveDescription>(ARK_SAVE_DESCRIPTION_DOWNLOAD),

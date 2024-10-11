@@ -64,7 +64,8 @@ public:
     static void SetTextIconSpace(const Dimension& value);
     static void SetTextIconSpace(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetTextIconLayoutDirection(const SecurityComponentLayoutDirection& value);
-    static void SetTextIconLayoutDirection(FrameNode* frameNode, const std::optional<SecurityComponentLayoutDirection>& value);
+    static void SetTextIconLayoutDirection(FrameNode* frameNode,
+        const std::optional<SecurityComponentLayoutDirection>& value);
 
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
     {

@@ -24,9 +24,14 @@ template<>
 void AssignCast(std::optional<SecurityComponentLayoutDirection>& dst, const Ark_SecurityComponentLayoutDirection& src)
 {
     switch (src) {
-        case ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_HORIZONTAL: dst = SecurityComponentLayoutDirection::HORIZONTAL; break;
-        case ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_VERTICAL: dst = SecurityComponentLayoutDirection::VERTICAL; break;
-        default: LOGE("Unexpected enum value in Ark_SecurityComponentLayoutDirection: %{public}d", src);
+        case ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_HORIZONTAL:
+            dst = SecurityComponentLayoutDirection::HORIZONTAL;
+            break;
+        case ARK_SECURITY_COMPONENT_LAYOUT_DIRECTION_VERTICAL:
+            dst = SecurityComponentLayoutDirection::VERTICAL;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_SecurityComponentLayoutDirection: %{public}d", src);
     }
 }
 template<>
