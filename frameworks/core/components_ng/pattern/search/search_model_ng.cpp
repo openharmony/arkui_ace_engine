@@ -1187,24 +1187,12 @@ void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, const std::optional
     IconOptions options;
     if (iconOptions) {
         options = iconOptions.value();
-        pattern->SetSearchImageIcon(options);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
             pattern->ConvertImageIconSizeValue(options.GetSize().value_or(ICON_HEIGHT)), frameNode);
-        auto searchIconFrameNode =  AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
-        CHECK_NULL_VOID(searchIconFrameNode);
-        ImageSourceInfo info(options.GetSrc().value_or(""));
-        auto color = options.GetColor();
-        if (color) {
-            info.SetFillColor(color.value());
-        }
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info, searchIconFrameNode);
     } else {
-        pattern->SetCancelImageIcon(options);
         ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize, frameNode);
-        auto searchIconFrameNode =  AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
-        CHECK_NULL_VOID(searchIconFrameNode);
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, searchIconFrameNode);
     }
+    pattern->SetCancelImageIcon(options);
 }
 
 void SearchModelNG::SetSearchButton(FrameNode* frameNode, const std::string& text)
@@ -1454,26 +1442,12 @@ void SearchModelNG::SetCancelImageIcon(FrameNode *frameNode, const std::optional
     IconOptions options;
     if (iconOptions) {
         options = iconOptions.value();
-        pattern->SetCancelImageIcon(options);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize,
             pattern->ConvertImageIconSizeValue(options.GetSize().value_or(ICON_HEIGHT)), frameNode);
-        auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-        CHECK_NULL_VOID(cancelImageFrameNode);
-        ImageSourceInfo info(options.GetSrc().value_or(""),
-            options.GetBundleName().value_or(""),
-            options.GetModuleName().value_or(""));
-        auto color = options.GetColor();
-        if (color) {
-            info.SetFillColor(color.value());
-        }
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, info, cancelImageFrameNode);
     } else {
-        pattern->SetCancelImageIcon(options);
         ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, frameNode);
-        auto cancelImageFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
-        CHECK_NULL_VOID(cancelImageFrameNode);
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, cancelImageFrameNode);
     }
+    pattern->SetCancelImageIcon(options);
 }
 
 void SearchModelNG::SetSearchEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& valueOpt)

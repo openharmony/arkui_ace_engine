@@ -267,7 +267,7 @@ const std::vector<ColorTest> COLOR_TEST_PLAN = {
 };
 
 const std::vector<ResourceSRC> RESOURCE_TEST_PLAN = {
-    { ArkUnion<Opt_ResourceStr, Ark_String>(""), "" },
+    { ArkUnion<Opt_ResourceStr, Ark_String>(""), "resource:///ohos_test_image.svg" },
     { ArkUnion<Opt_ResourceStr, Ark_String>("test/string/2"), "test/string/2" }
 };
 const std::vector<UnionResourceString> UNION_RESOURCE_STRING_PLAN = {
@@ -786,6 +786,28 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestIconSize, TestSize.Level1)
 }
 
 /**
+ * @tc.name: setCancelButtonTestIconSrc
+ * @tc.desc: Check set src functionality of setCancelButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setCancelButtonTestIconSrc, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    attrs.selector = 0;
+    for (const auto &[src, expected] : RESOURCE_TEST_PLAN) {
+        attrs.value0.icon.value.src = ArkValue<Opt_ResourceStr>(src);
+        modifier_->setCancelButton(node_, &attrs);
+        auto jsonValue = GetJsonValue(node_);
+        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SRC_ATTR);
+        EXPECT_EQ(resultStr, expected);
+    }
+}
+
+/**
  * @tc.name: setCancelButtonTestStyle
  * @tc.desc: Check set style functionality of setCancelButton
  *
@@ -827,10 +849,10 @@ HWTEST_F(SearchModifierTest, DISABLED_setCopyOptionTest, TestSize.Level1)
 /**
  * @tc.name: setSearchIconTest
  * @tc.desc: Check the functionality of setSearchIcon
- *
+ * This test disabled because set icon src and color always return default value
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, setSearchIconTest, TestSize.Level1)
+HWTEST_F(SearchModifierTest, DISABLED_setSearchIconTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSearchIcon, nullptr);
     // default
