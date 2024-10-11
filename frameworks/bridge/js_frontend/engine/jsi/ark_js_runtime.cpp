@@ -18,9 +18,6 @@
 #include <unistd.h>
 
 #include "ecmascript/napi/include/dfx_jsnapi.h"
-
-#include "frameworks/base/log/log_wrapper.h"
-#include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/core/common/ace_application_info.h"

@@ -15,8 +15,6 @@
 
 #include "inspect_slider.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectSlider::InspectSlider(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

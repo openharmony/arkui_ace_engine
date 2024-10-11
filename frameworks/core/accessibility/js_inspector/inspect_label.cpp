@@ -15,8 +15,6 @@
 
 #include "inspect_label.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectLabel::InspectLabel(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }
