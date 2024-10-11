@@ -220,8 +220,8 @@ HWTEST_F(CheckboxModifierTest, setShapeTestInvalidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    enum Ark_CheckBoxShape inputValueShape;
-    enum Ark_CheckBoxShape initValueShape;
+    Ark_CheckBoxShape inputValueShape;
+    Ark_CheckBoxShape initValueShape;
 
     // Initial setup
     initValueShape = std::get<1>(shapeShapeValidValues[0]);
