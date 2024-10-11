@@ -151,9 +151,6 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
 }
 
 class GridColumnsTemplateModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridColumnsTemplate');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -165,9 +162,6 @@ class GridColumnsTemplateModifier extends ModifierWithKey<string> {
 }
 
 class GridRowsTemplateModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridRowsTemplate');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -179,9 +173,6 @@ class GridRowsTemplateModifier extends ModifierWithKey<string> {
 }
 
 class GridColumnsGapModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridColumnsGap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -196,9 +187,6 @@ class GridColumnsGapModifier extends ModifierWithKey<Length> {
 }
 
 class GridRowsGapModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridRowsGap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -213,9 +201,6 @@ class GridRowsGapModifier extends ModifierWithKey<Length> {
 }
 
 class GridScrollBarWidthModifier extends ModifierWithKey<string | number> {
-  constructor(value: string | number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridScrollBarWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -227,9 +212,6 @@ class GridScrollBarWidthModifier extends ModifierWithKey<string | number> {
 }
 
 class GridScrollBarModifier extends ModifierWithKey<BarState> {
-  constructor(value: BarState) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridScrollBar');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -241,9 +223,6 @@ class GridScrollBarModifier extends ModifierWithKey<BarState> {
 }
 
 class GridScrollBarColorModifier extends ModifierWithKey<string | number | Color> {
-  constructor(value: string | number | Color) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridScrollBarColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -255,9 +234,6 @@ class GridScrollBarColorModifier extends ModifierWithKey<string | number | Color
 }
 
 class GridEditModeModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridEditMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -269,9 +245,6 @@ class GridEditModeModifier extends ModifierWithKey<boolean> {
 }
 
 class GridCachedCountModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridCachedCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -283,9 +256,6 @@ class GridCachedCountModifier extends ModifierWithKey<number> {
 }
 
 class GridMultiSelectableModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridMultiSelectable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -297,9 +267,6 @@ class GridMultiSelectableModifier extends ModifierWithKey<boolean> {
 }
 
 class GridEdgeEffectModifier extends ModifierWithKey<ArkGridEdgeEffect> {
-  constructor(value: ArkGridEdgeEffect) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridEdgeEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -316,9 +283,6 @@ class GridEdgeEffectModifier extends ModifierWithKey<ArkGridEdgeEffect> {
 }
 
 class GridNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
-  constructor(value: NestedScrollOptions) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridNestedScroll');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -335,9 +299,6 @@ class GridNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
 }
 
 class GridEnableScrollModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridEnableScroll');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -349,9 +310,6 @@ class GridEnableScrollModifier extends ModifierWithKey<boolean> {
 }
 
 class GridFrictionModifier extends ModifierWithKey<number | Resource> {
-  constructor(value: number | Resource) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridFriction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -367,9 +325,6 @@ class GridFrictionModifier extends ModifierWithKey<number | Resource> {
 }
 
 class GridMaxCountModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridMaxCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -381,9 +336,6 @@ class GridMaxCountModifier extends ModifierWithKey<number> {
 }
 
 class GridMinCountModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridMinCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -395,9 +347,6 @@ class GridMinCountModifier extends ModifierWithKey<number> {
 }
 
 class GridCellLengthModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridCellLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -409,9 +358,6 @@ class GridCellLengthModifier extends ModifierWithKey<number> {
 }
 
 class GridLayoutDirectionModifier extends ModifierWithKey<GridDirection> {
-  constructor(value: GridDirection) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridLayoutDirection');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -423,9 +369,6 @@ class GridLayoutDirectionModifier extends ModifierWithKey<GridDirection> {
 }
 
 class GridSupportAnimationModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridSupportAnimation');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -437,9 +380,6 @@ class GridSupportAnimationModifier extends ModifierWithKey<boolean> {
 }
 
 class GridClipModifier extends ModifierWithKey<boolean | object> {
-  constructor(value: boolean | object) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridClip');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -454,9 +394,6 @@ class GridClipModifier extends ModifierWithKey<boolean | object> {
 }
 
 class GridFlingSpeedLimitModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridFlingSpeedLimit');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -468,9 +405,6 @@ class GridFlingSpeedLimitModifier extends ModifierWithKey<number> {
 }
 
 class GridAlignItemsModifier extends ModifierWithKey<GridItemAlignment> {
-  constructor(value: GridItemAlignment) {
-    super(value);
-  }
   static identity: Symbol = Symbol('gridAlignItems');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
