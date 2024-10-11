@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include "base/utils/macros.h"
+#include "base/utils/apsmonitor.h"
 #include "core/common/window_animation_config.h"
 
 namespace OHOS::Ace {
@@ -146,6 +147,7 @@ public:
     void SetAppStartStatus();
     static PerfMonitor* GetPerfMonitor();
     static PerfMonitor* pMonitor;
+    void SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor);
     void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                            const std::string& pageName);
     void RecordWindowRectResize(OHOS::Ace::WindowSizeChangeReason reason,
@@ -162,6 +164,7 @@ private:
     bool IsExceptResponseTime(int64_t time, const std::string& sceneId);
     int32_t GetFilterType() const;
 private:
+    std::shared_ptr<ApsMonitor> apsMonitor_ = nullptr;
     std::map<PerfActionType, int64_t> mInputTime;
     int64_t mVsyncTime {0};
     PerfSourceType mSourceType {UNKNOWN_SOURCE};
