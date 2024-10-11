@@ -42,7 +42,10 @@ public:
  */
 HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
 {
-    EXPECT_TRUE(false);
+    modifier_->setObjectFit(node_, Ark_ImageFit::ARK_IMAGE_FIT_SCALE_DOWN);
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ("ImageFit.FitHeight", GetAttrValue<std::string>(json, "objectFit"));
 }
 
 /**
@@ -50,9 +53,20 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
  * @tc.desc: Test ImageModifierTest
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, ObjectFit_SetBadFitType, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, ObjectFit_SetDefaultedFitType, testing::ext::TestSize.Level1)
 {
-    EXPECT_TRUE(true);
+    std::string key = "objectFit";
+    std::string defaultedFit = "ImageFit.Cover";
+
+    modifier_->setObjectFit(node_, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::FILL) - 1));
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
+
+    modifier_->setObjectFit(node_, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::SCALE_DOWN) + 1));
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
 }
 
 } // namespace OHOS::Ace::NG
