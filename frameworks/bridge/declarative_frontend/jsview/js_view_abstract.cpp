@@ -10615,7 +10615,7 @@ std::function<std::string(const std::string&)> ParseJsGetFunc(const JSCallbackIn
             return resultString;
         }
         auto value = callValue->ToString(vm)->ToString(vm);
-        return value.c_str();
+        return value;
     };
 }
 
