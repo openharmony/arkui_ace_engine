@@ -205,6 +205,11 @@ void FlexModelNG::SetFlexWrap(FrameNode* frameNode)
     pattern->SetIsWrap(true);
 }
 
+void FlexModelNG::SetFlexDirection(FrameNode* frameNode, FlexDirection value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, FlexDirection, value, frameNode);
+}
+
 void FlexModelNG::SetFlexDirection(FrameNode* frameNode, std::optional<FlexDirection>& layoutDirection)
 {
     if (layoutDirection) {
@@ -246,6 +251,15 @@ void FlexModelNG::SetFlexAlignItems(FrameNode* frameNode, int32_t value)
         return;
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, static_cast<WrapAlignment>(value), frameNode);
+}
+
+void FlexModelNG::SetFlexAlignContent(FrameNode* frameNode, int32_t value)
+{
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    if (!pattern->GetIsWrap()) {
+        return;
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, static_cast<WrapAlignment>(value), frameNode);
 }
 
 void FlexModelNG::SetFlexAlignContent(FrameNode* frameNode, std::optional<WrapAlignment>& align)
