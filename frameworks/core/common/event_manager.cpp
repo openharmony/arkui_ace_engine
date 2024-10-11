@@ -136,9 +136,6 @@ void EventManager::CleanRefereeBeforeTouchTest(TouchEvent touchPoint, bool needA
         refereeNG_->CleanAll();
         CleanGestureEventHub();
     }
-    if (!needAppend && touchTestResults_.empty()) {
-        NG::NGGestureRecognizer::ResetGlobalTransCfg();
-    }
 }
 
 void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
