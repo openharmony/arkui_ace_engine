@@ -118,6 +118,8 @@ private:
     double GetScrollAmount();
     void ActionAnimation(AnimationOption& option, float end, int32_t playCount, bool needSecondPlay);
     bool IsRunMarquee();
+    void ProcessVisibleAreaCallback();
+
     bool measureChanged_ = false;
     int32_t animationId_ = 0;
     std::shared_ptr<AnimationUtils::Animation> animation_;

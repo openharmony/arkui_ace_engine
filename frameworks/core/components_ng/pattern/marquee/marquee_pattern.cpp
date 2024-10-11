@@ -47,6 +47,7 @@ void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }
 
 MarqueePattern::~MarqueePattern()
@@ -141,6 +142,7 @@ void MarqueePattern::OnModifyDone()
         StopMarqueeAnimation(playStatus);
     }
     StoreProperties();
+    ProcessVisibleAreaCallback();
 }
 
 void MarqueePattern::StartMarqueeAnimation()
@@ -387,12 +389,15 @@ float MarqueePattern::GetTextOffset()
 
 void MarqueePattern::OnVisibleChange(bool isVisible)
 {
-    CHECK_NULL_VOID(!playStatus_);
     CHECK_NULL_VOID(animation_);
     if (isVisible) {
+        CHECK_NULL_VOID(!playStatus_);
         AnimationUtils::ResumeAnimation(animation_);
+        playStatus_ = true;
     } else {
+        CHECK_NULL_VOID(playStatus_);
         AnimationUtils::PauseAnimation(animation_);
+        playStatus_ = false;
     }
 }
 
@@ -637,5 +642,20 @@ void MarqueePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("Play status", playStatus_);
     json->Put("loop", loop_);
     json->Put("step", scrollAmount_);
+}
+
+void MarqueePattern::ProcessVisibleAreaCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnVisibleChange(visible);
+    };
+    std::vector<double> ratioList = { 0.0 };
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
 }
 } // namespace OHOS::Ace::NG
