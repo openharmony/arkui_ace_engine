@@ -696,12 +696,11 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto frameSize = geometryNode->GetFrameSize();
-        auto iconSize = std::min(iconSize_.ConvertToPxDistribute(std::optional<float>(), std::optional<float>()),
-            static_cast<double>(frameSize.Height()));
-        if (NearZero(iconSize)) {
-            isShow_ = false;
+        auto iconSize = GetIconSize();
+        if (!NearZero(frameSize.Height())) {
+            iconSize = std::min(iconSize, frameSize.Height());
         }
-        auto hotZoneSize = iconSize + rightOffset;
+        auto hotZoneSize = NearZero(iconSize) ? 0.0f : iconSize + rightOffset;
         stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
         iconLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
     } else {
@@ -710,6 +709,22 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
     }
     iconFrameNode->MarkModifyDone();
     iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+bool CleanNodeResponseArea::CheckUpdateCleanNode()
+{
+    CHECK_NULL_RETURN(cleanNode_, false);
+    auto cleanNodeGeometryNode = cleanNode_->GetGeometryNode();
+    CHECK_NULL_RETURN(cleanNodeGeometryNode, false);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto textFieldFrameSize = geometryNode->GetFrameSize();
+    auto cleanNodeFrameSize = cleanNodeGeometryNode->GetFrameSize();
+    return GreatNotEqual(cleanNodeFrameSize.Height(), textFieldFrameSize.Height());
 }
 
 void CleanNodeResponseArea::ClearArea()
