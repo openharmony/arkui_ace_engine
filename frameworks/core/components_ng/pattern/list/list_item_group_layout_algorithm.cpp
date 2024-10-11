@@ -166,18 +166,18 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     bool show = listLayoutProperty_->GetShowCachedItemsValue(false);
     SetActiveChildRange(layoutWrapper, listLayoutProperty_->GetCachedCountValue(1), show);
 
+    if (cacheParam_) {
+        LayoutCacheItem(layoutWrapper, paddingOffset, crossSize, show);
+        CheckUpdateGroupAndItemPos(layoutWrapper, paddingOffset, crossSize);
+    } else {
+        LayoutListItem(layoutWrapper, paddingOffset, crossSize);
+    }
     if (headerIndex_ >= 0 || footerIndex_ >= 0) {
         if (layoutDirection_ == TextDirection::RTL && axis_ == Axis::HORIZONTAL) {
             LayoutHeaderFooterRTL(layoutWrapper, paddingOffset, crossSize);
         } else {
             LayoutHeaderFooterLTR(layoutWrapper, paddingOffset, crossSize);
         }
-    }
-    if (cacheParam_) {
-        LayoutCacheItem(layoutWrapper, paddingOffset, crossSize, show);
-        CheckUpdateGroupAndItemPos(layoutWrapper, paddingOffset, crossSize);
-    } else {
-        LayoutListItem(layoutWrapper, paddingOffset, crossSize);
     }
 }
 
@@ -1040,7 +1040,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
             if (GreatOrEqual(pos->second.endPos, startPos - referencePos)) {
                 break;
             }
-            itemPosition_.erase(pos++);
+            pos = itemPosition_.erase(pos);
         }
         return;
     }

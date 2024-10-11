@@ -73,9 +73,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
     if (contentModifier) {
-        SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
-        if (!textLayoutProperty->GetIsAnimationNeeded().has_value() ||
-            textLayoutProperty->GetIsAnimationNeeded().value()) {
+        if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
+            SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
             contentModifier->ModifyTextStyle(textStyle);
         }
         contentModifier->SetFontReady(false);

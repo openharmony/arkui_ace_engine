@@ -298,6 +298,7 @@ protected:
     {
         return false;
     }
+    void ApplySelectAreaWithKeyboard(RectF& selectArea);
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;

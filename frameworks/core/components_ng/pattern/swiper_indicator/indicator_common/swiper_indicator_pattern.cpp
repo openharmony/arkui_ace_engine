@@ -134,8 +134,30 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
         });
 }
 
+void SwiperIndicatorPattern::UpdateFocusable() const
+{
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto focusable = swiperPattern->TotalCount() != 0;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(focusable);
+
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto level = focusable ? "auto" : "no";
+    accessibilityProperty->SetAccessibilityLevel(level);
+}
+
 bool SwiperIndicatorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    UpdateFocusable();
+
     CHECK_NULL_RETURN(config.frameSizeChange, false);
     return true;
 }
@@ -723,7 +745,8 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     swiperPattern->SetTurnPageRate(turnPageRate);
     swiperPattern->SetGroupTurnPageRate(turnPageRate);
     if (std::abs(turnPageRate) >= 1) {
-        int32_t step = (swiperPattern->IsSwipeByGroup() ? swiperPattern->GetDisplayCount() : 1);
+        int32_t step = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+            swiperPattern->IsSwipeByGroup() ? swiperPattern->GetDisplayCount() : 1);
         if (Positive(turnPageRateOffset)) {
             swiperPattern->SwipeToWithoutAnimation(swiperPattern->GetCurrentIndex() + step);
         }
@@ -977,7 +1000,8 @@ int32_t SwiperIndicatorPattern::GetCurrentIndex() const
     auto indicatorCount = swiperPattern->DisplayIndicatorTotalCount();
     auto displayCount = swiperPattern->GetDisplayCount();
 
-    if (swiperPattern->IsSwipeByGroup() && displayCount != 0) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        swiperPattern->IsSwipeByGroup() && displayCount != 0) {
         currentIndex /= displayCount;
     }
 

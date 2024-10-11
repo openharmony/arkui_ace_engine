@@ -570,7 +570,7 @@ export class TipsDialog extends ViewPU {
                     this.observeComponentCreation2((t20, u20) => {
                         Text.create(this.title);
                         Text.fontSize(`${TITLE_S}fp`);
-                        Text.fontWeight(FontWeight.Medium);
+                        Text.fontWeight(FontWeight.Bold);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textAlign(TextAlign.Center);
                         Text.maxLines(CONTENT_MAX_LINES);
@@ -1076,6 +1076,22 @@ export class SelectDialog extends ViewPU {
                     };
                     const r16 = (n17, o17) => {
                         ListItem.create(s16, true);
+                        ListItem.padding({
+                            left: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level6'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            },
+                            right: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level6'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            }
+                        });
                         ListItem.onSizeChange((p17, q17) => {
                             this.itemHeight = Number(q17.height);
                         });
@@ -1084,21 +1100,15 @@ export class SelectDialog extends ViewPU {
                         q16(t16, u16);
                         this.observeComponentCreation2((l17, m17) => {
                             Column.create();
-                            Column.padding({
-                                left: {
-                                    'id': -1,
-                                    'type': 10002,
-                                    params: ['sys.float.padding_level6'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
-                                },
-                                right: {
-                                    'id': -1,
-                                    'type': 10002,
-                                    params: ['sys.float.padding_level6'],
-                                    'bundleName': '__harDefaultBundleName__',
-                                    'moduleName': '__harDefaultModuleName__'
-                                }
+                            Column.borderRadius({
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.corner_radius_level8'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__'
+                            });
+                            Column.focusBox({
+                                margin: { value: -2, unit: LengthUnit.VP }
                             });
                             Column.accessibilityText(getAccessibilityText(p16.title, this.selectedIndex === o16));
                             Column.onClick(() => {
@@ -1133,9 +1143,6 @@ export class SelectDialog extends ViewPU {
                                     'bundleName': '__harDefaultBundleName__',
                                     'moduleName': '__harDefaultModuleName__'
                                 }
-                            });
-                            Button.focusBox({
-                                margin: { value: -2, unit: LengthUnit.VP }
                             });
                         }, Button);
                         this.observeComponentCreation2((f17, g17) => {

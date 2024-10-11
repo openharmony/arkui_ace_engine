@@ -67,10 +67,11 @@ public:
             indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
             indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
 
+            auto indicatorDisplayCount = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) ?
+                swiperPattern->DisplayIndicatorTotalCount() : swiperPattern->TotalCount();
             auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
             maxDisplayCount > 0 ? indicatorLayoutAlgorithm->SetIndicatorDisplayCount(maxDisplayCount)
-                                : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(
-                                    swiperPattern->DisplayIndicatorTotalCount());
+                                : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(indicatorDisplayCount);
             return indicatorLayoutAlgorithm;
         } else {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DigitIndicatorLayoutAlgorithm>();
@@ -303,6 +304,8 @@ private:
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCountDefault() const;
     void ResetDotModifier();
+    void UpdateFocusable() const;
+
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

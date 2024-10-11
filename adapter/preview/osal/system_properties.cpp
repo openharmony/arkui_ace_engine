@@ -330,4 +330,9 @@ bool SystemProperties::IsSmallFoldProduct()
 {
     return false;
 }
+
+std::string SystemProperties::GetDebugInspectorId()
+{
+    return UNDEFINED_PARAM;
+}
 } // namespace OHOS::Ace

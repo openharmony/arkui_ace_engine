@@ -315,7 +315,6 @@ void AddAlarmLogFunc()
     OHOS::Rosen::RSTransactionData::AddAlarmLog(logFunc);
 }
 
-
 void DeduplicateAvoidAreas(const RefPtr<NG::PipelineContext>& context,
     std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
@@ -600,7 +599,11 @@ public:
         auto displayAvailableRect = ConvertDMRect2Rect(availableArea);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, displayAvailableRect] { pipeline->UpdateDisplayAvailableRect(displayAvailableRect); },
+            [pipeline, displayAvailableRect] {
+                pipeline->UpdateDisplayAvailableRect(displayAvailableRect);
+                TAG_LOGI(AceLogTag::ACE_WINDOW, "UpdateDisplayAvailableRect : %{public}s",
+                    displayAvailableRect.ToString().c_str());
+            },
             TaskExecutor::TaskType::UI, "ArkUIUpdateDisplayAvailableRect");
     }
 
@@ -2076,11 +2079,11 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     auto defaultDisplay = DMManager.GetDefaultDisplay();
     if (pipeline && defaultDisplay) {
         Rosen::DMError ret = defaultDisplay->GetAvailableArea(availableArea);
-        TAG_LOGI(AceLogTag::ACE_WINDOW,
-            "DisplayAvailableRect info: %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
-            availableArea.posX_, availableArea.width_, availableArea.height_);
         if (ret == Rosen::DMError::DM_OK) {
             pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
+            TAG_LOGI(AceLogTag::ACE_WINDOW,
+                "InitializeDisplayAvailableRect : %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
+                availableArea.posY_, availableArea.width_, availableArea.height_);
         }
     }
 }
@@ -2468,8 +2471,10 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     if (container->IsSubContainer()) {
-        SubwindowManager::GetInstance()->SetRect(NG::RectF(config.Left(), config.Top(),
-            config.Width(), config.Height()), instanceId_);
+        auto rect = NG::RectF(config.Left(), config.Top(), config.Width(), config.Height());
+        SubwindowManager::GetInstance()->SetRect(rect, instanceId_);
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "UpdateViewportConfig for subContainer: %{public}s",
+            rect.ToString().c_str());
     }
     // The density of sub windows related to dialog needs to be consistent with the main window.
     auto modifyConfig = config;
@@ -2528,7 +2533,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             UpdateSafeArea(pipelineContext, updatingInsets, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect to : %{public}s",
+            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(

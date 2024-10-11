@@ -3793,7 +3793,7 @@ void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEven
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
-    auto focusHub = frameNode->GetFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(true, false);
 }
@@ -4460,6 +4460,9 @@ void ViewAbstract::SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetJSFrameNodeOnClick(std::move(clickEventFunc));
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(true, false);
 }
 
 void ViewAbstract::ClearJSFrameNodeOnClick(FrameNode* frameNode)

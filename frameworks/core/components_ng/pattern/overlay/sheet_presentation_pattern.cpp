@@ -554,7 +554,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     //record the drag position
     uint32_t detentsLowerPos = 0;
     uint32_t detentsUpperPos = 0;
-    if (lowerIter == sheetDetentHeight_.end()) {
+    if (lowerIter == sheetDetentHeight_.end() || upperIter == sheetDetentHeight_.end()) {
         //when drag over the highest sheet page
         upHeight = sheetDetentHeight_[sheetDetentsSize - 1];
         downHeight = sheetDetentHeight_[sheetDetentsSize - 1];
@@ -626,7 +626,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
 
 void SheetPresentationPattern::ChangeSheetPage(float height)
 {
-    if (IsAvoidingKeyboard()) {
+    if (IsAvoidingKeyboard() && keyboardAvoidMode_ == SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL) {
         return;
     }
     ChangeScrollHeight(height);
@@ -790,8 +790,6 @@ float SheetPresentationPattern::GetSheetHeightChange()
     auto inputH = textFieldManager ? (pipelineContext->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
                                          textFieldManager->GetHeight())
                                    : .0;
-    TAG_LOGD(AceLogTag::ACE_SHEET,
-        "TextField's clickPositionY is %{public}f", textFieldManager->GetClickPosition().GetY());
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
@@ -848,7 +846,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         dragVelocity / SHEET_VELOCITY_THRESHOLD, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
     option.SetFillMode(FillMode::FORWARDS);
-    auto offset = GetPageHeight() - (height_ + sheetHeightUp_) + bottomOffsetY_;
+    auto offset = UpdateSheetTransitionOffset();
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     renderContext->AttachNodeAnimatableProperty(property_);
@@ -867,6 +865,7 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
         ref->isNeedProcessHeight_ = false;
         ref->FireOnDetentsDidChange(ref->height_);
         ref->preDidHeight_ = ref->height_;
+        ref->isSpringBack_ = false;
     };
 
     isAnimationProcess_ = true;
@@ -1029,12 +1028,12 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
     CHECK_NULL_VOID(scrollNode);
     auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(scrollProps);
-    auto scrollHeight = height - operationHeight;
+    auto scrollHeight = height - operationHeight - resizeDecreasedHeight_;
     auto sheetType = GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP || sheetType == SheetType::SHEET_CENTER ||
         sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         auto sheetHeight = geometryNode->GetFrameSize().Height();
-        scrollHeight = sheetHeight - operationHeight;
+        scrollHeight = sheetHeight - operationHeight - resizeDecreasedHeight_;
     }
     scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollHeight)));
     scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2690,6 +2689,7 @@ void SheetPresentationPattern::DecreaseScrollHeightInSheet(float decreaseHeight)
 
     TAG_LOGD(AceLogTag::ACE_SHEET, "To avoid Keyboard, Scroll Height reduces by height %{public}f.", decreaseHeight);
     layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(GetScrollHeight() - decreaseHeight)));
+    resizeDecreasedHeight_ = decreaseHeight;
     scroll->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 

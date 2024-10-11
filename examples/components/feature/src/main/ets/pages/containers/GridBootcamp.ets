@@ -176,6 +176,7 @@ export struct GridBootcamp {
       }
       .width('100%')
     }
+    .align(Alignment.Top)
     .height('50%')
   }
 }

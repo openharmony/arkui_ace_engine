@@ -248,14 +248,11 @@ void SecurityComponentPattern::ToJsonValueIconNode(std::unique_ptr<JsonValue>& j
     auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(iconProp);
     CHECK_NULL_VOID(iconProp->GetCalcLayoutConstraint());
-    CHECK_EQUAL_VOID(iconProp->GetCalcLayoutConstraint()->selfIdealSize.has_value(), false);
-    auto idealSize = iconProp->GetCalcLayoutConstraint()->selfIdealSize;
-    CHECK_EQUAL_VOID(idealSize->Width().has_value(), false);
-    auto width = idealSize->Width();
-    json->PutExtAttr("iconSize",
-        width->GetDimension().ToString().c_str(), filter);
-    CHECK_EQUAL_VOID(iconProp->HasImageSourceInfo(), false);
-    json->PutExtAttr("iconColor", iconProp->GetImageSourceInfo().value().GetFillColor().
+    // GetDimension would ret a empty dimension when width is empty
+    auto width = iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width();
+    CHECK_EQUAL_VOID(width.has_value(), false);
+    json->PutExtAttr("iconSize", width->GetDimension().ToString().c_str(), filter);
+    json->PutExtAttr("iconColor", iconProp->GetImageSourceInfo()->GetFillColor().
         value_or(Color::WHITE).ColorToString().c_str(), filter);
 }
 

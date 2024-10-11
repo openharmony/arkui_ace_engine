@@ -157,7 +157,16 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto toastInfo = pattern->GetToastInfo();
-    toastContext->UpdateBackShadow(toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD)));
+    auto shadow = toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD));
+    if (toastInfo.isTypeStyleShadow) {
+        auto colorMode = SystemProperties::GetColorMode();
+        auto shadowStyle = shadow.GetStyle();
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        if (shadowTheme) {
+            shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+        }
+    }
+    toastContext->UpdateBackShadow(shadow);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(Color::TRANSPARENT));
         BlurStyleOption styleOption;

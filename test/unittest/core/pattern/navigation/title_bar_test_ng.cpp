@@ -809,6 +809,18 @@ HWTEST_F(TitleBarTestNg, GetTempTitleOffsetY004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTempTitleOffsetX001
+ * @tc.desc: Test GetTempTitleOffsetX interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempTitleOffsetX001, TestSize.Level1)
+{
+    auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
+    auto ret = titleBarPattern->GetTempTitleOffsetX();
+    EXPECT_EQ(ret, RET_VALUE);
+}
+
+/**
  * @tc.name: GetTempSubTitleOffsetY001
  * @tc.desc: Test GetTempSubTitleOffsetY interface.
  * @tc.type: FUNC
@@ -817,6 +829,18 @@ HWTEST_F(TitleBarTestNg, GetTempSubTitleOffsetY001, TestSize.Level1)
 {
     auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
     auto ret = titleBarPattern->GetTempSubTitleOffsetY();
+    EXPECT_EQ(ret, RET_VALUE);
+}
+
+/**
+ * @tc.name: GetTempSubTitleOffsetX001
+ * @tc.desc: Test GetTempSubTitleOffsetX interface.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetTempSubTitleOffsetX001, TestSize.Level1)
+{
+    auto titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
+    auto ret = titleBarPattern->GetTempSubTitleOffsetX();
     EXPECT_EQ(ret, RET_VALUE);
 }
 
@@ -1607,6 +1631,21 @@ HWTEST_F(TitleBarTestNg, TitleBarPatternSpringAnimationTest001, TestSize.Level1)
     ASSERT_NE(titleBarPattern_->springAnimation_, nullptr);
     titleBarPattern_->OnCoordScrollStart();
     ASSERT_EQ(titleBarPattern_->springAnimation_, nullptr);
+}
+
+/**
+ * @tc.name: GetSideBarButtonInfoTest001
+ * @tc.desc: get the empty info of sideBarButton when the sideBarButton is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, GetSideBarButtonInfoTest001, TestSize.Level1)
+{
+    InitTitleBarTestNg();
+    bool hasSideBar = titleBarPattern_->IsNecessaryToAvoidSideBar();
+    EXPECT_EQ(hasSideBar, false);
+    RectF buttonRect = titleBarPattern_->GetControlButtonInfo();
+    EXPECT_EQ(buttonRect, RectF(0.0f, 0.0f, 0.0f, 0.0f));
+    DestroyTitleBarObject();
 }
 
 /**
@@ -2422,5 +2461,47 @@ HWTEST_F(TitleBarTestNg, OnLanguageConfigurationUpdate001, TestSize.Level1)
     ASSERT_EQ(message, accessibilityText);
     auto isAccessibilityGroup = accessibilityProperty->IsAccessibilityGroup();
     ASSERT_EQ(isAccessibilityGroup, true);
+}
+
+/**
+ * @tc.name: TitleBarPatternLongPress
+ * @tc.desc: Test TitleBarPattern back button long press event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, TitleBarPatternLongPress, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set backButton to TitleBarNode.
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<TitleBarPattern>());
+    ASSERT_NE(backButton, nullptr);
+    titleBarNode->SetBackButton(backButton);
+
+    /**
+     * @tc.steps: step2. Set fontScale to aging scale.
+     */
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 2.0f;
+
+    /**
+     * @tc.steps: step3. call HandleLongPress.
+     * @tc.expected: dialogNode != nullptr
+     */
+    titleBarPattern->HandleLongPress(backButton);
+    auto dialogNode = titleBarPattern->dialogNode_;
+    ASSERT_NE(dialogNode, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialogNode = nullptr
+     */
+    titleBarPattern->HandleLongPressActionEnd();
+    ASSERT_EQ(dialogNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

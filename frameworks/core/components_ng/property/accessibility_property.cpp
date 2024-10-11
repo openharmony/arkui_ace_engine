@@ -69,11 +69,19 @@ std::string AccessibilityProperty::GetText() const
 std::string AccessibilityProperty::GetGroupText(bool forceGetChildren) const
 {
     std::string text;
-    GetGroupTextRecursive(forceGetChildren, text);
+    GetGroupTextRecursive(forceGetChildren, text, false);
     return text;
 }
 
-void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::string& text) const
+std::string AccessibilityProperty::GetGroupPreferAccessibilityText(bool forceGetChildren) const
+{
+    std::string text;
+    GetGroupTextRecursive(forceGetChildren, text, true);
+    return text;
+}
+
+void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::string& text,
+                                                  bool preferAccessibilityText) const
 {
     auto node = host_.Upgrade();
     CHECK_NULL_VOID(node);
@@ -82,7 +90,8 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
     }
     auto level = GetAccessibilityLevel();
     if (level == Level::AUTO || level == Level::YES_STR) {
-        auto nodeText = GetText();
+        std::string accessibilityText = GetAccessibilityText();
+        auto nodeText = preferAccessibilityText && !accessibilityText.empty() ? accessibilityText : GetText();
         if (!text.empty() && !nodeText.empty()) {
             text += ", ";
         }
@@ -101,7 +110,8 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
         if (child == nullptr) {
             continue;
         }
-        child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text);
+        child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text,
+                                                                                        preferAccessibilityText);
     }
 }
 

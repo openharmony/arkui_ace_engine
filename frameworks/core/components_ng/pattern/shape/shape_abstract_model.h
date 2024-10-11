@@ -40,10 +40,6 @@ public:
     virtual void SetAntiAlias(bool antiAlias);
     virtual void SetWidth(Dimension& width);
     virtual void SetHeight(Dimension& height);
-
-private:
-    static std::unique_ptr<ShapeAbstractModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SHAPE_ABSTRACT_MODEL_H

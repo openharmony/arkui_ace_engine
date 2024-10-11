@@ -1177,12 +1177,13 @@ bool JSNavigationStack::RemoveDestinationIfNeeded(const JSRef<JSObject>& pathInf
         // not use pushDestination， return true
         return true;
     }
-    JSRef<JSObject> promise = pathInfo->GetProperty("promise");
-    if (promise->IsEmpty()) {
+    auto promise = pathInfo->GetProperty("promise");
+    if (!promise->IsObject()) {
         return true;
     }
+    auto promiseVal = JSRef<JSObject>::Cast(promise);
     if (errorCode == ERROR_CODE_NO_ERROR) {
-        JSRef<JSFunc> resolve = JSRef<JSFunc>::Cast(promise->GetProperty("resolve"));
+        JSRef<JSFunc> resolve = JSRef<JSFunc>::Cast(promiseVal->GetProperty("resolve"));
         if (resolve->IsEmpty()) {
             return true;
         }
@@ -1193,7 +1194,7 @@ bool JSNavigationStack::RemoveDestinationIfNeeded(const JSRef<JSObject>& pathInf
     }
     // push destination failed, remove page in pathStack
     RemoveInvalidPage(index);
-    JSRef<JSFunc> reject = JSRef<JSFunc>::Cast(promise->GetProperty("reject"));
+    JSRef<JSFunc> reject = JSRef<JSFunc>::Cast(promiseVal->GetProperty("reject"));
     if (reject->IsEmpty()) {
         return false;
     }

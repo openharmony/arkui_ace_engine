@@ -148,6 +148,7 @@ private:
     }
 
     std::optional<Dimension> fontSize_;
+    float lastFontSize_ = 0.0f;
     RefPtr<AnimatablePropertyFloat> fontSizeFloat_;
 
     std::optional<Dimension> adaptMinFontSize_;

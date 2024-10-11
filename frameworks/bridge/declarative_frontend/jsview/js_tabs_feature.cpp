@@ -25,11 +25,11 @@ struct ScrollInfo {
     bool isScrolling = false;
     bool isAtTop = false;
     bool isAtBottom = false;
+    std::optional<WeakPtr<JSScroller>> parentScroller;
 };
 
-using RelationInfoMap = std::map<WeakPtr<NG::TabsControllerNG>, bool>;
-using BindInfoMap = std::map<WeakPtr<JSScroller>, RelationInfoMap>;
-using ScrollInfoMap = std::map<WeakPtr<NG::TabsControllerNG>, ScrollInfo>;
+using ScrollInfoMap = std::map<WeakPtr<JSScroller>, ScrollInfo>;
+using BindInfoMap = std::map<WeakPtr<NG::TabsControllerNG>, ScrollInfoMap>;
 
 const auto INDEX_ZERO = 0;
 const auto INDEX_ONE = 1;
@@ -38,7 +38,6 @@ const auto SHOW_TAB_BAR_DELAY = 2000;
 const auto SCROLL_RANGE = 36;
 
 BindInfoMap bindInfoMap_;
-ScrollInfoMap scrollInfoMap_;
 
 void HandleOnTouchEvent(WeakPtr<JSScroller> jsScrollerWeak, const TouchEventInfo& info)
 {
@@ -46,32 +45,23 @@ void HandleOnTouchEvent(WeakPtr<JSScroller> jsScrollerWeak, const TouchEventInfo
     if (touchType != TouchType::DOWN && touchType != TouchType::UP && touchType != TouchType::CANCEL) {
         return;
     }
-    auto bindInfoIter = bindInfoMap_.find(jsScrollerWeak);
-    if (bindInfoIter == bindInfoMap_.end()) {
-        return;
-    }
-    for (auto& bindInfo : bindInfoIter->second) {
-        if (!bindInfo.second) {
-            // child scroller don't need to respond touch event.
-            continue;
-        }
-        auto scrollInfoIter = scrollInfoMap_.find(bindInfo.first);
-        if (scrollInfoIter == scrollInfoMap_.end()) {
-            continue;
-        }
-        auto tabsController = bindInfo.first.Upgrade();
-        if (!tabsController) {
+
+    for (auto& bindInfo : bindInfoMap_) {
+        auto& scrollInfoMap = bindInfo.second;
+        auto scrollInfoIter = scrollInfoMap.find(jsScrollerWeak);
+        if (scrollInfoIter == scrollInfoMap.end()) {
             continue;
         }
         auto& scrollInfo = scrollInfoIter->second;
+        auto tabsController = bindInfo.first.Upgrade();
         if (touchType == TouchType::DOWN) {
             scrollInfo.isTouching = true;
-            if (!scrollInfo.isAtTop && !scrollInfo.isAtBottom) {
+            if (!scrollInfo.isAtTop && !scrollInfo.isAtBottom && tabsController) {
                 tabsController->StopShowTabBar();
             }
         } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
             scrollInfo.isTouching = false;
-            if (!scrollInfo.isScrolling) {
+            if (!scrollInfo.isScrolling && tabsController) {
                 tabsController->StartShowTabBar(SHOW_TAB_BAR_DELAY);
             }
         }
@@ -84,82 +74,66 @@ void HandleOnPanActionEndEvent(WeakPtr<JSScroller> jsScrollerWeak, const Gesture
     if (!NearZero(velocity)) {
         return;
     }
-    auto bindInfoIter = bindInfoMap_.find(jsScrollerWeak);
-    if (bindInfoIter == bindInfoMap_.end()) {
-        return;
-    }
-    for (auto& bindInfo : bindInfoIter->second) {
-        auto tabsController = bindInfo.first.Upgrade();
-        if (!tabsController) {
+
+    for (auto& bindInfo : bindInfoMap_) {
+        auto& scrollInfoMap = bindInfo.second;
+        if (scrollInfoMap.find(jsScrollerWeak) == scrollInfoMap.end()) {
             continue;
         }
-        tabsController->StartShowTabBar(SHOW_TAB_BAR_DELAY);
+        auto tabsController = bindInfo.first.Upgrade();
+        if (tabsController) {
+            tabsController->StartShowTabBar(SHOW_TAB_BAR_DELAY);
+        }
     }
 }
 
 void HandleOnReachEvent(WeakPtr<JSScroller> jsScrollerWeak, bool isTopEvent)
 {
-    auto bindInfoIter = bindInfoMap_.find(jsScrollerWeak);
-    if (bindInfoIter == bindInfoMap_.end()) {
-        return;
-    }
-    for (auto& bindInfo : bindInfoIter->second) {
-        if (!bindInfo.second) {
-            // child scroller don't need to respond reach event.
+    for (auto& bindInfo : bindInfoMap_) {
+        auto& scrollInfoMap = bindInfo.second;
+        auto scrollInfoIter = scrollInfoMap.find(jsScrollerWeak);
+        if (scrollInfoIter == scrollInfoMap.end()) {
             continue;
         }
-        auto scrollInfoIter = scrollInfoMap_.find(bindInfo.first);
-        if (scrollInfoIter == scrollInfoMap_.end()) {
-            continue;
-        }
+        auto& scrollInfo = scrollInfoIter->second;
         if (isTopEvent) {
-            scrollInfoIter->second.isAtTop = true;
+            scrollInfo.isAtTop = true;
         } else {
-            scrollInfoIter->second.isAtBottom = true;
+            scrollInfo.isAtBottom = true;
         }
     }
 }
 
 void HandleOnScrollStartEvent(WeakPtr<JSScroller> jsScrollerWeak)
 {
-    auto bindInfoIter = bindInfoMap_.find(jsScrollerWeak);
-    if (bindInfoIter == bindInfoMap_.end()) {
-        return;
-    }
-    for (auto& bindInfo : bindInfoIter->second) {
-        if (!bindInfo.second) {
-            // child scroller don't need to respond scroll start event.
+    for (auto& bindInfo : bindInfoMap_) {
+        auto& scrollInfoMap = bindInfo.second;
+        auto scrollInfoIter = scrollInfoMap.find(jsScrollerWeak);
+        if (scrollInfoIter == scrollInfoMap.end()) {
             continue;
         }
-        auto scrollInfoIter = scrollInfoMap_.find(bindInfo.first);
-        if (scrollInfoIter == scrollInfoMap_.end()) {
-            continue;
+        auto& scrollInfo = scrollInfoIter->second;
+        scrollInfo.isScrolling = true;
+        auto tabsController = bindInfo.first.Upgrade();
+        if (!scrollInfo.isAtTop && !scrollInfo.isAtBottom && !scrollInfo.isTouching && tabsController) {
+            tabsController->StopShowTabBar();
         }
-        scrollInfoIter->second.isScrolling = true;
     }
 }
 
 void HandleOnScrollStopEvent(WeakPtr<JSScroller> jsScrollerWeak)
 {
-    auto bindInfoIter = bindInfoMap_.find(jsScrollerWeak);
-    if (bindInfoIter == bindInfoMap_.end()) {
-        return;
-    }
-    for (auto& bindInfo : bindInfoIter->second) {
-        if (!bindInfo.second) {
-            // child scroller don't need to respond scroll stop event.
+    for (auto& bindInfo : bindInfoMap_) {
+        auto& scrollInfoMap = bindInfo.second;
+        auto scrollInfoIter = scrollInfoMap.find(jsScrollerWeak);
+        if (scrollInfoIter == scrollInfoMap.end()) {
             continue;
         }
-        auto scrollInfoIter = scrollInfoMap_.find(bindInfo.first);
-        if (scrollInfoIter == scrollInfoMap_.end()) {
-            continue;
-        }
+        auto& scrollInfo = scrollInfoIter->second;
+        scrollInfo.isScrolling = false;
         auto tabsController = bindInfo.first.Upgrade();
-        if (!tabsController) {
-            continue;
-        }
-        scrollInfoIter->second.isScrolling = false;
-        if (!scrollInfoIter->second.isTouching) {
+        if (!scrollInfo.parentScroller.has_value() && !scrollInfo.isTouching && tabsController) {
+            // start show tab bar when parent scrollable component stop scroll.
             tabsController->StartShowTabBar(SHOW_TAB_BAR_DELAY);
         }
     }
@@ -168,13 +142,10 @@ void HandleOnScrollStopEvent(WeakPtr<JSScroller> jsScrollerWeak)
 void HandleOnDidScrollEvent(
     WeakPtr<JSScroller> jsScrollerWeak, Dimension dimension, ScrollState state, bool isAtTop, bool isAtBottom)
 {
-    auto bindInfoIter = bindInfoMap_.find(jsScrollerWeak);
-    if (bindInfoIter == bindInfoMap_.end()) {
-        return;
-    }
-    for (auto& bindInfo : bindInfoIter->second) {
-        auto scrollInfoIter = scrollInfoMap_.find(bindInfo.first);
-        if (scrollInfoIter == scrollInfoMap_.end()) {
+    for (auto& bindInfo : bindInfoMap_) {
+        auto& scrollInfoMap = bindInfo.second;
+        auto scrollInfoIter = scrollInfoMap.find(jsScrollerWeak);
+        if (scrollInfoIter == scrollInfoMap.end()) {
             continue;
         }
         auto& scrollInfo = scrollInfoIter->second;
@@ -185,14 +156,22 @@ void HandleOnDidScrollEvent(
         if (tabsController) {
             auto ratio = dimension.ConvertToPx() / Dimension(SCROLL_RANGE, DimensionUnit::VP).ConvertToPx();
             tabsController->UpdateTabBarHiddenRatio(ratio);
-            if (bindInfo.second && ((!scrollInfo.isAtTop && isAtTop) || (!scrollInfo.isAtBottom && isAtBottom))) {
+
+            auto isChildReachTop = !scrollInfo.isAtTop && isAtTop;
+            auto isChildReachBottom = !scrollInfo.isAtBottom && isAtBottom;
+            auto isParentAtTop = true;
+            auto isParentAtBottom = true;
+            if (scrollInfo.parentScroller.has_value()) {
+                auto iter = scrollInfoMap.find(scrollInfo.parentScroller.value());
+                isParentAtTop = iter == scrollInfoMap.end() || iter->second.isAtTop;
+                isParentAtBottom = iter == scrollInfoMap.end() || iter->second.isAtBottom;
+            }
+            if ((isChildReachTop && isParentAtTop) || (isChildReachBottom && isParentAtBottom)) {
                 tabsController->StartShowTabBar();
             }
         }
-        if (bindInfo.second) {
-            scrollInfo.isAtTop = isAtTop;
-            scrollInfo.isAtBottom = isAtBottom;
-        }
+        scrollInfo.isAtTop = isAtTop;
+        scrollInfo.isAtBottom = isAtBottom;
     }
 }
 
@@ -238,8 +217,8 @@ ScrollerObserver CreateObserver(WeakPtr<JSScroller> jsScrollerWeak)
     return observer;
 }
 
-void HandleBindTabsToScrollable(
-    const JSRef<JSVal>& jsTabsControllerVal, const JSRef<JSVal>& jsScrollerVal, bool isParentScroller)
+void HandleBindTabsToScrollable(const JSRef<JSVal>& jsTabsControllerVal, const JSRef<JSVal>& jsScrollerVal,
+    const std::optional<JSRef<JSVal>>& parentJsScrollerVal)
 {
     auto* jsTabsController = JSRef<JSObject>::Cast(jsTabsControllerVal)->Unwrap<JSTabsController>();
     CHECK_NULL_VOID(jsTabsController);
@@ -250,27 +229,29 @@ void HandleBindTabsToScrollable(
     CHECK_NULL_VOID(jsScroller);
     auto jsScrollerWeak = AceType::WeakClaim(jsScroller);
 
-    if (scrollInfoMap_.find(tabsControllerWeak) == scrollInfoMap_.end()) {
-        ScrollInfo scrollInfo;
-        scrollInfoMap_[tabsControllerWeak] = scrollInfo;
-    }
-
-    RelationInfoMap relationInfoMap;
-    auto bindInfoIter = bindInfoMap_.find(jsScrollerWeak);
-    if (bindInfoIter == bindInfoMap_.end()) {
-        auto observer = CreateObserver(jsScrollerWeak);
-        jsScroller->SetObserver(observer);
-    } else {
-        relationInfoMap = bindInfoIter->second;
-        if (relationInfoMap.find(tabsControllerWeak) != relationInfoMap.end()) {
+    ScrollInfoMap scrollInfoMap;
+    auto bindInfoIter = bindInfoMap_.find(tabsControllerWeak);
+    if (bindInfoIter != bindInfoMap_.end()) {
+        scrollInfoMap = bindInfoIter->second;
+        if (scrollInfoMap.find(jsScrollerWeak) != scrollInfoMap.end()) {
             return;
         }
     }
-    relationInfoMap[tabsControllerWeak] = isParentScroller;
-    bindInfoMap_[jsScrollerWeak] = relationInfoMap;
+    auto observer = CreateObserver(jsScrollerWeak);
+    jsScroller->SetObserver(observer);
+    ScrollInfo scrollInfo;
+    if (parentJsScrollerVal.has_value()) {
+        auto* parentJsScroller = JSRef<JSObject>::Cast(parentJsScrollerVal.value())->Unwrap<JSScroller>();
+        if (parentJsScroller) {
+            scrollInfo.parentScroller = AceType::WeakClaim(parentJsScroller);
+        }
+    }
+    scrollInfoMap[jsScrollerWeak] = scrollInfo;
+    bindInfoMap_[tabsControllerWeak] = scrollInfoMap;
 }
 
-void HandleUnbindTabsFromScrollable(const JSRef<JSVal>& jsTabsControllerVal, const JSRef<JSVal>& jsScrollerVal)
+void HandleUnbindTabsFromScrollable(const JSRef<JSVal>& jsTabsControllerVal, const JSRef<JSVal>& jsScrollerVal,
+    const std::optional<JSRef<JSVal>>& parentJsScrollerVal)
 {
     auto* jsTabsController = JSRef<JSObject>::Cast(jsTabsControllerVal)->Unwrap<JSTabsController>();
     CHECK_NULL_VOID(jsTabsController);
@@ -281,31 +262,36 @@ void HandleUnbindTabsFromScrollable(const JSRef<JSVal>& jsTabsControllerVal, con
     CHECK_NULL_VOID(jsScroller);
     auto jsScrollerWeak = AceType::WeakClaim(jsScroller);
 
-    auto bindInfoIter = bindInfoMap_.find(jsScrollerWeak);
+    auto bindInfoIter = bindInfoMap_.find(tabsControllerWeak);
     if (bindInfoIter == bindInfoMap_.end()) {
         return;
-    } else {
-        auto relationInfoMap = bindInfoIter->second;
-        if (relationInfoMap.find(tabsControllerWeak) == relationInfoMap.end()) {
-            return;
-        } else {
-            relationInfoMap.erase(tabsControllerWeak);
-            if (relationInfoMap.empty()) {
-                bindInfoMap_.erase(jsScrollerWeak);
-            }
+    }
+    auto& scrollInfoMap = bindInfoIter->second;
+    if (scrollInfoMap.find(jsScrollerWeak) != scrollInfoMap.end()) {
+        scrollInfoMap.erase(jsScrollerWeak);
+        if (scrollInfoMap.empty()) {
+            bindInfoMap_.erase(tabsControllerWeak);
         }
     }
 
-    if (scrollInfoMap_.find(tabsControllerWeak) != scrollInfoMap_.end()) {
-        auto needRemoveScrollInfo = true;
-        for (const auto& bindInfo : bindInfoMap_) {
-            if (bindInfo.second.find(tabsControllerWeak) != bindInfo.second.end()) {
-                needRemoveScrollInfo = false;
-                break;
+    if (parentJsScrollerVal.has_value()) {
+        // unbind nested scrollable component.
+        auto* parentJsScroller = JSRef<JSObject>::Cast(parentJsScrollerVal.value())->Unwrap<JSScroller>();
+        CHECK_NULL_VOID(parentJsScroller);
+        auto parentJsScrollerWeak = AceType::WeakClaim(parentJsScroller);
+
+        auto needRemoveParent = true;
+        for (const auto& scrollInfo : scrollInfoMap) {
+            if (scrollInfo.second.parentScroller.has_value() &&
+                scrollInfo.second.parentScroller.value() == parentJsScrollerWeak) {
+                needRemoveParent = false;
             }
         }
-        if (needRemoveScrollInfo) {
-            scrollInfoMap_.erase(tabsControllerWeak);
+        if (needRemoveParent) {
+            scrollInfoMap.erase(parentJsScrollerWeak);
+            if (scrollInfoMap.empty()) {
+                bindInfoMap_.erase(tabsControllerWeak);
+            }
         }
     }
 }
@@ -321,7 +307,7 @@ void JSTabsFeature::BindTabsToScrollable(const JSCallbackInfo& info)
         return;
     }
 
-    HandleBindTabsToScrollable(info[INDEX_ZERO], info[INDEX_ONE], true);
+    HandleBindTabsToScrollable(info[INDEX_ZERO], info[INDEX_ONE], std::nullopt);
 }
 
 void JSTabsFeature::UnbindTabsFromScrollable(const JSCallbackInfo& info)
@@ -333,7 +319,7 @@ void JSTabsFeature::UnbindTabsFromScrollable(const JSCallbackInfo& info)
         return;
     }
 
-    HandleUnbindTabsFromScrollable(info[INDEX_ZERO], info[INDEX_ONE]);
+    HandleUnbindTabsFromScrollable(info[INDEX_ZERO], info[INDEX_ONE], std::nullopt);
 }
 
 void JSTabsFeature::BindTabsToNestedScrollable(const JSCallbackInfo& info)
@@ -345,8 +331,8 @@ void JSTabsFeature::BindTabsToNestedScrollable(const JSCallbackInfo& info)
         return;
     }
 
-    HandleBindTabsToScrollable(info[INDEX_ZERO], info[INDEX_ONE], true);
-    HandleBindTabsToScrollable(info[INDEX_ZERO], info[INDEX_TWO], false);
+    HandleBindTabsToScrollable(info[INDEX_ZERO], info[INDEX_ONE], std::nullopt);
+    HandleBindTabsToScrollable(info[INDEX_ZERO], info[INDEX_TWO], info[INDEX_ONE]);
 }
 
 void JSTabsFeature::UnbindTabsFromNestedScrollable(const JSCallbackInfo& info)
@@ -358,8 +344,7 @@ void JSTabsFeature::UnbindTabsFromNestedScrollable(const JSCallbackInfo& info)
         return;
     }
 
-    HandleUnbindTabsFromScrollable(info[INDEX_ZERO], info[INDEX_ONE]);
-    HandleUnbindTabsFromScrollable(info[INDEX_ZERO], info[INDEX_TWO]);
+    HandleUnbindTabsFromScrollable(info[INDEX_ZERO], info[INDEX_TWO], info[INDEX_ONE]);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -285,18 +285,23 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
     return paint;
 }
 
+double TextFieldPattern::CalcCounterBoundHeight() {
+    auto counterNode = GetCounterNode().Upgrade();
+    CHECK_NULL_RETURN(counterNode, 0.0);
+    auto counterFrameNode = counterNode->GetHostNode();
+    CHECK_NULL_RETURN(counterFrameNode, 0.0);
+    auto geometryNode = counterFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0);
+    return COUNTER_TEXT_TOP_MARGIN.ConvertToPx() + COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx() +
+        geometryNode->GetFrameRect().Height();
+}
+
 void TextFieldPattern::CalculateBoundsRect()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pattern = host->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto counterNode = pattern->GetCounterNode().Upgrade();
-    CHECK_NULL_VOID(counterNode);
-    auto counterFrameNode = counterNode->GetHostNode();
-    CHECK_NULL_VOID(counterFrameNode);
 
     auto geometryNode = host->GetGeometryNode();
     auto frameOffset = geometryNode->GetFrameOffset();
@@ -307,14 +312,14 @@ void TextFieldPattern::CalculateBoundsRect()
         auto textWidth = std::max(errorParagraph_->GetLongestLine(), frameSize.Width());
         auto errorHeight = errorParagraph_->GetHeight() + ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
                                            ERROR_TEXT_BOTTOM_MARGIN.ConvertToPx();
-        auto countHeight = COUNTER_TEXT_TOP_MARGIN.ConvertToPx() + COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx() +
-            counterFrameNode->GetGeometryNode()->GetFrameRect().Height();
+        auto countHeight = std::max(CalcCounterBoundHeight(),
+            COUNTER_TEXT_TOP_MARGIN.ConvertToPx() + COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx());
         auto bottomHeight = std::max(errorHeight, countHeight);
         RectF boundsRect(0.0f, 0.0f, textWidth, bottomHeight + frameSize.Height());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
     } else if (isShowCount) {
-        auto countHeight = COUNTER_TEXT_TOP_MARGIN.ConvertToPx() + COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx() +
-            counterFrameNode->GetGeometryNode()->GetFrameRect().Height();
+        auto countHeight = std::max(CalcCounterBoundHeight(),
+            COUNTER_TEXT_TOP_MARGIN.ConvertToPx() + COUNTER_TEXT_BOTTOM_MARGIN.ConvertToPx());
         RectF boundsRect(0.0f, 0.0f, frameSize.Width(), countHeight + frameSize.Height());
         textFieldOverlayModifier_->SetBoundsRect(boundsRect);
     } else if (isShowError) {
@@ -2890,6 +2895,11 @@ void TextFieldPattern::ProcessSelection()
     }
 }
 
+void TextFieldPattern::UpdateAttributes()
+{
+    ProcessInnerPadding();
+}
+
 void TextFieldPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -3025,8 +3035,10 @@ void TextFieldPattern::AutoFillValueChanged()
     auto aceContentType = GetAutoFillType();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    if (aceContentType >= AceAutoFillType::ACE_PASSWORD && aceContentType <= AceAutoFillType::ACE_FORMAT_ADDRESS
-        && CheckAutoFill()) {
+    auto isValidType =
+        (aceContentType >= AceAutoFillType::ACE_PASSWORD && aceContentType <= AceAutoFillType::ACE_FORMAT_ADDRESS) ||
+        IsAutoFillUserName(aceContentType);
+    if (isValidType && CheckAutoFill()) {
         container->UpdatePopupUIExtension(host, autoFillSessionId_);
     }
 }
@@ -8542,6 +8554,7 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     info.maxLength = static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
     info.firstHandle = selectController_->GetFirstHandleRect().ToString();
     info.secondHandle = selectController_->GetSecondHandleRect().ToString();
+    info.componentType = host->GetTag();
 }
 
 void TextFieldPattern::HandleOnAIWrite()

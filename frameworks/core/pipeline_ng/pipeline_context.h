@@ -157,6 +157,8 @@ public:
 
     void HandlePenHoverOut(const TouchEvent& point) override;
 
+    void OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
+
     void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
     void DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
@@ -484,7 +486,7 @@ public:
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
-    void SetContainerWindow(bool isShow, Dimension contentBorderRadius);
+    void SetContainerWindow(bool isShow, RRect& rRect);
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetCloseButtonStatus(bool isEnabled);
 

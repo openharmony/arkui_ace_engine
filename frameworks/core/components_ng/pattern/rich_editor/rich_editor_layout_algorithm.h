@@ -25,7 +25,8 @@ class ACE_EXPORT RichEditorLayoutAlgorithm : public MultipleParagraphLayoutAlgor
 
 public:
     RichEditorLayoutAlgorithm() = delete;
-    RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs);
+    RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs,
+        std::optional<TextStyle> typingTextStyle);
     ~RichEditorLayoutAlgorithm() override = default;
 
     const OffsetF& GetParentGlobalOffset() const
@@ -74,6 +75,7 @@ private:
     ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
     RectF richTextRect_;
+    std::optional<TextStyle> typingTextStyle_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

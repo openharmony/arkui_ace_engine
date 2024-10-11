@@ -123,10 +123,15 @@ public:
 
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
-private:
-    void ApplyDefaultContentClip(const RefPtr<RenderContext>& ctx, const RefPtr<GeometryNode>& geometryNode) override
+    void SetAdjustOffset(float adjustOffset)
     {
-        ctx->SetContentClip(geometryNode->GetPaddingRect());
+        adjustOffset_ = adjustOffset;
+    }
+
+private:
+    ContentClipMode GetDefaultContentClip() const override
+    {
+        return ContentClipMode::CONTENT_ONLY;
     }
 
     V2::ItemDivider divider_;
@@ -135,6 +140,7 @@ private:
     float space_;
     float laneGutter_ = 0.0f;
     PositionMap itemPosition_;
+    float adjustOffset_ = 0.0f;
     RefPtr<ListContentModifier> listContentModifier_;
 
     WeakPtr<ScrollBar> scrollBar_;

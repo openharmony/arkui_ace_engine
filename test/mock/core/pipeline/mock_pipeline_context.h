@@ -54,4 +54,8 @@ protected:
     RefPtr<TaskExecutor> taskExecutor_;
 };
 } // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace {
+    void SetBoolStatus(bool value);
+} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_CONTEXT_H

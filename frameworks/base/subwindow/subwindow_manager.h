@@ -32,9 +32,6 @@
 namespace OHOS::Ace {
 
 using SubwindowMap = std::unordered_map<int32_t, RefPtr<Subwindow>>;
-using ToastWindowArray = std::array<RefPtr<Subwindow>,
-    static_cast<int32_t>(ToastWindowType::TOAST_WINDOW_COUNT)>;
-using ToastWindowMap = std::unordered_map<int32_t, ToastWindowArray>;
 
 class ACE_EXPORT SubwindowManager final : public NonCopyable {
 public:
@@ -111,8 +108,8 @@ public:
     void ClearToastInSubwindow();
     ACE_FORCE_EXPORT void ShowToast(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
     void ShowToastNG(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
-    const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId, const ToastWindowType& windowType);
-    void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow, const ToastWindowType& windowType);
+    const RefPtr<Subwindow> GetToastSubwindow(int32_t instanceId);
+    void AddToastSubwindow(int32_t instanceId, RefPtr<Subwindow> subwindow);
     void HideToastSubWindowNG();
     ToastWindowType GetToastWindowType(int32_t instanceId);
     ACE_FORCE_EXPORT void CloseToast(
@@ -171,7 +168,7 @@ private:
     static thread_local RefPtr<Subwindow> currentSubwindow_;
 
     std::mutex toastMutex_;
-    ToastWindowMap toastWindowMap_;
+    SubwindowMap toastWindowMap_;
     // Used to save the relationship between container and dialog subwindow, it is 1:1
     std::mutex dialogSubwindowMutex_;
     SubwindowMap dialogSubwindowMap_;

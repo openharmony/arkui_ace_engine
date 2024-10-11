@@ -11,13 +11,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
 
-ace_unittest("linear_indicator_test_ng") {
-  type = "new"
-  sources = [
-    "linear_indicator_controller_test_ng.cpp",
-    "linear_indicator_pattern_test_ng.cpp",
-    "linear_indicator_test_ng.cpp",
-  ]
+group("tools_target") {
+  if (build_variant == "root") {
+    # only compiling for eng version, and don`t compile for previewer and arkui-x
+    if (is_ohos_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+      deps = [ "raw_input_injector:rawinput" ]
+    }
+  }
 }

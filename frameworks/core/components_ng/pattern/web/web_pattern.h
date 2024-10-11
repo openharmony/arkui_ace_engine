@@ -812,6 +812,7 @@ private:
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
+    void WebSendMouseEvent(const MouseInfo& info, int32_t clickNum);
     bool HandleDoubleClickEvent(const MouseInfo& info);
     void SendDoubleClickEvent(const MouseClickInfo& info);
     int32_t HandleMouseClickEvent(const MouseInfo& info);
@@ -864,7 +865,10 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
-    void OnSelectHandleStart(bool isFirst);
+    RectF ChangeHandleHeight(
+        const std::shared_ptr<SelectOverlayInfo>& info, const GestureEvent& event, bool isFirst);
+    void HandleTouchClickEventFromOverlay(const GestureEvent& info);
+    void OnSelectHandleStart(const GestureEvent& event, bool isFirst);
     void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
     void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
 
@@ -1131,6 +1135,8 @@ private:
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
+    bool isLayoutModeInit_ = false;
+    bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
@@ -1144,6 +1150,7 @@ private:
     };
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
     bool imageOverlayIsSelected_ = false;
+    bool isLayoutModeChanged = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

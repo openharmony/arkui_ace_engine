@@ -1454,6 +1454,8 @@ export class c1 extends ViewPU {
     Stack.pop();
   }
   aboutToAppear() {
+    let m2 = this.getUIContext();
+    this.fontSizeScale = m2.getHostContext()?.config?.fontSizeScale ?? 1;
     this.smListener.on('change', (v2) => {
       if (v2.matches) {
         this.chipBreakPoints = u.SM;

@@ -42,7 +42,6 @@ constexpr float NORMAL_WIDTH = 4.f;
 
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 constexpr int32_t TICK = 2;
-constexpr float DRAG_VELOCITY = 200.f;
 constexpr float BAR_WIDTH = 10.f;
 
 class ScrollTestNg : public TestNG {

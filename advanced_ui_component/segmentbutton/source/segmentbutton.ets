@@ -829,6 +829,8 @@ struct SegmentButtonItemArrayComponent {
             .hoverEffect(HoverEffect.None)
             .backgroundColor(Color.Transparent)
             .accessibilityLevel(item.accessibilityLevel)
+            .accessibilitySelected(this.options.multiply ? undefined : this.selectedIndexes.includes(index))
+            .accessibilityChecked(this.options.multiply ? this.selectedIndexes.includes(index) : undefined)
             .accessibilityDescription(this.getAccessibilityDescription(item.accessibilityDescription))
             .direction(this.options.direction)
             .borderRadius(this.buttonBorderRadius[index])
@@ -1377,7 +1379,12 @@ export struct SegmentButton {
     if (!resourceManager) {
       return DEFAULT_MAX_FONT_SCALE;
     }
-    return resourceManager.getNumber(this.maxFontScale.id);
+    try {
+      return resourceManager.getNumber(this.maxFontScale.id);
+    } catch (error) {
+      console.error(`Ace SegmentButton getMaxFontSize, error: ${error.toString()}`);
+      return DEFAULT_MAX_FONT_SCALE;
+    }
   }
 
   getSelectedChangeCurve(): ICurve | null {

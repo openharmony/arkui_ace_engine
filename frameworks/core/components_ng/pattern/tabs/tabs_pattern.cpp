@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,22 +57,22 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
-    ChangeEventWithPreIndex changeEvent([weak = WeakClaim(this), tabBarNode, tabBarPattern, jsEvent = std::move(event)](
+    ChangeEventWithPreIndex changeEvent([weak = WeakClaim(this), jsEvent = std::move(event)](
                                             int32_t preIndex, int32_t currentIndex) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(pattern->GetHost());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+        CHECK_NULL_VOID(tabBarPattern);
         if (tabBarPattern->IsMaskAnimationExecuted()) {
             return;
         }
-        auto tabsNode = AceType::DynamicCast<TabsNode>(tabBarNode->GetParent());
-        CHECK_NULL_VOID(tabsNode);
         auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
         CHECK_NULL_VOID(tabsLayoutProperty);
         tabsLayoutProperty->UpdateIndex(currentIndex);
@@ -322,14 +322,18 @@ void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
-    ChangeEvent changeEvent([tabBarPattern, jsEvent = std::move(event)](int32_t index) {
+    ChangeEvent changeEvent([weak = WeakClaim(this), jsEvent = std::move(event)](int32_t index) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(pattern->GetHost());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+        CHECK_NULL_VOID(tabBarPattern);
         if (tabBarPattern->IsMaskAnimationExecuted()) {
             return;
         }
@@ -386,6 +390,18 @@ void TabsPattern::OnRestoreInfo(const std::string& restoreInfo)
 
     swiperPattern->OnRestoreInfo(restoreInfo);
     tabBarPattern->OnRestoreInfo(restoreInfo);
+}
+
+void TabsPattern::AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
+    CHECK_NULL_VOID(targetComponent);
+    targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+    targetComponent->SetInnerNodeGestureRecognizerJudge();
 }
 
 ScopeFocusAlgorithm TabsPattern::GetScopeFocusAlgorithm()

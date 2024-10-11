@@ -30,7 +30,6 @@
 
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/unittest/core/pattern/web/mock_web_delegate.h"
 
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -568,9 +567,8 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop001, TestSize.Level1)
     EXPECT_NE(host, nullptr);
     auto aceData = AceType::MakeRefPtr<OHOS::Ace::UnifiedDataMock>();
     gestureHub->SetData(nullptr);
-    g_funcHandleDragEventRepeat = 0;
     webPattern->HandleOnDragDrop(gestureHub);
-    EXPECT_EQ(g_funcHandleDragEventRepeat, 1);
+    EXPECT_GE(aceData->GetSize(), 1);
 #endif
 }
 
@@ -600,9 +598,8 @@ HWTEST_F(WebPatternTestHandle, HandleOnDragDrop002, TestSize.Level1)
     EXPECT_NE(host, nullptr);
     auto aceData = AceType::MakeRefPtr<OHOS::Ace::UnifiedDataMockRe>();
     gestureHub->SetData(aceData);
-    g_funcHandleDragEventRepeat = 0;
     webPattern->HandleOnDragDrop(gestureHub);
-    EXPECT_EQ(g_funcHandleDragEventRepeat, 1);
+    EXPECT_LT(aceData->GetSize(), 1);
 #endif
 }
 
@@ -863,9 +860,8 @@ HWTEST_F(WebPatternTestHandle, HandleDragEnd001, TestSize.Level1)
 
     int32_t x = 0;
     int32_t y = 0;
-    g_funcHandleDragEventRepeat = 0;
     webPattern->HandleDragEnd(x, y);
-    EXPECT_EQ(g_funcHandleDragEventRepeat, 1);
+    EXPECT_FALSE(webPattern->isDragging_);
 #endif
 }
 
@@ -890,9 +886,8 @@ HWTEST_F(WebPatternTestHandle, HandleDragEnd002, TestSize.Level1)
 
     int32_t x = 1;
     int32_t y = 1;
-    g_funcHandleDragEventRepeat = 1;
     webPattern->HandleDragEnd(x, y);
-    EXPECT_EQ(g_funcHandleDragEventRepeat, 0);
+    EXPECT_FALSE(webPattern->isReceivedArkDrag_);
 #endif
 }
 
@@ -917,9 +912,8 @@ HWTEST_F(WebPatternTestHandle, HandleDragEnd003, TestSize.Level1)
 
     int32_t x = 1;
     int32_t y = 0;
-    g_funcHandleDragEventRepeat = 1;
     webPattern->HandleDragEnd(x, y);
-    EXPECT_EQ(g_funcHandleDragEventRepeat, 0);
+    EXPECT_FALSE(webPattern->isW3cDragEvent_);
 #endif
 }
 
@@ -944,9 +938,8 @@ HWTEST_F(WebPatternTestHandle, HandleDragEnd004, TestSize.Level1)
 
     int32_t x = 0;
     int32_t y = 2;
-    g_funcHandleDragEventRepeat = 1;
     webPattern->HandleDragEnd(x, y);
-    EXPECT_EQ(g_funcHandleDragEventRepeat, 0);
+    EXPECT_FALSE(webPattern->isW3cDragEvent_);
 #endif
 }
 

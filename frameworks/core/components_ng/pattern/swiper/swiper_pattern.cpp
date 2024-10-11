@@ -2555,7 +2555,8 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     float currentTurnPageRate = currentPageStatus.first;
     currentFirstIndex_ = currentPageStatus.second;
 
-    groupTurnPageRate_ = (IsSwipeByGroup() ? CalculateGroupTurnPageRate(additionalOffset) : 0.0f);
+    groupTurnPageRate_ = (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        IsSwipeByGroup() ? CalculateGroupTurnPageRate(additionalOffset) : 0.0f);
     currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
@@ -2646,6 +2647,10 @@ float SwiperPattern::CalculateGroupTurnPageRate(float additionalOffset)
 
 std::pair<int32_t, int32_t> SwiperPattern::CalculateStepAndItemCount() const
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        return { RealTotalCount(), 1 };
+    }
+
     auto displaycount = GetDisplayCount();
 
     int32_t itemCount = (IsSwipeByGroup() ? TotalCount() : DisplayIndicatorTotalCount());
@@ -4193,6 +4198,10 @@ int32_t SwiperPattern::RealTotalCount() const
 
 int32_t SwiperPattern::DisplayIndicatorTotalCount() const
 {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        return RealTotalCount();
+    }
+
     auto displayCount = GetDisplayCount();
     auto realTotalCount = RealTotalCount();
     if (IsSwipeByGroup() && displayCount != 0) {
@@ -5141,8 +5150,44 @@ bool SwiperPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableSc
     return GetEdgeEffect() != EdgeEffect::NONE;
 }
 
+ScrollResult SwiperPattern::HandleOutBoundary(float offset, int32_t source, float velocity)
+{
+    float selfOffset = 0.0f;
+    float remainOffset = offset;
+    if (!IsLoop() && !itemPosition_.empty()) {
+        if (Negative(offset) && itemPosition_.begin()->first == 0) {
+            auto startPos = itemPosition_.begin()->second.startPos + AdjustIgnoreBlankOverScrollOffSet(true);
+            startPos = NearZero(startPos, PX_EPSILON) ? 0.f : startPos;
+            if (Positive(startPos)) {
+                selfOffset = -std::min(startPos, -offset);
+                remainOffset -= selfOffset;
+            }
+        } else if (Positive(offset) && itemPosition_.rbegin()->first == TotalCount() - 1) {
+            auto visibleWindowSize = CalculateVisibleSize();
+            auto endPos = itemPosition_.rbegin()->second.endPos + AdjustIgnoreBlankOverScrollOffSet(false);
+            endPos = NearEqual(endPos, visibleWindowSize, PX_EPSILON) ? visibleWindowSize : endPos;
+            if (LessNotEqual(endPos, visibleWindowSize)) {
+                selfOffset = std::min(visibleWindowSize - endPos, offset);
+                remainOffset -= selfOffset;
+            }
+        }
+    }
+    auto parent = GetNestedScrollParent();
+    if (!NearZero(remainOffset) && parent) {
+        auto res = parent->HandleScroll(remainOffset, source, NestedState::CHILD_CHECK_OVER_SCROLL, velocity);
+        remainOffset = res.remain;
+    }
+    if (!NearZero(selfOffset)) {
+        UpdateCurrentOffset(selfOffset);
+    }
+    return { remainOffset, true };
+}
+
 ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
 {
+    if (state == NestedState::CHILD_CHECK_OVER_SCROLL) {
+        return HandleOutBoundary(offset, source, velocity);
+    }
     if (IsHorizontalAndRightToLeft() && state != NestedState::GESTURE) {
         offset = -offset;
     }
@@ -5585,7 +5630,7 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
     bool releaseLeftTouchBottomStart = (currentIndex == totalCount - 1);
     bool releaseLeftTouchBottomEnd = (currentFirstIndex == 0);
     bool releaseRightTouchBottom = (currentFirstIndex == totalCount - 1);
-    if (IsSwipeByGroup()) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) && IsSwipeByGroup()) {
         commTouchBottom = (currentFirstIndex >= totalCount - displayCount);
         releaseLeftTouchBottomStart = (currentIndex == totalCount - displayCount);
         releaseRightTouchBottom = (currentFirstIndex >= totalCount - displayCount);
@@ -5625,7 +5670,7 @@ void SwiperPattern::HandleTouchBottomLoop()
 
     bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
     bool releaseTouchBottom = (currentIndex == TotalCount() - 1);
-    if (IsSwipeByGroup()) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) && IsSwipeByGroup()) {
         commTouchBottom = currentFirstIndex >= TotalCount() - GetDisplayCount();
         releaseTouchBottom = currentIndex >= TotalCount() - GetDisplayCount();
     }

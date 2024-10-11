@@ -2483,7 +2483,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
-        eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
+        eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddTouchPoint(scalePoint);
 #ifdef IS_RELEASE_VERSION
             TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
                 "InputTracking id:%{public}d, fingerId:%{public}d, type=%{public}d, inject=%{public}d, "
@@ -2936,7 +2936,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "-event") {
         if (eventManager_) {
-            eventManager_->DumpEvent(hasJson);
+            eventManager_->DumpEvent(EventTreeType::TOUCH, hasJson);
+        }
+    } else if (params[0] == "-postevent") {
+        if (eventManager_) {
+            eventManager_->DumpEvent(EventTreeType::POST_EVENT, hasJson);
         }
     } else if (params[0] == "-imagecache") {
         if (imageCache_) {
@@ -3095,7 +3099,6 @@ void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const R
     CHECK_RUN_ON(UI);
     auto scaleEvent = point.CreateScalePoint(viewScale_);
     if (scaleEvent.type != TouchType::HOVER_MOVE) {
-        eventManager_->GetEventTreeRecord().AddTouchPoint(scaleEvent);
         TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
             "OnAccessibilityHoverEvent event id:%{public}d, fingerId:%{public}d, x=%{public}f y=%{public}f "
             "type=%{public}d, "
@@ -3122,7 +3125,6 @@ void PipelineContext::OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::
     CHECK_RUN_ON(UI);
     auto scaleEvent = point.CreateScalePoint(viewScale_);
     if (scaleEvent.type != TouchType::MOVE) {
-        eventManager_->GetEventTreeRecord().AddTouchPoint(scaleEvent);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
             "OnPenHoverEvent event id:%{public}d, fingerId:%{public}d "
             "type=%{public}d, "
@@ -3597,7 +3599,48 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     }
 
     auto mouseEvent = ConvertAxisToMouse(event);
-    OnMouseEvent(mouseEvent, node);
+    OnMouseMoveEventForAxisEvent(mouseEvent, node);
+}
+
+void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node)
+{
+    if (event.action != MouseAction::MOVE || event.button != MouseButton::NONE_BUTTON) {
+        return;
+    }
+    CHECK_RUN_ON(UI);
+    if (!lastMouseEvent_) {
+        lastMouseEvent_ = std::make_unique<MouseEvent>();
+    }
+    lastMouseEvent_->x = event.x;
+    lastMouseEvent_->y = event.y;
+    lastMouseEvent_->button = event.button;
+    lastMouseEvent_->action = event.action;
+    lastMouseEvent_->sourceType = event.sourceType;
+    lastMouseEvent_->time = event.time;
+    lastMouseEvent_->touchEventId = event.touchEventId;
+    auto manager = GetDragDropManager();
+    if (manager) {
+        manager->SetIsDragCancel(false);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "InputTracking id:%{public}d, OnMouseEvent GetDragDropManager is null",
+            event.touchEventId);
+    }
+    auto touchPoint = event.CreateTouchPoint();
+    auto scalePoint = touchPoint.CreateScalePoint(GetViewScale());
+    auto rootOffset = GetRootRect().GetOffset();
+    eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
+    CHECK_NULL_VOID(node);
+    auto scaleEvent = event.CreateScaleEvent(viewScale_);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+    eventManager_->MouseTest(scaleEvent, node, touchRestrict);
+    eventManager_->DispatchMouseEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverEventNG(scaleEvent);
+    eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
+    accessibilityManagerNG_->HandleAccessibilityHoverEvent(node, scaleEvent);
+    RequestFrame();
 }
 
 bool PipelineContext::HasDifferentDirectionGesture() const
@@ -3777,29 +3820,28 @@ void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height)
     containerPattern->UpdateTitleInTargetPos(isShow, height);
 }
 
-void PipelineContext::SetContainerWindow(bool isShow, Dimension contentBorderRadius)
+
+void PipelineContext::SetContainerWindow(bool isShow, RRect& rRect)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {
         auto window = GetWindow();
         if (window) {
-            CHECK_NULL_VOID(rootNode_);
-            auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildAtIndex(0));
-            CHECK_NULL_VOID(containerNode);
-            auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
-            CHECK_NULL_VOID(containerPattern);
-            auto windowRect = window_->GetCurrentWindowRect();
-            RectInt rect;
-            rect.SetRect(0, 0, windowRect.Width(), windowRect.Height());
-            auto isContainerModal = windowModal_ == WindowModal::CONTAINER_MODAL;
-            containerPattern->GetWindowPaintRectWithoutMeasureAndLayout(rect, isContainerModal);
-            OHOS::Rosen::RectF rosenRect = {rect.GetX(), rect.GetY(), rect.Width(), rect.Height()};
-            float value = contentBorderRadius.ConvertToPx();
-            auto rrect = OHOS::Rosen::RRect(rosenRect, value, value);
+            auto rect = rRect.GetRect();
+            OHOS::Rosen::RectF rosenRectF = {rect.GetOffset().GetX(), rect.GetOffset().GetY(),
+                rect.Width(), rect.Height()};
+            auto radiusValueX = rRect.GetCorner().topLeftRadius.GetX().Value();
+            auto radiusValueY = rRect.GetCorner().topLeftRadius.GetY().Value();
+
+            auto rosenRRect = OHOS::Rosen::RRect(rosenRectF, radiusValueX, radiusValueY);
             auto rsUIDirector = window->GetRSUIDirector();
             if (rsUIDirector) {
                 // set container window show state to render service
-                rsUIDirector->SetContainerWindow(isShow, rrect);
+                TAG_LOGD(AceLogTag::ACE_APPBAR, "SetContainerWindow: isShow=%{public}d; "
+                    "x=%{public}f, y=%{public}f, width=%{public}f, hight=%{public}f, radiusValueX=%{public}f.",
+                    isShow, rect.GetOffset().GetX(), rect.GetOffset().GetY(),
+                    rect.Width(), rect.Height(), radiusValueX);
+                rsUIDirector->SetContainerWindow(isShow, rosenRRect);
             }
         }
     }
