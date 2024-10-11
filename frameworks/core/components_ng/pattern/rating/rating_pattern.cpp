@@ -231,6 +231,9 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
             backgroundImageCanvas_->IsStatic())) {
         ratingModifier_->SetNeedDraw(true);
     }
+    auto&& ratingGroup = ratingLayoutProperty->GetOrCreateRatingPropertyGroup();
+    CHECK_NULL_RETURN(ratingGroup, nullptr);
+    ratingModifier_->SetIndicator(ratingGroup->GetIndicatorValue());
     ratingModifier_->SetUseContentModifier(UseContentModifier());
     auto direction = ratingLayoutProperty->GetLayoutDirection();
     auto reverse = direction == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft() :
@@ -572,8 +575,8 @@ float RatingPattern::GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& prop
             auto contentSize = ratingModifier_->GetContentSize();
             CHECK_NULL_RETURN(contentSize, 0.0);
             auto isSquare = contentSize->Get().Width() / starNum == contentSize->Get().Height();
-            radius = isSquare ? contentSize->Get().Height() / NUMBER_TWO + ratingTheme->GetFocusSpace().ConvertToPx()
-                : ratingTheme->GetFocusBorderRadius().ConvertToPx();
+            radius = (isSquare ? contentSize->Get().Height() / NUMBER_TWO
+                : ratingTheme->GetFocusBorderRadius().ConvertToPx()) + ratingTheme->GetFocusSpace().ConvertToPx();
         }
     }
     return radius;
