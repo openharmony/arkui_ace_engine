@@ -361,6 +361,7 @@ void XComponentPattern::OnAttachToFrameNode()
 
 void XComponentPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     // if surface has been reset by pip, do not set backgourndColor
     if (handlingSurfaceRenderContext_ != renderContextForSurface_) {
         return;
@@ -2012,5 +2013,14 @@ void XComponentPattern::SetRenderFit(RenderFit renderFit)
 {
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetRenderFit(renderFit);
+}
+
+void XComponentPattern::EnableSecure(bool isSecure)
+{
+    if (type_ != XComponentType::SURFACE) {
+        return;
+    }
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContextForSurface_->SetSecurityLayer(isSecure);
 }
 } // namespace OHOS::Ace::NG

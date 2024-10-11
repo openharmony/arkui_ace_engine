@@ -1712,7 +1712,7 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest024, TestSize.Le
     clickRecognizerPtrOther = nullptr;
     gestureScope->recognizers_.push_back(clickRecognizerPtrOther);
     gestureScope->ForceCleanGestureScope();
-    SUCCEED();
+    EXPECT_EQ(clickRecognizerPtrOther, nullptr);
 }
 
 /**
@@ -1733,7 +1733,7 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest025, TestSize.Le
     clickRecognizerPtrOther = nullptr;
     gestureScope->recognizers_.push_back(clickRecognizerPtrOther);
     gestureScope->ForceCleanGestureScopeState();
-    SUCCEED();
+    EXPECT_EQ(clickRecognizerPtrOther, nullptr);
 }
 
 /**
@@ -1754,7 +1754,7 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest026, TestSize.Le
     clickRecognizerPtrOther = nullptr;
     gestureScope->recognizers_.push_back(clickRecognizerPtrOther);
     gestureScope->CleanGestureScopeState();
-    SUCCEED();
+    EXPECT_EQ(clickRecognizerPtrOther, nullptr);
 }
 
 /**
@@ -1771,7 +1771,7 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest027, TestSize.Le
     size_t id = 3;
     gesture->gestureScopes_.try_emplace(id, gestureScope);
     gesture->QueryAllDone();
-    SUCCEED();
+    EXPECT_EQ(id, 3);
 }
 
 /**
@@ -1789,7 +1789,7 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest028, TestSize.Le
     SourceType type = SourceType::TOUCH;
     bool isAxis = true;
     gesture->CheckEventTypeChange(type, isAxis);
-    SUCCEED();
+    EXPECT_EQ(isAxis, true);
 }
 
 /**
@@ -1805,7 +1805,7 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest029, TestSize.Le
     auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
     gesture->lastIsAxis_ = true;
     gesture->CleanRedundanceScope();
-    SUCCEED();
+    EXPECT_EQ(gesture->lastIsAxis_, true);
 }
 
 /**
@@ -1821,7 +1821,7 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest030, TestSize.Le
     auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
     gesture->lastIsAxis_ = true;
     gesture->IsReady();
-    SUCCEED();
+    EXPECT_EQ(gesture->lastIsAxis_, true);
 }
 
 /**
@@ -1838,10 +1838,9 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest031, TestSize.Le
     size_t id = 3;
     gesture->gestureScopes_.try_emplace(id, gestureScope);
     gesture->CleanGestureRefereeState(id);
-    SUCCEED();
     id = 5;
     gesture->CleanGestureRefereeState(id);
-    SUCCEED();
+    EXPECT_EQ(id, 5);
 }
 
 /**
@@ -1880,7 +1879,7 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest033, TestSize.Le
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
     gestureScope->ForceCleanGestureScope();
-    SUCCEED();
+    EXPECT_EQ(gestureScope->IsReady(), true);
 }
 
 /**
@@ -1897,7 +1896,7 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest034, TestSize.Le
     size_t id = 3;
     gesture->gestureScopes_.try_emplace(id, gestureScope);
     gesture->QueryAllDone(1);
-    SUCCEED();
+    EXPECT_EQ(id, 3);
 }
 
 /**
@@ -1923,6 +1922,6 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest035, TestSize.Le
     size_t id = 1;
     gesture->gestureScopes_.try_emplace(id, gestureScope);
     gesture->CleanRedundanceScope();
-    SUCCEED();
+    EXPECT_EQ(id, 1);
 }
 } // namespace OHOS::Ace::NG

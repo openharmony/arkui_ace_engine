@@ -23,6 +23,9 @@ void UIDisplaySyncManager::DispatchFunc(int64_t nanoTimestamp)
     displaySyncRange_->Reset();
 
     if (uiDisplaySyncMap_.empty()) {
+        if (sourceVsyncRate_ > 0) {
+            monitorVsyncRate_ = sourceVsyncRate_;
+        }
         return;
     }
 
@@ -43,6 +46,9 @@ void UIDisplaySyncManager::DispatchFunc(int64_t nanoTimestamp)
             auto rateRange = displaySync->GetDisplaySyncData()->rateRange_;
             if (rateRange->IsValid()) {
                 displaySyncRange_->Merge(*rateRange);
+                monitorVsyncRate_ = rateRange->preferred_;
+            } else if (sourceVsyncRate_ > 0) {
+                monitorVsyncRate_ = sourceVsyncRate_;
             }
             TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "UIDisplaySyncMapSize:%{public}d Id:%{public}d"
                 "FrameRateRange: {%{public}d, %{public}d, %{public}d}",
@@ -255,6 +261,11 @@ bool UIDisplaySyncManager::IsAnimatorStopped()
         return true;
     }
     return false;
+}
+
+int32_t UIDisplaySyncManager::GetMonitorVsyncRate() const
+{
+    return monitorVsyncRate_;
 }
 
 UIDisplaySyncManager::UIDisplaySyncManager() {}

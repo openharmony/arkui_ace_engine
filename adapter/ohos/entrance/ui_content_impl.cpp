@@ -93,6 +93,7 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef FORM_SUPPORTED
@@ -117,7 +118,6 @@ const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
-constexpr int32_t AVOID_DELAY_TIME = 20;
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
 #define UICONTENT_IMPL_PTR(name) _##name->uiContent_
@@ -184,9 +184,16 @@ void AddResConfigInfo(
     aceResCfg.SetAppHasDarkRes(resConfig->GetAppDarkRes());
     auto preferredLocaleInfo = resConfig->GetPreferredLocaleInfo();
     if (preferredLocaleInfo != nullptr) {
-        aceResCfg.SetPreferredLanguage(preferredLocaleInfo->getLanguage());
-        aceResCfg.SetPreferredCountry(preferredLocaleInfo->getCountry());
-        aceResCfg.SetPreferredScript(preferredLocaleInfo->getScript());
+        std::string preferredLanguage = preferredLocaleInfo->getLanguage();
+        std::string script = preferredLocaleInfo->getScript();
+        std::string country = preferredLocaleInfo->getCountry();
+        if (!script.empty()) {
+            preferredLanguage += "-" + script;
+        }
+        if (!country.empty()) {
+            preferredLanguage += "-" + country;
+        }
+        aceResCfg.SetPreferredLanguage(preferredLanguage);
     }
 }
 
@@ -307,7 +314,6 @@ void AddAlarmLogFunc()
 
     OHOS::Rosen::RSTransactionData::AddAlarmLog(logFunc);
 }
-
 
 void DeduplicateAvoidAreas(const RefPtr<NG::PipelineContext>& context,
     std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets>& updatingInsets,
@@ -441,20 +447,57 @@ public:
         auto curWindow = context->GetCurrentWindowRect();
         positionY -= curWindow.Top();
         ContainerScope scope(instanceId_);
-        if (NearZero(keyboardRect.Height())) {
-            taskExecutor->PostSyncTask([context, keyboardRect, rsTransaction, positionY, height] {
-                    CHECK_NULL_VOID(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
-                }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
-        } else {
-            taskExecutor->PostDelayedTask([context, keyboardRect, rsTransaction, positionY, height] {
-                    CHECK_NULL_VOID(context);
-                    context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
-                }, TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChange");
+        if (LaterAvoid(keyboardRect, positionY, height)) {
+            return;
         }
+        taskExecutor->PostSyncTask([context, keyboardRect, rsTransaction, positionY, height] {
+                CHECK_NULL_VOID(context);
+                context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
+            }, TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
     }
 
 private:
+    bool LaterAvoid(const Rect& keyboardRect, double positionY, double height)
+    {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_RETURN(container, false);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, false);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_RETURN(context, false);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+        CHECK_NULL_RETURN(pipeline, false);
+        bool isRotate = false;
+        auto displayInfo = container->GetDisplayInfo();
+        uint32_t lastKeyboardHeight = pipeline->GetSafeAreaManager() ?
+            pipeline->GetSafeAreaManager()->GetKeyboardInset().Length() : 0;
+        if (displayInfo) {
+            auto dmRotation = static_cast<int32_t>(displayInfo->GetRotation());
+            isRotate = lastRotation != -1 && lastRotation != dmRotation;
+            lastRotation = dmRotation;
+        } else {
+            lastRotation = -1;
+        }
+        auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+        CHECK_NULL_RETURN(textFieldManager, false);
+        if (textFieldManager->GetLaterAvoid()) {
+            auto laterRect = textFieldManager->GetLaterAvoidKeyboardRect();
+            if (NearEqual(laterRect.Height(), keyboardRect.Height())) {
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "will trigger avoid later, ignore this notify");
+                return true;
+            }
+        }
+        // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
+        if (isRotate && !NearZero(lastKeyboardHeight) && !NearZero(keyboardRect.Height())) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "rotation change to %{public}d,"
+                "later avoid %{public}s %{public}f %{public}f",
+                lastRotation, keyboardRect.ToString().c_str(), positionY, height);
+            textFieldManager->SetLaterAvoidArgs(keyboardRect, positionY, height);
+            return true;
+        }
+        return false;
+    }
+
     void SetUIExtensionImeShow(const Rect& keyboardRect)
     {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -479,6 +522,7 @@ private:
         }
     }
     int32_t instanceId_ = -1;
+    int32_t lastRotation = -1;
 };
 
 class AvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
@@ -555,7 +599,11 @@ public:
         auto displayAvailableRect = ConvertDMRect2Rect(availableArea);
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, displayAvailableRect] { pipeline->UpdateDisplayAvailableRect(displayAvailableRect); },
+            [pipeline, displayAvailableRect] {
+                pipeline->UpdateDisplayAvailableRect(displayAvailableRect);
+                TAG_LOGI(AceLogTag::ACE_WINDOW, "UpdateDisplayAvailableRect : %{public}s",
+                    displayAvailableRect.ToString().c_str());
+            },
             TaskExecutor::TaskType::UI, "ArkUIUpdateDisplayAvailableRect");
     }
 
@@ -796,7 +844,7 @@ UIContentErrorCode UIContentImpl::InitializeInner(
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, errorCode);
     auto rootNode = pipelineContext->GetRootElement();
-    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode);
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
 #endif
     return errorCode;
 }
@@ -912,7 +960,7 @@ void UIContentImpl::Initialize(
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto rootNode = pipelineContext->GetRootElement();
-    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode);
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
 #endif
 }
 
@@ -1376,10 +1424,8 @@ void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Conf
     }
 
     auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
-    bool useAppFontScale = !fontScale.empty();
-    context->SetUseAppFontScale(useAppFontScale);
-    if (useAppFontScale) {
-        context->SetAppFontScale(StringUtils::StringToFloat(fontScale));
+    if (!fontScale.empty()) {
+        context->SetFontScale(StringUtils::StringToFloat(fontScale));
     }
 }
 
@@ -1429,11 +1475,7 @@ void UIContentImpl::StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
     }
 
     auto string2float = [](const std::string& str) {
-        try {
-            return std::stof(str);
-        } catch (...) {
-            return 1.0f;
-        }
+        return std::stof(str);
     };
     auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
     if (!fontScale.empty()) {
@@ -1926,6 +1968,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     bool isOpenInvisibleFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "ArkUIInvisibleFreeze" && metaDataItem.value == "true";
     });
+    LOGI("ArkUIInvisibleFreeze: %{public}d", isOpenInvisibleFreeze);
     pipeline->SetOpenInvisibleFreeze(isOpenInvisibleFreeze);
     // Set sdk version in module json mode
     if (isModelJson) {
@@ -2036,11 +2079,11 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     auto defaultDisplay = DMManager.GetDefaultDisplay();
     if (pipeline && defaultDisplay) {
         Rosen::DMError ret = defaultDisplay->GetAvailableArea(availableArea);
-        TAG_LOGI(AceLogTag::ACE_WINDOW,
-            "DisplayAvailableRect info: %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
-            availableArea.posX_, availableArea.width_, availableArea.height_);
         if (ret == Rosen::DMError::DM_OK) {
             pipeline->UpdateDisplayAvailableRect(ConvertDMRect2Rect(availableArea));
+            TAG_LOGI(AceLogTag::ACE_WINDOW,
+                "InitializeDisplayAvailableRect : %{public}d, %{public}d, %{public}d, %{public}d", availableArea.posX_,
+                availableArea.posY_, availableArea.width_, availableArea.height_);
         }
     }
 }
@@ -2385,6 +2428,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
                 config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
             parsedConfig.mcc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
             parsedConfig.mnc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
+            parsedConfig.preferredLanguage = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
             // EtsCard Font followSytem disable
             if (formFontUseDefault) {
                 parsedConfig.fontScale = "1.0";
@@ -2404,6 +2448,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
+    if (SystemProperties::GetWindowRectResizeEnabled()) {
+        PerfMonitor::GetPerfMonitor()->RecordWindowRectResize(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason),
+            bundleName_);
+    }
     UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction, avoidAreas);
 }
 
@@ -2415,6 +2463,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
         static_cast<uint32_t>(reason));
+    bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
         AceLogTag::ACE_WINDOW, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
@@ -2422,8 +2471,10 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     if (container->IsSubContainer()) {
-        SubwindowManager::GetInstance()->SetRect(NG::RectF(config.Left(), config.Top(),
-            config.Width(), config.Height()), instanceId_);
+        auto rect = NG::RectF(config.Left(), config.Top(), config.Width(), config.Height());
+        SubwindowManager::GetInstance()->SetRect(rect, instanceId_);
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "UpdateViewportConfig for subContainer: %{public}s",
+            rect.ToString().c_str());
     }
     // The density of sub windows related to dialog needs to be consistent with the main window.
     auto modifyConfig = config;
@@ -2441,10 +2492,18 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SetViewportMetrics(aceView, modifyConfig); // update density into pipeline
     };
+    auto updateDeviceOrientationTask = [container, modifyConfig, reason]() {
+        if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
+            container->UpdateResourceOrientation(modifyConfig.Orientation());
+        }
+    };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         updateDensityTask(); // ensure density has been updated before load first page
+        updateDeviceOrientationTask();
     } else {
         taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
+        taskExecutor->PostTask(
+            std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI, "ArkUIDeviceOrientation");
     }
     RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
     auto pipelineContext = container->GetPipelineContext();
@@ -2452,6 +2511,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> updatingInsets;
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
+        context->FireSizeChangeByRotateCallback(isOrientationChanged, rsTransaction);
     }
     if (safeAreaManager) {
         DeduplicateAvoidAreas(context, updatingInsets, avoidAreas, config);
@@ -2473,7 +2533,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             UpdateSafeArea(pipelineContext, updatingInsets, avoidAreas, config, container);
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
-            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect to : %{public}s",
+            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(
@@ -2518,12 +2578,15 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     bool isReasonRotationOrDPI = (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC);
+    bool isAvoidAreaDoChanged = !updatingInsets.empty() ||
+        avoidAreas.find(OHOS::Rosen::AvoidAreaType::TYPE_KEYBOARD) != avoidAreas.end();
     if (container->IsUseStageModel() && isReasonRotationOrDPI) {
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
-    } else if (rsTransaction != nullptr || !updatingInsets.empty()) {
+    } else if (rsTransaction != nullptr || isAvoidAreaDoChanged) {
         // When rsTransaction is not nullptr, the task contains animation. It shouldn't be cancled.
         // When avoidAreas need updating, the task shouldn't be cancelled.
-        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::PLATFORM, "ArkUIUpdateViewportConfig");
+        viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container,
+            "ArkUIPromiseViewportConfig");
     } else {
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
     }
@@ -2589,14 +2652,18 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [container, visible, hasDeco]() {
-           auto pipelineContext = container->GetPipelineContext();
-           CHECK_NULL_VOID(pipelineContext);
-           pipelineContext->ShowContainerTitle(visible, hasDeco);
-           pipelineContext->ChangeDarkModeBrightness();
-        },
-        TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
+    auto task = [container, visible, hasDeco]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->ShowContainerTitle(visible, hasDeco);
+        pipelineContext->ChangeDarkModeBrightness();
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateDecorVisible");
+    }
 }
 
 void UIContentImpl::SetUIContentType(UIContentType uIContentType)
@@ -2609,23 +2676,27 @@ void UIContentImpl::SetUIContentType(UIContentType uIContentType)
 
 void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateMaximizeMode: %{public}d",
-        bundleName_.c_str(), moduleName_.c_str(), instanceId_, mode);
+    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateMaximizeMode: %{public}d", bundleName_.c_str(),
+        moduleName_.c_str(), instanceId_, mode);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [container, mode]() {
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto windowManager = pipelineContext->GetWindowManager();
-            CHECK_NULL_VOID(windowManager);
-            windowManager->SetCurrentWindowMaximizeMode(static_cast<OHOS::Ace::MaximizeMode>(mode));
-            pipelineContext->ShowContainerTitle(true, true, true);
-        },
-        TaskExecutor::TaskType::UI, "ArkUIUpdateMaximizeMode");
+    auto task = [container, mode]() {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto windowManager = pipelineContext->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        windowManager->SetCurrentWindowMaximizeMode(static_cast<OHOS::Ace::MaximizeMode>(mode));
+        pipelineContext->ShowContainerTitle(true, true, true);
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIUpdateMaximizeMode");
+    }
 }
 
 bool UIContentImpl::NeedSoftKeyboard()
@@ -2703,6 +2774,13 @@ void UIContentImpl::NotifyRotationAnimationEnd()
 
 void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    std::string currentPid = std::to_string(getpid());
+    for (auto param : params) {
+        if (param == currentPid) {
+            LOGE("DumpInfo pid has appeared");
+            return;
+        }
+    }
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
@@ -2989,7 +3067,8 @@ void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, 
     return front->SetErrorEventHandler(std::move(errorCallback));
 }
 
-void UIContentImpl::OnFormSurfaceChange(float width, float height)
+void UIContentImpl::OnFormSurfaceChange(float width, float height, OHOS::Rosen::WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -3002,7 +3081,7 @@ void UIContentImpl::OnFormSurfaceChange(float width, float height)
     ContainerScope scope(instanceId_);
     auto density = pipelineContext->GetDensity();
     pipelineContext->SetRootSize(density, formWidth, formHeight);
-    pipelineContext->OnSurfaceChanged(formWidth, formHeight);
+    pipelineContext->OnSurfaceChanged(formWidth, formHeight, static_cast<WindowSizeChangeReason>(type), rsTransaction);
 }
 
 void UIContentImpl::SetFormBackgroundColor(const std::string& color)
@@ -3573,13 +3652,17 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [customTitleSettedShow, floatingTitleSettedShow]() {
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
-        },
-        TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleVisible");
+    auto task = [customTitleSettedShow, floatingTitleSettedShow]() {
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetContainerModalTitleVisible(customTitleSettedShow, floatingTitleSettedShow);
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleVisible");
+    }
 }
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
@@ -3587,13 +3670,17 @@ void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [height]() {
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->SetContainerModalTitleHeight(height);
-        },
-        TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleHeight");
+    auto task = [height]() {
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetContainerModalTitleHeight(height);
+    };
+    auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+    if (uiTaskRunner.IsRunOnCurrentThread()) {
+        task();
+    } else {
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUISetContainerModalTitleHeight");
+    }
 }
 
 int32_t UIContentImpl::GetContainerModalTitleHeight()

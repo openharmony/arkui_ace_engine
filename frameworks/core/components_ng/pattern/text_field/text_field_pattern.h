@@ -109,20 +109,6 @@ enum class InputOperation {
     SET_PREVIEW_FINISH,
 };
 
-enum {
-    ACTION_SELECT_ALL, // Smallest code unit.
-    ACTION_UNDO,
-    ACTION_REDO,
-    ACTION_CUT,
-    ACTION_COPY,
-    ACTION_PASTE,
-    ACTION_SHARE,
-    ACTION_PASTE_AS_PLAIN_TEXT,
-    ACTION_REPLACE,
-    ACTION_ASSIST,
-    ACTION_AUTOFILL,
-};
-
 struct PasswordModeStyle {
     Color bgColor;
     Color textColor;
@@ -300,6 +286,8 @@ public:
     void InsertValueOperation(const SourceAndValueInfo& info);
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::string insertValue, int32_t maxLength);
     void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
+    float MeasureCounterNodeHeight();
+    double CalcCounterBoundHeight();
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
@@ -392,6 +380,8 @@ public:
     }
     void UpdateCaretPositionByTouch(const Offset& offset);
     bool IsReachedBoundary(float offset);
+
+    virtual int32_t GetRequestKeyboardId();
 
     virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboardCrossPlatForm(bool isFocusViewChanged);
@@ -1537,9 +1527,16 @@ public:
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
+    void StopContentScroll();
+    void UpdateContentScroller(const Offset& localOffset);
+    void SetIsInitTextRect(bool isInitTextRect)
+    {
+        initTextRect_ = isInitTextRect;
+    }
 
 protected:
     virtual void InitDragEvent();
+    void UpdateAttributes() override;
     void OnAttachToMainTree() override;
 
     void OnDetachFromMainTree() override;
@@ -1562,6 +1559,7 @@ protected:
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
+    void DoTextSelectionTouchCancel() override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
@@ -1683,6 +1681,7 @@ private:
     void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
+    void SetAccessibilityUnitAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();
@@ -1729,12 +1728,14 @@ private:
 #endif
     void NotifyOnEditChanged(bool isChanged);
     void ProcessResponseArea();
+    void ProcessCancelButton();
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
     bool CheckAutoFill(bool isFromKeyBoard = false);
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
+    void AdjustTextRectByCleanNode(RectF& textRect);
     void RequestKeyboardAfterLongPress();
     void UpdatePasswordModeState();
     void InitDragDropCallBack();
@@ -1793,8 +1794,6 @@ private:
     bool HasAutoFillPasswordNode();
     bool IsTriggerAutoFillPassword();
 
-    void UpdateContentScroller(const Offset& localOffset);
-    void StopContentScroll();
     void PauseContentScroll();
     void ScheduleContentScroll(float delay);
     void UpdateSelectionByLongPress(int32_t start, int32_t end, const Offset& localOffset);
@@ -1975,6 +1974,7 @@ private:
     int32_t previewTextEnd_ = -1;
     std::string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
+    std::string lastTextValue_ = "";
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;

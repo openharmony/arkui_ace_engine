@@ -668,4 +668,30 @@ ArkUINativeModuleValue XComponentBridge::ResetEnableAnalyzer(ArkUIRuntimeCallInf
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableAnalyzer(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue XComponentBridge::SetEnableSecure(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        bool boolValue = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentEnableSecure(nativeNode, boolValue);
+    } else {
+        GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableSecure(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::ResetEnableSecure(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableSecure(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

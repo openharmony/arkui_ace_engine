@@ -128,7 +128,7 @@ void ProcessImageNode(const RefPtr<UINode>& node)
         auto imageNode = AceType::DynamicCast<FrameNode>(node);
         if (imageNode && AceType::DynamicCast<ImagePattern>(imageNode->GetPattern())) {
             auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
-            imagePattern->SetIsComponentSnapshotNode();
+            imagePattern->SetIsComponentSnapshotNode(true);
             imagePattern->OnVisibleAreaChange(true);
         }
     }
@@ -274,6 +274,8 @@ void ComponentSnapshot::Create(
         stackNode->AddChild(uiNode);
         node = stackNode;
     }
+    ACE_SCOPED_TRACE("ComponentSnapshot::Create_Tag=%s_Id=%d_Key=%s", node->GetTag().c_str(), node->GetId(),
+        node->GetInspectorId().value_or("").c_str());
     FrameNode::ProcessOffscreenNode(node);
     node->SetActive();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
@@ -294,6 +296,7 @@ void ComponentSnapshot::Create(
                 auto pipeline = node->GetContext();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->FlushUITasks();
+                pipeline->FlushModifier();
                 pipeline->FlushMessages();
             },
             TaskExecutor::TaskType::UI, "ArkUIComponentSnapshotFlushUITasks", PriorityType::VIP);
@@ -312,8 +315,10 @@ void ComponentSnapshot::PostDelayedTaskOfBuiler(const RefPtr<TaskExecutor>& exec
     const RefPtr<FrameNode>& node, bool enableInspector, const RefPtr<PipelineContext>& pipeline,
     const SnapshotParam& param)
 {
+    auto instanceId = pipeline->GetInstanceId();
     executor->PostDelayedTask(
-        [callback, node, enableInspector, pipeline, param]() mutable {
+        [callback, node, enableInspector, pipeline, param, instanceId]() mutable {
+            ContainerScope scope(instanceId);
             BuilerTask(std::move(callback), node, enableInspector, pipeline, param);
         },
         TaskExecutor::TaskType::UI, param.delay, "ArkUIComponentSnapshotCreateCapture", PriorityType::VIP);
@@ -333,6 +338,7 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     }
     if (param.options.waitUntilRenderFinished) {
         pipeline->FlushUITasks();
+        pipeline->FlushModifier();
         pipeline->FlushMessages();
     }
     auto rsNode = GetRsNode(node);
@@ -412,7 +418,6 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
     RefPtr<PipelineContext> pipeline = nullptr;
     RefPtr<TaskExecutor> executor = nullptr;
     if (!GetTaskExecutor(customNode, pipeline, executor)) {
-        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error! Can't get TaskExecutor!");
         return nullptr;
     }
     auto node = AceType::DynamicCast<FrameNode>(customNode);
@@ -422,13 +427,9 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
         node = stackNode;
     }
     FrameNode::ProcessOffscreenNode(node);
-    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-        "Process off screen Node finished, root size = %{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s",
-        node->GetGeometryNode()->GetFrameSize().ToString().c_str(), node->GetId(), node->GetTag().c_str(),
-        node->GetInspectorId().value_or("").c_str());
-
     ProcessImageNode(node);
     pipeline->FlushUITasks();
+    pipeline->FlushModifier();
     pipeline->FlushMessages();
     int32_t imageCount = 0;
     bool checkImage = CheckImageSuccessfullyLoad(node, imageCount);
@@ -447,8 +448,12 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
     }
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     auto syncCallback = std::make_shared<SyncCustomizedCallback>();
-    rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
-        1.f, 1.f, true);
-    return syncCallback->GetPixelMap(CREATE_SNAPSHOT_TIMEOUT_DURATION).second;
+    rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback, 1.f, 1.f, true);
+    auto pair = syncCallback->GetPixelMap(CREATE_SNAPSHOT_TIMEOUT_DURATION);
+    TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+        "CreateSync, root size=%{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s code:%{public}d",
+        node->GetGeometryNode()->GetFrameSize().ToString().c_str(), node->GetId(), node->GetTag().c_str(),
+        node->GetInspectorId().value_or("").c_str(), pair.first);
+    return pair.second;
 }
 } // namespace OHOS::Ace::NG

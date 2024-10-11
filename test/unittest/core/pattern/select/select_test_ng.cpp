@@ -112,7 +112,15 @@ void SelectTestNg::SetUpTestCase()
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return nullptr;
+        }
+    });
 }
 
 void SelectTestNg::TearDownTestCase()
@@ -264,7 +272,7 @@ HWTEST_F(SelectTestNg, SelectSetMenuAlign001, TestSize.Level1)
     menuAlign.alignType = MenuAlignType::END;
     menuAlign.offset = DimensionOffset(Dimension(OFFSETX, DimensionUnit::VP), Dimension(OFFSETY, DimensionUnit::VP));
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_TRUE(select->GetChildren().empty());
+    ASSERT_FALSE(select->GetChildren().empty());
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto selectPattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(selectPattern, nullptr);
@@ -795,7 +803,7 @@ HWTEST_F(SelectTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
     selectModelInstance.SetArrowPosition(ArrowPosition::END);
     selectModelInstance.SetSpace(Dimension(20.00, DimensionUnit::VP));
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_TRUE(select->GetChildren().empty());
+    ASSERT_FALSE(select->GetChildren().empty());
 }
 
 /**
@@ -857,14 +865,13 @@ HWTEST_F(SelectTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
      * is the same as the original input.
      * @tc.expected: Property is setted successfully and obejects should not be null.
      */
-    selectTheme->backgroundColor_ = Color::BLACK;
     selectPattern->OnColorConfigurationUpdate();
     auto menuNode = selectPattern->GetMenuNode();
     ASSERT_NE(menuNode, nullptr);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     auto renderContext = menuNode->GetRenderContext();
-    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::BLACK);
+    EXPECT_EQ(renderContext->GetBackgroundColor(), Color::WHITE);
 }
 
 /**
@@ -1207,7 +1214,6 @@ HWTEST_F(SelectTestNg, SetSelectDefaultThemeTest001, TestSize.Level1)
     ASSERT_NE(select, nullptr);
     auto selectPattern = select->GetPattern<SelectPattern>();
     ASSERT_NE(selectPattern, nullptr);
-    selectPattern->SetSelectDefaultTheme();
     /**
      * @tc.steps: step2. build render context, pipeline and select theme.
      * @tc.expected: Objects are created successfully.

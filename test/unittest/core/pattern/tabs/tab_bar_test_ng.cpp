@@ -37,7 +37,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     tabBarPattern_->UpdateSubTabBoard(0);
@@ -211,7 +211,8 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
 
     tabBarPattern_->indicator_ = 1;
     tabBarPattern_->UpdateIndicator(0);
-    EXPECT_EQ(tabBarPattern_->indicator_, 1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(tabBarPattern_->indicator_, 0);
 }
 
 /**
@@ -1082,7 +1083,7 @@ HWTEST_F(TabBarTestNg, TabBarOnAttachToMainTree001, TestSize.Level1)
     tabContentFrameNode->OnAttachToMainTree(true);
     EXPECT_FALSE(tabContentFrameNode->useOffscreenProcess_);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     tabContentFrameNode->OnDetachFromMainTree(true, AceType::RawPtr(pipeline));
     EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 0);
 }
@@ -1152,71 +1153,6 @@ HWTEST_F(TabBarTestNg, TabBarPatternCalculateSelectedIndex001, TestSize.Level1)
     EXPECT_EQ(tabBarPattern_->CalculateSelectedIndex(info.GetLocalLocation()), 3);
     tabBarLayoutProperty_->UpdateAxis(Axis::VERTICAL);
     EXPECT_EQ(tabBarPattern_->CalculateSelectedIndex(info.GetLocalLocation()), 1);
-}
-
-/**
- * @tc.name: TabBarPatternGetIndicatorStyle002
- * @tc.desc: test GetIndicatorStyle
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorStyle002, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs(BarPosition::END);
-    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::SUBTABBATSTYLE);
-    CreateTabContentTabBarStyleWithBuilder(TabBarStyle::SUBTABBATSTYLE);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: steps2. GetIndicatorStyle
-     * @tc.expected: steps2. Check the result of GetIndicatorStyle
-     */
-    tabBarPattern_->indicatorStyles_.clear();
-    IndicatorStyle indicator;
-    IndicatorStyle indicator2;
-    tabBarPattern_->indicator_ = -1;
-    OffsetF indicatorOffset;
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    EXPECT_EQ(tabBarPattern_->indicator_, -1);
-    tabBarPattern_->indicator_ = 0;
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    tabBarPattern_->indicatorStyles_.push_back(indicator2);
-    tabBarPattern_->indicatorStyles_.push_back(indicator);
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    EXPECT_EQ(tabBarPattern_->indicator_, 0);
-    indicator.width.SetValue(1.0);
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    EXPECT_EQ(indicator.width.Value(), 0);
-    auto targetPaintRect = tabBarLayoutProperty_->GetIndicatorRect(tabBarPattern_->indicator_);
-    tabBarPaintProperty_->UpdateIndicator(targetPaintRect);
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    EXPECT_EQ(indicator.width.Value(), 10);
-    tabBarPattern_->isTouchingSwiper_ = false;
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    tabBarPattern_->axis_ = Axis::FREE;
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    EXPECT_EQ(tabBarPattern_->axis_, Axis::FREE);
-    tabBarPattern_->isTouchingSwiper_ = true;
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    EXPECT_TRUE(tabBarPattern_->isTouchingSwiper_);
-    tabBarPattern_->axis_ = Axis::HORIZONTAL;
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    EXPECT_EQ(tabBarPattern_->axis_, Axis::HORIZONTAL);
-    tabBarPattern_->turnPageRate_ = 2.0f;
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    EXPECT_EQ(tabBarPattern_->turnPageRate_, 1.0f);
-    tabBarPattern_->swiperStartIndex_ = 1;
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    EXPECT_EQ(tabBarPattern_->swiperStartIndex_, 1);
-    tabBarPattern_->swiperStartIndex_ = 1;
-    auto tabBarStyles1 = TabBarStyle::NOSTYLE;
-    auto tabBarStyles2 = TabBarStyle::SUBTABBATSTYLE;
-    tabBarPattern_->tabBarStyles_ = { tabBarStyles1, tabBarStyles2 };
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    EXPECT_EQ(tabBarPattern_->swiperStartIndex_, 1);
-    tabBarPattern_->swiperStartIndex_ = -1;
-    tabBarPattern_->GetIndicatorStyle(indicator, indicatorOffset);
-    EXPECT_EQ(tabBarPattern_->swiperStartIndex_, -1);
-    EXPECT_EQ(indicatorOffset.GetY(), 33.f);
 }
 
 /**
@@ -1474,9 +1410,12 @@ HWTEST_F(TabBarTestNg, Divider001, TestSize.Level1)
  */
 HWTEST_F(TabBarTestNg, TabBarBlurStyle001, TestSize.Level1)
 {
-    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    PipelineContext::GetCurrentContextSafelyWithCheck()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     TabsModelNG model = CreateTabs();
-    model.SetBarBackgroundBlurStyle(BlurStyle::COMPONENT_THICK);
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+    model.SetBarBackgroundBlurStyle(styleOption);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
 
@@ -1486,6 +1425,32 @@ HWTEST_F(TabBarTestNg, TabBarBlurStyle001, TestSize.Level1)
      */
     auto tabBarRenderContext = tabBarNode_->GetRenderContext();
     EXPECT_EQ(tabBarRenderContext->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_THICK);
+}
+
+/**
+ * @tc.name: TabBarBlurStyle002
+ * @tc.desc: test BarBlurStyleOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarTestNg, TabBarBlurStyle002, TestSize.Level1)
+{
+    PipelineContext::GetCurrentContext()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    TabsModelNG model = CreateTabs();
+    BlurStyleOption styleOption;
+    styleOption.colorMode = ThemeColorMode::LIGHT;
+    styleOption.scale = 0.5;
+    model.SetBarBackgroundBlurStyle(styleOption);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. update blurstyle
+     * @tc.expected: step2. expect The colorMode is LIGHT and the scale is 0.5.
+     */
+    auto tabBarRenderContext = tabBarNode_->GetRenderContext();
+    EXPECT_EQ(tabBarRenderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::LIGHT);
+    EXPECT_EQ(tabBarRenderContext->GetBackBlurStyle()->scale, 0.5);
 }
 
 /**
@@ -1661,7 +1626,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternUpdateSymbolStats001, TestSize.Level1)
     auto columnNode2 = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode2->GetTabBarItemId());
     auto symbolNode2 = GetChildFrameNode(columnNode2, 0);
     auto symbolProperty2 = symbolNode2->GetLayoutProperty<TextLayoutProperty>();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultColorOn = tabTheme->GetBottomTabSymbolOn();
     auto defaultColorOff = tabTheme->GetBottomTabSymbolOff();

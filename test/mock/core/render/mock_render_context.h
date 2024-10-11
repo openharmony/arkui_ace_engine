@@ -38,6 +38,8 @@ public:
     MOCK_METHOD1(GetPointWithRevert, void(PointF&));
     MOCK_METHOD1(SetSurfaceRotation, void(bool));
     MOCK_METHOD1(SetRenderFit, void(RenderFit));
+    MOCK_METHOD1(SetSecurityLayer, void(bool));
+    MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
 
     void SetVisible(bool visible) override
     {
@@ -52,11 +54,6 @@ public:
     void BlendBgColor(const Color& color) override
     {
         blendColor_ = color;
-    }
-
-    std::vector<double> GetTrans() override
-    {
-        return transInfo_;
     }
 
     void UpdatePaintRect(const RectF& rect) override
@@ -124,7 +121,6 @@ public:
     RectF rect_;
     RectF paintRect_;
     Color blendColor_ = Color::TRANSPARENT;
-    std::vector<double> transInfo_ = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     RefPtr<AnimatablePropertyOffsetF> translateXY_;
     float opacityMultiplier_ = 1.0f;
 };

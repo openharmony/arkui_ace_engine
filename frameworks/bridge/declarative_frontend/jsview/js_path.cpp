@@ -23,29 +23,21 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {
-
-std::unique_ptr<PathModel> PathModel::instance_ = nullptr;
-std::mutex PathModel::mutex_;
-
 PathModel* PathModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::PathModelNG());
+    static NG::PathModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::PathModelNG());
-            } else {
-                instance_.reset(new Framework::PathModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::PathModelNG instance;
+        return &instance;
+    } else {
+        static Framework::PathModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {

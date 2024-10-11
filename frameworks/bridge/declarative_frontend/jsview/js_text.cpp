@@ -58,21 +58,18 @@ std::mutex TextModel::mutex_;
 
 TextModel* TextModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::TextModelNG());
+    static NG::TextModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::TextModelNG());
-            } else {
-                instance_.reset(new Framework::TextModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::TextModelNG instance;
+        return &instance;
+    } else {
+        static Framework::TextModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -112,6 +109,14 @@ void JSText::SetHeight(const JSCallbackInfo& info)
 void JSText::SetFont(const JSCallbackInfo& info)
 {
     Font font;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    font.fontSize = theme->GetTextStyle().GetFontSize();
+    font.fontWeight = theme->GetTextStyle().GetFontWeight();
+    font.fontFamilies = theme->GetTextStyle().GetFontFamilies();
+    font.fontStyle = theme->GetTextStyle().GetFontStyle();
     GetFontInfo(info, font);
     TextModel::GetInstance()->SetFont(font);
     if (info.Length() < 2) { // 2 : two args
@@ -133,15 +138,6 @@ void JSText::SetFont(const JSCallbackInfo& info)
 void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
 {
     auto tmpInfo = info[0];
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    font.fontSize = theme->GetTextStyle().GetFontSize();
-    font.fontWeight = theme->GetTextStyle().GetFontWeight();
-    font.fontFamilies = theme->GetTextStyle().GetFontFamilies();
-    font.fontStyle = theme->GetTextStyle().GetFontStyle();
-
     if (!tmpInfo->IsObject()) {
         return;
     }
@@ -153,7 +149,7 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::WEIGHT));
-    if (!fontWeight->IsNull()) {
+    if (!fontWeight->IsNull() && !fontWeight->IsUndefined()) {
         int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
         ParseJsInt32(fontWeight, variableFontWeight);
         TextModel::GetInstance()->SetVariableFontWeight(variableFontWeight);
@@ -165,14 +161,14 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
         font.fontWeight = ConvertStrToFontWeight(weight);
     }
     auto fontFamily = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::FAMILY));
-    if (!fontFamily->IsNull()) {
+    if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
         std::vector<std::string> fontFamilies;
         if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies)) {
             font.fontFamilies = fontFamilies;
         }
     }
     auto style = paramObject->GetProperty(static_cast<int32_t>(ArkUIIndex::STYLE));
-    if (!style->IsNull() || style->IsNumber()) {
+    if (!style->IsNull() && style->IsNumber()) {
         font.fontStyle = static_cast<FontStyle>(style->ToNumber<int32_t>());
     }
 }

@@ -38,7 +38,7 @@ public:
     void Pop() override;
     void SetIndex(int32_t index) override;
     void SetTabBarPosition(BarPosition tabBarPosition) override;
-    void SetBarBackgroundBlurStyle(BlurStyle tabBarBlurStyle) override;
+    void SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption) override;
     void SetTabBarMode(TabBarMode tabBarMode) override;
     void SetTabBarWidth(const Dimension& tabBarWidth) override;
     void SetTabBarHeight(const Dimension& tabBarHeight) override;
@@ -66,6 +66,7 @@ public:
     void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback) override;
     void SetAnimateMode(TabAnimateMode mode) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
+    void SetBarBackgroundEffect(const EffectOption& effectOption) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

@@ -191,9 +191,10 @@ void ListModelNG::SetListItemAlign(V2::ListItemAlign listItemAlign)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign);
 }
 
-void ListModelNG::SetCachedCount(int32_t cachedCount)
+void ListModelNG::SetCachedCount(int32_t cachedCount, bool show)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, cachedCount);
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show);
 }
 
 int32_t ListModelNG::GetSticky(FrameNode* frameNode)
@@ -448,12 +449,12 @@ void ListModelNG::SetOnItemDrop(OnItemDropFunc&& onItemDrop)
 
 void ListModelNG::AddDragFrameNodeToManager() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
 
     dragDropManager->AddListDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }

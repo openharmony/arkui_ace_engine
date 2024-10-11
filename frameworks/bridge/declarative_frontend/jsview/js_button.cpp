@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_button_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -57,6 +58,63 @@ ButtonModel* ButtonModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+namespace {
+
+constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
+
+bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, std::optional<CalcDimension>& result)
+{
+    auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return true;
+}
+
+void GetBorderRadiusByLengthMetrics(
+    const char* key, const JSRef<JSObject>& object, std::optional<CalcDimension>& radius)
+{
+    if (object->HasProperty(key) && object->GetProperty(key)->IsObject()) {
+        JSRef<JSObject> startObj = JSRef<JSObject>::Cast(object->GetProperty(key));
+        ParseJsLengthMetrics(startObj, radius);
+    }
+}
+
+void GetNormalBorderRadius(const char* key, const JSRef<JSObject>& object, std::optional<CalcDimension>& radius)
+{
+    CalcDimension calcDimension;
+    auto jsVal = object->GetProperty(key);
+    if (!jsVal->IsUndefined() && JSViewAbstract::ParseJsDimensionVp(jsVal, calcDimension)) {
+        radius = calcDimension;
+    }
+}
+
+bool ParseAllBorderRadius(const JSRef<JSObject>& object, std::optional<CalcDimension>& topLeft,
+    std::optional<CalcDimension>& topRight, std::optional<CalcDimension>& bottomLeft,
+    std::optional<CalcDimension>& bottomRight)
+{
+    if (object->HasProperty("topStart") || object->HasProperty("topEnd") || object->HasProperty("bottomStart") ||
+        object->HasProperty("bottomEnd")) {
+        GetBorderRadiusByLengthMetrics("topStart", object, topLeft);
+        GetBorderRadiusByLengthMetrics("topEnd", object, topRight);
+        GetBorderRadiusByLengthMetrics("bottomStart", object, bottomLeft);
+        GetBorderRadiusByLengthMetrics("bottomEnd", object, bottomRight);
+        return true;
+    }
+    GetNormalBorderRadius("topLeft", object, topLeft);
+    GetNormalBorderRadius("topRight", object, topRight);
+    GetNormalBorderRadius("bottomLeft", object, bottomLeft);
+    GetNormalBorderRadius("bottomRight", object, bottomRight);
+    return false;
+}
+} // namespace
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
@@ -563,19 +621,18 @@ void JSButton::JsRadius(const JSCallbackInfo& info)
 
 void JSButton::JsRadius(const JSRef<JSVal>& jsValue)
 {
-    constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
     CalcDimension radius;
     if (ParseJsDimensionVpNG(jsValue, radius)) {
         ButtonModel::GetInstance()->SetBorderRadius(radius);
     } else if (jsValue->IsObject() && ((JSRef<JSObject>::Cast(jsValue)->GetPropertyValue<int32_t>(
                                            "type", UNKNOWN_RESOURCE_TYPE)) == UNKNOWN_RESOURCE_TYPE)) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
-        CalcDimension topLeft;
-        CalcDimension topRight;
-        CalcDimension bottomLeft;
-        CalcDimension bottomRight;
-        JSViewAbstract::ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
-        ButtonModel::GetInstance()->SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+        std::optional<CalcDimension> radiusTopLeft;
+        std::optional<CalcDimension> radiusTopRight;
+        std::optional<CalcDimension> radiusBottomLeft;
+        std::optional<CalcDimension> radiusBottomRight;
+        ParseAllBorderRadius(object, radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
+        ButtonModel::GetInstance()->SetBorderRadius(radiusTopLeft, radiusTopRight, radiusBottomLeft, radiusBottomRight);
     } else {
         ButtonModel::GetInstance()->ResetBorderRadius();
     }

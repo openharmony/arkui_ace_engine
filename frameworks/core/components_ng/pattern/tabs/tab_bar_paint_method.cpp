@@ -55,7 +55,7 @@ CanvasDrawFunction TabBarPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 void TabBarPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
     const std::vector<bool>& gradientRegions, const MarginPropertyF& padding)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
@@ -169,7 +169,7 @@ RefPtr<Modifier> TabBarPaintMethod::GetContentModifier(PaintWrapper* paintWrappe
 void TabBarPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(tabBarModifier_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
 
     tabBarModifier_->SetIndicatorOffset(indicatorOffset_);

@@ -234,7 +234,7 @@ public:
                 auto nextChar = value.substr(i, 1);
                 auto mapTuple = escapeMap.find(nextChar);
                 if (mapTuple == escapeMap.end()) {
-                    LOGE("Find escape \\%{public}s failed", nextChar.c_str());
+                    TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Find escape \\%{public}s failed", nextChar.c_str());
                     return false;
                 }
                 ch = mapTuple->second;
@@ -335,6 +335,7 @@ public:
     virtual void SetCanacelIconSrc(
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetCancelIconColor(const Color& iconColor) = 0;
+    virtual void SetCancelButtonSymbol(bool isShowSymbol) = 0;
     virtual void SetIsShowCancelButton(bool isShowCancelButton) = 0;
 
     virtual void SetSelectAllValue(bool isSetSelectAllValue) = 0;

@@ -45,7 +45,8 @@ void WaterFlowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     json->PutExtAttr("rowsTemplate", propRowsTemplate_.value_or("").c_str(), filter);
     json->PutExtAttr("columnsGap", propColumnsGap_.value_or(0.0_vp).ToString().c_str(), filter);
     json->PutExtAttr("rowsGap", propRowsGap_.value_or(0.0_vp).ToString().c_str(), filter);
-    json->PutExtAttr("layoutDirection ", GetWaterflowDirectionStr().c_str(), filter);
+    json->PutExtAttr("layoutDirection", GetWaterflowDirectionStr().c_str(), filter);
+    json->PutExtAttr("cachedCount", propCachedCount_.value_or(1), filter);
     auto jsonConstraintSize = JsonUtil::Create(true);
     if (itemLayoutConstraint_) {
         jsonConstraintSize->Put("minWidth", itemLayoutConstraint_->minSize.value_or(CalcSize())

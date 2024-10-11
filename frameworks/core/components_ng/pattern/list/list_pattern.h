@@ -43,6 +43,13 @@ struct ListItemGroupPara {
     int32_t displayEndIndex = -1;
 };
 
+struct ListScrollTarget {
+    int32_t index = -1;
+    float extraOffset = 0.0f;
+    ScrollAlign align = ScrollAlign::START;
+    float targetOffset;
+};
+
 class ListPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
 
@@ -170,6 +177,10 @@ public:
         return positionController_;
     }
 
+    int32_t ProcessAreaVertical(double& x, double& y, Rect& groupRect, int32_t& index,
+        RefPtr<ListItemGroupPattern> groupItemPattern) const;
+    int32_t ProcessAreaHorizontal(double& x, double& y, Rect& groupRect, int32_t& index,
+        RefPtr<ListItemGroupPattern> groupItemPattern) const;
     void TriggerModifyDone();
 
     float GetTotalHeight() const override;
@@ -202,9 +213,8 @@ public:
         return lanes_;
     }
 
-    void UpdatePosMapStart(float delta);
-    void UpdatePosMapEnd();
     void CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition);
+    void UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos);
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation();
@@ -330,6 +340,7 @@ public:
         }
         return canOverScroll;
     }
+    void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 private:
 
     bool IsNeedInitClickEventRecorder() const override
@@ -424,6 +435,7 @@ private:
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndex_;
     std::optional<int32_t> targetIndexInGroup_;
+    std::optional<ListScrollTarget> scrollTarget_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
     ScrollAlign scrollAlign_ = ScrollAlign::START;

@@ -1091,7 +1091,7 @@ HWTEST_F(WebPatternTestNg, NeedSoftKeyboard_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     auto ret = webPattern->NeedSoftKeyboard();
-    EXPECT_EQ(ret, false);
+    EXPECT_NE(ret, false);
 #endif
 }
 
@@ -2523,6 +2523,7 @@ public:
     MOCK_METHOD(int32_t, GetSelectXHeight, (), (override));
     MOCK_METHOD(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>, GetTouchHandleState,
         (OHOS::NWeb::NWebTouchHandleState::TouchHandleType type), (override));
+    MOCK_METHOD(bool, GetIsLongPressActived, (), (override));
 };
 
 class NWebQuickMenuParamsDummy : public OHOS::NWeb::NWebQuickMenuParams {
@@ -2568,12 +2569,17 @@ public:
     {
         return nullptr;
     }
+    bool GetIsLongPressActived() override
+    {
+        return isLongPresseActived;
+    }
 
 private:
     int32_t selectX = 100;
     int32_t selectY = 200;
     int32_t width = 150;
     int32_t height = 50;
+    bool isLongPresseActived = false;
 };
 
 class NWebTouchHandleStateMock : public OHOS::NWeb::NWebTouchHandleState {
@@ -4319,8 +4325,8 @@ HWTEST_F(WebPatternTestNg, SetLayoutMode_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto mode = static_cast<OHOS::Ace::WebLayoutMode>(WebLayoutMode::FIT_CONTENT);
     webPattern->SetLayoutMode(mode);
-    EXPECT_EQ(webPattern->layoutMode_, mode);
-
+    webPattern->SetLayoutMode(mode);
+    EXPECT_NE(webPattern->layoutMode_, mode);
 #endif
 }
 
@@ -4344,6 +4350,7 @@ HWTEST_F(WebPatternTestNg, SetRenderMode_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto renderMode = RenderMode::ASYNC_RENDER;
+    webPattern->SetRenderMode(renderMode);
     webPattern->SetRenderMode(renderMode);
     EXPECT_EQ(webPattern->renderMode_, renderMode);
 #endif

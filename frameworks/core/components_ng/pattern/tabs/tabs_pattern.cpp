@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,7 +82,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         /* js callback */
         if (jsEvent && tabsNode->IsOnMainTree()) {
             pattern->RecordChangeEvent(currentIndex);
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = tabsNode->GetContext();
             CHECK_NULL_VOID(context);
             context->AddAfterLayoutTask(
                 [currentIndex, jsEvent]() {
@@ -278,13 +278,19 @@ void TabsPattern::OnModifyDone()
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     auto tabBarPaintProperty = tabBarPattern->GetPaintProperty<TabBarPaintProperty>();
-    if (tabBarPaintProperty->GetTabBarBlurStyle().has_value() &&
+    if (tabBarPaintProperty->GetTabBarBlurStyleOption().has_value() &&
         Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto tabBarRenderContext = tabBarNode->GetRenderContext();
         CHECK_NULL_VOID(tabBarRenderContext);
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = tabBarPaintProperty->GetTabBarBlurStyle().value();
+        BlurStyleOption styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value();
         tabBarRenderContext->UpdateBackBlurStyle(styleOption);
+    }
+    if (tabBarPaintProperty->GetTabBarEffectOption().has_value() &&
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        auto tabBarRenderContext = tabBarNode->GetRenderContext();
+        CHECK_NULL_VOID(tabBarRenderContext);
+        EffectOption effectOption = tabBarPaintProperty->GetTabBarEffectOption().value();
+        tabBarRenderContext->UpdateBackgroundEffect(effectOption);
     }
 
     UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);
@@ -384,6 +390,18 @@ void TabsPattern::OnRestoreInfo(const std::string& restoreInfo)
 
     swiperPattern->OnRestoreInfo(restoreInfo);
     tabBarPattern->OnRestoreInfo(restoreInfo);
+}
+
+void TabsPattern::AddInnerOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto targetComponent = swiperNode->GetTargetComponent().Upgrade();
+    CHECK_NULL_VOID(targetComponent);
+    targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+    targetComponent->SetInnerNodeGestureRecognizerJudge();
 }
 
 ScopeFocusAlgorithm TabsPattern::GetScopeFocusAlgorithm()
@@ -554,6 +572,7 @@ void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->SetClickRepeat(false);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     tabBarPattern->UpdateImageColor(index);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();

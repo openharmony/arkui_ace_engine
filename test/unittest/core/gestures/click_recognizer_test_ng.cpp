@@ -604,6 +604,7 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest011, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("myButton", 100, AceType::MakeRefPtr<Pattern>());
     clickRecognizer.AttachFrameNode(frameNode);
     clickRecognizer.responseRegionBuffer_.emplace_back(RectF(0, 0, 200, 200));
+    clickRecognizer.SetDistanceThreshold(200);
     TouchEvent touchEvent;
 
     /**
@@ -1375,6 +1376,6 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEvent002, TestSize.L
     clickRecognizer.refereeState_ = RefereeState::SUCCEED_BLOCKED;
     clickRecognizer.currentFingers_ = 1;
     clickRecognizer.CleanRecognizerState();
-    SUCCEED();
+    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED_BLOCKED);
 }
 } // namespace OHOS::Ace::NG

@@ -26,6 +26,19 @@
 namespace OHOS::Ace::NG {
 
 enum class MouseStatus { PRESSED, RELEASED, MOVE, NONE };
+enum {
+    ACTION_SELECT_ALL, // Smallest code unit.
+    ACTION_UNDO,
+    ACTION_REDO,
+    ACTION_CUT,
+    ACTION_COPY,
+    ACTION_PASTE,
+    ACTION_SHARE,
+    ACTION_PASTE_AS_PLAIN_TEXT,
+    ACTION_REPLACE,
+    ACTION_ASSIST,
+    ACTION_AUTOFILL,
+};
 
 struct HandleMoveStatus {
     bool isFirsthandle = false;
@@ -95,7 +108,7 @@ protected:
     }
     virtual void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) {}
     virtual void OnTextGenstureSelectionEnd() {}
-
+    virtual void DoTextSelectionTouchCancel() {}
 private:
     void DoTextSelectionTouchMove(const TouchEventInfo& info);
     int32_t start_ = -1;

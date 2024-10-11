@@ -89,8 +89,9 @@ private:
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void OnClick() const;
-
     int32_t TotalCount() const;
+    RefPtr<SwiperPattern> GetSwiperPattern() const;
+
     RefPtr<ClickEvent> buttonClickListenr_;
     RefPtr<TouchEventImpl> buttonTouchListenr_;
     RefPtr<InputEvent> buttonOnHoverListenr_;

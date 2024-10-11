@@ -166,6 +166,7 @@ public:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void DumpTextStyleInfo();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
     void DumpParagraphsInfo();
@@ -175,7 +176,7 @@ public:
         return textSelector_;
     }
 
-    std::string GetTextForDisplay() const
+    const std::string& GetTextForDisplay() const
     {
         return textForDisplay_;
     }
@@ -375,6 +376,8 @@ public:
     ResultObject GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     std::string GetFontInJson() const;
+    std::string GetBindSelectionMenuInJson() const;
+    virtual void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const {}
 
     const std::vector<std::string>& GetDragContents() const
     {
@@ -713,7 +716,23 @@ public:
     {
         isEnableHapticFeedback_ = isEnabled;
     }
+
+    bool HasContent();
+    void SetupMagnifier();
+
+    virtual bool IsEnabledObscured() const
+    {
+        return true;
+    }
+
+    virtual Color GetUrlSpanColor();
+    void DoTextSelectionTouchCancel() override;
+
 protected:
+    int32_t GetClickedSpanPosition()
+    {
+        return clickedSpanPosition_;
+    }
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAfterModifyDone() override;
@@ -730,9 +749,12 @@ protected:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     void HandleClickAISpanEvent(const PointF& info);
-    void HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan);
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
+    void HandleClickOnTextAndSpan(GestureEvent& info);
+    void RecordClickEvent();
+    void ActTextOnClick(GestureEvent& info);
+    void RecordSpanClickEvent(const RefPtr<SpanItem>& span);
     bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
     void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
@@ -792,6 +814,7 @@ protected:
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
     void OnForegroundColorUpdate(const Color& value) override;
+    void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
     bool enabled_ = true;
     Status status_ = Status::NONE;
@@ -845,6 +868,8 @@ protected:
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    bool ShowShadow(const PointF& textOffset, const Color& color);
+    bool hasUrlSpan_ = false;
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -853,7 +878,6 @@ private:
     void OnHandleTouchUp();
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
-    void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     bool IsShowHandle();
     void InitUrlMouseEvent();
@@ -863,7 +887,6 @@ private:
     void URLOnHover(bool isHover);
     bool HandleUrlClick();
     std::pair<int32_t, int32_t> GetStartAndEnd(int32_t start);
-    bool ShowShadow(const PointF& textOffset, const Color& color);
     Color GetUrlHoverColor();
     Color GetUrlPressColor();
     void SetAccessibilityAction();
@@ -957,6 +980,7 @@ private:
     std::optional<ParagraphStyle> externalParagraphStyle_;
     bool isUserSetResponseRegion_ = false;
     WeakPtr<PipelineContext> pipeline_;
+    WeakPtr<ScrollablePattern> scrollableParent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

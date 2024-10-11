@@ -224,14 +224,20 @@ public:
         return isLastMoveBeforeUp_;
     }
 
-    NG::EventTreeRecord& GetEventTreeRecord()
+    NG::EventTreeRecord& GetEventTreeRecord(NG::EventTreeType treeType)
     {
-        return eventTree_;
+        switch (treeType) {
+            case NG::EventTreeType::TOUCH :
+                return eventTree_;
+            case NG::EventTreeType::POST_EVENT :
+                return postEventTree_;
+        }
     }
 
-    void DumpEvent(bool hasJson = false) const;
+    void DumpEvent(NG::EventTreeType type, bool hasJson = false);
 
-    void AddGestureSnapshot(int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target);
+    void AddGestureSnapshot(
+        int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type);
 
     RefPtr<NG::ResponseCtrl> GetResponseCtrl()
     {
@@ -286,6 +292,8 @@ public:
     void CheckAndLogLastConsumedEventInfo(int32_t eventId, bool logImmediately = false);
 
     void ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent);
+
+    TouchEvent ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent);
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
@@ -351,6 +359,7 @@ private:
     std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode_;
     std::vector<KeyCode> pressedKeyCodes_;
     NG::EventTreeRecord eventTree_;
+    NG::EventTreeRecord postEventTree_;
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
     int64_t lastTouchEventEndTimestamp_ = 0;

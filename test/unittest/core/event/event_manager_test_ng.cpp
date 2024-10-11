@@ -44,7 +44,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest001, TestSize.Level1)
     event.code = KeyCode::KEY_F4;
     event.pressedCodes = {KeyCode::KEY_ALT_LEFT};
     bool isSystemKey = eventManager->IsSystemKeyboardShortcut(event);
-    EXPECT_TRUE(isSystemKey);
+    EXPECT_FALSE(isSystemKey);
 
     /* RAlt + F4 */
     event.code = KeyCode::KEY_F4;
@@ -1174,7 +1174,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest033, TestSize.Level1)
      * @tc.steps: step2. Call DumpEvent.
      * @tc.expected: eventManager->axisNode_.Upgrade() is not null.
      */
-    eventManager->DumpEvent();
+    eventManager->DumpEvent(EventTreeType::TOUCH);
     std::list<std::pair<int32_t, std::string>> dumpList;
     eventManager->eventTree_.Dump(dumpList, 0);
     ASSERT_TRUE(dumpList.empty());

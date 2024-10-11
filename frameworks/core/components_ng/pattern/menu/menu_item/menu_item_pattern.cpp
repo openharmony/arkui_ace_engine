@@ -368,7 +368,6 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SetClickMenuItemId(host->GetId());
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
     auto menuPattern = subMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -379,6 +378,7 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
     CHECK_NULL_VOID(menuWrapper);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         expandingMode_ == SubMenuExpandingMode::STACK) {
+        SetClickMenuItemId(host->GetId());
         subMenu->MountToParent(menuWrapper);
         menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         menuPattern->SetSubMenuShow();
@@ -682,7 +682,19 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
     // change menu item paint props on press
     auto touchType = info.GetTouches().front().GetTouchType();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    if (touchType == TouchType::DOWN) {
+        // change background color, update press status
+        NotifyPressStatus(true);
+    } else if (touchType == TouchType::UP) {
+        NotifyPressStatus(false);
+    }
+}
+
+void MenuItemPattern::NotifyPressStatus(bool isPress)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -692,8 +704,6 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto parent = AceType::DynamicCast<UINode>(host->GetParent());
     auto menuWrapper = GetMenuWrapper();
     auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
@@ -703,7 +713,7 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
         && menuWrapperPattern && menuWrapperPattern->HasStackSubMenu() && !IsSubMenu());
     if (!canChangeColor) return;
 
-    if (touchType == TouchType::DOWN) {
+    if (isPress) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
         if (menuWrapperPattern) {
@@ -711,12 +721,10 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
         }
         props->UpdatePress(true);
         menuPattern->OnItemPressed(parent, index_, true);
-    } else if (touchType == TouchType::UP) {
+    } else {
         SetBgBlendColor(isHovered_ ? theme->GetHoverColor() : Color::TRANSPARENT);
         props->UpdatePress(false);
         menuPattern->OnItemPressed(parent, index_, false);
-    } else {
-        return;
     }
     PlayBgColorAnimation(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1353,8 +1361,12 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         } else if (textAlign == TextAlign::END) {
             textAlign = TextAlign::START;
         }
+        textProperty->UpdateTextAlign(textAlign);
+    } else {
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            textProperty->UpdateTextAlign(textAlign);
+        }
     }
-    textProperty->UpdateTextAlign(isLabel ? TextAlign::CENTER : textAlign);
     UpdateFont(menuProperty, theme, isLabel);
     textProperty->UpdateContent(content);
     UpdateTextOverflow(textProperty, theme);

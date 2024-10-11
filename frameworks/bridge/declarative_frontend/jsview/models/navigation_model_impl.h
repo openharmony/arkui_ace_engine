@@ -30,13 +30,13 @@ public:
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
-    void SetHideTitleBar(bool hideTitleBar) override;
+    void SetHideTitleBar(bool hideTitleBar, bool animated = false) override;
     void SetHideNavBar(bool hideNavBar) override;
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,
         const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
         const std::vector<std::string>& nameList) override;
     void SetHideBackButton(bool hideBackButton) override;
-    void SetHideToolBar(bool hideToolBar) override;
+    void SetHideToolBar(bool hideToolBar, bool animated = false) override;
     void SetCustomToolBar(const RefPtr<AceType>& customToolBar) override;
     bool NeedSetItems() override;
     void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) override;

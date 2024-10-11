@@ -81,6 +81,7 @@ bool LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
     // apply keyboard avoidance on Page or Overlay
     if ((GetHostTag() == V2::PAGE_ETS_TAG && isNeedAvoidKeyboard && !isFocusOnOverlay) ||
         GetHostTag() == V2::OVERLAY_ETS_TAG) {
+        CHECK_NULL_RETURN(IsActive(), false);
         auto renderContext = GetHostNode()->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto safeArea = manager->GetSafeArea();
@@ -350,7 +351,7 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(bool includingSelf)
     const auto& layoutProperty = GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, totalExpand);
     if (includingSelf && geometryNode->GetResolvedSingleSafeAreaPadding()) {
-        totalExpand.Plus(*(geometryNode->GetResolvedSingleSafeAreaPadding()));
+        totalExpand = totalExpand.Plus(*(geometryNode->GetResolvedSingleSafeAreaPadding()));
     }
     // CreateMargin does get or create
     auto hostMargin = layoutProperty->CreateMargin();

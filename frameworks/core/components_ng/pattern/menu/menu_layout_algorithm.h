@@ -38,6 +38,7 @@ struct MenuDumpInfo {
     std::string targetNode;
     OffsetF targetOffset;
     SizeF targetSize;
+    Rect menuWindowRect;
     Rect wrapperRect;
     float previewBeginScale = 0.0f;
     float previewEndScale = 0.0f;
@@ -47,6 +48,7 @@ struct MenuDumpInfo {
     float right = 0.0f;
     OffsetF globalLocation;
     std::string originPlacement;
+    std::string defaultPlacement;
     OffsetF finalPosition;
     std::string finalPlacement = "NONE";
 };
@@ -70,9 +72,15 @@ public:
         return placement_;
     }
 
-    bool hierarchicalParameters_ = false;
-    void InitHierarchicalParameters(bool isShowInSubWindow, const RefPtr<MenuPattern>& menuPattern);
+    std::string& GetClipPath()
+    {
+        return clipPath_;
+    }
+
+    bool canExpandCurrentWindow_ = false;
+    void InitCanExpandCurrentWindow(bool isShowInSubWindow);
     bool CheckIsEmbeddedMode(LayoutWrapper* layoutWrapper);
+    Rect GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern);
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition, bool IsContextMenu = false);
@@ -88,6 +96,21 @@ protected:
     SizeF wrapperSize_;
     // rect is relative to menuWrapper
     Rect wrapperRect_;
+    struct PreviewMenuParam {
+        SizeF windowGlobalSizeF;
+        Rect menuWindowRect;
+        float windowsOffsetX = 0.0f;
+        float windowsOffsetY = 0.0f;
+        float top = 0.0f;
+        float bottom = 0.0f;
+        float left = 0.0f;
+        float right = 0.0f;
+        float topSecurity = 0.0f;
+        float bottomSecurity = 0.0f;
+        float previewMenuGap = 0.0f;
+        float menuItemTotalHeight = 0.0f;
+    };
+    PreviewMenuParam param_;
 
 private:
     enum class ErrorPositionType {
@@ -101,19 +124,6 @@ private:
         Right_Direction,
         Left_Direction,
         None_Direction,
-    };
-    struct PreviewMenuParam {
-        SizeF windowGlobalSizeF;
-        float windowsOffsetX = 0.0f;
-        float windowsOffsetY = 0.0f;
-        float top = 0.0f;
-        float bottom = 0.0f;
-        float left = 0.0f;
-        float right = 0.0f;
-        float topSecurity = 0.0f;
-        float bottomSecurity = 0.0f;
-        float previewMenuGap = 0.0f;
-        float menuItemTotalHeight = 0.0f;
     };
 
     void Initialize(LayoutWrapper* layoutWrapper);
@@ -177,6 +187,9 @@ private:
     OffsetF AdjustPosition(const OffsetF& position, float width, float height, float space);
     OffsetF GetAdjustPosition(std::vector<Placement>& currentPlacementStates, size_t step, const SizeF& childSize,
         const OffsetF& topPosition, const OffsetF& bottomPosition);
+    void CalculateChildOffset(bool didNeedArrow);
+    OffsetF CalculateMenuPositionWithArrow(const OffsetF& menuPosition, bool didNeedArrow);
+    void UpdateMenuFrameSizeWithArrow(const RefPtr<GeometryNode>& geometryNode, bool didNeedArrow);
 
     RefPtr<PipelineContext> GetCurrentPipelineContext();
 
@@ -226,6 +239,27 @@ private:
     void UpdateChildConstraintByDevice(const RefPtr<MenuPattern>& menuPattern,
         LayoutConstraintF& childConstraint, const LayoutConstraintF& layoutConstraint);
     void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& windowGlobalRect);
+    void ModifyTargetOffset();
+
+    std::string MoveTo(double x, double y);
+    std::string LineTo(double x, double y);
+    std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
+    void BuildBottomArrowPath(float arrowX, float arrowY, std::string& path);
+    void BuildTopArrowPath(float arrowX, float arrowY, std::string& path);
+    void BuildRightArrowPath(float arrowX, float arrowY, std::string& path);
+    void BuildLeftArrowPath(float arrowX, float arrowY, std::string& path);
+    std::string BuildTopLinePath(const OffsetF& arrowPosition, float radiusPx,
+        Placement arrowBuildPlacement, bool didNeedArrow);
+    std::string BuildRightLinePath(const OffsetF& arrowPosition, float radiusPx,
+        Placement arrowBuildPlacement, bool didNeedArrow);
+    std::string BuildBottomLinePath(const OffsetF& arrowPosition, float radiusPx,
+        Placement arrowBuildPlacement, bool didNeedArrow);
+    std::string BuildLeftLinePath(const OffsetF& arrowPosition, float radiusPx,
+        Placement arrowBuildPlacement, bool didNeedArrow);
+    void NormalizeBorderRadius(float& radiusTopLeftPx, float& radiusTopRightPx,
+        float& radiusBottomLeftPx, float& radiusBottomRightPx);
+    std::string CalculateMenuPath(LayoutWrapper* layoutWrapper, bool didNeedArrow);
+    void ClipMenuPath(LayoutWrapper* layoutWrapper);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;
@@ -280,9 +314,17 @@ private:
     bool isHalfFoldHover_ = false;
     // previewScale_ must be greater than 0
     float previewScale_ = 1.0f;
-    PreviewMenuParam param_;
     MenuDumpInfo dumpInfo_;
     MarginPropertyF layoutRegionMargin_;
+    bool isExpandDisplay_ = false;
+    bool isFreeMultiWindow_ = false;
+    bool isUIExtensionSubWindow_ = false;
+    RectF displayWindowRect_;
+    RectF UIExtensionHostWindowRect_;
+
+    OffsetF childOffset_;
+    SizeF childMarginFrameSize_;
+    std::string clipPath_;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

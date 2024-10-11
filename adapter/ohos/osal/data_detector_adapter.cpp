@@ -41,7 +41,7 @@ void DataDetectorAdapter::GetAIEntityMenu()
 {
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask(
         [weak = AceType::WeakClaim(this), instanceId = context->GetInstanceId()] {
             ContainerScope scope(instanceId);
@@ -167,7 +167,7 @@ void DataDetectorAdapter::SetTextDetectTypes(const std::string& types)
 
 bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT, "Parse origine text entry");
+    TAG_LOGI(AceLogTag::ACE_TEXT, "Parse origin text entry");
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(Container::CurrentId());
     CHECK_NULL_RETURN(runtimeContext, false);
     if (runtimeContext->GetBundleName() != entityJson->GetString("bundleName")) {
@@ -182,6 +182,9 @@ bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJ
         return false;
     }
 
+    aiSpanMap_.clear();
+    aiSpanRects_.clear();
+    detectTexts_.clear();
     AISpan aiSpan;
     for (int32_t i = 0; i < aiSpanArray->GetArraySize(); ++i) {
         auto item = aiSpanArray->GetArrayItem(i);
@@ -194,6 +197,7 @@ bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJ
     aiDetectInitialized_ = true;
     text = entityJson->GetString("content");
     textForAI_ = text;
+    lastTextForAI_ = textForAI_;
     if (textDetectResult_.menuOptionAndAction.empty()) {
         GetAIEntityMenu();
     }

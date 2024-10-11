@@ -779,6 +779,10 @@ uint32_t MenuPattern::GetInnerMenuCount() const
         // found component <Menu>
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             child = child->GetFrameChildByIndex(0, false);
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child = child->GetChildAtIndex(0);
+                ++depth;
+            }
             continue;
         }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
@@ -806,6 +810,10 @@ RefPtr<FrameNode> MenuPattern::GetFirstInnerMenu() const
         // found component <Menu>
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             child = child->GetFrameChildByIndex(0, false);
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child = child->GetChildAtIndex(0);
+                ++depth;
+            }
             continue;
         }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
@@ -1216,7 +1224,7 @@ void MenuPattern::ShowStackExpandMenu()
     auto outterMenu = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(outterMenu);
 
-    auto [originOffset, endOffset] = GetMenuOffset(outterMenu);
+    auto [originOffset, endOffset] = GetMenuOffset(outterMenu, true);
     auto outterMenuContext = outterMenu->GetRenderContext();
     CHECK_NULL_VOID(outterMenuContext);
 
@@ -1278,9 +1286,7 @@ MenuItemInfo MenuPattern::GetInnerMenuOffset(const RefPtr<UINode>& child, bool i
         if (menuItemInfo.isFindTargetId) {
             return menuItemInfo;
         }
-    } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG
-        || child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
-        ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
+    } else {
         const auto& groupChildren = child->GetChildren();
         for (auto child : groupChildren) {
             menuItemInfo = GetInnerMenuOffset(child, isNeedRestoreNodeId);
@@ -1414,6 +1420,20 @@ void MenuPattern::ShowMenuDisappearAnimation()
     });
 }
 
+void MenuPattern::UpdateClipPath(const RefPtr<LayoutWrapper>& dirty)
+{
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto menuLayoutAlgorithm = DynamicCast<MenuLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(menuLayoutAlgorithm);
+    auto clipPath = menuLayoutAlgorithm->GetClipPath();
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<MenuPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateClipPath(clipPath);
+}
+
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     ShowPreviewMenuAnimation();
@@ -1427,6 +1447,7 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
 
+    UpdateClipPath(dirty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();

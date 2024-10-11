@@ -262,6 +262,10 @@ public:
     virtual bool IsHostSceneBoardWindow() const { return false; }
     virtual bool IsSubContainer() const { return false; }
     virtual bool IsFormRender() const { return false; }
+    virtual uint32_t GetParentMainWindowId(uint32_t currentWindowId) const
+    {
+        return 0;
+    }
 
     virtual void SetIsFormRender(bool isFormRender) {};
 
@@ -598,6 +602,11 @@ public:
     void DestroyToastSubwindow(int32_t instanceId);
 
     virtual void CheckAndSetFontFamily() {};
+
+    virtual bool IsFreeMultiWindow() const
+    {
+        return false;
+    }
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);

@@ -56,6 +56,15 @@ public:
         topologicalResult_ = result;
     }
 
+    void SetLoopDependentNodes(const std::string& result)
+    {
+        if (result.empty()) {
+            loopDependentNodes_.reset();
+            return;
+        }
+        loopDependentNodes_ = result;
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
@@ -81,6 +90,11 @@ public:
         topologicalResultList_ = std::move(cache);
     }
 
+    std::optional<std::string> GetLoopDependentNodes()
+    {
+        return loopDependentNodes_;
+    }
+
     static std::string TopoListToString(const std::list<std::string>& topoList)
     {
         std::string result = "[";
@@ -94,9 +108,25 @@ public:
         return result;
     }
 
+    static std::string LoopDependentNodesToString(
+        const std::optional<std::unordered_map<std::string, uint32_t>>& incomingDegreeMapCopy)
+    {
+        std::string loopDependentNodes = "";
+        if (!incomingDegreeMapCopy.has_value()) {
+            return loopDependentNodes;
+        }
+        for (const auto& node : incomingDegreeMapCopy.value()) {
+            loopDependentNodes += node.first + ",";
+        }
+        return loopDependentNodes;
+    }
+
     void DumpInfo() override
     {
         DumpLog::GetInstance().AddDesc(std::string("topologicalResult:").append(topologicalResult_));
+        if (loopDependentNodes_) {
+            DumpLog::GetInstance().AddDesc(std::string("loopDependentNodes:").append(loopDependentNodes_.value()));
+        }
     }
 
     bool GetChildAlignRulesChanged()
@@ -131,6 +161,7 @@ public:
 private:
     bool childAlignRulesChanged_ = true;
     std::string topologicalResult_;
+    std::optional<std::string> loopDependentNodes_;
     std::optional<std::list<std::string>> topologicalResultList_;
 };
 

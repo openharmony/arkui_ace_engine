@@ -37,7 +37,7 @@
 type ConstructorV2 = { new(...args: any[]): any };
 
 function ObservedV2<T extends ConstructorV2>(BaseClass: T): T {
-  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@observed`, BaseClass?.name);
+  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@ObservedV2`, BaseClass?.name);
   return observedV2Internal<T>(BaseClass);
 }
 
@@ -51,7 +51,7 @@ function ObservedV2<T extends ConstructorV2>(BaseClass: T): T {
  * @from 12
  */
 const Trace = (target: Object, propertyKey: string): void => {
-  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@track`, propertyKey);
+  ConfigureStateMgmt.instance.usingV2ObservedTrack(`@Trace`, propertyKey);
   return trackInternal(target, propertyKey);
 };
 
@@ -69,7 +69,7 @@ const Trace = (target: Object, propertyKey: string): void => {
  *
  */
 const Local = (target: Object, propertyKey: string): void => {
-  ObserveV2.addVariableDecoMeta(target, propertyKey, '@state');
+  ObserveV2.addVariableDecoMeta(target, propertyKey, '@Local');
   return trackInternal(target, propertyKey);
 };
 
@@ -255,7 +255,7 @@ const Consumer = (aliasName?: string) => {
 const Monitor = function (key : string, ...keys: string[]): (target: any, _: any, descriptor: any) => void {
   const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
   return function (target, _, descriptor): void {
-    stateMgmtConsole.debug(`@monitor('${pathsUniqueString}')`);
+    stateMgmtConsole.debug(`@Monitor('${pathsUniqueString}')`);
     let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + target.constructor.name);
     const monitorFunc = descriptor.value;
     target[watchProp] ? target[watchProp][pathsUniqueString] = monitorFunc : target[watchProp] = { [pathsUniqueString]: monitorFunc };

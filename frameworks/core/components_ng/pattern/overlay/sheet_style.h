@@ -42,6 +42,7 @@ enum SheetType {
     SHEET_POPUP,
     SHEET_BOTTOMLANDSPACE,
     SHEET_BOTTOM_FREE_WINDOW,
+    SHEET_BOTTOM_OFFSET,
 };
 
 struct SheetKey {
@@ -114,6 +115,7 @@ struct SheetStyle {
     std::optional<SheetType> sheetType;
     std::optional<Color> backgroundColor;
     std::optional<Color> maskColor;
+    std::optional<OffsetF> bottomOffset;
     std::optional<BlurStyleOption> backgroundBlurStyle;
     std::optional<std::string> sheetTitle;
     std::optional<std::string> sheetSubtitle;
@@ -141,7 +143,7 @@ struct SheetStyle {
                 borderWidth == sheetStyle.borderWidth && borderColor == sheetStyle.borderColor &&
                 borderStyle == sheetStyle.borderStyle && shadow == sheetStyle.shadow && width == sheetStyle.width &&
                 instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode &&
-                sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode);
+                sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode && bottomOffset == sheetStyle.bottomOffset);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -175,6 +177,7 @@ struct SheetStyle {
         borderStyle = sheetStyle.borderStyle.has_value() ? sheetStyle.borderStyle : borderStyle;
         shadow = sheetStyle.shadow.has_value() ? sheetStyle.shadow : shadow;
         width = sheetStyle.width.has_value() ? sheetStyle.width : width;
+        bottomOffset = sheetStyle.bottomOffset.has_value() ? sheetStyle.bottomOffset : bottomOffset;
     }
 };
 } // namespace OHOS::Ace::NG

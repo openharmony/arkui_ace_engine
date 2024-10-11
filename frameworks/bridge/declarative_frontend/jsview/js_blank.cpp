@@ -22,26 +22,20 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<BlankModel> BlankModel::instance_ = nullptr;
-std::mutex BlankModel::mutex_;
-
 BlankModel* BlankModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::BlankModelNG());
+    static NG::BlankModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::BlankModelNG());
-            } else {
-                instance_.reset(new Framework::BlankModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::BlankModelNG instance;
+        return &instance;
+    } else {
+        static Framework::BlankModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 

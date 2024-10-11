@@ -1735,19 +1735,19 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg041, TestSize.Level1)
             EXPECT_EQ(result, OffsetF(arrowOffsetValue, menuSize.Height() + ARROW_HIGHT.ConvertToPx()));
         }
         if (positionCondition2.find(placementValue) != positionCondition2.end()) {
-            EXPECT_EQ(result, OffsetF(arrowOffsetValue, -ARROW_HIGHT.ConvertToPx()));
+            EXPECT_EQ(result, OffsetF(arrowOffsetValue, 0));
         }
         if (positionCondition3.find(placementValue) != positionCondition3.end()) {
             EXPECT_EQ(result, OffsetF(menuSize.Width() + ARROW_HIGHT.ConvertToPx(), arrowOffsetValue));
         }
         if (positionCondition4.find(placementValue) != positionCondition4.end()) {
-            EXPECT_EQ(result, OffsetF(-ARROW_HIGHT.ConvertToPx(), arrowOffsetValue));
+            EXPECT_EQ(result, OffsetF(0, arrowOffsetValue));
         }
     }
 }
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg044
- * @tc.desc: Verify InitHierarchicalParameters.
+ * @tc.desc: Verify InitCanExpandCurrentWindow.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg044, TestSize.Level1)
@@ -1788,14 +1788,14 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg044, TestSize.Level1)
 
     selectTheme->expandDisplay_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
-    layoutAlgorithm->InitHierarchicalParameters(false, menuPattern);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false);
 
     menuPattern->isSelectMenu_ = true;
-    layoutAlgorithm->InitHierarchicalParameters(false, menuPattern);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false);
 }
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg045
- * @tc.desc: Verify InitHierarchicalParameters.
+ * @tc.desc: Verify InitCanExpandCurrentWindow.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg045, TestSize.Level1)
@@ -1827,9 +1827,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg045, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     layoutAlgorithm->Measure(&layoutWrapper);
     layoutAlgorithm->Layout(&layoutWrapper);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    layoutAlgorithm->InitHierarchicalParameters(false, menuPattern);
+    layoutAlgorithm->InitCanExpandCurrentWindow(false);
 }
 
 /**
@@ -1860,7 +1858,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg046, TestSize.Level1)
 
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
+    layoutAlgorithm->canExpandCurrentWindow_ = true;
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE);
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -1906,7 +1904,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg047, TestSize.Level1)
 
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
+    layoutAlgorithm->canExpandCurrentWindow_ = true;
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE);
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(
@@ -1953,7 +1951,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg048, TestSize.Level1)
 
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    layoutAlgorithm->hierarchicalParameters_ = true;
+    layoutAlgorithm->canExpandCurrentWindow_ = true;
     LayoutWrapperNode layoutWrapper(menuNode, geometryNode, menuNode->GetLayoutProperty());
     Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
     layoutWrapper.GetLayoutProperty()->UpdateUserDefinedIdealSize(

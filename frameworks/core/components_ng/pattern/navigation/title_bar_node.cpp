@@ -66,5 +66,4 @@ void TitleBarNode::OnAttachToMainTree(bool recursive)
         pattern->InitSideBarButtonUpdateCallbackIfNeeded();
     }
 }
-
 } // namespace OHOS::Ace::NG

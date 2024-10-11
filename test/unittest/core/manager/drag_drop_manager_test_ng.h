@@ -20,7 +20,6 @@
 #include "gtest/gtest.h"
 
 #define private public
-#include "test/mock/base/mock_drag_window.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -75,7 +74,6 @@ const SizeF FRAME_SIZE(GLOBAL_X * 10.0f, GLOBAL_Y * 10.0f);
 constexpr int32_t DRAGGED_INDEX = 0;
 const DragType DRAG_TYPE_GRID = DragType::GRID;
 const DragType DRAG_TYPE_LIST = DragType::LIST;
-RefPtr<DragWindow> MOCK_DRAG_WINDOW;
 } // namespace
 
 class DragDropManagerTestNg : public testing::Test {

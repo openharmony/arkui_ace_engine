@@ -12,14 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import curves from '@ohos.curves'
-import { KeyCode } from '@ohos.multimodalInput.keyCode'
+import curves from '@ohos.curves';
+import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import util from '@ohos.util';
-import { LengthMetrics } from '@ohos.arkui.node'
+import { LengthMetrics } from '@ohos.arkui.node';
 import I18n from '@ohos.i18n';
 
 const MIN_ITEM_COUNT = 2
 const MAX_ITEM_COUNT = 5
+const DEFAULT_MAX_FONT_SCALE: number = 1
+const MAX_MAX_FONT_SCALE: number = 2
+const MIN_MAX_FONT_SCALE: number = 1
 
 interface SegmentButtonThemeInterface {
   FONT_COLOR: ResourceColor,
@@ -62,17 +65,27 @@ function nearEqual(first: number, second: number): boolean {
 
 interface SegmentButtonTextItem {
   text: ResourceStr
+  accessibilityLevel?: string
+  accessibilityDescription?: ResourceStr
 }
 
 interface SegmentButtonIconItem {
   icon: ResourceStr,
+  iconAccessibilityText?: ResourceStr
   selectedIcon: ResourceStr
+  selectedIconAccessibilityText?: ResourceStr
+  accessibilityLevel?: string
+  accessibilityDescription?: ResourceStr
 }
 
 interface SegmentButtonIconTextItem {
   icon: ResourceStr,
+  iconAccessibilityText?: ResourceStr
   selectedIcon: ResourceStr,
+  selectedIconAccessibilityText?: ResourceStr
   text: ResourceStr
+  accessibilityLevel?: string
+  accessibilityDescription?: ResourceStr
 }
 
 type DimensionNoPercentage = PX | VP | FP | LPX | Resource
@@ -120,20 +133,32 @@ export interface CapsuleSegmentButtonOptions extends CapsuleSegmentButtonConstru
 
 interface SegmentButtonItemOptionsConstructorOptions {
   icon?: ResourceStr
+  iconAccessibilityText?: ResourceStr
   selectedIcon?: ResourceStr
+  selectedIconAccessibilityText?: ResourceStr
   text?: ResourceStr
+  accessibilityLevel?: string
+  accessibilityDescription?: ResourceStr
 }
 
 @Observed
 class SegmentButtonItemOptions {
   public icon?: ResourceStr
+  public iconAccessibilityText?: ResourceStr
   public selectedIcon?: ResourceStr
+  public selectedIconAccessibilityText?: ResourceStr
   public text?: ResourceStr
+  public accessibilityLevel?: string
+  public accessibilityDescription?: ResourceStr
 
   constructor(options: SegmentButtonItemOptionsConstructorOptions) {
     this.icon = options.icon
     this.selectedIcon = options.selectedIcon
     this.text = options.text
+    this.iconAccessibilityText = options.iconAccessibilityText
+    this.selectedIconAccessibilityText = options.selectedIconAccessibilityText
+    this.accessibilityLevel = options.accessibilityLevel
+    this.accessibilityDescription = options.accessibilityDescription
   }
 }
 
@@ -458,6 +483,7 @@ struct MultiSelectItemArray {
 struct SegmentButtonItem {
   @Link selectedIndexes: number[]
   @Link focusIndex: number
+  @Prop @Require maxFontScale: number | Resource
   @ObjectLink itemOptions: SegmentButtonItemOptions
   @ObjectLink options: SegmentButtonOptions;
   @ObjectLink property: ItemProperty
@@ -497,6 +523,19 @@ struct SegmentButtonItem {
     }
   }
 
+  private getAccessibilityText(): string {
+    if (this.selectedIndexes.includes(this.index) && this.itemOptions.selectedIconAccessibilityText) {
+      return (typeof this.itemOptions.selectedIconAccessibilityText === 'string') ?
+      this.itemOptions.selectedIconAccessibilityText :
+      getContext(this).resourceManager.getStringSync((this.itemOptions.selectedIconAccessibilityText as Resource).id)
+    } else if (this.itemOptions.iconAccessibilityText) {
+      return (typeof this.itemOptions.iconAccessibilityText === 'string') ?
+      this.itemOptions.iconAccessibilityText :
+      getContext(this).resourceManager.getStringSync((this.itemOptions.iconAccessibilityText as Resource).id)
+    }
+    return '';
+  }
+
   build() {
     Column({ space: 2 }) {
       if (this.options.showIcon) {
@@ -508,6 +547,7 @@ struct SegmentButtonItem {
           .fillColor(this.property.isSelected ? (this.options.selectedFontColor ??
           segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) : (this.options.fontColor ??
           segmentButtonTheme.FONT_COLOR))
+          .accessibilityText(this.getAccessibilityText())
       }
       if (this.options.showText) {
         Text(this.itemOptions.text)
@@ -517,23 +557,12 @@ struct SegmentButtonItem {
           .fontSize(this.property.fontSize)
           .minFontSize(9)
           .maxFontSize(this.property.fontSize)
+          .maxFontScale(this.maxFontScale)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(1)
           .textAlign(TextAlign.Center)
           .focusable(true)
           .padding(this.getTextPadding())
-          .gesture(TapGesture().onAction(() => {
-            this.focusIndex = -1
-            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-              if (this.selectedIndexes.indexOf(this.index) === -1) {
-                this.selectedIndexes.push(this.index)
-              } else {
-                this.selectedIndexes.splice(this.selectedIndexes.indexOf(this.index), 1)
-              }
-            } else {
-              this.selectedIndexes[0] = this.index
-            }
-          }))
       }
     }
     .direction(this.options.direction)
@@ -585,6 +614,7 @@ struct SegmentButtonItemArrayComponent {
   @Link pressArray: boolean[]
   @Link hoverArray: boolean[]
   @Link hoverColorArray: HoverColorProperty[]
+  @Prop @Require maxFontScale: number | Resource
   @State buttonWidth: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   private buttonItemsRealHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
@@ -758,12 +788,21 @@ struct SegmentButtonItemArrayComponent {
     this.buttonBorderRadius = borderRadiusArray
   }
 
+  getAccessibilityDescription(value?: ResourceStr): string {
+    if (value) {
+      return (typeof value === 'string') ? value :
+      getContext(this).resourceManager.getStringSync((value as Resource).id)
+    } else {
+      return '';
+    }
+  }
+
   build() {
     if (this.optionsArray !== void 0 && this.optionsArray.length > 1) {
       Row({ space: 1 }) {
         ForEach(this.optionsArray, (item: SegmentButtonItemOptions, index) => {
           if (index < MAX_ITEM_COUNT) {
-            Stack() {
+            Button() {
               SegmentButtonItem({
                 selectedIndexes: $selectedIndexes,
                 focusIndex: this.focusIndex,
@@ -771,7 +810,8 @@ struct SegmentButtonItemArrayComponent {
                 itemOptions: item,
                 options: this.options,
                 property: this.buttonItemProperty[index],
-                groupId: this.groupId
+                groupId: this.groupId,
+                maxFontScale: this.maxFontScale
               })
                 .onSizeChange((_, newValue) => {
                   // Calculate height of items
@@ -784,6 +824,14 @@ struct SegmentButtonItemArrayComponent {
                   this.calculateBorderRadius()
                 })
             }
+            .type(ButtonType.Normal)
+            .stateEffect(false)
+            .hoverEffect(HoverEffect.None)
+            .backgroundColor(Color.Transparent)
+            .accessibilityLevel(item.accessibilityLevel)
+            .accessibilitySelected(this.options.multiply ? undefined : this.selectedIndexes.includes(index))
+            .accessibilityChecked(this.options.multiply ? this.selectedIndexes.includes(index) : undefined)
+            .accessibilityDescription(this.getAccessibilityDescription(item.accessibilityDescription))
             .direction(this.options.direction)
             .borderRadius(this.buttonBorderRadius[index])
             .scale({
@@ -791,6 +839,7 @@ struct SegmentButtonItemArrayComponent {
               y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index]
             })
             .layoutWeight(1)
+            .padding(0)
             .onSizeChange((_, newValue) => {
               this.buttonItemsSize[index] = { width: newValue.width, height: this.buttonItemsSize[index].height }
               //measure position
@@ -816,6 +865,18 @@ struct SegmentButtonItemArrayComponent {
             .onFocus(() => {
               this.focusIndex = index
             })
+            .gesture(TapGesture().onAction(() => {
+              this.focusIndex = -1
+              if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+                if (this.selectedIndexes.indexOf(index) === -1) {
+                  this.selectedIndexes.push(index)
+                } else {
+                  this.selectedIndexes.splice(this.selectedIndexes.indexOf(index), 1)
+                }
+              } else {
+                this.selectedIndexes[0] = index
+              }
+            }))
             .onTouch((event: TouchEvent) => {
               if (event.source !== SourceType.TouchScreen) {
                 return
@@ -888,6 +949,7 @@ export struct SegmentButton {
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
   @Link @Watch('onSelectedChange') selectedIndexes: number[]
   public onItemClicked?: Callback<number>
+  @Prop maxFontScale: number | Resource = DEFAULT_MAX_FONT_SCALE
   @Provide componentSize: SizeOptions = { width: 0, height: 0 }
   @Provide buttonBorderRadius: LocalizedBorderRadiuses[] = Array.from({
     length: MAX_ITEM_COUNT
@@ -1107,6 +1169,7 @@ export struct SegmentButton {
           optionsArray: this.options.buttons,
           options: this.options,
           selectedIndexes: $selectedIndexes,
+          maxFontScale: this.getMaxFontSize()
         })
       }
     }
@@ -1303,6 +1366,25 @@ export struct SegmentButton {
           })
       )
     )
+  }
+
+  getMaxFontSize(): number {
+    if (typeof this.maxFontScale === void 0) {
+      return DEFAULT_MAX_FONT_SCALE;
+    }
+    if (typeof this.maxFontScale === 'number') {
+      return Math.max(Math.min(this.maxFontScale, MAX_MAX_FONT_SCALE), MIN_MAX_FONT_SCALE);
+    }
+    const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
+    if (!resourceManager) {
+      return DEFAULT_MAX_FONT_SCALE;
+    }
+    try {
+      return resourceManager.getNumber(this.maxFontScale.id);
+    } catch (error) {
+      console.error(`Ace SegmentButton getMaxFontSize, error: ${error.toString()}`);
+      return DEFAULT_MAX_FONT_SCALE;
+    }
   }
 
   getSelectedChangeCurve(): ICurve | null {

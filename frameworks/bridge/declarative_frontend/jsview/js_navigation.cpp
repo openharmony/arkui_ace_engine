@@ -351,9 +351,9 @@ void JSNavigation::SetSubTitle(const std::string& subTitle)
     NavigationModel::GetInstance()->SetSubtitle(subTitle);
 }
 
-void JSNavigation::SetHideTitleBar(bool hide)
+void JSNavigation::SetHideTitleBar(bool isHide, bool animated)
 {
-    NavigationModel::GetInstance()->SetHideTitleBar(hide);
+    NavigationModel::GetInstance()->SetHideTitleBar(isHide, animated);
 }
 
 void JSNavigation::SetHideNavBar(bool hide)
@@ -400,9 +400,9 @@ void JSNavigation::SetHideBackButton(bool hide)
     NavigationModel::GetInstance()->SetHideBackButton(hide);
 }
 
-void JSNavigation::SetHideToolBar(bool hide)
+void JSNavigation::SetHideToolBar(bool isHide, bool animated)
 {
-    NavigationModel::GetInstance()->SetHideToolBar(hide);
+    NavigationModel::GetInstance()->SetHideToolBar(isHide, animated);
 }
 
 void JSNavigation::SetToolBar(const JSCallbackInfo& info)

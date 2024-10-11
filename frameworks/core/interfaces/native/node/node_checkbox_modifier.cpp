@@ -273,6 +273,7 @@ ArkUI_Int32 GetCheckboxShape(ArkUINodeHandle node)
 
 void SetCheckboxName(ArkUINodeHandle node, ArkUI_CharPtr name)
 {
+    CHECK_NULL_VOID(name);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::SetCheckboxName(frameNode, std::string(name));
@@ -280,6 +281,7 @@ void SetCheckboxName(ArkUINodeHandle node, ArkUI_CharPtr name)
 
 void SetCheckboxGroup(ArkUINodeHandle node, ArkUI_CharPtr group)
 {
+    CHECK_NULL_VOID(group);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::SetCheckboxGroup(frameNode, std::string(group));

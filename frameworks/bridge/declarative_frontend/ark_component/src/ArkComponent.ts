@@ -200,17 +200,22 @@ class ModifierWithKey<T extends number | string | boolean | object | Function> {
       this.applyPeer(node, true, component);
       return true;
     }
-    const stageTypeInfo: string = typeof this.stageValue;
-    const valueTypeInfo: string = typeof this.value;
-    let different: boolean = false;
-    if (stageTypeInfo !== valueTypeInfo) {
-      different = true;
-    } else if (stageTypeInfo === 'number' || stageTypeInfo === 'string' || stageTypeInfo === 'boolean') {
-      different = (this.stageValue !== this.value);
+    if (component._needDiff) {
+      const stageTypeInfo: string = typeof this.stageValue;
+      const valueTypeInfo: string = typeof this.value;
+      let different: boolean = false;
+      if (stageTypeInfo !== valueTypeInfo) {
+        different = true;
+      } else if (stageTypeInfo === 'number' || stageTypeInfo === 'string' || stageTypeInfo === 'boolean') {
+        different = (this.stageValue !== this.value);
+      } else {
+        different = this.checkObjectDiff();
+      }
+      if (different) {
+        this.value = this.stageValue;
+        this.applyPeer(node, false, component);
+      }
     } else {
-      different = this.checkObjectDiff();
-    }
-    if (different) {
       this.value = this.stageValue;
       this.applyPeer(node, false, component);
     }
@@ -1038,13 +1043,39 @@ class BorderModifier extends ModifierWithKey<ArkBorder> {
     if (reset) {
       getUINativeModule().common.resetBorder(node);
     } else {
+      let isLocalizedBorderWidth;
+      let isLocalizedBorderColor;
+      let isLocalizedBorderRadius;
+      if ((Object.keys(this.value.arkWidth).indexOf('start') >= 0 && isUndefined(this.value.arkWidth.start)) ||
+        (Object.keys(this.value.arkWidth).indexOf('end') >= 0 && isUndefined(this.value.arkWidth.end))) {
+        isLocalizedBorderWidth = true;
+      } else {
+        isLocalizedBorderWidth = false;
+      }
+      if ((Object.keys(this.value.arkColor).indexOf('startColor') >= 0 && isUndefined(this.value.arkColor.startColor)) ||
+        (Object.keys(this.value.arkColor).indexOf('endColor') >= 0 && isUndefined(this.value.arkColor.endColor))) {
+        isLocalizedBorderColor = true;
+      } else {
+        isLocalizedBorderColor = false;
+      }
+      if ((Object.keys(this.value.arkRadius).indexOf('topStart') >= 0 && isUndefined(this.value.arkRadius.topStart)) ||
+        (Object.keys(this.value.arkRadius).indexOf('topEnd') >= 0 && isUndefined(this.value.arkRadius.topEnd)) ||
+        (Object.keys(this.value.arkRadius).indexOf('bottomStart') >= 0 && isUndefined(this.value.arkRadius.bottomStart)) ||
+        (Object.keys(this.value.arkRadius).indexOf('bottomEnd') >= 0 && isUndefined(this.value.arkRadius.bottomEnd))) {
+        isLocalizedBorderRadius = true;
+      } else {
+        isLocalizedBorderRadius = false;
+      }
       getUINativeModule().common.setBorderWithDashParams(node,
         this.value.arkWidth.left, this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
         this.value.arkColor.leftColor, this.value.arkColor.rightColor, this.value.arkColor.topColor, this.value.arkColor.bottomColor,
         this.value.arkRadius.topLeft, this.value.arkRadius.topRight, this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
         this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left,
         this.value.arkDashGap.left, this.value.arkDashGap.right, this.value.arkDashGap.top, this.value.arkDashGap.bottom,
-        this.value.arkDashWidth.left, this.value.arkDashWidth.right, this.value.arkDashWidth.top, this.value.arkDashWidth.bottom);
+        this.value.arkDashWidth.left, this.value.arkDashWidth.right, this.value.arkDashWidth.top, this.value.arkDashWidth.bottom,
+        this.value.arkWidth.start, this.value.arkWidth.end, this.value.arkColor.startColor, this.value.arkColor.endColor,
+        this.value.arkRadius.topStart, this.value.arkRadius.topEnd, this.value.arkRadius.bottomStart, this.value.arkRadius.bottomEnd,
+        isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius);
     }
   }
 
@@ -3056,7 +3087,7 @@ class FocusScopeIdModifier extends ModifierWithKey<ArkFocusScopeId> {
     if (reset) {
       getUINativeModule().common.resetFocusScopeId(node);
     } else {
-      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup);
+      getUINativeModule().common.setFocusScopeId(node, this.value.id, this.value.isGroup, this.value.arrowStepOut);
     }
   }
 }
@@ -3146,11 +3177,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _nativePtrChanged: boolean;
   _gestureEvent: UIGestureEvent;
   _instanceId: number;
+  _needDiff: boolean;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    this._needDiff = true;
     if (classType === ModifierType.FRAME_NODE) {
       this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
@@ -3564,11 +3597,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkBorder.arkWidth.top = value.width;
         arkBorder.arkWidth.bottom = value.width;
       } else {
-        arkBorder.arkWidth.left = (value.width as EdgeWidths).left;
-        arkBorder.arkWidth.right = (value.width as EdgeWidths).right;
-        arkBorder.arkWidth.top = (value.width as EdgeWidths).top;
-        arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom;
-      }
+        if ((Object.keys(value.width).indexOf('start') >= 0) ||
+        (Object.keys(value.width).indexOf('end') >= 0)) {
+          arkBorder.arkWidth.start = (value.width as LocalizedEdgeWidths).start;
+          arkBorder.arkWidth.end = (value.width as LocalizedEdgeWidths).end;
+          arkBorder.arkWidth.top = (value.width as LocalizedEdgeWidths).top;
+          arkBorder.arkWidth.bottom = (value.width as LocalizedEdgeWidths).bottom;
+        } else {
+          arkBorder.arkWidth.left = (value.width as EdgeWidths).left;
+          arkBorder.arkWidth.right = (value.width as EdgeWidths).right;
+          arkBorder.arkWidth.top = (value.width as EdgeWidths).top;
+          arkBorder.arkWidth.bottom = (value.width as EdgeWidths).bottom;
+        }
     }
     if (!isUndefined(value?.color) && value?.color !== null) {
       if (isNumber(value.color) || isString(value.color) || isResource(value.color)) {
@@ -3577,10 +3617,18 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkBorder.arkColor.topColor = value.color;
         arkBorder.arkColor.bottomColor = value.color;
       } else {
-        arkBorder.arkColor.leftColor = (value.color as EdgeColors).left;
-        arkBorder.arkColor.rightColor = (value.color as EdgeColors).right;
-        arkBorder.arkColor.topColor = (value.color as EdgeColors).top;
-        arkBorder.arkColor.bottomColor = (value.color as EdgeColors).bottom;
+        if ((Object.keys(value.color).indexOf('start') >= 0) ||
+          (Object.keys(value.color).indexOf('end') >= 0)) {
+            arkBorder.arkColor.startColor = (value.color as LocalizedEdgeColors).start;
+            arkBorder.arkColor.endColor = (value.color as LocalizedEdgeColors).end;
+            arkBorder.arkColor.topColor = (value.color as LocalizedEdgeColors).top;
+            arkBorder.arkColor.bottomColor = (value.color as LocalizedEdgeColors).bottom;
+          } else {
+            arkBorder.arkColor.leftColor = (value.color as EdgeColors).left;
+            arkBorder.arkColor.rightColor = (value.color as EdgeColors).right;
+            arkBorder.arkColor.topColor = (value.color as EdgeColors).top;
+            arkBorder.arkColor.bottomColor = (value.color as EdgeColors).bottom;
+          }
       }
     }
     if (!isUndefined(value?.radius) && value?.radius !== null) {
@@ -3590,11 +3638,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
         arkBorder.arkRadius.bottomLeft = value.radius;
         arkBorder.arkRadius.bottomRight = value.radius;
       } else {
-        arkBorder.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft;
-        arkBorder.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight;
-        arkBorder.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft;
-        arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight;
-      }
+        if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
+          (Object.keys(this.value).indexOf('topEnd') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
+          (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
+          arkBorder.arkRadius.topStart = (value.radius as LocalizedBorderRadius)?.topStart;
+          arkBorder.arkRadius.topEnd = (value.radius as LocalizedBorderRadius)?.topEnd;
+          arkBorder.arkRadius.bottomStart = (value.radius as LocalizedBorderRadius)?.bottomStart;
+          arkBorder.arkRadius.bottomEnd = (value.radius as LocalizedBorderRadius)?.bottomEnd;
+        } else {
+          arkBorder.arkRadius.topLeft = (value.radius as BorderRadiuses)?.topLeft;
+          arkBorder.arkRadius.topRight = (value.radius as BorderRadiuses)?.topRight;
+          arkBorder.arkRadius.bottomLeft = (value.radius as BorderRadiuses)?.bottomLeft;
+          arkBorder.arkRadius.bottomRight = (value.radius as BorderRadiuses)?.bottomRight;
+        }
     }
     if (!isUndefined(value?.style) && value?.style !== null) {
       let arkBorderStyle = new ArkBorderStyle();
@@ -4439,10 +4496,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   customProperty(key: string, value: object): this {
-    const property = new ArkCustomProperty();
-    property.key = key;
-    property.value = value;
-    modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+    let returnBool = getUINativeModule().frameNode.setCustomPropertyModiferByKey(this.nativePtr, key, value);
+    if (!returnBool) {
+      const property = new ArkCustomProperty();
+      property.key = key;
+      property.value = value;
+      modifierWithKey(this._modifiersWithKeys, CustomPropertyModifier.identity, CustomPropertyModifier, property);
+    }
     return this;
   }
 
@@ -4451,13 +4511,16 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  focusScopeId(id: string, isGroup?: boolean): this {
+  focusScopeId(id: string, isGroup?: boolean, arrowStepOut?: boolean): this {
     let arkFocusScopeId = new ArkFocusScopeId();
     if (isString(id)) {
       arkFocusScopeId.id = id;
     }
     if (typeof isGroup === 'boolean') {
       arkFocusScopeId.isGroup = isGroup;
+    }
+    if (typeof arrowStepOut === 'boolean') {
+      arkFocusScopeId.arrowStepOut = arrowStepOut;
     }
     modifierWithKey(
       this._modifiersWithKeys, FocusScopeIdModifier.identity, FocusScopeIdModifier, arkFocusScopeId);
@@ -4865,6 +4928,18 @@ function __getCustomProperty__(nodeId: number, key: string): Object | undefined 
 
     if (customProperties) {
       return customProperties.get(key);
+    }
+  }
+
+  return undefined;
+}
+
+function __getCustomPropertyString__(nodeId: number, key: string): string | undefined {
+  if (__elementIdToCustomProperties__.has(nodeId)) {
+    const customProperties = __elementIdToCustomProperties__.get(nodeId);
+
+    if (customProperties) {
+      return JSON.stringify(customProperties.get(key));
     }
   }
 

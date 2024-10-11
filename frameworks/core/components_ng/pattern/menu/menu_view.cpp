@@ -56,22 +56,6 @@ const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
 const std::string HOVER_IMAGE_CLIP_PROPERTY_NAME = "hoverImageClip";
 
-void SetSelfAndChildDraggableFalse(const RefPtr<UINode>& customNode)
-{
-    CHECK_NULL_VOID(customNode);
-    auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
-    if (frameNode) {
-        auto eventHub = frameNode->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(eventHub);
-        auto gestureEventHub = eventHub->GetGestureEventHub();
-        CHECK_NULL_VOID(gestureEventHub);
-        gestureEventHub->SetDragForbiddenForcely(true);
-    }
-    for (const auto& child : customNode->GetChildren()) {
-        SetSelfAndChildDraggableFalse(child);
-    }
-}
-
 void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& previewCustomNode = nullptr)
 {
     CHECK_NULL_VOID(previewCustomNode);
@@ -944,14 +928,13 @@ void MenuView::ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode)
     if (menuWrapperPattern->HasPreviewTransitionEffect()) {
         auto layoutProperty = imageNode->GetLayoutProperty();
         layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+    }
+    if (isShowHoverImage) {
+        auto hoverImageStackNode = menuWrapperPattern->GetHoverImageStackNode();
+        auto previewNode = menuWrapperPattern->GetHoverImageCustomPreview();
+        ShowHoverImageAnimationProc(hoverImageStackNode, previewNode, imageContext, menuWrapperPattern);
     } else {
-        if (isShowHoverImage) {
-            auto hoverImageStackNode = menuWrapperPattern->GetHoverImageStackNode();
-            auto previewNode = menuWrapperPattern->GetHoverImageCustomPreview();
-            ShowHoverImageAnimationProc(hoverImageStackNode, previewNode, imageContext, menuWrapperPattern);
-        } else {
-            ShowPixelMapScaleAnimationProc(menuTheme, imageNode, menuPattern);
-        }
+        ShowPixelMapScaleAnimationProc(menuTheme, imageNode, menuPattern);
     }
     ShowBorderRadiusAndShadowAnimation(menuTheme, imageContext, isShowHoverImage);
 }
@@ -1164,7 +1147,6 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     if (type == MenuType::CONTEXT_MENU) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
-        SetSelfAndChildDraggableFalse(previewCustomNode);
         MountTextNode(wrapperNode, previewCustomNode);
     }
     return wrapperNode;

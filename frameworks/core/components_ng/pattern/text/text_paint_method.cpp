@@ -83,10 +83,6 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (renderContext->GetClipEdge().has_value()) {
         textContentModifier_->SetClip(renderContext->GetClipEdge().value());
     }
-    PropertyChangeFlag flag = 0;
-    if (textContentModifier_->NeedMeasureUpdate(flag)) {
-        frameNode->MarkDirtyNode(flag);
-    }
 }
 
 void TextPaintMethod::UpdateObscuredRects()
@@ -97,7 +93,7 @@ void TextPaintMethod::UpdateObscuredRects()
     CHECK_NULL_VOID(pManager);
 
     auto spanItemChildren = pattern->GetSpanItemChildren();
-    auto ifPaintObscuration = spanItemChildren.empty();
+    auto ifPaintObscuration = spanItemChildren.empty() && pattern->IsEnabledObscured();
     textContentModifier_->SetIfPaintObscuration(ifPaintObscuration);
     CHECK_NULL_VOID(ifPaintObscuration);
 
@@ -141,7 +137,7 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textOverlayModifier_->SetContentRect(contentRect);
     textOverlayModifier_->SetShowSelect(textPattern->GetShowSelect());
     textOverlayModifier_->SetSelectedRects(selectedRects);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);

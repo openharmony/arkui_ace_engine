@@ -36,7 +36,7 @@ export class SelectTitleBar extends ViewPU {
     if (typeof b10 === 'function') {
       this.paramsGenerator_ = b10;
     }
-    this.__selected = new ObservedPropertySimplePU(0, this, 'selected');
+    this.__selected = new SynchedPropertySimpleOneWayPU(y9.selected, this, 'selected');
     this.options = [];
     this.menuItems = [];
     this.subtitle = '';
@@ -51,8 +51,8 @@ export class SelectTitleBar extends ViewPU {
   }
 
   setInitiallyProvidedValue(w9) {
-    if (w9.selected !== undefined) {
-      this.selected = w9.selected;
+    if (w9.selected === undefined) {
+      this.__selected.set(0);
     }
     if (w9.options !== undefined) {
       this.options = w9.options;
@@ -84,6 +84,7 @@ export class SelectTitleBar extends ViewPU {
   }
 
   updateStateVars(v9) {
+    this.__selected.reset(v9.selected);
   }
 
   purgeVariableDependenciesOnElmtId(u9) {

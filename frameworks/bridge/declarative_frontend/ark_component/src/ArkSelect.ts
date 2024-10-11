@@ -25,7 +25,10 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
     return 0;
   }
   initialize(value: Object[]): this {
-    if (isObject(value[0])) {
+    if (!value.length) {
+      return this;
+    }
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
       modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, value[0]);
     } else {
       modifierWithKey(this._modifiersWithKeys, SelectOptionsModifier.identity, SelectOptionsModifier, undefined);
@@ -177,12 +180,16 @@ class SelectOptionsModifier extends ModifierWithKey<SelectOption[]> {
       let valueArray: string[] = [];
       let iconArray: string[] = [];
       let symbolIconArray: object[] = [];
-      let length: number = this.value?.length;
-      for (let i = 0; i < length; i++) {
-        valueArray.push(this.value[i]?.value);
-        iconArray.push(this.value[i]?.icon);
-        symbolIconArray.push(this.value[i]?.symbolIcon);
+      let length: number = 0;
+      if (this.value) {
+        length = this.value.length;
+        for (let i = 0; i < length; i++) {
+          valueArray.push(this.value[i]?.value);
+          iconArray.push(this.value[i]?.icon);
+          symbolIconArray.push(this.value[i]?.symbolIcon);
+        }
       }
+
       getUINativeModule().select.setOptions(node, valueArray, iconArray, symbolIconArray, length);
     }
   }

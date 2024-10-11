@@ -193,8 +193,19 @@ public:
 
     void Refresh() override;
 
+    float GetIconSize()
+    {
+        return static_cast<float>(iconSize_.ConvertToPxDistribute(std::optional<float>(), std::optional<float>()));
+    }
+
+    bool CheckUpdateCleanNode();
+
 private:
     bool IsShowClean();
+    bool IsShowSymbol();
+    bool IsSymbolIcon();
+    void ReplaceNode();
+    void UpdateSymbolSource();
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
     void OnCleanNodeClicked();
     RefPtr<FrameNode> CreateNode();

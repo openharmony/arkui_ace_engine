@@ -200,6 +200,26 @@ public:
         pressedKeyCodes_ = pressedKeyCodes;
     }
 
+    int32_t GetPostEventNodeId() const
+    {
+        return postEventNodeId_;
+    }
+
+    void SetPostEventNodeId(int32_t postEventNodeId)
+    {
+        postEventNodeId_ = postEventNodeId;
+    }
+
+    bool GetIsPostEventResult() const
+    {
+        return isPostEventResult_;
+    }
+
+    void SetIsPostEventResult(bool isPostEventResult)
+    {
+        isPostEventResult_ = isPostEventResult;
+    }
+
 protected:
     // Event type like onTouchDown, onClick and so on.
     std::string type_;
@@ -219,6 +239,8 @@ protected:
     bool preventDefault_ = false;
     std::string patternName_;
     std::vector<KeyCode> pressedKeyCodes_;
+    bool isPostEventResult_ = false;
+    int32_t postEventNodeId_ = -1;
 };
 
 class PropagationEventInfo : public virtual TypeInfoBase {

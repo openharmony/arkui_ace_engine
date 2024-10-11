@@ -30,6 +30,7 @@ public:
 
     void TransferHoverEvent(const PointF& point, SourceType source,
         AccessibilityHoverEventType eventType, TimeStamp time) override;
+    bool IgnoreHostNode() const override;
 
 private:
     WeakPtr<SessionWrapper> sessionWrapper_;

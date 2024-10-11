@@ -90,6 +90,12 @@ public:
             theme->textStyle_.SetTextDecorationColor(pattern->GetAttr<Color>("default_text_color", DEFAULT_TEXT_COLOR));
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("rich_editor_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("rich_editor_writting_ability_name", "");
+            theme->aiWriteIsSupport_ = pattern->GetAttr<std::string>("rich_editor_writting_is_support", "");
+            auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
+            theme->urlDefaultColor_ = pattern->GetAttr<Color>("font_emphasize", Color(0xff007dff));
+            theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(disabledOpacity);
+            theme->urlHoverColor_ = pattern->GetAttr<Color>("interactive_hover", Color(0x0C182431));
+            theme->urlPressColor_ = pattern->GetAttr<Color>("interactive_pressed", Color(0x19182431));
         }
     };
 
@@ -197,6 +203,31 @@ public:
     {
         return aiWriteAbilityName_;
     }
+
+    const std::string& GetAIWriteIsSupport() const
+    {
+        return aiWriteIsSupport_;
+    }
+
+    const Color& GetUrlDisabledColor() const
+    {
+        return urlDisabledColor_;
+    }
+
+    const Color& GetUrlDefaultColor() const
+    {
+        return urlDefaultColor_;
+    }
+
+    const Color& GetUrlHoverColor() const
+    {
+        return urlHoverColor_;
+    }
+
+    const Color& GetUrlPressColor() const
+    {
+        return urlPressColor_;
+    }
 protected:
     RichEditorTheme() = default;
 
@@ -224,6 +255,11 @@ private:
     bool richeditorShowHandle_ = false;
     std::string aiWriteBundleName_;
     std::string aiWriteAbilityName_;
+    std::string aiWriteIsSupport_;
+    Color urlDisabledColor_ = Color(0x99000000);
+    Color urlDefaultColor_ = Color(0x99000000);
+    Color urlHoverColor_ = Color(0x99000000);
+    Color urlPressColor_ = Color(0x99000000);
 };
 } // namespace OHOS::Ace::NG
 
