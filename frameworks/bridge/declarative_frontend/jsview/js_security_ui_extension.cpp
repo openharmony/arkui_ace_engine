@@ -240,6 +240,7 @@ void JSSecurityUIExtensionProxy::On(const JSCallbackInfo& info)
     if (!CanTurnOn(info)){
         return;
     }
+    const RegisterType registerType = GetRegisterType(info[0]->ToString());
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(
         NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
@@ -477,53 +478,4 @@ void JSSecurityUIExtension::OnError(const JSCallbackInfo& info)
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("SecurityUIExtensionComponent.onError");
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateCurrentActiveNode(node);
-            JSRef<JSObject> obj = JSRef<JSObject>::New();
-            obj->SetProperty<int32_t>("code", code);
-            obj->SetProperty<std::string>("name", name);
-            obj->SetProperty<std::string>("message", message);
-            auto returnValue = JSRef<JSVal>::Cast(obj);
-            func->ExecuteJS(1, &returnValue);
-        };
-    UIExtensionModel::GetInstance()->SetOnError(
-        std::move(onError), NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
-}
-
-void JSSecurityUIExtension::OnTerminated(const JSCallbackInfo& info)
-{
-    if (!info[0]->IsFunction()) {
-        return;
-    }
-    WeakPtr<NG::FrameNode> frameNode =
-        AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
-    auto instanceId = ContainerScope::CurrentId();
-    auto onTerminated = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-        instanceId, node = frameNode] (int32_t code, const RefPtr<WantWrap>& wantWrap) {
-            ContainerScope scope(instanceId);
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            ACE_SCORING_EVENT("SecurityUIExtensionComponent.onTerminated");
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->UpdateCurrentActiveNode(node);
-            auto engine = EngineHelper::GetCurrentEngine();
-            CHECK_NULL_VOID(engine);
-            NativeEngine* nativeEngine = engine->GetNativeEngine();
-            CHECK_NULL_VOID(nativeEngine);
-            JSRef<JSObject> obj = JSRef<JSObject>::New();
-            obj->SetProperty<int32_t>("code", code);
-            if (wantWrap) {
-                auto nativeWant = WantWrap::ConvertToNativeValue(
-                    wantWrap->GetWant(), reinterpret_cast<napi_env>(nativeEngine));
-                auto wantJSVal = JsConverter::ConvertNapiValueToJsVal(nativeWant);
-                obj->SetPropertyObject("want", wantJSVal);
-            }
-            auto returnValue = JSRef<JSVal>::Cast(obj);
-            func->ExecuteJS(1, &returnValue);
-        };
-    UIExtensionModel::GetInstance()->SetOnTerminated(
-        std::move(onTerminated), NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
-}
-} // namespace OHOS::Ace::Framework
+       
