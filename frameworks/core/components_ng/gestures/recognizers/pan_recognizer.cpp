@@ -19,6 +19,7 @@
 #include "base/log/log.h"
 #include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/gestures/gesture_referee.h"
