@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
 #include "core/components_ng/pattern/form_link/form_link_model_ng.h"
+#include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -697,7 +698,10 @@ void* createFormLinkNode(ArkUI_Int32 nodeId)
 
 void* createGaugeNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = GaugeModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createGridContainerNode(ArkUI_Int32 nodeId)
