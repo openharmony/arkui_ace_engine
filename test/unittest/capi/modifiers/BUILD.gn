@@ -75,6 +75,13 @@ ace_unittest("capi_all_modifiers_test") {
 
 config("capi_config") {
   include_dirs = [ "." ]
+  if (capi_asan) {
+    cflags_cc = [ "-fsanitize=address" ]
+    ldflags = [ "-fsanitize=address" ]
+  }
+  if (capi_theme_debug) {
+    defines = [ "CAPI_BACKTRACE" ]
+  }
 }
 
 source_set("capi_deps") {
@@ -88,7 +95,6 @@ source_set("capi_deps") {
     "//third_party/googletest:gtest_main",
   ]
   if (capi_theme_debug) {
-    defines = [ "CAPI_BACKTRACE" ]
     sources += [ "unwind_utils.cpp" ]
     external_deps = [ "libunwind:libunwind" ]
     deps += [
