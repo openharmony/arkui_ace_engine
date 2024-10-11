@@ -815,7 +815,7 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     onActionUpdate_ = std::move(curr->onActionUpdate_);
     onActionEnd_ = std::move(curr->onActionEnd_);
     onActionCancel_ = std::move(curr->onActionCancel_);
-
+    ReconcileGestureInfoFrom(recognizer);
     return true;
 }
 
@@ -892,7 +892,8 @@ RefPtr<GestureSnapshot> PanRecognizer::Dump() const
     oss << "direction: " << direction_.type << ", "
         << "isForDrag: " << isForDrag_ << ", "
         << "distance: " << distance_ << ", "
-        << "fingers: " << fingers_;
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
 }
