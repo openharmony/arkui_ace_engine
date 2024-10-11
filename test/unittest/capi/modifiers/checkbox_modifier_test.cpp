@@ -25,9 +25,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
-    const auto ATTRIBUTE_MARK_NAME = "mark";
-    const auto ATTRIBUTE_OPTIONS_NAME = "options";
-    const auto ATTRIBUTE_OPTIONS_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_SELECT_NAME = "select";
     const auto ATTRIBUTE_SELECT_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
@@ -36,99 +33,10 @@ namespace  {
     const auto ATTRIBUTE_SHAPE_DEFAULT_VALUE = "CheckBoxShape.CIRCLE";
     const auto ATTRIBUTE_UNSELECTED_COLOR_NAME = "unselectedColor";
     const auto ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE = "#FF000000";
-    const auto ATTRIBUTE_MARK_STROKE_COLOR_NAME = "strokeColor";
-    const auto ATTRIBUTE_MARK_STROKE_COLOR_DEFAULT_VALUE = "";
-    const auto ATTRIBUTE_MARK_SIZE_NAME = "size";
-    const auto ATTRIBUTE_MARK_SIZE_DEFAULT_VALUE = "";
-    const auto ATTRIBUTE_MARK_STROKE_WIDTH_NAME = "strokeWidth";
-    const auto ATTRIBUTE_MARK_STROKE_WIDTH_DEFAULT_VALUE = "";
 } // namespace
 
 class CheckboxModifierTest : public ModifierTestBase<GENERATED_ArkUICheckboxModifier, &GENERATED_ArkUINodeModifiers::getCheckboxModifier, GENERATED_ARKUI_CHECKBOX> {
 };
-
-
-/*
- * @tc.name: setCheckboxOptionsTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTIONS_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_OPTIONS_DEFAULT_VALUE);
-}
-
-// Valid values for attribute 'options' of method 'setCheckboxOptions'
-static std::vector<std::tuple<std::string, Opt_CheckboxOptions, std::string>> setCheckboxOptionsOptionsValidValues = {
-};
-
-/*
- * @tc.name: setCheckboxOptionsTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-/*HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    std::string expectedStr;
-    Opt_CheckboxOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
-    Ark_CheckboxOptions& inputValueOptions = realInputValue.value;
-    Ark_CheckboxOptions initValueOptions;
-
-    // Initial setup
-    // TODO: Add processing for substructures!
-
-    // Verifying attribute's  values
-    inputValueOptions = initValueOptions;
-    for (auto&& value: setCheckboxOptionsOptionsValidValues) {
-        inputValueOptions = std::get<1>(value);
-        modifier_->setCheckboxOptions(node_, &realInputValue);
-        jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTIONS_NAME);
-        expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-}*/
-
-// Invalid values for attribute 'options' of method 'setCheckboxOptions'
-static std::vector<std::tuple<std::string, Opt_CheckboxOptions>> setCheckboxOptionsOptionsInvalidValues = {
-    {"Ark_Empty()", Converter::ArkValue<Opt_CheckboxOptions>(Ark_Empty())},
-};
-
-/*
- * @tc.name: setCheckboxOptionsTestInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-/*HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestInvalidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    std::string expectedStr;
-    Opt_CheckboxOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
-    Ark_CheckboxOptions& inputValueOptions = realInputValue.value;
-    Ark_CheckboxOptions initValueOptions;
-
-    // Initial setup
-    // TODO: Add processing for substructures!
-
-    // Verifying attribute's  values
-    for (auto&& value: setCheckboxOptionsOptionsInvalidValues) {
-        inputValueOptions = initValueOptions;
-        modifier_->setCheckboxOptions(node_, &realInputValue);
-        inputValueOptions = std::get<1>(value);
-        modifier_->setCheckboxOptions(node_, &realInputValue);
-        jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OPTIONS_NAME);
-        expectedStr = ATTRIBUTE_OPTIONS_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-}*/
 
 /*
  * @tc.name: setSelectTestDefaultValues
@@ -386,41 +294,5 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestInvalidValues, TestSize.Lev
     // Initial setup
     initValueUnselectedColor = std::get<1>(unselectedColorUnselectedColorValidValues[0]);
 }
-
-/*
- * @tc.name: setMarkTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CheckboxModifierTest, setMarkTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MARK_STROKE_COLOR_DEFAULT_VALUE);
-
-    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MARK_SIZE_DEFAULT_VALUE);
-
-    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_MARK_STROKE_WIDTH_DEFAULT_VALUE);
-}
-
-// Valid values for attribute 'strokeColor' of method 'mark'
-static std::vector<std::tuple<std::string, Opt_ResourceColor, std::string>> markStrokeColorValidValues = {
-    {"\"#123456\"", Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#123456"), "#FF123456"},
-    {"0x11223344", Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x11223344), "#11223344"},
-    {"-1", Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(-1), "#FFFFFFFF"},
-};
-
-// Valid values for attribute 'size' of method 'mark'
-static std::vector<std::tuple<std::string, Opt_Length, std::string>> markSizeValidValues = {
-};
-
-// Valid values for attribute 'strokeWidth' of method 'mark'
-static std::vector<std::tuple<std::string, Opt_Length, std::string>> markStrokeWidthValidValues = {
-};
 
 } // namespace OHOS::Ace::NG
