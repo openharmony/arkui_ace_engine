@@ -674,13 +674,14 @@ void SwiperPattern::InitSurfaceChangedCallback()
     }
 }
 
-bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode)
+bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub)
 {
     for (const auto& item : itemPosition_) {
         if (!item.second.node) {
             continue;
         }
-        if (item.second.node == focusNode) {
+        auto focusHub = item.second.node->GetFirstFocusHubChild();
+        if (focusHub == targetFocusHub) {
             return true;
         }
     }
@@ -714,10 +715,10 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
             ++iter;
             continue;
         }
-        if (!IsFocusNodeInItemPosition(child->GetFrameNode())) {
-            child->SetParentFocusable(false);
-        } else {
+        if (IsFocusNodeInItemPosition(child)) {
             child->SetParentFocusable(true);
+        } else {
+            child->SetParentFocusable(false);
         }
         ++iter;
     }
@@ -2855,8 +2856,9 @@ int32_t SwiperPattern::ComputeSwipePageNextIndex(float velocity, bool onlyDistan
 
 int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDistance) const
 {
-    auto swiperWidth = CalculateVisibleSize();
-    if (LessOrEqual(swiperWidth, 0)) {
+    auto firstItemInfo = GetFirstItemInfoInVisibleArea();
+    auto swiperWidthHalf = (firstItemInfo.second.endPos - firstItemInfo.second.startPos) / SWIPER_HALF;
+    if (LessOrEqual(swiperWidthHalf, 0)) {
         return currentIndex_;
     }
     // if direction is true, expected index to decrease by 1
@@ -2865,17 +2867,13 @@ int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDis
         !onlyDistance && (std::abs(velocity) > (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)
                                                        ? NEW_MIN_TURN_PAGE_VELOCITY
                                                        : MIN_TURN_PAGE_VELOCITY));
-    auto iter = itemPosition_.find(currentIndex_);
-    if (iter == itemPosition_.end() || overTurnPageVelocity) {
-        return direction ? currentIndex_ - 1 : currentIndex_ + 1;
+
+    auto firstIndex = firstItemInfo.first;
+    auto baseIndex = -firstItemInfo.second.startPos < swiperWidthHalf ? firstIndex : firstIndex + 1;
+    if (overTurnPageVelocity) {
+        return direction ? baseIndex - 1 : baseIndex + 1;
     }
-    if (-iter->second.startPos > swiperWidth / SWIPER_HALF) {
-        return currentIndex_ + 1;
-    }
-    if (iter->second.startPos > swiperWidth / SWIPER_HALF) {
-        return currentIndex_ - 1;
-    }
-    return currentIndex_;
+    return baseIndex;
 }
 
 int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDistance) const
@@ -2912,7 +2910,8 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     auto props = GetLayoutProperty<SwiperLayoutProperty>();
     // don't run this in nested scroll. Parallel nested scroll can deviate > 1 page from currentIndex_
     if (!childScrolling_ && SwiperUtils::IsStretch(props) && GetDisplayCount() == 1) {
-        nextIndex = ComputeNextIndexInSinglePage(velocity, onlyDistance);
+        nextIndex =
+            std::clamp(ComputeNextIndexInSinglePage(velocity, onlyDistance), currentIndex_ - 1, currentIndex_ + 1);
     }
 
     if (!IsAutoLinear() && nextIndex > currentIndex_ + GetDisplayCount()) {
@@ -3065,12 +3064,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
 #ifdef OHOS_PLATFORM
-        if (!swiper->isInAutoPlay_) {
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-        } else {
+        if (swiper->isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
         }
-
 #endif
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
@@ -3106,12 +3102,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiperPattern = swiper.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
 #ifdef OHOS_PLATFORM
-        if (!swiperPattern->isInAutoPlay_) {
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-        } else {
+        if (swiperPattern->isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_on");
         }
-
 #endif
         if (!swiperPattern->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::LAST_UP, "");

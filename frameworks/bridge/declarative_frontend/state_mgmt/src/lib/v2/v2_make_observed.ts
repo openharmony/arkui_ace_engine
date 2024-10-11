@@ -17,8 +17,9 @@ class RefInfo {
   private static obj2ref: WeakMap<object, object> = new WeakMap();
 
   static get(target: Object): any {
-    if (typeof (target) !== 'object') {
-      throw new Error('target must be a object');
+    if (!target || typeof target !== 'object') {
+      stateMgmtConsole.warn(`makeObserved target is not a valid object, return target directly`);
+      return { proxy: target };
     }
     // makeObserved does not support @Observed, @ObservedV2/@Trace class or makeObserved proxy, will return target directly
     if (ObservedObject.IsObservedObject(target) || ObserveV2.IsObservedObjectV2(target) || ObserveV2.IsMakeObserved(target)) {

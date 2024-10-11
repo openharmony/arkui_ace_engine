@@ -46,6 +46,11 @@ enum class MenuPreviewMode {
     IMAGE,
     CUSTOM,
 };
+
+enum class MenuBindingType {
+    LONG_PRESS,
+    RIGHT_CLICK,
+};
 namespace OHOS::Ace::NG {
 
 enum class HitTestMode {
@@ -120,6 +125,19 @@ struct DragDropBaseInfo {
     RefPtr<AceType> node;
     RefPtr<PixelMap> pixelMap;
     std::string extraInfo;
+};
+
+struct BindMenuStatus {
+    bool isBindCustomMenu = false;
+    bool isBindLongPressMenu = false;
+    bool isShow = false;
+    MenuPreviewMode isShowPreviewMode = MenuPreviewMode::NONE;
+    MenuPreviewMode longPressPreviewMode = MenuPreviewMode::NONE;
+    bool IsNotNeedShowPreview() const
+    {
+        return (isBindCustomMenu && isShow && isShowPreviewMode!= MenuPreviewMode::NONE) ||
+            (isBindLongPressMenu && longPressPreviewMode != MenuPreviewMode::NONE);
+    }
 };
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -572,6 +590,16 @@ public:
         return contextMenuShowStatus_;
     }
 
+    void SetMenuBindingType(MenuBindingType menuBindingType)
+    {
+        menuBindingType_ = menuBindingType;
+    }
+
+    MenuBindingType GetMenuBindingType()
+    {
+        return menuBindingType_;
+    }
+
     void SetPixelMap(RefPtr<PixelMap> pixelMap)
     {
         pixelMap_ = pixelMap;
@@ -691,7 +719,10 @@ public:
     static void PrintIfImageNode(
         const RefPtr<UINode>& builderNode, int32_t depth, bool& hasImageNode, std::list<RefPtr<FrameNode>>& imageNodes);
     static void CheckImageDecode(std::list<RefPtr<FrameNode>>& imageNodes);
+    void StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
+        const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
 #endif
+    static bool IsAllowedDrag(const RefPtr<FrameNode>& frameNode);
 
     void SetMenuPreviewScale(float menuPreviewScale)
     {
@@ -701,6 +732,12 @@ public:
     float GetMenuPreviewScale() const
     {
         return menuPreviewScale_;
+    }
+    
+    void SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode);
+    const BindMenuStatus& GetBindMenuStatus()
+    {
+        return bindMenuStatus_;
     }
 
 private:
@@ -727,6 +764,15 @@ private:
 
     template<typename T>
     const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
+
+    void ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>& current,
+        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& parallelIndex, const Offset& offset,
+        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host);
+
+    void ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
+        std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& exclusiveIndex, const Offset& offset,
+        int32_t touchId, const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
+        GesturePriority priority);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;
@@ -785,6 +831,8 @@ private:
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     // the value from show parameter of context menu, which is controlled by caller manually
     bool contextMenuShowStatus_  = false;
+    MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
+    BindMenuStatus bindMenuStatus_;
     bool isDragForbidden_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;

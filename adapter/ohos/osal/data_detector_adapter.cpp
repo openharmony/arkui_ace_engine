@@ -45,7 +45,7 @@ void DataDetectorAdapter::GetAIEntityMenu()
 {
     auto context = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask(
         [weak = AceType::WeakClaim(this), instanceId = context->GetInstanceId()] {
             ContainerScope scope(instanceId);
@@ -108,7 +108,7 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     if (targetNode) {
-        overlayManager->CloseAIEntityMenu(targetNode);
+        overlayManager->CloseAIEntityMenu(targetNode->GetId());
     }
     Container::UpdateCurrent(mainContainerId_);
 

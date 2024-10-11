@@ -19,7 +19,6 @@
 #include "base/log/log.h"
 #include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/base_gesture_event.h"
 #include "core/components_ng/gestures/gesture_referee.h"
@@ -108,20 +107,6 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
     panGestureOption_->SetOnPanDistanceId(onChangeDistance_);
 }
 
-inline void ReportSlideOn()
-{
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-#endif
-}
-
-inline void ReportSlideOff()
-{
-#ifdef OHOS_PLATFORM
-    ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-#endif
-}
-
 void PanRecognizer::OnAccepted()
 {
     int64_t acceptTime = GetSysTimestamp();
@@ -138,7 +123,6 @@ void PanRecognizer::OnAccepted()
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pan accepted, tag = %{public}s",
         node ? node->GetTag().c_str() : "null");
     refereeState_ = RefereeState::SUCCEED;
-    ReportSlideOn();
     SendCallbackMsg(onActionStart_);
     // only report the pan gesture starting for touch event
     DispatchPanStartedToPerf(lastTouchEvent_);
@@ -328,7 +312,6 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             // last one to fire end.
             isStartTriggered_ = false;
             SendCallbackMsg(onActionEnd_);
-            ReportSlideOff();
             averageDistance_.Reset();
             AddOverTimeTrace();
             refereeState_ = RefereeState::READY;
@@ -356,6 +339,13 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (event.isRotationEvent) {
         return;
     }
+
+    if (event.sourceTool == SourceTool::MOUSE) {
+        delta_ = event.ConvertToOffset();
+        mainDelta_ = GetMainAxisDelta();
+        averageDistance_ += delta_;
+    }
+
     globalPoint_ = Point(event.x, event.y);
 
     touchPoints_[event.id] = TouchEvent();
@@ -379,7 +369,6 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         // AxisEvent is single one.
         isStartTriggered_ = false;
         SendCallbackMsg(onActionEnd_);
-        ReportSlideOff();
         AddOverTimeTrace();
     }
 }
@@ -768,6 +757,9 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     }
 
     if (curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
+        if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
+            SendCancelMsg();
+        }
         ResetStatus();
         return false;
     }

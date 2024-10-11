@@ -540,6 +540,7 @@ public:
     bool IsFocusableScopeByTab();
 
     bool IsFocusableWholePath();
+    bool IsSelfFocusableWholePath();
     bool IsOnRootTree() const;
 
     bool IsFocusable();
@@ -1064,6 +1065,8 @@ protected:
     }
 
 private:
+    friend class FocusView;
+
     bool CalculatePosition();
 
     void SetScopeFocusAlgorithm();
@@ -1092,6 +1095,8 @@ private:
     void SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId);
 
     void RaiseZIndex(); // Recover z-index in ClearFocusState
+
+    bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

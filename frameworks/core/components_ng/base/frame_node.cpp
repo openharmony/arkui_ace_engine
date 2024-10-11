@@ -481,7 +481,11 @@ FrameNode::~FrameNode()
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
-
+    for (const auto& destroyCallback : destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
+    }
     if (removeCustomProperties_) {
         removeCustomProperties_();
         removeCustomProperties_ = nullptr;
@@ -3122,6 +3126,11 @@ void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
+    }
+    for (const auto& destroyCallback : destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
     }
     layoutProperty_->ResetGeometryTransition();
     pattern_->OnRecycle();

@@ -34,6 +34,7 @@ constexpr int32_t MOUSE_HOVER_DURATION = 250;
 constexpr int32_t TYPE_TOUCH = 0;
 constexpr int32_t TYPE_HOVER = 1;
 constexpr int32_t TYPE_CANCEL = 2;
+constexpr float NORMAL_SCALE = 1.0f;
 } // namespace
 
 Color ButtonPattern::GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type)
@@ -49,13 +50,13 @@ Color ButtonPattern::GetColorFromType(const RefPtr<ButtonTheme>& theme, const in
 
 void ButtonPattern::OnAttachToFrameNode()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetAlphaOffscreen(true);
@@ -99,7 +100,7 @@ void ButtonPattern::UpdateTextLayoutProperty(
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(textLayoutProperty);
-
+    UpdateTextFontScale(layoutProperty, textLayoutProperty);
     auto label = layoutProperty->GetLabelValue("");
     textLayoutProperty->UpdateContent(label);
     if (layoutProperty->GetFontSize().has_value()) {
@@ -150,7 +151,9 @@ void ButtonPattern::UpdateTextLayoutProperty(
 void ButtonPattern::UpdateTextStyle(
     RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = layoutProperty->GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
@@ -361,7 +364,7 @@ void ButtonPattern::HandleBackgroundColor()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -396,7 +399,7 @@ void ButtonPattern::HandleEnabled()
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
@@ -408,7 +411,9 @@ void ButtonPattern::HandleEnabled()
 void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo,
     int32_t duration, const RefPtr<Curve>& curve)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
@@ -509,6 +514,7 @@ RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
 void ButtonPattern::OnColorConfigurationUpdate()
 {
     auto node = GetHost();
+    CHECK_NULL_VOID(node);
     if (isColorUpdateFlag_) {
         node->SetNeedCallChildrenUpdate(false);
         return;
@@ -518,12 +524,13 @@ void ButtonPattern::OnColorConfigurationUpdate()
     if (buttonLayoutProperty->GetCreateWithLabelValue(true)) {
         node->SetNeedCallChildrenUpdate(false);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = node->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     ButtonStyleMode buttonStyle = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
         auto color = buttonTheme->GetBgColor(buttonStyle, buttonRole);
         renderContext->UpdateBackgroundColor(color);
@@ -555,5 +562,17 @@ void ButtonPattern::SetBuilderFunc(ButtonMakeCallback&& makeFunc)
         return;
     }
     makeFunc_ = std::move(makeFunc);
+}
+
+void ButtonPattern::UpdateTextFontScale(
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
+    } else {
+        textLayoutProperty->ResetMaxFontScale();
+    }
 }
 } // namespace OHOS::Ace::NG

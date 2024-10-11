@@ -1535,7 +1535,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         return;
     }
     auto scalePoint = point.CreateScalePoint(viewScale_);
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint);
     if (scalePoint.type == TouchType::DOWN) {
         eventManager_->HandleOutOfRectCallback(
             { scalePoint.x, scalePoint.y, scalePoint.sourceType }, rectCallbackList_);
@@ -1578,11 +1578,13 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 
     std::optional<TouchEvent> lastMoveEvent;
     if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
-        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
+        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
             auto movePoint = (*iter).CreateScalePoint(GetViewScale());
             if (scalePoint.id == movePoint.id) {
                 lastMoveEvent = movePoint;
                 iter = touchEvents_.erase(iter);
+            } else {
+                ++iter;
             }
         }
         if (lastMoveEvent.has_value()) {

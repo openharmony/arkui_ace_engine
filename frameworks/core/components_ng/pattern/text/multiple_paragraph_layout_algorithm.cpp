@@ -226,7 +226,6 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
                 isCustomFont = true;
             }
         }
-        fontManager->AddVariationNodeNG(frameNode);
         if (isCustomFont || fontManager->IsDefaultFontChanged()) {
             auto pattern = frameNode->GetPattern<TextPattern>();
             CHECK_NULL_VOID(pattern);
@@ -548,6 +547,7 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
     placeholderStyle.paragraphFontSize = Dimension(paragraphFontSize_);
+    placeholderStyle.paragraphTextColor = textStyle_.value_or(TextStyle()).GetTextColor();
     if (NearZero(baselineOffset.Value())) {
         imageSpanItem->placeholderIndex =
             imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);

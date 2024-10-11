@@ -294,6 +294,12 @@ void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& cal
     onAreaChangedInnerCallbacks_[id] = std::move(callback);
 }
 
+void EventHub::RemoveInnerOnAreaChangedCallback(int32_t id)
+{
+    CHECK_RUN_ON(UI);
+    onAreaChangedInnerCallbacks_.erase(id);
+}
+
 void EventHub::SetOnSizeChanged(OnSizeChangedFunc&& onSizeChanged)
 {
     onSizeChanged_ = std::move(onSizeChanged);
@@ -477,5 +483,19 @@ void EventHub::FireOnDetach()
         auto onDetach = onDetach_;
         onDetach();
     }
+}
+
+void EventHub::ClearStateStyle()
+{
+    if (stateStyleMgr_) {
+        stateStyleMgr_->ClearStateStyleTask();
+    }
+}
+
+void EventHub::OnDetachClear()
+{
+    FireOnDetach();
+    FireOnDisappear();
+    ClearStateStyle();
 }
 } // namespace OHOS::Ace::NG

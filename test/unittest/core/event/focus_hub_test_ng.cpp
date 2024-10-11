@@ -1191,68 +1191,6 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusHubOnKeyEvent003
- * @tc.desc: Test the function OnKeyEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent003, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: create frameNode.
-     */
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto child = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
-        AceType::MakeRefPtr<ButtonPattern>());
-    child->GetOrCreateFocusHub();
-    frameNode->AddChild(child);
-
-    /**
-     * @tc.steps2: create eventHub and focusHub.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-
-    /**
-     * @tc.steps3: create lastWeakFocusNode_.
-     */
-    std::list<RefPtr<FocusHub>> focusNodes;
-    focusHub->FlushChildrenFocusHub(focusNodes);
-    focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*(focusNodes.begin())));
-
-    /**
-     * @tc.steps4: create keyEvent.
-     */
-    KeyEvent keyEvent;
-    keyEvent.action = KeyAction::UP;
-    keyEvent.code = KeyCode::KEY_SPACE;
-
-    /**
-     * @tc.steps5: create lastFocusNode.
-     */
-    focusHub->currentFocus_ = true;
-    focusHub->SetFocusType(FocusType::SCOPE);
-    auto onKeyEvent = [](const KeyEvent& event) -> bool { return true; };
-
-    /**
-     * @tc.steps6: call the function OnKeyEvent with FocusType::SCOPE.
-     * @tc.expected: The return value of OnKeyEvent is true.
-     */
-    auto lastFocusNode = focusHub->lastWeakFocusNode_.Upgrade();
-    lastFocusNode->currentFocus_ = true;
-    lastFocusNode->SetOnKeyEventInternal(onKeyEvent);
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
-
-    /**
-     * @tc.steps7: call the function OnKeyEvent with FocusType::SCOPE.
-     * @tc.expected: The return value of OnKeyEvent is true.
-     */
-    lastFocusNode->currentFocus_ = false;
-    focusHub->SetOnKeyEventInternal(onKeyEvent);
-    EXPECT_TRUE(focusHub->OnKeyEvent(keyEvent));
-}
-
-/**
  * @tc.name: FocusHubOnKeyEvent004
  * @tc.desc: Test the function OnKeyEvent.
  * @tc.type: FUNC

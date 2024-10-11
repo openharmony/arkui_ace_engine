@@ -2049,7 +2049,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     eventManager_->CheckDownEvent(scalePoint);
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint);
 
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
@@ -3957,6 +3957,19 @@ void PipelineContext::SubscribeContainerModalButtonsRectChange(
     containerPattern->SubscribeContainerModalButtonsRectChange(std::move(callback));
 }
 
+void PipelineContext::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect)
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    CHECK_NULL_VOID(rootNode_);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_VOID(containerPattern);
+    containerPattern->GetWindowPaintRectWithoutMeasureAndLayout(rect);
+}
+
 const RefPtr<PostEventManager>& PipelineContext::GetPostEventManager()
 {
     return postEventManager_;
@@ -4192,7 +4205,7 @@ void PipelineContext::RemoveFrameNodeChangeListener(int32_t nodeId)
 bool PipelineContext::AddChangedFrameNode(const WeakPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node.Upgrade(), false);
-    if (changeInfoListeners_.empty() || !node.Upgrade()->IsOnMainTree()) {
+    if (changeInfoListeners_.empty()) {
         return false;
     }
     if (std::find(changedNodes_.begin(), changedNodes_.end(), node) == changedNodes_.end()) {

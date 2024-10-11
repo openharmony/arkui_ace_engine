@@ -281,9 +281,7 @@ void SubwindowOhos::InitContainer()
     subPipelineContextNG->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
     subPipelineContextNG->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
     subPipelineContextNG->SetFollowSystem(parentPipeline->IsFollowSystem());
-    if (!parentPipeline->IsFollowSystem()) {
-        subPipelineContextNG->SetFontScale(1.0f);
-    }
+    subPipelineContextNG->SetFontScale(parentPipeline->GetFontScale());
 #else
     if (container->IsCurrentUseNewPipeline()) {
         auto subPipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(
@@ -296,9 +294,7 @@ void SubwindowOhos::InitContainer()
         subPipelineContextNG->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
         subPipelineContextNG->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
         subPipelineContextNG->SetFollowSystem(parentPipeline->IsFollowSystem());
-        if (!parentPipeline->IsFollowSystem()) {
-            subPipelineContextNG->SetFontScale(1.0f);
-        }
+        subPipelineContextNG->SetFontScale(parentPipeline->GetFontScale());
         return;
     }
     auto subPipelineContext =
@@ -311,9 +307,7 @@ void SubwindowOhos::InitContainer()
     subPipelineContext->SetDragNodeGrayscale(parentPipeline->GetDragNodeGrayscale());
     subPipelineContext->SetMaxAppFontScale(parentPipeline->GetMaxAppFontScale());
     subPipelineContext->SetFollowSystem(parentPipeline->IsFollowSystem());
-    if (!parentPipeline->IsFollowSystem()) {
-        subPipelineContext->SetFontScale(1.0f);
-    }
+    subPipelineContext->SetFontScale(parentPipeline->GetFontScale());
 #endif
 }
 
@@ -821,7 +815,8 @@ bool SubwindowOhos::GetMenuPreviewCenter(NG::OffsetF& offset)
     return overlay->GetMenuPreviewCenter(offset);
 }
 
-void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
+void SubwindowOhos::UpdateHideMenuOffsetNG(
+    const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
     ContainerScope scope(childContainerId_);
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
@@ -831,7 +826,7 @@ void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset, float menu
     if (overlay->IsContextMenuDragHideFinished()) {
         return;
     }
-    overlay->UpdateContextMenuDisappearPosition(offset, menuScale, isRedragStart);
+    overlay->UpdateContextMenuDisappearPosition(offset, menuScale, isRedragStart, menuWrapperId);
 }
 
 void SubwindowOhos::ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,

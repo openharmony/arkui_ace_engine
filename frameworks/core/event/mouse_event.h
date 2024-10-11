@@ -48,7 +48,8 @@ enum class MouseAction : int32_t {
     HOVER_EXIT,
     PULL_DOWN,
     PULL_MOVE,
-    PULL_UP
+    PULL_UP,
+    CANCEL
 };
 
 enum class AccessibilityHoverAction : int32_t {
@@ -188,6 +189,8 @@ struct MouseEvent final {
             type = TouchType::UP;
         } else if (action == MouseAction::MOVE) {
             type = TouchType::MOVE;
+        } else if (action == MouseAction::CANCEL) {
+            type = TouchType::CANCEL;
         } else {
             type = TouchType::UNKNOWN;
         }
@@ -195,10 +198,7 @@ struct MouseEvent final {
         if (sourceType == SourceType::MOUSE) {
             pointId = GetPointerId(pointId);
         }
-        auto pointOriginalId = originalId;
-        if (sourceType == SourceType::MOUSE) {
-            pointOriginalId = GetId();
-        }
+        auto pointOriginalId = sourceType == SourceType::MOUSE ? GetId() : originalId;
         TouchPoint point { .id = pointId,
             .x = x,
             .y = y,

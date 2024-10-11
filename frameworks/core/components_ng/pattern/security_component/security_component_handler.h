@@ -70,8 +70,7 @@ private:
     static bool CheckRenderEffect(RefPtr<FrameNode>& node);
     static bool CheckParentNodesEffect(RefPtr<FrameNode>& node,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
-    static void GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect, RectF& visibleRectWithPosition);
-    static bool IsOutOfParent(const RectF& visibleRect, const RectF& renderRect);
+    static void GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect);
     static bool IsOutOfParentWithRound(const RectF& visibleRect, const RectF& renderRect,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static bool GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId);

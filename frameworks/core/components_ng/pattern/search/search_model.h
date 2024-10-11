@@ -89,6 +89,7 @@ public:
     virtual void SetType(TextInputType value);
     virtual void SetDragPreviewOptions(const NG::DragPreviewOption option) {};
     virtual void SetSelectedBackgroundColor(const Color& value) {};
+    virtual void UpdateInspectorId(const std::string& key) {};
 
     virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) {};
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) {};

@@ -1755,6 +1755,7 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
 
 void ListPattern::UpdateScrollBarOffset()
 {
+    CheckScrollBarOff();
     if (itemPosition_.empty()) {
         return;
     }

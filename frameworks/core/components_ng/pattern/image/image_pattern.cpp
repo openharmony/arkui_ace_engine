@@ -169,6 +169,9 @@ void ImagePattern::OnCompleteInDataReady()
 
 void ImagePattern::TriggerFirstVisibleAreaChange()
 {
+    if (isComponentSnapshotNode_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RectF frameRect;
@@ -1447,18 +1450,15 @@ void ImagePattern::OnIconConfigurationUpdate()
 void ImagePattern::OnConfigurationUpdate()
 {
     CHECK_NULL_VOID(loadingCtx_);
-
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
-    src.GenerateCacheKey();
     UpdateInternalResource(src);
 
     LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
         imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        altImageSourceInfo.GenerateCacheKey();
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }
@@ -1570,7 +1570,7 @@ void ImagePattern::CreateAnalyzerOverlay()
     if (imageAnalyzerManager_->IsOverlayCreated()) {
         return;
     }
- 
+
     CHECK_NULL_VOID(image_);
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
