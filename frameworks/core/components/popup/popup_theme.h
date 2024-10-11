@@ -102,7 +102,7 @@ public:
             theme->defaultBGColor_ = pattern->GetAttr<Color>("popup_default_bg_color", Color::TRANSPARENT);
             theme->borderColor_ = pattern->GetAttr<Color>("popup_border_color", Color::BLACK);
             theme->borderWidth_ = pattern->GetAttr<Dimension>("popup_border_width", 0.0_vp);
-            theme->minHeight_ = pattern->GetAttr<Dimension>("popup_min_height", 0.0_vp);
+            theme->bubbleMiniMumHeight_ = pattern->GetAttr<Dimension>("popup_min_height", 0.0_vp);
             theme->popupMaxColumns_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_max_columns", 0));
             theme->bgThemeColorMode_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_bg_theme_color_mode", 0));
         }
@@ -338,11 +338,6 @@ public:
         return borderWidth_;
     }
 
-    const Dimension& GetMinHeight() const
-    {
-        return minHeight_;
-    }
-
     uint32_t GetMaxColumns() const
     {
         return popupMaxColumns_;
@@ -404,7 +399,6 @@ private:
     Color defaultBGColor_;
     Color borderColor_;
     Dimension borderWidth_ = 0.0_vp;
-    Dimension minHeight_ = 0.0_vp;
     uint32_t popupMaxColumns_ = 0;
     uint32_t bgThemeColorMode_ = 0;
 };

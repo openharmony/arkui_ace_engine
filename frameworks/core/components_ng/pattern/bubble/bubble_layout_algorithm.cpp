@@ -594,7 +594,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     marginTop_ = top_ + DRAW_EDGES_SPACE.ConvertToPx();
     marginBottom_ = bottom_ + DRAW_EDGES_SPACE.ConvertToPx();
     showArrow_ = false;
-    minHeight_ = popupTheme->GetMinHeight();
+    minHeight_ = popupTheme->GetBubbleMiniMumHeight();
     maxColumns_ = popupTheme->GetMaxColumns();
 }
 
