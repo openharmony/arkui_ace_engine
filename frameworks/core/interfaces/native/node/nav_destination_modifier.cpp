@@ -19,32 +19,32 @@
 namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_SAFE_AREA_TYPE = 0b1;
 constexpr int32_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
-void SetHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hideTitle)
+void SetHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hideTitle, ArkUI_Bool animated)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavDestinationModelNG::SetHideTitleBar(frameNode, hideTitle);
+    NavDestinationModelNG::SetHideTitleBar(frameNode, hideTitle, animated);
 }
 
 void ResetHideTitleBar(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavDestinationModelNG::SetHideTitleBar(frameNode, false);
+    NavDestinationModelNG::SetHideTitleBar(frameNode, false, false);
 }
 
-void SetNavDestinationHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide)
+void SetNavDestinationHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavDestinationModelNG::SetHideToolBar(frameNode, hide);
+    NavDestinationModelNG::SetHideToolBar(frameNode, hide, animated);
 }
 
 void ResetNavDestinationHideToolBar(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavDestinationModelNG::SetHideToolBar(frameNode, false);
+    NavDestinationModelNG::SetHideToolBar(frameNode, false, false);
 }
 
 void SetNavDestinationMode(ArkUINodeHandle node, int32_t value)
