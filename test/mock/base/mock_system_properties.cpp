@@ -200,6 +200,11 @@ bool SystemProperties::IsSmallFoldProduct()
     return false;
 }
 
+std::string SystemProperties::GetDebugInspectorId()
+{
+    return "N/A";
+}
+
 double SystemProperties::GetSrollableVelocityScale()
 {
     return 0.0;

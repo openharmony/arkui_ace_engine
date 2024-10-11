@@ -87,6 +87,11 @@ enum class DragFuncType {
     DRAG_END,
 };
 
+enum class EventTreeType {
+    TOUCH = 0,
+    POST_EVENT,
+};
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_CONSTANTS_H

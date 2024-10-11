@@ -667,6 +667,7 @@ HWTEST_F(ScrollableCoverTestNg, ProcessSpringMotionTest001, TestSize.Level1)
      * @tc.steps: step1. Create a Scrollable object and set necessary properties
      */
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollable->context_ = PipelineContext::GetCurrentContext();
     scrollable->currentPos_ = 0.0;
     scrollable->isFadingAway_ = true;
     auto propertyCallback = [](float offset) {};
@@ -764,6 +765,7 @@ HWTEST_F(ScrollableCoverTestNg, GetSnapPropertyCallbackTest001, TestSize.Level1)
      */
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     scrollable->state_ = Scrollable::AnimationState::SNAP;
+    scrollable->context_ = PipelineContext::GetCurrentContext();
 
     /**
      * @tc.steps: step2. Get the callback from snapOffsetProperty_
@@ -1765,6 +1767,7 @@ HWTEST_F(ScrollableCoverTestNg, UpdateScrollSnapEndWithOffsetTest001, TestSize.L
 HWTEST_F(ScrollableCoverTestNg, GetFrictionPropertyTest001, TestSize.Level1)
 {
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollable->context_ = PipelineContext::GetCurrentContext();
     auto frictionProperty = scrollable->GetFrictionProperty();
     ASSERT_NE(frictionProperty, nullptr);
     auto propertyCallback = [](float offset) {};

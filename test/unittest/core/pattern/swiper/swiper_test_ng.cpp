@@ -49,11 +49,13 @@ void SwiperTestNg::SetUpTestSuite()
     swiperIndicatorTheme->digitalIndicatorTextStyle_ = textStyle;
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
+    MockContainer::SetUp();
 }
 
 void SwiperTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    MockContainer::TearDown();
 }
 
 void SwiperTestNg::SetUp() {}

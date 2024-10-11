@@ -29,10 +29,7 @@
 
 namespace OHOS::Ace {
 
-constexpr int32_t COUNTER_NUMBER_ZERO = 0;
-constexpr int32_t COUNTER_NUMBER_MAX = 9;
-constexpr int32_t MOCK_REGISTER_DIVISOR = 2;
-static int32_t registerStatus = 0;
+static bool g_setBoolStatus = false;
 class MockAccessibilityManager : public AccessibilityManager {
 public:
     MOCK_METHOD(void, SendAccessibilityAsyncEvent, (const AccessibilityEvent& accessibilityEvent), (override));
@@ -101,21 +98,12 @@ public:
     MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree, (int32_t treeId), (override));
 #endif
     void RegisterAccessibilityChildTreeCallback(
-        int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback>& callback) override
-    {}
+        int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback>& callback) override {}
     void DeregisterAccessibilityChildTreeCallback(int64_t elementId) override {}
     void RegisterInteractionOperationAsChildTree(
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) override
     {
-        if (registerStatus % MOCK_REGISTER_DIVISOR == COUNTER_NUMBER_ZERO) {
-            registerStatus++;
-            Register(true);
-        } else {
-            registerStatus++;
-            Register(false);
-        }
-        if (registerStatus > COUNTER_NUMBER_MAX)
-            registerStatus = COUNTER_NUMBER_ZERO;
+        Register(g_setBoolStatus);
     }
     void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) override {}
     void SetAccessibilityGetParentRectHandler(std::function<void(AccessibilityParentRectInfo&)>&& callback) override {}
@@ -328,6 +316,8 @@ void PipelineContext::ReDispatch(KeyEvent& keyEvent) {}
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node) {}
 
+void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {};
+
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
@@ -384,7 +374,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height) {}
 
-void PipelineContext::SetContainerWindow(bool isShow, Dimension contentBorderRadius) {}
+void PipelineContext::SetContainerWindow(bool isShow, RRect& rRect) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
@@ -635,6 +625,7 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, co
     CHECK_NULL_VOID(callback);
     callback(false, 0.0);
     callback(true, ratio[0]);
+    callback(false, ratio[1]);
 }
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
@@ -1067,6 +1058,11 @@ void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameN
         node->Measure(layoutConstraint);
         node->Layout();
     }
+}
+
+void SetBoolStatus(bool value)
+{
+    g_setBoolStatus = value;
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

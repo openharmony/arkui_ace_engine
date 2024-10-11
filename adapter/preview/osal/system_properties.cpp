@@ -331,6 +331,11 @@ bool SystemProperties::IsSmallFoldProduct()
     return false;
 }
 
+std::string SystemProperties::GetDebugInspectorId()
+{
+    return UNDEFINED_PARAM;
+}
+
 double SystemProperties::GetSrollableVelocityScale()
 {
     return 0.0;

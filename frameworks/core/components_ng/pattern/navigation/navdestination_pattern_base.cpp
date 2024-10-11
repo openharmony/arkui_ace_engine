@@ -172,7 +172,9 @@ void NavDestinationPatternBase::UpdateTitleBarTranslateAndOpacity(
     if (titleBarNode) {
         auto renderContext = titleBarNode->GetRenderContext();
         if (renderContext) {
-            renderContext->UpdateTranslateInXY({ 0.0f, hide ? -titleBarHeight : 0.0f });
+            auto offset = renderContext->GetTranslateXYProperty();
+            offset.SetY(hide ? -titleBarHeight : 0.0f);
+            renderContext->UpdateTranslateInXY(offset);
             renderContext->UpdateOpacity(hide ? 0.0f : 1.0f);
         }
     }
@@ -243,7 +245,7 @@ void NavDestinationPatternBase::HideOrShowTitleBarImmediately(const RefPtr<NavDe
     UpdateTitleBarProperty(navBarLayoutProperty, hide, hostNode);
     UpdateTitleBarTranslateAndOpacity(hide, titleBarNode, navBarPattern->GetTitleBarHeight());
     titleBarNode->MarkModifyDone();
-    titleBarNode->MarkDirtyNode();
+    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 void NavDestinationPatternBase::HideOrShowToolBarImmediately(const RefPtr<NavDestinationNodeBase>& hostNode, bool hide)
@@ -255,7 +257,6 @@ void NavDestinationPatternBase::HideOrShowToolBarImmediately(const RefPtr<NavDes
     auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
     auto toolBarDividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolBarDividerNode());
-    CHECK_NULL_VOID(toolBarDividerNode);
     UpdateToolBarAndDividerProperty(navBarLayoutProperty, hide, hostNode);
     UpdateToolBarAndDividerTranslateAndOpacity(hide, toolBarNode, GetToolBarHeight(),
         toolBarDividerNode, GetToolBarDividerHeight());
@@ -351,10 +352,10 @@ void NavDestinationPatternBase::OnToolBarAnimationFinish()
     }
 
     SetForceMeasureToolBar(false);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(navBarNode);
-    auto propertyBase = navBarNode->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    auto nodeBase = AceType::DynamicCast<NavDestinationNodeBase>(GetHost());
+    CHECK_NULL_VOID(nodeBase);
+    auto propertyBase = nodeBase->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
     CHECK_NULL_VOID(propertyBase);
-    HideOrShowToolBarImmediately(navBarNode, propertyBase->GetHideToolBarValue(false));
+    HideOrShowToolBarImmediately(nodeBase, propertyBase->GetHideToolBarValue(false));
 }
 } // namespace OHOS::Ace::NG

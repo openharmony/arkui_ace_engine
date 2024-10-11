@@ -2186,7 +2186,9 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
     host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, currentOffset_);
     translateAnimationIsRunning_ = true;
     translateAnimation_ = AnimationUtils::StartAnimation(option,
-        [host, targetCurrentOffset]() {
+        [weakHost = WeakClaim(RawPtr(host)), targetCurrentOffset]() {
+            auto host = weakHost.Upgrade();
+            CHECK_NULL_VOID(host);
             host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, targetCurrentOffset);
         },
         [weak]() {
@@ -2199,21 +2201,40 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
 void TabBarPattern::PlayIndicatorTranslateAnimation(AnimationOption option, RectF originalPaintRect,
     RectF targetPaintRect, float targetOffset)
 {
-    auto weak = AceType::WeakClaim(this);
-    const auto& pattern = weak.Upgrade();
-    auto host = pattern->GetHost();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
 
     isAnimating_ = true;
     turnPageRate_ = 0.0f;
     indicatorStartPos_ = originalPaintRect.GetX() + originalPaintRect.Width() / HALF_OF_WIDTH;
     indicatorEndPos_ = targetPaintRect.GetX() + targetPaintRect.Width() / HALF_OF_WIDTH + targetOffset;
     auto propertyName = INDICATOR_OFFSET_PROPERTY_NAME;
-
     if (NearZero(indicatorEndPos_ - indicatorStartPos_)) {
         indicatorStartPos_ = originalPaintRect.Width();
         indicatorEndPos_ = targetPaintRect.Width();
         propertyName = INDICATOR_WIDTH_PROPERTY_NAME;
-        host->CreateAnimatablePropertyFloat(propertyName, 0, [weak](float value) {
+    }
+    CreateIndicatorTranslateProperty(host, propertyName);
+
+    host->UpdateAnimatablePropertyFloat(propertyName, indicatorStartPos_);
+    indicatorAnimationIsRunning_ = true;
+    tabbarIndicatorAnimation_ = AnimationUtils::StartAnimation(option,
+        [weakHost = WeakClaim(RawPtr(host)), propertyName, endPos = indicatorEndPos_]() {
+            auto host = weakHost.Upgrade();
+            CHECK_NULL_VOID(host);
+            host->UpdateAnimatablePropertyFloat(propertyName, endPos);
+        },
+        [weak = AceType::WeakClaim(this)]() {
+            auto tabBarPattern = weak.Upgrade();
+            CHECK_NULL_VOID(tabBarPattern);
+            tabBarPattern->indicatorAnimationIsRunning_ = false;
+        });
+}
+
+void TabBarPattern::CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& host, const std::string& propertyName)
+{
+    if (propertyName == INDICATOR_WIDTH_PROPERTY_NAME) {
+        host->CreateAnimatablePropertyFloat(propertyName, 0, [weak = AceType::WeakClaim(this)](float value) {
             auto tabBarPattern = weak.Upgrade();
             CHECK_NULL_VOID(tabBarPattern);
             if (!tabBarPattern->isAnimating_ ||
@@ -2224,8 +2245,8 @@ void TabBarPattern::PlayIndicatorTranslateAnimation(AnimationOption option, Rect
                 (tabBarPattern->indicatorEndPos_ - tabBarPattern->indicatorStartPos_);
             tabBarPattern->UpdateIndicatorCurrentOffset(0.0f);
         });
-    } else {
-        host->CreateAnimatablePropertyFloat(propertyName, 0, [weak](float value) {
+    } else if (propertyName == INDICATOR_OFFSET_PROPERTY_NAME) {
+        host->CreateAnimatablePropertyFloat(propertyName, 0, [weak = AceType::WeakClaim(this)](float value) {
             auto tabBarPattern = weak.Upgrade();
             CHECK_NULL_VOID(tabBarPattern);
             if (!tabBarPattern->isAnimating_ ||
@@ -2238,17 +2259,6 @@ void TabBarPattern::PlayIndicatorTranslateAnimation(AnimationOption option, Rect
                 static_cast<float>(value - tabBarPattern->currentIndicatorOffset_));
         });
     }
-    host->UpdateAnimatablePropertyFloat(propertyName, indicatorStartPos_);
-    indicatorAnimationIsRunning_ = true;
-    tabbarIndicatorAnimation_ = AnimationUtils::StartAnimation(option,
-        [host, propertyName, endPos = indicatorEndPos_]() {
-            host->UpdateAnimatablePropertyFloat(propertyName, endPos);
-        },
-        [weak]() {
-            auto tabBarPattern = weak.Upgrade();
-            CHECK_NULL_VOID(tabBarPattern);
-            tabBarPattern->indicatorAnimationIsRunning_ = false;
-        });
 }
 
 void TabBarPattern::StopTranslateAnimation()

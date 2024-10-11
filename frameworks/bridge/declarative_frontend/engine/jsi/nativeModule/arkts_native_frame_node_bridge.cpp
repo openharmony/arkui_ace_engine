@@ -271,10 +271,9 @@ void FrameNodeBridge::FireLayoutCallback(EcmaVM* vm, JsWeak<panda::CopyableGloba
     func->Call(vm, obj.ToLocal(), params, 1);
 }
 
-ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+static ArkUINodeType ParseNodeType(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, int32_t nodeId, RefPtr<FrameNode>& node)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(1);
     std::string type = firstArg->IsString(vm) ? firstArg->ToString(vm)->ToString(vm) : "";
     static const std::unordered_map<std::string, ArkUINodeType> typeMap = { { "Text", ARKUI_TEXT },
@@ -291,37 +290,51 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
         { "Checkbox", ARKUI_CHECKBOX }, {"CheckboxGroup", ARKUI_CHECK_BOX_GROUP }, { "Rating", ARKUI_RATING},
         { "Radio", ARKUI_RADIO }, { "Slider", ARKUI_SLIDER }, { "Select", ARKUI_SELECT }, { "Toggle", ARKUI_TOGGLE } };
     ArkUINodeType nodeType = ARKUI_CUSTOM;
-    RefPtr<FrameNode> node;
-    ArkUINodeHandle nodePtr = nullptr;
     auto iter = typeMap.find(type);
     if (iter != typeMap.end()) {
         nodeType = iter->second;
-        if (nodeType != ARKUI_CUSTOM) {
-            if (nodeType == ARKUI_XCOMPONENT) {
+    }
+    return nodeType;
+}
+
+static void HandleNodeParams(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeType nodeType, int32_t nodeId, RefPtr<FrameNode>& node)
+{
+    ArkUINodeHandle nodePtr = nullptr;
+    if (nodeType == ARKUI_XCOMPONENT) {
 #ifdef XCOMPONENT_SUPPORTED
-                ArkUI_XComponent_Params params;
-                XComponentBridge::ParseParams(runtimeCallInfo, params);
-                params.nodeType = ARKUI_XCOMPONENT;
-                nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
-                XComponentBridge::SetControllerCallback(runtimeCallInfo, reinterpret_cast<FrameNode*>(nodePtr));
+        ArkUI_XComponent_Params params;
+        XComponentBridge::ParseParams(runtimeCallInfo, params);
+        params.nodeType = ARKUI_XCOMPONENT;
+        nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
+        XComponentBridge::SetControllerCallback(runtimeCallInfo, reinterpret_cast<FrameNode*>(nodePtr));
 #else
-                nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
+        nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
 #endif
-            } else if (nodeType == ARKUI_TOGGLE) {
-                ArkUI_Toggle_Params params;
-                params.nodeType = ARKUI_TOGGLE;
-                ToggleBridge::ParseParams(runtimeCallInfo, params);
-                nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
-            } else {
-                nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
-            }
-            // let 'node' take the reference, so decrease ref of C node
-            node = AceType::Claim(reinterpret_cast<FrameNode*>(nodePtr));
-            node->DecRefCount();
-            if (node) {
-                node->SetIsArkTsFrameNode(true);
-            }
-        }
+    } else if (nodeType == ARKUI_TOGGLE) {
+        ArkUI_Toggle_Params params;
+        params.nodeType = ARKUI_TOGGLE;
+        ToggleBridge::ParseParams(runtimeCallInfo, params);
+        nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
+    } else {
+        nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
+    }
+    // let 'node' take the reference, so decrease ref of C node
+    node = AceType::Claim(reinterpret_cast<FrameNode*>(nodePtr));
+    node->DecRefCount();
+    if (node) {
+        node->SetIsArkTsFrameNode(true);
+    }
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> node;
+    ArkUINodeType nodeType = ParseNodeType(runtimeCallInfo, vm, nodeId, node);
+    if (nodeType != ARKUI_CUSTOM) {
+        HandleNodeParams(runtimeCallInfo, nodeType, nodeId, node);
     }
 
     const char* keys[] = { "nodeId", "nativeStrongRef" };

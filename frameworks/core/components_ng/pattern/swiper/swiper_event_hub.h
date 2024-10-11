@@ -161,7 +161,7 @@ public:
                 });
         }
         // animationEnd callback need to be fired after animationStart callback, use flag for protection.
-        isAnimationStartCalled_ = true;
+        ++aniStartCalledCount_;
         if (delayCallback_) {
             TAG_LOGI(AceLogTag::ACE_SWIPER, "the timing of the animation callback has been corrected");
             delayCallback_();
@@ -171,7 +171,7 @@ public:
 
     void FireAnimationEndEvent(int32_t index, const AnimationCallbackInfo& info)
     {
-        if (!isAnimationStartCalled_) {
+        if (aniStartCalledCount_ <= 0) {
             delayCallback_ = [weak = WeakClaim(this), index, info]() {
                 auto hub = weak.Upgrade();
                 CHECK_NULL_VOID(hub);
@@ -189,12 +189,12 @@ public:
                     event(index, info);
                 });
         }
-        isAnimationStartCalled_ = false;
+        --aniStartCalledCount_;
     }
 
     void FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info)
     {
-        if (!isAnimationStartCalled_) {
+        if (aniStartCalledCount_ <= 0) {
             delayCallback_ = [weak = WeakClaim(this), index, info]() {
                 auto hub = weak.Upgrade();
                 CHECK_NULL_VOID(hub);
@@ -203,6 +203,7 @@ public:
             return;
         }
         if (animationEndEvents_.empty()) {
+            --aniStartCalledCount_;
             return;
         }
         auto context = GetFrameNode()->GetContext();
@@ -217,7 +218,7 @@ public:
                     event(index, info);
                 });
         });
-        isAnimationStartCalled_ = false;
+        --aniStartCalledCount_;
     }
 
     void FireGestureSwipeEvent(int32_t index, const AnimationCallbackInfo& info) const
@@ -253,7 +254,7 @@ private:
     std::list<AnimationStartEventPtr> animationStartEvents_;
     std::list<AnimationEndEventPtr> animationEndEvents_;
     GestureSwipeEvent gestureSwipeEvent_;
-    bool isAnimationStartCalled_ = false;
+    int32_t aniStartCalledCount_ = 0;
     std::function<void()> delayCallback_;
 };
 

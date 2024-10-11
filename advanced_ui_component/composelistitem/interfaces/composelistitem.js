@@ -76,6 +76,7 @@ const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
 const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
 const RIGHT_ONLY_ARROW_WIDTH = '24vp';
+const ACCESSIBILITY_LEVEL_NO = 'no';
 const ICON_SIZE_MAP = new Map([
     [IconType.BADGE, BADGE_SIZE],
     [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
@@ -354,6 +355,7 @@ class ContentItemStruct extends ViewPU {
             Text.fontWeight(FontWeight.Medium);
             Text.focusable(true);
             Text.draggable(false);
+            Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
         }, Text);
         Text.pop();
         this.observeComponentCreation2((k9, l9) => {
@@ -367,6 +369,7 @@ class ContentItemStruct extends ViewPU {
                         Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.draggable(false);
+                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
                 });
@@ -388,6 +391,7 @@ class ContentItemStruct extends ViewPU {
                         Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.draggable(false);
+                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
                 });
@@ -872,6 +876,7 @@ class OperateItemStruct extends ViewPU {
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
             Text.draggable(false);
             Text.flexShrink(1);
+            Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
         }, Text);
         Text.pop();
     }
@@ -1068,6 +1073,7 @@ class OperateItemStruct extends ViewPU {
                         Text.constraintSize({
                             maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
                         });
+                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((j11, k11) => {
@@ -1100,6 +1106,7 @@ class OperateItemStruct extends ViewPU {
                         Text.constraintSize({
                             maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
                         });
+                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((o6, u6) => {
@@ -1239,6 +1246,7 @@ export class ComposeListItem extends ViewPU {
         this.__textArrowLeftSafeOffset = new ObservedPropertySimplePU(0, this, "textArrowLeftSafeOffset");
         this.isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
         this.maxFontScale = this.getUIContext().getMaxFontScale();
+        this.__accessibilityTextBuilder = new ObservedPropertySimplePU('', this, "accessibilityTextBuilder");
         this.setInitiallyProvidedValue(u2);
         this.declareWatch("contentItem", this.onPropChange);
         this.declareWatch("operateItem", this.onPropChange);
@@ -1309,6 +1317,9 @@ export class ComposeListItem extends ViewPU {
         if (s2.maxFontScale !== undefined) {
             this.maxFontScale = s2.maxFontScale;
         }
+        if (s2.accessibilityTextBuilder !== undefined) {
+            this.accessibilityTextBuilder = s2.accessibilityTextBuilder;
+        }
     }
     updateStateVars(r2) {
         this.__contentItem.reset(r2.contentItem);
@@ -1334,6 +1345,7 @@ export class ComposeListItem extends ViewPU {
         this.__contentItemDirection.purgeDependencyOnElmtId(q2);
         this.__containerPadding.purgeDependencyOnElmtId(q2);
         this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(q2);
+        this.__accessibilityTextBuilder.purgeDependencyOnElmtId(q2);
     }
     aboutToBeDeleted() {
         this.__contentItem.aboutToBeDeleted();
@@ -1355,6 +1367,7 @@ export class ComposeListItem extends ViewPU {
         this.__contentItemDirection.aboutToBeDeleted();
         this.__containerPadding.aboutToBeDeleted();
         this.__textArrowLeftSafeOffset.aboutToBeDeleted();
+        this.__accessibilityTextBuilder.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -1472,6 +1485,12 @@ export class ComposeListItem extends ViewPU {
     set textArrowLeftSafeOffset(o4) {
         this.__textArrowLeftSafeOffset.set(o4);
     }
+    get accessibilityTextBuilder() {
+        return this.__accessibilityTextBuilder.get();
+    }
+    set accessibilityTextBuilder(t15) {
+        this.__accessibilityTextBuilder.set(t15);
+    }
     onWillApplyTheme(b2) {
         this.hoveringColor = b2.colors.interactiveHover;
         this.touchDownColor = b2.colors.interactivePressed;
@@ -1511,6 +1530,12 @@ export class ComposeListItem extends ViewPU {
         if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle) >= this.itemHeight) {
             this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle) + SAFE_LIST_PADDING;
         }
+        this.accessibilityTextBuilder = `
+          ${this.contentItem?.primaryText ?? ''}
+          ${this.contentItem?.secondaryText ?? ''}
+          ${this.contentItem?.description ?? ''}
+          ${this.operateItem?.text ?? ''}
+        `;
     }
     aboutToAppear() {
         this.onPropChange();
@@ -1649,6 +1674,7 @@ export class ComposeListItem extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((z1, a2) => {
             Stack.create();
+            Stack.accessibilityText(this.accessibilityTextBuilder);
             Stack.padding({
                 left: STACK_PADDING,
                 right: STACK_PADDING

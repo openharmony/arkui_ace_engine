@@ -181,7 +181,7 @@ class SelectOptionsModifier extends ModifierWithKey<SelectOption[]> {
       let iconArray: string[] = [];
       let symbolIconArray: object[] = [];
       let length: number = 0;
-      if(this.value) {
+      if (this.value) {
         length = this.value.length;
         for (let i = 0; i < length; i++) {
           valueArray.push(this.value[i]?.value);

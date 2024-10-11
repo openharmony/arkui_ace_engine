@@ -110,6 +110,8 @@ const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
 const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
 const RIGHT_ONLY_ARROW_WIDTH = '24vp';
+const ACCESSIBILITY_LEVEL_NO: string = 'no';
+
 const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.BADGE, BADGE_SIZE],
   [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
@@ -197,6 +199,7 @@ struct ContentItemStruct {
         .fontWeight(FontWeight.Medium)
         .focusable(true)
         .draggable(false)
+        .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
       if (this.secondaryText != null) {
         Text(this.secondaryText)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
@@ -204,6 +207,7 @@ struct ContentItemStruct {
           .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .draggable(false)
+          .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
       }
       if (this.description != null) {
         Text(this.description)
@@ -212,6 +216,7 @@ struct ContentItemStruct {
           .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .draggable(false)
+          .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
       }
     }
     .flexShrink(1)
@@ -412,6 +417,7 @@ struct OperateItemStruct {
       .fontColor(this.secondaryTextColor)
       .draggable(false)
       .flexShrink(1)
+      .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
   }
 
   @Builder
@@ -555,6 +561,7 @@ struct OperateItemStruct {
             .constraintSize({
               maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
+            .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
           Image(this.arrow?.value)
             .height(OPERATEITEM_ICONLIKE_SIZE)
             .width(OPERATEITEM_ARROW_WIDTH)
@@ -577,6 +584,7 @@ struct OperateItemStruct {
             .constraintSize({
               maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
+            .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
           Image(this.arrow?.value)
             .height(OPERATEITEM_ICONLIKE_SIZE)
             .width(OPERATEITEM_ARROW_WIDTH)
@@ -694,6 +702,7 @@ export struct ComposeListItem {
   @State textArrowLeftSafeOffset: number = 0;
   private isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
   private maxFontScale = this.getUIContext().getMaxFontScale();
+  @State accessibilityTextBuilder: string = '';
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -733,6 +742,13 @@ export struct ComposeListItem {
     if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
       this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
     }
+
+    this.accessibilityTextBuilder = `
+      ${this.contentItem?.primaryText ?? ''}
+      ${this.contentItem?.secondaryText ?? ''}
+      ${this.contentItem?.description ?? ''}
+      ${this.operateItem?.text ?? ''}
+    `;
   }
 
   aboutToAppear() {
@@ -960,6 +976,7 @@ export struct ComposeListItem {
         }
       }).padding(this.containerPadding)
     }
+    .accessibilityText(this.accessibilityTextBuilder)
     .padding({
       left: STACK_PADDING,
       right: STACK_PADDING

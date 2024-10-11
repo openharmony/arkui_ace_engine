@@ -383,6 +383,14 @@ public:
         return windowScale_;
     }
 
+    double GetWindowDensity() const
+    {
+        if (!uiWindow_) {
+            return 0.0;
+        }
+        return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
+    }
+
     int32_t GetParentId() const
     {
         return parentId_;
@@ -689,6 +697,12 @@ public:
 
     void UpdateResourceOrientation(int32_t orientation);
     void UpdateResourceDensity(double density);
+
+    bool IsFreeMultiWindow() const override
+    {
+        return uiWindow_->GetFreeMultiWindowModeEnabledState();
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

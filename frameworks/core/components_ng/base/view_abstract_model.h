@@ -415,11 +415,6 @@ public:
     virtual void SetPositionLocalizedEdges(bool needLocalized) = 0;
     virtual void SetLocalizedMarkAnchor(bool needLocalized) = 0;
     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
-
-private:
-    static std::unique_ptr<ViewAbstractModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

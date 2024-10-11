@@ -593,6 +593,8 @@ public:
 
     static std::string GetWebDebugRenderMode();
 
+    static std::string GetDebugInspectorId();
+
     static double GetSrollableVelocityScale();
     
     static double GetSrollableFriction();

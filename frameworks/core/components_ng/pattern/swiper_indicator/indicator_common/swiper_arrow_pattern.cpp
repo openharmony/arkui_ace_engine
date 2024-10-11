@@ -327,7 +327,8 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     auto displayCount = swiperPattern->GetDisplayCount();
     bool leftArrowIsHidden = (index_ == 0);
     bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount);
-    if (swiperPattern->IsSwipeByGroup()) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        swiperPattern->IsSwipeByGroup()) {
         leftArrowIsHidden = (index_ < displayCount);
         rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displayCount);
     }

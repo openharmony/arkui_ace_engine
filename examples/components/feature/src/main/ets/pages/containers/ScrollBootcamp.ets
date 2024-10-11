@@ -171,6 +171,7 @@ export struct ScrollBootcamp {
       }
       .width('100%')
     }
+    .align(Alignment.Top)
     .height('50%')
   }
 }

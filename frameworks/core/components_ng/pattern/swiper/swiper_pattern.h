@@ -859,6 +859,8 @@ private:
      */
     void CloseTheGap(float& offset);
 
+    ScrollResult HandleOutBoundary(float offset, int32_t source, float velocity);
+
     ScrollResult HandleScroll(
         float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
 
@@ -1167,6 +1169,7 @@ private:
     bool needResetCurrentIndex_ = false;
 
     bool needFireCustomAnimationEvent_ = true;
+    // Indicates whether previous frame animation is running, only used on swiper custom animation.
     bool prevFrameAnimationRunning_ = false;
     std::optional<bool> isSwipeByGroup_;
     std::set<WeakPtr<FrameNode>> groupedItems_;

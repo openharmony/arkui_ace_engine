@@ -1214,13 +1214,13 @@ private:
     void GetPercentSensitive();
     void UpdatePercentSensitive();
 
-    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList);
+    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type);
 
     int32_t GetNodeExpectedRate();
 
     void RecordExposureInner();
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
+    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
 
     const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const;
 
@@ -1241,7 +1241,7 @@ private:
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
 
-    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp);
+    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
@@ -1254,6 +1254,8 @@ private:
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
     void ResetPredictNodes();
+
+    bool IsDebugInspectorId();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

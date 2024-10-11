@@ -48,28 +48,21 @@ XComponentType ConvertToXComponentType(const std::string& type)
 }
 } // namespace
 
-std::unique_ptr<XComponentModel> XComponentModel::instance_ = nullptr;
-std::mutex XComponentModel::mutex_;
-
 XComponentModel* XComponentModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::XComponentModelNG());
+    static NG::XComponentModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::XComponentModelNG());
-            } else {
-                instance_.reset(new Framework::XComponentModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::XComponentModelNG instance;
+        return &instance;
+    } else {
+        static Framework::XComponentModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {

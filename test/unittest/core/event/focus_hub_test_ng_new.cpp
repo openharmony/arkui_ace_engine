@@ -137,8 +137,8 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0047, TestSize.Level1)
     auto eventHub1 = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     eventHub1->AttachHost(frameNode1);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(eventHub1);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    auto focusHub1 = frameNode1->GetOrCreateFocusHub();
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
@@ -1049,7 +1049,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0078, TestSize.Level1)
 /**
  * @tc.name: FocusHubTestNg079
  * @tc.desc: Test the function TryRequestFocus.
- * @tc.type: FUNC
+ * @tc.type: FUNC obsolete
  */
 HWTEST_F(FocusHubTestNg, FocusHubTestNg0079, TestSize.Level1)
 {
@@ -1067,7 +1067,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0079, TestSize.Level1)
     frameNode1->GetOrCreateFocusHub();
     auto focusHub1 = frameNode1->GetFocusHub();
     auto res = focusHub->TryRequestFocus(focusHub1, RectF(), FocusStep::LEFT);
-    ASSERT_FALSE(res);
+    ASSERT_TRUE(res);
 }
 
 /**

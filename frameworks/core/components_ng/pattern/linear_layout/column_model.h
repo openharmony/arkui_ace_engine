@@ -39,11 +39,6 @@ public:
     virtual void SetAlignItems(FlexAlign flexAlign) = 0;
     virtual void SetJustifyContent(FlexAlign flexAlign) = 0;
     virtual void SetIsReverse(bool isReverse) = 0;
-
-private:
-    static std::unique_ptr<ColumnModel> instance_;
-    static std::mutex mutex_;
 };
-
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_MODEL_H

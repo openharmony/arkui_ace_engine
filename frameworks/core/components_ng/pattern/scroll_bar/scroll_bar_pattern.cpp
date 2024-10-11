@@ -667,7 +667,7 @@ void ScrollBarPattern::InitPanRecognizer()
     panDirection.type = axis_ == Axis::HORIZONTAL ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
     const static int32_t PLATFORM_VERSION_TEN = 10;
     float distance = DEFAULT_PAN_DISTANCE.Value();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContext();
     if (context && (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN)) {
         distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
     }
@@ -761,7 +761,11 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     }
     scrollBarProxy_->SetScrollSnapTrigger_(false);
     if (!frictionController_) {
-        frictionController_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        frictionController_ = CREATE_ANIMATOR(context);
         frictionController_->AddStopListener([weakBar = AceType::WeakClaim(this)]() {
             auto scrollBar = weakBar.Upgrade();
             CHECK_NULL_VOID(scrollBar);
@@ -924,7 +928,7 @@ void ScrollBarPattern::HandleLongPress(bool smooth)
 
 void ScrollBarPattern::ScheduleCaretLongPress()
 {
-    auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+    auto context = GetContext();
     CHECK_NULL_VOID(context);
     if (!context->GetTaskExecutor()) {
         return;

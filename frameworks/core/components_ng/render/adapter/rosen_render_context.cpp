@@ -275,6 +275,9 @@ void RosenRenderContext::DetachModifiers()
     }
     auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
     if (pipeline) {
+        if (densityChangedCallbackId_ != -1) {
+            pipeline->UnregisterDensityChangedCallback(densityChangedCallbackId_);
+        }
         pipeline->RequestFrame();
     }
 }
@@ -589,10 +592,10 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 
     if (!isSynced_) {
         isSynced_ = true;
-    }
-    auto borderRadius = GetBorderRadius();
-    if (borderRadius.has_value()) {
-        OnBorderRadiusUpdate(borderRadius.value());
+        auto borderRadius = GetBorderRadius();
+        if (borderRadius.has_value()) {
+            OnBorderRadiusUpdate(borderRadius.value());
+        }
     }
 
     if (firstTransitionIn_) {
@@ -2373,6 +2376,20 @@ void RosenRenderContext::SetBorderRadius(const BorderRadiusProperty& value)
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
+    if (densityChangedCallbackId_ == -1) {
+        auto context = GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        densityChangedCallbackId_ = context->RegisterDensityChangedCallback(
+            [self = WeakClaim(this)](double density) {
+            auto renderContext = self.Upgrade();
+            CHECK_NULL_VOID(renderContext);
+            auto borderRadius = renderContext->GetBorderRadius();
+            if (borderRadius.has_value()) {
+                renderContext->SetBorderRadius(borderRadius.value());
+            }
+        });
+    }
+    CHECK_NULL_VOID(isSynced_);
     SetBorderRadius(value);
 }
 
@@ -5772,7 +5789,7 @@ void RosenRenderContext::OnTransitionOutFinish()
     CHECK_NULL_VOID(host);
     auto parent = host->GetParent();
     CHECK_NULL_VOID(parent);
-    if (!host->IsVisible() && !host->IsDisappearing()) {
+    if (!host->IsVisible() && host->IsOnMainTree()) {
         // trigger transition through visibility
         if (transitionOutCallback_) {
             transitionOutCallback_();

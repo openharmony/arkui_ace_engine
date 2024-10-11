@@ -180,6 +180,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(windowManager);
     windowMode_ = windowManager->GetWindowMode();
     isShow = isShow && hasDeco;
+    isTitleShow_ = isShow;
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -214,9 +215,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     CHECK_NULL_VOID(customTitleLayoutProperty);
     customTitleLayoutProperty->UpdateVisibility(
         (isShow && customTitleSettedShow_) ? VisibleType::VISIBLE : VisibleType::GONE);
-
-    // set container window show state to RS
-    pipelineContext->SetContainerWindow(isShow, (isFloatingWindow && isShow) ? CONTAINER_OUTER_RADIUS : 0.0_vp);
 
     auto floatingLayoutProperty = floatingTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(floatingLayoutProperty);
@@ -747,5 +745,17 @@ void ContainerModalPatternEnhance::ResetHoverTimer()
 {
     contextTimer_.Reset(nullptr);
     isMenuPending_ = false;
+}
+
+bool ContainerModalPatternEnhance::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty,
+    const DirtySwapConfig& config)
+{
+    CallButtonsRectChange();
+
+    auto considerFloatingWindow = true;
+    CallSetContainerWindow(considerFloatingWindow);
+    
+    return false;
 }
 } // namespace OHOS::Ace::NG
