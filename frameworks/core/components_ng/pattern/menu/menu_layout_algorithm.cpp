@@ -356,7 +356,7 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     if (!NearEqual(screenHeight, menuWindowRect.Height())) {
         screenHeight += bottom;
     }
-    SizeF windowGlobalSizeF(menuWindowRect.Width(), menuWindowRect.Width());
+    SizeF windowGlobalSizeF(menuWindowRect.Width(), menuWindowRect.Height());
     float topSecurity = 0.0f;
     float bottomSecurity = 0.0f;
     if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT) {
