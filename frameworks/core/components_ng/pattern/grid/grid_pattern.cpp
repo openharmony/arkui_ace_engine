@@ -1652,8 +1652,9 @@ void GridPattern::SyncLayoutBeforeSpring()
 void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const
 {
     const auto& info = gridLayoutInfo_;
+    float contentHeight = std::max(GetMainContentSize(), info.totalHeightOfItemsInView_);
     float disToBot = info.GetDistanceToBottom(
-        info.lastMainSize_ - info.contentEndPadding_, info.totalHeightOfItemsInView_, GetMainGap());
+        info.lastMainSize_ - info.contentEndPadding_, contentHeight, GetMainGap());
     if (!info.offsetEnd_) {
         offset.end = std::min(0.0f, disToBot + static_cast<float>(delta));
     } else if (Negative(delta)) {
