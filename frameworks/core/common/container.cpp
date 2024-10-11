@@ -228,7 +228,7 @@ void Container::DestroyToastSubwindow(int32_t instanceId)
     if (subwindow && subwindow->IsToastSubWindow()) {
         subwindow->DestroyWindow();
     }
-    auto systemToastWindow = SubwindowManager::GetInstance()->GetSystemToastWindow();
+    auto systemToastWindow = SubwindowManager::GetInstance()->GetSystemToastWindow(instanceId);
     if (systemToastWindow && systemToastWindow->IsToastSubWindow()) {
         systemToastWindow->DestroyWindow();
     }
