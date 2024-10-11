@@ -83,7 +83,8 @@ public:
 
     // UI content event process
     bool ProcessBackPressed() override;
-    void UpdateDialogResourceConfiguration(RefPtr<Container>& container);
+    void UpdateDialogResourceConfiguration(RefPtr<Container>& container,
+        const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
     bool ProcessPointerEventWithCallback(
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback) override;
