@@ -252,7 +252,7 @@ ArkUINativeModuleValue SpanBridge::SetFontSize(ArkUIRuntimeCallInfo *runtimeCall
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
 
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, fontSize, false) || fontSize.IsNegative()) {
+    if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, fontSize, false) || fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
     }
     GetArkUINodeModifiers()->getSpanModifier()->setSpanFontSize(nativeNode, fontSize.Value(),
@@ -441,7 +441,7 @@ ArkUINativeModuleValue SpanBridge::SetFont(ArkUIRuntimeCallInfo *runtimeCallInfo
     CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
 
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (sizeArg->IsNull() || !ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false) || fontSize.IsNegative()) {
+    if (sizeArg->IsNull() || !ArkTSUtils::ParseJsDimensionFpNG(vm, sizeArg, fontSize, false) || fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
     }
     fontInfo.fontSizeNumber = fontSize.Value();
