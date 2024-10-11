@@ -238,6 +238,7 @@ private:
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
     Dimension defaultPaddingSize_;
+    Dimension defaultRoundPaddingSize_;
     Dimension shadowWidth_;
     Dimension focusBoardSize_;
     Dimension roundFocusBoardSize_;
