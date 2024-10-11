@@ -1332,6 +1332,9 @@ std::function<std::string(const std::string&)> ParseGetFunc(ArkUIRuntimeCallInfo
         CHECK_NULL_RETURN(vm, resultString);
         panda::LocalScope scope(vm);
         auto global = JSNApi::GetGlobalObject(vm);
+        if (global.IsNull()) {
+            return resultString;
+        }
         auto getCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getCustomPropertyString__"));
         if (getCustomProperty->IsUndefined() || !getCustomProperty->IsFunction(vm)) {
             return resultString;
@@ -1346,7 +1349,7 @@ std::function<std::string(const std::string&)> ParseGetFunc(ArkUIRuntimeCallInfo
             return resultString;
         }
         auto value = callValue->ToString(vm)->ToString(vm);
-        return value.c_str();
+        return value;
     };
 }
 
