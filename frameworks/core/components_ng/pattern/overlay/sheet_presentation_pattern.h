@@ -674,6 +674,8 @@ private:
     void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ClipSheetNode();
     void CreatePropertyCallback();
+    void ComputeDetentsPos(float currentSheetHeight, float& upHeight, float& downHeight, uint32_t& detentsLowerPos,
+        uint32_t& detentsUpperPos);
     void IsCustomDetentsChanged(SheetStyle sheetStyle);
     std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetCenterStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
