@@ -35,6 +35,7 @@
 #include "core/components/text/text_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/render/paragraph.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
@@ -46,7 +47,7 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 const int32_t WORD_BREAK_TYPES_DEFAULT = 2;
-} //namespace
+} // namespace
 
 CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool withoutPercent = true)
 {
@@ -920,6 +921,62 @@ const ImageSpanOptions& JSImageAttachment::GetImageOptions() const
     return imageSpan_->GetImageSpanOptions();
 }
 
+// JSNativeCustomSpan
+void JSNativeCustomSpan::Constructor(const JSCallbackInfo& args)
+{
+    auto customSpan = Referenced::MakeRefPtr<JSNativeCustomSpan>();
+    customSpan->IncRefCount();
+    args.SetReturnValue(Referenced::RawPtr(customSpan));
+}
+
+void JSNativeCustomSpan::Destructor(JSNativeCustomSpan* customSpan)
+{
+    if (customSpan != nullptr) {
+        customSpan->DecRefCount();
+    }
+}
+
+void JSNativeCustomSpan::Invalidate(const JSCallbackInfo& info)
+{
+    for (const auto& styledStringWeakPtr : spanStringBaseSet_) {
+        auto styledString = AceType::DynamicCast<SpanString>(styledStringWeakPtr.Upgrade());
+        if (!styledString) {
+            continue;
+        }
+        styledString->MarkDirtyFrameNode();
+    }
+}
+
+void JSNativeCustomSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSNativeCustomSpan>::Declare("NativeCustomSpan");
+    JSClass<JSNativeCustomSpan>::CustomMethod("invalidate", &JSNativeCustomSpan::Invalidate);
+    JSClass<JSNativeCustomSpan>::Bind(globalObj, JSNativeCustomSpan::Constructor, JSNativeCustomSpan::Destructor);
+}
+
+void JSNativeCustomSpan::AddStyledString(const WeakPtr<SpanStringBase>& spanString)
+{
+    spanStringBaseSet_.insert(spanString);
+}
+
+void JSNativeCustomSpan::RemoveStyledString(const WeakPtr<SpanStringBase>& spanString)
+{
+    spanStringBaseSet_.erase(spanString);
+}
+
+// JSCustomSpan
+void JSCustomSpan::AddStyledString(const WeakPtr<SpanStringBase>& spanString)
+{
+    CHECK_NULL_VOID(customSpan_);
+    customSpan_->AddStyledString(spanString);
+}
+
+void JSCustomSpan::RemoveStyledString(const WeakPtr<SpanStringBase>& spanString)
+{
+    CHECK_NULL_VOID(customSpan_);
+    customSpan_->RemoveStyledString(spanString);
+}
+
 JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj, const JSCallbackInfo& args) : customSpanObj_(customSpanObj)
 {
     auto obj = JSRef<JSObject>::Cast(customSpanObj);
@@ -938,13 +995,23 @@ JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj, const JSCallbackInfo& 
         auto onDrawFunc = JSCustomSpan::ParseOnDrawFunc(jsDrawFunc, args.GetExecutionContext());
         CustomSpan::SetOnDraw(onDrawFunc);
     }
+    auto type = customSpanObj->Unwrap<AceType>();
+    CHECK_NULL_VOID(type);
+    auto* nativeCustomSpan = AceType::DynamicCast<JSNativeCustomSpan>(type);
+    customSpan_ = nativeCustomSpan;
 }
 
 JSCustomSpan::JSCustomSpan(JSRef<JSObject> customSpanObj,
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure,
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw, int32_t start, int32_t end)
     : CustomSpan(onMeasure, onDraw, start, end), customSpanObj_(customSpanObj)
-{}
+{
+    auto type = customSpanObj->Unwrap<AceType>();
+    CHECK_NULL_VOID(type);
+    auto* nativeCustomSpan = AceType::DynamicCast<JSNativeCustomSpan>(type);
+    customSpan_ = nativeCustomSpan;
+}
+
 void JSCustomSpan::SetJsCustomSpanObject(const JSRef<JSObject>& customSpanObj)
 {
     customSpanObj_ = customSpanObj;
@@ -1045,8 +1112,7 @@ std::function<void(NG::DrawingContext&, CustomSpanOptions)> JSCustomSpan::ParseO
         JSValueWrapper valueWrapper = value;
         napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
-        napi_wrap(
-            env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
+        napi_wrap(env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
         JSRef<JSObject> customSpanOptionsObj = objectTemplate->NewInstance();
         customSpanOptionsObj->SetProperty<float>("x", customSpanOptions.x);
         customSpanOptionsObj->SetProperty<float>("lineTop", customSpanOptions.lineTop);
@@ -1274,8 +1340,7 @@ bool JSParagraphStyleSpan::IsPixelMap(const JSRef<JSVal>& jsValue)
     return (!func->IsNull() && func->IsFunction());
 }
 
-void JSParagraphStyleSpan::ParseJsLeadingMargin(const JSRef<JSObject>& obj,
-    SpanParagraphStyle& paragraphStyle)
+void JSParagraphStyleSpan::ParseJsLeadingMargin(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
 {
     if (!obj->HasProperty("leadingMargin")) {
         return;
@@ -1350,8 +1415,8 @@ void JSParagraphStyleSpan::GetTextAlign(const JSCallbackInfo& info)
     if (!paragraphStyleSpan_->GetParagraphStyle().align.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
-        static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().align.value()))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().align.value()))));
     info.SetReturnValue(ret);
 }
 
@@ -1387,8 +1452,8 @@ void JSParagraphStyleSpan::GetOverflow(const JSCallbackInfo& info)
     if (!paragraphStyleSpan_->GetParagraphStyle().textOverflow.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
-        static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().textOverflow.value()))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().textOverflow.value()))));
     info.SetReturnValue(ret);
 }
 void JSParagraphStyleSpan::SetOverflow(const JSCallbackInfo& info) {}
@@ -1399,8 +1464,8 @@ void JSParagraphStyleSpan::GetWordBreak(const JSCallbackInfo& info)
     if (!paragraphStyleSpan_->GetParagraphStyle().wordBreak.has_value()) {
         return;
     }
-    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(
-        static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().wordBreak.value()))));
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().wordBreak.value()))));
     info.SetReturnValue(ret);
 }
 void JSParagraphStyleSpan::SetWordBreak(const JSCallbackInfo& info) {}
