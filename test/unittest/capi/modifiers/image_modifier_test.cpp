@@ -49,7 +49,7 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
 }
 
 /**
- * @tc.name: ObjectFit_SetFitType
+ * @tc.name: ObjectFit_SetDefaultedFitType
  * @tc.desc: Test ImageModifierTest
  * @tc.type: FUNC
  */
