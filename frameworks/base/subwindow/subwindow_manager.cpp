@@ -1051,7 +1051,7 @@ bool SubwindowManager::GetShown()
 void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId)
 {
     auto containerId = Container::CurrentId();
-    auto subwindow = parentContainerId < 0 ? GetDialogSubwindow(parentContainerId) : GetSubwindow(containerId);
+    auto subwindow = parentContainerId < 0 ? GetDialogSubwindow(parentContainerId) : GetToastSubwindow(containerId);
     if (!subwindow) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
             "Get Subwindow error, containerId = %{public}d, parentContainerId = %{public}d", containerId,

@@ -894,4 +894,9 @@ std::string SystemProperties::GetWebDebugRenderMode()
 {
     return OHOS::system::GetParameter("web.debug.renderMode", "");
 }
+
+std::string SystemProperties::GetDebugInspectorId()
+{
+    return system::GetParameter("ace.debug.inspectorId", INVALID_PARAM);
+}
 } // namespace OHOS::Ace

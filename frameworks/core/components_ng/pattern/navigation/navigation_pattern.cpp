@@ -850,8 +850,9 @@ void NavigationPattern::CheckTopNavPathChange(
     bool disableAllAnimation = navigationStack_->GetDisableAnimation();
     bool animated = navigationStack_->GetAnimatedValue();
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-        "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d",
-        disableAllAnimation, animated, isPopPage);
+        "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d, isDialog: "
+        "%{public}d",
+        disableAllAnimation, animated, isPopPage, isDialog);
     if (isDialog && !isCustomAnimation_) {
         // dialog navDestination no need transition animation.
         StartTransition(preTopNavDestination, newTopNavDestination, true, isPopPage, isShow);

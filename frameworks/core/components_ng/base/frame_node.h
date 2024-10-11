@@ -581,9 +581,15 @@ public:
         customerSet_ = true;
     }
 
-    void SetDragPreviewOptions(const DragPreviewOption& previewOption)
+    void SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions = true)
     {
-        previewOption_ = previewOption;
+        if (isResetOptions) {
+            previewOption_ = previewOption;
+        } else {
+            auto options = previewOption_.options;
+            previewOption_ = previewOption;
+            previewOption_.options = options;
+        }
         previewOption_.onApply = std::move(previewOption.onApply);
     }
 
@@ -1220,7 +1226,7 @@ private:
 
     void RecordExposureInner();
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
+    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
 
     const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const;
 
@@ -1241,7 +1247,7 @@ private:
 
     RectF ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<FrameNode>& parent) const;
 
-    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp);
+    CacheVisibleRectResult GetCacheVisibleRect(uint64_t timestamp, bool logFlag = false);
 
     CacheVisibleRectResult CalculateCacheVisibleRect(CacheVisibleRectResult& parentCacheVisibleRect,
         const RefPtr<FrameNode>& parentUi, RectF& rectToParent, VectorF scale, uint64_t timestamp);
@@ -1254,6 +1260,8 @@ private:
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
     void ResetPredictNodes();
+
+    bool IsDebugInspectorId();
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

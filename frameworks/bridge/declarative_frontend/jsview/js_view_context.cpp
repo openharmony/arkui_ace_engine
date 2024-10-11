@@ -580,11 +580,8 @@ void JSViewContext::JSAnimateToImmediately(const JSCallbackInfo& info)
 
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 {
-#ifdef USE_ORIGIN_SCOPE
-    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
-#else
+    ContainerScope scope(Container::CurrentIdSafelyWithCheck());
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
-#endif
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
         const char* funcName = immediately ? "animateToImmediately" : "animateTo";
@@ -745,7 +742,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
             keyframe.animationClosure();
             pipelineContext->FlushBuild();
             if (!pipelineContext->IsLayouting()) {
-                pipelineContext->FlushUITasks();
+                pipelineContext->FlushUITasks(true);
             } else {
                 TAG_LOGI(AceLogTag::ACE_ANIMATION, "isLayouting, maybe some layout keyframe animation not generated");
             }
@@ -753,6 +750,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
         AceTraceEnd();
     }
     pipelineContext->CloseImplicitAnimation();
+    pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
 }
 
 void JSViewContext::SetDynamicDimming(const JSCallbackInfo& info)

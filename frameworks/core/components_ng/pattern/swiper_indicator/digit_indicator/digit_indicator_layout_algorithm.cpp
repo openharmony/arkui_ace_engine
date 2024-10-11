@@ -85,7 +85,7 @@ void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
     CHECK_NULL_VOID(indicatorPattern);
     SizeF frameSize = { 0.0f, 0.0f };
-    auto success = indicatorPattern->GetDigitFrameSize(frameSize);
+    auto success = indicatorPattern->GetDigitFrameSize(layoutGeometryNode, frameSize);
     CHECK_NULL_VOID(success);
     auto height = frameSize.Height();
     auto frontCurrentOffset = OffsetF { INDICATOR_PADDING.ConvertToPx(),
