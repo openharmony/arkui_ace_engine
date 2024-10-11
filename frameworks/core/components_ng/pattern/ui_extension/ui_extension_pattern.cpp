@@ -236,7 +236,7 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 
 void UIExtensionPattern::MountPlaceholderNode(PlaceholderType type)
 {
-    if (IsShowPlaceholder()) {
+    if (!IsCanMountPlaceholder(type)) {
         return;
     }
     RefPtr<NG::FrameNode> placeholderNode = nullptr;
@@ -258,7 +258,6 @@ void UIExtensionPattern::RemovePlaceholderNode()
     if (!IsShowPlaceholder()) {
         return;
     }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->RemoveChildAtIndex(0);
@@ -424,7 +423,11 @@ PlaceholderType UIExtensionPattern::GetSizeChangeReason()
         SetFoldStatusChanged(false);
         return PlaceholderType::FOLD_TO_EXPAND;
     }
-    return static_cast<PlaceholderType>(sessionWrapper_->GetSizeChangeReason());
+    if (IsRotateStatusChanged()) {
+        SetRotateStatusChanged(false);
+        return PlaceholderType::ROTATION;
+    }
+    return PlaceholderType::UNDEFINED;
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
@@ -488,6 +491,13 @@ void UIExtensionPattern::OnWindowHide()
     }
 }
 
+void UIExtensionPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*height*/, WindowSizeChangeReason type)
+{
+    if (WindowSizeChangeReason::ROTATION == type) {
+        SetRotateStatusChanged(true);
+    }
+}
+
 void UIExtensionPattern::NotifySizeChangeReason(
     WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
@@ -548,6 +558,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
     pipeline->AddOnAreaChangeNode(host->GetId());
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
     surfacePositionCallBackId_ =
         pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
@@ -570,6 +581,7 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveOnAreaChangeNode(id);
+    pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionCallBackId_);
     pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayCallBackId_);
