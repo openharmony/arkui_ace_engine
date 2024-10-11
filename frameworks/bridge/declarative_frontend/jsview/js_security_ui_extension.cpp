@@ -219,6 +219,11 @@ RegisterType JSSecurityUIExtensionProxy::GetRegisterType(const std::string& strT
     return type;
 }
 
+bool JSSecurityUIExtensionProxy::CanTurnOn(const JSCallbackInfo& info)
+{
+    
+}
+
 void JSSecurityUIExtensionProxy::On(const JSCallbackInfo& info)
 {
     if (!info[0]->IsString() || !info[1]->IsFunction()) {
