@@ -581,9 +581,15 @@ public:
         customerSet_ = true;
     }
 
-    void SetDragPreviewOptions(const DragPreviewOption& previewOption)
+    void SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions = true)
     {
-        previewOption_ = previewOption;
+        if (isResetOptions) {
+            previewOption_ = previewOption;
+        } else {
+            auto options = previewOption_.options;
+            previewOption_ = previewOption;
+            previewOption_.options = options;
+        }
         previewOption_.onApply = std::move(previewOption.onApply);
     }
 
