@@ -96,6 +96,8 @@ public:
 private:
     void InitAllCallback();
     void UpdateSessionConfig();
+    int32_t GetWindowSceneId();
+
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;
     int32_t instanceId_;

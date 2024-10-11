@@ -298,6 +298,11 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         UIEXT_LOGW("Unable to StartUiextensionAbility while in the background.");
         return;
     }
+    if (!isModal_ && !hasMountToParent_) {
+        needReNotifyForeground_ = true;
+        UIEXT_LOGI("Should NotifyForeground after MountToParent.");
+        return;
+    }
     NotifyForeground();
 }
 
@@ -1095,6 +1100,12 @@ void UIExtensionPattern::OnAccessibilityDumpChildInfo(
 
 void UIExtensionPattern::OnMountToParentDone()
 {
+    hasMountToParent_ = true;
+    if (needReNotifyForeground_) {
+        needReNotifyForeground_ = false;
+        UIEXT_LOGI("NotifyForeground After MountToParent.");
+        NotifyForeground();
+    }
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetNodeStatus() == NodeStatus::NORMAL_NODE) {
