@@ -1178,32 +1178,24 @@ bool JSNavigationStack::RemoveDestinationIfNeeded(const JSRef<JSObject>& pathInf
         return true;
     }
     auto promise = pathInfo->GetProperty("promise");
-    if (!promise->IsObject()) {
+    if (!promise->IsFunction()) {
         return true;
     }
-    auto promiseVal = JSRef<JSObject>::Cast(promise);
+    auto promiseFunc = JSRef<JSFunc>::Cast(promise);
     if (errorCode == ERROR_CODE_NO_ERROR) {
-        JSRef<JSFunc> resolve = JSRef<JSFunc>::Cast(promiseVal->GetProperty("resolve"));
-        if (resolve->IsEmpty()) {
-            return true;
-        }
         JSRef<JSVal> params[1];
         params[0] = JSRef<JSVal>::Make(ToJSValue(errorCode));
-        resolve->Call(dataSourceObj_, 1, params);
+        promiseFunc->Call(dataSourceObj_, 1, params);
         return true;
     }
     // push destination failed, remove page in pathStack
     RemoveInvalidPage(index);
-    JSRef<JSFunc> reject = JSRef<JSFunc>::Cast(promiseVal->GetProperty("reject"));
-    if (reject->IsEmpty()) {
-        return false;
-    }
-    JSRef<JSVal> params[1];
+    const int32_t argc = 2;
+    JSRef<JSVal> params[argc];
     JSRef<JSObject> errorInfo = JSRef<JSObject>::New();
-    errorInfo->SetPropertyObject("code", JSRef<JSVal>::Make(ToJSValue(errorCode)));
-    errorInfo->SetPropertyObject("message", JSRef<JSVal>::Make(ToJSValue(ErrorToMessage(errorCode))));
-    params[0] = errorInfo;
-    reject->Call(dataSourceObj_, 1, params);
+    params[0] = JSRef<JSVal>::Make(ToJSValue(errorCode));
+    params[1] = JSRef<JSVal>::Make(ToJSValue(ErrorToMessage(errorCode)));
+    promiseFunc->Call(dataSourceObj_, argc, params);
     return false;
 }
 } // namespace OHOS::Ace::Framework
