@@ -21,9 +21,9 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr float SUIT_AGE_LEVEL_ONE = 1.75f;
-constexpr float SUIT_AGE_LEVEL_TWO = 2.0f;
-constexpr float SUIT_AGE_LEVEL_THRER = 3.2f;
+constexpr float LEVEL_ONE = 1.75f;
+constexpr float LEVEL_TWO = 2.0f;
+constexpr float LEVEL_THREE = 3.2f;
 constexpr Dimension PADDING = 4.0_vp;
 constexpr float HEIGHT_HALF_RATIO = 0.5f;
 constexpr float HEIGHT_DOUBLE_RATIO = 2.0f;
@@ -51,8 +51,13 @@ void StepperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetFontScale() == SUIT_AGE_LEVEL_ONE || pipeline->GetFontScale() == SUIT_AGE_LEVEL_TWO ||
-        pipeline->GetFontScale() == SUIT_AGE_LEVEL_THRER) {
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto stepperPattern = hostNode->GetPattern<StepperPattern>();
+    CHECK_NULL_VOID(stepperPattern);
+    isLoadingButton_ = stepperPattern->GetIsLoadingButton();
+    if ((pipeline->GetFontScale() == LEVEL_ONE || pipeline->GetFontScale() == LEVEL_TWO ||
+        pipeline->GetFontScale() == LEVEL_THREE) && !isLoadingButton_) {
         MeasureLeftButton(layoutWrapper, childLayoutConstraint);
         MeasureRightButton(layoutWrapper, childLayoutConstraint);
         auto rightButtonHeight = CaluateButtonHeight(layoutWrapper, true);
@@ -113,8 +118,8 @@ void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, Lay
     auto index = hostNode->GetChildIndexById(hostNode->GetLeftButtonId());
     auto leftButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     buttonLayoutConstraint.minSize = { 0, buttonHeight };
-    if (pipeline->GetFontScale() == SUIT_AGE_LEVEL_ONE || pipeline->GetFontScale() == SUIT_AGE_LEVEL_TWO ||
-        pipeline->GetFontScale() == SUIT_AGE_LEVEL_THRER) {
+    if (pipeline->GetFontScale() == LEVEL_ONE || pipeline->GetFontScale() == LEVEL_TWO ||
+        pipeline->GetFontScale() == LEVEL_THREE) {
         auto stepperHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
         buttonLayoutConstraint.maxSize = { buttonWidth, stepperHeight };
         auto ButtonRow = leftButtonWrapper->GetChildByIndex(0);
@@ -123,7 +128,7 @@ void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, Lay
         CHECK_NULL_VOID(ButtonText);
         auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(ButtonText->GetLayoutProperty());
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateMaxFontScale(SUIT_AGE_LEVEL_TWO);
+        textLayoutProperty->UpdateMaxFontScale(LEVEL_TWO);
         MeasureText(leftButtonWrapper, buttonLayoutConstraint, true);
         float TextHeight = ButtonText->GetGeometryNode()->GetFrameSize().Height();
         buttonLayoutConstraint.selfIdealSize =
@@ -154,8 +159,8 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
     auto index = hostNode->GetChildIndexById(hostNode->GetRightButtonId());
     auto rightButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     buttonLayoutConstraint.minSize = { 0, buttonHeight };
-    if (pipeline->GetFontScale() == SUIT_AGE_LEVEL_ONE || pipeline->GetFontScale() == SUIT_AGE_LEVEL_TWO ||
-        pipeline->GetFontScale() == SUIT_AGE_LEVEL_THRER) {
+    if ((pipeline->GetFontScale() == LEVEL_ONE || pipeline->GetFontScale() == LEVEL_TWO ||
+        pipeline->GetFontScale() == LEVEL_THREE) && !isLoadingButton_) {
         auto stepperHeight = hostNode->GetGeometryNode()->GetFrameSize().Height();
         buttonLayoutConstraint.maxSize = { buttonWidth, stepperHeight };
         auto ButtonRow = rightButtonWrapper->GetChildByIndex(0);
@@ -164,7 +169,7 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
         if (!ButtonText) {
             auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(ButtonRow->GetLayoutProperty());
             CHECK_NULL_VOID(textLayoutProperty);
-            textLayoutProperty->UpdateMaxFontScale(SUIT_AGE_LEVEL_TWO);
+            textLayoutProperty->UpdateMaxFontScale(LEVEL_TWO);
             PaddingProperty textPadding;
             textPadding.top = CalcLength(PADDING.ConvertToPx(), DimensionUnit::PX);
             textPadding.bottom = CalcLength(PADDING.ConvertToPx(), DimensionUnit::PX);
@@ -173,7 +178,7 @@ void StepperLayoutAlgorithm::MeasureRightButton(LayoutWrapper* layoutWrapper, La
         } else {
             auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(ButtonText->GetLayoutProperty());
             CHECK_NULL_VOID(textLayoutProperty);
-            textLayoutProperty->UpdateMaxFontScale(SUIT_AGE_LEVEL_TWO);
+            textLayoutProperty->UpdateMaxFontScale(LEVEL_TWO);
             MeasureText(rightButtonWrapper, buttonLayoutConstraint, false);
             float TextHeight = ButtonText->GetGeometryNode()->GetFrameSize().Height();
             buttonLayoutConstraint.selfIdealSize =
@@ -226,8 +231,8 @@ void StepperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     LayoutSwiper(layoutWrapper);
-    if (pipeline->GetFontScale() == SUIT_AGE_LEVEL_ONE || pipeline->GetFontScale() == SUIT_AGE_LEVEL_TWO ||
-        pipeline->GetFontScale() == SUIT_AGE_LEVEL_THRER) {
+    if (pipeline->GetFontScale() == LEVEL_ONE || pipeline->GetFontScale() == LEVEL_TWO ||
+        pipeline->GetFontScale() == LEVEL_THREE) {
         auto layoutProperty = layoutWrapper->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         auto constraint = layoutProperty->GetLayoutConstraint();
