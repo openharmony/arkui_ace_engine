@@ -991,6 +991,8 @@ void RichEditorPattern::OnAttachToFrameNode()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     frameId_ = frameNode->GetId();
+    frameNode->GetRenderContext()->UpdateClipEdge(true);
+    frameNode->GetRenderContext()->SetClipToFrame(true);
     StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
 }
 
