@@ -1348,7 +1348,7 @@ void SelectOverlayNode::CreateToolBar()
     selectMenuInner_ =
         FrameNode::GetOrCreateFrameNode("SelectMenuInner", ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "CreateSelectOverlay default, id:%{public}d", selectMenu_->GetId());        
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "CreateSelectOverlay default, id:%{public}d", selectMenu_->GetId());
     SelectMenuAndInnerInitProperty();
     // Menu initial state.
     InitSelectMenuStatus(pattern->GetMode(), info);
