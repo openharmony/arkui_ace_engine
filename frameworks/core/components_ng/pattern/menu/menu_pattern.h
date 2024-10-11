@@ -419,6 +419,16 @@ public:
         return targetSize_;
     }
 
+    void SetTargetOffset(const OffsetF& offset)
+    {
+        targetOffset_ = offset;
+    }
+
+    OffsetF GetTargetOffset() const
+    {
+        return targetOffset_;
+    }
+
     void SetIsHeightModifiedBySelect(bool isModified)
     {
         isHeightModifiedBySelect_ = isModified;
@@ -613,6 +623,7 @@ private:
     bool isHeightModifiedBySelect_ = false;
     bool hasLaid_ = false;
     bool hasOptionWidth_ = false;
+    OffsetF targetOffset_;
     SizeF targetSize_;
     bool expandDisplay_ = false;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
