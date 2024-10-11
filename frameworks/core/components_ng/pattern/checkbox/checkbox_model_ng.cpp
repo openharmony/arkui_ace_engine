@@ -83,7 +83,6 @@ void CheckBoxModelNG::SetCheckboxStyle(CheckBoxStyle checkboxStyle)
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle);
 }
 
-
 void CheckBoxModelNG::SetCheckMarkColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColor, color);

@@ -31,11 +31,11 @@ namespace  {
     const auto ATTRIBUTE_SELECT_NAME = "select";
     const auto ATTRIBUTE_SELECT_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
-    const auto ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE = "#FF000000";
     const auto ATTRIBUTE_SHAPE_NAME = "shape";
-    const auto ATTRIBUTE_SHAPE_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_SHAPE_DEFAULT_VALUE = "CheckBoxShape.CIRCLE";
     const auto ATTRIBUTE_UNSELECTED_COLOR_NAME = "unselectedColor";
-    const auto ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE = "#FF000000";
     const auto ATTRIBUTE_MARK_STROKE_COLOR_NAME = "strokeColor";
     const auto ATTRIBUTE_MARK_STROKE_COLOR_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_MARK_SIZE_NAME = "size";
@@ -194,6 +194,8 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestDefaultValues, TestSize.Level
 
 // Valid values for attribute 'selectedColor' of method 'selectedColor'
 static std::vector<std::tuple<std::string, ResourceColor, std::string>> selectedColorSelectedColorValidValues = {
+    { "blue", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { "red", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
 };
 
 /*
@@ -211,6 +213,7 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestValidValues, TestSize.Level1)
 
     // Initial setup
     initValueSelectedColor = std::get<1>(selectedColorSelectedColorValidValues[0]);
+    modifier_->setSelect(node_, Converter::ArkValue<Ark_Boolean>(true));
 
     // Verifying attribute's  values
     inputValueSelectedColor = initValueSelectedColor;
@@ -420,154 +423,4 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> markSizeVal
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> markStrokeWidthValidValues = {
 };
 
-/*
- * @tc.name: setMarkTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-/*HWTEST_F(CheckboxModifierTest, setMarkTestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::unique_ptr<JsonValue> resultMark;
-    std::string resultStr;
-    std::string expectedStr;
-    Ark_MarkStyle inputValueMark;
-    Ark_MarkStyle initValueMark;
-
-    // Initial setup
-    initValueMark.strokeColor = std::get<1>(markStrokeColorValidValues[0]);
-    initValueMark.size = std::get<1>(markSizeValidValues[0]);
-    initValueMark.strokeWidth = std::get<1>(markStrokeWidthValidValues[0]);
-
-    // Verifying attribute's 'strokeColor'  values
-    inputValueMark = initValueMark;
-    for (auto&& value: markStrokeColorValidValues) {
-        inputValueMark.strokeColor = std::get<1>(value);
-        modifier_->setMark(node_, &inputValueMark);
-        jsonValue = GetJsonValue(node_);
-        resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
-        resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
-        expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-
-    // Verifying attribute's 'size'  values
-    inputValueMark = initValueMark;
-    for (auto&& value: markSizeValidValues) {
-        inputValueMark.size = std::get<1>(value);
-        modifier_->setMark(node_, &inputValueMark);
-        jsonValue = GetJsonValue(node_);
-        resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
-        resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
-        expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-
-    // Verifying attribute's 'strokeWidth'  values
-    inputValueMark = initValueMark;
-    for (auto&& value: markStrokeWidthValidValues) {
-        inputValueMark.strokeWidth = std::get<1>(value);
-        modifier_->setMark(node_, &inputValueMark);
-        jsonValue = GetJsonValue(node_);
-        resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
-        resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
-        expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-}*/
-
-// Invalid values for attribute 'strokeColor' of method 'mark'
-/*static std::vector<std::tuple<std::string, Opt_ResourceColor>> markStrokeColorInvalidValues = {
-    {"Ark_Empty()", Converter::ArkUnion<Opt_ResourceColor>(Ark_Empty())},
-    {"nullptr", Converter::ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr)},
-};
-
-// Invalid values for attribute 'size' of method 'mark'
-static std::vector<std::tuple<std::string, Opt_Length>> markSizeInvalidValues = {
-    {"Ark_Empty()", Converter::ArkValue<Opt_Length>(Ark_Empty())},
-};
-
-// Invalid values for attribute 'strokeWidth' of method 'mark'
-static std::vector<std::tuple<std::string, Opt_Length>> markStrokeWidthInvalidValues = {
-    {"Ark_Empty()", Converter::ArkValue<Opt_Length>(Ark_Empty())},
-};*/
-
-/*
- * @tc.name: setMarkTestInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-/*HWTEST_F(CheckboxModifierTest, setMarkTestInvalidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::unique_ptr<JsonValue> resultMark;
-    std::string resultStr;
-    std::string expectedStr;
-    Ark_MarkStyle inputValueMark;
-    Ark_MarkStyle initValueMark;
-
-    // Initial setup
-    initValueMark.strokeColor = std::get<1>(markStrokeColorValidValues[0]);
-    initValueMark.size = std::get<1>(markSizeValidValues[0]);
-    initValueMark.strokeWidth = std::get<1>(markStrokeWidthValidValues[0]);
-
-    // Verifying attribute's 'strokeColor'  values
-    for (auto&& value: markStrokeColorInvalidValues) {
-        inputValueMark = initValueMark;
-        modifier_->setMark(node_, &inputValueMark);
-        inputValueMark.strokeColor = std::get<1>(value);
-        modifier_->setMark(node_, &inputValueMark);
-        jsonValue = GetJsonValue(node_);
-        resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
-        resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
-        expectedStr = ATTRIBUTE_MARK_STROKE_COLOR_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-
-    // Verifying attribute's 'size'  values
-    for (auto&& value: markSizeInvalidValues) {
-        inputValueMark = initValueMark;
-        modifier_->setMark(node_, &inputValueMark);
-        inputValueMark.size = std::get<1>(value);
-        modifier_->setMark(node_, &inputValueMark);
-        jsonValue = GetJsonValue(node_);
-        resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
-        resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
-        expectedStr = ATTRIBUTE_MARK_SIZE_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-
-    // Verifying attribute's 'strokeWidth'  values
-    for (auto&& value: markStrokeWidthInvalidValues) {
-        inputValueMark = initValueMark;
-        modifier_->setMark(node_, &inputValueMark);
-        inputValueMark.strokeWidth = std::get<1>(value);
-        modifier_->setMark(node_, &inputValueMark);
-        jsonValue = GetJsonValue(node_);
-        resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
-        resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
-        expectedStr = ATTRIBUTE_MARK_STROKE_WIDTH_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-}*/
-
-/*
- * @tc.name: DISABLED_setOnChangeTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CheckboxModifierTest, DISABLED_setOnChangeTest, TestSize.Level1)
-{
-    // TODO: Implement callback tests!
-}
-
-/*
- * @tc.name: DISABLED_setContentModifierTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CheckboxModifierTest, DISABLED_setContentModifierTest, TestSize.Level1)
-{
-    // TODO: CustomObjects is not implemented yet!
-}
 } // namespace OHOS::Ace::NG
