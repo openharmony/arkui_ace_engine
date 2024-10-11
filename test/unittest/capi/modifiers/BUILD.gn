@@ -52,6 +52,7 @@ ace_unittest("capi_all_modifiers_test") {
     "rect_modifier_test.cpp",
     "relative_container_modifier_test.cpp",
     "row_modifier_test.cpp",
+    "save_button_modifier_test.cpp",
     "scroll_modifier_test.cpp",
     "search_modifier_resources_test.cpp",
     "search_modifier_test.cpp",

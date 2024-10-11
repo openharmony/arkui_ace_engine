@@ -13,21 +13,82 @@
  * limitations under the License.
  */
 
-#include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
+#include "core/components/common/layout/constants.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "arkoala_api_generated.h"
 
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<SaveButtonIconStyle>& dst, const Ark_SaveIconStyle& src)
+{
+    switch (src) {
+        case ARK_SAVE_ICON_STYLE_FULL_FILLED: dst = SaveButtonIconStyle::ICON_FULL_FILLED; break;
+        case ARK_SAVE_ICON_STYLE_LINES: dst = SaveButtonIconStyle::ICON_LINE; break;
+        case ARK_SAVE_ICON_STYLE_PICTURE: dst = SaveButtonIconStyle::ICON_PICTURE; break;
+        default: LOGE("Unexpected enum value in Ark_SaveIconStyle: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<SaveButtonSaveDescription>& dst, const Ark_SaveDescription& src)
+{
+    switch (src) {
+        case ARK_SAVE_DESCRIPTION_DOWNLOAD: dst = SaveButtonSaveDescription::DOWNLOAD; break;
+        case ARK_SAVE_DESCRIPTION_DOWNLOAD_FILE: dst = SaveButtonSaveDescription::DOWNLOAD_FILE; break;
+        case ARK_SAVE_DESCRIPTION_SAVE: dst = SaveButtonSaveDescription::SAVE; break;
+        case ARK_SAVE_DESCRIPTION_SAVE_IMAGE: dst = SaveButtonSaveDescription::SAVE_IMAGE; break;
+        case ARK_SAVE_DESCRIPTION_SAVE_FILE: dst = SaveButtonSaveDescription::SAVE_FILE; break;
+        case ARK_SAVE_DESCRIPTION_DOWNLOAD_AND_SHARE: dst = SaveButtonSaveDescription::DOWNLOAD_AND_SHARE; break;
+        case ARK_SAVE_DESCRIPTION_RECEIVE: dst = SaveButtonSaveDescription::RECEIVE; break;
+        case ARK_SAVE_DESCRIPTION_CONTINUE_TO_RECEIVE: dst = SaveButtonSaveDescription::CONTINUE_TO_RECEIVE; break;
+        case ARK_SAVE_DESCRIPTION_SAVE_TO_GALLERY: dst = SaveButtonSaveDescription::SAVE_TO_GALLERY; break;
+        case ARK_SAVE_DESCRIPTION_EXPORT_TO_GALLERY: dst = SaveButtonSaveDescription::EXPORT_TO_GALLERY; break;
+        case ARK_SAVE_DESCRIPTION_QUICK_SAVE_TO_GALLERY: dst = SaveButtonSaveDescription::QUICK_SAVE_TO_GALLERY; break;
+        case ARK_SAVE_DESCRIPTION_RESAVE_TO_GALLERY: dst = SaveButtonSaveDescription::RESAVE_TO_GALLERY; break;
+        default: LOGE("Unexpected enum value in Ark_SaveDescription: %{public}d", src);
+    }
+}
+template<>
+SecurityComponentElementStyle Convert(const Ark_SaveButtonOptions& src)
+{
+    SecurityComponentElementStyle style;
+
+    auto optIcon = OptConvert<SaveButtonIconStyle>(src.icon);
+    auto icon = optIcon ? optIcon.value() : SaveButtonIconStyle::ICON_NULL;
+    style.icon = static_cast<int32_t>(icon);
+
+    auto optText = OptConvert<SaveButtonSaveDescription>(src.text);
+    auto text = optText ? optText.value() : SaveButtonSaveDescription::TEXT_NULL;
+    style.text = static_cast<int32_t>(text);
+
+    auto optButtonType = OptConvert<ButtonType>(src.buttonType);
+    auto buttonType = optButtonType ? optButtonType.value() : ButtonType::CAPSULE;
+    style.backgroundType = static_cast<int32_t>(buttonType);
+    return style;
+}
+} // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SaveButtonInterfaceModifier {
 void SetSaveButtonOptions0Impl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SaveButtonModelNG::InitSaveButton(frameNode, SecurityComponentElementStyle(), false);
+    SecurityComponentElementStyle style;
+    style.text = static_cast<int32_t>(SaveButtonSaveDescription::DOWNLOAD);
+    style.icon = static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED);
+    style.backgroundType = static_cast<int32_t>(ButtonType::CAPSULE);
+    SaveButtonModelNG::InitSaveButton(frameNode, style, false);
 }
 void SetSaveButtonOptions1Impl(Ark_NativePointer node,
                                const Ark_SaveButtonOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    auto style = Converter::Convert<SecurityComponentElementStyle>(*options);
+    SaveButtonModelNG::InitSaveButton(frameNode, style, false);
 }
 } // SaveButtonInterfaceModifier
 namespace SaveButtonAttributeModifier {
