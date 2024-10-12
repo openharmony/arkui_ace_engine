@@ -119,6 +119,8 @@ public:
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
     int32_t GetRecoveredDestinationMode(int32_t index) override;
+    void SetRecoveryFromReplaceDestination(int32_t index, bool value) override;
+    bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex) override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;

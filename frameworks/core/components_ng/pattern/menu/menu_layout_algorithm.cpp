@@ -323,7 +323,6 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         InitializePadding(layoutWrapper);
     }
     InitializeParam(menuPattern);
-    InitWrapperRect(props, menuPattern);
     dumpInfo_.originPlacement =
         PlacementUtils::ConvertPlacementToString(props->GetMenuPlacement().value_or(Placement::NONE));
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
@@ -352,10 +351,6 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     auto menuWindowRect = GetMenuWindowRectInfo(menuPattern);
     float windowsOffsetX = static_cast<float>(menuWindowRect.GetOffset().GetX());
     float windowsOffsetY = static_cast<float>(menuWindowRect.GetOffset().GetY());
-    float screenHeight = wrapperSize_.Height() + wrapperRect_.Top();
-    if (!NearEqual(screenHeight, menuWindowRect.Height())) {
-        screenHeight += bottom;
-    }
     SizeF windowGlobalSizeF(menuWindowRect.Width(), menuWindowRect.Height());
     float topSecurity = 0.0f;
     float bottomSecurity = 0.0f;
@@ -388,6 +383,7 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     param_.bottomSecurity = bottomSecurity;
     param_.previewMenuGap = targetSecurity_;
 
+    InitWrapperRect(props, menuPattern);
     InitializeLayoutRegionMargin(menuPattern);
 }
 
@@ -444,8 +440,7 @@ void MenuLayoutAlgorithm::InitializeLayoutRegionMargin(const RefPtr<MenuPattern>
 void MenuLayoutAlgorithm::InitWrapperRect(
     const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
 {
-    wrapperRect_ = param_.menuWindowRect;
-    TAG_LOGI(AceLogTag::ACE_MENU, "wrapperRect initialized to : %{public}s", wrapperRect_.ToString().c_str());
+    wrapperRect_.SetRect(0, 0, param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
@@ -473,7 +468,6 @@ void MenuLayoutAlgorithm::InitWrapperRect(
             wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
         }
     }
-    TAG_LOGI(AceLogTag::ACE_MENU, "wrapperRect update to : %{public}s", wrapperRect_.ToString().c_str());
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
 }
@@ -2203,32 +2197,55 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
 
+bool MenuLayoutAlgorithm::SkipUpdateTargetNodeSize(
+    const RefPtr<FrameNode>& targetNode, const RefPtr<MenuPattern>& menuPattern)
+{
+    CHECK_NULL_RETURN(menuPattern, false);
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, false);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+
+    auto isMenuHide = menuWrapperPattern->IsHide();
+    auto isTargetEmpty = !targetNode && menuPattern->GetTargetSize().IsPositive();
+    if (isMenuHide || isTargetEmpty) {
+        TAG_LOGI(AceLogTag::ACE_MENU,
+            "targetNode empty: %{public}d, menu hidden: %{public}d, update targetNode to last size and position",
+            isMenuHide, isTargetEmpty);
+        targetSize_ = menuPattern->GetTargetSize();
+        targetOffset_ = menuPattern->GetTargetOffset();
+        return true;
+    }
+    return false;
+}
+
 void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     const LayoutWrapper* layoutWrapper, bool isContextMenu, const RefPtr<MenuPattern>& menuPattern)
 {
     CHECK_NULL_VOID(layoutWrapper && menuPattern);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
-    CHECK_NULL_VOID(targetNode);
-    dumpInfo_.targetNode = targetNode->GetTag();
-    auto geometryNode = targetNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(props);
-    bool expandDisplay = menuPattern->GetMenuExpandDisplay();
-    if (props->GetIsRectInTargetValue(false)) {
-        targetSize_ = props->GetTargetSizeValue(SizeF());
-        targetOffset_ = props->GetMenuOffsetValue(OffsetF());
-    } else {
-        targetSize_ = targetNode->GetPaintRectWithTransform().GetSize();
-        targetOffset_ = targetNode->GetPaintRectOffset();
+    if (!SkipUpdateTargetNodeSize(targetNode, menuPattern)) {
+        CHECK_NULL_VOID(targetNode);
+        dumpInfo_.targetNode = targetNode->GetTag();
+        auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(props);
+        if (props->GetIsRectInTargetValue(false)) {
+            targetSize_ = props->GetTargetSizeValue(SizeF());
+            targetOffset_ = props->GetMenuOffsetValue(OffsetF());
+        } else {
+            targetSize_ = targetNode->GetPaintRectWithTransform().GetSize();
+            targetOffset_ = targetNode->GetPaintRectOffset();
+        }
     }
     dumpInfo_.targetSize = targetSize_;
     dumpInfo_.targetOffset = targetOffset_;
     menuPattern->SetTargetSize(targetSize_);
+    menuPattern->SetTargetOffset(targetOffset_);
     TAG_LOGI(AceLogTag::ACE_MENU, "targetNode: %{public}s, targetSize: %{public}s, targetOffset: %{public}s",
-        targetNode->GetTag().c_str(), targetSize_.ToString().c_str(), targetOffset_.ToString().c_str());
+        targetTag_.c_str(), targetSize_.ToString().c_str(), targetOffset_.ToString().c_str());
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
+    bool expandDisplay = menuPattern->GetMenuExpandDisplay();
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         expandDisplay = true;
     }
