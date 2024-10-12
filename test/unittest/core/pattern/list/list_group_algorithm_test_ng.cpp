@@ -834,6 +834,8 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount001, TestSize.Level1)
     EXPECT_EQ(childrenCount, 5);
     auto cachedItem = groupNode->GetChildByIndex(4 + 1)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(groupNode, 4 + 1), ITEM_HEIGHT * 4 + GROUP_HEADER_LEN);
 
     /**
      * @tc.steps: step3. Flush Idle Task
@@ -845,8 +847,12 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount001, TestSize.Level1)
     EXPECT_EQ(childrenCount, 7);
     cachedItem = groupNode->GetChildByIndex(1 + 1)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -300.0f);
+    EXPECT_EQ(GetChildY(groupNode, 1 + 1), ITEM_HEIGHT * 1 + GROUP_HEADER_LEN);
     cachedItem = groupNode->GetChildByIndex(7 + 1)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -300.0f);
+    EXPECT_EQ(GetChildY(groupNode, 7 + 1), ITEM_HEIGHT * 7 + GROUP_HEADER_LEN);
 }
 
 /**
@@ -879,7 +885,7 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Flush Idle Task
-     * @tc.expected: ListItem 10,11 is cached
+     * @tc.expected: ListItem 8, 9 is cached
      */
     auto listPattern = frameNode_->GetPattern<ListPattern>();
     FlushIdleTask(listPattern);
@@ -887,8 +893,12 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(childrenCount, 10);
     auto item8 = groupNode->GetChildByIndex(8 + 1)->GetHostNode();
     EXPECT_EQ(item8->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(GetChildY(groupNode, 8 + 1), ITEM_HEIGHT * (8 / 2) + GROUP_HEADER_LEN);
     auto item9 = groupNode->GetChildByIndex(9 + 1)->GetHostNode();
     EXPECT_EQ(item9->IsActive(), false);
+    EXPECT_EQ(GetChildX(groupNode, 9 + 1), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(groupNode, 9 + 1), ITEM_HEIGHT * (9 / 2) + GROUP_HEADER_LEN);
 
     /**
      * @tc.steps: step3. Flush Idle Task
@@ -898,14 +908,21 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount002, TestSize.Level1)
     FlushIdleTask(listPattern);
     childrenCount = repeat->GetChildren().size();
     EXPECT_EQ(childrenCount, 14);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -300.0f);
     auto item2 = groupNode->GetChildByIndex(2 + 1)->GetHostNode();
     EXPECT_EQ(item2->IsActive(), false);
+    EXPECT_EQ(GetChildY(groupNode, 2 + 1), ITEM_HEIGHT * (2 / 2) + GROUP_HEADER_LEN);
     auto item3 = groupNode->GetChildByIndex(3 + 1)->GetHostNode();
     EXPECT_EQ(item3->IsActive(), false);
+    EXPECT_EQ(GetChildX(groupNode, 3 + 1), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(groupNode, 3 + 1), ITEM_HEIGHT * (3 / 2) + GROUP_HEADER_LEN);
     auto item14 = groupNode->GetChildByIndex(14 + 1)->GetHostNode();
     EXPECT_EQ(item14->IsActive(), false);
+    EXPECT_EQ(GetChildY(groupNode, 14 + 1), ITEM_HEIGHT * (14 / 2) + GROUP_HEADER_LEN);
     auto item15 = groupNode->GetChildByIndex(15 + 1)->GetHostNode();
     EXPECT_EQ(item15->IsActive(), false);
+    EXPECT_EQ(GetChildX(groupNode, 15 + 1), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(groupNode, 15 + 1), ITEM_HEIGHT * (15 / 2) + GROUP_HEADER_LEN);
 }
 
 /**
