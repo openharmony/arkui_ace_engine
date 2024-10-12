@@ -975,6 +975,7 @@ protected:
     }
 
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
+    PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
 
 private:
     bool HandleUrlSpanClickEvent(const GestureEvent& info);

@@ -912,8 +912,7 @@ bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& 
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(host, false);
-    PointF textOffset = { static_cast<float>(localLocation.GetX()) - textContentRect.GetX(),
-        static_cast<float>(localLocation.GetY()) - textContentRect.GetY() };
+    PointF textOffset = GetTextOffset(localLocation, textContentRect);
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
@@ -933,6 +932,13 @@ bool TextPattern::CheckClickedOnSpanOrText(RectF textContentRect, const Offset& 
         return true;
     }
     return false;
+}
+
+PointF TextPattern::GetTextOffset(const Offset &localLocation, const RectF &contentRect)
+{
+    PointF textOffset = {static_cast<float>(localLocation.GetX()) - contentRect.GetX(),
+                         static_cast<float>(localLocation.GetY()) - contentRect.GetY()};
+    return textOffset;
 }
 
 bool TextPattern::CalculateClickedSpanPosition(const PointF& textOffset)
