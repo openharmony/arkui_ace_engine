@@ -4480,4 +4480,11 @@ void TextPattern::DoTextSelectionTouchCancel()
     magnifierController_->RemoveMagnifierFrameNode();
     ResetSelection();
 }
+
+void TextPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
+{
+    if (afterLayoutCallback_.has_value()) {
+        (*afterLayoutCallback_)();
+    }
+}
 } // namespace OHOS::Ace::NG
