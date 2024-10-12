@@ -4876,8 +4876,12 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         currentIndexOffset_ = 0.0f;
         auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline) {
-            pipeline->FlushUITasks();
-            pipeline->FlushMessages();
+            if (pipeline->IsLayouting()) {
+                pipeline->FlushUITaskWithSingleDirtyNode(host);
+            } else {
+                pipeline->FlushUITasks();
+                pipeline->FlushMessages();
+            }
         }
         FireChangeEvent(tempOldIndex, GetLoopIndex(currentIndex_));
         // lazyBuild feature.
