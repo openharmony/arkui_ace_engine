@@ -35,6 +35,8 @@
 #include "core/components/indexer/indexer_theme.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components/list/list_theme.h"
+#include "core/components/list/arc_list_item_theme.h"
+#include "core/components/list/arc_list_theme.h"
 #include "core/components/marquee/marquee_theme.h"
 #include "core/components/navigation_bar/navigation_bar_theme.h"
 #include "core/components/picker/picker_theme.h"
@@ -105,6 +107,8 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { RefreshTheme::TypeId(), &ThemeBuildFunc<RefreshTheme::Builder> },
     { ListTheme::TypeId(), &ThemeBuildFunc<ListTheme::Builder> },
     { ListItemTheme::TypeId(), &ThemeBuildFunc<ListItemTheme::Builder> },
+    { ArcListTheme::TypeId(), &ThemeBuildFunc<ArcListTheme::Builder> },
+    { ArcListItemTheme::TypeId(), &ThemeBuildFunc<ArcListItemTheme::Builder> },
     { ToastTheme::TypeId(), &ThemeBuildFunc<ToastTheme::Builder> },
     { TextTheme::TypeId(), &ThemeBuildFunc<TextTheme::Builder> },
     { RatingTheme::TypeId(), &ThemeBuildFunc<RatingTheme::Builder> },
