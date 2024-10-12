@@ -96,12 +96,9 @@ public:
         weakLunarSwitchText_ = lunarSwitchTextNode;
     }
 
-    void OnFontConfigurationUpdate() override
-    {
-        if (closeDialogEvent_) {
-            closeDialogEvent_();
-        }
-    }
+    void OnFontConfigurationUpdate() override;
+
+    void OnFontScaleConfigurationUpdate() override;
 
     void OnLanguageConfigurationUpdate() override;
 

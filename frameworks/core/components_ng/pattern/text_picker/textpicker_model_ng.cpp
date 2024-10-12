@@ -401,8 +401,7 @@ PickerTextStyle TextPickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetDisappearOptionStyle();
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextPickerLayoutProperty, DisappearFontSize, pickerTextStyle.fontSize, frameNode,
-        ConvertFontScaleValue(style.GetFontSize()));
+        TextPickerLayoutProperty, DisappearFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextPickerLayoutProperty, DisappearColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -424,8 +423,7 @@ PickerTextStyle TextPickerModelNG::getNormalTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(false, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextPickerLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode,
-        ConvertFontScaleValue(style.GetFontSize()));
+        TextPickerLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextPickerLayoutProperty, Color, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -447,8 +445,7 @@ PickerTextStyle TextPickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(true, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        TextPickerLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode,
-        ConvertFontScaleValue(style.GetFontSize()));
+        TextPickerLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextPickerLayoutProperty, SelectedColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(

@@ -73,17 +73,18 @@ private:
 
     static RefPtr<FrameNode> CreateNextPrevButtonNode(std::function<void()>& timePickerSwitchEvent,
         const RefPtr<FrameNode>& timeNode, const std::vector<ButtonInfo>& buttonInfos);
-    static RefPtr<FrameNode> CreateButtonNodeForAging(const RefPtr<FrameNode>& frameNode,
-        const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos,
-        std::map<std::string, NG::DialogEvent> dialogEvent,
+    static RefPtr<FrameNode> CreateButtonNodeForAging(const RefPtr<FrameNode>& buttonTitleNode,
+        const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& timePickerNode,
+        const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static bool NeedAdaptForAging();
-    static std::function<void()> CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& timePicker,
-        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode,
-        const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode);
-    static void SwitchTimePickerPage(const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& buttonCancelNode,
+    static std::function<void()> CreateAndSetTimePickerSwitchEvent(const RefPtr<FrameNode>& buttonTitleNode,
+        const RefPtr<FrameNode>& timePicker, const RefPtr<FrameNode>& buttonCancelNode,
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<FrameNode>& cancelNextDividerNode,
         const RefPtr<FrameNode>& nextConfirmDividerNode);
+    static void SwitchTimePickerPage(const RefPtr<FrameNode>& buttonTitleNode, const RefPtr<FrameNode>& timePickerNode,
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<FrameNode>& buttonConfirmNode,
+        const RefPtr<FrameNode>& cancelNextDividerNode, const RefPtr<FrameNode>& nextConfirmDividerNode);
     static bool GetIsUserSetTextProperties(const PickerTextProperties& properties);
     static std::function<void(const GestureEvent&)> UpdateTimePickerSwitchEvent(
         const RefPtr<FrameNode>& timeNode, const RefPtr<FrameNode>& textNode, const RefPtr<DialogTheme>& dialogTheme,

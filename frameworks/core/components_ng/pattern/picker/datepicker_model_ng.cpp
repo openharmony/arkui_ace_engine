@@ -408,8 +408,7 @@ PickerTextStyle DatePickerModelNG::getNormalTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(false, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        DataPickerRowLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode,
-        ConvertFontScaleValue(style.GetFontSize()));
+        DataPickerRowLayoutProperty, FontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         DataPickerRowLayoutProperty, Color, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
@@ -452,8 +451,7 @@ PickerTextStyle DatePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(theme, pickerTextStyle);
     auto style = theme->GetOptionStyle(true, false);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
-        DataPickerRowLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode,
-        ConvertFontScaleValue(style.GetFontSize()));
+        DataPickerRowLayoutProperty, SelectedFontSize, pickerTextStyle.fontSize, frameNode, style.GetFontSize());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         DataPickerRowLayoutProperty, SelectedColor, pickerTextStyle.textColor, frameNode, style.GetTextColor());
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(

@@ -180,6 +180,12 @@ void TextPickerPattern::OnFontConfigurationUpdate()
     closeDialogEvent_();
 }
 
+void TextPickerPattern::OnFontScaleConfigurationUpdate()
+{
+    CHECK_NULL_VOID(closeDialogEvent_);
+    closeDialogEvent_();
+}
+
 void TextPickerPattern::SetButtonIdeaSize()
 {
     auto host = GetHost();
