@@ -51,7 +51,7 @@ public:
     }
 
     virtual RefPtr<ImageObject> Clone() = 0;
-
+    virtual std::string GetDumpInfo() { return ""; }
     bool IsSupportCache() const
     {
         return src_.SupportObjCache();

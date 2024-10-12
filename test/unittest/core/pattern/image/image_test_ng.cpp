@@ -357,7 +357,7 @@ HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level
      * @tc.cases: case1. Before Image load and ImagePattern windowHide, Image doesn't need resetLoading.
      */
     imagePattern->OnWindowHide();
-    imagePattern->OnNotifyMemoryLevel(0);
+    imagePattern->OnNotifyMemoryLevel(2);
     EXPECT_TRUE(imagePattern->isShow_ == false);
     EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
     EXPECT_EQ(imagePattern->image_, nullptr);
@@ -374,7 +374,7 @@ HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level
      */
     imagePattern->altImage_ = AceType::MakeRefPtr<MockCanvasImage>();
     imagePattern->OnWindowHide();
-    imagePattern->OnNotifyMemoryLevel(0);
+    imagePattern->OnNotifyMemoryLevel(2);
     EXPECT_FALSE(imagePattern->isShow_);
     EXPECT_EQ(imagePattern->image_, nullptr);
     EXPECT_EQ(imagePattern->altLoadingCtx_, nullptr);

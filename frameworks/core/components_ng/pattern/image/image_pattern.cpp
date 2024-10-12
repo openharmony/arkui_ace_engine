@@ -56,6 +56,7 @@ constexpr int32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t CRITICAL_TIME = 50;      // ms. If show time of image is less than this, use more cacheImages.
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
+constexpr int32_t MEMORY_LEVEL_LOW_STATUS = 1;
 } // namespace
 
 constexpr float BOX_EPSILON = 0.5f;
@@ -937,25 +938,14 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
     // when image component is [onShow], do not clean image data
-    if (isShow_) {
+    if (isShow_ || level <= static_cast<int32_t>(MEMORY_LEVEL_LOW_STATUS)) {
         return;
     }
-
     // clean image data
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-
-    // clean rs node to release the sk_sp<SkImage> held by it
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto rsRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushMessages();
 }
 
 // when recycle image component, release the pixelmap resource
@@ -1363,6 +1353,21 @@ void ImagePattern::DumpRenderInfo()
     }
 }
 
+void ImagePattern::DumpSvgInfo()
+{
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    CHECK_NULL_VOID(imageSourceInfo);
+    if (!imageSourceInfo->IsSvg()|| !loadingCtx_) {
+        return;
+    }
+    auto imageObject = loadingCtx_->GetImageObject();
+    CHECK_NULL_VOID(imageObject);
+    DumpLog::GetInstance().AddDesc(
+        std::string("Svg:").append(imageObject->GetDumpInfo()));
+}
+
 void ImagePattern::DumpInfo()
 {
     DumpLayoutInfo();
@@ -1387,6 +1392,7 @@ void ImagePattern::DumpInfo()
     }
 
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
+    DumpSvgInfo();
 }
 
 void ImagePattern::DumpAdvanceInfo()
