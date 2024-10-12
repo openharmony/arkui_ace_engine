@@ -218,6 +218,8 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    bool UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo);
+    void UpdateIconSrc();
     // make render after measure and layout
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
     {
