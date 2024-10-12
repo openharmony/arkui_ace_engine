@@ -2044,6 +2044,13 @@ void FrameNode::OnMountToParentDone()
     pattern_->OnMountToParentDone();
 }
 
+void FrameNode::AfterMountToParent()
+{
+    if (pattern_) {
+        pattern_->AfterMountToParent();
+    }
+}
+
 void FrameNode::FlushUpdateAndMarkDirty()
 {
     MarkDirtyNode();

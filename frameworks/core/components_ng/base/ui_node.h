@@ -640,7 +640,7 @@ public:
     {
         rootNodeId_ = rootNodeId;
     }
-    
+
     virtual bool HasVirtualNodeAccessibilityProperty()
     {
         return false;
@@ -794,6 +794,7 @@ protected:
         }
     }
 
+    virtual void AfterMountToParent() {}
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}

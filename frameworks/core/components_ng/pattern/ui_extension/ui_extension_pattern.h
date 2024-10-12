@@ -94,6 +94,7 @@ public:
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
     void OnMountToParentDone() override;
+    void AfterMountToParent() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
 
     void OnConnect();
@@ -138,6 +139,8 @@ public:
     int32_t GetSessionId();
     int32_t GetNodeId();
     int32_t GetUiExtensionId() override;
+    bool IsModalUec();
+    bool IsForeground();
     RefPtr<SessionWrapper> GetSessionWrapper()
     {
         return sessionWrapper_;
@@ -211,6 +214,7 @@ private:
     void MountPlaceholderNode();
     void RemovePlaceholderNode();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
+    void ReDispatchDisplayArea();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -253,6 +257,7 @@ private:
     // StartUIExtension should after mountToParent
     bool hasMountToParent_ = false;
     bool needReNotifyForeground_ = false;
+    bool needReDispatchDisplayArea_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 

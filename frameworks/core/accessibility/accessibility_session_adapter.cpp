@@ -18,12 +18,8 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-bool AccessibilitySessionAdapter::IgnoreHostNode() const
-{
-    return false;
-}
-
-RefPtr<AccessibilitySessionAdapter> AccessibilitySessionAdapter::GetSessionAdapter(const RefPtr<FrameNode>& node)
+RefPtr<AccessibilitySessionAdapter> AccessibilitySessionAdapter::GetSessionAdapter(
+    const RefPtr<FrameNode>& node)
 {
     auto pattern = node->GetPattern();
     CHECK_NULL_RETURN(pattern, nullptr);

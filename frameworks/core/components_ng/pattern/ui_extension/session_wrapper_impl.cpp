@@ -60,6 +60,7 @@ constexpr char OCCUPIED_AREA_CHANGE_KEY[] = "ability.want.params.IsNotifyOccupie
 // Set the UIExtension type of the EmbeddedComponent.
 constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 const std::string EMBEDDED_UI("embeddedUI");
+constexpr int32_t AVOID_DELAY_TIME = 30;
 constexpr int32_t INVALID_WINDOW_ID = -1;
 } // namespace
 
@@ -250,6 +251,9 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
     UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto realHostWindowId = pipeline->GetRealHostWindowId();
     auto wantPtr = std::make_shared<Want>(want);
     if (sessionType_ == SessionType::UI_EXTENSION_ABILITY) {
         if (wantPtr->GetStringParam(UI_EXTENSION_TYPE_KEY) == EMBEDDED_UI) {
@@ -277,17 +281,19 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         wantPtr->SetParam(UI_EXTENSION_TYPE_KEY, EMBEDDED_UI);
     }
     isNotifyOccupiedAreaChange_ = want.GetBoolParam(OCCUPIED_AREA_CHANGE_KEY, true);
-    UIEXT_LOGD("Want param isNotifyOccupiedAreaChange is %{public}d.", isNotifyOccupiedAreaChange_);
+    UIEXT_LOGI("Want param isNotifyOccupiedAreaChange is %{public}d, realHostWindowId: %{public}u.",
+        isNotifyOccupiedAreaChange_, realHostWindowId);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
-    Rosen::SessionInfo extensionSessionInfo;
-    extensionSessionInfo.bundleName_ = want.GetElement().GetBundleName();
-    extensionSessionInfo.abilityName_ = want.GetElement().GetAbilityName();
-    extensionSessionInfo.callerToken_ = callerToken;
-    extensionSessionInfo.rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken;
-    extensionSessionInfo.want = wantPtr;
-    extensionSessionInfo.isAsyncModalBinding_ = config.isAsyncModalBinding;
-    extensionSessionInfo.uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage);
+    Rosen::SessionInfo extensionSessionInfo = {
+        .bundleName_ = want.GetElement().GetBundleName(),
+        .abilityName_ = want.GetElement().GetAbilityName(),
+        .callerToken_ = callerToken,
+        .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
+        .want = wantPtr,
+        .isAsyncModalBinding_ = config.isAsyncModalBinding,
+        .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
+    };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     UpdateSessionConfig();
@@ -464,6 +470,9 @@ void SessionWrapperImpl::NotifyForeground()
     UIEXT_LOGI("NotifyForeground, persistentid = %{public}d, hostWindowId = %{public}u,"
         " windowSceneId = %{public}d, IsScenceBoardWindow: %{public}d.",
         session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsScenceBoardWindow());
+    if (container->IsScenceBoardWindow() && windowSceneId != INVALID_WINDOW_ID) {
+        hostWindowId = static_cast<uint32_t>(windowSceneId);
+    }
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
         session_, hostWindowId, std::move(foregroundCallback_));
 }
@@ -621,15 +630,11 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     CHECK_NULL_VOID(pipeline);
     auto curWindow = pipeline->GetCurrentWindowRect();
     displayArea_ = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
-    UIEXT_LOGI("Display area with '%{public}s' notified to uiextension, persistentid = %{public}d.",
-        displayArea_.ToString().c_str(), GetSessionId());
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
-    ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d], displayArea [%s]",
-        persistentId, reason, displayArea_.ToString().c_str());
-    UIEXT_LOGD("NotifyDisplayArea id: %{public}d, reason = %{public}d", persistentId, reason);
+    int32_t duration = 0;
     if (reason == Rosen::SizeChangeReason::ROTATION) {
         if (transaction_.lock()) {
             transaction = transaction_.lock();
@@ -638,9 +643,15 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
             transaction = transactionController->GetRSTransaction();
         }
         if (transaction && parentSession) {
-            transaction->SetDuration(pipeline->GetSyncAnimationOption().GetDuration());
+            duration = pipeline->GetSyncAnimationOption().GetDuration();
+            transaction->SetDuration(duration);
         }
     }
+    ACE_SCOPED_TRACE("NotifyDisplayArea displayArea[%s], curWindow[%s], reason[%d], duration[%d]",
+        displayArea_.ToString().c_str(), curWindow.ToString().c_str(), reason, duration);
+    UIEXT_LOGI("NotifyDisplayArea displayArea = %{public}s, curWindow = %{public}s, "
+        "reason = %{public}d, duration = %{public}d, persistentId = %{public}d.",
+        displayArea_.ToString().c_str(), curWindow.ToString().c_str(), reason, duration, persistentId);
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
         std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, transaction);
 }
@@ -663,7 +674,34 @@ void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea
     session_->UpdateAvoidArea(sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
 }
 
-bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const
+bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
+    sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout)
+{
+    CHECK_NULL_RETURN(session_, false);
+    CHECK_NULL_RETURN(info, false);
+    CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto curWindow = pipeline->GetCurrentWindowRect();
+    if (displayAreaWindow_ != curWindow && needWaitLayout && taskExecutor_) {
+        UIEXT_LOGI("OccupiedArea wait layout, displayAreaWindow: %{public}s, curWindow = %{public}s",
+            displayAreaWindow_.ToString().c_str(), curWindow.ToString().c_str());
+        taskExecutor_->PostDelayedTask(
+            [info, weak = AceType::WeakClaim(this)] {
+                auto session = weak.Upgrade();
+                if (session) {
+                    session->InnerNotifyOccupiedAreaChangeInfo(info);
+                }
+            },
+            TaskExecutor::TaskType::UI, AVOID_DELAY_TIME, "ArkUIVirtualKeyboardAreaChangeDelay");
+    }
+    InnerNotifyOccupiedAreaChangeInfo(info);
+    return true;
+}
+
+bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
+    sptr<Rosen::OccupiedAreaChangeInfo> info) const
 {
     CHECK_NULL_RETURN(session_, false);
     CHECK_NULL_RETURN(info, false);

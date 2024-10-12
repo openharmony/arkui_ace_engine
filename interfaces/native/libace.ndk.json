@@ -2138,5 +2138,225 @@
     {
         "first_introduced": "12",
         "name": "OH_ArkUI_CustomSpanDrawInfo_GetBaseline"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityProviderRegisterCallback"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_SendAccessibilityAsyncEvent"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AddAndGetAccessibilityElementInfo"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetParentId"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetComponentType"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetContents"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetHintText"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetAccessibilityText"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetAccessibilityDescription"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetChildNodeIds"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetOperationActions"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetScreenRect"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetCheckable"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetChecked"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetFocusable"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetFocused"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetVisible"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetAccessibilityFocused"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetSelected"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetClickable"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetLongClickable"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetEnabled"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetIsPassword"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetScrollable"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetEditable"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetIsHint"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetRangeInfo"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetGridInfo"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetGridItemInfo"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetSelectedTextStart"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetSelectedTextEnd"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetCurrentItemIndex"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetStartItemIndex"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetEndItemIndex"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetItemCount"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetAccessibilityOffset"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetAccessibilityGroup"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetAccessibilityLevel"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetZIndex"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetAccessibilityOpacity"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetBackgroundColor"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetBackgroundImage"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetBlur"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetHitTestBehavior"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_CreateAccessibilityEventInfo"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_DestoryAccessibilityEventInfo"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityEventSetEventType"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityEventSetTextAnnouncedForAccessibility"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityEventSetRequestFocusId"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityEventSetElementInfo"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_FindAccessibilityActionArgumentByKey"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_CreateAccessibilityElementInfo"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_DestoryAccessibilityElementInfo"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_NativeXComponent_GetNativeAccessibilityProvider"
+    },
+    {
+        "first_introduced": "13",
+        "name": "OH_ArkUI_AccessibilityElementInfoSetElementId"
     }
 ]

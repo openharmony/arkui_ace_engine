@@ -86,7 +86,8 @@ public:
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
     void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
-    bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const override;
+    bool NotifyOccupiedAreaChangeInfo(
+        sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout) override;
     void SetDensityDpiImpl(bool isDensityDpi) override;
 
     // The interface to send the data for ArkTS
@@ -97,6 +98,8 @@ private:
     void InitAllCallback();
     void UpdateSessionConfig();
     int32_t GetWindowSceneId();
+    bool InnerNotifyOccupiedAreaChangeInfo(
+        sptr<Rosen::OccupiedAreaChangeInfo> info) const;
 
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -106,6 +109,7 @@ private:
     int32_t uiExtensionId_ = 0;
     sptr<Rosen::ExtensionSession> session_;
     bool isNotifyOccupiedAreaChange_ = true;
+    Rect displayAreaWindow_;
     RectF displayArea_;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     std::function<void((OHOS::Rosen::WSError))> foregroundCallback_;
