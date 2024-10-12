@@ -1830,4 +1830,51 @@ HWTEST_F(WaterFlowSWTest, Illegal001, TestSize.Level1)
     EXPECT_EQ(info_->segmentCache_.size(), 9);
     EXPECT_EQ(info_->margins_.size(), 7);
 }
+
+/**
+ * @tc.name: DataChange001
+ * @tc.desc: In less-than fillViewport scene, test overScroll position after changing dataSource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, DataChange001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(2);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 200.0f);
+    frameNode_->RemoveChildAtIndex(1);
+    frameNode_->ChildrenUpdatedFrom(1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 100.0f);
+
+    GestureEvent gesture;
+    gesture.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    gesture.SetMainVelocity(-1000.0f);
+    gesture.SetMainDelta(-100.0f);
+    gesture.SetGlobalLocation(Offset(1.0f, 1.0f));
+    gesture.SetGlobalPoint(Point(1.0f, 100.0f));
+    gesture.SetLocalLocation(Offset(1.0f, 1.0f));
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(gesture);
+    scrollable->HandleDragUpdate(gesture);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -15.755195);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(gesture);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0),  -31.510389);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -15.755194);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+}
 } // namespace OHOS::Ace::NG

@@ -595,6 +595,10 @@ public:
 
     static std::string GetDebugInspectorId();
 
+    static double GetSrollableVelocityScale();
+
+    static double GetSrollableFriction();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;

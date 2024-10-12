@@ -73,14 +73,16 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(windowManager);
     dialogPattern->UpdateFontScale();
     isSuitOldMeasure_ = dialogPattern->GetIsSuitOldMeasure();
+    auto dialogContext = dialogPattern->GetDialogContext();
+    CHECK_NULL_VOID(dialogContext);
     isSuitableForElderly_ = (dialogPattern->GetIsSuitableForAging() || dialogPattern->GetCustomNode()) &&
                             windowManager->GetWindowMode() != WindowMode::WINDOW_MODE_FLOATING &&
-                            GreatOrEqual(pipeline->GetFontScale(), 1.75f);
+                            GreatOrEqual(dialogContext->GetFontScale(), 1.75f);
     auto isPickekDiaglog = dialogPattern->GetIsPickerDiaglog();
     if (isPickekDiaglog || customSize_) {
         isSuitableForElderly_ = false;
     }
-    if (isSuitableForElderly_ || GreatOrEqual(pipeline->GetFontScale(), 1.75f)) {
+    if (isSuitableForElderly_ || GreatOrEqual(dialogContext->GetFontScale(), 1.75f)) {
         dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
     }
     UpdateSafeArea();
@@ -934,7 +936,7 @@ void DialogLayoutAlgorithm::UpdateIsScrollHeightNegative(LayoutWrapper* layoutWr
         const auto& children = layoutWrapper->GetAllChildrenWithBuild();
         auto child = children.front();
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        if (childSize.Height() == dialogMaxHeight_) {
+        if (childSize.Height() == dialogMaxHeight_ && childSize.Height() > 0) {
             auto hostNode = layoutWrapper->GetHostNode();
             CHECK_NULL_VOID(hostNode);
             auto dialogPattern = hostNode->GetPattern<DialogPattern>();

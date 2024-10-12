@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/geometry/dimension.h"
+#include "base/utils/system_properties.h"
 #include "core/animation/animator.h"
 #include "core/animation/friction_motion.h"
 #include "core/animation/scroll_motion.h"
@@ -165,12 +166,17 @@ public:
 
     void SetUnstaticFriction(double friction)
     {
-        friction_ = friction;
+        friction_ = friction > 0 ? friction : -1.0;
     }
 
     double GetFriction() const
     {
-        return friction_;
+        double friction = friction_;
+        if (friction == -1.0) {
+            double ret = SystemProperties::GetSrollableFriction();
+            friction = !NearZero(ret) ? ret : defaultFriction_;
+        }
+        return friction;
     }
 
     float GetRatio() const
@@ -628,6 +634,7 @@ private:
     uint32_t springAnimationCount_ = 0;
     double flingVelocityScale_ = 1.5;
     double springVelocityScale_ = 1.5;
+    double defaultFriction_ = 0;
     float ratio_ = 1.848f;
     float springResponse_ = 0.416f;
     float touchPadVelocityScaleRate_ = 1.0f;

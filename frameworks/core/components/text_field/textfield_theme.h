@@ -749,8 +749,8 @@ private:
     uint32_t hideSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;
 
-    // UX::insert cursor offset up by 32vp
-    Dimension insertCursorOffset_ = 32.0_vp;
+    // UX::insert cursor offset up by 24vp
+    Dimension insertCursorOffset_ = 24.0_vp;
 
     Dimension avoidKeyboardOffset_ = 24.0_vp;
 

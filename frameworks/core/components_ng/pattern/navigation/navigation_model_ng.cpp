@@ -1056,7 +1056,7 @@ void NavigationModelNG::SetMenuCount(int32_t menuCount)
     return;
 }
 
-void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
+void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated)
 {
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1066,6 +1066,7 @@ void NavigationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideToolBar(hideToolBar);
+    navBarLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
 void NavigationModelNG::SetMinContentWidth(FrameNode* frameNode, const Dimension& value)
@@ -1179,7 +1180,7 @@ void NavigationModelNG::SetHideNavBar(FrameNode* frameNode, bool hideNavBar)
     SetHideNavBarInner(navigationGroupNode, hideNavBar);
 }
 
-void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
+void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated)
 {
     CHECK_NULL_VOID(frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1189,6 +1190,7 @@ void NavigationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideTitleBar(hideTitleBar);
+    navBarLayoutProperty->UpdateIsAnimatedTitleBar(animated);
 }
 
 void NavigationModelNG::SetSubtitle(FrameNode* frameNode, const std::string& subtitle)

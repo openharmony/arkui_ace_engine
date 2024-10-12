@@ -419,6 +419,8 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
 
 void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale, bool isScrollFromTouchPad)
 {
+    double ret = SystemProperties::GetSrollableVelocityScale();
+    velocityScale = !NearZero(ret) ? ret : velocityScale;
     sVelocityScale_ = isScrollFromTouchPad ? velocityScale * touchPadVelocityScaleRate_ : velocityScale;
     if (isReverseCallback_ && isReverseCallback_()) {
         currentVelocity_ = -gestureVelocity * sVelocityScale_.value_or(velocityScale) * GetGain(GetDragOffset());
@@ -513,6 +515,10 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
     StopSnapController();
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of scroll motion is %{public}f, velocity is %{public}f",
         mainPosition, correctVelocity);
+    if (friction_ == -1.0) {
+        double ret = SystemProperties::GetSrollableFriction();
+        friction_ = !NearZero(ret) ? ret : defaultFriction_;
+    }
     float friction = sFriction_.value_or(friction_);
     initVelocity_ = correctVelocity;
     finalPosition_ = mainPosition + correctVelocity / (friction * -FRICTION_SCALE);
@@ -668,9 +674,12 @@ float Scrollable::GetFrictionVelocityByFinalPosition(
 
 void Scrollable::InitFriction(double friction)
 {
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : friction_;
-    friction_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN) ? friction : friction_;
+    defaultFriction_ =
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
+    defaultFriction_ =
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ? API12_FRICTION : defaultFriction_;
+    defaultFriction_ =
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN) ? friction : defaultFriction_;
 }
 
 void Scrollable::FixScrollMotion(float position, float initVelocity)
@@ -864,12 +873,13 @@ void Scrollable::StartSpringMotion(
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
             scroll->springAnimationCount_--;
-            // avoid current animation being interrupted by the prev animation's finish callback
-            if (scroll->springAnimationCount_ > 0) {
-                return;
-            }
             ACE_SCOPED_TRACE(
                 "Scrollable spring animation finish, id:%d, tag:%s", scroll->nodeId_, scroll->nodeTag_.c_str());
+            // avoid current animation being interrupted by the prev animation's finish callback
+            // and triggering onScrollStop when spring animation turns to friction animation.
+            if (scroll->springAnimationCount_ > 0 || scroll->scrollPause_) {
+                return;
+            }
             scroll->state_ = AnimationState::IDLE;
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();

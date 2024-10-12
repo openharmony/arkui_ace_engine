@@ -206,6 +206,10 @@ void SwiperArrowPattern::InitNavigationArrow()
     host->AddChild(buttonNode);
     buttonNode->AddChild(symbolNode);
     UpdateArrowContent();
+
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
 }
 
 int32_t SwiperArrowPattern::TotalCount() const
