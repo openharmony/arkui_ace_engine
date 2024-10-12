@@ -499,6 +499,7 @@ void CustomPaintPaintMethod::DrawSvgImage(
 void CustomPaintPaintMethod::DrawImageInternal(
     const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
     RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
@@ -574,6 +575,7 @@ void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, doub
 
 void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     if (imageData.data.empty()) {
         return;
     }
@@ -590,6 +592,7 @@ void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
 
 void CustomPaintPaintMethod::FillRect(const Rect& rect)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
     GetFillPaint(brush, options);
@@ -622,6 +625,7 @@ void CustomPaintPaintMethod::FillRect(const Rect& rect)
 
 void CustomPaintPaintMethod::StrokeRect(const Rect& rect)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSPen pen;
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
@@ -654,6 +658,7 @@ void CustomPaintPaintMethod::StrokeRect(const Rect& rect)
 
 void CustomPaintPaintMethod::ClearRect(const Rect& rect)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
     InitImagePaint(nullptr, &brush, options);
@@ -685,6 +690,7 @@ void CustomPaintPaintMethod::SetFillRuleForPath2D(const CanvasFillRule& rule)
 
 void CustomPaintPaintMethod::Fill()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
     GetFillPaint(brush, options);
@@ -720,6 +726,7 @@ void CustomPaintPaintMethod::Fill(const RefPtr<CanvasPath2D>& path)
 
 void CustomPaintPaintMethod::Path2DFill()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush brush;
     RSSamplingOptions options;
     GetFillPaint(brush, options);
@@ -747,6 +754,7 @@ void CustomPaintPaintMethod::Path2DFill()
 
 void CustomPaintPaintMethod::Stroke()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSPen pen;
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
@@ -782,6 +790,7 @@ void CustomPaintPaintMethod::Stroke(const RefPtr<CanvasPath2D>& path)
 
 void CustomPaintPaintMethod::Path2DStroke()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSPen pen;
     RSSamplingOptions options;
     GetStrokePaint(pen, options);
@@ -809,6 +818,7 @@ void CustomPaintPaintMethod::Path2DStroke()
 
 void CustomPaintPaintMethod::Clip()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->ClipPath(rsPath_, RSClipOp::INTERSECT);
 }
 
@@ -822,6 +832,7 @@ void CustomPaintPaintMethod::Clip(const RefPtr<CanvasPath2D>& path)
 
 void CustomPaintPaintMethod::Path2DClip()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->ClipPath(rsPath2d_, RSClipOp::INTERSECT);
 }
 
@@ -1126,6 +1137,7 @@ void CustomPaintPaintMethod::Path2DSetTransform(const PathArgs& args)
 
 void CustomPaintPaintMethod::Save()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     saveStates_.push_back(state_);
     saveColorFilter_.push_back(colorFilter_);
     saveBlurFilter_.push_back(blurFilter_);
@@ -1134,6 +1146,7 @@ void CustomPaintPaintMethod::Save()
 
 void CustomPaintPaintMethod::Restore()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     if ((rsCanvas_->GetSaveCount() > DEFAULT_SAVE_COUNT) && (!saveStates_.empty()) && (!saveColorFilter_.empty()) &&
         (!saveBlurFilter_.empty())) {
         state_ = saveStates_.back();
@@ -1148,21 +1161,25 @@ void CustomPaintPaintMethod::Restore()
 
 void CustomPaintPaintMethod::Scale(double x, double y)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Scale(x, y);
 }
 
 void CustomPaintPaintMethod::Rotate(double angle)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Rotate(angle * 180 / M_PI);
 }
 
 void CustomPaintPaintMethod::ResetTransform()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->ResetMatrix();
 }
 
 void CustomPaintPaintMethod::Transform(const TransformParam& param)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSMatrix matrix;
     matrix.SetMatrix(param.scaleX, param.skewY, param.translateX, param.skewX, param.scaleY, param.translateY, 0, 0, 1);
     rsCanvas_->ConcatMatrix(matrix);
@@ -1170,6 +1187,7 @@ void CustomPaintPaintMethod::Transform(const TransformParam& param)
 
 void CustomPaintPaintMethod::Translate(double x, double y)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Translate(x, y);
 }
 
@@ -1190,6 +1208,7 @@ void CustomPaintPaintMethod::StrokeText(const std::string& text, double x, doubl
 void CustomPaintPaintMethod::PaintText(
     const float width, double x, double y, std::optional<double> maxWidth, bool isStroke)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     CHECK_NULL_VOID(paragraph_);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
         paragraph_->Layout(FLT_MAX);
@@ -1239,6 +1258,7 @@ void CustomPaintPaintMethod::PaintText(
 void CustomPaintPaintMethod::PaintStrokeTextShadow(
     const float width, const double dx, const double dy, const std::optional<double> scale, RSSaveLayerOps* slo)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     CHECK_NULL_VOID(shadowParagraph_);
     if (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) {
         rsCanvas_->SaveLayer(*slo);
@@ -1914,6 +1934,7 @@ void CustomPaintPaintMethod::TranslateMatrix(double tx, double ty)
 
 void CustomPaintPaintMethod::SaveLayer()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSBrush compositeOperationpBrush;
     InitPaintBlend(compositeOperationpBrush);
     RSSaveLayerOps slo(nullptr, &compositeOperationpBrush);
@@ -1922,6 +1943,7 @@ void CustomPaintPaintMethod::SaveLayer()
 
 void CustomPaintPaintMethod::RestoreLayer()
 {
+    CHECK_NULL_VOID(rsCanvas_);
     rsCanvas_->Restore();
 }
 
@@ -1985,6 +2007,7 @@ void CustomPaintPaintMethod::Path2DRect(const PathArgs& args)
 
 void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
 {
+    CHECK_NULL_VOID(rsCanvas_);
     RSMatrix rsMatrix;
     rsMatrix.SetMatrix(
         param.scaleX, param.skewX, param.translateX, param.skewY, param.scaleY, param.translateY, 0, 0, 1);
