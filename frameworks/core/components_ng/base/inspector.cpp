@@ -163,7 +163,7 @@ void GetSpanInspector(
     jsonNodeArray->PutRef(std::move(jsonNode));
 }
 
-void PutNodeInfoToJsonNode(RefPtr<OHOS::Ace::NG::FrameNode>& node, 
+void PutNodeInfoToJsonNode(RefPtr<OHOS::Ace::NG::FrameNode>& node,
     bool& isActive, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode, const RefPtr<NG::UINode>& parent)
 {
     if (node) {
