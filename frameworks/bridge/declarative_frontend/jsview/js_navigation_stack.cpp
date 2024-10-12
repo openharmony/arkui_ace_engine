@@ -1198,4 +1198,38 @@ bool JSNavigationStack::RemoveDestinationIfNeeded(const JSRef<JSObject>& pathInf
     promiseFunc->Call(dataSourceObj_, argc, params);
     return false;
 }
+
+bool JSNavigationStack::CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto recoveryFromReplaceDestination = pathInfo->GetProperty("recoveryFromReplaceDestination");
+    if (!recoveryFromReplaceDestination->IsBoolean() || !recoveryFromReplaceDestination->ToBoolean()) {
+        return false;
+    }
+    auto jsReplacedName = pathInfo->GetProperty("name");
+    if (!jsReplacedName->IsString()) {
+        return false;
+    }
+    replacedName = jsReplacedName->ToString();
+    auto jsReplacedIndex = pathInfo->GetProperty("index");
+    if (!jsReplacedIndex->IsNumber()) {
+        return false;
+    }
+    replacedIndex = jsReplacedIndex->ToNumber<int32_t>();
+    return true;
+}
+
+void JSNavigationStack::SetRecoveryFromReplaceDestination(int32_t index, bool value)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return;
+    }
+    pathInfo->SetProperty<bool>("recoveryFromReplaceDestination", value);
+}
 } // namespace OHOS::Ace::Framework
