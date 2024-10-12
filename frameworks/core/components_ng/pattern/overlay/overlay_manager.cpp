@@ -2927,7 +2927,7 @@ bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
     return true;
 }
 
-bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
+bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay, bool isBackPressed)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove dragPreview enter");
     auto columnNode = pixmapColumnNodeWeak_.Upgrade();
@@ -2936,6 +2936,14 @@ bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
     }
     RemovePixelMap();
     RemoveGatherNode();
+
+    if (isBackPressed) {
+        auto mainPipeline = PipelineContext::GetMainPipelineContext();
+        CHECK_NULL_RETURN(mainPipeline, false);
+        auto dragDropManager = mainPipeline->GetDragDropManager();
+        CHECK_NULL_RETURN(dragDropManager, true);
+        dragDropManager->SetIsBackPressedCleanLongPressNodes(true);
+    }
     return true;
 }
 
@@ -2996,10 +3004,11 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         return RemoveBubble(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (InstanceOf<MenuWrapperPattern>(pattern)) {
+        RemoveDragPreview(overlay, isBackPressed);
         return RemoveMenu(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (InstanceOf<LinearLayoutPattern>(pattern)) {
-        return RemoveDragPreview(overlay) ? OVERLAY_REMOVE : OVERLAY_NOTHING;
+        return RemoveDragPreview(overlay, isBackPressed) ? OVERLAY_REMOVE : OVERLAY_NOTHING;
     }
     return OVERLAY_NOTHING;
 }
