@@ -17,6 +17,7 @@
 #include "modifiers_test_utils.h"
 
 #include "core/components/indexer/indexer_theme.h"
+#include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
@@ -97,7 +98,9 @@ const auto PROP_NAME_POPUP_POSITION_X = "popupPositionX";
 const auto PROP_NAME_POPUP_POSITION_Y = "popupPositionY";
 const auto PROP_NAME_AUTO_COLLAPSE = "autoCollapse";
 const auto PROP_NAME_POPUP_ITEM_BORDER_RADIUS = "popupItemBorderRadius";
+const auto PROP_NAME_POPUP_BORDER_RADIUS = "popupBorderRadius";
 const auto PROP_NAME_ITEM_BORDER_RADIUS = "itemBorderRadius";
+const auto PROP_NAME_INDEXER_BORDER_RADIUS = "indexerBorderRadius";
 const auto PROP_NAME_POPUP_BACKGROUND_BLUR_STYLE = "popupBackgroundBlurStyle";
 const auto PROP_NAME_POPUP_TITLE_BACKGROUND = "popupTitleBackground";
 const auto PROP_NAME_HAPTIC_FEEDBACK = "enableHapticFeedback";
@@ -108,6 +111,7 @@ const auto ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE = 0;
 const auto ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE = "#FFFFFFFF";
 const auto ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK = "#FF000000";
 const auto ATTRIBUTE_USING_POPUP_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_ITEM_SIZE_INITIAL_VALUE = "0.00vp";
 const auto ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE = "16.00vp";
 const auto ATTRIBUTE_FONT_DEFAULT_SIZE = "14.00px";
 const auto ATTRIBUTE_ALIGN_STYLE_DEFAULT_VALUE = "IndexerAlign.End";
@@ -137,12 +141,12 @@ static const std::vector<int32_t> SELECTED_INDEX_TEST_PLAN = { 1, 10, 32, -1, -3
 
 typedef std::pair<Ark_Number, std::string> ArkNumberTestStep;
 static const std::vector<ArkNumberTestStep> BORDER_RADIUS_TEST_PLAN = {
-    { ArkValue<Ark_Number>(10), "10.00vp" },
-    { ArkValue<Ark_Number>(832.5f), "832.50vp"},
-    { ArkValue<Ark_Number>(-123), "-123.00vp"},
-    { ArkValue<Ark_Number>(0), "0.00vp"},
-    { ArkValue<Ark_Number>(-832.5f), "-832.50vp"},
-    { ArkValue<Ark_Number>(0.0f), "0.00vp"}
+    { ArkValue<Ark_Number>(10), StringUtils::DoubleToString(10 + RADIUS_OFFSET).append("vp") },
+    { ArkValue<Ark_Number>(832.599345f), StringUtils::DoubleToString(832.599345f + RADIUS_OFFSET).append("vp") },
+    { ArkValue<Ark_Number>(-123), "0.00vp" },
+    { ArkValue<Ark_Number>(25.01), StringUtils::DoubleToString(25.01 + RADIUS_OFFSET).append("vp") },
+    { ArkValue<Ark_Number>(-832.5f), "0.00vp" },
+    { ArkValue<Ark_Number>(0.0f), StringUtils::DoubleToString(RADIUS_OFFSET).append("vp") },
 };
 static const std::vector<ArkNumberTestStep> SELECTED_TEST_PLAN = {
     { ArkValue<Ark_Number>(10), "10" },
@@ -158,8 +162,9 @@ static const std::vector<ItemSizeTestStep> ITEM_SIZE_TEST_PLAN = {
     { { .selector = 1, .value1 = ArkNum(45.0f) }, "45.00vp"},
     { { .selector = 1, .value1 = ArkNum(-45) }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
     { { .selector = 1, .value1 = ArkNum(32) }, "32.00vp"},
+    { { .selector = 1, .value1 = ArkNum(0) }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
     { { .selector = 0, .value0 = ArkStr("15px") }, "15.00px"},
-    { { .selector = 0, .value0 = ArkStr("99%") }, "99.00%"},
+    { { .selector = 0, .value0 = ArkStr("99%") }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
     { { .selector = 0, .value0 = ArkStr("45vp") }, "45.00vp"},
     { { .selector = 0, .value0 = ArkStr("-13px") }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE}
 };
@@ -352,7 +357,7 @@ static const std::vector<BlurStyleTestStep> BLUR_STYLE_TEST_PLAN = {
     { ARK_BLUR_STYLE_COMPONENT_REGULAR, "BlurStyle.COMPONENT_REGULAR" },
     { ARK_BLUR_STYLE_COMPONENT_THICK, "BlurStyle.COMPONENT_THICK" },
     { ARK_BLUR_STYLE_COMPONENT_ULTRA_THICK, "BlurStyle.COMPONENT_ULTRA_THICK" },
-    { static_cast<Ark_BlurStyle>(177), "BlurStyle.NONE" }
+    { static_cast<Ark_BlurStyle>(177), "BlurStyle.COMPONENT_REGULAR" }
 };
 
 class IndexerModifierTest
@@ -1116,7 +1121,7 @@ HWTEST_F(IndexerModifierTest, setItemSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setItemSize, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_SIZE);
-    EXPECT_EQ(checkVal, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE);
+    EXPECT_EQ(checkVal, ATTRIBUTE_ITEM_SIZE_INITIAL_VALUE);
 
     for (const auto& [size, expectVal] : ITEM_SIZE_TEST_PLAN) {
         modifier_->setItemSize(node_, &size);
@@ -1486,6 +1491,8 @@ HWTEST_F(IndexerModifierTest, setPopupItemBorderRadius, TestSize.Level1)
         modifier_->setPopupItemBorderRadius(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BORDER_RADIUS);
         EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BORDER_RADIUS);
+        EXPECT_EQ(checkVal, expectVal);
     }
 }
 
@@ -1503,6 +1510,8 @@ HWTEST_F(IndexerModifierTest, setItemBorderRadius, TestSize.Level1)
     for (const auto& [value, expectVal] : BORDER_RADIUS_TEST_PLAN) {
         modifier_->setItemBorderRadius(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ITEM_BORDER_RADIUS);
+        EXPECT_EQ(checkVal, expectVal);
+        checkVal = GetAttrValue<std::string>(node_, PROP_NAME_INDEXER_BORDER_RADIUS);
         EXPECT_EQ(checkVal, expectVal);
     }
 }

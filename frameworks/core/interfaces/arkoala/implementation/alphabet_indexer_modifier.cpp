@@ -27,6 +27,7 @@ void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
     auto arrayValue = Converter::Convert<std::vector<std::string>>(options->arrayValue);
     auto index = Converter::Convert<int32_t>(options->selected);
     IndexerModelNG::SetArrayValue(frameNode, arrayValue);
@@ -150,13 +151,18 @@ void PopupItemFontImpl(Ark_NativePointer node, const Ark_Font* value)
         IndexerModelNG::SetFontWeight(frameNode, fontOpt.value().fontWeight.value_or(FontWeight::NORMAL));
     }
 }
-void ItemSizeImpl(Ark_NativePointer node, const Type_AlphabetIndexerAttribute_itemSize_Arg0* value) {
+void ItemSizeImpl(Ark_NativePointer node, const Type_AlphabetIndexerAttribute_itemSize_Arg0* value)
+{
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto size = Converter::OptConvert<Dimension>(*value);
-    if (size.has_value()) {
+    if (size.has_value() &&
+        GreatNotEqual(size.value().ConvertToVp(), 0.0) &&
+        size.value().Unit() != DimensionUnit::PERCENT) {
         IndexerModelNG::SetItemSize(frameNode, size.value());
+    } else {
+        IndexerModelNG::SetItemSize(frameNode, DEFAULT_ITEM_SIZE);
     }
 }
 void FontImpl(Ark_NativePointer node, const Ark_Font* value)
@@ -178,7 +184,7 @@ void AlignStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto align = static_cast<int32_t>(value);
     IndexerModelNG::SetAlignStyle(frameNode, align);
-    auto offsetDimension = Converter::OptConvert<Dimension>(*offset);
+    auto offsetDimension = offset ? Converter::OptConvert<Dimension>(*offset) : std::nullopt;
     if (offsetDimension.has_value()) {
         IndexerModelNG::SetPopupHorizontalSpace(frameNode, offsetDimension.value());
     }
@@ -198,7 +204,7 @@ void OnSelectImpl(Ark_NativePointer node,
 void OnRequestPopupDataImpl(Ark_NativePointer node,
                             Ark_Function callback)
 {
-    // blocked Arkoala
+    LOGI("Arkoala method AlphabetIndexerAttributeModifier.setOnRequestPopupData not implemented");
 }
 void OnPopupSelectImpl(Ark_NativePointer node,
                        Ark_Function callback)
@@ -243,16 +249,34 @@ void PopupItemBorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    IndexerModelNG::SetPopupItemBorderRadius(frameNode, Converter::Convert<Dimension>(*value));
+    float radius = ZERO_RADIUS;
+    if (value) {
+        auto radiusValue = Converter::Convert<float>(*value);
+        if (radiusValue >= 0) {
+            radius = radiusValue + RADIUS_OFFSET;
+        }
+    } else {
+        radius = POPUP_ITEM_DEFAULT_RADIUS + RADIUS_OFFSET;
+    }
+    IndexerModelNG::SetPopupItemBorderRadius(frameNode, Dimension(radius, DimensionUnit::VP));
+    IndexerModelNG::SetPopupBorderRadius(frameNode, Dimension(radius, DimensionUnit::VP));
 }
 void ItemBorderRadiusImpl(Ark_NativePointer node,
                           const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    IndexerModelNG::SetItemBorderRadius(frameNode, Converter::Convert<Dimension>(*value));
+    float radius = ZERO_RADIUS;
+    if (value) {
+        auto radiusValue = Converter::Convert<float>(*value);
+        if (radiusValue >= 0) {
+            radius = radiusValue + RADIUS_OFFSET;
+        }
+    } else {
+        radius = ITEM_DEFAULT_RADIUS + RADIUS_OFFSET;
+    }
+    IndexerModelNG::SetItemBorderRadius(frameNode, Dimension(radius, DimensionUnit::VP));
+    IndexerModelNG::SetIndexerBorderRadius(frameNode, Dimension(radius, DimensionUnit::VP));
 }
 void PopupBackgroundBlurStyleImpl(Ark_NativePointer node,
                                   enum Ark_BlurStyle value)
@@ -261,9 +285,7 @@ void PopupBackgroundBlurStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption option;
     auto blurStyle = Converter::OptConvert<BlurStyle>(value);
-    if (blurStyle) {
-        option.blurStyle = blurStyle.value();
-    }
+    option.blurStyle = blurStyle ? blurStyle.value() : BlurStyle::COMPONENT_REGULAR;
     IndexerModelNG::SetPopupBackgroundBlurStyle(frameNode, option);
 }
 void PopupTitleBackgroundImpl(Ark_NativePointer node,
