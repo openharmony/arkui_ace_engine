@@ -1367,7 +1367,6 @@ private:
     DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
-    std::mutex customPropertyMapLock_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
