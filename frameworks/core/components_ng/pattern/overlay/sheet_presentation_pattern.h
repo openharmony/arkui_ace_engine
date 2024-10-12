@@ -522,6 +522,15 @@ public:
         return isDrag_;
     }
 
+    void UpdateMaskBackgroundColor();
+
+    void UpdateMaskBackgroundColorRender();
+
+    Color GetMaskBackgroundColor() const
+    {
+        return sheetMaskColor_;
+    }
+
     void SetFoldStatusChanged(bool isFoldStatusChanged)
     {
         isFoldStatusChanged_ = isFoldStatusChanged;
@@ -715,6 +724,7 @@ private:
 
     float preDetentsHeight_ = 0.0f;
     float scale_ = 1.0;
+    Color sheetMaskColor_ = Color::TRANSPARENT;
 };
 } // namespace OHOS::Ace::NG
 
