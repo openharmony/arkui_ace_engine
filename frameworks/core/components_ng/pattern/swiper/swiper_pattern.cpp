@@ -4360,9 +4360,6 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             ACE_SCOPED_TRACE("Swiper autoPlay delayTime %d targetIndex %d isVisibleArea_ %d isWindowShow_ %d",
                 delayTime, swiper->targetIndex_.value(), swiper->isVisibleArea_, swiper->isWindowShow_);
             swiper->MarkDirtyNodeSelf();
-            auto pipeline = swiper->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->FlushUITasks();
         }
     });
 
