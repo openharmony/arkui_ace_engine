@@ -16,9 +16,23 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SAVE_BUTTON_SAVE_BUTTON_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SAVE_BUTTON_SAVE_BUTTON_MODEL_NG_H
 
+#include "core/components_ng/pattern/security_component/save_button/save_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 
 namespace OHOS::Ace::NG {
+struct SaveButtonStyle {
+    SaveButtonStyle()
+    {
+        text = SaveButtonSaveDescription::DOWNLOAD;
+        icon = SaveButtonIconStyle::ICON_FULL_FILLED;
+        backgroundType = ButtonType::CAPSULE;
+    }
+
+    std::optional<SaveButtonIconStyle> icon;
+    std::optional<SaveButtonSaveDescription> text;
+    std::optional<ButtonType> backgroundType;
+};
+
 class ACE_EXPORT SaveButtonModelNG : public SecurityComponentModelNG {
 public:
     static SaveButtonModelNG* GetInstance();
@@ -28,7 +42,7 @@ public:
     virtual bool GetTextResource(int32_t textStyle, std::string& text) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static bool InitSaveButton(FrameNode* frameNode,
-        const SecurityComponentElementStyle& style, bool isArkuiComponent);
+        const SaveButtonStyle& style, bool isArkuiComponent);
 private:
     static std::unique_ptr<SaveButtonModelNG> instance_;
     static std::mutex mutex_;

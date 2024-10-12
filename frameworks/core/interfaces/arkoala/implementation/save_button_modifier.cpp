@@ -51,21 +51,12 @@ void AssignCast(std::optional<SaveButtonSaveDescription>& dst, const Ark_SaveDes
     }
 }
 template<>
-SecurityComponentElementStyle Convert(const Ark_SaveButtonOptions& src)
+SaveButtonStyle Convert(const Ark_SaveButtonOptions& src)
 {
-    SecurityComponentElementStyle style;
-
-    auto optIcon = OptConvert<SaveButtonIconStyle>(src.icon);
-    auto icon = optIcon ? optIcon.value() : SaveButtonIconStyle::ICON_NULL;
-    style.icon = static_cast<int32_t>(icon);
-
-    auto optText = OptConvert<SaveButtonSaveDescription>(src.text);
-    auto text = optText ? optText.value() : SaveButtonSaveDescription::TEXT_NULL;
-    style.text = static_cast<int32_t>(text);
-
-    auto optButtonType = OptConvert<ButtonType>(src.buttonType);
-    auto buttonType = optButtonType ? optButtonType.value() : ButtonType::CAPSULE;
-    style.backgroundType = static_cast<int32_t>(buttonType);
+    SaveButtonStyle style;
+    style.text = OptConvert<SaveButtonSaveDescription>(src.text);
+    style.icon = OptConvert<SaveButtonIconStyle>(src.icon);
+    style.backgroundType = OptConvert<ButtonType>(src.buttonType);
     return style;
 }
 } // namespace OHOS::Ace::NG::Converter
@@ -75,11 +66,7 @@ void SetSaveButtonOptions0Impl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SecurityComponentElementStyle style;
-    style.text = static_cast<int32_t>(SaveButtonSaveDescription::DOWNLOAD);
-    style.icon = static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED);
-    style.backgroundType = static_cast<int32_t>(ButtonType::CAPSULE);
-    SaveButtonModelNG::InitSaveButton(frameNode, style, false);
+    SaveButtonModelNG::InitSaveButton(frameNode, SaveButtonStyle(), false);
 }
 void SetSaveButtonOptions1Impl(Ark_NativePointer node,
                                const Ark_SaveButtonOptions* options)
@@ -87,7 +74,7 @@ void SetSaveButtonOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto style = Converter::Convert<SecurityComponentElementStyle>(*options);
+    auto style = Converter::Convert<SaveButtonStyle>(*options);
     SaveButtonModelNG::InitSaveButton(frameNode, style, false);
 }
 } // SaveButtonInterfaceModifier

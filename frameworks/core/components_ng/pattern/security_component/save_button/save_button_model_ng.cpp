@@ -92,10 +92,20 @@ RefPtr<FrameNode> SaveButtonModelNG::CreateFrameNode(int32_t nodeId)
 }
 
 bool SaveButtonModelNG::InitSaveButton(FrameNode* frameNode,
-    const SecurityComponentElementStyle& style, bool isArkuiComponent)
+    const SaveButtonStyle& style, bool isArkuiComponent)
 {
     CHECK_NULL_RETURN(frameNode, false);
-    return SecurityComponentModelNG::InitSecurityComponent(frameNode, style, isArkuiComponent,
+
+    auto text = style.text ? style.text.value() : SaveButtonSaveDescription::TEXT_NULL;
+    auto icon = style.icon ? style.icon.value() : SaveButtonIconStyle::ICON_NULL;
+    auto backgroundType = style.backgroundType ? style.backgroundType.value() : ButtonType::CAPSULE;
+
+    SecurityComponentElementStyle secCompStyle = {
+        .text = static_cast<int32_t>(text),
+        .icon = static_cast<int32_t>(icon),
+        .backgroundType = static_cast<int32_t>(backgroundType)
+    };
+    return SecurityComponentModelNG::InitSecurityComponent(frameNode, secCompStyle, isArkuiComponent,
         SaveButtonModelNG::GetIconResourceStatic, SaveButtonModelNG::GetTextResourceStatic);
 }
 } // namespace OHOS::Ace::NG

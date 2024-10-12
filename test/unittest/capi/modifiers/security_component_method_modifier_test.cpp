@@ -50,8 +50,7 @@ public:
 
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         ASSERT_NE(frameNode, nullptr);
-        SecurityComponentElementStyle style;
-        SaveButtonModelNG::InitSaveButton(frameNode, style, false);
+        SaveButtonModelNG::InitSaveButton(frameNode, SaveButtonStyle(), false);
     }
 };
 
