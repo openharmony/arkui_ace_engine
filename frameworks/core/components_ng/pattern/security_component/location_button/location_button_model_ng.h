@@ -16,9 +16,23 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOCATION_BUTTON_LOCATION_BUTTON_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOCATION_BUTTON_LOCATION_BUTTON_MODEL_NG_H
 
+#include "core/components_ng/pattern/security_component/location_button/location_button_common.h"
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 
 namespace OHOS::Ace::NG {
+    struct LocationButtonStyle {
+    LocationButtonStyle()
+    {
+        icon = LocationButtonIconStyle::ICON_LINE;
+        text = LocationButtonLocationDescription::CURRENT_LOCATION;
+        backgroundType = ButtonType::CAPSULE;
+    }
+
+    std::optional<LocationButtonLocationDescription> text;
+    std::optional<LocationButtonIconStyle> icon;
+    std::optional<ButtonType> backgroundType;
+};
+
 class ACE_EXPORT LocationButtonModelNG : public SecurityComponentModelNG {
 public:
     static LocationButtonModelNG* GetInstance();
@@ -26,9 +40,14 @@ public:
         int32_t backgroundType, bool isArkuiComponent) override;
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id) override;
     virtual bool GetTextResource(int32_t textStyle, std::string& text) override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static bool InitLocationButton(FrameNode* frameNode, const LocationButtonStyle& style, bool isArkuiComponent);
 private:
     static std::unique_ptr<LocationButtonModelNG> instance_;
     static std::mutex mutex_;
+
+    static bool GetIconResourceStatic(int32_t iconStyle, InternalResource::ResourceId& id);
+    static bool GetTextResourceStatic(int32_t textStyle, std::string& text);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LOCATION_BUTTON_LOCATION_BUTTON_MODEL_NG_H

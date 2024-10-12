@@ -13,16 +13,56 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
+#include "core/components/common/layout/constants.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<PasteButtonIconStyle>& dst, const Ark_PasteIconStyle& src)
+{
+    switch (src) {
+        case ARK_PASTE_ICON_STYLE_LINES: dst = PasteButtonIconStyle::ICON_LINE; break;
+        default: LOGE("Unexpected enum value in Ark_PasteIconStyle: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<PasteButtonPasteDescription>& dst, const Ark_PasteDescription& src)
+{
+    switch (src) {
+        case ARK_PASTE_DESCRIPTION_PASTE: dst = PasteButtonPasteDescription::PASTE; break;
+        default: LOGE("Unexpected enum value in Ark_PasteDescription: %{public}d", src);
+    }
+}
+template<>
+PasteButtonStyle Convert(const Ark_PasteButtonOptions& src)
+{
+    PasteButtonStyle style;
+    style.text = OptConvert<PasteButtonPasteDescription>(src.text);
+    style.icon = OptConvert<PasteButtonIconStyle>(src.icon);
+    style.backgroundType = OptConvert<ButtonType>(src.buttonType);
+    return style;
+}
+} // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PasteButtonInterfaceModifier {
 void SetPasteButtonOptions0Impl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PasteButtonModelNG::InitPasteButton(frameNode, PasteButtonStyle(), false);
 }
 void SetPasteButtonOptions1Impl(Ark_NativePointer node,
                                 const Ark_PasteButtonOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    auto style = Converter::Convert<PasteButtonStyle>(*options);
+    PasteButtonModelNG::InitPasteButton(frameNode, style, false);
 }
 } // PasteButtonInterfaceModifier
 namespace PasteButtonAttributeModifier {

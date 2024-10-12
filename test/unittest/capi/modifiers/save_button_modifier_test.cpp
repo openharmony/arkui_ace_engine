@@ -48,6 +48,25 @@ public:
     }
 };
 
+/*
+ * @tc.name: setSaveButtonOptions0
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions0, TestSize.Level1)
+{
+    auto node = CreateNode();
+    modifier_->setSaveButtonOptions0(node);
+    auto jsonValue = GetJsonValue(node);
+    DisposeNode(node);
+    int32_t resultText = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
+    int32_t resultIcon = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
+    int32_t resultButtonType = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
+    EXPECT_EQ(resultText, static_cast<int32_t>(SaveButtonSaveDescription::DOWNLOAD));
+    EXPECT_EQ(resultIcon, static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED));
+    EXPECT_EQ(resultButtonType, static_cast<int32_t>(ButtonType::CAPSULE));
+}
+
 // Valid values for attribute 'icon' of method 'setSaveButtonOptions'
 using IconValidValuesStep = std::tuple<std::string, Opt_SaveIconStyle, SaveButtonIconStyle>;
 static std::vector<IconValidValuesStep> setSaveButtonOptionsIconValidValues = {
