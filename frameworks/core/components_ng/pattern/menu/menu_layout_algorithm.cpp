@@ -323,7 +323,6 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         InitializePadding(layoutWrapper);
     }
     InitializeParam(menuPattern);
-    InitWrapperRect(props, menuPattern);
     dumpInfo_.originPlacement =
         PlacementUtils::ConvertPlacementToString(props->GetMenuPlacement().value_or(Placement::NONE));
     placement_ = props->GetMenuPlacement().value_or(Placement::BOTTOM_LEFT);
@@ -352,10 +351,6 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     auto menuWindowRect = GetMenuWindowRectInfo(menuPattern);
     float windowsOffsetX = static_cast<float>(menuWindowRect.GetOffset().GetX());
     float windowsOffsetY = static_cast<float>(menuWindowRect.GetOffset().GetY());
-    float screenHeight = wrapperSize_.Height() + wrapperRect_.Top();
-    if (!NearEqual(screenHeight, menuWindowRect.Height())) {
-        screenHeight += bottom;
-    }
     SizeF windowGlobalSizeF(menuWindowRect.Width(), menuWindowRect.Height());
     float topSecurity = 0.0f;
     float bottomSecurity = 0.0f;
@@ -388,6 +383,7 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     param_.bottomSecurity = bottomSecurity;
     param_.previewMenuGap = targetSecurity_;
 
+    InitWrapperRect(props, menuPattern);
     InitializeLayoutRegionMargin(menuPattern);
 }
 
@@ -444,8 +440,7 @@ void MenuLayoutAlgorithm::InitializeLayoutRegionMargin(const RefPtr<MenuPattern>
 void MenuLayoutAlgorithm::InitWrapperRect(
     const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
 {
-    wrapperRect_ = param_.menuWindowRect;
-    TAG_LOGI(AceLogTag::ACE_MENU, "wrapperRect initialized to : %{public}s", wrapperRect_.ToString().c_str());
+    wrapperRect_.SetRect(0, 0, param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
@@ -473,7 +468,6 @@ void MenuLayoutAlgorithm::InitWrapperRect(
             wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
         }
     }
-    TAG_LOGI(AceLogTag::ACE_MENU, "wrapperRect update to : %{public}s", wrapperRect_.ToString().c_str());
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
 }
