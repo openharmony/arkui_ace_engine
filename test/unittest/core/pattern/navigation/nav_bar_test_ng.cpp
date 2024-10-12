@@ -523,7 +523,7 @@ HWTEST_F(NavBarTestNg, NarBarPattern002, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
-    navigationPattern->InitPanEvent(gestureHub);
+    navigationPattern->InitDividerPanEvent(gestureHub);
     auto panEvent = navigationPattern->panEvent_;
     EXPECT_NE(panEvent, nullptr);
 }
@@ -1110,7 +1110,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern021, TestSize.Level1)
 
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    navigationPattern->InitPanEvent(gestureHub);
+    navigationPattern->InitDividerPanEvent(gestureHub);
 }
 
 /**

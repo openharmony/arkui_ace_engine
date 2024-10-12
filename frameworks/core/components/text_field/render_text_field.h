@@ -623,7 +623,7 @@ protected:
     CursorPositionType cursorPositionType_ = CursorPositionType::NORMAL;
     DirectionStatus directionStatus_ = DirectionStatus::LEFT_LEFT;
     double estimateHeight_ = 0.0;
-    CopyOptions copyOption_ = CopyOptions::Distributed;
+    CopyOptions copyOption_ = CopyOptions::Local;
     TextFieldOverflowX overflowX_ = TextFieldOverflowX::HIDDEN;
 
     bool showPasswordIcon_ = true; // Whether show password icon, effect only type is password.
