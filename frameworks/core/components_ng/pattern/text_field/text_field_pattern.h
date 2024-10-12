@@ -1425,6 +1425,11 @@ public:
 
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     bool IsTextEditableForStylus() const override;
+
+    virtual void ProcessSelection();
+    void AfterLayoutProcessCleanResponse(
+        const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override
@@ -1442,9 +1447,26 @@ protected:
         return false;
     }
 
+    bool SelectOverlayIsOn()
+    {
+        return selectOverlay_->SelectOverlayIsOn();
+    }
+
+    void SetIsSingleHandle(bool isSingleHandle)
+    {
+        selectOverlay_->SetIsSingleHandle(isSingleHandle);
+    }
+
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
+    void UpdateSelection(int32_t both);
+    void UpdateSelection(int32_t start, int32_t end);
+
+    RefPtr<ContentController> contentController_;
+    RefPtr<TextSelectController> selectController_;
+    bool needToRefreshSelectOverlay_ = false;
+    bool isTextChangedAtCreation_ = false;
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1501,11 +1523,6 @@ private:
     void ProcessOverlayAfterLayout(const OffsetF& prevOffset);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
-    bool SelectOverlayIsOn()
-    {
-        return selectOverlay_->SelectOverlayIsOn();
-    }
-
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -1523,8 +1540,6 @@ private:
 
     void FilterInitializeText();
 
-    void UpdateSelection(int32_t both);
-    void UpdateSelection(int32_t start, int32_t end);
     void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPosition();
     void UpdateCaretRect(bool isEditorValueChanged);
@@ -1601,10 +1616,6 @@ private:
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
 #endif
-    void SetIsSingleHandle(bool isSingleHandle)
-    {
-        selectOverlay_->SetIsSingleHandle(isSingleHandle);
-    }
     void NotifyOnEditChanged(bool isChanged);
     void ProcessResponseArea();
     bool HasInputOperation();
@@ -1702,7 +1713,6 @@ private:
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
     bool isOnHover_ = false;
-    bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
     bool needToRequestKeyboardOnFocus_ = false;
     bool isTransparent_ = false;
@@ -1798,8 +1808,6 @@ private:
     bool leftMouseCanMove_ = false;
     bool isLongPress_ = false;
     bool isEdit_ = false;
-    RefPtr<ContentController> contentController_;
-    RefPtr<TextSelectController> selectController_;
     CaretStatus caretStatus_ = CaretStatus::NONE;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
@@ -1841,7 +1849,6 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
-    bool isTextChangedAtCreation_ = false;
     bool isEnableHapticFeedback_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
