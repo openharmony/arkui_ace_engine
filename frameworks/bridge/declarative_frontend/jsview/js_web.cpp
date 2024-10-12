@@ -4119,7 +4119,7 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
         }
         auto executor = Container::CurrentTaskExecutorSafely();
         CHECK_NULL_VOID(executor);
-        executor->PostTask([execCtx, postFunc = func, info]() {
+        executor->PostSyncTask([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<DataResubmittedEvent>(info.get());
             postFunc->Execute(*eventInfo);
@@ -4603,7 +4603,7 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
         }
         auto executor = Container::CurrentTaskExecutorSafely();
         CHECK_NULL_VOID(executor);
-        executor->PostTask([execCtx, postFunc = func]() {
+        executor->PostSyncTask([execCtx, postFunc = func]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             postFunc->Execute();
             }, TaskExecutor::TaskType::UI, "ArkUIWebControllerAttached");
