@@ -965,6 +965,33 @@ HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MarginIgnoreBlankTest003
+ * @tc.desc: Test Swiper IgnoreBlank with itemspace
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, MarginIgnoreBlankTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWith SetLoop true
+     */
+    const int32_t displayCount = 2;
+    CreateWithItem(
+        [=](SwiperModelNG model) {
+            model.SetDisplayCount(displayCount);
+            model.SetPreviousMargin(Dimension(0.0_vp), true);
+            model.SetItemSpace(Dimension(10.f));
+        },
+        3);
+
+    /**
+     * @tc.steps: step2. check first item position
+     * @tc.expected: loop is true, ignoreBlank on the endpage is not effective
+     */
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0);
+}
+
+/**
  * @tc.name: IsAtStartEnd001
  * @tc.desc: Test IsAtStart IsAtEnd
  * @tc.type: FUNC
