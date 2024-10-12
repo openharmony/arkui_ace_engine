@@ -100,13 +100,11 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     static constexpr size_t THROTTLE_INTERVAL_HOVER_EVENT = 100;
     uint64_t duration =
         static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count());
-    bool skipEvent = !hoverState_.idle && duration < THROTTLE_INTERVAL_HOVER_EVENT;
-    if (skipEvent) {
+    if (!hoverState_.idle && duration < THROTTLE_INTERVAL_HOVER_EVENT) {
         return;
     }
     static constexpr size_t MIN_SOURCE_CHANGE_GAP_MS = 1000;
-    skipEvent = sourceType != hoverState_.source && !hoverState_.idle;
-    if (skipEvent) {
+    if (sourceType != hoverState_.source && !hoverState_.idle) {
         if (duration < MIN_SOURCE_CHANGE_GAP_MS) {
             return;
         }

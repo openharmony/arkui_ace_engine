@@ -237,7 +237,7 @@ bool JSSecurityUIExtensionProxy::CanTurnOn(const JSCallbackInfo& info)
 
 void JSSecurityUIExtensionProxy::On(const JSCallbackInfo& info)
 {
-    if (!CanTurnOn(info)){
+    if (!CanTurnOn(info)) {
         return;
     }
     const RegisterType registerType = GetRegisterType(info[0]->ToString());
