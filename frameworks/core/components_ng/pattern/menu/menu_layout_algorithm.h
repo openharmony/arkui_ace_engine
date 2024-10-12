@@ -165,6 +165,7 @@ private:
     OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
     void InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
         const RefPtr<MenuPattern>& menuPattern);
+    bool SkipUpdateTargetNodeSize(const RefPtr<FrameNode>& targetNode, const RefPtr<MenuPattern>& menuPattern);
     OffsetF GetChildPosition(const SizeF& childSize, bool didNeedArrow = false);
     OffsetF FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow = false);
     bool CheckPosition(const OffsetF& position, const SizeF& childSize);
