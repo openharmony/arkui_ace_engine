@@ -86,4 +86,13 @@ bool SearchTextFieldPattern::IsTextEditableForStylus() const
     }
     return true;
 }
+
+int32_t SearchTextFieldPattern::GetRequestKeyboardId()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    auto searchHost = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_RETURN(searchHost, -1);
+    return searchHost->GetId();
+}
 } // namespace OHOS::Ace::NG

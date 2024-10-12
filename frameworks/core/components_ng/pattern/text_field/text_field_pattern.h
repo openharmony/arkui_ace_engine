@@ -349,6 +349,8 @@ public:
     void UpdateCaretPositionByTouch(const Offset& offset);
 
     bool IsReachedBoundary(float offset);
+    virtual int32_t GetRequestKeyboardId();
+
     virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboardCrossPlatForm(bool isFocusViewChanged);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
