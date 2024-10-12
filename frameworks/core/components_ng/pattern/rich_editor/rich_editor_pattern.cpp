@@ -2738,6 +2738,13 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
     }
 }
 
+PointF RichEditorPattern::GetTextOffset(const Offset &localLocation, const RectF &contentRect)
+{
+    PointF textOffset = {static_cast<float>(localLocation.GetX()) - GetTextRect().GetX(),
+                         static_cast<float>(localLocation.GetY()) - GetTextRect().GetY()};
+    return textOffset;
+}
+
 std::vector<RectF> RichEditorPattern::GetSelectedRects(int32_t start, int32_t end)
 {
     return paragraphs_.GetRects(start, end);
@@ -3330,8 +3337,8 @@ bool RichEditorPattern::HandleUrlSpanShowShadow(const Offset& localLocation, con
         localLocationOffset = ConvertGlobalToLocalOffset(globalOffset);
     }
 
-    PointF textOffset = { static_cast<float>(localLocationOffset.GetX()) - textContentRect.GetX(),
-        static_cast<float>(localLocationOffset.GetY()) - textContentRect.GetY() };
+    PointF textOffset = {static_cast<float>(localLocationOffset.GetX()) - GetTextRect().GetX(),
+                         static_cast<float>(localLocationOffset.GetY()) - GetTextRect().GetY()};
     return ShowShadow(textOffset, color);
 }
 
