@@ -75,9 +75,6 @@ export struct TextInputBootcamp {
       .height('100%')
     }
     .height('52%')
-    .onAppear(()=>{
-      AppStorage.setOrCreate('Block', []);
-    })
   }
 }
 

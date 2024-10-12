@@ -14,10 +14,10 @@
  */
 
 export class BlockTag {
-  public nowTime: string = '';
-  public tagDes: string = '';
+  public time: string = '';
+  public description: string = '';
   constructor(nowTime: string, tagDes: string) {
-    this.nowTime = nowTime;
-    this.tagDes = tagDes;
+    this.time = nowTime;
+    this.description = tagDes;
   }
 }

@@ -23,9 +23,8 @@ export struct ColorPalette {
     ['#0A59F7', '#646AFD', '#FE7062', '#E9E8ED', '#1C1C1C', $r('sys.color.ohos_id_color_text_primary_contrary')];
   @Prop isEnabled: boolean = false;
   onChange?: (color: ResourceColor) => void;
+  callBack?: (color: ResourceColor) => void;
   @Prop title: string = '';
-  @State listColorBlockTags: Array<BlockTag> = [];
-  @State listColorBlockTagsTemp: Array<BlockTag> = [];
 
   build() {
     Row() {
@@ -50,32 +49,8 @@ export struct ColorPalette {
         .width(32)
         .height(32)
         .onClick(() => {
-          if (this.isEnabled) {
-            this.onChange?.(color);
-            let time = formatDate(new Date(Date.now()))
-            this.listColorBlockTagsTemp.push(new BlockTag(time, tagDesRule(this.title, (color).toString())))
-            console.log('Block  =====>>>>>' + JSON.stringify(this.listColorBlockTagsTemp));
-            setTimeout(() => {
-              if (AppStorage.get('Block')) {
-                let block = AppStorage.get('Block') as Array<BlockTag>;
-                this.listColorBlockTags = block.concat(this.listColorBlockTagsTemp);
-                this.listColorBlockTagsTemp = [];
-                AppStorage.setOrCreate('Block', this.listColorBlockTags);
-                console.log('get Block this.listBlockTags ==' + JSON.stringify(this.listColorBlockTagsTemp));
-                console.log('get Block this.listBlockTags length ==>> ' + this.listColorBlockTags.length);
-              } else {
-                if (this.listColorBlockTagsTemp) {
-                  this.listColorBlockTags = this.listColorBlockTags.concat(this.listColorBlockTagsTemp);
-                }
-                console.log('Block this.listBlockTags ==' + JSON.stringify(this.listColorBlockTags));
-                console.log('Block this.listBlockTags length ==>> ' + this.listColorBlockTags.length);
-                AppStorage.setOrCreate('Block', this.listColorBlockTags);
-                if (this.listColorBlockTags) {
-                  this.listColorBlockTagsTemp = [];
-                }
-              }
-            }, 200)
-          }
+          this.onChange?.(color);
+          this.callBack?.(color)
         })
       })
     }

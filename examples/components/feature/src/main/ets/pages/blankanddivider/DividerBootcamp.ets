@@ -15,8 +15,7 @@
 
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { ColorBlock, RadioBlock, SliderBlock, SliderOpacityBlock, useEnabled } from 'common';
-import { promptAction } from '@kit.ArkUI';
+import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
 
 @Component
 export struct DividerBootcamp {
@@ -100,12 +99,13 @@ export struct DividerBootcamp {
           max: 100
         })
 
-        SliderOpacityBlock({
+        SliderBlock({
           title: '透明度设置',
           isEnabled: $enableDividerOpacity,
           value: $dividerOpacity,
           min: 0,
-          max: 1
+          max: 1,
+          step: 0.1
         })
 
         ColorBlock({
@@ -182,9 +182,6 @@ export struct DividerBootcamp {
       }.width('100%')
     }
     .height('52%')
-    .onAppear(()=>{
-      AppStorage.setOrCreate('Block', []);
-    })
   }
 }
 

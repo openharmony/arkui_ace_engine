@@ -85,7 +85,7 @@ export struct CheckboxGroupBootcamp {
   @Builder
   Parameters() {
     Scroll() {
-      Column({ space: 8 }) {
+      Column() {
         RadioBlock({
           title: '组件形状',
           isEnabled: this.enableCheckboxGroupShape,
@@ -117,9 +117,6 @@ export struct CheckboxGroupBootcamp {
       .height('100%')
     }
     .height('52%')
-    .onAppear(()=>{
-      AppStorage.setOrCreate('Block', []);
-    })
   }
 }
 

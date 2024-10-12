@@ -26,7 +26,7 @@ export struct SliderBlock {
   @Link value: number;
   @Prop min: number = 0;
   @Prop max: number = 100;
-  @State listSliderTagsTemp: Array<BlockTag> = [];
+  @StorageLink('Block') listSliderTagsTemp: Array<BlockTag> = [];
   @State listSliderTags: Array<BlockTag> = [];
 
   build() {
@@ -55,8 +55,7 @@ export struct SliderBlock {
                   this.listSliderTagsTemp.push(new BlockTag(time, tagDesRule(this.title, value.toString())))
                   console.log('Block  =====>>>>>' + JSON.stringify(this.listSliderTagsTemp));
                   if (AppStorage.get('Block')) {
-                    let block = AppStorage.get('Block') as Array<BlockTag>;
-                    this.listSliderTags = block.concat(this.listSliderTagsTemp);
+                    this.listSliderTags = this.listSliderTags.concat(this.listSliderTagsTemp);
                     this.listSliderTagsTemp = [];
                     AppStorage.setOrCreate('Block', this.listSliderTags);
                     console.log('get Block Slider ==' + JSON.stringify(this.listSliderTags));

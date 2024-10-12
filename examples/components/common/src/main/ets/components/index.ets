@@ -21,7 +21,5 @@ export * from './RadioBlock';
 
 export * from './SliderBlock';
 
-export * from './SliderOpacityBlock';
-
 export * from './Drawer';
 

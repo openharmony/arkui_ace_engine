@@ -136,9 +136,6 @@ export struct CalendarPickerDialogBootcamp {
         })
     }
     .width('100%')
-    .onAppear(()=>{
-      AppStorage.setOrCreate('Block', []);
-    })
   }
 
   @Builder
@@ -304,9 +301,6 @@ export struct CalendarPickerDialogBootcamp {
       }.width('100%')
     }
     .height('52%')
-    .onAppear(()=>{
-      AppStorage.setOrCreate('Block', []);
-    })
   }
 }
 

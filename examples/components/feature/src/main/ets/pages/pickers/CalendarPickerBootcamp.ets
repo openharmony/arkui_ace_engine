@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ColorBlock, RadioBlock, SliderBlock } from 'common';
-
+import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
 import { Drawer } from 'common/src/main/ets/components/Drawer';
+
 
 @Component
 export struct CalendarPickerBootcamp {
@@ -50,14 +50,15 @@ export struct CalendarPickerBootcamp {
 
   @Builder
   Content() {
-    Column() {
+    Column({ space: 8 }) {
       Column() {
-        CalendarPicker({ hintRadius: 10, selected: this.selectedDate })
+        CalendarPicker({ hintRadius: useEnabled(this.enableHintRadius, this.hintRadius), selected: this.selectedDate })
+          .edgeAlign(useEnabled(this.enableEdgeAlign, this.edgeAlign))
           .onChange((value) => {
             console.info('CalendarPicker onChange:' + JSON.stringify(value))
           })
       }
-    }.width('100%')
+    }.width('100%').height('100%')
   }
 
   @Builder
@@ -99,9 +100,6 @@ export struct CalendarPickerBootcamp {
       }.width('100%')
     }
     .height('52%')
-    .onAppear(() => {
-      AppStorage.setOrCreate('Block', []);
-    })
   }
 }
 

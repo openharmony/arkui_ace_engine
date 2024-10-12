@@ -28,7 +28,7 @@ export struct RadioBlock {
   @Link isEnabled: boolean;
   @Link value: Object;
   @Prop dataSource: RadioItem[];
-  @State listRadioBlockTags: Array<BlockTag> = [];
+  @StorageLink('Block') listRadioBlockTags: Array<BlockTag> = [];
   @State listRadioBlockTagsTemp: Array<BlockTag> = [];
 
   build() {
@@ -36,7 +36,7 @@ export struct RadioBlock {
       Block({ title: this.title, isEnabled: $isEnabled }) {
         Flex({ wrap: FlexWrap.Wrap }) {
           ForEach(this.dataSource, (item: RadioItem, index: number) => {
-            Row() {
+            Row({ space: 8 }) {
               Radio({ group: this.title, value: JSON.stringify(item.value) })
                 .checked(JSON.stringify(this.value) === JSON.stringify(item.value))
                 .enabled(this.isEnabled)
@@ -51,8 +51,7 @@ export struct RadioBlock {
                 .onClick(() => {
                   setTimeout(() => {
                     if (AppStorage.get('Block')) {
-                      let block = AppStorage.get('Block') as Array<BlockTag>;
-                      this.listRadioBlockTags = block.concat(this.listRadioBlockTagsTemp);
+                      this.listRadioBlockTags = this.listRadioBlockTags.concat(this.listRadioBlockTagsTemp);
                       this.listRadioBlockTagsTemp = [];
                       AppStorage.setOrCreate('Block', this.listRadioBlockTags);
                       console.log('get Block this.listBlockTags ==' + JSON.stringify(this.listRadioBlockTags));
@@ -72,7 +71,6 @@ export struct RadioBlock {
                 })
 
               Text(item.label)
-                .margin({ left: 8 })
                 .fontSize($r('sys.float.Body_M'))
                 .fontWeight(FontWeight.Regular)
                 .fontColor($r('sys.color.font_primary'))

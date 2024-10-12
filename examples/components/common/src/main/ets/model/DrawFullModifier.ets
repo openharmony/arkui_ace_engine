@@ -20,38 +20,47 @@ export class MyFullDrawModifier extends DrawModifier {
   public scaleX: number = 1;
   public scaleY: number = 1;
 
-  drawFront(context: DrawContext): void
-  {
+  drawFront(context: DrawContext): void {
     let canvas = context.canvas;
     let pen = new drawing.Pen();
     pen.setAntiAlias(true)
     pen.setStrokeWidth(2);
-    pen.setColor({alpha: 255, red: 0, green: 125, blue: 255});
+    pen.setColor({
+      alpha: 255,
+      red: 0,
+      green: 125,
+      blue: 255
+    });
     canvas.attachPen(pen);
     canvas.drawCircle(8, 28, 6);
     canvas.detachPen();
+
+    pen.setStrokeWidth(6);
+    pen.setColor({
+      alpha: 255,
+      red: 255,
+      green: 255,
+      blue: 255
+    });
+    canvas.attachPen(pen);
+    canvas.drawCircle(8, 28, 1);
+    canvas.detachPen();
   }
 
-  drawBehind(context: DrawContext): void
-  {
+  drawBehind(context: DrawContext): void {
     let canvas = context.canvas;
     let pen = new drawing.Pen();
     pen.setAntiAlias(true)
     pen.setStrokeWidth(1);
-    pen.setColor({alpha: 255, red: 157, green: 157, blue: 157});
+    pen.setColor({
+      alpha: 255,
+      red: 157,
+      green: 157,
+      blue: 157
+    });
     canvas.attachPen(pen);
     canvas.drawLine(8, 0, 8, 106);
     canvas.detachPen();
   }
 
-  drawContent(context: DrawContext): void {
-    let canvas = context.canvas;
-    let pen = new drawing.Pen();
-    pen.setAntiAlias(true)
-    pen.setStrokeWidth(6);
-    pen.setColor({alpha: 255, red: 255, green: 255, blue: 255});
-    canvas.attachPen(pen);
-    canvas.drawCircle(8, 28, 1);
-    canvas.detachPen();
-  }
 }

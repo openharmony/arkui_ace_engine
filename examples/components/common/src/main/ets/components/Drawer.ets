@@ -14,7 +14,7 @@
  */
 
 import curves from '@ohos.curves';
-import { SegmentButton, SegmentButtonOptions } from '@kit.ArkUI';
+import { LengthMetrics, SegmentButton, SegmentButtonOptions } from '@kit.ArkUI';
 import { BlockTag } from '../model/BlockTag';
 import { MyFullDrawModifier } from '../model/DrawFullModifier';
 
@@ -77,90 +77,73 @@ export struct Drawer {
 
       if (this.showParameters) {
         Column() {
-          Row() {
-            Blank()
+          Stack() {
             SegmentButton({ options: this.tabOptions, selectedIndexes: $tabSelectedIndexes })
               .width(250)
+
             Row() {
-              Button({ type: ButtonType.Circle }) {
-                Image($r('sys.media.ohos_ic_public_close'))
-                  .fillColor($r('sys.color.ohos_id_color_primary'))
-                  .width(24)
-                  .height(24)
-              }
-              .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
-              .height(40)
-              .width(40)
-              .margin({ left: 38 })
-              .onClick(() => {
+              IconButton($r('sys.media.ohos_ic_public_close'), () => {
                 animateTo({ curve: curves.interpolatingSpring(0, 1, 328, 36) }, () => {
                   this.showParameters = false;
-                })
+                });
               })
             }
-            .justifyContent(FlexAlign.Center)
-            .width(100)
+            .height('100%')
+            .position({ right: 8 })
+            .alignItems(VerticalAlign.Center)
           }
-          .justifyContent(FlexAlign.Center)
           .width('100%')
           .height(56)
           .margin({ bottom: 12, top: 8 })
 
-          if (this.tabSelectedIndexes.toString() === '0') {
+          if (this.tabSelectedIndexes[0] === 0) {
             this.parameters()
           } else {
-            Scroll() {
-              Stack() {
-                List() {
-                  ForEach(this.listBlockTags, (item: BlockTag) => {
-                    ListItem() {
-                      Column() {
-                        Row() {
-                          Text(item.nowTime)
-                            .fontSize($r('sys.float.Body_S'))
-                            .fontWeight(FontWeight.Medium)
-                            .fontColor($r('sys.color.font_secondary'))
-                        }
-                        .justifyContent(FlexAlign.Start)
-                        .width('100%')
-
-                        Row() {
-                          Text(item.tagDes)
-                            .fontSize($r('sys.float.Body_L'))
-                            .fontWeight(FontWeight.Medium)
-                            .fontColor($r('sys.color.font_primary'))
-                            .maxLines(2)
-                        }
-                        .margin({ top: 12 })
-                        .align(Alignment.Top)
-                        .width('100%')
+            Stack() {
+              List() {
+                ForEach(this.listBlockTags, (item: BlockTag) => {
+                  ListItem() {
+                    Column({ space: 12 }) {
+                      Row() {
+                        Text(item.time)
+                          .fontSize($r('sys.float.Body_S'))
+                          .fontWeight(FontWeight.Medium)
+                          .fontColor($r('sys.color.font_secondary'))
                       }
-                      .padding({ left: 24, bottom: 12 })
-                      .margin({ top: 12 })
-                      .width('100%')
                       .justifyContent(FlexAlign.Start)
+                      .width('100%')
+
+                      Row() {
+                        Text(item.description)
+                          .fontSize($r('sys.float.Body_L'))
+                          .fontWeight(FontWeight.Medium)
+                          .fontColor($r('sys.color.font_primary'))
+                          .maxLines(2)
+                      }
+                      .align(Alignment.Top)
+                      .width('100%')
                     }
-                    .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-                      console.info(`Ace: ListItem on item change, oldValue is ${JSON.stringify(oldValue)} value is ${JSON.stringify(newValue)}`)
-                    })
-                    .drawModifier(this.circleModifier)
-                  }, (item: string) => JSON.stringify(item))
-                }
-                .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-                  console.info(`Ace: List on area change, oldValue is ${JSON.stringify(oldValue)} value is ${JSON.stringify(newValue)}`)
-                  this.dividerHeight = newValue.height as number
-                  this.dividerHeight = this.dividerHeight + 16
-                  console.info('Ace: on area change, dividerHeight is' + this.dividerHeight)
-                })
-                .width('100%')
-                .zIndex(2)
-                .align(Alignment.Start)
+                    .margin({ top: 12 })
+                    .padding({ start: LengthMetrics.vp(24), bottom: LengthMetrics.vp(12) })
+                    .width('100%')
+                    .justifyContent(FlexAlign.Start)
+                  }
+                  .drawModifier(this.circleModifier)
+                }, (item: string) => JSON.stringify(item))
               }
-              .width('100%')
-              .onDisAppear(() => {
-                AppStorage.setOrCreate('Block', []);
+              .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+                console.info(`Ace: List on area change, oldValue is ${JSON.stringify(oldValue)} value is ${JSON.stringify(newValue)}`)
+                this.dividerHeight = (newValue.height as number) + 16
+                console.info('Ace: on area change, dividerHeight is' + this.dividerHeight)
               })
+              .width('100%')
+              .zIndex(2)
+              .align(Alignment.Start)
             }
+            .width('100%')
+            .onDisAppear(() => {
+              AppStorage.setOrCreate('Block', []);
+            })
           }
         }
         .backgroundColor($r('sys.color.ohos_id_color_dialog_bg'))
@@ -180,6 +163,9 @@ export struct Drawer {
     .align(Alignment.Top)
     .height('100%')
     .width('100%')
+    .onAppear(() => {
+      AppStorage.setOrCreate('Block', []);
+    })
   }
 }
 
