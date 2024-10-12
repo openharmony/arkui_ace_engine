@@ -99,6 +99,10 @@ public:
                 theme->tipFontSize_ = pattern->GetAttr<Dimension>("tip_font_size", 14.0_fp);
                 theme->tipTextPadding_ = pattern->GetAttr<Dimension>("tip_text_padding_size", 8.0_vp);
                 theme->blockShadowColor_ = BLOCK_SHADOW_COLOR;
+                theme->selectedTxt_ = pattern->GetAttr<std::string>("slider_accessibility_selected", "");
+                theme->unselectedTxt_ = pattern->GetAttr<std::string>("slider_accessibility_unselected", "");
+                theme->unselectedDesc_ = pattern->GetAttr<std::string>("slider_accessibility_unselectedDesc", "");
+                theme->disabledDesc_ = pattern->GetAttr<std::string>("slider_accessibility_disabledDesc", "");        
             } else {
                 LOGW("find pattern of slider fail");
             }
@@ -255,6 +259,22 @@ public:
     {
         return moveAnimationDuration_;
     }
+    std::string GetSelectedTxt() const
+    {
+        return selectedTxt_;
+    }
+    std::string GetUnselectedTxt() const
+    {
+        return unselectedTxt_;
+    }
+    std::string GetUnselectedDesc() const
+    {
+        return unselectedDesc_;
+    }
+    std::string GetDisabelDesc() const
+    {
+        return disabledDesc_;
+    }
 
 protected:
     SliderTheme() = default;
@@ -299,6 +319,12 @@ private:
     double hoverAnimationDuration_ = 0.0;
     double pressAnimationDuration_ = 0.0;
     double moveAnimationDuration_ = 0.0;
+
+    // accessibility
+    std::string selectedTxt_ = "";
+    std::string unselectedTxt_ = "";
+    std::string unselectedDesc_ = "";
+    std::string disabledDesc_ = "";
 };
 
 } // namespace OHOS::Ace

@@ -224,6 +224,11 @@ public:
 
     void DeregisterAccessibilityChildTreeCallback(int64_t elementId) override;
 
+    void RegisterAccessibilitySAObserverCallback(
+        int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback) override;
+
+    void DeregisterAccessibilitySAObserverCallback(int64_t elementId) override;
+
     void RegisterInteractionOperationAsChildTree(uint32_t parentWindowId, int32_t parentTreeId,
         int64_t parentElementId) override;
     void SetAccessibilityGetParentRectHandler(std::function<void(int32_t &, int32_t &)> &&callback) override;
@@ -524,6 +529,7 @@ private:
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
     void SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent);
     int64_t GetDelayTimeBeforeSendEvent(const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node);
+    void NotifyAccessibilitySAStateChange(bool state);
 
     std::string callbackKey_;
     uint32_t windowId_ = 0;
@@ -538,6 +544,8 @@ private:
     NG::SizeF oldGeometrySize_;
     mutable std::mutex childTreeCallbackMapMutex_;
     std::unordered_map<int64_t, std::shared_ptr<AccessibilityChildTreeCallback>> childTreeCallbackMap_;
+    mutable std::mutex componentSACallbackMutex_;
+    std::unordered_map<int64_t, std::shared_ptr<AccessibilitySAObserverCallback>> componentSACallbackMap_;
     int64_t parentElementId_ = INVALID_PARENT_ID;
     uint32_t parentWindowId_ = 0;
     int32_t parentTreeId_ = 0;

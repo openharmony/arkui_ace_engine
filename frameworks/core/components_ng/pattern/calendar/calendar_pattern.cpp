@@ -208,6 +208,8 @@ void CalendarPattern::InitSwiperChangeDoneEvent()
             pattern->FireRequestData(MonthState::PRE_MONTH);
             pattern->SetMoveDirection(NG::Direction::PRE);
         }
+        pattern->ReadTitleNode();
+        pattern->ClearChildrenFocus();
     };
     swiperEventHub->SetChangeDoneEvent(requestDataCallBack);
     for (const auto& calendarMonthNode : swiperNode->GetChildren()) {
@@ -396,6 +398,39 @@ void CalendarPattern::FlushDialogMonthData(ObtainedMonth& obtainedMonth)
     }
 }
 
+void CalendarPattern::ClearChildrenFocus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto swiperNode = host->GetChildren().front();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperFrameNode = DynamicCast<FrameNode>(swiperNode);
+    CHECK_NULL_VOID(swiperFrameNode);
+    auto preFrameNode = AceType::DynamicCast<FrameNode>(swiperFrameNode->GetChildren().front());
+    CHECK_NULL_VOID(preFrameNode);
+    auto prePattern = preFrameNode->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_VOID(prePattern);
+    auto iterator = swiperFrameNode->GetChildren().begin();
+    auto currentFrameNode = AceType::DynamicCast<FrameNode>(*(++iterator));
+    CHECK_NULL_VOID(currentFrameNode);
+    auto currentPattern = currentFrameNode->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_VOID(currentPattern);
+    auto nextFrameNode = AceType::DynamicCast<FrameNode>(swiperFrameNode->GetChildren().back());
+    CHECK_NULL_VOID(nextFrameNode);
+    auto nextPattern = nextFrameNode->GetPattern<CalendarMonthPattern>();
+    CHECK_NULL_VOID(nextPattern);
+    prePattern->ClearFocusCalendarDay();
+    currentPattern->ClearFocusCalendarDay();
+    nextPattern->ClearFocusCalendarDay();
+}
+
+void CalendarPattern::ReadTitleNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY, selectedMonth_);
+}
+
 void CalendarPattern::UpdateTitleNode()
 {
     if (!HasTitleNode()) {
@@ -412,8 +447,9 @@ void CalendarPattern::UpdateTitleNode()
     date.month = currentMonth_.month - 1 < 0
                      ? 0
                      : static_cast<uint32_t>(currentMonth_.month - 1); // W3C's month start from 0 to 11
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->FormatDateTime(date, "YYYYMM"));
-
+    auto titleDate = Localization::GetInstance()->FormatDateTime(date, "YYYYMM");
+    textLayoutProperty->UpdateContent(titleDate);
+    selectedMonth_ = titleDate;
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();

@@ -60,6 +60,27 @@ void CalendarPickerPattern::OnModifyDone()
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
     UpdateEntryButtonColor();
     UpdateEntryButtonBorderWidth();
+    UpdateAccessibilityText();
+}
+
+void CalendarPickerPattern::UpdateAccessibilityText()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto contentNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(contentNode);
+    int32_t hoverIndexs[] = { yearIndex_, FIRST_SLASH, monthIndex_, SECOND_SLASH, dayIndex_ };
+    std::string message;
+    for (auto index : hoverIndexs) {
+        auto textFrameNode = DynamicCast<FrameNode>(contentNode->GetChildAtIndex(index));
+        CHECK_NULL_VOID(textFrameNode);
+        auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        message += textLayoutProperty->GetContent().value_or("");
+    }
+    auto textAccessibilityProperty = contentNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(textAccessibilityProperty);
+    textAccessibilityProperty->SetAccessibilityText(message);
 }
 
 void CalendarPickerPattern::InitDateIndex()
@@ -1175,6 +1196,7 @@ void CalendarPickerPattern::SetDate(const std::string& info)
     auto dayString = (json->GetUInt("day") < 10 ? "0" : "") + std::to_string(json->GetUInt("day"));
     textLayoutProperty->UpdateContent(dayString);
     dayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    UpdateAccessibilityText();
 }
 
 void CalendarPickerPattern::FlushTextStyle()

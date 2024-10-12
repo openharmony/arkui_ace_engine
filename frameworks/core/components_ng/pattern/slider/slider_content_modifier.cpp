@@ -231,16 +231,19 @@ void SliderContentModifier::DrawStep(DrawingContext& context)
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(stepColor));
     canvas.AttachBrush(brush);
+    stepPointVec_.clear();
 
     if (reverse_) {
         while (GreatOrEqual(endX, startX) && GreatOrEqual(endY, startY)) {
             canvas.DrawCircle(RSPoint(endX, endY), stepSize * HALF);
+            stepPointVec_.emplace_back(PointF(endX, endY));
             endX -= stepsLengthX;
             endY -= stepsLengthY;
         }
     } else {
         while (LessOrEqual(startX, endX) && LessOrEqual(startY, endY)) {
             canvas.DrawCircle(RSPoint(startX, startY), stepSize * HALF);
+            stepPointVec_.emplace_back(PointF(startX, startY));
             startX += stepsLengthX;
             startY += stepsLengthY;
         }

@@ -54,6 +54,17 @@
         "patternlock":{
             "accessibilitypasspoint":"已连接圆点"
         },
+        "calendar":{
+            "week":"星期",
+            "year":"年",
+            "month":"月",
+            "day":"日",
+            "pre_month":"上一月",
+            "pre_year":"上一年",
+            "next_year":"下一年",
+            "next_month":"下一月",
+            "today":"今天"
+        },
         "sheet":{
             "close":"关闭"
         }
