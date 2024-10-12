@@ -1456,7 +1456,7 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     CHECK_NULL_VOID(tmpHost);
     auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) == CopyOptions::None) {
+    if (layoutProperty->GetCopyOptionsValue(CopyOptions::Local) == CopyOptions::None) {
         return;
     }
     if (!IsSelected() || IsInPasswordMode()) {
@@ -1470,8 +1470,8 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
     if (value.empty()) {
         return;
     }
-    if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
-        clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
+    if (layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None) {
+        clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
     }
 
     if (isUsingExternalKeyboard || IsUsingMouse()) {
@@ -1659,7 +1659,7 @@ void TextFieldPattern::HandleOnCut()
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) == CopyOptions::None) {
+    if (layoutProperty->GetCopyOptionsValue(CopyOptions::Local) == CopyOptions::None) {
         return;
     }
     auto start = selectController_->GetStartIndex();
@@ -1671,9 +1671,9 @@ void TextFieldPattern::HandleOnCut()
     }
     UpdateEditingValueToRecord();
     auto selectedText = contentController_->GetSelectedValue(start, end);
-    if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
+    if (layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Cut value is %{private}s", selectedText.c_str());
-        clipboard_->SetData(selectedText, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
+        clipboard_->SetData(selectedText, layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
     }
     contentController_->erase(start, end - start);
     UpdateSelection(start);
@@ -3319,7 +3319,7 @@ bool TextFieldPattern::AllowCopy()
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None && !IsInPasswordMode();
+    return layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None && !IsInPasswordMode();
 }
 
 void TextFieldPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -6013,7 +6013,7 @@ std::string TextFieldPattern::GetCopyOptionString() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     std::string copyOptionString = "CopyOptions.None";
-    switch (layoutProperty->GetCopyOptionsValue(CopyOptions::None)) {
+    switch (layoutProperty->GetCopyOptionsValue(CopyOptions::Local)) {
         case CopyOptions::InApp:
             copyOptionString = "CopyOptions.InApp";
             break;
@@ -6687,7 +6687,7 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
         { "CopyOptions.Distributed", CopyOptions::Distributed },
     };
     auto copyOption = json->GetString("copyOption");
-    CopyOptions copyOptionsEnum = CopyOptions::None;
+    CopyOptions copyOptionsEnum = CopyOptions::Local;
     auto iter = uMap.find(copyOption);
     if (iter != uMap.end()) {
         copyOptionsEnum = iter->second;
@@ -7278,7 +7278,7 @@ void TextFieldPattern::OnAttachToFrameNode()
 
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
+    layoutProperty->UpdateCopyOptions(CopyOptions::Local);
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();

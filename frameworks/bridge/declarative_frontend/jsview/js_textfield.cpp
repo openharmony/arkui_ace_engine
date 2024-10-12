@@ -1177,7 +1177,7 @@ void JSTextField::SetCopyOption(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
-    auto copyOptions = CopyOptions::None;
+    auto copyOptions = CopyOptions::Local;
     if (jsValue->IsNumber()) {
         auto emunNumber = jsValue->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
