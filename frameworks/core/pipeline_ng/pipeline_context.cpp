@@ -1321,6 +1321,10 @@ void PipelineContext::RegisterRootEvent()
     if (!IsFormRender()) {
         return;
     }
+    auto accessibilityProperty = rootNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty != nullptr) {
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+    }
 
     // To avoid conflicts between longPress and click events on the card,
     // use an empty longPress event placeholder in the EtsCard scenario
@@ -2278,8 +2282,9 @@ bool PipelineContext::OnBackPressed()
         auto lastRequestKeyboardNodeId = textfieldMgr->GetLastRequestKeyboardId();
         auto lastRequestKeyboardNode = DynamicCast<FrameNode>(
             ElementRegister::GetInstance()->GetUINodeById(lastRequestKeyboardNodeId));
-        if (lastRequestKeyboardNode && lastRequestKeyboardNode->GetPageId() == -1 &&
-            textfieldMgr->OnBackPressed()) {
+        auto hasContainerModal = windowModal_ == WindowModal::CONTAINER_MODAL;
+        if (lastRequestKeyboardNode && (lastRequestKeyboardNode->GetPageId() == -1 || (hasContainerModal &&
+            lastRequestKeyboardNode->GetPageId() == 0)) && textfieldMgr->OnBackPressed()) {
             LOGI("textfield consumed backpressed event");
             return true;
         }

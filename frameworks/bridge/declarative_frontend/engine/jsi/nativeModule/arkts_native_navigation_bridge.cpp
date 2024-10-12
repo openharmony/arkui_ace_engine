@@ -32,13 +32,18 @@ ArkUINativeModuleValue NavigationBridge::SetHideToolBar(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
+    const int32_t argsNum = 2; // 2: parameter index
+    Local<JSValueRef> animatedArg = runtimeCallInfo->GetCallArgRef(argsNum);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (hideArg->IsNull() || hideArg->IsUndefined() || !hideArg->IsBoolean()) {
-        GetArkUINodeModifiers()->getNavigationModifier()->resetHideToolBar(nativeNode);
-    } else {
-        bool hide = hideArg->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getNavigationModifier()->setHideToolBar(nativeNode, hide);
+    bool hide = false;
+    bool animated = false;
+    if (!hideArg->IsNull() && !hideArg->IsUndefined() && hideArg->IsBoolean()) {
+        hide = hideArg->ToBoolean(vm)->Value();
     }
+    if (!animatedArg->IsNull() && !animatedArg->IsUndefined() && animatedArg->IsBoolean()) {
+        animated = animatedArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->setHideToolBar(nativeNode, hide, animated);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -189,13 +194,18 @@ ArkUINativeModuleValue NavigationBridge::SetHideTitleBar(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
+    const int32_t argsNum = 2; // 2: parameter index
+    Local<JSValueRef> animatedArg = runtimeCallInfo->GetCallArgRef(argsNum);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (hideArg->IsBoolean()) {
-        bool hide = hideArg->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getNavigationModifier()->setNavHideTitleBar(nativeNode, hide);
-    } else {
-        GetArkUINodeModifiers()->getNavigationModifier()->resetNavHideTitleBar(nativeNode);
+    bool hide = false;
+    bool animated = false;
+    if (!hideArg->IsNull() && !hideArg->IsUndefined() && hideArg->IsBoolean()) {
+        hide = hideArg->ToBoolean(vm)->Value();
     }
+    if (!animatedArg->IsNull() && !animatedArg->IsUndefined() && animatedArg->IsBoolean()) {
+        animated = animatedArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->setNavHideTitleBar(nativeNode, hide, animated);
     return panda::JSValueRef::Undefined(vm);
 }
 

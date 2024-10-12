@@ -59,60 +59,6 @@ using ScriptItems = std::map<std::string, std::vector<std::string>>;
 using WeakPtr = std::weak_ptr<OHOS::Ace::PipelineBase>;
 using ErrorCallback = std::function<void(const std::string&)>;
 
-namespace OHOS::NWeb {
-
-class NWebDateTimeChooserCallbackMock : public NWebDateTimeChooserCallback {
-public:
-    void Continue(bool success, const DateTime& value) override {}
-};
-
-class NWebSelectPopupMenuCallbackMock : public NWebSelectPopupMenuCallback {
-public:
-    void Continue(const std::vector<int32_t>& indices) override {}
-
-    void Cancel() override {}
-};
-
-class NWebSelectPopupMenuParamMock : public NWebSelectPopupMenuParam {
-public:
-    std::vector<std::shared_ptr<NWebSelectPopupMenuItem>> GetMenuItems() override
-    {
-        std::vector<std::shared_ptr<NWebSelectPopupMenuItem>> value;
-        return value;
-    }
-
-    int GetItemHeight() override
-    {
-        return 0;
-    }
-
-    int GetSelectedItem() override
-    {
-        return 0;
-    }
-
-    double GetItemFontSize() override
-    {
-        return 0;
-    }
-
-    bool GetIsRightAligned() override
-    {
-        return true;
-    }
-
-    std::shared_ptr<NWebSelectMenuBound> GetSelectMenuBound() override
-    {
-        return 0;
-    }
-
-    bool GetIsAllowMultipleSelection() override
-    {
-        return true;
-    }
-};
-} // namespace OHOS::NWeb
-
 namespace OHOS::Ace::NG {
 
 class PageNodeInfoWrapMock : public PageNodeInfoWrap {
@@ -1043,6 +989,115 @@ HWTEST_F(WebPatternBranchTestUT, RequestAutoSave_001, TestSize.Level1)
     bool flag = webPattern->RequestAutoSave();
     MockContainer::TearDown();
     ASSERT_FALSE(flag);
+#endif
+}
+
+/**
+ * @tc.name: OnAttachContextDrag
+ * @tc.desc: OnAttachContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternBranchTestUT, OnAttachContextDrag, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+
+    auto dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    pipelineContext->SetupRootElement();
+    webPattern->OnAttachContext(pipelineContext.GetRawPtr());
+    ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
+#endif
+}
+
+/**
+ * @tc.name: OnDetachContextDrag
+ * @tc.desc: OnDetachContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternBranchTestUT, OnDetachContextDrag, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+
+    auto dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    pipelineContext->SetupRootElement();
+    webPattern->tooltipId_ = 1;
+    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
+#endif
+}
+
+/**
+ * @tc.name: OnModifyDoneRendermode
+ * @tc.desc: OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternBranchTestUT, OnModifyDoneRendermode, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    webPattern->renderMode_ = RenderMode::SYNC_RENDER;
+    webPattern->layoutMode_ = WebLayoutMode::NONE;
+    webPattern->OnNativeEmbedModeEnabledUpdate(true);
+    webPattern->webData_ = std::make_optional<std::string>("example.com");
+    webPattern->OnModifyDone();
+    ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
+#endif
+}
+
+/**
+ * @tc.name: ShowMagnifierAndOnColor
+ * @tc.desc: ShowMagnifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternBranchTestUT, ShowMagnifierAndOnColor, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+
+    int centerOffsetX = 20;
+    int centerOffsetY = 20;
+    webPattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(webPattern);
+    webPattern->ShowMagnifier(centerOffsetX, centerOffsetY);
+    webPattern->OnColorConfigurationUpdate();
+    OffsetT offset(20.0f, 20.0f);
+    EXPECT_EQ(webPattern->magnifierController_->GetLocalOffset(), offset);
+    EXPECT_TRUE(webPattern->magnifierController_->colorModeChange_);
 #endif
 }
 } // namespace OHOS::Ace::NG

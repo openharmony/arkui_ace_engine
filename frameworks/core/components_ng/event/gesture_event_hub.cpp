@@ -32,6 +32,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
@@ -1137,17 +1138,15 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), info.GetScreenLocation().GetX(),
         info.GetScreenLocation().GetY(), info.GetTargetDisplayId(), windowId, true, false, summary };
-    std::string summarys;
-    for (const auto& [udkey, recordSize] : summary) {
-        std::string str = udkey + "-" + std::to_string(recordSize) + ";";
-        summarys += str;
-    }
+    std::string summarys = DragDropFuncWrapper::GetSummaryString(summary);
     TAG_LOGI(AceLogTag::ACE_DRAG,
         "Start drag, frameNode is %{public}s, id is %{public}s, pixelMap width %{public}d height %{public}d, "
-        "scale is %{public}f, udkey %{public}s, recordsSize %{public}d, pointerId %{public}d, "
-        "displayId %{public}d, windowId %{public}d, summary %{public}s.",
-        frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str(), width, height, scale, udKey.c_str(),
-        recordsSize, info.GetPointerId(), info.GetTargetDisplayId(), windowId, summarys.c_str());
+        "scale is %{public}f, udkey %{public}s, recordsSize %{public}d, extraInfo length %{public}d, "
+        "pointerId %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s.",
+        frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str(), width, height, scale,
+        DragDropFuncWrapper::GetAnonyString(udKey).c_str(), recordsSize,
+        static_cast<int32_t>(extraInfoLimited.length()), info.GetPointerId(), info.GetTargetDisplayId(),
+        windowId, summarys.c_str());
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     {
         ACE_SCOPED_TRACE("drag: call msdp start drag");
@@ -1643,6 +1642,13 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
         ContainerScope scope(id);
         taskScheduler->PostTask(
             [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage, id]() {
+                auto container = Container::GetContainer(id);
+                if (!container) {
+                    TAG_LOGE(AceLogTag::ACE_DRAG, "handle drag end callback, can not get container.");
+                    return;
+                }
+                TAG_LOGI(AceLogTag::ACE_DRAG,
+                    "handle drag end callback, windowId is %{public}d.", container->GetWindowId());
                 dragDropManager->SetDragResult(notifyMessage, dragEvent);
                 dragDropManager->SetDragBehavior(notifyMessage, dragEvent);
                 dragDropManager->DoDragReset();
@@ -1874,14 +1880,14 @@ void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc
     touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
 }
 
-void GestureEventHub::SetDragForbiddenForcely(bool isDragForbidden)
+void GestureEventHub::SetDragForbiddenForcely(bool isDragForbiddenForWholeSubTree)
 {
-    isDragForbidden_ = isDragForbidden;
+    isDragForbiddenForWholeSubTree_ = isDragForbiddenForWholeSubTree;
 }
 
 bool GestureEventHub::IsDragForbidden()
 {
-    return isDragForbidden_;
+    return isDragForbiddenForWholeSubTree_;
 }
 
 bool GestureEventHub::IsNeedSwitchToSubWindow() const

@@ -39,9 +39,9 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin());
     itemEnd_ = endIndex_ == itemCnt - 1;
     if (footerIndex_ == 0) {
-        itemEnd_ &= LessOrEqual(endPos_, mainSize);
+        itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize, 0.1f);
     }
-    offsetEnd_ = itemEnd_ && LessOrEqual(endPos_ + footerHeight_ + BotMargin(), mainSize);
+    offsetEnd_ = itemEnd_ && LessOrEqualCustomPrecision(endPos_ + footerHeight_ + BotMargin(), mainSize, 0.1f);
     maxHeight_ = std::max(endPos_ - startPos_ + footerHeight_, maxHeight_);
 
     if (!itemEnd_) {

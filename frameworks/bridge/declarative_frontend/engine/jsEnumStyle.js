@@ -2230,14 +2230,18 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-
-    let promise = new Promise((resolve, reject) => {
-      info.promise = {resolve: resolve, reject: reject};
-    })
     [info.index, info.navDestinationId] = this.findInPopArray(name);
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
-    return promise;
+    return new Promise((resolve, reject) => {
+      info.promise = (errorCode, errorMessage) => {
+        if (errorCode == 0) {
+          resolve(0);
+          return;
+        }
+        reject({code: errorCode, message: errorMessage});
+      }
+    });
   }
   parseNavigationOptions(param) {
     let launchMode = LaunchMode.STANDARD;
@@ -2301,16 +2305,21 @@ class NavPathStack {
     }
     this.isReplace = 0;
     this.animated = animated;
-    let promise = new Promise((resolve, reject) => {
-      info.promise = {resolve: resolve, reject: reject};
-    });
     [info.index, info.navDestinationId] = this.findInPopArray(info.name);
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
-    return promise;
+    return new Promise((resolve, reject) => {
+      info.promise = (errorCode, errorMessage) => {
+        if (errorCode == 0) {
+          resolve(0);
+          return;
+        }
+        reject({code: errorCode, message: errorMessage});
+      }
+    });
   }
   replacePath(info, optionParam) {
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);

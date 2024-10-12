@@ -1398,6 +1398,15 @@ public:
         return dragNodeGrayscale_;
     }
 
+    virtual bool IsDirtyNodesEmpty() const
+    {
+        return true;
+    }
+
+    virtual bool IsDirtyLayoutNodesEmpty() const
+    {
+        return true;
+    }
     bool IsWaitFlushFinish() const
     {
         return isWaitFlushFinish_;

@@ -40,6 +40,7 @@ void MarqueePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowSizeChangeCallback(host->GetId());
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    ProcessVisibleAreaCallback();
 }
 
 void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -62,9 +63,7 @@ void MarqueePattern::OnWindowHide()
     if (!playStatus_) {
         return;
     }
-    CHECK_NULL_VOID(animation_);
-    playStatus_ = false;
-    AnimationUtils::PauseAnimation(animation_);
+    PauseAnimation();
 }
 
 void MarqueePattern::OnWindowShow()
@@ -72,9 +71,7 @@ void MarqueePattern::OnWindowShow()
     if (playStatus_) {
         return;
     }
-    CHECK_NULL_VOID(animation_);
-    playStatus_ = true;
-    AnimationUtils::ResumeAnimation(animation_);
+    ResumeAnimation();
 }
 
 bool MarqueePattern::OnDirtyLayoutWrapperSwap(
@@ -109,15 +106,10 @@ void MarqueePattern::OnModifyDone()
     CHECK_NULL_VOID(childRenderContext);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    UpdateTextDirection(layoutProperty, textLayoutProperty);
     auto gestureHub = textChild->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetHitTestMode(HitTestMode::HTMNONE);
-    auto src = layoutProperty->GetSrc().value_or(" ");
-    std::replace(src.begin(), src.end(), '\n', ' ');
-    textLayoutProperty->UpdateContent(src);
-    auto direction = layoutProperty->GetLayoutDirection();
-    auto textDirection = GetTextDirection(src, direction);
-    CheckTextDirectionChange(textDirection);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
@@ -146,7 +138,6 @@ void MarqueePattern::OnModifyDone()
         StopMarqueeAnimation(playStatus);
     }
     StoreProperties();
-    ProcessVisibleAreaCallback();
 }
 
 void MarqueePattern::StartMarqueeAnimation()
@@ -392,15 +383,12 @@ float MarqueePattern::GetTextOffset()
 
 void MarqueePattern::OnVisibleChange(bool isVisible)
 {
-    CHECK_NULL_VOID(animation_);
     if (isVisible) {
         CHECK_NULL_VOID(!playStatus_);
-        AnimationUtils::ResumeAnimation(animation_);
-        playStatus_ = true;
+        ResumeAnimation();
     } else {
         CHECK_NULL_VOID(playStatus_);
-        AnimationUtils::PauseAnimation(animation_);
-        playStatus_ = false;
+        PauseAnimation();
     }
 }
 
@@ -435,12 +423,9 @@ void MarqueePattern::ChangeAnimationPlayStatus()
             StartMarqueeAnimation();
             return;
         }
-        playStatus_ = true;
-        AnimationUtils::ResumeAnimation(animation_);
+        ResumeAnimation();
     } else {
-        CHECK_NULL_VOID(animation_);
-        playStatus_ = false;
-        AnimationUtils::PauseAnimation(animation_);
+        PauseAnimation();
     }
 }
 
@@ -682,6 +667,18 @@ void MarqueePattern::CheckTextDirectionChange(TextDirection direction)
     currentTextDirection_ = direction;
 }
 
+void MarqueePattern::UpdateTextDirection(
+    const RefPtr<MarqueeLayoutProperty>& layoutProperty, const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    auto src = layoutProperty->GetSrc().value_or(" ");
+    std::replace(src.begin(), src.end(), '\n', ' ');
+    textLayoutProperty->UpdateContent(src);
+    auto direction = layoutProperty->GetLayoutDirection();
+    auto textDirection = GetTextDirection(src, direction);
+    textLayoutProperty->UpdateLayoutDirection(textDirection);
+    CheckTextDirectionChange(textDirection);
+}
+
 void MarqueePattern::ProcessVisibleAreaCallback()
 {
     auto host = GetHost();
@@ -695,5 +692,19 @@ void MarqueePattern::ProcessVisibleAreaCallback()
     };
     std::vector<double> ratioList = { 0.0 };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+}
+
+void MarqueePattern::PauseAnimation()
+{
+    CHECK_NULL_VOID(animation_);
+    playStatus_ = false;
+    AnimationUtils::PauseAnimation(animation_);
+}
+
+void MarqueePattern::ResumeAnimation()
+{
+    CHECK_NULL_VOID(animation_);
+    playStatus_ = true;
+    AnimationUtils::ResumeAnimation(animation_);
 }
 } // namespace OHOS::Ace::NG

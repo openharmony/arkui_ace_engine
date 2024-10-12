@@ -760,4 +760,35 @@ HWTEST_F(GridLayoutInfoTest, ItemBelowViewport001, TestSize.Level1)
     EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1005.0f));
     EXPECT_FALSE(GreatNotEqual(info.GetItemBottomPos(1, 2, 5.0f), 1010.0f));
 }
+
+/**
+ * @tc.name: SkipStartIndexByOffset001
+ * @tc.desc: Test GridLayoutInfo::SkipStartIndexByOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 2 }, { 2, 3 } } },
+        { 2, { { 0, 4 }, { 1, 5 }, { 2, 6 } } },
+    };
+    info.lineHeightMap_ = { { 0, 162.5f }, { 1, 422.16f }, { 2, 422.16f } };
+    info.crossCount_ = 3;
+    info.childrenCount_ = 10000;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 8874, 8876, 8878, 8975, 8977, 8979, 8981, 9725 };
+
+    info.currentOffset_ = 26915.4f;
+    info.prevOffset_ = -164.25f;
+    info.currentHeight_ = 1396768.75f;
+
+    info.SkipStartIndexByOffset(option, 2.f);
+
+    EXPECT_EQ(info.startIndex_, 9677);
+}
 } // namespace OHOS::Ace::NG

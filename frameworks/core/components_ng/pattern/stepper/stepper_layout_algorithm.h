@@ -45,6 +45,7 @@ private:
     void SuitAgeLayoutButton(
         LayoutWrapper* layoutWrapper, float rightButtonHeight, float leftButtonHeight, bool isRight);
     bool layoutLeftButton_ = true;
+    bool isLoadingButton_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(StepperLayoutAlgorithm);
 };
 
