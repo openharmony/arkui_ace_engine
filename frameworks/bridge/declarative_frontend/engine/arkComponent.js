@@ -7373,6 +7373,38 @@ class ImageSpanOnErrorModifier extends ModifierWithKey {
   }
 }
 ImageSpanOnErrorModifier.identity = Symbol('imageSpanOnError');
+
+class ImageSpanBorderRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageSpan.resetBorderRadius(node);
+    } else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().imageSpan.setBorderRadius(node, this.value, this.value, this.value, this.value);
+      } else {
+        getUINativeModule().imageSpan.setBorderRadius(node, this.value.topLeft, this.value.topRight,
+          this.value.bottomLeft, this.value.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.topLeft === this.value.topLeft &&
+        this.stageValue.topRight === this.value.topRight &&
+        this.stageValue.bottomLeft === this.value.bottomLeft &&
+        this.stageValue.bottomRight === this.value.bottomRight);
+    } else {
+      return true;
+    }
+  }
+}
+ImageSpanBorderRadiusModifier.identity = Symbol('imageSpanBorderRadius');
+
 class ArkImageSpanComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -7403,6 +7435,11 @@ class ArkImageSpanComponent extends ArkComponent {
   }
   onError(callback) {
     modifierWithKey(this._modifiersWithKeys, ImageSpanOnErrorModifier.identity, ImageSpanOnErrorModifier, callback);
+    return this;
+  }
+  borderRadius(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, ImageSpanBorderRadiusModifier.identity, ImageSpanBorderRadiusModifier, value);
     return this;
   }
 }
@@ -12395,6 +12432,21 @@ class TextAreaEditMenuOptionsModifier extends ModifierWithKey {
   }
 }
 TextAreaEditMenuOptionsModifier.identity = Symbol('textAreaEditMenuOptions');
+
+class TextAreaWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetWidth(node);
+    } else {
+      getUINativeModule().textArea.setWidth(node, this.value);
+    }
+  }
+}
+TextAreaWidthModifier.identity = Symbol('textAreaWidth');
+
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -12680,6 +12732,10 @@ class ArkTextAreaComponent extends ArkComponent {
   editMenuOptions(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEditMenuOptionsModifier.identity,
       TextAreaEditMenuOptionsModifier, value);
+    return this;
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaWidthModifier.identity, TextAreaWidthModifier, value);
     return this;
   }
 }
@@ -13970,6 +14026,21 @@ class TextInputEditMenuOptionsModifier extends ModifierWithKey {
   }
 }
 TextInputEditMenuOptionsModifier.identity = Symbol('textInputEditMenuOptions');
+
+class TextInputWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetWidth(node);
+    } else {
+      getUINativeModule().textInput.setWidth(node, this.value);
+    }
+  }
+}
+TextInputWidthModifier.identity = Symbol('textInputWidth');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -14320,6 +14391,10 @@ class ArkTextInputComponent extends ArkComponent {
   editMenuOptions(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEditMenuOptionsModifier.identity,
       TextInputEditMenuOptionsModifier, value);
+    return this;
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputWidthModifier.identity, TextInputWidthModifier, value);
     return this;
   }
 }

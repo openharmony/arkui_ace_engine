@@ -35,6 +35,8 @@ public:
     static ArkUINativeModuleValue ResetOnComplete(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetOnError(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnError(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 
