@@ -20,6 +20,7 @@
 
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
+#include "securec.h"
 
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
@@ -2148,6 +2149,44 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
     jsWebSslError->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("error", eventInfo.GetError());
+    
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    std::vector<std::string> certChainDerData = eventInfo.GetCertChainData();
+    JSRef<JSArray> certsArr = JSRef<JSArray>::New();
+    for (uint8_t i = 0; i < certChainDerData.size(); i++) {
+        if (i == UINT8_MAX) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data array reach max.");
+            break;
+        }
+        
+        void *data = nullptr;
+        napi_value buffer = nullptr;
+        napi_value item = nullptr;
+        napi_status status = napi_create_arraybuffer(env, certChainDerData[i].size(), &data, &buffer);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create array buffer failed, status = %{public}d.", status);
+            continue;
+        }
+        int retCode = memcpy_s(data, certChainDerData[i].size(),
+                               certChainDerData[i].data(), certChainDerData[i].size());
+        if (retCode != 0) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data failed, index = %{public}u.", i);
+            continue;
+        }
+        status = napi_create_typedarray(env, napi_uint8_array, certChainDerData[i].size(), buffer, 0, &item);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create typed array failed, status = %{public}d.", status);
+            continue;
+        }
+        JSRef<JSVal> cert = JsConverter::ConvertNapiValueToJsVal(item);
+        certsArr->SetValueAt(i, cert);
+    }
+    obj->SetPropertyObject("certChainData", certsArr);
     return JSRef<JSVal>::Cast(obj);
 }
 
