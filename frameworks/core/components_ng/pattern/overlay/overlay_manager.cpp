@@ -625,6 +625,16 @@ void FireMenuDisappear(AnimationOption& option, const RefPtr<MenuWrapperPattern>
         }
     }, option.GetOnFinishEvent());
 }
+
+void SendPopupAccessibilityPageOpen(const RefPtr<FrameNode>& popupNode)
+{
+    CHECK_NULL_VOID(popupNode);
+    auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetShowedState(1);
+    popupNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+}
 } // namespace
 
 OverlayManager::~OverlayManager()
@@ -1381,8 +1391,11 @@ void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int3
             }
         },
         option.GetOnFinishEvent());
+    auto toastProperty = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    CHECK_NULL_VOID(toastProperty);
+    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::ON);
     toastNode->OnAccessibilityEvent(
-        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+        AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::PopToast(int32_t toastId)
@@ -1456,10 +1469,11 @@ void OverlayManager::PopToast(int32_t toastId)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
-    AccessibilityEvent event;
-    event.type = AccessibilityEventType::CHANGE;
-    event.windowContentChangeTypes = WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE;
-    pipeline->SendEventToAccessibility(event);
+    auto toastProperty = toastUnderPop->GetLayoutProperty<ToastLayoutProperty>();
+    CHECK_NULL_VOID(toastProperty);
+    toastProperty->SetSelectStatus(ToastLayoutProperty::SelectStatus::OFF);
+    toastUnderPop->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
 }
 
 void OverlayManager::ClearToastInSubwindow()
@@ -1622,6 +1636,7 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
         ShowPopupAnimationNG(popupNode);
     }
     SetPopupHotAreas(popupNode);
+    SendPopupAccessibilityPageOpen(popupNode);
 }
 
 void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
@@ -1699,6 +1714,11 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         ResetLowerNodeFocusable(popupNode);
     }
     CheckReturnFocus(popupNode);
+    auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetShowedState(0);
+    popupNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
     auto onFinish = [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable,
@@ -1730,8 +1750,6 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         }
     };
     HidePopupAnimation(popupNode, onFinish);
-    popupNode->OnAccessibilityEvent(
-        AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     RemoveEventColumn();
     RemovePixelMapAnimation(false, 0, 0);
     RemoveGatherNodeWithAnimation();
@@ -1886,6 +1904,11 @@ void OverlayManager::ErasePopup(int32_t targetId)
         auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
         CHECK_NULL_VOID(layoutProp);
         auto isShowInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+        auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetShowedState(0);
+        popupNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         if (isShowInSubWindow) {
             auto subwindowMgr = SubwindowManager::GetInstance();
             subwindowMgr->DeleteHotAreas(Container::CurrentId(), popupNode->GetId());
