@@ -2427,10 +2427,6 @@ void AceContainer::CheckAndSetFontFamily()
 void AceContainer::SetFontScaleAndWeightScale(
     const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
 {
-    if (IsKeyboard()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "Keyboard does not adjust font");
-        return;
-    }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
