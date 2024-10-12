@@ -57,12 +57,14 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
     // Create paragraph.
+    pattern->SetAdaptFontSize(std::nullopt);
     auto textFieldContentConstraint = CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     if (IsNeedAdaptFontSize(textStyle, textFieldLayoutProperty, textFieldContentConstraint)) {
         if (!AddAdaptFontSizeAndAnimations(textStyle, textFieldLayoutProperty, textFieldContentConstraint,
             layoutWrapper)) {
             return std::nullopt;
         }
+        pattern->SetAdaptFontSize(textStyle.GetFontSize());
     } else {
         CreateParagraphEx(textStyle, textContent_, contentConstraint, layoutWrapper);
     }

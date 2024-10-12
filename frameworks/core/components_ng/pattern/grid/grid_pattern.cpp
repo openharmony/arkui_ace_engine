@@ -121,6 +121,7 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 
 void GridPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
 
@@ -1405,6 +1406,7 @@ float GridPattern::GetTotalHeight() const
 
 void GridPattern::UpdateScrollBarOffset()
 {
+    CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }

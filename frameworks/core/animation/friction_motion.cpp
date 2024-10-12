@@ -15,7 +15,6 @@
 
 #include "core/animation/friction_motion.h"
 
-#include "base/log/log.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {

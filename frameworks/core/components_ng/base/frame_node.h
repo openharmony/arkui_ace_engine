@@ -436,7 +436,7 @@ public:
 
     OffsetF GetPositionToScreenWithTransform();
 
-    OffsetF GetPositionToWindowWithTransform() const;
+    OffsetF GetPositionToWindowWithTransform(bool fromBottom = false) const;
 
     OffsetF GetTransformRelativeOffset() const;
 
@@ -490,6 +490,11 @@ public:
     void PushDestroyCallback(std::function<void()>&& callback)
     {
         destroyCallbacks_.emplace_back(callback);
+    }
+
+    void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
+    {
+        destroyCallbacksMap_[tag] = callback;
     }
 
     std::list<std::function<void()>> GetDestroyCallback() const
@@ -1057,6 +1062,8 @@ public:
 
 protected:
     void DumpInfo() override;
+    std::list<std::function<void()>> destroyCallbacks_;
+    std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
 
 private:
     void MarkDirtyNode(
@@ -1174,7 +1181,6 @@ private:
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
-    std::list<std::function<void()>> destroyCallbacks_;
     std::function<void()> colorModeUpdateCallback_;
     std::function<void(int32_t)> ndkColorModeUpdateCallback_;
     std::function<void(float, float)> ndkFontUpdateCallback_;

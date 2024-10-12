@@ -32,7 +32,7 @@ void ResSchedReport::ResSchedDataReport(
     uint32_t resType, int32_t value, const std::unordered_map<std::string, std::string>& payload)
 {}
 
-void ResSchedReport::OnTouchEvent(const TouchType& touchType) {}
+void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent) {}
 
 ResSchedReportScope::ResSchedReportScope(
     const std::string& name, const std::unordered_map<std::string, std::string>& param)

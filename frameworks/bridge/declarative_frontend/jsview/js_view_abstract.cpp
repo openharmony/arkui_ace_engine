@@ -100,13 +100,15 @@
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
+#include "interfaces/native/node/resource.h"
+
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/property/progress_mask_property.h"
-#include "interfaces/native/node/resource.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1245,6 +1247,13 @@ std::string GetBundleNameFromContainer()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, "");
     return container->GetBundleName();
+}
+
+std::string GetModuleNameFromContainer()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, "");
+    return container->GetModuleName();
 }
 
 void CompleteResourceObjectFromParams(
@@ -3626,6 +3635,8 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         if (preview->ToNumber<int32_t>() == 1) {
             menuParam.previewMode = MenuPreviewMode::IMAGE;
             ParseContentPreviewAnimationOptionsParam(info, menuContentOptions, menuParam);
+        } else if (preview->ToNumber<int32_t>() == 0) {
+            menuParam.isSetPreviewNone = true;
         }
     } else {
         previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
@@ -5029,6 +5040,21 @@ bool JSViewAbstract::ConvertResourceType(const std::string& typeName, ResourceTy
 
 void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
 {
+    std::string bundleName;
+    std::string moduleName;
+    int32_t resId = -1;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId);
+}
+
+void JSViewAbstract::CompleteResourceObjectWithBundleName(
+    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId)
+{
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId);
+}
+
+void JSViewAbstract::CompleteResourceObjectInner(
+    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue)
+{
     // dynamic $r raw input format is
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
     JSRef<JSVal> resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
@@ -5047,49 +5073,20 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
         }
         CompleteResourceObjectFromId(type, jsObj, resType, resName);
     } else if (resId->IsNumber()) {
-        int32_t resIdValue = resId->ToNumber<int32_t>();
+        resIdValue = resId->ToNumber<int32_t>();
         if (resIdValue == -1) {
             CompleteResourceObjectFromParams(resIdValue, jsObj, targetModule, resType, resName);
         }
     }
 
-    std::string bundleName;
-    std::string moduleName;
     JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
-    if (bundleName.empty() && !moduleName.empty()) {
+    if ((bundleName.empty() && !moduleName.empty()) || bundleName == DEFAULT_HAR_BUNDLE_NAME) {
         bundleName = GetBundleNameFromContainer();
         jsObj->SetProperty<std::string>(static_cast<int32_t>(ArkUIIndex::BUNDLE_NAME), bundleName);
     }
-}
-
-void JSViewAbstract::CompleteResourceObjectWithBundleName(
-    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId)
-{
-    JSRef<JSVal> tmp = jsObj->GetProperty("id");
-    ResourceType resType;
-
-    std::string targetModule;
-    std::string resName;
-    if (tmp->IsString()) {
-        JSRef<JSVal> type = jsObj->GetProperty("type");
-        int32_t typeNum = -1;
-        if (type->IsNumber()) {
-            typeNum = type->ToNumber<int32_t>();
-        }
-        if (!ParseDollarResource(tmp, targetModule, resType, resName, typeNum == UNKNOWN_RESOURCE_TYPE)) {
-            return;
-        }
-        CompleteResourceObjectFromId(type, jsObj, resType, resName);
-    } else if (!tmp->IsNull() && tmp->IsNumber()) {
-        resId = tmp->ToNumber<int32_t>();
-        if (resId == -1) {
-            CompleteResourceObjectFromParams(resId, jsObj, targetModule, resType, resName);
-        }
-    }
-    JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
-    if (bundleName.empty() && !moduleName.empty()) {
-        bundleName = GetBundleNameFromContainer();
-        jsObj->SetProperty<std::string>("bundleName", bundleName);
+    if (moduleName == DEFAULT_HAR_MODULE_NAME) {
+        moduleName = GetModuleNameFromContainer();
+        jsObj->SetProperty<std::string>(static_cast<int32_t>(ArkUIIndex::MODULE_NAME), moduleName);
     }
 }
 
@@ -5535,7 +5532,6 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     }
     if (type == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
-        result.SetResourceId(resId->ToNumber<uint32_t>());
         return true;
     }
     return false;
@@ -7670,6 +7666,17 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->BindBackground(std::move(buildFunc), alignment);
 }
 
+void UpdatePreviewModeForDraggableTarget(const WeakPtr<NG::FrameNode>& target, NG::MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuParam.previewMode == MenuPreviewMode::NONE && !menuParam.isSetPreviewNone);
+    auto targetNode = target.Upgrade();
+    CHECK_NULL_VOID(targetNode);
+    if (NG::GestureEventHub::IsAllowedDrag(targetNode)) {
+        menuParam.previewMode = MenuPreviewMode::IMAGE;
+        TAG_LOGI(AceLogTag::ACE_MENU, "targetNode is draggable, use image for preview");
+    }
+}
+
 void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
@@ -7709,6 +7716,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
+    UpdatePreviewModeForDraggableTarget(frameNode, menuParam);
 
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
@@ -10901,5 +10909,36 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resour
     res->src = src;
     res->bundleName = bundleName;
     res->moduleName = moduleName;
+}
+
+void JSViewAbstract::SetTextStyleApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const JSRef<JSVal>& modifierObj)
+{
+    if (!modifierObj->IsObject()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyTextModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+    auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                    modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        JSRef<JSVal> params[2];
+        params[0] = modifierParam;
+        params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(2, params);
+    };
+    textStyleApply = onApply;
 }
 } // namespace OHOS::Ace::Framework

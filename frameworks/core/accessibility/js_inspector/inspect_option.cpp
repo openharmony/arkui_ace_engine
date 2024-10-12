@@ -15,8 +15,6 @@
 
 #include "inspect_option.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectOption::InspectOption(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

@@ -15,10 +15,7 @@
 
 #include "core/animation/card_transition_controller.h"
 
-#include "core/animation/curve_animation.h"
-#include "core/components/list/list_item_element.h"
 #include "core/components/list/render_list.h"
-#include "core/components/page_transition/page_transition_element.h"
 #include "core/components/transform/transform_element.h"
 
 namespace OHOS::Ace {

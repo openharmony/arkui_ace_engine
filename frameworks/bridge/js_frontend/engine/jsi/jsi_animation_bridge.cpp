@@ -16,13 +16,6 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_animation_bridge.h"
 
 #include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "core/animation/keyframe_animation.h"
-#include "core/components/tween/tween_component.h"
-#include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

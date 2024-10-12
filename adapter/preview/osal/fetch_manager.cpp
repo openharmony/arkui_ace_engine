@@ -108,9 +108,9 @@ public:
         responseData.SetCode(responseCode);
         responseData.SetData(responseBody);
         responseData.SetHeaders(responseHeader);
-
-        curl_slist_free_all(header);
-
+        if (header != nullptr) {
+            curl_slist_free_all(header);
+        }
         return true;
     }
 

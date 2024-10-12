@@ -73,7 +73,7 @@ public:
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
     void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f), float menuScale = 1.0f,
-        bool isRedragStart = false);
+        bool isRedragStart = false, int32_t menuWrapperId = -1);
     void UpdatePreviewPosition();
     bool GetMenuPreviewCenter(NG::OffsetF& offset);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,

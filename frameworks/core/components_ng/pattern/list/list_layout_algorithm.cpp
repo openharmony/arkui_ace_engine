@@ -1387,7 +1387,9 @@ void ListLayoutAlgorithm::ProcessCacheCount(LayoutWrapper* layoutWrapper, int32_
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
         if (!items.empty()) {
-            PostIdleTaskV2(host, { items, childLayoutConstraint_, GetGroupLayoutConstraint() });
+            ListMainSizeValues value = { startMainPos_, endMainPos_, jumpIndexInGroup_, prevContentMainSize_,
+                scrollAlign_, layoutStartMainPos_, layoutEndMainPos_ };
+            PostIdleTaskV2(host, { items, childLayoutConstraint_, GetGroupLayoutConstraint() }, value);
         } else {
             auto pattern = host->GetPattern<ListPattern>();
             CHECK_NULL_VOID(pattern);
@@ -1988,19 +1990,38 @@ std::list<PredictLayoutItem> ListLayoutAlgorithm::LayoutCachedItemV2(LayoutWrapp
     return predictBuildList;
 }
 
-bool ListLayoutAlgorithm::PredictBuildGroup(RefPtr<LayoutWrapper> wrapper,
-    const LayoutConstraintF& constraint, bool forward, int64_t deadline, int32_t cached)
+bool ListLayoutAlgorithm::PredictBuildGroup(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint,
+    int64_t deadline, int32_t cached, const ListMainSizeValues& listMainSizeValues)
 {
     CHECK_NULL_RETURN(wrapper, false);
     auto groupNode = AceType::DynamicCast<FrameNode>(wrapper);
     CHECK_NULL_RETURN(groupNode, false);
     auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(groupPattern, false);
-    groupPattern->LayoutCache(constraint, forward, deadline, cached);
+    float referencePos = 0.0f;
+    if (listMainSizeValues.jumpIndexInGroup.has_value() && listMainSizeValues.scrollAlign == ScrollAlign::CENTER) {
+        referencePos = (listMainSizeValues.startPos + listMainSizeValues.endPos) / 2; // 2:average
+    }
+    float endPos = 0.0f;
+    float startPos = 0.0f;
+    if (listMainSizeValues.forward) {
+        startPos = listMainSizeValues.startPos;
+        endPos = listMainSizeValues.layoutEndMainPos.value_or(listMainSizeValues.endPos);
+    } else {
+        startPos = listMainSizeValues.layoutStartMainPos.value_or(listMainSizeValues.startPos);
+        endPos = listMainSizeValues.endPos;
+    }
+    ListMainSizeValues values;
+    values.startPos = startPos;
+    values.endPos = endPos;
+    values.referencePos = referencePos;
+    values.prevContentMainSize = listMainSizeValues.prevContentMainSize;
+    groupPattern->LayoutCache(constraint, listMainSizeValues.forward, deadline, cached, values);
     return true;
 }
 
-void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline)
+void ListLayoutAlgorithm::PredictBuildV2(
+    RefPtr<FrameNode> frameNode, int64_t deadline, ListMainSizeValues listMainSizeValues)
 {
     ACE_SCOPED_TRACE("List predict v2");
     CHECK_NULL_VOID(frameNode);
@@ -2031,7 +2052,8 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
             frameNode->GetGeometryNode()->SetParentLayoutConstraint(param.layoutConstraint);
             FrameNode::ProcessOffscreenNode(frameNode);
         } else {
-            PredictBuildGroup(wrapper, param.groupLayoutConstraint, (*it).forward, deadline, (*it).cached);
+            listMainSizeValues.forward = (*it).forward;
+            PredictBuildGroup(wrapper, param.groupLayoutConstraint, deadline, (*it).cached, listMainSizeValues);
         }
         needMarkDirty = true;
         param.items.erase(it++);
@@ -2041,11 +2063,12 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
     }
     pattern->SetPredictLayoutParamV2(std::nullopt);
     if (!param.items.empty()) {
-        ListLayoutAlgorithm::PostIdleTaskV2(frameNode, param);
+        ListLayoutAlgorithm::PostIdleTaskV2(frameNode, param, listMainSizeValues);
     }
 }
 
-void ListLayoutAlgorithm::PostIdleTaskV2(RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param)
+void ListLayoutAlgorithm::PostIdleTaskV2(
+    RefPtr<FrameNode> frameNode, const ListPredictLayoutParamV2& param, ListMainSizeValues listMainSizeValues)
 {
     ACE_SCOPED_TRACE("PostIdleTaskV2");
     CHECK_NULL_VOID(frameNode);
@@ -2058,9 +2081,9 @@ void ListLayoutAlgorithm::PostIdleTaskV2(RefPtr<FrameNode> frameNode, const List
     pattern->SetPredictLayoutParamV2(param);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->AddPredictTask([weak = WeakClaim(RawPtr(frameNode))](int64_t deadline, bool canUseLongPredictTask) {
-        ListLayoutAlgorithm::PredictBuildV2(weak.Upgrade(), deadline);
-    });
+    context->AddPredictTask(
+        [weak = WeakClaim(RawPtr(frameNode)), value = listMainSizeValues](int64_t deadline,
+            bool canUseLongPredictTask) { ListLayoutAlgorithm::PredictBuildV2(weak.Upgrade(), deadline, value); });
 }
 
 float ListLayoutAlgorithm::GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign) const

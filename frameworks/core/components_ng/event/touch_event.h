@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 
@@ -156,6 +157,11 @@ public:
 private:
     bool TriggerTouchCallBack(const TouchEvent& changedPoint);
     bool ShouldResponse() override;
+    void TriggerCallBacks(TouchEventInfo& event);
+    TouchEventInfo CreateTouchEventInfo(const TouchEvent& lastPoint);
+    TouchLocationInfo CreateChangedTouchInfo(const TouchEvent& lastPoint, const TouchEvent& event);
+    TouchLocationInfo CreateTouchItemInfo(const TouchPoint& pointItem, const TouchEvent& event, TouchType type);
+    TouchLocationInfo CreateHistoryTouchItemInfo(const TouchEvent& eventItem, const TouchEvent& event);
 
     std::list<RefPtr<TouchEventImpl>> touchEvents_;
     RefPtr<TouchEventImpl> touchAfterEvents_;

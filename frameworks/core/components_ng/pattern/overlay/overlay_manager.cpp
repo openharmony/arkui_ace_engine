@@ -633,7 +633,8 @@ OverlayManager::~OverlayManager()
     popupMap_.clear();
 }
 
-void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale, bool isRedragStart)
+void OverlayManager::UpdateContextMenuDisappearPosition(
+    const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -646,20 +647,22 @@ void OverlayManager::UpdateContextMenuDisappearPosition(const NG::OffsetF& offse
     if (menuMap_.empty()) {
         return;
     }
-    
+
+    RefPtr<FrameNode> menuWrapper = nullptr;
+    for (auto [targetId, node] : menuMap_) {
+        if (node && node->GetId() == menuWrapperId) {
+            menuWrapper = node;
+        }
+    }
+
+    CHECK_NULL_VOID(menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG);
     overlayManager->UpdateDragMoveVector(offset);
 
     if (overlayManager->IsOriginDragMoveVector() || !overlayManager->IsUpdateDragMoveVector()) {
         return;
     }
 
-    auto rootNode = rootNodeWeak_.Upgrade();
-    for (const auto& child : rootNode->GetChildren()) {
-        auto node = DynamicCast<FrameNode>(child);
-        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            UpdateContextMenuDisappearPositionAnimation(node, overlayManager->GetUpdateDragMoveVector(), menuScale);
-        }
-    }
+    UpdateContextMenuDisappearPositionAnimation(menuWrapper, overlayManager->GetUpdateDragMoveVector(), menuScale);
 }
 
 OffsetF OverlayManager::CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset)
@@ -2924,6 +2927,18 @@ bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
     return true;
 }
 
+bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
+{
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove dragPreview enter");
+    auto columnNode = pixmapColumnNodeWeak_.Upgrade();
+    if (columnNode != overlay) {
+        return false;
+    }
+    RemovePixelMap();
+    RemoveGatherNode();
+    return true;
+}
+
 int32_t OverlayManager::GetPopupIdByNode(const RefPtr<FrameNode>& overlay)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "GetPopupIdByNode IN");
@@ -2982,6 +2997,9 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
     }
     if (InstanceOf<MenuWrapperPattern>(pattern)) {
         return RemoveMenu(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
+    }
+    if (InstanceOf<LinearLayoutPattern>(pattern)) {
+        return RemoveDragPreview(overlay) ? OVERLAY_REMOVE : OVERLAY_NOTHING;
     }
     return OVERLAY_NOTHING;
 }
@@ -5318,14 +5336,26 @@ void OverlayManager::MountFilterToWindowScene(const RefPtr<FrameNode>& columnNod
     hasFilter_ = true;
 }
 
-void OverlayManager::MountPixelMapToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene)
+/**
+ * Mount pixelMap to wndow scene for lifting or for drag moving.
+ * When isDragPixelMap is true, the pixelMap is saved by dragPixmapColumnNodeWeak_ used for moving with drag finger or
+ * mouse, etc.
+ * When isDragPixelMap is false, the pixelMap is saved by pixmapColumnNodeWeak_ used for lifting.
+ */
+void OverlayManager::MountPixelMapToWindowScene(
+    const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene, bool isDragPixelMap)
 {
     CHECK_NULL_VOID(windowScene);
     columnNode->MountToParent(windowScene);
     columnNode->OnMountToParentDone();
     windowScene->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    pixmapColumnNodeWeak_ = columnNode;
-    hasPixelMap_ = true;
+    if (isDragPixelMap) {
+        dragPixmapColumnNodeWeak_ = columnNode;
+        hasDragPixelMap_ = true;
+    } else {
+        pixmapColumnNodeWeak_ = columnNode;
+        hasPixelMap_ = true;
+    }
 }
 
 void OverlayManager::MountEventToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene)
@@ -5337,15 +5367,26 @@ void OverlayManager::MountEventToWindowScene(const RefPtr<FrameNode>& columnNode
     hasEvent_ = true;
 }
 
-void OverlayManager::MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode)
+/**
+ * Mount pixelMap to root node for lifting or for drag moving.
+ * When isDragPixelMap is true, the pixelMap is saved by dragPixmapColumnNodeWeak_ used for moving with drag finger or
+ * mouse, etc.
+ * When isDragPixelMap is false, the pixelMap is saved by pixmapColumnNodeWeak_ used for lifting.
+ */
+void OverlayManager::MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode, bool isDragPixelMap)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     columnNode->MountToParent(rootNode);
     columnNode->OnMountToParentDone();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    pixmapColumnNodeWeak_ = columnNode;
-    hasPixelMap_ = true;
+    if (isDragPixelMap) {
+        dragPixmapColumnNodeWeak_ = columnNode;
+        hasDragPixelMap_ = true;
+    } else {
+        pixmapColumnNodeWeak_ = columnNode;
+        hasPixelMap_ = true;
+    }
 }
 
 void OverlayManager::MountEventToRootNode(const RefPtr<FrameNode>& columnNode)
@@ -5478,6 +5519,25 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y,
         },
         scaleOption.GetOnFinishEvent());
     isOnAnimation_ = true;
+}
+
+void OverlayManager::RemoveDragPixelMap()
+{
+    TAG_LOGI(AceLogTag::ACE_DRAG, "remove drag pixelMap enter");
+    if (!hasDragPixelMap_) {
+        return;
+    }
+    auto columnNode = dragPixmapColumnNodeWeak_.Upgrade();
+    if (!columnNode) {
+        hasDragPixelMap_ = false;
+        return;
+    }
+    auto rootNode = columnNode->GetParent();
+    CHECK_NULL_VOID(rootNode);
+    rootNode->RemoveChild(columnNode);
+    rootNode->RebuildRenderContextTree();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    hasDragPixelMap_ = false;
 }
 
 void OverlayManager::UpdatePixelMapScale(float& scale)
@@ -6308,9 +6368,26 @@ void OverlayManager::UpdatePixelMapPosition(bool isSubwindowOverlay)
     imageContext->OnModifyDone();
 }
 
+RefPtr<FrameNode> OverlayManager::GetDragPixelMapContentNode() const
+{
+    auto column = dragPixmapColumnNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(column, nullptr);
+    auto imageNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
+    return imageNode;
+}
+
 RefPtr<FrameNode> OverlayManager::GetPixelMapBadgeNode() const
 {
     auto column = pixmapColumnNodeWeak_.Upgrade();
+    CHECK_NULL_RETURN(column, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(column->GetLastChild());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    return textNode;
+}
+
+RefPtr<FrameNode> OverlayManager::GetDragPixelMapBadgeNode() const
+{
+    auto column = dragPixmapColumnNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(column, nullptr);
     auto textNode = AceType::DynamicCast<FrameNode>(column->GetLastChild());
     CHECK_NULL_RETURN(textNode, nullptr);

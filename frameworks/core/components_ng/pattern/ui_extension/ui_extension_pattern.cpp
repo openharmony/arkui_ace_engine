@@ -299,6 +299,11 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         UIEXT_LOGW("Unable to StartUiextensionAbility while in the background.");
         return;
     }
+    if (!isModal_ && !hasMountToParent_) {
+        needReNotifyForeground_ = true;
+        UIEXT_LOGI("Should NotifyForeground after MountToParent.");
+        return;
+    }
     NotifyForeground();
 }
 

@@ -32,7 +32,6 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
-#include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/property/measure_property.h"
 
 

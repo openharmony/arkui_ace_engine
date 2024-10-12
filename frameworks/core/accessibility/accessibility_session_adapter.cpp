@@ -15,8 +15,6 @@
 
 #include "core/accessibility/accessibility_session_adapter.h"
 
-#include <map>
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
