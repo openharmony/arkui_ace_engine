@@ -865,6 +865,8 @@ public:
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
 
     bool CheckThreadSafe() const;
+    
+    void AnimateOnSafeAreaUpdate();
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -936,8 +938,6 @@ private:
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
-
-    void AnimateOnSafeAreaUpdate();
 
     // only used for static form.
     void UpdateFormLinkInfos();
