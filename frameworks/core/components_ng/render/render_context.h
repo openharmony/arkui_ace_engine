@@ -282,7 +282,6 @@ public:
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
     virtual void SetContentRectToFrame(RectF rect) {}
     virtual void SetSecurityLayer(bool isSecure) {}
-    virtual void SetLeashPersistId(uint64_t leashPersistId) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}

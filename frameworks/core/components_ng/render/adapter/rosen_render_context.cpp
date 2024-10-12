@@ -5189,14 +5189,6 @@ int32_t RosenRenderContext::CalcExpectedFrameRate(const std::string& scene, floa
     return rsNode_->CalcExpectedFrameRate(scene, speed);
 }
 
-void RosenRenderContext::SetLeashPersistId(uint64_t leashPersistId)
-{
-    CHECK_NULL_VOID(rsNode_);
-    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
-    CHECK_NULL_VOID(rsSurfaceNode);
-    rsSurfaceNode->SetLeashPersistId(leashPersistId);
-}
-
 bool RosenRenderContext::DoTextureExport(uint64_t surfaceId)
 {
     CHECK_NULL_RETURN(rsNode_, false);

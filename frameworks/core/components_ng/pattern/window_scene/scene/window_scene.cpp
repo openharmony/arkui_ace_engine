@@ -87,6 +87,7 @@ std::shared_ptr<Rosen::RSSurfaceNode> WindowScene::CreateLeashWindowNode()
     Rosen::RSSurfaceNodeConfig config;
     config.SurfaceNodeName = "WindowScene_" + name + std::to_string(session_->GetPersistentId());
     auto surfaceNode = Rosen::RSSurfaceNode::Create(config, Rosen::RSSurfaceNodeType::LEASH_WINDOW_NODE);
+    CHECK_NULL_RETURN(surfaceNode, nullptr);
     surfaceNode->SetLeashPersistId(static_cast<int64_t>(session_->GetPersistentId()));
     return surfaceNode;
 }
