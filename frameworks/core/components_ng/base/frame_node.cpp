@@ -5805,7 +5805,6 @@ void FrameNode::ResetPredictNodes()
 
 void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
 {
-    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
     bool result = func();
     if (IsCNode()) {
         return;
@@ -5832,7 +5831,6 @@ bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value
     if (!IsCNode()) {
         return false;
     }
-    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
     auto iter = customPropertyMap_.find(key);
     if (iter != customPropertyMap_.end()) {
         value = iter->second;
@@ -5843,13 +5841,11 @@ bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value
 
 void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
 {
-    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
     customPropertyMap_[key] = value;
 }
 
 void FrameNode::RemoveCustomProperty(const std::string& key)
 {
-    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
     auto iter = customPropertyMap_.find(key);
     if (iter != customPropertyMap_.end()) {
         customPropertyMap_.erase(iter);
