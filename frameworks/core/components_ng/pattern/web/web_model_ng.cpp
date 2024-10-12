@@ -366,6 +366,20 @@ void WebModelNG::SetOnContextMenuShow(std::function<bool(const BaseEventInfo* in
     webEventHub->SetOnContextMenuShowEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetNewDragStyle(bool isNewDragStyle)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetNewDragStyle(isNewDragStyle);
+}
+
+void WebModelNG::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetPreviewSelectionMenu(param);
+}
+
 void WebModelNG::SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;

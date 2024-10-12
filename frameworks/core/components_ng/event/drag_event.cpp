@@ -110,8 +110,10 @@ void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info)
     }
 }
 
-void DragEventActuator::StartLongPressActionForWeb()
+void DragEventActuator::StartLongPressActionForWeb(bool isFloatImage)
 {
+    TAG_LOGW(AceLogTag::ACE_WEB, "StartLongPressActionForWeb isFloatImage:%{public}d", isFloatImage);
+    isFloatImage_ = isFloatImage;
     if (!isReceivedLongPress_) {
         TAG_LOGW(AceLogTag::ACE_WEB, "DragDrop not received long press action,"
             "don't start long press action for web");
@@ -225,6 +227,21 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
         TAG_LOGI(AceLogTag::ACE_DRAG, "Restart drag for lifting status");
         actionStart_(gestureInfo);
     }
+}
+
+bool DragEventActuator::IsNotNeedShowPreviewForWeb(const RefPtr<FrameNode>& frameNode)
+{
+#ifdef WEB_SUPPORTED
+    bool isNotNeedShowPreview = false;
+    if (frameNode && frameNode->GetTag() == V2::WEB_ETS_TAG) {
+        auto webPattern = frameNode->GetPattern<WebPattern>();
+        CHECK_NULL_RETURN(webPattern, false);
+        isNotNeedShowPreview = webPattern->IsPreviewMenuNotNeedShowPreview();
+    }
+    return isNotNeedShowPreview;
+#else
+    return false;
+#endif
 }
 
 void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -440,7 +457,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (actuator->GetIsNotInPreviewState() && !gestureHub->GetTextDraggable()) {
             DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
         }
-        if (!gestureHub->GetBindMenuStatus().IsNotNeedShowPreview()) {
+        if (!gestureHub->GetBindMenuStatus().IsNotNeedShowPreview() &&
+            !actuator->IsNotNeedShowPreviewForWeb(frameNode)) {
             if (gestureHub->GetTextDraggable()) {
                 if (gestureHub->GetIsTextDraggable()) {
                     actuator->HideEventColumn();
@@ -605,6 +623,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 actuator->SetTextAnimation(gestureHub, info.GetGlobalLocation());
                 actuator->SetEventColumn(actuator);
             }
+            return;
+        }
+        if (!actuator->isFloatImage_) {
+            actuator->isFloatImage_ = true;
             return;
         }
 
@@ -1135,7 +1157,6 @@ RefPtr<PixelMap> DragEventActuator::GetPreviewPixelMapByInspectorId(const std::s
     // Take a screenshot of the frame node and return it as a PixelMap.
     return GetScreenShotPixelMap(dragPreviewFrameNode);
 }
-
 
 /* Captures a screenshot of the specified frame node and encapsulates it in a PixelMap.
  *

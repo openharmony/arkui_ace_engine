@@ -274,6 +274,7 @@ public:
     int GetMediaType() const override;
     int GetInputFieldType() const override;
     std::string GetSelectionText() const override;
+    void GetImageRect(int32_t& x, int32_t& y, int32_t& width, int32_t& height) const override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebContextMenuParams> param_;
@@ -909,6 +910,7 @@ public:
     void SuggestionSelected(int32_t index);
     void OnHideAutofillPopup();
     std::shared_ptr<OHOS::NWeb::NWebDragData> GetOrCreateDragData();
+    bool IsDragging();
     bool IsImageDrag();
     std::shared_ptr<OHOS::NWeb::NWebDragData> dragData_ = nullptr;
     std::string tempDir_;
