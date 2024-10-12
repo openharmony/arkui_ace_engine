@@ -271,14 +271,6 @@ OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
     return OffsetF(offsetX, offsetY);
 }
 
-RefPtr<MenuPattern> GetMenuPattern(const RefPtr<FrameNode>& menuNode)
-{
-    CHECK_NULL_RETURN(menuNode, nullptr);
-    auto menuHostNode = menuNode->GetChildByIndex(0)->GetHostNode();
-    CHECK_NULL_RETURN(menuHostNode, nullptr);
-    return menuHostNode->GetPattern<MenuPattern>();
-}
-
 void UpdateContainerMaxSizeConstraint(const RefPtr<FrameNode>& node, const CalcSize& maxSize)
 {
     CHECK_NULL_VOID(node);
@@ -614,36 +606,6 @@ void ShowPixelMapScaleAnimationProc(
         scaleOption.GetOnFinishEvent());
 }
 
-void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
-{
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_VOID(mainPipeline);
-    auto manager = mainPipeline->GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    manager->UpdateGatherNodeToTop();
-    auto gatherNode = manager->GetGatherNode();
-    CHECK_NULL_VOID(gatherNode);
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    CHECK_NULL_VOID(textNode);
-    textNode->MountToParent(menuNode);
-    textNode->MarkModifyDone();
-    auto menuPattern = GetMenuPattern(menuNode);
-    CHECK_NULL_VOID(menuPattern);
-    mainPipeline->AddAfterRenderTask([weakImageNode = AceType::WeakClaim(AceType::RawPtr(imageNode)),
-        weakManager = AceType::WeakClaim(AceType::RawPtr(manager)),
-        weakTextNode = AceType::WeakClaim(AceType::RawPtr(textNode)),
-        weakMenuPattern = AceType::WeakClaim(AceType::RawPtr(menuPattern))]() {
-        auto imageNode = weakImageNode.Upgrade();
-        auto manager = weakManager.Upgrade();
-        auto textNode = weakTextNode.Upgrade();
-        auto menuPattern = weakMenuPattern.Upgrade();
-        DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
-        DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
-        DragAnimationHelper::ShowBadgeAnimation(textNode);
-    });
-}
-
 void HandleDragEnd(float offsetX, float offsetY, float velocity, const RefPtr<FrameNode>& menuWrapper)
 {
     if ((LessOrEqual(std::abs(offsetY), std::abs(offsetX)) || LessOrEqual(offsetY, 0.0f)) &&
@@ -794,7 +756,6 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
         props->UpdateUserDefinedIdealSize(targetSize);
         props->UpdateImageFit(ImageFit::FILL);
 
-        ShowGatherAnimation(target, wrapperNode);
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
         imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(imageOffset.GetX()), Dimension(imageOffset.GetY())));
@@ -803,6 +764,8 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
         }
         imageNode->MarkModifyDone();
         imageNode->MountToParent(wrapperNode);
+        DragAnimationHelper::UpdateGatherNodeToTop();
+        MountTextNode(wrapperNode, previewNode);
     }
     
     auto geometryNode = imageNode->GetGeometryNode();

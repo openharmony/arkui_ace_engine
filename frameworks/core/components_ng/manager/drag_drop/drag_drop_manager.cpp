@@ -44,7 +44,6 @@ constexpr int32_t MAX_RETRY_TIMES = 3;
 constexpr int32_t MAX_RETRY_DURATION = 800;
 constexpr float MOVE_DISTANCE_LIMIT = 20.0f;
 constexpr uint64_t MOVE_TIME_LIMIT = 6L;
-constexpr Dimension PIXELMAP_BORDER_RADIUS = 8.0_vp;
 constexpr Dimension PRESERVE_HEIGHT = 8.0_vp;
 constexpr float FIRST_PIXELMAP_OPACITY = 0.6f;
 constexpr float SECOND_PIXELMAP_OPACITY = 0.3f;
@@ -1829,17 +1828,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     CHECK_NULL_VOID(info_.imageNode);
     isDragFwkShow_ = false;
     ResetPullMoveReceivedForCurrentDrag();
-    auto distance = CalcDragPreviewDistanceWithPoint(PRESERVE_HEIGHT, event.GetGlobalLocation().GetX(),
-        event.GetGlobalLocation().GetY(), info_);
     auto gatherNodeCenter = info_.imageNode->GetPaintRectCenter();
-    auto maxDistance = CalcGatherNodeMaxDistanceWithPoint(overlayManager, gatherNodeCenter.GetX(),
-        gatherNodeCenter.GetY());
-    constexpr decltype(distance) MAX_DISTANCE = 5.0;
-    if ((distance < MAX_DISTANCE || !IsNeedScaleDragPreview()) &&
-        (maxDistance < MAX_DISTANCE || (!isMouseDragged_ && !isTouchGatherAnimationPlaying_)) && !isSubwindowOverlay) {
-        TransDragWindowToDragFwk(containerId);
-        return;
-    }
     Point point = { static_cast<int32_t>(event.GetGlobalLocation().GetX()),
         static_cast<int32_t>(event.GetGlobalLocation().GetY()) };
     Offset newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(event.GetGlobalLocation().GetX()),
@@ -1874,13 +1863,16 @@ void DragDropManager::DragStartAnimation(
     AnimationUtils::Animate(
         option,
         [renderContext, info = info_, newOffset, overlayManager, gatherNodeCenter, menuRenderContext, menuPosition]() {
+            CHECK_NULL_VOID(renderContext);
             if (menuRenderContext && !menuPosition.NonOffset()) {
                 menuRenderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
             }
             renderContext->UpdateTransformScale({ info.scale, info.scale });
             renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
-            UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, info.scale, info.width, info.height);
+            GatherAnimationInfo gatherAnimationInfo = { info.scale, info.width, info.height,
+                gatherNodeCenter, renderContext->GetBorderRadius() };
+            UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
             UpdateTextNodePosition(info.textNode, newOffset);
         },
         option.GetOnFinishEvent());
@@ -1926,15 +1918,17 @@ void DragDropManager::SetDragBehavior(
 }
 
 void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
-    const OffsetF& gatherNodeCenter, float scale, float previewWidth, float previewHeight)
+    const GatherAnimationInfo& info)
 {
     CHECK_NULL_VOID(overlayManager);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
     BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(PIXELMAP_BORDER_RADIUS);
+    if (info.borderRadius.has_value()) {
+        borderRadius = info.borderRadius.value();
+    }
     borderRadius.multiValued = false;
     int32_t cnt = static_cast<int>(gatherNodeChildrenInfo.size());
-    scale = scale <= 0.0f ? 1.0f : scale;
+    auto scale = info.scale <= 0.0f ? 1.0f : info.scale;
     std::vector<std::pair<float, float>> props(cnt, { 0.0, 0.0 });
     if (cnt > 0) {
         props[cnt - FIRST_GATHER_PIXEL_MAP] = { FIRST_PIXELMAP_ANGLE, FIRST_PIXELMAP_OPACITY };
@@ -1949,12 +1943,12 @@ void DragDropManager::UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlay
         CHECK_NULL_VOID(imageContext);
         auto& childInfo = gatherNodeChildrenInfo[i];
         imageContext->UpdatePosition(OffsetT<Dimension>(
-            Dimension(gatherNodeCenter.GetX() - childInfo.halfWidth),
-            Dimension(gatherNodeCenter.GetY() - childInfo.halfHeight)));
+            Dimension(info.gatherNodeCenter.GetX() - childInfo.halfWidth),
+            Dimension(info.gatherNodeCenter.GetY() - childInfo.halfHeight)));
         auto updateScale = scale;
-        if (((childInfo.width > previewWidth) || (childInfo.height > previewHeight)) &&
+        if (((childInfo.width > info.width) || (childInfo.height > info.height)) &&
             !NearZero(childInfo.width) && !NearZero(childInfo.height)) {
-            updateScale *= std::min(previewWidth / childInfo.width, previewHeight / childInfo.height);
+            updateScale *= std::min(info.width / childInfo.width, info.height / childInfo.height);
         }
         imageContext->UpdateTransformScale({ updateScale, updateScale });
         imageContext->UpdateBorderRadius(borderRadius);

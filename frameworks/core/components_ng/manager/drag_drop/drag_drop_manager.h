@@ -39,6 +39,14 @@ enum class DragDropMgrState : int32_t {
     DRAGGING
 };
 
+struct GatherAnimationInfo {
+    float scale = 0.0f;
+    float width = 0.0f;
+    float height = 0.0f;
+    OffsetF gatherNodeCenter;
+    std::optional<BorderRadiusProperty> borderRadius;
+};
+
 class ACE_EXPORT DragDropManager : public virtual AceType {
     DECLARE_ACE_TYPE(DragDropManager, AceType);
 
@@ -342,8 +350,7 @@ public:
     }
 
     static RectF GetMenuPreviewRect();
-    static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager,
-        const OffsetF& gatherNodeCenter, float scale, float previewWidth, float previewHeight);
+    static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager, const GatherAnimationInfo& info);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
         const RefPtr<FrameNode>& imageNode);
     static void UpdateTextNodePosition(const RefPtr<FrameNode>& textNode, const Offset& localPoint);
@@ -390,11 +397,6 @@ public:
     bool IsShowBadgeAnimation()
     {
         return isShowBadgeAnimation_;
-    }
-
-    void SetIsTouchGatherAnimationPlaying(bool isTouchGatherAnimationPlaying)
-    {
-        isTouchGatherAnimationPlaying_ = isTouchGatherAnimationPlaying;
     }
 
     void SetBadgeNumber(int32_t badgeNumber)
@@ -552,7 +554,6 @@ private:
     OffsetF curPointerOffset_;
     std::vector<RefPtr<PixelMap>> gatherPixelMaps_;
     bool hasGatherNode_ = false;
-    bool isTouchGatherAnimationPlaying_ = false;
     bool isShowBadgeAnimation_ = true;
     bool eventStrictReportingEnabled_ = false;
     int32_t badgeNumber_ = -1;
