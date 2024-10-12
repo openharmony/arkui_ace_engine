@@ -2549,7 +2549,7 @@ void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
     RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // reload js views
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, true);
-    JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    JSNApi::TriggerGC(vm, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
     TAG_LOGI(AceLogTag::ACE_FORM, "Card model was reloaded successfully.");
 }
 #endif
