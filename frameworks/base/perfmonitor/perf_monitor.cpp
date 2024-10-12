@@ -283,7 +283,7 @@ PerfMonitor* PerfMonitor::GetPerfMonitor()
 void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
-    if (apsMonitor_) {
+    if (apsMonitor_ != nullptr) {
         apsMonitor_->SetApsScene(sceneId, true);
     }
 
@@ -306,7 +306,7 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
 void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
-    if (apsMonitor_) {
+    if (apsMonitor_ != nullptr) {
         apsMonitor_->SetApsScene(sceneId, false);
     }
 
