@@ -297,4 +297,28 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestInvalidValues, TestSiz
     }
 }
 
+/*
+ * @tc.name: setSaveButtonOptions1TestTextAndIconEmpty
+ * @tc.desc: Verify that all attributes are set to default values in case neither text nor icon is set.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestTextAndIconEmpty, TestSize.Level1)
+{
+    Ark_SaveButtonOptions inputValueOptions = {
+        .text = Converter::ArkValue<Opt_SaveDescription>(Ark_Empty()),
+        .icon = Converter::ArkValue<Opt_SaveIconStyle>(Ark_Empty()),
+        .buttonType = Converter::ArkValue<Opt_ButtonType>(ARK_BUTTON_TYPE_NORMAL)
+    };
+    auto node = CreateNode();
+    modifier_->setSaveButtonOptions1(node, &inputValueOptions);
+    auto jsonValue = GetJsonValue(node);
+    DisposeNode(node);
+    int32_t resultText = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
+    int32_t resultIcon = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
+    int32_t resultButtonType = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
+    EXPECT_EQ(resultText, static_cast<int32_t>(SaveButtonSaveDescription::DOWNLOAD));
+    EXPECT_EQ(resultIcon, static_cast<int32_t>(SaveButtonIconStyle::ICON_FULL_FILLED));
+    EXPECT_EQ(resultButtonType, static_cast<int32_t>(ButtonType::CAPSULE));
+}
+
 } // namespace OHOS::Ace::NG
