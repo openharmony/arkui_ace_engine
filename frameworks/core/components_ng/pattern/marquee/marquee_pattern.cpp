@@ -108,15 +108,10 @@ void MarqueePattern::OnModifyDone()
     CHECK_NULL_VOID(childRenderContext);
     auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
+    UpdateTextDirection(layoutProperty, textLayoutProperty);
     auto gestureHub = textChild->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetHitTestMode(HitTestMode::HTMNONE);
-    auto src = layoutProperty->GetSrc().value_or(" ");
-    std::replace(src.begin(), src.end(), '\n', ' ');
-    textLayoutProperty->UpdateContent(src);
-    auto direction = layoutProperty->GetLayoutDirection();
-    auto textDirection = GetTextDirection(src, direction);
-    CheckTextDirectionChange(textDirection);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
@@ -675,5 +670,17 @@ void MarqueePattern::CheckTextDirectionChange(TextDirection direction)
         lastAnimationParam_.lastAnimationPosition = 0.0f;
     }
     currentTextDirection_ = direction;
+}
+
+void MarqueePattern::UpdateTextDirection(
+    const RefPtr<MarqueeLayoutProperty>& layoutProperty, const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    auto src = layoutProperty->GetSrc().value_or(" ");
+    std::replace(src.begin(), src.end(), '\n', ' ');
+    textLayoutProperty->UpdateContent(src);
+    auto direction = layoutProperty->GetLayoutDirection();
+    auto textDirection = GetTextDirection(src, direction);
+    textLayoutProperty->UpdateLayoutDirection(textDirection);
+    CheckTextDirectionChange(textDirection);
 }
 } // namespace OHOS::Ace::NG
