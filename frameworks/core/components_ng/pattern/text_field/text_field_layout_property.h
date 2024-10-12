@@ -134,6 +134,16 @@ public:
         json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
     }
 
+    const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const
+    {
+        return cancelIconSymbol_;
+    }
+
+    void SetCancelIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& cancelIconSymbol)
+    {
+        cancelIconSymbol_ = cancelIconSymbol;
+    }
+
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
@@ -276,6 +286,9 @@ protected:
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutProperty);
+
+private:
+    std::function<void(WeakPtr<NG::FrameNode>)> cancelIconSymbol_;
 };
 } // namespace OHOS::Ace::NG
 

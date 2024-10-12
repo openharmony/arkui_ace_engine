@@ -117,6 +117,8 @@ private:
     void UpdateSymbolSource();
     void InitSymbolEffectOptions();
     bool IsShowSymbol();
+    bool IsSymbolIcon();
+    void ReplaceNode();
     bool IsShowPasswordIcon();
     float GetIconRightOffset();
     float GetIconSize();

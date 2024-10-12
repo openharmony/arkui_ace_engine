@@ -90,6 +90,7 @@ public:
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) override {};
     void SetCancelIconColor(const Color& iconColor) override {};
     void SetCancelButtonSymbol(bool isShowSymbol) override {};
+    void SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol) override{};
     void SetIsShowCancelButton(bool isShowCancelButton) override {};
     void SetShowPasswordText(bool value) override {}
     void SetSelectAllValue(bool isSetSelectAllValue) override {};

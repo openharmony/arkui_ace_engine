@@ -1540,6 +1540,12 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
 
     auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
+    bool isSymbolIcon = iconParam->HasProperty("fontColor"); // only SymbolGlyph has fontColor property
+    if (isSymbolIcon) {
+        SetCancelSymbolIcon(info);
+        return;
+    }
+
     // set icon size
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
@@ -1565,6 +1571,20 @@ void JSTextField::SetCancelDefaultIcon()
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
     TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
+    TextFieldModel::GetInstance()->SetCancelSymbolIcon(nullptr);
+    TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
+}
+
+void JSTextField::SetCancelSymbolIcon(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+        auto param = JSRef<JSObject>::Cast(info[0]);
+        auto iconProp = param->GetProperty("icon");
+        SetSymbolOptionApply(info, iconSymbol, iconProp);
+        TextFieldModel::GetInstance()->SetCancelSymbolIcon(iconSymbol);
+        TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
+    }
 }
 
 void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
