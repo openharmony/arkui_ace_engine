@@ -135,7 +135,6 @@ RefPtr<Component> ContainerModalComponent::BuildContent()
     contentBox->SetBackDecoration(contentDecoration);
 
     auto clip = AceType::MakeRefPtr<ClipComponent>(contentBox);
-    clip->SetClipRadius(Radius(CONTAINER_INNER_RADIUS));
     clip->SetFlexWeight(1.0);
     return clip;
 }
