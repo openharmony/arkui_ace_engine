@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::Framework {
 
-void ListModelImpl::Create()
+void ListModelImpl::Create(bool isCreateArc)
 {
     auto listComponent = AceType::MakeRefPtr<V2::ListComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(listComponent);

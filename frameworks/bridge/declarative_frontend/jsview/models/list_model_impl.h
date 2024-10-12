@@ -25,7 +25,7 @@ public:
     ListModelImpl() = default;
     ~ListModelImpl() override = default;
 
-    void Create() override;
+    void Create(bool isCreateArc = false) override;
     void SetSpace(const Dimension& space) override;
     void SetInitialIndex(int32_t initialIndex) override;
     RefPtr<ScrollControllerBase> CreateScrollController() override;
