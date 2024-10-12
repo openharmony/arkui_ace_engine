@@ -246,6 +246,13 @@ napi_modules = [
         part_name = "ace_engine"
         lib_names = [ "arclist" ]
       },
+      {
+        label =
+            "//foundation/arkui/ace_engine/component_ext/arc_swiper:arcswiper"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "arcswiper" ]
+      },
     ]
   },
   {
