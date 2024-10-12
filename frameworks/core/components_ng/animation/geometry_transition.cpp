@@ -369,7 +369,7 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         CHECK_NULL_VOID(node);
         auto renderContext = node->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->SetSandBox(std::nullopt, follow);
+        renderContext->SetSandBox(std::nullopt);
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
     };
     if (!isNodeIn && inNodeAbsRect_) {
