@@ -1546,7 +1546,6 @@ public:
 
 protected:
     virtual void InitDragEvent();
-    void UpdateAttributes() override;
     void OnAttachToMainTree() override;
 
     void OnDetachFromMainTree() override;

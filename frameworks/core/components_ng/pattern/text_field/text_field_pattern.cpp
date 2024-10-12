@@ -2900,11 +2900,6 @@ void TextFieldPattern::ProcessSelection()
     }
 }
 
-void TextFieldPattern::UpdateAttributes()
-{
-    ProcessInnerPadding();
-}
-
 void TextFieldPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
