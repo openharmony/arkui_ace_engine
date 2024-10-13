@@ -271,28 +271,6 @@ void TabsPattern::SetSwiperPaddingAndBorder()
 void TabsPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
-    auto tabBarPaintProperty = tabBarPattern->GetPaintProperty<TabBarPaintProperty>();
-    if (tabBarPaintProperty->GetTabBarBlurStyleOption().has_value() &&
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        auto tabBarRenderContext = tabBarNode->GetRenderContext();
-        CHECK_NULL_VOID(tabBarRenderContext);
-        BlurStyleOption styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value();
-        tabBarRenderContext->UpdateBackBlurStyle(styleOption);
-    }
-    if (tabBarPaintProperty->GetTabBarEffectOption().has_value() &&
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        auto tabBarRenderContext = tabBarNode->GetRenderContext();
-        CHECK_NULL_VOID(tabBarRenderContext);
-        EffectOption effectOption = tabBarPaintProperty->GetTabBarEffectOption().value();
-        tabBarRenderContext->UpdateBackgroundEffect(effectOption);
-    }
-
     UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);
     SetSwiperPaddingAndBorder();
 
