@@ -335,7 +335,8 @@ public:
 
     void SetNavigationTransition(const OnNavigationAnimation navigationAnimation)
     {
-        if (currentProxy_ && !currentProxy_->GetIsFinished()) {
+        auto currentProxy = GetTopNavigationProxy();
+        if (currentProxy && !currentProxy->GetIsFinished()) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "not support to update callback during animation");
             return;
         }
@@ -392,10 +393,14 @@ public:
         return isFinishInteractiveAnimation_;
     }
 
-    const RefPtr<NavigationTransitionProxy>& GetNavigationProxy() const
+    const RefPtr<NavigationTransitionProxy> GetTopNavigationProxy() const
     {
-        return currentProxy_;
+        return proxyList_.empty() ? nullptr : proxyList_.back();
     }
+
+    RefPtr<NavigationTransitionProxy> GetProxyById(uint64_t id) const;
+
+    void RemoveProxyById(uint64_t id);
 
     bool IsCurTopNewInstance() const
     {
@@ -491,7 +496,7 @@ private:
     RefPtr<NavigationStack> navigationStack_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_;
-    RefPtr<NavigationTransitionProxy> currentProxy_;
+    std::vector<RefPtr<NavigationTransitionProxy>> proxyList_;
     RectF dragRect_;
     WeakPtr<FrameNode> pageNode_;
     bool isFullPageNavigation_ = false;

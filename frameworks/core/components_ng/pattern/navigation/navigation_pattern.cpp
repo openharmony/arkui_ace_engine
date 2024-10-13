@@ -709,8 +709,9 @@ void NavigationPattern::CheckTopNavPathChange(
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (preTopNavPath == newTopNavPath && replaceValue != 1) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "page is not change. don't transition");
-        if (currentProxy_) {
-            currentProxy_->SetIsSuccess(false);
+        auto currentProxy = GetTopNavigationProxy();
+        if (currentProxy) {
+            currentProxy->SetIsSuccess(false);
         }
         hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_HIDE);
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true, true);
@@ -1123,8 +1124,9 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
 void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible)
 {
-    if (currentProxy_) {
-        currentProxy_->SetIsFinished(true);
+    auto currentProxy = GetTopNavigationProxy();
+    if (currentProxy) {
+        currentProxy->SetIsFinished(true);
     }
     navigationStack_->ClearRecoveryList();
     bool isDialog =
@@ -1717,7 +1719,8 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
     auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
     proxy->SetPreDestination(preTopNavDestination);
     proxy->SetTopDestination(newTopNavDestination);
-    currentProxy_ = proxy;
+    auto proxyId = proxy->GetProxyId();
+    proxyList_.emplace_back(proxy);
     auto navigationTransition = ExecuteTransition(preTopNavDestination, newTopNavDestination, isPopPage);
     if (!navigationTransition.isValid) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom transition value is invalid, do default animation");
@@ -1727,15 +1730,20 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     if (navigationTransition.interactive) {
         auto finishCallback = [weakNavigation = WeakClaim(this),
-                                        weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
-                                        weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
-                                        isPopPage, proxy]() {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation is finish: %{public}d", proxy->GetIsSuccess());
-            if (proxy == nullptr || !proxy->GetInteractive()) {
-                return;
-            }
+                                  weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
+                                  weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
+                                  isPopPage, proxyId]() {
             auto pattern = weakNavigation.Upgrade();
             CHECK_NULL_VOID(pattern);
+            auto proxy = pattern->GetProxyById(proxyId);
+            if (proxy == nullptr) {
+                return;
+            }
+            if (!proxy->GetInteractive()) {
+                pattern->RemoveProxyById(proxyId);
+                return;
+            }
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation is finish: %{public}d", proxy->GetIsSuccess());
             pattern->isFinishInteractiveAnimation_ = true;
             auto preDestination = weakPreNavDestination.Upgrade();
             auto topDestination = weakNewNavDestination.Upgrade();
@@ -1751,6 +1759,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             }
             pattern->SyncWithJsStackIfNeeded();
             proxy->FireEndCallback();
+            pattern->RemoveProxyById(proxyId);
         };
         auto pipelineContext = hostNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, false);
@@ -1886,8 +1895,9 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, navigationTransition);
     NavigationOperation operation;
-    auto preInfo = currentProxy_->GetPreDestinationContext();
-    auto topInfo = currentProxy_->GetTopDestinationContext();
+    auto currentProxy = GetTopNavigationProxy();
+    auto preInfo = currentProxy->GetPreDestinationContext();
+    auto topInfo = currentProxy->GetTopDestinationContext();
     auto replaceValue = navigationStack_->GetReplaceValue();
     if (replaceValue != 0) {
         operation = NavigationOperation::REPLACE;
@@ -2494,13 +2504,17 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
     if (newTopNavDestination) {
         newTopNavDestination->SetIsOnAnimation(true);
     }
+    auto proxyId = proxy->GetProxyId();
     proxy->SetInteractive(navigationTransition.interactive);
     // set on transition end callback
     proxy->SetEndCallback(std::move(navigationTransition.endCallback));
     proxy->SetFinishTransitionEvent([weakNavigation = WeakClaim(this),
                                         weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
                                         weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
-                                        isPopPage, proxy]() {
+                                        isPopPage, proxyId]() {
+        auto pattern = weakNavigation.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto proxy = pattern->GetProxyById(proxyId);
         auto preDestination = weakPreNavDestination.Upgrade();
         auto topDestination = weakNewNavDestination.Upgrade();
         // disable render group for text node after the custom animation
@@ -2516,13 +2530,12 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "custom animation proxy is empty or is finished");
             return;
         }
-        auto pattern = weakNavigation.Upgrade();
-        CHECK_NULL_VOID(pattern);
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom animation finish end");
         proxy->SetIsFinished(true);
         // update pre navigation stack
         pattern->GetNavigationStack()->ClearRecoveryList();
         pattern->OnCustomAnimationFinish(preDestination, topDestination, isPopPage);
+        pattern->RemoveProxyById(proxyId);
     });
     // add timeout callback
     auto timeout = navigationTransition.timeout;
@@ -2557,5 +2570,25 @@ bool NavigationPattern::GetIsFocusable(const RefPtr<FrameNode>& frameNode)
     auto currentFocusHub = frameNode->GetFocusHub();
     CHECK_NULL_RETURN(currentFocusHub, false);
     return currentFocusHub->IsFocusableNode();
+}
+
+RefPtr<NavigationTransitionProxy> NavigationPattern::GetProxyById(uint64_t id) const
+{
+    for (auto proxy : proxyList_) {
+        if (proxy && proxy->GetProxyId() == id) {
+            return proxy;
+        }
+    }
+    return nullptr;
+}
+    
+void NavigationPattern::RemoveProxyById(uint64_t id)
+{
+    for (auto it = proxyList_.begin(); it != proxyList_.end(); ++it) {
+        if (*it && (*it)->GetProxyId() == id) {
+            it = proxyList_.erase(it);
+            return;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
