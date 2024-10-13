@@ -311,11 +311,11 @@ void JSNavDestination::SetOnReady(const JSCallbackInfo& info)
     auto onReadyCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onReady = [execCtx = info.GetExecutionContext(), func = std::move(onReadyCallback)](
                        RefPtr<NG::NavDestinationContext> context) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto jsContext = JSClass<JSNavDestinationContext>::NewInstance();
         auto jsNavDestinationContext = Referenced::Claim(jsContext->Unwrap<JSNavDestinationContext>());
         CHECK_NULL_VOID(jsNavDestinationContext);
         jsNavDestinationContext->SetNavDestinationContext(context);
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("NavDestination.onReady");
         JSRef<JSVal> params[1];
         params[0] = jsContext;

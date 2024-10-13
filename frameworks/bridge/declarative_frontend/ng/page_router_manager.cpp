@@ -943,6 +943,9 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
 
         auto silentInstallErrorCallBack = [errorCallback = target.errorCallback, taskExecutor, instanceId](
                                               int32_t errorCode, const std::string& errorMsg) {
+            if (!errorCallback) {
+                return;
+            }
             ContainerScope scope(instanceId);
             taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
                 TaskExecutor::TaskType::JS, "ArkUIPageRouterPushErrorCallback");
@@ -1041,6 +1044,9 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
 
         auto silentInstallErrorCallBack = [errorCallback = target.errorCallback, taskExecutor, instanceId](
                                               int32_t errorCode, const std::string& errorMsg) {
+            if (!errorCallback) {
+                return;
+            }
             ContainerScope scope(instanceId);
             taskExecutor->PostTask([errorCallback, errorCode, errorMsg]() { errorCallback(errorMsg, errorCode); },
                 TaskExecutor::TaskType::JS, "ArkUIPageRouterReplaceErrorCallback");
