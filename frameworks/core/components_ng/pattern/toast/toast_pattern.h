@@ -121,6 +121,8 @@ public:
     }
 
     bool IsShowInFreeMultiWindow();
+
+    bool IsUIExtensionSubWindow();
     
 private:
     void BeforeCreateLayoutWrapper() override;
