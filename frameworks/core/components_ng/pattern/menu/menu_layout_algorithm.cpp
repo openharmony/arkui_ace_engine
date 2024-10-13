@@ -822,32 +822,10 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     childMarginFrameSize_ = idealSize;
 }
 
-void MenuLayoutAlgorithm::GetPreviewNodeTargetHoverImageChild(const RefPtr<LayoutWrapper>& child,
-    RefPtr<FrameNode>& hostNode, RefPtr<GeometryNode>& geometryNode, bool isShowHoverImage)
-{
-    CHECK_NULL_VOID(isShowHoverImage);
-    bool isFlexNode = hostNode->GetTag() == V2::FLEX_ETS_TAG;
-    CHECK_NULL_VOID(isFlexNode);
-    // flex -> stack -> image index 0 , preview index 1 when hoverScale api in use
-    auto stackNode = child->GetChildByIndex(0);
-    CHECK_NULL_VOID(stackNode);
-    auto previewLayoutWrapper = stackNode->GetChildByIndex(1);
-    CHECK_NULL_VOID(previewLayoutWrapper);
-
-    auto previewNode = previewLayoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(previewNode);
-    CHECK_NULL_VOID(previewNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || previewNode->GetTag() == V2::IMAGE_ETS_TAG);
-
-    auto childGeometryNode = previewLayoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(childGeometryNode);
-
-    hostNode = previewNode;
-    geometryNode = childGeometryNode;
-}
-
 void MenuLayoutAlgorithm::CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& windowGlobalRect)
 {
-    CHECK_NULL_VOID(frameNode && frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG);
+    CHECK_NULL_VOID(frameNode &&
+        (frameNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || frameNode->GetTag() == V2::FLEX_ETS_TAG));
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
@@ -888,10 +866,11 @@ void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& c
     if (!hostNode || !geometryNode) {
         return;
     }
-    GetPreviewNodeTargetHoverImageChild(child, hostNode, geometryNode, isShowHoverImage);
 
     bool isImageNode = hostNode->GetTag() == V2::IMAGE_ETS_TAG;
-    if (hostNode->GetTag() != V2::MENU_PREVIEW_ETS_TAG && !isImageNode) {
+    bool isPreviewNode = hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG;
+    bool isFlexNode = hostNode->GetTag() == V2::FLEX_ETS_TAG;
+    if (!isPreviewNode && !isImageNode && !isFlexNode) {
         return;
     }
 
@@ -900,7 +879,7 @@ void MenuLayoutAlgorithm::GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& c
     }
 
     auto frameSize = geometryNode->GetMarginFrameSize();
-    if (hostNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG) {
+    if (isPreviewNode || isFlexNode) {
         CheckPreviewConstraint(hostNode, windowGlobalRect);
     } else {
         geometryNode->SetFrameSize(frameSize);

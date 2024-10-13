@@ -830,7 +830,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg015, TestSize.Level1)
     mainMenu->GetPattern<MenuPattern>()->SetDisappearAnimation(true);
     subMenu->GetPattern<MenuPattern>()->SetDisappearAnimation(true);
     wrapperPattern->HideSubMenu();
-    EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
+    EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
 }
 
 /**

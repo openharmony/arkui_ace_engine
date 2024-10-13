@@ -420,6 +420,16 @@ void TextModelNG::SetTextSelection(int32_t startIndex, int32_t endIndex)
     textPattern->SetTextSelection(startIndex, endIndex);
 }
 
+void TextModelNG::SetTextCaretColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CursorColor, value);
+}
+
+void TextModelNG::SetSelectedBackgroundColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value);
+}
+
 void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     auto dragStart = [dragStartFunc = std::move(onDragStart)](
