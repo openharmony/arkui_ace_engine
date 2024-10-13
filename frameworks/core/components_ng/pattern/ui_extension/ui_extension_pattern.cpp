@@ -1161,7 +1161,6 @@ void UIExtensionPattern::AfterMountToParent()
     UIEXT_LOGI("AfterMountToParent.");
     hasMountToParent_ = true;
     if (needReNotifyForeground_) {
-<<<<<<< HEAD
         auto hostWindowNode = WindowSceneHelper::FindWindowScene(GetHost());
         if (hostWindowNode) {
             needReNotifyForeground_ = false;
@@ -1170,11 +1169,6 @@ void UIExtensionPattern::AfterMountToParent()
         } else {
             UIEXT_LOGI("No WindowScene When AfterMountToParent, wait.");
         }
-=======
-        needReNotifyForeground_ = false;
-        UIEXT_LOGI("NotifyForeground AfterMountToParent.");
-        NotifyForeground();
->>>>>>> 1ba7da2a1d (fix)
     }
 }
 
