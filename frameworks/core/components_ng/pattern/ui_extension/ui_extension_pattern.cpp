@@ -58,13 +58,10 @@ constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
-<<<<<<< HEAD
-=======
 constexpr char PID_FLAG[] = "pidflag";
 constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
 constexpr double SHOW_START = 0.0;
 constexpr double SHOW_FULL = 1.0;
->>>>>>> a270bbad57 (HandleVisibleAreaChange)
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -1189,7 +1186,7 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
         uiExtension->HandleVisibleAreaChange(visible, ratio);
     };
     std::vector<double> ratioList = { SHOW_START, SHOW_FULL };
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false); 
 }
 
 void UIExtensionPattern::HandleVisibleAreaChange(bool visible, double ratio)
