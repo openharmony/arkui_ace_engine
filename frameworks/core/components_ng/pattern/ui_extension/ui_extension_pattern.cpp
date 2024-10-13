@@ -173,7 +173,9 @@ UIExtensionPattern::~UIExtensionPattern()
     if (accessibilityChildTreeCallback_ == nullptr) {
         return;
     }
-    ContainerScope scope(instanceId_);
+
+    auto instanceId = GetInstanceIdFromHost();
+    ContainerScope scope(instanceId);
     auto ngPipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
@@ -1063,7 +1065,8 @@ void UIExtensionPattern::InitializeAccessibility()
     if (accessibilityChildTreeCallback_ != nullptr) {
         return;
     }
-    ContainerScope scope(instanceId_);
+    auto instanceId = GetInstanceIdFromHost();
+    ContainerScope scope(instanceId);
     auto ngPipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
@@ -1216,6 +1219,16 @@ int32_t UIExtensionPattern::GetNodeId()
 int32_t UIExtensionPattern::GetInstanceId()
 {
     return instanceId_;
+}
+
+int32_t UIExtensionPattern::GetInstanceIdFromHost()
+{
+    auto instanceId = GetHostInstanceId();
+    if (instanceId != instanceId_) {
+        UIEXT_LOGW("UIExtension pattern instanceId %{public}d not equal frame node instanceId %{public}d",
+            instanceId_, instanceId);
+    }
+    return instanceId;
 }
 
 void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
