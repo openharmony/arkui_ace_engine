@@ -769,7 +769,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
-#if defined(PLAYER_FRAMEWORK_EXISTS)
+#if defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
     { "Video", JSVideo::JSBind },
     { "VideoController", JSVideoController::JSBind },
 #endif
