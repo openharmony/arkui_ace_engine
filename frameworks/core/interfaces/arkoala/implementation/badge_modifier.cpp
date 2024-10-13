@@ -19,7 +19,6 @@
 #include "core/components/badge/badge_theme.h"
 #include "arkoala_api_generated.h"
 
-
 namespace OHOS::Ace::NG::Converter {
 
 std::optional<Dimension> ValidateNonNegative(std::optional<Dimension> value, bool isPercentEnabled = false)
@@ -48,7 +47,6 @@ BadgeParameters ConvertHelper(const T& src)
             Ark_BadgePosition value0 = position.value.value0;
             dst.isPositionXy = false;
             dst.badgePosition = value0;
-
         } else if (position.value.selector == 1) {
             dst.isPositionXy = true;
             Ark_Position value1 = position.value.value1;

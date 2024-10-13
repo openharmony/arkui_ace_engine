@@ -29,6 +29,13 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+Ark_Position ToArkPos(int32_t value);
+Ark_Position ToArkPos(double v, DimensionUnit unit);
+Ark_Length ToArkLength(int32_t value);
+inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
+    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
+    const char* bundle = "");
+
 const auto ATTRIBUTE_POSITION_NAME = "position";
 const auto ATTRIBUTE_POSITION_DEFAULT_VALUE = "BadgePosition.RightTop";
 const auto ATTRIBUTE_SET_STYLE_NAME = "style";
@@ -57,15 +64,15 @@ const auto ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE = "99";
 const auto ATTRIBUTE_VALUE_NAME = "value";
 const auto ATTRIBUTE_VALUE_DEFAULT_VALUE = "";
 
-inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
-    const char* bundle = "")
+inline Ark_Resource ArkRes(Ark_String* name, int id, NodeModifier::ResourceType type, 
+    const char* module, const char* bundle)
 {
     return { .id = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
         .type = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type) },
         .moduleName = { .chars = module },
         .bundleName = { .chars = bundle },
-        .params = { .tag = ARK_TAG_OBJECT, .value = { .array = name, .length = name ? 1 : 0 } } };
+        .params = { .tag = ARK_TAG_OBJECT, .value = { .array = name, .length = name ? 1 : 0 } }
+    };
 }
 
 template<typename T>
@@ -101,8 +108,9 @@ void InitNumberOptions(Ark_BadgeParamWithNumber& options)
  */
 Ark_Length ToArkLength(int32_t value)
 {
-    Ark_Length x = { .type = ARK_TAG_RESOURCE, .resource = Ark_Int32(value) };
-    return x;
+   return { 
+        .type = ARK_TAG_RESOURCE, .resource = Ark_Int32(value) 
+    };
 }
 
 /**
@@ -111,39 +119,44 @@ Ark_Length ToArkLength(int32_t value)
 Ark_Position ToArkPos(int32_t value)
 {
     Ark_Length x = { .type = ARK_TAG_RESOURCE, .resource = Ark_Int32(value) };
-
-    Ark_Position position = { .x = Converter::ArkValue<Opt_Length>(x), .y = Converter::ArkValue<Opt_Length>(x) };
-
-    return position;
+    
+    return { 
+        .x = Converter::ArkValue<Opt_Length>(x), .y = Converter::ArkValue<Opt_Length>(x) 
+    };
 }
 
 /**
- * Converts double and DimensionUnit into Dimension
+ * Converts double and DimensionUnit into Ark_Position
  */
 Ark_Position ToArkPos(double v, DimensionUnit unit)
 {
-    Position position = {
-        .x = std::optional(Dimension(v, unit)),
-        .y = std::optional(Dimension(v, unit)),
-    };
-    return Converter::ArkValue<Ark_Position>(position);
+   return {
+        .x =Converter::ArkValue<Opt_Length>(Dimension(v, unit)),
+        .y =Converter::ArkValue<Opt_Length>(Dimension(v, unit)),
+   };
 }
 
 } // namespace
 
 namespace Converter {
 
-inline void AssignArkValue(Ark_Position& dst, const Position& src)
+void AssignArkValue(Ark_FontWeight& dst, const FontWeight& src)
 {
-    dst.x = Converter::ArkValue<Opt_Length>(src.x);
-    dst.y = Converter::ArkValue<Opt_Length>(src.y);
-}
-
-template<>
-void AssignCast(std::optional<Position>& dst, const Ark_Position& src)
-{
-    dst->x = Converter::OptConvert<Dimension>(src.x);
-    dst->y = Converter::OptConvert<Dimension>(src.y);
+    switch (src) {
+        case FontWeight::W100: dst = Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER; break;
+        case FontWeight::W400: dst = Ark_FontWeight::ARK_FONT_WEIGHT_NORMAL; break;
+        case FontWeight::W700: dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLD; break;
+        case FontWeight::W900: dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER; break;
+        case FontWeight::LIGHTER: dst = Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER; break;
+        case FontWeight::NORMAL: dst = Ark_FontWeight::ARK_FONT_WEIGHT_NORMAL; break;
+        case FontWeight::REGULAR: dst = Ark_FontWeight::ARK_FONT_WEIGHT_REGULAR; break;
+        case FontWeight::MEDIUM: dst = Ark_FontWeight::ARK_FONT_WEIGHT_MEDIUM; break;
+        case FontWeight::BOLD: dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLD; break;
+        case FontWeight::BOLDER: dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER; break;
+        default:
+            dst = static_cast<Ark_FontWeight>(-1);
+            LOGE("Unexpected enum value in Ark_FontWeight: %{public}d", src);
+    }
 }
 
 } // namespace Converter

@@ -21,79 +21,21 @@
 
 #include "core/components/badge/badge_theme.h"
 
-namespace OHOS::Ace::NG {
-typedef struct Position {
-    std::optional<Dimension> x;
-    std::optional<Dimension> y;
-} Position;
-
-namespace {
-Ark_Position ToArkPos(int32_t value);
-Ark_Position ToArkPos(double v, DimensionUnit unit);
-Ark_Length ToArkLength(int32_t value);
-} // namespace
-} // namespace OHOS::Ace::NG
-
 namespace OHOS::Ace::NG::Converter {
 
-inline void AssignArkValue(Ark_FontWeight& dst, const FontWeight& src)
-{
-    switch (src) {
-        case FontWeight::W100:
-            dst = Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER;
-            break;
-        case FontWeight::W400:
-            dst = Ark_FontWeight::ARK_FONT_WEIGHT_NORMAL;
-            break;
-        case FontWeight::W700:
-            dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLD;
-            break;
-        case FontWeight::W900:
-            dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER;
-            break;
-        case FontWeight::LIGHTER:
-            dst = Ark_FontWeight::ARK_FONT_WEIGHT_LIGHTER;
-            break;
-        case FontWeight::NORMAL:
-            dst = Ark_FontWeight::ARK_FONT_WEIGHT_NORMAL;
-            break;
-        case FontWeight::REGULAR:
-            dst = Ark_FontWeight::ARK_FONT_WEIGHT_REGULAR;
-            break;
-        case FontWeight::MEDIUM:
-            dst = Ark_FontWeight::ARK_FONT_WEIGHT_MEDIUM;
-            break;
-        case FontWeight::BOLD:
-            dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLD;
-            break;
-        case FontWeight::BOLDER:
-            dst = Ark_FontWeight::ARK_FONT_WEIGHT_BOLDER;
-            break;
-        default:
-            dst = static_cast<Ark_FontWeight>(-1);
-            LOGE("Unexpected enum value in Ark_FontWeight: %{public}d", src);
-    }
-}
+inline void AssignArkValue(Ark_FontWeight& dst, const FontWeight& src);
 
 inline void AssignArkValue(Ark_BadgePosition& dst, const BadgePosition& src)
 {
     switch (src) {
-        case BadgePosition::RIGHT_TOP:
-            dst = ARK_BADGE_POSITION_RIGHT_TOP;
-            break;
-        case BadgePosition::RIGHT:
-            dst = ARK_BADGE_POSITION_RIGHT;
-            break;
-        case BadgePosition::LEFT:
-            dst = ARK_BADGE_POSITION_LEFT;
-            break;
+        case BadgePosition::RIGHT_TOP: dst = ARK_BADGE_POSITION_RIGHT_TOP; break;
+        case BadgePosition::RIGHT: dst = ARK_BADGE_POSITION_RIGHT; break;
+        case BadgePosition::LEFT: dst = ARK_BADGE_POSITION_LEFT; break;
         default:
             dst = static_cast<Ark_BadgePosition>(-1);
             LOGE("Unexpected enum value in BadgePosition: %{public}d", src);
     }
 }
-
-inline void AssignArkValue(Ark_Position& dst, const Position& src);
 
 } // namespace OHOS::Ace::NG::Converter
 #endif
