@@ -2406,6 +2406,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     DoProcessAutoFill();
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+    TriggerAvoidOnCaretChange();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -3078,6 +3079,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
                 return;
             }
             pattern->ScrollToSafeArea();
+            pattern->TriggerAvoidOnCaretChange();
             if (pattern->customKeyboard_ || pattern->customKeyboardBuilder_) {
                 pattern->StartTwinkling();
             }
@@ -3269,6 +3271,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
     StartGestureSelection(start, end, localOffset);
+    TriggerAvoidOnCaretChange();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -5602,6 +5605,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position, bool moveContent)
         StartTwinkling();
     }
     CloseSelectOverlay();
+    TriggerAvoidOnCaretChange();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -7809,17 +7813,6 @@ void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, Window
             textField->UpdateTextFieldManager(Offset(textField->parentGlobalOffset_.GetX(),
                 textField->parentGlobalOffset_.GetY()), textField->frameRect_.Height());
             textField->UpdateCaretInfoToController(true);
-            auto textFieldManager = manager.Upgrade();
-            if (textField->GetIsCustomKeyboardAttached()) {
-                auto caretHeight = textField->GetCaretRect().Height();
-                auto safeHeight = caretHeight + textField->GetCaretRect().GetY();
-                if (textField->GetCaretRect().GetY() > caretHeight) {
-                    safeHeight = caretHeight;
-                }
-                auto keyboardOverLay = textField->GetKeyboardOverLay();
-                CHECK_NULL_VOID(keyboardOverLay);
-                keyboardOverLay->AvoidCustomKeyboard(nodeId, safeHeight);
-            }
             TAG_LOGI(ACE_TEXT_FIELD, "%{public}d OnWindowSizeChanged change parentGlobalOffset to: %{public}s",
                 nodeId, textField->parentGlobalOffset_.ToString().c_str());
         },
@@ -7848,11 +7841,29 @@ void TextFieldPattern::UnitResponseKeyEvent()
 
 void TextFieldPattern::ScrollToSafeArea() const
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
+    if (pipeline->UsingCaretAvoidMode()) {
+        // using TriggerAvoidOnCaretChange instead in CaretAvoidMode
+        return;
+    }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->ScrollTextFieldToSafeArea();
+}
+
+void TextFieldPattern::TriggerAvoidOnCaretChange()
+{
+    CHECK_NULL_VOID(HasFocus());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    textFieldManager->TriggerAvoidOnCaretChange();
 }
 
 void TextFieldPattern::CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction)
