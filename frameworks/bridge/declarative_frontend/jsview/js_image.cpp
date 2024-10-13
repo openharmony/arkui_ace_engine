@@ -850,8 +850,12 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSColorFilter>::Bind(globalObj, JSColorFilter::ConstructorCallback, JSColorFilter::DestructorCallback);
 }
 
-void JSImage::JsSetDraggable(bool draggable)
+void JSImage::JsSetDraggable(const JSCallbackInfo& info)
 {
+    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN);
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        draggable = info[0]->ToBoolean();
+    }
     ImageModel::GetInstance()->SetDraggable(draggable);
 }
 
