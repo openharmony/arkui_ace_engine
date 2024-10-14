@@ -2067,6 +2067,7 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR);
     ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
 }
 
@@ -2075,6 +2076,7 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP);
     ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
 }
 
@@ -2083,6 +2085,7 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL);
     ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
 }
 
@@ -2619,6 +2622,7 @@ void ViewAbstract::SetForegroundColor(const Color& color)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetForegroundColorStrategy().has_value()) {
         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
         renderContext->ResetForegroundColorStrategy();
@@ -2881,16 +2885,19 @@ void ViewAbstract::SetZIndex(FrameNode* frameNode, int32_t value)
 
 void ViewAbstract::SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
 }
 
