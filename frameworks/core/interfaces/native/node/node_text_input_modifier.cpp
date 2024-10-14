@@ -1777,6 +1777,21 @@ void ResetTextInputSelectionMenuOptions(ArkUINodeHandle node)
     NG::OnMenuItemClickCallback onMenuItemClick;
     TextFieldModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
+
+void SetTextInputWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto widthValue = std::string(value);
+    TextFieldModelNG::SetWidth(frameNode, widthValue);
+}
+
+void ResetTextInputWidth(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::ClearWidth(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1835,7 +1850,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         ResetTextInputLineBreakStrategy, SetTextInputMargin, ResetTextInputMargin,
         GetTextInputMargin, SetTextInputCaret, GetTextInputController,
         SetTextInputEnablePreviewText, ResetTextInputEnablePreviewText,
-        SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions };
+        SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions,
+        SetTextInputWidth, ResetTextInputWidth };
     return &modifier;
 }
 
