@@ -4378,6 +4378,9 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithm
     if (textStyle.GetFontSize().IsNonPositive()) {
         textStyle.SetFontSize(DEFAULT_FONT);
     }
+    if (textStyle.GetLineHeight().IsNegative()) {
+        textStyle.SetLineHeight(Dimension(0.0));
+    }
     ParagraphStyle paraStyle { .direction =
                                    TextFieldLayoutAlgorithm::GetTextDirection(contentController_->GetTextValue()),
         .align = textStyle.GetTextAlign(),
