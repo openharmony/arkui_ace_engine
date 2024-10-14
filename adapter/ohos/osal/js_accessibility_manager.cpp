@@ -1781,17 +1781,10 @@ bool IsNodeInRoot(const RefPtr<NG::FrameNode>& node, const RefPtr<NG::PipelineCo
 }
 }
 
-void JsAccessibilityManager::UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos,
-    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
-    const RefPtr<NG::PipelineContext>& ngPipeline, const SearchParameter& searchParam)
+void JsAccessibilityManager::UpdateChildrenNodeInCache(std::list<AccessibilityElementInfo>& infos,
+    const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
+    const SearchParameter& searchParam, std::list<RefPtr<NG::FrameNode>>& children)
 {
-    uint32_t umode = searchParam.mode;
-    std::list<RefPtr<NG::FrameNode>> children;
-    // get all children
-    if (!(umode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN))) {
-        return;
-    }
-    GetChildrenFromFrameNode(node, children, commonProperty.pageId);
     while (!children.empty()) {
         RefPtr<NG::FrameNode> frameNodeParent = children.front();
         children.pop_front();
@@ -1805,8 +1798,8 @@ void JsAccessibilityManager::UpdateCacheInfoNG(std::list<AccessibilityElementInf
                 continue;
             }
             AccessibilityElementInfo virtualInfo;
-            UpdateVirtualNodeAccessibilityElementInfo(frameNodeParent, virtualNode,
-                commonProperty, virtualInfo, ngPipeline);
+            UpdateVirtualNodeAccessibilityElementInfo(
+                frameNodeParent, virtualNode, commonProperty, virtualInfo, ngPipeline);
             virtualInfo.SetParent(frameNodeParent->GetAccessibilityId());
             auto childIds = nodeInfo.GetChildIds();
             for (auto& child : childIds) {
@@ -1837,6 +1830,20 @@ void JsAccessibilityManager::UpdateCacheInfoNG(std::list<AccessibilityElementInf
         SearchExtensionElementInfoNG(transferParam, frameNodeParent, infos, nodeInfo);
         infos.push_back(nodeInfo);
     }
+}
+
+void JsAccessibilityManager::UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos,
+    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+    const RefPtr<NG::PipelineContext>& ngPipeline, const SearchParameter& searchParam)
+{
+    uint32_t umode = searchParam.mode;
+    std::list<RefPtr<NG::FrameNode>> children;
+    // get all children
+    if (!(umode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN))) {
+        return;
+    }
+    GetChildrenFromFrameNode(node, children, commonProperty.pageId);
+    UpdateChildrenNodeInCache(infos, commonProperty, ngPipeline, searchParam, children);
 }
 
 namespace {
