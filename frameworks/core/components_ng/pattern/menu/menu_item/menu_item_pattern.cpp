@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "charconv"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
 #include "menu_item_model.h"
@@ -1280,16 +1281,23 @@ void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
     }
 }
 
+bool convertToLong(const std::string& str, long& value)
+{
+    auto [ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+    return ec == std::errc{} && ptr == str.data() + str.size();
+}
+
 bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo)
 {
     if (imageSourceInfo.IsSvg()) {
         auto src = imageSourceInfo.GetSrc();
         auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
             src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
+        long parsedSrcId;
         return (srcId.find("ohos_") != std::string::npos)
-            || ((std::all_of(srcId.begin(), srcId.end(), ::isdigit))
-                && (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID)
-                && (std::stoul(srcId) <= MAX_SYSTEM_RESOURCE_ID));
+            || (convertToLong(srcId, parsedSrcId)
+            && (parsedSrcId >= MIN_SYSTEM_RESOURCE_ID)
+            && (parsedSrcId <= MAX_SYSTEM_RESOURCE_ID));
     }
     return false;
 }
