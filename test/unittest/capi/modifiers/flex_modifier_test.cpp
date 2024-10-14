@@ -49,7 +49,7 @@ namespace  {
     const auto ATTRIBUTE_POINT_LIGHT_ILLUMINATED_DEFAULT_VALUE = "!NOT-DEFINED!";
     const auto ATTRIBUTE_POINT_LIGHT_BLOOM_NAME = "bloom";
     const auto ATTRIBUTE_POINT_LIGHT_BLOOM_DEFAULT_VALUE = "!NOT-DEFINED!";
-} // namespace ATTRIBUTE_SET_FLEX_JUSTIFY_CONTENT_VALID_VALUE
+} // namespace
 
 class FlexModifierTest : public ModifierTestBase<GENERATED_ArkUIFlexModifier,
  &GENERATED_ArkUINodeModifiers::getFlexModifier, GENERATED_ARKUI_FLEX> {

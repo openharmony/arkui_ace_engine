@@ -140,10 +140,10 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto options = Converter::OptConvert<FlexOptions>(value->value);
+    auto options = Converter::OptConvert<FlexOptions>(*value);
     CHECK_NULL_VOID(options);
-    int32_t wrap = static_cast<int32_t>(value->value.wrap.value);
-    int32_t direction = static_cast<int32_t>(value->value.direction.value);
+    int32_t wrap = static_cast<int32_t>(options->wrap.value());
+    int32_t direction = static_cast<int32_t>(options->direction.value());
 
     if (options->wrap == FlexWrap::NO_WRAP) {
         FlexModelNG::SetFlexRow(frameNode);
@@ -179,13 +179,6 @@ namespace FlexAttributeModifier {
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
-    LOGE("ARKOALA FlexAttribute_PointLightImpl -> Method is not FULLY "
-        "implemented.");
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated,
-        (float)Converter::ConvertOrDefault(value->illuminated, 0), frameNode);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
 }
 } // FlexAttributeModifier
 const GENERATED_ArkUIFlexModifier* GetFlexModifier()
