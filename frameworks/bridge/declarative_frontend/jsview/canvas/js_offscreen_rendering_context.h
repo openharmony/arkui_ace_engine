@@ -47,7 +47,7 @@ public:
 
     uint32_t GetId()
     {
-        return id;
+        return id_;
     }
 
     void SetWidth(double width)
@@ -74,7 +74,7 @@ public:
 
 private:
     static std::mutex mutex_;
-    uint32_t id;
+    uint32_t id_;
     double width_ = 0.0f;
     double height_ = 0.0f;
     static std::unordered_map<uint32_t, RefPtr<AceType>> offscreenPatternMap_;

@@ -122,6 +122,10 @@ ACE_EXPORT extern const char SWIPER_RIGHT_ARROW_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_LEFT_CAPTURE_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_RIGHT_CAPTURE_ETS_TAG[];
 
+// indicator
+ACE_EXPORT extern const char INDICATOR_COMPONENT_TAG[];
+ACE_EXPORT extern const char INDICATOR_ETS_TAG[];
+
 // tabs
 ACE_EXPORT extern const char TABS_COMPONENT_TAG[];
 ACE_EXPORT extern const char TABS_ETS_TAG[];
@@ -615,10 +619,6 @@ ACE_EXPORT extern const char CUSTOM_FRAME_NODE_ETS_TAG[];
 // MovingPhoto
 ACE_EXPORT extern const char MOVING_PHOTO_COMPONENT_TAG[];
 ACE_FORCE_EXPORT extern const char MOVING_PHOTO_ETS_TAG[];
-
-// LinearIndicator
-ACE_EXPORT extern const char LINEARINDICATOR_COMPONENT_TAG[];
-ACE_EXPORT extern const char LINEARINDICATOR_ETS_TAG[];
 
 // CustomSpanNode
 ACE_EXPORT extern const char CUSTOM_SPAN_NODE_ETS_TAG[];

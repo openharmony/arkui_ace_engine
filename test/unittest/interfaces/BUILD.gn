@@ -931,6 +931,45 @@ ohos_unittest("js_drawable_descriptor_test") {
   ]
 }
 
+ohos_unittest("xcomponent_controller_test") {
+  module_out_path = interface_test_output_path
+
+  sources = [
+    "$ace_root/interfaces/inner_api/xcomponent_controller/xcomponent_controller.cpp",
+    "xcomponent_controller_test.cpp",
+  ]
+
+  configs = [
+    "$ace_root/test/unittest:ace_unittest_config",
+    ":c_api_configs",
+  ]
+
+  include_dirs = [
+    "$ace_root/frameworks/core/interfaces/arkoala",
+    "$ace_root/frameworks/",
+    "$ace_root/interfaces/native/",
+    "$ace_root/interfaces/native/node",
+    "$ace_root",
+    "$ace_root/interfaces/inner_api/xcomponent_controller",
+  ]
+
+  deps = [
+    "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "ets_runtime:libark_jsruntime",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+  ]
+}
+
 group("interfaces_unittest") {
   testonly = true
   deps = [
@@ -956,5 +995,6 @@ group("interfaces_unittest") {
     ":ui_content_test",
     ":ui_event_test",
     ":viewport_config_test",
+    ":xcomponent_controller_test",
   ]
 }

@@ -203,6 +203,7 @@ void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
     payload[Ressched::NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
     RecordTouchEvent(touchEvent, true);
+    isInTouch_ = true;
 }
 
 void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
@@ -212,7 +213,8 @@ void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
     payload[Ressched::NAME] = TOUCH;
     payload[UP_SPEED_KEY] = std::to_string(GetUpVelocity(lastTouchEvent_, curTouchEvent_));
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_UP_EVENT, payload);
-    isInSilde = false;
+    isInSlide_ = false;
+    isInTouch_ = false;
     averageDistance_.Reset();
 }
 
@@ -220,23 +222,26 @@ void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
 {
     RecordTouchEvent(touchEvent);
     averageDistance_ += curTouchEvent_.GetOffset() - lastTouchEvent_.GetOffset();
-    if (averageDistance_.GetDistance() >= ResDefine::JUDGE_DISTANCE && !isInSilde) {
+    if (averageDistance_.GetDistance() >= ResDefine::JUDGE_DISTANCE &&
+        !isInSlide_ && isInTouch_) {
         std::unordered_map<std::string, std::string> payload;
         LoadAceApplicationContext(payload);
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
-        isInSilde = true;
+        isInSlide_ = true;
     }
 }
 
 void ResSchedReport::HandleTouchCancel(const TouchEvent& touchEvent)
 {
-    isInSilde = false;
+    isInSlide_ = false;
+    isInTouch_ = false;
     averageDistance_.Reset();
 }
 
 void ResSchedReport::HandleTouchPullDown(const TouchEvent& touchEvent)
 {
     RecordTouchEvent(touchEvent, true);
+    isInTouch_ = true;
 }
 
 void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent)
@@ -245,15 +250,16 @@ void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent)
     payload[Ressched::NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_PULL_UP_EVENT, payload);
     averageDistance_.Reset();
+    isInTouch_ = false;
 }
 
 void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent)
 {
-    if (!isInSilde) {
+    if (!isInSlide_) {
         std::unordered_map<std::string, std::string> payload;
         LoadAceApplicationContext(payload);
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
-        isInSilde = true;
+        isInSlide_ = true;
     }
     RecordTouchEvent(touchEvent);
 }

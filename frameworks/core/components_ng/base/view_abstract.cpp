@@ -1035,8 +1035,13 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
-void ViewAbstract::SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
+    GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetExposeInnerGestureFlag(exposeInnerGestureFlag);
+
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
@@ -1307,7 +1312,7 @@ void ViewAbstract::SetDragPreviewOptions(const DragPreviewOption& previewOption)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreviewOptions(previewOption);
+    frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
 void ViewAbstract::SetOnDragStart(
@@ -2099,8 +2104,8 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
     ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR);
+    ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
 }
 
 void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
@@ -2108,8 +2113,8 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
     ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP);
+    ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
 }
 
 void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
@@ -2117,8 +2122,8 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
     ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL);
+    ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
 }
 
 void ViewAbstract::SetInspectorId(const std::string& inspectorId)
@@ -2661,6 +2666,7 @@ void ViewAbstract::SetForegroundColor(const Color& color)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetForegroundColorStrategy().has_value()) {
         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
         renderContext->ResetForegroundColorStrategy();
@@ -2931,20 +2937,20 @@ void ViewAbstract::SetZIndex(FrameNode *frameNode, int32_t value)
 
 void ViewAbstract::SetLinearGradient(FrameNode *frameNode, const NG::Gradient& gradient)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay)
@@ -3571,7 +3577,7 @@ void ViewAbstract::SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen:
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreviewOptions(previewOption);
+    frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
 void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo)
@@ -3787,7 +3793,7 @@ void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEven
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
-    auto focusHub = frameNode->GetFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(true, false);
 }
@@ -4454,6 +4460,9 @@ void ViewAbstract::SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetJSFrameNodeOnClick(std::move(clickEventFunc));
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(true, false);
 }
 
 void ViewAbstract::ClearJSFrameNodeOnClick(FrameNode* frameNode)

@@ -2197,6 +2197,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         auto objXComp = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName().value(), true, arguments,
             OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent.get()), soPath);
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
+            napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
             return;
         }
         auto objContext = JsiObject(objXComp);
@@ -2282,6 +2283,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
     auto objXComp = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, arguments,
         OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_), soPath);
     if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
+        napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
         return;
     }
 
@@ -2819,7 +2821,7 @@ void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
     RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // reload js views
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, true);
-    JSNApi::TriggerGC(vm, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    JSNApi::HintGC(vm, JSNApi::MemoryReduceDegree::MIDDLE, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI);
     TAG_LOGI(AceLogTag::ACE_FORM, "Card model was reloaded successfully.");
 }
 #endif

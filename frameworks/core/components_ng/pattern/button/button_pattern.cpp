@@ -125,10 +125,10 @@ void ButtonPattern::UpdateTextLayoutProperty(
     if (layoutProperty->GetMaxLines().has_value()) {
         textLayoutProperty->UpdateMaxLines(layoutProperty->GetMaxLines().value());
     }
-    if (layoutProperty->GetMinFontSize().has_value()) {
+    if (layoutProperty->GetMinFontSize().has_value() && !(NeedAgingUpdateText(layoutProperty))) {
         textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
     }
-    if (layoutProperty->GetMaxFontSize().has_value()) {
+    if (layoutProperty->GetMaxFontSize().has_value() && !(NeedAgingUpdateText(layoutProperty))) {
         textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
     }
     if (layoutProperty->GetHeightAdaptivePolicy().has_value()) {
@@ -568,5 +568,29 @@ void ButtonPattern::UpdateTextFontScale(
     } else {
         textLayoutProperty->ResetMaxFontScale();
     }
+}
+
+void ButtonPattern::OnFontScaleConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (NeedAgingUpdateText(layoutProperty)) {
+        textLayoutProperty->ResetAdaptMinFontSize();
+        textLayoutProperty->ResetAdaptMaxFontSize();
+    } else {
+        if (layoutProperty->GetMaxFontSize().has_value()) {
+            textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+        }
+        if (layoutProperty->GetMinFontSize().has_value()) {
+            textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+        }
+    }
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

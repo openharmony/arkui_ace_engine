@@ -296,9 +296,9 @@ int32_t CameraCallback::PreparePhoto(sptr<OHOS::CameraStandard::CameraManager> c
 
 void CameraCallback::MakeDir(const std::string& path)
 {
-    LOGI("Camera MakeDir: %{public}s.", path.c_str());
+    LOGI("Camera MakeDir");
     if (IsDirectory(path.c_str())) {
-        LOGE("Camera MakeDir: It's already a directory, %{public}s.", path.c_str());
+        LOGE("Camera MakeDir: It's already a directory");
         return;
     }
 
@@ -308,7 +308,7 @@ void CameraCallback::MakeDir(const std::string& path)
             LOGE("chmod failed for the newly created directory");
         }
     }
-    LOGI("Camera MakeDir: success %{public}s.", path.c_str());
+    LOGI("Camera MakeDir: success");
 }
 
 int32_t CameraCallback::PrepareVideo(sptr<OHOS::CameraStandard::CameraManager> camManagerObj)
@@ -655,7 +655,7 @@ int32_t CameraCallback::SaveData(char *buffer, int32_t size, std::string& path)
         pic.close();
         chown(path.c_str(), CHOWN_OWNER_ID, CHOWN_GROUP_ID);
         if (chmod(path.c_str(), MKDIR_RWX_USR_GRP_FILE) == -1) {
-            LOGE("chmod failed for the newly file %{public}s.", path.c_str());
+            LOGE("chmod failed for the newly file");
         }
     }
 

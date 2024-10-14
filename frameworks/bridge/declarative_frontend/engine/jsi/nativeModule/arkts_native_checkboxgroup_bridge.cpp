@@ -291,13 +291,13 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupOptions(ArkUIRuntime
     CHECK_EQUAL_RETURN(pointer.IsEmpty(), true, panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(pointer->Value());
     CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
-    ArkUI_CharPtr group;
+    std::string group;
     if (!groupArg.IsNull() && groupArg->IsString(vm)) {
-        group = groupArg->ToString(vm)->ToString(vm).c_str();
+        group = groupArg->ToString(vm)->ToString(vm);
     }
     auto modifier = GetArkUINodeModifiers()->getCheckboxGroupModifier();
     CHECK_NULL_RETURN(modifier, panda::JSValueRef::Undefined(vm));
-    modifier->setCheckboxGroupName(nativeNode, group);
+    modifier->setCheckboxGroupName(nativeNode, group.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

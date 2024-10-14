@@ -123,10 +123,6 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
     CHECK_NULL_VOID(textFieldWrapper);
-    auto cancelButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
-    CHECK_NULL_VOID(cancelButtonWrapper);
-    auto textFieldGeometryNode = textFieldWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(textFieldGeometryNode);
 
     UpdateFontFeature(layoutWrapper);
     auto buttonWidth = searchButtonSizeMeasure_.Width();
@@ -169,7 +165,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
         SetTextFieldLayoutConstraintHeight(childLayoutConstraint, textFieldHeight, layoutWrapper);
     }
     textFieldWrapper->Measure(childLayoutConstraint);
-    textFieldSizeMeasure_ = textFieldGeometryNode->GetFrameSize();
+    UpdateTextFieldSize(layoutWrapper);
 }
 
 void SearchLayoutAlgorithm::UpdateFontFeature(LayoutWrapper* layoutWrapper)
@@ -185,6 +181,19 @@ void SearchLayoutAlgorithm::UpdateFontFeature(LayoutWrapper* layoutWrapper)
         textFieldLayoutProperty->UpdateFontFeature(layoutProperty->GetFontFeature().value());
     }
 }
+
+void SearchLayoutAlgorithm::UpdateTextFieldSize(LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
+    CHECK_NULL_VOID(textFieldWrapper);
+
+    auto textFieldGeometryNode = textFieldWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(textFieldGeometryNode);
+    textFieldSizeMeasure_ = textFieldGeometryNode->GetFrameSize();
+}
+
 void SearchLayoutAlgorithm::SetTextFieldLayoutConstraintHeight(LayoutConstraintF& contentConstraint,
     double textFieldHeight, LayoutWrapper* layoutWrapper)
 {
@@ -269,10 +278,11 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     buttonLayoutProperty->UpdateUserDefinedIdealSize(searchButtonCalcSize);
 
     auto textWrapper = buttonWrapper->GetChildByIndex(0);
-    CHECK_NULL_VOID(textWrapper);
-    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+    if (textWrapper) {
+        auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+    }
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
         buttonLayoutProperty->ClearUserDefinedIdealSize(false, true);
     }

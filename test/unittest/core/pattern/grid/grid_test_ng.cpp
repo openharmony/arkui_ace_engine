@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 
 #include "grid_test_ng.h"
 
-#include "test/mock/base/mock_drag_window.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -40,10 +39,9 @@ void GridTestNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_GRID);
     auto gridItemTheme = GridItemTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(GridItemTheme::TypeId())).WillRepeatedly(Return(gridItemTheme));
-    RefPtr<DragWindow> dragWindow = DragWindow::CreateDragWindow({"", 0, 0, 0, 0, 0});
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), DrawFrameNode(_)).Times(AnyNumber());
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), MoveTo(_, _)).Times(AnyNumber());
-    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), Destroy()).Times(AnyNumber());
+    auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
+    auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     EXPECT_CALL(*MockPipelineContext::pipeline_, FlushUITasks).Times(AnyNumber());
     auto container = Container::GetContainer(CONTAINER_ID_DIVIDE_SIZE);
     EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
@@ -51,6 +49,7 @@ void GridTestNg::SetUpTestSuite()
 #ifndef TEST_IRREGULAR_GRID
     g_irregularGrid = false;
 #endif
+    testing::FLAGS_gmock_verbose = "error";
 }
 
 void GridTestNg::CheckPreloadListEqual(const std::list<int32_t>& expectedList) const

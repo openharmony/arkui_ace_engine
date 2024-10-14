@@ -120,6 +120,7 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -127,11 +128,12 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
      */
     auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
     auto stackNode = cleanNodeResponseArea->cleanNode_;
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    auto iconLayoutProperty = iconFrameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(iconLayoutProperty, nullptr);
 
     /**
-     * @tc.steps: step5. create text inco size
+     * @tc.steps: step5. create text icon size
      */
     auto iconSize = Dimension(ICON_SIZE, DimensionUnit::PX);
 
@@ -139,14 +141,14 @@ HWTEST_F(TextFieldUXTest, CleanNode001, TestSize.Level1)
      * @tc.steps: step6. test Update clear node true
      */
     cleanNodeResponseArea->UpdateCleanNode(true);
-    EXPECT_EQ(imageLayoutProperty->calcLayoutConstraint_->selfIdealSize,
+    EXPECT_EQ(iconLayoutProperty->calcLayoutConstraint_->selfIdealSize,
         CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
 
     /**
      * @tc.steps: step7. test Update clear node false
      */
     cleanNodeResponseArea->UpdateCleanNode(false);
-    EXPECT_EQ(imageLayoutProperty->calcLayoutConstraint_->selfIdealSize, CalcSize(CalcLength(0.0), CalcLength(0.0)));
+    EXPECT_EQ(iconLayoutProperty->calcLayoutConstraint_->selfIdealSize, CalcSize(CalcLength(0.0), CalcLength(0.0)));
 }
 
 /**
@@ -163,6 +165,7 @@ HWTEST_F(TextFieldUXTest, CleanNode002, TestSize.Level1)
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
         model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -176,6 +179,147 @@ HWTEST_F(TextFieldUXTest, CleanNode002, TestSize.Level1)
      */
     cleanNodeResponseArea->OnCleanNodeClicked();
     EXPECT_EQ(pattern_->GetTextValue(), "");
+}
+
+/**
+ * @tc.name: CleanNode003
+ * @tc.desc: Test showCancelButtonSymbol false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CleanNode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input, set cancelButtonSymbol false
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
+    });
+
+    /**
+     * @tc.steps: step2. Get clear node response area
+     */
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+
+    /**
+     * @tc.steps: step3. test clean node symbol false
+     */
+    EXPECT_FALSE(cleanNodeResponseArea->IsShowSymbol());
+    EXPECT_FALSE(cleanNodeResponseArea->IsSymbolIcon());
+}
+
+/**
+ * @tc.name: CleanNode004
+ * @tc.desc: Test showCancelButtonSymbol true
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CleanNode004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input, set cancelButtonSymbol true
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(true);
+    });
+
+    /**
+     * @tc.steps: step2. Get clear node response area
+     */
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+
+    /**
+     * @tc.steps: step3. test clean node symbol true
+     */
+    EXPECT_TRUE(cleanNodeResponseArea->IsShowSymbol());
+    EXPECT_TRUE(cleanNodeResponseArea->IsSymbolIcon());
+}
+
+/**
+ * @tc.name: CleanNode005
+ * @tc.desc: Test showCancelSymbolIcon true, since VERSION_FOURTEEN
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CleanNode005, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+
+    /**
+     * @tc.steps: step1. Initialize text input, set cancelSymbolIcon not nullptr
+     */
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        EXPECT_NE(node, nullptr);
+    };
+    CreateTextField(DEFAULT_TEXT, "", [onApply](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(true);
+        model.SetCancelSymbolIcon(onApply);
+    });
+
+    /**
+     * @tc.steps: step2. Get clear node response area
+     */
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+
+    /**
+     * @tc.steps: step3. test cancelSymbolIcon is not nullptr
+     */
+    ASSERT_NE(layoutProperty_, nullptr);
+    EXPECT_NE(layoutProperty_->GetCancelIconSymbol(), nullptr);
+    EXPECT_TRUE(cleanNodeResponseArea->IsShowSymbol());
+    EXPECT_TRUE(cleanNodeResponseArea->IsSymbolIcon());
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+}
+
+/**
+ * @tc.name: CleanNode006
+ * @tc.desc: Test showCancelSymbolIcon false
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CleanNode006, TestSize.Level1)
+{
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+
+    /**
+     * @tc.steps: step1. Initialize text input, set cancelSymbolIcon nullptr
+     */
+    auto onApply = nullptr;
+    CreateTextField(DEFAULT_TEXT, "", [onApply](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(true);
+        model.SetCancelSymbolIcon(onApply);
+    });
+
+    /**
+     * @tc.steps: step2. Get clear node response area
+     */
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+
+    /**
+     * @tc.steps: step3. test cancelSymbolIcon is nullptr
+     */
+    ASSERT_NE(layoutProperty_, nullptr);
+    EXPECT_EQ(layoutProperty_->GetCancelIconSymbol(), nullptr);
+    EXPECT_TRUE(cleanNodeResponseArea->IsShowSymbol());
+    EXPECT_TRUE(cleanNodeResponseArea->IsSymbolIcon());
+
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 }
 
 /**
@@ -248,6 +392,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward002, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -277,6 +422,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusForward003, TestSize.Level1)
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -355,6 +501,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward002, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
         model.SetIsShowCancelButton(true);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -410,6 +557,7 @@ HWTEST_F(TextFieldUXTest, UpdateFocusBackward004, TestSize.Level1)
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**
@@ -1345,7 +1493,7 @@ HWTEST_F(TextFieldUXTest, testShowPasswordIcon001, TestSize.Level1)
 
 /**
  * @tc.name: testShowPasswordSymbol001
- * @tc.desc: test testInput showPasswordSymbol
+ * @tc.desc: test testInput showPasswordSymbol true, since VERSION_THIRTEEN
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol001, TestSize.Level1)
@@ -1378,7 +1526,7 @@ HWTEST_F(TextFieldUXTest, testShowPasswordSymbol001, TestSize.Level1)
 
 /**
  * @tc.name: testShowPasswordSymbol002
- * @tc.desc: test testInput showPasswordSymbol
+ * @tc.desc: test testInput showPasswordSymbol false, because VERSION_TWELVE
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol002, TestSize.Level1)
@@ -1411,7 +1559,7 @@ HWTEST_F(TextFieldUXTest, testShowPasswordSymbol002, TestSize.Level1)
 
 /**
  * @tc.name: testShowPasswordSymbol003
- * @tc.desc: test testInput showPasswordSymbol
+ * @tc.desc: test testInput showPasswordSymbol false, because set SetPasswordIcon
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol003, TestSize.Level1)
@@ -1744,6 +1892,7 @@ HWTEST_F(TextFieldUXTest, HandleOnTab001, TestSize.Level1)
         model.SetType(TextInputType::VISIBLE_PASSWORD);
         model.SetShowPasswordIcon(true);
         model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetCancelButtonSymbol(false);
     });
 
     /**

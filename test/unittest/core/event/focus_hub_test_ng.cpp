@@ -1196,7 +1196,7 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent002, TestSize.Level1)
 /**
  * @tc.name: FocusHubOnKeyEvent003
  * @tc.desc: Test the function OnKeyEvent.
- * @tc.type: FUNC
+ * @tc.type: FUNC obsolete
  */
 HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent003, TestSize.Level1)
 {
@@ -1239,12 +1239,12 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent003, TestSize.Level1)
 
     /**
      * @tc.steps6: call the function OnKeyEvent with FocusType::SCOPE.
-     * @tc.expected: The return value of OnKeyEvent is true.
+     * @tc.expected: The return value of OnKeyEvent is false.
      */
     auto lastFocusNode = focusHub->lastWeakFocusNode_.Upgrade();
     lastFocusNode->currentFocus_ = true;
     lastFocusNode->SetOnKeyEventInternal(onKeyEvent);
-    EXPECT_TRUE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
 
     /**
      * @tc.steps7: call the function OnKeyEvent with FocusType::SCOPE.

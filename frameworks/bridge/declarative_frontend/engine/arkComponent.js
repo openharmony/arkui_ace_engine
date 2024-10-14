@@ -138,19 +138,24 @@ class ModifierWithKey {
       this.applyPeer(node, true, component);
       return true;
     }
-    const stageTypeInfo = typeof this.stageValue;
-    const valueTypeInfo = typeof this.value;
-    let different = false;
-    if (stageTypeInfo !== valueTypeInfo) {
-      different = true;
-    }
-    else if (stageTypeInfo === 'number' || stageTypeInfo === 'string' || stageTypeInfo === 'boolean') {
-      different = (this.stageValue !== this.value);
-    }
-    else {
-      different = this.checkObjectDiff();
-    }
-    if (different) {
+    if (component._needDiff) {
+      const stageTypeInfo = typeof this.stageValue;
+      const valueTypeInfo = typeof this.value;
+      let different = false;
+      if (stageTypeInfo !== valueTypeInfo) {
+        different = true;
+      }
+      else if (stageTypeInfo === 'number' || stageTypeInfo === 'string' || stageTypeInfo === 'boolean') {
+        different = (this.stageValue !== this.value);
+      }
+      else {
+        different = this.checkObjectDiff();
+      }
+      if (different) {
+        this.value = this.stageValue;
+        this.applyPeer(node, false, component);
+      }
+    } else {
       this.value = this.stageValue;
       this.applyPeer(node, false, component);
     }
@@ -1442,8 +1447,7 @@ class AdvancedBlendModeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().common.resetAdvancedBlendMode(node);
-    }
-    else {
+    } else {
       getUINativeModule().common.setAdvancedBlendMode(node, this.value.blendMode, this.value.blendApplyType);
     }
   }
@@ -2845,8 +2849,7 @@ class CustomPropertyModifier extends ModifierWithKey {
     const nodeId = getUINativeModule().frameNode.getIdByNodePtr(node);
     if (reset) {
       __removeCustomProperty__(nodeId, this.value.key);
-    }
-    else {
+    } else {
       __setValidCustomProperty__(nodeId, this.value.key, this.value.value);
     }
   }
@@ -3077,6 +3080,7 @@ class ArkComponent {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    this._needDiff = true;
     if (classType === ModifierType.FRAME_NODE) {
       this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();
@@ -8366,6 +8370,10 @@ class ArkRichEditorComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RichEditorEditMenuOptionsModifier.identity, RichEditorEditMenuOptionsModifier, value);
     return this;
   }
+  barState(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorBarStateModifier.identity, RichEditorBarStateModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.RichEditor !== undefined) {
@@ -8431,87 +8439,6 @@ class RowSpaceModifier extends ModifierWithKey {
   }
 }
 RowSpaceModifier.identity = Symbol('rowSpace');
-
-class LinearIndicatorIndicatorStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().linearIndicator.resetIndicatorStyle(node);
-    }
-    else {
-      getUINativeModule().linearIndicator.setIndicatorStyle(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-LinearIndicatorIndicatorStyleModifier.identity = Symbol('linearIndicatorIndicatorStyle');
-
-class LinearIndicatorIndicatorLoopModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().linearIndicator.resetIndicatorLoop(node);
-    }
-    else {
-      getUINativeModule().linearIndicator.setIndicatorLoop(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-LinearIndicatorIndicatorLoopModifier.identity = Symbol('linearIndicatorIndicatorLoop');
-
-class LinearIndicatorOnChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().linearIndicator.resetOnChange(node);
-    } else {
-      getUINativeModule().linearIndicator.setOnChange(node, this.value);
-    }
-  }
-}
-LinearIndicatorOnChangeModifier.identity = Symbol('linearIndicatorOnChange');
-
-class ArkLinearIndicatorComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-
-  indicatorStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorStyleModifier.identity, LinearIndicatorIndicatorStyleModifier, value);
-    return this;
-  }
-
-  indicatorLoop(value) {
-    modifierWithKey(this._modifiersWithKeys, LinearIndicatorIndicatorLoopModifier.identity, LinearIndicatorIndicatorLoopModifier, value);
-    return this;
-  }
-
-  onChange(value) {
-    modifierWithKey(this._modifiersWithKeys, LinearIndicatorOnChangeModifier.identity, LinearIndicatorOnChangeModifier, value);
-    return this;
-  }
-}
-// @ts-ignore
-if (globalThis.LinearIndicator !== undefined) {
-  globalThis.LinearIndicator.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkLinearIndicatorComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.LinearIndicatorModifier(nativePtr, classType);
-    });
-  };
-}
 
 class RowPointLightModifier extends ModifierWithKey {
   constructor(value) {
@@ -14008,11 +13935,8 @@ class TextInputCancelButtonModifier extends ModifierWithKey {
       getUINativeModule().textInput.resetCancelButton(node);
     }
     else {
-      let _a, _b, _c;
       getUINativeModule().textInput.setCancelButton(node, this.value.style,
-        (_a = this.value.icon) === null || _a === void 0 ? void 0 : _a.size,
-        (_b = this.value.icon) === null || _b === void 0 ? void 0 : _b.color,
-        (_c = this.value.icon) === null || _c === void 0 ? void 0 : _c.src);
+        this.value.icon);
     }
   }
   checkObjectDiff() {
@@ -16235,6 +16159,16 @@ class ArkNavigationTitle {
   }
   isEqual(another) {
     return (this.value === another.value) && (this.navigationTitleOptions === another.navigationTitleOptions);
+  }
+}
+
+class ArkNavHideTitleBarOrToolBar {
+  constructor() {
+    this.isHide = undefined;
+    this.animated = undefined;
+  }
+  isEqual(another) {
+    return (this.isHide === another.isHide) && (this.animated === another.animated);
   }
 }
 
@@ -20395,9 +20329,40 @@ class ArkNavDestinationComponent extends ArkComponent {
         NavDestinationMenusModifier, value);
     return this;
   }
-  hideTitleBar(value) {
-    modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
+  hideTitleBar(isHide, animated) {
+    let arkNavDestinationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavDestinationHideTitleBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavDestinationHideTitleBar.animated = animated;
+    }
+    if (arkNavDestinationHideTitleBar.isHide === undefined && arkNavDestinationHideTitleBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, arkNavDestinationHideTitleBar);
+    }
     return this;
+  }
+  hideToolBar(isHide, animated) {
+    let arkNavDestinationHideToolBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavDestinationHideToolBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavDestinationHideToolBar.animated = animated;
+    }
+    if (arkNavDestinationHideToolBar.isHide === undefined && arkNavDestinationHideToolBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, NavDestinationHideToolBarModifier.identity,
+          NavDestinationHideToolBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, NavDestinationHideToolBarModifier.identity,
+          NavDestinationHideToolBarModifier, arkNavDestinationHideToolBar);
+    }
+    return this;
+  }
+  toolbarConfiguration(value) {
+    throw new Error('Method not implemented.');
   }
   backButtonIcon(value) {
     modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
@@ -20476,11 +20441,26 @@ class HideTitleBarModifier extends ModifierWithKey {
       getUINativeModule().navDestination.resetHideTitleBar(node);
     }
     else {
-      getUINativeModule().navDestination.setHideTitleBar(node, this.value);
+      getUINativeModule().navDestination.setHideTitleBar(node, this.value?.isHide, this.value?.animated);
     }
   }
 }
 HideTitleBarModifier.identity = Symbol('hideTitleBar');
+
+class NavDestinationHideToolBarModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetHideToolBar(node);
+    }
+    else {
+      getUINativeModule().navDestination.setHideToolBar(node, this.value?.isHide, this.value?.animated);
+    }
+  }
+}
+NavDestinationHideToolBarModifier.identity = Symbol('hideToolBar');
 
 class IgnoreLayoutSafeAreaModifier extends ModifierWithKey {
   constructor(value) {
@@ -21244,8 +21224,19 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SubTitleModifier.identity, SubTitleModifier, value);
     return this;
   }
-  hideTitleBar(value) {
-    modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, value);
+  hideTitleBar(isHide, animated) {
+    let arkNavigationHideTitleBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavigationHideTitleBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavigationHideTitleBar.animated = animated;
+    }
+    if (arkNavigationHideTitleBar.isHide === undefined && arkNavigationHideTitleBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, arkNavigationHideTitleBar);
+    }
     return this;
   }
   hideBackButton(value) {
@@ -21270,8 +21261,19 @@ class ArkNavigationComponent extends ArkComponent {
   toolbarConfiguration(value) {
     throw new Error('Method not implemented.');
   }
-  hideToolBar(value) {
-    modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, value);
+  hideToolBar(isHide, animated) {
+    let arkNavigationHideToolBar = new ArkNavHideTitleBarOrToolBar();
+    if (!isUndefined(isHide) && !isNull(isHide)) {
+      arkNavigationHideToolBar.isHide = isHide;
+    }
+    if (!isUndefined(animated) && !isNull(animated)) {
+      arkNavigationHideToolBar.animated = animated;
+    }
+    if (arkNavigationHideToolBar.isHide === undefined && arkNavigationHideToolBar.animated === undefined) {
+        modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, undefined);
+    } else {
+        modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, arkNavigationHideToolBar);
+    }
     return this;
   }
   onTitleModeChange(callback) {
@@ -21468,7 +21470,7 @@ class HideToolBarModifier extends ModifierWithKey {
       getUINativeModule().navigation.resetHideToolBar(node);
     }
     else {
-      getUINativeModule().navigation.setHideToolBar(node, this.value);
+      getUINativeModule().navigation.setHideToolBar(node, this.value?.isHide, this.value?.animated);
     }
   }
 }
@@ -21524,7 +21526,7 @@ class NavigationHideTitleBarModifier extends ModifierWithKey {
       getUINativeModule().navigation.resetHideTitleBar(node);
     }
     else {
-      getUINativeModule().navigation.setHideTitleBar(node, this.value);
+      getUINativeModule().navigation.setHideTitleBar(node, this.value?.isHide, this.value?.animated);
     }
   }
 }

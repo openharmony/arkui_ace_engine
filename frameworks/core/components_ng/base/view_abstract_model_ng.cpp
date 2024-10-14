@@ -261,6 +261,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
         auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
         if (type == ResponseType::RIGHT_CLICK) {
             OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam](MouseInfo& info) mutable {
+                TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
                 auto containerId = Container::CurrentId();
                 auto taskExecutor = Container::CurrentTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
@@ -306,12 +307,6 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                         CHECK_NULL_VOID(targetNode);
                         auto pipelineContext = NG::PipelineContext::GetCurrentContext();
                         CHECK_NULL_VOID(pipelineContext);
-                        auto dragDropManager = pipelineContext->GetDragDropManager();
-                        CHECK_NULL_VOID(dragDropManager);
-                        if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging()) {
-                            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag is in progress, return");
-                            return;
-                        }
                         if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
                             auto context = targetNode->GetRenderContext();
                             CHECK_NULL_VOID(context);
@@ -375,10 +370,13 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(FrameNode* targetNode, c
         gestureHub->SetPreviewMode(menuParam.previewMode);
         gestureHub->SetContextMenuShowStatus(menuParam.isShow);
         gestureHub->SetMenuBindingType(menuParam.menuBindType);
-        auto menuPreviewScale = menuParam.previewAnimationOptions.scaleTo;
         // set menu preview scale to drag.
-        gestureHub->SetMenuPreviewScale(
-            LessOrEqual(menuPreviewScale, 0.0) ? DEFALUT_DRAG_PPIXELMAP_SCALE : menuPreviewScale);
+        if (menuParam.menuBindType != MenuBindingType::RIGHT_CLICK) {
+            auto menuPreviewScale = LessOrEqual(menuParam.previewAnimationOptions.scaleTo, 0.0)
+                                        ? DEFALUT_DRAG_PPIXELMAP_SCALE
+                                        : menuParam.previewAnimationOptions.scaleTo;
+            gestureHub->SetMenuPreviewScale(menuPreviewScale);
+        }
     } else {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
     }
@@ -656,22 +654,32 @@ void ViewAbstractModelNG::SetAccessibilityVirtualNode(std::function<void()>&& bu
     accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
 }
 
-void ViewAbstractModelNG::SetAccessibilitySelected(bool selected)
+void ViewAbstractModelNG::SetAccessibilitySelected(bool selected, bool resetValue)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetUserSelected(selected);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserSelected();
+    } else {
+        accessibilityProperty->SetUserSelected(selected);
+    }
 }
 
-void ViewAbstractModelNG::SetAccessibilityChecked(bool checked)
+void ViewAbstractModelNG::SetAccessibilityChecked(bool checked, bool resetValue)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetUserCheckedType(checked);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserCheckedType();
+        accessibilityProperty->ResetUserCheckable();
+    } else {
+        accessibilityProperty->SetUserCheckedType(checked);
+        accessibilityProperty->SetUserCheckable(true);
+    }
 }
 
 void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
@@ -722,20 +730,30 @@ std::string ViewAbstractModelNG::GetAccessibilityImportance(FrameNode* frameNode
     return accessibilityProperty->GetAccessibilityLevel();
 }
 
-void ViewAbstractModelNG::SetAccessibilitySelected(FrameNode* frameNode, bool selected)
+void ViewAbstractModelNG::SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue)
 {
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetUserSelected(selected);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserSelected();
+    } else {
+        accessibilityProperty->SetUserSelected(selected);
+    }
 }
 
-void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool checked)
+void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue)
 {
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetUserCheckedType(checked);
+    if (resetValue == true) {
+        accessibilityProperty->ResetUserCheckedType();
+        accessibilityProperty->ResetUserCheckable();
+    } else {
+        accessibilityProperty->SetUserCheckedType(checked);
+        accessibilityProperty->SetUserCheckable(true);
+    }
 }
 
 } // namespace OHOS::Ace::NG

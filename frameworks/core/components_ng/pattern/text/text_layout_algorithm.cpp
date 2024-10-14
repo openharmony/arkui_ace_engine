@@ -141,10 +141,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     } else {
         heightFinal = std::min(heightFinal, contentConstraint.maxSize.Height());
     }
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT, "MeasureContent[id:%d][w:%f][h:%f][lineW:%f][height:%f]", host->GetId(), maxWidth,
-            heightFinal, longestLine, height);
-    }
     if (host->GetTag() == V2::TEXT_ETS_TAG && textLayoutProperty->GetContent().value_or("").empty() &&
         NonPositive(longestLine)) {
         ACE_SCOPED_TRACE("TextHeightFinal [%f], TextContentWidth [%f], FontSize [%lf]", heightFinal, maxWidth,
@@ -459,7 +455,7 @@ std::pair<bool, double> TextLayoutAlgorithm::GetSuitableSizeLD(TextStyle& textSt
         return {false, 0.0};
     }
     double suitableSize = maxFontSize;
-    while (suitableSize >= maxFontSize) {
+    while (GreatOrEqual(suitableSize, minFontSize)) {
         textStyle.SetFontSize(Dimension(suitableSize));
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper)) {
             return {false, 0.0};

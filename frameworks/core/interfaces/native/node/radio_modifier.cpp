@@ -304,7 +304,7 @@ void SetRadioOptions(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr gr
     if (static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::TICK &&
         static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::DOT &&
         static_cast<RadioIndicatorType>(indicatorType) != RadioIndicatorType::CUSTOM) {
-            indicatorType = static_cast<int32_t>(RadioIndicatorType::TICK);
+            indicatorType = static_cast<ArkUI_Uint32>(RadioIndicatorType::TICK);
     }
     RadioModelNG::SetRadioOptions(frameNode, std::string(value), std::string(group), indicatorType);
 }

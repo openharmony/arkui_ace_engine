@@ -141,12 +141,19 @@ void NavDestinationPattern::OnModifyDone()
 
     UpdateNameIfNeeded(hostNode);
     UpdateBackgroundColorIfNeeded(hostNode);
-    MountTitleBar(hostNode);
-    NavigationToolbarUtil::MountToolBar(hostNode);
+    bool needRunTitleBarAnimation = false;
+    MountTitleBar(hostNode, needRunTitleBarAnimation);
+    bool needRunToolBarAnimation = false;
+    NavigationToolbarUtil::MountToolBar(hostNode, needRunToolBarAnimation);
+    HandleTitleBarAndToolBarAnimation(hostNode, needRunTitleBarAnimation, needRunToolBarAnimation);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
-        InitBackButtonLongPressEvent(hostNode);
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+        CHECK_NULL_VOID(titleBarPattern);
+        auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+        CHECK_NULL_VOID(backButtonNode);
+        titleBarPattern->InitBackButtonLongPressEvent(backButtonNode);
     }
 }
 
@@ -214,8 +221,10 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
         renderContext->GetBackgroundColor()->ColorToString().c_str());
 }
 
-void NavDestinationPattern::MountTitleBar(RefPtr<NavDestinationGroupNode>& hostNode)
+void NavDestinationPattern::MountTitleBar(
+    RefPtr<NavDestinationGroupNode>& hostNode, bool& needRunTitleBarAnimation)
 {
+    needRunTitleBarAnimation = false;
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
@@ -232,17 +241,19 @@ void NavDestinationPattern::MountTitleBar(RefPtr<NavDestinationGroupNode>& hostN
         }
         titleBarLayoutProperty->UpdateNoPixMap(navDestinationLayoutProperty->GetNoPixMapValue());
     }
-
-    if (isHideTitlebar_) {
-        titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        titleBarNode->SetJSViewActive(false);
-    } else {
-        titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        titleBarNode->SetJSViewActive(true);
-        auto&& opts = navDestinationLayoutProperty->GetSafeAreaExpandOpts();
-        if (opts) {
-            titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
-        }
+    bool hideTitleBar = navDestinationLayoutProperty->GetHideTitleBarValue(false);
+    BuildMenu(hostNode, titleBarNode);
+    /**
+     * if titlebar is the first time to hide/display,
+     * doesn't require animation or isn't currently being animated and the
+     * hidden/display status hasn't changed.
+     */
+    if (!currHideTitleBar_.has_value() ||
+        !navDestinationLayoutProperty->GetIsAnimatedTitleBarValue(false) ||
+        (titleBarAnimationCount_ <= 0 && currHideTitleBar_.value() == hideTitleBar)) {
+        currHideTitleBar_ = hideTitleBar;
+        HideOrShowTitleBarImmediately(hostNode, hideTitleBar);
+        return;
     }
 
     auto navDesIndex = hostNode->GetIndex();
@@ -251,10 +262,11 @@ void NavDestinationPattern::MountTitleBar(RefPtr<NavDestinationGroupNode>& hostN
         titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     }
 
-    BuildMenu(hostNode, titleBarNode);
-
     titleBarNode->MarkModifyDone();
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+
+    currHideTitleBar_ = hideTitleBar;
+    needRunTitleBarAnimation = true;
 }
 
 bool NavDestinationPattern::GetBackButtonState()
@@ -263,7 +275,7 @@ bool NavDestinationPattern::GetBackButtonState()
     CHECK_NULL_RETURN(hostNode, false);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_RETURN(navDestinationLayoutProperty, false);
-    if (navDestinationLayoutProperty->GetHideTitleBarValue(false)) {
+    if (navDestinationLayoutProperty->GetHideTitleBarValue(false) && !ForceMeasureTitleBar()) {
         return false;
     }
     // get navigation node
@@ -365,105 +377,18 @@ bool NavDestinationPattern::NeedIgnoreKeyboard()
     return false;
 }
 
-void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGroupNode>& hostNode)
-{
-    CHECK_NULL_VOID(hostNode);
-    auto titleBarUINode = hostNode->GetTitleBarNode();
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarUINode);
-    CHECK_NULL_VOID(titleBarNode);
-
-    auto backButtonUINode = titleBarNode->GetBackButton();
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(backButtonUINode);
-    CHECK_NULL_VOID(backButtonNode);
-
-    auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-
-    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleLongPress();
-    };
-    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gestureHub->SetLongPressEvent(longPressEvent_);
-
-    auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
-    CHECK_NULL_VOID(longPressRecognizer);
-
-    auto longPressEndCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleLongPressActionEnd();
-    };
-    longPressRecognizer->SetOnActionEnd(longPressEndCallback);
-}
-
-void NavDestinationPattern::HandleLongPress()
-{
-    auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleBarUINode = hostNode->GetTitleBarNode();
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarUINode);
-    CHECK_NULL_VOID(titleBarNode);
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
-    CHECK_NULL_VOID(backButtonNode);
-    auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    auto message = accessibilityProperty->GetAccessibilityText();
-    if (dialogNode_ != nullptr) {
-        // clear the last dialog
-        HandleLongPressActionEnd();
-    }
-
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
-        auto backButtonIconNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetFirstChild());
-        CHECK_NULL_VOID(backButtonIconNode);
-        if (backButtonIconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-            auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
-            CHECK_NULL_VOID(symbolProperty);
-            dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message,
-                symbolProperty->GetSymbolSourceInfoValue(), symbolProperty->GetSymbolColorListValue({}),
-                symbolProperty->GetFontWeightValue(FontWeight::NORMAL));
-            return;
-        }
-        auto imageProperty = backButtonIconNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(imageProperty);
-        ImageSourceInfo imageSourceInfo = imageProperty->GetImageSourceInfoValue();
-        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
-        return;
-    }
-    auto backButtonImageLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(backButtonImageLayoutProperty);
-    ImageSourceInfo imageSourceInfo = backButtonImageLayoutProperty->GetImageSourceInfoValue();
-    dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
-}
-
-void NavDestinationPattern::HandleLongPressActionEnd()
-{
-    CHECK_NULL_VOID(dialogNode_);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->CloseDialog(dialogNode_);
-    dialogNode_ = nullptr;
-}
-
 void NavDestinationPattern::OnFontScaleConfigurationUpdate()
 {
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
+    auto titleBarUINode = hostNode->GetTitleBarNode();
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarUINode);
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
     if (LessNotEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
-        auto titleBarUINode = hostNode->GetTitleBarNode();
-        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarUINode);
-        CHECK_NULL_VOID(titleBarNode);
-
-        auto backButtonUINode = titleBarNode->GetBackButton();
-        auto backButtonNode = AceType::DynamicCast<FrameNode>(backButtonUINode);
-        CHECK_NULL_VOID(backButtonNode);
-
         auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetLongPressEvent(nullptr);
@@ -472,7 +397,9 @@ void NavDestinationPattern::OnFontScaleConfigurationUpdate()
         longPressRecognizer->SetOnActionEnd(nullptr);
         return;
     }
-    InitBackButtonLongPressEvent(hostNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->InitBackButtonLongPressEvent(backButtonNode);
 }
 
 void NavDestinationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)

@@ -46,21 +46,18 @@ std::mutex SearchModel::mutex_;
 
 SearchModel* SearchModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::SearchModelNG());
+    static NG::SearchModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::SearchModelNG());
-            } else {
-                instance_.reset(new Framework::SearchModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::SearchModelNG instance;
+        return &instance;
+    } else {
+        static Framework::SearchModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -849,19 +846,11 @@ void JSSearch::ParseBorderRadius(const JSRef<JSVal>& args)
     if (ParseJsDimensionVp(args, borderRadius)) {
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
-        auto textFieldTheme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(textFieldTheme);
-        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
-        NG::BorderRadiusProperty defaultBorderRadius {
-            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
-            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
-        };
-
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
-        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
-        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
-        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
+        CalcDimension topLeft;
+        CalcDimension topRight;
+        CalcDimension bottomLeft;
+        CalcDimension bottomRight;
         if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
             ViewAbstractModel::GetInstance()->SetBorderRadius(
                 JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
@@ -1000,7 +989,7 @@ void JSSearch::SetCopyOption(const JSCallbackInfo& info)
         SearchModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
-    auto copyOptions = CopyOptions::None;
+    auto copyOptions = CopyOptions::Local;
     if (info[0]->IsNumber()) {
         auto emunNumber = info[0]->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);

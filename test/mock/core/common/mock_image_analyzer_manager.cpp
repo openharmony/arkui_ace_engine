@@ -105,5 +105,6 @@ void ImageAnalyzerManager::UpdateOverlayStatus(bool status, int offsetX, int off
 
 void ImageAnalyzerManager::SetNotifySelectedCallback(OnNotifySelectedStatusCallback&& callback)
 {
+    analyzerUIConfig_.onNotifySelectedStatus = std::move(callback);
 }
 } // namespace OHOS::Ace

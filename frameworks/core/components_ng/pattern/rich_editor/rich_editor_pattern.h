@@ -190,7 +190,6 @@ public:
         bool isTouchCaret = false;
         bool isMoveCaret = false;
         Offset touchDownOffset;
-        OffsetF touchDownPaintOffset;
         const Dimension minDistance = 5.0_vp;
 
         void Reset()
@@ -198,7 +197,6 @@ public:
             isTouchCaret = false;
             isMoveCaret = false;
             touchDownOffset.Reset();
-            touchDownPaintOffset.Reset();
         }
     };
 
@@ -295,7 +293,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_);
+        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_, typingTextStyle_);
     }
 
     FocusPattern GetFocusPattern() const override
@@ -711,11 +709,7 @@ public:
 
     void OnAttachToFrameNode() override;
 
-    void OnDetachFromFrameNode(FrameNode* node) override
-    {
-        TextPattern::OnDetachFromFrameNode(node);
-        ScrollablePattern::OnDetachFromFrameNode(node);
-    }
+    void OnDetachFromFrameNode(FrameNode* node) override;
 
     bool IsAtBottom() const override
     {
@@ -812,10 +806,6 @@ public:
     void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
-        CHECK_NULL_VOID(!textSelector_.SelectNothing());
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
 
     Color GetSelectedBackgroundColor();
@@ -872,6 +862,8 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
     OffsetF GetPaintRectGlobalOffset() const;
+    // original local point to transformed global point.
+    void HandlePointWithTransform(OffsetF& point);
 
     float GetCrossOverHeight() const;
 
@@ -965,6 +957,12 @@ public:
         return barDisplayMode_.value_or(DisplayMode::AUTO);
     }
 
+    Color GetUrlSpanColor() override;
+
+    void TriggerAvoidOnCaretChange();
+
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
 protected:
     bool CanStartAITask() override;
 
@@ -977,6 +975,7 @@ protected:
     }
 
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
+    PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
 
 private:
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
@@ -998,6 +997,7 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     bool HandleClickSelection(const OHOS::Ace::GestureEvent& info);
+    bool IsClickEventOnlyForMenuToggle(const OHOS::Ace::GestureEvent& info);
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     bool IsShowSingleHandleByClick(const OHOS::Ace::GestureEvent& info, int32_t lastCaretPosition,
         const RectF& lastCaretRect, bool isCaretTwinkling);
@@ -1054,6 +1054,7 @@ private:
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
     void UpdateCaretByTouchMove(const Offset& offset);
+    Offset AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset);
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
@@ -1076,7 +1077,11 @@ private:
     void ResetAfterTextChange() override {};
     void AddOprationWhenAddImage(int32_t beforeCaretPos);
     void UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpanOptions& options);
-
+    void InitPlaceholderSpansMap(
+        RefPtr<SpanItem>& newSpanItem, const RefPtr<SpanItem>& spanItem, size_t& index, size_t& placeholderGains);
+    void ReplacePlaceholderWithCustomSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
+    void ReplacePlaceholderWithSymbolSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
+    void ReplacePlaceholderWithImageSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
         auto host = GetHost();
@@ -1275,9 +1280,12 @@ private:
     void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
     void EnableOneStepDrag(const RefPtr<ImageSpanNode>& imageNode);
     void SetImageSelfResponseEvent(bool isEnable);
-    void CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub);
+    void CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode);
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     void UpdateImagePreviewParam();
+    void UpdateImagePreviewParam(const RefPtr<ImageSpanNode>& imageNode);
+    void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
+    void ClearOnFocusTextField();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1341,8 +1349,6 @@ private:
     RefPtr<OverlayManager> keyboardOverlay_;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     Offset selectionMenuOffset_;
-    // has urlspan
-    bool hasUrlSpan_ = false;
     // add for scroll
     RectF richTextRect_;
     float scrollOffset_ = 0.0f;
@@ -1363,6 +1369,8 @@ private:
     bool isShowPlaceholder_ = false;
     bool isSingleHandle_ = false;
     TouchAndMoveCaretState moveCaretState_;
+    // Recorded when touch down or mouse left button press.
+    OffsetF globalOffsetOnMoveStart_;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
@@ -1397,6 +1405,7 @@ private:
     std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
     bool isImageSelfResponseEvent_ = true;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
+    uint32_t twinklingInterval_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

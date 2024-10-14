@@ -6322,13 +6322,13 @@ void SetOnAppear(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onAppear = [frameNode, nodeId, extraParam]() {
+    auto onAppear = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_APPEAR;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
@@ -6339,13 +6339,13 @@ void SetOnDisappear(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onDisappear = [frameNode, nodeId, extraParam]() {
+    auto onDisappear = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_DISAPPEAR;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnDisappear(frameNode, std::move(onDisappear));
@@ -6356,13 +6356,13 @@ void SetOnAttach(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onAttach = [frameNode, nodeId, extraParam]() {
+    auto onAttach = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_ATTACH;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
@@ -6373,13 +6373,13 @@ void SetOnDetach(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onDetach = [frameNode, nodeId, extraParam]() {
+    auto onDetach = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_DETACH;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
@@ -6422,14 +6422,14 @@ void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onAreaChanged = [nodeId, frameNode, extraParam](
+    auto onAreaChanged = [nodeId, node = AceType::WeakClaim(frameNode), extraParam](
                              const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_AREA_CHANGE;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         auto oldLocalOffset = oldRect.GetOffset();
         event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
         event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Height());

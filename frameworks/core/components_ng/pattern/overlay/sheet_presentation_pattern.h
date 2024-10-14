@@ -378,6 +378,8 @@ public:
         return false;
     }
 
+    bool IsWindowSizeChangedWithUndefinedReason(int32_t width, int32_t height, WindowSizeChangeReason type);
+
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     bool HasTitleNode() const
@@ -672,6 +674,8 @@ private:
     void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ClipSheetNode();
     void CreatePropertyCallback();
+    void ComputeDetentsPos(float currentSheetHeight, float& upHeight, float& downHeight, uint32_t& detentsLowerPos,
+        uint32_t& detentsUpperPos);
     void IsCustomDetentsChanged(SheetStyle sheetStyle);
     std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetCenterStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
@@ -777,10 +781,12 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 
     float preDetentsHeight_ = 0.0f;
+    std::optional<SizeT<int32_t>> windowSize_;
     float scale_ = 1.0;
 
     Color sheetMaskColor_ = Color::TRANSPARENT;
     SheetKeyboardAvoidMode keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+    float resizeDecreasedHeight_ = 0.f;
 };
 } // namespace OHOS::Ace::NG
 

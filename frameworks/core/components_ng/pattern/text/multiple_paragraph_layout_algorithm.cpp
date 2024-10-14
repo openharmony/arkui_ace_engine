@@ -73,8 +73,10 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
     if (contentModifier) {
-        SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
-        contentModifier->ModifyTextStyle(textStyle);
+        if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
+            SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
+            contentModifier->ModifyTextStyle(textStyle);
+        }
         contentModifier->SetFontReady(false);
     }
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));

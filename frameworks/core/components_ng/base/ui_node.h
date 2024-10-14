@@ -95,6 +95,7 @@ public:
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     RefPtr<FrameNode> GetParentFrameNode() const;
+    RefPtr<FrameNode> GetFocusParentWithBoundary() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
@@ -714,6 +715,16 @@ public:
         destroyCallback_(GetId());
     }
 
+    bool IsAllowAddChildBelowModalUec() const
+    {
+        return isAllowAddChildBelowModalUec_;
+    }
+
+    void SetIsAllowAddChildBelowModalUec(bool isAllowAddChildBelowModalUec)
+    {
+        isAllowAddChildBelowModalUec_ = isAllowAddChildBelowModalUec;
+    }
+
     void SetBuilderFunc(std::function<void()>&& lazyBuilderFunc)
     {
         lazyBuilderFunc_ = lazyBuilderFunc;
@@ -768,6 +779,16 @@ public:
     bool IsFreeze() const
     {
         return isFreeze_;
+    }
+
+    bool IsCNode() const
+    {
+        return isCNode_;
+    }
+
+    void setIsCNode(bool createByCapi)
+    {
+        isCNode_ = createByCapi;
     }
 
 protected:
@@ -853,6 +874,7 @@ protected:
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
+    bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
 
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
@@ -885,6 +907,9 @@ private:
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;
+
+    bool isCNode_ = false;
+    bool isAllowAddChildBelowModalUec_ = true;
 
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;

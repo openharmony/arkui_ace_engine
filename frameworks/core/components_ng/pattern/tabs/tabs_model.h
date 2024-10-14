@@ -115,7 +115,7 @@ public:
     virtual void Pop() = 0;
     virtual void SetIndex(int32_t index) = 0;
     virtual void SetTabBarPosition(BarPosition tabBarPosition) = 0;
-    virtual void SetBarBackgroundBlurStyle(BlurStyle tabBarBlurStyle) {}
+    virtual void SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption) {}
     virtual void SetTabBarMode(TabBarMode tabBarMode) = 0;
     virtual void SetTabBarWidth(const Dimension& tabBarWidth) = 0;
     virtual void SetTabBarHeight(const Dimension& tabBarHeight) = 0;
@@ -143,6 +143,7 @@ public:
     virtual void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback) {}
     virtual void SetAnimateMode(TabAnimateMode mode) {}
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) {}
+    virtual void SetBarBackgroundEffect(const EffectOption& effectOption) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

@@ -22,6 +22,7 @@ import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import componentUtils from '@ohos.arkui.componentUtils';
 import hilog from '@ohos.hilog';
+import common from '@ohos.app.ability.common';
 
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
@@ -296,6 +297,31 @@ function isValidDimensionString(dimension: string): boolean {
   return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
 }
 
+function isValidResource(context: Context | undefined, value: Resource) {
+  const resourceManager = context?.resourceManager;
+  if (value === void (0) || value === null || resourceManager === void (0)) {
+    return false;
+  }
+  if (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
+    value.type !== RESOURCE_TYPE_FLOAT) {
+    return false;
+  }
+
+  if (value.type === RESOURCE_TYPE_INTEGER || value.type === RESOURCE_TYPE_FLOAT) {
+    if (resourceManager.getNumber(value.id) >= 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  if (value.type === RESOURCE_TYPE_STRING && !isValidDimensionString(resourceManager.getStringSync(value.id))) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 @Component
 export struct ChipComponent {
   private theme: ChipTheme = defaultTheme;
@@ -422,13 +448,9 @@ export struct ChipComponent {
       case 'object':
         try {
           let returnValue = this.lengthMetricsToVp(LengthMetrics.resource(value));
-          if (returnValue === 0) {
-            if ((value.type === RESOURCE_TYPE_STRING &&
-              !isValidDimensionString(getContext(this).resourceManager.getStringSync(value.id))) ||
-              (value.type !== RESOURCE_TYPE_STRING && value.type !== RESOURCE_TYPE_INTEGER &&
-                value.type !== RESOURCE_TYPE_FLOAT)) {
-              return Number.NEGATIVE_INFINITY;
-            }
+          if (returnValue === 0 &&
+            !isValidResource(getContext(this), value)) {
+            return Number.NEGATIVE_INFINITY;
           }
           return returnValue;
         } catch (error) {
@@ -889,6 +911,8 @@ export struct ChipComponent {
   }
 
   aboutToAppear() {
+    let uiContent: UIContext = this.getUIContext();
+    this.fontSizeScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     this.smListener.on("change", (mediaQueryResult: mediaquery.MediaQueryResult) => {
       if (mediaQueryResult.matches) {
         this.chipBreakPoints = BreakPointsType.SM
@@ -1068,11 +1092,6 @@ export struct ChipComponent {
     .focusable(true)
     .opacity(this.getChipNodeOpacity())
     .padding(0)
-    .focusBox({
-      margin: LengthMetrics.vp(this.theme.chipNode.focusOutlineMargin),
-      strokeColor: ColorMetrics.resourceColor(this.theme.chipNode.focusOutlineColor),
-      strokeWidth: LengthMetrics.vp(this.theme.chipNode.borderWidth)
-    })
     .onFocus(() => {
       this.chipNodeOnFocus = true
     })

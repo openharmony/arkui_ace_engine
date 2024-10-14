@@ -43,7 +43,7 @@ void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
 
 Color ScrollablePaintProperty::GetBarColor() const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::TRANSPARENT);
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, Color::TRANSPARENT);
@@ -56,7 +56,7 @@ Color ScrollablePaintProperty::GetBarColor() const
 
 Dimension ScrollablePaintProperty::GetBarWidth() const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Dimension());
     auto themeManager = context->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, Dimension());

@@ -703,4 +703,47 @@ HWTEST_F(SwiperControllerTestNg, PreloadItems002, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(frameNode_->TotalChildCount(), 5);
 }
+
+/**
+ * @tc.name: ChangeIndex001
+ * @tc.desc: Test ChangeIndex with SwiperDisplayMode::AUTO_LINEAR and item invisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ChangeIndex001, TestSize.Level1)
+{
+    Create([](SwiperModelNG model) {
+        model.SetIndex(0);
+        model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+        CreateItemWithSize(200.f, SWIPER_HEIGHT);
+        CreateItemWithSize(300.f, SWIPER_HEIGHT);
+        CreateItemWithSize(400.f, SWIPER_HEIGHT);
+        CreateItemWithSize(500.f, SWIPER_HEIGHT);
+        CreateItemWithSize(100.f, SWIPER_HEIGHT);
+        CreateItemWithSize(100.f, SWIPER_HEIGHT);
+    });
+
+    GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
+    FlushLayoutTask(frameNode_);
+
+    VerifyChangeIndex(2, false, 3);
+    VerifyChangeIndex(5, false, 5);
+    VerifyChangeIndex(2, false, 1);
+}
+
+/**
+ * @tc.name: ChangeIndex002
+ * @tc.desc: Test ChangeIndex with prevMargin nextMargin itemSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ChangeIndex002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetPreviousMargin(Dimension(20), false);
+        model.SetNextMargin(Dimension(20), false);
+        model.SetItemSpace(Dimension(30));
+        model.SetDisplayCount(3);
+    }, 10);
+
+    VerifyChangeIndex(9, false, 9);
+}
 } // namespace OHOS::Ace::NG

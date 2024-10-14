@@ -23,29 +23,21 @@
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 
 namespace OHOS::Ace {
-
-std::unique_ptr<GridColModel> GridColModel::instance_;
-std::mutex GridColModel::mutex_;
-
 GridColModel* GridColModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::GridColModelNG());
+    static NG::GridColModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::GridColModelNG());
-            } else {
-                instance_.reset(new Framework::GridColModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::GridColModelNG instance;
+        return &instance;
+    } else {
+        static Framework::GridColModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 namespace {

@@ -383,6 +383,14 @@ public:
         return windowScale_;
     }
 
+    double GetWindowDensity() const
+    {
+        if (!uiWindow_) {
+            return 0.0;
+        }
+        return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
+    }
+
     int32_t GetParentId() const
     {
         return parentId_;
@@ -539,6 +547,8 @@ public:
     sptr<IRemoteObject> GetToken();
     void SetParentToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetParentToken();
+    uint32_t GetParentWindowType() const;
+    uint32_t GetWindowType() const;
 
     std::string GetWebHapPath() const override
     {
@@ -685,6 +695,15 @@ public:
         return paramUie_;
     }
 
+    void UpdateResourceOrientation(int32_t orientation);
+    void UpdateResourceDensity(double density);
+
+    bool IsFreeMultiWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetFreeMultiWindowModeEnabledState();
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -705,7 +724,10 @@ private:
     void FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
 
     void NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration);
-
+    void ProcessThemeUpdate(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
+    DeviceOrientation ProcessDirectionUpdate(
+        const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
+    void InitDragEventCallback();
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;

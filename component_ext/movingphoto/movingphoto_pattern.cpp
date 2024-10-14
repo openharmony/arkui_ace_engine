@@ -34,7 +34,7 @@ constexpr int64_t PERIOD_START = 0;
 constexpr int32_t PREPARE_RETURN = 0;
 constexpr int64_t VIDEO_PLAYTIME_START_POSITION = 0;
 constexpr int64_t VIDEO_PLAYTIME_END_POSITION = 3000;
-constexpr int32_t IMAGE_LOADING_COMPLETE = 1;
+constexpr int32_t IMAGE_LOADING_COMPLETE = 0;
 constexpr int32_t DURATION_FLAG = -1;
 }
 MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& controller)
@@ -1303,7 +1303,7 @@ void MovingPhotoPattern::RegisterVisibleAreaChange()
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::vector<double> ratioList = {0.0};
+    std::vector<double> ratioList = {1.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     hasVisibleChangeRegistered_ = true;
 }

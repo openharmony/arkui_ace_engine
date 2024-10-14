@@ -44,8 +44,6 @@ public:
 
     void SetOnContext2DAttach(std::function<void()>&& callback);
     void SetOnContext2DDetach(std::function<void()>&& callback);
-    void FireOnContext2DAttach();
-    void FireOnContext2DDetach();
 
     int32_t GetId() const
     {
@@ -189,6 +187,9 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void FireOnContext2DAttach();
+    void FireOnContext2DDetach();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnSizeChanged(const DirtySwapConfig& config, bool needReset);
     void CreateAnalyzerOverlay();

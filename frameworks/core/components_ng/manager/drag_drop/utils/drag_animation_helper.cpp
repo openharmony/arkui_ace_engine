@@ -90,10 +90,12 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
     const RefPtr<OverlayManager>& overlayManager)
 {
     CHECK_NULL_VOID(actuator);
+    CHECK_NULL_VOID(overlayManager);
     AnimationOption option;
     option.SetDuration(BEFORE_LIFTING_TIME);
     option.SetCurve(Curves::SHARP);
     auto frameNode = actuator->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto gatherNodeCenter = frameNode->GetPaintRectCenter();
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
 
@@ -245,8 +247,12 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
         frameNodeSize.Height(), gatherNodeCenter, renderContext->GetBorderRadius() };
     AnimationUtils::Animate(
         option,
-        [overlayManager, gatherAnimationInfo]() {
+        [weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager)), gatherAnimationInfo,
+            weak = AceType::WeakClaim(AceType::RawPtr(frameNode))]() {
+            auto overlayManager = weakOverlayManager.Upgrade();
+            auto frameNode = weak.Upgrade();
             DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
+            DragDropManager::UpdateGatherNodePosition(overlayManager, frameNode);
         },
         option.GetOnFinishEvent());
 }
@@ -303,12 +309,15 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
 {
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(menuPattern);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto badgeNumber = dragDropManager->GetBadgeNumber();
-    auto childSize = badgeNumber > 0 ? static_cast<size_t>(badgeNumber) :
+    auto frameNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+    CHECK_NULL_VOID(frameNode);
+    auto badgeNumber = frameNode->GetDragPreviewOption().GetCustomerBadgeNumber();
+    auto childSize = badgeNumber.has_value() ? static_cast<size_t>(badgeNumber.value()) :
                                         manager->GetGatherNodeChildrenInfo().size() + 1;
     auto badgeLength = std::to_string(childSize).size();
     UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
@@ -322,14 +331,17 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     textNode->MarkModifyDone();
     textNode->SetLayoutDirtyMarked(true);
     textNode->SetActive(true);
-    textNode->CreateLayoutTask();
+    auto context = textNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(textNode);
+    }
     pipeline->FlushSyncGeometryNodeTasks();
 }
 
 void DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(
     const RefPtr<FrameNode>& textNode, int32_t badgeLength, int32_t childSize)
 {
-    if (childSize <= 1) {
+    if (childSize < 1) {
         return;
     }
     CHECK_NULL_VOID(textNode);

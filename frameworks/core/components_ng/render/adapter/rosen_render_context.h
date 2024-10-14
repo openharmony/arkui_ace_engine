@@ -239,6 +239,7 @@ public:
     void ClipWithCircle(const Circle& circle) override;
     void RemoveClipWithRRect() override;
     void UpdateWindowFocusState(bool isFocused) override;
+    void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
@@ -362,8 +363,6 @@ public:
     void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
     bool CreateThumbnailPixelMapAsyncTask(
         bool needScale, std::function<void(const RefPtr<PixelMap>)> &&callback) override;
-    std::vector<double> transInfo_;
-    std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
     bool GetBitmap(SkBitmap& bitmap, std::shared_ptr<OHOS::Rosen::DrawCmdList> drawCmdList = nullptr);
     bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
@@ -661,6 +660,7 @@ protected:
     int appearingTransitionCount_ = 0;
     int disappearingTransitionCount_ = 0;
     int sandBoxCount_ = 0;
+    int32_t densityChangedCallbackId_ = -1;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 7;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;

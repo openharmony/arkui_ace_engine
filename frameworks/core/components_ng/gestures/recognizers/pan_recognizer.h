@@ -120,6 +120,7 @@ private:
     GestureAcceptResult IsPanGestureAcceptInAllDirection(double judgeDistance) const;
     GestureAcceptResult IsPanGestureAcceptInHorizontalDirection(double judgeDistance) const;
     GestureAcceptResult IsPanGestureAcceptInVerticalDirection(double judgeDistance) const;
+    bool JudgeVerticalDistance() const;
     bool CalculateTruthFingers(bool isDirectionUp) const;
     void UpdateTouchPointInVelocityTracker(const TouchEvent& touchEvent);
     void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);

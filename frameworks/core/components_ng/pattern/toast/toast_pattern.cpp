@@ -18,6 +18,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -123,9 +124,12 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto toastNode = dirty->GetHostNode();
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, false);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, false);
+    expandDisplay_ = dialogTheme->GetExpandDisplay() || IsShowInFreeMultiWindow();
     OffsetT<Dimension> offset { GetOffsetX(dirty), GetOffsetY(dirty) };
     // show in the float subwindow
-    if (!IsDefaultToast()) {
+    if (!IsDefaultToast() && expandDisplay_) {
         OffsetT<Dimension> displayWindowOffset = { Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetX()),
             Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetY()) };
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast displayWindowOffset, x: %{public}.2f vp, y: %{public}.2f vp",
@@ -183,8 +187,9 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     CHECK_NULL_RETURN(toastProp, Dimension(0.0));
     auto textHeight = text->GetGeometryNode()->GetMarginFrameSize().Height();
     Dimension offsetY;
+    // Get toastBottom and update defaultBottom_
+    auto toastBottom = GetBottomValue(layoutWrapper);
     if (!toastProp->HasToastAlignment()) {
-        auto toastBottom = GetBottomValue(layoutWrapper);
         toastBottom_ = toastBottom;
         if (context->GetMinPlatformVersion() > API_VERSION_9) {
             offsetY = Dimension(rootHeight - toastBottom - textHeight);
@@ -379,16 +384,16 @@ double ToastPattern::GetTextMaxHeight()
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     auto containerId = Container::CurrentId();
-    double deviceHeight = 0.0f;
-    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
-        deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
-    } else {
+    double deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
+    if (containerId >= 0 && containerId < MIN_SUBCONTAINER_ID) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-        deviceHeight = windowGlobalRect.Height();
-    }
-    if (LessOrEqual(deviceHeight, 0.0)) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY,
-            "toast get device height is invalid, containerId: %{public}d", containerId);
+        auto windowHeight = windowGlobalRect.Height();
+        if (LessOrEqual(windowHeight, 0.0)) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY,
+                "toast get device height is invalid, containerId: %{public}d", containerId);
+        } else {
+            deviceHeight = windowHeight;
+        }
     }
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
@@ -408,18 +413,17 @@ double ToastPattern::GetTextMaxWidth()
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     auto containerId = Container::CurrentId();
-    double deviceWidth = 0.0f;
-    if (containerId < 0 || containerId >= MIN_SUBCONTAINER_ID) {
-        deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
-    } else {
+    double deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
+    if (containerId >= 0 && containerId < MIN_SUBCONTAINER_ID) {
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-        deviceWidth = windowGlobalRect.Width();
+        auto windowWidth = windowGlobalRect.Width();
+        if (LessOrEqual(windowWidth, 0.0)) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY,
+                "toast get device width is invalid, containerId: %{public}d", containerId);
+        } else {
+            deviceWidth = windowWidth;
+        }
     }
-    if (LessOrEqual(deviceWidth, 0.0)) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY,
-            "toast get device width is invalid, containerId: %{public}d", containerId);
-    }
-
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, 0.0);
     auto marging = toastTheme->GetMarging();
@@ -452,6 +456,25 @@ int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)
         paragLineHeight = static_cast<int32_t>(paragHeight / paragLineCount);
     }
     return paragLineHeight;
+}
+
+bool ToastPattern::IsShowInFreeMultiWindow()
+{
+    auto currentId = Container::CurrentId();
+    auto container = Container::Current();
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "parent container is null");
+            return false;
+        }
+    }
+    return container->IsFreeMultiWindow();
 }
 
 void ToastPattern::DumpInfo()

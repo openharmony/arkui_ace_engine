@@ -20,9 +20,6 @@ namespace OHOS::Ace::NG {
 class ScrollEventTestNg : public ScrollTestNg {
 public:
     AssertionResult ScrollToNode(const RefPtr<FrameNode>& focusFrameNode, float expectOffset);
-    void DragStart(GestureEvent& gesture);
-    void DragUpdate(GestureEvent& gesture);
-    void DragEnd(GestureEvent& gesture);
 };
 
 AssertionResult ScrollEventTestNg::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode, float expectOffset)
@@ -30,42 +27,6 @@ AssertionResult ScrollEventTestNg::ScrollToNode(const RefPtr<FrameNode>& focusFr
     pattern_->ScrollToNode(focusFrameNode);
     FlushLayoutTask(frameNode_);
     return IsEqual(pattern_->GetTotalOffset(), expectOffset);
-}
-
-void ScrollEventTestNg::DragStart(GestureEvent& gesture)
-{
-    gesture.SetSourceTool(SourceTool::FINGER);
-    gesture.SetInputEventType(InputEventType::TOUCH_SCREEN);
-    gesture.SetGlobalPoint(Point());
-    gesture.SetGlobalLocation(Offset());
-    gesture.SetLocalLocation(Offset());
-    scrollable_->HandleTouchDown();
-    scrollable_->isDragging_ = true;
-    scrollable_->HandleDragStart(gesture);
-}
-
-void ScrollEventTestNg::DragUpdate(GestureEvent& gesture)
-{
-    float dragDelta = gesture.GetMainDelta();
-    gesture.SetGlobalPoint(Point(0, dragDelta));
-    gesture.SetGlobalLocation(Offset(0, dragDelta));
-    gesture.SetLocalLocation(Offset(0, dragDelta));
-    double velocity = dragDelta > 0 ? DRAG_VELOCITY : -DRAG_VELOCITY;
-    gesture.SetMainVelocity(velocity);
-    scrollable_->HandleDragUpdate(gesture);
-    FlushLayoutTask(frameNode_);
-}
-
-void ScrollEventTestNg::DragEnd(GestureEvent& gesture)
-{
-    gesture.SetMainDelta(0);
-    gesture.SetGlobalPoint(gesture.GetGlobalPoint());
-    gesture.SetGlobalLocation(gesture.GetGlobalLocation());
-    gesture.SetLocalLocation(gesture.GetLocalLocation());
-    scrollable_->HandleTouchUp();
-    scrollable_->HandleDragEnd(gesture);
-    scrollable_->isDragging_ = false;
-    FlushLayoutTask(frameNode_);
 }
 
 /**
@@ -193,9 +154,6 @@ HWTEST_F(ScrollEventTestNg, ScrollEvent002, TestSize.Level1)
  */
 HWTEST_F(ScrollEventTestNg, ScrollEvent003, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Test onScrollStart event in VERTICAL
-     */
     bool isStart = false;
     bool isStop = false;
     bool isEnd = false;
@@ -203,7 +161,6 @@ HWTEST_F(ScrollEventTestNg, ScrollEvent003, TestSize.Level1)
     OnScrollStopEvent stopEvent = [&isStop]() { isStop = true; };
     ScrollEndEvent endEvent = [&isEnd]() { isEnd = true; };
     ScrollModelNG model = CreateScroll();
-    model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetOnScrollStart(std::move(startEvent));
     model.SetOnScrollStop(std::move(stopEvent));
     model.SetOnScrollEnd(std::move(endEvent));
@@ -213,29 +170,26 @@ HWTEST_F(ScrollEventTestNg, ScrollEvent003, TestSize.Level1)
     /**
      * @tc.steps: step1. DragStart
      */
-    GestureEvent gesture;
-    DragStart(gesture);
+    DragStart(frameNode_, Offset());
     EXPECT_TRUE(isStart);
 
     /**
-     * @tc.steps: step2. DragUpdate over top
+     * @tc.steps: step2. DragUpdate
      * @tc.expected: Scroll with drag
      */
-    const float dragDelta = 10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), dragDelta);
-
+    float dragDelta = -10.f;
+    DragUpdate(dragDelta);
+    EXPECT_TRUE(Position(dragDelta));
     /**
      * @tc.steps: step3. DragEnd
-     * @tc.expected: Scroll back with animation
+     * @tc.expected: Continue inertial scrolling
      */
     MockAnimationManager::GetInstance().SetTicks(TICK);
-    gesture.SetMainVelocity(DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), dragDelta);
-    EXPECT_TRUE(VerifyTickPosition(dragDelta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    float velocityDelta = -100;
+    DragEnd(velocityDelta);
+    EXPECT_TRUE(Position(dragDelta));
+    EXPECT_TRUE(TickPosition(dragDelta + velocityDelta / TICK));
+    EXPECT_TRUE(TickPosition(dragDelta + velocityDelta));
     EXPECT_TRUE(isEnd);
     EXPECT_TRUE(isStop);
 }
@@ -319,19 +273,10 @@ HWTEST_F(ScrollEventTestNg, Axis001, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
 
-    /**
-     * @tc.steps: step1. Drag
-     * @tc.expected: Would not scroll
-     */
-    GestureEvent gesture;
-    DragStart(gesture);
-    const float dragDelta = -10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
-    gesture.SetMainVelocity(-DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    Offset startOffset = Offset();
+    float dragDelta = -10.f;
+    DragAction(frameNode_, startOffset, dragDelta, 0);
+    EXPECT_TRUE(Position(0));
 }
 
 /**
@@ -346,28 +291,14 @@ HWTEST_F(ScrollEventTestNg, HandleDrag001, TestSize.Level1)
     CreateScrollDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
 
-    /**
-     * @tc.steps: step1. DragStart
-     */
-    GestureEvent gesture;
-    DragStart(gesture);
-
-    /**
-     * @tc.steps: step2. DragUpdate
-     * @tc.expected: Scroll with drag
-     */
-    const float dragDelta = -10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), dragDelta);
-
-    /**
-     * @tc.steps: step3. DragEnd
-     * @tc.expected: Scroll back with animation
-     */
-    gesture.SetMainVelocity(-DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), dragDelta);
+    Offset startOffset = Offset();
+    float dragDelta = -10.f;
+    float velocityDelta = -90;
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
+    EXPECT_TRUE(Position(dragDelta));
+    EXPECT_TRUE(TickPosition(dragDelta + velocityDelta / TICK));
+    EXPECT_TRUE(TickPosition(dragDelta + velocityDelta));
 }
 
 /**
@@ -382,25 +313,16 @@ HWTEST_F(ScrollEventTestNg, HandleDrag002, TestSize.Level1)
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent();
     CreateScrollDone();
-    EXPECT_EQ(GetChildX(frameNode_, 0), -HORIZONTAL_SCROLLABLE_DISTANCE);
+    EXPECT_TRUE(Position(-HORIZONTAL_SCROLLABLE_DISTANCE));
 
-    /**
-     * @tc.steps: step1. DragStart and DragUpdate
-     * @tc.expected: Scroll by drag
-     */
-    GestureEvent gesture;
-    DragStart(gesture);
-    const float dragDelta = 10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildX(frameNode_, 0), dragDelta - HORIZONTAL_SCROLLABLE_DISTANCE);
-
-    /**
-     * @tc.steps: step2. DragEnd
-     */
-    gesture.SetMainVelocity(DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildX(frameNode_, 0), dragDelta - HORIZONTAL_SCROLLABLE_DISTANCE);
+    Offset startOffset = Offset();
+    float dragDelta = 10.f;
+    float velocityDelta = 90;
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
+    EXPECT_TRUE(Position(dragDelta - HORIZONTAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(dragDelta + velocityDelta / TICK - HORIZONTAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(dragDelta + velocityDelta - HORIZONTAL_SCROLLABLE_DISTANCE));
 }
 
 /**
@@ -472,34 +394,28 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll001, TestSize.Level1)
     CreateScrollDone();
 
     /**
-     * @tc.steps: step1. DragStart
-     */
-    GestureEvent gesture;
-    DragStart(gesture);
-
-    /**
-     * @tc.steps: step2. DragUpdate over top
+     * @tc.steps: step1. DragUpdate over top
      * @tc.expected: Scroll with drag
      */
+    DragStart(frameNode_, Offset());
     const float dragDelta = 10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), dragDelta);
-    DragUpdate(gesture);
-    EXPECT_GT(GetChildY(frameNode_, 0), dragDelta);
-    EXPECT_LT(GetChildY(frameNode_, 0), dragDelta * 2);
+    DragUpdate(dragDelta);
+    EXPECT_TRUE(Position(dragDelta));
+    DragUpdate(dragDelta);
+    EXPECT_EQ(GetChildY(frameNode_, 0), dragDelta * 2);
 
     /**
-     * @tc.steps: step3. DragEnd
+     * @tc.steps: step2. DragEnd
      * @tc.expected: Scroll back with animation
      */
     float currentOffset = GetChildY(frameNode_, 0);
     MockAnimationManager::GetInstance().SetTicks(TICK);
-    gesture.SetMainVelocity(DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), currentOffset);
-    EXPECT_TRUE(VerifyTickPosition(currentOffset / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    float velocityDelta = 100;
+    DragEnd(velocityDelta);
+    EXPECT_TRUE(Position(currentOffset));
+    EXPECT_TRUE(TickByVelocityPosition(velocityDelta, currentOffset + velocityDelta));
+    EXPECT_TRUE(TickPosition((currentOffset + velocityDelta) / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -518,47 +434,77 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll002, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll to bottom
      */
-    ScrollTo(CONTENT_MAIN_SIZE);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
-     * @tc.steps: step2. DragStart
-     */
-    GestureEvent gesture;
-    DragStart(gesture);
-
-    /**
-     * @tc.steps: step3. DragUpdate over bottom
+     * @tc.steps: step2. DragUpdate over bottom
      * @tc.expected: Scroll with drag
      */
+    DragStart(frameNode_, Offset());
     const float dragDelta = -10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE + dragDelta);
-    DragUpdate(gesture);
-    EXPECT_LT(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE + dragDelta);
-    EXPECT_GT(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE + dragDelta * 2);
+    DragUpdate(dragDelta);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE + dragDelta));
+    DragUpdate(dragDelta);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE + dragDelta * 2);
 
     /**
-     * @tc.steps: step4. DragEnd
+     * @tc.steps: step3. DragEnd
      * @tc.expected: Scroll back with animation
      */
     float currentOffset = GetChildY(frameNode_, 0);
     MockAnimationManager::GetInstance().SetTicks(TICK);
-    gesture.SetMainVelocity(DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), currentOffset);
-    EXPECT_TRUE(
-        VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE + (currentOffset + VERTICAL_SCROLLABLE_DISTANCE) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
+    float velocityDelta = -100;
+    DragEnd(velocityDelta);
+    EXPECT_TRUE(Position(currentOffset));
+    EXPECT_TRUE(TickByVelocityPosition(velocityDelta, currentOffset + velocityDelta));
+    EXPECT_TRUE(TickPosition(
+        -VERTICAL_SCROLLABLE_DISTANCE + (currentOffset + VERTICAL_SCROLLABLE_DISTANCE + velocityDelta) / TICK));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 }
 
 /**
  * @tc.name: HandleDragOverScroll003
- * @tc.desc: Handle drag over in unScrollable scroll, and set AlwaysEnabled, still can drag over
+ * @tc.desc: Handle drag over top and drag back with velocity
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollEventTestNg, HandleDragOverScroll003, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Drag over the top
+     */
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    DragStart(frameNode_, Offset());
+    DragUpdate(10);
+    EXPECT_TRUE(Position(10));
+
+    /**
+     * @tc.steps: step2. Drag back and drag with velocity
+     * @tc.expected: Inertial scrolling back
+     */
+    DragUpdate(-5);
+    EXPECT_LT(GetChildY(frameNode_, 0), 10);
+    EXPECT_GT(GetChildY(frameNode_, 0), 5);
+
+    float currentOffset = GetChildY(frameNode_, 0);
+    float velocityDelta = -100;
+    DragEnd(velocityDelta);
+    EXPECT_TRUE(Position(currentOffset));
+    EXPECT_TRUE(TickByVelocityPosition(velocityDelta, 0));
+    EXPECT_TRUE(TickByVelocityPosition(velocityDelta + currentOffset, velocityDelta + currentOffset));
+}
+
+/**
+ * @tc.name: HandleDragOverScroll004
+ * @tc.desc: Handle drag over in unScrollable scroll, and set AlwaysEnabled, still can drag over
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, HandleDragOverScroll004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Has no scrollable distance, and AlwaysEnabled
@@ -571,81 +517,18 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll003, TestSize.Level1)
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_EQ(pattern_->GetScrollableDistance(), 0);
 
-    /**
-     * @tc.steps: step2. DragStart
-     */
-    GestureEvent gesture;
-    DragStart(gesture);
-
-    /**
-     * @tc.steps: step3. DragUpdate over scroll
-     * @tc.expected: Scroll with drag
-     */
-    const float dragDelta = 10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), dragDelta);
-
-    /**
-     * @tc.steps: step4. DragEnd
-     * @tc.expected: Scroll back with animation
-     */
+    float dragDelta = 10.f;
     MockAnimationManager::GetInstance().SetTicks(TICK);
-    gesture.SetMainVelocity(DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), dragDelta);
-    EXPECT_TRUE(VerifyTickPosition(dragDelta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
-}
-
-/**
- * @tc.name: HandleDragOverScroll004
- * @tc.desc: Handle drag over in unScrollable scroll, and set !AlwaysEnabled, still can drag over
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollEventTestNg, HandleDragOverScroll004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Has no scrollable distance, and !AlwaysEnabled
-     * @tc.expected: Still can drag over
-     */
-    ScrollModelNG model = CreateScroll();
-    model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    CreateContent(SCROLL_HEIGHT);
-    CreateScrollDone();
-    EXPECT_FALSE(pattern_->GetAlwaysEnabled());
-    EXPECT_EQ(pattern_->GetScrollableDistance(), 0);
-
-    /**
-     * @tc.steps: step2. DragStart
-     */
-    GestureEvent gesture;
-    DragStart(gesture);
-
-    /**
-     * @tc.steps: step3. DragUpdate over scroll
-     * @tc.expected: Scroll with drag
-     */
-    const float dragDelta = 10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), dragDelta);
-
-    /**
-     * @tc.steps: step4. DragEnd
-     * @tc.expected: Scroll back with animation
-     */
-    MockAnimationManager::GetInstance().SetTicks(TICK);
-    gesture.SetMainVelocity(DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), dragDelta);
-    EXPECT_TRUE(VerifyTickPosition(dragDelta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    DragAction(frameNode_, Offset(), dragDelta, DRAG_VELOCITY);
+    EXPECT_TRUE(Position(dragDelta));
+    EXPECT_TRUE(TickByVelocityPosition(DRAG_VELOCITY, dragDelta + DRAG_VELOCITY));
+    EXPECT_TRUE(TickPosition((dragDelta + DRAG_VELOCITY) / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
  * @tc.name: HandleDragOverScroll005
- * @tc.desc: Handle drag over top in EdgeEffect::FADE, can not drag over
+ * @tc.desc: Handle drag over edge in EdgeEffect::FADE, can not drag over
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollEventTestNg, HandleDragOverScroll005, TestSize.Level1)
@@ -659,83 +542,29 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll005, TestSize.Level1)
     CreateScrollDone();
 
     /**
-     * @tc.steps: step2. DragStart
-     */
-    GestureEvent gesture;
-    DragStart(gesture);
-
-    /**
-     * @tc.steps: step3. DragUpdate over top
+     * @tc.steps: step2. Drag over the top
      * @tc.expected: Can not drag over
      */
-    const float dragDelta = 10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    DragAction(frameNode_, Offset(), 10, DRAG_VELOCITY);
+    EXPECT_TRUE(Position(0));
 
     /**
-     * @tc.steps: step4. DragEnd
+     * @tc.steps: step2. Scroll to bottom and drag over the bottom
      * @tc.expected: Can not drag over
      */
-    gesture.SetMainVelocity(DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    DragAction(frameNode_, Offset(), -10, -DRAG_VELOCITY);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 }
 
 /**
  * @tc.name: HandleDragOverScroll006
- * @tc.desc: Handle drag over bottom in EdgeEffect::FADE, can not drag over
+ * @tc.desc: Handle drag over edge in EdgeEffect::NONE, can not drag over
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollEventTestNg, HandleDragOverScroll006, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. EdgeEffect::FADE
-     */
-    ScrollModelNG model = CreateScroll();
-    model.SetEdgeEffect(EdgeEffect::FADE, true);
-    CreateContent();
-    CreateScrollDone();
-    EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
-
-    /**
-     * @tc.steps: step2. Scroll to bottom
-     */
-    ScrollTo(CONTENT_MAIN_SIZE);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
-
-    /**
-     * @tc.steps: step3. DragStart
-     */
-    GestureEvent gesture;
-    DragStart(gesture);
-
-    /**
-     * @tc.steps: step4. DragUpdate over bottom
-     * @tc.expected: Can not drag over
-     */
-    const float dragDelta = -10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
-
-    /**
-     * @tc.steps: step5. DragEnd
-     * @tc.expected: Can not drag over
-     */
-    gesture.SetMainVelocity(DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
-}
-
-/**
- * @tc.name: HandleDragOverScroll007
- * @tc.desc: Handle drag over top in EdgeEffect::NONE, can not drag over
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollEventTestNg, HandleDragOverScroll007, TestSize.Level1)
-{
-    /**
      * @tc.steps: step1. EdgeEffect::NONE
      */
     CreateScroll();
@@ -743,72 +572,19 @@ HWTEST_F(ScrollEventTestNg, HandleDragOverScroll007, TestSize.Level1)
     CreateScrollDone();
 
     /**
-     * @tc.steps: step2. DragStart
-     */
-    GestureEvent gesture;
-    DragStart(gesture);
-
-    /**
-     * @tc.steps: step3. DragUpdate over top
+     * @tc.steps: step2. Drag over the top
      * @tc.expected: Can not drag over
      */
-    const float dragDelta = 10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    DragAction(frameNode_, Offset(), 10, DRAG_VELOCITY);
+    EXPECT_TRUE(Position(0));
 
     /**
-     * @tc.steps: step4. DragEnd
+     * @tc.steps: step2. Scroll to bottom and drag over the bottom
      * @tc.expected: Can not drag over
      */
-    gesture.SetMainVelocity(DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
-}
-
-/**
- * @tc.name: HandleDragOverScroll008
- * @tc.desc: Handle drag over bottom in EdgeEffect::NONE, can not drag over
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollEventTestNg, HandleDragOverScroll008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. EdgeEffect::NONE
-     */
-    CreateScroll();
-    CreateContent();
-    CreateScrollDone();
-    EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
-
-    /**
-     * @tc.steps: step2. Scroll to bottom
-     */
-    ScrollTo(CONTENT_MAIN_SIZE);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
-
-    /**
-     * @tc.steps: step3. DragStart
-     */
-    GestureEvent gesture;
-    DragStart(gesture);
-
-    /**
-     * @tc.steps: step4. DragUpdate over bottom
-     * @tc.expected: Can not drag over
-     */
-    const float dragDelta = -10.f;
-    gesture.SetMainDelta(dragDelta);
-    DragUpdate(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
-
-    /**
-     * @tc.steps: step5. DragEnd
-     * @tc.expected: Can not drag over
-     */
-    gesture.SetMainVelocity(DRAG_VELOCITY);
-    DragEnd(gesture);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    DragAction(frameNode_, Offset(), -10, -DRAG_VELOCITY);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 }
 
 /**
@@ -906,9 +682,9 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap001, TestSize.Level1)
     const float halfInterval = intervalSize / 2;
     float delta = 1 - halfInterval;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition(delta / TICK));
+    EXPECT_TRUE(TickPosition(0));
 
     /**
      * @tc.steps: step3. Scroll down greater than half of intervalSize
@@ -916,16 +692,16 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap001, TestSize.Level1)
      */
     delta = -halfInterval;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition((delta - intervalSize) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-intervalSize));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition((delta - intervalSize) / TICK));
+    EXPECT_TRUE(TickPosition(-intervalSize));
 
     /**
      * @tc.steps: step4. Scroll to bottom
      * @tc.expected: Align end
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step5. Scroll up a little delta
@@ -936,9 +712,9 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap001, TestSize.Level1)
     float startOffset = intervalSize - (SCROLL_HEIGHT - viewIntervalSize - lastIntervalSize);
     delta = 1;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta - VERTICAL_SCROLLABLE_DISTANCE);
-    EXPECT_TRUE(VerifyTickPosition((startOffset + delta) / TICK - VERTICAL_SCROLLABLE_DISTANCE));
-    EXPECT_TRUE(VerifyTickPosition(startOffset - VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(Position(delta - VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition((startOffset + delta) / TICK - VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(startOffset - VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step6. Scroll up less than half of intervalSize
@@ -947,9 +723,9 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap001, TestSize.Level1)
     float currentOffset = GetChildY(frameNode_, 0);
     delta = halfInterval;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta + currentOffset);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK + currentOffset));
-    EXPECT_TRUE(VerifyTickPosition(currentOffset));
+    EXPECT_TRUE(Position(delta + currentOffset));
+    EXPECT_TRUE(TickPosition(delta / TICK + currentOffset));
+    EXPECT_TRUE(TickPosition(currentOffset));
 
     /**
      * @tc.steps: step7. Scroll up greater than half of intervalSize
@@ -957,9 +733,9 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap001, TestSize.Level1)
      */
     delta = halfInterval + 1;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta + currentOffset);
-    EXPECT_TRUE(VerifyTickPosition(intervalSize + currentOffset - (intervalSize - delta) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(intervalSize + currentOffset));
+    EXPECT_TRUE(Position(delta + currentOffset));
+    EXPECT_TRUE(TickPosition(intervalSize + currentOffset - (intervalSize - delta) / TICK));
+    EXPECT_TRUE(TickPosition(intervalSize + currentOffset));
 }
 
 /**
@@ -980,7 +756,7 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap002, TestSize.Level1)
     model.SetScrollSnap(ScrollSnapAlign::END, Dimension(intervalSize), snapPaginations, enableSnapToSide);
     CreateContent();
     CreateScrollDone();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(Position(0));
 
     /**
      * @tc.steps: step2. Scroll down a little delta
@@ -991,9 +767,9 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap002, TestSize.Level1)
     const float endAlignOffset = 40;
     float delta = -1;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition((endAlignOffset - intervalSize + delta) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(endAlignOffset - intervalSize));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition((endAlignOffset - intervalSize + delta) / TICK));
+    EXPECT_TRUE(TickPosition(endAlignOffset - intervalSize));
 
     /**
      * @tc.steps: step3. Scroll down less than half of intervalSize
@@ -1002,9 +778,9 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap002, TestSize.Level1)
     float currentOffset = GetChildY(frameNode_, 0);
     delta = 1 - halfInterval;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), currentOffset + delta);
-    EXPECT_TRUE(VerifyTickPosition(currentOffset + delta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(currentOffset));
+    EXPECT_TRUE(Position(currentOffset + delta));
+    EXPECT_TRUE(TickPosition(currentOffset + delta / TICK));
+    EXPECT_TRUE(TickPosition(currentOffset));
 
     /**
      * @tc.steps: step4. Scroll down greater than half of intervalSize
@@ -1012,16 +788,16 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap002, TestSize.Level1)
      */
     delta = -halfInterval;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), currentOffset + delta);
-    EXPECT_TRUE(VerifyTickPosition(currentOffset - intervalSize + (intervalSize + delta) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(currentOffset - intervalSize));
+    EXPECT_TRUE(Position(currentOffset + delta));
+    EXPECT_TRUE(TickPosition(currentOffset - intervalSize + (intervalSize + delta) / TICK));
+    EXPECT_TRUE(TickPosition(currentOffset - intervalSize));
 
     /**
      * @tc.steps: step5. Scroll to top
      * @tc.expected: Align start
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(Position(0));
 }
 
 /**
@@ -1042,7 +818,7 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
     model.SetScrollSnap(ScrollSnapAlign::CENTER, Dimension(intervalSize), snapPaginations, enableSnapToSide);
     CreateContent();
     CreateScrollDone();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(Position(0));
 
     /**
      * @tc.steps: step2. Scroll down a little delta
@@ -1054,9 +830,9 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
     float centerOffset = halfInterval - centerPosition + 2 * intervalSize;
     float delta = -1;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition((delta - centerOffset) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-centerOffset));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition((delta - centerOffset) / TICK));
+    EXPECT_TRUE(TickPosition(-centerOffset));
 
     /**
      * @tc.steps: step3. Scroll down less than half of intervalSize
@@ -1065,9 +841,9 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
     float currentOffset = -centerOffset;
     delta = 1 - halfInterval;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), currentOffset + delta);
-    EXPECT_TRUE(VerifyTickPosition(currentOffset + delta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(currentOffset));
+    EXPECT_TRUE(Position(currentOffset + delta));
+    EXPECT_TRUE(TickPosition(currentOffset + delta / TICK));
+    EXPECT_TRUE(TickPosition(currentOffset));
 
     /**
      * @tc.steps: step4. Scroll down greater than half of intervalSize
@@ -1075,16 +851,16 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
      */
     delta = -halfInterval;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), currentOffset + delta);
-    EXPECT_TRUE(VerifyTickPosition(currentOffset - intervalSize - delta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(currentOffset - intervalSize));
+    EXPECT_TRUE(Position(currentOffset + delta));
+    EXPECT_TRUE(TickPosition(currentOffset - intervalSize - delta / TICK));
+    EXPECT_TRUE(TickPosition(currentOffset - intervalSize));
 
     /**
      * @tc.steps: step5. Scroll to bottom
      * @tc.expected: Align end
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step6. Scroll up a little delta
@@ -1093,9 +869,9 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
     centerOffset = halfInterval - 10;
     delta = 1;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta - VERTICAL_SCROLLABLE_DISTANCE);
-    EXPECT_TRUE(VerifyTickPosition((centerOffset + delta) / TICK - VERTICAL_SCROLLABLE_DISTANCE));
-    EXPECT_TRUE(VerifyTickPosition(centerOffset - VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(Position(delta - VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition((centerOffset + delta) / TICK - VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(centerOffset - VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step7. Scroll up less than half of intervalSize
@@ -1104,9 +880,9 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
     currentOffset = GetChildY(frameNode_, 0);
     delta = halfInterval;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta + currentOffset);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK + currentOffset));
-    EXPECT_TRUE(VerifyTickPosition(currentOffset));
+    EXPECT_TRUE(Position(delta + currentOffset));
+    EXPECT_TRUE(TickPosition(delta / TICK + currentOffset));
+    EXPECT_TRUE(TickPosition(currentOffset));
 
     /**
      * @tc.steps: step8. Scroll up greater than half of intervalSize
@@ -1114,9 +890,9 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
      */
     delta = halfInterval + 1;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta + currentOffset);
-    EXPECT_TRUE(VerifyTickPosition(intervalSize + currentOffset - (intervalSize - delta) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(intervalSize + currentOffset));
+    EXPECT_TRUE(Position(delta + currentOffset));
+    EXPECT_TRUE(TickPosition(intervalSize + currentOffset - (intervalSize - delta) / TICK));
+    EXPECT_TRUE(TickPosition(intervalSize + currentOffset));
 }
 
 /**
@@ -1146,9 +922,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations001, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(TICK);
     float delta = 1 - firstPagination / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition(delta / TICK));
+    EXPECT_TRUE(TickPosition(0));
 
     /**
      * @tc.steps: step2. Scroll down greater than half of first snapPaginations
@@ -1156,9 +932,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations001, TestSize.Level1)
      */
     delta = -firstPagination / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition((delta - firstPagination) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-firstPagination));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition((delta - firstPagination) / TICK));
+    EXPECT_TRUE(TickPosition(-firstPagination));
 
     /**
      * @tc.steps: step3. Scroll down less than half of second snapPaginations
@@ -1166,9 +942,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations001, TestSize.Level1)
      */
     delta = 1 - (secondPagination - firstPagination) / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta - firstPagination);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK - firstPagination));
-    EXPECT_TRUE(VerifyTickPosition(-firstPagination));
+    EXPECT_TRUE(Position(delta - firstPagination));
+    EXPECT_TRUE(TickPosition(delta / TICK - firstPagination));
+    EXPECT_TRUE(TickPosition(-firstPagination));
 
     /**
      * @tc.steps: step4. Scroll down greater than half of second snapPaginations
@@ -1176,9 +952,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations001, TestSize.Level1)
      */
     delta = (firstPagination - secondPagination) / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta - firstPagination);
-    EXPECT_TRUE(VerifyTickPosition((delta - firstPagination - secondPagination) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-secondPagination));
+    EXPECT_TRUE(Position(delta - firstPagination));
+    EXPECT_TRUE(TickPosition((delta - firstPagination - secondPagination) / TICK));
+    EXPECT_TRUE(TickPosition(-secondPagination));
 }
 
 /**
@@ -1200,7 +976,7 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations002, TestSize.Level1)
     model.SetScrollSnap(ScrollSnapAlign::END, Dimension(intervalSize), snapPaginations, enableSnapToSide);
     CreateContent();
     CreateScrollDone();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(Position(0));
 
     /**
      * @tc.steps: step1. Scroll down less than half of first snapPaginations
@@ -1209,9 +985,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations002, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(TICK);
     float delta = 1 - (firstPagination - SCROLL_HEIGHT) / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition(delta / TICK));
+    EXPECT_TRUE(TickPosition(0));
 
     /**
      * @tc.steps: step2. Scroll down greater than half of first snapPaginations
@@ -1219,16 +995,16 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations002, TestSize.Level1)
      */
     delta = (SCROLL_HEIGHT - firstPagination) / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition(-337.5));
-    EXPECT_TRUE(VerifyTickPosition(-450));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition(-337.5));
+    EXPECT_TRUE(TickPosition(-450));
 
     /**
      * @tc.steps: step3. Scroll to top
      * @tc.expected: Align start
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(Position(0));
 }
 
 /**
@@ -1250,7 +1026,7 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations003, TestSize.Level1)
     model.SetScrollSnap(ScrollSnapAlign::CENTER, Dimension(intervalSize), snapPaginations, enableSnapToSide);
     CreateContent();
     CreateScrollDone();
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(Position(0));
 
     /**
      * @tc.steps: step1. Scroll down less than half
@@ -1259,9 +1035,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations003, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(TICK);
     float delta = -24;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition(delta / TICK));
+    EXPECT_TRUE(TickPosition(0));
 
     /**
      * @tc.steps: step2. Scroll down greater than half
@@ -1269,9 +1045,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations003, TestSize.Level1)
      */
     delta = -25;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition((delta - 50) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-50));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition((delta - 50) / TICK));
+    EXPECT_TRUE(TickPosition(-50));
 
     /**
      * @tc.steps: step3. Scroll down less than half of second snapPaginations
@@ -1280,9 +1056,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations003, TestSize.Level1)
     float currentOffset = GetChildY(frameNode_, 0);
     delta = -161.5;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta + currentOffset);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK + currentOffset));
-    EXPECT_TRUE(VerifyTickPosition(currentOffset));
+    EXPECT_TRUE(Position(delta + currentOffset));
+    EXPECT_TRUE(TickPosition(delta / TICK + currentOffset));
+    EXPECT_TRUE(TickPosition(currentOffset));
 
     /**
      * @tc.steps: step4. Scroll down greater than half of second snapPaginations
@@ -1290,16 +1066,16 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations003, TestSize.Level1)
      */
     delta = -162.5;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta + currentOffset);
-    EXPECT_TRUE(VerifyTickPosition(-293.75));
-    EXPECT_TRUE(VerifyTickPosition(-375));
+    EXPECT_TRUE(Position(delta + currentOffset));
+    EXPECT_TRUE(TickPosition(-293.75));
+    EXPECT_TRUE(TickPosition(-375));
 
     /**
      * @tc.steps: step5. Scroll to bottom
      * @tc.expected: Align end
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE));
 }
 
 /**
@@ -1329,9 +1105,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations004, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(TICK);
     float delta = 1 - firstPagination / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition(delta / TICK));
+    EXPECT_TRUE(TickPosition(0));
 
     /**
      * @tc.steps: step2. Scroll down greater than half of first snapPaginations
@@ -1339,9 +1115,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations004, TestSize.Level1)
      */
     delta = -firstPagination / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition((delta - firstPagination) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-firstPagination));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition((delta - firstPagination) / TICK));
+    EXPECT_TRUE(TickPosition(-firstPagination));
 
     /**
      * @tc.steps: step3. Scroll down less than half of second snapPaginations
@@ -1349,9 +1125,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations004, TestSize.Level1)
      */
     delta = 1 - (secondPagination - firstPagination) / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta - firstPagination);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK - firstPagination));
-    EXPECT_TRUE(VerifyTickPosition(-firstPagination));
+    EXPECT_TRUE(Position(delta - firstPagination));
+    EXPECT_TRUE(TickPosition(delta / TICK - firstPagination));
+    EXPECT_TRUE(TickPosition(-firstPagination));
 
     /**
      * @tc.steps: step4. Scroll down greater than half of second snapPaginations
@@ -1359,9 +1135,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations004, TestSize.Level1)
      */
     delta = (firstPagination - secondPagination) / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta - firstPagination);
-    EXPECT_TRUE(VerifyTickPosition((delta - firstPagination - secondPagination) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-secondPagination));
+    EXPECT_TRUE(Position(delta - firstPagination));
+    EXPECT_TRUE(TickPosition((delta - firstPagination - secondPagination) / TICK));
+    EXPECT_TRUE(TickPosition(-secondPagination));
 }
 
 /**
@@ -1393,9 +1169,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations005, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(TICK);
     float delta = -firstPagination / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition(delta));
-    EXPECT_TRUE(VerifyTickPosition(delta));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition(delta));
+    EXPECT_TRUE(TickPosition(delta));
 
     /**
      * @tc.steps: step2. Scroll down less than half of second snapPaginations
@@ -1403,9 +1179,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations005, TestSize.Level1)
      */
     delta += 1 - (secondPagination - firstPagination) / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta - firstPagination / 2);
-    EXPECT_TRUE(VerifyTickPosition((delta + firstPagination / 2) / TICK) - firstPagination);
-    EXPECT_TRUE(VerifyTickPosition(-firstPagination));
+    EXPECT_TRUE(Position(delta - firstPagination / 2));
+    EXPECT_TRUE(TickPosition((delta + firstPagination / 2) / TICK) - firstPagination);
+    EXPECT_TRUE(TickPosition(-firstPagination));
 
     /**
      * @tc.steps: step3. Scroll down greater than half of second snapPaginations
@@ -1413,9 +1189,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations005, TestSize.Level1)
      */
     delta = (firstPagination - secondPagination) / 2;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta - firstPagination);
-    EXPECT_TRUE(VerifyTickPosition((delta - firstPagination - secondPagination) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-secondPagination));
+    EXPECT_TRUE(Position(delta - firstPagination));
+    EXPECT_TRUE(TickPosition((delta - firstPagination - secondPagination) / TICK));
+    EXPECT_TRUE(TickPosition(-secondPagination));
 
     /**
      * @tc.steps: step4. Scroll to bottom, than scroll up greater than half of last snapPaginations
@@ -1424,9 +1200,9 @@ HWTEST_F(ScrollEventTestNg, SnapPaginations005, TestSize.Level1)
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
     delta = thirdPagination / 2 + 1;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE + delta);
-    EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE + delta));
-    EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE + delta));
+    EXPECT_TRUE(Position(-VERTICAL_SCROLLABLE_DISTANCE + delta));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE + delta));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE + delta));
 }
 
 /**
@@ -1525,7 +1301,6 @@ HWTEST_F(ScrollEventTestNg, EnablePaging002, TestSize.Level1)
     };
     std::pair<bool, bool> enableSnapToSide = { false, false };
     auto scrollSnapAlign = ScrollSnapAlign::START;
-    ClearOldNodes();
     model = CreateScroll();
     model.SetEnablePaging(true);
     model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
@@ -1537,7 +1312,6 @@ HWTEST_F(ScrollEventTestNg, EnablePaging002, TestSize.Level1)
      * @tc.steps: step3. Create scroll, first set snap and than set enablePaging.
      * @tc.expected: the value of IsEnablePagingValid() is false
      */
-    ClearOldNodes();
     model = CreateScroll();
     model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
     model.SetEnablePaging(true);
@@ -1549,7 +1323,6 @@ HWTEST_F(ScrollEventTestNg, EnablePaging002, TestSize.Level1)
      * @tc.steps: step4. Create scroll, set enablePaging true and than set enablePaging false.
      * @tc.expected: the value of GetEnablePaging() is INVALID
      */
-    ClearOldNodes();
     model = CreateScroll();
     model.SetEnablePaging(true);
     model.SetEnablePaging(false);
@@ -1562,7 +1335,6 @@ HWTEST_F(ScrollEventTestNg, EnablePaging002, TestSize.Level1)
      * @tc.steps: step5. Create scroll, set enablePaging false and than set enablePaging true.
      * @tc.expected: the value of GetEnablePaging() is VALID
      */
-    ClearOldNodes();
     model = CreateScroll();
     model.SetEnablePaging(false);
     model.SetEnablePaging(true);
@@ -1592,9 +1364,9 @@ HWTEST_F(ScrollEventTestNg, EnablePaging003, TestSize.Level1)
     const float halfHeight = SCROLL_HEIGHT / 2;
     float delta = 1 - halfHeight;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition(delta / TICK));
+    EXPECT_TRUE(TickPosition(0));
 
     /**
      * @tc.steps: step2. Scroll down greater than half of SCROLL_HEIGHT
@@ -1602,9 +1374,9 @@ HWTEST_F(ScrollEventTestNg, EnablePaging003, TestSize.Level1)
      */
     delta = -halfHeight;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition((delta - SCROLL_HEIGHT) / 2));
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition((delta - SCROLL_HEIGHT) / 2));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT));
 
     /**
      * @tc.steps: step3. Scroll down less than half of last page
@@ -1615,9 +1387,9 @@ HWTEST_F(ScrollEventTestNg, EnablePaging003, TestSize.Level1)
     float currentOffset = -SCROLL_HEIGHT;
     delta = 1 - halfLastPageHeight;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta + currentOffset);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK + currentOffset));
-    EXPECT_TRUE(VerifyTickPosition(currentOffset));
+    EXPECT_TRUE(Position(delta + currentOffset));
+    EXPECT_TRUE(TickPosition(delta / TICK + currentOffset));
+    EXPECT_TRUE(TickPosition(currentOffset));
 
     /**
      * @tc.steps: step4. Scroll down greater than half of last page
@@ -1625,9 +1397,9 @@ HWTEST_F(ScrollEventTestNg, EnablePaging003, TestSize.Level1)
      */
     delta = -halfLastPageHeight;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta + currentOffset);
-    EXPECT_TRUE(VerifyTickPosition((lastPageHeight + delta) / 2 - VERTICAL_SCROLLABLE_DISTANCE));
-    EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(Position(delta + currentOffset));
+    EXPECT_TRUE(TickPosition((lastPageHeight + delta) / 2 - VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step5. Scroll up less than half of last page
@@ -1635,9 +1407,9 @@ HWTEST_F(ScrollEventTestNg, EnablePaging003, TestSize.Level1)
      */
     delta = halfLastPageHeight;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta - VERTICAL_SCROLLABLE_DISTANCE);
-    EXPECT_TRUE(VerifyTickPosition(delta / TICK - VERTICAL_SCROLLABLE_DISTANCE));
-    EXPECT_TRUE(VerifyTickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(Position(delta - VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(delta / TICK - VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(-VERTICAL_SCROLLABLE_DISTANCE));
 
     /**
      * @tc.steps: step6. Scroll up greater than half of last page
@@ -1645,9 +1417,9 @@ HWTEST_F(ScrollEventTestNg, EnablePaging003, TestSize.Level1)
      */
     delta = halfLastPageHeight + 1;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta - VERTICAL_SCROLLABLE_DISTANCE);
-    EXPECT_TRUE(VerifyTickPosition(-449.5));
-    EXPECT_TRUE(VerifyTickPosition(lastPageHeight - VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(Position(delta - VERTICAL_SCROLLABLE_DISTANCE));
+    EXPECT_TRUE(TickPosition(-449.5));
+    EXPECT_TRUE(TickPosition(lastPageHeight - VERTICAL_SCROLLABLE_DISTANCE));
 }
 
 /**
@@ -1674,8 +1446,41 @@ HWTEST_F(ScrollEventTestNg, EnablePaging004, TestSize.Level1)
     const float halfInterval = intervalSize / 2;
     float delta = -halfInterval;
     ScrollBy(0, delta);
-    EXPECT_EQ(GetChildY(frameNode_, 0), delta);
-    EXPECT_TRUE(VerifyTickPosition((delta - intervalSize) / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-intervalSize));
+    EXPECT_TRUE(Position(delta));
+    EXPECT_TRUE(TickPosition((delta - intervalSize) / TICK));
+    EXPECT_TRUE(TickPosition(-intervalSize));
+}
+
+/**
+ * @tc.name: CAPIScrollPage001
+ * @tc.desc: Test CAPI ScrollPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, CAPIScrollPage001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollNode
+     * @tc.expected: scrollNode create successfully
+     */
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step2. scroll to next page without animation
+     */
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.f);
+    pattern_->ScrollPage(false, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -SCROLL_HEIGHT);
+
+    /**
+     * @tc.steps: step3. scroll to previous page with animation
+     */
+    pattern_->ScrollPage(true, true);
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.f);
 }
 } // namespace OHOS::Ace::NG

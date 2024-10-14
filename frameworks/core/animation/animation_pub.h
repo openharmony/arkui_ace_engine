@@ -93,6 +93,20 @@ enum class FinishCallbackType {
     LOGICALLY = 1
 };
 
+enum class AnimationInterface : int32_t {
+    ANIMATION = 0,
+    ANIMATE_TO,
+    ANIMATE_TO_IMMEDIATELY,
+    KEYFRAME_ANIMATE_TO,
+};
+
+static const char* g_animationInterfaceNames[4] = {
+    "animation",
+    "animateTo",
+    "animateToImmediately",
+    "keyframeAnimateTo",
+};
+
 using ShareId = std::string;
 
 } // namespace OHOS::Ace

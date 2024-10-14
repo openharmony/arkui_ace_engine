@@ -28,21 +28,18 @@
 namespace OHOS::Ace {
 CanvasModel* CanvasModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::CanvasModelNG());
+    static NG::CanvasModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::CanvasModelNG());
-            } else {
-                instance_.reset(new Framework::CanvasModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::CanvasModelNG instance;
+        return &instance;
+    } else {
+        static Framework::CanvasModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {

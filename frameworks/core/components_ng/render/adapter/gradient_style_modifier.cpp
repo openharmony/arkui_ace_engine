@@ -128,7 +128,7 @@ void GradientStyleModifier::SetGradient(const Gradient& gradient)
 
 void GradientStyleModifier::PaddingColors(ColorAnimatableArithmetic& colors, bool repeat)
 {
-    if (!repeat) {
+    if (repeat) {
         return;
     }
     if (colors_->Get().GetColors().size() <= colors.GetColors().size()) {
@@ -140,7 +140,7 @@ void GradientStyleModifier::PaddingColors(ColorAnimatableArithmetic& colors, boo
 
 void GradientStyleModifier::PaddingColorStops(ColorStopAnimatableArithmetic& colorStops, bool repeat)
 {
-    if (!repeat) {
+    if (repeat) {
         return;
     }
     if (colorStops_->Get().GetColorStops().size() <= colorStops.GetColorStops().size()) {

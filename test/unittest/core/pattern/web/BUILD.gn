@@ -263,6 +263,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navdestination_node_base.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navdestination_pattern_base.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_content_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_drag_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_group_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_layout_algorithm.cpp",
@@ -628,21 +629,22 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "web_context_select_overlay_test.cpp",
     "web_model_test_ng.cpp",
     "web_paint_method_test.cpp",
+    "web_pattern_add_test_ng.cpp",
     "web_pattern_event_test.cpp",
     "web_pattern_focus_test_ng.cpp",
     "web_pattern_keyboard_test_ng.cpp",
+    "web_pattern_method_test_ng.cpp",
     "web_pattern_nbranch_test.cpp",
+    "web_pattern_new_branch_test.cpp",
     "web_pattern_select_test_ng.cpp",
     "web_pattern_test.cpp",
+    "web_pattern_test_handle_ng.cpp",
     "web_pattern_test_ng.cpp",
+    "web_pattern_test_ng_supplement.cpp",
     "web_pattern_touch_test_ng.cpp",
     "web_pattern_web_test_ng.cpp",
     "web_pattern_window_test_ng.cpp",
   ]
-
-  sources += [ "web_pattern_test_ng_supplement.cpp" ]
-  sources -=
-      [ "$ace_root/frameworks/core/components_ng/pattern/web/web_pattern.cpp" ]
 
   deps = [
     "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_ohos",

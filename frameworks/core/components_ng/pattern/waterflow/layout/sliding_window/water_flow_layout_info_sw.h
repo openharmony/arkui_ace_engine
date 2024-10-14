@@ -63,7 +63,7 @@ public:
 
     bool ReachStart(float prevPos, bool firstLayout) const override;
 
-    bool ReachEnd(float prevPos) const override;
+    bool ReachEnd(float prevPos, bool firstLayout) const override;
 
     bool OutOfBounds() const override;
 
@@ -93,6 +93,7 @@ public:
     float BottomFinalPos(float viewHeight) const override;
 
     void Reset() override;
+    void ResetFooter() override;
 
     bool IsMisaligned() const override;
 

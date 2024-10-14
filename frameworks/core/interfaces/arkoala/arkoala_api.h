@@ -223,6 +223,16 @@ struct ArkUIMouseEvent {
     ArkUI_Int32 interceptResult;
 };
 
+struct ArkUIAxisEvent {
+    ArkUI_Int32 action;
+    ArkUI_Int64 timeStamp;
+    ArkUITouchPoint actionTouchPoint;
+    ArkUI_Int32 sourceType;
+    ArkUI_Float64 horizontalAxis;
+    ArkUI_Float64 verticalAxis;
+    ArkUI_Float64 pinchAxisScale;
+};
+
 struct ArkUIDragEvent {
     void* unifiedData;
     void* unifiedDataSummary;
@@ -1073,6 +1083,7 @@ struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Float32 velocityX;
     ArkUI_Float32 velocityY;
     ArkUI_Float32 velocity;
+    ArkUI_Int32 inputEventType;
     void* rawPointerEvent;
 };
 
@@ -2730,6 +2741,7 @@ struct ArkUIScrollModifier {
     void (*setScrollFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetScrollFadingEdge)(ArkUINodeHandle node);
+    void (*setScrollFling)(ArkUINodeHandle node, ArkUI_Float64 value);
 };
 
 struct ArkUIListItemModifier {
@@ -3030,8 +3042,10 @@ struct ArkUIPluginModifier {
 };
 
 struct ArkUINavDestinationModifier {
-    void (*setHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle);
+    void (*setHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle, ArkUI_Bool animated);
     void (*resetHideTitleBar)(ArkUINodeHandle node);
+    void (*setNavDestinationHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated);
+    void (*resetNavDestinationHideToolBar)(ArkUINodeHandle node);
     void (*setNavDestinationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
     void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
@@ -3401,6 +3415,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setTextInputWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextInputWidth)(ArkUINodeHandle node);
+    void (*setTextInputCancelSymbolIcon)(ArkUINodeHandle node, ArkUI_Int32 style, void* symbolFunction);
+    void (*resetTextInputCancelSymbolIcon)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -3660,7 +3676,7 @@ struct ArkUIToggleModifier {
 };
 
 struct ArkUINavigationModifier {
-    void (*setHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide);
+    void (*setHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated);
     void (*resetHideToolBar)(ArkUINodeHandle node);
     void (*setHideNavBar)(ArkUINodeHandle node, ArkUI_Bool hideNavBar);
     void (*resetHideNavBar)(ArkUINodeHandle node);
@@ -3672,7 +3688,7 @@ struct ArkUINavigationModifier {
     void (*resetSubtitle)(ArkUINodeHandle node);
     void (*resetUsrNavigationMode)(ArkUINodeHandle node);
     void (*setUsrNavigationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
-    void (*setNavHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle);
+    void (*setNavHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle, ArkUI_Bool animated);
     void (*resetNavHideTitleBar)(ArkUINodeHandle node);
     void (*setNavBarPosition)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavBarPosition)(ArkUINodeHandle node);
@@ -4510,26 +4526,6 @@ struct ArkUIRichEditorControllerModifier {
     ArkUINodeHandle (*getRichEditorController)(ArkUINodeHandle node);
 };
 
-struct ArkUILinearIndicatorModifier {
-    void (*setLinearIndicatorIndicatorStyleSpace)(ArkUINodeHandle node, ArkUI_Float32 space, ArkUI_Int32 unit);
-    void (*resetLinearIndicatorIndicatorStyleSpace)(ArkUINodeHandle node);
-    void (*setLinearIndicatorIndicatorStyleStrokeWidth)(
-        ArkUINodeHandle node, ArkUI_Float32 strokeWidth, ArkUI_Int32 unit);
-    void (*resetLinearIndicatorIndicatorStyleStrokeWidth)(ArkUINodeHandle node);
-    void (*setLinearIndicatorIndicatorStyleStrokeRadius)(
-        ArkUINodeHandle node, ArkUI_Float32 strokeRadius, ArkUI_Int32 unit);
-    void (*resetLinearIndicatorIndicatorStyleStrokeRadius)(ArkUINodeHandle node);
-    void (*setLinearIndicatorIndicatorStyleTrackBackgroundColor)(
-        ArkUINodeHandle node, ArkUI_Uint32 trackBackgroundColor);
-    void (*resetLinearIndicatorIndicatorStyleTrackBackgroundColor)(ArkUINodeHandle node);
-    void (*setLinearIndicatorIndicatorStyleTrackColor)(ArkUINodeHandle node, ArkUI_Uint32 trackColor);
-    void (*resetLinearIndicatorIndicatorStyleTrackColor)(ArkUINodeHandle node);
-    void (*setLinearIndicatorIndicatorLoop)(ArkUINodeHandle node, ArkUI_Bool value);
-    void (*resetLinearIndicatorIndicatorLoop)(ArkUINodeHandle node);
-    void (*setLinearIndicatorOnChange)(ArkUINodeHandle node, void* callback);
-    void (*resetLinearIndicatorOnChange)(ArkUINodeHandle node);
-};
-
 struct ArkUIDataPanelModifier {
     void (*setCloseEffect)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetCloseEffect)(ArkUINodeHandle node);
@@ -4753,10 +4749,12 @@ struct ArkUIFrameNodeModifier {
     void (*resetSystemColorModeChangeEvent)(ArkUINodeHandle node);
     ArkUI_Int32 (*setSystemFontStyleChangeEvent)(ArkUINodeHandle node, void* userData, void* onFontStyleChange);
     void (*resetSystemFontStyleChangeEvent)(ArkUINodeHandle node);
-    ArkUI_CharPtr (*getCustomPropertyCapiByKey)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    ArkUI_Uint32 (*getCustomPropertyCapiByKey)(
+        ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size);
     void (*setCustomPropertyModiferByKey)(ArkUINodeHandle node, void* callback, void* getCallback);
     void (*addCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, ArkUI_CharPtr value);
     void (*removeCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*freeCustomPropertyCharPtr)(char* value, ArkUI_Uint32 size);
 };
 
 struct ArkUINodeContentEvent {
@@ -5008,7 +5006,6 @@ struct ArkUINodeModifiers {
     const ArkUISymbolSpanModifier* (*getSymbolSpanModifier)();
     const ArkUIComponent3DModifier* (*getComponent3DModifier)();
     const ArkUIContainerSpanModifier* (*getContainerSpanModifier)();
-    const ArkUILinearIndicatorModifier* (*getLinearIndicatorModifier)();
 };
 
 // same as inner defines in property.h

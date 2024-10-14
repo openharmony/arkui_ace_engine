@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_ISOLATED_PATTERN_H
 
 #include "core/common/dynamic_component_renderer.h"
+#include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -41,19 +42,21 @@ public:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     int32_t GetUiExtensionId() override;
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
-
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
     void SetAdaptiveWidth(bool state);
     void SetAdaptiveHeight(bool state);
 
-    virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
+    void SearchExtensionElementInfoByAccessibilityId(
+        int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+    void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
+    void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
-    virtual void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
+    void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
-    virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+    bool TransferExecuteAction(
+        int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int64_t offset) override;
 
     void DumpInfo() override;
@@ -79,6 +82,7 @@ private:
     IsolatedInfo curIsolatedInfo_;
     IsolatedDumpInfo isolatedDumpInfo_;
     int32_t uiExtensionId_ = 0;
+    RefPtr<AccessibilitySessionAdapterIsolatedComponent> accessibilitySessionAdapter_;
 
     static int32_t isolatedIdGenerator_; // only run on JS thread, and do not require mutex
     ACE_DISALLOW_COPY_AND_MOVE(IsolatedPattern);

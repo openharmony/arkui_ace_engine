@@ -758,7 +758,7 @@ HWTEST_F(TextTestFiveNg, GetTextDirection001, TestSize.Level1)
     textLayoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::RTL);
+        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
@@ -2879,5 +2879,20 @@ HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
     ASSERT_NE(paragraph, nullptr);
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
     pattern->UpdateFontColor(Color::BLACK);
+}
+
+/**
+ * @tc.name: UnRegisterAfterLayoutCallback001
+ * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->RegisterAfterLayoutCallback([]() {});
+    EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), true);
+    pattern->UnRegisterAfterLayoutCallback();
+    EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), false);
 }
 } // namespace OHOS::Ace::NG

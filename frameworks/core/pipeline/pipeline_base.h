@@ -197,6 +197,8 @@ public:
     // Called by ohos AceContainer when mouse event received.
     virtual void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {}
 
+    virtual void OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {};
+
     // Called by view when axis event received.
     virtual void OnAxisEvent(const AxisEvent& event) = 0;
 
@@ -268,6 +270,19 @@ public:
         auto accessibilityManager = GetAccessibilityManager();
         CHECK_NULL_VOID(accessibilityManager);
         accessibilityManager->UpdateVirtualNodeFocus();
+    }
+
+    void RegisterWindowDensityCallback(std::function<double()>&& callback)
+    {
+        windowDensityCallback_ = callback;
+    }
+
+    double GetWindowDensity() const
+    {
+        if (windowDensityCallback_) {
+            return windowDensityCallback_();
+        }
+        return 0.0;
     }
 
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
@@ -995,7 +1010,11 @@ public:
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+    virtual void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {}
+
+    virtual KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() {
+        return KeyBoardAvoidMode::OFFSET;
+    }
 
     virtual bool IsEnableKeyBoardAvoidMode() {
         return false;
@@ -1383,6 +1402,15 @@ public:
         return dragNodeGrayscale_;
     }
 
+    virtual bool IsDirtyNodesEmpty() const
+    {
+        return true;
+    }
+
+    virtual bool IsDirtyLayoutNodesEmpty() const
+    {
+        return true;
+    }
     bool IsWaitFlushFinish() const
     {
         return isWaitFlushFinish_;
@@ -1605,6 +1633,7 @@ private:
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
     bool isWaitFlushFinish_ = false;
+    std::function<double()> windowDensityCallback_;
     std::function<void(void)> uiExtensionFlushFinishCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);

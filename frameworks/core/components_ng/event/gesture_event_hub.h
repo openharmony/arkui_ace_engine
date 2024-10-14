@@ -688,6 +688,11 @@ public:
         return bindMenuStatus_;
     }
 
+    bool WillRecreateGesture() const
+    {
+        return recreateGesture_;
+    }
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
@@ -784,7 +789,8 @@ private:
     bool contextMenuShowStatus_  = false;
     MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
     BindMenuStatus bindMenuStatus_;
-    bool isDragForbidden_ = false;
+    // disable drag for the node itself and its all children
+    bool isDragForbiddenForWholeSubTree_ = false;
     bool textDraggable_ = false;
     bool isTextDraggable_ = false;
     bool monopolizeEvents_ = false;

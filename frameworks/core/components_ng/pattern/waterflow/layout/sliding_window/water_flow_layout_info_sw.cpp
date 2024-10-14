@@ -39,9 +39,9 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin());
     itemEnd_ = endIndex_ == itemCnt - 1;
     if (footerIndex_ == 0) {
-        itemEnd_ &= LessOrEqual(endPos_, mainSize);
+        itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize, 0.1f);
     }
-    offsetEnd_ = itemEnd_ && LessOrEqual(endPos_ + footerHeight_ + BotMargin(), mainSize);
+    offsetEnd_ = itemEnd_ && LessOrEqualCustomPrecision(endPos_ + footerHeight_ + BotMargin(), mainSize, 0.1f);
     maxHeight_ = std::max(endPos_ - startPos_ + footerHeight_, maxHeight_);
 
     if (!itemEnd_) {
@@ -119,7 +119,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
     if (lanes_.empty()) {
         return res;
     }
-
+    delta += delta_;
     if (startIndex_ == 0) {
         float disToTop = -StartPosWithMargin();
         if (!itemStart_) {
@@ -215,16 +215,19 @@ bool WaterFlowLayoutInfoSW::ReachStart(float prevPos, bool firstLayout) const
     if (!itemStart_ || lanes_.empty()) {
         return false;
     }
-    return firstLayout || Negative(prevPos);
+    const bool backFromOverScroll = Positive(prevPos) && NonPositive(totalOffset_);
+    return firstLayout || Negative(prevPos) || backFromOverScroll;
 }
 
-bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos) const
+bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos, bool firstLayout) const
 {
     if (!offsetEnd_ || lanes_.empty()) {
         return false;
     }
-    float prevEndPos = EndPos() - (totalOffset_ - prevPos);
-    return GreatNotEqual(prevEndPos + footerHeight_, lastMainSize_);
+    const float prevEndPos = EndPos() - (totalOffset_ - prevPos) + footerHeight_;
+    const bool backFromOverScroll =
+        LessNotEqual(prevEndPos, lastMainSize_) && GreatOrEqual(EndPos() + footerHeight_, lastMainSize_);
+    return firstLayout || GreatNotEqual(prevEndPos, lastMainSize_) || backFromOverScroll;
 }
 
 float WaterFlowLayoutInfoSW::GetContentHeight() const
@@ -314,6 +317,12 @@ void WaterFlowLayoutInfoSW::Reset()
     idxToLane_.clear();
     maxHeight_ = 0.0f;
     synced_ = false;
+}
+
+void WaterFlowLayoutInfoSW::ResetFooter()
+{
+    footerIndex_ = -1;
+    footerHeight_ = 0.0f;
 }
 
 int32_t WaterFlowLayoutInfoSW::EndIndex() const
@@ -611,7 +620,7 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
         // move old lanes_[prevSegIdx,...] to Lanes_[curSegIdx,...]
         if (n <= lanes_.size()) {
             // means curSegIdx <= prevSegIdx
-            for (size_t i = static_cast<size_t>(start); i < curSegIdx; ++i) {
+            for (size_t i = 0; i < curSegIdx; ++i) {
                 lanes_[i] = std::vector<Lane>(sections[i].crossCount.value_or(1));
             }
             for (size_t i = curSegIdx; i < n; ++i) {
@@ -625,12 +634,14 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
             for (size_t i = n - 1; i >= curSegIdx; i--) {
                 lanes_[i] = lanes_[oriSize--];
             }
-            for (size_t i = static_cast<size_t>(start); i < curSegIdx; ++i) {
+            for (size_t i = 0; i < curSegIdx; ++i) {
                 lanes_[i] = std::vector<Lane>(sections[i].crossCount.value_or(1));
             }
         }
         margins_.clear();
         return true;
+    } else {
+        newStartIndex_ = INVALID_NEW_START_INDEX;
     }
     return false;
 }
@@ -655,7 +666,8 @@ void WaterFlowLayoutInfoSW::NotifyDataChange(int32_t index, int32_t count)
         return;
     }
     // 更新的index是否在newStartIndex_上方、是否会影响newStartIndex_
-    if (index >= newStartIndex_ || (count < 0 && newStartIndex_ <= index - count - 1)) {
+    if ((count == 0 && newStartIndex_ <= index) || (count > 0 && newStartIndex_ < index) ||
+        (count < 0 && newStartIndex_ <= index - count - 1)) {
         newStartIndex_ = INVALID_NEW_START_INDEX;
         return;
     }
@@ -674,6 +686,8 @@ void WaterFlowLayoutInfoSW::UpdateLanesIndex(int32_t updateIdx)
             }
         }
     }
+    startIndex_ = StartIndex();
+    endIndex_ = EndIndex();
 }
 
 void WaterFlowLayoutInfoSW::BeginCacheUpdate()

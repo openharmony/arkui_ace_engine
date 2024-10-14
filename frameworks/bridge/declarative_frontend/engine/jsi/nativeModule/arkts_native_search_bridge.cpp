@@ -617,7 +617,7 @@ ArkUINativeModuleValue SearchBridge::SetCopyOption(ArkUIRuntimeCallInfo* runtime
     if (secondArg->IsNumber()) {
         value = secondArg->Uint32Value(vm);
     } else if (!secondArg->IsNumber() && !secondArg->IsUndefined()) {
-        copyOptions = CopyOptions::None;
+        copyOptions = CopyOptions::Local;
         value = static_cast<uint32_t>(copyOptions);
     }
     GetArkUINodeModifiers()->getSearchModifier()->setSearchCopyOption(nativeNode, value);

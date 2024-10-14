@@ -89,6 +89,14 @@ void SpanModelNG::SetFont(const Font& value)
     }
 }
 
+void SpanModelNG::ResetFont()
+{
+    ResetFontSize();
+    ResetFontWeight();
+    ResetFontFamily();
+    ResetItalicFontStyle();
+}
+
 void SpanModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_SPAN_PROPERTY(FontSize, value);
@@ -104,6 +112,11 @@ void SpanModelNG::SetTextColor(const Color& value)
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     CHECK_NULL_VOID(spanNode);
     spanNode->UpdateSpanTextColor(value);
+}
+
+void SpanModelNG::ResetTextColor()
+{
+    ACE_RESET_SPAN_PROPERTY(TextColor);
 }
 
 void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -385,15 +398,23 @@ void SpanModelNG::SetFont(UINode* uiNode, const Font& value)
 {
     if (value.fontSize.has_value()) {
         SetFontSize(uiNode, value.fontSize.value());
+    } else {
+        ResetFontSize(uiNode);
     }
     if (value.fontWeight.has_value()) {
         SetFontWeight(uiNode, value.fontWeight.value());
+    } else {
+        ResetFontWeight(uiNode);
     }
     if (!value.fontFamilies.empty()) {
         SetFontFamily(uiNode, value.fontFamilies);
+    } else {
+        ResetFontFamily(uiNode);
     }
     if (value.fontStyle.has_value()) {
         SetItalicFontStyle(uiNode, value.fontStyle.value());
+    } else {
+        ResetItalicFontStyle(uiNode);
     }
 }
 

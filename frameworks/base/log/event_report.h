@@ -199,6 +199,8 @@ public:
                                   const std::string& pageName);
     static void ReportNonManualPostCardActionInfo(const std::string& formName, const std::string& bundleName,
         const std::string& abilityName, const std::string& moduleName, int32_t dimension);
+    static void ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
+        const std::string& moduleName);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);

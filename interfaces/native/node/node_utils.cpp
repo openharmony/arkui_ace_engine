@@ -14,8 +14,10 @@
  */
 
 
+#include <cstdlib>
 #include "node_model.h"
 
+#include "base/utils/utils.h"
 #include "base/error/error_code.h"
 
 #ifdef __cplusplus
@@ -165,6 +167,10 @@ void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* nam
     if (node == nullptr) {
         return;
     }
+    if (name == nullptr || value == nullptr) {
+        LOGF("AddCustomProperty input params name or value is nullptr");
+        abort();
+    }
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->addCustomProperty(node->uiNodeHandle, name, value);
 }
@@ -173,6 +179,10 @@ void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* 
 {
     if (node == nullptr) {
         return;
+    }
+    if (name == nullptr) {
+        LOGF("RemoveCustomProperty input params name is nullptr");
+        abort();
     }
     auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->removeCustomProperty(node->uiNodeHandle, name);

@@ -520,4 +520,35 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg016, TestSize.Level1)
     pattern->ChangeSurfaceCallbackMode(SurfaceCallbackMode::PIP);
     EXPECT_EQ(onSurfaceCreatedSurfaceCount, 2);
 }
+
+/**
+ * @tc.name: XComponentTestTwoNg017
+ * @tc.desc: Test EnableSecure Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg017, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetSecurityLayer(true)).WillOnce(Return());
+    pattern->EnableSecure(true);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetSecurityLayer(false)).WillOnce(Return());
+    pattern->EnableSecure(false);
+
+    pattern->type_ = XCOMPONENT_TEXTURE_TYPE_VALUE;
+
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetSecurityLayer(true)).Times(0);
+    pattern->EnableSecure(true);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetSecurityLayer(false)).Times(0);
+    pattern->EnableSecure(false);
+}
 } // namespace OHOS::Ace::NG

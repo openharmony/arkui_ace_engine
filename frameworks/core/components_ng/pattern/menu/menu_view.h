@@ -47,6 +47,8 @@ public:
 
     static void ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode);
 
+    static void CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode);
+
 private:
     static void UpdateMenuPaintProperty(
         const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& isContextMenu);

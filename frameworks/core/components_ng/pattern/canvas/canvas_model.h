@@ -33,11 +33,6 @@ public:
     virtual void EnableAnalyzer(bool enable) {};
     virtual void SetImageAIOptions(void* options) {};
     virtual void DetachRenderContext() {};
-
-private:
-    static std::unique_ptr<CanvasModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CUSTOM_PAINT_CANVAS_MODEL_H

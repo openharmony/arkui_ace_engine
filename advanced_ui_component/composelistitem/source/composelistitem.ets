@@ -110,6 +110,8 @@ const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
 const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
 const RIGHT_ONLY_ARROW_WIDTH = '24vp';
+const ACCESSIBILITY_LEVEL_NO: string = 'no';
+
 const ICON_SIZE_MAP: Map<number, number> = new Map([
   [IconType.BADGE, BADGE_SIZE],
   [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
@@ -197,6 +199,7 @@ struct ContentItemStruct {
         .fontWeight(FontWeight.Medium)
         .focusable(true)
         .draggable(false)
+        .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
       if (this.secondaryText != null) {
         Text(this.secondaryText)
           .fontSize($r('sys.float.ohos_id_text_size_body2'))
@@ -204,6 +207,7 @@ struct ContentItemStruct {
           .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .draggable(false)
+          .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
       }
       if (this.description != null) {
         Text(this.description)
@@ -212,6 +216,7 @@ struct ContentItemStruct {
           .maxLines(TEXT_MAX_LINE)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .draggable(false)
+          .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
       }
     }
     .flexShrink(1)
@@ -345,14 +350,6 @@ struct OperateItemStruct {
     .onFocus(() => {
       this.parentCanFocus = false;
     })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
       if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -385,14 +382,6 @@ struct OperateItemStruct {
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .onFocus(() => {
       this.parentCanFocus = false;
-    })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
     })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
@@ -428,6 +417,7 @@ struct OperateItemStruct {
       .fontColor(this.secondaryTextColor)
       .draggable(false)
       .flexShrink(1)
+      .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
   }
 
   @Builder
@@ -442,7 +432,7 @@ struct OperateItemStruct {
         .matchTextDirection(true)
     }
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
-    .hitTestBehavior(HitTestMode.Transparent)
+    .hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
@@ -450,17 +440,6 @@ struct OperateItemStruct {
       this.parentCanFocus = false;
     })
     .stateEffect(this.arrow?.action !== undefined)
-    .onTouch((event: TouchEvent) => {
-      if (this.arrow?.action === undefined) {
-        return;
-      }
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
     .onHover((isHover: boolean) => {
       if (this.arrow?.action === undefined) {
@@ -494,14 +473,6 @@ struct OperateItemStruct {
         this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down) {
-          this.parentCanTouch = false;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.parentCanTouch = true;
-        }
-      })
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
         if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -530,14 +501,6 @@ struct OperateItemStruct {
         this.parentCanFocus = false;
       })
       .hitTestBehavior(HitTestMode.Block)
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down) {
-          this.parentCanTouch = false;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.parentCanTouch = true;
-        }
-      })
       .onHover((isHover: boolean) => {
         this.parentCanHover = false
         if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -570,14 +533,6 @@ struct OperateItemStruct {
     .onFocus(() => {
       this.parentCanFocus = false;
     })
-    .onTouch((event: TouchEvent) => {
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .onHover((isHover: boolean) => {
       this.parentCanHover = false
       if (isHover && this.parentFrontColor === this.hoveringColor) {
@@ -606,6 +561,7 @@ struct OperateItemStruct {
             .constraintSize({
               maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
+            .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
           Image(this.arrow?.value)
             .height(OPERATEITEM_ICONLIKE_SIZE)
             .width(OPERATEITEM_ARROW_WIDTH)
@@ -628,6 +584,7 @@ struct OperateItemStruct {
             .constraintSize({
               maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
             })
+            .accessibilityLevel(ACCESSIBILITY_LEVEL_NO)
           Image(this.arrow?.value)
             .height(OPERATEITEM_ICONLIKE_SIZE)
             .width(OPERATEITEM_ARROW_WIDTH)
@@ -642,7 +599,7 @@ struct OperateItemStruct {
         })
       }
     }
-    .hitTestBehavior(HitTestMode.Transparent)
+    .hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent)
     .labelStyle({
       maxLines: TEXT_MAX_LINE
     })
@@ -659,17 +616,6 @@ struct OperateItemStruct {
       right: 0
     })
     .stateEffect(this.arrow?.action !== undefined)
-    .onTouch((event: TouchEvent) => {
-      if (this.arrow?.action === undefined) {
-        return;
-      }
-      if (event.type === TouchType.Down) {
-        this.parentCanTouch = false;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.parentCanTouch = true;
-      }
-    })
     .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
     .onHover((isHover: boolean) => {
       if (this.arrow?.action === undefined) {
@@ -756,6 +702,7 @@ export struct ComposeListItem {
   @State textArrowLeftSafeOffset: number = 0;
   private isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
   private maxFontScale = this.getUIContext().getMaxFontScale();
+  @State accessibilityTextBuilder: string = '';
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -795,6 +742,13 @@ export struct ComposeListItem {
     if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
       this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
     }
+
+    this.accessibilityTextBuilder = `
+      ${this.contentItem?.primaryText ?? ''}
+      ${this.contentItem?.secondaryText ?? ''}
+      ${this.contentItem?.description ?? ''}
+      ${this.operateItem?.text ?? ''}
+    `;
   }
 
   aboutToAppear() {
@@ -952,7 +906,6 @@ export struct ComposeListItem {
             parentDirection: this.containerDirection,
             itemDirection: this.contentItemDirection,
           })
-            .flexShrink(0)
         }
         if (this.operateItem !== null) {
           OperateItemStruct({
@@ -1002,14 +955,6 @@ export struct ComposeListItem {
             (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
       })
-      .onTouch((event: TouchEvent) => {
-        if (event.type === TouchType.Down && this.canTouch) {
-          this.frontColor = this.touchDownColor;
-        }
-        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-          this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
-        }
-      })
       .stateStyles({
         focused: {
           .border({
@@ -1025,9 +970,13 @@ export struct ComposeListItem {
             width: ITEM_BORDER_SHOWN,
             color: Color.Transparent
           })
+        },
+        pressed: {
+          .backgroundColor(this.touchDownColor)
         }
       }).padding(this.containerPadding)
     }
+    .accessibilityText(this.accessibilityTextBuilder)
     .padding({
       left: STACK_PADDING,
       right: STACK_PADDING
