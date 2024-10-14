@@ -1180,13 +1180,15 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
         CHECK_NULL_VOID(uiExtension);
         uiExtension->HandleVisibleAreaChange(visible, ratio);
     };
     std::vector<double> ratioList = { SHOW_START, SHOW_FULL };
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false); 
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
 }
 
 void UIExtensionPattern::HandleVisibleAreaChange(bool visible, double ratio)
