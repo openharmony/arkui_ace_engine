@@ -715,6 +715,16 @@ public:
         destroyCallback_(GetId());
     }
 
+    bool IsAllowAddChildBelowModalUec() const
+    {
+        return isAllowAddChildBelowModalUec_;
+    }
+
+    void SetIsAllowAddChildBelowModalUec(bool isAllowAddChildBelowModalUec)
+    {
+        isAllowAddChildBelowModalUec_ = isAllowAddChildBelowModalUec;
+    }
+
     void SetBuilderFunc(std::function<void()>&& lazyBuilderFunc)
     {
         lazyBuilderFunc_ = lazyBuilderFunc;
@@ -864,6 +874,7 @@ protected:
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
+    bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
 
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
@@ -898,6 +909,7 @@ private:
     bool useOffscreenProcess_ = false;
 
     bool isCNode_ = false;
+    bool isAllowAddChildBelowModalUec_ = true;
 
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;
