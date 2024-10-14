@@ -2352,11 +2352,6 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
     }
 }
 
-void PipelineContext::RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback)
-{
-    dumpListeners_.push_back(callback);
-}
-
 bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
     bool skipSubAutoFillContainer, bool needsRecordData)
 {
@@ -2493,8 +2488,15 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             jsParams = std::vector<std::string>(params.begin() + 1, params.end());
         }
 
-        for (const auto& func : dumpListeners_) {
-            func(jsParams);
+        auto stageNode = stageManager_->GetStageNode();
+        CHECK_NULL_RETURN(stageNode, false);
+        auto children = stageNode->GetChildren();
+        for (const auto& pageNode : children) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
+            CHECK_NULL_RETURN(frameNode, false);
+            auto pagePattern = frameNode->GetPattern<PagePattern>();
+            CHECK_NULL_RETURN(pagePattern, false);
+            pagePattern->FireDumpListener(jsParams);
         }
     } else if (params[0] == "-event") {
         if (eventManager_) {
