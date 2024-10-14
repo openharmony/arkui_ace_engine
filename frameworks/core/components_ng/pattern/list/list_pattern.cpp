@@ -160,7 +160,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (predictSnapOffset.has_value()) {
         if (scrollable_ && !(NearZero(predictSnapOffset.value()) && NearZero(scrollSnapVelocity_)) &&
             !AnimateRunning()) {
-            scrollable_->StartListSnapAnimation(predictSnapOffset.value(), scrollSnapVelocity_);
+            StartListSnapAnimation(predictSnapOffset.value(), scrollSnapVelocity_);
             if (snapTrigOnScrollStart_) {
                 FireOnScrollStart();
             }
@@ -916,7 +916,7 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     return UpdateCurrentOffset(offset, source);
 }
 
-bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
+bool ListPattern::StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance)
 {
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, false);
@@ -930,10 +930,16 @@ bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
     if (!GetIsDragging()) {
         snapTrigOnScrollStart_ = true;
     }
-    predictSnapOffset_ = targetOffset;
-    scrollSnapVelocity_ = velocity;
+    predictSnapOffset_ = snapDelta;
+    scrollSnapVelocity_ = snapVelocity;
     MarkDirtyNodeSelf();
     return true;
+}
+
+void ListPattern::StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
+{
+    CHECK_NULL_VOID(scrollable_);
+    scrollable_->StartListSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
 }
 
 void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)

@@ -260,11 +260,6 @@ public:
         return { 0, 0 };
     }
 
-    bool OnScrollSnapCallback(double targetOffset, double velocity) override
-    {
-        return false;
-    }
-
     void StopAnimate() override {}
 
     float GetTotalOffset() const override

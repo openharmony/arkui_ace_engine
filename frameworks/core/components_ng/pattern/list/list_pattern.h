@@ -266,7 +266,10 @@ public:
     {
         predictSnapOffset_ = predictSnapOffset;
     }
-    bool OnScrollSnapCallback(double targetOffset, double velocity) override;
+
+    bool StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance = 0.f) override;
+
+    void StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
 
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 

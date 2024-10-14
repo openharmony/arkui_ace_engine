@@ -258,8 +258,8 @@ void Scrollable::HandleTouchUp()
         }
         return;
     }
-    if (state_ != AnimationState::SNAP && scrollSnapListCallback_) {
-        scrollSnapListCallback_(0.0, 0.0);
+    if (state_ != AnimationState::SNAP && startSnapAnimationCallback_) {
+        startSnapAnimationCallback_(0.f, 0.f, 0.f);
     }
 }
 
@@ -449,7 +449,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     double mainPosition = Round(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     if (!moved_ || IsMouseWheelScroll(info)) {
         LayoutDirectionEst(lastGestureVelocity_, flingVelocityScale_, isScrollFromTouchPad);
-        if (TriggerScrollSnap(0.f, 0.f, 0.f, mainPosition)) {
+        currentPos_ = mainPosition;
+        if (startSnapAnimationCallback_ && startSnapAnimationCallback_(0.f, 0.f, 0.f)) {
             isTouching_ = false;
             return;
         }
@@ -479,19 +480,6 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     isTouching_ = false;
 }
 
-bool Scrollable::TriggerScrollSnap(float delta, float dragDistance, float velocity, double mainPosition)
-{
-    if (calcPredictSnapOffsetCallback_) {
-        std::optional<float> predictSnapOffset = calcPredictSnapOffsetCallback_(delta, dragDistance, velocity);
-        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
-            currentPos_ = mainPosition;
-            StartScrollSnapAnimation(predictSnapOffset.value(), currentVelocity_);
-            return true;
-        }
-    }
-    return false;
-}
-
 void Scrollable::CalcOverScrollVelocity()
 {
     auto gamma = 0.0f;
@@ -516,12 +504,9 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
     float friction = sFriction_.value_or(friction_);
     initVelocity_ = correctVelocity;
     finalPosition_ = mainPosition + correctVelocity / (friction * -FRICTION_SCALE);
-    CHECK_NULL_VOID(
-        !TriggerScrollSnap(GetFinalPosition() - mainPosition, GetDragOffset(), correctVelocity, mainPosition));
-    if (scrollSnapListCallback_ && scrollSnapListCallback_(GetFinalPosition() - mainPosition, correctVelocity)) {
-        currentVelocity_ = 0.0;
-        return;
-    }
+    currentPos_ = mainPosition;
+    CHECK_NULL_VOID(!(startSnapAnimationCallback_ &&
+        startSnapAnimationCallback_(GetFinalPosition() - mainPosition, correctVelocity, GetDragOffset())));
     auto frictionVelocityTh =
         isScrollFromTouchPad ? FRICTION_VELOCITY_THRESHOLD * touchPadVelocityScaleRate_ : FRICTION_VELOCITY_THRESHOLD;
     if (NearZero(correctVelocity, frictionVelocityTh)) {
@@ -541,7 +526,6 @@ void Scrollable::TriggerFrictionAnimation(float mainPosition, float friction, fl
 {
     // change motion param when list item need to be center of screen on watch
     FixScrollMotion(mainPosition, correctVelocity);
-    currentPos_ = mainPosition;
     currentVelocity_ = 0.0;
     lastPosition_ = currentPos_;
     frictionVelocity_ = initVelocity_;
@@ -937,13 +921,9 @@ void Scrollable::UpdateSpringMotion(double mainPosition, const ExtentPair& exten
 
 void Scrollable::ProcessScrollMotionStop(bool stopFriction)
 {
-    if (needScrollSnapChange_ && calcPredictSnapOffsetCallback_ && frictionOffsetProperty_) {
+    if (needScrollSnapChange_ && startSnapAnimationCallback_ && frictionOffsetProperty_) {
         needScrollSnapChange_ = false;
-        auto predictSnapOffset = calcPredictSnapOffsetCallback_(GetFinalPosition() - currentPos_, 0.0f, 0.0f);
-        if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
-            StartScrollSnapAnimation(predictSnapOffset.value(), currentVelocity_);
-            return;
-        }
+        CHECK_NULL_VOID(!startSnapAnimationCallback_(GetFinalPosition() - currentPos_, 0.f, 0.f));
     }
     // spring effect special process
     if (scrollPause_) {

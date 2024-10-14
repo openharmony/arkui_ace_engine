@@ -1172,10 +1172,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign007, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
 {
     CreateSnapList(V2::ScrollSnapAlign::START);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 
@@ -1185,10 +1185,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 }
@@ -1201,10 +1201,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign009, TestSize.Level1)
 {
     CreateSnapList(V2::ScrollSnapAlign::END);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 
@@ -1214,10 +1214,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign009, TestSize.Level1)
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 }
@@ -1231,10 +1231,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign010, TestSize.Level1)
 {
     float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_HEIGHT) / 2; // -140.f
     CreateSnapList(V2::ScrollSnapAlign::CENTER);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
 
@@ -1245,10 +1245,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign010, TestSize.Level1)
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
 }
