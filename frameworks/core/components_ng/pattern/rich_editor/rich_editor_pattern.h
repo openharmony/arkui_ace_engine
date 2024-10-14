@@ -1286,6 +1286,8 @@ private:
     void UpdateImagePreviewParam(const RefPtr<ImageSpanNode>& imageNode);
     void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
     void ClearOnFocusTextField();
+    void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
+    void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
