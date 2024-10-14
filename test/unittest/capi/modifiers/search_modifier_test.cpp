@@ -50,6 +50,9 @@ Ark_Resource ArkResStr(Ark_String* name, int id = -1,
     };
 }
 // attrs
+const auto SEARCH_VALUE_OPTION("value");
+const auto SEARCH_PLACEHOLDER_OPTION("placeholder");
+const auto SEARCH_ICON_OPTION("icon");
 const auto BUTTON_OPTIONS_ATTR("searchButtonOption");
 const auto BUTTON_OPTIONS_COLOR_ATTR("fontColor");
 const auto BUTTON_OPTIONS_SIZE_ATTR("fontSize");
@@ -267,7 +270,7 @@ const std::vector<ColorTest> COLOR_TEST_PLAN = {
 };
 
 const std::vector<ResourceSRC> RESOURCE_TEST_PLAN = {
-    { ArkUnion<Opt_ResourceStr, Ark_String>(""), "resource:///ohos_test_image.svg" },
+    { ArkUnion<Opt_ResourceStr, Ark_String>(""), ICON_DEFAULT_SRC },
     { ArkUnion<Opt_ResourceStr, Ark_String>("test/string/2"), "test/string/2" }
 };
 const std::vector<UnionResourceString> UNION_RESOURCE_STRING_PLAN = {
@@ -566,6 +569,49 @@ public:
         fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 };
+
+/**
+ * @tc.name: setCancelButtonTestDefault
+ * @tc.desc: Check the default values of cancelButton
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setSearchOptionsDefault, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSearchOptions, nullptr);
+    // default
+    auto jsonValue = GetJsonValue(node_);
+    auto value = GetAttrValue<std::string>(jsonValue, SEARCH_VALUE_OPTION);
+    auto placeholder = GetAttrValue<std::string>(jsonValue, SEARCH_PLACEHOLDER_OPTION);
+    auto icon = GetAttrValue<std::string>(jsonValue, SEARCH_ICON_OPTION);
+    EXPECT_EQ(value, EMPTY_TEXT);
+    EXPECT_EQ(placeholder, EMPTY_TEXT);
+    EXPECT_EQ(icon, ICON_DEFAULT_SRC);
+}
+
+/**
+ * @tc.name: setCancelButtonTestDefault
+ * @tc.desc: Check the default values of cancelButton
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setSearchOptionsValidValues, TestSize.Level1)
+{
+    Type_SearchInterface_setSearchOptions_Arg0 options = {};
+    options.value = ArkValue<Opt_String>("test");
+    options.placeholder = ArkUnion<Opt_ResourceStr, Ark_String>("test1");
+    options.value = ArkValue<Opt_String>("test2");
+    auto optOptions = ArkValue<Opt_Type_SearchInterface_setSearchOptions_Arg0>(options);
+    modifier_->setSearchOptions(node_, &optOptions);
+    // default
+    auto jsonValue = GetJsonValue(node_);
+    auto value = GetAttrValue<std::string>(jsonValue, SEARCH_VALUE_OPTION);
+    auto placeholder = GetAttrValue<std::string>(jsonValue, SEARCH_PLACEHOLDER_OPTION);
+    auto icon = GetAttrValue<std::string>(jsonValue, SEARCH_ICON_OPTION);
+    EXPECT_EQ(value, "test");
+    EXPECT_EQ(placeholder, "test1");
+    EXPECT_EQ(icon, "test2");
+}
 
 /**
  * @tc.name: setCancelButtonTestDefault
