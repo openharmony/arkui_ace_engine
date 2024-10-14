@@ -159,11 +159,9 @@ void ScrollBarColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(color);
     auto colorVal = Converter::OptConvert<Color>(*value);
-    if (colorVal) {
-        ScrollModelNG::SetScrollBarColor(frameNode, colorVal.value());
-    }
+    ScrollModelNG::SetScrollBarColor(frameNode, colorVal);
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
                         const Ark_Union_Number_String* value)
@@ -174,9 +172,17 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
     auto width = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(width);
     Validator::ValidateNonPercent(width);
-    if (width) {
-        ScrollModelNG::SetScrollBarWidth(frameNode, width.value());
-    }
+    ScrollModelNG::SetScrollBarWidth(frameNode, width);
+}
+void EdgeEffectImpl(Ark_NativePointer node,
+                    Ark_EdgeEffect edgeEffect,
+                    const Opt_EdgeEffectOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(edgeEffect);
+    //auto convValue = Converter::OptConvert<type>(edgeEffect); // for enums
+    //ScrollModelNG::SetEdgeEffect(frameNode, convValue);
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
                             const OnScrollFrameBeginCallback* value)

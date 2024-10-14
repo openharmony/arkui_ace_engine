@@ -433,6 +433,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetBadColorString, testing::ext::Tes
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     std::string before = "#FF000000";
+
     // empty color string
     std::string testColor = "";
     Ark_String str = Converter::ArkValue<Ark_String>(testColor);
@@ -461,7 +462,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
 {
     std::string jsonKey = "scrollBarWidth";
     Dimension testValue(33.56, DimensionUnit::VP);
-    auot testNumber = Converter::ArkValue<Ark_Number>(testValue.ConvertToVp())
+    auto testNumber = Converter::ArkValue<Ark_Number>(testValue.ConvertToVp());
     auto arkVal = Converter::ArkUnion<Union_Number_String, Ark_Number>(testNumber);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -521,7 +522,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::Tes
     testValDim = Dimension::FromString(testVal);
     ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
-    auto testStr = Converter::ArkValue<Ark_String>("33%")
+    auto testStr = Converter::ArkValue<Ark_String>("33%");
     defectiveNumber = Converter::ArkUnion<Union_Number_String, Ark_String>(testStr);
     modifier_->setScrollBarWidth(frameNode, &defectiveNumber);
 
@@ -560,7 +561,7 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValue, testing::ext::TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     float testValue = 0.13;
-    auto testNumber = Converter::ArkValue<Ark_Number>(testValue)
+    auto testNumber = Converter::ArkValue<Ark_Number>(testValue);
     auto friction = Converter::ArkUnion<Union_Number_Resource, Ark_Number>(testNumber);
 
     modifier_->setFriction(node_, &friction);

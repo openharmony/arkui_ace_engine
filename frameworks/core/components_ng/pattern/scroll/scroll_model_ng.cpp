@@ -18,6 +18,9 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
+#include "core/interfaces/native/node/node_utils.h"
+
+
 namespace OHOS::Ace::NG {
 namespace {
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
@@ -468,11 +471,9 @@ void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
     pattern->SetAxis(axis);
 }
 
-void ScrollModelNG::SetAxis(FrameNode* frameNode, std::optional<Axis> axis)
+void ScrollModelNG::SetAxis(FrameNode* frameNode, const std::optional<Axis>& axis)
 {
-    if (axis) {
-        SetAxis(frameNode, axis.value());
-    }
+    SetAxis(frameNode, axis.value_or(Axis::VERTICAL));
 }
 
 void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
@@ -480,9 +481,33 @@ void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color, frameNode);
 }
 
+void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color) {
+        SetScrollBarColor(frameNode, color.value());
+    } else {
+        auto theme = GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(theme);
+        auto colorDef = theme->GetBackgroundColor();
+        SetScrollBarColor(frameNode, colorDef);
+    }
+}
+
 void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension, frameNode);
+}
+
+void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& dimension)
+{
+    if (dimension) {
+        SetScrollBarWidth(frameNode, dimension.value());
+    } else {
+        auto theme = GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(theme);
+        auto width = theme->GetDefaultWidth();
+        SetScrollBarWidth(frameNode, width);
+    }
 }
 
 void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled)
