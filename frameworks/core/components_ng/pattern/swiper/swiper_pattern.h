@@ -596,9 +596,9 @@ public:
         return layoutConstraint_;
     }
 
-    void SetLayoutConstraint(const LayoutConstraintF& layoutConstraint)
+    void SetContentMainSize(float contentMainSize)
     {
-        layoutConstraint_ = layoutConstraint;
+        contentMainSize_ = contentMainSize;
     }
 
     bool GetRequestLongPredict() const
