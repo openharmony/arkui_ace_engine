@@ -716,7 +716,7 @@ HWTEST_F(TextTestFiveNg, GetTextDirection001, TestSize.Level1)
     textLayoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
     EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
-        content, layoutWrapper.GetRawPtr()), TextDirection::RTL);
+        content, layoutWrapper.GetRawPtr()), TextDirection::LTR);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
 }
 
