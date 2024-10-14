@@ -751,7 +751,7 @@ class TextInputCancelButtonModifier extends ModifierWithKey<{ style?: CancelButt
       getUINativeModule().textInput.resetCancelButton(node);
     } else {
       getUINativeModule().textInput.setCancelButton(node, this.value.style,
-        this.value.icon?.size, this.value.icon?.color, this.value.icon?.src);
+        this.value.icon);
     }
   }
   checkObjectDiff(): boolean {

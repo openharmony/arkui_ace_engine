@@ -1309,9 +1309,6 @@ ArkUINativeModuleValue TextInputBridge::SetCancelButton(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> styleArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    Local<JSValueRef> sizeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
-    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
-    Local<JSValueRef> srcArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto container = Container::Current();
@@ -1329,9 +1326,54 @@ ArkUINativeModuleValue TextInputBridge::SetCancelButton(ArkUIRuntimeCallInfo* ru
         style = static_cast<int32_t>(cancelButtonStyle);
     }
 
+    auto info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto iconJsVal = Framework::JsiRef<Framework::JsiValue>::Cast(info[CALL_ARG_2]);
+    // set default icon
+    if (iconJsVal->IsUndefined() || iconJsVal->IsNull() || !iconJsVal->IsObject()) {
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCancelSymbolIcon(nativeNode,
+            style, nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto iconParam = Framework::JsiRef<Framework::JsiObject>::Cast(iconJsVal);
+    bool isSymbolIcon = iconParam->HasProperty("fontColor"); // only SymbolGlyph has fontColor property
+    if (isSymbolIcon) {
+        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+        Framework::JSViewAbstract::SetSymbolOptionApply(runtimeCallInfo, iconSymbol, iconParam);
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCancelSymbolIcon(nativeNode,
+            style, reinterpret_cast<void*>(&iconSymbol));
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    SetCancelButtonImage(runtimeCallInfo, style);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void TextInputBridge::SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t style)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto iconJsVal = Framework::JsiRef<Framework::JsiValue>::Cast(info[CALL_ARG_2]);
+    auto iconParam = Framework::JsiRef<Framework::JsiObject>::Cast(iconJsVal);
+    auto sizeArg = iconParam->GetProperty("size");
+    auto colorArg = iconParam->GetProperty("color");
+    auto srcArg = iconParam->GetProperty("src");
+
     CalcDimension iconSize;
     if (!sizeArg->IsUndefined() && !sizeArg->IsNull() &&
-        ArkTSUtils::ParseJsDimensionVpNG(vm, sizeArg, iconSize, false)) {
+        Framework::JSViewAbstract::ParseJsDimensionVpNG(sizeArg, iconSize, false)) {
         if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
             iconSize = theme->GetIconSize();
         }
@@ -1342,7 +1384,7 @@ ArkUINativeModuleValue TextInputBridge::SetCancelButton(ArkUIRuntimeCallInfo* ru
     Color value;
     uint32_t color;
     if (!colorArg->IsUndefined() && !colorArg->IsNull() &&
-        ArkTSUtils::ParseJsColorAlpha(vm, colorArg, value)) {
+        Framework::JSViewAbstract::ParseJsColor(colorArg, value)) {
         color = value.GetValue();
     } else {
         color = theme->GetCancelButtonIconColor().GetValue();
@@ -1350,14 +1392,13 @@ ArkUINativeModuleValue TextInputBridge::SetCancelButton(ArkUIRuntimeCallInfo* ru
 
     std::string srcStr;
     if (srcArg->IsUndefined() || srcArg->IsNull() ||
-        !ArkTSUtils::ParseJsMedia(vm, srcArg, srcStr)) {
+        !Framework::JSViewAbstract::ParseJsMedia(srcArg, srcStr)) {
         srcStr = "";
     }
 
     struct ArkUISizeType size = {iconSize.Value(), static_cast<int8_t>(iconSize.Unit())};
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCancelButton(nativeNode,
         style, &size, color, srcStr.c_str());
-    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue TextInputBridge::ResetCancelButton(ArkUIRuntimeCallInfo* runtimeCallInfo)
