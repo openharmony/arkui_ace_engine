@@ -529,6 +529,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
         }
         CHECK_NULL_VOID(overlayManager);
         overlayManager->DeleteModal(id);
+        SheetManager::GetInstance().DeleteOverlayForWindowScene(rootNodeId, rootNodeType);
     };
     targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
 

@@ -2132,36 +2132,6 @@ RefPtr<OverlayManager> SheetPresentationPattern::GetOverlayManager()
     return overlay;
 }
 
-void SheetPresentationPattern::DeleteOverlay()
-{
-    const auto& layoutProp = GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_VOID(layoutProp);
-    auto showInPage = layoutProp->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false);
-    CHECK_NULL_VOID(showInPage);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto sheetWrapper = host->GetParent();
-    CHECK_NULL_VOID(sheetWrapper);
-    auto node = AceType::DynamicCast<FrameNode>(sheetWrapper->GetParent());
-    CHECK_NULL_VOID(node);
-    if (node->GetTag() == V2::PAGE_ETS_TAG) {
-        auto pattern = node->GetPattern<PagePattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->DeleteOverlayManager();
-    } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-        auto pattern = node->GetPattern<NavDestinationPattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->DeleteOverlayManager();
-    }
-#ifdef WINDOW_SCENE_SUPPORTED
-    else if (node->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-        auto pattern = node->GetPattern<SystemWindowScene>();
-        CHECK_NULL_VOID(pattern);
-        pattern->DeleteOverlayManager();
-    }
-#endif
-}
-
 void SheetPresentationPattern::GetBuilderInitHeight()
 {
     auto host = GetHost();
