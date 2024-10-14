@@ -398,4 +398,32 @@ HWTEST_F(ScrollableEventTest, SetOnScrollFrameBegin001, TestSize.Level1)
     onScrollFrameBeginEvent(scrollOffset, scrollState);
     EXPECT_TRUE(isOnScrollFrameBeginCalled);
 }
+
+/**
+ * @tc.name: SetOnReachEnd001
+ * @tc.desc: Test ScrollableModelNG::SetOnReachEnd and FireOnReachEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableEventTest, SetOnReachEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize variables and callback
+     * @tc.expected: Variables initialized successfully.
+     */
+    bool isCalled = false;
+    auto onReachEnd = [&isCalled]() {
+        isCalled = true;
+    };
+    
+    /**
+     * @tc.steps: step2. Set SetOnReachEnd callback using ScrollableModelNG::SetOnReachEnd
+     * @tc.expected: Callback set successfully.
+     */
+    ScrollableModelNG::SetOnReachEnd(AceType::RawPtr(node_), std::move(onReachEnd));
+    auto eventHub = node_->GetEventHub<ScrollableEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto onReachEndEvent = eventHub->GetOnReachEnd();
+    onReachEndEvent();
+    EXPECT_TRUE(isCalled);
+}
 } // namespace OHOS::Ace::NG
