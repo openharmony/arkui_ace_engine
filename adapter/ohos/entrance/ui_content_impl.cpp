@@ -34,6 +34,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/render/animation_utils.h"
 
 #if !defined(ACE_UNITTEST)
 #include "core/components_ng/base/transparent_node_detector.h"
@@ -1333,10 +1334,15 @@ void UIContentImpl::UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Conf
         context->SetFollowSystem(isFollowSystem);
     }
     if (!maxAppFontScale.empty()) {
-        context->SetMaxAppFontScale(std::stof(maxAppFontScale));
+        context->SetMaxAppFontScale(StringUtils::StringToFloat(maxAppFontScale));
     }
     if (!isFollowSystem) {
         context->SetFontScale(1.0f);
+    }
+
+    auto fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+    if (!fontScale.empty()) {
+        context->SetFontScale(StringUtils::StringToFloat(fontScale));
     }
 }
 
@@ -2329,6 +2335,14 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
+    UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction, avoidAreas);
+}
+
+void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& config,
+    OHOS::Rosen::WindowSizeChangeReason reason, AnimationOption animationOpt,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+    const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s", bundleName_.c_str(),
         moduleName_.c_str(), instanceId_, config.ToString().c_str());
     SystemProperties::SetDeviceOrientation(config.Orientation());
@@ -2376,8 +2390,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     if (safeAreaManager) {
         DeduplicateAvoidAreas(context, updatingInsets, avoidAreas, config);
     }
+
     auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_,
-                    updatingInsets, avoidAreas]() {
+                    isDynamicRender = isDynamicRender_, animationOpt, updatingInsets, avoidAreas]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
@@ -2401,8 +2416,19 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::TransformHintChanged(aceView, config.TransformHint());
-        Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
-            static_cast<WindowSizeChangeReason>(reason), rsTransaction);
+        if (isDynamicRender && animationOpt.IsValid()) {
+            AnimationUtils::Animate(animationOpt, [pipelineContext, aceView, config, reason, rsTransaction] {
+                ContainerScope scope(aceView->GetInstanceId());
+                Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
+                    static_cast<WindowSizeChangeReason>(reason), rsTransaction);
+                pipelineContext->OnSurfaceChanged(
+                    config.Width(), config.Height(), static_cast<WindowSizeChangeReason>(reason), rsTransaction);
+                pipelineContext->FlushUITasks(true);
+            });
+        } else {
+            Platform::AceViewOhos::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
+                static_cast<WindowSizeChangeReason>(reason), rsTransaction);
+        }
         Platform::AceViewOhos::SurfacePositionChanged(aceView, config.Left(), config.Top());
         SubwindowManager::GetInstance()->OnWindowSizeChanged(container->GetInstanceId(),
             Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())),

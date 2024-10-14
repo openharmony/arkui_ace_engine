@@ -826,6 +826,20 @@ void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
     SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 
+void SetSearchInspectorId(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetId(frameNode, key);
+}
+
+void ResetSearchInspectorId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetId(frameNode, "");
+}
+
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -855,7 +869,8 @@ const ArkUISearchModifier* GetSearchModifier()
         SetSearchOnWillDelete, ResetSearchOnWillDelete,
         SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText, ResetSearchEnablePreviewText,
         SetSearchCaretPosition, ResetSearchCaretPosition,
-        SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions };
+        SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions,
+        SetSearchInspectorId, ResetSearchInspectorId };
     return &modifier;
 }
 

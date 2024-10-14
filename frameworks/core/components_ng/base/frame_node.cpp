@@ -481,7 +481,11 @@ FrameNode::~FrameNode()
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
     }
-
+    for (const auto& destroyCallback : destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
+    }
     if (removeCustomProperties_) {
         removeCustomProperties_();
         removeCustomProperties_ = nullptr;
@@ -2040,6 +2044,13 @@ void FrameNode::OnMountToParentDone()
     pattern_->OnMountToParentDone();
 }
 
+void FrameNode::AfterMountToParent()
+{
+    if (pattern_) {
+        pattern_->AfterMountToParent();
+    }
+}
+
 void FrameNode::FlushUpdateAndMarkDirty()
 {
     MarkDirtyNode();
@@ -2885,11 +2896,18 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     return offset;
 }
 
-OffsetF FrameNode::GetPositionToWindowWithTransform() const
+OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
-    auto offset = context->GetPaintRectWithoutTransform().GetOffset();
+    auto rect = context->GetPaintRectWithoutTransform();
+    OffsetF offset;
+    if (!fromBottom) {
+        offset = rect.GetOffset();
+    } else {
+        OffsetF offsetBottom(rect.GetX() + rect.Width(), rect.GetY() + rect.Height());
+        offset = offsetBottom;
+    }
     PointF pointNode(offset.GetX(), offset.GetY());
     context->GetPointTransformRotate(pointNode);
     auto parent = GetAncestorNodeOfFrame(true);
@@ -3122,6 +3140,11 @@ void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacks_) {
         destroyCallback();
+    }
+    for (const auto& destroyCallback : destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
     }
     layoutProperty_->ResetGeometryTransition();
     pattern_->OnRecycle();

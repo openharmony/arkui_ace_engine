@@ -144,7 +144,7 @@ public:
     static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
-        const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode);
+        const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode, bool isDragPixelMap = false);
     static RefPtr<PixelMap> GetPreviewPixelMap(const std::string& inspectorId, const RefPtr<FrameNode>& selfFrameNode);
     static RefPtr<PixelMap> GetPreviewPixelMapByInspectorId(const std::string& inspectorId);
     static RefPtr<PixelMap> GetScreenShotPixelMap(const RefPtr<FrameNode>& frameNode);
@@ -291,6 +291,7 @@ private:
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
+    void RecordMenuWrapperNodeForDrag(int32_t targetId);
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;

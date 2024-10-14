@@ -652,7 +652,6 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
         miscTextConfig.value().range.end
     };
     if (lastCursorRange_ == miscTextConfigRange && !forceUpdate) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "UpdateCaretInfoToController, same to update caretInfo");
         return;
     }
     lastCursorRange_.Set(miscTextConfig.value().range.start, miscTextConfig.value().range.end);
@@ -894,6 +893,7 @@ void TextFieldPattern::HandleFocusEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField %{public}d on focus", host->GetId());
+    ACE_LAYOUT_SCOPED_TRACE("[TextField:%d] on focus", host->GetId());
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
@@ -1628,10 +1628,12 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (selectOverlay_->IsTouchAtHandle(info)) {
         return;
     }
+    auto touchInfo = GetAcceptedTouchLocationInfo(info);
+    CHECK_NULL_VOID(touchInfo);
     DoGestureSelection(info);
-    auto touchType = info.GetTouches().front().GetTouchType();
+    auto touchType = touchInfo->GetTouchType();
     if (touchType == TouchType::DOWN) {
-        HandleTouchDown(info.GetTouches().front().GetLocalLocation());
+        HandleTouchDown(touchInfo->GetLocalLocation());
     } else if (touchType == TouchType::UP) {
         OnCaretMoveDone(info);
         RequestKeyboardAfterLongPress();
@@ -1651,7 +1653,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
             return;
         }
         if (!IsUsingMouse()) {
-            HandleTouchMove(info);
+            HandleTouchMove(touchInfo.value());
         }
     }
 }
@@ -1692,12 +1694,15 @@ void TextFieldPattern::HandleTouchUp()
     ScheduleDisappearDelayTask();
 }
 
-void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
+void TextFieldPattern::HandleTouchMove(const TouchLocationInfo& info)
 {
     if (moveCaretState_.isTouchCaret && !moveCaretState_.isMoveCaret) {
-        auto offset = info.GetTouches().front().GetLocalLocation();
+        auto offset = info.GetLocalLocation();
         auto moveDistance = (offset - moveCaretState_.touchDownOffset).GetDistance();
         moveCaretState_.isMoveCaret = GreatNotEqual(moveDistance, moveCaretState_.minDinstance.ConvertToPx());
+        if (moveCaretState_.isMoveCaret) {
+            moveCaretState_.touchFingerId = info.GetFingerId();
+        }
     }
     if (SelectOverlayIsOn() && moveCaretState_.isMoveCaret) {
         CloseSelectOverlay(false);
@@ -1714,12 +1719,12 @@ void TextFieldPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t 
     VibratorUtils::StartVibraFeedback("slide");
 }
 
-void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
+void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
 {
     scrollable_ = false;
     SetScrollEnabled(scrollable_);
     // limit move when preview text is shown
-    auto touchOffset = info.GetTouches().front().GetLocalLocation();
+    auto touchOffset = info.GetLocalLocation();
     int32_t preCaretIndex = selectController_->GetCaretIndex();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
@@ -2555,8 +2560,6 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
         needToResetKeyboard = action_ != GetTextInputActionValue(GetDefaultTextInputAction());
     }
     action_ = GetTextInputActionValue(GetDefaultTextInputAction());
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Keyboard action is %{public}d",
-        tmpHost->GetId(), action_);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (needToResetKeyboard && HasFocus()) {
         if (isCustomKeyboardAttached_) {
@@ -2567,6 +2570,8 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         CHECK_NULL_VOID(inputMethod);
         MiscServices::Configuration config;
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d Keyboard action is %{public}d",
+            tmpHost->GetId(), action_);
         config.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>(action_));
         config.SetTextInputType(static_cast<MiscServices::TextInputType>(keyboard_));
         inputMethod->OnConfigurationChange(config);
@@ -3555,6 +3560,13 @@ void TextFieldPattern::KeyboardContentTypeToInputType()
     }
 }
 
+int32_t TextFieldPattern::GetRequestKeyboardId()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
+}
+
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield to request keyboard"
@@ -3576,6 +3588,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     }
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (!inputMethod) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "inputMethod is null");
         return false;
     }
     auto optionalTextConfig = GetMiscTextConfig();
@@ -3602,7 +3615,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     if (context && context->GetTextFieldManager()) {
         auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
         textFieldManager->SetImeAttached(true);
-        textFieldManager->SetLastRequestKeyboardId(tmpHost->GetId());
+        textFieldManager->SetLastRequestKeyboardId(GetRequestKeyboardId());
     }
     inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
     UpdateCaretInfoToController();
@@ -3815,6 +3828,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
     ACE_LAYOUT_SCOPED_TRACE("RequestCustomKeyboard[id:%d]", frameNode->GetId());
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "RequestCustomKeyboard, id:%{public}d", frameNode->GetId());
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
@@ -4020,10 +4034,10 @@ void TextFieldPattern::UltralimitShake()
     CHECK_NULL_VOID(pipelineContext);
     AnimationUtils::Animate(
         option,
-        [context]() {
-            if (context) {
-                context->UpdateTranslateInXY({ 0.0f, 0.0f });
-            }
+        [weak = WeakClaim(context.GetRawPtr())]() {
+            auto context = weak.Upgrade();
+            CHECK_NULL_VOID(context);
+            context->UpdateTranslateInXY({ 0.0f, 0.0f });
         },
         option.GetOnFinishEvent());
 }
@@ -4108,6 +4122,9 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithm
         TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
             GetHost(), layoutProperty, textFieldTheme, textStyle, false);
         textContent = "b";
+    }
+    if (adaptFontSize_.has_value()) {
+        textStyle.SetFontSize(adaptFontSize_.value());
     }
     if (textStyle.GetFontSize().IsNonPositive()) {
         textStyle.SetFontSize(DEFAULT_FONT);
@@ -7450,6 +7467,30 @@ void TextFieldPattern::SetThemeBorderAttr()
     }
 }
 
+PaddingProperty TextFieldPattern::GetPaddingByUserValue()
+{
+    PaddingProperty padding;
+    auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, padding);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, padding);
+    padding = paintProperty->GetPaddingByUserValue();
+    auto themePadding = IsUnderlineMode() ? theme->GetUnderlinePadding() : theme->GetPadding();
+    if (!padding.top.has_value()) {
+        padding.top = CalcLength(CalcLength(themePadding.Top()).GetDimension());
+    }
+    if (!padding.bottom.has_value()) {
+        padding.bottom = CalcLength(CalcLength(themePadding.Bottom()).GetDimension());
+    }
+    if (!padding.left.has_value()) {
+        padding.left = CalcLength(CalcLength(themePadding.Left()).GetDimension());
+    }
+    if (!padding.right.has_value()) {
+        padding.right = CalcLength(CalcLength(themePadding.Right()).GetDimension());
+    }
+    return padding;
+}
+
 void TextFieldPattern::SetThemeAttr()
 {
     auto host = GetHost();
@@ -7487,7 +7528,7 @@ void TextFieldPattern::SetThemeAttr()
         padding.right = CalcLength(CalcLength(themePadding.Right()).GetDimension());
         layoutProperty->UpdatePadding(padding);
     } else {
-        layoutProperty->UpdatePadding(paintProperty->GetPaddingByUserValue());
+        layoutProperty->UpdatePadding(GetPaddingByUserValue());
     }
 
     if (!paintProperty->HasTextColorFlagByUser()) {
@@ -8010,5 +8051,22 @@ void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vect
     SetCaretPosition(start + spanString->GetLength());
     StartTwinkling();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+std::optional<TouchLocationInfo> TextFieldPattern::GetAcceptedTouchLocationInfo(const TouchEventInfo& info)
+{
+    auto touchInfos = info.GetChangedTouches();
+    if (touchInfos.empty()) {
+        return std::nullopt;
+    }
+    if (!moveCaretState_.isMoveCaret) {
+        return touchInfos.front();
+    }
+    for (auto touchInfo : touchInfos) {
+        if (touchInfo.GetFingerId() == moveCaretState_.touchFingerId) {
+            return touchInfo;
+        }
+    }
+    return std::nullopt;
 }
 } // namespace OHOS::Ace::NG

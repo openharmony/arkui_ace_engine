@@ -105,6 +105,7 @@ constexpr int32_t RIGHT_ANGLE = 90;
 constexpr int32_t STRAIGHT_ANGLE = 180;
 constexpr int32_t REFLEX_ANGLE = 270;
 constexpr int32_t FULL_ROTATION = 360;
+constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
 constexpr Dimension DASH_GEP_WIDTH = -1.0_px;
@@ -499,6 +500,8 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
             sandBoxCount_++;
         }
         Rosen::Vector2f value = { parentPosition.value().GetX(), parentPosition.value().GetY() };
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Set SandBox",
+            std::to_string(rsNode_->GetId()).c_str());
         rsNode_->SetSandBox(value);
     } else {
         if (!force) {
@@ -506,11 +509,10 @@ void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition
             if (sandBoxCount_ > 0) {
                 return;
             }
-            sandBoxCount_ = 0;
-            CHECK_NULL_VOID(!host->IsRemoving());
-        } else {
-            sandBoxCount_ = 0;
         }
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node[%{public}s] Remove SandBox",
+            std::to_string(rsNode_->GetId()).c_str());
+        sandBoxCount_ = 0;
         rsNode_->SetSandBox(std::nullopt);
     }
 }
@@ -2542,6 +2544,11 @@ void RosenRenderContext::OnAccessibilityFocusUpdate(
     } else {
         ClearAccessibilityFocus();
     }
+
+    if (accessibilityIdForVirtualNode == ACCESSIBILITY_FOCUS_WITHOUT_EVENT) {
+        return;
+    }
+
     if (accessibilityIdForVirtualNode == INVALID_PARENT_ID) {
         uiNode->OnAccessibilityEvent(isAccessibilityFocus ? AccessibilityEventType::ACCESSIBILITY_FOCUSED
                                                           : AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED);

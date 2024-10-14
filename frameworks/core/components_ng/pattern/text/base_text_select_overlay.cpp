@@ -201,7 +201,7 @@ RefPtr<FrameNode> BaseTextSelectOverlay::GetOwner()
     return pattern->GetHost();
 }
 
-void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void BaseTextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     if (IsMouseClickDown(sourceType, touchType)) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
@@ -905,6 +905,9 @@ bool BaseTextSelectOverlay::HasUnsupportedTransform()
         if (parent->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
             return false;
         }
+        if (renderContext->HasMotionPath()) {
+            return true;
+        }
         auto rotateVector = renderContext->GetTransformRotate();
         if (rotateVector.has_value() && !NearZero(rotateVector->w) &&
             !(NearZero(rotateVector->x) && NearZero(rotateVector->y))) {
@@ -1019,6 +1022,10 @@ bool BaseTextSelectOverlay::CheckHasTransformAttr()
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            break;
+        }
+        if (renderContext->HasMotionPath()) {
+            hasTransform = true;
             break;
         }
         // has rotate.

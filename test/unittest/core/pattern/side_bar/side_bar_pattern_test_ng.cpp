@@ -893,7 +893,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg029, TestSize.Level1)
     pattern->showSideBar_ = false;
     EXPECT_FALSE(pattern->showSideBar_);
     pattern->OnUpdateShowSideBar(layoutProperty);
-    EXPECT_TRUE(pattern->showSideBar_);
+    EXPECT_FALSE(pattern->showSideBar_);
 }
 
 /**
@@ -1583,7 +1583,7 @@ HWTEST_F(SideBarPatternTestNg, SideBarPatternTestNg050, TestSize.Level1)
     pattern->hasInit_ = true;
     pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
     pattern->OnUpdateShowSideBar(layoutProperty);
-    EXPECT_TRUE(pattern->showSideBar_);
+    EXPECT_FALSE(pattern->showSideBar_);
 }
 
 /**

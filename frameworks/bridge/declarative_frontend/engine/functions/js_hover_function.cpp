@@ -52,8 +52,6 @@ void JsHoverFunction::AccessibilityHoverExecute(bool isHover, AccessibilityHover
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
     objectTemplate->SetInternalFieldCount(1);
     JSRef<JSObject> hoverObj = objectTemplate->NewInstance();
-    hoverObj->SetPropertyObject(
-        "getModifierKeyState", JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     hoverObj->SetProperty<double>(
         "timestamp", static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count()));
     hoverObj->SetProperty<double>("source", static_cast<int32_t>(hoverInfo.GetSourceDevice()));

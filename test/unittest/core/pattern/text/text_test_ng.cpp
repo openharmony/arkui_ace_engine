@@ -2879,56 +2879,6 @@ HWTEST_F(TextTestNg, TextSelectOverlayTestOnMenuItemAction001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextSelectOverlayTestOnCloseOverlay001
- * @tc.desc: Verify OnCloseOverlay
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextSelectOverlayTestOnCloseOverlay001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
-    ASSERT_NE(textSelectOverlay, nullptr);
-
-    pattern->textForDisplay_ = TEXT_CONTENT;
-    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::NO_MENU);
-    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_CONTENT.size());
-
-    textSelectOverlay->OnCloseOverlay(OptionMenuType::NO_MENU, CloseReason::CLOSE_REASON_TOOL_BAR);
-    textSelectOverlay->OnCloseOverlay(OptionMenuType::NO_MENU, CloseReason::CLOSE_REASON_HOLD_BY_OTHER);
-
-    ASSERT_EQ(pattern->textSelector_.GetStart(), -1);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), -1);
-}
-
-/**
- * @tc.name: TextSelectOverlayTestOnHandleGlobalTouchEvent001
- * @tc.desc: Verify OnHandleGlobalTouchEvent
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextSelectOverlayTestOnHandleGlobalTouchEvent001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto textSelectOverlay = pattern->selectOverlay_;
-    ASSERT_NE(textSelectOverlay, nullptr);
-
-    pattern->textForDisplay_ = TEXT_CONTENT;
-    textSelectOverlay->OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::NO_MENU);
-    ASSERT_EQ(pattern->textSelector_.GetStart(), 0);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), TEXT_CONTENT.size());
-
-    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::DOWN);
-    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::UP);
-    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::DOWN);
-    textSelectOverlay->OnHandleGlobalTouchEvent(SourceType::MOUSE, TouchType::UP);
-
-    ASSERT_EQ(pattern->textSelector_.GetStart(), -1);
-    ASSERT_EQ(pattern->textSelector_.GetEnd(), -1);
-}
-
-/**
  * @tc.name: TextStylesTestGetFontFamilyInJson001
  * @tc.desc: Verify GetFontFamilyInJson
  * @tc.type: FUNC

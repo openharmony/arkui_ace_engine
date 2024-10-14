@@ -15,8 +15,6 @@
 
 #include "inspect_popup.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectPopup::InspectPopup(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

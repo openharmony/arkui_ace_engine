@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_RECOGNIZERS_CLICK_RECOGNIZER_H
 
 #include <functional>
+#include <limits>
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/point_t.h"
@@ -124,6 +125,9 @@ private:
     void InitGlobalValue(SourceType deviceId);
 
     bool CheckNeedReceiveEvent();
+
+    bool IsFormRenderClickRejected(const TouchEvent& event);
+    void TriggerClickAccepted(const TouchEvent& event);
 
     int32_t count_ = 1;
     double distanceThreshold_ = std::numeric_limits<double>::infinity();

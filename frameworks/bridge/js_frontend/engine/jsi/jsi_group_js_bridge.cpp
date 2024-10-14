@@ -15,12 +15,7 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_group_js_bridge.h"
 
-#include "base/json/json_util.h"
 #include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "base/memory/ace_type.h"
-#include "frameworks/bridge/codec/function_call.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
 #if defined(PREVIEW)
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"

@@ -55,9 +55,22 @@ struct NavigationBarOptions {
     }
 };
 
+using TextStyleApplyFunc = std::function<void(WeakPtr<FrameNode>)>;
+struct NavigationTextOptions {
+    TextStyleApplyFunc mainTitleApplyFunc;
+    TextStyleApplyFunc subTitleApplyFunc;
+
+    void Reset()
+    {
+        mainTitleApplyFunc = nullptr;
+        subTitleApplyFunc = nullptr;
+    }
+};
+
 struct NavigationTitlebarOptions {
     NavigationBackgroundOptions bgOptions;
     NavigationBarOptions brOptions;
+    NavigationTextOptions textOptions;
 
     bool operator== (const NavigationTitlebarOptions& other) const
     {

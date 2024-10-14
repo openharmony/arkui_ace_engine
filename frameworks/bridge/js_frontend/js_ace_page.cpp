@@ -15,12 +15,7 @@
 
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
-#include "base/utils/system_properties.h"
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
-#include "core/components/page/page_component.h"
-#include "core/components/page_transition/page_transition_component.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::Framework {
 

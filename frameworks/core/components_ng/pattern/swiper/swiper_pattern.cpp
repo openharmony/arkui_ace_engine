@@ -674,13 +674,14 @@ void SwiperPattern::InitSurfaceChangedCallback()
     }
 }
 
-bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode)
+bool SwiperPattern::IsFocusNodeInItemPosition(const RefPtr<FocusHub>& targetFocusHub)
 {
     for (const auto& item : itemPosition_) {
         if (!item.second.node) {
             continue;
         }
-        if (item.second.node == focusNode) {
+        auto focusHub = item.second.node->GetFirstFocusHubChild();
+        if (focusHub == targetFocusHub) {
             return true;
         }
     }
@@ -714,10 +715,10 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
             ++iter;
             continue;
         }
-        if (!IsFocusNodeInItemPosition(child->GetFrameNode())) {
-            child->SetParentFocusable(false);
-        } else {
+        if (IsFocusNodeInItemPosition(child)) {
             child->SetParentFocusable(true);
+        } else {
+            child->SetParentFocusable(false);
         }
         ++iter;
     }
@@ -3063,12 +3064,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
 #ifdef OHOS_PLATFORM
-        if (!swiper->isInAutoPlay_) {
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
-        } else {
+        if (swiper->isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
         }
-
 #endif
         if (!swiper->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
@@ -3104,12 +3102,9 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
         auto swiperPattern = swiper.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
 #ifdef OHOS_PLATFORM
-        if (!swiperPattern->isInAutoPlay_) {
-            ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
-        } else {
+        if (swiperPattern->isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_on");
         }
-
 #endif
         if (!swiperPattern->hasTabsAncestor_) {
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::LAST_UP, "");

@@ -15,8 +15,6 @@
 
 #include "inspect_textarea.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectTextArea::InspectTextArea(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {}
 

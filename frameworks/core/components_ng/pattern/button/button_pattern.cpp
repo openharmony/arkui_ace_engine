@@ -34,6 +34,7 @@ constexpr int32_t MOUSE_HOVER_DURATION = 250;
 constexpr int32_t TYPE_TOUCH = 0;
 constexpr int32_t TYPE_HOVER = 1;
 constexpr int32_t TYPE_CANCEL = 2;
+constexpr float NORMAL_SCALE = 1.0f;
 } // namespace
 
 Color ButtonPattern::GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type)
@@ -99,7 +100,7 @@ void ButtonPattern::UpdateTextLayoutProperty(
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(textLayoutProperty);
-
+    UpdateTextFontScale(layoutProperty, textLayoutProperty);
     auto label = layoutProperty->GetLabelValue("");
     textLayoutProperty->UpdateContent(label);
     if (layoutProperty->GetFontSize().has_value()) {
@@ -561,5 +562,17 @@ void ButtonPattern::SetBuilderFunc(ButtonMakeCallback&& makeFunc)
         return;
     }
     makeFunc_ = std::move(makeFunc);
+}
+
+void ButtonPattern::UpdateTextFontScale(
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
+    } else {
+        textLayoutProperty->ResetMaxFontScale();
+    }
 }
 } // namespace OHOS::Ace::NG

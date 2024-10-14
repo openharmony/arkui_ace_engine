@@ -15,8 +15,6 @@
 
 #include "core/animation/svg_animate.h"
 
-#include "base/log/log.h"
-#include "base/utils/string_utils.h"
 #include "frameworks/core/components/svg/svg_transform.h"
 
 namespace OHOS::Ace {

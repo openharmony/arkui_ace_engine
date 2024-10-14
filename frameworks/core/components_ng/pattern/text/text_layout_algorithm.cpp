@@ -116,7 +116,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
-    ACE_TEXT_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d]", host->GetId());
+    ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d]", host->GetId());
     TextStyle textStyle;
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -129,8 +129,10 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         if (spanStringHasMaxLines_) {
             textStyle.SetMaxLines(UINT32_MAX);
         }
+        textStyle_ = textStyle;
         BuildParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
+        textStyle_ = textStyle;
         if (!AddPropertiesAndAnimations(textStyle, textLayoutProperty, contentConstraint, layoutWrapper)) {
             return std::nullopt;
         }

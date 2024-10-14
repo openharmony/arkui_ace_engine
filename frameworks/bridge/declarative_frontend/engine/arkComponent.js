@@ -5000,6 +5000,12 @@ globalThis.applyImageModifierToNode = function (modifier, nodePtr) {
   component.applyModifierPatch();
 };
 
+globalThis.applyTextModifierToNode = function (modifier, nodePtr) {
+  let component = new ArkTextComponent(nodePtr);
+  applyUIAttributes(modifier, nodePtr, component);
+  component.applyModifierPatch();
+};
+
 /// <reference path='./import.ts' />
 class ColumnAlignItemsModifier extends ModifierWithKey {
   constructor(value) {
@@ -7900,6 +7906,9 @@ class ArkRichEditorComponent extends ArkComponent {
     return this;
   }
   dataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
     let detectorConfig = new TextDataDetectorConfig();
     detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
@@ -8845,6 +8854,23 @@ class SearchEnablePreviewTextModifier extends ModifierWithKey {
   }
 }
 SearchEnablePreviewTextModifier.identity = Symbol('searchEnablePreviewText');
+class SearchIdModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSearchInspectorId(node);
+    } else {
+      getUINativeModule().search.setSearchInspectorId(node, this.value);
+    }
+  }
+  
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchIdModifier.identity = Symbol('searchId');
 class SearchEditMenuOptionsModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -8858,6 +8884,7 @@ class SearchEditMenuOptionsModifier extends ModifierWithKey {
   }
 }
 SearchEditMenuOptionsModifier.identity = Symbol('searchEditMenuOptions');
+
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8995,14 +9022,6 @@ class ArkSearchComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SearchHeightModifier.identity, SearchHeightModifier, value);
     return this;
   }
-  id(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
-    return this;
-  }
-  key(value) {
-    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
-    return this;
-  }
   decoration(value) {
     modifierWithKey(this._modifiersWithKeys, SearchDecorationModifier.identity, SearchDecorationModifier, value);
     return this;
@@ -9013,6 +9032,14 @@ class ArkSearchComponent extends ArkComponent {
   }
   lineHeight(value) {
     modifierWithKey(this._modifiersWithKeys, SearchLineHeightModifier.identity, SearchLineHeightModifier, value);
+    return this;
+  }
+  id(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
+    return this;
+  }
+  key(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchIdModifier.identity, SearchIdModifier, value);
     return this;
   }
   minFontSize(value) {
@@ -11146,6 +11173,9 @@ class ArkTextComponent extends ArkComponent {
     return this;
   }
   dataDetectorConfig(config) {
+    if (config === undefined || config === null) {
+      return this;
+    }
     let detectorConfig = new TextDataDetectorConfig();
     detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
@@ -11159,6 +11189,9 @@ class ArkTextComponent extends ArkComponent {
     return this;
   }
   font(value, options) {
+    if (value === undefined || value === null) {
+      return this;
+    }
     let arkTextFont = new ArkTextFont();
     arkTextFont.value = value;
     arkTextFont.enableVariableFontWeight = options?.enableVariableFontWeight;

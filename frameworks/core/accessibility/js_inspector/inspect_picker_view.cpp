@@ -15,8 +15,6 @@
 
 #include "inspect_picker_view.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectPickerView::InspectPickerView(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

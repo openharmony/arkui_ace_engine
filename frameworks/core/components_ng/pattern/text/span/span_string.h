@@ -44,6 +44,10 @@ public:
     std::wstring GetWideString();
     int32_t GetLength() const;
     void SetString(const std::string& text);
+    void SetFramNode(const WeakPtr<NG::FrameNode>& frameNode);
+    void MarkDirtyFrameNode();
+    void AddCustomSpan();
+    void RemoveCustomSpan();
     void SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems);
     void SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap);
     const std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>& GetSpansMap() const;
@@ -110,6 +114,7 @@ protected:
     std::string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
     std::list<RefPtr<NG::SpanItem>> spans_;
+    WeakPtr<NG::FrameNode> framNode_;
 };
 } // namespace OHOS::Ace
 

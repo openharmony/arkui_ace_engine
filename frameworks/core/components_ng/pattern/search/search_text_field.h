@@ -39,6 +39,7 @@ public:
 
 private:
     bool searchRequestStopTwinkling_ = false;
+    int32_t GetRequestKeyboardId() override;
 };
 } // namespace OHOS::Ace::NG
 

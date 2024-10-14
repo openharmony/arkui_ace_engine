@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
@@ -172,7 +173,9 @@ UIExtensionPattern::~UIExtensionPattern()
     if (accessibilityChildTreeCallback_ == nullptr) {
         return;
     }
-    ContainerScope scope(instanceId_);
+
+    auto instanceId = GetInstanceIdFromHost();
+    ContainerScope scope(instanceId);
     auto ngPipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
@@ -298,7 +301,22 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         UIEXT_LOGW("Unable to StartUiextensionAbility while in the background.");
         return;
     }
+    if (!isModal_ && !hasMountToParent_) {
+        needReNotifyForeground_ = true;
+        UIEXT_LOGI("Should NotifyForeground after MountToParent.");
+        return;
+    }
     NotifyForeground();
+}
+
+bool UIExtensionPattern::IsModalUec()
+{
+    return usage_ == UIExtensionUsage::MODAL;
+}
+
+bool UIExtensionPattern::IsForeground()
+{
+    return state_ == AbilityState::FOREGROUND;
 }
 
 UIExtensionUsage UIExtensionPattern::GetUIExtensionUsage(const AAFwk::Want& want)
@@ -368,6 +386,7 @@ void UIExtensionPattern::OnConnect()
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
     }
     InitializeAccessibility();
+    ReDispatchDisplayArea();
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
@@ -397,7 +416,22 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
 
 void UIExtensionPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 {
+    if (needReNotifyForeground_) {
+        needReNotifyForeground_ = false;
+        UIEXT_LOGI("NotifyForeground onSyncGeometryNode first.");
+        NotifyForeground();
+        needReDispatchDisplayArea_ = true;
+    }
     DispatchDisplayArea(true);
+}
+
+void UIExtensionPattern::ReDispatchDisplayArea()
+{
+    if (needReDispatchDisplayArea_) {
+        UIEXT_LOGI("ReDispatchDisplayArea.");
+        DispatchDisplayArea(true);
+        needReDispatchDisplayArea_ = false;
+    }
 }
 
 void UIExtensionPattern::OnWindowShow()
@@ -1031,7 +1065,8 @@ void UIExtensionPattern::InitializeAccessibility()
     if (accessibilityChildTreeCallback_ != nullptr) {
         return;
     }
-    ContainerScope scope(instanceId_);
+    auto instanceId = GetInstanceIdFromHost();
+    ContainerScope scope(instanceId);
     auto ngPipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
@@ -1044,10 +1079,13 @@ void UIExtensionPattern::InitializeAccessibility()
     accessibilityChildTreeCallback_ = std::make_shared<UIExtensionAccessibilityChildTreeCallback>(
         WeakClaim(this), accessibilityId);
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    auto realHostWindowId = ngPipeline->GetRealHostWindowId();
     if (accessibilityManager->IsRegister()) {
-        accessibilityChildTreeCallback_->OnRegister(ngPipeline->GetFocusWindowId(), accessibilityManager->GetTreeId());
+        accessibilityChildTreeCallback_->OnRegister(
+            realHostWindowId, accessibilityManager->GetTreeId());
     }
-    UIEXT_LOGD("UIExtension: %{public}" PRId64 " register child tree", accessibilityId);
+    UIEXT_LOGI("UIExtension: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
+        accessibilityId, realHostWindowId);
     accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
 }
 
@@ -1095,6 +1133,18 @@ void UIExtensionPattern::OnAccessibilityDumpChildInfo(
 
 void UIExtensionPattern::OnMountToParentDone()
 {
+    UIEXT_LOGI("OnMountToParentDone.");
+    hasMountToParent_ = true;
+    if (needReNotifyForeground_) {
+        auto hostWindowNode = WindowSceneHelper::FindWindowScene(GetHost());
+        if (hostWindowNode) {
+            needReNotifyForeground_ = false;
+            UIEXT_LOGI("NotifyForeground OnMountToParentDone.");
+            NotifyForeground();
+        } else {
+            UIEXT_LOGI("No WindowScene When OnMountToParentDone, wait.");
+        }
+    }
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetNodeStatus() == NodeStatus::NORMAL_NODE) {
@@ -1105,6 +1155,22 @@ void UIExtensionPattern::OnMountToParentDone()
     CHECK_NULL_VOID(wantWrap);
     UpdateWant(wantWrap);
     SetWantWrap(nullptr);
+}
+
+void UIExtensionPattern::AfterMountToParent()
+{
+    UIEXT_LOGI("AfterMountToParent.");
+    hasMountToParent_ = true;
+    if (needReNotifyForeground_) {
+        auto hostWindowNode = WindowSceneHelper::FindWindowScene(GetHost());
+        if (hostWindowNode) {
+            needReNotifyForeground_ = false;
+            UIEXT_LOGI("NotifyForeground AfterMountToParent.");
+            NotifyForeground();
+        } else {
+            UIEXT_LOGI("No WindowScene When AfterMountToParent, wait.");
+        }
+    }
 }
 
 void UIExtensionPattern::RegisterVisibleAreaChange()
@@ -1153,6 +1219,16 @@ int32_t UIExtensionPattern::GetNodeId()
 int32_t UIExtensionPattern::GetInstanceId()
 {
     return instanceId_;
+}
+
+int32_t UIExtensionPattern::GetInstanceIdFromHost()
+{
+    auto instanceId = GetHostInstanceId();
+    if (instanceId != instanceId_) {
+        UIEXT_LOGW("UIExtension pattern instanceId %{public}d not equal frame node instanceId %{public}d",
+            instanceId_, instanceId);
+    }
+    return instanceId;
 }
 
 void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)

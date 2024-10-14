@@ -198,17 +198,7 @@ public:
         return contentMod_;
     }
 
-    void SetTextDetectEnable(bool enable)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        dataDetectorAdapter_->frameNode_ = host;
-        bool cache = textDetectEnable_;
-        textDetectEnable_ = enable;
-        if (cache != textDetectEnable_) {
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
-    }
+    void SetTextDetectEnable(bool enable);
     bool GetTextDetectEnable()
     {
         return textDetectEnable_;
@@ -374,6 +364,8 @@ public:
     ResultObject GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     std::string GetFontInJson() const;
+    std::string GetBindSelectionMenuInJson() const;
+    virtual void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const {}
 
     const std::vector<std::string>& GetDragContents() const
     {
@@ -738,16 +730,7 @@ protected:
     bool IsSelectableAndCopy();
     void SetResponseRegion(const SizeF& frameSize, const SizeF& boundsSize);
 
-    virtual bool CanStartAITask()
-    {
-        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-        if (textLayoutProperty) {
-            return textDetectEnable_ && enabled_ &&
-                   textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE;
-        } else {
-            return textDetectEnable_ && enabled_;
-        }
-    };
+    virtual bool CanStartAITask();
 
     void OnAttachToMainTree() override
     {

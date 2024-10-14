@@ -37,7 +37,7 @@ public:
      * @brief Get the singleton instance of TimeEventProxy.
      * @return The singleton instance of TimeEventProxy.
      */
-    static TimeEventProxy* GetInstance();
+    ACE_FORCE_EXPORT static TimeEventProxy* GetInstance();
 
     /**
      * @brief Register a time event listener.

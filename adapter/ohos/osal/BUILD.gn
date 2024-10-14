@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -101,6 +101,12 @@ template("ace_osal_ohos_source_set") {
         defines += [ "SOC_PERF_ENABLE" ]
       }
 
+      if (defined(global_parts_info) && defined(
+              global_parts_info.resourceschedule_resource_schedule_service)) {
+        external_deps += [ "resource_schedule_service:ressched_client" ]
+        defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
+      }
+
       if (defined(resourceschedule_ffrt_support) &&
           resourceschedule_ffrt_support) {
         sources += [ "long_frame_report_impl.cpp" ]
@@ -119,7 +125,11 @@ template("ace_osal_ohos_source_set") {
       ]
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
-        sources += [ "js_accessibility_manager.cpp" ]
+        sources += [
+          "js_accessibility_manager.cpp",
+          "js_third_accessibility_hover_ng.cpp",
+          "js_third_provider_interaction_operation.cpp",
+        ]
         deps += [ "$ace_root/frameworks/bridge/common/accessibility:bridge_accessibility_$platform" ]
         external_deps += [
           "accessibility:accessibility_common",

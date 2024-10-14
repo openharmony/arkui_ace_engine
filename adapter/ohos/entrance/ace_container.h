@@ -401,6 +401,13 @@ public:
         }
     }
 
+    void SetRealHostWindowId(uint32_t realHostWindowId)
+    {
+        if (pipelineContext_) {
+            pipelineContext_->SetRealHostWindowId(realHostWindowId);
+        }
+    }
+
     bool IsUseCustomBg() const
     {
         return isUseCustomBg_;
@@ -590,7 +597,6 @@ public:
         int32_t instanceId = -1) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
     void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode, AbilityBase::ViewData& viewData);
-    bool ChangeType(AbilityBase::ViewData& viewData);
     HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder) override;
 
     void SearchElementInfoByAccessibilityIdNG(

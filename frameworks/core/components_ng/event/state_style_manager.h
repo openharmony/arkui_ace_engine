@@ -121,6 +121,11 @@ public:
 
     RefPtr<FrameNode> GetFrameNode() const;
 
+    void ClearStateStyleTask()
+    {
+        ResetPressedState();
+    }
+
 private:
     void FireStateFunc(bool isReset);
 

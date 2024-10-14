@@ -15,8 +15,6 @@
 
 #include "chain_animation.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {

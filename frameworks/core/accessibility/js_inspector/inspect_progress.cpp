@@ -15,8 +15,6 @@
 
 #include "inspect_progress.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectProgress::InspectProgress(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {
 }

@@ -176,6 +176,7 @@ struct TouchAndMoveCaretState {
     bool isMoveCaret = false;
     Offset touchDownOffset;
     Dimension minDinstance = 5.0_vp;
+    int32_t touchFingerId = -1;
 };
 
 class TextFieldPattern : public ScrollablePattern,
@@ -348,6 +349,8 @@ public:
     void UpdateCaretPositionByTouch(const Offset& offset);
 
     bool IsReachedBoundary(float offset);
+    virtual int32_t GetRequestKeyboardId();
+
     virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboardCrossPlatForm(bool isFocusViewChanged);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
@@ -1410,6 +1413,11 @@ public:
         return multipleClickRecognizer_;
     }
 
+    void SetAdaptFontSize(const std::optional<Dimension>& adaptFontSize)
+    {
+        adaptFontSize_ = adaptFontSize;
+    }
+
     void ShowCaretAndStopTwinkling();
     bool IsLTRLayout()
     {
@@ -1478,8 +1486,8 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
-    void HandleTouchMove(const TouchEventInfo& info);
-    void UpdateCaretByTouchMove(const TouchEventInfo& info);
+    void HandleTouchMove(const TouchLocationInfo& info);
+    void UpdateCaretByTouchMove(const TouchLocationInfo& info);
     void InitDisableColor();
     void InitFocusEvent();
     void InitTouchEvent();
@@ -1642,6 +1650,7 @@ private:
     void HandleParentGlobalOffsetChange();
     HintToTypeWrap GetHintType();
     HintToTypeWrap GetAutoFillTypeAndMetaData(bool isNeedToHitType = true);
+    PaddingProperty GetPaddingByUserValue();
     void SetThemeAttr();
     void SetThemeBorderAttr();
     void ProcessInlinePaddingAndMargin();
@@ -1673,6 +1682,7 @@ private:
     bool IsContentRectNonPositive();
     bool IsHandleDragging();
     void ReportEvent();
+    std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
 
     RectF frameRect_;
     RectF textRect_;
@@ -1852,6 +1862,7 @@ private:
     bool isEnableHapticFeedback_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    std::optional<Dimension> adaptFontSize_;
 };
 } // namespace OHOS::Ace::NG
 
