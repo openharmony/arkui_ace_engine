@@ -94,7 +94,7 @@ const auto RES_NUMBER_INVALID = IntResourceId{-1, NodeModifier::ResourceType::FL
 
 const auto DIMENSION_BY_ID = Dimension(5, DimensionUnit::VP);
 const auto DIMENSION_BY_NAME = Dimension(4, DimensionUnit::VP);
-const auto DIMENSION_BY_INVALID = Dimension(10, DimensionUnit::PX);
+const auto DIMENSION_BY_INVALID = Dimension(0, DimensionUnit::PX);
 
 const auto FAMILY_BY_STRING = "first";
 const auto FAMILY_BY_NUMBER = "second";
@@ -127,12 +127,12 @@ static const std::vector<ResourceColorTestPlan> COLOR_RESOURCE_TEST_PLAN = {
 using OneTestStep = std::pair<Ark_Length, std::string>;
 const std::vector<OneTestStep> ARK_LENGTH_TEST_PLAN = {
     { { .type = ARK_TAG_RESOURCE, .resource = RES_DIMENSION_ID }, "5.00vp" },
-    { { .type = ARK_TAG_RESOURCE, .resource = -1 }, "10.00px" }
+    { { .type = ARK_TAG_RESOURCE, .resource = -1 }, "0.00px" }
 };
 
 const std::vector<OneTestStep> ARK_SIZE_TEST_PLAN = {
     { { .type = ARK_TAG_RESOURCE, .resource = RES_DIMENSION_ID }, "5.00px" },
-    { { .type = ARK_TAG_RESOURCE, .resource = -1 }, "10.00px" }
+    { { .type = ARK_TAG_RESOURCE, .resource = -1 }, "0.00px" }
 };
 
 const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_RESOURCES = {
@@ -578,6 +578,17 @@ HWTEST_F(SearchModifierResourcesTest, setLineHeightTestResource, TestSize.Level1
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;
+    const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_RESOURCES = {
+        { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_ID)),
+            DIMENSION_BY_ID.ToString()
+        },
+        { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_NAME)),
+            DIMENSION_BY_NAME.ToString()
+        },
+        { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_INVALID)),
+            Dimension(0.0f, DimensionUnit::VP).ToString()
+        }
+    };
     for (const auto &[value, expected]: UNION_NUM_STR_RES_TEST_PLAN_RESOURCES) {
         modifier_->setLineHeight(node_, &value);
         jsonValue = GetJsonValue(node_);

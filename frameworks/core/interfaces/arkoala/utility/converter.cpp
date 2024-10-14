@@ -221,8 +221,10 @@ std::optional<Dimension> ResourceConverter::ToDimension()
     if (type_ == NodeModifier::ResourceType::FLOAT) {
         if (id_ == -1 && params_.size() > 0) {
             return themeConstants_->GetDimensionByName(params_.front());
-        } else {
+        } else if (id_ != -1) {
             return themeConstants_->GetDimension(id_);
+        } else {
+            LOGE("ResourceConverter::ToFontFamilies Unknown resource value");
         }
     }
     return std::nullopt;

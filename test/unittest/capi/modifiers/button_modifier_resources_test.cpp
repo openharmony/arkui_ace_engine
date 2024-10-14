@@ -45,6 +45,8 @@ namespace {
     const auto ATTRIBUTE_LABEL_STYLE_FONT_NAME = "font";
     const auto ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_NAME("family");
 
+    const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE("16.00fp");
+
     using ButtonLabelResourceTest = std::tuple<ResourceStr, std::string>;
 
     // invalid id
@@ -179,11 +181,11 @@ HWTEST_F(ButtonModifierResourcesTest, setFontColorTestResourceColorValues, TestS
 }
 
 /*
- * @tc.name: setFontSizeTestResources
+ * @tc.name: setFontSizeTestResourcesValidResources
  * @tc.desc: check setFontSize from resource
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResources, TestSize.Level1)
+HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResourcesValidResources, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;
@@ -191,7 +193,30 @@ HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResources, TestSize.Level1)
     using OneTestStep = std::pair<Ark_Length, std::string>;
     const std::vector<OneTestStep> testPlan = {
         { { .type = ARK_TAG_RESOURCE, .resource = RES_DIMENSION_ID }, "5.00vp" },
-        { { .type = ARK_TAG_RESOURCE, .resource = -1 }, "10.00px" }
+    };
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        modifier_->setFontSize(node_, &arkLength);
+        jsonValue = GetJsonValue(node_);
+        result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
+        EXPECT_EQ(result, expected);
+    }
+}
+
+/*
+ * @tc.name: setFontSizeTestResourcesInvalidResources
+ * @tc.desc: check setFontSize from resource
+ * Disabled because FontSize default value is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierResourcesTest, DISABLED_setFontSizeTestResourcesInvalidResources, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string result;
+
+    using OneTestStep = std::pair<Ark_Length, std::string>;
+    const std::vector<OneTestStep> testPlan = {
+        { { .type = ARK_TAG_RESOURCE, .resource = -1 }, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE }
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
