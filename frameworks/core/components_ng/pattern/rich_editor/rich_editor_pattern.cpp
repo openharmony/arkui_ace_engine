@@ -825,7 +825,7 @@ void RichEditorPattern::CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode)
         auto imageNode = weakImageNode.Upgrade();
         return start(event, getJsonRange(imageNode));
     };
-    IF_TRUE(start, imageEventHub->SetOnDragStart(std::move(start)));
+    IF_TRUE(start, imageEventHub->SetOnDragStart(std::move(oneStepDragStart)));
 
     // end
     auto end = hostEventHub->GetCustomerOnDragEndFunc();
