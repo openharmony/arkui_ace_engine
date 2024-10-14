@@ -279,6 +279,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     textLayoutProperty->UpdateFontWeight(pickerTheme->GetTitleStyle().GetFontWeight());
     textLayoutProperty->UpdateTextOverflow(pickerTheme->GetTitleStyle().GetTextOverflow());
     textLayoutProperty->UpdateMaxLines(pickerTheme->GetTitleStyle().GetMaxLines());
+    textLayoutProperty->UpdateFlexShrink(1.0);
     auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonTitleRenderContext, nullptr);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -291,6 +292,8 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
         buttonTitleNode->GetLayoutProperty()->UpdateMargin(margin);
     } else {
         buttonTitleNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
+            CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_BUTTON_HEIGHT)));
+        titleButtonRow->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(
             CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(TITLE_BUTTON_HEIGHT)));
     }
     textTitleNode->MountToParent(titleButtonRow);
