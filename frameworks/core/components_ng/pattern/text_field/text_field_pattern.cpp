@@ -8161,6 +8161,7 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     info.maxLength = static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
     info.firstHandle = selectController_->GetFirstHandleRect().ToString();
     info.secondHandle = selectController_->GetSecondHandleRect().ToString();
+    info.componentType = host->GetTag();
 }
 
 void TextFieldPattern::HandleOnAIWrite()
