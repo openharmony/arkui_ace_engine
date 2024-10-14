@@ -59,22 +59,6 @@ inline void AssignArkValue(Ark_OffsetOptions& dst, const OffsetT<CalcDimension>&
     AssignArkValue(dst.xOffset, src.GetX());
     AssignArkValue(dst.yOffset, src.GetY());
 }
-
-inline Ark_Resource ArkResource(Ark_String* name,
-                                int id = -1,
-                                NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR)
-{
-    return {
-        .id = Converter::ArkValue<Ark_Number>(id),
-        .type = Converter::ArkValue<Ark_Number>(static_cast<int>(type)),
-        .moduleName = Converter::ArkValue<Ark_String>(""),
-        .bundleName = Converter::ArkValue<Ark_String>(""),
-        .params = {
-            .tag = ARK_TAG_OBJECT,
-            .value = { .array = name, .length = name ? 1 : 0 }
-        }
-    };
-}
 } // namespace
 
 class ScrollModifierTest : public ModifierTestBase<GENERATED_ArkUIScrollModifier,
@@ -391,8 +375,8 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorString, testing::ext::TestSi
     ASSERT_NE(frameNode, nullptr);
 
     std::string testColor = "#11123456";
-    Ark_String str = {.length = testColor.size(), .chars = testColor.data()};
-    Union_Color_Number_String colorUnion = {.selector = 2, .value2 = str};
+    Ark_String str = Converter::ArkValue<Ark_String>(testColor);
+    auto colorUnion = Converter::ArkUnion<Union_Color_Number_String, Ark_String>(str);
     modifier_->setScrollBarColor(frameNode, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -410,7 +394,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorEnum, testing::ext::TestSize
     ASSERT_NE(frameNode, nullptr);
 
     int32_t testColor = 0xff008000;
-    Union_Color_Number_String colorUnion = {.selector = 0, .value0 = Ark_Color::ARK_COLOR_GREEN};
+    auto colorUnion = Converter::ArkUnion<Union_Color_Number_String, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
     modifier_->setScrollBarColor(frameNode, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -429,7 +413,8 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorFloat, testing::ext::TestSiz
     ASSERT_NE(frameNode, nullptr);
 
     float testColor = 286405718.0;
-    Union_Color_Number_String colorUnion = {.selector = 1, .value1 = {.tag = ARK_TAG_FLOAT32, .f32 = testColor}};
+    auto testNumber = Converter::ArkValue<Ark_Number>(testColor);
+    auto colorUnion = Converter::ArkUnion<Union_Color_Number_String, Ark_Number>(testNumber);
     modifier_->setScrollBarColor(frameNode, &colorUnion);
 
     auto after = GetStringAttribute(node_, "scrollBarColor");
@@ -450,7 +435,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetBadColorString, testing::ext::Tes
     std::string before = "#FF000000";
     // empty color string
     std::string testColor = "";
-    Ark_String str = {.length = testColor.size(), .chars = testColor.data()};
+    Ark_String str = Converter::ArkValue<Ark_String>(testColor);
     Union_Color_Number_String colorUnion = {.selector = 2, .value2 = str};
     modifier_->setScrollBarColor(frameNode, &colorUnion);
     auto after = GetStringAttribute(node_, jsonKey);
@@ -476,10 +461,8 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
 {
     std::string jsonKey = "scrollBarWidth";
     Dimension testValue(33.56, DimensionUnit::VP);
-    Union_Number_String arkVal = {
-        .selector = 0,
-        .value0 = { .tag = ARK_TAG_FLOAT32, .f32 = testValue.ConvertToVp() }
-    };
+    auot testNumber = Converter::ArkValue<Ark_Number>(testValue.ConvertToVp())
+    auto arkVal = Converter::ArkUnion<Union_Number_String, Ark_Number>(testNumber);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -489,10 +472,8 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
     EXPECT_EQ(setVal, testValue.ToString());
 
     auto strVal = std::string("222.99px");
-    arkVal = {
-        .selector = 1,
-        .value1 = { .chars = strVal.data(), .length = strVal.size() }
-    };
+    auto testStr = Converter::ArkValue<Ark_String>(strVal.data());
+    arkVal = Converter::ArkUnion<Union_Number_String, Ark_String>(testStr);
     modifier_->setScrollBarWidth(frameNode, &arkVal);
 
     setVal = GetStringAttribute(node_, jsonKey);
@@ -523,11 +504,26 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::Tes
 
     testVal = GetStringAttribute(node_, jsonKey);
     Dimension testValDim = Dimension::FromString(testVal);
-
     ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
 
     Union_Number_String emptyString = {.selector = 1, .value1 = {.length = 0, .chars = 0}};
     modifier_->setScrollBarWidth(frameNode, &emptyString);
+
+    testVal = GetStringAttribute(node_, jsonKey);
+    testValDim = Dimension::FromString(testVal);
+    ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
+
+    auto testNumber = Converter::ArkValue<Ark_Number>(-1.0f);
+    defectiveNumber = Converter::ArkUnion<Union_Number_String, Ark_Number>(testNumber);
+    modifier_->setScrollBarWidth(frameNode, &defectiveNumber);
+
+    testVal = GetStringAttribute(node_, jsonKey);
+    testValDim = Dimension::FromString(testVal);
+    ASSERT_EQ(testValDim.ConvertToVp(), defaultValDim.ConvertToVp());
+
+    auto testStr = Converter::ArkValue<Ark_String>("33%")
+    defectiveNumber = Converter::ArkUnion<Union_Number_String, Ark_String>(testStr);
+    modifier_->setScrollBarWidth(frameNode, &defectiveNumber);
 
     testVal = GetStringAttribute(node_, jsonKey);
     testValDim = Dimension::FromString(testVal);
@@ -564,10 +560,8 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValue, testing::ext::TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     float testValue = 0.13;
-    Union_Number_Resource friction= {
-        .selector = 0,
-        .value0 = Converter::ArkValue<Ark_Number>(testValue)
-    };
+    auto testNumber = Converter::ArkValue<Ark_Number>(testValue)
+    auto friction = Converter::ArkUnion<Union_Number_Resource, Ark_Number>(testNumber);
 
     modifier_->setFriction(node_, &friction);
     auto json = GetJsonValue(node_);
@@ -585,21 +579,18 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    auto json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    double defaultVal = GetAttrValue<double>(json, "friction");
-
-    auto resName = Converter::ArkValue<Ark_String>("aa.bb.cc");
-    const Union_Number_Resource friction = {
-        .selector = 1,
-        .value1 = ArkResource(&resName, -1, NodeModifier::ResourceType::FLOAT)
-    };
+    double testVal = 0.317;
+    std::string resName = "friction";
+    AddResource(resName, testVal);
+    const auto RES_ID = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::FLOAT};
+    const Union_Number_Resource friction =
+        Converter::ArkUnion<Union_Number_Resource, Ark_Resource>(CreateResourceUnion(RES_ID));
 
     modifier_->setFriction(node_, &friction);
-    json = GetJsonValue(node_);
+    auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
-
-    EXPECT_NEAR(defaultVal, GetAttrValue<double>(json, "friction"), 0.0001);
+    std::string jsonName = "friction";
+    EXPECT_NEAR(testVal, GetAttrValue<double>(json, jsonName), 0.0001);
 }
 
 /**

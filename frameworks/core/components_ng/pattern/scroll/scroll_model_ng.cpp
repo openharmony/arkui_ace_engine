@@ -468,6 +468,13 @@ void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)
     pattern->SetAxis(axis);
 }
 
+void ScrollModelNG::SetAxis(FrameNode* frameNode, std::optional<Axis> axis)
+{
+    if (axis) {
+        SetAxis(frameNode, axis.value());
+    }
+}
+
 void ScrollModelNG::SetScrollBarColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, color, frameNode);

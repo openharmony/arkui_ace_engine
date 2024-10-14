@@ -73,6 +73,7 @@ public:
     static void SetScrollBar(FrameNode* frameNode, DisplayMode barState);
     static int32_t GetAxis(FrameNode* frameNode);
     static void SetAxis(FrameNode* frameNode, Axis axis);
+    static void SetAxis(FrameNode* frameNode, std::optional<Axis> axis);
     static uint32_t GetScrollBarColor(FrameNode* frameNode);
     static void SetScrollBarColor(FrameNode* frameNode, const Color& color);
     static float GetScrollBarWidth(FrameNode* frameNode);
