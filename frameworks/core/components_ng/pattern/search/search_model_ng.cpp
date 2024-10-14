@@ -1187,12 +1187,13 @@ void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, const std::optional
     IconOptions options;
     if (iconOptions) {
         options = iconOptions.value();
+        pattern->SetCancelImageIcon(options);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
             pattern->ConvertImageIconSizeValue(options.GetSize().value_or(ICON_HEIGHT)), frameNode);
     } else {
+        pattern->SetCancelImageIcon(options);
         ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize, frameNode);
     }
-    pattern->SetCancelImageIcon(options);
 }
 
 void SearchModelNG::SetSearchButton(FrameNode* frameNode, const std::string& text)
@@ -1442,12 +1443,13 @@ void SearchModelNG::SetCancelImageIcon(FrameNode *frameNode, const std::optional
     IconOptions options;
     if (iconOptions) {
         options = iconOptions.value();
+        pattern->SetCancelImageIcon(options);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize,
             pattern->ConvertImageIconSizeValue(options.GetSize().value_or(ICON_HEIGHT)), frameNode);
     } else {
+        pattern->SetCancelImageIcon(options);
         ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize, frameNode);
     }
-    pattern->SetCancelImageIcon(options);
 }
 
 void SearchModelNG::SetSearchEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& valueOpt)
