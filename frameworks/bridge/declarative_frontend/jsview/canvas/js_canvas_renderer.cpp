@@ -864,7 +864,6 @@ void JSCanvasRenderer::JsDrawBitmapMesh(const JSCallbackInfo& info)
     }
 
     BitmapMeshInfo bitmapMeshInfo;
-    bitmapMeshInfo.pool = canvasPattern_;
     bitmapMeshInfo.offscreenPattern = OffscreenPattern;
     bitmapMeshInfo.mesh = mesh;
     bitmapMeshInfo.column = column;
