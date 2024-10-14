@@ -302,7 +302,6 @@ inline bool PreloadRequireNative(const shared_ptr<JsRuntime>& runtime, const sha
  */
 std::string BuildOhmUrl(const std::string& bundleName, const std::string& moduleName, const std::string& pagePath)
 {
-    LOGE("It is necessary to build ohmUrl for forward compatibility");
     std::string tempUrl = OHMURL_START_TAG + bundleName + "/" + moduleName;
     std::string ohmUrl = tempUrl + "/ets/" + pagePath;
     auto pos = pagePath.rfind("../");
@@ -340,15 +339,13 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
         auto jsOhmUrl = params->Get(vm, panda::StringRef::NewFromUtf8(vm, "ohmUrl"));
         if (jsOhmUrl->IsString(vm)) {
             ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
-            if (ohmUrl.find(OHMURL_START_TAG) == std::string::npos) {
-                ohmUrl = OHMURL_START_TAG + ohmUrl;
-                ohmUrlValid = true;
-            }
+            ohmUrlValid = true;
         } else {
             LOGE("add named router record with invalid ohmUrl!");
         }
     }
     if (!ohmUrlValid) {
+        LOGI("build ohmUrl for forward compatibility");
         ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
     }
 
