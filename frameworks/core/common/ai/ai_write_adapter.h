@@ -41,6 +41,7 @@ struct AIWriteInfo {
     int32_t start = 0;
     int32_t end = 0;
 
+    std::string componentType;
     std::string firstHandle;
     std::string secondHandle;
     PlatformVersion apiVersion = PlatformVersion::VERSION_TWELVE;
