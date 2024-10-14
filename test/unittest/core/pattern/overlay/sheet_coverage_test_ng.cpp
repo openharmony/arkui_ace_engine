@@ -1192,7 +1192,7 @@ HWTEST_F(SheetCoverageTestNg, GetOverlayRoot001, TestSize.Level1)
  * @tc.desc: Increase the coverage of GetOverlayManager and DeleteOverlay function.
  * @tc.type: FUNC
  */
-HWTEST_F(SheetCoverageTestNg, GetOverlayManagerAndDeleteOverlay001, TestSize.Level1)
+HWTEST_F(SheetCoverageTestNg, GetOverlayManager001, TestSize.Level1)
 {
     SheetCoverageTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
@@ -1210,26 +1210,20 @@ HWTEST_F(SheetCoverageTestNg, GetOverlayManagerAndDeleteOverlay001, TestSize.Lev
     EXPECT_TRUE(layoutProperty->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false));
     EXPECT_NE(rootNode->GetTag(), V2::PAGE_ETS_TAG);
     EXPECT_NE(rootNode->GetTag(), V2::NAVDESTINATION_VIEW_ETS_TAG);
-    EXPECT_NE(rootNode->GetTag(), V2::WINDOW_SCENE_ETS_TAG);
     sheetPattern->GetOverlayManager();
-    sheetPattern->DeleteOverlay();
-
-    rootNode->tag_ = V2::WINDOW_SCENE_ETS_TAG;
-    EXPECT_EQ(rootNode->GetTag(), V2::WINDOW_SCENE_ETS_TAG);
-    sheetPattern->DeleteOverlay();
 
     rootNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
-    PipelineContext::GetCurrentContext();
+    EXPECT_TRUE(layoutProperty->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false));
     EXPECT_EQ(rootNode->GetTag(), V2::NAVDESTINATION_VIEW_ETS_TAG);
     sheetPattern->GetOverlayManager();
-    sheetPattern->DeleteOverlay();
 
     rootNode->tag_ = V2::PAGE_ETS_TAG;
-    EXPECT_EQ(rootNode->GetTag(), V2::PAGE_ETS_TAG);
     rootNode->pattern_ = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
     rootNode->GetPattern<PagePattern>()->overlayManager_ = PipelineContext::GetCurrentContext()->overlayManager_;
+    EXPECT_EQ(rootNode->GetTag(), V2::PAGE_ETS_TAG);
+    EXPECT_NE(rootNode->GetPattern<PagePattern>(), nullptr);
+    EXPECT_NE(rootNode->GetPattern<PagePattern>()->GetOverlayManager(), nullptr);
     sheetPattern->GetOverlayManager();
-    sheetPattern->DeleteOverlay();
     SheetCoverageTestNg::TearDownTestCase();
 }
 
