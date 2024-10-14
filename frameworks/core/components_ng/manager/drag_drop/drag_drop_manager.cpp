@@ -1567,9 +1567,7 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
         return;
     }
     if (type != DragEventType::ENTER && type != DragEventType::LEAVE) {
-        if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGI(AceLogTag::ACE_DRAG, "It is an invalid drag type %{public}d", type);
-        }
+        TAG_LOGD(AceLogTag::ACE_DRAG, "It is an invalid drag type %{public}d", type);
         return;
     }
 
@@ -1583,6 +1581,7 @@ void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frame
         TAG_LOGI(AceLogTag::ACE_DRAG, "Coordinates have been transformed.");
         return;
     }
+
     NotifyEnterTextEditorArea();
 }
 
@@ -1608,7 +1607,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     } else {
         dragPreviewInfo.scale = 1.0f;
     }
-    
+
     if (!isMouseDragged_ && dragPreviewInfo.scale == 1.0f) {
         dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
     }
@@ -1677,6 +1676,7 @@ double DragDropManager::CalcDragPreviewDistanceWithPoint(
     CHECK_NULL_RETURN(renderContext, 0.0);
     nodeOffset -= pixelMapOffset_;
     auto touchOffset = GetTouchOffsetRelativeToSubwindow(x, y);
+    // calculate distance, so need to pow 2.
     return sqrt(pow(nodeOffset.GetX() - touchOffset.GetX(), 2) + pow(nodeOffset.GetY() - touchOffset.GetY(), 2));
 }
 
