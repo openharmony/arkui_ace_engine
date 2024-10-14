@@ -7370,6 +7370,25 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle nod
 int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset);
 
 /**
+ * @brief Add the custom property of the component. This interface only works on the main thread.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param name The name of the custom property. Passing null pointers is not allowed.
+ * @param value The value of the custom property. Passing null pointers is not allowed.
+ * @since 13
+ */
+void OH_ArkUI_NodeUtils_AddCustomProperty(ArkUI_NodeHandle node, const char* name, const char* value);
+
+/**
+ * @brief Remove the custom property of the component.
+ *
+ * @param node ArkUI_NodeHandle pointer.
+ * @param name The name of the custom property.
+ * @since 13
+ */
+void OH_ArkUI_NodeUtils_RemoveCustomProperty(ArkUI_NodeHandle node, const char* name);
+
+/**
  * @brief The event called when the sliding operation offset changes.
  *
  * @param node Indicates the target node.

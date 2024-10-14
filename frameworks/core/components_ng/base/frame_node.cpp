@@ -103,6 +103,7 @@ constexpr int32_t THRESH_CHILD_NO = 2;
 constexpr float HIGHT_RATIO_LIMIT = 0.8;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
+constexpr char UPDATE_FLAG_KEY[] = "updateFlag";
 } // namespace
 namespace OHOS::Ace::NG {
 
@@ -5154,6 +5155,59 @@ void FrameNode::ResetPredictNodes()
         if (frameNode && frameNode->isLayoutDirtyMarked_) {
             frameNode->isLayoutDirtyMarked_ = false;
         }
+    }
+}
+
+void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc)
+{
+    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
+    bool result = func();
+    if (IsCNode()) {
+        return;
+    }
+    if (result) {
+        customPropertyMap_[UPDATE_FLAG_KEY] = "1";
+    }
+    if (!getCustomProperty_) {
+        getCustomProperty_ = getFunc;
+    }
+}
+
+bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
+{
+    if (getCustomProperty_) {
+        value = getCustomProperty_(key);
+        return true;
+    }
+    return false;
+}
+
+bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)
+{
+    if (!IsCNode()) {
+        return false;
+    }
+    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        value = iter->second;
+        return true;
+    }
+    return false;
+}
+
+void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
+{
+    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
+    customPropertyMap_[key] = value;
+}
+
+void FrameNode::RemoveCustomProperty(const std::string& key)
+{
+    std::lock_guard<std::mutex> lock(customPropertyMapLock_);
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        customPropertyMap_.erase(iter);
     }
 }
 } // namespace OHOS::Ace::NG
