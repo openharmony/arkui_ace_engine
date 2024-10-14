@@ -189,7 +189,8 @@ public:
     bool SetIsFullScreen(bool value);
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);
-    bool SetKeyBoardAvoidMode(bool value);
+    bool SetKeyBoardAvoidMode(KeyBoardAvoidMode value);
+    KeyBoardAvoidMode GetKeyBoardAvoidMode();
     bool IsIgnoreAsfeArea()
     {
         return ignoreSafeArea_;
@@ -273,6 +274,8 @@ private:
      * offset vertically according to [keyboardOffset_].
      */
     bool keyboardSafeAreaEnabled_ = false;
+
+    KeyBoardAvoidMode keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
 
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;

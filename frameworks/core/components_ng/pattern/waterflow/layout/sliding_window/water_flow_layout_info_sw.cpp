@@ -319,6 +319,12 @@ void WaterFlowLayoutInfoSW::Reset()
     synced_ = false;
 }
 
+void WaterFlowLayoutInfoSW::ResetFooter()
+{
+    footerIndex_ = -1;
+    footerHeight_ = 0.0f;
+}
+
 int32_t WaterFlowLayoutInfoSW::EndIndex() const
 {
     if (synced_) {

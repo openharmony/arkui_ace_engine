@@ -366,7 +366,18 @@ public:
     {
         return displayAvailableRect_;
     }
-    void SetEnableKeyBoardAvoidMode(bool value) override;
+
+    void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) override;
+
+    KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() override;
+
+    bool UsingCaretAvoidMode();
+
+    void OnCaretPositionChangeOrKeyboardHeightChange(float keyboardHeight, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
+    float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
+        float height, SizeF rootSize);
+
     bool IsEnableKeyBoardAvoidMode() override;
 
     void RequireSummary() override;
@@ -1018,6 +1029,8 @@ private:
     void RegisterRootEvent();
 
     void ResetDraggingStatus(const TouchEvent& touchPoint, const RefPtr<FrameNode>& node = nullptr);
+
+    void CancelDragIfRightBtnPressed(const MouseEvent& event);
 
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
