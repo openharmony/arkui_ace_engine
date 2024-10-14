@@ -47,6 +47,9 @@ public:
     RectF GetFirstHandleLocalPaintRect() override;
     RectF GetSecondHandleLocalPaintRect() override;
     void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    void UpdateAllHandlesOffset() override;
+    void UpdateFirstHandleOffset() override;
+    void UpdateSecondHandleOffset() override;
 
     // override SelectOverlayHolder
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;
@@ -92,6 +95,7 @@ public:
     {
         return !HasRenderTransform();
     }
+    std::optional<Color> GetHandleColor() override;
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
@@ -99,6 +103,7 @@ private:
     int32_t GetTextAreaCaretPosition(const OffsetF& localOffset);
     int32_t GetTextInputCaretPosition(const OffsetF& localOffset, bool isFirst);
     void CloseMagnifier();
+    void TriggerContentToScroll(const OffsetF& localOffset, bool isEnd);
     SourceType lastSourceType_ = SourceType::NONE;
     std::vector<std::string> pasteMimeTypes_ = { "text/plain", "text/html" };
 };

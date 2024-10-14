@@ -35,10 +35,6 @@ public:
     virtual void SetBranchId(int32_t value, std::list<int32_t>& removedElmtId) = 0;
     virtual int32_t GetBranchId() = 0;
     virtual bool CanRetake(const std::string& id) = 0;
-
-private:
-    static std::unique_ptr<IfElseModel> instance;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

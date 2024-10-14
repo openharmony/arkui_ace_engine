@@ -45,7 +45,6 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textField, value);
     if (textField->GetIsPreviewText()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "no PreprocessString at previewing text");
         return tmp;
     }
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -176,7 +175,6 @@ void ContentController::FilterValue()
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
     if (textField->GetIsPreviewText()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "no filter at previewing text");
         return;
     }
 

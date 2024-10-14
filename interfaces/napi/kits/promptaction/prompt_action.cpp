@@ -87,7 +87,7 @@ bool GetToastMessage(napi_env env, napi_value messageNApi, std::string& messageS
             return false;
         }
         if (messageString.size() == 0) {
-            TAG_LOGD(AceLogTag::ACE_DIALOG, "Toast message is empty");
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Toast message is empty");
         }
     } else {
         NapiThrow(env, "The type of message is incorrect.", ERROR_CODE_PARAM_INVALID);
@@ -314,7 +314,7 @@ void GetToastObjectShadow(napi_env env, napi_value shadowNApi, Shadow& shadowPro
     shadowProps.SetIsFilled(isFilled);
 }
 
-void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& shadow)
+void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& shadow, bool& isTypeStyleShadow)
 {
     Shadow shadowProps;
     napi_valuetype valueType = napi_undefined;
@@ -356,6 +356,7 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
             }
         }
         GetToastObjectShadow(env, shadowNApi, shadowProps);
+        isTypeStyleShadow = false;
     } else {
         GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadowProps);
     }
@@ -443,7 +444,7 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
     GetToastBackgroundColor(env, backgroundColorNApi, toastInfo.backgroundColor);
     GetToastTextColor(env, textColorNApi, toastInfo.textColor);
     GetToastBackgroundBlurStyle(env, backgroundBlurStyleNApi, toastInfo.backgroundBlurStyle);
-    GetToastShadow(env, shadowNApi, toastInfo.shadow);
+    GetToastShadow(env, shadowNApi, toastInfo.shadow, toastInfo.isTypeStyleShadow);
     return true;
 }
 

@@ -621,6 +621,54 @@ private:
     uint8_t theme_flags_ = static_cast<uint8_t>(NWeb::SystemThemeFlags::NONE);
 };
 
+class NWebMouseEventImpl : public OHOS::NWeb::NWebMouseEvent {
+public:
+    NWebMouseEventImpl(int32_t x, int32_t y,
+        int32_t buttton, int32_t action,
+        int32_t clickNum, std::vector<int32_t> pressedCodes)
+        : x_(x), y_(y), buttton_(buttton), action_(action),
+        clickNum_(clickNum), pressedCodes_(pressedCodes) {}
+    ~NWebMouseEventImpl() = default;
+
+    int32_t GetX() override
+    {
+        return x_;
+    }
+
+    int32_t GetY() override
+    {
+        return y_;
+    }
+
+    int32_t GetButton() override
+    {
+        return buttton_;
+    }
+
+    int32_t GetAction() override
+    {
+        return action_;
+    }
+
+    int32_t GetClickNum() override
+    {
+        return clickNum_;
+    }
+
+    std::vector<int32_t> GetPressKeyCodes() override
+    {
+        return pressedCodes_;
+    }
+
+private:
+    int32_t x_ = 0;
+    int32_t y_ = 0;
+    int32_t buttton_ = 0;
+    int32_t action_ = 0;
+    int32_t clickNum_ = 0;
+    std::vector<int32_t> pressedCodes_ {};
+};
+
 class WebDelegate : public WebResource {
     DECLARE_ACE_TYPE(WebDelegate, WebResource);
 
@@ -755,6 +803,7 @@ public:
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
+    void WebOnMouseEvent(const std::shared_ptr<OHOS::NWeb::NWebMouseEvent>& mouseEvent);
     void OnFocus(const OHOS::NWeb::FocusReason& reason = OHOS::NWeb::FocusReason::EVENT_REQUEST);
     bool NeedSoftKeyboard();
     void OnBlur();
@@ -917,6 +966,7 @@ public:
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
+    bool CloseImageOverlaySelection();
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -982,7 +1032,7 @@ public:
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);
-    NG::WebInfoType GetWebInfoType();
+    std::string GetWebInfoType();
     void OnInterceptKeyboardAttach(
         const std::shared_ptr<OHOS::NWeb::NWebCustomKeyboardHandler> keyboardHandler,
         const std::map<std::string, std::string> &attributes, bool &useSystemKeyboard, int32_t &enterKeyType);
@@ -1022,6 +1072,11 @@ public:
     }
 
     void StartVibraFeedback(const std::string& vibratorType);
+
+    RefPtr<TaskExecutor> GetTaskExecutor() const
+    {
+        return taskExecutor_;
+    }
 
 private:
     void InitWebEvent();
@@ -1104,8 +1159,8 @@ private:
     void ratioStrToFloat(const std::string& str);
     // Return canonical encoding name according to the encoding alias name.
     std::string GetCanonicalEncodingName(const std::string& alias_name) const;
-    void RegisterAvoidAreaChangeListener();
-    void UnregisterAvoidAreaChangeListener();
+    void RegisterAvoidAreaChangeListener(int32_t instanceId);
+    void UnregisterAvoidAreaChangeListener(int32_t instanceId);
     void OnSafeInsetsChange();
 #endif
 
@@ -1232,6 +1287,7 @@ private:
     std::string sharedRenderProcessToken_;
     int64_t lastFocusInputId_ = 0;
     int64_t lastFocusReportId_ = 0;
+    RefPtr<TaskExecutor> taskExecutor_;
 #endif
 };
 

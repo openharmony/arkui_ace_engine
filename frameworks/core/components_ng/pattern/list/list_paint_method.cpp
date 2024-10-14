@@ -49,11 +49,17 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         frameSize.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
     }
     UpdateFadingGradient(renderContext);
-    bool hasPadding = padding && padding->HasValue();
-    bool clip = hasPadding && (!renderContext || renderContext->GetClipEdge().value_or(true));
-    listContentModifier_->SetClipOffset(paddingOffset);
-    listContentModifier_->SetClipSize(frameSize);
-    listContentModifier_->SetClip(clip);
+
+    if (TryContentClip(paintWrapper)) {
+        listContentModifier_->SetClip(false);
+    } else {
+        const bool hasPadding = padding && padding->HasValue();
+        bool clip = hasPadding && (!renderContext || renderContext->GetClipEdge().value_or(true));
+        listContentModifier_->SetClipOffset(paddingOffset);
+        listContentModifier_->SetClipSize(frameSize);
+        listContentModifier_->SetClip(clip);
+    }
+
     float contentSize = vertical_ ? frameSize.Width() : frameSize.Height();
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
         divider_.strokeWidth.Unit() == DimensionUnit::PERCENT ||
@@ -63,8 +69,7 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         return;
     }
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
-    DividerInfo dividerInfo = {
-        .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
+    DividerInfo dividerInfo = { .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
         .startMargin = std::max(0.0, divider_.startMargin.ConvertToPx()),
         .endMargin = std::max(0.0, divider_.endMargin.ConvertToPx()),
@@ -76,10 +81,11 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         .totalItemCount = totalItemCount_,
         .color = divider_.color,
         .laneGutter = laneGutter_,
-        .mainSize = size
-    };
+        .mainSize = size };
     float checkMargin = dividerInfo.crossSize / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
-    if (NearZero(checkMargin)) return;
+    if (NearZero(checkMargin)) {
+        return;
+    }
     if (LessNotEqual(checkMargin, 0.0f)) {
         dividerInfo.startMargin = 0.0f;
         dividerInfo.endMargin = 0.0f;
@@ -100,8 +106,7 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
     bool nextIsPressed = false;
     for (const auto& child : itemPosition_) {
         auto nextId = child.first - lanes;
-        nextIsPressed = nextId < 0 || lastIsItemGroup || child.second.isGroup ?
-            false : itemPosition_[nextId].isPressed;
+        nextIsPressed = nextId < 0 || lastIsItemGroup || child.second.isGroup ? false : itemPosition_[nextId].isPressed;
         if (!isFirstItem && !(child.second.isPressed || nextIsPressed)) {
             dividerMap[child.second.id] = HandleDividerList(child.first, lastIsItemGroup, laneIdx, dividerInfo);
         }
@@ -137,19 +142,19 @@ ListDivider ListPaintMethod::HandleDividerList(
         (dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
     float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
     float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-    float mainPos = itemPosition_.at(index).startPos - divOffset + dividerInfo.mainPadding;
+    float mainPos = itemPosition_.at(index).startPos - divOffset + dividerInfo.mainPadding + adjustOffset_;
     float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
     if (isReverse_) {
         if (dividerInfo.isVertical) {
             float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-            mainPos = dividerInfo.mainSize - itemPosition_.at(index).startPos + divOffset - dividerInfo.mainPadding;
+            mainPos = dividerInfo.mainSize - itemPosition_.at(index).startPos + divOffset - dividerInfo.mainPadding +
+                      adjustOffset_;
         } else {
             crossPos = dividerInfo.endMargin + dividerInfo.crossPadding;
         }
     }
     if (dividerInfo.lanes > 1 && !lastIsGroup && !itemPosition_.at(index).isGroup) {
-        crossPos +=
-            laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
+        crossPos += laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
         divider.length = laneLen;
     } else {
         divider.length = crossLen;
@@ -178,8 +183,7 @@ ListDivider ListPaintMethod::HandleLastLineIndex(int32_t index, int32_t laneIdx,
         }
     }
     if (dividerInfo.lanes > 1 && !itemPosition_.at(index).isGroup) {
-        crossPos +=
-            laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
+        crossPos += laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
         divider.length = laneLen;
     } else {
         divider.length = crossLen;

@@ -66,11 +66,10 @@ struct TextConfig;
 #endif
 #endif
 
-#define COPY_SPAN_STYLE_IF_PRESENT(sourceNode, targetNode, styleType, propertyInfo) \
+#define COPY_SPAN_STYLE_IF_PRESENT(sourceNode, targetNode, styleType) \
     do {                                                                            \
         if ((sourceNode)->Has##styleType()) {                                       \
             (targetNode)->Update##styleType(*((sourceNode)->Get##styleType()));     \
-            (targetNode)->AddPropertyInfo(propertyInfo);                            \
         }                                                                           \
     } while (false)
 #define CONTENT_MODIFY_LOCK(patternPtr) ContentModifyLock contentModifyLock(patternPtr)
@@ -129,6 +128,7 @@ struct CaretOffsetInfo {
     float caretHeightDown = 0.0f;
     float caretHeightLine = 0.0f;
 };
+enum class PositionType { DEFAULT, PARAGRAPH_START, PARAGRAPH_END, LINE_START, LINE_END };
 
 class RichEditorPattern
     : public TextPattern, public ScrollablePattern, public TextInputClient, public SpanWatcher {
@@ -190,7 +190,6 @@ public:
         bool isTouchCaret = false;
         bool isMoveCaret = false;
         Offset touchDownOffset;
-        OffsetF touchDownPaintOffset;
         const Dimension minDistance = 5.0_vp;
 
         void Reset()
@@ -198,7 +197,6 @@ public:
             isTouchCaret = false;
             isMoveCaret = false;
             touchDownOffset.Reset();
-            touchDownPaintOffset.Reset();
         }
     };
 
@@ -218,6 +216,9 @@ public:
                 return;
             }
             pattern->isModifyingContent_ = false;
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     private:
         WeakPtr<RichEditorPattern> pattern_;
@@ -292,7 +293,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_);
+        return MakeRefPtr<RichEditorLayoutAlgorithm>(spans_, &paragraphs_, typingTextStyle_);
     }
 
     FocusPattern GetFocusPattern() const override
@@ -445,6 +446,7 @@ public:
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
+    void HandleExtendAction(int32_t action) override;
     bool BeforeStatusCursorMove(bool isLeft);
     bool CursorMoveLeft();
     bool CursorMoveRight();
@@ -458,12 +460,12 @@ public:
     bool CursorMoveEnd();
     void CalcLineSidesIndexByPosition(int32_t& startIndex, int32_t& endIndex);
     RectF CalcLineInfoByPosition();
-    CaretOffsetInfo GetCaretOffsetInfoByPosition();
+    CaretOffsetInfo GetCaretOffsetInfoByPosition(int32_t position = -1);
     int32_t CalcMoveUpPos(float& leadingMarginOffset);
     int32_t CalcMoveDownPos(float& leadingMarginOffset);
     int32_t CalcLineBeginPosition();
     float GetTextThemeFontSize();
-    int32_t CalcLineEndPosition();
+    int32_t CalcLineEndPosition(int32_t index = -1);
     int32_t CalcSingleLineBeginPosition(int32_t fixedPos);
     int32_t CalcSingleLineEndPosition(int32_t fixedPos);
     bool CursorMoveLineBegin();
@@ -473,6 +475,7 @@ public:
     void HandleOnShowMenu() override;
     int32_t HandleSelectPosition(bool isForward);
     int32_t HandleSelectParagraghPos(bool direction);
+    PositionType GetPositionTypeFromLine();
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
     bool HandleOnDeleteComb(bool backward) override;
@@ -557,7 +560,7 @@ public:
     void CreateHandles() override;
     void ShowHandles(const bool isNeedShowHandles) override;
     void ShowHandles() override;
-    void HandleMenuCallbackOnSelectAll();
+    void HandleMenuCallbackOnSelectAll(bool isShowMenu = true);
     void HandleOnSelectAll() override;
     void OnCopyOperation(bool isUsingExternalKeyboard = false);
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
@@ -706,11 +709,7 @@ public:
 
     void OnAttachToFrameNode() override;
 
-    void OnDetachFromFrameNode(FrameNode* node) override
-    {
-        TextPattern::OnDetachFromFrameNode(node);
-        ScrollablePattern::OnDetachFromFrameNode(node);
-    }
+    void OnDetachFromFrameNode(FrameNode* node) override;
 
     bool IsAtBottom() const override
     {
@@ -765,6 +764,8 @@ public:
 
     bool SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
+    std::string GetPlaceHolder() const;
+
     void HandleOnCameraInput() override;
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
@@ -797,6 +798,7 @@ public:
     void SetCaretColor(const Color& caretColor)
     {
         caretColor_ = caretColor;
+        IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }
 
     Color GetCaretColor();
@@ -860,6 +862,8 @@ public:
 
     OffsetF GetTextPaintOffset() const override;
     OffsetF GetPaintRectGlobalOffset() const;
+    // original local point to transformed global point.
+    void HandlePointWithTransform(OffsetF& point);
 
     float GetCrossOverHeight() const;
 
@@ -948,10 +952,16 @@ public:
         isOnlyRequestFocus_ = true;
     }
 
-    void SetBarState(DisplayMode mode)
+    DisplayMode GetBarDisplayMode()
     {
-        barDisplayMode_ = mode;
+        return barDisplayMode_.value_or(DisplayMode::AUTO);
     }
+
+    Color GetUrlSpanColor() override;
+
+    void TriggerAvoidOnCaretChange();
+
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
 protected:
     bool CanStartAITask() override;
@@ -965,8 +975,14 @@ protected:
     }
 
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
+    PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
 
 private:
+    bool HandleUrlSpanClickEvent(const GestureEvent& info);
+    void HandleUrlSpanForegroundClear();
+    bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
+    Color GetUrlHoverColor();
+    Color GetUrlPressColor();
     friend class RichEditorSelectOverlay;
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
@@ -981,6 +997,7 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     bool HandleClickSelection(const OHOS::Ace::GestureEvent& info);
+    bool IsClickEventOnlyForMenuToggle(const OHOS::Ace::GestureEvent& info);
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     bool IsShowSingleHandleByClick(const OHOS::Ace::GestureEvent& info, int32_t lastCaretPosition,
         const RectF& lastCaretRect, bool isCaretTwinkling);
@@ -997,6 +1014,7 @@ private:
     void CalcCaretInfoByClick(const Offset& touchOffset);
     std::pair<OffsetF, float> CalcAndRecordLastClickCaretInfo(const Offset& textOffset);
     void HandleEnabled();
+    void HandleAISpanHoverEvent(const MouseInfo& info) override;
     void InitMouseEvent();
     void ScheduleCaretTwinkling();
     void OnCaretTwinkling();
@@ -1036,6 +1054,7 @@ private:
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const Offset& offset);
     void UpdateCaretByTouchMove(const Offset& offset);
+    Offset AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset);
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void UseHostToUpdateTextFieldManager();
@@ -1051,14 +1070,23 @@ private:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
+    void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void ResetSelectionAfterAddSpan(bool isPaste);
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
     SelectionInfo GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo);
     void ResetAfterTextChange() override {};
-
+    void AddOprationWhenAddImage(int32_t beforeCaretPos);
+    void UpdateSpanNode(RefPtr<SpanNode> spanNode, const TextSpanOptions& options);
+    void InitPlaceholderSpansMap(
+        RefPtr<SpanItem>& newSpanItem, const RefPtr<SpanItem>& spanItem, size_t& index, size_t& placeholderGains);
+    void ReplacePlaceholderWithCustomSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
+    void ReplacePlaceholderWithSymbolSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
+    void ReplacePlaceholderWithImageSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContextSafely();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -1067,7 +1095,9 @@ private:
 
     void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
     {
-        auto context = PipelineContext::GetCurrentContextSafely();
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto dragDropManager = context->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -1250,9 +1280,12 @@ private:
     void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
     void EnableOneStepDrag(const RefPtr<ImageSpanNode>& imageNode);
     void SetImageSelfResponseEvent(bool isEnable);
-    void CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub);
+    void CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode);
     void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     void UpdateImagePreviewParam();
+    void UpdateImagePreviewParam(const RefPtr<ImageSpanNode>& imageNode);
+    void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
+    void ClearOnFocusTextField();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1336,6 +1369,8 @@ private:
     bool isShowPlaceholder_ = false;
     bool isSingleHandle_ = false;
     TouchAndMoveCaretState moveCaretState_;
+    // Recorded when touch down or mouse left button press.
+    OffsetF globalOffsetOnMoveStart_;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
@@ -1369,7 +1404,8 @@ private:
     std::shared_ptr<OneStepDragParam> oneStepDragParam_ = nullptr;
     std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
     bool isImageSelfResponseEvent_ = true;
-    DisplayMode barDisplayMode_ = DisplayMode::AUTO;
+    std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
+    uint32_t twinklingInterval_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

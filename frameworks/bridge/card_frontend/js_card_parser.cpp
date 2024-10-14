@@ -1329,6 +1329,13 @@ void JsCardParser::UpdateDomNode(const RefPtr<Framework::JsAcePage>& page, const
     page->PushCommand(styleCommand);
 
     auto childList = rootJson->GetValue("children");
+    UpdateChildRen(childList, page, selfId, idArray, dataJson, styleJson, propsJson);
+}
+
+void JsCardParser::UpdateChildRen(const std::unique_ptr<JsonValue>& childList, const RefPtr<Framework::JsAcePage>& page,
+    int32_t selfId, const std::vector<int>& idArray, const std::unique_ptr<JsonValue>& dataJson,
+    const std::unique_ptr<JsonValue>& styleJson, const std::unique_ptr<JsonValue>& propsJson)
+{
     if (childList && childList->IsValid()) {
         auto child = childList->GetChild();
         while (child && child->IsValid()) {

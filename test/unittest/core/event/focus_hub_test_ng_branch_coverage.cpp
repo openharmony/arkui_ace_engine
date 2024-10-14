@@ -56,6 +56,9 @@ HWTEST_F(FocusHubTestNg, PaintFocusState0002, TestSize.Level1)
     eventHub->stateStyleMgr_ = nullptr;
     ASSERT_EQ(eventHub->stateStyleMgr_, nullptr);
     context->isFocusActive_ = true;
+    FocusBoxStyle styledStyle;
+    styledStyle.strokeColor = Color::RED;
+    focusHub->box_.SetStyle(styledStyle);
     EXPECT_TRUE(focusHub->IsNeedPaintFocusState());
     focusHub->focusStyleType_ = FocusStyleType::NONE;
     EXPECT_FALSE(focusHub->HasFocusStateStyle());
@@ -66,11 +69,5 @@ HWTEST_F(FocusHubTestNg, PaintFocusState0002, TestSize.Level1)
     focusHub->focusStyleType_ = FocusStyleType::FORCE_NONE;
     EXPECT_FALSE(focusHub->HasFocusStateStyle());
     EXPECT_TRUE(focusHub->PaintFocusState(false));
-
-    context->isFocusActive_ = true;
-    EXPECT_TRUE(focusHub->IsNeedPaintFocusState());
-    focusHub->focusStyleType_ = FocusStyleType::NONE;
-    EXPECT_FALSE(focusHub->HasFocusStateStyle());
-    EXPECT_FALSE(focusHub->PaintFocusState(false));
 }
 } // namespace OHOS::Ace::NG

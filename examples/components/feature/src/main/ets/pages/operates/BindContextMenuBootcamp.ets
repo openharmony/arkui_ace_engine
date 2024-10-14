@@ -48,7 +48,7 @@ export struct BindContextMenuBootcamp {
   }
 
   @Builder
-  SubMenu(){
+  SubMenu() {
     Menu() {
       MenuItem({ content: '复制', labelInfo: 'Ctrl+C' })
       MenuItem({ content: '粘贴', labelInfo: 'Ctrl+V' })
@@ -56,7 +56,7 @@ export struct BindContextMenuBootcamp {
   }
 
   @Builder
-  MyMenu(){
+  MyMenu() {
     Menu() {
       MenuItem({
         startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
@@ -94,7 +94,7 @@ export struct BindContextMenuBootcamp {
   }
 
   @Builder
-  Content(){
+  Content() {
     Column() {
       Button(
         this.enableLabelNum ? '弹出菜单'.repeat(this.labelNum / 2) : '弹出菜单',
@@ -107,7 +107,7 @@ export struct BindContextMenuBootcamp {
   }
 
   @Builder
-  Parameters(){
+  Parameters() {
     Scroll() {
       Column({ space: 8 }) {
         RadioBlock({

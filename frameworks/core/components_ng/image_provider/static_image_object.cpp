@@ -23,8 +23,10 @@
 namespace OHOS::Ace::NG {
 
 void StaticImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& targetSize, bool forceResize, bool syncLoad)
+    const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& targetSize, bool forceResize, bool syncLoad)
 {
+    auto ctx = ctxWp.Upgrade();
+    CHECK_NULL_VOID(ctx);
     RefPtr<CanvasImage> cachedImage;
     auto key = ImageUtils::GenerateImageKey(src_, targetSize);
     if (SystemProperties::GetImageFrameworkEnabled()) {

@@ -62,7 +62,76 @@ void UIExtensionManager::RegisterSecurityUIExtensionInFocus(
 bool UIExtensionManager::OnBackPressed()
 {
     auto sessionWrapper = sessionWrapper_.Upgrade();
-    return sessionWrapper && sessionWrapper->NotifyBackPressedSync();
+    if (sessionWrapper) {
+        return sessionWrapper->NotifyBackPressedSync();
+    }
+
+    return HandleUnfocusedModalUecBackPressed();
+}
+
+bool UIExtensionManager::HandleUnfocusedModalUecBackPressed()
+{
+    std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
+    for (auto item = aliveUIExtensions_.rbegin(); item != aliveUIExtensions_.rend(); ++item) {
+        auto uiExtension = item->second.Upgrade();
+        if (uiExtension == nullptr) {
+            continue;
+        }
+
+        if (!uiExtension->IsModalUec()) {
+            continue;
+        }
+
+        bool isForeground = uiExtension->IsForeground();
+        bool isLastModal = IsLastModalUec(uiExtension->GetHost());
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "HandleUnfocusedModalUecBackPressed,"
+            " sessionId: %{public}d, isForeground: %{public}d, isLastModal: %{public}d",
+            uiExtension->GetSessionId(), isForeground, isLastModal);
+        if (!isForeground || !isLastModal) {
+            continue;
+        }
+
+        auto session = uiExtension->GetSessionWrapper();
+        if (session) {
+            return session->NotifyBackPressedSync();
+        }
+    }
+
+    return false;
+}
+
+bool UIExtensionManager::IsLastModalUec(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto parentNode = frameNode->GetParent();
+    CHECK_NULL_RETURN(parentNode, false);
+    if (parentNode->GetTag() != V2::MODAL_PAGE_TAG) {
+        TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "parentNode not modalPage, parentNode tag: %{public}s",
+            parentNode->GetTag().c_str());
+        return false;
+    }
+
+    auto grandpaNode = parentNode->GetParent();
+    if (grandpaNode == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "ModalPage no parent.");
+        return false;
+    }
+
+    auto lastChild = grandpaNode->GetLastChild();
+    if (lastChild == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "LastChild is null.");
+        return false;
+    }
+
+    if (lastChild != parentNode) {
+        TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "ModalPage is not the last "
+            "child of rootNode, lastChild tag: %{public}s, parentNode tag: %{public}s",
+            lastChild->GetTag().c_str(), parentNode->GetTag().c_str());
+        return false;
+    }
+
+    return true;
 }
 
 bool UIExtensionManager::IsWrapExtensionAbilityId(int64_t elementId)
@@ -112,6 +181,7 @@ void UIExtensionManager::RecycleExtensionId(int32_t id)
 
 void UIExtensionManager::AddAliveUIExtension(int32_t nodeId, const WeakPtr<UIExtensionPattern>& uiExtension)
 {
+    std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
     aliveUIExtensions_.try_emplace(nodeId, uiExtension);
 }
 
@@ -140,9 +210,12 @@ void UIExtensionManager::TransferOriginAvoidArea(const Rosen::AvoidArea& avoidAr
 
 void UIExtensionManager::RemoveDestroyedUIExtension(int32_t nodeId)
 {
-    auto it = aliveUIExtensions_.find(nodeId);
-    if (it != aliveUIExtensions_.end()) {
-        aliveUIExtensions_.erase(nodeId);
+    {
+        std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
+        auto it = aliveUIExtensions_.find(nodeId);
+        if (it != aliveUIExtensions_.end()) {
+            aliveUIExtensions_.erase(nodeId);
+        }
     }
 
     auto iter = aliveSecurityUIExtensions_.find(nodeId);

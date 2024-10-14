@@ -162,7 +162,7 @@ public:
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
         const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
-    std::shared_ptr<AnimationUtils::Animation> MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
+    std::shared_ptr<AnimationUtils::Animation> MaskAnimation(const RefPtr<FrameNode>& curNode, bool isTransitionIn);
     std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(
         const RefPtr<FrameNode>& node, bool isTransitionOut);
     void TransitionWithReplace(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar);
@@ -237,8 +237,12 @@ public:
 
     float CheckLanguageDirection();
 
-    void RemoveDialogDestination();
-
+    void RemoveDialogDestination(bool isReplace = false);
+    void AddDestinationNode(const RefPtr<UINode>& parent);
+    WeakPtr<NavDestinationGroupNode> GetParentDestinationNode() const
+    {
+        return parentDestinationNode_;
+    }
     void SetNavigationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
         navigationPathInfo_ = pagePath;
@@ -270,6 +274,16 @@ public:
         return recoverable_ && !curId_.empty();
     }
 
+    void SetDragBarNode(const RefPtr<UINode>& dragNode)
+    {
+        dragBarNode_ = dragNode;
+    }
+
+    const RefPtr<UINode>& GetDragBarNode() const
+    {
+        return dragBarNode_;
+    }
+
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
@@ -286,14 +300,13 @@ private:
     void ReorderAnimatingDestination(RefPtr<FrameNode>& navigationContentNode, RefPtr<UINode>& maxAnimatingDestination,
         RefPtr<UINode>& remainDestination, RefPtr<UINode>& curTopDestination);
     bool FindNavigationParent(const std::string& parentName);
-    bool GetCurTitleBarNode(RefPtr<TitleBarNode>& curTitleBarNode, const RefPtr<FrameNode>& curNode,
-        bool isNavBar);
-
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
+    RefPtr<UINode> dragBarNode_;
+    WeakPtr<NavDestinationGroupNode> parentDestinationNode_;
     // dialog hideNodes, if is true, nodes need remove
     std::vector<std::pair<RefPtr<NavDestinationGroupNode>, bool>> hideNodes_;
     std::vector<RefPtr<NavDestinationGroupNode>> showNodes_;

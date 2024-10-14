@@ -49,8 +49,8 @@ public:
         napi_value storage) override {
         return UIContentErrorCode::NO_ERRORS;
     }
-    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
-        const std::vector<std::string>& registerComponents) override {}
+    void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
+        const std::string& entryPoint, const std::vector<std::string>& registerComponents) override {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}
@@ -109,7 +109,9 @@ public:
     // ArkTS Form
     void PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) override {}
     void RunFormPage() override {}
-    void OnFormSurfaceChange(float width, float height) override {}
+    void OnFormSurfaceChange(float width, float height,
+        OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0),
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override {}
     void UpdateFormData(const std::string& data) override {}
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override
     {}

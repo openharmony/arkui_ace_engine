@@ -3233,7 +3233,7 @@ void JsiEngine::RegisterWorker()
 
 JsiEngine::~JsiEngine()
 {
-    LOG_DESTROY();
+    LOGI("Engine destroyed");
     if (nativeEngine_ != nullptr) {
 #if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();

@@ -66,7 +66,7 @@ public:
     static void JsOpacity(const JSCallbackInfo& info);
     static void JsBlur(const JSCallbackInfo& info);
     static void JsTransition(const JSCallbackInfo& info);
-    static void JsSetDraggable(bool draggable);
+    static void JsSetDraggable(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
 

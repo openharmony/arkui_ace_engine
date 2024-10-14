@@ -124,12 +124,6 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (layoutInfo_->targetIndex_.has_value()) {
         MeasureToTarget(layoutWrapper, layoutInfo_->endIndex_, std::nullopt);
     }
-    if (layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
-        if (layoutInfo_->extraOffset_.has_value() && Negative(layoutInfo_->extraOffset_.value())) {
-            layoutInfo_->extraOffset_.reset();
-        }
-        layoutInfo_->JumpTo({ footerMainStartPos_, footerMainSize_ });
-    }
     if (matchChildren) {
         mainSize_ = layoutInfo_->GetMaxMainHeight() + footerMainSize_;
         idealSize.SetMainSize(mainSize_, axis_);
@@ -383,6 +377,13 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         footerMainStartPos_ = maxItemHeight;
         footerMainSize_ = WaterFlowLayoutUtils::MeasureFooter(layoutWrapper, axis_);
         maxItemHeight += footerMainSize_;
+        if (layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
+            if (layoutInfo_->extraOffset_.has_value() && Negative(layoutInfo_->extraOffset_.value())) {
+                layoutInfo_->extraOffset_.reset();
+            }
+            layoutInfo_->itemStart_ = false;
+            layoutInfo_->JumpTo({ footerMainStartPos_, footerMainSize_ });
+        }
     }
     layoutInfo_->maxHeight_ = maxItemHeight;
 
@@ -390,12 +391,12 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         if (!canOverScroll_) {
             layoutInfo_->currentOffset_ = 0;
         }
-        layoutInfo_->offsetEnd_ = true;
-        layoutInfo_->itemStart_ = true;
+        layoutInfo_->itemStart_ = GreatOrEqual(layoutInfo_->currentOffset_, 0.0f);
+        layoutInfo_->offsetEnd_ = LessOrEqual(layoutInfo_->currentOffset_, 0.0f);
         return;
     }
 
-    if (LessOrEqual(layoutInfo_->currentOffset_ + maxItemHeight, mainSize)) {
+    if (LessOrEqualCustomPrecision(layoutInfo_->currentOffset_ + maxItemHeight, mainSize, 0.1f)) {
         layoutInfo_->offsetEnd_ = true;
         if (!canOverScroll_) {
             layoutInfo_->currentOffset_ = mainSize - maxItemHeight;

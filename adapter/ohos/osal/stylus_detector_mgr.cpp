@@ -603,7 +603,7 @@ void StylusDetectorMgr::AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& frame
     }
     auto id = frameNode->GetId();
     auto destructor = [id]() { StylusDetectorMgr::GetInstance()->RemoveTextFieldFrameNode(id); };
-    frameNode->PushDestroyCallback(std::move(destructor));
+    frameNode->PushDestroyCallbackWithTag(std::move(destructor), "DestroyCallbackForStylus");
     textFieldNodes_[id] = AceType::WeakClaim(AceType::RawPtr(frameNode));
     textFieldLayoutInfos_[id] = layoutInfo;
 }

@@ -30,14 +30,12 @@ void DragDropManagerTestNgCoverage::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
-    MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow({"", 0, 0, 0, 0, 0});
 }
 
 void DragDropManagerTestNgCoverage::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
-    MOCK_DRAG_WINDOW = nullptr;
 }
 
 /**
@@ -1207,7 +1205,6 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage048, TestSi
     dragDropManager->DoDragMoveAnimate(pointerEvent);
     pointerEvent.x = 3.0f;
     pointerEvent.y = 4.0f;
-    dragDropManager->prePointerOffset_ = { 0.0f, 0.0f };
     dragDropManager->info_.scale = 0.5f;
     dragDropManager->DoDragMoveAnimate(pointerEvent);
     EXPECT_NE(frameNode, nullptr);
@@ -1247,12 +1244,8 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage049, TestSi
 HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage050, TestSize.Level1)
 {
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(customNode, nullptr);
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    GestureEvent gestureEvent;
-    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeNull, nullptr);
@@ -1296,10 +1289,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage050, TestSi
 HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage051, TestSize.Level1)
 {
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    GestureEvent gestureEvent;
-    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeNull, nullptr);
@@ -1343,10 +1333,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage051, TestSi
 HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage052, TestSize.Level1)
 {
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
-    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    GestureEvent gestureEvent;
-    auto dragDropProxy = dragDropManager->CreateAndShowDragWindow(customNode, gestureEvent);
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeNull, nullptr);

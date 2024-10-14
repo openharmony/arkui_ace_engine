@@ -635,11 +635,9 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest015, TestSize.Level1)
     postEventManager_->lastEventMap_.insert(std::make_pair(touchUpEvent.id, eventAction));
     postEventManager_->postEventAction_.push_back(eventAction);
     postEventManager_->CheckAndClearPostEventAction(UInode, touchUpEvent.id);
-    SUCCEED();
     postEventManager_->CheckAndClearPostEventAction(UInode, (touchUpEvent.id + 1));
-    SUCCEED();
     postEventManager_->CheckAndClearPostEventAction(UInode, touchUpEvent.id);
-    SUCCEED();
+    EXPECT_EQ(touchUpEvent.id, 2);
 }
 
 /**
@@ -672,7 +670,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest016, TestSize.Level1)
     postEventManager_->lastEventMap_.insert(std::make_pair(touchUpEvent.id, eventAction));
     postEventManager_->postEventAction_.push_back(eventAction);
     postEventManager_->CheckAndClearPostEventAction(UInode, touchUpEvent.id);
-    SUCCEED();
+    EXPECT_EQ(touchUpEvent.y, 15);
 }
 
 /**
@@ -705,7 +703,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest017, TestSize.Level1)
     postEventManager_->lastEventMap_.insert(std::make_pair(touchUpEvent.id, eventAction));
     postEventManager_->postEventAction_.push_back(eventAction);
     postEventManager_->CheckAndClearPostEventAction(UInode, touchUpEvent.id);
-    SUCCEED();
+    EXPECT_EQ(touchUpEvent.x, 15);
 }
 
 /**

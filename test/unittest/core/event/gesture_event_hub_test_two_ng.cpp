@@ -12,13 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "test/unittest/core/event/gesture_event_hub_test_ng.h"
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/mock/base/mock_subwindow.h"
-#include "test/mock/core/common/mock_container.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 using namespace testing;
@@ -248,7 +242,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset002, TestSize.Le
     auto size = SizeF(1, 1);
     gestureEventHub->frameNodeOffset_.SetX(1);
     gestureEventHub->frameNodeOffset_.SetY(1);
-    gestureEventHub->GetPixelMapOffset(info, size, -1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, -1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
     OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);

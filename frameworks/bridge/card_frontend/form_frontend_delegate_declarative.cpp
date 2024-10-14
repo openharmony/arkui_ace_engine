@@ -23,7 +23,7 @@ namespace OHOS::Ace::Framework {
 FormFrontendDelegateDeclarative::~FormFrontendDelegateDeclarative()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormDelegateDeclarative Destroyed");
 }
 
 UIContentErrorCode FormFrontendDelegateDeclarative::RunCard(const std::string& url, const std::string& params,

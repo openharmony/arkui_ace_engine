@@ -535,6 +535,36 @@ HWTEST_F(ListLayoutTestNg, ContentOffset007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ContentOffset008
+ * @tc.desc: Test List edge check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ContentOffset008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List without item
+     * @tc.expected: not contentStartOffset
+     */
+    const float contentStartOffset = 50;
+    const float contentEndOffset = 50;
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    CreateListItems(0);
+    CreateDone(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 0.0f);
+
+    /**
+     * @tc.steps: step2. add ListItem
+     * @tc.expected: ListItem position is correct.
+     */
+    AddItems(1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), -50.0f);
+}
+
+/**
  * @tc.name: PaintMethod001
  * @tc.desc: Test paint method when has no ListItem in List and in ListItemGroup
  * @tc.type: FUNC
@@ -1614,6 +1644,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount001, TestSize.Level1)
     EXPECT_EQ(childrenCount, 5);
     auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), LIST_HEIGHT);
 
     /**
      * @tc.steps: step2. Flush Idle Task
@@ -1627,6 +1658,8 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount001, TestSize.Level1)
     EXPECT_EQ(cachedItem->IsActive(), false);
     cachedItem = frameNode_->GetChildByIndex(7)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -150.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 7), 450.0f);
 }
 
 /**
@@ -1664,8 +1697,12 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(childrenCount, 10);
     auto item8 = frameNode_->GetChildByIndex(8)->GetHostNode();
     EXPECT_EQ(item8->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 8), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 8), LIST_HEIGHT);
     auto item9 = frameNode_->GetChildByIndex(9)->GetHostNode();
     EXPECT_EQ(item9->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 9), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(frameNode_, 9), LIST_HEIGHT);
 
     /**
      * @tc.steps: step2. Flush Idle Task
@@ -1677,12 +1714,20 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(childrenCount, 14);
     auto item2 = frameNode_->GetChildByIndex(2)->GetHostNode();
     EXPECT_EQ(item2->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -150.0f);
     auto item3 = frameNode_->GetChildByIndex(3)->GetHostNode();
     EXPECT_EQ(item3->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 3), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(frameNode_, 3), -150.0f);
     auto item14 = frameNode_->GetChildByIndex(14)->GetHostNode();
     EXPECT_EQ(item14->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 14), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 14), 450.0f);
     auto item15 = frameNode_->GetChildByIndex(15)->GetHostNode();
     EXPECT_EQ(item15->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 15), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 450.0f);
 }
 
 /**
@@ -1748,5 +1793,83 @@ HWTEST_F(ListLayoutTestNg, SetHeaderFooterComponent01, TestSize.Level1)
     group0Pattern->RemoveFooter();
     group0Children = group0->GetChildren();
     EXPECT_EQ(group0Children.size(), 2);
+}
+
+/**
+ * @tc.name: ListScrollOffsetTest001
+ * @tc.desc: list scroll offset test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListScrollOffsetTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     * @tc.expected: current offset is 250
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(4);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    for (int32_t i = 0; i < 9; i++) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone(frameNode_);
+    EXPECT_EQ(pattern_->currentOffset_, 250);
+
+    /**
+     * @tc.steps: step2. Update center index height
+     * @tc.expected: current offset is 260
+     */
+    auto centerNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(4));
+    ViewAbstract::SetHeight(AceType::RawPtr(centerNode), CalcLength(120));
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 260);
+
+    /**
+     * @tc.steps: step3. Update center index height
+     * @tc.expected: current offset is 175
+     */
+    for (int32_t i = 3; i <= 5; i++) {
+        auto centerNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(i));
+        ViewAbstract::SetHeight(AceType::RawPtr(centerNode), CalcLength(50));
+    }
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 175);
+}
+
+/**
+ * @tc.name: ListScrollOffsetTest002
+ * @tc.desc: list scroll offset test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListScrollOffsetTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG model = CreateList();
+    for (int32_t i = 0; i < 9; i++) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. ScrollTo item2
+     * @tc.expected: current offset is 250
+     */
+    UpdateCurrentOffset(-250);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 250);
+
+    /**
+     * @tc.steps: step3. Update item1 height and scroll to item1
+     * @tc.expected: current offset is 170
+     */
+    auto centerNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
+    ViewAbstract::SetHeight(AceType::RawPtr(centerNode), CalcLength(120));
+    UpdateCurrentOffset(100);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(pattern_->currentOffset_, 170);
 }
 } // namespace OHOS::Ace::NG

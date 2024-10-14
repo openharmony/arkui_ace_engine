@@ -19,7 +19,11 @@
 
 namespace OHOS::Ace {
 namespace {
-
+constexpr int PARAMS_NUM = 4;
+constexpr int INITIAL_VELOCITY = 0;
+constexpr int DAMPING = 1;
+constexpr int STIFFNESS = 2;
+constexpr int MASS = 3;
 template<class T>
 T ParseFunctionValue(const std::string& line, const std::string& key, std::function<T(const std::string&)> parser)
 {
@@ -497,18 +501,21 @@ AnimationOption AnimationUtil::CreateKeyboardAnimationOption(
     };
 
     AnimationOption option;
-    NearZero(keyboardHeight) ? option.SetDuration(config.durationOut_) : option.SetDuration(config.durationIn_);
+    auto curveConfig = NearZero(keyboardHeight) ? config.curveOut_ : config.curveIn_;
+    option.SetDuration(curveConfig.duration_);
     RefPtr<Curve> curve;
-    if (config.curveType_ == "cubic" && config.curveParams_.size() == 4) {
+    if (curveConfig.curveType_ == "cubic" && curveConfig.curveParams_.size() == PARAMS_NUM) {
         // cubic curve needs 4 params
         curve = AceType::MakeRefPtr<CubicCurve>(
-            config.curveParams_[0], config.curveParams_[1], config.curveParams_[2], config.curveParams_[3]);
-    } else if (config.curveType_ == "interpolatingSpring" && config.curveParams_.size() == 4) {
+            curveConfig.curveParams_[INITIAL_VELOCITY], curveConfig.curveParams_[DAMPING],
+            curveConfig.curveParams_[STIFFNESS], curveConfig.curveParams_[MASS]);
+    } else if (curveConfig.curveType_ == "interpolatingSpring" && curveConfig.curveParams_.size() == PARAMS_NUM) {
         // interpolatingSpring needs 4 params
         curve = AceType::MakeRefPtr<InterpolatingSpring>(
-            config.curveParams_[0], config.curveParams_[1], config.curveParams_[2], config.curveParams_[3]);
+            curveConfig.curveParams_[INITIAL_VELOCITY], curveConfig.curveParams_[DAMPING],
+            curveConfig.curveParams_[STIFFNESS], curveConfig.curveParams_[MASS]);
     } else {
-        auto index = BinarySearchFindIndex(curveMap, ArraySize(curveMap), config.curveType_.c_str());
+        auto index = BinarySearchFindIndex(curveMap, ArraySize(curveMap), curveConfig.curveType_.c_str());
         curve = index < 0 ? nullptr : curveMap[index].value;
     }
     option.SetCurve(curve);

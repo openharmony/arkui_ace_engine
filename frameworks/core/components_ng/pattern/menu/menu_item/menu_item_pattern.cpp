@@ -277,31 +277,13 @@ RefPtr<MenuPattern> MenuItemPattern::GetMenuPattern(bool needTopMenu)
     return menu->GetPattern<MenuPattern>();
 }
 
-void MenuItemPattern::ShowSubMenu()
+void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto menuWrapper = GetMenuWrapper();
-    CHECK_NULL_VOID(menuWrapper);
-    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto hasSubMenu = menuWrapperPattern->HasStackSubMenu();
-    auto buildFunc = GetSubBuilder();
-    if (!buildFunc || isSubMenuShowed_ || IsEmbedded() ||
-        (expandingMode_ == SubMenuExpandingMode::STACK && hasSubMenu)) {
-        return;
-    }
-    // Hide SubMenu of parent Menu node
-    auto parentMenu = GetMenu();
-    CHECK_NULL_VOID(parentMenu);
-    // parentMenu no need focus
     auto menuNode = GetMenu(true);
     CHECK_NULL_VOID(menuNode);
-    auto layoutProps = parentMenu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
-    NG::ScopedViewStackProcessor builderViewStackProcessor;
-    buildFunc();
-    auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    auto customNode = BuildSubMenuCustomNode();
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
@@ -313,8 +295,6 @@ void MenuItemPattern::ShowSubMenu()
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->FocusViewHide();
-    auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(parentMenuPattern);
     HideSubMenu();
     isSubMenuShowed_ = true;
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
@@ -334,12 +314,34 @@ void MenuItemPattern::ShowSubMenu()
     CHECK_NULL_VOID(subMenu);
     ShowSubMenuHelper(subMenu);
     menuPattern->SetShowedSubMenu(subMenu);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    if (type == ShowSubMenuType::KEY_DPAD_RIGHT) {
+        subMenuPattern->SetIsViewRootScopeFocused(false);
+    }
     auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(true);
     subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
-        static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "show sub menu, open type %{public}d", type);
+}
+
+RefPtr<UINode> MenuItemPattern::BuildSubMenuCustomNode()
+{
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+    auto hasSubMenu = menuWrapperPattern->HasStackSubMenu();
+    auto buildFunc = GetSubBuilder();
+    if (!buildFunc || isSubMenuShowed_ || IsEmbedded() ||
+        (expandingMode_ == SubMenuExpandingMode::STACK && hasSubMenu)) {
+        return nullptr;
+    }
+
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    buildFunc();
+    return NG::ViewStackProcessor::GetInstance()->Finish();
 }
 
 void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
@@ -368,7 +370,6 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SetClickMenuItemId(host->GetId());
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
     auto menuPattern = subMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
@@ -379,6 +380,7 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
     CHECK_NULL_VOID(menuWrapper);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         expandingMode_ == SubMenuExpandingMode::STACK) {
+        SetClickMenuItemId(host->GetId());
         subMenu->MountToParent(menuWrapper);
         menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         menuPattern->SetSubMenuShow();
@@ -671,7 +673,7 @@ void MenuItemPattern::OnClick()
     if (GetSubBuilder() != nullptr && (expandingMode_ == SubMenuExpandingMode::SIDE ||
         (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && !hasSubMenu) ||
         (expandingMode_ == SubMenuExpandingMode::EMBEDDED && !IsEmbedded()))) {
-        ShowSubMenu();
+        ShowSubMenu(ShowSubMenuType::CLICK);
         return;
     }
     // hide menu when menu item is clicked
@@ -682,7 +684,19 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
     // change menu item paint props on press
     auto touchType = info.GetTouches().front().GetTouchType();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    if (touchType == TouchType::DOWN) {
+        // change background color, update press status
+        NotifyPressStatus(true);
+    } else if (touchType == TouchType::UP) {
+        NotifyPressStatus(false);
+    }
+}
+
+void MenuItemPattern::NotifyPressStatus(bool isPress)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -692,8 +706,6 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto parent = AceType::DynamicCast<UINode>(host->GetParent());
     auto menuWrapper = GetMenuWrapper();
     auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
@@ -703,7 +715,7 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
         && menuWrapperPattern && menuWrapperPattern->HasStackSubMenu() && !IsSubMenu());
     if (!canChangeColor) return;
 
-    if (touchType == TouchType::DOWN) {
+    if (isPress) {
         // change background color, update press status
         SetBgBlendColor(GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
         if (menuWrapperPattern) {
@@ -711,12 +723,10 @@ void MenuItemPattern::OnTouch(const TouchEventInfo& info)
         }
         props->UpdatePress(true);
         menuPattern->OnItemPressed(parent, index_, true);
-    } else if (touchType == TouchType::UP) {
+    } else {
         SetBgBlendColor(isHovered_ ? theme->GetHoverColor() : Color::TRANSPARENT);
         props->UpdatePress(false);
         menuPattern->OnItemPressed(parent, index_, false);
-    } else {
-        return;
     }
     PlayBgColorAnimation(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -789,7 +799,7 @@ void MenuItemPattern::OnHover(bool isHover)
     if (isHover || isSubMenuShowed_) {
         // keep hover color when subMenu showed
         SetBgBlendColor(theme->GetHoverColor());
-        ShowSubMenu();
+        ShowSubMenu(ShowSubMenuType::HOVER);
         props->UpdateHover(true);
         menuPattern->OnItemPressed(parent, index_, true, true);
     } else {
@@ -833,7 +843,7 @@ bool MenuItemPattern::OnKeyEvent(const KeyEvent& event)
         SetBgBlendColor(theme->GetHoverColor());
         PlayBgColorAnimation();
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        ShowSubMenu();
+        ShowSubMenu(ShowSubMenuType::KEY_DPAD_RIGHT);
         return true;
     }
     return false;
@@ -871,7 +881,7 @@ void MenuItemPattern::InitLongPressEvent()
         if (itemPattern && itemPattern->GetSubBuilder() != nullptr &&
             menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE &&
             !(topLevelMenuPattern->IsSelectOverlayCustomMenu())) {
-            itemPattern->ShowSubMenu();
+            itemPattern->ShowSubMenu(ShowSubMenuType::LONG_PRESS);
         }
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
@@ -1353,8 +1363,12 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         } else if (textAlign == TextAlign::END) {
             textAlign = TextAlign::START;
         }
+        textProperty->UpdateTextAlign(textAlign);
+    } else {
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            textProperty->UpdateTextAlign(textAlign);
+        }
     }
-    textProperty->UpdateTextAlign(isLabel ? TextAlign::CENTER : textAlign);
     UpdateFont(menuProperty, theme, isLabel);
     textProperty->UpdateContent(content);
     UpdateTextOverflow(textProperty, theme);
@@ -1508,7 +1522,7 @@ void MenuItemPattern::SetAccessibilityAction()
         pattern->MarkIsSelected(pattern->IsSelected());
         context->OnMouseSelectUpdate(pattern->IsSelected(), ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         if (pattern->GetSubBuilder() != nullptr) {
-            pattern->ShowSubMenu();
+            pattern->ShowSubMenu(ShowSubMenuType::ACTION);
             return;
         }
 

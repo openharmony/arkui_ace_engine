@@ -440,11 +440,11 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
         }
         auto pullDownRatio = CalculatePullDownRatio();
         scrollOffset_ = std::clamp(scrollOffset_ + delta * pullDownRatio, 0.0f, MAX_OFFSET);
+        UpdateFirstChildPlacement();
+        FireOnOffsetChange(scrollOffset_);
         if (!isSourceFromAnimation_) {
-            FireOnOffsetChange(scrollOffset_);
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
-                UpdateFirstChildPlacement();
                 return { 0.f, true };
             }
             UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_HAND, GetFollowRatio());
@@ -454,7 +454,6 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
                 UpdateRefreshStatus(RefreshStatus::OVER_DRAG);
             }
         }
-        UpdateFirstChildPlacement();
     } else {
         HandleDragUpdateLowVersion(delta);
     }
@@ -487,7 +486,21 @@ float RefreshPattern::CalculatePullDownRatio()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 1.0f);
     auto contentHeight = geometryNode->GetPaddingSize().Height();
-    return NearZero(contentHeight) ? 1.0f : ScrollablePattern::CalculateFriction(scrollOffset_ / contentHeight);
+    if (NearZero(contentHeight)) {
+        return 1.0f;
+    }
+    if (!ratio_.has_value()) {
+        auto context = GetContext();
+        CHECK_NULL_RETURN(context, 1.0f);
+        auto scrollableTheme = context->GetTheme<ScrollableTheme>();
+        CHECK_NULL_RETURN(scrollableTheme, 1.0f);
+        ratio_ = scrollableTheme->GetRatio();
+    }
+    auto gamma = scrollOffset_ / contentHeight;
+    if (GreatOrEqual(gamma, 1.0)) {
+        gamma = 1.0f;
+    }
+    return exp(-ratio_.value() * gamma);
 }
 
 float RefreshPattern::GetFollowRatio()
@@ -650,7 +663,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
 
 void RefreshPattern::SwitchToFinish()
 {
-    if (refreshStatus_ != RefreshStatus::REFRESH && refreshStatus_ != RefreshStatus::DONE) {
+    if (isSourceFromAnimation_ || (refreshStatus_ != RefreshStatus::REFRESH && refreshStatus_ != RefreshStatus::DONE)) {
         UpdateRefreshStatus(RefreshStatus::INACTIVE);
     } else {
         UpdateRefreshStatus(RefreshStatus::DONE);
@@ -1151,6 +1164,7 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
     if (NearZero(offset)) {
         return result;
     }
+    isSourceFromAnimation_ = (source == SCROLL_FROM_ANIMATION);
     auto parent = GetNestedScrollParent();
     if (state == NestedState::CHILD_SCROLL) {
         if (Negative(offset) && Positive(scrollOffset_)) {
@@ -1164,19 +1178,18 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
                 result = HandleDragUpdate(offset, velocity);
             }
         } else {
-            if (!parent || ((Negative(offset) && (nestedScroll.forward == NestedScrollMode::SELF_ONLY ||
-                                                     nestedScroll.forward == NestedScrollMode::PARALLEL)) ||
-                               (Positive(offset) && (nestedScroll.backward == NestedScrollMode::SELF_ONLY ||
-                                                        nestedScroll.backward == NestedScrollMode::PARALLEL)))) {
-                return result;
-            } else {
+            bool selfScroll = !parent || ((Negative(offset) && (nestedScroll.forward == NestedScrollMode::SELF_ONLY ||
+                                                             nestedScroll.forward == NestedScrollMode::PARALLEL)) ||
+                                       (Positive(offset) && (nestedScroll.backward == NestedScrollMode::SELF_ONLY ||
+                                                                nestedScroll.backward == NestedScrollMode::PARALLEL)));
+            if (!selfScroll) {
                 result = parent->HandleScroll(offset, source, NestedState::CHILD_SCROLL, velocity);
             }
         }
-        return result;
     } else if (state == NestedState::CHILD_OVER_SCROLL) {
-        if (parent && ((Negative(offset) && nestedScroll.forward == NestedScrollMode::SELF_FIRST) ||
-                          (Positive(offset) && nestedScroll.backward == NestedScrollMode::SELF_FIRST))) {
+        bool parentScroll = parent && ((Negative(offset) && nestedScroll.forward == NestedScrollMode::SELF_FIRST) ||
+                          (Positive(offset) && nestedScroll.backward == NestedScrollMode::SELF_FIRST));
+        if (parentScroll) {
             result = parent->HandleScroll(offset, source, NestedState::CHILD_OVER_SCROLL, velocity);
             if (!NearZero(result.remain)) {
                 result = HandleDragUpdate(result.remain, velocity);

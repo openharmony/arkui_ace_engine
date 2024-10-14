@@ -14,6 +14,7 @@
  */
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "ui_report_proxy.h"
 
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 namespace OHOS::Ace {
@@ -93,6 +94,13 @@ void UiSessionManager::ReportWebUnfocusEvent(int64_t accessibilityId, const std:
 
 void UiSessionManager::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId)
 {
+    // add death callback
+    auto uiReportProxyRecipient = new UiReportProxyRecipient([processId, this]() {
+        LOGW("agent process dead,processId:%{public}d", processId);
+        // reportMap remove this processId
+        this->reportObjectMap_.erase(processId);
+    });
+    reportStub->AddDeathRecipient(uiReportProxyRecipient);
     reportObjectMap_[processId] = reportStub;
 }
 

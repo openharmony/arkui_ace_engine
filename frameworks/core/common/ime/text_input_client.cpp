@@ -15,6 +15,8 @@
 
 #include "core/common/ime/text_input_client.h"
 
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace {
 namespace {
 using tic = TextInputClient; // give it a shorter name to maintain a good code layout
@@ -100,6 +102,15 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_I, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_I); } },
     { KeyComb(KeyCode::KEY_U, KEY_CTRL), [](tic* c) -> void { c->HandleSelectFontStyle(KeyCode::KEY_U); } },
 };
+
+void TextInputClient::NotifyKeyboardHeight(uint32_t height)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    manager->SetkeyboardHeightConsideringUIExtension(height);
+}
 
 bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
 {

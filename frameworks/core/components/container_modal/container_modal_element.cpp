@@ -131,9 +131,6 @@ void ContainerModalElement::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
         isShow = false;
     }
 
-    // set container window show state to RS
-    context->SetContainerWindow(isShow);
-
     // full screen need to hide border and padding.
     auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
     if (containerRenderBox) {
@@ -175,7 +172,7 @@ void ContainerModalElement::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     }
     auto renderClip = AceType::DynamicCast<RenderClip>(clip->GetRenderNode());
     if (renderClip) {
-        isShow ? renderClip->SetClipRadius(Radius(CONTAINER_INNER_RADIUS)) : renderClip->SetClipRadius(Radius(0.0));
+        renderClip->SetClipRadius(Radius(0.0));
     }
 
     // Get first child : title

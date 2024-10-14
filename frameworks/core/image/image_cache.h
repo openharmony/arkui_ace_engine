@@ -96,7 +96,7 @@ private:
     std::list<CacheNode<std::shared_ptr<CachedImage>>> cacheList_;
     std::unordered_map<std::string, std::list<CacheNode<std::shared_ptr<CachedImage>>>::iterator> imageCache_;
 
-    std::mutex dataCacheMutex_;
+    std::timed_mutex dataCacheMutex_;
     std::list<CacheNode<RefPtr<NG::ImageData>>> dataCacheList_;
     std::unordered_map<std::string, std::list<CacheNode<RefPtr<NG::ImageData>>>::iterator> imageDataCache_;
 

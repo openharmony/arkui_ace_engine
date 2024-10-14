@@ -52,7 +52,7 @@ public:
     }
 
     virtual RefPtr<ImageObject> Clone() = 0;
-
+    virtual std::string GetDumpInfo() { return ""; }
     bool IsSupportCache() const
     {
         return src_.SupportObjCache();
@@ -69,7 +69,7 @@ public:
     }
 
     virtual void MakeCanvasImage(
-        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) = 0;
+        const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& resizeTarget, bool forceResize, bool syncLoad) = 0;
 
 protected:
     const ImageSourceInfo src_;

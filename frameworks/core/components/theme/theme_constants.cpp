@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -306,6 +306,14 @@ bool ThemeConstants::GetRawFileDescription(const std::string& rawfileName, Rawfi
         return false;
     }
     return resAdapter_->GetRawFileDescription(rawfileName, rawfileDescription);
+}
+
+bool ThemeConstants::CloseRawFileDescription(const std::string& rawfileName) const
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->CloseRawFileDescription(rawfileName);
 }
 
 bool ThemeConstants::GetMediaById(const int32_t& resId, std::string& mediaPath) const

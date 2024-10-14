@@ -24,9 +24,9 @@ public:
     TestingData() = default;
     virtual ~TestingData() = default;
 
-    virtual bool BuildWithCopy(const void* /* data */, size_t /* length */)
+    virtual bool BuildWithCopy(const void* data, size_t length)
     {
-        return false;
+        return length > 0 ? true : false;
     }
 
     virtual size_t GetSize() const

@@ -274,7 +274,7 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("sticky"), "Sticky.Opacity");
     EXPECT_EQ(json->GetString("editable"), "EditMode.Movable");
     swipeAction = json->GetObject("swipeAction");
-    EXPECT_EQ(swipeAction->GetString("edgeEffect"), "SwipeEdgeEffect.Node");
+    EXPECT_EQ(swipeAction->GetString("edgeEffect"), "SwipeEdgeEffect.None");
 
     /**
      * @tc.steps: step4. Change some property, Call ToJsonValue()
@@ -1254,6 +1254,31 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrScrollSnapAlign010
+ * @tc.desc: Test FixPredictSnapOffsetAlignCenter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign::END
+     * @tc.expected: not contentStartOffset
+     */
+    CreateSnapList(V2::ScrollSnapAlign::END);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+
+    /**
+     * @tc.steps: step2. change ListItem height
+     * @tc.expected: The item(index:2) align to end
+     */
+    
+    SetListItemHeight(0, 200.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 20.0f);
+}
+
+/**
  * @tc.name: AttrSLECM001
  * @tc.desc: Test property about edgeEffect/chainAnimation/multiSelectable
  * @tc.type: FUNC
@@ -2132,5 +2157,59 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition006, TestSize.Level1)
     EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 0);
     EXPECT_EQ(pattern_->currentOffset_, 0);
     EXPECT_EQ(groupPattern->layoutedItemInfo_.value().startIndex, 0);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition007
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup with header/footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetMaintainVisibleContentPosition(true);
+    auto groupModel = CreateListItemGroup();
+    groupModel.SetSpace(Dimension(10));
+    auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetHeader(std::move(header));
+    auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetFooter(std::move(footer));
+    CreateListItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 0, insert 1 Item in 0.
+     * @tc.expected: Current index is 0, currentOffset = 0
+     */
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    groupPattern->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 0);
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+
+    /**
+     * @tc.steps: step2. Scroll to listItem1, insert 1 Item in 0.
+     * @tc.expected: Current index is 2, currentOffset = 260
+     */
+    UpdateCurrentOffset(-160);
+    EXPECT_EQ(pattern_->currentOffset_, 160);
+    groupPattern->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 2);
+    EXPECT_EQ(pattern_->currentOffset_, 260);
+
+    /**
+     * @tc.steps: step3. Scroll to listItem1, delete 1 Item in 0.
+     * @tc.expected: Current index is 1, currentOffset = 260
+     */
+    groupPattern->NotifyDataChange(2, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 160);
 }
 } // namespace OHOS::Ace::NG

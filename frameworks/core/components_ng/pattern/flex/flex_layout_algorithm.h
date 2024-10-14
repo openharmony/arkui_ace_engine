@@ -96,6 +96,7 @@ private:
     bool MarginOnMainAxisNegative(LayoutWrapper* layoutWrapper);
     bool IsKeepMinSize(const RefPtr<LayoutWrapper>& childLayoutWrapper, float& flexSize);
     bool CheckSetConstraint(const std::unique_ptr<MeasureProperty>& propertyPtr);
+    void CheckMainAxisSizeAuto(const std::unique_ptr<MeasureProperty>& calcLayoutConstraint);
 
     OptionalSizeF realSize_;
     float mainAxisSize_ = 0.0f;

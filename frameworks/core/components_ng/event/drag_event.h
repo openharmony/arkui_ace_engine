@@ -138,7 +138,8 @@ public:
         ResponseLinkResult& responseLinkResult) override;
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
-    static void UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset);
+    static void UpdatePreviewPositionAndScale(
+        const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset, float scale = -1.0f);
     static void UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
     static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
@@ -288,6 +289,7 @@ private:
     // check the current node's status to decide if it can initiate one drag operation
     bool IsCurrentNodeStatusSuitableForDragging(
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+    bool IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode);
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
     void RecordMenuWrapperNodeForDrag(int32_t targetId);
@@ -317,10 +319,11 @@ private:
     std::vector<DimensionRect> responseRegion_;
     bool isSelectedItemNode_ = false;
     bool isOnBeforeLiftingAnimation = false;
+    bool isDragPrepareFinish_ = false;
 
     bool isDragUserReject_ = false;
     bool defaultOnDragStartExecuted_ = false;
-    bool isResponseRegionFull = false;
+    bool isResponseRegionFull_ = false;
     OptionsAfterApplied optionsAfterApplied_;
 
     PanDirection direction_;

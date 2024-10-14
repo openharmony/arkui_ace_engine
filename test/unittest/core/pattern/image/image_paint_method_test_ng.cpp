@@ -14,6 +14,7 @@
  */
 
 #include "image_base.h"
+#include "core/components_ng/pattern/image/image_dfx.h"
 
 namespace OHOS::Ace::NG {
 
@@ -66,16 +67,17 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdateBorderRadius, Test
      */
     RefPtr<PaintWrapper> paintWrapperNull = AceType::MakeRefPtr<PaintWrapper>(nullptr, nullptr, nullptr);
     PaintWrapper* imagePaintWrapperNullRaw_ = AceType::RawPtr(paintWrapperNull);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperNullRaw_);
+    ImageDfxConfig imageDfxConfig;
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperNullRaw_, imageDfxConfig);
     PaintWrapper* imagePaintWrapperRaw_ = AceType::RawPtr(imagePaintWrapper_);
     EXPECT_NE(imagePaintWrapperRaw_, nullptr);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
     BorderWidthProperty borderWidth_;
     frameNode->GetRenderContext()->UpdateBorderWidth(borderWidth_);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
     borderWidth_.SetBorderWidth(IMAGE_SOURCEINFO_WIDTH);
     frameNode->GetRenderContext()->UpdateBorderWidth(borderWidth_);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
     EXPECT_EQ(imagePaintMethod_->selected_, true);
 }
 
@@ -129,17 +131,17 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig, TestS
     EXPECT_NE(imagePaintWrapperRaw_, nullptr);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     EXPECT_EQ(isRightToLeft, false);
-    imagePaintMethod_->UpdatePaintConfig(imagePaintProperty_, imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdatePaintConfig(imagePaintWrapperRaw_);
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
     bool isRightToLeftEnd = AceApplicationInfo::GetInstance().IsRightToLeft();
     EXPECT_EQ(isRightToLeftEnd, true);
-    imagePaintMethod_->UpdatePaintConfig(imagePaintProperty_, imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdatePaintConfig(imagePaintWrapperRaw_);
     auto& config = imagePaintMethod_->canvasImage_->paintConfig_;
     EXPECT_NE(config, nullptr);
     auto drawingColorFilter = config->colorFilter_.colorFilterDrawing_;
     imagePaintProperty_->UpdateDrawingColorFilter(drawingColorFilter);
     imagePaintProperty_->UpdateNeedBorderRadius(false);
-    imagePaintMethod_->UpdatePaintConfig(imagePaintProperty_, imagePaintWrapperRaw_);
+    imagePaintMethod_->UpdatePaintConfig(imagePaintWrapperRaw_);
     EXPECT_EQ(imagePaintMethod_->selected_, true);
 }
 } // namespace OHOS::Ace::NG

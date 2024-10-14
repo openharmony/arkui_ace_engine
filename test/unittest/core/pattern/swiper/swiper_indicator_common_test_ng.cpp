@@ -634,7 +634,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
     indicatorPattern->isPressed_ = false;
     indicatorPattern->isClicked_ = true;
     indicatorPattern->isRepeatClicked_ = false;
-    indicatorPattern->swiperIndicatorType_ = SwiperIndicatorType::DOT;
     /**
      * @tc.steps: step2. call the function DumpAdvanceInfo.
      * @tc.expected: verify the size dumped correctly.
@@ -651,7 +650,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
     indicatorPattern->isPressed_ = true;
     indicatorPattern->isClicked_ = false;
     indicatorPattern->isRepeatClicked_ = true;
-    indicatorPattern->swiperIndicatorType_ = SwiperIndicatorType::DIGIT;
     indicatorPattern->DumpAdvanceInfo();
     EXPECT_EQ(DumpLog::GetInstance().description_.size(), 5);
 }
@@ -671,10 +669,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern015, TestSize.Level1)
      * @tc.expected: dotIndicatorModifier_ methods are called, overlongDotIndicatorModifier_ is created.
      */
     indicatorPattern->dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
-    indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_ = false;
     indicatorPattern->overlongDotIndicatorModifier_ = nullptr;
     auto result = indicatorPattern->CreateOverlongDotIndicatorPaintMethod(pattern_);
-    EXPECT_TRUE(indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_);
+    EXPECT_EQ(indicatorPattern->dotIndicatorModifier_, nullptr);
     EXPECT_NE(indicatorPattern->overlongDotIndicatorModifier_, nullptr);
     EXPECT_NE(result, nullptr);
     /**
@@ -682,10 +679,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern015, TestSize.Level1)
      * @tc.expected: dotIndicatorModifier_ methods are called, overlongDotIndicatorModifier_ is reused.
      */
     indicatorPattern->dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
-    indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_ = false;
     indicatorPattern->overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
     result = indicatorPattern->CreateOverlongDotIndicatorPaintMethod(pattern_);
-    EXPECT_TRUE(indicatorPattern->dotIndicatorModifier_->longPointLeftAnimEnd_);
+    EXPECT_EQ(indicatorPattern->dotIndicatorModifier_, nullptr);
     EXPECT_NE(indicatorPattern->overlongDotIndicatorModifier_, nullptr);
     EXPECT_NE(result, nullptr);
 
@@ -724,9 +720,8 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern016, TestSize.Level1)
      * @tc.expected: overlongDotIndicatorModifier_ methods are called
      */
     indicatorPattern->overlongDotIndicatorModifier_ = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
-    indicatorPattern->overlongDotIndicatorModifier_->blackPointsAnimEnd_ = false;
     indicatorPattern->CreateDotIndicatorPaintMethod(pattern_);
-    EXPECT_TRUE(indicatorPattern->overlongDotIndicatorModifier_->blackPointsAnimEnd_);
+    EXPECT_EQ(indicatorPattern->overlongDotIndicatorModifier_, nullptr);
 }
 
 /**
@@ -845,5 +840,38 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern019, TestSize.Level1)
     indicatorPattern->UpdateOverlongPaintMethod(pattern_, overlongPaintMethod);
     EXPECT_EQ(overlongPaintMethod->gestureState_, GestureState::GESTURE_STATE_NONE);
     EXPECT_TRUE(modifier->longPointLeftAnimEnd_);
+}
+
+/**
+ * @tc.name: SwiperIndicatorPattern020
+ * @tc.desc: Test HandleLongDragUpdate when SwipeByGroup is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(2);
+        model.SetSwipeByGroup(true);
+    });
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    int32_t settingApiVersion = 14;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    TouchEventInfo touchEventInfo("default");
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetLocalLocation(Offset(18.0f, 1.0f));
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    GestureEvent info;
+    info.SetLocalLocation(Offset(0.0f, 1.0f));
+    indicatorPattern->HandleTouchDown();
+    indicatorPattern->HandleDragStart(info);
+    indicatorPattern->HandleTouchEvent(touchEventInfo);
+    EXPECT_EQ(pattern_->jumpIndex_.value(), 2);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

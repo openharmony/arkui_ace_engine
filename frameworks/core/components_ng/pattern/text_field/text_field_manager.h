@@ -57,6 +57,10 @@ public:
         optionalPosition_ = std::nullopt;
     }
 
+    RectF GetFocusedNodeCaretRect();
+    
+    void TriggerAvoidOnCaretChange();
+
     void AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField);
 
     void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) override {}
@@ -121,6 +125,8 @@ public:
     bool UsingCustomKeyboardAvoid() {
         return usingCustomKeyboardAvoid_;
     }
+
+    void TriggerCustomKeyboardAvoid();
 
     void SetUsingCustomKeyboardAvoid(bool usingCustomKeyboardAvoid) {
         usingCustomKeyboardAvoid_ = usingCustomKeyboardAvoid;
@@ -190,6 +196,39 @@ public:
         return onFocusTextFieldId;
     }
 
+    bool GetLaterAvoid() const
+    {
+        return laterAvoid_;
+    }
+
+    void SetLaterAvoid(bool laterAvoid)
+    {
+        laterAvoid_ = laterAvoid;
+    }
+
+    void SetLaterAvoidArgs(Rect keyboardArea, double positionY, double height)
+    {
+        laterAvoid_ = true;
+        laterAvoidKeyboardArea_ = keyboardArea;
+        laterAvoidPositionY_ = positionY;
+        laterAvoidHeight_ = height;
+    }
+
+    Rect GetLaterAvoidKeyboardRect()
+    {
+        return laterAvoidKeyboardArea_;
+    }
+
+    double GetLaterAvoidPositionY()
+    {
+        return laterAvoidPositionY_;
+    }
+
+    double GetLaterAvoidHeight()
+    {
+        return laterAvoidHeight_;
+    }
+
     void SetLastRequestKeyboardId(int32_t lastRequestKeyboardId) {
         lastRequestKeyboardId_ = lastRequestKeyboardId;
     }
@@ -198,6 +237,7 @@ public:
         return lastRequestKeyboardId_;
     }
 
+    RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
     void AddTextFieldInfo(const TextFieldInfo& textFieldInfo);
     void RemoveTextFieldInfo(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
     void UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo);
@@ -205,7 +245,6 @@ public:
 
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
-    RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
     RefPtr<FrameNode> FindNavNode(const RefPtr<FrameNode>& textField);
     bool IsAutoFillPasswordType(const TextFieldInfo& textFieldInfo);
 
@@ -228,6 +267,10 @@ private:
     bool imeAttachCalled_ = false;
     bool needToRequestKeyboard_ = true;
     std::unordered_map<int32_t, std::unordered_map<int32_t, TextFieldInfo>> textFieldInfoMap_;
+    bool laterAvoid_ = false;
+    Rect laterAvoidKeyboardArea_;
+    double laterAvoidPositionY_ = 0.0;
+    double laterAvoidHeight_ = 0.0;
 };
 
 } // namespace OHOS::Ace::NG

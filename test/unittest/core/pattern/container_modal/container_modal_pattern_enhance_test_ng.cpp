@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
+
 #define protected public
 #define private public
 
-#include "gtest/gtest.h"
 #include "test/mock/base/mock_subwindow.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"

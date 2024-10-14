@@ -231,6 +231,7 @@ struct GradientProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LinearGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SweepGradient, NG::Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(RadialGradient, NG::Gradient);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(LastGradientType, NG::GradientType);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };

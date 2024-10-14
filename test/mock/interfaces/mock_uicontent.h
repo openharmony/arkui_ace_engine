@@ -81,7 +81,8 @@ public:
     MOCK_METHOD1(SetFormHeight, void(const float height));
     MOCK_METHOD0(GetFormWidth, float());
     MOCK_METHOD0(GetFormHeight, float());
-    MOCK_METHOD2(OnFormSurfaceChange, void(float width, float height));
+    MOCK_METHOD4(OnFormSurfaceChange, void(float width, float height, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> &rsTransaction));
     MOCK_METHOD1(SetActionEventHandler, void(std::function<void(const std::string& action)>&& actionCallback));
     MOCK_METHOD1(SetFormLinkInfoUpdateHandler, void(std::function<void(const std::vector<std::string>&)>&& callback));
     MOCK_METHOD1(SetErrorEventHandler,
@@ -125,6 +126,7 @@ public:
         int64_t baseParent, Accessibility::AccessibilityElementInfo& output));
 #endif
     MOCK_METHOD1(GetAppPaintSize, void(OHOS::Rosen::Rect&));
+    MOCK_METHOD1(GetWindowPaintSize, void(OHOS::Rosen::Rect&));
     MOCK_METHOD3(CreateCustomPopupUIExtension, int32_t(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config));
     MOCK_METHOD1(DestroyCustomPopupUIExtension, void(int32_t nodeId));

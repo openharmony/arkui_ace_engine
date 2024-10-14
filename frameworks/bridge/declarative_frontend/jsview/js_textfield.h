@@ -66,6 +66,12 @@ public:
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void JsBorderStyle(const JSCallbackInfo& info);
+
+    static void GetBorderRadiusByLengthMetrics(const char* key,
+        JSRef<JSObject>& object, std::optional<CalcDimension>& radius);
+    static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft,
+        CalcDimension& topRight, CalcDimension& bottomLeft, CalcDimension& bottomRight);
+    static void ParseBorderRadius(const JSRef<JSVal>& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void JsHoverEffect(const JSCallbackInfo& info);
     static void SetOnEditChanged(const JSCallbackInfo& info);
@@ -129,6 +135,8 @@ public:
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);
+    static void SetCancelDefaultIcon();
+    static void SetCancelSymbolIcon(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

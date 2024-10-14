@@ -46,16 +46,16 @@ public:
 
     static float GetItemSpace(const RefPtr<SwiperLayoutProperty>& property)
     {
-        if (property->IgnoreItemSpace()) {
+        if (!property || property->IgnoreItemSpace()) {
             return 0.0f;
         }
-        auto scale = property->GetLayoutConstraint()->scaleProperty;
-        return ConvertToPx(property->GetItemSpace().value_or(0.0_px), scale).value_or(0);
+        return property->GetItemSpace().value_or(0.0_px).ConvertToPx();
     }
 
     static LayoutConstraintF CreateChildConstraint(
         const RefPtr<SwiperLayoutProperty>& property, const OptionalSizeF& idealSize, bool getAutoFill)
     {
+        CHECK_NULL_RETURN(property, {});
         auto layoutConstraint = property->CreateChildConstraint();
         layoutConstraint.parentIdealSize = idealSize;
         auto displayCount = property->GetDisplayCount().value_or(1);
@@ -145,6 +145,7 @@ public:
     static void CheckAutoFillDisplayCount(
         RefPtr<SwiperLayoutProperty>& swiperLayoutProperty, float contentWidth, int32_t totalCount)
     {
+        CHECK_NULL_VOID(swiperLayoutProperty);
         bool isAutoFill = swiperLayoutProperty->GetMinSize().has_value();
         if (!isAutoFill) {
             return;
@@ -163,6 +164,17 @@ public:
         if (displayCountProperty != displayCount) {
             swiperLayoutProperty->UpdateDisplayCount(displayCount);
         }
+    }
+
+    static bool CheckIsSingleCase(const RefPtr<SwiperLayoutProperty>& property)
+    {
+        bool hasMinSize = property->GetMinSize().has_value() && !LessOrEqual(property->GetMinSizeValue().Value(), 0);
+        bool hasPrevMargin = Positive(property->GetCalculatedPrevMargin());
+        bool hasNextMargin = Positive(property->GetCalculatedNextMargin());
+
+        return !hasMinSize && (!hasPrevMargin && !hasNextMargin) &&
+               ((property->GetDisplayCount().has_value() && property->GetDisplayCountValue() == 1) ||
+                   (!property->GetDisplayCount().has_value() && SwiperUtils::IsStretch(property)));
     }
 
 private:

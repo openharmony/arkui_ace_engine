@@ -19,6 +19,7 @@ ace_unittest("refresh_test_ng") {
     "refresh_accessibility_test_ng.cpp",
     "refresh_event_test_ng.cpp",
     "refresh_layout_test_ng.cpp",
+    "refresh_nested_test_ng.cpp",
     "refresh_test_ng.cpp",
   ]
 }

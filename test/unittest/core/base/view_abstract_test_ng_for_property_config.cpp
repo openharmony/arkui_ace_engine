@@ -535,7 +535,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractGestureRecognizerJudge001, TestSize.Lev
     ASSERT_NE(frameNode, nullptr);
     
     GestureRecognizerJudgeFunc gestureRecognizerJudgeFunc;
-    ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+    ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc), false);
 
     /**
      * @tc.steps: step2. Verify that the touch intercept function has been set.
@@ -614,7 +614,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractFocusScopeId001, TestSize.Level1)
     std::string focusScopeId = "focusScope1";
     bool isGroup = true;
     ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub()->focusType_ = FocusType::SCOPE;
-    ViewAbstract::SetFocusScopeId(focusScopeId, isGroup);
+    ViewAbstract::SetFocusScopeId(focusScopeId, isGroup, true);
 
     /**
      * @tc.steps: step2. Verify that the focus scope ID has been set.
@@ -675,7 +675,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractFocusScopeIdWithFrameNode001, TestSize.
     std::string focusScopeId = "focusScope2";
     bool isGroup = true;
     ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub()->focusType_ = FocusType::SCOPE;
-    ViewAbstract::SetFocusScopeId(AceType::RawPtr(frameNode), focusScopeId, isGroup);
+    ViewAbstract::SetFocusScopeId(AceType::RawPtr(frameNode), focusScopeId, isGroup, true);
 
     /**
      * @tc.steps: step2. Verify that the focus scope ID has been set.
@@ -1064,7 +1064,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractPositionEdges002, TestSize.Level1)
     CalcDimension right(20, DimensionUnit::VP);
     edges.SetBottom(bottom);
     edges.SetRight(right);
-    ViewAbstract::SetPositionEdges(nullptr, edges);
+    ViewAbstract::SetPositionEdges(rootFrameNode, edges);
 
     EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
     EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()
@@ -1106,7 +1106,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractOffset002, TestSize.Level1)
     CalcDimension left(20, DimensionUnit::VP);
     edges.SetTop(top);
     edges.SetLeft(left);
-    ViewAbstract::SetOffsetEdges(nullptr, edges);
+    ViewAbstract::SetOffsetEdges(rootFrameNode, edges);
 
     EXPECT_NE(FRAME_NODE_ROOT->GetRenderContext(), nullptr);
     EXPECT_EQ(FRAME_NODE_ROOT->GetRenderContext()

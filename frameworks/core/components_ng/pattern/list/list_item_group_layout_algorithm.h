@@ -43,10 +43,20 @@ struct ListItemGroupInfo {
 
 struct ListItemGroupCacheParam {
     bool forward = true;
-    int32_t cacheCount = 0;
+    bool backward = false;
+    bool show = false;
+    int32_t cacheCountForward = 0;
+    int32_t cacheCountBackward = 0;
     int32_t forwardCachedIndex = -1;
     int32_t backwardCachedIndex = INT_MAX;
     int64_t deadline = 0;
+};
+
+struct CachedIndexInfo {
+    int32_t forwardCachedCount = 0;
+    int32_t backwardCachedCount = 0;
+    int32_t forwardCacheMax = 0;
+    int32_t backwardCacheMax = 0;
 };
 
 // TextLayoutAlgorithm acts as the underlying text layout.
@@ -69,9 +79,24 @@ public:
         return itemPosition_;
     }
 
+    const PositionMap& GetCachedItemPosition() const
+    {
+        return cachedItemPosition_;
+    }
+
+    void ResetCachedItemPosition()
+    {
+        cachedItemPosition_.clear();
+    }
+
     void SetItemsPosition(const PositionMap& itemPosition)
     {
         itemPosition_ = itemPosition;
+    }
+
+    void SetCachedItemsPosition(const PositionMap& itemPosition)
+    {
+        cachedItemPosition_ = itemPosition;
     }
 
     void ClearItemPosition();
@@ -138,9 +163,10 @@ public:
         needAdjustRefPos_ = needAdjust;
     }
 
-    void SetNeedCheckOffset(bool needCheckOffset)
+    void SetNeedCheckOffset(bool needCheckOffset, float averageHeight)
     {
         isNeedCheckOffset_ = needCheckOffset;
+        groupItemAverageHeight_ = averageHeight;
     }
 
     float GetRefPos() const
@@ -179,6 +205,16 @@ public:
         return itemPosition_.empty() ? 0 : itemPosition_.rbegin()->first;
     }
 
+    int32_t GetCacheStartIndex() const
+    {
+        return cachedItemPosition_.empty() ? -1 : cachedItemPosition_.begin()->first;
+    }
+
+    int32_t GetCacheEndIndex() const
+    {
+        return cachedItemPosition_.empty() ? -1 : cachedItemPosition_.rbegin()->first;
+    }
+
     float GetStartPosition() const
     {
         if (itemPosition_.empty()) {
@@ -199,6 +235,28 @@ public:
             return itemPosition_.rbegin()->second.endPos;
         }
         return itemPosition_.rbegin()->second.endPos + spaceWidth_;
+    }
+
+    float GetCacheStartPosition() const
+    {
+        if (cachedItemPosition_.empty()) {
+            return 0.0f;
+        }
+        if (GetCacheStartIndex() == 0) {
+            return cachedItemPosition_.begin()->second.startPos;
+        }
+        return cachedItemPosition_.begin()->second.startPos - spaceWidth_;
+    }
+
+    float GetCacheEndPosition() const
+    {
+        if (cachedItemPosition_.empty()) {
+            return 0.0f;
+        }
+        if (GetCacheEndIndex() == totalItemCount_ - 1) {
+            return cachedItemPosition_.rbegin()->second.endPos;
+        }
+        return cachedItemPosition_.rbegin()->second.endPos + spaceWidth_;
     }
 
     int32_t GetTotalItemCount() const
@@ -297,6 +355,22 @@ public:
     {
         return adjustReferenceDelta_;
     }
+    
+    float GetAdjustTotalSize() const
+    {
+        return adjustTotalSize_;
+    }
+
+    void SetCachedIndex(int32_t forwardIndex, int32_t backwardIndex)
+    {
+        forwardCachedIndex_ = forwardIndex;
+        backwardCachedIndex_ = backwardIndex;
+    }
+
+    std::pair<int32_t, int32_t> GetCachedIndex() const
+    {
+        return { forwardCachedIndex_, backwardCachedIndex_ };
+    }
 
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
@@ -324,8 +398,8 @@ private:
         int32_t currentIndex);
     int32_t MeasureALineAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t currentIndex);
-    void CheckJumpForwardForBigOffset(int32_t& startIndex, float& startPos);
-    void CheckJumpBackwardForBigOffset(int32_t& endIndex, float& endPos);
+    bool CheckJumpForwardForBigOffset(int32_t& startIndex, float& startPos);
+    bool CheckJumpBackwardForBigOffset(int32_t& endIndex, float& endPos);
     void MeasureForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t startIndex, float startPos);
     void MeasureBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
@@ -339,7 +413,7 @@ private:
     void MeasureEnd(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureHeaderFooter(LayoutWrapper* layoutWrapper);
-    void SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount);
+    void SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show);
     float UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos);
     bool NeedMeasureItem(LayoutWrapper* layoutWrapper);
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
@@ -349,7 +423,12 @@ private:
     void AdjustItemPosition();
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
     void MeasureCacheItem(LayoutWrapper* layoutWrapper);
-    void LayoutCacheItem(LayoutWrapper* layoutWrapper);
+    void MeasureCacheForward(LayoutWrapper* layoutWrapper, ListItemGroupCacheParam& param);
+    void MeasureCacheBackward(LayoutWrapper* layoutWrapper, ListItemGroupCacheParam& param);
+    void LayoutCacheItem(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize, bool show);
+    void CheckUpdateGroupAndItemPos(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
+    void UpdateCachedItemPosition();
+    void UpdateLayoutedItemInfo();
 
     bool isCardStyle_ = false;
     int32_t headerIndex_;
@@ -374,6 +453,8 @@ private:
     std::optional<int32_t> targetIndex_;
     ScrollAlign scrollAlign_ = ScrollAlign::NONE;
     int32_t totalItemCount_ = 0;
+    int32_t forwardCachedIndex_ = -1;
+    int32_t backwardCachedIndex_ = INT_MAX;
     float totalMainSize_ = 0.0f;
     float headerMainSize_ = 0.0f;
     float footerMainSize_ = 0.0f;
@@ -385,10 +466,12 @@ private:
     float endPos_ = 0.0f;
     float referencePos_ = 0.0f;
     float adjustReferenceDelta_ = 0.0f;
+    float adjustTotalSize_ = 0.0f;
     float refPos_ = 0.0f;
     float prevContentMainSize_ = 0.0f;
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
+    float groupItemAverageHeight_ = 0.0f;
     bool forwardLayout_ = true;
     bool needAllLayout_ = false;
     bool needAdjustRefPos_ = false;
@@ -400,7 +483,7 @@ private:
     TextDirection layoutDirection_ = TextDirection::LTR;
 
     std::optional<ListItemGroupCacheParam> cacheParam_;
-    std::list<int32_t> cachedItem_;
+    PositionMap cachedItemPosition_;
 };
 } // namespace OHOS::Ace::NG
 

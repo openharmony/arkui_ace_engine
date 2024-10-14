@@ -217,20 +217,12 @@ bool ScrollBarProxy::NotifySnapScroll(
     float delta, float velocity, float barScrollableDistance, float dragDistance) const
 {
     auto scrollable = scorllableNode_.scrollableNode.Upgrade();
-    if (!scrollable || !CheckScrollable(scrollable) || !scorllableNode_.calcPredictSnapOffsetCallback ||
-        !scorllableNode_.startScrollSnapMotionCallback) {
-        return false;
-    }
-
-    auto controlDistance = GetScrollableNodeDistance(scrollable);
-    auto patternOffset = CalcPatternOffset(controlDistance, barScrollableDistance, delta);
-    dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance);
-    auto predictSnapOffset = scorllableNode_.calcPredictSnapOffsetCallback(patternOffset, dragDistance, -velocity);
-    // If snap scrolling, predictSnapOffset will has a value.
-    if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
-        scorllableNode_.startScrollSnapMotionCallback(predictSnapOffset.value(), velocity);
-        // Outer scrollBar can only control one snap scrollable component.
-        return true;
+    CHECK_NULL_RETURN(scrollable, false);
+    if (scorllableNode_.startSnapMotionCallback) {
+        auto controlDistance = GetScrollableNodeDistance(scrollable);
+        auto patternOffset = CalcPatternOffset(controlDistance, barScrollableDistance, delta);
+        dragDistance = CalcPatternOffset(controlDistance, barScrollableDistance, dragDistance);
+        return scorllableNode_.startSnapMotionCallback(patternOffset, dragDistance, velocity);
     }
 
     return false;

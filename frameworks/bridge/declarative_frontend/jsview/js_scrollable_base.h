@@ -26,6 +26,7 @@ public:
     static void JsOnDidScroll(const JSCallbackInfo& args);
     static void JSBind(BindingTarget globalObj);
     static void SetFadingEdge(const JSCallbackInfo& info);
+    static void JSClipContent(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLABLE_BASE_H

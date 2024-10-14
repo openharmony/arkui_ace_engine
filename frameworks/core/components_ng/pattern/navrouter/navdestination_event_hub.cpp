@@ -20,12 +20,14 @@ void NavDestinationEventHub::FireOnDisappear()
 {
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
     CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to OnDisappear state. id is %{public}d",
+        name_.c_str(), navDestination->GetId());
     if (navDestination->GetIsAnimated()) {
         auto pattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(pattern);
         state_ = NavDestinationState::ON_DISAPPEAR;
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(pattern, NavDestinationState::ON_DISAPPEAR);
-        FireDisappearCallback();
+        FireDisappearCallback(navDestination);
         pattern->SetCustomNode(nullptr);
         return;
     }
@@ -38,7 +40,7 @@ void NavDestinationEventHub::FireOnDisappear()
         CHECK_NULL_VOID(pattern);
         eventHub->state_ = NavDestinationState::ON_DISAPPEAR;
         UIObserverHandler::GetInstance().NotifyNavigationStateChange(pattern, NavDestinationState::ON_DISAPPEAR);
-        eventHub->FireDisappearCallback();
+        eventHub->FireDisappearCallback(destination);
         pattern->SetCustomNode(nullptr);
     });
 }
@@ -57,7 +59,10 @@ void NavDestinationEventHub::FireAutoSave()
 
 void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std::string& param)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onShown state.", name_.c_str());
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onShown state. id is %{public}d",
+        name_.c_str(), navDestination->GetId());
     state_= NavDestinationState::ON_SHOWN;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_SHOWN);
@@ -83,7 +88,10 @@ void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std
 
 void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to onHidden state.", name_.c_str());
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle chang to onHidden state. id is %{public}d",
+        name_.c_str(), navDestination->GetId());
     state_ = NavDestinationState::ON_HIDDEN;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_HIDDEN);
@@ -105,8 +113,11 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
 
 void NavDestinationEventHub::FireOnAppear()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onAppear state.", name_.c_str());
-    auto onAppearAction = [weakEventHub = WeakClaim(this)]() {
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onAppear state. id is %{public}d",
+        name_.c_str(), navDestination->GetId());
+    auto onAppearAction = [weakEventHub = WeakClaim(this), destination = navDestination]() {
         auto eventHub = weakEventHub.Upgrade();
         CHECK_NULL_VOID(eventHub);
         eventHub->state_ = NavDestinationState::ON_APPEAR;
@@ -114,6 +125,8 @@ void NavDestinationEventHub::FireOnAppear()
             NavDestinationState::ON_APPEAR);
         if (eventHub->onAppear_) {
             auto onAppear = eventHub->onAppear_;
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle Respond user onAppear. id is %{public}d",
+                eventHub->name_.c_str(), destination->GetId());
             onAppear();
         }
         if (eventHub->onJSFrameNodeAppear_) {
@@ -121,30 +134,32 @@ void NavDestinationEventHub::FireOnAppear()
             onJSFrameNodeAppear();
         }
     };
-    auto navdestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
     // if navdestination is created from recovery, it need trigger onAppear immediately
-    if (navdestination && navdestination->NeedAppearFromRecovery()) {
-        navdestination->SetNeedAppearFromRecovery(false);
+    if (navDestination && navDestination->NeedAppearFromRecovery()) {
+        navDestination->SetNeedAppearFromRecovery(false);
         onAppearAction();
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
-    CHECK_NULL_VOID(navDestination);
     auto pattern = navDestination->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetNavigationNode()) {
         navigationManager->AddNavigationUpdateCallback(std::move(onAppearAction));
     } else {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle Respond user onAppear. id is %{public}d",
+            name_.c_str(), navDestination->GetId());
         EventHub::FireOnAppear();
     }
 }
 
 void NavDestinationEventHub::FireOnWillAppear()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillAppear state.", name_.c_str());
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillAppear state. id is %{public}d",
+        name_.c_str(), navDestination->GetId());
     state_ = NavDestinationState::ON_WILL_APPEAR;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_WILL_APPEAR);
@@ -155,7 +170,10 @@ void NavDestinationEventHub::FireOnWillAppear()
 
 void NavDestinationEventHub::FireOnWillShow()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillShow state.", name_.c_str());
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillShow state. id is %{public}d",
+        name_.c_str(), navDestination->GetId());
     state_ = NavDestinationState::ON_WILL_SHOW;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_WILL_SHOW);
@@ -166,7 +184,10 @@ void NavDestinationEventHub::FireOnWillShow()
 
 void NavDestinationEventHub::FireOnWillHide()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillHide state.", name_.c_str());
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillHide state. id is %{public}d",
+        name_.c_str(), navDestination->GetId());
     state_ = NavDestinationState::ON_WILL_HIDE;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_WILL_HIDE);
@@ -179,7 +200,10 @@ void NavDestinationEventHub::FireOnWillHide()
 
 void NavDestinationEventHub::FireOnWillDisAppear()
 {
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillDisappear state.", name_.c_str());
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onWillDisappear state. id is %{public}d",
+        name_.c_str(), navDestination->GetId());
     state_ = NavDestinationState::ON_WILL_DISAPPEAR;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_WILL_DISAPPEAR);

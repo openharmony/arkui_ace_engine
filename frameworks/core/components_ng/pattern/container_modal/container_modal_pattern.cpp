@@ -75,10 +75,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     if (!hasDeco_) {
         isShow = false;
     }
-
-    // set container window show state to RS
-    pipelineContext->SetContainerWindow(isShow);
-
+    isTitleShow_ = isShow;
     // update container modal padding and border
     auto layoutProperty = containerNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -111,7 +108,8 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
     BorderRadiusProperty stageBorderRadius;
-    stageBorderRadius.SetRadius(isShow ? GetStackNodeRadius() : 0.0_vp);
+    auto contentBorderRadius = isShow ? GetStackNodeRadius() : 0.0_vp;
+    stageBorderRadius.SetRadius(contentBorderRadius);
     stackRenderContext->UpdateBorderRadius(stageBorderRadius);
     stackRenderContext->SetClipToBounds(true);
 
@@ -370,9 +368,9 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
     InternalResource::ResourceId maxId;
     if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
-        maxId = InternalResource::ResourceId::IC_WINDOW_RESTORES;
+        maxId = InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_RECOVER;
     } else {
-        maxId = InternalResource::ResourceId::IC_WINDOW_MAX;
+        maxId = InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE;
     }
 
     ChangeTitleButtonIcon(maximizeButton, maxId, isFocus, false);
@@ -380,12 +378,12 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     auto minimizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
     ChangeTitleButtonIcon(minimizeButton,
-        InternalResource::ResourceId::IC_WINDOW_MIN, isFocus, false);
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, isFocus, false);
 
     // update close button
     auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
     ChangeTitleButtonIcon(closeButton,
-        InternalResource::ResourceId::IC_WINDOW_CLOSE, isFocus, true);
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, isFocus, true);
 }
 
 void ContainerModalPattern::ChangeFloatingTitle(bool isFocus)
@@ -526,19 +524,16 @@ void ContainerModalPattern::SetWindowContainerColor(const Color& activeColor, co
     // update container modal background
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     activeColor_ = activeColor;
     inactiveColor_ = inactiveColor;
+    isCustomColor_ = true;
+    renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
 }
 
 Color ContainerModalPattern::GetContainerColor(bool isFocus)
 {
-
-    if (isFocus) {
-        return activeColor_;
-    } else {
-        return inactiveColor_;
-    }
+    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    return isCustomColor_ ? (isFocus ? activeColor_ : inactiveColor_) : theme->GetBackGroundColor(isFocus);
 }
 
 void ContainerModalPattern::UpdateGestureRowVisible()
@@ -660,6 +655,33 @@ void ContainerModalPattern::SubscribeContainerModalButtonsRectChange(
     std::function<void(RectF& containerModal, RectF& buttons)>&& callback)
 {
     controlButtonsRectChangeCallback_ = std::move(callback);
+}
+
+void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto titleHeight = round(GetCustomTitleHeight().ConvertToPx());
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    rect.SetRect(padding.Offset().GetX(), padding.Offset().GetY() + titleHeight, rect.Width() - padding.Width(),
+        rect.Height() - padding.Height() - titleHeight);
+}
+
+void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(Rect& rect, bool isContainerModal)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto titleHeight = GetCustomTitleHeight().ConvertToPx();
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    rect.SetRect(
+        padding.Offset().GetX(),
+        isContainerModal ? padding.Offset().GetY() + titleHeight : padding.Offset().GetY(),
+        rect.Width() - padding.Width(),
+        rect.Height() - padding.Height() - titleHeight);
 }
 
 void ContainerModalPattern::CallButtonsRectChange()
@@ -856,7 +878,7 @@ Dimension ContainerModalPattern::GetCustomTitleHeight()
 
 Dimension ContainerModalPattern::GetStackNodeRadius()
 {
-    Dimension radius = customTitleSettedShow_ ? CONTAINER_INNER_RADIUS : CONTAINER_OUTER_RADIUS;
+    Dimension radius = CONTAINER_OUTER_RADIUS;
     auto trimRadiusPx = Dimension(round(radius.ConvertToPx() * 2) / 2.0);
     auto trimRadiusVp = Dimension(trimRadiusPx.ConvertToVp(), DimensionUnit::VP);
     return trimRadiusVp;
@@ -893,5 +915,47 @@ void ContainerModalPattern::TrimFloatingWindowLayout()
             CalcLength(CONTENT_PADDING) };
     }
     hostProp->UpdatePadding(padding);
+}
+
+bool ContainerModalPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<LayoutWrapper>& dirty,
+    const DirtySwapConfig& config)
+{
+    CallButtonsRectChange();
+
+    auto considerFloatingWindow = false;
+    CallSetContainerWindow(considerFloatingWindow);
+    
+    return false;
+}
+
+void ContainerModalPattern::CallSetContainerWindow(bool considerFloatingWindow)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto curWindowRect = pipelineContext->GetCurrentWindowRect();
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL;
+    GetWindowPaintRectWithoutMeasureAndLayout(curWindowRect, isContainerModal);
+
+    auto borderRadius = 0.0_vp;
+    if (considerFloatingWindow) {
+        auto windowManager = pipelineContext->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+        bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+        borderRadius = (isFloatingWindow && isTitleShow_) ? CONTAINER_OUTER_RADIUS : 0.0_vp;
+    } else {
+        borderRadius = isTitleShow_ ? CONTAINER_OUTER_RADIUS : 0.0_vp;
+    }
+    auto borderRadiusValue = borderRadius.ConvertToPx();
+
+    auto expectRect = RRect::MakeRect(curWindowRect);
+    expectRect.SetRectWithSimpleRadius(curWindowRect, borderRadiusValue, borderRadiusValue);
+    if (windowPaintRect_ == expectRect) {
+        return;
+    }
+
+    // set container window show state to RS
+    pipelineContext->SetContainerWindow(isTitleShow_, expectRect);
+    windowPaintRect_ = expectRect;
 }
 } // namespace OHOS::Ace::NG

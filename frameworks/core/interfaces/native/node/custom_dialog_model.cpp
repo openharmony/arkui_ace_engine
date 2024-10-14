@@ -159,9 +159,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         dialogProperties.onWillDismiss = [controllerHandler](int32_t reason) {
             CHECK_NULL_VOID(controllerHandler);
             CHECK_NULL_VOID(controllerHandler->onWillDismissCall);
-            auto executeClose = (*(controllerHandler->onWillDismissCall))(reason);
-            if (!executeClose) {
-            }
+            (*(controllerHandler->onWillDismissCall))(reason);
         };
     }
 

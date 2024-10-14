@@ -657,7 +657,9 @@ void CheckBoxPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 void CheckBoxPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipelineContext = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto checkBoxTheme = pipelineContext->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
@@ -676,7 +678,9 @@ void CheckBoxPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 FocusPattern CheckBoxPattern::GetFocusPattern() const
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, FocusPattern());
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_RETURN(checkBoxTheme, FocusPattern());
@@ -797,11 +801,24 @@ RefPtr<FrameNode> CheckBoxPattern::BuildContentModifierNode()
     return (makeFunc_.value())(checkBoxConfiguration);
 }
 
+void CheckBoxPattern::UpdatePaintPropertyBySettingData(RefPtr<CheckBoxPaintProperty> paintProp)
+{
+    if (checkboxSettingData_.selectedColor.has_value()) {
+        paintProp->UpdateCheckBoxSelectedColor(checkboxSettingData_.selectedColor.value());
+    }
+    if (checkboxSettingData_.unselectedColor.has_value()) {
+        paintProp->UpdateCheckBoxUnSelectedColor(checkboxSettingData_.unselectedColor.value());
+    }
+    if (checkboxSettingData_.strokeColor.has_value()) {
+        paintProp->UpdateCheckBoxCheckMarkColor(checkboxSettingData_.strokeColor.value());
+    }
+}
+
 void CheckBoxPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
@@ -810,6 +827,7 @@ void CheckBoxPattern::OnColorConfigurationUpdate()
     checkBoxPaintProperty->UpdateCheckBoxSelectedColor(checkBoxTheme->GetActiveColor());
     checkBoxPaintProperty->UpdateCheckBoxUnSelectedColor(checkBoxTheme->GetInactiveColor());
     checkBoxPaintProperty->UpdateCheckBoxCheckMarkColor(checkBoxTheme->GetPointColor());
+    UpdatePaintPropertyBySettingData(checkBoxPaintProperty);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

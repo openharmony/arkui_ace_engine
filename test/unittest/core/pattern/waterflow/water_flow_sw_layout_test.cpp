@@ -951,8 +951,8 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     EXPECT_EQ(info_->newStartIndex_, 13);
 
     /**
-     * @tc.steps: step2. update the sections which in the lanes.
-     * @tc.expected: newStartIndex_ can be setted to -2.
+     * @tc.steps: step2. UPDATE the sections which in the lanes without the change of dataSource.
+     * @tc.expected: newStartIndex_ is -1.
      */
 
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -961,7 +961,7 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
 
     newSections = { WaterFlowSections::Section { .itemsCount = 2, .crossCount = 5 } };
     secObj->ChangeData(4, 1, newSections);
-    EXPECT_EQ(info_->newStartIndex_, -2);
+    EXPECT_EQ(info_->newStartIndex_, -1);
 
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 13);
@@ -979,6 +979,696 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     newSections = { WaterFlowSections::Section { .itemsCount = 30, .crossCount = 5 } };
     secObj->ChangeData(6, 1, newSections);
     EXPECT_EQ(info_->newStartIndex_, -2);
+}
+
+/**
+ * @tc.name: KeepContentPosition001
+ * @tc.desc: In regular layout, test the function of KeepContentPosition when adding items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, KeepContentPosition001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_->Mode(), WaterFlowLayoutMode::SLIDING_WINDOW);
+
+    /**
+     * @ts.brief: add items at startIndex_, content should be unchanged.
+     * @tc.steps: step1. current lanes_: [0, 3], Add 1 items at 0.
+     * @tc.expected: newStartIndex_ should be set to 1, keep content unchanged.
+     */
+    AddItemsAtSlot(1, 100.0f, 0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    info_->NotifyDataChange(0, 1);
+
+    EXPECT_EQ(info_->newStartIndex_, 1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 1);
+    EXPECT_EQ(info_->endIndex_, 4);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    // slide backward.
+    UpdateCurrentOffset(1000.0f);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 4);
+
+    /**
+     * @ts.brief: add items in front of startIndex_, content should be unchanged.
+     * @tc.steps: step2. current lanes_: [7, 10], Add 2 items at 6.
+     * @tc.expected: newStartIndex_ should be set to 7+2, keep content unchanged.
+     */
+    UpdateCurrentOffset(-1000.0f);
+    EXPECT_EQ(info_->startIndex_, 7);
+    EXPECT_EQ(info_->endIndex_, 10);
+
+    AddItemsAtSlot(2, 100.0f, 6);
+    frameNode_->ChildrenUpdatedFrom(6);
+    info_->NotifyDataChange(6, 2);
+
+    EXPECT_EQ(info_->newStartIndex_, 9);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 9);
+    EXPECT_EQ(info_->endIndex_, 12);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    // slide forward.
+    UpdateCurrentOffset(-500.0f);
+    EXPECT_EQ(info_->startIndex_, 12);
+    EXPECT_EQ(info_->endIndex_, 16);
+
+    // slide backward.
+    UpdateCurrentOffset(1000.0f);
+    EXPECT_EQ(info_->startIndex_, 5);
+    EXPECT_EQ(info_->endIndex_, 9);
+
+    /**
+     * @ts.brief: add items behind startIndex_, content should be changed.
+     * @tc.steps: step2. current lanes_: [5, 9], Add 1 items at 6.
+     * @tc.expected: newStartIndex_ should be set to -2, content is changed.
+     */
+    EXPECT_EQ(info_->startIndex_, 5);
+    EXPECT_EQ(info_->endIndex_, 9);
+
+    AddItemsAtSlot(1, 100.0f, 6);
+    frameNode_->ChildrenUpdatedFrom(6);
+    info_->NotifyDataChange(6, 1);
+
+    EXPECT_EQ(info_->newStartIndex_, -2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 5);
+    EXPECT_EQ(info_->endIndex_, 9);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+}
+
+/**
+ * @tc.name: KeepContentPosition002
+ * @tc.desc: In regular layout, test the KeepContentPosition function when deleting items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, KeepContentPosition002, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(60);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_->Mode(), WaterFlowLayoutMode::SLIDING_WINDOW);
+
+    /**
+     * @ts.brief: delete items at startIndex_, content should be changed.
+     * @tc.steps: step1. current lanes_: [0, 3], delete 1 items at 0.
+     * @tc.expected: newStartIndex_ should be set to -2, content is changed.
+     */
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    info_->NotifyDataChange(0, -1);
+
+    EXPECT_EQ(info_->newStartIndex_, -2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 3);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    // slide forward.
+    UpdateCurrentOffset(-600.0f);
+    EXPECT_EQ(info_->startIndex_, 4);
+    EXPECT_EQ(info_->endIndex_, 7);
+
+    /**
+     * @ts.brief: delete items in front of startIndex_, content should be unchanged.
+     * @tc.steps: step2. current lanes_: [10, 14], delete 1 items at 9.
+     * @tc.expected: newStartIndex_ should be set to 10-1, keep content unchanged.
+     */
+    UpdateCurrentOffset(-1000.0f);
+    EXPECT_EQ(info_->startIndex_, 10);
+    EXPECT_EQ(info_->endIndex_, 14);
+
+    frameNode_->RemoveChildAtIndex(9);
+    frameNode_->ChildrenUpdatedFrom(9);
+    info_->NotifyDataChange(9, -1);
+
+    EXPECT_EQ(info_->newStartIndex_, 9);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 9);
+    EXPECT_EQ(info_->endIndex_, 13);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    // slide forward.
+    UpdateCurrentOffset(-200.0f);
+    EXPECT_EQ(info_->startIndex_, 11);
+    EXPECT_EQ(info_->endIndex_, 14);
+
+    // slide backward.
+    UpdateCurrentOffset(300.0f);
+    EXPECT_EQ(info_->startIndex_, 9);
+    EXPECT_EQ(info_->endIndex_, 12);
+
+    /**
+     * @ts.brief: If delete the item in [startIndex_, endIndex_], content should be changed.
+     * @tc.steps: step2. current lanes_: [9, 12], delete 2 items at 8.
+     * @tc.expected: newStartIndex_ should be set to -2, layout at original startIndex_ (9).
+     */
+    EXPECT_EQ(info_->startIndex_, 9);
+    EXPECT_EQ(info_->endIndex_, 12);
+
+    frameNode_->RemoveChildAtIndex(8);
+    frameNode_->RemoveChildAtIndex(8);
+    frameNode_->ChildrenUpdatedFrom(8);
+    info_->NotifyDataChange(8, -2);
+
+    EXPECT_EQ(info_->newStartIndex_, -2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 9);
+    EXPECT_EQ(info_->endIndex_, 12);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    // slide forward.
+    UpdateCurrentOffset(-200.0f);
+    EXPECT_EQ(info_->startIndex_, 10);
+    EXPECT_EQ(info_->endIndex_, 13);
+
+    // slide backward.
+    UpdateCurrentOffset(300.0f);
+    EXPECT_EQ(info_->startIndex_, 8);
+    EXPECT_EQ(info_->endIndex_, 11);
+
+    /**
+     * @ts.brief: delete items behind startIndex_, content should be changed.
+     * @tc.steps: step2. current lanes_: [8, 11], delete 1 items at 10.
+     * @tc.expected: newStartIndex_ should be set to -2, layout at original startIndex_ (9).
+     */
+    EXPECT_EQ(info_->startIndex_, 8);
+    EXPECT_EQ(info_->endIndex_, 11);
+
+    frameNode_->RemoveChildAtIndex(10);
+    frameNode_->ChildrenUpdatedFrom(10);
+    info_->NotifyDataChange(10, -1);
+
+    EXPECT_EQ(info_->newStartIndex_, -2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 8);
+    EXPECT_EQ(info_->endIndex_, 11);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    /**
+     * @ts.brief: change items in front of startIndex_, content should be unchanged.
+     * @tc.steps: step2. current lanes_: [8, 11], change 1 items at 7.
+     * @tc.expected: newStartIndex_ should be set to 8, layout at startIndex_ (8).
+     */
+    EXPECT_EQ(info_->startIndex_, 8);
+    EXPECT_EQ(info_->endIndex_, 11);
+
+    frameNode_->ChildrenUpdatedFrom(7);
+    info_->NotifyDataChange(7, 0);
+
+    EXPECT_EQ(info_->newStartIndex_, 8);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 8);
+    EXPECT_EQ(info_->endIndex_, 11);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+}
+
+/**
+ * @tc.name: KeepContentPosition003
+ * @tc.desc: In segment layout, test the function of KeepContentPosition without dataSource change.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, KeepContentPosition003, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(35);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_11);
+    CreateDone();
+
+    UpdateCurrentOffset(-600.0f);
+    EXPECT_EQ(info_->startIndex_, 6);
+    EXPECT_EQ(info_->endIndex_, 12);
+    EXPECT_EQ(pattern_->layoutInfo_->Mode(), WaterFlowLayoutMode::SLIDING_WINDOW);
+
+    /**
+     * @ts.brief: when update section in the front of lanes, keep content unchanged.
+     * @tc.steps: step1. current lanes_: [6, 12], {seg0: {0, 1, 2}, seg1:{3, 4}} -> {seg0: {0, 1}, seg1: {2, 3, 4}}.
+     * @tc.expected: newStartIndex_ should be set to 6, keep content unchanged.
+     */
+    std::vector<WaterFlowSections::Section> newSection = {
+        WaterFlowSections::Section {
+            .itemsCount = 2, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 3, .margin = MARGIN_1 },
+        WaterFlowSections::Section {
+            .itemsCount = 3, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 3, .margin = MARGIN_1 }
+    };
+    secObj->ChangeData(0, 2, newSection);
+
+    EXPECT_EQ(info_->newStartIndex_, 6);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 6);
+    EXPECT_EQ(info_->endIndex_, 12);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    // slide backward.
+    UpdateCurrentOffset(1000.0f);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 6);
+
+    /**
+     * @ts.brief: when update section in the front of lanes, keep content unchanged.
+     * @tc.steps: step2. current lanes_: [6, 12], {seg0: {0,1}, seg1:{2,3,4}} -> {seg0: {0,1,2,3}, seg1: {4}}.
+     * @tc.expected: newStartIndex_ should be set to 6, keep content unchanged.
+     */
+    UpdateCurrentOffset(-700.0f);
+    EXPECT_EQ(info_->startIndex_, 6);
+    EXPECT_EQ(info_->endIndex_, 12);
+
+    newSection = {
+        WaterFlowSections::Section {
+            .itemsCount = 4, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 3, .margin = MARGIN_1 },
+        WaterFlowSections::Section {
+            .itemsCount = 1, .onGetItemMainSizeByIndex = GET_MAIN_SIZE_FUNC, .crossCount = 3, .margin = MARGIN_1 }
+    };
+    secObj->ChangeData(0, 2, newSection);
+
+    EXPECT_EQ(info_->newStartIndex_, 6);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 6);
+    EXPECT_EQ(info_->endIndex_, 12);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    // slide forward.
+    UpdateCurrentOffset(-500.0f);
+    EXPECT_EQ(info_->startIndex_, 11);
+    EXPECT_EQ(info_->endIndex_, 17);
+
+    // slide backward.
+    UpdateCurrentOffset(1000.0f);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 7);
+}
+
+/**
+ * @tc.name: KeepContentPosition004
+ * @tc.desc: In segment layout, test the function of KeepContentPosition using section.UPDATE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, KeepContentPosition004, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(35);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_11);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 6);
+    EXPECT_EQ(pattern_->layoutInfo_->Mode(), WaterFlowLayoutMode::SLIDING_WINDOW);
+
+    /**
+     * @ts.brief: when ADD new items in the beginning using section.UPDATE, keep content unchanged.
+     * @tc.steps: step1. current lanes_: [0, 6], add 1 items at 0.
+                 {lanes_[0]: {0, 1, 2}, lanes_[1]: {3, 4}} -> {lanes_[0]: {1, 2, 3}, lanes_[1]: {4, 5}}.
+     * @tc.expected: newStartIndex_ should be set to 0+1, keep content unchanged.
+     */
+    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
+    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 2);
+    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 3);
+    EXPECT_EQ(info_->lanes_[1][1].items_.back().idx, 4);
+
+    AddItemsAtSlot(1, 100.0f, 0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    info_->NotifyDataChange(0, 1);
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section { .itemsCount = 4,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+        .crossCount = 1,
+        .rowsGap = 5.0_vp,
+        .margin = MARGIN_3 } };
+    secObj->ChangeData(0, 1, newSection);
+
+    EXPECT_EQ(info_->newStartIndex_, 1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 1);
+    EXPECT_EQ(info_->endIndex_, 7);
+    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 1);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    /**
+     * @ts.brief: when add new items in the beginning using section.UPDATE, keep content unchanged.
+     * @tc.steps: step2. current lanes_: [1, 5], add 3 items at 0.
+     *            {lanes_[0]: {1, 2, 3}, lanes_[1]: {4, 5}} -> {lanes_[0]: {4, 5, 6}, lanes_[1]: {7, 8}}.
+     * @tc.expected: newStartIndex_ should be set to 1+3, keep content unchanged.
+     */
+
+    AddItemsAtSlot(3, 100.0f, 0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    info_->NotifyDataChange(0, 3);
+    newSection = { WaterFlowSections::Section { .itemsCount = 7,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+        .crossCount = 1,
+        .rowsGap = 5.0_vp,
+        .margin = MARGIN_3 } };
+    secObj->ChangeData(0, 1, newSection);
+
+    EXPECT_EQ(info_->newStartIndex_, 4);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 4);
+    EXPECT_EQ(info_->endIndex_, 10);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 4);
+    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 6);
+    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 7);
+    EXPECT_EQ(info_->lanes_[1][1].items_.back().idx, 8);
+    EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 10);
+
+    /**
+     * @ts.brief: when delete items in front of startIndex_ using section.UPDATE, keep content unchanged.
+     * @tc.steps: step4. current lanes_: [4, 10], delete 2 items at 1.
+     *            {lanes_[0]: {4, 5, 6}, lanes_[1]: {7, 8}, lanes_[2]: {}, lanes_[3]: {9,10}} ->
+     *            {lanes_[0]: {2, 3, 4}, lanes_[1]: {5, 6}, lanes_[2]: {}, lanes_[3]: {7,8}}.
+     * @tc.expected: newStartIndex_ should be set to 4-2, keep content unchanged.
+     */
+
+    frameNode_->ChildrenUpdatedFrom(1);
+    frameNode_->RemoveChildAtIndex(1);
+    frameNode_->RemoveChildAtIndex(1);
+    info_->NotifyDataChange(1, -2);
+
+    newSection = { WaterFlowSections::Section { .itemsCount = 5,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+        .crossCount = 1,
+        .rowsGap = 5.0_vp,
+        .margin = MARGIN_3 } };
+    secObj->ChangeData(0, 1, newSection);
+
+    EXPECT_EQ(info_->newStartIndex_, 2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 2);
+    EXPECT_EQ(info_->endIndex_, 8);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 2);
+    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 4);
+    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 5);
+    EXPECT_EQ(info_->lanes_[1][1].items_.back().idx, 6);
+    EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 8);
+
+    /**
+     * @ts.brief: when delete items in front of startIndex_ using section.UPDATE, keep content unchanged.
+     * @tc.steps: step4. current lanes_: [2, 8], delete 1 items at 1.
+     *            {lanes_[0]: {2, 3, 4}, lanes_[1]: {5, 6}, lanes_[2]: {}, lanes_[3]: {7,8}} ->
+     *            {lanes_[0]: {1, 2, 3}, lanes_[1]: {4, 5}, lanes_[2]: {}, lanes_[3]: {6,7}}.
+     * @tc.expected: newStartIndex_ should be set to 2-1, keep content unchanged.
+     */
+
+    frameNode_->RemoveChildAtIndex(1);
+    frameNode_->ChildrenUpdatedFrom(1);
+    info_->NotifyDataChange(1, -1);
+    newSection = { WaterFlowSections::Section { .itemsCount = 4,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+        .crossCount = 1,
+        .rowsGap = 5.0_vp,
+        .margin = MARGIN_3 } };
+    secObj->ChangeData(0, 1, newSection);
+
+    EXPECT_EQ(info_->newStartIndex_, 1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 1);
+    EXPECT_EQ(info_->endIndex_, 7);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 1);
+    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 3);
+    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 4);
+    EXPECT_EQ(info_->lanes_[1][1].items_.back().idx, 5);
+    EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 7);
+
+    /**
+     * @ts.brief: when delete items in front of startIndex_ using section.UPDATE, keep content unchanged.
+     * @tc.steps: step4. current lanes_: [1, 7], delete 1 items at 0.
+     *            {lanes_[0]: {1, 2, 3}, lanes_[1]: {4, 5}, lanes_[2]: {}, lanes_[3]: {6, 7}} ->
+     *            {lanes_[0]: {0, 1, 2}, lanes_[1]: {3, 4}, lanes_[2]: {}, lanes_[3]: {5, 6}}.
+     * @tc.expected: newStartIndex_ should be set to 1-1, keep content unchanged.
+     */
+
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    info_->NotifyDataChange(0, -1);
+    newSection = { WaterFlowSections::Section { .itemsCount = 3,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+        .crossCount = 1,
+        .rowsGap = 5.0_vp,
+        .margin = MARGIN_3 } };
+    secObj->ChangeData(0, 1, newSection);
+
+    EXPECT_EQ(info_->newStartIndex_, 0);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 6);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    /**
+     * @ts.brief: when change the property of section using section.UPDATE, can't keep content unchanged.
+     * @tc.steps: step4. current lanes_: [2, 8], delete 1 items at 1.
+     *            {lanes_[0]: {2, 3, 4}, lanes_[1]: {5, 6}, lanes_[2]: {}, lanes_[3]: {7,8}} ->
+     *            {lanes_[0]: {1, 2, 3}, lanes_[1]: {4, 5}, lanes_[2]: {}, lanes_[3]: {6,7}}.
+     * @tc.expected: newStartIndex_ should be set to -2, can't keep content unchanged.
+     */
+
+    AddItemsAtSlot(0, 100.0f, 1);
+    frameNode_->ChildrenUpdatedFrom(0);
+    info_->NotifyDataChange(0, 1);
+    newSection = { WaterFlowSections::Section { .itemsCount = 4,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+        .crossCount = 2,
+        .rowsGap = 5.0_vp,
+        .margin = MARGIN_3 } };
+    secObj->ChangeData(0, 1, newSection);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(info_->newStartIndex_, -2);
+}
+
+/**
+ * @tc.name: KeepContentPosition005
+ * @tc.desc: In segment layout, test the function of KeepContentPosition using section.SPLICE to add sections in the
+ *           beginning.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, KeepContentPosition005, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(35);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_11);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 6);
+    EXPECT_EQ(pattern_->layoutInfo_->Mode(), WaterFlowLayoutMode::SLIDING_WINDOW);
+
+    /**
+     * @ts.brief: when ADD new sections in the beginning using section.SPLICE, keep content unchanged.
+     * @tc.steps: step1. current lanes_: [0, 6], add 1 section(including 2 items) at 0.
+                 {lanes_[0]: {0, 1, 2}, lanes_[1]: {3, 4}} -> {lanes_[0]: {1, 2, 3}, lanes_[1]: {4, 5}}.
+     * @tc.expected: newStartIndex_ should be set to 0+2, keep content unchanged.
+     */
+    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
+    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 2);
+    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 3);
+    EXPECT_EQ(info_->lanes_[1][1].items_.back().idx, 4);
+    EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 6);
+
+    AddItemsAtSlot(2, 100.0f, 0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    info_->NotifyDataChange(0, 2);
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section { .itemsCount = 2,
+        .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+        .crossCount = 2,
+        .rowsGap = 10.0_vp,
+        .margin = MARGIN_3 } };
+    secObj->ChangeData(0, 0, newSection);
+
+    EXPECT_EQ(info_->newStartIndex_, 2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 2);
+    EXPECT_EQ(info_->endIndex_, 8);
+    EXPECT_TRUE(info_->lanes_[0][0].items_.empty());
+    EXPECT_TRUE(info_->lanes_[0][1].items_.empty());
+    EXPECT_EQ(info_->lanes_[1][0].items_.front().idx, 2);
+    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 4);
+    EXPECT_EQ(info_->lanes_[2][0].items_.back().idx, 5);
+    EXPECT_EQ(info_->lanes_[2][1].items_.back().idx, 6);
+    EXPECT_TRUE(info_->lanes_[3][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[4][0].items_.back().idx, 8);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    // slide backward.
+    UpdateCurrentOffset(1000.0f);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 7);
+    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
+    EXPECT_EQ(info_->lanes_[0][1].items_.front().idx, 1);
+    EXPECT_EQ(info_->lanes_[1][0].items_.front().idx, 2);
+    EXPECT_EQ(info_->lanes_[1][0].items_.back().idx, 4);
+    EXPECT_EQ(info_->lanes_[2][0].items_.back().idx, 5);
+    EXPECT_EQ(info_->lanes_[2][1].items_.back().idx, 6);
+    EXPECT_TRUE(info_->lanes_[3][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[4][0].items_.back().idx, 7);
+
+    /**
+     * @ts.brief: when ADD new sections in the beginning using section.SPLICE, keep content unchanged.
+     * @tc.steps: step2. current lanes_: [0, 7], add 2 section(including 2 items) at 0.
+                 {lanes_[0]: {0, 1}, lanes_[1]: {2, 3, 4}, lanes_[2]: {5, 6}, lanes_[3]: {}, lanes[4]: {7}}
+     *        -> {lanes_[2]: {4, 5}, lanes_[3]: {6, 7, 8}, lanes_[4]: {9, 10}, lanes_[5]: {}, lanes[6]: {11}}.
+     * @tc.expected: newStartIndex_ should be set to 0+4, keep content unchanged.
+     */
+
+    AddItemsAtSlot(4, 100.0f, 0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    info_->NotifyDataChange(0, 4);
+    newSection = { WaterFlowSections::Section { .itemsCount = 2,
+                       .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+                       .crossCount = 2,
+                       .rowsGap = 10.0_vp,
+                       .margin = MARGIN_3 },
+        WaterFlowSections::Section { .itemsCount = 2,
+            .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+            .crossCount = 2,
+            .rowsGap = 10.0_vp,
+            .margin = MARGIN_3 } };
+    secObj->ChangeData(0, 0, newSection);
+
+    EXPECT_EQ(info_->newStartIndex_, 4);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 4);
+    EXPECT_EQ(info_->endIndex_, 11);
+    EXPECT_TRUE(info_->lanes_[0][0].items_.empty());
+    EXPECT_TRUE(info_->lanes_[0][1].items_.empty());
+    EXPECT_TRUE(info_->lanes_[1][0].items_.empty());
+    EXPECT_TRUE(info_->lanes_[1][1].items_.empty());
+    EXPECT_EQ(info_->lanes_[2][0].items_.front().idx, 4);
+    EXPECT_EQ(info_->lanes_[2][1].items_.back().idx, 5);
+    EXPECT_EQ(info_->lanes_[3][0].items_.front().idx, 6);
+    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 8);
+    EXPECT_EQ(info_->lanes_[4][0].items_.back().idx, 9);
+    EXPECT_EQ(info_->lanes_[4][1].items_.back().idx, 10);
+    EXPECT_TRUE(info_->lanes_[5][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[6][0].items_.back().idx, 11);
+    EXPECT_EQ(info_->newStartIndex_, -1);
+
+    // slide backward.
+    UpdateCurrentOffset(1000.0f);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 8);
+    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 0);
+    EXPECT_EQ(info_->lanes_[0][1].items_.front().idx, 1);
+    EXPECT_EQ(info_->lanes_[1][0].items_.front().idx, 2);
+    EXPECT_EQ(info_->lanes_[1][1].items_.front().idx, 3);
+    EXPECT_EQ(info_->lanes_[2][0].items_.front().idx, 4);
+    EXPECT_EQ(info_->lanes_[2][1].items_.back().idx, 5);
+    EXPECT_EQ(info_->lanes_[3][0].items_.front().idx, 6);
+    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 8);
+    EXPECT_TRUE(info_->lanes_[4][0].items_.empty());
+    EXPECT_TRUE(info_->lanes_[4][1].items_.empty());
+    EXPECT_TRUE(info_->lanes_[5][0].items_.empty());
+}
+
+/**
+ * @tc.name: KeepContentPosition006
+ * @tc.desc: In segment layout, test the function of KeepContentPosition using section.SPLICE(0, 2, newSection).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, KeepContentPosition006, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(35);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_11);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 6);
+    EXPECT_EQ(pattern_->layoutInfo_->Mode(), WaterFlowLayoutMode::SLIDING_WINDOW);
+
+    /**
+     * @ts.brief: when use section.SPLICE operate the sections on the upper of screen, keep content unchanged.
+     * @tc.steps: step1. current lanes_: [5, 11], operate lanes_[0] and lanes_[1] which are on the upper of screen.
+                 {lanes_[0]: {0, 1, 2}, lanes_[1]: {3, 4}} -> {lanes_[0]: {0, 1, 2, 3, 4}}.
+     * @tc.expected: newStartIndex_ should be set to 5, keep content unchanged.
+     */
+    pattern_->ScrollToIndex(5, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 5);
+    EXPECT_EQ(info_->endIndex_, 10);
+    EXPECT_TRUE(info_->lanes_[0][0].items_.empty());
+    EXPECT_TRUE(info_->lanes_[1][0].items_.empty());
+    EXPECT_TRUE(info_->lanes_[1][1].items_.empty());
+    EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[3][0].items_.front().idx, 5);
+    EXPECT_EQ(info_->lanes_[3][0].items_.back().idx, 10);
+
+    std::vector<WaterFlowSections::Section> newSection = {
+        WaterFlowSections::Section { .itemsCount = 5,
+            .onGetItemMainSizeByIndex = GET_MAIN_SIZE_2,
+            .crossCount = 2,
+            .rowsGap = 5.0_vp,
+            .margin = MARGIN_3 },
+    };
+
+    secObj->ChangeData(0, 2, newSection);
+
+    EXPECT_EQ(info_->newStartIndex_, 5);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 5);
+    EXPECT_EQ(info_->endIndex_, 10);
+    EXPECT_TRUE(info_->lanes_[0][0].items_.empty());
+    EXPECT_TRUE(info_->lanes_[0][1].items_.empty());
+    EXPECT_TRUE(info_->lanes_[1][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[2][0].items_.front().idx, 5);
+    EXPECT_EQ(info_->lanes_[2][0].items_.back().idx, 10);
+    // slide backward.
+    UpdateCurrentOffset(200.0f);
+    EXPECT_EQ(info_->startIndex_, 1);
+    EXPECT_EQ(info_->endIndex_, 8);
+    EXPECT_EQ(info_->lanes_[0][0].items_.front().idx, 1);
+    EXPECT_EQ(info_->lanes_[0][0].items_.back().idx, 3);
+    EXPECT_EQ(info_->lanes_[0][1].items_.back().idx, 4);
+    EXPECT_TRUE(info_->lanes_[1][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[2][0].items_.front().idx, 5);
+    EXPECT_EQ(info_->lanes_[2][0].items_.back().idx, 8);
 }
 
 /**
@@ -1087,7 +1777,104 @@ HWTEST_F(WaterFlowSWTest, Refresh002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
+    // can't enter the refreshing status when refresh updates scroll offset by animation source
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+}
+
+/**
+ * @tc.name: Illegal001
+ * @tc.desc: Update Section with empty sections.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Illegal001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(45);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_10);
+    CreateDone();
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info_->startIndex_, 3);
+    EXPECT_EQ(info_->endIndex_, 12);
+
+    /**
+     * @tc.steps: step1. update [sections_] with empty section, without changing the dataSource.
+     * @tc.expected: currentOffset_ is set to 0.0f, cache information is reset.
+     */
+    auto sectionLength = secObj->GetSectionInfo().size();
+    secObj->ChangeData(0, sectionLength, {});
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_TRUE(info_->lanes_.empty());
+    EXPECT_TRUE(info_->idxToLane_.empty());
+    EXPECT_TRUE(info_->segmentTails_.empty());
+    EXPECT_TRUE(info_->segmentCache_.empty());
+    EXPECT_TRUE(info_->margins_.empty());
+
+    /**
+     * @tc.steps: step2. recover [sections_].
+     * @tc.expected: layout at start.
+     */
+    secObj->ChangeData(0, 0, SECTION_10);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 7);
+
+    EXPECT_EQ(info_->lanes_.size(), 7);
+    EXPECT_EQ(info_->idxToLane_.size(), 8);
+    EXPECT_EQ(info_->segmentTails_.size(), 7);
+    EXPECT_EQ(info_->segmentCache_.size(), 9);
+    EXPECT_EQ(info_->margins_.size(), 7);
+}
+
+/**
+ * @tc.name: DataChange001
+ * @tc.desc: In less-than fillViewport scene, test overScroll position after changing dataSource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, DataChange001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(2);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 200.0f);
+    frameNode_->RemoveChildAtIndex(1);
+    frameNode_->ChildrenUpdatedFrom(1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 100.0f);
+
+    GestureEvent gesture;
+    gesture.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    gesture.SetMainVelocity(-1000.0f);
+    gesture.SetMainDelta(-100.0f);
+    gesture.SetGlobalLocation(Offset(1.0f, 1.0f));
+    gesture.SetGlobalPoint(Point(1.0f, 100.0f));
+    gesture.SetLocalLocation(Offset(1.0f, 1.0f));
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(gesture);
+    scrollable->HandleDragUpdate(gesture);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -15.755195);
+    MockAnimationManager::GetInstance().SetTicks(2);
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(gesture);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0),  -31.510389);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -15.755194);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 }
 } // namespace OHOS::Ace::NG

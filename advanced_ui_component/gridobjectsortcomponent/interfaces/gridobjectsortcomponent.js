@@ -1862,6 +1862,11 @@ export class GridObjectSortComponent extends ViewPU {
                 }
                 this.calcGridHeight();
             });
+            LongPressGesture.onActionCancel(() => {
+                if (this.isStartDrag) {
+                    this.insertItem(this.itemIndex, this.itemIndex);
+                }
+            });
             LongPressGesture.pop();
             Gesture.pop();
             Grid.clip(false);

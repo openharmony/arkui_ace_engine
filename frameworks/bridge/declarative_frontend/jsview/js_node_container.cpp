@@ -163,9 +163,10 @@ void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecut
     CHECK_NULL_VOID(nodeContainerModelInstance);
 
     auto jsFunc = JSRef<JSFunc>::Cast(jsMakeNodeFunc);
+    auto containerId = Container::CurrentId();
     RefPtr<JsFunction> jsMake = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), jsFunc);
     nodeContainerModelInstance->SetMakeFunction(
-        [func = std::move(jsMake), execCtx](int32_t containerId) -> RefPtr<NG::UINode> {
+        [func = std::move(jsMake), containerId, execCtx]() -> RefPtr<NG::UINode> {
             JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             ContainerScope scope(containerId);
             panda::Local<panda::JSValueRef> uiContext = NG::UIContextHelper::GetUIContext(execCtx.vm_, containerId);

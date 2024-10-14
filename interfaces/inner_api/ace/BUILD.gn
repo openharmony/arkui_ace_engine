@@ -67,6 +67,7 @@ ohos_shared_library("ace_uicontent") {
   }
 
   public_configs = [ ":uicontent_public_config" ]
+  branch_protector_ret = "pac_ret"
 
   configs = [
     ":uicontent_config",
@@ -105,6 +106,7 @@ ohos_shared_library("ace_forward_compatibility") {
   include_dirs = [ "${ace_root}/frameworks" ]
 
   public_configs = [ ":uicontent_public_config" ]
+  branch_protector_ret = "pac_ret"
 
   sources =
       [ "${ace_root}/interfaces/inner_api/ace/ace_forward_compatibility.cpp" ]

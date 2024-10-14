@@ -61,6 +61,7 @@ constexpr int32_t DOT_INDICATOR_LEFT = 9;
 constexpr int32_t DOT_INDICATOR_TOP = 10;
 constexpr int32_t DOT_INDICATOR_RIGHT = 11;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 12;
+constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 13;
 constexpr double DEFAULT_PERCENT_VALUE = 100.0;
 } // namespace
 
@@ -599,6 +600,16 @@ std::string GetStringByValueRef(const EcmaVM* vm, const Local<JSValueRef>& jsVal
                  : "0.0_vp";
     return result;
 }
+std::string GetIntStringByValueRef(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    std::string result = "-";
+    if (jsValue->IsUndefined()) {
+        return result;
+    }
+    int32_t intValue;
+    result = ArkTSUtils::ParseJsInteger(vm, jsValue, intValue) ? std::to_string(intValue) : "0";
+    return result;
+}
 std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
 {
     Local<JSValueRef> itemWidthArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_ITEM_WIDTH);
@@ -639,9 +650,11 @@ std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
     std::string top = GetStringByValueRef(vm, topArg);
     std::string right = GetStringByValueRef(vm, rightArg);
     std::string bottom = GetStringByValueRef(vm, bottomArg);
+    Local<JSValueRef> maxDisplayCountArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_MAX_DISPLAY_COUNT);
+    auto maxDisplayCount = GetIntStringByValueRef(vm, maxDisplayCountArg);
     std::string indicatorStr = itemWidth + "|" + itemHeight + "|" + selectedItemWidth + "|" +
                                selectedItemHeight + "|" + mask + "|" + colorStr + "|" + selectedColor + "|" + left +
-                               "|" + top + "|" + right + "|" + bottom;
+                               "|" + top + "|" + right + "|" + bottom + "|" + maxDisplayCount;
     return indicatorStr;
 }
 std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)

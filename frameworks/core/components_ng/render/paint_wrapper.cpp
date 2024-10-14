@@ -95,7 +95,7 @@ void PaintWrapper::FlushRender()
     if (overlayModifier) {
         nodePaintImpl_->UpdateOverlayModifier(this);
         if (extensionHandler_) {
-            extensionHandler_->InvalidateRender();
+            extensionHandler_->OverlayRender();
         }
     }
 
@@ -103,7 +103,7 @@ void PaintWrapper::FlushRender()
     if (foregroundModifier) {
         nodePaintImpl_->UpdateForegroundModifier(this);
         if (extensionHandler_) {
-            extensionHandler_->InvalidateRender();
+            extensionHandler_->ForegroundRender();
         }
     }
 

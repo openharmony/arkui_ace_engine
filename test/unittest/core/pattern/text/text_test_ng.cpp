@@ -2386,7 +2386,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     // set pipelineContext nullptr
     MockPipelineContext::TearDown();
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
-    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
+    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE, textStyle);
     MockPipelineContext::SetUp();
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
@@ -2446,7 +2446,7 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
     // set pipelineContext nullptr
     MockPipelineContext::TearDown();
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
-    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
+    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE, textStyle);
     MockPipelineContext::SetUp();
     // set textDecorationAnimatable_ true
     textContentModifier.textDecorationAnimatable_ = true;
@@ -2782,7 +2782,6 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*paragraph, PushStyle).Times(2);
     EXPECT_CALL(*paragraph, AddText).Times(2);
-    EXPECT_CALL(*paragraph, Layout).Times(2);
     EXPECT_CALL(*paragraph, Build).Times(2);
     EXPECT_CALL(*paragraph, GetLineCount).WillRepeatedly(Return(2));
     EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
@@ -2839,12 +2838,6 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
     EXPECT_EQ(
         textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, AceType::RawPtr(textFrameNode)),
         true);
-
-    // set NormalizeToPx false
-    textStyle.adaptFontSizeStep_.SetUnit(DimensionUnit::CALC);
-    EXPECT_EQ(
-        textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, AceType::RawPtr(textFrameNode)),
-        false);
 }
 
 /**

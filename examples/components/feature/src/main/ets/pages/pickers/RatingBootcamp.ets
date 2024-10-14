@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, SliderBlock, useEnabled } from 'common';
 
@@ -30,6 +29,8 @@ export struct RatingBootcamp {
   @State enableStepSize: boolean = false;
   @State stepSize: number = 0.5;
   @State enableStarStyle: boolean = false;
+  @State enableDirection: boolean = false;
+  @State compDirection: Direction = Direction.Auto;
 
   build() {
     NavDestination() {
@@ -44,6 +45,7 @@ export struct RatingBootcamp {
         }
       })
     }
+    .backgroundColor($r('sys.color.ohos_id_color_sub_background'))
     .hideTitleBar(true)
   }
 
@@ -59,6 +61,7 @@ export struct RatingBootcamp {
         .onChange((value: number) => {
           this.rating = value;
         })
+        .direction(useEnabled(this.enableDirection, this.compDirection))
     }
   }
 
@@ -81,6 +84,17 @@ export struct RatingBootcamp {
           dataSource: [
             { label: '是：不可进行评分', value: true },
             { label: '否：可进行评分', value: false },
+          ]
+        })
+
+        RadioBlock({
+          title: '评分组件布局方式',
+          isEnabled: this.enableDirection,
+          value: this.compDirection,
+          dataSource: [
+            { label: '跟随系统默认布局', value: Direction.Auto },
+            { label: '从右到左', value: Direction.Rtl },
+            { label: '从左到右', value: Direction.Ltr }
           ]
         })
 

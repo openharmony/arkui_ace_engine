@@ -23,19 +23,6 @@
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
-namespace OHOS::Ace {
-CanvasModel* CanvasModel::GetInstanceNG()
-{
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
-            instance_.reset(new NG::CanvasModelNG());
-        }
-    }
-    return instance_.get();
-}
-} // namespace OHOS::Ace
-
 namespace OHOS::Ace::NG {
 RefPtr<AceType> CanvasModelNG::Create()
 {
@@ -46,6 +33,15 @@ RefPtr<AceType> CanvasModelNG::Create()
         V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
     stack->Push(frameNode);
     return frameNode->GetPattern<CanvasPattern>();
+}
+
+void CanvasModelNG::DetachRenderContext()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->DetachRenderContext();
 }
 
 void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)

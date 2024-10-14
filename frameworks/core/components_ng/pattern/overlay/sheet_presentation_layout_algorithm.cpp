@@ -97,7 +97,8 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(scrollNode);
         childConstraint.selfIdealSize.SetWidth(childConstraint.maxSize.Width());
         scrollNode->Measure(childConstraint);
-        if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP)
+        if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP ||
+            (sheetType_ == SheetType::SHEET_BOTTOM_OFFSET))
             && (sheetStyle_.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
             auto&& children = layoutWrapper->GetAllChildrenWithBuild();
             auto secondIter = std::next(children.begin(), 1);
@@ -161,6 +162,8 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         // which is the offset of the upper left corner of the bubble relative to the SheetWrapper
         sheetOffsetX_ = popupStyleSheetOffset.GetX() - parentOffset.GetX();
         sheetOffsetY_ = popupStyleSheetOffset.GetY() - parentOffset.GetY();
+    } else if (sheetType_ == SheetType::SHEET_BOTTOM_OFFSET) {
+        sheetOffsetY_ = (sheetMaxHeight_ - sheetHeight_ + sheetStyle_.bottomOffset->GetY());
     }
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet layout info, sheetOffsetX_ is: %{public}f, sheetOffsetY_ is: %{public}f",
         sheetOffsetX_, sheetOffsetY_);
@@ -341,6 +344,7 @@ float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& m
         case SheetType::SHEET_BOTTOMLANDSPACE:
             height = maxSize.Height();
             break;
+        case SheetType::SHEET_BOTTOM_OFFSET:
         case SheetType::SHEET_CENTER:
             height = GetHeightBySheetStyle();
             break;

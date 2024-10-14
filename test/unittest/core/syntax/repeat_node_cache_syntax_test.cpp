@@ -142,7 +142,7 @@ auto g_onGetTypes4Range = [](uint32_t from, uint32_t to) -> std::list<std::strin
 /**
  * Function needed by RepeatVirtualScrollNode constructor
  */
-auto g_onSetActiveRange = [](uint32_t from, uint32_t to) {
+auto g_onSetActiveRange = [](int32_t from, int32_t to) {
 };
 
 /**
@@ -414,12 +414,6 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest008, TestSize.Level1)
      */
     auto frameNode = repeatNode->GetFrameNode(1);
     EXPECT_NE(frameNode, nullptr);
-    /**
-     * @tc.steps: step5. Get children count
-     * @tc.expected: Returns number of children. Should be 0
-     */
-    RefPtr<UINode> nodes =  repeatNode->CreateOrUpdateFrameChild4Index(5, "Key1");
-    EXPECT_NE(nodes, nullptr);
 }
 
 /**

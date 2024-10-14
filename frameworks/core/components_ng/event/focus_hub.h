@@ -30,7 +30,6 @@ class FocusHub;
 class EventHub;
 class FocusView;
 class FocusManager;
-class PipelineContext;
 
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
@@ -464,6 +463,10 @@ public:
     bool HasBackwardFocusMovementInChildren();
     bool HasForwardFocusMovementInChildren();
     void ClearFocusMovementFlagsInChildren();
+    void SetForceProcessOnKeyEventInternal(bool forceProcessOnKeyEventInternal)
+    {
+        forceProcessOnKeyEventInternal_ = forceProcessOnKeyEventInternal;
+    }
 
     Dimension GetFocusPadding() const
     {
@@ -507,6 +510,7 @@ public:
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
     RefPtr<FocusHub> GetParentFocusHub() const;
+    RefPtr<FocusHub> GetParentFocusHubWithBoundary() const;
     RefPtr<FocusHub> GetRootFocusHub();
     std::string GetFrameName() const;
     int32_t GetFrameId() const;
@@ -515,6 +519,7 @@ public:
     bool RequestFocusImmediately(bool isJudgeRootTree = false);
     void RequestFocus() const;
     void SwitchFocus(const RefPtr<FocusHub>& focusNode);
+    void HandleLastFocusNodeInFocusWindow();
 
     static void LostFocusToViewRoot();
 
@@ -808,6 +813,8 @@ public:
     void DumpFocusTree(int32_t depth, bool hasJson = false);
     void DumpFocusNodeTree(int32_t depth);
     void DumpFocusScopeTree(int32_t depth);
+    void DumpFocusUie();
+    void DumpFocusUieInJson(std::unique_ptr<JsonValue>& json);
 
     bool OnClick(const KeyEvent& event);
 
@@ -920,13 +927,14 @@ public:
 
     bool PaintFocusState(bool isNeedStateStyles = true);
     bool PaintFocusStateToRenderContext();
-    Color GetPaintColor();
-    Dimension GetPaintWidth();
-    Dimension GetPaintPaddingVp();
+    void GetPaintColorFromBox(Color& paintColor);
+    void GetPaintWidthFromBox(Dimension& paintWidth);
+    void GetPaintPaddingVp(Dimension& focusPaddingVp);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
     void ClearFocusState(bool isNeedStateStyles = true);
     void ClearAllFocusState();
+    void PrintOnKeyEventUserInfo(const KeyEvent& keyEvent, bool retCallback);
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
     {
@@ -1007,7 +1015,7 @@ public:
     
     static double GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step);
 
-    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut = true);
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
     void RemoveFocusScopeIdAndPriority();
     bool AcceptFocusOfPriorityChild();
@@ -1061,6 +1069,8 @@ protected:
 
     bool CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const;
     bool RequestNextFocus(FocusStep moveStep, const RectF& rect);
+    bool RequestNextFocusByDefaultAlgorithm(FocusStep moveStep, const RectF& rect);
+    bool RequestNextFocusByCustomAlgorithm(FocusStep moveStep, const RectF& rect);
 
     void OnFocus();
     void OnFocusNode();
@@ -1078,6 +1088,8 @@ protected:
 private:
     friend class FocusView;
 
+    friend class FocusManager;
+ 
     bool CalculatePosition();
 
     void SetScopeFocusAlgorithm();
@@ -1111,14 +1123,15 @@ private:
     bool OnKeyEventNodeInternal(const KeyEvent& keyEvent);
     bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
     bool RequestNextFocusByKey(const KeyEvent& keyEvent);
-    RefPtr<PipelineContext> GetPipelineContext() const;
+
+    bool IsComponentDirectionRtl();
 
     void DumpFocusNodeTreeInJson(int32_t depth);
     void DumpFocusScopeTreeInJson(int32_t depth);
 
-    bool IsComponentDirectionRtl();
-
     bool SkipFocusMoveBeforeRemove();
+
+    bool IsArrowKeyStepOut(FocusStep moveStep);
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
@@ -1148,6 +1161,7 @@ private:
     bool hasBackwardMovement_ { false };
     bool isFocusActiveWhenFocused_ { false };
     bool isRaisedZIndex_ { false };
+    bool forceProcessOnKeyEventInternal_ { false }; // extension use only
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
@@ -1164,6 +1178,7 @@ private:
     bool isFocusScope_ { false };
     bool isGroup_ { false };
     FocusPriority focusPriority_ = FocusPriority::AUTO;
+    bool arrowKeyStepOut_ { true };
 };
 } // namespace OHOS::Ace::NG
 

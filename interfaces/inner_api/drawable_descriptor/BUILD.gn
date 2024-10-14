@@ -74,6 +74,7 @@ if (is_arkui_x) {
       }
     }
     public_configs = [ ":drawable_config" ]
+    branch_protector_ret = "pac_ret"
 
     configs = [
       "$ace_root:ace_config",

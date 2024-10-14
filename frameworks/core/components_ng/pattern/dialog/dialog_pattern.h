@@ -294,6 +294,7 @@ public:
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
     void UpdateFontScale();
+    PipelineContext* GetDialogContext();
 
     bool GetIsSuitOldMeasure()
     {
@@ -309,6 +310,8 @@ public:
     {
         return true;
     }
+
+    bool IsShowInFreeMultiWindow();
 
 private:
     bool AvoidKeyboard() const override

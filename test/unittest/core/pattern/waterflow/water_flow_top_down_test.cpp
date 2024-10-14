@@ -712,11 +712,110 @@ HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
-    MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 64);
+    // can't enter the refreshing status when refresh updates scroll offset by animation source
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+}
+
+/**
+ * @tc.name: WaterFlowTest016
+ * @tc.desc: Test prevOffset_ when update offset repeatedly in one frame.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest016, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(20);
+    CreateDone();
+    UpdateCurrentOffset(-500.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 7);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
+    EXPECT_EQ(pattern_->GetPrevOffset(), -500.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -500.0f);
+
+    pattern_->UpdateCurrentOffset(-10.0f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -510.0f);
+    EXPECT_EQ(pattern_->GetPrevOffset(), -500.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -510.0f);
+    EXPECT_EQ(pattern_->GetPrevOffset(), -510.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 7);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 18);
+
+    pattern_->UpdateCurrentOffset(-10.0f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(-5.0f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(20.0f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -505.0f);
+    EXPECT_EQ(pattern_->GetPrevOffset(), -510.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -505.0f);
+    EXPECT_EQ(pattern_->GetPrevOffset(), -505.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 7);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 18);
+}
+
+/**
+ * @tc.name: WaterFlowTest017.
+ * @tc.desc: Test endIndex when there has a flowItem with a height of 0 at the end.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest017, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    CreateWaterFlowItems(10);
+    CreateDone();
+    AddItemsAtSlot(2, 0.0f, 10);
+    UpdateCurrentOffset(-1500.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 5);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 11);
+    EXPECT_EQ(GetChildY(frameNode_, 9), WATER_FLOW_HEIGHT - GetChildHeight(frameNode_, 9));
+    EXPECT_EQ(GetChildY(frameNode_, 10), WATER_FLOW_HEIGHT);
+    EXPECT_EQ(GetChildY(frameNode_, 11), WATER_FLOW_HEIGHT);
+}
+
+/**
+ * @tc.name: WaterFlowTest018.
+ * @tc.desc: Test layout after changing the dataSource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest018, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    // slide to bottom.
+    UpdateCurrentOffset(-4500.0f);
+    EXPECT_EQ(info->startIndex_, 19);
+    EXPECT_EQ(info->endIndex_, 29);
+    EXPECT_EQ(info->GetContentHeight(), 2300.0f);
+    EXPECT_EQ(info->items_[0][0].size() + info->items_[0][1].size(), 30);
+
+    // slide backward.
+    UpdateCurrentOffset(1000.0f);
+    EXPECT_EQ(info->startIndex_, 7);
+    EXPECT_EQ(info->endIndex_, 17);
+    EXPECT_EQ(info->GetContentHeight(), 2300.0f);
+
+    // delete a flowItem.
+    frameNode_->RemoveChildAtIndex(20);
+    frameNode_->ChildrenUpdatedFrom(20);
+    pattern_->MarkDirtyNodeSelf();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 7);
+    EXPECT_EQ(info->endIndex_, 17);
+    EXPECT_EQ(info->items_[0][0].size() + info->items_[0][1].size(), 20);
+    EXPECT_EQ(info->GetContentHeight(), 1600.0f);
+
+    // slide forward.
+    UpdateCurrentOffset(-1000.0f);
+    EXPECT_EQ(info->startIndex_, 19);
+    EXPECT_EQ(info->endIndex_, 28);
+    EXPECT_EQ(info->GetContentHeight(), 2300.0f);
+    EXPECT_EQ(info->items_[0][0].size() + info->items_[0][1].size(), 29);
 }
 } // namespace OHOS::Ace::NG

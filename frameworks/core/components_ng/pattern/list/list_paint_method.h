@@ -123,13 +123,24 @@ public:
 
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
+    void SetAdjustOffset(float adjustOffset)
+    {
+        adjustOffset_ = adjustOffset;
+    }
+
 private:
+    ContentClipMode GetDefaultContentClip() const override
+    {
+        return ContentClipMode::CONTENT_ONLY;
+    }
+
     V2::ItemDivider divider_;
     int32_t lanes_ = 1;
     int32_t totalItemCount_ = 0;
     float space_;
     float laneGutter_ = 0.0f;
     PositionMap itemPosition_;
+    float adjustOffset_ = 0.0f;
     RefPtr<ListContentModifier> listContentModifier_;
 
     WeakPtr<ScrollBar> scrollBar_;

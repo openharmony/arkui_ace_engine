@@ -79,6 +79,7 @@ UINode::~UINode()
 
 void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
+    CHECK_NULL_VOID(context);
     context_ = context;
     instanceId_ = context->GetInstanceId();
     if (updateJSInstanceCallback_) {
@@ -108,13 +109,6 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
     bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
-    if (!addModalUiextension && modalUiextensionCount_ > 0) {
-        LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
-            "Current modalUiextension count is : %{public}d",
-            GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
-        return;
-    }
-
     auto it = std::find(children_.begin(), children_.end(), child);
     if (it != children_.end()) {
         return;
@@ -124,7 +118,49 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
     RemoveDisappearingChild(child);
     it = children_.begin();
     std::advance(it, slot);
+    if (!addModalUiextension && modalUiextensionCount_ > 0) {
+        bool canAddChild = CanAddChildWhenTopNodeIsModalUec(it);
+        if (!canAddChild) {
+            LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
+                "Current modalUiextension count is : %{public}d",
+                GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
+            return;
+        } else {
+            LOGI("Child(tag %{public}s, id: %{public}d) must under modalUec, which count is: %{public}d",
+                child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
+        }
+    }
     DoAddChild(it, child, silently, addDefaultTransition);
+}
+
+bool UINode::CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter)
+{
+    if (children_.empty()) {
+        return true;
+    }
+
+    auto preIter = curIter;
+    preIter--;
+    // Gernerally, uiContent instance is allowwd to have multiple modalUecs.
+    // Therefore, need to check all modalUec's isAllowAddChildBelowModalUec.
+    while (preIter != children_.begin()) {
+        if (preIter == children_.end()) {
+            break;
+        }
+
+        if ((*preIter)->GetTag() != V2::MODAL_PAGE_TAG) {
+            break;
+        }
+
+        if (!(*preIter)->IsAllowAddChildBelowModalUec()) {
+            return false;
+        }
+
+        curIter--;
+        preIter--;
+    }
+
+    return true;
 }
 
 void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
@@ -535,6 +571,30 @@ RefPtr<FrameNode> UINode::GetFocusParent() const
     return nullptr;
 }
 
+RefPtr<FrameNode> UINode::GetFocusParentWithBoundary() const
+{
+    auto parentUi = GetParent();
+    while (parentUi) {
+        if (parentUi->GetTag() == V2::SCREEN_ETS_TAG) {
+            return nullptr;
+        }
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUi);
+        if (!parentFrame) {
+            parentUi = parentUi->GetParent();
+            continue;
+        }
+        auto type = parentFrame->GetFocusType();
+        if (type == FocusType::SCOPE) {
+            return parentFrame;
+        }
+        if (type == FocusType::NODE) {
+            return nullptr;
+        }
+        parentUi = parentUi->GetParent();
+    }
+    return nullptr;
+}
+
 RefPtr<FocusHub> UINode::GetFirstFocusHubChild() const
 {
     const auto* frameNode = AceType::DynamicCast<FrameNode>(this);
@@ -604,6 +664,7 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     if (onMainTree_) {
         return;
     }
+    // the context should not be nullptr.
     AttachContext(context, false);
     onMainTree_ = true;
     if (nodeStatus_ == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
@@ -615,6 +676,12 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     for (const auto& child : GetChildren()) {
         child->AttachToMainTree(isRecursive, context);
+    }
+    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
+    if (isOpenInvisibleFreeze) {
+        auto parent = GetParent();
+        // if it does not has parent, reset the flag.
+        SetFreeze(parent ? parent->isFreeze_ : false);
     }
 }
 
@@ -657,6 +724,28 @@ void UINode::DetachFromMainTree(bool recursive)
         child->DetachFromMainTree(isRecursive);
     }
     isTraversing_ = false;
+}
+
+void UINode::SetFreeze(bool isFreeze)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
+    if (isOpenInvisibleFreeze && isFreeze_ != isFreeze) {
+        isFreeze_ = isFreeze;
+        OnFreezeStateChange();
+        UpdateChildrenFreezeState(isFreeze_);
+    }
+}
+
+void UINode::UpdateChildrenFreezeState(bool isFreeze)
+{
+    const auto& children = GetChildren(true);
+    for (const auto& child : children) {
+        if (child) {
+            child->SetFreeze(isFreeze);
+        }
+    }
 }
 
 void UINode::FireCustomDisappear()
@@ -883,7 +972,7 @@ void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current
                 array->PutRef(std::move(child));
             }
         }
-        if (!disappearingChildren_.size()) {
+        if (!disappearingChildren_.empty()) {
             for (const auto& [item, index, branch] : disappearingChildren_) {
                 auto child = JsonUtil::Create();
                 item->DumpSimplifyTree(depth + 1, child);
@@ -1563,8 +1652,13 @@ bool UINode::GetIsRootBuilderNode() const
 void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
     std::list<int32_t>& removedElmtId, bool isEntry)
 {
+    auto greatOrEqualApi13 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
     for (auto const& child : children) {
-        if (!child->IsDisappearing() && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
+        bool needByTransition = child->IsDisappearing();
+        if (greatOrEqualApi13) {
+            needByTransition = isEntry && child->IsDisappearing() && child->GetInspectorIdValue("") != "";
+        }
+        if (!needByTransition && child->GetTag() != V2::RECYCLE_VIEW_ETS_TAG && !child->GetIsRootBuilderNode()) {
             CollectRemovedChild(child, removedElmtId);
         }
     }

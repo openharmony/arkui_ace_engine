@@ -1267,6 +1267,11 @@ export struct GridObjectSortComponent {
             }
             this.calcGridHeight();
           })
+          .onActionCancel(() => {
+            if (this.isStartDrag) {
+              this.insertItem(this.itemIndex, this.itemIndex);
+            }
+          })
       )
       .clip(false)
       .editMode(this.gridComState)

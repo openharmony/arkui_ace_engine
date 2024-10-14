@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "base/image/file_uri_helper.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -31,6 +34,7 @@ const int32_t RAWFILE_PREFIX_LENGTH = strlen("resource://RAWFILE/");
 const std::regex MEDIA_RES_ID_REGEX(R"(^resource://\w+/([0-9]+)\.\w+$)", std::regex::icase);
 const std::regex MEDIA_APP_RES_ID_REGEX(R"(^resource://.*/([0-9]+)\.\w+$)", std::regex::icase);
 const std::string FA_RESOURCE_PREFIX = "assets/entry/";
+const std::regex MEDIA_APP_RES_PATH_REGEX(R"(^resource://RAWFILE/(.*)$)");
 
 OHOS::Media::PlayerSeekMode ConvertToMediaSeekMode(SeekMode seekMode)
 {
@@ -103,12 +107,12 @@ void RosenMediaPlayer::SetMediaMuted(int32_t type, bool isMuted)
     mediaPlayer_->SetMediaMuted(static_cast<OHOS::Media::MediaType>(type), isMuted);
 }
 
-bool RosenMediaPlayer::SetSource(const std::string& src)
+bool RosenMediaPlayer::SetSource(const std::string& src, const std::string& bundleName, const std::string& moduleName)
 {
     auto videoSrc = src;
     int32_t fd = -1;
     bool useFd = false;
-    if (!SetMediaSource(videoSrc, fd, useFd)) {
+    if (!SetMediaSource(videoSrc, fd, useFd, bundleName, moduleName)) {
         LOGE("Video media player set media source failed.");
         return false;
     }
@@ -213,6 +217,45 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
     return true;
 }
 
+bool RosenMediaPlayer::RawFileWithModuleInfoPlay(const std::string& src, const std::string& bundleName,
+    const std::string& moduleName)
+{
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+    RefPtr<ThemeConstants> themeConstants = nullptr;
+    if (SystemProperties::GetResourceDecoupling()) {
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        CHECK_NULL_RETURN(resourceAdapter, false);
+        resourceAdapter->UpdateResourceManager(bundleName, moduleName);
+    } else {
+        auto themeManager = PipelineBase::CurrentThemeManager();
+        CHECK_NULL_RETURN(themeManager, false);
+        themeConstants = themeManager->GetThemeConstants();
+        CHECK_NULL_RETURN(themeConstants, false);
+    }
+
+    static std::mutex rawFdMutex_;
+    std::lock_guard lock(rawFdMutex_);
+    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    std::string rawFile;
+    RawfileDescription rawfileDescription;
+    if (GetResourceId(src, rawFile)) {
+        if (!resourceWrapper->GetRawFileDescription(rawFile, rawfileDescription)) {
+            TAG_LOGW(AceLogTag::ACE_VIDEO, "get video data by name failed");
+            return false;
+        }
+    }
+
+    if (!mediaPlayer_ ||
+        mediaPlayer_->SetSource(rawfileDescription.fd, rawfileDescription.offset, rawfileDescription.length) != 0) {
+        LOGE("Player SetSource failed");
+        resourceWrapper->CloseRawFileDescription(rawFile);
+        return false;
+    }
+    resourceWrapper->CloseRawFileDescription(rawFile);
+    return true;
+}
+
 bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -236,12 +279,15 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
     if (!RealPath(hapPath, realPath)) {
         return false;
     }
+
+    static std::mutex fdMutex_;
+    std::lock_guard lock(fdMutex_);
     auto hapFd = open(realPath, O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");
         return false;
     }
-    if (mediaPlayer_ && mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
+    if (!mediaPlayer_ || mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
         close(hapFd);
         return false;
@@ -301,7 +347,19 @@ bool RosenMediaPlayer::GetResourceId(const std::string& path, uint32_t& resId)
     return false;
 }
 
-bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& useFd)
+bool RosenMediaPlayer::GetResourceId(const std::string& uri, std::string& path) const
+{
+    std::smatch matches;
+    if (std::regex_match(uri, matches, MEDIA_APP_RES_PATH_REGEX) && matches.size() == MEDIA_RESOURCE_MATCH_SIZE) {
+        path = matches[1].str();
+        return true;
+    }
+
+    return false;
+}
+
+bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& useFd,
+    const std::string& bundleName, const std::string& moduleName)
 {
     if (StringUtils::StartWith(filePath, "dataability://") || StringUtils::StartWith(filePath, "datashare://") ||
         StringUtils::StartWith(filePath, "file://media")) {
@@ -320,8 +378,12 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd, bool& 
         // file path: resources/base/media/xxx.xx --> resource:///xxx.xx
         return MediaPlay(filePath);
     } else if (StringUtils::StartWith(filePath, "resource://RAWFILE")) {
-        // file path: resource/rawfile/xxx.xx --> resource://rawfile/xxx.xx
-        return RawFilePlay(filePath);
+        //Multi module, eg: HSP
+        if (!RawFileWithModuleInfoPlay(filePath, bundleName, moduleName)) {
+            // file path: resource/rawfile/xxx.xx --> resource://rawfile/xxx.xx
+            return RawFilePlay(filePath);
+        }
+        return true;
     } else if (StringUtils::StartWith(filePath, "http")) {
         // http or https
         if (mediaPlayer_ && mediaPlayer_->SetSource(filePath) != 0) {

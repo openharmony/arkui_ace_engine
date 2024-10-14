@@ -61,6 +61,10 @@ public:
 
     RefPtr<CanvasImage> MoveCanvasImage();
     RefPtr<ImageObject> MoveImageObject();
+    RefPtr<ImageObject> GetImageObject()
+    {
+        return imageObj_;
+    }
 
     const ImageSourceInfo& GetSourceInfo() const;
     const SizeF& GetDstSize() const;

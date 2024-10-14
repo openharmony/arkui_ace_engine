@@ -40,10 +40,6 @@ public:
 
     virtual void Create(const RefPtr<LazyForEachActuator>& actuator) = 0;
     virtual void OnMove(std::function<void(int32_t, int32_t)>&& onMove) = 0;
-
-private:
-    static std::unique_ptr<LazyForEachModel> instance_;
-    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

@@ -150,6 +150,13 @@ void FrontendDelegate::ResetRequestFocusCallback()
     focusManager->ResetRequestFocusCallback();
 }
 
+bool FrontendDelegate::Activate(bool isActive, bool autoInactive)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->SetIsFocusActive(isActive, NG::FocusActiveReason::USE_API, autoInactive);
+}
+
 template<typename T>
 bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content, std::string& ami)
 {

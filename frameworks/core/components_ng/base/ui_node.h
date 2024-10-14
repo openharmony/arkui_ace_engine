@@ -95,6 +95,7 @@ public:
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
     RefPtr<FrameNode> GetParentFrameNode() const;
+    RefPtr<FrameNode> GetFocusParentWithBoundary() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
@@ -714,6 +715,16 @@ public:
         destroyCallback_(GetId());
     }
 
+    bool IsAllowAddChildBelowModalUec() const
+    {
+        return isAllowAddChildBelowModalUec_;
+    }
+
+    void SetIsAllowAddChildBelowModalUec(bool isAllowAddChildBelowModalUec)
+    {
+        isAllowAddChildBelowModalUec_ = isAllowAddChildBelowModalUec;
+    }
+
     void SetBuilderFunc(std::function<void()>&& lazyBuilderFunc)
     {
         lazyBuilderFunc_ = lazyBuilderFunc;
@@ -763,6 +774,23 @@ public:
      */
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
+    // Used to mark freeze and block dirty mark.
+    virtual void SetFreeze(bool isFreeze);
+    bool IsFreeze() const
+    {
+        return isFreeze_;
+    }
+
+    bool IsCNode() const
+    {
+        return isCNode_;
+    }
+
+    void setIsCNode(bool createByCapi)
+    {
+        isCNode_ = createByCapi;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -805,6 +833,10 @@ protected:
     virtual void OnAttachToMainTree(bool recursive = false);
     virtual void OnDetachFromMainTree(bool recursive = false, PipelineContext* context = nullptr);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
+
+    virtual void OnFreezeStateChange() {}
+    virtual void UpdateChildrenFreezeState(bool isFreeze);
+
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
 
@@ -842,6 +874,7 @@ protected:
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
+    bool CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter);
 
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
@@ -875,6 +908,9 @@ private:
 
     bool useOffscreenProcess_ = false;
 
+    bool isCNode_ = false;
+    bool isAllowAddChildBelowModalUec_ = true;
+
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;
     std::function<void(int32_t, RefPtr<UINode>&)> updateNodeFunc_;
@@ -891,6 +927,8 @@ private:
     bool isAccessibilityVirtualNode_ = false;
     WeakPtr<UINode> parentForAccessibilityVirtualNode_;
     bool isFirstAccessibilityVirtualNode_ = false;
+    // the flag to block dirty mark.
+    bool isFreeze_ = false;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

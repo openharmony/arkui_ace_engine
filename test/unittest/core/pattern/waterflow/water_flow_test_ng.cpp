@@ -43,6 +43,9 @@ void WaterFlowTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
+    auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks).Times(AnyNumber());
     MockAnimationManager::Enable(true);
     auto container = Container::Current();
@@ -53,6 +56,7 @@ void WaterFlowTestNg::SetUpTestSuite()
 #endif
     PipelineContext::GetCurrentContext()->SetMinPlatformVersion(12);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(12);
+    testing::FLAGS_gmock_verbose = "error";
 }
 
 void WaterFlowTestNg::TearDownTestSuite()
@@ -1985,5 +1989,48 @@ HWTEST_F(WaterFlowTestNg, MarginPadding001, TestSize.Level1)
     FlushLayoutTask(colNode, true);
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(1, 5, 480, 800)));
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2), RectF(3, 111, 237, 100)));
+}
+
+/**
+ * @tc.name: WaterFlowTest019
+ * @tc.desc: Test layout when update offset repeatedly in one frame.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest019, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 30; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateDone();
+
+    UpdateCurrentOffset(-500.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 21);
+
+    pattern_->UpdateCurrentOffset(-10.0f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(20.0f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(-5.0f, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 8);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 21);
+    for (int32_t i = 8; i <= 21; i++) {
+        EXPECT_TRUE(IsEqual(pattern_->GetItemRect(i),
+            Rect(i % 2 == 0 ? 0 : WATER_FLOW_WIDTH / 2, -95.0f + 100.f * ((i - 8) / 2), WATER_FLOW_WIDTH / 2, 100.0f)));
+    }
+
+    pattern_->UpdateCurrentOffset(10.0f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(-25.0f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(5.0f, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 23);
+    for (int32_t i = 10; i <= 23; i++) {
+        EXPECT_TRUE(IsEqual(pattern_->GetItemRect(i),
+            Rect(i % 2 == 0 ? 0 : WATER_FLOW_WIDTH / 2, -5.0f + 100.f * ((i - 10) / 2), WATER_FLOW_WIDTH / 2, 100.0f)));
+    }
 }
 } // namespace OHOS::Ace::NG

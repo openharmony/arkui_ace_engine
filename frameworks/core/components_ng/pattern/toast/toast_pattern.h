@@ -119,6 +119,8 @@ public:
     {
         return toastInfo_;
     }
+
+    bool IsShowInFreeMultiWindow();
     
 private:
     void BeforeCreateLayoutWrapper() override;
@@ -141,8 +143,10 @@ private:
     ToastInfo toastInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
     double toastBottom_;
+    Dimension defaultBottom_;
     Rect wrapperRect_;
     bool isHoverMode_ = false;
+    bool expandDisplay_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOAST_TOAST_PATTERN_H

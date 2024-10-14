@@ -1873,4 +1873,33 @@ HWTEST_F(ToggleTestNg, ToggleModelTest011, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 }
 
+/**
+ * @tc.name: ToggleModelTest012
+ * @tc.desc: Test ToggleModelNG::CreateTypeNode and ToggleModelNG::SetToggleState
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ToggleModelTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Toggle node.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(ToggleType::CHECKBOX, false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. SetToggleState.
+     */
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    ToggleModelNG::SetToggleState(node, true);
+
+    /**
+     * @tc.steps: step3. assert ToggleState.
+     */
+    auto paintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetCheckBoxSelectValue(), true);
+}
 } // namespace OHOS::Ace::NG

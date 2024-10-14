@@ -22,6 +22,7 @@
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/time_util.h"
+#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/event/target_component.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
@@ -495,6 +496,9 @@ struct TouchRestrict final {
     TouchEvent touchEvent;
 
     std::list<std::string> childTouchTestList;
+
+    // use to dump event tree
+    NG::EventTreeType touchTestType = NG::EventTreeType::TOUCH;
 };
 
 class TouchCallBackInfo : public BaseEventInfo {

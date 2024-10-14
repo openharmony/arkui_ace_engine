@@ -112,7 +112,7 @@ void WebModelNG::SetOnConsoleLog(std::function<bool(const BaseEventInfo* info)>&
 {
     auto func = jsCallback;
     auto onConsole = [func](const std::shared_ptr<BaseEventInfo>& info) -> bool {
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_RETURN(context, false);
         bool result = false;
         context->PostSyncEvent([func, info, &result]() { result = func(info.get()); }, "ArkUIWebConsoleLogCallback");
@@ -584,6 +584,13 @@ void WebModelNG::SetScreenCaptureRequestEventId(std::function<void(const BaseEve
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnScreenCaptureRequestEvent(std::move(uiCallback));
+}
+
+Color WebModelNG::GetDefaultBackgroundColor()
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_RETURN(webPattern, Color::WHITE);
+    return webPattern->GetDefaultBackgroundColor();
 }
 
 void WebModelNG::SetBackgroundColor(Color backgroundColor)

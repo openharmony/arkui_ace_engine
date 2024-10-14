@@ -38,6 +38,8 @@ struct OverlayRequest {
     int32_t requestCode = 0;
 };
 
+enum class DragHandleIndex { NONE, FIRST, SECOND };
+
 class BaseTextSelectOverlay : public SelectOverlayHolder, public SelectOverlayCallback {
     DECLARE_ACE_TYPE(BaseTextSelectOverlay, SelectOverlayHolder, SelectOverlayCallback);
 
@@ -88,9 +90,9 @@ public:
     void HideMenu(bool noAnimation = false);
     void DisableMenu();
     void EnableMenu();
-    void UpdateAllHandlesOffset();
-    void UpdateFirstHandleOffset();
-    void UpdateSecondHandleOffset();
+    virtual void UpdateAllHandlesOffset();
+    virtual void UpdateFirstHandleOffset();
+    virtual void UpdateSecondHandleOffset();
     void UpdateViewPort();
     bool IsShowMouseMenu();
     bool IsCurrentMenuVisibile();
@@ -222,10 +224,12 @@ public:
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override
     {
         isHandleDragging_ = true;
+        dragHandleIndex_ = isFirst ? DragHandleIndex::FIRST : DragHandleIndex::SECOND;
     }
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override
     {
         isHandleDragging_ = false;
+        dragHandleIndex_ = DragHandleIndex::NONE;
     }
     bool GetIsHandleDragging()
     {
@@ -246,6 +250,14 @@ public:
             pattern->GetSelectIndex(start, end);
         };
         selectInfo.onCreateCallback.textRangeCallback = textRange;
+    }
+    bool GetClipHandleViewPort(RectF& rect);
+    void MarkOverlayDirty();
+    void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
+    void UpdateHandleColor();
+    virtual std::optional<Color> GetHandleColor()
+    {
+        return std::nullopt;
     }
 
 protected:
@@ -286,19 +298,20 @@ protected:
         originalMenuIsShow_ = IsCurrentMenuVisibile();
     }
     virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
-    bool GetClipHandleViewPort(RectF& rect);
     virtual void UpdateClipHandleViewPort(RectF& rect) {};
     bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
     virtual bool IsClipHandleWithViewPort()
     {
         return false;
     }
+    void ApplySelectAreaWithKeyboard(RectF& selectArea);
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
     bool isHandleMoving_ = false;
+    DragHandleIndex dragHandleIndex_ = DragHandleIndex::NONE;
 
 private:
     void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);

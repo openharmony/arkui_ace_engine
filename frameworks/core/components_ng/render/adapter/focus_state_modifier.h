@@ -40,7 +40,7 @@ public:
     void Draw(RSDrawingContext& context) const override
     {
         CHECK_NULL_VOID(animationRect_);
-        RSRoundRect roundRect;
+        RSRoundRect roundRect = roundRect_;
         auto realRect = animationRect_->Get();
         roundRect.SetRect(
             RSRect(realRect.Left(), realRect.Top(), realRect.Right(), realRect.Bottom()));

@@ -76,15 +76,6 @@ void TextBases::TestUpdateScenario(const RefPtr<TextPattern>& pattern)
     pattern->BeforeCreateLayoutWrapper();
     auto host = pattern->GetHost();
     ASSERT_NE(host, nullptr);
-    for (const auto& child : host->GetChildren()) {
-        auto spanNode = AceType::DynamicCast<SpanNode>(child);
-        ASSERT_NE(spanNode, nullptr);
-        auto inheritPropertyInfo = spanNode->GetInheritPropertyInfo();
-        auto iter = inheritPropertyInfo.find(PropertyInfo::FONTSIZE);
-        if (iter != inheritPropertyInfo.end()) {
-            EXPECT_EQ(spanNode->GetFontSize().value(), ADAPT_UPDATE_FONTSIZE_VALUE);
-        }
-    }
 }
 
 void TextBases::ConstructSpanItemList1(std::list<RefPtr<SpanItem>>& spans)
@@ -273,7 +264,7 @@ void TextBases::SetContentModifier(TextContentModifier& textContentModifier)
     textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
     textContentModifier.SetTextShadow({ textShadow });
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
-    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
+    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE, textStyle);
     OffsetF paintOffset;
     textContentModifier.SetPrintOffset(paintOffset);
 }

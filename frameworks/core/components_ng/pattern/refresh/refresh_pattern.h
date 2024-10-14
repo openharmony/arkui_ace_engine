@@ -170,6 +170,7 @@ private:
     bool pullToRefresh_ = true;
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
+    std::optional<float> ratio_;
     // API version 10
     void InitLowVersionOffset();
     void UpdateChild();

@@ -84,6 +84,9 @@ void OnTextChangedListenerImpl::SetKeyboardStatus(bool status)
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
         client->SetInputMethodStatus(status);
+        if (!status) {
+            client->NotifyKeyboardHeight(0);
+        }
     };
     PostTaskToUI(task, "ArkUITextFieldSetKeyboardStatus");
 }
@@ -147,11 +150,7 @@ void OnTextChangedListenerImpl::NotifyKeyboardHeight(uint32_t height)
         auto client = textField.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID(manager);
-        manager->SetkeyboardHeightConsideringUIExtension(height);
+        client->NotifyKeyboardHeight(height);
     };
     PostTaskToUI(task, "ArkUITextFieldNotifyKeyboardHeight");
 }

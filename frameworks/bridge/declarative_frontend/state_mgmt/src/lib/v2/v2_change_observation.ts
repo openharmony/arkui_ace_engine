@@ -75,6 +75,7 @@ class ObserveV2 {
 
   public static readonly OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
   public static readonly OB_PREFIX_LEN = 5;
+  public static readonly CONSUMER_PREFIX = '__consumer_';
 
   // used by array Handler to create dependency on artificial 'length'
   // property of array, mark it as changed when array has changed.
@@ -93,20 +94,21 @@ class ObserveV2 {
   // Map bindId to WeakRef<ViewPU> | MonitorV2
   private id2cmp_: { number: WeakRef<Object> } = {} as { number: WeakRef<Object> };
 
-  // Map bindId -> Set of @observed class objects
+  // Map bindId -> Set of @ObservedV2 class objects
   // reverse dependency map for quickly removing all dependencies of a bindId
   private id2targets_: { number: Set<WeakRef<Object>> } = {} as { number: Set<WeakRef<Object>> };
 
   // queued up Set of bindId
   // elmtIds of UINodes need re-render
-  // @monitor functions that need to execute
+  // @Monitor functions that need to executed
   private elmtIdsChanged_: Set<number> = new Set();
   private computedPropIdsChanged_: Set<number> = new Set();
   private monitorIdsChanged_: Set<number> = new Set();
+  private monitorFuncsToRun_: Set<number> = new Set();
   private persistenceChanged_: Set<number> = new Set();
   // avoid recursive execution of updateDirty
   // by state changes => fireChange while
-  // UINode rerender or @monitor function execution
+  // UINode rerender or @Monitor function execution
   private startDirty_: boolean = false;
 
   // flag to indicate change observation is disabled
@@ -124,14 +126,32 @@ class ObserveV2 {
     return this.obsInstance_;
   }
 
-  // return true given value is @observed object
+  // return true given value is @ObservedV2 object
   public static IsObservedObjectV2(value: any): boolean {
     return (value && typeof (value) === 'object' && value[ObserveV2.V2_DECO_META]);
+  }
+
+  // return true if given value is proxied observed object, either makeObserved or autoProxyObject
+  public static IsProxiedObservedV2(value: any): boolean {
+    return (value && typeof value === 'object' && value[ObserveV2.SYMBOL_PROXY_GET_TARGET]);
   }
 
   // return true given value is the return value of makeObserved
   public static IsMakeObserved(value: any): boolean {
     return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
+  }
+
+  public static IsTrackedProperty(parentObj: any, prop: string): boolean {
+    if (!parentObj || typeof parentObj !== 'object') {
+      return false;
+    }
+    const trackedKey = ObserveV2.OB_PREFIX + prop;
+    const consumerKey = ObserveV2.CONSUMER_PREFIX + prop;
+    const computedKey = ComputedV2.COMPUTED_CACHED_PREFIX + prop;
+    if (trackedKey in parentObj || consumerKey in parentObj || computedKey in parentObj) {
+      return true;
+    }
+    return false;
   }
 
   public static getCurrentRecordedId(): number {
@@ -295,6 +315,12 @@ class ObserveV2 {
     return [totalCount, aliveCount];
   }
 
+  // Register the "parent" @Monitor id to known components
+  // it's needed when running the dirty @Monitor functions
+  public registerMonitor(monitor: object, id: number): void {
+    this.id2cmp_[id] = new WeakRef<Object>(monitor);
+  }
+  
   // add dependency view model object 'target' property 'attrName'
   // to current this.bindId
   public addRef(target: object, attrName: string): void {
@@ -302,8 +328,8 @@ class ObserveV2 {
     if (!bound) {
       return;
     }
-    if (bound[0] === UINodeRegisterProxy.monitorIllegalV2V3StateAccess) {
-      const error = `${attrName}: ObserveV2.addRef: trying to use V3 state '${attrName}' to init/update child V2 @Component. Application error`;
+    if (bound[0] === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
+      const error = `${attrName}: ObserveV2.addRef: trying to use V2 state '${attrName}' to init/update child V2 @Component. Application error`;
       stateMgmtConsole.applicationError(error);
       throw new TypeError(error);
     }
@@ -345,7 +371,7 @@ class ObserveV2 {
   public setUnmonitored<Z>(target: object, attrName: string, newValue: Z): void {
     const storeProp = ObserveV2.OB_PREFIX + attrName;
     if (storeProp in target) {
-      // @track attrName
+      // @Track attrName
       stateMgmtConsole.propertyAccess(`setUnmonitored '${attrName}' - tracked but unchanged. Doing nothing.`);
       target[storeProp] = newValue;
     } else {
@@ -358,7 +384,7 @@ class ObserveV2 {
   /**
    * Execute given task while state change observation is disabled
    * A state mutation caused by the task will NOT trigger UI rerender
-   * and @monitor function execution.
+   * and @Monitor function execution.
    *
    * !!! Use with Caution !!!
    *
@@ -463,15 +489,16 @@ class ObserveV2 {
 
   public updateDirty2(updateUISynchronously: boolean = false): void {
     aceTrace.begin('updateDirty2');
-    stateMgmtConsole.debug(`ObservedV3.updateDirty2 updateUISynchronously=${updateUISynchronously} ... `);
+    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} ... `);
     // obtain and unregister the removed elmtIds
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
 
     // priority order of processing:
     // 1- update computed properties until no more need computed props update
-    // 2- update monitors until no more monitors and no more computed props
-    // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
+    // 2- update monitors paths until no more monitors paths and no more computed props
+    // 3- run all monitor functions
+    // 4- update UINodes until no more monitors, no more computed props, and no more UINodes
     // FIXME prevent infinite loops
     do {
       do {
@@ -493,9 +520,16 @@ class ObserveV2 {
         if (this.monitorIdsChanged_.size) {
           const monitors = this.monitorIdsChanged_;
           this.monitorIdsChanged_ = new Set<number>();
-          this.updateDirtyMonitors(monitors);
+          this.updateDirtyMonitorPaths(monitors);
         }
-      } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + this.computedPropIdsChanged_.size > 0);
+
+        if (this.monitorFuncsToRun_.size) {
+          const monitorFuncs = this.monitorFuncsToRun_;
+          this.monitorFuncsToRun_ = new Set<number>();
+          this.runDirtyMonitors(monitorFuncs);
+        }
+      } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + 
+               this.computedPropIdsChanged_.size + this.monitorFuncsToRun_.size > 0);
 
       if (this.elmtIdsChanged_.size) {
         const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
@@ -504,7 +538,7 @@ class ObserveV2 {
       }
     } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
 
-    stateMgmtConsole.debug(`ObservedV3.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
+    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
     aceTrace.end();
   }
 
@@ -528,9 +562,29 @@ class ObserveV2 {
   }
 
 
-  public updateDirtyMonitors(monitors: Set<number>): void {
-    stateMgmtConsole.debug(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
-    aceTrace.begin(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor`);
+  public updateDirtyMonitorPaths(monitors: Set<number>): void {
+    stateMgmtConsole.debug(`ObservedV2.updateDirtyMonitorPaths: ${Array.from(monitors).length} @Monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
+    aceTrace.begin(`ObservedV2.updateDirtyMonitorPaths: ${Array.from(monitors).length} @Monitor`);
+    let weakMonitor: WeakRef<MonitorV2 | undefined>;
+    let monitor: MonitorV2 | undefined;
+    let ret: number = 0;
+    monitors.forEach((watchId) => {
+      ret = 0;
+      weakMonitor = this.id2cmp_[watchId];
+      if (weakMonitor && 'deref' in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV2) {
+        ret = monitor.notifyChange(watchId);
+      }
+      // Collect @Monitor functions that need to be executed later
+      if (ret > 0) {
+        this.monitorFuncsToRun_.add(ret);
+      }
+    });
+    aceTrace.end();
+  }
+
+  public runDirtyMonitors(monitors: Set<number>): void {
+    stateMgmtConsole.debug(`ObservedV2.runDirtyMonitors: ${Array.from(monitors).length} @Monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
+    aceTrace.begin(`ObservedV2.runDirtyMonitors: ${Array.from(monitors).length} @Monitor`);
     let weakMonitor: WeakRef<MonitorV2 | undefined>;
     let monitor: MonitorV2 | undefined;
     let monitorTarget: Object;
@@ -541,7 +595,7 @@ class ObserveV2 {
           // monitor notifyChange delayed if target is a View that is not active
           monitorTarget.addDelayedMonitorIds(watchId);
         } else {
-          monitor.notifyChange();
+          monitor.runMonitorFunction();
         }
       }
     });
@@ -590,7 +644,7 @@ class ObserveV2 {
       if (viewWeak && 'deref' in viewWeak && (view = viewWeak.deref()) &&
         ((view instanceof ViewV2) || (view instanceof ViewPU))) {
         if (view.isViewActive()) {
-          view.uiNodeNeedUpdateV3(elmtId);
+          view.uiNodeNeedUpdateV2(elmtId);
         } else if (view instanceof ViewV2) {
           // schedule delayed update once the view gets active
           view.scheduleDelayedUpdate(elmtId);
@@ -673,7 +727,7 @@ class ObserveV2 {
    * Helper function to add meta data about decorator to ViewPU or ViewV2
    * @param proto prototype object of application class derived from  ViewPU or ViewV2
    * @param varName decorated variable
-   * @param deco '@state', '@event', etc (note '@model' gets transpiled in '@param' and '@event')
+   * @param deco '@Local', '@Event', etc 
    */
   public static addVariableDecoMeta(proto: Object, varName: string, deco: string): void {
     // add decorator meta data
@@ -682,10 +736,10 @@ class ObserveV2 {
     meta[varName].deco = deco;
 
     // FIXME
-    // when splitting ViewPU and ViewV3
+    // when splitting ViewPU and ViewV2
     // use instanceOf. Until then, this is a workaround.
-    // any @state, @track, etc V3 event handles this function to return false
-    Reflect.defineProperty(proto, 'isViewV3', {
+    // any @Local, @Trace, etc V2 event handles this function to return false
+    Reflect.defineProperty(proto, 'isViewV2', {
       get() { return true; },
       enumerable: false
     }
@@ -705,10 +759,10 @@ class ObserveV2 {
     }
 
     // FIXME
-    // when splitting ViewPU and ViewV3
+    // when splitting ViewPU and ViewV2
     // use instanceOf. Until then, this is a workaround.
-    // any @state, @track, etc V3 event handles this function to return false
-    Reflect.defineProperty(proto, 'isViewV3', {
+    // any @Local, @Trace, etc V2 event handles this function to return false
+    Reflect.defineProperty(proto, 'isViewV2', {
       get() { return true; },
       enumerable: false
     }
@@ -716,7 +770,7 @@ class ObserveV2 {
   }
 
 
-  public static usesV3Variables(proto: Object): boolean {
+  public static usesV2Variables(proto: Object): boolean {
     return (proto && typeof proto === 'object' && proto[ObserveV2.V2_DECO_META]);
   }
 } // class ObserveV2
@@ -748,7 +802,7 @@ const trackInternal = (
     },
     enumerable: true
   });
-  // this marks the proto as having at least one @track property inside
+  // this marks the proto as having at least one @Trace property inside
   // used by IsObservedObjectV2
   target[ObserveV2.V2_DECO_META] ??= {};
 }; // trackInternal

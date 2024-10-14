@@ -37,7 +37,13 @@ constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 void ClickRecognizer::ForceCleanRecognizer()
 {
     MultiFingersRecognizer::ForceCleanRecognizer();
-    OnResetStatus();
+    tappedCount_ = 0;
+    equalsToFingers_ = false;
+    focusPoint_ = {};
+    fingerDeadlineTimer_.Cancel();
+    tapDeadlineTimer_.Cancel();
+    currentTouchPointsNum_ = 0;
+    responseRegionBuffer_.clear();
 }
 
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
@@ -285,6 +291,7 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture judge reject");
         return;
     }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
@@ -314,6 +321,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
     }
+    bool fingersNumberSatisfied = equalsToFingers_;
     // Check whether multi-finger taps are completed in count_ times
     if (equalsToFingers_ && (currentTouchPointsNum_ == 0) && isUpInRegion) {
         // Turn off the multi-finger lift deadline timer
@@ -328,7 +336,11 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         DeadlineTimer(tapDeadlineTimer_, MULTI_TAP_TIMEOUT);
     }
     if (refereeState_ != RefereeState::PENDING && refereeState_ != RefereeState::FAIL) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+        if (fingersNumberSatisfied) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
+        } else {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
     }
     if (currentTouchPointsNum_ < fingers_ && equalsToFingers_) {
         DeadlineTimer(fingerDeadlineTimer_, MULTI_FINGER_TIMEOUT);
@@ -462,6 +474,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
 #endif
     info.SetPointerEvent(lastPointEvent_);
     info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
+    info.SetInputEventType(inputEventType_);
     return info;
 }
 

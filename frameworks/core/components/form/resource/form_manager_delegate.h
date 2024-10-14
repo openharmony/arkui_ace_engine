@@ -100,7 +100,7 @@ public:
     void AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback);
     void AddFormSurfaceDetachCallback(OnFormSurfaceDetachCallback&& callback);
     void AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCallback&& callback);
-    void AddGetRectRelativeToWindowCallback(OnGetRectRelativeToWindowCallback && callback);
+    void AddGetRectRelativeToWindowCallback(OnGetRectRelativeToWindowCallback&& callback);
     void AddActionEventHandle(const ActionEventHandle& callback);
     void AddUnTrustFormCallback(const UnTrustFormCallback& callback);
     void AddSnapshotCallback(SnapshotCallback&& callback);

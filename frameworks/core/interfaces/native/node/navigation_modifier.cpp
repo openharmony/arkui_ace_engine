@@ -22,18 +22,18 @@ constexpr int32_t NAVIGATION_MODE_RANGE_MODIFIER = 2;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH_FOR_MODIFIER = 240;
 constexpr int32_t DEFAULT_SAFE_AREA_TYPE = 0b1;
 constexpr int32_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
-void SetHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide)
+void SetHideToolBar(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideToolBar(frameNode, hide);
+    NavigationModelNG::SetHideToolBar(frameNode, hide, animated);
 }
 
 void ResetHideToolBar(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideToolBar(frameNode, false);
+    NavigationModelNG::SetHideToolBar(frameNode, false, false);
 }
 
 void SetMinContentWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit)
@@ -200,18 +200,18 @@ void ResetUsrNavigationMode(ArkUINodeHandle node)
     NavigationModelNG::SetUsrNavigationMode(frameNode, NG::NavigationMode::AUTO);
 }
 
-void SetNavHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hideBackButton)
+void SetNavHideTitleBar(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideTitleBar(frameNode, hideBackButton);
+    NavigationModelNG::SetHideTitleBar(frameNode, hide, animated);
 }
 
 void ResetNavHideTitleBar(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NavigationModelNG::SetHideTitleBar(frameNode, false);
+    NavigationModelNG::SetHideTitleBar(frameNode, false, false);
 }
 
 void SetNavIgnoreLayoutSafeArea(ArkUINodeHandle node, const char* typeStr, const char* edgesStr)
@@ -287,6 +287,9 @@ void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUI
         finalOptions.brOptions.paddingEnd = CalcDimension(static_cast<double>(options.paddingEnd.dimension.value),
             static_cast<DimensionUnit>(options.paddingEnd.dimension.units));
     }
+    if (options.enableHoverMode.isSet) {
+        finalOptions.enableHoverMode = options.enableHoverMode.value;
+    }
     NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
 }
 
@@ -318,6 +321,14 @@ void SetNavMenus(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length)
             menuItem.isEnabled = items[i].isEnable.value;
         }
         menuItems.push_back(menuItem);
+        if (items[i].text.value) {
+            delete[] items[i].text.value;
+            items[i].text.value = nullptr;
+        }
+        if (items[i].icon.value) {
+            delete[] items[i].icon.value;
+            items[i].icon.value = nullptr;
+        }
     }
     NavigationModelNG::SetMenuItems(frameNode, std::move(menuItems));
 }

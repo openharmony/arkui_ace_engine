@@ -321,7 +321,7 @@ HWTEST_F(SafeAreaManagerTest, GetCombinedSafeAreaTest, TestSize.Level1)
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
     safeAreaManager_->UpdateNavArea(navArea);
     safeAreaManager_->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT);
-    safeAreaManager_->SetKeyBoardAvoidMode(false);
+    safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
     SafeAreaExpandOpts opt;
     /*@tc.steps: step1 call GetCombinedSafeArea ignore SafeArea*/
     safeAreaManager_->SetIgnoreSafeArea(true);
@@ -337,14 +337,14 @@ HWTEST_F(SafeAreaManagerTest, GetCombinedSafeAreaTest, TestSize.Level1)
     funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
     /**@tc.steps: step5 call GetCombinedSafeArea not ignore SafeArea and keyboardSafeAreaEnabled_
         and SAFE_AREA_TYPE_KEYBOARD*/
-    safeAreaManager_->SetKeyBoardAvoidMode(true);
+    safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
     funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
 
-    safeAreaManager_->SetKeyBoardAvoidMode(false);
+    safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
     opt.type |= SAFE_AREA_TYPE_KEYBOARD;
     funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
 
-    safeAreaManager_->SetKeyBoardAvoidMode(true);
+    safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
     funExPect(opt, SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END);
     /*@tc.steps: step6 call GetSafeAreaWithoutCutout*/
     auto res = safeAreaManager_->GetSafeAreaWithoutCutout();
@@ -369,9 +369,9 @@ HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest, TestSize.Level1)
     /**
      * @tc.steps: step1 keyboardSafeAreaEnabled_ is true
      */
-    auto kbam = safeAreaManager_->SetKeyBoardAvoidMode(true);
+    auto kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
     EXPECT_EQ(kbam, true);
-    kbam = safeAreaManager_->SetKeyBoardAvoidMode(true);
+    kbam = safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
     EXPECT_EQ(kbam, false);
     auto ret = safeAreaManager_->KeyboardSafeAreaEnabled();
     EXPECT_EQ(ret, true);
@@ -380,7 +380,7 @@ HWTEST_F(SafeAreaManagerTest, KeyboardOffsetTest, TestSize.Level1)
     /**
      * @tc.steps: step2 keyboardSafeAreaEnabled_ is false
      */
-    safeAreaManager_->SetKeyBoardAvoidMode(false);
+    safeAreaManager_->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
     ret = safeAreaManager_->KeyboardSafeAreaEnabled();
     EXPECT_EQ(ret, false);
     kbo = safeAreaManager_->GetKeyboardOffset();

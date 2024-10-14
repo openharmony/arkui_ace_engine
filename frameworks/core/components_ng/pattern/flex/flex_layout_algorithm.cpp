@@ -140,15 +140,6 @@ float GetMainAxisMargin(const RefPtr<LayoutWrapper>& child, FlexDirection direct
     return childMainAxisMargin;
 }
 
-bool CheckFlexMainAxisSizeAuto(FlexDirection direction, const std::unique_ptr<MeasureProperty>& propertyPtr)
-{
-    if (!propertyPtr || !propertyPtr->selfIdealSize) {
-        return false;
-    }
-    return IsHorizontal(direction) ? propertyPtr->selfIdealSize->IsWidthDimensionUnitAuto()
-                                   : propertyPtr->selfIdealSize->IsHeightDimensionUnitAuto();
-}
-
 } // namespace
 
 float FlexLayoutAlgorithm::GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
@@ -834,6 +825,19 @@ bool FlexLayoutAlgorithm::CheckSetConstraint(const std::unique_ptr<MeasureProper
     return propertyPtr && (propertyPtr->minSize || propertyPtr->maxSize);
 }
 
+void FlexLayoutAlgorithm::CheckMainAxisSizeAuto(const std::unique_ptr<MeasureProperty>& calcLayoutConstraint)
+{
+    if (isInfiniteLayout_) {
+        mainAxisSize_ = allocatedSize_;
+    }
+    CHECK_NULL_VOID(calcLayoutConstraint);
+    CHECK_NULL_VOID(calcLayoutConstraint->selfIdealSize);
+    if (IsHorizontal(direction_) ? calcLayoutConstraint->selfIdealSize->IsWidthDimensionUnitAuto()
+                                 : calcLayoutConstraint->selfIdealSize->IsHeightDimensionUnitAuto()) {
+        mainAxisSize_ = allocatedSize_;
+    }
+}
+
 void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
@@ -926,13 +930,7 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
      * For Row and Column, the main axis size is wrapContent.
      * And, FlexLayoutAlgorithm, as the parent class, should not handle the special logic of the subclass LinearLayout.
      */
-    bool flexNeedSelfAdaptive = false;
-    if (rawConstraint) {
-        flexNeedSelfAdaptive = CheckFlexMainAxisSizeAuto(direction_, rawConstraint);
-    }
-    if (isInfiniteLayout_ || flexNeedSelfAdaptive) {
-        mainAxisSize_ = allocatedSize_;
-    }
+    CheckMainAxisSizeAuto(rawConstraint);
 
     auto finalMainAxisSize = mainAxisSize_;
     auto finalCrossAxisSize = crossAxisSize_;

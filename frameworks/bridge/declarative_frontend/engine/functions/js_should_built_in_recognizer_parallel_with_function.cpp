@@ -62,4 +62,53 @@ JSRef<JSObject> JsShouldBuiltInRecognizerParallelWithFunction::CreateRecognizerO
     return recognizerObj;
 }
 
+void JSEventTargetInfo::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSEventTargetInfo>::Declare("EventTargetInfo");
+    JSClass<JSEventTargetInfo>::CustomMethod("getId", &JSEventTargetInfo::GetInspectorId);
+    JSClass<JSEventTargetInfo>::Bind(globalObj, &JSEventTargetInfo::Constructor, &JSEventTargetInfo::Destructor);
+}
+
+void JSScrollableTargetInfo::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSScrollableTargetInfo>::Declare("ScrollableTargetInfo");
+    JSClass<JSScrollableTargetInfo>::CustomMethod("isBegin", &JSScrollableTargetInfo::IsBegin);
+    JSClass<JSScrollableTargetInfo>::CustomMethod("isEnd", &JSScrollableTargetInfo::IsEnd);
+    JSClass<JSScrollableTargetInfo>::CustomMethod("getId", &JSEventTargetInfo::GetInspectorId);
+    JSClass<JSScrollableTargetInfo>::Inherit<JSEventTargetInfo>();
+    JSClass<JSScrollableTargetInfo>::Bind(
+        globalObj, &JSScrollableTargetInfo::Constructor, &JSScrollableTargetInfo::Destructor);
+}
+
+void JSGestureRecognizer::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSGestureRecognizer>::Declare("GestureRecognizer");
+    JSClass<JSGestureRecognizer>::CustomMethod("getTag", &JSGestureRecognizer::GetTag);
+    JSClass<JSGestureRecognizer>::CustomMethod("getType", &JSGestureRecognizer::GetType);
+    JSClass<JSGestureRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
+    JSClass<JSGestureRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
+    JSClass<JSGestureRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
+    JSClass<JSGestureRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
+    JSClass<JSGestureRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
+    JSClass<JSGestureRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
+    JSClass<JSGestureRecognizer>::Bind(
+        globalObj, &JSGestureRecognizer::Constructor, &JSGestureRecognizer::Destructor);
+}
+
+void JSPanRecognizer::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSPanRecognizer>::Declare("PanRecognizer");
+    JSClass<JSPanRecognizer>::CustomMethod("getTag", &JSGestureRecognizer::GetTag);
+    JSClass<JSPanRecognizer>::CustomMethod("getType", &JSGestureRecognizer::GetType);
+    JSClass<JSPanRecognizer>::CustomMethod("isBuiltIn", &JSGestureRecognizer::IsBuiltInRecognizer);
+    JSClass<JSPanRecognizer>::CustomMethod("setEnabled", &JSGestureRecognizer::SetEnabled);
+    JSClass<JSPanRecognizer>::CustomMethod("isEnabled", &JSGestureRecognizer::IsEnabled);
+    JSClass<JSPanRecognizer>::CustomMethod("getEventTargetInfo", &JSGestureRecognizer::GetEventTargetInfo);
+    JSClass<JSPanRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
+    JSClass<JSPanRecognizer>::CustomMethod("getPanGestureOptions", &JSPanRecognizer::GetPanGestureOptions);
+    JSClass<JSPanRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
+    JSClass<JSPanRecognizer>::Inherit<JSGestureRecognizer>();
+    JSClass<JSPanRecognizer>::Bind(globalObj, &JSPanRecognizer::Constructor, &JSPanRecognizer::Destructor);
+}
+
 } // namespace OHOS::Ace::Framework

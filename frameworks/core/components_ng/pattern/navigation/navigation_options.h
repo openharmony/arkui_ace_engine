@@ -71,10 +71,12 @@ struct NavigationTitlebarOptions {
     NavigationBackgroundOptions bgOptions;
     NavigationBarOptions brOptions;
     NavigationTextOptions textOptions;
+    bool enableHoverMode = false;
 
     bool operator== (const NavigationTitlebarOptions& other) const
     {
-        return bgOptions == other.bgOptions &&  brOptions == other.brOptions;
+        return bgOptions == other.bgOptions && brOptions == other.brOptions
+            && enableHoverMode == other.enableHoverMode;
     }
 
     bool operator!= (const NavigationTitlebarOptions& other) const
@@ -85,10 +87,12 @@ struct NavigationTitlebarOptions {
 
 struct NavigationToolbarOptions {
     NavigationBackgroundOptions bgOptions;
+    // toolBar not support paddingStart and paddingEnd of NavigationBarOptions now
+    NavigationBarOptions brOptions;
 
     bool operator== (const NavigationToolbarOptions& other) const
     {
-        return bgOptions == other.bgOptions;
+        return bgOptions == other.bgOptions && brOptions == other.brOptions;
     }
 
     bool operator!= (const NavigationToolbarOptions& other) const

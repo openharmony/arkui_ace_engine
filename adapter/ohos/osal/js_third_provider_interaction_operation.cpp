@@ -556,9 +556,9 @@ void JsThirdProviderInteractionOperation::GetNodeConfig(NodeConfig& config)
     auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
     config.offset = displayOffset;
     config.pageId = host->GetPageId();
-    config.windowId = context->GetRealHostWindowId();
+    config.windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.belongTreeId = belongTreeId_;
-    config.parentWindowId = context->GetRealHostWindowId();
+    config.parentWindowId = static_cast<int32_t>(context->GetRealHostWindowId());
     config.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
 }
 
@@ -639,8 +639,9 @@ bool JsThirdProviderInteractionOperation::HandleEventByFramework(
                     nativeAccessibilityEvent.GetElementInfo()->GetElementId(),
                     accessibilityEventInfo);
             }
-        default:
             break;
+        default:
+            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "Unsupported eventType");
     }
     return needSendEvent;
 }

@@ -555,7 +555,7 @@ export struct ChipGroup {
             .hitTestBehavior(HitTestMode.None)
         }
       }
-      .height(this.getChipGroupHeight())
+      .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
       .layoutWeight(1)
       .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
       .alignContent(Alignment.End)
@@ -570,6 +570,5 @@ export struct ChipGroup {
     }
     .align(Alignment.End)
     .width("100%")
-    .padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() })
   }
 }

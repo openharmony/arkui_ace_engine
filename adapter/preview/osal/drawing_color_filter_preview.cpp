@@ -15,52 +15,34 @@
 
 #include "drawing_color_filter_preview.h"
 
-#ifdef USE_ROSEN_DRAWING
 #include "base/utils/utils.h"
 #include "color_filter_napi/js_color_filter.h"
-#endif
 
 namespace OHOS::Ace {
 RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilter(void* sptrAddr)
 {
-#ifndef USE_ROSEN_DRAWING
-    return nullptr;
-#else
     CHECK_NULL_RETURN(sptrAddr, nullptr);
     auto* jsColorFilter = reinterpret_cast<OHOS::Rosen::Drawing::JsColorFilter*>(sptrAddr);
     return AceType::MakeRefPtr<DrawingColorFilterPreview>(jsColorFilter->GetColorFilter());
-#endif
 }
 
 RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilter(const std::vector<float>& matrix)
 {
-#ifndef USE_ROSEN_DRAWING
-    return nullptr;
-#else
     OHOS::Rosen::Drawing::ColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix.data());
     return AceType::MakeRefPtr<DrawingColorFilterPreview>(
         Rosen::Drawing::ColorFilter::CreateMatrixColorFilter(colorMatrix));
-#endif
 }
 
 RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilterFromNative(void* sptrAddr)
 {
-#ifndef USE_ROSEN_DRAWING
-    return nullptr;
-#else
     CHECK_NULL_RETURN(sptrAddr, nullptr);
     auto* colorFilter = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::ColorFilter>*>(sptrAddr);
     return AceType::MakeRefPtr<DrawingColorFilterPreview>(*colorFilter);
-#endif
 }
 
 void* DrawingColorFilterPreview::GetDrawingColorFilterSptrAddr()
 {
-#ifndef USE_ROSEN_DRAWING
-    return nullptr;
-#else
     return static_cast<void*>(&colorFilter_);
-#endif
 }
 } // namespace OHOS::Ace

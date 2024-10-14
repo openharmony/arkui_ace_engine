@@ -1197,6 +1197,19 @@ void LayoutProperty::UpdateDisplayIndex(int32_t displayIndex)
     }
     if (flexItemProperty_->UpdateDisplayIndex(displayIndex)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto parent = host->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parent);
+        const auto& children = parent->GetChildren();
+        CHECK_EQUAL_VOID(children.empty(), true);
+        for (const auto& child : children) {
+            auto childFrameNode = AceType::DynamicCast<NG::FrameNode>(child);
+            CHECK_NULL_CONTINUE(childFrameNode);
+            auto layoutProperty = childFrameNode->GetLayoutProperty();
+            CHECK_NULL_CONTINUE(layoutProperty);
+            layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     }
 }
 

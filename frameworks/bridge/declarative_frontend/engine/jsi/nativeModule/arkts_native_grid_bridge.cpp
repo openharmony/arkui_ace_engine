@@ -798,8 +798,8 @@ ArkUINativeModuleValue GridBridge::SetGridLayoutOptions(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> irregularIndexesVal = runtimeCallInfo->GetCallArgRef(2);
-    Local<JSValueRef> indexesLengthVal = runtimeCallInfo->GetCallArgRef(3);
+    Local<JSValueRef> irregularIndexesVal = runtimeCallInfo->GetCallArgRef(2); // 2: parameter index
+    Local<JSValueRef> indexesLengthVal = runtimeCallInfo->GetCallArgRef(3); // 3: parameter index
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
     int32_t length = 0;
     if (indexesLengthVal->IsNumber()) {
@@ -822,8 +822,8 @@ ArkUINativeModuleValue GridBridge::SetGridLayoutOptions(ArkUIRuntimeCallInfo* ru
         }
     }
     irregularIndexes.reset();
-    ParseGetGridItemSize(vm, runtimeCallInfo->GetCallArgRef(4), options);
-    ParseGetGridItemRect(vm, runtimeCallInfo->GetCallArgRef(5), options);
+    ParseGetGridItemSize(vm, runtimeCallInfo->GetCallArgRef(4), options); // 4: parameter index
+    ParseGetGridItemRect(vm, runtimeCallInfo->GetCallArgRef(5), options); // 5: parameter index
     GridModelNG::SetLayoutOptions(reinterpret_cast<FrameNode*>(nativeNode), options);
     return panda::JSValueRef::Undefined(vm);
 }

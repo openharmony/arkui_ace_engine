@@ -57,14 +57,16 @@ void ListEventHub::InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void ListEventHub::OnItemDragStart(const GestureEvent& info, const DragDropInfo& dragDropInfo)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     if (dragDropInfo.pixelMap) {
-        dragDropProxy_ = manager->CreateAndShowDragWindow(dragDropInfo.pixelMap, info);
+        dragDropProxy_ = manager->CreateAndShowItemDragOverlay(dragDropInfo.pixelMap, info, AceType::Claim(this));
     } else if (dragDropInfo.customNode) {
-        dragDropProxy_ = manager->CreateAndShowDragWindow(dragDropInfo.customNode, info);
+        dragDropProxy_ = manager->CreateAndShowItemDragOverlay(dragDropInfo.customNode, info, AceType::Claim(this));
     }
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info, GetFrameNode());
@@ -75,7 +77,9 @@ void ListEventHub::OnItemDragStart(const GestureEvent& info, const DragDropInfo&
 
 void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
 
     auto globalX = static_cast<float>(info.GetGlobalPoint().GetX());
@@ -86,11 +90,9 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
         return;
     }
 
-    auto host = GetFrameNode();
-    CHECK_NULL_VOID(host);
     OHOS::Ace::ItemDragInfo itemDragInfo;
-    itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
-    itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
+    itemDragInfo.SetX(globalX);
+    itemDragInfo.SetY(globalY);
     auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
     CHECK_NULL_VOID(customNode);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -108,7 +110,7 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
             TAG_LOGE(AceLogTag::ACE_DRAG, "listItem drag start failed, custom component screenshot is empty.");
             return;
         }
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         DragDropInfo dragDropInfo;
         dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));

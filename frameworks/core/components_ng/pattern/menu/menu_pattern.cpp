@@ -50,6 +50,7 @@ constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr Dimension MIN_SELECT_MENU_WIDTH = 64.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
 constexpr int32_t STACK_EXPAND_DISAPPEAR_DURATION = 300;
+constexpr int32_t HALF_FOLD_HOVER_DURATION = 1000;
 constexpr double MENU_ORIGINAL_SCALE = 0.6f;
 constexpr double MOUNT_MENU_OPACITY = 0.4f;
 
@@ -190,6 +191,7 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
+    halfFoldHoverCallbackId_ = RegisterHalfFoldHover(targetNode);
     OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
                                               const OffsetF& oldOrigin, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -197,7 +199,6 @@ void MenuPattern::OnAttachToFrameNode()
         if (oldRect.IsEmpty() && oldOrigin.NonOffset()) {
             return;
         }
-
         auto pipelineContext = PipelineContext::GetCurrentContext();
         AnimationOption option;
         option.SetCurve(pipelineContext->GetSafeAreaManager()->GetSafeAreaCurve());
@@ -224,15 +225,38 @@ void MenuPattern::OnAttachToFrameNode()
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
 
+int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
+{
+    // register when hoverMode enabled
+    auto pipelineContext = menuNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    int32_t callbackId = pipelineContext->RegisterHalfFoldHoverChangedCallback(
+        [weak = WeakClaim(this), pipelineContext](bool isHalfFoldHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        AnimationOption optionPosition;
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+        optionPosition.SetDuration(HALF_FOLD_HOVER_DURATION);
+        optionPosition.SetCurve(motion);
+        pipelineContext->FlushUITasks();
+        pipelineContext->Animate(optionPosition, motion, [host, pipelineContext]() {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            pipelineContext->FlushUITasks();
+        });
+    });
+    return callbackId;
+}
+
 void MenuPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    eventHub->RemoveInnerOnAreaChangedCallback(host->GetId());
+    eventHub->RemoveInnerOnAreaChangedCallback(frameNode->GetId());
 }
 
 void MenuPattern::OnModifyDone()
@@ -755,6 +779,10 @@ uint32_t MenuPattern::GetInnerMenuCount() const
         // found component <Menu>
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             child = child->GetFrameChildByIndex(0, false);
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child = child->GetChildAtIndex(0);
+                ++depth;
+            }
             continue;
         }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
@@ -782,6 +810,10 @@ RefPtr<FrameNode> MenuPattern::GetFirstInnerMenu() const
         // found component <Menu>
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             child = child->GetFrameChildByIndex(0, false);
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child = child->GetChildAtIndex(0);
+                ++depth;
+            }
             continue;
         }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
@@ -1099,10 +1131,11 @@ void MenuPattern::ShowPreviewMenuScaleAnimation()
 void MenuPattern::ShowPreviewMenuAnimation()
 {
     CHECK_NULL_VOID(isFirstShow_ && previewMode_ != MenuPreviewMode::NONE);
-    ShowPreviewMenuScaleAnimation();
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    MenuView::CalcHoverScaleInfo(host);
+    ShowPreviewMenuScaleAnimation();
+
     MenuView::ShowPixelMapAnimation(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1192,7 +1225,7 @@ void MenuPattern::ShowStackExpandMenu()
     auto outterMenu = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(outterMenu);
 
-    auto [originOffset, endOffset] = GetMenuOffset(outterMenu);
+    auto [originOffset, endOffset] = GetMenuOffset(outterMenu, true);
     auto outterMenuContext = outterMenu->GetRenderContext();
     CHECK_NULL_VOID(outterMenuContext);
 
@@ -1254,9 +1287,7 @@ MenuItemInfo MenuPattern::GetInnerMenuOffset(const RefPtr<UINode>& child, bool i
         if (menuItemInfo.isFindTargetId) {
             return menuItemInfo;
         }
-    } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG
-        || child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
-        ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
+    } else {
         const auto& groupChildren = child->GetChildren();
         for (auto child : groupChildren) {
             menuItemInfo = GetInnerMenuOffset(child, isNeedRestoreNodeId);
@@ -1390,6 +1421,20 @@ void MenuPattern::ShowMenuDisappearAnimation()
     });
 }
 
+void MenuPattern::UpdateClipPath(const RefPtr<LayoutWrapper>& dirty)
+{
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(layoutAlgorithmWrapper);
+    auto menuLayoutAlgorithm = DynamicCast<MenuLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(menuLayoutAlgorithm);
+    auto clipPath = menuLayoutAlgorithm->GetClipPath();
+    auto host = dirty->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<MenuPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateClipPath(clipPath);
+}
+
 bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     ShowPreviewMenuAnimation();
@@ -1403,6 +1448,7 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
 
+    UpdateClipPath(dirty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();

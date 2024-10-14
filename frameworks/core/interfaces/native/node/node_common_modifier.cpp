@@ -1770,18 +1770,18 @@ void ResetBackgroundBlurStyle(ArkUINodeHandle node)
 /**
  * @param src source borderWidth and and BorderRadius value
  * @param options option value
- * values[offset + 0], option[offset + 1], option[offset + 2]: borderWidth left(hasValue, value, unit)
- * values[offset + 3], option[offset + 4], option[offset + 5]: borderWidth right(hasValue, value, unit)
+ * values[offset + 0], option[offset + 1], option[offset + 2]: borderWidth start/left(hasValue, value, unit)
+ * values[offset + 3], option[offset + 4], option[offset + 5]: borderWidth end/right(hasValue, value, unit)
  * values[offset + 6], option[offset + 7], option[offset + 8]: borderWidth top(hasValue, value, unit)
  * values[offset + 9], option[offset + 10], option[offset + 11]: borderWidth bottom(hasValue, value, unit)
- * values[offset + 12], option[offset + 13], option[offset + 14] : BorderRadius TopLeft(hasValue, value, unit)
- * values[offset + 15], option[offset + 16], option[offset + 17] : BorderRadius TopRight(hasValue, value, unit)
- * values[offset + 18], option[offset + 19], option[offset + 20] : BorderRadius BottomLeft(hasValue, value, unit)
- * values[offset + 21], option[offset + 22], option[offset + 23] : BorderRadius BottomRight(hasValue, value, unit)
+ * values[offset + 12], option[offset + 13], option[offset + 14] : BorderRadius TopStart/TopLeft(hasValue, value, unit)
+ * values[offset + 15], option[offset + 16], option[offset + 17] : BorderRadius TopEnd/TopRight(hasValue, value, unit)
+ * values[offset + 18], option[offset + 19], option[offset + 20] : BorderRadius BottomStart/BottomLeft(hasValue, value, unit)
+ * values[offset + 21], option[offset + 22], option[offset + 23] : BorderRadius BottomEnd/BottomRight(hasValue, value, unit)
  * @param optionsLength options valuesSize
  * @param src source color and Style value
- * colorAndStyle[offset + 0], option[offset + 1]: borderColors leftColor(hasValue, value)
- * colorAndStyle[offset + 2], option[offset + 3]: borderColors rightColor(hasValue, value)
+ * colorAndStyle[offset + 0], option[offset + 1]: borderColors startColor/leftColor(hasValue, value)
+ * colorAndStyle[offset + 2], option[offset + 3]: borderColors endColor/rightColor(hasValue, value)
  * colorAndStyle[offset + 4], option[offset + 5]: borderColors topColor(hasValue, value)
  * colorAndStyle[offset + 6], option[offset + 7]: borderColors bottomColor(hasValue, value)
  * colorAndStyle[offset + 8], option[offset + 9]: borderStyles styleLeft(hasValue, value)
@@ -1789,9 +1789,13 @@ void ResetBackgroundBlurStyle(ArkUINodeHandle node)
  * colorAndStyle[offset + 12], option[offset + 12]: borderStyles styleTop(hasValue, value)
  * colorAndStyle[offset + 14], option[offset + 15]: borderStyles styleBottom(hasValue, value)
  * @param optionsLength options colorAndStyleSize
+ * @param isLocalizedBorderWidth options isLocalizedBorderWidth
+ * @param isLocalizedBorderColor options isLocalizedBorderColor
+ * @param isLocalizedBorderRadius options isLocalizedBorderRadius
  */
 void SetBorder(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize, const uint32_t* colorAndStyle,
-    int32_t colorAndStyleSize)
+    int32_t colorAndStyleSize, ArkUI_Bool isLocalizedBorderWidth, ArkUI_Bool isLocalizedBorderColor,
+    ArkUI_Bool isLocalizedBorderRadius)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1801,33 +1805,51 @@ void SetBorder(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 va
 
     int32_t offset = NUM_0;
     NG::BorderWidthProperty borderWidth;
-
-    SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
-    SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
+    if (isLocalizedBorderWidth) {
+        SetOptionalBorder(borderWidth.startDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderWidth.endDimen, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
+        SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
+    }
     SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
     SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
     borderWidth.multiValued = true;
     if (borderWidth.leftDimen.has_value() || borderWidth.rightDimen.has_value() || borderWidth.topDimen.has_value() ||
-        borderWidth.bottomDimen.has_value()) {
+        borderWidth.bottomDimen.has_value() || borderWidth.startDimen.has_value() || borderWidth.endDimen.has_value()) {
         ViewAbstract::SetBorderWidth(frameNode, borderWidth);
     }
 
     NG::BorderRadiusProperty borderRadius;
-    SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
-    SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
+    if (isLocalizedBorderRadius) {
+        SetOptionalBorder(borderRadius.radiusTopStart, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusTopEnd, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomStart, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomEnd, values, valuesSize, offset);
+    } else {
+        SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
+        SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
+    }
 
     borderRadius.multiValued = true;
     if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
-        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value()) {
+        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value() ||
+        borderRadius.radiusTopStart.has_value() || borderRadius.radiusTopEnd.has_value() ||
+        borderRadius.radiusBottomStart.has_value() || borderRadius.radiusBottomEnd.has_value()) {
         ViewAbstract::SetBorderRadius(frameNode, borderRadius);
     }
 
     int32_t colorAndStyleOffset = NUM_0;
     NG::BorderColorProperty borderColors;
-    SetOptionalBorderColor(borderColors.leftColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
-    SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    if (isLocalizedBorderColor) {
+        SetOptionalBorderColor(borderColors.startColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+        SetOptionalBorderColor(borderColors.endColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    } else {
+        SetOptionalBorderColor(borderColors.leftColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+        SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    }
     SetOptionalBorderColor(borderColors.topColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     SetOptionalBorderColor(borderColors.bottomColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     borderColors.multiValued = true;
@@ -3421,7 +3443,7 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension radius;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
         radius = CalcDimension(radiusArg, DimensionUnit::VP);
     } else {
         radius = CalcDimension(radiusArg, DimensionUnit::PX);
@@ -5811,12 +5833,12 @@ ArkUI_CharPtr GetAccessibilityRole(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
-void SetFocusScopeId(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup)
+void SetFocusScopeId(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup, ArkUI_Bool arrowKeyStepOut)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string idStr = id;
-    ViewAbstract::SetFocusScopeId(frameNode, idStr, isGroup);
+    ViewAbstract::SetFocusScopeId(frameNode, idStr, isGroup, arrowKeyStepOut);
 }
 
 void ResetFocusScopeId(ArkUINodeHandle node)
@@ -5825,7 +5847,8 @@ void ResetFocusScopeId(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     std::string id = "";
     bool isGroup = false;
-    ViewAbstract::SetFocusScopeId(frameNode, id, isGroup);
+    bool arrowKeyStepOut = true;
+    ViewAbstract::SetFocusScopeId(frameNode, id, isGroup, arrowKeyStepOut);
 }
 
 void SetFocusScopePriority(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority)
@@ -6299,13 +6322,13 @@ void SetOnAppear(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onAppear = [frameNode, nodeId, extraParam]() {
+    auto onAppear = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_APPEAR;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
@@ -6316,13 +6339,13 @@ void SetOnDisappear(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onDisappear = [frameNode, nodeId, extraParam]() {
+    auto onDisappear = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_DISAPPEAR;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnDisappear(frameNode, std::move(onDisappear));
@@ -6333,13 +6356,13 @@ void SetOnAttach(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onAttach = [frameNode, nodeId, extraParam]() {
+    auto onAttach = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_ATTACH;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnAttach(frameNode, std::move(onAttach));
@@ -6350,13 +6373,13 @@ void SetOnDetach(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onDetach = [frameNode, nodeId, extraParam]() {
+    auto onDetach = [node = AceType::WeakClaim(frameNode), nodeId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.nodeId = nodeId;
         event.componentAsyncEvent.subKind = ON_DETACH;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         SendArkUIAsyncEvent(&event);
     };
     ViewAbstract::SetOnDetach(frameNode, std::move(onDetach));
@@ -6399,14 +6422,14 @@ void SetOnAreaChange(ArkUINodeHandle node, void* extraParam)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onAreaChanged = [nodeId, frameNode, extraParam](
+    auto onAreaChanged = [nodeId, node = AceType::WeakClaim(frameNode), extraParam](
                              const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.nodeId = nodeId;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_AREA_CHANGE;
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         auto oldLocalOffset = oldRect.GetOffset();
         event.componentAsyncEvent.data[0].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Width());
         event.componentAsyncEvent.data[1].f32 = PipelineBase::Px2VpWithCurrentDensity(oldRect.Height());

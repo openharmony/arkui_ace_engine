@@ -44,37 +44,25 @@ XComponentType ConvertToXComponentType(const std::string& type)
     if (type == "node") {
         return XComponentType::NODE;
     }
-#ifdef PLATFORM_VIEW_SUPPORTED
-    if (type == "platform_view") {
-        return XComponentType::PLATFORM_VIEW;
-    }
-#endif
     return XComponentType::SURFACE;
 }
 } // namespace
 
-std::unique_ptr<XComponentModel> XComponentModel::instance_ = nullptr;
-std::mutex XComponentModel::mutex_;
-
 XComponentModel* XComponentModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::XComponentModelNG());
+    static NG::XComponentModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::XComponentModelNG());
-            } else {
-                instance_.reset(new Framework::XComponentModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::XComponentModelNG instance;
+        return &instance;
+    } else {
+        static Framework::XComponentModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -182,6 +170,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("linearGradientBlur", &JSXComponent::JsLinearGradientBlur);
     JSClass<JSXComponent>::StaticMethod("enableAnalyzer", &JSXComponent::JsEnableAnalyzer);
     JSClass<JSXComponent>::StaticMethod("renderFit", &JSXComponent::JsRenderFit);
+    JSClass<JSXComponent>::StaticMethod("enableSecure", &JSXComponent::JsEnableSecure);
 
     JSClass<JSXComponent>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -692,5 +681,18 @@ void JSXComponent::JsRenderFit(const JSCallbackInfo& args)
         }
     }
     XComponentModel::GetInstance()->SetRenderFit(renderFit);
+}
+
+void JSXComponent::JsEnableSecure(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::SURFACE || args.Length() != 1) {
+        return;
+    }
+    // set isSecure on SurfaceNode when type is SURFACE
+    if (args[0]->IsBoolean()) {
+        bool isSecure = args[0]->ToBoolean();
+        XComponentModel::GetInstance()->EnableSecure(isSecure);
+    }
 }
 } // namespace OHOS::Ace::Framework

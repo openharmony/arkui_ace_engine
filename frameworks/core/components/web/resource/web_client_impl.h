@@ -300,6 +300,7 @@ public:
 
     void OnNativeEmbedVisibilityChange(const std::string& embedId, bool visibility) override;
 
+    bool CloseImageOverlaySelection() override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

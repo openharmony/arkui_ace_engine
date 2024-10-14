@@ -418,10 +418,14 @@ void FocusManager::WindowFocus(bool isFocus)
     } else if (curFocusView->GetIsViewHasFocused() && !curFocusViewHub->IsCurrentFocus()) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on current focus view: %{public}s/%{public}d",
             curFocusView->GetFrameName().c_str(), curFocusView->GetFrameId());
-        curFocusViewHub->RequestFocusImmediately();
+        curFocusViewHub->RequestFocusImmediatelyInner();
     } else {
         auto container = Container::Current();
         if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS,
+                "Request default focus on current focus view: %{public}s/%{public}d",
+                curFocusView->GetFrameName().c_str(),
+                curFocusView->GetFrameId());
             curFocusView->SetIsViewRootScopeFocused(false);
             curFocusView->RequestDefaultFocus();
         }
@@ -434,9 +438,13 @@ void FocusManager::WindowFocus(bool isFocus)
     auto rootFocusHub = root->GetFocusHub();
     CHECK_NULL_VOID(rootFocusHub);
     if (!rootFocusHub->IsCurrentFocus()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Request focus on rootFocusHub: %{public}s/%{public}d",
+            rootFocusHub->GetFrameName().c_str(),
+            rootFocusHub->GetFrameId());
         auto focusDepend = rootFocusHub->GetFocusDependence();
         rootFocusHub->SetFocusDependence(FocusDependence::SELF);
-        rootFocusHub->RequestFocusImmediately();
+        rootFocusHub->RequestFocusImmediatelyInner();
         rootFocusHub->SetFocusDependence(focusDepend);
     }
     pipeline->RequestFrame();

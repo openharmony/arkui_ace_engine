@@ -58,6 +58,7 @@ private:
     double CalcSearchWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     double CalcSearchHeight(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     void UpdateFontFeature(LayoutWrapper* layoutWrapper);
+    void UpdateTextFieldSize(LayoutWrapper* layoutWrapper);
     void SetTextFieldLayoutConstraintHeight(LayoutConstraintF& contentConstraint, double textFieldHeight,
         LayoutWrapper* layoutWrapper);
 

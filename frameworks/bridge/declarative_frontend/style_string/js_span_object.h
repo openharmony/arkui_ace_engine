@@ -356,7 +356,7 @@ public:
     JSUrlSpan() = default;
     ~JSUrlSpan() override = default;
     static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSUrlSpan* urlAddress);
+    static void Destructor(JSUrlSpan* urlSpan);
     static void JSBind(BindingTarget globalObj);
     void GetUrlContext(const JSCallbackInfo& info);
     void SetUrlContext(const JSCallbackInfo& info);

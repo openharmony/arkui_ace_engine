@@ -21,8 +21,9 @@
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
-RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs)
-    : pManager_(paragraphs)
+RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, ParagraphManager* paragraphs,
+    std::optional<TextStyle> typingTextStyle)
+    : pManager_(paragraphs), typingTextStyle_(typingTextStyle)
 {
     allSpans_ = spans;
     // split spans into groups by \newline
@@ -72,12 +73,14 @@ void RichEditorLayoutAlgorithm::AppendNewLineSpan()
 
 void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<SpanItem> target)
 {
+    if (typingTextStyle_.has_value()) {
+        auto typingTextStyle = typingTextStyle_.value();
+        target->fontStyle->UpdateFontSize(typingTextStyle.GetFontSize());
+        target->textLineStyle->UpdateLineHeight(typingTextStyle.GetLineHeight());
+        return;
+    }
     if (source->fontStyle->HasFontSize()) {
         target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
-    }
-
-    if (source->textLineStyle->HasTextAlign()) {
-        target->textLineStyle->UpdateTextAlign(source->textLineStyle->GetTextAlignValue());
     }
 
     if (source->textLineStyle->HasLineHeight()) {
@@ -88,14 +91,14 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureEmptyContentSize(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, {});
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, {});
     auto defaultCaretHeight = richEditorTheme->GetDefaultCaretHeight().ConvertToPx();
     auto width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(host, {});
     auto pattern = host->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, {});
     auto presetParagraph = pattern->GetPresetParagraph();

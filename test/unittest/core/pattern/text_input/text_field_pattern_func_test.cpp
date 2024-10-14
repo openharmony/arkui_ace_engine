@@ -1271,7 +1271,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc0570, TestSize.Level1)
     auto offset = info.GetTouches().front().GetLocalLocation();
     pattern->moveCaretState_.touchDownOffset = Offset(0, 0);
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(AceType::MakeRefPtr<TextFieldPattern>());
-    pattern->HandleTouchMove(info);
+    pattern->HandleTouchMove(location);
     EXPECT_TRUE(pattern->moveCaretState_.isMoveCaret);
 }
 
@@ -1298,7 +1298,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc071, TestSize.Level1)
     location.SetLocalLocation(pos);
     info.touches_.emplace_back(location);
     pattern->selectOverlay_ = AceType::MakeRefPtr<TextFieldSelectOverlay>(AceType::MakeRefPtr<TextFieldPattern>());
-    pattern->HandleTouchMove(info);
+    pattern->HandleTouchMove(location);
     EXPECT_TRUE(pattern->cursorVisible_);
 }
 } // namespace OHOS::Ace

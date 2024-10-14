@@ -111,7 +111,7 @@ public:
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) = 0;
     virtual UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
                                                 napi_value storage) = 0;
-    virtual void InitializeDynamic(const std::string& hapPath, const std::string& abcPath,
+    virtual void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
         const std::string& entryPoint, const std::vector<std::string>& registerComponents) {};
 
     // UIExtensionAbility initialize for focusWindow ID
@@ -192,7 +192,10 @@ public:
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
     virtual void ReloadForm(const std::string& url) {};
-    virtual void OnFormSurfaceChange(float width, float height) {}
+    virtual void OnFormSurfaceChange(float width, float height,
+        OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0),
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) {}
+
     virtual void SetFormBackgroundColor(const std::string& color) {};
     virtual void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) {};
     virtual void SetFormRenderingMode(int8_t renderMode) {};
@@ -371,8 +374,11 @@ public:
      */
     virtual void SetLastestFrameLayoutFinishCallback(std::function<void()>&& callback) {};
 
-    // Actually paint size of window
+    // Current paintSize of window
     virtual void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) {};
+
+    // Get paintSize of window by calculating
+    virtual void GetWindowPaintSize(OHOS::Rosen::Rect& paintrect) {};
 
     /**
      * @description: Create a custom popup with UIExtensionComponent.

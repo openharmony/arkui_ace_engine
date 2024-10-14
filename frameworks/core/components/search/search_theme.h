@@ -70,6 +70,8 @@ public:
             theme->textFieldWidthReserved_ = theme->closeIconHotZoneSize_;
             theme->leftPadding_ = pattern->GetAttr<Dimension>("search_text_field_padding_left", 0.0_vp);
             theme->rightPadding_ = pattern->GetAttr<Dimension>("search_text_field_padding_right", 0.0_vp);
+            theme->rightPaddingWithoutButton_ =
+                pattern->GetAttr<Dimension>("search_text_field_right_padding_without_button", 12.0_vp);
             theme->fontWeight_ = FontWeight(static_cast<int32_t>(pattern->GetAttr<double>("search_font_weight", 0.0)));
             theme->borderRadius_ = Radius(pattern->GetAttr<Dimension>("search_text_field_border_radius", 0.0_vp));
             theme->blockRightShade_ = static_cast<int32_t>(pattern->GetAttr<double>("search_block_right_shade", 0.0));
@@ -257,6 +259,11 @@ public:
         return symbolIconColor_;
     }
 
+    const Dimension& GetRightPaddingWithoutButton() const
+    {
+        return rightPaddingWithoutButton_;
+    }
+
 protected:
     SearchTheme() = default;
 
@@ -293,6 +300,7 @@ private:
     uint32_t searchSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;
     Color symbolIconColor_;
+    Dimension rightPaddingWithoutButton_;
 };
 
 } // namespace OHOS::Ace

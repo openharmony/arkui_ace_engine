@@ -188,25 +188,20 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     buttonTitlePattern->SetSkipColorConfigurationUpdate();
 
     if (isNeedAging) {
-        auto hourNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(1));
-        CHECK_NULL_RETURN(hourNode, nullptr);
-        auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_RETURN(hourLayoutProperty, nullptr);
-        hourLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        hourNode->MarkModifyDone();
-        auto minuteNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(2));
-        CHECK_NULL_RETURN(minuteNode, nullptr);
-        auto minuteLayoutProperty = minuteNode->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_RETURN(minuteLayoutProperty, nullptr);
-        minuteLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        minuteNode->MarkModifyDone();
-        if (timePickerPattern->GetHasSecond()) {
-            auto secondNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(3));
-            CHECK_NULL_RETURN(secondNode, nullptr);
-            auto secondLayoutProperty = secondNode->GetLayoutProperty<LayoutProperty>();
-            CHECK_NULL_RETURN(secondLayoutProperty, nullptr);
-            secondLayoutProperty->UpdateVisibility(VisibleType::GONE);
-            secondNode->MarkModifyDone();
+        for (uint32_t i = 1; i < timePickerNode->GetChildren().size(); i++) {
+            auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
+            CHECK_NULL_RETURN(childStackNode, nullptr);
+            for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
+                auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
+                CHECK_NULL_RETURN(childNode, nullptr);
+                auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
+                CHECK_NULL_RETURN(childLayoutProperty, nullptr);
+                childLayoutProperty->UpdateVisibility(VisibleType::GONE);
+                childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+            }
+            auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+            layoutProperty->UpdateAlignment(Alignment::CENTER);
+            layoutProperty->UpdateLayoutWeight(0);
         }
     }
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
@@ -567,34 +562,25 @@ void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &timePic
                                                 const RefPtr<FrameNode>& cancelNextDividerNode,
                                                 const RefPtr<FrameNode>& nextConfirmDividerNode)
 {
-    auto ampmNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(0));
-    CHECK_NULL_VOID(ampmNode);
-    auto ampmLayoutProperty = ampmNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(ampmLayoutProperty);
-    ampmLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
-    ampmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-
-    auto hourNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(1));
-    CHECK_NULL_VOID(hourNode);
-    auto hourLayoutProperty = hourNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(hourLayoutProperty);
-    hourLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
-
-    auto minuteNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(2));
-    CHECK_NULL_VOID(minuteNode);
-    auto minuteLayoutProperty = minuteNode->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(minuteLayoutProperty);
-    minuteLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
-    hourNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    minuteNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-
-    auto timePickerPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
-    if (timePickerPattern->GetHasSecond()) {
-        auto secondNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(3));
-        CHECK_NULL_VOID(secondNode);
-        auto secondLayoutProperty = secondNode->GetLayoutProperty<LayoutProperty>();
-        CHECK_NULL_VOID(secondLayoutProperty);
-        secondLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
+    for (uint32_t i = 0; i < timePickerNode->GetChildren().size(); i++) {
+        auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
+        CHECK_NULL_VOID(childStackNode);
+        auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
+            auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
+            CHECK_NULL_VOID(childNode);
+            auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
+            CHECK_NULL_VOID(childLayoutProperty);
+            if (i == 0) {
+                childLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::VISIBLE : VisibleType::GONE);
+                layoutProperty->UpdateLayoutWeight(switchFlag_ ? 1 : 0);
+            } else {
+                childLayoutProperty->UpdateVisibility(switchFlag_ ? VisibleType::GONE : VisibleType::VISIBLE);
+                layoutProperty->UpdateLayoutWeight(switchFlag_ ? 0 : 1);
+            }
+            childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        }
     }
 
     auto cancelButtonLayoutProperty = buttonCancelNode->GetLayoutProperty<LayoutProperty>();
@@ -703,9 +689,9 @@ void TimePickerDialogView::UpdateConfirmButtonMargin(
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
     } else {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
     }
     buttonConfirmLayoutProperty->UpdateMargin(margin);
 }
@@ -730,9 +716,9 @@ void TimePickerDialogView::UpdateCancelButtonMargin(
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
+        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
     } else {
-        ModuleDialogTypeRtl::UpdateMarginIsRtl(!isRtl, margin, dialogTheme, false,
+        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, false,
             ModuleDialogType::TIMEPICKER_DIALOG);
     }
     buttonCancelLayoutProperty->UpdateMargin(margin);
@@ -1056,8 +1042,7 @@ const Dimension TimePickerDialogView::ConvertFontScaleValue(
     Dimension fontSizeValueResultVp(fontSizeLimit.Value(), DimensionUnit::VP);
 
     if (fontSizeValue.Unit() == DimensionUnit::VP) {
-        fontSizeValueResultVp = std::min(fontSizeValueResultVp, fontSizeValue);
-        return fontSizeValueResultVp;
+        return isUserSetFont ? std::min(fontSizeValueResultVp, fontSizeValue) : fontSizeValue;
     }
 
     if (NeedAdaptForAging()) {

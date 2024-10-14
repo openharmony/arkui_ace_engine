@@ -69,7 +69,7 @@ export struct ToggleBootcamp {
         type: useEnabled(this.enabledToggleType, this.toggleType),
         isOn: useEnabled(this.enableIsOn, this.isOn)
       }) {
-        Text('status button').fontColor('#182431').fontSize(12)
+        Text(useEnabled(this.toggleType == ToggleType.Button, 'status button')).fontColor('#182431').fontSize(12)
       }
       .padding(useEnabled(this.enablePadding,this.togglePadding))
       .margin(useEnabled(this.enableMargin,this.toggleMargin))

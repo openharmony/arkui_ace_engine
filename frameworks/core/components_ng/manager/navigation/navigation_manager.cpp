@@ -100,7 +100,7 @@ bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& add
     CHECK_NULL_RETURN(navigationGroupNode, false);
     auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    auto proxy = pattern->GetNavigationProxy();
+    auto proxy = pattern->GetTopNavigationProxy();
     CHECK_NULL_RETURN(proxy, false);
     proxy->AddInteractiveAnimation(addCallback);
     return true;

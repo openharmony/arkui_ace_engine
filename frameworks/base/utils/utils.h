@@ -57,6 +57,11 @@
         }                                   \
     } while (0)                             \
 
+#define CHECK_NULL_CONTINUE(ptr)                                    \
+    if (!(ptr)) {                                                   \
+        continue;                                                   \
+    }
+
 #define PRIMITIVE_CAT(x, y) x##y
 #define CAT(x, y) PRIMITIVE_CAT(x, y)
 

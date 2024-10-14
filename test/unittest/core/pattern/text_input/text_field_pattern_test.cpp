@@ -1911,6 +1911,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     touchLocationInfo.touchType_ = TouchType::MOVE;
     touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
 
     pattern->isMoveCaretAnywhere_ = true;
     pattern->HandleTouchEvent(touchEventInfo);
@@ -1924,6 +1925,18 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     pattern->ProcessOverlay();
     pattern->moveCaretState_.isTouchCaret = false;
     pattern->HandleTouchEvent(touchEventInfo);
+
+    RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->SetLocalOffset(OffsetF(0.f, 0.f));
+    EXPECT_TRUE(controller->GetShowMagnifier());
+    touchLocationInfo.touchType_ = TouchType::CANCEL;
+    touchEventInfo.touches_.clear();
+    touchEventInfo.changedTouches_.clear();
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    pattern->HandleTouchEvent(touchEventInfo);
+    EXPECT_FALSE(controller->GetShowMagnifier());
 }
 
 /**
@@ -2001,9 +2014,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern085, TestSize.Level0)
 
     pattern->moveCaretState_.isTouchCaret = true;
     pattern->hasPreviewText_ = true;
-    pattern->HandleTouchMove(touchEventInfo);
+    pattern->HandleTouchMove(touchLocationInfo);
     pattern->hasPreviewText_ = false;
-    pattern->HandleTouchMove(touchEventInfo);
+    pattern->HandleTouchMove(touchLocationInfo);
 }
 
 /**
@@ -2029,7 +2042,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern086, TestSize.Level0)
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
 
     pattern->hasPreviewText_ = true;
-    pattern->UpdateCaretByTouchMove(touchEventInfo);
+    pattern->UpdateCaretByTouchMove(touchLocationInfo);
 }
 
 /**

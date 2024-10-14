@@ -1211,7 +1211,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest017, TestSize.Level1)
     panRecognizer.direction_.type = PanDirection::VERTICAL;
     panRecognizer.refereeState_ = RefereeState::SUCCEED;
     panRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
+    EXPECT_EQ(panRecognizer.touchPoints_.size(), 1);
     EXPECT_EQ(panRecognizer.delta_.GetX(), 0);
     EXPECT_EQ(panRecognizer.delta_.GetY(), 0);
 
@@ -1225,7 +1225,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest017, TestSize.Level1)
     panRecognizer.refereeState_ = RefereeState::SUCCEED;
     axisEvent.horizontalAxis = 0;
     panRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
+    EXPECT_EQ(panRecognizer.touchPoints_.size(), 1);
     EXPECT_EQ(panRecognizer.delta_.GetX(), 0);
     EXPECT_EQ(panRecognizer.delta_.GetY(), 0);
 
@@ -1239,7 +1239,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest017, TestSize.Level1)
     panRecognizer.refereeState_ = RefereeState::PENDING;
     axisEvent.horizontalAxis = 1;
     panRecognizer.HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
+    EXPECT_EQ(panRecognizer.touchPoints_.size(), 1);
 }
 
 /**

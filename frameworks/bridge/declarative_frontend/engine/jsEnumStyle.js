@@ -717,10 +717,10 @@ var FormDimension;
   FormDimension["DIMENSION_6_4"] = 7;
 })(FormDimension || (FormDimension = {}));
 
-var FormShape;
+let FormShape;
 (function (FormShape) {
-  FormShape["RECT"] = 1;
-  FormShape["CIRCLE"] = 2;
+  FormShape.RECT = 1;
+  FormShape.CIRCLE = 2;
 })(FormShape || (FormShape = {}));
 
 let FormRenderingMode;
@@ -1011,6 +1011,7 @@ let BarStyle;
 (function (BarStyle) {
   BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
   BarStyle[BarStyle.STACK = 1] = "STACK";
+  BarStyle[BarStyle.SAFE_AREA_PADDING = 2] = "SAFE_AREA_PADDING";
 })(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
@@ -1631,11 +1632,11 @@ var ScrollSizeMode ;
 
 var SheetKeyboardAvoidMode;
 (function (SheetKeyboardAvoidMode) {
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["NONE"] = 0] = "NONE";
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_RESIZE"] = 1] = "TRANSLATE_AND_RESIZE";
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["RESIZE_ONLY"] = 2] = "RESIZE_ONLY";
-  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode["TRANSLATE_AND_SCROLL"] = 3] = "TRANSLATE_AND_SCROLL";
-})(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}))
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['NONE'] = 0] = 'NONE';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['TRANSLATE_AND_RESIZE'] = 1] = 'TRANSLATE_AND_RESIZE';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['RESIZE_ONLY'] = 2] = 'RESIZE_ONLY';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode['TRANSLATE_AND_SCROLL'] = 3] = 'TRANSLATE_AND_SCROLL';
+})(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}));
 
 var FunctionKey;
 (function (FunctionKey) {
@@ -2118,6 +2119,9 @@ class NavPathInfo {
     this.needUpdate = false;
     this.needBuildNewInstance = false;
     this.navDestinationId = undefined;
+    this.promise = undefined;
+    this.replacedDestinationInfo = undefined;
+    this.recoveryFromReplaceDestination = undefined;
     this.isEntry = isEntry;
     this.fromRecovery = false;
     this.mode = undefined;
@@ -2202,7 +2206,6 @@ class NavPathStack {
       info = new NavPathInfo(name, param, onPop);
     }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
-    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2229,18 +2232,18 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-
-    let promise = this.nativeStack?.onPushDestination(info);
-    if (!promise) {
-      return new Promise((resolve, reject) => {
-        reject({ message: 'Internal error.', code: 100001 });
-      })
-    }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
-    info.pushDestination = true;
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
-    return promise;
+    return new Promise((resolve, reject) => {
+      info.promise = (errorCode, errorMessage) => {
+        if (errorCode == 0) {
+          resolve(0);
+          return;
+        }
+        reject({code: errorCode, message: errorMessage});
+      }
+    });
   }
   parseNavigationOptions(param) {
     let launchMode = LaunchMode.STANDARD;
@@ -2291,7 +2294,6 @@ class NavPathStack {
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
-    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
@@ -2305,22 +2307,23 @@ class NavPathStack {
     }
     this.isReplace = 0;
     this.animated = animated;
-    let promise = this.nativeStack?.onPushDestination(info);
-    if (!promise) {
-      return new Promise((resolve, reject) => {
-        reject({ message: 'Internal error.', code: 100001 });
-      })
-    }
     [info.index, info.navDestinationId] = this.findInPopArray(info.name);
-    info.pushDestination = true;
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
-    return promise;
+    return new Promise((resolve, reject) => {
+      info.promise = (errorCode, errorMessage) => {
+        if (errorCode == 0) {
+          resolve(0);
+          return;
+        }
+        reject({code: errorCode, message: errorMessage});
+      }
+    });
   }
-  replacePath(info, optionParam) {
+  replacePath(info, optionParam, isReplaceDestination) {
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
     let index = -1;
     if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON || launchMode === LaunchMode.POP_TO_SINGLETON) {
@@ -2338,11 +2341,19 @@ class NavPathStack {
           }
           this.pathArray.push(targetInfo[0]);
         }
+        if (isReplaceDestination) {
+          return new Promise((resolve, reject) => {
+            resolve();
+          });
+        }
       }
     }
     if (index === -1) {
       if (this.pathArray.length !== 0) {
-        this.pathArray.pop();
+        let popInfo = this.pathArray.pop();
+        if (isReplaceDestination) {
+          info.replacedDestinationInfo = popInfo;
+        }
       }
       this.pathArray.push(info);
       this.pathArray[this.pathArray.length - 1].index = -1;
@@ -2350,6 +2361,21 @@ class NavPathStack {
     this.isReplace = 1;
     this.animated = animated;
     this.nativeStack?.onStateChanged();
+  }
+  replaceDestination(info, navigationOptions) {
+    let promiseWithLaunchMode = this.replacePath(info, navigationOptions, true);
+    if (promiseWithLaunchMode !== undefined) {
+      return promiseWithLaunchMode;
+    }
+    return new Promise((resolve, reject) => {
+      info.promise = (errorCode, errorMessage) => {
+        if (errorCode == 0) {
+          resolve(0);
+          return;
+        }
+        reject({code: errorCode, message: errorMessage});
+      }
+    });
   }
   replacePathByName(name, param, animated) {
     if (this.pathArray.length !== 0) {
@@ -2533,14 +2559,16 @@ class NavPathStack {
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
   }
-  removeInvalidPage(name, param) {
-    for (let i = 0; i < this.pathArray.length; i++) {
-      if (this.pathArray[i].name === name &&
-        this.pathArray[i].param === param) {
-        this.pathArray.splice(i, 1);
-        return;
-      }
+  removeInvalidPage(index) {
+    if (index >= this.pathArray.length || index < 0) {
+      return;
     }
+    if (this.pathArray[index].replacedDestinationInfo !== undefined) {
+      this.pathArray[index] = this.pathArray[index].replacedDestinationInfo;
+      this.pathArray[index].recoveryFromReplaceDestination = true;
+      return;
+    }
+    this.pathArray.splice(index, 1);
   }
   getAllPathName() {
     let array = this.pathArray.flatMap(element => element.name);
@@ -2954,7 +2982,6 @@ var XComponentType;
   XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
   XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
   XComponentType[XComponentType["NODE"] = 3] = "NODE";
-  XComponentType[XComponentType["PLATFORM_VIEW"] = 999] = "PLATFORM_VIEW";
 })(XComponentType || (XComponentType = {}));
 
 var NestedScrollMode;
@@ -3311,11 +3338,11 @@ var StyledStringKey;
 })(StyledStringKey || (StyledStringKey = {}));
 
 class CustomSpan extends NativeCustomSpan {
-  type_ = "CustomSpan";
+  type_ = 'CustomSpan';
 }
 
 class UserDataSpan {
-  type_ = "ExtSpan";
+  type_ = 'ExtSpan';
 }
 
 let FocusPriority;
@@ -3359,6 +3386,13 @@ let GridItemAlignment;
   GridItemAlignment[GridItemAlignment['DEFAULT'] = 0] = 'DEFAULT';
   GridItemAlignment[GridItemAlignment['STRETCH'] = 1] = 'STRETCH';
 })(GridItemAlignment || (GridItemAlignment = {}));
+
+let ContentClipMode;
+(function (ContentClipMode) {
+  ContentClipMode[ContentClipMode['CONTENT_ONLY'] = 0] = 'CONTENT_ONLY';
+  ContentClipMode[ContentClipMode['BOUNDARY'] = 1] = 'BOUNDARY';
+  ContentClipMode[ContentClipMode['SAFE_AREA'] = 2] = 'SAFE_AREA';
+})(ContentClipMode || (ContentClipMode = {}));
 
 var AccessibilityHoverType;
 (function (AccessibilityHoverType) {

@@ -773,6 +773,7 @@ void BubblePattern::UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupThe
             }
         }
         textNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     } else {
         for (const auto& childNode : node->GetChildren()) {
             UpdateText(childNode, popupTheme);

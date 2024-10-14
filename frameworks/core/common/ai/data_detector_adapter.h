@@ -98,6 +98,7 @@ private:
     bool pressedByLeftMouse_ = false;
     bool typeChanged_ = false;
     bool hasClickedMenuOption_ = false;
+    std::vector<NG::RectF> aiSpanRects_;
     AISpan clickedAISpan_;
     std::string textDetectTypes_;
     std::string textForAI_;

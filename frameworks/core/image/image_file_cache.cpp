@@ -215,8 +215,8 @@ void ImageFileCache::EraseCacheFile(const std::string &url)
                 TAG_LOGW(AceLogTag::ACE_IMAGE, "remove file %{private}s failed.", removeFile.c_str());
                 return;
             }
-            cacheFileInfo_.erase(infoIter);
             cacheFileSize_ -= infoIter->fileSize;
+            cacheFileInfo_.erase(infoIter);
             fileNameToFileInfoPos_.erase(fileCacheKey);
         }
     }

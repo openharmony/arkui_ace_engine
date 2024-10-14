@@ -36,6 +36,8 @@ struct MockNavPathInfo {
     std::string name = "";
     std::string navDestinationId = UNDEFINED_ID;
     bool needBuildNewInstance = false;
+    bool fromRecovery = false;
+    int32_t mode = 0; // 0 for standard and 1 for dialog
 
     explicit MockNavPathInfo(std::string name) : name(std::move(name)) {}
 };
@@ -125,7 +127,8 @@ public:
     void FireNavigationInterception(bool isBefore, const RefPtr<NavDestinationContext>& from,
         const RefPtr<NavDestinationContext>& to, NavigationOperation operation, bool isAnimated) override;
 
-    RefPtr<UINode> CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode) override;
+    bool CreateNodeByIndex(int32_t index, const OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode>& customNode,
+        OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode>& node) override;
 
     std::vector<std::string> GetAllPathName() override;
 
@@ -138,6 +141,12 @@ public:
     bool NeedBuildNewInstance(int32_t index) override;
 
     void SetNeedBuildNewInstance(int32_t index, bool need) override;
+
+    void SetPathArray(const std::vector<NavdestinationRecoveryInfo>& navdestinationsInfo);
+
+    void SetFromRecovery(int32_t index, bool fromRecovery);
+
+    bool IsFromRecovery(int32_t index);
 
     //  ============================ operation below is for mock NavPathStack in arkTS ============================
     /**
@@ -158,6 +167,11 @@ public:
     void PopToIndex(int32_t index);
 
     std::pair<int32_t, std::string> FindInPopArray(const std::string& name);
+
+    int32_t Size() const
+    {
+        return static_cast<int32_t>(mockPathArray_.size());
+    }
     // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:
     int8_t lifecycleIndex_ = 0;

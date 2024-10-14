@@ -373,6 +373,7 @@ HWTEST_F(TextFieldUXTest, CursorOperation002, TestSize.Level1)
     pattern_->inputOperations_.push(InputOperation::CURSOR_DOWN);
     auto ret = pattern_->CursorMoveDown();
     EXPECT_FALSE(ret);
+    pattern_->textRect_.height_ = pattern_->PreferredLineHeight() * 3;
     pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(pattern_->GetCaretIndex(), 0);
 }

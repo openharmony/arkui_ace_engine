@@ -559,14 +559,6 @@ HWTEST_F(LayoutPropertyTestNg, CreatePaddingAndBorderWithDefault001, TestSize.Le
     EXPECT_EQ(paddingPropertyF.right, 1.0 + 3.0);
 
     /**
-     * @tc.steps3: call CreatePaddingWithoutBorder, push layoutConstraint_is null.
-     * @tc.expected: After CombinePaddingsAndBorder, Return paddingOne is [0, 0, 0, 0].
-     */
-    PaddingPropertyF paddingOne = layoutProperty->CreatePaddingWithoutBorder();
-    EXPECT_EQ(paddingOne.left, 0);
-    EXPECT_EQ(paddingOne.right, 0);
-
-    /**
      * @tc.steps4: call CreateMargin, push layoutConstraint_ null.
      * @tc.expected: Return margin is nullopt.
      */

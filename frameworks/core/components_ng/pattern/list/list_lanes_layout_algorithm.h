@@ -78,9 +78,11 @@ private:
         int32_t startIndex, float crossSize);
     float GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper);
     int32_t LayoutCachedForward(LayoutWrapper* layoutWrapper,
-        int32_t cacheCount, int32_t cached, int32_t& currIndex) override;
+        int32_t cacheCount, int32_t& cachedCount, int32_t& currIndex) override;
     int32_t LayoutCachedBackward(LayoutWrapper* layoutWrapper,
-        int32_t cacheCount, int32_t cached, int32_t& currIndex) override;
+        int32_t cacheCount, int32_t& cachedCount, int32_t& currIndex) override;
+    CachedIndexInfo GetLayoutGroupCachedCount(LayoutWrapper* layoutWrapper,
+        const RefPtr<LayoutWrapper>& wrapper, int32_t forwardCache, int32_t backwardCache, bool outOfView) override;
     static int32_t FindLanesStartIndex(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t index);
     static int32_t GetLazyForEachIndex(const RefPtr<FrameNode>& host);
     void MeasureGroup(LayoutWrapper* listWrapper, const RefPtr<LayoutWrapper>& groupWrapper,

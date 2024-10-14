@@ -62,8 +62,8 @@ public:
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
     UIContentErrorCode InitializeByName(
         OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
-    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint,
-        const std::vector<std::string>& registerComponents) override;
+    void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
+        const std::string& entryPoint, const std::vector<std::string>& registerComponents) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
@@ -117,8 +117,11 @@ public:
 
     void SetOnWindowFocused(const std::function<void()>& callback) override;
 
-    // Actually paint size of window
+    // Current paintSize of window
     void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) override;
+
+    // Get paintSize of window by calculating
+    void GetWindowPaintSize(OHOS::Rosen::Rect& paintrect) override;
 
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
@@ -166,7 +169,9 @@ public:
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) override;
 
-    void OnFormSurfaceChange(float width, float height) override;
+    void OnFormSurfaceChange(float width, float height,
+        OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0),
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     void SetFormBackgroundColor(const std::string& color) override;
 
@@ -411,6 +416,7 @@ private:
     std::unique_ptr<DistributedUIManager> uiManager_;
 
     bool isDynamicRender_ = false;
+    int32_t hostInstanceId_ = -1;
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
     std::shared_ptr<TaskWrapper> taskWrapper_;
     std::vector<std::string> registerComponents_;

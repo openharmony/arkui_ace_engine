@@ -31,6 +31,14 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+enum class ShowSubMenuType : int32_t {
+    DEFAULT = 0,
+    HOVER = 1,
+    CLICK = 2,
+    LONG_PRESS = 3,
+    KEY_DPAD_RIGHT = 4,
+    ACTION = 5
+};
 class ACE_EXPORT MenuItemPattern : public Pattern {
     DECLARE_ACE_TYPE(MenuItemPattern, Pattern);
 
@@ -224,6 +232,7 @@ public:
     }
     RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
     void OnHover(bool isHover);
+    void NotifyPressStatus(bool isPress);
 
 protected:
     void RegisterOnKeyEvent();
@@ -254,7 +263,8 @@ private:
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();
 
-    void ShowSubMenu();
+    void ShowSubMenu(ShowSubMenuType type = ShowSubMenuType::DEFAULT);
+    RefPtr<UINode> BuildSubMenuCustomNode();
     void UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode);
     void ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu);
     void HideSubMenu();

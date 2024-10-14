@@ -32,7 +32,7 @@ let origin = 40001;
 
 async function test(sdkPath, testFile, resultPath, casePath, ohpmBat, nodePath, hvigorPath) {
     return new Promise(async (resolve, reject) => {
-        const testCasePath = `${casePath}\\test\\componenttest\\test_cases\\components\\${testFile[0]}`;
+        const testCasePath = `${casePath}\\test\\component_test\\test_cases\\components\\${testFile[0]}`;
         const previewerExePath = `${sdkPath}\\previewer\\common\\bin`;
         const jParam = `${testCasePath}\\entry\\.preview\\default\\intermediates\\loader_out\\default\\ets`;
         const ljPathParam = `${testCasePath}\\entry\\.preview\\default\\intermediates\\loader\\default\\loader.json`;
@@ -70,11 +70,9 @@ const runCommand = (command, args, options) => {
         let stdoutData = "";
         let stderrData = "";
         child.stdout.on('data', data => {
-            console.log(data.toString());
             stdoutData += data.toString();
         });
         child.stderr.on('data', (data) => {
-            console.log(data.toString());
             stderrData += data.toString();
             if (data.toString().includes("ERROR")) {
                 resolve(false)
@@ -91,7 +89,7 @@ const runCommand = (command, args, options) => {
 };
 
 async function runHvigor(sdkPath, testFile, resultPath, casePath, ohpmBat, nodePath, hvigorPath) {
-    const testCasePath = `${casePath}\\test\\componenttest\\test_cases\\components\\${testFile[0]}`;
+    const testCasePath = `${casePath}\\test\\component_test\\test_cases\\components\\${testFile[0]}`;
     const fParam = `${testCasePath}\\.idea\\previewer\\default\\defaultSettingConfig_Default.json`;
     const caseResultPath = `${resultPath}\\${testFile[2]}.json`.replaceAll("\\", "\\\\");
     runCommand(`"${ohpmBat}"`, [
@@ -211,7 +209,6 @@ async function runPreviewer(
             '-componentTest', `"${componentTestParam}"`
         ], { detached: true, cwd: previewerExePath, shell: true });
         previewerProcess.on('close', (code) => {
-            console.log(`Previewer process exited with code ${code}`);
             resolve(true);
         });
         previewerProcess.on('error', (err) => {

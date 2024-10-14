@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,29 +27,21 @@
 #endif
 
 namespace OHOS::Ace {
-
-std::unique_ptr<VideoModel> VideoModel::instance_ = nullptr;
-std::mutex VideoModel::mutex_;
-
 VideoModel* VideoModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::VideoModelNG());
+    static NG::VideoModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::VideoModelNG());
-            } else {
-                instance_.reset(new Framework::VideoModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::VideoModelNG instance;
+        return &instance;
+    } else {
+        static Framework::VideoModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
-
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -76,9 +68,12 @@ void JSVideo::Create(const JSCallbackInfo& info)
     VideoModel::GetInstance()->Create(videoController);
 
     // Parse the src, if it is invalid, use the empty string.
-    std::string videoSrc;
-    ParseJsMedia(srcValue, videoSrc);
-    VideoModel::GetInstance()->SetSrc(videoSrc);
+    std::string bundleNameSrc;
+    std::string moduleNameSrc;
+    std::string src;
+    int32_t resId = 0;
+    ParseJsMediaWithBundleName(srcValue, src, bundleNameSrc, moduleNameSrc, resId);
+    VideoModel::GetInstance()->SetSrc(src, bundleNameSrc, moduleNameSrc);
 
     // Parse the rate, if it is invalid, set it as 1.0.
     double currentProgressRate = 1.0;
