@@ -14,7 +14,7 @@
  */
 
 #include "ext_napi_utils.h"
-
+#include <memory>
 #include "securec.h"
 
 namespace OHOS::Ace {
@@ -144,5 +144,33 @@ bool ExtNapiUtils::CheckTypeForNapiValue(napi_env env, napi_value param, napi_va
     }
 
     return valueType == expectType;
+}
+
+napi_value ExtNapiUtils::GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName)
+{
+    if (GetValueType(env, object) != napi_object) {
+        return CreateUndefined(env);
+    }
+
+    napi_value value = nullptr;
+    NAPI_CALL(env, napi_get_named_property(env, object, propertyName.c_str(), &value));
+    return value;
+}
+
+bool ExtNapiUtils::IsArray(napi_env env, napi_value value)
+{
+    bool isArray = false;
+    napi_status ret = napi_is_array(env, value, &isArray);
+    if (ret == napi_ok) {
+        return isArray;
+    }
+    return false;
+}
+
+napi_value ExtNapiUtils::CreateUndefined(napi_env env)
+{
+    napi_value undefined = nullptr;
+    NAPI_CALL(env, napi_get_undefined(env, &undefined));
+    return undefined;
 }
 }

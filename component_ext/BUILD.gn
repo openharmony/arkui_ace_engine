@@ -12,5 +12,8 @@
 # limitations under the License.
 
 group("component_ext") {
-  deps = [ "movingphoto:movingphotoview" ]
+  deps = [
+    "arc_alphabet_indexer:arcalphabetindexer",
+    "movingphoto:movingphotoview",
+  ]
 }

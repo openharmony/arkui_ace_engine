@@ -85,7 +85,17 @@ void JSIndexer::ParseIndexerSelectedObject(
     }
 }
 
+void JSIndexer::CreateArc(const JSCallbackInfo& args)
+{
+    Create(args, true);
+}
+
 void JSIndexer::Create(const JSCallbackInfo& args)
+{
+    Create(args, false);
+}
+
+void JSIndexer::Create(const JSCallbackInfo& args, bool isArc)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
@@ -109,7 +119,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
     JSRef<JSVal> selectedProperty = paramObj->GetProperty("selected");
     if (selectedProperty->IsNumber()) {
         selectedVal = selectedProperty->ToNumber<int32_t>();
-        IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        IndexerModel::GetInstance()->Create(indexerArray, selectedVal, isArc);
         JSIndexerTheme::ApplyTheme();
     } else if (length > 0 && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
@@ -117,7 +127,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
         if (selectedValueProperty->IsNumber()) {
             selectedVal = selectedValueProperty->ToNumber<int32_t>();
         }
-        IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        IndexerModel::GetInstance()->Create(indexerArray, selectedVal, isArc);
         JSIndexerTheme::ApplyTheme();
         JSRef<JSVal> changeEventVal = selectedObj->GetProperty("changeEvent");
         if (!changeEventVal.IsEmpty()) {
@@ -129,7 +139,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
 
         args.ReturnSelf();
     } else {
-        IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        IndexerModel::GetInstance()->Create(indexerArray, selectedVal, isArc);
         JSIndexerTheme::ApplyTheme();
     }
 }
@@ -553,6 +563,7 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSIndexer>::Declare("AlphabetIndexer");
     JSClass<JSIndexer>::StaticMethod("create", &JSIndexer::Create);
+    JSClass<JSIndexer>::StaticMethod("createArc", &JSIndexer::CreateArc);
     // API7 onSelected deprecated
     JSClass<JSIndexer>::StaticMethod("onSelected", &JSIndexer::JsOnSelected);
     JSClass<JSIndexer>::StaticMethod("onSelect", &JSIndexer::JsOnSelected);
