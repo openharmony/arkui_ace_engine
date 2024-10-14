@@ -45,11 +45,18 @@ std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_
     return content.substr(start);
 }
 
-SpanString::SpanString(const std::string& text) : text_(text)
+SpanString::SpanString(const std::string& text)
 {
     auto spanItem = MakeRefPtr<NG::SpanItem>();
-    spanItem->content = text;
-    spanItem->interval = { 0, StringUtils::ToWstring(text).length() };
+    std::wstring wideText = StringUtils::ToWstring(text);
+    if (wideText.length() == 0 && text.length() != 0) {
+        text_ = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(text);
+        wideText = StringUtils::ToWstring(text_);
+    } else {
+        text_ = text;
+    }
+    spanItem->content = text_;
+    spanItem->interval = { 0, wideText.length() };
     spans_.emplace_back(spanItem);
     auto it = spans_.begin();
     SplitSpansAndForward(it);
