@@ -28,12 +28,8 @@ constexpr bool DEFAULT_USINGPOPUP = false;
 constexpr int32_t DEFAULT_SELECTED = 0;
 constexpr Dimension DEFAULT_POPUPHORIZONTALSPACE = -1.0_vp;
 constexpr int32_t DEFAULT_ALIGN_STYLE = static_cast<int32_t>(NG::AlignStyle::RIGHT);
-constexpr double DEFAULT_ITEM_SIZE = 16.0;
 constexpr double DEFAULT_POPUP_POSITION_X = 60.0;
 constexpr double DEFAULT_POPUP_POSITION_Y = 48.0;
-constexpr double POPUP_ITEM_DEFAULT_RADIUS = 24.0;
-constexpr double ITEM_DEFAULT_RADIUS = 8.0;
-constexpr double RADIUS_OFFSET = 4.0;
 } // namespace
 
 void SetPopupItemFont(ArkUINodeHandle node, ArkUI_Float32 size, int unit, const char* weight)
@@ -381,7 +377,7 @@ void ResetItemSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelNG::SetItemSize(frameNode, Dimension(DEFAULT_ITEM_SIZE, DimensionUnit::VP));
+    IndexerModelNG::SetItemSize(frameNode, DEFAULT_ITEM_SIZE);
 }
 
 void SetPopupPosition(ArkUINodeHandle node, ArkUI_Float32 xValue, int xUnit, ArkUI_Float32 yValue, int yUnit)

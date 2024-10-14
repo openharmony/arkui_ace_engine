@@ -65,7 +65,8 @@ inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
         .type = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type) },
         .moduleName = { .chars = module },
         .bundleName = { .chars = bundle },
-        .params = { .tag = ARK_TAG_OBJECT, .value = { .array = name, .length = name ? 1 : 0 } } };
+        .params = { .tag = ARK_TAG_OBJECT, .value = { .array = name, .length = name ? 1 : 0 } }
+    };
 }
 } // namespace
 
@@ -131,11 +132,11 @@ static const std::string EXPECTED_FALSE("false");
 // Test plans
 typedef std::pair<std::vector<std::string>, std::string> ArrayValueTestStep;
 static const std::vector<ArrayValueTestStep> ARRAY_VALUE_TEST_PLAN = {
-    { { "a" } , "[\"a\"]" },
-    { { "a", "b" } , "[\"a\",\"b\"]" },
-    { { "a", "b", "c" } , "[\"a\",\"b\",\"c\"]" },
-    { { } , ATTRIBUTE_ARRAY_VALUE_DEFAULT_VALUE },
-    { { "a", "b", "c", "d", "e", "f" } , "[\"a\",\"b\",\"c\",\"d\",\"e\",\"f\"]" }
+    { { "a" }, "[\"a\"]" },
+    { { "a", "b" }, "[\"a\",\"b\"]" },
+    { { "a", "b", "c" }, "[\"a\",\"b\",\"c\"]" },
+    { { }, ATTRIBUTE_ARRAY_VALUE_DEFAULT_VALUE },
+    { { "a", "b", "c", "d", "e", "f" }, "[\"a\",\"b\",\"c\",\"d\",\"e\",\"f\"]" }
 };
 static const std::vector<int32_t> SELECTED_INDEX_TEST_PLAN = { 1, 10, 32, -1, -35, 832 };
 
@@ -197,12 +198,12 @@ const auto RES_COLOR_NAME = NamedResourceId{"color_name", NodeModifier::Resource
 const auto RES_COLOR_ID = IntResourceId{123456, NodeModifier::ResourceType::COLOR};
 const auto INVALID_ID_COLOR = IntResourceId{-1, NodeModifier::ResourceType::COLOR};
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_NAME)),
-            COLOR_RED },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_ID)),
-            COLOR_RED },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(INVALID_ID_COLOR)),
-            COLOR_RED }
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_NAME)),
+        COLOR_RED },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_ID)),
+        COLOR_RED },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(INVALID_ID_COLOR)),
+        COLOR_RED }
 };
 
 const Ark_Int32 AINT32_POS(70);
