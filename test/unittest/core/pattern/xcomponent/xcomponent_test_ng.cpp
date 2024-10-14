@@ -244,6 +244,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
     xComponentEventHub->FireDestroyEvent();
     EXPECT_EQ(onLoadKey, CHECK_KEY);
     EXPECT_EQ(onDestroyKey, CHECK_KEY);
+    testProperty.destroyEvent = std::nullopt;
 }
 
 /**
@@ -1286,6 +1287,7 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     testProperty.surfaceCreatedEvent = std::move(onSurfaceCreated);
     testProperty.surfaceChangedEvent = std::move(onSurfaceChanged);
     testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
+    testProperty.destroyEvent = std::nullopt;
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
     auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
