@@ -82,6 +82,11 @@ protected:
     {
         hasTransform_ = CheckHasTransformAttr();
     }
+    bool IsClipHandleWithViewPort() override
+    {
+        return !HasRenderTransform();
+    }
+    void UpdateClipHandleViewPort(RectF& rect) override;
     bool selectTextUseTopHandle = false;
 
 private:
