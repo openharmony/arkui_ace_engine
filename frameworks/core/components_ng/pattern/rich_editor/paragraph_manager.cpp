@@ -290,6 +290,33 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHe
     return res;
 }
 
+std::vector<std::vector<RectF>> ParagraphManager::GetParagraphsRects(
+    int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
+{
+    std::vector<std::vector<RectF>> paragraphsRects;
+    float y = 0.0f;
+    for (auto&& info : paragraphs_) {
+        if (info.start > end) {
+            break;
+        }
+        if (info.end > start) {
+            std::vector<RectF> rects;
+            auto relativeStart = (start < info.start) ? 0 : start - info.start;
+            if (rectHeightPolicy == RectHeightPolicy::COVER_TEXT) {
+                info.paragraph->GetTightRectsForRange(relativeStart, end - info.start, rects);
+            } else {
+                info.paragraph->GetRectsForRange(relativeStart, end - info.start, rects);
+            }
+            for (auto&& rect : rects) {
+                rect.SetTop(rect.Top() + y);
+            }
+            paragraphsRects.emplace_back(rects);
+        }
+        y += info.paragraph->GetHeight();
+    }
+    return paragraphsRects;
+}
+
 bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const
 {
     for (auto iter = paragraphs_.begin(); iter != paragraphs_.end(); iter++) {

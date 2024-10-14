@@ -54,6 +54,7 @@ SecurityComponentPattern::~SecurityComponentPattern()
 bool SecurityComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     const DirtySwapConfig& config)
 {
+    CHECK_NULL_RETURN(dirty, false);
     return !(config.skipMeasure || dirty->SkipMeasureContent());
 }
 
@@ -87,6 +88,7 @@ bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
         }
 #endif
         auto jsonNode = JsonUtil::Create(true);
+        CHECK_NULL_RETURN(jsonNode, false);
         jsonNode->Put("handleRes", res);
         std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
         auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
@@ -158,6 +160,7 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
         res = 1;
     }
     auto jsonNode = JsonUtil::Create(true);
+    CHECK_NULL_VOID(jsonNode);
     jsonNode->Put("handleRes", res);
     std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
@@ -219,6 +222,7 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
             return;
         }
         auto jsonNode = JsonUtil::Create(true);
+        CHECK_NULL_VOID(jsonNode);
         std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
         int32_t res;
         // if info.GetPointerEvent() is null, device may in screen read mode
@@ -245,6 +249,31 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
     SetNodeHitTestMode(text, HitTestMode::HTMTRANSPARENT);
 }
 
+void SecurityComponentPattern::ToJsonValueIconNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& iconNode,
+    const InspectorFilter& filter) const
+{
+    auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(iconProp);
+    json->PutExtAttr("iconSize",
+        iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ToString().c_str(), filter);
+    json->PutExtAttr("iconColor", iconProp->GetImageSourceInfo().value().GetFillColor().
+        value_or(Color::WHITE).ColorToString().c_str(), filter);
+}
+
+void SecurityComponentPattern::ToJsonValueTextNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& textNode,
+    const InspectorFilter& filter) const
+{
+    auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProp);
+    json->PutExtAttr("fontSize", textProp->GetFontSize().value_or(Dimension(0.0)).ToString().c_str(), filter);
+    json->PutExtAttr("fontWeight", V2::ConvertWrapFontWeightToStirng(
+        textProp->GetFontWeight().value_or(FontWeight::NORMAL)).c_str(), filter);
+    json->PutExtAttr("fontFamily", "HarmonyOS Sans", filter);
+    json->PutExtAttr("fontStyle",
+        static_cast<int64_t>(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)), filter);
+    json->PutExtAttr("fontColor", textProp->GetTextColor().value_or(Color::WHITE).ColorToString().c_str(), filter);
+}
+
 void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     /* no fixed attr below, just return */
@@ -266,26 +295,14 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, con
 
     RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
     if (iconNode != nullptr) {
-        auto iconProp = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(iconProp);
-        json->PutExtAttr("iconSize",
-            iconProp->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ToString().c_str(), filter);
-        json->PutExtAttr("iconColor", iconProp->GetImageSourceInfo().value().GetFillColor().
-            value_or(Color::WHITE).ColorToString().c_str(), filter);
+        ToJsonValueIconNode(json, iconNode, filter);
     }
     RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
     if (textNode != nullptr) {
-        auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textProp);
-        json->PutExtAttr("fontSize", textProp->GetFontSize().value_or(Dimension(0.0)).ToString().c_str(), filter);
-        json->PutExtAttr("fontWeight", V2::ConvertWrapFontWeightToStirng(
-            textProp->GetFontWeight().value_or(FontWeight::NORMAL)).c_str(), filter);
-        json->PutExtAttr("fontFamily", "HarmonyOS Sans", filter);
-        json->PutExtAttr("fontStyle",
-            static_cast<int64_t>(textProp->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL)), filter);
-        json->PutExtAttr("fontColor", textProp->GetTextColor().value_or(Color::WHITE).ColorToString().c_str(), filter);
+        ToJsonValueTextNode(json, textNode, filter);
     }
     auto paddingJson = JsonUtil::Create(true);
+    CHECK_NULL_VOID(paddingJson);
     paddingJson->Put("top", layoutProperty->GetBackgroundTopPadding().value_or(Dimension(0.0)).ToString().c_str());
     paddingJson->Put("bottom",
         layoutProperty->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ToString().c_str());
@@ -357,7 +374,7 @@ void SecurityComponentPattern::UpdateIconProperty(RefPtr<FrameNode>& scNode, Ref
 
     auto scPaintProp = scNode->GetPaintProperty<SecurityComponentPaintProperty>();
     CHECK_NULL_VOID(scPaintProp);
-    if (scPaintProp->GetIconColor().has_value()) {
+    if (scPaintProp->GetIconColor().has_value() && iconLayoutProp->GetImageSourceInfo().has_value()) {
         auto iconSrcInfo = iconLayoutProp->GetImageSourceInfo().value();
         iconSrcInfo.SetFillColor(scPaintProp->GetIconColor().value());
         iconLayoutProp->UpdateImageSourceInfo(iconSrcInfo);
@@ -582,6 +599,7 @@ void SecurityComponentPattern::DoTriggerOnclick(int32_t result)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto jsonNode = JsonUtil::Create(true);
+    CHECK_NULL_VOID(jsonNode);
     if (result != 0) {
         jsonNode->Put("handleRes", static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED));
     } else {

@@ -1037,6 +1037,7 @@ public:
     void ProcessFrameNodeChangeFlag();
     void OnNodeTransformInfoUpdate(bool changed);
     void OnNodeTransitionInfoUpdate();
+    uint32_t GetWindowPatternType() const;
 
     void ResetLayoutAlgorithm()
     {

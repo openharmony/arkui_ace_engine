@@ -86,4 +86,55 @@ bool SearchTextFieldPattern::IsTextEditableForStylus() const
     }
     return true;
 }
+
+void SearchTextFieldPattern::ProcessSelection()
+{
+    auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (SelectOverlayIsOn()) {
+        needToRefreshSelectOverlay_ = textWidth > 0;
+        UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
+            std::clamp(selectController_->GetEndIndex(), 0, textWidth));
+        SetIsSingleHandle(!IsSelected());
+        if (isTextChangedAtCreation_ && textWidth == 0) {
+            CloseSelectOverlay();
+            StartTwinkling();
+        }
+    } else if (HasFocus() && !IsSelected() && !searchRequestStopTwinkling_) {
+        StartTwinkling();
+    } else {
+        needToRefreshSelectOverlay_ = false;
+    }
+}
+
+void SearchTextFieldPattern::SearchRequestStartTwinkling()
+{
+    searchRequestStopTwinkling_ = false;
+    StartTwinkling();
+}
+
+void SearchTextFieldPattern::SearchRequestStopTwinkling()
+{
+    searchRequestStopTwinkling_ = true;
+    UpdateSelection(0);
+    StopTwinkling();
+}
+
+void SearchTextFieldPattern::ResetSearchRequestStopTwinkling()
+{
+    searchRequestStopTwinkling_ = false;
+}
+
+bool SearchTextFieldPattern::IsNeedProcessAutoFill()
+{
+    return false;
+}
+
+int32_t SearchTextFieldPattern::GetRequestKeyboardId()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    auto searchHost = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_RETURN(searchHost, -1);
+    return searchHost->GetId();
+}
 } // namespace OHOS::Ace::NG

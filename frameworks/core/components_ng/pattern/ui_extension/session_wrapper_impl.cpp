@@ -484,12 +484,18 @@ void SessionWrapperImpl::NotifyBackground()
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
         session_, std::move(backgroundCallback_));
 }
-void SessionWrapperImpl::NotifyDestroy()
+void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
-    UIEXT_LOGI("NotifyDestroy, persistentid = %{public}d.", session_->GetPersistentId());
-    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
-        session_, std::move(destructionCallback_));
+    UIEXT_LOGI("NotifyDestroy, isHandleError = %{public}d, persistentid = %{public}d.",
+        isHandleError, session_->GetPersistentId());
+    if (isHandleError) {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
+            session_, std::move(destructionCallback_));
+    } else {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
+            session_, nullptr);
+    }
 }
 
 void SessionWrapperImpl::NotifyConfigurationUpdate() {}
@@ -653,7 +659,8 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         "reason = %{public}d, duration = %{public}d, persistentId = %{public}d.",
         displayArea_.ToString().c_str(), curWindow.ToString().c_str(), reason, duration, persistentId);
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
-        std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, transaction);
+        std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, "NotifyDisplayArea",
+        transaction);
 }
 
 void SessionWrapperImpl::NotifySizeChangeReason(

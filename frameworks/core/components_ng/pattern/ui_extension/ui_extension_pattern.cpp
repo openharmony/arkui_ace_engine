@@ -58,6 +58,8 @@ constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
+constexpr double SHOW_START = 0.0;
+constexpr double SHOW_FULL = 1.0;
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -173,7 +175,9 @@ UIExtensionPattern::~UIExtensionPattern()
     if (accessibilityChildTreeCallback_ == nullptr) {
         return;
     }
-    ContainerScope scope(instanceId_);
+
+    auto instanceId = GetInstanceIdFromHost();
+    ContainerScope scope(instanceId);
     auto ngPipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
@@ -299,7 +303,9 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         UIEXT_LOGW("Unable to StartUiextensionAbility while in the background.");
         return;
     }
-    if (!isModal_ && !hasMountToParent_) {
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    if (container->IsScenceBoardWindow() && !isModal_ && !hasMountToParent_) {
         needReNotifyForeground_ = true;
         UIEXT_LOGI("Should NotifyForeground after MountToParent.");
         return;
@@ -479,7 +485,7 @@ void UIExtensionPattern::NotifyDestroy()
         state_ != AbilityState::NONE) {
         UIEXT_LOGI("The state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
         state_ = AbilityState::DESTRUCTION;
-        sessionWrapper_->NotifyDestroy();
+        sessionWrapper_->NotifyDestroy(false);
         sessionWrapper_->DestroySession();
     }
 }
@@ -684,22 +690,9 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
-    if (!window) {
-        UIEXT_LOGE("The pipline window is empty.");
-        return;
-    }
-    auto rsWindow = window->GetRSWindow();
-    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
-    if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
-        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
-    } else {
-        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
-    }
+    Platform::CalculatePointerEvent(pointerEvent, host);
     AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -733,9 +726,7 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
     lastPointerEvent_ = pointerEvent;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
-    Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale);
+    Platform::CalculatePointerEvent(pointerEvent, host);
     if (info.GetAction() == MouseAction::PRESS) {
         auto hub = host->GetFocusHub();
         CHECK_NULL_VOID(hub);
@@ -815,19 +806,9 @@ void UIExtensionPattern::HandleDragEvent(const PointerEvent& info)
     CHECK_NULL_VOID(pointerEvent);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto selfGlobalOffset = host->GetTransformRelativeOffset();
-    auto scale = host->GetTransformScale();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto window = static_cast<RosenWindow*>(pipeline->GetWindow());
-    CHECK_NULL_VOID(window);
-    auto rsWindow = window->GetRSWindow();
-    auto udegree = WindowPattern::CalculateTranslateDegree(host->GetId());
-    if (rsWindow->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD) {
-        Platform::CalculateWindowCoordinate(selfGlobalOffset, pointerEvent, scale, udegree);
-    } else {
-        Platform::CalculatePointerEvent(selfGlobalOffset, pointerEvent, scale, udegree);
-    }
+    Platform::CalculatePointerEvent(pointerEvent, host);
     Platform::UpdatePointerAction(pointerEvent, info.action);
     DispatchPointerEvent(pointerEvent);
 }
@@ -1063,7 +1044,8 @@ void UIExtensionPattern::InitializeAccessibility()
     if (accessibilityChildTreeCallback_ != nullptr) {
         return;
     }
-    ContainerScope scope(instanceId_);
+    auto instanceId = GetInstanceIdFromHost();
+    ContainerScope scope(instanceId);
     auto ngPipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
@@ -1174,15 +1156,32 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
         CHECK_NULL_VOID(uiExtension);
-        uiExtension->OnVisibleChange(visible);
+        uiExtension->HandleVisibleAreaChange(visible, ratio);
     };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    std::vector<double> ratioList = { 0.0 };
+    std::vector<double> ratioList = { SHOW_START, SHOW_FULL };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+}
+
+void UIExtensionPattern::HandleVisibleAreaChange(bool visible, double ratio)
+{
+    UIEXT_LOGI("HandleVisibleAreaChange visible: %{public}d, curVisible: %{public}d, "
+        "ratio: %{public}f, displayArea: %{public}s.", visible, curVisible_,
+        ratio, displayArea_.ToString().c_str());
+    bool needCheckDisplayArea = NearEqual(ratio, SHOW_FULL) && curVisible_ && visible;
+    bool curVisible = !NearEqual(ratio, SHOW_START);
+    if (curVisible_ != curVisible) {
+        curVisible_ = curVisible;
+        OnVisibleChange(curVisible_);
+    }
+
+    if (needCheckDisplayArea) {
+        DispatchDisplayArea(false);
+    }
 }
 
 void UIExtensionPattern::OnLanguageConfigurationUpdate()
@@ -1216,6 +1215,16 @@ int32_t UIExtensionPattern::GetNodeId()
 int32_t UIExtensionPattern::GetInstanceId()
 {
     return instanceId_;
+}
+
+int32_t UIExtensionPattern::GetInstanceIdFromHost()
+{
+    auto instanceId = GetHostInstanceId();
+    if (instanceId != instanceId_) {
+        UIEXT_LOGW("UIExtension pattern instanceId %{public}d not equal frame node instanceId %{public}d",
+            instanceId_, instanceId);
+    }
+    return instanceId;
 }
 
 void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)

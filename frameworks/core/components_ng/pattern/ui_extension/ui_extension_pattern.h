@@ -147,6 +147,7 @@ public:
     }
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
+    void HandleVisibleAreaChange(bool visible, double ratio);
     void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     RefPtr<OHOS::Ace::WantWrap> GetWantWrap();
     bool IsShowPlaceholder()
@@ -215,6 +216,7 @@ private:
     void RemovePlaceholderNode();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
+    int32_t GetInstanceIdFromHost();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -258,6 +260,7 @@ private:
     bool hasMountToParent_ = false;
     bool needReNotifyForeground_ = false;
     bool needReDispatchDisplayArea_ = false;
+    bool curVisible_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 

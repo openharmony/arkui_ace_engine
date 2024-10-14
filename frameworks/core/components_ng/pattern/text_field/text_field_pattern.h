@@ -61,6 +61,7 @@
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_select_overlay.h"
@@ -349,6 +350,8 @@ public:
     void UpdateCaretPositionByTouch(const Offset& offset);
 
     bool IsReachedBoundary(float offset);
+    virtual int32_t GetRequestKeyboardId();
+
     virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboardCrossPlatForm(bool isFocusViewChanged);
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
@@ -1431,26 +1434,43 @@ public:
 
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     bool IsTextEditableForStylus() const override;
+
+    virtual void ProcessSelection();
+    void AfterLayoutProcessCleanResponse(
+        const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
+
 protected:
     virtual void InitDragEvent();
-    void OnAttachToMainTree() override
-    {
-        isDetachFromMainTree_ = false;
-    }
+    void OnAttachToMainTree() override;
 
-    void OnDetachFromMainTree() override
-    {
-        isDetachFromMainTree_ = true;
-    }
+    void OnDetachFromMainTree() override;
     
     bool IsReverse() const override
     {
         return false;
     }
 
+    bool SelectOverlayIsOn()
+    {
+        return selectOverlay_->SelectOverlayIsOn();
+    }
+
+    void SetIsSingleHandle(bool isSingleHandle)
+    {
+        selectOverlay_->SetIsSingleHandle(isSingleHandle);
+    }
+
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
+    virtual bool IsNeedProcessAutoFill();
+    void UpdateSelection(int32_t both);
+    void UpdateSelection(int32_t start, int32_t end);
+
+    RefPtr<ContentController> contentController_;
+    RefPtr<TextSelectController> selectController_;
+    bool needToRefreshSelectOverlay_ = false;
+    bool isTextChangedAtCreation_ = false;
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1507,11 +1527,6 @@ private:
     void ProcessOverlayAfterLayout(const OffsetF& prevOffset);
     void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
 
-    bool SelectOverlayIsOn()
-    {
-        return selectOverlay_->SelectOverlayIsOn();
-    }
-
     // when moving one handle causes shift of textRect, update x position of the other handle
     void SetHandlerOnMoveDone();
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -1529,8 +1544,6 @@ private:
 
     void FilterInitializeText();
 
-    void UpdateSelection(int32_t both);
-    void UpdateSelection(int32_t start, int32_t end);
     void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPosition();
     void UpdateCaretRect(bool isEditorValueChanged);
@@ -1607,10 +1620,6 @@ private:
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
 #endif
-    void SetIsSingleHandle(bool isSingleHandle)
-    {
-        selectOverlay_->SetIsSingleHandle(isSingleHandle);
-    }
     void NotifyOnEditChanged(bool isChanged);
     void ProcessResponseArea();
     bool HasInputOperation();
@@ -1669,6 +1678,13 @@ private:
     bool IsContentRectNonPositive();
     bool IsHandleDragging();
     void ReportEvent();
+    TextFieldInfo GenerateTextFieldInfo();
+    void AddTextFieldInfo();
+    void RemoveTextFieldInfo();
+    void UpdateTextFieldInfo();
+    bool IsAutoFillUserName(const AceAutoFillType& autoFillType);
+    bool HasAutoFillPasswordNode();
+    bool IsTriggerAutoFillPassword();
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
 
     RectF frameRect_;
@@ -1710,7 +1726,6 @@ private:
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
     bool isOnHover_ = false;
-    bool needToRefreshSelectOverlay_ = false;
     bool needToRequestKeyboardInner_ = false;
     bool needToRequestKeyboardOnFocus_ = false;
     bool isTransparent_ = false;
@@ -1806,8 +1821,6 @@ private:
     bool leftMouseCanMove_ = false;
     bool isLongPress_ = false;
     bool isEdit_ = false;
-    RefPtr<ContentController> contentController_;
-    RefPtr<TextSelectController> selectController_;
     CaretStatus caretStatus_ = CaretStatus::NONE;
     RefPtr<NG::UINode> unitNode_;
     RefPtr<TextInputResponseArea> responseArea_;
@@ -1849,11 +1862,11 @@ private:
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
     bool isTouchPreviewText_ = false;
-    bool isTextChangedAtCreation_ = false;
     bool isEnableHapticFeedback_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     std::optional<Dimension> adaptFontSize_;
+    WeakPtr<FrameNode> firstAutoFillContainerNode_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -19,6 +19,7 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -242,9 +243,9 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
     if (transactionController && (session_->GetSessionRect() != windowRect)) {
         session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED,
-            transactionController->GetRSTransaction());
+            "OnBoundsChanged", transactionController->GetRSTransaction());
     } else {
-        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
     }
 }
 
@@ -661,5 +662,10 @@ void WindowScene::SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rose
         session->SetBufferAvailable(true);
     };
     surfaceNode->SetBufferAvailableCallback(subWindowCallback);
+}
+
+uint32_t WindowScene::GetWindowPatternType() const
+{
+    return static_cast<uint32_t>(WindowPatternType::WINDOW_SCENE);
 }
 } // namespace OHOS::Ace::NG

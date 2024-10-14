@@ -461,7 +461,7 @@ void SecuritySessionWrapperImpl::NotifyBackground()
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
         session_, std::move(backgroundCallback_));
 }
-void SecuritySessionWrapperImpl::NotifyDestroy()
+void SecuritySessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
@@ -600,7 +600,8 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
         }
     }
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
-        std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, transaction);
+        std::round(displayArea_.Width()), std::round(displayArea_.Height()) },
+        reason, "NotifyDisplayArea", transaction);
 }
 
 void SecuritySessionWrapperImpl::NotifySizeChangeReason(

@@ -69,6 +69,11 @@ public:
     virtual void SetBottom(float pos) {}
     virtual void Offset(float dx, float dy) {}
 
+    bool Join(const TestingRect& other)
+    {
+        return true;
+    }
+
 private:
     float left_;
     float right_;
