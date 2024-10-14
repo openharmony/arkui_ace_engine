@@ -62,15 +62,15 @@ public:
         resetFunc_();
     }
 
-    void SetMakeFunction(std::function<RefPtr<UINode>(int32_t)>&& makeFunc)
+    void SetMakeFunction(std::function<RefPtr<UINode>()>&& makeFunc)
     {
         makeFunc_ = std::move(makeFunc);
     }
 
-    RefPtr<UINode> FireMakeFunction(int32_t instanceId) const
+    RefPtr<UINode> FireMakeFunction() const
     {
         CHECK_NULL_RETURN(makeFunc_, nullptr);
-        return makeFunc_(instanceId);
+        return makeFunc_();
     }
 
     void SetOnResize(std::function<void(const SizeF& size)>&& resizeFunc)
@@ -113,7 +113,7 @@ private:
     void SetExportTextureInfoIfNeeded();
     bool HandleTextureExport(bool isStop);
     std::function<void()> resetFunc_;
-    std::function<RefPtr<UINode>(int32_t)> makeFunc_;
+    std::function<RefPtr<UINode>()> makeFunc_;
     std::function<void(const SizeF& size)> resizeFunc_;
     WeakPtr<UINode> exportTextureNode_;
     uint64_t surfaceId_ = 0U;
