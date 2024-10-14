@@ -410,14 +410,14 @@ public:
         isDragWithContextMenu_ = isDragWithContextMenu;
     }
 
-    bool IsBackPressedCleanLongPressNodes() const
+    void SetIsDragNodeNeedClean(bool isDragNodeNeedClean = false)
     {
-        return isBackPressedCleanLongPressNodes_;
+        isDragNodeNeedClean_ = isDragNodeNeedClean;
     }
 
-    void SetIsBackPressedCleanLongPressNodes(bool isBackPressedCleanLongPressNodes)
+    bool IsDragNodeNeedClean() const
     {
-        isBackPressedCleanLongPressNodes_ = isBackPressedCleanLongPressNodes;
+        return isDragNodeNeedClean_;
     }
 
     void UpdateDragMovePosition(const NG::OffsetF& offset, bool isRedragStart = false);
@@ -546,6 +546,7 @@ private:
     bool hasNotifiedTransformation_ = false;
     bool isPullMoveReceivedForCurrentDrag_ = false;
     bool isDragWindowSubWindow_ = false;
+    bool isDragNodeNeedClean_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
@@ -563,7 +564,6 @@ private:
     int32_t currentAnimationCnt_ = 0;
     int32_t allAnimationCnt_ = 0;
     bool isDragWithContextMenu_ = false;
-    bool isBackPressedCleanLongPressNodes_ = false;
     Point dragDampStartPoint_ { 1, 1 };
     OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMovePosition_ = OffsetF(0.0f, 0.0f);

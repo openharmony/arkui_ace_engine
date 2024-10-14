@@ -234,7 +234,7 @@ public:
     bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter = false);
     bool RemoveBubble(const RefPtr<FrameNode>& overlay);
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
-    bool RemoveDragPreview(const RefPtr<FrameNode>& overlay, bool isBackPressed = false);
+    bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
     bool RemoveAllModalInOverlayByStack();
@@ -803,6 +803,8 @@ private:
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
+    void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
+    void SetDragNodeNeedClean();
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

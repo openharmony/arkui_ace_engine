@@ -2089,7 +2089,7 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
             subwindowMgr->DeleteHotAreas(containerId, child);
         }
     });
-    rootNode->Clean();
+    hasDragPixelMap_ ? RemoveMenuWrapperNode(rootNode) : rootNode->Clean();
 
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -3046,23 +3046,16 @@ bool OverlayManager::RemoveMenu(const RefPtr<FrameNode>& overlay)
     return true;
 }
 
-bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay, bool isBackPressed)
+bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove dragPreview enter");
     auto columnNode = pixmapColumnNodeWeak_.Upgrade();
     if (columnNode != overlay) {
         return false;
     }
+    RemoveEventColumn();
     RemovePixelMap();
     RemoveGatherNode();
-
-    if (isBackPressed) {
-        auto mainPipeline = PipelineContext::GetMainPipelineContext();
-        CHECK_NULL_RETURN(mainPipeline, false);
-        auto dragDropManager = mainPipeline->GetDragDropManager();
-        CHECK_NULL_RETURN(dragDropManager, true);
-        dragDropManager->SetIsBackPressedCleanLongPressNodes(true);
-    }
     return true;
 }
 
@@ -3130,11 +3123,12 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         return RemoveBubble(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (InstanceOf<MenuWrapperPattern>(pattern)) {
-        RemoveDragPreview(overlay, isBackPressed);
+        SetDragNodeNeedClean();
+        RemoveDragPreview(overlay);
         return RemoveMenu(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (InstanceOf<LinearLayoutPattern>(pattern)) {
-        return RemoveDragPreview(overlay, isBackPressed) ? OVERLAY_REMOVE : OVERLAY_NOTHING;
+        return RemoveDragPreview(overlay) ? OVERLAY_REMOVE : OVERLAY_NOTHING;
     }
     return OVERLAY_NOTHING;
 }
@@ -3144,6 +3138,7 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
     RemoveIndexerPopup();
+    SetDragNodeNeedClean();
     auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
     // There is overlay under the root node or it is in atomicservice
@@ -5817,14 +5812,12 @@ void OverlayManager::RemoveEventColumn()
     }
     auto columnNode = eventColumnNodeWeak_.Upgrade();
     if (!columnNode) {
+        hasEvent_ = false;
         TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn, columnNode is null.");
         return;
     }
     auto rootNode = columnNode->GetParent();
-    if (!rootNode) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn, cannot find rootNode.");
-        return;
-    }
+    CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(columnNode);
     hasEvent_ = false;
     TAG_LOGI(AceLogTag::ACE_DRAG, "remove eventColumn success, id %{public}d.", columnNode->GetId());
@@ -6896,8 +6889,6 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
 {
     CHECK_NULL_VOID(rootNode);
     CHECK_NULL_VOID(node);
-    auto pipeline = rootNode->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
     auto parent = node->GetParent();
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(node);
@@ -6942,5 +6933,25 @@ bool OverlayManager::IsRootExpansive() const
     CHECK_NULL_RETURN(layoutProp, false);
     const auto& opts = layoutProp->GetSafeAreaExpandOpts();
     return opts && opts->Expansive();
+}
+
+void OverlayManager::RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode)
+{
+    CHECK_NULL_VOID(rootNode);
+    for (const auto& child : rootNode->GetChildren()) {
+        auto node = DynamicCast<FrameNode>(child);
+        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            rootNode->RemoveChild(node);
+        }
+    }
+}
+
+void OverlayManager::SetDragNodeNeedClean()
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto dragDropManager = mainPipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->SetIsDragNodeNeedClean(true);
 }
 } // namespace OHOS::Ace::NG
