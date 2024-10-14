@@ -185,7 +185,6 @@ void PointLightImpl(Ark_NativePointer node,
     ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated,
         (float)Converter::ConvertOrDefault(value->illuminated, 0), frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
-
 }
 } // FlexAttributeModifier
 const GENERATED_ArkUIFlexModifier* GetFlexModifier()
