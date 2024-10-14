@@ -23,11 +23,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/components_ng/image_provider/image_loading_context.h"
 
-#ifdef PIXEL_MAP_SUPPORTED
-#include "pixel_map.h"
-#include "pixel_map_napi.h"
-#endif
-
 namespace OHOS::Ace::Framework {
 
 void BindNativeFunction(napi_env env, napi_value object, const char* name, napi_callback func);
