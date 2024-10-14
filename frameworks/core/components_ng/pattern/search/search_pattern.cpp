@@ -953,6 +953,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
                 textFieldPattern->NeedRequestKeyboard();
                 textFieldPattern->SearchRequestKeyboard();
                 textFieldPattern->HandleOnSelectAll(false); // Select all text
+                textFieldPattern->HandleFocusEvent(); // Show caret
                 searchTextFieldPattern->ResetSearchRequestStopTwinkling(); // reset flag
                 textFieldPattern->StopTwinkling(); // Hide caret
             } else {
