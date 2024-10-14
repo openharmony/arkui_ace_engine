@@ -152,7 +152,7 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
     if (footer && footer->FrameCount() > 0) {
         layoutInfo_->footerIndex_ = 0;
     } else {
-        layoutInfo_->footerIndex_ = -1;
+        layoutInfo_->ResetFooter();
     }
 }
 
