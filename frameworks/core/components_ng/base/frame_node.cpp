@@ -5134,6 +5134,12 @@ void FrameNode::NotifyChange(int32_t index, int32_t count, int64_t id, Notificat
     }
 }
 
+uint32_t FrameNode::GetWindowPatternType() const
+{
+    CHECK_NULL_RETURN(pattern_, 0);
+    return pattern_->GetWindowPatternType();
+}
+
 // for Grid refresh GridItems
 void FrameNode::ChildrenUpdatedFrom(int32_t index)
 {

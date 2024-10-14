@@ -627,6 +627,11 @@ public:
         return false;
     }
 
+    virtual uint32_t GetWindowPatternType() const
+    {
+        return 0;
+    }
+    
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
