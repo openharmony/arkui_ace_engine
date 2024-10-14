@@ -178,8 +178,8 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle001, TestSize.Level1)
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
-    textInputLayoutAlgorithm -> UpdateTextStyleMore(frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
-    textInputLayoutAlgorithm -> UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
+    textInputLayoutAlgorithm->UpdateTextStyleMore(frameNode_, layoutProperty_, textStyle, true);
+    textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
 }
 
 /**
@@ -202,7 +202,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle002, TestSize.Level1)
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
-    textInputLayoutAlgorithm -> UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, false);
+    textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, false);
 }
 
 /**
@@ -222,7 +222,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdatePlaceholderTextStyle, TestSize.Level1)
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
-    textInputLayoutAlgorithm -> UpdatePlaceholderTextStyle(
+    textInputLayoutAlgorithm->UpdatePlaceholderTextStyle(
         frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
 }
 
@@ -347,7 +347,7 @@ HWTEST_F(TextFieldAlgorithmTest, HandleTextArea001, TestSize.Level1)
     layoutWrapper.GetGeometryNode()->SetContentSize({ 40.0f, 40.0f });
     RefPtr<LayoutWrapper> counterNode = pattern_->GetCounterNode().Upgrade();
     float countX = 0;
-    textInputLayoutAlgorithm -> HandleTextArea(&layoutWrapper, counterNode, pattern_, true, countX);
+    textInputLayoutAlgorithm->HandleTextArea(&layoutWrapper, counterNode, pattern_, true, countX);
 }
 
 /**
@@ -371,7 +371,7 @@ HWTEST_F(TextFieldAlgorithmTest, HandleTextArea002, TestSize.Level1)
     layoutWrapper.GetGeometryNode()->SetContentSize({ 40.0f, 40.0f });
     RefPtr<LayoutWrapper> counterNode = pattern_->GetCounterNode().Upgrade();
     float countX = 0;
-    textInputLayoutAlgorithm -> HandleTextArea(&layoutWrapper, counterNode, pattern_, false, countX);
+    textInputLayoutAlgorithm->HandleTextArea(&layoutWrapper, counterNode, pattern_, false, countX);
 }
 
 /**
@@ -686,8 +686,8 @@ HWTEST_F(TextFieldAlgorithmTest, AddAdaptFontSizeAndAnimations001, TestSize.Leve
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
     auto textInputLayoutAlgorithm =
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    textInputLayoutAlgorithm -> BuildInlineFocusLayoutConstraint(layoutConstraint, &layoutWrapper);
-    textInputLayoutAlgorithm -> AddAdaptFontSizeAndAnimations(
+    textInputLayoutAlgorithm->BuildInlineFocusLayoutConstraint(layoutConstraint, &layoutWrapper);
+    textInputLayoutAlgorithm->AddAdaptFontSizeAndAnimations(
         textStyle, layoutProperty_, layoutConstraint, &layoutWrapper);
 }
 
@@ -704,7 +704,7 @@ HWTEST_F(TextFieldAlgorithmTest, IsInlineFocusAdaptMinExceedLimit, TestSize.Leve
     uint32_t maxViewLines = 2;
     auto textInputLayoutAlgorithm =
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    EXPECT_FALSE(textInputLayoutAlgorithm -> IsInlineFocusAdaptMinExceedLimit(maxSize, maxViewLines));
+    EXPECT_FALSE(textInputLayoutAlgorithm->IsInlineFocusAdaptMinExceedLimit(maxSize, maxViewLines));
 }
 
 /**
@@ -718,7 +718,7 @@ HWTEST_F(TextFieldAlgorithmTest, DidExceedMaxLines, TestSize.Level1)
     SizeF maxSize;
     auto textInputLayoutAlgorithm =
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    EXPECT_FALSE(textInputLayoutAlgorithm -> DidExceedMaxLines(maxSize));
+    EXPECT_FALSE(textInputLayoutAlgorithm->DidExceedMaxLines(maxSize));
 }
 
 } // namespace OHOS::Ace::NG //
