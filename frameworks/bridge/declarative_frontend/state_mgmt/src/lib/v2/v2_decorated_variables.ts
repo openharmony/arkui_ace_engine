@@ -118,12 +118,6 @@ class VariableUtilV2 {
       const searchingPrefixedAliasName = ProviderConsumerUtilV2.metaAliasKey(aliasName, '@Provider');
       stateMgmtConsole.debug(`findProvider: Try to connect ${view.debugInfo__()} '@Consumer ${aliasName}' to @Provider counterpart....`);
 
-      // Check if the view is a JSBuilderNode
-      if (!checkView && view.isJSBuilderNode) {
-        const error = `Application Error: @Provider/@Consumer is not supported in BuilderNode. Use @Local/@Param instead.`;
-        throw new Error(error);
-      }
-
       while (checkView) {
         const meta = checkView.constructor?.prototype[ObserveV2.V2_DECO_META];
         if (checkView instanceof ViewV2 && meta && meta[searchingPrefixedAliasName]) {
