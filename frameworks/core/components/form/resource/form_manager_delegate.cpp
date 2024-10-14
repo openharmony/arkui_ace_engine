@@ -282,6 +282,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         state_ = State::CREATEFAILED;
+        TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError CREATEFAILED");
         OnFormError("internal error");
         return;
     }
@@ -297,6 +298,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         auto resRegister = weakRes.Upgrade();
         auto context = delegate->context_.Upgrade();
         if (!resRegister || !context) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError resRegister or context error");
             delegate->OnFormError("internal error");
             return;
         }
@@ -317,6 +319,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         std::string param = paramStream.str();
         delegate->id_ = resRegister->CreateResource(FORM_ADAPTOR_RESOURCE_NAME, param);
         if (delegate->id_ == INVALID_ID) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError INVALID_ID");
             delegate->OnFormError("internal error");
             return;
         }
@@ -793,6 +796,8 @@ void FormManagerDelegate::OnFormUpdate(const std::string& param)
 void FormManagerDelegate::OnFormError(const std::string& param)
 {
     auto result = ParseMapFromString(param);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "OnFormError, code:%{public}s, msg:%{public}s", result["code"].c_str(), result["msg"].c_str());
     if (onFormErrorCallback_) {
         onFormErrorCallback_(result["code"], result["msg"]);
     }
