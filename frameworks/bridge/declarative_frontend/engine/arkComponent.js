@@ -13935,11 +13935,8 @@ class TextInputCancelButtonModifier extends ModifierWithKey {
       getUINativeModule().textInput.resetCancelButton(node);
     }
     else {
-      let _a, _b, _c;
       getUINativeModule().textInput.setCancelButton(node, this.value.style,
-        (_a = this.value.icon) === null || _a === void 0 ? void 0 : _a.size,
-        (_b = this.value.icon) === null || _b === void 0 ? void 0 : _b.color,
-        (_c = this.value.icon) === null || _c === void 0 ? void 0 : _c.src);
+        this.value.icon);
     }
   }
   checkObjectDiff() {
