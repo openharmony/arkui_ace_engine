@@ -34,7 +34,7 @@ public:
     static IndexerModel* GetInstance();
     virtual ~IndexerModel() = default;
 
-    virtual void Create(std::vector<std::string>& indexerArray, int32_t selectedVal) = 0;
+    virtual void Create(std::vector<std::string>& indexerArray, int32_t selectedVal, bool isArc = false) = 0;
     virtual void SetSelectedColor(const std::optional<Color>& color) = 0;
     virtual void SetColor(const std::optional<Color>& color) = 0;
     virtual void SetPopupColor(const std::optional<Color>& color) = 0;
