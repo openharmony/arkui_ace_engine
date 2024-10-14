@@ -43,9 +43,11 @@
     do {                                                                                                         \
         auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);                                               \
         CHECK_NULL_VOID(spanNode);                                                                               \
+        if (spanNode->Has##name()) {                                                                             \
+            spanNode->MarkTextDirty();                                                                           \
+        }                                                                                                        \
         spanNode->Reset##name();                                                                                 \
         spanNode->ResetPropertyInfo(flag);                                                                       \
-        spanNode->MarkTextDirty();                                                                               \
     } while (false)
 namespace OHOS::Ace::NG {
 

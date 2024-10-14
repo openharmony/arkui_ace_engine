@@ -502,14 +502,14 @@ public:
         propertyInfo_.insert(value);
     }
 
-    void CleanPropertyInfo()
-    {
-        propertyInfo_.clear();
-    }
-
     void ResetPropertyInfo(PropertyInfo value)
     {
         propertyInfo_.erase(value);
+    }
+
+    void CleanPropertyInfo()
+    {
+        propertyInfo_.clear();
     }
 
     void MarkTextDirty() override
