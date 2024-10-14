@@ -547,35 +547,10 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
     start_ = currentSheetHeight;
     TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet HandleDragEnd, current height is: %{public}f", currentSheetHeight);
 
-    //when drag the sheet page, find the lower and upper index range
-    auto lowerIter = std::lower_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
-    auto upperIter = std::upper_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
-
-    //record the drag position
+    // record the drag position
     uint32_t detentsLowerPos = 0;
     uint32_t detentsUpperPos = 0;
-    if (lowerIter == sheetDetentHeight_.end() || upperIter == sheetDetentHeight_.end()) {
-        //when drag over the highest sheet page
-        upHeight = sheetDetentHeight_[sheetDetentsSize - 1];
-        downHeight = sheetDetentHeight_[sheetDetentsSize - 1];
-        detentsLowerPos = sheetDetentsSize - 1;
-        detentsUpperPos = sheetDetentsSize - 1;
-    } else {
-        auto lowerPosition = static_cast<uint32_t>(std::distance(sheetDetentHeight_.begin(), lowerIter));
-        auto upperPosition = static_cast<uint32_t>(std::distance(sheetDetentHeight_.begin(), upperIter));
-        if (lowerPosition == 0) {
-            upHeight = sheetDetentHeight_[lowerPosition];
-            downHeight = 0;
-        } else {
-            //the first largest height greater than the currentsheet height
-            upHeight = sheetDetentHeight_[upperPosition];
-
-            //the largest height lower than the currentsheet height
-            downHeight = sheetDetentHeight_[lowerPosition - 1];
-            detentsLowerPos = lowerPosition - 1;
-            detentsUpperPos = upperPosition;
-        }
-    }
+    ComputeDetentsPos(currentSheetHeight, upHeight, downHeight, detentsLowerPos, detentsUpperPos);
 
     // when drag velocity is under the threshold and the sheet height is not in the middle of lower and upper bound.
     if ((LessNotEqual(std::abs(dragVelocity), SHEET_VELOCITY_THRESHOLD)) &&
@@ -615,12 +590,43 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
         }
     }
 
-    //match the sorted detents index to the unsorted one
+    // match the sorted detents index to the unsorted one
     auto detentHeight = sheetDetentHeight_[detentsIndex_];
     auto pos = std::find(unSortedSheetDentents_.begin(), unSortedSheetDentents_.end(), detentHeight);
     if (pos != std::end(unSortedSheetDentents_)) {
         auto idx = static_cast<uint32_t>(std::distance(unSortedSheetDentents_.begin(), pos));
         detentsFinalIndex_ = idx;
+    }
+}
+
+void SheetPresentationPattern::ComputeDetentsPos(
+    float currentSheetHeight, float& upHeight, float& downHeight, uint32_t& detentsLowerPos, uint32_t& detentsUpperPos)
+{
+    // when drag the sheet page, find the lower and upper index range
+    auto lowerIter = std::lower_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
+    auto upperIter = std::upper_bound(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), currentSheetHeight);
+    auto sheetDetentsSize = sheetDetentHeight_.size();
+    if (lowerIter == sheetDetentHeight_.end() || upperIter == sheetDetentHeight_.end()) {
+        // when drag over the highest sheet page
+        upHeight = sheetDetentHeight_[sheetDetentsSize - 1];
+        downHeight = sheetDetentHeight_[sheetDetentsSize - 1];
+        detentsLowerPos = sheetDetentsSize - 1;
+        detentsUpperPos = sheetDetentsSize - 1;
+    } else {
+        auto lowerPosition = static_cast<uint32_t>(std::distance(sheetDetentHeight_.begin(), lowerIter));
+        auto upperPosition = static_cast<uint32_t>(std::distance(sheetDetentHeight_.begin(), upperIter));
+        if (lowerPosition == 0) {
+            upHeight = sheetDetentHeight_[lowerPosition];
+            downHeight = 0;
+        } else {
+            // the first largest height greater than the currentsheet height
+            upHeight = sheetDetentHeight_[upperPosition];
+
+            // the largest height lower than the currentsheet height
+            downHeight = sheetDetentHeight_[lowerPosition - 1];
+            detentsLowerPos = lowerPosition - 1;
+            detentsUpperPos = upperPosition;
+        }
     }
 }
 

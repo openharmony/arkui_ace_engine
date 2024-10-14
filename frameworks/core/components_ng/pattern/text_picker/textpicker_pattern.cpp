@@ -575,7 +575,7 @@ RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
         }
     } else {
         piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
-        centerX = (columnWidth - piantRectWidth) / HALF;
+        centerX = currentFocusIndex * columnWidth + (columnWidth - piantRectWidth) / HALF;
     }
     return RectF(centerX, centerY, piantRectWidth, piantRectHeight);
 }

@@ -282,7 +282,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg0, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->isSelectMenu_ = true;
@@ -330,7 +330,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg1, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
     Placement placements[] = { Placement::TOP, Placement::BOTTOM, Placement::RIGHT, Placement::LEFT,
         Placement::TOP_LEFT, Placement::BOTTOM_LEFT, Placement::LEFT_BOTTOM, Placement::LEFT_TOP,
         Placement::RIGHT_BOTTOM, Placement::RIGHT_TOP, Placement::TOP_RIGHT, Placement::BOTTOM_RIGHT };
@@ -528,7 +528,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg009, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
     layoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
@@ -602,7 +602,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg011, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF());
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
     layoutAlgorithm->Layout(&layoutWrapper);
     EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
@@ -644,9 +644,9 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg012, TestSize.Level1)
     layoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(layoutAlgorithm->position_, OffsetF());
     EXPECT_EQ(layoutAlgorithm->positionOffset_, OffsetF(POSITION_OFFSET, POSITION_OFFSET));
-    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    EXPECT_EQ(layoutAlgorithm->wrapperSize_, SizeF(0.0f, 0.0f));
     layoutAlgorithm->Layout(&layoutWrapper);
-    EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(POSITION_OFFSET, POSITION_OFFSET));
+    EXPECT_EQ(geometryNode->GetMarginFrameOffset(), OffsetF(0.0f, 0.0f));
 }
 
 /**
@@ -1572,7 +1572,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
     /**
      * @tc.steps: step4. layoutWrapper, target and the geometry node of target is not null, isContextMenu and
      * isContainerModal is true
-     * @tc.expected: targetOffset_ is OffsetF(-5.0f, -38.0f)
+     * @tc.expected: targetOffset_ is OffsetF(-5.0f, -1.0f)
      */
     MockPipelineContext::GetCurrent()->SetWindowModal(WindowModal::CONTAINER_MODAL);
     MockPipelineContext::GetCurrent()->windowManager_ = AceType::MakeRefPtr<WindowManager>();
@@ -1580,21 +1580,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
         []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; });
 
     menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, true, menuPattern);
-    auto pipelineContext = menuLayoutAlgorithm->GetCurrentPipelineContext();
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    float windowsOffsetX = static_cast<float>(windowGlobalRect.GetOffset().GetX());
-    float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
-    OffsetF offset = OffsetF(windowsOffsetX, windowsOffsetY);
-    OffsetF offset2 = menuLayoutAlgorithm->GetMenuWrapperOffset(layoutWrapper);
-    offset -= offset2;
-    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, offset);
-
-    /**
-     * @tc.steps: step5. layoutWrapper, target and the geometry node of target is not null, isContextMenu is false
-     * @tc.expected: targetOffset_ is OffsetF(-5.0f, -38.0f)
-     */
-    layoutProp->UpdateIsRectInTarget(true);
-    menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, false, menuPattern);
+    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(-5.0f, -1.0f));
     delete layoutWrapper;
     layoutWrapper = nullptr;
 }

@@ -709,11 +709,7 @@ public:
 
     void OnAttachToFrameNode() override;
 
-    void OnDetachFromFrameNode(FrameNode* node) override
-    {
-        TextPattern::OnDetachFromFrameNode(node);
-        ScrollablePattern::OnDetachFromFrameNode(node);
-    }
+    void OnDetachFromFrameNode(FrameNode* node) override;
 
     bool IsAtBottom() const override
     {
@@ -963,6 +959,10 @@ public:
 
     Color GetUrlSpanColor() override;
 
+    void TriggerAvoidOnCaretChange();
+
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
 protected:
     bool CanStartAITask() override;
 
@@ -975,6 +975,7 @@ protected:
     }
 
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
+    PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
 
 private:
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
@@ -1284,6 +1285,7 @@ private:
     void UpdateImagePreviewParam();
     void UpdateImagePreviewParam(const RefPtr<ImageSpanNode>& imageNode);
     void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
+    void ClearOnFocusTextField();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

@@ -270,6 +270,10 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                 dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
             return;
         }
+        if (dragDropManager->GetPreDragStatus() >= PreDragStatus::PREVIEW_LANDING_FINISHED) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Drag preview is landing finished, stop dragging.");
+            return;
+        }
         if (dragDropManager->IsDragNodeNeedClean()) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "Drag node have been cleaned by backpress or click event, stop dragging.");
             return;
@@ -546,6 +550,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
+        dragDropManager->SetPrepareDragFrameNode(frameNode);
         if (!gestureHub->GetTextDraggable()) {
             // For the drag initiacating from long press gesture, the preview option set by the modifier
             // should also be applied in floating pharse, so we need to update the preview option here.
@@ -568,7 +573,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         if (overlayManager->GetHasPixelMap()) {
             return;
         }
-        
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
         if (dragDropManager->IsAboutToPreview() || dragDropManager->IsDragging() ||
@@ -581,6 +585,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
+        auto panRecognizer = actuator->panRecognizer_;
+        if (panRecognizer && panRecognizer->GetGestureDisposal() == GestureDisposal::REJECT) {
+            TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because drag action reject");
+            return;
+        }
         actuator->isOnBeforeLiftingAnimation = false;
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);

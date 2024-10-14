@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/option/option_pattern.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 
@@ -24,6 +25,11 @@ namespace {
     constexpr Dimension MIN_OPTION_WIDTH = 56.0_vp;
     constexpr Dimension OPTION_MARGIN = 8.0_vp;
     constexpr int32_t COLUMN_NUM = 2;
+    const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
+    // id of system resource start from 0x07000000
+    constexpr unsigned long MIN_SYSTEM_RESOURCE_ID = 0x07000000;
+    // id of system resource end to 0x07FFFFFF
+    constexpr unsigned long MAX_SYSTEM_RESOURCE_ID = 0x07FFFFFF;
 } // namespace
 
 void OptionPattern::OnAttachToFrameNode()
@@ -48,6 +54,7 @@ void OptionPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<OptionEventHub>();
     CHECK_NULL_VOID(eventHub);
+    UpdateIconSrc();
     if (!eventHub->IsEnabled()) {
         UpdatePasteFontColor(selectTheme_->GetDisabledMenuFontColor());
         CHECK_NULL_VOID(text_);
@@ -64,6 +71,38 @@ void OptionPattern::OnModifyDone()
         UpdatePasteFontColor(selectTheme_->GetMenuFontColor());
     }
     SetAccessibilityAction();
+}
+
+bool OptionPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo)
+{
+    if (imageSourceInfo.IsSvg()) {
+        auto src = imageSourceInfo.GetSrc();
+        auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
+            src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
+        return (srcId.find("ic_") != std::string::npos)
+            || ((std::all_of(srcId.begin(), srcId.end(), ::isdigit))
+                && (std::stoul(srcId) >= MIN_SYSTEM_RESOURCE_ID)
+                && (std::stoul(srcId) <= MAX_SYSTEM_RESOURCE_ID));
+    }
+    return false;
+}
+
+void OptionPattern::UpdateIconSrc()
+{
+    if (icon_ == nullptr || iconSrc_.empty()) {
+        return;
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    ImageSourceInfo imageSourceInfo(iconSrc_);
+    bool useDefaultIcon = UseDefaultThemeIcon(imageSourceInfo);
+    if (useDefaultIcon) {
+        auto iconRenderProperty = icon_->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(iconRenderProperty);
+        iconRenderProperty->UpdateSvgFillColor(selectTheme->GetMenuIconColor());
+    }
 }
 
 void OptionPattern::UpdatePasteFontColor(const Color& fontColor)

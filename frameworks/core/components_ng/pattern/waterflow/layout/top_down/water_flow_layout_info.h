@@ -76,6 +76,7 @@ public:
     float GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const;
     void Reset() override;
     void Reset(int32_t resetFrom);
+    void ResetFooter() override;
     int32_t GetCrossCount() const override;
     int32_t GetMainCount() const override;
     void ClearCacheAfterIndex(int32_t currentIndex);

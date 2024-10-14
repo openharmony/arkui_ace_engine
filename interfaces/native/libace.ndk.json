@@ -1420,11 +1420,11 @@
         "name": "OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen"
     },
     {
-        "first_introduced": "14",
+        "first_introduced": "13",
         "name": "OH_ArkUI_NodeUtils_AddCustomProperty"
     },
     {
-        "first_introduced": "14",
+        "first_introduced": "13",
         "name": "OH_ArkUI_NodeUtils_RemoveCustomProperty"
     },
     {

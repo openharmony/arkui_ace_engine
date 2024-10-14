@@ -18,6 +18,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -123,9 +124,12 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto toastNode = dirty->GetHostNode();
     auto toastContext = toastNode->GetRenderContext();
     CHECK_NULL_RETURN(toastContext, false);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, false);
+    expandDisplay_ = dialogTheme->GetExpandDisplay() || IsShowInFreeMultiWindow();
     OffsetT<Dimension> offset { GetOffsetX(dirty), GetOffsetY(dirty) };
     // show in the float subwindow
-    if (!IsDefaultToast()) {
+    if (!IsDefaultToast() && expandDisplay_) {
         OffsetT<Dimension> displayWindowOffset = { Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetX()),
             Dimension(context->GetDisplayWindowRectInfo().GetOffset().GetY()) };
         TAG_LOGD(AceLogTag::ACE_OVERLAY, "toast displayWindowOffset, x: %{public}.2f vp, y: %{public}.2f vp",
@@ -452,6 +456,25 @@ int32_t ToastPattern::GetTextLineHeight(const RefPtr<FrameNode>& textNode)
         paragLineHeight = static_cast<int32_t>(paragHeight / paragLineCount);
     }
     return paragLineHeight;
+}
+
+bool ToastPattern::IsShowInFreeMultiWindow()
+{
+    auto currentId = Container::CurrentId();
+    auto container = Container::Current();
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "parent container is null");
+            return false;
+        }
+    }
+    return container->IsFreeMultiWindow();
 }
 
 void ToastPattern::DumpInfo()

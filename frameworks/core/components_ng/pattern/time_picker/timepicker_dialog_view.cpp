@@ -188,10 +188,10 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     buttonTitlePattern->SetSkipColorConfigurationUpdate();
 
     if (isNeedAging) {
-        for (auto i = 1; i < timePickerNode->GetChildren().size(); i++) {
+        for (uint32_t i = 1; i < timePickerNode->GetChildren().size(); i++) {
             auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
             CHECK_NULL_RETURN(childStackNode, nullptr);
-            for (auto j = 0; j < childStackNode->GetChildren().size(); j++) {
+            for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
                 auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
                 CHECK_NULL_RETURN(childNode, nullptr);
                 auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();
@@ -562,12 +562,12 @@ void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode> &timePic
                                                 const RefPtr<FrameNode>& cancelNextDividerNode,
                                                 const RefPtr<FrameNode>& nextConfirmDividerNode)
 {
-    for (auto i = 0; i < timePickerNode->GetChildren().size(); i++) {
+    for (uint32_t i = 0; i < timePickerNode->GetChildren().size(); i++) {
         auto childStackNode = AceType::DynamicCast<FrameNode>(timePickerNode->GetChildAtIndex(i));
         CHECK_NULL_VOID(childStackNode);
         auto layoutProperty = childStackNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
-        for (auto j = 0; j < childStackNode->GetChildren().size(); j++) {
+        for (uint32_t j = 0; j < childStackNode->GetChildren().size(); j++) {
             auto childNode = AceType::DynamicCast<FrameNode>(childStackNode->GetChildAtIndex(j));
             CHECK_NULL_VOID(childNode);
             auto childLayoutProperty = childNode->GetLayoutProperty<LayoutProperty>();

@@ -953,6 +953,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
                 textFieldPattern->NeedRequestKeyboard();
                 textFieldPattern->SearchRequestKeyboard();
                 textFieldPattern->HandleOnSelectAll(false); // Select all text
+                textFieldPattern->HandleFocusEvent(); // Show caret
                 searchTextFieldPattern->ResetSearchRequestStopTwinkling(); // reset flag
                 textFieldPattern->StopTwinkling(); // Hide caret
             } else {
@@ -1323,7 +1324,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     textFontJson->Put("fontFamily", textFieldPattern->GetFontFamily().c_str());
     json->PutExtAttr("textFont", textFontJson->ToString().c_str(), filter);
     json->PutExtAttr("copyOption",
-        ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str(), filter);
+        ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::Local)).c_str(), filter);
     auto maxLength = GetMaxLength();
     json->PutExtAttr(
         "maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str(), filter);

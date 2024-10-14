@@ -74,6 +74,16 @@
             "https://gitee.com/xiexiyun",
             "https://gitee.com/keerecles",
             "https://gitee.com/sunbees"
+        ],
+        "https://gitee.com/arkwebinarkuireview": [
+            "https://gitee.com/libing23",
+            "https://gitee.com/LongLie",
+            "https://gitee.com/defeng2020",
+            "https://gitee.com/zhufenghao",
+            "https://gitee.com/cr_wanghui",
+            "https://gitee.com/chenjiadong0322",
+            "https://gitee.com/smileJuliet",
+            "https://gitee.com/bc_yx"
         ]
     },
     "userInfos": {
@@ -288,6 +298,38 @@
         "https://gitee.com/sunbees": {
             "info": "[绘制类组件 sunqinjia]",
             "group": "https://gitee.com/arkuilayout"
+        },
+        "https://gitee.com/libing23": {
+            "info": "[web-基础框架 libing]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/LongLie": {
+            "info": "[web-渲染 lvjunmao]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/defeng2020": {
+            "info": "[web-渲染性能 wudefeng]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/zhufenghao": {
+            "info": "[web-事件交互 zhufenghao]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/cr_wanghui": {
+            "info": "[web-网络加载 wanghui]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/chenjiadong0322": {
+            "info": "[web-网络加载 chenjiadong]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/smileJuliet": {
+            "info": "[web-性能优化 yangshimiao]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/bc_yx": {
+            "info": "[web-性能优化 liurongliang]",
+            "group": "https://gitee.com/arkwebinarkuireview"
         }
     }
 }

@@ -163,19 +163,9 @@ void GetSpanInspector(
     jsonNodeArray->PutRef(std::move(jsonNode));
 }
 
-void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
-    int pageId, bool isActive, const InspectorFilter& filter = InspectorFilter(), uint32_t depth = UINT32_MAX,
-    bool isLayoutInspector = false)
+void PutNodeInfoToJsonNode(RefPtr<OHOS::Ace::NG::FrameNode>& node,
+    bool& isActive, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode, const RefPtr<NG::UINode>& parent)
 {
-    // Span is a special case in Inspector since span inherits from UINode
-    if (AceType::InstanceOf<SpanNode>(parent)) {
-        GetSpanInspector(parent, jsonNodeArray, pageId);
-        return;
-    }
-    auto jsonNode = JsonUtil::Create(true);
-    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
-    jsonNode->Put(INSPECTOR_ID, parent->GetId());
-    auto node = AceType::DynamicCast<FrameNode>(parent);
     if (node) {
         RectF rect;
         isActive = isActive && node->IsActive();
@@ -199,6 +189,22 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
         parent->ToJsonValue(jsonObject, filter);
         jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));
     }
+}
+
+void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
+    int pageId, bool isActive, const InspectorFilter& filter = InspectorFilter(), uint32_t depth = UINT32_MAX,
+    bool isLayoutInspector = false)
+{
+    // Span is a special case in Inspector since span inherits from UINode
+    if (AceType::InstanceOf<SpanNode>(parent)) {
+        GetSpanInspector(parent, jsonNodeArray, pageId);
+        return;
+    }
+    auto jsonNode = JsonUtil::Create(true);
+    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
+    jsonNode->Put(INSPECTOR_ID, parent->GetId());
+    auto node = AceType::DynamicCast<FrameNode>(parent);
+    PutNodeInfoToJsonNode(node, isActive, jsonNode, parent);
 
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
@@ -297,6 +303,20 @@ void GetCustomNodeInfo(const RefPtr<NG::UINode> &customNode, std::unique_ptr<OHO
     jsonNode->Put(INSPECTOR_CUSTOM_VIEW_TAG, node->GetCustomTag().c_str());
 }
 
+void PutNodeInfoToJsonNode(RefPtr<OHOS::Ace::NG::FrameNode>& node,
+    bool& isActive, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNode)
+{
+    if (node) {
+        RectF rect;
+        isActive = isActive && node->IsActive();
+        if (isActive) {
+            rect = node->GetTransformRectRelativeToWindow();
+        }
+        jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
+        jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
+    }
+}
+
 void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
     int pageId, bool isActive, const InspectorFilter& filter = InspectorFilter(), uint32_t depth = UINT32_MAX,
     bool isLayoutInspector = false)
@@ -318,15 +338,7 @@ void GetInspectorChildren(const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS
         jsonNode->Put(INSPECTOR_COMPONENT_TYPE, "build-in");
     }
     auto node = AceType::DynamicCast<FrameNode>(parent);
-    if (node) {
-        RectF rect;
-        isActive = isActive && node->IsActive();
-        if (isActive) {
-            rect = node->GetTransformRectRelativeToWindow();
-        }
-        jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
-        jsonNode->Put(INSPECTOR_DEBUGLINE, node->GetDebugLine().c_str());
-    }
+    PutNodeInfoToJsonNode(node, isActive, jsonNode);
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject, filter);
     jsonNode->PutRef(INSPECTOR_ATTRS, std::move(jsonObject));

@@ -323,36 +323,20 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
     if (offscreenCanvasPattern_ == nullptr || offscreenCanvasContext_ == nullptr) {
         return nullptr;
     }
-    napi_value global = nullptr;
-    napi_status status = napi_get_global(env, &global);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    napi_value constructor = nullptr;
-    status = napi_get_named_property(env, global, "ImageBitmap", &constructor);
-    if (status != napi_ok) {
-        return nullptr;
-    }
     napi_value renderImage = nullptr;
     napi_create_object(env, &renderImage);
-    status = napi_new_instance(env, constructor, 0, nullptr, &renderImage);
-    if (status != napi_ok) {
+    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
+    if (!JSRenderImage::CreateJSRenderImage(env, pixelMap, renderImage)) {
         return nullptr;
     }
     void* nativeObj = nullptr;
-    status = napi_unwrap(env, renderImage, &nativeObj);
+    napi_status status = napi_unwrap(env, renderImage, &nativeObj);
     if (status != napi_ok) {
         return nullptr;
     }
     auto jsImage = (JSRenderImage*)nativeObj;
     CHECK_NULL_RETURN(jsImage, nullptr);
-#ifdef PIXEL_MAP_SUPPORTED
-    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
-    if (pixelMap == nullptr) {
-        return nullptr;
-    }
-    jsImage->SetPixelMap(pixelMap);
-#else
+#ifndef PIXEL_MAP_SUPPORTED
     auto imageData = offscreenCanvasPattern_->GetImageData(0, 0, width_, height_);
     if (imageData == nullptr) {
         return nullptr;

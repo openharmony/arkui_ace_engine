@@ -154,8 +154,10 @@ void HandleOnDidScrollEvent(
         }
         auto tabsController = bindInfo.first.Upgrade();
         if (tabsController) {
-            auto ratio = dimension.ConvertToPx() / Dimension(SCROLL_RANGE, DimensionUnit::VP).ConvertToPx();
-            tabsController->UpdateTabBarHiddenRatio(ratio);
+            if (scrollInfo.isScrolling) {
+                auto ratio = dimension.ConvertToPx() / Dimension(SCROLL_RANGE, DimensionUnit::VP).ConvertToPx();
+                tabsController->UpdateTabBarHiddenRatio(ratio);
+            }
 
             auto isChildReachTop = !scrollInfo.isAtTop && isAtTop;
             auto isChildReachBottom = !scrollInfo.isAtBottom && isAtBottom;
@@ -217,15 +219,15 @@ ScrollerObserver CreateObserver(WeakPtr<JSScroller> jsScrollerWeak)
     return observer;
 }
 
-void HandleBindTabsToScrollable(const JSRef<JSVal>& jsTabsControllerVal, const JSRef<JSVal>& jsScrollerVal,
-    const std::optional<JSRef<JSVal>>& parentJsScrollerVal)
+void HandleBindTabsToScrollable(const JSRef<JSObject>& jsTabsControllerVal, const JSRef<JSObject>& jsScrollerVal,
+    const std::optional<JSRef<JSObject>>& parentJsScrollerVal)
 {
-    auto* jsTabsController = JSRef<JSObject>::Cast(jsTabsControllerVal)->Unwrap<JSTabsController>();
+    auto* jsTabsController = jsTabsControllerVal->Unwrap<JSTabsController>();
     CHECK_NULL_VOID(jsTabsController);
     auto tabsController = jsTabsController->GetTabsController();
     CHECK_NULL_VOID(tabsController);
     auto tabsControllerWeak = AceType::WeakClaim(AceType::RawPtr(tabsController));
-    auto* jsScroller = JSRef<JSObject>::Cast(jsScrollerVal)->Unwrap<JSScroller>();
+    auto* jsScroller = jsScrollerVal->Unwrap<JSScroller>();
     CHECK_NULL_VOID(jsScroller);
     auto jsScrollerWeak = AceType::WeakClaim(jsScroller);
 
@@ -241,7 +243,7 @@ void HandleBindTabsToScrollable(const JSRef<JSVal>& jsTabsControllerVal, const J
     jsScroller->SetObserver(observer);
     ScrollInfo scrollInfo;
     if (parentJsScrollerVal.has_value()) {
-        auto* parentJsScroller = JSRef<JSObject>::Cast(parentJsScrollerVal.value())->Unwrap<JSScroller>();
+        auto* parentJsScroller = parentJsScrollerVal.value()->Unwrap<JSScroller>();
         if (parentJsScroller) {
             scrollInfo.parentScroller = AceType::WeakClaim(parentJsScroller);
         }
@@ -250,15 +252,15 @@ void HandleBindTabsToScrollable(const JSRef<JSVal>& jsTabsControllerVal, const J
     bindInfoMap_[tabsControllerWeak] = scrollInfoMap;
 }
 
-void HandleUnbindTabsFromScrollable(const JSRef<JSVal>& jsTabsControllerVal, const JSRef<JSVal>& jsScrollerVal,
-    const std::optional<JSRef<JSVal>>& parentJsScrollerVal)
+void HandleUnbindTabsFromScrollable(const JSRef<JSObject>& jsTabsControllerVal, const JSRef<JSObject>& jsScrollerVal,
+    const std::optional<JSRef<JSObject>>& parentJsScrollerVal)
 {
-    auto* jsTabsController = JSRef<JSObject>::Cast(jsTabsControllerVal)->Unwrap<JSTabsController>();
+    auto* jsTabsController = jsTabsControllerVal->Unwrap<JSTabsController>();
     CHECK_NULL_VOID(jsTabsController);
     auto tabsController = jsTabsController->GetTabsController();
     CHECK_NULL_VOID(tabsController);
     auto tabsControllerWeak = AceType::WeakClaim(AceType::RawPtr(tabsController));
-    auto* jsScroller = JSRef<JSObject>::Cast(jsScrollerVal)->Unwrap<JSScroller>();
+    auto* jsScroller = jsScrollerVal->Unwrap<JSScroller>();
     CHECK_NULL_VOID(jsScroller);
     auto jsScrollerWeak = AceType::WeakClaim(jsScroller);
 
@@ -272,11 +274,12 @@ void HandleUnbindTabsFromScrollable(const JSRef<JSVal>& jsTabsControllerVal, con
         if (scrollInfoMap.empty()) {
             bindInfoMap_.erase(tabsControllerWeak);
         }
+        tabsController->StartShowTabBar();
     }
 
     if (parentJsScrollerVal.has_value()) {
         // unbind nested scrollable component.
-        auto* parentJsScroller = JSRef<JSObject>::Cast(parentJsScrollerVal.value())->Unwrap<JSScroller>();
+        auto* parentJsScroller = parentJsScrollerVal.value()->Unwrap<JSScroller>();
         CHECK_NULL_VOID(parentJsScroller);
         auto parentJsScrollerWeak = AceType::WeakClaim(parentJsScroller);
 
@@ -292,6 +295,7 @@ void HandleUnbindTabsFromScrollable(const JSRef<JSVal>& jsTabsControllerVal, con
             if (scrollInfoMap.empty()) {
                 bindInfoMap_.erase(tabsControllerWeak);
             }
+            tabsController->StartShowTabBar();
         }
     }
 }

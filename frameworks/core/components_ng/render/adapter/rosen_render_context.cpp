@@ -755,6 +755,7 @@ void RosenRenderContext::OnForegroundColorStrategyUpdate(const ForegroundColorSt
 DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
 {
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "backgroundImageDataReady src = %{private}s", sourceInfo.ToString().c_str());
         auto rosenRenderContext = weak.Upgrade();
         CHECK_NULL_VOID(rosenRenderContext);
         auto imageSourceInfo = rosenRenderContext->GetBackgroundImage().value_or(ImageSourceInfo(""));
@@ -769,6 +770,7 @@ DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
 LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 {
     auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "backgroundImageLoadSuccess src = %{private}s", sourceInfo.ToString().c_str());
         auto ctx = weak.Upgrade();
         CHECK_NULL_VOID(ctx);
         auto imageSourceInfo = ctx->GetBackgroundImage().value_or(ImageSourceInfo(""));

@@ -483,6 +483,8 @@ private:
     void BeforeCreateLayoutWrapper() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool CustomizeExpandSafeArea() override;
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
 
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -568,7 +570,7 @@ private:
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
 
-    void StartShowTabBar(int32_t delay);
+    void StartShowTabBar(int32_t delay = 0);
     void StopShowTabBar();
     void InitTabBarProperty();
     void UpdateTabBarHiddenRatio(float ratio);

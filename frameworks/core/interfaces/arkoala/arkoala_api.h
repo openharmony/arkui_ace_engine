@@ -3415,6 +3415,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputSelectionMenuOptions)(ArkUINodeHandle node);
     void (*setTextInputWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextInputWidth)(ArkUINodeHandle node);
+    void (*setTextInputCancelSymbolIcon)(ArkUINodeHandle node, ArkUI_Int32 style, void* symbolFunction);
+    void (*resetTextInputCancelSymbolIcon)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {

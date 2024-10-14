@@ -366,7 +366,18 @@ public:
     {
         return displayAvailableRect_;
     }
-    void SetEnableKeyBoardAvoidMode(bool value) override;
+
+    void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) override;
+
+    KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() override;
+
+    bool UsingCaretAvoidMode();
+
+    void OnCaretPositionChangeOrKeyboardHeightChange(float keyboardHeight, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
+    float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
+        float height, SizeF rootSize);
+
     bool IsEnableKeyBoardAvoidMode() override;
 
     void RequireSummary() override;
@@ -929,6 +940,16 @@ public:
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 
+    bool IsDirtyNodesEmpty() const override
+    {
+        return dirtyNodes_.empty();
+    }
+
+    bool IsDirtyLayoutNodesEmpty() const override
+    {
+        return taskScheduler_->IsDirtyLayoutNodesEmpty();
+    }
+
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe();
 
@@ -938,6 +959,8 @@ public:
     }
 
     void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
+
+    void AnimateOnSafeAreaUpdate();
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1007,13 +1030,13 @@ private:
 
     void ResetDraggingStatus(const TouchEvent& touchPoint, const RefPtr<FrameNode>& node = nullptr);
 
+    void CancelDragIfRightBtnPressed(const MouseEvent& event);
+
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
-
-    void AnimateOnSafeAreaUpdate();
 
     // only used for static form.
     void UpdateFormLinkInfos();

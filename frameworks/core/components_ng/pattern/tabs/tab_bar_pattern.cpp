@@ -106,9 +106,6 @@ TabBarPattern::TabBarPattern(const RefPtr<SwiperController>& swiperController) :
 
 void TabBarPattern::StartShowTabBar(int32_t delay)
 {
-    if (axis_ == Axis::VERTICAL || isTabBarShowing_) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -116,7 +113,13 @@ void TabBarPattern::StartShowTabBar(int32_t delay)
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     auto translate = options.y.ConvertToPx();
     auto size = renderContext->GetPaintRectWithoutTransform().Height();
-    if (NearZero(translate) || NearZero(size)) {
+    if (axis_ == Axis::VERTICAL || NearZero(translate) || NearZero(size)) {
+        return;
+    }
+    if (delay == 0 && GreatOrEqual(std::abs(translate), size)) {
+        StopShowTabBar();
+    }
+    if (isTabBarShowing_) {
         return;
     }
 
@@ -1150,6 +1153,39 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return false;
 }
 
+bool TabBarPattern::CustomizeExpandSafeArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, false);
+    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(tabLayoutProperty, false);
+    return tabLayoutProperty->GetSafeAreaPaddingProperty() ? true : false;
+}
+
+void TabBarPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
+    CHECK_NULL_VOID(tabLayoutProperty);
+    if (!tabLayoutProperty->GetSafeAreaPaddingProperty()) {
+        return;
+    }
+    auto tabBarSize = host->GetGeometryNode()->GetMarginFrameSize();
+    auto tabBarOffset = host->GetGeometryNode()->GetMarginFrameOffset();
+    auto tabsExpandEdges = tabsNode->GetAccumulatedSafeAreaExpand();
+    auto tabBarExpandEdges = host->GetAccumulatedSafeAreaExpand();
+    auto tabBarRect = RectF(tabBarOffset.GetX(), tabBarOffset.GetY(), tabBarSize.Width(),
+        tabBarSize.Height() + tabsExpandEdges.bottom.value_or(0) + tabBarExpandEdges.bottom.value_or(0));
+    auto tabBarRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
+    tabBarRenderContext->UpdatePaintRect(tabBarRect);
+}
+
 void TabBarPattern::InitLongPressAndDragEvent()
 {
     auto host = GetHost();
@@ -1200,11 +1236,7 @@ void TabBarPattern::ShowDialogWithNode(int32_t index)
     CHECK_NULL_VOID(textLayoutProperty);
     auto textValue = textLayoutProperty->GetContent();
     if (imageNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        auto symbolProperty = imageNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(symbolProperty);
-        dialogNode_ =
-            AgingAdapationDialogUtil::ShowLongPressDialog(textValue.value_or(""),
-                symbolProperty->GetSymbolSourceInfoValue());
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(textValue.value_or(""), imageNode);
     } else {
         auto imageProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageProperty);
@@ -1856,6 +1888,7 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
         tabBarPattern->UpdateSubTabBoard(index);
         tabBarPattern->UpdatePaintIndicator(index, true);
         tabBarPattern->UpdateTextColorAndFontWeight(index);
+        tabBarPattern->StartShowTabBar();
         if (!tabBarPattern->GetClickRepeat() || tabBarLayoutProperty->GetIndicator().value_or(0) == index) {
             tabBarPattern->ResetIndicatorAnimationState();
             tabBarLayoutProperty->UpdateIndicator(index);

@@ -93,6 +93,7 @@ public:
     float BottomFinalPos(float viewHeight) const override;
 
     void Reset() override;
+    void ResetFooter() override;
 
     bool IsMisaligned() const override;
 

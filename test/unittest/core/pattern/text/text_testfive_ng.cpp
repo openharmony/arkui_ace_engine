@@ -2880,4 +2880,19 @@ HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 1 });
     pattern->UpdateFontColor(Color::BLACK);
 }
+
+/**
+ * @tc.name: UnRegisterAfterLayoutCallback001
+ * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->RegisterAfterLayoutCallback([]() {});
+    EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), true);
+    pattern->UnRegisterAfterLayoutCallback();
+    EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), false);
+}
 } // namespace OHOS::Ace::NG

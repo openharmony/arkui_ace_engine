@@ -1010,7 +1010,11 @@ public:
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+    virtual void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {}
+
+    virtual KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() {
+        return KeyBoardAvoidMode::OFFSET;
+    }
 
     virtual bool IsEnableKeyBoardAvoidMode() {
         return false;
@@ -1398,6 +1402,15 @@ public:
         return dragNodeGrayscale_;
     }
 
+    virtual bool IsDirtyNodesEmpty() const
+    {
+        return true;
+    }
+
+    virtual bool IsDirtyLayoutNodesEmpty() const
+    {
+        return true;
+    }
     bool IsWaitFlushFinish() const
     {
         return isWaitFlushFinish_;

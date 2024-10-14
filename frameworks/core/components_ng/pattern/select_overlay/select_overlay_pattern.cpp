@@ -280,6 +280,8 @@ void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (changedPoint.GetTouchType() == TouchType::UP && isSimulateOnClick_) {
         isSimulateOnClick_ = false;
         GestureEvent gestureEvent;
+        gestureEvent.SetGlobalLocation(changedPoint.GetGlobalLocation());
+        gestureEvent.SetLocalLocation(changedPoint.GetLocalLocation());
         HandleOnClick(gestureEvent);
         clickConsumeBySimulate_ = true;
     }

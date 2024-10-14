@@ -23,6 +23,11 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/components_ng/image_provider/image_loading_context.h"
 
+#ifdef PIXEL_MAP_SUPPORTED
+#include "pixel_map.h"
+#include "pixel_map_napi.h"
+#endif
+
 namespace OHOS::Ace::Framework {
 
 void BindNativeFunction(napi_env env, napi_value object, const char* name, napi_callback func);
@@ -43,6 +48,7 @@ public:
     static napi_value JsSetHeight(napi_env env, napi_callback_info info);
     static napi_value JsGetWidth(napi_env env, napi_callback_info info);
     static napi_value JsGetHeight(napi_env env, napi_callback_info info);
+    static bool CreateJSRenderImage(napi_env env, RefPtr<PixelMap> pixelMap, napi_value& renderImage);
 
     double GetWidth();
     void SetWidth(double width);
@@ -53,11 +59,6 @@ public:
     RefPtr<PixelMap> GetPixelMap() const
     {
         return pixelMap_;
-    }
-
-    void SetPixelMap(const RefPtr<PixelMap>& pixelMap)
-    {
-        pixelMap_ = pixelMap;
     }
 
     std::shared_ptr<Ace::ImageData> GetImageData() const

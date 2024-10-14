@@ -726,7 +726,7 @@ void OverlayManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::Fram
 
 void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "post dialog finish event enter");
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "post dialog finish event enter");
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
@@ -776,8 +776,8 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
 
 void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "on dialog close event enter");
     CHECK_NULL_VOID(node);
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "on dialog/%{public}d close event enter", node->GetId());
 
     BlurOverlayNode(node);
     FireAutoSave(node);
@@ -912,7 +912,10 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
             dialogPattern->CallDialogDidDisappearCallback();
         });
     auto ctx = node->GetRenderContext();
-    CHECK_NULL_VOID(ctx);
+    if (!ctx) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "not find render context when closing dialog");
+        return;
+    }
     option.SetFinishCallbackType(dialogPattern->GetOpenAnimation().has_value()
                             ? dialogPattern->GetOpenAnimation().value().GetFinishCallbackType()
                             : FinishCallbackType::REMOVED);
@@ -977,7 +980,10 @@ void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
     dialogPattern->CallDialogWillDisappearCallback();
 
     auto ctx = node->GetRenderContext();
-    CHECK_NULL_VOID(ctx);
+    if (!ctx) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "not find render context when closing dialog");
+        return;
+    }
     auto layoutProperty = node->GetLayoutProperty();
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
     if (ctx->HasDisappearTransition()) {
@@ -2931,6 +2937,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     RemoveDialogFromMap(dialogNode);
     if (dialogNode->IsRemoving()) {
         // already in close animation
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "dialogNode/%{public}d is removing", dialogNode->GetId());
         return;
     }
     dialogNode->MarkRemoving();

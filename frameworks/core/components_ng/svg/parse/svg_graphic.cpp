@@ -184,6 +184,10 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
     fillBrush_.SetAntiAlias(antiAlias);
 #endif
     if (fillState_.GetGradient()) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            SetGradientStyle(curOpacity);
+            return true;
+        }
         return SetGradientStyle(curOpacity);
     } else {
         auto fillColor = (color) ? *color : fillState_.GetColor();
