@@ -2146,6 +2146,8 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
     };
     SnapshotParam param;
     param.delay = CREATE_PIXELMAP_TIME;
+    param.checkImageStatus = true;
+    param.options.waitUntilRenderFinished = true;
     ACE_SCOPED_TRACE("drag: try sync failed, to get snapshot async");
     NG::ComponentSnapshot::Create(dragDropInfo.customNode, std::move(callback), true, param);
     PrintBuilderNode(dragDropInfo.customNode);
