@@ -102,9 +102,6 @@ export struct SliderBootcamp {
         })
       }
       .height('52%')
-      .onAppear(()=>{
-        AppStorage.setOrCreate('Block', []);
-      })
     }
   }
 }

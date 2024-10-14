@@ -30,7 +30,7 @@ export struct BindMenuBootcamp {
   @State enableLabelNum: boolean = false
   @State showSecondaryMenu: boolean = false
 
-  build(){
+  build() {
     NavDestination() {
       Drawer({
         title: this.title,
@@ -48,7 +48,7 @@ export struct BindMenuBootcamp {
   }
 
   @Builder
-  SubMenu(){
+  SubMenu() {
     Menu() {
       MenuItem({ content: '复制', labelInfo: 'Ctrl+C' })
       MenuItem({ content: '粘贴', labelInfo: 'Ctrl+V' })
@@ -56,7 +56,7 @@ export struct BindMenuBootcamp {
   }
 
   @Builder
-  MyMenu(){
+  MyMenu() {
     Menu() {
       MenuItem({
         startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
@@ -65,21 +65,21 @@ export struct BindMenuBootcamp {
         builder: useEnabled<CustomBuilder>(this.showSecondaryMenu,
           this.showSecondaryMenu ? (): void => this.SubMenu() : undefined),
       })
-       .enabled(useEnabled<boolean>(this.enableAllowUse, this.allowUse))
-        MenuItem({
-          startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
-          content: '菜单选项2',
-          endIcon: useEnabled<ResourceStr>(this.enableEndIcon, this.endIcon),
-          builder: useEnabled<CustomBuilder>(this.showSecondaryMenu,
-            this.showSecondaryMenu ? (): void => this.SubMenu() : undefined),
-        })
-        MenuItem({
-          startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
-          content: '菜单选项3',
-          endIcon: useEnabled<ResourceStr>(this.enableEndIcon, this.endIcon),
-          builder: useEnabled<CustomBuilder>(this.showSecondaryMenu,
-            this.showSecondaryMenu ? (): void => this.SubMenu() : undefined),
-        })
+        .enabled(useEnabled<boolean>(this.enableAllowUse, this.allowUse))
+      MenuItem({
+        startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
+        content: '菜单选项2',
+        endIcon: useEnabled<ResourceStr>(this.enableEndIcon, this.endIcon),
+        builder: useEnabled<CustomBuilder>(this.showSecondaryMenu,
+          this.showSecondaryMenu ? (): void => this.SubMenu() : undefined),
+      })
+      MenuItem({
+        startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
+        content: '菜单选项3',
+        endIcon: useEnabled<ResourceStr>(this.enableEndIcon, this.endIcon),
+        builder: useEnabled<CustomBuilder>(this.showSecondaryMenu,
+          this.showSecondaryMenu ? (): void => this.SubMenu() : undefined),
+      })
       MenuItem({
         startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
         content: '菜单选项4',
@@ -91,20 +91,20 @@ export struct BindMenuBootcamp {
   }
 
   @Builder
-  Content(){
-      Column() {
-        Button(
-          this.enableLabelNum ? '弹出菜单'.repeat(this.labelNum / 2) : '弹出菜单',
-        )
-          .bindMenu(this.MyMenu)
-      }
-      .onDragStart(()=>{
-        ContextMenu.close()
-      })
+  Content() {
+    Column() {
+      Button(
+        this.enableLabelNum ? '弹出菜单'.repeat(this.labelNum / 2) : '弹出菜单',
+      )
+        .bindMenu(this.MyMenu)
     }
+    .onDragStart(()=>{
+      ContextMenu.close()
+    })
+  }
 
   @Builder
-  Parameters(){
+  Parameters() {
     Scroll() {
       Column({ space: 8 }) {
         RadioBlock({
@@ -142,9 +142,6 @@ export struct BindMenuBootcamp {
       }.width('100%')
     }
     .height('52%')
-    .onAppear(()=>{
-      AppStorage.setOrCreate('Block', []);
-    })
   }
 }
 

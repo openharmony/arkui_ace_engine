@@ -15,8 +15,12 @@
 import { BlockTag } from '../model/BlockTag';
 import { tagDesRule } from '../utils';
 import { formatDate } from '../utils/timeUtil';
-
 import { Block } from './Block';
+
+enum Mode {
+  ONE = '1',
+  TWO = '2',
+};
 
 @Component
 export struct SliderBlock {
@@ -26,8 +30,8 @@ export struct SliderBlock {
   @Link value: number;
   @Prop min: number = 0;
   @Prop max: number = 100;
-  @StorageLink('Block') listSliderTagsTemp: Array<BlockTag> = [];
-  @State listSliderTags: Array<BlockTag> = [];
+  @State listSliderTagsTemp: Array<BlockTag> = [];
+  @StorageLink('Block') listSliderTags: Array<BlockTag> = [];
 
   build() {
     Column({ space: 0 }) {
@@ -48,8 +52,8 @@ export struct SliderBlock {
             .showSteps(true)
             .width('80%')
             .onChange((value: number, mode: SliderChangeMode) => {
-              this.value = Math.floor(value)
-              if (mode.toString() === '2') {
+              this.value = value
+              if (mode.toString() === Mode.TWO) {
                 setTimeout(() => {
                   let time = formatDate(new Date(Date.now()))
                   this.listSliderTagsTemp.push(new BlockTag(time, tagDesRule(this.title, value.toString())))
@@ -57,7 +61,6 @@ export struct SliderBlock {
                   if (AppStorage.get('Block')) {
                     this.listSliderTags = this.listSliderTags.concat(this.listSliderTagsTemp);
                     this.listSliderTagsTemp = [];
-                    AppStorage.setOrCreate('Block', this.listSliderTags);
                     console.log('get Block Slider ==' + JSON.stringify(this.listSliderTags));
                     console.log('get Block Slider length ==>> ' + this.listSliderTags.length);
                   } else {
@@ -66,7 +69,6 @@ export struct SliderBlock {
                     }
                     console.log('Block Slider ==' + JSON.stringify(this.listSliderTags));
                     console.log('Block Slider length ==>> ' + this.listSliderTags.length);
-                    AppStorage.setOrCreate('Block', this.listSliderTags);
                     if (this.listSliderTags) {
                       this.listSliderTagsTemp = [];
                     }

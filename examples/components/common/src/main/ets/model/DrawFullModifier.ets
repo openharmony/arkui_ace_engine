@@ -62,5 +62,4 @@ export class MyFullDrawModifier extends DrawModifier {
     canvas.drawLine(8, 0, 8, 106);
     canvas.detachPen();
   }
-
 }

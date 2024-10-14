@@ -29,8 +29,7 @@ export struct IconPalette {
   ];
   @Prop isEnabled: boolean = false;
   @Prop title: string = '';
-  onChange?: (color: ResourceStr) => void;
-  callBack?: (index: number) => void;
+  onChange?: (color: ResourceStr, index: number) => void;
 
   private equals(icon1: ResourceStr, icon2: ResourceStr) {
     const type1 = typeof icon1;
@@ -61,8 +60,7 @@ export struct IconPalette {
         .width(32)
         .height(32)
         .onClick(() => {
-          this.onChange?.(icon);
-          this.callBack?.(index);
+          this.onChange?.(icon, index);
         })
       })
     }

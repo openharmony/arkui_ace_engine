@@ -53,7 +53,6 @@ export struct RadioBlock {
                     if (AppStorage.get('Block')) {
                       this.listRadioBlockTags = this.listRadioBlockTags.concat(this.listRadioBlockTagsTemp);
                       this.listRadioBlockTagsTemp = [];
-                      AppStorage.setOrCreate('Block', this.listRadioBlockTags);
                       console.log('get Block this.listBlockTags ==' + JSON.stringify(this.listRadioBlockTags));
                       console.log('get Block this.listBlockTags length ==>> ' + this.listRadioBlockTags.length);
                     } else {
@@ -62,7 +61,6 @@ export struct RadioBlock {
                       }
                       console.log('Block this.listBlockTags ==' + JSON.stringify(this.listRadioBlockTags));
                       console.log('Block this.listBlockTags length ==>> ' + this.listRadioBlockTags.length);
-                      AppStorage.setOrCreate('Block', this.listRadioBlockTags);
                       if (this.listRadioBlockTags) {
                         this.listRadioBlockTagsTemp = [];
                       }

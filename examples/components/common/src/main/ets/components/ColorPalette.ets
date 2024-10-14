@@ -23,7 +23,6 @@ export struct ColorPalette {
     ['#0A59F7', '#646AFD', '#FE7062', '#E9E8ED', '#1C1C1C', $r('sys.color.ohos_id_color_text_primary_contrary')];
   @Prop isEnabled: boolean = false;
   onChange?: (color: ResourceColor) => void;
-  callBack?: (color: ResourceColor) => void;
   @Prop title: string = '';
 
   build() {
@@ -50,7 +49,6 @@ export struct ColorPalette {
         .height(32)
         .onClick(() => {
           this.onChange?.(color);
-          this.callBack?.(color)
         })
       })
     }

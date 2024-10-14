@@ -34,11 +34,8 @@ export struct IconBlock {
       IconPalette({
         icon: this.icon,
         title: this.title,
-        onChange: (icon) => {
-          this.icon = icon
-        },
-        isEnabled: this.isEnabled,
-        callBack: (index)  => {
+        onChange: (icon,index) => {
+          this.icon = icon;
           if (this.isEnabled) {
             let time = formatDate(new Date(Date.now()))
             this.listIconBlockTagsTemp.push(new BlockTag(time, tagDesRule(this.title, (index + 1).toString())))
@@ -47,7 +44,6 @@ export struct IconBlock {
               if (AppStorage.get('Block')) {
                 this.listIconBlockTags = this.listIconBlockTags.concat(this.listIconBlockTagsTemp);
                 this.listIconBlockTagsTemp = [];
-                AppStorage.setOrCreate('Block', this.listIconBlockTags);
                 console.log('get Block Icon ==' + JSON.stringify(this.listIconBlockTagsTemp));
                 console.log('get Block Icon length ==>> ' + this.listIconBlockTags.length);
               } else {
@@ -56,14 +52,14 @@ export struct IconBlock {
                 }
                 console.log('Block Icon ==' + JSON.stringify(this.listIconBlockTags));
                 console.log('Block Icon length ==>> ' + this.listIconBlockTags.length);
-                AppStorage.setOrCreate('Block', this.listIconBlockTags);
                 if (this.listIconBlockTags) {
                   this.listIconBlockTagsTemp = [];
                 }
               }
             }, 200)
           }
-        }
+        },
+        isEnabled: this.isEnabled,
       })
     }
   }
