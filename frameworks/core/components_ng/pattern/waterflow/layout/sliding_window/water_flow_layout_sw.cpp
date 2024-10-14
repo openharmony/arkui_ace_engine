@@ -191,7 +191,7 @@ void WaterFlowLayoutSW::CheckReset()
         return;
     }
 
-    if (!wrapper_->IsConstraintNoChanged()) {
+    if (wrapper_->ConstraintChanged()) {
         info_->ResetWithLaneOffset(std::nullopt);
         FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
     }
