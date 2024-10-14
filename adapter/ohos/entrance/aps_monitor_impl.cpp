@@ -14,6 +14,7 @@
  */
 
 #include <dlfcn.h>
+#include "aps_monitor_impl.h"
 #include "core/common/ace_application_info.h"
 #include "base/perfmonitor/perf_constants.h"
 
