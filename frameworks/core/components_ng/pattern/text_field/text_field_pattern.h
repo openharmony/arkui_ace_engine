@@ -61,6 +61,7 @@
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_select_overlay.h"
@@ -1440,15 +1441,9 @@ public:
 
 protected:
     virtual void InitDragEvent();
-    void OnAttachToMainTree() override
-    {
-        isDetachFromMainTree_ = false;
-    }
+    void OnAttachToMainTree() override;
 
-    void OnDetachFromMainTree() override
-    {
-        isDetachFromMainTree_ = true;
-    }
+    void OnDetachFromMainTree() override;
     
     bool IsReverse() const override
     {
@@ -1468,6 +1463,7 @@ protected:
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
+    virtual bool IsNeedProcessAutoFill();
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
 
@@ -1682,6 +1678,13 @@ private:
     bool IsContentRectNonPositive();
     bool IsHandleDragging();
     void ReportEvent();
+    TextFieldInfo GenerateTextFieldInfo();
+    void AddTextFieldInfo();
+    void RemoveTextFieldInfo();
+    void UpdateTextFieldInfo();
+    bool IsAutoFillUserName(const AceAutoFillType& autoFillType);
+    bool HasAutoFillPasswordNode();
+    bool IsTriggerAutoFillPassword();
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
 
     RectF frameRect_;
@@ -1863,6 +1866,7 @@ private:
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     std::optional<Dimension> adaptFontSize_;
+    WeakPtr<FrameNode> firstAutoFillContainerNode_;
 };
 } // namespace OHOS::Ace::NG
 

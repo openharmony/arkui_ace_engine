@@ -43,7 +43,6 @@ public:
     }
 
 protected:
-    void GetSpanParagraphStyle(const std::unique_ptr<TextLineStyle>& lineStyle, ParagraphStyle& pStyle) override;
     void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) override;
     RefPtr<SpanItem> GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup) override;
 

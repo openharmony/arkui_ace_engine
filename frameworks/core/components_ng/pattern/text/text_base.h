@@ -206,7 +206,8 @@ public:
 
     static void SetSelectionNode(const SelectedByMouseInfo& info);
     static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
-    static void CalculateSelectedRect(std::vector<RectF>& selectedRect, float longestLine);
+    static void CalculateSelectedRect(
+        std::vector<RectF>& selectedRect, float longestLine, TextDirection direction = TextDirection::LTR);
 
     virtual bool IsTextEditableForStylus() const
     {
