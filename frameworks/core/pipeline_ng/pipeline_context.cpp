@@ -3301,6 +3301,22 @@ void PipelineContext::HandlePenHoverOut(const TouchEvent& point)
     eventManager_->DispatchPenHoverEventNG(oriPoint);
 }
 
+void PipelineContext::CancelDragIfRightBtnPressed(const MouseEvent& event)
+{
+    auto manager = GetDragDropManager();
+    if (!manager) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "InputTracking id:%{public}d, OnMouseEvent GetDragDropManager is null",
+            event.touchEventId);
+        return;
+    }
+    if (event.button == MouseButton::RIGHT_BUTTON &&
+        (event.action == MouseAction::PRESS || event.action == MouseAction::PULL_UP)) {
+        manager->SetIsDragCancel(true);
+        return;
+    }
+    manager->SetIsDragCancel(false);
+}
+
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
 {
     CHECK_RUN_ON(UI);
@@ -3315,34 +3331,37 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
     lastMouseEvent_->time = event.time;
     lastMouseEvent_->touchEventId = event.touchEventId;
 
+    if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE) {
+#ifdef IS_RELEASE_VERSION
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "InputTracking id:%{public}d, mouseId:%{public}d, type=%{public}d, button=%{public}d, inject=%{public}d",
+            event.touchEventId, event.id, (int)event.action, (int)event.button, event.isInjected);
+#else
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "InputTracking id:%{public}d, mouseId:%{public}d, x=%{public}.3f, y=%{public}.3f, z=%{public}.3f, "
+            "type=%{public}d, button=%{public}d"
+            "inject=%{public}d",
+            event.touchEventId, event.id, event.x, event.y, event.z, (int)event.action, (int)event.button,
+            event.isInjected);
+#endif
+    }
+
     if (event.button == MouseButton::RIGHT_BUTTON && event.action == MouseAction::PRESS) {
         // Mouse right button press event set focus inactive here.
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT);
     }
 
-    auto manager = GetDragDropManager();
-    if (manager) {
-        if (event.button == MouseButton::RIGHT_BUTTON &&
-            (event.action == MouseAction::PRESS || event.action == MouseAction::PULL_UP)) {
-            manager->SetIsDragCancel(true);
-        } else {
-            manager->SetIsDragCancel(false);
-        }
-    } else {
-        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "InputTracking id:%{public}d, OnMouseEvent GetDragDropManager is null",
-            event.touchEventId);
-    }
-
+    CancelDragIfRightBtnPressed(event);
     auto container = Container::Current();
     if (event.action == MouseAction::MOVE) {
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
-        return ;
+        return;
     }
-    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-             event.action == MouseAction::MOVE) &&
+
+    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS) &&
             (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
         event.action == MouseAction::CANCEL) {
         auto touchPoint = event.CreateTouchPoint();
