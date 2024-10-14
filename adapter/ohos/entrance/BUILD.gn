@@ -34,6 +34,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/ace_new_pipe_judgement.cpp",
       "$ace_root/adapter/ohos/entrance/ace_service_ability.cpp",
       "$ace_root/adapter/ohos/entrance/ace_view_ohos.cpp",
+      "$ace_root/adapter/ohos/entrance/aps_monitor_impl.cpp",
       "$ace_root/adapter/ohos/entrance/capability_registry.cpp",
       "$ace_root/adapter/ohos/entrance/data_ability_helper_standard.cpp",
       "$ace_root/adapter/ohos/entrance/dialog_container.cpp",
@@ -47,7 +48,6 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
       "$ace_root/adapter/ohos/entrance/touch_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/window/foldable_window_ohos.cpp",
-      "$ace_root/adapter/ohos/entrance/aps_monitor_impl.cpp",
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
