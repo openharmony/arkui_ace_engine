@@ -206,6 +206,10 @@ private:
         const MarginProperty& margin, uint32_t fillColor, double opacity);
     void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
         int32_t dimensionHeight);
+    void SetTransparencyConfig(bool isTransparencyForm, const RequestFormInfo &info);
+    void SetSkeletonEnableConfig(const RequestFormInfo &info);
+    void DoSkeletonAnimation();
+    void UpdateFormBaseConfig(bool isDynamic);
     void AddFormChildNode(FormChildNodeType formChildNodeType, const RefPtr<FrameNode> child);
     RefPtr<FrameNode> GetFormChildNode(FormChildNodeType formChildNodeType) const;
     double GetTimeLimitFontSize();
@@ -243,6 +247,8 @@ private:
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
+    bool isTransparencyEnable_ = false;
+    bool isSkeletonAnimEnable_ = false;
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
     bool isTibetanLanguage_ = false;
     bool isManuallyClick_ = false;
