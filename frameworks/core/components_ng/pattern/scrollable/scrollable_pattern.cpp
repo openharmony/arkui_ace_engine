@@ -388,6 +388,9 @@ void ScrollablePattern::OnScrollEnd()
     if (isAnimationStop_) {
         SetUiDvsyncSwitch(false);
     }
+    if (scrollStop_) {
+        scrollAbort_ = false;
+    }
     OnScrollEndCallback();
     SelectOverlayScrollNotifier::NotifyOnScrollEnd(WeakClaim(this));
 }
@@ -2312,8 +2315,8 @@ void ScrollablePattern::Fling(double flingVelocity)
     if (IsOutOfBoundary()) {
         scrollable->HandleOverScroll(flingVelocity);
     } else {
-        scrollable->StartScrollAnimation(0.0f, flingVelocity);
         FireOnScrollStart();
+        scrollable->StartScrollAnimation(0.0f, flingVelocity);
     }
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);

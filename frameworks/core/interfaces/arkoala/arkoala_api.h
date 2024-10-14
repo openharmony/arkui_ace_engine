@@ -2649,6 +2649,7 @@ struct ArkUIScrollModifier {
     void (*resetScrollOnWillScrollCallBack)(ArkUINodeHandle node);
     void (*setOnScrollFrameBeginCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnScrollFrameBeginCallBack)(ArkUINodeHandle node);
+    void (*setScrollFling)(ArkUINodeHandle node, ArkUI_Float64 value);
 };
 
 struct ArkUIListItemModifier {
