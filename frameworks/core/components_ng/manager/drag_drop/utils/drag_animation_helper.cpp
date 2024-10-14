@@ -341,7 +341,7 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
 void DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(
     const RefPtr<FrameNode>& textNode, int32_t badgeLength, int32_t childSize)
 {
-    if (childSize < 1) {
+    if (childSize <= 1) {
         return;
     }
     CHECK_NULL_VOID(textNode);

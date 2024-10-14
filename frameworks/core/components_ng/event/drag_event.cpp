@@ -2345,7 +2345,7 @@ void DragEventActuator::ShowPreviewBadgeAnimation(
 RefPtr<FrameNode> DragEventActuator::CreateBadgeTextNode(
     const RefPtr<FrameNode>& frameNode, int32_t childSize, float previewScale, bool isUsePixelMapOffset)
 {
-    if (childSize < 1) {
+    if (childSize <= 1) {
         return nullptr;
     }
     CHECK_NULL_RETURN(frameNode, nullptr);
