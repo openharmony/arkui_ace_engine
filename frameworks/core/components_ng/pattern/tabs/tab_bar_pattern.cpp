@@ -928,7 +928,8 @@ void TabBarPattern::OnModifyDone()
         auto theme = pipelineContext->GetTheme<TabTheme>();
         CHECK_NULL_VOID(theme);
         auto defaultBlurStyle = static_cast<BlurStyle>(theme->GetBottomTabBackgroundBlurStyle());
-        if (defaultBlurStyle != BlurStyle::NO_MATERIAL) {
+        if (defaultBlurStyle != BlurStyle::NO_MATERIAL &&
+            !tabBarPaintProperty->GetTabBarBlurStyleOption().has_value()) {
             BlurStyleOption styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value();
             styleOption.blurStyle = defaultBlurStyle;
             tabBarPaintProperty->UpdateTabBarBlurStyleOption(styleOption);

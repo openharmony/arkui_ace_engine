@@ -26,10 +26,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 130
+#define ARKUI_FULL_API_VERSION 131
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 130
+#define ARKUI_NODE_API_VERSION 131
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -1492,6 +1492,33 @@ struct ArkUINavigationTitleInfo {
     ArkUI_CharPtr mainTitle;
 };
 
+struct ArkUITabBarBackgroundBlurStyle {
+    ArkUI_Int32 blurStyle;
+    ArkUI_Int32 colorMode;
+    ArkUI_Int32 adaptiveColor;
+    ArkUI_Float32 scale;
+    const ArkUI_Float32* blurValues;
+    ArkUI_Int32 blurValuesSize;
+    ArkUI_Int32 policy;
+    ArkUI_Uint32 inactiveColor;
+    ArkUI_Bool isValidColor;
+    ArkUI_Int32 blurType;
+};
+
+struct ArkUITabBarBackgroundEffect {
+    ArkUI_Float32 radius;
+    ArkUI_Float32 saturation;
+    ArkUI_Float32 brightness;
+    ArkUI_Uint32 color;
+    ArkUI_Int32 adaptiveColor;
+    const ArkUI_Float32* blurValues;
+    ArkUI_Int32 blurValuesSize;
+    ArkUI_Int32 policy;
+    ArkUI_Int32 blurType;
+    ArkUI_Bool isValidColor;
+    ArkUI_Uint32 inactiveColor;
+};
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -2784,7 +2811,7 @@ struct ArkUITabsModifier {
         ArkUI_Int32 length);
     void (*setFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge);
     void (*setBarBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*setBarBackgroundBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 blurStyle);
+    void (*setBarBackgroundBlurStyle)(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption);
     void (*setBarOverlap)(ArkUINodeHandle node, ArkUI_Bool overlap);
     void (*setIsVertical)(ArkUINodeHandle node, ArkUI_Bool isVertical);
     void (*setTabBarPosition)(ArkUINodeHandle node, ArkUI_Int32 barVal);
@@ -2818,6 +2845,9 @@ struct ArkUITabsModifier {
     void (*resetTabHeightAuto)(ArkUINodeHandle node);
     void (*setAnimateMode)(ArkUINodeHandle node, ArkUI_Uint32 mode);
     void (*resetAnimateMode)(ArkUINodeHandle node);
+    void (*setBarBackgroundEffect)(ArkUINodeHandle node, ArkUITabBarBackgroundEffect* effectOption);
+    void (*resetBarBackgroundEffect)(ArkUINodeHandle node);
+
 };
 
 struct ArkUIStepperItemModifier {
