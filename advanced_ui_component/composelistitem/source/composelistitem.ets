@@ -438,7 +438,7 @@ struct OperateItemStruct {
     }
     .padding({ top: 0, bottom: 0 })
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
-    .hitTestBehavior(HitTestMode.Block)
+    .hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Block)
     .fontSize($r('sys.float.ohos_id_text_size_button3'))
     .fontColor($r('sys.color.ohos_id_color_text_primary_activated_transparent'))
     .constraintSize({
@@ -485,7 +485,7 @@ struct OperateItemStruct {
         .draggable(false)
     }
     .shadow(CLEAR_SHADOW)
-    .hitTestBehavior(HitTestMode.Block)
+    .hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Block)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -561,7 +561,7 @@ struct OperateItemStruct {
     }
     .shadow(CLEAR_SHADOW)
     .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
-    .hitTestBehavior(HitTestMode.Transparent)
+    .hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Transparent)
     .backgroundColor(Color.Transparent)
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
@@ -624,7 +624,7 @@ struct OperateItemStruct {
       .onFocus(() => {
         this.parentCanFocus = false;
       })
-      .hitTestBehavior(HitTestMode.Block)
+      .hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Block)
       .onTouch((event: TouchEvent) => {
         if (!event) {
           return;
@@ -673,7 +673,7 @@ struct OperateItemStruct {
       .onFocus(() => {
         this.parentCanFocus = false;
       })
-      .hitTestBehavior(HitTestMode.Block)
+      .hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Block)
       .onTouch((event: TouchEvent) => {
         if (event.type === TouchType.Down) {
           this.parentCanTouch = false;
@@ -713,7 +713,7 @@ struct OperateItemStruct {
             this.switch?.onChange(isCheck);
           }
         })
-        .hitTestBehavior(HitTestMode.Block)
+        .hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Block)
     }
     .margin({ end: LengthMetrics.vp(SWITCH_PADDING) })
     .height(OPERATEITEM_ICON_CLICKABLE_SIZE)
@@ -803,7 +803,7 @@ struct OperateItemStruct {
       }
     }
     .shadow(CLEAR_SHADOW)
-    .hitTestBehavior(HitTestMode.Transparent)
+    .hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Transparent)
     .labelStyle({
       maxLines: TEXT_MAX_LINE
     })
