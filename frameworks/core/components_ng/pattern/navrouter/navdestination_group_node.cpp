@@ -55,6 +55,35 @@ RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
     return navDestinationNode;
 }
 
+bool NavDestinationGroupNode::IsNeedContentTransition()
+{
+    if (systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
+        return true;
+    }
+    if (mode_ == NavDestinationMode::STANDARD) {
+        return (systemTransitionType_ & NavigationSystemTransitionType::CONTENT)
+            != NavigationSystemTransitionType::NONE;
+    }
+    return systemTransitionType_ != NavigationSystemTransitionType::NONE;
+}
+
+bool NavDestinationGroupNode::TransitionContentInValid()
+{
+    return (systemTransitionType_ & NavigationSystemTransitionType::CONTENT) == NavigationSystemTransitionType::NONE
+        && mode_ == NavDestinationMode::STANDARD;
+}
+
+bool NavDestinationGroupNode::IsNeedTitleTransition()
+{
+    if (systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
+        return true;
+    }
+    if (mode_ == NavDestinationMode::STANDARD) {
+        return (systemTransitionType_ & NavigationSystemTransitionType::TITLE) != NavigationSystemTransitionType::NONE;
+    }
+    return systemTransitionType_ != NavigationSystemTransitionType::NONE;
+}
+
 void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<Pattern>(GetPattern());
@@ -162,20 +191,24 @@ void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)
 {
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     float isRTL = GetLanguageDirection();
+    bool needContentAnimation = IsNeedContentTransition();
+    bool needTitleAnimation = IsNeedTitleTransition();
     if (transitionIn) {
         SetIsOnAnimation(true);
         SetTransitionType(PageTransitionType::ENTER_PUSH);
         auto frameSize = GetGeometryNode()->GetFrameSize();
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            GetRenderContext()->ClipWithRRect(
-                RectF(0.0f, 0.0f, frameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
-        } else {
-            GetRenderContext()->ClipWithRRect(
-                RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
-                RadiusF(EdgeF(0.0f, 0.0f)));
+        if (needContentAnimation) {
+            if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+                GetRenderContext()->ClipWithRRect(
+                    RectF(0.0f, 0.0f, frameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+            } else {
+                GetRenderContext()->ClipWithRRect(
+                    RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
+                    RadiusF(EdgeF(0.0f, 0.0f)));
+            }
+            GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
         }
-        GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
-        if (titleBarNode) {
+        if (titleBarNode && needTitleAnimation) {
             titleBarNode->GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
         }
         return;
@@ -183,11 +216,13 @@ void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)
     SetTransitionType(PageTransitionType::EXIT_PUSH);
     SetIsOnAnimation(true);
     GetRenderContext()->RemoveClipWithRRect();
-    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    if (needContentAnimation) {
+        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    }
     if (NeedRemoveInPush()) {
         GetEventHub<EventHub>()->SetEnabledInternal(false);
     }
-    if (titleBarNode) {
+    if (titleBarNode && needTitleAnimation) {
         titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     }
 }
@@ -197,18 +232,24 @@ void NavDestinationGroupNode::StartSystemTransitionPush(bool transitionIn)
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     auto frameSize = GetGeometryNode()->GetFrameSize();
     float isRTL = GetLanguageDirection();
+    bool needContentAnimation = IsNeedContentTransition();
+    bool needTitleAnimation = IsNeedTitleTransition();
     if (transitionIn) {
-        GetRenderContext()->ClipWithRRect(
-            RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
-        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-        if (titleBarNode) {
+        if (needContentAnimation) {
+            GetRenderContext()->ClipWithRRect(
+                RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+            GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        }
+        if (titleBarNode && needTitleAnimation) {
             titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         }
         return;
     }
-    GetRenderContext()->UpdateTranslateInXY(
-        { -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
-    if (titleBarNode) {
+    if (needContentAnimation) {
+        GetRenderContext()->UpdateTranslateInXY(
+            { -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+    }
+    if (titleBarNode && needTitleAnimation) {
         titleBarNode->GetRenderContext()->UpdateTranslateInXY(
             { frameSize.Width() * TITLE_OFFSET_PERCENT  * isRTL, 0.0f });
     }
@@ -230,7 +271,9 @@ void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn, co
         GetRenderContext()->RemoveClipWithRRect();
         return;
     }
-    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    if (IsNeedContentTransition()) {
+        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    }
     GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
     auto navDestinationPattern = GetPattern<NavDestinationPattern>();
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(navDestinationPattern->GetNavigationNode());
@@ -241,7 +284,7 @@ void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn, co
         SetJSViewActive(false);
     }
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
-    if (titleBarNode) {
+    if (titleBarNode && IsNeedTitleTransition()) {
         titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     }
 }
@@ -251,11 +294,15 @@ void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
     auto frameSize = GetGeometryNode()->GetFrameSize();
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     float isRTL = GetLanguageDirection();
+    bool needContentAnimation = IsNeedContentTransition();
+    bool needTitleAnimation = IsNeedTitleTransition();
     if (isTransitionIn) {
         SetTransitionType(PageTransitionType::ENTER_POP);
         GetRenderContext()->RemoveClipWithRRect();
-        GetRenderContext()->UpdateTranslateInXY({ -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
-        if (titleBarNode) {
+        if (needContentAnimation) {
+            GetRenderContext()->UpdateTranslateInXY({ -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+        }
+        if (titleBarNode && needTitleAnimation) {
             titleBarNode->GetRenderContext()->UpdateTranslateInXY(
                 { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
         }
@@ -264,10 +311,12 @@ void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
     SetIsOnAnimation(true);
     SetTransitionType(PageTransitionType::EXIT_POP);
     GetEventHub<EventHub>()->SetEnabledInternal(false);
-    GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
-        RadiusF(EdgeF(0.0f, 0.0f)));
-    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-    if (titleBarNode) {
+    if (needContentAnimation) {
+        GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
+            RadiusF(EdgeF(0.0f, 0.0f)));
+        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    }
+    if (titleBarNode && needTitleAnimation) {
         titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     }
 }
@@ -275,25 +324,31 @@ void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
 void NavDestinationGroupNode::StartSystemTransitionPop(bool transitionIn)
 {
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    bool needContentAnimation = IsNeedContentTransition();
+    bool needTitleAnimation = IsNeedTitleTransition();
     if (transitionIn) {
-        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-        if (titleBarNode) {
+        if (needContentAnimation) {
+            GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        }
+        if (titleBarNode && needTitleAnimation) {
             titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         }
         return;
     }
     auto frameSize = GetGeometryNode()->GetFrameSize();
-    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-        GetRenderContext()->ClipWithRRect(
-            RectF(0.0f, 0.0f, frameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
-    } else {
-        GetRenderContext()->ClipWithRRect(
-            RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
-            RadiusF(EdgeF(0.0f, 0.0f)));
-    }
     float isRTL = GetLanguageDirection();
-    GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
-    if (titleBarNode) {
+    if (needContentAnimation) {
+        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+            GetRenderContext()->ClipWithRRect(
+                RectF(0.0f, 0.0f, frameSize.Width() * HALF, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
+        } else {
+            GetRenderContext()->ClipWithRRect(
+                RectF(frameSize.Width() * HALF, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
+                RadiusF(EdgeF(0.0f, 0.0f)));
+        }
+        GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
+    }
+    if (titleBarNode && needTitleAnimation) {
         titleBarNode->GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
     }
 }
@@ -325,9 +380,11 @@ bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animatio
     }
     GetEventHub<EventHub>()->SetEnabledInternal(true);
     GetRenderContext()->RemoveClipWithRRect();
-    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    if (IsNeedContentTransition()) {
+        GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    }
     auto preTitleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
-    if (preTitleNode) {
+    if (preTitleNode && IsNeedTitleTransition()) {
         preTitleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
         preTitleNode->GetRenderContext()->SetOpacity(1.0);
         auto titleBarNode = AceType::DynamicCast<TitleBarNode>(preTitleNode);
@@ -342,6 +399,9 @@ bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animatio
 
 void NavDestinationGroupNode::InitDialogTransition(bool isZeroY)
 {
+    if (systemTransitionType_ == NavigationSystemTransitionType::NONE) {
+        return;
+    }
     auto contentNode = AceType::DynamicCast<FrameNode>(GetContentNode());
     CHECK_NULL_VOID(contentNode);
     auto context = contentNode->GetRenderContext();
@@ -356,6 +416,9 @@ void NavDestinationGroupNode::InitDialogTransition(bool isZeroY)
 
 std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacityAnimation(bool isTransitionIn)
 {
+    if (!IsNeedTitleTransition()) {
+        return nullptr;
+    }
     CHECK_NULL_RETURN(GetTitleBarNode(), nullptr);
     auto titleNode = AceType::DynamicCast<TitleBarNode>(GetTitleBarNode());
     CHECK_NULL_RETURN(titleNode, nullptr);
@@ -387,6 +450,9 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacity
 
 std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAnimation(bool isTransitionIn)
 {
+    if (!IsNeedTitleTransition()) {
+        return nullptr;
+    }
     auto titleNode = AceType::DynamicCast<TitleBarNode>(GetTitleBarNode());
     CHECK_NULL_RETURN(titleNode, nullptr);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleNode->GetBackButton());

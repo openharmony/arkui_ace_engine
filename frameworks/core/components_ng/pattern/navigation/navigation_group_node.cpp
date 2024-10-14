@@ -592,21 +592,23 @@ void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNo
     const AnimationFinishCallback finishCallback, bool isNavBar)
 {
     // this function has been override for different device type
-    CHECK_NULL_VOID(preNode);
-    CHECK_NULL_VOID(curNode);
     if (isNavBar) {
         auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
         CHECK_NULL_VOID(navBarNode);
         navBarNode->SystemTransitionPushAction(true);
     } else {
-        auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-        CHECK_NULL_VOID(navDestination);
-        navDestination->InitSystemTransitionPush(false);
+        if (preNode) {
+            auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+            CHECK_NULL_VOID(navDestination);
+            navDestination->InitSystemTransitionPush(false);
+        }
     }
-    auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-    CHECK_NULL_VOID(curNavDestination);
-    curNavDestination->InitSystemTransitionPush(true);
-
+    if (curNode) {
+        auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+        CHECK_NULL_VOID(curNavDestination);
+        curNavDestination->InitSystemTransitionPush(true);
+    }
+    
     // start transition animation
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         finishCallback);
@@ -620,14 +622,18 @@ void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNo
                 CHECK_NULL_VOID(navBarNode);
                 navBarNode->StartSystemTransitionPush();
             } else {
-                auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-                CHECK_NULL_VOID(navDestination);
-                navDestination->StartSystemTransitionPush(false);
+                if (preNode) {
+                    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+                    CHECK_NULL_VOID(navDestination);
+                    navDestination->StartSystemTransitionPush(false);
+                }
             }
             // curNode
-            auto curNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
-            CHECK_NULL_VOID(curNavdestination);
-            curNavdestination->StartSystemTransitionPush(true);
+            if (curNode) {
+                auto curNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+                CHECK_NULL_VOID(curNavdestination);
+                curNavdestination->StartSystemTransitionPush(true);
+            }
     }, option.GetOnFinishEvent());
     if (newPushAnimation) {
         pushAnimations_.emplace_back(newPushAnimation);
@@ -636,6 +642,7 @@ void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNo
     if (maskAnimation) {
         pushAnimations_.emplace_back(maskAnimation);
     }
+    CHECK_NULL_VOID(curNode);
     auto curNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
     CHECK_NULL_VOID(curNavdestination);
 
@@ -649,6 +656,18 @@ void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNo
     if (backButtonAnimation) {
         pushAnimations_.emplace_back(backButtonAnimation);
     }
+}
+
+RefPtr<FrameNode> NavigationGroupNode::TransitionAnimationIsValid(const RefPtr<FrameNode>& node, bool isNavBar)
+{
+    if (isNavBar) {
+        return node;
+    }
+    auto destination = AceType::DynamicCast<NavDestinationGroupNode>(node);
+    if (destination && destination->GetSystemTransitionType() == NavigationSystemTransitionType::NONE) {
+        return nullptr;
+    }
+    return node;
 }
 
 void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
@@ -719,7 +738,11 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             pattern->CheckContentNeedMeasure(navigation);
         };
 
-    CreateAnimationWithPush(preNode, curNode, callback, isNavBar);
+    auto preNodeNew = TransitionAnimationIsValid(preNode, isNavBar);
+    auto curNodeNew = TransitionAnimationIsValid(curNode, isNavBar);
+    if (preNodeNew != nullptr || curNodeNew != nullptr) {
+        CreateAnimationWithPush(preNodeNew, curNodeNew, callback, isNavBar);
+    }
 
     isOnAnimation_ = true;
     auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
@@ -753,6 +776,10 @@ std::shared_ptr<AnimationUtils::Animation> NavigationGroupNode::MaskAnimation(co
     bool isTransitionIn)
 {
     CHECK_NULL_RETURN(node, nullptr);
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(node);
+    if (navDestination && navDestination->TransitionContentInValid()) {
+        return nullptr;
+    }
     AnimationOption maskOption;
     maskOption.SetCurve(Curves::FRICTION);
     maskOption.SetDuration(MASK_DURATION);
@@ -811,7 +838,10 @@ void NavigationGroupNode::TransitionWithReplace(
         context->MarkNeedFlushMouseEvent();
     });
     preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
-    curNode->GetRenderContext()->UpdateOpacity(0.0f);
+    auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+    if (curNavDestination && curNavDestination->GetSystemTransitionType() != NavigationSystemTransitionType::NONE) {
+        curNode->GetRenderContext()->UpdateOpacity(0.0f);
+    }
     if (!isNavBar) {
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
         if (navDestination) {
@@ -824,7 +854,10 @@ void NavigationGroupNode::TransitionWithReplace(
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation replace animation start");
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page replace transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-            curNode->GetRenderContext()->UpdateOpacity(1.0f);
+            auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
+            if (curNavDestination->GetSystemTransitionType() != NavigationSystemTransitionType::NONE) {
+                curNode->GetRenderContext()->UpdateOpacity(1.0f);
+            }
         },
         option.GetOnFinishEvent());
     isOnAnimation_ = true;

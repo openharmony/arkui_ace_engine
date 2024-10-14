@@ -230,6 +230,16 @@ enum NavDestinationLifecycle {
     ON_DISAPPEAR
 };
 
+enum class NavigationSystemTransitionType {
+    NONE = 0,
+    TITLE = 1,
+    CONTENT = 1 << 1,
+    DEFAULT = 1 | (1 << 1),
+};
+inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
+{
+    return static_cast<NavigationSystemTransitionType>(static_cast<int32_t>(lv) & static_cast<int32_t>(rv));
+}
 struct NavSafeArea {
     float top = 0.0f;
     float bottom = 0.0f;

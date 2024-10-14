@@ -60,6 +60,23 @@ constexpr int32_t PARAMATER_LENGTH_ONE = 1;
 constexpr int32_t PARAMATER_LENGTH_TWO = 2;
 constexpr uint32_t FIRST_INDEX = 0;
 constexpr uint32_t SECOND_INDEX = 1;
+constexpr int32_t JS_EMUN_TRANSITIONTYPE_NONE = 1;
+constexpr int32_t JS_EMUN_TRANSITIONTYPE_TITLE = 2;
+constexpr int32_t JS_EMUN_TRANSITIONTYPE_CONTENT = 3;
+
+NG::NavigationSystemTransitionType ParseTransitionType(int32_t value)
+{
+    switch (value) {
+        case JS_EMUN_TRANSITIONTYPE_NONE:
+            return NG::NavigationSystemTransitionType::NONE;
+        case JS_EMUN_TRANSITIONTYPE_TITLE:
+            return NG::NavigationSystemTransitionType::TITLE;
+        case JS_EMUN_TRANSITIONTYPE_CONTENT:
+            return NG::NavigationSystemTransitionType::CONTENT;
+        default:
+            return NG::NavigationSystemTransitionType::DEFAULT;
+    }
+}
 
 bool ParseCommonTitle(const JSRef<JSObject>& jsObj)
 {
@@ -561,6 +578,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("recoverable", &JSNavDestination::SetRecoverable);
     JSClass<JSNavDestination>::StaticMethod("toolbarConfiguration", &JSNavDestination::SetToolBarConfiguration);
     JSClass<JSNavDestination>::StaticMethod("hideToolBar", &JSNavDestination::SetHideToolBar);
+    JSClass<JSNavDestination>::StaticMethod("systemTransition", &JSNavDestination::SetSystemTransition);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -575,5 +593,16 @@ void JSNavDestination::SetSystemBarStyle(const JSCallbackInfo& info)
         }
     }
     NavDestinationModel::GetInstance()->SetSystemBarStyle(style);
+}
+
+void JSNavDestination::SetSystemTransition(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsNumber()) {
+        NavDestinationModel::GetInstance()->SetSystemTransitionType(NG::NavigationSystemTransitionType::DEFAULT);
+        return;
+    }
+    auto value = info[0]->ToNumber<int32_t>();
+    NG::NavigationSystemTransitionType type = ParseTransitionType(value);
+    NavDestinationModel::GetInstance()->SetSystemTransitionType(type);
 }
 } // namespace OHOS::Ace::Framework
