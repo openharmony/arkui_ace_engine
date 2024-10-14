@@ -179,6 +179,13 @@ namespace FlexAttributeModifier {
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    LOGE("ARKOALA FlexAttribute_PointLightImpl -> Method is not FULLY implemented.");
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated,
+        (float)Converter::ConvertOrDefault(value->illuminated, 0), frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
+
 }
 } // FlexAttributeModifier
 const GENERATED_ArkUIFlexModifier* GetFlexModifier()
