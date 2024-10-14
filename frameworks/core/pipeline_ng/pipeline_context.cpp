@@ -51,6 +51,9 @@
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
+#endif
 #include "core/image/image_file_cache.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -612,6 +615,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     FlushMessages();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
+    FlushWindowPatternInfo();
     if (onShow_ && onFocus_ && isWindowHasFocused_) {
         auto isDynamicRender = Container::Current() == nullptr ? false : Container::Current()->IsDynamicRender();
         if ((!isFormRender_) || isDynamicRender) {
@@ -635,6 +639,26 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
     window_->Unlock();
+}
+
+void PipelineContext::FlushWindowPatternInfo()
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (!container->IsScenceBoardWindow()) {
+        return;
+    }
+    auto screenNode = screenNode_.Upgrade();
+    if (!screenNode) {
+        return;
+    }
+    ACE_SCOPED_TRACE("FlushWindowPatternInfo");
+    auto instance = WindowSceneLayoutManager::GetInstance();
+    if (instance != nullptr) {
+        instance->FlushWindowPatternInfo(screenNode);
+    }
+#endif
 }
 
 void PipelineContext::InspectDrew()
@@ -3081,7 +3105,7 @@ void PipelineContext::WindowFocus(bool isFocus)
         NotifyPopupDismiss();
     } else {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Window id: %{public}d get focus.", windowId_);
-        
+
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
     }
