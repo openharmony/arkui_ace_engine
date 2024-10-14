@@ -58,6 +58,8 @@ constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
+constexpr double SHOW_START = 0.0;
+constexpr double SHOW_FULL = 1.0;
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -301,7 +303,9 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         UIEXT_LOGW("Unable to StartUiextensionAbility while in the background.");
         return;
     }
-    if (!isModal_ && !hasMountToParent_) {
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    if (container->IsScenceBoardWindow() && !isModal_ && !hasMountToParent_) {
         needReNotifyForeground_ = true;
         UIEXT_LOGI("Should NotifyForeground after MountToParent.");
         return;
@@ -481,7 +485,7 @@ void UIExtensionPattern::NotifyDestroy()
         state_ != AbilityState::NONE) {
         UIEXT_LOGI("The state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
         state_ = AbilityState::DESTRUCTION;
-        sessionWrapper_->NotifyDestroy();
+        sessionWrapper_->NotifyDestroy(false);
         sessionWrapper_->DestroySession();
     }
 }
@@ -1177,15 +1181,32 @@ void UIExtensionPattern::RegisterVisibleAreaChange()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
         CHECK_NULL_VOID(uiExtension);
-        uiExtension->OnVisibleChange(visible);
+        uiExtension->HandleVisibleAreaChange(visible, ratio);
     };
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    std::vector<double> ratioList = { 0.0 };
+    std::vector<double> ratioList = { SHOW_START, SHOW_FULL };
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+}
+
+void UIExtensionPattern::HandleVisibleAreaChange(bool visible, double ratio)
+{
+    UIEXT_LOGI("HandleVisibleAreaChange visible: %{public}d, curVisible: %{public}d, "
+        "ratio: %{public}f, displayArea: %{public}s.", visible, curVisible_,
+        ratio, displayArea_.ToString().c_str());
+    bool needCheckDisplayArea = NearEqual(ratio, SHOW_FULL) && curVisible_ && visible;
+    bool curVisible = !NearEqual(ratio, SHOW_START);
+    if (curVisible_ != curVisible) {
+        curVisible_ = curVisible;
+        OnVisibleChange(curVisible_);
+    }
+
+    if (needCheckDisplayArea) {
+        DispatchDisplayArea(false);
+    }
 }
 
 void UIExtensionPattern::OnLanguageConfigurationUpdate()
