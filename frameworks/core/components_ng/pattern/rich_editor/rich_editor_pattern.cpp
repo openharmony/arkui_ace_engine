@@ -728,11 +728,7 @@ void RichEditorPattern::EnableOneStepDrag(const RefPtr<ImageSpanNode>& imageNode
     CHECK_NULL_VOID(imageGestureHub);
     imageGestureHub->InitDragDropEvent();
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hostEventHub = host->GetEventHub<EventHub>();
-    auto imageEventHub = imageNode->GetEventHub<EventHub>();
-    CopyDragCallback(hostEventHub, imageEventHub);
+    CopyDragCallback(imageNode);
 }
 
 RichEditorPattern::OneStepDragParam::OneStepDragParam(const std::function<void()>& builder,
@@ -804,12 +800,32 @@ void RichEditorPattern::UpdateImagePreviewParam()
     }
 }
 
-void RichEditorPattern::CopyDragCallback(const RefPtr<EventHub>& hostEventHub, const RefPtr<EventHub>& imageEventHub)
+void RichEditorPattern::CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hostEventHub = host->GetEventHub<EventHub>();
+    auto imageEventHub = imageNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hostEventHub && imageEventHub);
+
+    auto getJsonRange = [](const RefPtr<ImageSpanNode>& imageNode) -> std::string {
+        CHECK_NULL_RETURN(imageNode, "");
+        auto imageSpanItem = imageNode->GetSpanItem();
+        CHECK_NULL_RETURN(imageSpanItem, "");
+        auto jsonRange = JsonUtil::Create(true);
+        jsonRange->Put("rangeStart", imageSpanItem->rangeStart);
+        jsonRange->Put("rangeEnd", imageSpanItem->position);
+        return jsonRange->ToString();
+    };
+
     // start
     auto start = hostEventHub->GetOnDragStart();
-    IF_TRUE(start, imageEventHub->SetOnDragStart(std::move(start)));
+    auto oneStepDragStart = [weakImageNode = WeakClaim(RawPtr(imageNode)), start, getJsonRange](
+        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
+        auto imageNode = weakImageNode.Upgrade();
+        return start(event, getJsonRange(imageNode));
+    };
+    IF_TRUE(start, imageEventHub->SetOnDragStart(std::move(oneStepDragStart)));
 
     // end
     auto end = hostEventHub->GetCustomerOnDragEndFunc();
