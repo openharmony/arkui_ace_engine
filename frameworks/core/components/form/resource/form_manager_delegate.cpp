@@ -427,7 +427,9 @@ void FormManagerDelegate::AddGetRectRelativeToWindowCallback(OnGetRectRelativeTo
 
 void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback)
 {
+    TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
     if (!callback || state_ == State::RELEASED) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - ,state_ is RELEASED");
         return;
     }
     actionEventHandle_ = callback;
@@ -445,6 +447,8 @@ void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback)
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
 {
     if (actionEventHandle_) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - OnActionEventHandle ,formId: %{public}" PRId64,
+            runningCardId_);;
         actionEventHandle_(action);
     }
 }
@@ -537,7 +541,11 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
 
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
+        TAG_LOGI(AceLogTag::ACE_FORM, "EventHandle - AddActionEventHandle");
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - ,formManagerDelegate is null");
+            return;
+        }
         formManagerDelegate->OnActionEventHandle(action);
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
