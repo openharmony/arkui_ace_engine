@@ -1559,10 +1559,13 @@ private:
     void SetNeedToRequestKeyboardOnFocus();
     void SetAccessibilityAction() override;
     void SetAccessibilityActionGetAndSetCaretPosition();
+    void SetAccessibilityActionOverlayAndSelection();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityScrollAction();
+    void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
+    void SetAccessibilityUnitAction();
 
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();

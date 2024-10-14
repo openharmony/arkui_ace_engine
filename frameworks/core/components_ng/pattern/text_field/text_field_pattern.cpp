@@ -544,6 +544,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     SetAccessibilityClearAction();
     SetAccessibilityPasswordIconAction();
+    SetAccessibilityUnitAction();
     return true;
 }
 
@@ -556,6 +557,7 @@ void TextFieldPattern::SetAccessibilityPasswordIconAction()
         CHECK_NULL_VOID(node);
         auto textAccessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
         CHECK_NULL_VOID(textAccessibilityProperty);
+        textAccessibilityProperty->SetAccessibilityLevel("yes");
         textAccessibilityProperty->SetAccessibilityText(GetPasswordIconPromptInformation(passwordArea->IsObscured()));
     }
 }
@@ -569,6 +571,7 @@ void TextFieldPattern::SetAccessibilityClearAction()
             CHECK_NULL_VOID(stackNode);
             auto textAccessibilityProperty = stackNode->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(textAccessibilityProperty);
+            textAccessibilityProperty->SetAccessibilityLevel("yes");
             auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
@@ -578,7 +581,18 @@ void TextFieldPattern::SetAccessibilityClearAction()
         }
     }
 }
- 
+
+void TextFieldPattern::SetAccessibilityUnitAction()
+{
+    if (unitNode_ && responseArea_) {
+        auto unitNode = AceType::DynamicCast<FrameNode>(unitNode_);
+        CHECK_NULL_VOID(unitNode);
+        auto unitAccessibilityProperty = unitNode->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(unitAccessibilityProperty);
+        unitAccessibilityProperty->SetAccessibilityLevel("yes");
+    }
+}
+
 void TextFieldPattern::HandleContentSizeChange(const RectF& textRect)
 {
     if (textRect_ == textRect) {
@@ -6284,6 +6298,20 @@ void TextFieldPattern::SetAccessibilityAction()
     CHECK_NULL_VOID(host);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityGroup(true);
+    SetAccessibilityActionOverlayAndSelection();
+    SetAccessibilityActionGetAndSetCaretPosition();
+    SetAccessibilityScrollAction();
+    SetAccessibilityMoveTextAction();
+    SetAccessibilityErrotText();
+}
+
+void TextFieldPattern::SetAccessibilityActionOverlayAndSelection()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetActionSetText([weakPtr = WeakClaim(this)](const std::string& value) {
         const auto& pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -6332,9 +6360,6 @@ void TextFieldPattern::SetAccessibilityAction()
         pattern->CloseSelectOverlay(true);
         pattern->StartTwinkling();
     });
-    SetAccessibilityActionGetAndSetCaretPosition();
-    SetAccessibilityScrollAction();
-    SetAccessibilityMoveTextAction();
 }
 
 void TextFieldPattern::SetAccessibilityActionGetAndSetCaretPosition()
@@ -6424,6 +6449,15 @@ void TextFieldPattern::SetAccessibilityScrollAction()
             // AccessibilityEventType::SCROLL_END
         }
     });
+}
+
+void TextFieldPattern::SetAccessibilityErrotText()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetErrorText(GetErrorTextString());
 }
 
 void TextFieldPattern::StopEditing()
