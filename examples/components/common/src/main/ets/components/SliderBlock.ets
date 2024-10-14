@@ -57,18 +57,13 @@ export struct SliderBlock {
                 setTimeout(() => {
                   let time = formatDate(new Date(Date.now()))
                   this.listSliderTagsTemp.push(new BlockTag(time, tagDesRule(this.title, value.toString())))
-                  console.log('Block  =====>>>>>' + JSON.stringify(this.listSliderTagsTemp));
                   if (AppStorage.get('Block')) {
                     this.listSliderTags = this.listSliderTags.concat(this.listSliderTagsTemp);
                     this.listSliderTagsTemp = [];
-                    console.log('get Block Slider ==' + JSON.stringify(this.listSliderTags));
-                    console.log('get Block Slider length ==>> ' + this.listSliderTags.length);
                   } else {
                     if (this.listSliderTagsTemp) {
                       this.listSliderTags = this.listSliderTags.concat(this.listSliderTagsTemp);
                     }
-                    console.log('Block Slider ==' + JSON.stringify(this.listSliderTags));
-                    console.log('Block Slider length ==>> ' + this.listSliderTags.length);
                     if (this.listSliderTags) {
                       this.listSliderTagsTemp = [];
                     }

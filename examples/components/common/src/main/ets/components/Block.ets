@@ -35,11 +35,6 @@ export struct Block {
           isOn: this.isEnabled
         }).onChange((enabled) => {
           this.isEnabled = enabled;
-          if (this.isEnabled) {
-            console.log('Block 打开 ' + this.title);
-          } else {
-            console.log('Block 关闭 ' + this.title);
-          }
         })
       }
       .padding({ left: 8, right: 8 })

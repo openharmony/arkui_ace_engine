@@ -45,7 +45,6 @@ export struct RadioBlock {
                     this.value = item.value;
                     let time = formatDate(new Date(Date.now()))
                     this.listRadioBlockTagsTemp.push(new BlockTag(time, tagDesRule(this.title, item.label.toString())))
-                    console.log('Block  =====>>>>>' + JSON.stringify(this.listRadioBlockTagsTemp));
                   }
                 })
                 .onClick(() => {
@@ -53,14 +52,10 @@ export struct RadioBlock {
                     if (AppStorage.get('Block')) {
                       this.listRadioBlockTags = this.listRadioBlockTags.concat(this.listRadioBlockTagsTemp);
                       this.listRadioBlockTagsTemp = [];
-                      console.log('get Block this.listBlockTags ==' + JSON.stringify(this.listRadioBlockTags));
-                      console.log('get Block this.listBlockTags length ==>> ' + this.listRadioBlockTags.length);
                     } else {
                       if (this.listRadioBlockTagsTemp) {
                         this.listRadioBlockTags = this.listRadioBlockTags.concat(this.listRadioBlockTagsTemp);
                       }
-                      console.log('Block this.listBlockTags ==' + JSON.stringify(this.listRadioBlockTags));
-                      console.log('Block this.listBlockTags length ==>> ' + this.listRadioBlockTags.length);
                       if (this.listRadioBlockTags) {
                         this.listRadioBlockTagsTemp = [];
                       }

@@ -115,7 +115,6 @@ export struct TextPickerDialogBootcamp {
             },
             onAccept: (value: TextPickerResult) => {
               this.select = value.index
-              console.log(this.select + '')
             },
             onCancel: () => {
               console.info('TextPickerDialog:onCancel()')
