@@ -32,6 +32,13 @@ public:
     void InitDragEvent() override;
     void ApplyNormalTheme() override;
     bool IsTextEditableForStylus() const override;
+    void ProcessSelection() override;
+    void SearchRequestStartTwinkling();
+    void SearchRequestStopTwinkling();
+    void ResetSearchRequestStopTwinkling();
+
+private:
+    bool searchRequestStopTwinkling_ = false;
     bool IsNeedProcessAutoFill() override;
     int32_t GetRequestKeyboardId() override;
 };
