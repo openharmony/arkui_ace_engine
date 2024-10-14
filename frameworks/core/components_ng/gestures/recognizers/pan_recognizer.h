@@ -119,7 +119,7 @@ private:
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     GestureAcceptResult IsPanGestureAccept() const;
     bool CalculateTruthFingers(bool isDirectionUp) const;
-    void UpdateTouchPointInVelocityTracker(const TouchEvent& event, bool end = false);
+    void UpdateTouchPointInVelocityTracker(const TouchEvent& touchEvent);
     void UpdateAxisPointInVelocityTracker(const AxisEvent& event, bool end = false);
 
     Offset GetRawGlobalLocation(int32_t postEventNodeId);
