@@ -1530,6 +1530,16 @@ public:
         return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
     }
 
+    float GetLastCaretPos()
+    {
+        return lastCaretPos_;
+    }
+
+    void SetLastCaretPos(float lastCaretPos)
+    {
+        lastCaretPos_ = lastCaretPos;
+    }
+
     void SetEnableHapticFeedback(bool isEnabled)
     {
         isEnableHapticFeedback_ = isEnabled;
@@ -2000,6 +2010,7 @@ private:
     uint32_t longPressFingerNum_ = 0;
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
+    float lastCaretPos_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
