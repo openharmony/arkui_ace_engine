@@ -87,6 +87,11 @@ bool SearchTextFieldPattern::IsTextEditableForStylus() const
     return true;
 }
 
+bool SearchTextFieldPattern::IsNeedProcessAutoFill()
+{
+    return false;
+}
+
 int32_t SearchTextFieldPattern::GetRequestKeyboardId()
 {
     auto host = GetHost();
