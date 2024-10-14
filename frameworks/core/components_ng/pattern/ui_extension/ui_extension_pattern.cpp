@@ -58,8 +58,6 @@ constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
-constexpr char PID_FLAG[] = "pidflag";
-constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
 constexpr double SHOW_START = 0.0;
 constexpr double SHOW_FULL = 1.0;
 
