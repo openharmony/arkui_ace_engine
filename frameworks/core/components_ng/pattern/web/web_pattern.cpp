@@ -4445,7 +4445,9 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
         }
     } else {
         if (overlayType == INSERT_OVERLAY) {
-            UpdateTouchHandleForOverlay();
+            if (!IsSelectOverlayDragging()) {
+                UpdateTouchHandleForOverlay();
+            }
         } else {
             UpdateSelectHandleInfo();
             if (!IsSelectOverlayDragging()) {
