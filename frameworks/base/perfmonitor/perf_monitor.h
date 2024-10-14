@@ -21,6 +21,7 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 #include "base/utils/macros.h"
 #include "base/utils/aps_monitor.h"
