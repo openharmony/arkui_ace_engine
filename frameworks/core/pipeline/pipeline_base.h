@@ -1573,6 +1573,8 @@ protected:
     std::atomic<bool> isForegroundCalled_ = false;
     std::atomic<bool> onFocus_ = false;
     uint64_t lastTouchTime_ = 0;
+    uint64_t lastMouseTime_ = 0;
+    uint64_t lastDragTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
     struct FunctionHash {
         std::size_t operator()(const std::shared_ptr<std::function<void()>>& functionPtr) const
