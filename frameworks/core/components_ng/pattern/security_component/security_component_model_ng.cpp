@@ -291,6 +291,7 @@ bool SecurityComponentModelNG::IsBackgroundVisible()
 
 bool SecurityComponentModelNG::IsBackgroundVisible(FrameNode* frameNode)
 {
+    CHECK_NULL_RETURN(frameNode, false);
     auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     if (prop) {
         return (prop->GetBackgroundType() != BUTTON_TYPE_NULL);
@@ -326,6 +327,7 @@ void SecurityComponentModelNG::SetIconSize(const Dimension& value)
 
 void SecurityComponentModelNG::SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, IconSize, value.value(), frameNode);
     } else {
@@ -345,6 +347,7 @@ void SecurityComponentModelNG::SetFontSize(const Dimension& value)
 
 void SecurityComponentModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, FontSize, value.value(), frameNode);
     } else {
@@ -420,14 +423,12 @@ void SecurityComponentModelNG::SetBackgroundBorderStyle(const BorderStyle& value
 
 void SecurityComponentModelNG::SetBackgroundBorderStyle(FrameNode* frameNode, const std::optional<BorderStyle>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (!IsBackgroundVisible(frameNode)) {
         SC_LOG_WARN("background is not exist");
         return;
     }
-    BorderStyle borderStyle = BorderStyle::NONE;
-    if (value) {
-        borderStyle = value.value();
-    }
+    BorderStyle borderStyle = value.value_or(BorderStyle::NONE);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundBorderStyle, borderStyle, frameNode);
 }
 
@@ -489,6 +490,7 @@ void SecurityComponentModelNG::SetTextIconSpace(const Dimension& value)
 
 void SecurityComponentModelNG::SetTextIconSpace(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     auto refPtr = AceType::Claim(frameNode);
     if ((GetSecCompChildNode(refPtr, V2::TEXT_ETS_TAG) == nullptr) ||
         (GetSecCompChildNode(refPtr, V2::IMAGE_ETS_TAG) == nullptr)) {
@@ -510,7 +512,8 @@ void SecurityComponentModelNG::SetTextIconLayoutDirection(const SecurityComponen
 void SecurityComponentModelNG::SetTextIconLayoutDirection(FrameNode* frameNode,
     const std::optional<SecurityComponentLayoutDirection>& value)
 {
-    auto layoutDirection = value ? value.value() : SecurityComponentLayoutDirection::HORIZONTAL;
+    CHECK_NULL_VOID(frameNode);
+    auto layoutDirection = value.value_or(SecurityComponentLayoutDirection::HORIZONTAL);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconLayoutDirection, layoutDirection,
         frameNode);
 }
