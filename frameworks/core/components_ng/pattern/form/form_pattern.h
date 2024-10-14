@@ -247,8 +247,8 @@ private:
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
-    bool isTransparencyEnable_;
-    bool isSkeletonAnimEnable_;
+    bool isTransparencyEnable_ = false;
+    bool isSkeletonAnimEnable_ = false;
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
     bool isTibetanLanguage_ = false;
     bool isManuallyClick_ = false;
