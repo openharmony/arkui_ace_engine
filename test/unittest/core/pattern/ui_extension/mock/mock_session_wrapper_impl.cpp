@@ -165,11 +165,7 @@ void SessionWrapperImpl::NotifyForeground()
 void SessionWrapperImpl::NotifyBackground()
 {
 }
-<<<<<<< HEAD
 void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
-=======
-void SessionWrapperImpl::NotifyDestroy()
->>>>>>> d957ca380d (UEC add TDD)
 {
 }
 
