@@ -263,11 +263,11 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
         spanTextStyle.SetEnableVariableFontWeight(false);
     }
     auto fontManager = pipelineContext->GetFontManager();
-    if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (textStyle.GetFontFamilies().empty())) {
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (spanTextStyle.GetFontFamilies().empty())) {
         spanTextStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
     if (frameNode) {
-        FontRegisterCallback(frameNode, textStyle);
+        FontRegisterCallback(frameNode, spanTextStyle);
     }
     if (NearZero(spanTextStyle.GetFontSize().Value())) {
         return -1;
