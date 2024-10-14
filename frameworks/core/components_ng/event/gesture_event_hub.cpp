@@ -1009,12 +1009,17 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             frameNodeOffset_ = menuPreviewRect.GetOffset();
         }
         int32_t originPixelMapWidth = pixelMap ? pixelMap->GetWidth() : 0;
+        auto menuPreviewScale = menuPreviewScale_;
+        if (GreatNotEqual(originPixelMapWidth, 0.0f)) {
+            menuPreviewScale = menuPreviewRect.Width() / originPixelMapWidth;
+        }
         if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(originPixelMapWidth, 0.0f) &&
-            menuPreviewRect.Width() < originPixelMapWidth * menuPreviewScale_) {
-            defaultPixelMapScale = menuPreviewRect.Width() / originPixelMapWidth;
+            menuPreviewRect.Width() < originPixelMapWidth * menuPreviewScale_ &&
+            NearEqual(menuPreviewRect.Height(), menuPreviewScale * pixelMap->GetHeight(), 1.0)) {
+            defaultPixelMapScale = menuPreviewScale;
             menuPreviewScale_ = defaultPixelMapScale;
         } else {
-            defaultPixelMapScale = menuPreviewScale_;
+            defaultPixelMapScale = menuPreviewScale;
         }
     }
     auto windowScale = dragDropManager->GetWindowScale();
