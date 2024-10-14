@@ -92,14 +92,14 @@ bool RepeatVirtualScrollCaches::FetchMoreKeysTTypes(uint32_t from, uint32_t to, 
 
     if (allowFetchMore) {
         // following a key4index_/ttype4index_ purge fetch the whole range
-        const auto a = lastActiveRanges_[0].first;
-        const auto b = lastActiveRanges_[0].second;
+        const auto rangeStart = lastActiveRanges_[0].first;
+        const auto rangeEnd = lastActiveRanges_[0].second;
 
-        if (a <= b) {
-            return FetchMoreKeysTTypes(from, std::max(to, b), false);
+        if (rangeStart <= rangeEnd) {
+            return FetchMoreKeysTTypes(from, std::max(to, rangeEnd), false);
         } else {
-            const bool v1 = FetchMoreKeysTTypes(0, b, false);
-            const bool v2 = FetchMoreKeysTTypes(a, std::numeric_limits<int>::max(), false);
+            const bool v1 = FetchMoreKeysTTypes(0, rangeEnd, false);
+            const bool v2 = FetchMoreKeysTTypes(rangeStart, std::numeric_limits<int>::max(), false);
             return v1 || v2;
         }
     }
