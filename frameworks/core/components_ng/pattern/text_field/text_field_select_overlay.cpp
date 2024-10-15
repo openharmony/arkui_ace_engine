@@ -119,6 +119,7 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
         OnResetTextSelection();
         if (info && info->isSingleHandle) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SingleHandle OnCloseOverlayv");
             pattern->OnBackPressed();
         }
     }
