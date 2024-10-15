@@ -16,6 +16,9 @@
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "application_context.h"
 #endif
+#include <charconv>
+#include <system_error>
+
 #include "drawable_descriptor.h"
 #include "third_party/cJSON/cJSON.h"
 #ifndef PREVIEW
@@ -82,6 +85,20 @@ inline bool IsNumber(const std::string& value)
     }
     return std::all_of(value.begin(), value.end(), [](char i) { return isdigit(i); });
 }
+
+bool ConvertStringToUInt32(const std::string& idStr, uint32_t& result)
+{
+    auto [ptr, ec] = std::from_chars(idStr.data(), idStr.data() + idStr.size(), result);
+
+    if (ec == std::errc()) {
+        return true;
+    } else if (ec == std::errc::invalid_argument) {
+        HILOGE("Invalid argument: unable to convert string to uint32_t");
+    } else if (ec == std::errc::result_out_of_range) {
+        HILOGE("Out of range: string value is too large for uint32_t");
+    }
+    return false;
+}
 } // namespace
 
 DrawableItem LayeredDrawableDescriptor::PreGetDrawableItem(
@@ -95,10 +112,11 @@ DrawableItem LayeredDrawableDescriptor::PreGetDrawableItem(
     }
 
     std::tuple<std::string, size_t, std::string> info;
-    auto state = resourceMgr->GetDrawableInfoById(
-        static_cast<uint32_t>(std::stoul(idStr)), info, resItem.data_, iconType_, density_);
+    uint32_t resourceId = 0;
+    if (ConvertStringToUInt32(idStr, resourceId)) {
+        resItem.state_ = resourceMgr->GetDrawableInfoById(resourceId, info, resItem.data_, iconType_, density_);
+    }
     resItem.len_ = std::get<1>(info);
-    resItem.state_ = state;
     return resItem;
 }
 
