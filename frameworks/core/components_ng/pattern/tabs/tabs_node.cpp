@@ -89,8 +89,10 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         json->PutExtAttr("barMode", "BarMode.Fixed", filter);
     }
     json->PutExtAttr("barWidth", std::to_string(GetBarWidth().Value()).c_str(), filter);
+    json->PutExtAttr("barWidthAttr", GetBarWidthAttr().ToString().c_str(), filter);
     json->PutExtAttr("barHeight",
         GetBarAdaptiveHeight() ? "auto" : std::to_string(GetBarHeight().Value()).c_str(), filter);
+    json->PutExtAttr("barHeightAttr", GetBarHeightAttr().ToString().c_str(), filter);
     json->PutExtAttr("fadingEdge", GetFadingEdge() ? "true" : "false", filter);
     json->PutExtAttr("barBackgroundColor", GetBarBackgroundColor().ColorToString().c_str(), filter);
     json->PutExtAttr("barBackgroundBlurStyle",
@@ -170,6 +172,18 @@ Dimension TabsNode::GetBarWidth() const
     return Dimension(PipelineBase::Px2VpWithCurrentDensity(frameSize.Width()), DimensionUnit::VP);
 }
 
+Dimension TabsNode::GetBarWidthAttr() const
+{
+    if (!tabBarId_.has_value()) {
+        return 0.0_vp;
+    }
+    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
+    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_RETURN(tabBarProperty, 0.0_vp);
+    return tabBarProperty->GetTabBarWidth().value_or(0.0_vp);
+}
+
 bool TabsNode::GetBarAdaptiveHeight() const
 {
     if (!tabBarId_.has_value()) {
@@ -193,6 +207,18 @@ Dimension TabsNode::GetBarHeight() const
     CHECK_NULL_RETURN(geometryNode, 0.0_vp);
     auto frameSize = geometryNode->GetFrameSize();
     return Dimension(PipelineBase::Px2VpWithCurrentDensity(frameSize.Height()), DimensionUnit::VP);
+}
+
+Dimension TabsNode::GetBarHeightAttr() const
+{
+    if (!tabBarId_.has_value()) {
+        return 0.0_vp;
+    }
+    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
+    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_RETURN(tabBarProperty, 0.0_vp);
+    return tabBarProperty->GetTabBarHeight().value_or(0.0_vp);
 }
 
 Color TabsNode::GetBarBackgroundColor() const

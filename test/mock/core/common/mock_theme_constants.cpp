@@ -67,11 +67,17 @@ Dimension ThemeConstants::GetDimensionByName(const std::string& resName) const
 
 int32_t ThemeConstants::GetInt(uint32_t key) const
 {
+    if (currentThemeStyle_) {
+        return currentThemeStyle_->GetAttr<int32_t>(std::to_string(key), INT_DEFAULT);
+    }
     return INT_DEFAULT;
 }
 
 int32_t ThemeConstants::GetIntByName(const std::string& resName) const
 {
+    if (currentThemeStyle_) {
+        return currentThemeStyle_->GetAttr<int32_t>(resName, 0);
+    }
     return 0;
 }
 

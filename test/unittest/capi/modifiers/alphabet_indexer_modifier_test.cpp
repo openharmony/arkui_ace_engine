@@ -90,14 +90,23 @@ const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
 const Ark_String COLOR_NAME = Converter::ArkValue<Ark_String>("color_name");
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
-const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
+const std::vector<ColorTestStep> COLOR_TEST_PLAN_BLACK = {
     { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
     { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), COLOR_BLACK },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), COLOR_TRANSPARENT }
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK }
+};
+const std::vector<ColorTestStep> COLOR_TEST_PLAN_WHITE = {
+    { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), "#11223344" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("65535"), "#FF00FFFF" },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("incorrect_color"), ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE },
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""), ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE }
 };
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
     { Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(ArkRes(const_cast<Ark_String*>(&COLOR_NAME))),
@@ -218,7 +227,7 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-        
+
         SetupTheme<IndexerTheme>();
 
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
@@ -262,8 +271,8 @@ HWTEST_F(IndexerModifierTest, setColor, TestSize.Level1)
     ASSERT_NE(modifier_->setColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
-    
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_WHITE) {
         modifier_->setColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_COLOR);
         EXPECT_EQ(checkVal, expectVal);
@@ -280,7 +289,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setColorRes, TestSize.Level1)
     ASSERT_NE(modifier_->setColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
-    
+
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_COLOR);
@@ -298,8 +307,8 @@ HWTEST_F(IndexerModifierTest, setSelectedColor, TestSize.Level1)
     ASSERT_NE(modifier_->setSelectedColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
-    
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_WHITE) {
         modifier_->setSelectedColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_COLOR);
         EXPECT_EQ(checkVal, expectVal);
@@ -316,7 +325,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setSelectedColorRes, TestSize.Level1)
     ASSERT_NE(modifier_->setSelectedColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
-    
+
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setSelectedColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_COLOR);
@@ -334,8 +343,8 @@ HWTEST_F(IndexerModifierTest, setPopupColor, TestSize.Level1)
     ASSERT_NE(modifier_->setPopupColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
-    
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_WHITE) {
         modifier_->setPopupColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_COLOR);
         EXPECT_EQ(checkVal, expectVal);
@@ -351,7 +360,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupColorRes, TestSize.Level1)
     ASSERT_NE(modifier_->setPopupColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
-    
+
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_COLOR);
@@ -369,8 +378,8 @@ HWTEST_F(IndexerModifierTest, setSelectedBackgroundColor, TestSize.Level1)
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
-    
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_WHITE) {
         modifier_->setSelectedBackgroundColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
         EXPECT_EQ(checkVal, expectVal);
@@ -387,7 +396,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setSelectedBackgroundColorRes, TestSize.L
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
-    
+
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setSelectedBackgroundColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_SELECTED_BACKGROUND_COLOR);
@@ -405,8 +414,8 @@ HWTEST_F(IndexerModifierTest, setPopupBackground, TestSize.Level1)
     ASSERT_NE(modifier_->setPopupBackground, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_BACKGROUND);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
-    
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_WHITE) {
         modifier_->setPopupBackground(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BACKGROUND);
         EXPECT_EQ(checkVal, expectVal);
@@ -423,7 +432,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupBackgroundRes, TestSize.Level1)
     ASSERT_NE(modifier_->setPopupBackground, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_BACKGROUND);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_WHITE);
-    
+
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupBackground(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BACKGROUND);
@@ -441,8 +450,8 @@ HWTEST_F(IndexerModifierTest, setPopupSelectedColor, TestSize.Level1)
     ASSERT_NE(modifier_->setPopupSelectedColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_SELECTED_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
-    
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_BLACK) {
         modifier_->setPopupSelectedColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_SELECTED_COLOR);
         EXPECT_EQ(checkVal, expectVal);
@@ -459,7 +468,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupSelectedColorRes, TestSize.Level1
     ASSERT_NE(modifier_->setPopupSelectedColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_SELECTED_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
-    
+
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupSelectedColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_SELECTED_COLOR);
@@ -477,8 +486,8 @@ HWTEST_F(IndexerModifierTest, setPopupUnselectedColor, TestSize.Level1)
     ASSERT_NE(modifier_->setPopupUnselectedColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_UNSELECTED_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
-    
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_BLACK) {
         modifier_->setPopupUnselectedColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_UNSELECTED_COLOR);
         EXPECT_EQ(checkVal, expectVal);
@@ -495,7 +504,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupUnselectedColorRes, TestSize.Leve
     ASSERT_NE(modifier_->setPopupUnselectedColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_UNSELECTED_COLOR);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
-    
+
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupUnselectedColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_UNSELECTED_COLOR);
@@ -513,8 +522,8 @@ HWTEST_F(IndexerModifierTest, setPopupItemBackgroundColor, TestSize.Level1)
     ASSERT_NE(modifier_->setPopupItemBackgroundColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_BACKGROUND);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
-    
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
+
+    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_BLACK) {
         modifier_->setPopupItemBackgroundColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BACKGROUND);
         EXPECT_EQ(checkVal, expectVal);
@@ -531,7 +540,7 @@ HWTEST_F(IndexerModifierTest, DISABLED_setPopupItemBackgroundColorRes, TestSize.
     ASSERT_NE(modifier_->setPopupItemBackgroundColor, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_ITEM_BACKGROUND);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
-    
+
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupItemBackgroundColor(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_ITEM_BACKGROUND);

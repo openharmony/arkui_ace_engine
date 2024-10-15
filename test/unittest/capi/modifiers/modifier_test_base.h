@@ -51,9 +51,9 @@ class ModifierTestBase : public testing::Test {
 public:
     ArkUINodeHandle node_ = nullptr;
 
-    static ArkUINodeHandle CreateNode(GENERATED_Ark_NodeType nodeType)
+    static ArkUINodeHandle CreateNode()
     {
-        return basicAPI_ ? basicAPI_->createNode(nodeType, ARKUI_AUTO_GENERATE_NODE_ID, 0) : nullptr;
+        return basicAPI_ ? basicAPI_->createNode(NodeType, ARKUI_AUTO_GENERATE_NODE_ID, 0) : nullptr;
     }
 
     static void DisposeNode(ArkUINodeHandle &node)
@@ -153,7 +153,7 @@ public:
     virtual void SetUp(void)
     {
         ASSERT_NE(modifier_, nullptr);
-        node_ = CreateNode(NodeType);
+        node_ = CreateNode();
         ASSERT_NE(node_, nullptr);
     }
 
