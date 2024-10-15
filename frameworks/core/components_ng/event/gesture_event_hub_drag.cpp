@@ -21,6 +21,7 @@
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
@@ -748,6 +749,15 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         DragEventActuator::MountGatherNode(subWindowOverlayManager, frameNode, gatherNode, gatherNodeChildrenInfo);
         DragEventActuator::UpdatePreviewPositionAndScale(
             imageNode, imageNode->GetOffsetInSubwindow(subWindow->GetWindowRect().GetOffset()));
+        auto gatherNodeOffset = DragDropManager::GetTouchOffsetRelativeToSubwindow(container->GetInstanceId());
+        if (pipeline->HasFloatTitle()) {
+            gatherNodeOffset.SetX(
+                gatherNodeOffset.GetX() + static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()));
+            gatherNodeOffset.SetY(
+                gatherNodeOffset.GetY() +
+                static_cast<float>((pipeline->GetCustomTitleHeight() + CONTAINER_BORDER_WIDTH).ConvertToPx()));
+        }
+        DragEventActuator::UpdateGatherAnimatePosition(gatherNodeChildrenInfo, gatherNodeOffset);
         if (textNode) {
             DragEventActuator::UpdatePreviewPositionAndScale(
                 textNode, textNode->GetOffsetInSubwindow(subWindow->GetWindowRect().GetOffset()));

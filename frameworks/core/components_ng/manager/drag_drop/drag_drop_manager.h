@@ -352,6 +352,7 @@ public:
         return isPullMoveReceivedForCurrentDrag_;
     }
 
+    static OffsetF GetTouchOffsetRelativeToSubwindow(int32_t containerId, int32_t x = 0, int32_t y = 0);
     static RectF GetMenuPreviewRect();
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager, const GatherAnimationInfo& info);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,

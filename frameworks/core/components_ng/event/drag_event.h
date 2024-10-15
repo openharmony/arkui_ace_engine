@@ -141,6 +141,8 @@ public:
     static void UpdatePreviewPositionAndScale(
         const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset, float scale = -1.0f);
     static void UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
+    static void UpdateGatherAnimatePosition(
+        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo, const OffsetF& GatherNodeOffset);
     static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
@@ -237,8 +239,8 @@ public:
     static RefPtr<FrameNode> GetOrCreateGatherNode(const RefPtr<NG::OverlayManager>& overlayManager,
         const RefPtr<DragEventActuator>& actuator, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static RefPtr<FrameNode> CreateGatherNode(const RefPtr<DragEventActuator>& actuator);
-    static RefPtr<FrameNode> CreateImageNode(const RefPtr<FrameNode>& frameNode,
-        GatherNodeChildInfo& gatherNodeChildInfo);
+    static RefPtr<FrameNode> CreateImageNode(
+        const RefPtr<FrameNode>& frameNode, GatherNodeChildInfo& gatherNodeChildInfo);
     static void MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode);
     static void ResetNode(const RefPtr<FrameNode>& frameNode);
     static void MountGatherNode(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,

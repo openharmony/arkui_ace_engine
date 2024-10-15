@@ -973,6 +973,20 @@ OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNod
     return OffsetF(offsetX, offsetY);
 }
 
+void DragEventActuator::UpdateGatherAnimatePosition(
+    std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo, const OffsetF& GatherNodeOffset)
+{
+    for (const auto& child : gatherNodeChildrenInfo) {
+        auto imageNode = child.imageNode.Upgrade();
+        CHECK_NULL_VOID(imageNode);
+        auto imageContext = imageNode->GetRenderContext();
+        CHECK_NULL_VOID(imageContext);
+        auto childFrameOffset = imageContext->GetPaintRectWithoutTransform();
+        imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(GatherNodeOffset.GetX() + childFrameOffset.GetX()),
+            Dimension(GatherNodeOffset.GetY() + childFrameOffset.GetY())));
+    }
+}
+
 void DragEventActuator::UpdatePreviewPositionAndScale(
     const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset, float scale)
 {
