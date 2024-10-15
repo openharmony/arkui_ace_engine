@@ -2335,6 +2335,9 @@ void SheetPresentationPattern::OnScrollStartRecursive(float position, float velo
 ScrollResult SheetPresentationPattern::HandleScroll(float scrollOffset, int32_t source, NestedState state,
     float velocity)
 {
+    if (state == NestedState::CHILD_CHECK_OVER_SCROLL) {
+        return {scrollOffset, true};
+    }
     ScrollResult result = {0, true};
     if (GreatOrEqual(currentOffset_, 0.0) && (source == SCROLL_FROM_UPDATE) && !isSheetNeedScroll_) {
         isSheetNeedScroll_ = true;
