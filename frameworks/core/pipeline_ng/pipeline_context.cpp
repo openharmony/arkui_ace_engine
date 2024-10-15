@@ -652,6 +652,7 @@ void PipelineContext::FlushOnceVsyncTask()
 void PipelineContext::FlushDragEvents()
 {
     auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
     std::string extraInfo = manager->GetExtraInfo();
     std::unordered_set<int32_t> moveEventIds;
     decltype(dragEvents_) dragEvents(std::move(dragEvents_));
