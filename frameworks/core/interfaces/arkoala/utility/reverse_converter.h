@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
@@ -216,6 +217,22 @@ namespace OHOS::Ace::NG::Converter {
     inline void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src)
     {
         AssignArkValue(dst, static_cast<ListItemGroupArea>(src));
+    }
+
+    inline void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src)
+    {
+        switch (src) {
+            case SecurityComponentHandleResult::CLICK_SUCCESS:
+                dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_SUCCESS;
+                break;
+            case SecurityComponentHandleResult::CLICK_GRANT_FAILED:
+                dst = ARK_SAVE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED;
+                break;
+            default:
+                dst = static_cast<Ark_SaveButtonOnClickResult>(-1);
+                LOGE("Unexpected enum value in SecurityComponentHandleResult: %{public}d", src);
+                break;
+        }
     }
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
