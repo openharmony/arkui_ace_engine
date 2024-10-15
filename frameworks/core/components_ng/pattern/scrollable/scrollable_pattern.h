@@ -248,12 +248,9 @@ public:
         scrollable->StopScrollable();
     }
 
-    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
+    virtual bool StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance = 0.f)
     {
-        CHECK_NULL_VOID(scrollableEvent_);
-        auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_VOID(scrollable);
-        scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
+        return false;
     }
 
     bool IsScrollableSpringEffect() const
@@ -279,11 +276,6 @@ public:
     virtual OverScrollOffset GetOverScrollOffset(double delta) const
     {
         return { 0, 0 };
-    }
-
-    virtual bool OnScrollSnapCallback(double targetOffset, double velocity)
-    {
-        return false;
     }
 
     void StartScrollBarAnimatorByProxy()
@@ -417,6 +409,14 @@ public:
     float GetCurrentVelocity() const
     {
         return currentVelocity_;
+    }
+
+    double GetScrollableCurrentVelocity() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, 0.0);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, 0.0);
+        return scrollable->GetCurrentVelocity();
     }
 
     ScrollState GetScrollState() const;
@@ -853,8 +853,7 @@ private:
     void SetScrollEndCallback(const RefPtr<Scrollable>& scrollable);
     void SetRemainVelocityCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragEndCallback(const RefPtr<Scrollable>& scrollable);
-    void SetScrollSnapListCallback(const RefPtr<Scrollable>& scrollable);
-    void SetCalcPredictSnapOffsetCallback(const RefPtr<Scrollable>& scrollable);
+    void SetStartSnapAnimationCallback(const RefPtr<Scrollable>& scrollable);
     void SetNeedScrollSnapToSideCallback(const RefPtr<Scrollable>& scrollable);
     void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);

@@ -39,11 +39,6 @@ void Scrollable::StartSpringMotion(
 void Scrollable::UpdateScrollSnapStartOffset(double offset)
 {}
 
-void Scrollable::StartListSnapAnimation(float predictSnapOffset, float scrollSnapVelocity)
-{
-    endPos_ = currentPos_ + predictSnapOffset;
-}
-
 void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
 {}
 
