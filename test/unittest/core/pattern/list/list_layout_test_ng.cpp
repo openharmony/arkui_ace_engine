@@ -1075,6 +1075,45 @@ HWTEST_F(ListLayoutTestNg, Pattern011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Pattern014
+ * @tc.desc: Test add a listItem and scroll to the added listItem within the same frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, Pattern014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create an empty list
+     */
+    ListModelNG model = CreateList();
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. add a listItem and scroll to the added listItem within the same frame.
+     * @tc.expected: layoutDirection = LayoutDirection::NONE
+     */
+    ViewStackProcessor::GetInstance()->Push(frameNode_);
+    CreateListItems(1);
+    auto startIndex = pattern_->GetStartIndex();
+    ScrollToIndex(0, true, ScrollAlign::END);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 1);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, frameNode_->GetGeometryNode(), layoutProperty_);
+    auto layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+
+    CreateListItems(1);
+    startIndex = pattern_->GetStartIndex();
+    ScrollToIndex(1, true, ScrollAlign::END);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 2);
+    layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    ViewStackProcessor::GetInstance()->Pop();
+}
+
+/**
  * @tc.name: ListItemGroupCreateForCardModeTest001
  * @tc.desc: Test the initialization of listItem in card mode.
  * @tc.type: FUNC
