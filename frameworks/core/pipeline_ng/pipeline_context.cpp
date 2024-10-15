@@ -85,11 +85,16 @@ constexpr int32_t PARAM_NUM = 2;
 
 namespace OHOS::Ace::NG {
 
+std::unordered_set<int32_t> PipelineContext::aliveInstanceSet_;
+
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId, platformResRegister)
 {
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    PipelineContext::aliveInstanceSet_.emplace(instanceId);
+#endif
     window_->OnHide();
 }
 
@@ -97,6 +102,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
 {
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    PipelineContext::aliveInstanceSet_.emplace(instanceId);
+#endif
     window_->OnHide();
 }
 
@@ -3818,6 +3826,9 @@ void PipelineContext::Destroy()
     uiExtensionManager_.Reset();
 #endif
     PipelineBase::Destroy();
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    PipelineContext::aliveInstanceSet_.erase(instanceId_);
+#endif
 }
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)

@@ -927,6 +927,10 @@ public:
     }
 
     void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
+    static bool IsPipelineDestroyed(int32_t instanceId)
+    {
+        return aliveInstanceSet_.find(instanceId) == aliveInstanceSet_.end();
+    }
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1217,6 +1221,7 @@ private:
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
     bool autoFocusInactive_ = true;
+    static std::unordered_set<int32_t> aliveInstanceSet_;
 };
 } // namespace OHOS::Ace::NG
 
