@@ -307,10 +307,10 @@ void ImageAnimatorPattern::OnModifyDone()
     CHECK_NULL_VOID(imageTheme);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (!renderContext->HasBorderRadius()) {
+    if (!renderContext->HasBorderRadius() && imageTheme->GetCardRadius() > 0.0_vp) {
         renderContext->UpdateBorderRadius(BorderRadiusProperty(imageTheme->GetCardRadius()));
     }
-    if (!renderContext->HasClipEdge()) {
+    if (!renderContext->HasClipEdge() && imageTheme->GetClipEdge()) {
         renderContext->UpdateClipEdge(imageTheme->GetClipEdge());
     }
 
