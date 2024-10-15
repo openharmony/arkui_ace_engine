@@ -318,6 +318,7 @@ namespace Converter {
     template<> StringArray Convert(const Ark_String& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
+    template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
 
     // Converter implementations
@@ -494,6 +495,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
+    template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);

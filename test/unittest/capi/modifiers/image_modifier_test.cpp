@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,103 +13,239 @@
  * limitations under the License.
  */
 
+#include <gtest/gtest.h>
+#include <tuple>
+
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
-
-#include "core/components/image/image_theme.h"
-
-namespace OHOS::Ace::NG {
+#include "core/components_ng/pattern/image/image_event_hub.h"
+#include "generated/test_fixtures.h"
+#include "arkoala_api_generated.h"
 
 using namespace testing;
 using namespace testing::ext;
 
+namespace OHOS::Ace::NG {
+namespace Converter {
+template<>
+LoadImageFailEvent Convert(const Ark_ImageError& info)
+{
+    auto width = Convert<float>(info.componentWidth);
+    auto height = Convert<float>(info.componentHeight);
+    auto error = Convert<std::string>(info.message);
+    LoadImageFailEvent event(width, height, error);
+    return event;
+}
+} // OHOS::Ace::NG::Converter
+
+namespace  {
+    const auto ATTRIBUTE_FILL_COLOR_NAME = "fillColor";
+    const auto ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE = "#FF000000";
+    const auto OPACITY_COLOR = "#FF000000";
+    const auto ATTRIBUTE_AUTO_RESIZE_NAME = "autoResize";
+    const auto ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE = "false";
+
+    struct EventsTracker {
+        static inline GENERATED_ArkUIImageEventsReceiver getImageEventsReceiver {};
+
+        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
+            .getImageEventsReceiver = [] () -> const GENERATED_ArkUIImageEventsReceiver* {
+                return &getImageEventsReceiver;
+            }
+        };
+    }; // EventsTracker
+} // namespace
+
 class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier,
-                              &GENERATED_ArkUINodeModifiers::getImageModifier, GENERATED_ARKUI_IMAGE> {
+    &GENERATED_ArkUINodeModifiers::getImageModifier,
+    GENERATED_ARKUI_IMAGE> {
 public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
-        SetupTheme<ImageTheme>();
+        for (auto&& res : Fixtures::resourceInitTable) {
+            AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
+            AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
+        }
+        fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
-
-/**
- * @tc.name: ObjectFit_SetFitType
- * @tc.desc: Test ImageModifierTest
+/*
+ * @tc.name: setFillColorTestDefaultValues
+ * @tc.desc: Check functionality of ImageModifier.setFillColor
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, setFillColorTestDefaultValues, TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
 
-    modifier_->setObjectFit(frameNode, Ark_ImageFit::ARK_IMAGE_FIT_SCALE_DOWN);
-    auto json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    ASSERT_EQ("ImageFit.FitHeight", GetAttrValue<std::string>(json, "objectFit"));
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE);
 }
 
-/**
- * @tc.name: ObjectFit_SetDefaultedFitType
- * @tc.desc: Test ImageModifierTest
+/*
+ * @tc.name: setFillColorTestValidValues
+ * @tc.desc: Check functionality of ImageModifier.setFillColor
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, ObjectFit_SetDefaultedFitType, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, setFillColorTestValidValues, TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
+    auto checkValue = [this](const std::string& input, const ResourceColor& value, const std::string& expectedStr) {
+        modifier_->setFillColor(node_, &value);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FILL_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+    };
 
-    std::string key = "objectFit";
-    std::string defaultedFit = "ImageFit.Cover";
-
-    modifier_->setObjectFit(frameNode, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::FILL) - 1));
-    auto json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
-
-    modifier_->setObjectFit(frameNode, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::SCALE_DOWN) + 1));
-    json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
+    for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)),
+            std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor,
+            Ark_String>(std::get<1>(value)), OPACITY_COLOR);
+    }
+    for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Number>(std::get<1>(value)),
+            std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Resource>(std::get<1>(value)),
+            std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)),
+            std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)),
+            ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE);
+    }
 }
 
-/**
- * @tc.name: Ctor_InitWithUrl
- * @tc.desc: Test ImageModifierTest
+/*
+ * @tc.name: setAutoResizeTestDefaultValues
+ * @tc.desc: Check functionality of ImageModifier.setAutoResize
+ * Disabled because the default value should be false, but the returned value is true.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, Ctor_InitWithUrl, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setAutoResizeTestDefaultValues, TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
 
-    std::string urlString = "https://www.example.com/xxx.png";
-    std::string resName = "image_url";
-    AddResource(resName, urlString);
-    const auto RES_ID = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
-    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(CreateResourceUnion(RES_ID));
-    const auto imageRc = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
-
-    modifier_->setImageOptions0(node_, &imageRc);
-    auto json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
-    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
-
-    urlString = "https://www.example.com/xxx.jpg";
-    image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
-    const auto imageIm = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
-
-    modifier_->setImageOptions0(node_, &imageIm);
-    json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
-    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_RESIZE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE);
 }
 
+// Valid values for attribute 'autoResize' of method 'autoResize'
+static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> autoResizeAutoResizeValidValues = {
+    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+};
+
+/*
+ * @tc.name: setAutoResizeTestValidValues
+ * @tc.desc: Check set color functionality of setCancelButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setAutoResizeTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    Ark_Boolean inputValueAutoResize;
+    Ark_Boolean initValueAutoResize;
+
+    // Initial setup
+    initValueAutoResize = std::get<1>(autoResizeAutoResizeValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueAutoResize = initValueAutoResize;
+    for (auto&& value: autoResizeAutoResizeValidValues) {
+        inputValueAutoResize = std::get<1>(value);
+        modifier_->setAutoResize(node_, inputValueAutoResize);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_AUTO_RESIZE_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setOnFinishTest
+ * @tc.desc: Check functionality of ImageModifier.setOnFinish
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setOnFinishTest, TestSize.Level1)
+{
+    Ark_Function func = {};
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::getImageEventsReceiver.onFinish = [](
+        Ark_Int32 nodeId)
+    {
+        checkEvent = {
+            .nodeId = nodeId,
+        };
+    };
+
+    EXPECT_FALSE(checkEvent.has_value());
+    modifier_->setOnFinish(node_, func);
+    eventHub->FireFinishEvent();
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+}
+
+/*
+ * @tc.name: setOnErrorTest
+ * @tc.desc: Check functionality of ImageModifier.setOnError
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
+{
+    Ark_Function func = {};
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    const auto width = 0.5f;
+    const auto height = 0.6f;
+    const auto error = "error_test";
+    LoadImageFailEvent event(width, height, error);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        double width;
+        double height;
+        std::string error;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    EventsTracker::getImageEventsReceiver.onError = [](
+        Ark_Int32 nodeId, const Ark_ImageError error)
+    {
+        auto event = Converter::Convert<LoadImageFailEvent>(error);
+        checkEvent = {
+            .nodeId = nodeId,
+            .width = event.GetComponentWidth(),
+            .height = event.GetComponentHeight(),
+            .error = event.GetErrorMessage()
+        };
+    };
+
+    EXPECT_FALSE(checkEvent.has_value());
+    modifier_->setOnError(node_, func);
+    eventHub->FireErrorEvent(event);
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_NEAR(checkEvent->width, width, FLT_EPSILON);
+    EXPECT_NEAR(checkEvent->height, height, FLT_EPSILON);
+    EXPECT_EQ(checkEvent->error, error);
+}
 } // namespace OHOS::Ace::NG

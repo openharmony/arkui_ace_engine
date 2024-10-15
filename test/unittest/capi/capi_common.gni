@@ -13,4 +13,5 @@
 
 declare_args() {
   capi_theme_debug = false
+  capi_asan = false
 }

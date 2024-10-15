@@ -514,7 +514,7 @@ public:
     static void ReSetMagnifier(FrameNode* frameNode);
     static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
     static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
-    static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
+    static void SetBackgroundImageSize(FrameNode* frameNode, const std::optional<BackgroundImageSize>& bgImgSize);
     static void SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat);
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);

@@ -18,6 +18,19 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "frameworks/core/components/common/layout/constants.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+Ark_ImageError ArkValue(const LoadImageFailEvent& event)
+{
+    Ark_ImageError arkEvent;
+    arkEvent.componentWidth = Converter::ArkValue<Ark_Number>(event.GetComponentWidth());
+    arkEvent.componentHeight = Converter::ArkValue<Ark_Number>(event.GetComponentHeight());
+    arkEvent.message = Converter::ArkValue<Ark_String>(event.GetErrorMessage());
+    return arkEvent;
+}
+} // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageInterfaceModifier {
@@ -73,7 +86,7 @@ void FillColorImpl(Ark_NativePointer node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetImageFill(frameNode, Converter::ConvertOrDefault(*value, Color()));
+    ImageModelNG::SetImageFill(frameNode, Converter::OptConvert<Color>(*value));
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    Ark_ImageFit value)
@@ -103,7 +116,7 @@ void AutoResizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelNG::SetAutoResize(frameNode, Converter::ConvertOrDefault(value, false));
+    ImageModelNG::SetAutoResize(frameNode, Converter::Convert<bool>(value));
 }
 void RenderModeImpl(Ark_NativePointer node,
                     Ark_ImageRenderMode value)
@@ -228,15 +241,8 @@ void OnErrorImpl(Ark_NativePointer node,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [frameNode](const LoadImageFailEvent& info) {
-        Ark_ImageError event;
-        event.componentWidth.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.componentWidth.f32 = info.GetComponentWidth();
-        event.componentHeight.tag = Ark_Tag::ARK_TAG_FLOAT32;
-        event.componentHeight.f32 = info.GetComponentHeight();
-        std::string message = info.GetErrorMessage();
-        event.message.chars = message.c_str();
-        event.message.length = message.length();
-        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onError(frameNode->GetId(), event);
+        auto arkInfo = Converter::ArkValue<Ark_ImageError>(info);
+        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onError(frameNode->GetId(), arkInfo);
     };
     ImageModelNG::SetOnError(frameNode, std::move(onEvent));
 }
