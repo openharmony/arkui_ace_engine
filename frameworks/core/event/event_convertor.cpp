@@ -17,16 +17,12 @@
 
 namespace OHOS::Ace {
 
-void SetTouchEventType(AceActionData::ActionType actionType, int8_t actionPoint,
-                       TouchEvent& point, std::vector<TouchEvent>& events, std::vector<TouchEvent>& allEvents)
+void SetTouchEventType(AceActionData::ActionType actionType, TouchEvent& point, std::vector<TouchEvent>& events)
 {
     switch (actionType) {
         case AceActionData::ActionType::CANCEL:
             point.type = TouchType::CANCEL;
-            allEvents.push_back(point);
-            if (actionPoint == ACTION_POINT) {
-                events.push_back(point);
-            }
+            events.push_back(point);
             return;
         case AceActionData::ActionType::ADD:
         case AceActionData::ActionType::REMOVE:
@@ -34,24 +30,15 @@ void SetTouchEventType(AceActionData::ActionType actionType, int8_t actionPoint,
             return;
         case AceActionData::ActionType::DOWN:
             point.type = TouchType::DOWN;
-            allEvents.push_back(point);
-            if (actionPoint == ACTION_POINT) {
-                events.push_back(point);
-            }
+            events.push_back(point);
             return;
         case AceActionData::ActionType::MOVE:
             point.type = TouchType::MOVE;
-            allEvents.push_back(point);
-            if (actionPoint == ACTION_POINT) {
-                events.push_back(point);
-            }
+            events.push_back(point);
             return;
         case AceActionData::ActionType::UP:
             point.type = TouchType::UP;
-            allEvents.push_back(point);
-            if (actionPoint == ACTION_POINT) {
-                events.push_back(point);
-            }
+            events.push_back(point);
             return;
         case AceActionData::ActionType::UNKNOWN:
         default:
@@ -59,13 +46,12 @@ void SetTouchEventType(AceActionData::ActionType actionType, int8_t actionPoint,
     }
 }
 
-void UpdateTouchEvent(std::vector<TouchEvent>& events, std::vector<TouchEvent>& allEvents)
+void UpdateTouchEvent(std::vector<TouchEvent>& events)
 {
-    if (allEvents.empty() || events.empty()) {
+    if (events.empty()) {
         return;
     }
-    std::vector<TouchPoint> pointers;
-    for (auto& event : allEvents) {
+    for (auto& event : events) {
         TouchPoint touchPoint;
         touchPoint.size = event.size;
         touchPoint.id = event.id;
@@ -76,10 +62,7 @@ void UpdateTouchEvent(std::vector<TouchEvent>& events, std::vector<TouchEvent>& 
         touchPoint.screenX = event.screenX;
         touchPoint.screenY = event.screenY;
         touchPoint.isPressed = (event.type == TouchType::DOWN);
-        pointers.emplace_back(std::move(touchPoint));
-    }
-    for (auto& event : events) {
-        std::copy(pointers.begin(), pointers.end(), std::back_inserter(event.pointers));
+        event.pointers.emplace_back(std::move(touchPoint));
     }
 }
 
@@ -100,8 +83,6 @@ void ConvertMouseEvent(const std::vector<uint8_t>& data, MouseEvent& events)
     events.scrollX = mouseActionData->scrollDeltaX;
     events.scrollY = mouseActionData->scrollDeltaY;
     events.scrollZ = mouseActionData->scrollDeltaZ;
-    events.screenX = mouseActionData->physicalX;
-    events.screenY = mouseActionData->physicalY;
     switch (mouseActionData->action) {
         case AceMouseData::Action::PRESS:
             events.action = MouseAction::PRESS;
@@ -148,7 +129,6 @@ void ConvertMouseEvent(const std::vector<uint8_t>& data, MouseEvent& events)
     events.pressedButtons = static_cast<int32_t>(mouseActionData->pressedButtons);
     events.time = time;
     events.deviceId = mouseActionData->deviceId;
-    events.sourceType = static_cast<SourceType>(mouseActionData->deviceType);
 }
 
 } // namespace OHOS::Ace
