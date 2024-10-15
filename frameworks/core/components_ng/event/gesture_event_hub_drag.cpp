@@ -590,7 +590,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             defaultPixelMapScale = menuPreviewScale;
             menuPreviewScale_ = defaultPixelMapScale;
         } else {
-            defaultPixelMapScale = menuPreviewScale;
+            defaultPixelMapScale = menuPreviewScale_;
         }
     }
     auto windowScale = dragDropManager->GetWindowScale();
