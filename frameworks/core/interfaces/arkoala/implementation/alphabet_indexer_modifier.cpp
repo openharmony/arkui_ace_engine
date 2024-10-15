@@ -18,6 +18,7 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -157,13 +158,9 @@ void ItemSizeImpl(Ark_NativePointer node, const Type_AlphabetIndexerAttribute_it
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto size = Converter::OptConvert<Dimension>(*value);
-    if (size.has_value() &&
-        GreatNotEqual(size.value().ConvertToVp(), 0.0) &&
-        size.value().Unit() != DimensionUnit::PERCENT) {
-        IndexerModelNG::SetItemSize(frameNode, size.value());
-    } else {
-        IndexerModelNG::SetItemSize(frameNode, DEFAULT_ITEM_SIZE);
-    }
+    Validator::ValidateNonNegative(size);
+    Validator::ValidateNonPercent(size);
+    IndexerModelNG::SetItemSize(frameNode, size.value_or(DEFAULT_ITEM_SIZE));
 }
 void FontImpl(Ark_NativePointer node, const Ark_Font* value)
 {

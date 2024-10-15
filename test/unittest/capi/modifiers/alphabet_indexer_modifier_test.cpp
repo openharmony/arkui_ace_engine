@@ -39,24 +39,6 @@ struct EventsTracker {
     };
 }; // EventsTracker
 
-inline Ark_Number ArkNum(float src)
-{
-    return {.tag= ARK_TAG_FLOAT32, .f32 = static_cast<Ark_Float32>(src)
-    };
-}
-
-inline Ark_Number ArkNum(int src)
-{
-    return {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(src)
-    };
-}
-
-inline Ark_String ArkStr(const char *s)
-{
-    return {.chars = s, .length = strlen(s)
-    };
-}
-
 inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
     NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
     const char* bundle = "")
@@ -160,14 +142,14 @@ static const std::vector<ArkNumberTestStep> SELECTED_TEST_PLAN = {
 
 typedef std::pair<Type_AlphabetIndexerAttribute_itemSize_Arg0, std::string> ItemSizeTestStep;
 static const std::vector<ItemSizeTestStep> ITEM_SIZE_TEST_PLAN = {
-    { { .selector = 1, .value1 = ArkNum(45.0f) }, "45.00vp"},
-    { { .selector = 1, .value1 = ArkNum(-45) }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
-    { { .selector = 1, .value1 = ArkNum(32) }, "32.00vp"},
-    { { .selector = 1, .value1 = ArkNum(0) }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
-    { { .selector = 0, .value0 = ArkStr("15px") }, "15.00px"},
-    { { .selector = 0, .value0 = ArkStr("99%") }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
-    { { .selector = 0, .value0 = ArkStr("45vp") }, "45.00vp"},
-    { { .selector = 0, .value0 = ArkStr("-13px") }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE}
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(45.0f) }, "45.00vp"},
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(-45) }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(32) }, "32.00vp"},
+    { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(0) }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
+    { { .selector = 0, .value0 = Converter::ArkValue<Ark_String>("15px") }, "15.00px"},
+    { { .selector = 0, .value0 = Converter::ArkValue<Ark_String>("99%") }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
+    { { .selector = 0, .value0 = Converter::ArkValue<Ark_String>("45vp") }, "45.00vp"},
+    { { .selector = 0, .value0 = Converter::ArkValue<Ark_String>("-13px") }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE}
 };
 
 const std::string COLOR_RED = "#FFFF0000";
