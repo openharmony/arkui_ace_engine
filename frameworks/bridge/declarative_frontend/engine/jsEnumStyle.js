@@ -3418,6 +3418,16 @@ let HeightBreakpoint;
   HeightBreakpoint[HeightBreakpoint['HEIGHT_LG'] = 2] = 'HEIGHT_LG';
 })(HeightBreakpoint || (HeightBreakpoint = {}));
 
+var WebElementType;
+(function (WebElementType) {
+  WebElementType[WebElementType['IMAGE'] = 1] = 'IMAGE';
+})(WebElementType || (WebElementType = {}));
+
+var WebResponseType;
+(function (WebResponseType) {
+  WebResponseType[WebResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
+})(WebResponseType || (WebResponseType = {}));
+
 class ImageAnalyzerController {
   constructor() {
   }
