@@ -165,6 +165,18 @@ void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringS
 }
 
 template<>
+void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src)
+{
+    switch (src) {
+        case ARK_IMAGE_REPEAT_NO_REPEAT: dst = ImageRepeat::NO_REPEAT; break;
+        case ARK_IMAGE_REPEAT_X: dst = ImageRepeat::REPEAT_X; break;
+        case ARK_IMAGE_REPEAT_Y: dst = ImageRepeat::REPEAT_Y; break;
+        case ARK_IMAGE_REPEAT_XY: dst = ImageRepeat::REPEAT; break;
+        default: LOGE("Unexpected enum value in Ark_ImageRepeat: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src)
 {
     switch (src) {

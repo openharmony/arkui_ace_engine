@@ -383,12 +383,6 @@ namespace Converter {
     }
 
     template<>
-    inline ImageRepeat Convert(const Ark_ImageRepeat& src)
-    {
-        return static_cast<ImageRepeat>(src);
-    }
-
-    template<>
     inline ImageFit Convert(const Ark_ImageFit& src)
     {
         return static_cast<ImageFit>(src);
@@ -499,6 +493,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
+    template<> void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src);
     template<> void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src);
     template<> void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
     template<> void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src);

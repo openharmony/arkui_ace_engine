@@ -16,12 +16,15 @@
 #include <algorithm>
 #include <variant>
 
+#include "base/utils/system_properties.h"
+#include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
@@ -32,6 +35,8 @@ constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
+constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 }
 
 namespace OHOS::Ace::NG {
@@ -71,6 +76,32 @@ using ClipType = std::variant<
     Ark_PathAttribute,
     Ark_RectAttribute
 >;
+
+namespace Validator {
+void ValidateAnimationOption(AnimationOption& opt, bool isForm)
+{
+    // limit animation for ArkTS Form
+    if (isForm) {
+        auto duration = opt.GetDuration();
+        auto delay = opt.GetDelay();
+        auto iterations = opt.GetIteration();
+        auto tempo = opt.GetTempo();
+
+        if (duration > static_cast<int32_t>(DEFAULT_DURATION)) {
+            duration = static_cast<int32_t>(DEFAULT_DURATION);
+        }
+        if (delay != 0) {
+            delay = 0;
+        }
+        if (SystemProperties::IsFormAnimationLimited() && iterations != 1) {
+            iterations = 1;
+        }
+        if (!NearEqual(tempo, 1.0)) {
+            tempo = 1.0;
+        }
+    }
+}
+} // namespace Validator
 
 namespace Converter {
 template<>
@@ -129,6 +160,28 @@ void AssignCast(std::optional<std::pair<double, double>>& dst, const Ark_Alignme
         case ARK_ALIGNMENT_BOTTOM: dst = { HALF_DIMENSION, FULL_DIMENSION }; break;
         case ARK_ALIGNMENT_BOTTOM_END: dst = { FULL_DIMENSION, FULL_DIMENSION }; break;
         default: LOGE("Unexpected enum value in Ark_Alignment: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<AnimationDirection>& dst, const Ark_PlayMode& src)
+{
+    switch (src) {
+        case ARK_PLAY_MODE_NORMAL: dst = AnimationDirection::NORMAL; break;
+        case ARK_PLAY_MODE_REVERSE: dst = AnimationDirection::REVERSE; break;
+        case ARK_PLAY_MODE_ALTERNATE: dst = AnimationDirection::ALTERNATE; break;
+        case ARK_PLAY_MODE_ALTERNATE_REVERSE: dst = AnimationDirection::ALTERNATE_REVERSE; break;
+        default: LOGE("Unexpected enum value in Ark_PlayMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<FinishCallbackType>& dst, const Ark_FinishCallbackType& src)
+{
+    switch (src) {
+        case ARK_FINISH_CALLBACK_TYPE_REMOVED: dst = FinishCallbackType::REMOVED; break;
+        case ARK_FINISH_CALLBACK_TYPE_LOGICALLY: dst = FinishCallbackType::LOGICALLY; break;
+        default: LOGE("Unexpected enum value in Ark_FinishCallbackType: %{public}d", src);
     }
 }
 
@@ -335,6 +388,47 @@ TranslateOpt Convert(const Ark_TranslateOptions& src)
     translateOptions.z = OptConvert<Dimension>(src.z);
     return translateOptions;
 }
+
+template<>
+RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src)
+{
+    int32_t fRRmin = Converter::Convert<int32_t>(src.min);
+    int32_t fRRmax = Converter::Convert<int32_t>(src.max);
+    int32_t fRRExpected = Converter::Convert<int32_t>(src.expected);
+
+    return AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
+}
+
+template<>
+AnimationOption Convert(const Ark_AnimateParam& src)
+{
+    AnimationOption option;
+    // If the attribute does not exist, the default value is used.
+    auto duration = Converter::OptConvert<int32_t>(src.duration).value_or(DEFAULT_DURATION);
+    auto delay = Converter::OptConvert<int32_t>(src.delay).value_or(0);
+    auto iterations = Converter::OptConvert<int32_t>(src.iterations).value_or(1);
+    auto tempo = static_cast<double>(Converter::OptConvert<float>(src.tempo).value_or(1.0f));
+    if (SystemProperties::GetRosenBackendEnabled() && NearZero(tempo)) {
+        // set duration to 0 to disable animation.
+        duration = 0;
+    }
+    auto direction = Converter::OptConvert<AnimationDirection>(src.playMode).value_or(AnimationDirection::NORMAL);
+    auto finishCallbackType = Converter::OptConvert<FinishCallbackType>(src.finishCallbackType)
+        .value_or(FinishCallbackType::REMOVED);
+    auto curve = Converter::OptConvert<RefPtr<Curve>>(src.curve).value_or(Curves::EASE_IN_OUT);
+    auto frameRateRange = Converter::OptConvert<RefPtr<FrameRateRange>>(src.expectedFrameRateRange)
+        .value_or(AceType::MakeRefPtr<FrameRateRange>(0, 0, 0));
+
+    option.SetDuration(duration);
+    option.SetDelay(delay);
+    option.SetIteration(iterations);
+    option.SetTempo(tempo);
+    option.SetAnimationDirection(direction);
+    option.SetFinishCallbackType(finishCallbackType);
+    option.SetCurve(curve);
+    option.SetFrameRateRange(frameRateRange);
+    return option;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -344,6 +438,12 @@ constexpr int32_t CASE_1 = 1;
 constexpr int32_t CASE_2 = 2;
 
 namespace CommonMethodModifier {
+int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
+{
+    CHECK_NULL_RETURN(pipelineContext, 0);
+    return (GetMicroTickCount() - pipelineContext->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
+}
+
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)
 {
@@ -505,6 +605,14 @@ void BackgroundImageImpl(Ark_NativePointer node,
                          const Type_CommonMethod_backgroundImage_Arg0* src,
                          const Opt_ImageRepeat* repeat)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(src);
+    std::optional<ImageSourceInfo> sourceInfo = Converter::OptConvert<ImageSourceInfo>(*src);
+    ViewAbstract::SetBackgroundImage(frameNode, sourceInfo);
+
+    auto imageRepeat = repeat ? Converter::OptConvert<ImageRepeat>(*repeat) : std::nullopt;
+    ViewAbstract::SetBackgroundImageRepeat(frameNode, imageRepeat);
 }
 void BackgroundImageSizeImpl(Ark_NativePointer node,
                              const Type_CommonMethod_backgroundImageSize_Arg0* value)
@@ -838,6 +946,47 @@ void FocusScopePriorityImpl(Ark_NativePointer node,
 void AnimationImpl(Ark_NativePointer node,
                    const Ark_AnimateParam* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (frameNode->IsFirstBuilding()) {
+        // the node sets attribute value for the first time. No animation is generated.
+        return;
+    }
+
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContextBase = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContextBase);
+    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+        GetFormAnimationTimeInterval(pipelineContextBase) > DEFAULT_DURATION) {
+        TAG_LOGW(
+            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+        return;
+    }
+
+    if (value) {
+        AnimationOption option = Converter::Convert<AnimationOption>(*value);
+        Validator::ValidateAnimationOption(option, pipelineContextBase->IsFormRender());
+
+        if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+            option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
+            option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
+            TAG_LOGW(AceLogTag::ACE_FORM, "[Form animation]  Form animation SetDuration: %{public}lld ms",
+                static_cast<long long>(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase)));
+        }
+
+        LOGI("ARKOALA CommonMethod::AnimationImpl: onFinish callback don`t supported yet");
+        // we need to support onFinish callback and set it to options:
+
+        if (SystemProperties::GetRosenBackendEnabled()) {
+            option.SetAllowRunningAsynchronously(true);
+        }
+        ViewContextModelNG::openAnimationInternal(option);
+    } else {
+        AnimationOption option = AnimationOption();
+        ViewContextModelNG::closeAnimationInternal(option, true);
+    }
 }
 void Transition0Impl(Ark_NativePointer node,
                      const Type_CommonMethod_transition_Arg0* value)
