@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,24 +22,47 @@ namespace RowInterfaceModifier {
 void SetRowOptionsImpl(Ark_NativePointer node,
                        const Opt_RowOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //RowModelNG::SetSetRowOptions(frameNode, convValue);
 }
 } // RowInterfaceModifier
 namespace RowAttributeModifier {
 void AlignItemsImpl(Ark_NativePointer node,
-                    enum Ark_VerticalAlign value)
+                    Ark_VerticalAlign value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //RowModelNG::SetAlignItems(frameNode, convValue);
 }
 void JustifyContentImpl(Ark_NativePointer node,
-                        enum Ark_FlexAlign value)
+                        Ark_FlexAlign value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //RowModelNG::SetJustifyContent(frameNode, convValue);
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //RowModelNG::SetPointLight(frameNode, convValue);
 }
 void ReverseImpl(Ark_NativePointer node,
-                 const Opt_Boolean* isReversed)
+                 const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RowModelNG::SetReverse(frameNode, convValue);
 }
 } // RowAttributeModifier
 const GENERATED_ArkUIRowModifier* GetRowModifier()

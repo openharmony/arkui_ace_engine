@@ -13,53 +13,110 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonShapeMethodModifier {
 void StrokeImpl(Ark_NativePointer node,
-                const ResourceColor* value)
+                const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonShapeMethodModelNG::SetStroke(frameNode, convValue);
 }
 void FillImpl(Ark_NativePointer node,
-              const ResourceColor* value)
+              const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonShapeMethodModelNG::SetFill(frameNode, convValue);
 }
 void StrokeDashOffsetImpl(Ark_NativePointer node,
-                          const Type_CommonShapeMethod_strokeDashOffset_Arg0* value)
+                          const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonShapeMethodModelNG::SetStrokeDashOffset(frameNode, convValue);
 }
 void StrokeLineCapImpl(Ark_NativePointer node,
-                       enum Ark_LineCapStyle value)
+                       Ark_LineCapStyle value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //CommonShapeMethodModelNG::SetStrokeLineCap(frameNode, convValue);
 }
 void StrokeLineJoinImpl(Ark_NativePointer node,
-                        enum Ark_LineJoinStyle value)
+                        Ark_LineJoinStyle value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //CommonShapeMethodModelNG::SetStrokeLineJoin(frameNode, convValue);
 }
 void StrokeMiterLimitImpl(Ark_NativePointer node,
-                          const Type_CommonShapeMethod_strokeMiterLimit_Arg0* value)
+                          const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonShapeMethodModelNG::SetStrokeMiterLimit(frameNode, convValue);
 }
 void StrokeOpacityImpl(Ark_NativePointer node,
-                       const Type_CommonShapeMethod_strokeOpacity_Arg0* value)
+                       const Ark_Union_Number_String_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonShapeMethodModelNG::SetStrokeOpacity(frameNode, convValue);
 }
 void FillOpacityImpl(Ark_NativePointer node,
-                     const Type_CommonShapeMethod_fillOpacity_Arg0* value)
+                     const Ark_Union_Number_String_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonShapeMethodModelNG::SetFillOpacity(frameNode, convValue);
 }
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonShapeMethodModelNG::SetStrokeWidth(frameNode, convValue);
 }
 void AntiAliasImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //CommonShapeMethodModelNG::SetAntiAlias(frameNode, convValue);
 }
 void StrokeDashArrayImpl(Ark_NativePointer node,
                          const Array_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonShapeMethodModelNG::SetStrokeDashArray(frameNode, convValue);
 }
 } // CommonShapeMethodModifier
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()

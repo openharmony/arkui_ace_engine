@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,36 +22,73 @@ namespace ListItemInterfaceModifier {
 void SetListItemOptions0Impl(Ark_NativePointer node,
                              const Opt_ListItemOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ListItemModelNG::SetSetListItemOptions0(frameNode, convValue);
 }
 void SetListItemOptions1Impl(Ark_NativePointer node,
                              const Opt_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ListItemModelNG::SetSetListItemOptions1(frameNode, convValue);
 }
 } // ListItemInterfaceModifier
 namespace ListItemAttributeModifier {
 void StickyImpl(Ark_NativePointer node,
-                enum Ark_Sticky value)
+                Ark_Sticky value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ListItemModelNG::SetSticky(frameNode, convValue);
 }
 void EditableImpl(Ark_NativePointer node,
-                  const Type_ListItemAttribute_editable_Arg0* value)
+                  const Ark_Union_Boolean_EditMode* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ListItemModelNG::SetEditable(frameNode, convValue);
 }
 void SelectableImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //ListItemModelNG::SetSelectable(frameNode, convValue);
 }
 void SelectedImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //ListItemModelNG::SetSelected(frameNode, convValue);
 }
 void SwipeActionImpl(Ark_NativePointer node,
                      const Ark_SwipeActionOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ListItemModelNG::SetSwipeAction(frameNode, convValue);
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ListItemModelNG::SetOnSelect(frameNode, convValue);
 }
 } // ListItemAttributeModifier
 const GENERATED_ArkUIListItemModifier* GetListItemModifier()

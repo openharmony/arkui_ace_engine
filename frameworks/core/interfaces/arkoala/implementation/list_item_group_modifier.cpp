@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,16 +22,30 @@ namespace ListItemGroupInterfaceModifier {
 void SetListItemGroupOptionsImpl(Ark_NativePointer node,
                                  const Opt_ListItemGroupOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //ListItemGroupModelNG::SetSetListItemGroupOptions(frameNode, convValue);
 }
 } // ListItemGroupInterfaceModifier
 namespace ListItemGroupAttributeModifier {
 void DividerImpl(Ark_NativePointer node,
-                 const Type_ListItemGroupAttribute_divider_Arg0* value)
+                 const Ark_Union_ListDividerOptions_Undefined* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ListItemGroupModelNG::SetDivider(frameNode, convValue);
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           const Ark_Materialized* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ListItemGroupModelNG::SetChildrenMainSize(frameNode, convValue);
 }
 } // ListItemGroupAttributeModifier
 const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()

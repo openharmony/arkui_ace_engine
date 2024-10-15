@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,38 +22,77 @@ namespace SymbolGlyphInterfaceModifier {
 void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
                                const Opt_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SymbolGlyphModelNG::SetSetSymbolGlyphOptions(frameNode, convValue);
 }
 } // SymbolGlyphInterfaceModifier
 namespace SymbolGlyphAttributeModifier {
 void FontSizeImpl(Ark_NativePointer node,
-                  const Type_SymbolGlyphAttribute_fontSize_Arg0* value)
+                  const Ark_Union_Number_String_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SymbolGlyphModelNG::SetFontSize(frameNode, convValue);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Array_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SymbolGlyphModelNG::SetFontColor(frameNode, convValue);
 }
 void FontWeightImpl(Ark_NativePointer node,
-                    const Type_SymbolGlyphAttribute_fontWeight_Arg0* value)
+                    const Ark_Union_Number_FontWeight_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SymbolGlyphModelNG::SetFontWeight(frameNode, convValue);
 }
 void EffectStrategyImpl(Ark_NativePointer node,
-                        enum Ark_SymbolEffectStrategy value)
+                        Ark_SymbolEffectStrategy value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //SymbolGlyphModelNG::SetEffectStrategy(frameNode, convValue);
 }
 void RenderingStrategyImpl(Ark_NativePointer node,
-                           enum Ark_SymbolRenderingStrategy value)
+                           Ark_SymbolRenderingStrategy value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //SymbolGlyphModelNG::SetRenderingStrategy(frameNode, convValue);
 }
 void SymbolEffect0Impl(Ark_NativePointer node,
                        const Ark_SymbolEffect* symbolEffect,
                        const Opt_Boolean* isActive)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(symbolEffect);
+    //auto convValue = Converter::OptConvert<type>(symbolEffect); // for enums
+    //SymbolGlyphModelNG::SetSymbolEffect0(frameNode, convValue);
 }
 void SymbolEffect1Impl(Ark_NativePointer node,
                        const Ark_SymbolEffect* symbolEffect,
                        const Opt_Number* triggerValue)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(symbolEffect);
+    //auto convValue = Converter::OptConvert<type>(symbolEffect); // for enums
+    //SymbolGlyphModelNG::SetSymbolEffect1(frameNode, convValue);
 }
 } // SymbolGlyphAttributeModifier
 const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()

@@ -13,98 +13,183 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavDestinationInterfaceModifier {
 void SetNavDestinationOptionsImpl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //NavDestinationModelNG::SetSetNavDestinationOptions(frameNode, convValue);
 }
 } // NavDestinationInterfaceModifier
 namespace NavDestinationAttributeModifier {
-void TitleImpl(Ark_NativePointer node,
-               const Type_NavDestinationAttribute_title_Arg0* value,
-               const Opt_NavigationTitleOptions* options)
-{
-}
 void HideTitleBar0Impl(Ark_NativePointer node,
                        Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //NavDestinationModelNG::SetHideTitleBar0(frameNode, convValue);
+}
+void OnShownImpl(Ark_NativePointer node,
+                 Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavDestinationModelNG::SetOnShown(frameNode, convValue);
+}
+void OnHiddenImpl(Ark_NativePointer node,
+                  Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavDestinationModelNG::SetOnHidden(frameNode, convValue);
+}
+void OnBackPressedImpl(Ark_NativePointer node,
+                       Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavDestinationModelNG::SetOnBackPressed(frameNode, convValue);
+}
+void ModeImpl(Ark_NativePointer node,
+              Ark_NavDestinationMode value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //NavDestinationModelNG::SetMode(frameNode, convValue);
+}
+void BackButtonIconImpl(Ark_NativePointer node,
+                        const Ark_Union_ResourceStr_PixelMap_SymbolGlyphModifier* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavDestinationModelNG::SetBackButtonIcon(frameNode, convValue);
+}
+void MenusImpl(Ark_NativePointer node,
+               const Ark_Union_Array_NavigationMenuItem_CustomBuilder* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavDestinationModelNG::SetMenus(frameNode, convValue);
+}
+void OnReadyImpl(Ark_NativePointer node,
+                 Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavDestinationModelNG::SetOnReady(frameNode, convValue);
+}
+void OnWillAppearImpl(Ark_NativePointer node,
+                      Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavDestinationModelNG::SetOnWillAppear(frameNode, convValue);
+}
+void OnWillDisappearImpl(Ark_NativePointer node,
+                         Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavDestinationModelNG::SetOnWillDisappear(frameNode, convValue);
+}
+void OnWillShowImpl(Ark_NativePointer node,
+                    Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavDestinationModelNG::SetOnWillShow(frameNode, convValue);
+}
+void OnWillHideImpl(Ark_NativePointer node,
+                    Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavDestinationModelNG::SetOnWillHide(frameNode, convValue);
+}
+void SystemBarStyleImpl(Ark_NativePointer node,
+                        const Opt_CustomObject* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavDestinationModelNG::SetSystemBarStyle(frameNode, convValue);
+}
+void RecoverableImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavDestinationModelNG::SetRecoverable(frameNode, convValue);
+}
+void SystemTransitionImpl(Ark_NativePointer node,
+                          Ark_NavigationSystemTransitionType value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //NavDestinationModelNG::SetSystemTransition(frameNode, convValue);
+}
+void TitleImpl(Ark_NativePointer node,
+               const Ark_Type_NavDestinationAttribute_title_value* value,
+               const Opt_NavigationTitleOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //NavDestinationModelNG::SetTitle(frameNode, convValue);
 }
 void HideTitleBar1Impl(Ark_NativePointer node,
                        Ark_Boolean hide,
                        Ark_Boolean animated)
 {
-}
-void OnShownImpl(Ark_NativePointer node,
-                 Ark_Function callback)
-{
-}
-void OnHiddenImpl(Ark_NativePointer node,
-                  Ark_Function callback)
-{
-}
-void OnBackPressedImpl(Ark_NativePointer node,
-                       Ark_Function callback)
-{
-}
-void ModeImpl(Ark_NativePointer node,
-              enum Ark_NavDestinationMode value)
-{
-}
-void BackButtonIconImpl(Ark_NativePointer node,
-                        const Type_NavDestinationAttribute_backButtonIcon_Arg0* value)
-{
-}
-void MenusImpl(Ark_NativePointer node,
-               const Type_NavDestinationAttribute_menus_Arg0* value)
-{
-}
-void OnReadyImpl(Ark_NativePointer node,
-                 Ark_Function callback)
-{
-}
-void OnWillAppearImpl(Ark_NativePointer node,
-                      Ark_Function callback)
-{
-}
-void OnWillDisappearImpl(Ark_NativePointer node,
-                         Ark_Function callback)
-{
-}
-void OnWillShowImpl(Ark_NativePointer node,
-                    Ark_Function callback)
-{
-}
-void OnWillHideImpl(Ark_NativePointer node,
-                    Ark_Function callback)
-{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(hide);
+    //auto convValue = Converter::OptConvert<type>(hide); // for enums
+    //NavDestinationModelNG::SetHideTitleBar1(frameNode, convValue);
 }
 void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
                               const Opt_Array_LayoutSafeAreaType* types,
                               const Opt_Array_LayoutSafeAreaEdge* edges)
 {
-}
-void SystemBarStyleImpl(Ark_NativePointer node,
-                        const Opt_CustomObject* style)
-{
-}
-void RecoverableImpl(Ark_NativePointer node,
-                     const Opt_Boolean* recoverable)
-{
-}
-void SystemTransitionImpl(Ark_NativePointer node,
-                          enum Ark_NavigationSystemTransitionType type)
-{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(types);
+    //auto convValue = Converter::OptConvert<type>(types); // for enums
+    //NavDestinationModelNG::SetIgnoreLayoutSafeArea(frameNode, convValue);
 }
 } // NavDestinationAttributeModifier
 const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
     static const GENERATED_ArkUINavDestinationModifier ArkUINavDestinationModifierImpl {
         NavDestinationInterfaceModifier::SetNavDestinationOptionsImpl,
-        NavDestinationAttributeModifier::TitleImpl,
         NavDestinationAttributeModifier::HideTitleBar0Impl,
-        NavDestinationAttributeModifier::HideTitleBar1Impl,
         NavDestinationAttributeModifier::OnShownImpl,
         NavDestinationAttributeModifier::OnHiddenImpl,
         NavDestinationAttributeModifier::OnBackPressedImpl,
@@ -116,10 +201,12 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationAttributeModifier::OnWillDisappearImpl,
         NavDestinationAttributeModifier::OnWillShowImpl,
         NavDestinationAttributeModifier::OnWillHideImpl,
-        NavDestinationAttributeModifier::IgnoreLayoutSafeAreaImpl,
         NavDestinationAttributeModifier::SystemBarStyleImpl,
         NavDestinationAttributeModifier::RecoverableImpl,
         NavDestinationAttributeModifier::SystemTransitionImpl,
+        NavDestinationAttributeModifier::TitleImpl,
+        NavDestinationAttributeModifier::HideTitleBar1Impl,
+        NavDestinationAttributeModifier::IgnoreLayoutSafeAreaImpl,
     };
     return &ArkUINavDestinationModifierImpl;
 }

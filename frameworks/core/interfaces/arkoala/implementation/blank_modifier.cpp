@@ -13,19 +13,30 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankInterfaceModifier {
 void SetBlankOptionsImpl(Ark_NativePointer node,
-                         const Opt_Type_BlankInterface_setBlankOptions_Arg0* min)
+                         const Opt_Union_Number_String* min)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = min ? Converter::OptConvert<type>(*min) : std::nullopt;
+    //BlankModelNG::SetSetBlankOptions(frameNode, convValue);
 }
 } // BlankInterfaceModifier
 namespace BlankAttributeModifier {
 void ColorImpl(Ark_NativePointer node,
-               const ResourceColor* value)
+               const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //BlankModelNG::SetColor(frameNode, convValue);
 }
 } // BlankAttributeModifier
 const GENERATED_ArkUIBlankModifier* GetBlankModifier()

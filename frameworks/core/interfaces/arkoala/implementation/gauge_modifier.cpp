@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,48 +22,102 @@ namespace GaugeInterfaceModifier {
 void SetGaugeOptionsImpl(Ark_NativePointer node,
                          const Ark_GaugeOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    //auto convValue = Converter::OptConvert<type_name>(*options);
+    //GaugeModelNG::SetSetGaugeOptions(frameNode, convValue);
 }
 } // GaugeInterfaceModifier
 namespace GaugeAttributeModifier {
 void ValueImpl(Ark_NativePointer node,
                const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GaugeModelNG::SetValue(frameNode, convValue);
 }
 void StartAngleImpl(Ark_NativePointer node,
-                    const Ark_Number* angle)
+                    const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GaugeModelNG::SetStartAngle(frameNode, convValue);
 }
 void EndAngleImpl(Ark_NativePointer node,
-                  const Ark_Number* angle)
+                  const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GaugeModelNG::SetEndAngle(frameNode, convValue);
 }
 void ColorsImpl(Ark_NativePointer node,
-                const Type_GaugeAttribute_colors_Arg0* colors)
+                const Ark_Type_GaugeAttribute_colors_colors* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GaugeModelNG::SetColors(frameNode, convValue);
 }
 void StrokeWidthImpl(Ark_NativePointer node,
-                     const Ark_Length* length)
+                     const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GaugeModelNG::SetStrokeWidth(frameNode, convValue);
 }
 void DescriptionImpl(Ark_NativePointer node,
-                     const CustomBuilder* value)
+                     const Ark_CustomBuilder* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GaugeModelNG::SetDescription(frameNode, convValue);
 }
 void TrackShadowImpl(Ark_NativePointer node,
                      const Ark_GaugeShadowOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GaugeModelNG::SetTrackShadow(frameNode, convValue);
 }
 void IndicatorImpl(Ark_NativePointer node,
                    const Ark_GaugeIndicatorOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GaugeModelNG::SetIndicator(frameNode, convValue);
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
-                          const Opt_Boolean* isPrivacySensitiveMode)
+                          const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetPrivacySensitive(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GaugeModelNG::SetContentModifier(frameNode, convValue);
 }
 } // GaugeAttributeModifier
 const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()

@@ -13,18 +13,30 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RowSplitInterfaceModifier {
 void SetRowSplitOptionsImpl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //RowSplitModelNG::SetSetRowSplitOptions(frameNode, convValue);
 }
 } // RowSplitInterfaceModifier
 namespace RowSplitAttributeModifier {
 void ResizeableImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //RowSplitModelNG::SetResizeable(frameNode, convValue);
 }
 } // RowSplitAttributeModifier
 const GENERATED_ArkUIRowSplitModifier* GetRowSplitModifier()

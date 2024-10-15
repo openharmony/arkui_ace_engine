@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,65 +22,140 @@ namespace ShapeInterfaceModifier {
 void SetShapeOptions0Impl(Ark_NativePointer node,
                           const Ark_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ShapeModelNG::SetSetShapeOptions0(frameNode, convValue);
 }
 void SetShapeOptions1Impl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //ShapeModelNG::SetSetShapeOptions1(frameNode, convValue);
 }
 } // ShapeInterfaceModifier
 namespace ShapeAttributeModifier {
 void ViewPortImpl(Ark_NativePointer node,
-                  const Type_ShapeAttribute_viewPort_Arg0* value)
+                  const Ark_Literal_Union_Number_String_x_y_width_height* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ShapeModelNG::SetViewPort(frameNode, convValue);
 }
 void StrokeImpl(Ark_NativePointer node,
-                const ResourceColor* value)
+                const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ShapeModelNG::SetStroke(frameNode, convValue);
 }
 void FillImpl(Ark_NativePointer node,
-              const ResourceColor* value)
+              const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ShapeModelNG::SetFill(frameNode, convValue);
 }
 void StrokeDashOffsetImpl(Ark_NativePointer node,
-                          const Type_ShapeAttribute_strokeDashOffset_Arg0* value)
+                          const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ShapeModelNG::SetStrokeDashOffset(frameNode, convValue);
 }
 void StrokeDashArrayImpl(Ark_NativePointer node,
                          const Array_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ShapeModelNG::SetStrokeDashArray(frameNode, convValue);
 }
 void StrokeLineCapImpl(Ark_NativePointer node,
-                       enum Ark_LineCapStyle value)
+                       Ark_LineCapStyle value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ShapeModelNG::SetStrokeLineCap(frameNode, convValue);
 }
 void StrokeLineJoinImpl(Ark_NativePointer node,
-                        enum Ark_LineJoinStyle value)
+                        Ark_LineJoinStyle value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ShapeModelNG::SetStrokeLineJoin(frameNode, convValue);
 }
 void StrokeMiterLimitImpl(Ark_NativePointer node,
-                          const Type_ShapeAttribute_strokeMiterLimit_Arg0* value)
+                          const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ShapeModelNG::SetStrokeMiterLimit(frameNode, convValue);
 }
 void StrokeOpacityImpl(Ark_NativePointer node,
-                       const Type_ShapeAttribute_strokeOpacity_Arg0* value)
+                       const Ark_Union_Number_String_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ShapeModelNG::SetStrokeOpacity(frameNode, convValue);
 }
 void FillOpacityImpl(Ark_NativePointer node,
-                     const Type_ShapeAttribute_fillOpacity_Arg0* value)
+                     const Ark_Union_Number_String_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ShapeModelNG::SetFillOpacity(frameNode, convValue);
 }
 void StrokeWidthImpl(Ark_NativePointer node,
-                     const Type_ShapeAttribute_strokeWidth_Arg0* value)
+                     const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ShapeModelNG::SetStrokeWidth(frameNode, convValue);
 }
 void AntiAliasImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //ShapeModelNG::SetAntiAlias(frameNode, convValue);
 }
 void MeshImpl(Ark_NativePointer node,
               const Array_CustomObject* value,
               const Ark_Number* column,
               const Ark_Number* row)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ShapeModelNG::SetMesh(frameNode, convValue);
 }
 } // ShapeAttributeModifier
 const GENERATED_ArkUIShapeModifier* GetShapeModifier()

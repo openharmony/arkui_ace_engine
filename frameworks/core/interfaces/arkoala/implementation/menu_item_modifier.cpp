@@ -13,43 +13,83 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemInterfaceModifier {
 void SetMenuItemOptionsImpl(Ark_NativePointer node,
-                            const Opt_Type_MenuItemInterface_setMenuItemOptions_Arg0* value)
+                            const Opt_Union_MenuItemOptions_CustomBuilder* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //MenuItemModelNG::SetSetMenuItemOptions(frameNode, convValue);
 }
 } // MenuItemInterfaceModifier
 namespace MenuItemAttributeModifier {
 void SelectedImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //MenuItemModelNG::SetSelected(frameNode, convValue);
 }
 void SelectIconImpl(Ark_NativePointer node,
-                    const Type_MenuItemAttribute_selectIcon_Arg0* value)
+                    const Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //MenuItemModelNG::SetSelectIcon(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //MenuItemModelNG::SetOnChange(frameNode, convValue);
 }
 void ContentFontImpl(Ark_NativePointer node,
                      const Ark_Font* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //MenuItemModelNG::SetContentFont(frameNode, convValue);
 }
 void ContentFontColorImpl(Ark_NativePointer node,
-                          const ResourceColor* value)
+                          const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //MenuItemModelNG::SetContentFontColor(frameNode, convValue);
 }
 void LabelFontImpl(Ark_NativePointer node,
                    const Ark_Font* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //MenuItemModelNG::SetLabelFont(frameNode, convValue);
 }
 void LabelFontColorImpl(Ark_NativePointer node,
-                        const ResourceColor* value)
+                        const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //MenuItemModelNG::SetLabelFontColor(frameNode, convValue);
 }
 } // MenuItemAttributeModifier
 const GENERATED_ArkUIMenuItemModifier* GetMenuItemModifier()

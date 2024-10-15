@@ -13,27 +13,48 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RectInterfaceModifier {
 void SetRectOptionsImpl(Ark_NativePointer node,
-                        const Opt_Type_RectInterface_setRectOptions_Arg0* value)
+                        const Opt_Type_RectInterface_value* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RectModelNG::SetSetRectOptions(frameNode, convValue);
 }
 } // RectInterfaceModifier
 namespace RectAttributeModifier {
 void RadiusWidthImpl(Ark_NativePointer node,
-                     const Type_RectAttribute_radiusWidth_Arg0* value)
+                     const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //RectModelNG::SetRadiusWidth(frameNode, convValue);
 }
 void RadiusHeightImpl(Ark_NativePointer node,
-                      const Type_RectAttribute_radiusHeight_Arg0* value)
+                      const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //RectModelNG::SetRadiusHeight(frameNode, convValue);
 }
 void RadiusImpl(Ark_NativePointer node,
-                const Type_RectAttribute_radius_Arg0* value)
+                const Ark_Union_Number_String_Array_Any* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //RectModelNG::SetRadius(frameNode, convValue);
 }
 } // RectAttributeModifier
 const GENERATED_ArkUIRectModifier* GetRectModifier()

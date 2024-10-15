@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,6 +22,10 @@ namespace CircleInterfaceModifier {
 void SetCircleOptionsImpl(Ark_NativePointer node,
                           const Opt_CircleOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CircleModelNG::SetSetCircleOptions(frameNode, convValue);
 }
 } // CircleInterfaceModifier
 const GENERATED_ArkUICircleModifier* GetCircleModifier()

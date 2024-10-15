@@ -13,22 +13,38 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LocationButtonInterfaceModifier {
 void SetLocationButtonOptions0Impl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //LocationButtonModelNG::SetSetLocationButtonOptions0(frameNode, convValue);
 }
 void SetLocationButtonOptions1Impl(Ark_NativePointer node,
                                    const Ark_LocationButtonOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    //auto convValue = Converter::OptConvert<type_name>(*options);
+    //LocationButtonModelNG::SetSetLocationButtonOptions1(frameNode, convValue);
 }
 } // LocationButtonInterfaceModifier
 namespace LocationButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
-                 Ark_Function event)
+                 Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //LocationButtonModelNG::SetOnClick(frameNode, convValue);
 }
 } // LocationButtonAttributeModifier
 const GENERATED_ArkUILocationButtonModifier* GetLocationButtonModifier()

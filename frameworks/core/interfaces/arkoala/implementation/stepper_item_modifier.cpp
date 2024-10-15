@@ -13,26 +13,49 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StepperItemInterfaceModifier {
 void SetStepperItemOptionsImpl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //StepperItemModelNG::SetSetStepperItemOptions(frameNode, convValue);
 }
 } // StepperItemInterfaceModifier
 namespace StepperItemAttributeModifier {
 void PrevLabelImpl(Ark_NativePointer node,
                    const Ark_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<std::string>(*value);
+    //StepperItemModelNG::SetPrevLabel(frameNode, convValue);
 }
 void NextLabelImpl(Ark_NativePointer node,
                    const Ark_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<std::string>(*value);
+    //StepperItemModelNG::SetNextLabel(frameNode, convValue);
 }
 void StatusImpl(Ark_NativePointer node,
                 const Opt_ItemState* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //StepperItemModelNG::SetStatus(frameNode, convValue);
 }
 } // StepperItemAttributeModifier
 const GENERATED_ArkUIStepperItemModifier* GetStepperItemModifier()

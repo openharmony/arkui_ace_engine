@@ -13,26 +13,48 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RelativeContainerInterfaceModifier {
 void SetRelativeContainerOptionsImpl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //RelativeContainerModelNG::SetSetRelativeContainerOptions(frameNode, convValue);
 }
 } // RelativeContainerInterfaceModifier
 namespace RelativeContainerAttributeModifier {
 void GuideLineImpl(Ark_NativePointer node,
                    const Array_GuideLineStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //RelativeContainerModelNG::SetGuideLine(frameNode, convValue);
 }
 void Barrier0Impl(Ark_NativePointer node,
                   const Array_BarrierStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //RelativeContainerModelNG::SetBarrier0(frameNode, convValue);
 }
 void Barrier1Impl(Ark_NativePointer node,
-                  const Array_LocalizedBarrierStyle* barrierStyle)
+                  const Array_LocalizedBarrierStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //RelativeContainerModelNG::SetBarrier1(frameNode, convValue);
 }
 } // RelativeContainerAttributeModifier
 const GENERATED_ArkUIRelativeContainerModifier* GetRelativeContainerModifier()

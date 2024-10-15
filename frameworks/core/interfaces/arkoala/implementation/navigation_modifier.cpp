@@ -13,127 +13,263 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigationInterfaceModifier {
 void SetNavigationOptions0Impl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //NavigationModelNG::SetSetNavigationOptions0(frameNode, convValue);
 }
 void SetNavigationOptions1Impl(Ark_NativePointer node,
                                const Ark_Materialized* pathInfos)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(pathInfos);
+    //auto convValue = Converter::OptConvert<type_name>(*pathInfos);
+    //NavigationModelNG::SetSetNavigationOptions1(frameNode, convValue);
 }
 } // NavigationInterfaceModifier
 namespace NavigationAttributeModifier {
 void NavBarWidthImpl(Ark_NativePointer node,
                      const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavigationModelNG::SetNavBarWidth(frameNode, convValue);
 }
 void NavBarPositionImpl(Ark_NativePointer node,
-                        enum Ark_NavBarPosition value)
+                        Ark_NavBarPosition value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //NavigationModelNG::SetNavBarPosition(frameNode, convValue);
 }
 void NavBarWidthRangeImpl(Ark_NativePointer node,
-                          const Type_NavigationAttribute_navBarWidthRange_Arg0* value)
+                          const Ark_Tuple_Dimension_Dimension* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavigationModelNG::SetNavBarWidthRange(frameNode, convValue);
 }
 void MinContentWidthImpl(Ark_NativePointer node,
                          const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavigationModelNG::SetMinContentWidth(frameNode, convValue);
 }
 void ModeImpl(Ark_NativePointer node,
-              enum Ark_NavigationMode value)
+              Ark_NavigationMode value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //NavigationModelNG::SetMode(frameNode, convValue);
 }
 void BackButtonIconImpl(Ark_NativePointer node,
-                        const Type_NavigationAttribute_backButtonIcon_Arg0* value)
+                        const Ark_Union_String_PixelMap_Resource_SymbolGlyphModifier* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavigationModelNG::SetBackButtonIcon(frameNode, convValue);
 }
 void HideNavBarImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
-}
-void TitleImpl(Ark_NativePointer node,
-               const Type_NavigationAttribute_title_Arg0* value,
-               const Opt_NavigationTitleOptions* options)
-{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //NavigationModelNG::SetHideNavBar(frameNode, convValue);
 }
 void SubTitleImpl(Ark_NativePointer node,
                   const Ark_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<std::string>(*value);
+    //NavigationModelNG::SetSubTitle(frameNode, convValue);
 }
 void HideTitleBar0Impl(Ark_NativePointer node,
                        Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //NavigationModelNG::SetHideTitleBar0(frameNode, convValue);
+}
+void HideBackButtonImpl(Ark_NativePointer node,
+                        Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //NavigationModelNG::SetHideBackButton(frameNode, convValue);
+}
+void TitleModeImpl(Ark_NativePointer node,
+                   Ark_NavigationTitleMode value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //NavigationModelNG::SetTitleMode(frameNode, convValue);
+}
+void MenusImpl(Ark_NativePointer node,
+               const Ark_Union_Array_NavigationMenuItem_CustomBuilder* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavigationModelNG::SetMenus(frameNode, convValue);
+}
+void ToolBarImpl(Ark_NativePointer node,
+                 const Ark_Union_object_CustomBuilder* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavigationModelNG::SetToolBar(frameNode, convValue);
+}
+void HideToolBar0Impl(Ark_NativePointer node,
+                      Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //NavigationModelNG::SetHideToolBar0(frameNode, convValue);
+}
+void OnTitleModeChangeImpl(Ark_NativePointer node,
+                           Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavigationModelNG::SetOnTitleModeChange(frameNode, convValue);
+}
+void OnNavBarStateChangeImpl(Ark_NativePointer node,
+                             Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavigationModelNG::SetOnNavBarStateChange(frameNode, convValue);
+}
+void OnNavigationModeChangeImpl(Ark_NativePointer node,
+                                Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavigationModelNG::SetOnNavigationModeChange(frameNode, convValue);
+}
+void NavDestinationImpl(Ark_NativePointer node,
+                        Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavigationModelNG::SetNavDestination(frameNode, convValue);
+}
+void CustomNavContentTransitionImpl(Ark_NativePointer node,
+                                    Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //NavigationModelNG::SetCustomNavContentTransition(frameNode, convValue);
+}
+void SystemBarStyleImpl(Ark_NativePointer node,
+                        const Opt_CustomObject* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavigationModelNG::SetSystemBarStyle(frameNode, convValue);
+}
+void RecoverableImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavigationModelNG::SetRecoverable(frameNode, convValue);
+}
+void TitleImpl(Ark_NativePointer node,
+               const Ark_Type_NavigationAttribute_title_value* value,
+               const Opt_NavigationTitleOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //NavigationModelNG::SetTitle(frameNode, convValue);
 }
 void HideTitleBar1Impl(Ark_NativePointer node,
                        Ark_Boolean hide,
                        Ark_Boolean animated)
 {
-}
-void HideBackButtonImpl(Ark_NativePointer node,
-                        Ark_Boolean value)
-{
-}
-void TitleModeImpl(Ark_NativePointer node,
-                   enum Ark_NavigationTitleMode value)
-{
-}
-void MenusImpl(Ark_NativePointer node,
-               const Type_NavigationAttribute_menus_Arg0* value)
-{
-}
-void ToolBarImpl(Ark_NativePointer node,
-                 const Type_NavigationAttribute_toolBar_Arg0* value)
-{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(hide);
+    //auto convValue = Converter::OptConvert<type>(hide); // for enums
+    //NavigationModelNG::SetHideTitleBar1(frameNode, convValue);
 }
 void ToolbarConfigurationImpl(Ark_NativePointer node,
-                              const Type_NavigationAttribute_toolbarConfiguration_Arg0* value,
+                              const Ark_Union_Array_ToolbarItem_CustomBuilder* value,
                               const Opt_NavigationToolbarOptions* options)
 {
-}
-void HideToolBar0Impl(Ark_NativePointer node,
-                      Ark_Boolean value)
-{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //NavigationModelNG::SetToolbarConfiguration(frameNode, convValue);
 }
 void HideToolBar1Impl(Ark_NativePointer node,
                       Ark_Boolean hide,
                       Ark_Boolean animated)
 {
-}
-void OnTitleModeChangeImpl(Ark_NativePointer node,
-                           Ark_Function callback)
-{
-}
-void OnNavBarStateChangeImpl(Ark_NativePointer node,
-                             Ark_Function callback)
-{
-}
-void OnNavigationModeChangeImpl(Ark_NativePointer node,
-                                Ark_Function callback)
-{
-}
-void NavDestinationImpl(Ark_NativePointer node,
-                        Ark_Function builder)
-{
-}
-void CustomNavContentTransitionImpl(Ark_NativePointer node,
-                                    Ark_Function delegate)
-{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(hide);
+    //auto convValue = Converter::OptConvert<type>(hide); // for enums
+    //NavigationModelNG::SetHideToolBar1(frameNode, convValue);
 }
 void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
                               const Opt_Array_LayoutSafeAreaType* types,
                               const Opt_Array_LayoutSafeAreaEdge* edges)
 {
-}
-void SystemBarStyleImpl(Ark_NativePointer node,
-                        const Opt_CustomObject* style)
-{
-}
-void RecoverableImpl(Ark_NativePointer node,
-                     const Opt_Boolean* recoverable)
-{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(types);
+    //auto convValue = Converter::OptConvert<type>(types); // for enums
+    //NavigationModelNG::SetIgnoreLayoutSafeArea(frameNode, convValue);
 }
 } // NavigationAttributeModifier
 const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
@@ -148,25 +284,25 @@ const GENERATED_ArkUINavigationModifier* GetNavigationModifier()
         NavigationAttributeModifier::ModeImpl,
         NavigationAttributeModifier::BackButtonIconImpl,
         NavigationAttributeModifier::HideNavBarImpl,
-        NavigationAttributeModifier::TitleImpl,
         NavigationAttributeModifier::SubTitleImpl,
         NavigationAttributeModifier::HideTitleBar0Impl,
-        NavigationAttributeModifier::HideTitleBar1Impl,
         NavigationAttributeModifier::HideBackButtonImpl,
         NavigationAttributeModifier::TitleModeImpl,
         NavigationAttributeModifier::MenusImpl,
         NavigationAttributeModifier::ToolBarImpl,
-        NavigationAttributeModifier::ToolbarConfigurationImpl,
         NavigationAttributeModifier::HideToolBar0Impl,
-        NavigationAttributeModifier::HideToolBar1Impl,
         NavigationAttributeModifier::OnTitleModeChangeImpl,
         NavigationAttributeModifier::OnNavBarStateChangeImpl,
         NavigationAttributeModifier::OnNavigationModeChangeImpl,
         NavigationAttributeModifier::NavDestinationImpl,
         NavigationAttributeModifier::CustomNavContentTransitionImpl,
-        NavigationAttributeModifier::IgnoreLayoutSafeAreaImpl,
         NavigationAttributeModifier::SystemBarStyleImpl,
         NavigationAttributeModifier::RecoverableImpl,
+        NavigationAttributeModifier::TitleImpl,
+        NavigationAttributeModifier::HideTitleBar1Impl,
+        NavigationAttributeModifier::ToolbarConfigurationImpl,
+        NavigationAttributeModifier::HideToolBar1Impl,
+        NavigationAttributeModifier::IgnoreLayoutSafeAreaImpl,
     };
     return &ArkUINavigationModifierImpl;
 }

@@ -13,30 +13,55 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabContentInterfaceModifier {
 void SetTabContentOptionsImpl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //TabContentModelNG::SetSetTabContentOptions(frameNode, convValue);
 }
 } // TabContentInterfaceModifier
 namespace TabContentAttributeModifier {
 void TabBar0Impl(Ark_NativePointer node,
-                 const Type_TabContentAttribute_tabBar_Arg0* value)
+                 const Ark_Type_TabContentAttribute_tabBar_value* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TabContentModelNG::SetTabBar0(frameNode, convValue);
 }
 void TabBar1Impl(Ark_NativePointer node,
-                 const Type_TabContentAttribute_tabBar1_Arg0* value)
+                 const Ark_Union_SubTabBarStyle_BottomTabBarStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TabContentModelNG::SetTabBar1(frameNode, convValue);
 }
 void OnWillShowImpl(Ark_NativePointer node,
-                    Ark_Function event)
+                    Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //TabContentModelNG::SetOnWillShow(frameNode, convValue);
 }
 void OnWillHideImpl(Ark_NativePointer node,
-                    Ark_Function event)
+                    Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //TabContentModelNG::SetOnWillHide(frameNode, convValue);
 }
 } // TabContentAttributeModifier
 const GENERATED_ArkUITabContentModifier* GetTabContentModifier()

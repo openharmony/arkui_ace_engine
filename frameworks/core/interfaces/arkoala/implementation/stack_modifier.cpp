@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,16 +22,30 @@ namespace StackInterfaceModifier {
 void SetStackOptionsImpl(Ark_NativePointer node,
                          const Opt_StackOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //StackModelNG::SetSetStackOptions(frameNode, convValue);
 }
 } // StackInterfaceModifier
 namespace StackAttributeModifier {
 void AlignContentImpl(Ark_NativePointer node,
-                      enum Ark_Alignment value)
+                      Ark_Alignment value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //StackModelNG::SetAlignContent(frameNode, convValue);
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //StackModelNG::SetPointLight(frameNode, convValue);
 }
 } // StackAttributeModifier
 const GENERATED_ArkUIStackModifier* GetStackModifier()

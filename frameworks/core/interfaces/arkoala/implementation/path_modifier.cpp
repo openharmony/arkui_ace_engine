@@ -13,19 +13,31 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PathInterfaceModifier {
 void SetPathOptionsImpl(Ark_NativePointer node,
-                        const Opt_Type_PathInterface_setPathOptions_Arg0* value)
+                        const Opt_Literal_Union_Number_String_width_height_String_commands* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //PathModelNG::SetSetPathOptions(frameNode, convValue);
 }
 } // PathInterfaceModifier
 namespace PathAttributeModifier {
 void CommandsImpl(Ark_NativePointer node,
                   const Ark_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<std::string>(*value);
+    //PathModelNG::SetCommands(frameNode, convValue);
 }
 } // PathAttributeModifier
 const GENERATED_ArkUIPathModifier* GetPathModifier()

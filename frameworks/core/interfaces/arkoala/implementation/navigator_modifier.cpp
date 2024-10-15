@@ -13,34 +13,66 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigatorInterfaceModifier {
 void SetNavigatorOptions0Impl(Ark_NativePointer node,
-                              const Opt_Type_NavigatorInterface_setNavigatorOptions_Arg0* value)
+                              const Opt_Literal_String_target_NavigationType_type* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //NavigatorModelNG::SetSetNavigatorOptions0(frameNode, convValue);
 }
 void SetNavigatorOptions1Impl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //NavigatorModelNG::SetSetNavigatorOptions1(frameNode, convValue);
 }
 } // NavigatorInterfaceModifier
 namespace NavigatorAttributeModifier {
 void ActiveImpl(Ark_NativePointer node,
                 Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //NavigatorModelNG::SetActive(frameNode, convValue);
 }
 void TypeImpl(Ark_NativePointer node,
-              enum Ark_NavigationType value)
+              Ark_NavigationType value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //NavigatorModelNG::SetType(frameNode, convValue);
 }
 void TargetImpl(Ark_NativePointer node,
                 const Ark_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<std::string>(*value);
+    //NavigatorModelNG::SetTarget(frameNode, convValue);
 }
 void ParamsImpl(Ark_NativePointer node,
                 const Ark_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavigatorModelNG::SetParams(frameNode, convValue);
 }
 } // NavigatorAttributeModifier
 const GENERATED_ArkUINavigatorModifier* GetNavigatorModifier()

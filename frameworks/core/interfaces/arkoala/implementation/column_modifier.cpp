@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,24 +22,47 @@ namespace ColumnInterfaceModifier {
 void SetColumnOptionsImpl(Ark_NativePointer node,
                           const Opt_ColumnOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //ColumnModelNG::SetSetColumnOptions(frameNode, convValue);
 }
 } // ColumnInterfaceModifier
 namespace ColumnAttributeModifier {
 void AlignItemsImpl(Ark_NativePointer node,
-                    enum Ark_HorizontalAlign value)
+                    Ark_HorizontalAlign value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ColumnModelNG::SetAlignItems(frameNode, convValue);
 }
 void JustifyContentImpl(Ark_NativePointer node,
-                        enum Ark_FlexAlign value)
+                        Ark_FlexAlign value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ColumnModelNG::SetJustifyContent(frameNode, convValue);
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ColumnModelNG::SetPointLight(frameNode, convValue);
 }
 void ReverseImpl(Ark_NativePointer node,
-                 const Opt_Boolean* isReversed)
+                 const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ColumnModelNG::SetReverse(frameNode, convValue);
 }
 } // ColumnAttributeModifier
 const GENERATED_ArkUIColumnModifier* GetColumnModifier()

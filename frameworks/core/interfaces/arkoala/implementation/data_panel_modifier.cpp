@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,32 +22,67 @@ namespace DataPanelInterfaceModifier {
 void SetDataPanelOptionsImpl(Ark_NativePointer node,
                              const Ark_DataPanelOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    //auto convValue = Converter::OptConvert<type_name>(*options);
+    //DataPanelModelNG::SetSetDataPanelOptions(frameNode, convValue);
 }
 } // DataPanelInterfaceModifier
 namespace DataPanelAttributeModifier {
 void CloseEffectImpl(Ark_NativePointer node,
                      Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //DataPanelModelNG::SetCloseEffect(frameNode, convValue);
 }
 void ValueColorsImpl(Ark_NativePointer node,
                      const Array_Union_ResourceColor_LinearGradient* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //DataPanelModelNG::SetValueColors(frameNode, convValue);
 }
 void TrackBackgroundColorImpl(Ark_NativePointer node,
-                              const ResourceColor* value)
+                              const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //DataPanelModelNG::SetTrackBackgroundColor(frameNode, convValue);
 }
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //DataPanelModelNG::SetStrokeWidth(frameNode, convValue);
 }
 void TrackShadowImpl(Ark_NativePointer node,
                      const Ark_DataPanelShadowOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //DataPanelModelNG::SetTrackShadow(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //DataPanelModelNG::SetContentModifier(frameNode, convValue);
 }
 } // DataPanelAttributeModifier
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier()
