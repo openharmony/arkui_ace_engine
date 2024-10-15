@@ -14,11 +14,14 @@
  */
 #include "style_modifier.h"
 
+#include <cstdlib>
+
 #include "frame_information.h"
 #include "node_model.h"
 #include "node_transition.h"
 #include "waterflow_section_option.h"
 
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NodeModel {
@@ -309,7 +312,16 @@ uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
     if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC)) {
         colorStr.erase(0, 1);
         constexpr int colorNumFormat = 16;
-        auto value = stoul(colorStr, nullptr, colorNumFormat);
+        char* end = nullptr;
+        unsigned long int value = strtoul(colorStr.c_str(), &end, colorNumFormat);
+        if (errno == ERANGE) {
+            LOGF("%{public}s is out of range.", colorStr.c_str());
+            abort();
+        }
+        if (value == 0 && end == colorStr.c_str()) {
+            LOGW("input %{public}s can not covert to number, use default color：0x00000000" , colorStr.c_str());
+        }
+    
         return value;
     }
     return defaultValue;

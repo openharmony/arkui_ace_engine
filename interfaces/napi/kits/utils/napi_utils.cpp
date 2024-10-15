@@ -473,7 +473,12 @@ void ParseCurveInfo(const std::string& curveString, std::string& curveTypeString
         if (param == "false" || param == "end") {
             param = "0.000000";
         }
-        curveValue.emplace_back(std::stof(param));
+        char* end = nullptr;
+        float value = strtof(param.c_str(), &end);
+        if (end == param.c_str() || errno == ERANGE) {
+            LOGW("%{public}s can not be converted to float or is out of range.", param.c_str());
+        }
+        curveValue.emplace_back(value);
     }
 }
 

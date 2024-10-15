@@ -315,8 +315,6 @@ public:
 
     void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
-    bool ParseThemeConfig(const std::string& themeConfig);
-
     void CheckAndSetFontFamily() override;
 
     void OnFinish()
