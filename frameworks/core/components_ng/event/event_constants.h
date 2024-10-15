@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_CONSTANTS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_CONSTANTS_H
 
+#include <cstddef>
+#include <cstdint>
 enum class MenuPreviewMode {
     NONE,
     IMAGE,
@@ -62,11 +64,7 @@ enum class HitTestMode {
     HTMTRANSPARENT_SELF,
 };
 
-enum class TouchTestStrategy {
-    DEFAULT = 0,
-    FORWARD_COMPETITION,
-    FORWARD
-};
+enum class TouchTestStrategy { DEFAULT = 0, FORWARD_COMPETITION, FORWARD };
 
 enum class HitTestResult {
     // The touch point is located outside the current component area;
@@ -93,5 +91,29 @@ enum class EventTreeType {
 };
 
 } // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace {
+
+static const int32_t TOUCH_TOOL_BASE_ID = 100;
+
+enum class TouchType : size_t {
+    DOWN = 0,
+    UP,
+    MOVE,
+    CANCEL,
+    PULL_DOWN,
+    PULL_UP,
+    PULL_MOVE,
+    PULL_IN_WINDOW,
+    PULL_OUT_WINDOW,
+    HOVER_ENTER,
+    HOVER_MOVE,
+    HOVER_EXIT,
+    HOVER_CANCEL,
+    PROXIMITY_IN,
+    PROXIMITY_OUT,
+    UNKNOWN,
+};
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_CONSTANTS_H

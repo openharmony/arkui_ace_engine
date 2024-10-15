@@ -238,6 +238,7 @@ template("ace_core_source_set") {
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",
       "event/mouse_raw_recognizer.cpp",
+      "event/touch_event.cpp",
 
       # focus
       "focus/focus_node.cpp",
@@ -735,6 +736,7 @@ template("ace_core_ng_source_set") {
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",
       "event/mouse_raw_recognizer.cpp",
+      "event/touch_event.cpp",
 
       # gestures
       "gestures/click_recognizer.cpp",
