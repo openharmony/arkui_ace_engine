@@ -3709,6 +3709,8 @@ struct ArkUINavigationModifier {
     void (*setNavMenuItemSymbol)(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index);
     void (*setRecoverable)(ArkUINodeHandle node, ArkUI_Bool recoverable);
     void (*resetRecoverable)(ArkUINodeHandle node);
+    void (*setEnableDragBar)(ArkUINodeHandle node, ArkUI_Bool enbaleDragBar);
+    void (*resetEnableDragBar)(ArkUINodeHandle node);
 };
 
 struct ArkUINavRouterModifier {

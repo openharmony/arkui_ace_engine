@@ -21339,6 +21339,11 @@ class ArkNavigationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, NavigationRecoverableModifier.identity, NavigationRecoverableModifier, value);
     return this;
   }
+
+  enableDragBar(value) {
+    modifierWithKey(this._modifiersWithKeys, NavigationEnableDragBarModifier.identity, NavigationEnableDragBarModifier, value);
+    return this;
+  }
 }
 class BackButtonIconModifier extends ModifierWithKey {
   constructor(value) {
@@ -21581,6 +21586,21 @@ class NavigationRecoverableModifier extends ModifierWithKey {
   }
 }
 NavigationRecoverableModifier.identity = Symbol('recoverable');
+
+class NavigationEnableDragBarModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navigation.resetEnableDragBar(node);
+    } else {
+      getUINativeModule().navigation.setEnableDragBar(node, this.value);
+    }
+  }
+}
+NavigationEnableDragBarModifier.identity = Symbol('enableDragBar');
 
 class MenusModifier extends ModifierWithKey {
   constructor(value) {

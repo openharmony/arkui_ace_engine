@@ -89,6 +89,7 @@ public:
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
     static void SetRecoverable(FrameNode* frameNode, bool recoverable);
+    static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
 
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);

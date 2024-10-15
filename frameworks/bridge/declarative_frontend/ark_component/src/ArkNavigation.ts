@@ -190,6 +190,11 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, NavigationRecoverableModifier.identity, NavigationRecoverableModifier, value);
     return this;
   }
+
+  enableDargBar(value: boolean | undefined): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, NavigationEnableDragBarModifier.identity, NavigationEnableDragBarModifier, value);
+    return this;
+  }
 }
 
 class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
@@ -467,6 +472,21 @@ class NavigationRecoverableModifier extends ModifierWithKey<boolean | undefined>
       getUINativeModule().navigation.resetRecoverable(node);
     } else {
       getUINativeModule().navigation.setRecoverable(node, this.value);
+    }
+  }
+}
+
+class NavigationEnableDragBarModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableDragBar');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navigation.resetEnableDragBar(node);
+    } else {
+      getUINativeModule().navigation.setEnableDragBar(node, this.value);
     }
   }
 }
