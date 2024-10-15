@@ -236,7 +236,7 @@ static const std::vector<TestVector> VALID_0_TEST1_PLAN = {
 
 static const std::vector<TestVector> VALID_0_TEST2_PLAN = {
     { ATTRIBUTE_SET_STYLE_X_NAME, "12.00px" },
-    { ATTRIBUTE_SET_STYLE_Y_NAME, "10.00px" },
+    { ATTRIBUTE_SET_STYLE_Y_NAME, "14.00px" },
     { ATTRIBUTE_SET_STYLE_COLOR_NAME, "#FF808080" },
     { ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME, "8.00vp" },
     { ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME, "#FF00FF00" },
@@ -256,8 +256,8 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestValidValues, TestSize.Level1)
     Ark_BadgeParamWithNumber inputValueOptions;
     InitNumberOptions(inputValueOptions);
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(Dimension(12.00, DimensionUnit::PX));
-    position.y = Converter::ArkValue<Opt_Length>(Dimension(10.00, DimensionUnit::PX));
+    position.x = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(12)));
+    position.y = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(14)));
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
@@ -434,8 +434,8 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestValidValues, TestSize.Level1)
     InitStringOptions(inputValueOptions);
 
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(Dimension(16, DimensionUnit::VP));
-    position.y = Converter::ArkValue<Opt_Length>(Dimension(24, DimensionUnit::VP));
+    position.x = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(16.00f)));
+    position.y = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(24.00f)));
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
