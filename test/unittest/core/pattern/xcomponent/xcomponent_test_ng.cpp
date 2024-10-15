@@ -141,6 +141,14 @@ class XComponentTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void TearDown() override
+    {
+        testProperty.loadEvent = std::nullopt;
+        testProperty.destroyEvent = std::nullopt;
+        testProperty.surfaceCreatedEvent = std::nullopt;
+        testProperty.surfaceChangedEvent = std::nullopt;
+        testProperty.surfaceDestroyedEvent = std::nullopt;
+    }
 
 protected:
     static RefPtr<FrameNode> CreateXComponentNode(TestProperty& testProperty);
