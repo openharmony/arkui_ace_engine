@@ -814,6 +814,10 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     };
     constexpr int ONE = 1; // Only one focusable component on scene
     bool isOnlyOneFocusableComponent = getMaxFocusableCount(getMaxFocusableCount, parentHub) == ONE;
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        isOnlyOneFocusableComponent = false; // UI Extension Window
+    }
 
     if (event.action != KeyAction::DOWN) {
         if (event.code == KeyCode::KEY_TAB && focusChoice_ == FocusChoice::SEARCH) {
