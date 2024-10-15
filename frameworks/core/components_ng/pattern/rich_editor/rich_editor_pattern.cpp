@@ -2687,6 +2687,7 @@ bool RichEditorPattern::HandleClickSelection(const OHOS::Ace::GestureEvent& info
 {
     CHECK_NULL_RETURN(!selectOverlay_->GetIsHandleMoving(), true);
     if (SelectOverlayIsOn()) {
+        selectOverlay_->SwitchToOverlayMode();
         selectOverlay_->ToggleMenu();
     } else {
         CalculateHandleOffsetAndShowOverlay();
