@@ -153,11 +153,6 @@ void SessionWrapperImpl::NotifyCreate()
 {
 }
 
-int32_t SessionWrapperImpl::GetWindowSceneId()
-{
-    return 1;
-}
-
 void SessionWrapperImpl::NotifyForeground()
 {
 }
