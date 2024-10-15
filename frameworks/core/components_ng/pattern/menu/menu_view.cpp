@@ -537,7 +537,7 @@ void ShowHoverImageAnimationProc(const RefPtr<FrameNode>& hoverImageStackNode, c
 void ShowPixelMapScaleAnimationProc(
     const RefPtr<MenuTheme>& menuTheme, const RefPtr<FrameNode>& imageNode, const RefPtr<MenuPattern>& menuPattern)
 {
-    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(menuPattern && menuTheme);
     auto scaleBefore = menuPattern->GetPreviewBeforeAnimationScale();
     auto scaleAfter = menuPattern->GetPreviewAfterAnimationScale();
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED);
@@ -546,6 +546,7 @@ void ShowPixelMapScaleAnimationProc(
     auto previewAfterAnimationScale =
         LessNotEqual(scaleAfter, 0.0) ? menuTheme->GetPreviewAfterAnimationScale() : scaleAfter;
 
+    CHECK_NULL_VOID(imageNode);
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     auto imageRawSize = imagePattern->GetRawImageSize();
@@ -843,11 +844,16 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
         SetPixelMap(targetNode, wrapperNode, hoverImageStackNode, previewNode, menuParam);
     }
     if (menuParam.previewMode == MenuPreviewMode::NONE && isAllowedDrag) {
-        auto pixelMapNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetLastChild());
+        CHECK_NULL_VOID(wrapperNode);
+        auto pixelMapNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(1));
         CHECK_NULL_VOID(pixelMapNode);
         auto renderContext = pixelMapNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateZIndex(-1);
+        auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+        if (menuNode) {
+            MenuView::ShowPixelMapAnimation(menuNode);
+        }
         // if filter set in subwindow, need to adjust zOrder to show in back.
         auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);

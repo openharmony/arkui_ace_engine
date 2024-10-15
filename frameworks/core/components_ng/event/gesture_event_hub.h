@@ -75,8 +75,7 @@ struct BindMenuStatus {
     MenuPreviewMode longPressPreviewMode = MenuPreviewMode::NONE;
     bool IsNotNeedShowPreview() const
     {
-        return (isBindCustomMenu && isShow && isShowPreviewMode!= MenuPreviewMode::NONE) ||
-            (isBindLongPressMenu && longPressPreviewMode != MenuPreviewMode::NONE);
+        return (isBindCustomMenu && isShow) || isBindLongPressMenu;
     }
 };
 
@@ -284,7 +283,6 @@ public:
     void StartDragForCustomBuilder(const GestureEvent& info, const RefPtr<PipelineBase>& pipeline,
         const RefPtr<FrameNode> frameNode, DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event);
 #endif
-    static bool IsAllowedDrag(const RefPtr<FrameNode>& frameNode);
     void SetMenuPreviewScale(float menuPreviewScale);
     float GetMenuPreviewScale() const;
     void SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreviewMode previewMode);
