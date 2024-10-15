@@ -54,11 +54,7 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     return this;
   }
   usingPopup(value: boolean): this {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, UsingPopupModifier, value);
-    } else {
-      modifier(this._modifiers, UsingPopupModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, UsingPopupModifier.identity, UsingPopupModifier, value);
     return this;
   }
   selectedFont(value: Font): this {
@@ -74,12 +70,7 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     return this;
   }
   itemSize(value: string | number): this {
-    if (typeof value !== 'number' && typeof value !== 'string') {
-      modifier(this._modifiers, ItemSizeModifier, undefined);
-    }
-    else {
-      modifier(this._modifiers, ItemSizeModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, ItemSizeModifier.identity, ItemSizeModifier, value);
     return this;
   }
   font(value: Font): this {
@@ -103,11 +94,7 @@ class ArkAlphabetIndexerComponent extends ArkComponent implements AlphabetIndexe
     throw new Error('Method not implemented.');
   }
   selected(index: number): this {
-    if (typeof index === 'number') {
-      modifier(this._modifiers, AlphabetIndexerSelectedModifier, index);
-    } else {
-      modifier(this._modifiers, AlphabetIndexerSelectedModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, AlphabetIndexerSelectedModifier.identity, AlphabetIndexerSelectedModifier, index);
     return this;
   }
   popupPosition(value: Position): this {
@@ -242,11 +229,7 @@ class PopupItemBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -264,11 +247,7 @@ class ColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -286,11 +265,7 @@ class PopupColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -308,11 +283,7 @@ class SelectedColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -330,11 +301,7 @@ class PopupBackgroundModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -352,11 +319,7 @@ class SelectedBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -374,11 +337,7 @@ class PopupUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -396,11 +355,7 @@ class PopupSelectedColorModifier extends ModifierWithKey<ResourceColor> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -421,7 +376,7 @@ class AlignStyleModifier extends ModifierWithKey<ArkAlignStyle> {
   }
 }
 
-class UsingPopupModifier extends Modifier<boolean> {
+class UsingPopupModifier extends ModifierWithKey<boolean> {
   static identity = Symbol('usingPopup');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -432,7 +387,7 @@ class UsingPopupModifier extends Modifier<boolean> {
   }
 }
 
-class AlphabetIndexerSelectedModifier extends Modifier<number> {
+class AlphabetIndexerSelectedModifier extends ModifierWithKey<number> {
   static identity = Symbol('alphabetIndexerSelected');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -443,7 +398,7 @@ class AlphabetIndexerSelectedModifier extends Modifier<number> {
   }
 }
 
-class ItemSizeModifier extends Modifier<number | string> {
+class ItemSizeModifier extends ModifierWithKey<number | string> {
   static identity: Symbol = Symbol('itemSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
