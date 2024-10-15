@@ -15,7 +15,7 @@
 
 #include "core/interfaces/arkoala/implementation/custom_dialog_controller_peer_impl.h"
 #include "core/interfaces/arkoala/utility/validators.h"
-
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "core/components/theme/shadow_theme.h"
 
 namespace {

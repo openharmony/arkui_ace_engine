@@ -76,6 +76,14 @@ RefPtr<RichEditorBaseControllerBase> RichEditorModelNG::GetRichEditorController(
     return richEditorPattern->GetRichEditorController();
 }
 
+RefPtr<RichEditorBaseControllerBase> RichEditorModelNG::GetRichEditorController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetRichEditorController();
+}
+
 void RichEditorModelNG::SetOnReady(std::function<void()>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
@@ -557,7 +565,10 @@ void RichEditorModelNG::SetBarState(FrameNode* frameNode, DisplayMode mode)
 
 RefPtr<NG::FrameNode> RichEditorModelNG::CreateFrameNode(int32_t nodeId)
 {
-    return FrameNode::CreateFrameNode(
-        V2::RICH_EDITOR_DRAG_ETS_TAG, nodeId, AceType::MakeRefPtr<RichEditorPattern>());
+    auto richEditorPattern = AceType::MakeRefPtr<RichEditorPattern>();
+    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
+    richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
+
+    return FrameNode::CreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId, richEditorPattern);
 }
 } // namespace OHOS::Ace::NG
