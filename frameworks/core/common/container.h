@@ -562,6 +562,15 @@ public:
         return apiTargetVersion >= static_cast<int32_t>(version);
     }
 
+    static int32_t GetCurrentApiTargetVersion()
+    {
+        auto container = Current();
+        if (!container) {
+            return AceApplicationInfo::GetInstance().GetApiTargetVersion() % 1000;
+        }
+        return container->GetApiTargetVersion();
+    }
+
     void SetAppBar(const RefPtr<NG::AppBarView>& appBar)
     {
         appBar_ = appBar;
