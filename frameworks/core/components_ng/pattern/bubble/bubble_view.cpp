@@ -161,6 +161,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     if (param->GetRadius().has_value()) {
         popupProp->UpdateRadius(param->GetRadius().value());
     }
+    popupProp->UpdateFollowTransformOfTarget(param->IsFollowTransformOfTarget());
     SetHitTestMode(popupNode, param->IsBlockEvent());
     if (param->GetTargetSpace().has_value()) {
         popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
@@ -306,6 +307,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     if (param->GetRadius().has_value()) {
         layoutProps->UpdateRadius(param->GetRadius().value());
     }
+    layoutProps->UpdateFollowTransformOfTarget(param->IsFollowTransformOfTarget());
     SetHitTestMode(popupNode, param->IsBlockEvent());
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     layoutProps->UpdateDisplayWindowOffset(displayWindowOffset);
@@ -564,6 +566,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     if (param->GetRadius().has_value()) {
         popupLayoutProp->UpdateRadius(param->GetRadius().value());
     }
+    popupLayoutProp->UpdateFollowTransformOfTarget(param->IsFollowTransformOfTarget());
     SetHitTestMode(popupNode, param->IsBlockEvent());
     popupLayoutProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     if (param->IsMaskColorSetted()) {
