@@ -62,7 +62,7 @@ std::list<int32_t> WaterFlowLayoutBase::GeneratePreloadList(
     std::list<int32_t> preloadList;
     const int32_t endBound = std::min(info->ItemCnt(host->GetTotalChildCount()) - 1, info->endIndex_ + cacheCount);
     for (int32_t i = info->endIndex_ + 1; i <= endBound; ++i) {
-        if (force|| !host->GetChildByIndex(info->NodeIdx(i))) {
+        if (force || !host->GetChildByIndex(info->NodeIdx(i))) {
             preloadList.emplace_back(i);
         }
     }

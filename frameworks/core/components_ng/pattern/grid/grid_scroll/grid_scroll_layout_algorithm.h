@@ -191,7 +191,7 @@ private:
 
     /**
      * @brief immediately create & measure items in cache range.
-     * 
+     *
      * @param cacheLineCnt number of lines to preload above and below viewport.
      */
     void SyncPreload(LayoutWrapper* wrapper, int32_t cacheLineCnt, float crossSize, float mainSize);

@@ -502,4 +502,31 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 26), -50.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), WATER_FLOW_HEIGHT - 50.0f);
 }
+
+/**
+ * @tc.name: ShowCache003
+ * @tc.desc: Test cache items immediately changing layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ShowCache003, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+    model.SetCachedCount(3, true);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -300.0f);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr");
+    FlushLayoutTask(frameNode_);
+    const auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 2);
+    EXPECT_EQ(info->endIndex_, 8);
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), 480.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 10), 480.0f);
+}
 } // namespace OHOS::Ace::NG
