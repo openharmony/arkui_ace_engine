@@ -84,6 +84,16 @@ public:
         return { FocusType::NODE, false };
     }
 
+    void UpdateCurrentDateModified(int64_t currentDateModified)
+    {
+        currentDateModified_ = currentDateModified;
+    }
+
+    int64_t GetCurrentDateModified()
+    {
+        return currentDateModified_;
+    }
+
 protected:
     int32_t instanceId_;
 
@@ -165,6 +175,7 @@ private:
     bool isFastKeyUp_ = false;
     bool hasVisibleChangeRegistered_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
+    int64_t currentDateModified_ = -2;
 
     Rect lastBoundsRect_;
 
