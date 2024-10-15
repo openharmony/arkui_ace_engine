@@ -101,9 +101,9 @@ bool LocationButtonModelNG::InitLocationButton(FrameNode* frameNode,
 
     if ((text == LocationButtonLocationDescription::TEXT_NULL) && (icon == LocationButtonIconStyle::ICON_NULL)) {
         // set default values
-        text = LocationButtonLocationDescription::CURRENT_LOCATION;
-        icon = LocationButtonIconStyle::ICON_LINE;
-        backgroundType = ButtonType::CAPSULE;
+        text = LocationButtonStyle::DEFAULT_TEXT;
+        icon = LocationButtonStyle::DEFAULT_ICON;
+        backgroundType = LocationButtonStyle::DEFAULT_BACKGROUND_TYPE;
     }
 
     SecurityComponentElementStyle secCompStyle = {

@@ -21,11 +21,15 @@
 
 namespace OHOS::Ace::NG {
     struct LocationButtonStyle {
+    static const auto DEFAULT_ICON = LocationButtonIconStyle::ICON_LINE;
+    static const auto DEFAULT_TEXT = LocationButtonLocationDescription::CURRENT_LOCATION;
+    static const auto DEFAULT_BACKGROUND_TYPE = ButtonType::CAPSULE;
+
     LocationButtonStyle()
     {
-        icon = LocationButtonIconStyle::ICON_LINE;
-        text = LocationButtonLocationDescription::CURRENT_LOCATION;
-        backgroundType = ButtonType::CAPSULE;
+        icon = DEFAULT_ICON;
+        text = DEFAULT_TEXT;
+        backgroundType = DEFAULT_BACKGROUND_TYPE;
     }
 
     std::optional<LocationButtonLocationDescription> text;

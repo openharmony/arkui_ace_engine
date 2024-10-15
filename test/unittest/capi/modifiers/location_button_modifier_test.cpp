@@ -62,9 +62,9 @@ HWTEST_F(LocationButtonModifierTest, setLocationButtonOptions0, TestSize.Level1)
     int32_t resultText = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
     int32_t resultIcon = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
     int32_t resultButtonType = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
-    EXPECT_EQ(resultText, static_cast<int32_t>(LocationButtonLocationDescription::CURRENT_LOCATION));
-    EXPECT_EQ(resultIcon, static_cast<int32_t>(LocationButtonIconStyle::ICON_LINE));
-    EXPECT_EQ(resultButtonType, static_cast<int32_t>(ButtonType::CAPSULE));
+    EXPECT_EQ(resultText, static_cast<int32_t>(LocationButtonStyle::DEFAULT_TEXT));
+    EXPECT_EQ(resultIcon, static_cast<int32_t>(LocationButtonStyle::DEFAULT_ICON));
+    EXPECT_EQ(resultButtonType, static_cast<int32_t>(LocationButtonStyle::DEFAULT_BACKGROUND_TYPE));
 }
 
 // Valid values for attribute 'icon' of method 'setLocationButtonOptions'
@@ -338,9 +338,9 @@ HWTEST_F(LocationButtonModifierTest, setLocationButtonOptions1TestTextAndIconEmp
     int32_t resultText = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
     int32_t resultIcon = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
     int32_t resultButtonType = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
-    EXPECT_EQ(resultText, static_cast<int32_t>(LocationButtonLocationDescription::CURRENT_LOCATION));
-    EXPECT_EQ(resultIcon, static_cast<int32_t>(LocationButtonIconStyle::ICON_LINE));
-    EXPECT_EQ(resultButtonType, static_cast<int32_t>(ButtonType::CAPSULE));
+    EXPECT_EQ(resultText, static_cast<int32_t>(LocationButtonStyle::DEFAULT_TEXT));
+    EXPECT_EQ(resultIcon, static_cast<int32_t>(LocationButtonStyle::DEFAULT_ICON));
+    EXPECT_EQ(resultButtonType, static_cast<int32_t>(LocationButtonStyle::DEFAULT_BACKGROUND_TYPE));
 }
 
 } // namespace OHOS::Ace::NG
