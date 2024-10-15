@@ -3102,7 +3102,7 @@ void FrameNode::OnAccessibilityEvent(
         event.type = eventType;
         event.windowContentChangeTypes = windowsContentChangeType;
         event.nodeId = GetAccessibilityId();
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibility(event);
     }
@@ -3133,6 +3133,21 @@ void FrameNode::OnAccessibilityEvent(
         auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->SendEventToAccessibilityWithNode(event, Claim(this));
+    }
+}
+
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.windowContentChangeTypes = windowsContentChangeType;
+        event.nodeId = GetAccessibilityId();
+        event.stackNodeId = stackNodeId;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
     }
 }
 
@@ -3811,6 +3826,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
+    renderContext_->UpdateAccessibilityRoundRect();
     ProcessAccessibilityVirtualNode();
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);

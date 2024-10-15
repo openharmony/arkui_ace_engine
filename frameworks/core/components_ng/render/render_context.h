@@ -178,7 +178,7 @@ public:
         std::optional<std::string> surfaceName;
         PatternType patternType = PatternType::DEFAULT;
     };
-    
+
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
 
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) {}
@@ -449,6 +449,8 @@ public:
     virtual void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
     virtual void PaintAccessibilityFocus() {};
+
+    virtual void UpdateAccessibilityRoundRect() {};
 
     virtual void ClearAccessibilityFocus() {};
 
