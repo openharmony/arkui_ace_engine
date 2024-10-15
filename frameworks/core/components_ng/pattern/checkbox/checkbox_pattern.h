@@ -203,7 +203,6 @@ public:
         json->PutExtAttr("group", group.c_str(), filter);
         json->PutExtAttr("type", "ToggleType.Checkbox", filter);
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
-        
         auto select = paintProperty->GetCheckBoxSelectValue(false);
         json->PutExtAttr("select", select ? "true" : "false", filter);
     }
