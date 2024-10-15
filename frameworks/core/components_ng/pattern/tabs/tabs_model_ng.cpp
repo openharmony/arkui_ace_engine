@@ -392,17 +392,11 @@ void TabsModelNG::SetBarOverlap(bool barOverlap)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarOverlap, barOverlap);
 
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(tabBarPaintProperty);
     BlurStyleOption option;
     if (barOverlap) {
         option.blurStyle = BlurStyle::COMPONENT_THICK;
     }
-    tabBarPaintProperty->UpdateTabBarBlurStyleOption(option);
+    SetBarBackgroundBlurStyle(option);
 }
 
 void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange)
@@ -802,17 +796,11 @@ void TabsModelNG::SetBarOverlap(FrameNode* frameNode, bool barOverlap)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarOverlap, barOverlap, frameNode);
 
-    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(tabBarPaintProperty);
     BlurStyleOption option;
     if (barOverlap) {
         option.blurStyle = BlurStyle::COMPONENT_THICK;
     }
-    tabBarPaintProperty->UpdateTabBarBlurStyleOption(option);
+    SetBarBackgroundBlurStyle(frameNode, option);
 }
 
 void TabsModelNG::SetIsVertical(FrameNode* frameNode, bool isVertical)
