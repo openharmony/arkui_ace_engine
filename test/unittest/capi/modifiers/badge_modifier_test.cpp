@@ -29,9 +29,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-Ark_Position ToArkPos(int32_t value);
-Ark_Position ToArkPos(double v, DimensionUnit unit);
-Ark_Length ToArkLength(int32_t value);
+
 inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
     NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
     const char* bundle = "");
@@ -64,9 +62,9 @@ const auto ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE = "99";
 const auto ATTRIBUTE_VALUE_NAME = "value";
 const auto ATTRIBUTE_VALUE_DEFAULT_VALUE = "";
 
-inline Ark_Resource ArkRes(Ark_String* name, int id, NodeModifier::ResourceType type, 
+inline Ark_Resource ArkRes(Ark_String* name, int id, NodeModifier::ResourceType type,
     const char* module, const char* bundle)
-{
+    {
     return { .id = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
         .type = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type) },
         .moduleName = { .chars = module },
@@ -101,39 +99,6 @@ void InitNumberOptions(Ark_BadgeParamWithNumber& options)
     FillEmptyOptions(options);
     options.maxCount = Converter::ArkValue<Opt_Number>(Ark_Empty());
     options.count = Converter::ArkValue<Ark_Number>(0);
-}
-
-/**
- *  Converts int32_t into Ark_Length
- */
-Ark_Length ToArkLength(int32_t value)
-{
-   return { 
-        .type = ARK_TAG_RESOURCE, .resource = Ark_Int32(value) 
-    };
-}
-
-/**
- *  Converts int32_t into Ark_Position, x = y = value
- */
-Ark_Position ToArkPos(int32_t value)
-{
-    Ark_Length x = { .type = ARK_TAG_RESOURCE, .resource = Ark_Int32(value) };
-    
-    return { 
-        .x = Converter::ArkValue<Opt_Length>(x), .y = Converter::ArkValue<Opt_Length>(x) 
-    };
-}
-
-/**
- * Converts double and DimensionUnit into Ark_Position
- */
-Ark_Position ToArkPos(double v, DimensionUnit unit)
-{
-   return {
-        .x =Converter::ArkValue<Opt_Length>(Dimension(v, unit)),
-        .y =Converter::ArkValue<Opt_Length>(Dimension(v, unit)),
-   };
 }
 
 } // namespace
@@ -172,6 +137,27 @@ public:
     }
 };
 
+typedef std::pair<std::string, std::string> TestVector;
+
+static const std::vector<TestVector> DEFAULT_0_TEST1_PLAN = {
+    { ATTRIBUTE_POSITION_NAME, ATTRIBUTE_POSITION_DEFAULT_VALUE },
+    { ATTRIBUTE_COUNT_NAME, ATTRIBUTE_COUNT_DEFAULT_VALUE },
+    { ATTRIBUTE_MAX_COUNT_NAME, ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE },
+    { ATTRIBUTE_VALUE_NAME, ATTRIBUTE_VALUE_DEFAULT_VALUE },
+};
+
+static const std::vector<TestVector> DEFAULT_0_TEST2_PLAN = {
+    { ATTRIBUTE_SET_STYLE_X_NAME, ATTRIBUTE_SET_STYLE_X_DEFAULT_VALUE },
+    { ATTRIBUTE_SET_STYLE_Y_NAME, ATTRIBUTE_SET_STYLE_Y_DEFAULT_VALUE },
+    { ATTRIBUTE_SET_STYLE_COLOR_NAME, ATTRIBUTE_SET_STYLE_COLOR_DEFAULT_VALUE },
+    { ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME, ATTRIBUTE_SET_STYLE_FONT_SIZE_DEFAULT_VALUE },
+    { ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME, ATTRIBUTE_SET_STYLE_BADGE_COLOR_DEFAULT_VALUE },
+    { ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME, ATTRIBUTE_SET_STYLE_BADGE_SIZE_DEFAULT_VALUE },
+    { ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME, ATTRIBUTE_SET_STYLE_BORDER_COLOR_DEFAULT_VALUE },
+    { ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME, ATTRIBUTE_SET_STYLE_BORDER_WIDTH_DEFAULT_VALUE },
+    { ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME, ATTRIBUTE_SET_STYLE_FONT_WEIGHT_DEFAULT_VALUE },
+};
+
 /*
  * @tc.name: setBadgeOptionsTestDefaultValues
  * @tc.desc:
@@ -182,47 +168,37 @@ HWTEST_F(BadgeModifierTest, setBadgeOptionsTestDefaultValues, TestSize.Level1)
     auto jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
 
-    auto badgePosition = jsonValue->GetString(ATTRIBUTE_POSITION_NAME);
-    EXPECT_EQ(badgePosition, ATTRIBUTE_POSITION_DEFAULT_VALUE);
-
     auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    auto badgeStyleX = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_X_NAME);
-    EXPECT_EQ(badgeStyleX, ATTRIBUTE_SET_STYLE_X_DEFAULT_VALUE);
+    std::string strResult;
+    for (const auto& [key, expected] : DEFAULT_0_TEST1_PLAN) {
+        strResult = jsonValue->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 
-    auto badgeStyleY = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_Y_NAME);
-    EXPECT_EQ(badgeStyleY, ATTRIBUTE_SET_STYLE_Y_DEFAULT_VALUE);
-
-    auto badgeStyleColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleColor, ATTRIBUTE_SET_STYLE_COLOR_DEFAULT_VALUE);
-
-    auto badgeStyleFontSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME);
-    EXPECT_EQ(badgeStyleFontSize, ATTRIBUTE_SET_STYLE_FONT_SIZE_DEFAULT_VALUE);
-
-    auto badgeStyleBadgeColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBadgeColor, ATTRIBUTE_SET_STYLE_BADGE_COLOR_DEFAULT_VALUE);
-
-    auto badgeStyleBadgeSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME);
-    EXPECT_EQ(badgeStyleBadgeSize, ATTRIBUTE_SET_STYLE_BADGE_SIZE_DEFAULT_VALUE);
-
-    auto badgeStyleBorderColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBorderColor, ATTRIBUTE_SET_STYLE_BORDER_COLOR_DEFAULT_VALUE);
-
-    auto badgeStyleBorderWidth = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(badgeStyleBorderWidth, ATTRIBUTE_SET_STYLE_BORDER_WIDTH_DEFAULT_VALUE);
-
-    auto badgeStyleFontWeight = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(badgeStyleFontWeight, ATTRIBUTE_SET_STYLE_FONT_WEIGHT_DEFAULT_VALUE);
-
-    auto badgeCount = jsonValue->GetString(ATTRIBUTE_COUNT_NAME);
-    EXPECT_EQ(badgeCount, ATTRIBUTE_COUNT_DEFAULT_VALUE);
-
-    auto badgeMaxCount = jsonValue->GetString(ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(badgeMaxCount, ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE);
-
-    auto badgeValue = jsonValue->GetString(ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(badgeValue, ATTRIBUTE_VALUE_DEFAULT_VALUE);
+    for (const auto& [key, expected] : DEFAULT_0_TEST2_PLAN) {
+        strResult = badgeStyleAttrs->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 }
+
+static const std::vector<TestVector> EMPTY_0_TEST1_PLAN = {
+    { ATTRIBUTE_POSITION_NAME, "BadgePosition.RightTop" },
+    { ATTRIBUTE_COUNT_NAME, "0" },
+    { ATTRIBUTE_MAX_COUNT_NAME, "99" },
+};
+
+static const std::vector<TestVector> EMPTY_0_TEST2_PLAN = {
+    { ATTRIBUTE_SET_STYLE_X_NAME, "0.00vp" },
+    { ATTRIBUTE_SET_STYLE_Y_NAME, "0.00vp" },
+    { ATTRIBUTE_SET_STYLE_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME, "10.00vp" },
+    { ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME, "16.00vp" },
+    { ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME, "0.00px" },
+    { ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME, "FontWeight.Normal" },
+};
 
 /*
  * @tc.name: setBadgeOptions0TestEmptyValues
@@ -238,45 +214,37 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestEmptyValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-
-    auto badgePosition = jsonValue->GetString(ATTRIBUTE_POSITION_NAME);
-    EXPECT_EQ(badgePosition, "BadgePosition.RightTop");
-
     auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    auto badgeStyleX = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_X_NAME);
-    EXPECT_EQ(badgeStyleX, "0.00vp");
+    std::string strResult;
+    for (const auto& [key, expected] : EMPTY_0_TEST1_PLAN) {
+        strResult = jsonValue->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 
-    auto badgeStyleY = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_Y_NAME);
-    EXPECT_EQ(badgeStyleY, "0.00vp");
-
-    auto badgeStyleColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleColor, "#FF000000");
-
-    auto badgeStyleFontSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME);
-    EXPECT_EQ(badgeStyleFontSize, "10.00vp");
-
-    auto badgeStyleBadgeColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBadgeColor, "#FF000000");
-
-    auto badgeStyleBadgeSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME);
-    EXPECT_EQ(badgeStyleBadgeSize, "16.00vp");
-
-    auto badgeStyleBorderColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBorderColor, "#FF000000");
-
-    auto badgeStyleBorderWidth = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(badgeStyleBorderWidth, "0.00px");
-
-    auto badgeStyleFontWeight = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(badgeStyleFontWeight, "FontWeight.Normal");
-
-    auto badgeCount = jsonValue->GetString(ATTRIBUTE_COUNT_NAME);
-    EXPECT_EQ(badgeCount, "0");
-
-    auto badgeMaxCount = jsonValue->GetString(ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(badgeMaxCount, "99");
+    for (const auto& [key, expected] : EMPTY_0_TEST2_PLAN) {
+        strResult = badgeStyleAttrs->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 }
+
+static const std::vector<TestVector> VALID_0_TEST1_PLAN = {
+    { ATTRIBUTE_POSITION_NAME, "BadgePosition.RightTop" },
+    { ATTRIBUTE_COUNT_NAME, "4" },
+    { ATTRIBUTE_MAX_COUNT_NAME, "20" },
+};
+
+static const std::vector<TestVector> VALID_0_TEST2_PLAN = {
+    { ATTRIBUTE_SET_STYLE_X_NAME, "12.00px" },
+    { ATTRIBUTE_SET_STYLE_Y_NAME, "10.00px" },
+    { ATTRIBUTE_SET_STYLE_COLOR_NAME, "#FF808080" },
+    { ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME, "8.00vp" },
+    { ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME, "#FF00FF00" },
+    { ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME, "32.00vp" },
+    { ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME, "#FF0000FF" },
+    { ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME, "2.45vp" },
+    { ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME, "FontWeight.Medium" },
+};
 
 /*
  * @tc.name: setBadgeOptions0TestValidValues
@@ -287,8 +255,11 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestValidValues, TestSize.Level1)
 {
     Ark_BadgeParamWithNumber inputValueOptions;
     InitNumberOptions(inputValueOptions);
-    inputValueOptions.position =
-        Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(ToArkPos(12.00, DimensionUnit::PX));
+    Ark_Position position;
+    position.x = Converter::ArkValue<Opt_Length>(Dimension(12.00, DimensionUnit::PX));
+    position.y = Converter::ArkValue<Opt_Length>(Dimension(10.00, DimensionUnit::PX));
+
+    inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
         .color =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GRAY)),
@@ -309,45 +280,37 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestValidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-
-    auto badgePosition = jsonValue->GetString(ATTRIBUTE_POSITION_NAME);
-    EXPECT_EQ(badgePosition, "BadgePosition.RightTop");
-
     auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    auto badgeStyleX = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_X_NAME);
-    EXPECT_EQ(badgeStyleX, "12.00px");
+    std::string strResult;
+    for (const auto& [key, expected] : VALID_0_TEST1_PLAN) {
+        strResult = jsonValue->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 
-    auto badgeStyleY = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_Y_NAME);
-    EXPECT_EQ(badgeStyleY, "12.00px");
-
-    auto badgeStyleColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleColor, "#FF808080");
-
-    auto badgeStyleFontSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME);
-    EXPECT_EQ(badgeStyleFontSize, "8.00vp");
-
-    auto badgeStyleBadgeColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBadgeColor, "#FF00FF00");
-
-    auto badgeStyleBadgeSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME);
-    EXPECT_EQ(badgeStyleBadgeSize, "32.00vp");
-
-    auto badgeStyleBorderColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBorderColor, "#FF0000FF");
-
-    auto badgeStyleBorderWidth = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(badgeStyleBorderWidth, "2.45vp");
-
-    auto badgeStyleFontWeight = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(badgeStyleFontWeight, "FontWeight.Medium");
-
-    auto badgeCount = jsonValue->GetString(ATTRIBUTE_COUNT_NAME);
-    EXPECT_EQ(badgeCount, "4");
-
-    auto badgeMaxCount = jsonValue->GetString(ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(badgeMaxCount, "20");
+    for (const auto& [key, expected] : VALID_0_TEST2_PLAN) {
+        strResult = badgeStyleAttrs->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 }
+
+static const std::vector<TestVector> INALID_0_TEST1_PLAN = {
+    { ATTRIBUTE_POSITION_NAME, "BadgePosition.RightTop" },
+    { ATTRIBUTE_COUNT_NAME, "-1" },
+    { ATTRIBUTE_MAX_COUNT_NAME, "-100" },
+};
+
+static const std::vector<TestVector> INALID_0_TEST2_PLAN = {
+    { ATTRIBUTE_SET_STYLE_X_NAME, "0.00vp" },
+    { ATTRIBUTE_SET_STYLE_Y_NAME, "0.00vp" },
+    { ATTRIBUTE_SET_STYLE_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME, "10.00vp" },
+    { ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME, "16.00vp" },
+    { ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME, "0.00px" },
+    { ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME, "FontWeight.Normal" },
+};
 
 /*
  * @tc.name: setBadgeOptions0TestInvalidValues
@@ -359,7 +322,11 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestInvalidValues, TestSize.Level1)
     Ark_BadgeParamWithNumber inputValueOptions;
     InitNumberOptions(inputValueOptions);
 
-    inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(ToArkPos(-12.00));
+    Ark_Position position;
+    position.x = Converter::ArkValue<Opt_Length>(Dimension(-12.00));
+    position.y = Converter::ArkValue<Opt_Length>(Dimension(-14.00));
+
+    inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
         .color =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("invalid color")),
@@ -380,45 +347,36 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions0TestInvalidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-
-    auto badgePosition = jsonValue->GetString(ATTRIBUTE_POSITION_NAME);
-    EXPECT_EQ(badgePosition, "BadgePosition.RightTop");
-
     auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    auto badgeStyleX = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_X_NAME);
-    EXPECT_EQ(badgeStyleX, "10.00px");
+    std::string strResult;
+    for (const auto& [key, expected] : INALID_0_TEST1_PLAN) {
+        strResult = jsonValue->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 
-    auto badgeStyleY = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_Y_NAME);
-    EXPECT_EQ(badgeStyleY, "10.00px");
-
-    auto badgeStyleColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleColor, "#FF000000");
-
-    auto badgeStyleFontSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME);
-    EXPECT_EQ(badgeStyleFontSize, "10.00vp");
-
-    auto badgeStyleBadgeColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBadgeColor, "#FF000000");
-
-    auto badgeStyleBadgeSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME);
-    EXPECT_EQ(badgeStyleBadgeSize, "16.00vp");
-
-    auto badgeStyleBorderColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBorderColor, "#FF000000");
-
-    auto badgeStyleBorderWidth = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(badgeStyleBorderWidth, "0.00px");
-
-    auto badgeStyleFontWeight = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(badgeStyleFontWeight, "FontWeight.Normal");
-
-    auto badgeCount = jsonValue->GetString(ATTRIBUTE_COUNT_NAME);
-    EXPECT_EQ(badgeCount, "-1");
-
-    auto badgeMaxCount = jsonValue->GetString(ATTRIBUTE_MAX_COUNT_NAME);
-    EXPECT_EQ(badgeMaxCount, "-100");
+    for (const auto& [key, expected] : INALID_0_TEST2_PLAN) {
+        strResult = badgeStyleAttrs->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 }
+
+static const std::vector<TestVector> EMPTY_1_TEST1_PLAN = {
+    { ATTRIBUTE_POSITION_NAME, "BadgePosition.RightTop" },
+    { ATTRIBUTE_VALUE_NAME, "" },
+};
+
+static const std::vector<TestVector> EMPTY_1_TEST2_PLAN = {
+    { ATTRIBUTE_SET_STYLE_X_NAME, "0.00vp" },
+    { ATTRIBUTE_SET_STYLE_Y_NAME, "0.00vp" },
+    { ATTRIBUTE_SET_STYLE_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME, "10.00vp" },
+    { ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME, "16.00vp" },
+    { ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME, "0.00px" },
+    { ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME, "FontWeight.Normal" },
+};
 
 /*
  * @tc.name: setBadgeOptions1TestEmptyValues
@@ -434,42 +392,36 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestEmptyValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-
-    auto badgePosition = jsonValue->GetString(ATTRIBUTE_POSITION_NAME);
-    EXPECT_EQ(badgePosition, "BadgePosition.RightTop");
-
     auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    auto badgeStyleX = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_X_NAME);
-    EXPECT_EQ(badgeStyleX, "0.00vp");
+    std::string strResult;
+    for (const auto& [key, expected] : EMPTY_1_TEST1_PLAN) {
+        strResult = jsonValue->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 
-    auto badgeStyleY = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_Y_NAME);
-    EXPECT_EQ(badgeStyleY, "0.00vp");
-
-    auto badgeStyleColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleColor, "#FF000000");
-
-    auto badgeStyleFontSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME);
-    EXPECT_EQ(badgeStyleFontSize, "10.00vp");
-
-    auto badgeStyleBadgeColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBadgeColor, "#FF000000");
-
-    auto badgeStyleBadgeSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME);
-    EXPECT_EQ(badgeStyleBadgeSize, "16.00vp");
-
-    auto badgeStyleBorderColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBorderColor, "#FF000000");
-
-    auto badgeStyleBorderWidth = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(badgeStyleBorderWidth, "0.00px");
-
-    auto badgeStyleFontWeight = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(badgeStyleFontWeight, "FontWeight.Normal");
-
-    auto badgeValue = jsonValue->GetString(ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(badgeValue, "");
+    for (const auto& [key, expected] : EMPTY_1_TEST2_PLAN) {
+        strResult = badgeStyleAttrs->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 }
+
+static const std::vector<TestVector> VALID_1_TEST1_PLAN = {
+    { ATTRIBUTE_POSITION_NAME, "BadgePosition.RightTop" },
+    { ATTRIBUTE_VALUE_NAME, "badge_value" },
+};
+
+static const std::vector<TestVector> VALID_1_TEST2_PLAN = {
+    { ATTRIBUTE_SET_STYLE_X_NAME, "16.00vp" },
+    { ATTRIBUTE_SET_STYLE_Y_NAME, "24.00vp" },
+    { ATTRIBUTE_SET_STYLE_COLOR_NAME, "#FF00FFFF" },
+    { ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME, "28.00vp" },
+    { ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME, "#FF0000FF" },
+    { ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME, "32.00px" },
+    { ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME, "#FFFF0000" },
+    { ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME, "10.00px" },
+    { ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME, "100" },
+};
 
 /*
  * @tc.name: setBadgeOptions1TestValidValues
@@ -480,17 +432,21 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestValidValues, TestSize.Level1)
 {
     Ark_BadgeParamWithString inputValueOptions;
     InitStringOptions(inputValueOptions);
-    inputValueOptions.position =
-        Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(ToArkPos(16, DimensionUnit::VP));
+
+    Ark_Position position;
+    position.x = Converter::ArkValue<Opt_Length>(Dimension(16, DimensionUnit::VP));
+    position.y = Converter::ArkValue<Opt_Length>(Dimension(24, DimensionUnit::VP));
+
+    inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
         .color = Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF00FFFF)),
         .fontSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(28.00f),
         .badgeSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("32.00px"),
         .badgeColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE)),
-        .borderColor =
-            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#FF0000FF")),
-        .borderWidth = Converter::ArkValue<Opt_Length>(ToArkLength(10)),
+        .borderColor =Converter::ArkValue<Opt_ResourceColor>(
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 150001))),
+        .borderWidth = Converter::ArkValue<Opt_Length>(10),
         .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>("100"),
     };
     inputValueOptions.value = Converter::ArkValue<Ark_String>("badge_value");
@@ -499,42 +455,36 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestValidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-
-    auto badgePosition = jsonValue->GetString(ATTRIBUTE_POSITION_NAME);
-    EXPECT_EQ(badgePosition, "BadgePosition.RightTop");
-
     auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    auto badgeStyleX = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_X_NAME);
-    EXPECT_EQ(badgeStyleX, "16.00vp");
-
-    auto badgeStyleY = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_Y_NAME);
-    EXPECT_EQ(badgeStyleY, "16.00vp");
-
-    auto badgeStyleColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleColor, "#FF00FFFF");
-
-    auto badgeStyleFontSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME);
-    EXPECT_EQ(badgeStyleFontSize, "28.00vp");
-
-    auto badgeStyleBadgeColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBadgeColor, "#FF0000FF");
-
-    auto badgeStyleBadgeSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME);
-    EXPECT_EQ(badgeStyleBadgeSize, "32.00px");
-
-    auto badgeStyleBorderColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBorderColor, "#FF0000FF");
-
-    auto badgeStyleBorderWidth = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(badgeStyleBorderWidth, "10.00px");
-
-    auto badgeStyleFontWeight = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(badgeStyleFontWeight, "100");
-
-    auto badgeValue = jsonValue->GetString(ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(badgeValue, "badge_value");
+    std::string strResult;
+    for (const auto& [key, expected] : VALID_1_TEST1_PLAN) {
+        strResult = jsonValue->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
+    
+    for (const auto& [key, expected] : VALID_1_TEST2_PLAN) {
+        strResult = badgeStyleAttrs->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 }
+
+static const std::vector<TestVector> INALID_1_TEST1_PLAN = {
+    { ATTRIBUTE_POSITION_NAME, "BadgePosition.RightTop" },
+    { ATTRIBUTE_VALUE_NAME, "" },
+};
+
+static const std::vector<TestVector> INALID_1_TEST2_PLAN = {
+    { ATTRIBUTE_SET_STYLE_X_NAME, "0.00vp" },
+    { ATTRIBUTE_SET_STYLE_Y_NAME, "0.00vp" },
+    { ATTRIBUTE_SET_STYLE_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME, "10.00vp" },
+    { ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME, "16.00vp" },
+    { ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME, "#FF000000" },
+    { ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME, "0.00px" },
+    { ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME, "FontWeight.Normal" },
+};
 
 /*
  * @tc.name: setBadgeOptions1TestInvalidValues
@@ -546,8 +496,11 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestInvalidValues, TestSize.Level1)
     Ark_BadgeParamWithString inputValueOptions;
     InitStringOptions(inputValueOptions);
 
-    inputValueOptions.position =
-        Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(ToArkPos(-12.00, DimensionUnit::PX));
+    Ark_Position position;
+    position.x = Converter::ArkValue<Opt_Length>(Dimension(-12.00, DimensionUnit::PX));
+    position.y = Converter::ArkValue<Opt_Length>(Dimension(-10.00, DimensionUnit::PX));
+
+    inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {
         .color =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("invalid color")),
@@ -555,8 +508,8 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestInvalidValues, TestSize.Level1)
         .badgeSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("10%"),
         .badgeColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("no color")),
-        .borderColor = Converter::ArkValue<Opt_ResourceColor>(
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 150001))),
+        .borderColor =
+            Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>("blue color")),
         .borderWidth = Converter::ArkValue<Opt_Length>(Dimension(0.55f, DimensionUnit::PERCENT)),
         .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(-100),
     };
@@ -566,41 +519,18 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestInvalidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     jsonValue->Delete("position");
-
-    auto badgePosition = jsonValue->GetString(ATTRIBUTE_POSITION_NAME);
-    EXPECT_EQ(badgePosition, "BadgePosition.RightTop");
-
     auto badgeStyleAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SET_STYLE_NAME);
 
-    auto badgeStyleX = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_X_NAME);
-    EXPECT_EQ(badgeStyleX, "0.00vp");
+    std::string strResult;
+    for (const auto& [key, expected] : INALID_1_TEST1_PLAN) {
+        strResult = jsonValue->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 
-    auto badgeStyleY = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_Y_NAME);
-    EXPECT_EQ(badgeStyleY, "0.00vp");
-
-    auto badgeStyleColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleColor, "#FF000000");
-
-    auto badgeStyleFontSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME);
-    EXPECT_EQ(badgeStyleFontSize, "10.00vp");
-
-    auto badgeStyleBadgeColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBadgeColor, "#FF000000");
-
-    auto badgeStyleBadgeSize = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME);
-    EXPECT_EQ(badgeStyleBadgeSize, "16.00vp");
-
-    auto badgeStyleBorderColor = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME);
-    EXPECT_EQ(badgeStyleBorderColor, "#FFFF0000");
-
-    auto badgeStyleBorderWidth = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(badgeStyleBorderWidth, "0.00px");
-
-    auto badgeStyleFontWeight = badgeStyleAttrs->GetString(ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME);
-    EXPECT_EQ(badgeStyleFontWeight, "FontWeight.Normal");
-
-    auto badgeValue = jsonValue->GetString(ATTRIBUTE_VALUE_NAME);
-    EXPECT_EQ(badgeValue, "");
+    for (const auto& [key, expected] : INALID_1_TEST2_PLAN) {
+        strResult = badgeStyleAttrs->GetString(key);
+        EXPECT_EQ(strResult, expected);
+    }
 }
 
 } // namespace OHOS::Ace::NG
