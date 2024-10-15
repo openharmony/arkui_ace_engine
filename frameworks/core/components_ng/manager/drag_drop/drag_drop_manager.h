@@ -302,6 +302,8 @@ public:
         double height { 0.0 };
         double maxWidth { 0.0 };
         double scale { -1.0 };
+        VectorF originScale { 1.0f, 1.0f };
+        OffsetF originOffset;
         RefPtr<FrameNode> imageNode { nullptr };
         RefPtr<FrameNode> textNode { nullptr };
     } DragPreviewInfo;
