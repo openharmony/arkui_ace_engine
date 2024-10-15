@@ -141,6 +141,14 @@ class XComponentTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void TearDown() override
+    {
+        testProperty.loadEvent = std::nullopt;
+        testProperty.destroyEvent = std::nullopt;
+        testProperty.surfaceCreatedEvent = std::nullopt;
+        testProperty.surfaceChangedEvent = std::nullopt;
+        testProperty.surfaceDestroyedEvent = std::nullopt;
+    }
 
 protected:
     static RefPtr<FrameNode> CreateXComponentNode(TestProperty& testProperty);
@@ -244,7 +252,6 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
     xComponentEventHub->FireDestroyEvent();
     EXPECT_EQ(onLoadKey, CHECK_KEY);
     EXPECT_EQ(onDestroyKey, CHECK_KEY);
-    testProperty.destroyEvent = std::nullopt;
 }
 
 /**
@@ -1287,7 +1294,6 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     testProperty.surfaceCreatedEvent = std::move(onSurfaceCreated);
     testProperty.surfaceChangedEvent = std::move(onSurfaceChanged);
     testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
-    testProperty.destroyEvent = std::nullopt;
     auto frameNode = CreateXComponentNode(testProperty);
     ASSERT_TRUE(frameNode);
     auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
