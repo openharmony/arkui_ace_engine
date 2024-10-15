@@ -161,7 +161,7 @@ public:
         isLoop_ = isLoop;
     }
 protected:
-    void UpdateChildrenFreezeState(bool isFreeze) override;
+    void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
 private:
     void PostIdleTask();
 

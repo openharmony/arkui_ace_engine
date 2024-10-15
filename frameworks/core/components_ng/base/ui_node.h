@@ -775,7 +775,7 @@ public:
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
     // Used to mark freeze and block dirty mark.
-    virtual void SetFreeze(bool isFreeze);
+    virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false);
     bool IsFreeze() const
     {
         return isFreeze_;
@@ -835,7 +835,7 @@ protected:
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
 
     virtual void OnFreezeStateChange() {}
-    virtual void UpdateChildrenFreezeState(bool isFreeze);
+    virtual void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false);
 
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}

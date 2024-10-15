@@ -374,7 +374,7 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
     return children_;
 }
 
-void RepeatVirtualScrollNode::UpdateChildrenFreezeState(bool isFreeze)
+void RepeatVirtualScrollNode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)
 {
     const auto& allChildren = caches_.GetAllNodes();
     for (auto& child : allChildren) {
