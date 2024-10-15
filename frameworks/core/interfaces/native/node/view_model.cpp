@@ -609,11 +609,6 @@ void* createCalendarNode(ArkUI_Int32 nodeId)
     return nullptr;
 }
 
-void* createColumnSplitNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
 void* createCommonMethodNode(ArkUI_Int32 nodeId)
 {
     return nullptr;
@@ -839,11 +834,6 @@ void* createRichTextNode(ArkUI_Int32 nodeId)
 }
 
 void* createRootSceneNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createRowSplitNode(ArkUI_Int32 nodeId)
 {
     return nullptr;
 }
