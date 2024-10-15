@@ -103,7 +103,11 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     auto selectOverlayInfo = manager->GetSelectOverlayInfo();
     CHECK_NULL_VOID(selectOverlayInfo);
     if (!selectOverlayInfo->isUsingMouse) {
-        pattern->StopTwinkling();
+        if (manager->IsHiddenHandle()) {
+            pattern->StartTwinkling();
+        } else {
+            pattern->StopTwinkling();
+        }
     }
     manager->MarkInfoChange(DIRTY_SELECT_TEXT);
     latestReqeust_.reset();
