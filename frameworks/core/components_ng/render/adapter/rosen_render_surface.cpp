@@ -529,7 +529,7 @@ void RosenRenderSurface::DrawBufferForXComponent(
 #else
     auto& recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
     Rosen::DrawingSurfaceBufferInfo info { surfaceNode->buffer_, offsetX, offsetY, static_cast<int32_t>(width),
-        static_cast<int32_t>(height), getpid(), GetUniqueIdNum() };
+        static_cast<int32_t>(height), getpid(), GetUniqueIdNum(), surfaceNode->fence_ };
     recordingCanvas.DrawSurfaceBuffer(info);
 #endif
 #endif
