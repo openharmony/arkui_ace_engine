@@ -453,6 +453,10 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     right_ = static_cast<double>(safeAreaInsets.right_.Length());
     width_ = wrapperRect_.Width();
     height_ = wrapperRect_.Height();
+    dumpInfo_.top = top_;
+    dumpInfo_.bottom = bottom_;
+    dumpInfo_.left = left_;
+    dumpInfo_.right = right_;
     auto windowManager = pipelineContext->GetWindowManager();
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;

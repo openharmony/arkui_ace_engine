@@ -701,6 +701,12 @@ public:
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
+    Rect GetUIExtensionHostWindowRect(int32_t instanceId) override
+    {
+        CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());
+        auto rect = uiWindow_->GetHostWindowRect(instanceId);
+        return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
 
 private:
     virtual bool MaybeRelease() override;
