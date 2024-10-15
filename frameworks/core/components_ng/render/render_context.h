@@ -702,6 +702,11 @@ public:
         isNeedAnimate_ = isNeedAnimate;
     }
 
+    virtual bool IsDisappearing() const
+    {
+        return false;
+    }
+
     virtual void SetRenderFit(RenderFit renderFit) {}
 
 protected:
