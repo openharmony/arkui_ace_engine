@@ -104,11 +104,6 @@ public:
         return hasFinished_;
     }
 
-    void SetNavigationOperation(NavigationOperation operation)
-    {
-        operation_ = operation;
-    }
-
     void SetCancelAnimationCallback(std::function<void()>&& cancelAnimation)
     {
         cancelAnimation_ = std::move(cancelAnimation);
@@ -233,7 +228,6 @@ private:
     std::function<void()> cancelAnimation_; // cancel transition callback to reverse animation
     std::function<void(bool)> endCallback_;
     std::function<void()> interactiveFinishCallback_;
-    NavigationOperation operation_;
     std::shared_ptr<AnimationUtils::InteractiveAnimation> interactiveAnimation_;
     bool hasFinished_ = false; // current transition is finish or not
     bool isSuccess_ = true; // set current custom transition is start success or not
