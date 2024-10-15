@@ -102,9 +102,9 @@ bool SaveButtonModelNG::InitSaveButton(FrameNode* frameNode,
 
     if ((text == SaveButtonSaveDescription::TEXT_NULL) && (icon == SaveButtonIconStyle::ICON_NULL)) {
         // set default values
-        text = SaveButtonSaveDescription::DOWNLOAD;
-        icon = SaveButtonIconStyle::ICON_FULL_FILLED;
-        backgroundType = ButtonType::CAPSULE;
+        text = SaveButtonStyle::DEFAULT_TEXT;
+        icon = SaveButtonStyle::DEFAULT_ICON;
+        backgroundType = SaveButtonStyle::DEFAULT_BACKGROUND_TYPE;
     }
 
     SecurityComponentElementStyle secCompStyle = {

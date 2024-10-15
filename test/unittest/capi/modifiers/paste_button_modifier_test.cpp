@@ -62,9 +62,9 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions0, TestSize.Level1)
     int32_t resultText = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
     int32_t resultIcon = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
     int32_t resultButtonType = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
-    EXPECT_EQ(resultText, static_cast<int32_t>(PasteButtonPasteDescription::PASTE));
-    EXPECT_EQ(resultIcon, static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE));
-    EXPECT_EQ(resultButtonType, static_cast<int32_t>(ButtonType::CAPSULE));
+    EXPECT_EQ(resultText, static_cast<int32_t>(PasteButtonStyle::DEFAULT_TEXT));
+    EXPECT_EQ(resultIcon, static_cast<int32_t>(PasteButtonStyle::DEFAULT_ICON));
+    EXPECT_EQ(resultButtonType, static_cast<int32_t>(PasteButtonStyle::DEFAULT_BACKGROUND_TYPE));
 }
 
 // Valid values for attribute 'icon' of method 'setPasteButtonOptions'
@@ -282,9 +282,9 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestTextAndIconEmpty, Te
     int32_t resultText = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
     int32_t resultIcon = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
     int32_t resultButtonType = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
-    EXPECT_EQ(resultText, static_cast<int32_t>(PasteButtonPasteDescription::PASTE));
-    EXPECT_EQ(resultIcon, static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE));
-    EXPECT_EQ(resultButtonType, static_cast<int32_t>(ButtonType::CAPSULE));
+    EXPECT_EQ(resultText, static_cast<int32_t>(PasteButtonStyle::DEFAULT_TEXT));
+    EXPECT_EQ(resultIcon, static_cast<int32_t>(PasteButtonStyle::DEFAULT_ICON));
+    EXPECT_EQ(resultButtonType, static_cast<int32_t>(PasteButtonStyle::DEFAULT_BACKGROUND_TYPE));
 }
 
 } // namespace OHOS::Ace::NG

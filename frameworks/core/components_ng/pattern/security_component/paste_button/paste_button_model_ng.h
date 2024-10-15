@@ -21,11 +21,15 @@
 
 namespace OHOS::Ace::NG {
 struct PasteButtonStyle {
+    static const auto DEFAULT_ICON = PasteButtonIconStyle::ICON_LINE;
+    static const auto DEFAULT_TEXT = PasteButtonPasteDescription::PASTE;
+    static const auto DEFAULT_BACKGROUND_TYPE = ButtonType::CAPSULE;
+
     PasteButtonStyle()
     {
-        icon = PasteButtonIconStyle::ICON_LINE;
-        text = PasteButtonPasteDescription::PASTE;
-        backgroundType = ButtonType::CAPSULE;
+        icon = PasteButtonStyle::DEFAULT_ICON;
+        text = PasteButtonStyle::DEFAULT_TEXT;
+        backgroundType = PasteButtonStyle::DEFAULT_BACKGROUND_TYPE;
     }
 
     std::optional<PasteButtonPasteDescription> text;

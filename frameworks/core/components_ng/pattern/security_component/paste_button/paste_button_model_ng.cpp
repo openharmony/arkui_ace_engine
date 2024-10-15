@@ -113,9 +113,9 @@ bool PasteButtonModelNG::InitPasteButton(FrameNode* frameNode,
 
     if ((text == PasteButtonPasteDescription::TEXT_NULL) && (icon == PasteButtonIconStyle::ICON_NULL)) {
         // set default values
-        text = PasteButtonPasteDescription::PASTE;
-        icon = PasteButtonIconStyle::ICON_LINE;
-        backgroundType = ButtonType::CAPSULE;
+        text = PasteButtonStyle::DEFAULT_TEXT;
+        icon = PasteButtonStyle::DEFAULT_ICON;
+        backgroundType = PasteButtonStyle::DEFAULT_BACKGROUND_TYPE;
     }
 
     SecurityComponentElementStyle secCompStyle = {
