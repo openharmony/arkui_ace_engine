@@ -45,11 +45,13 @@ private:
     ~WindowSceneLayoutManager() = default;
     void Init();
     void TraverseTree(const RefPtr<FrameNode>& rootNode, TraverseResult& res,
-        bool isAncestorRecent, bool isAncestorDirty);
-    void FillWindowSceneInfo(const RefPtr<FrameNode>& node, TraverseResult& res, bool isAncestorRecent);
+        bool isAncestorRecent, bool isAncestorDirty, bool notSyncPosition);
+    void FillWindowSceneInfo(const RefPtr<FrameNode>& node, TraverseResult& res, bool isAncestorRecent,
+        bool notSyncPosition);
     bool IsNodeVisible(const RefPtr<FrameNode>& node);
     bool IsNodeDirty(const RefPtr<FrameNode>& node);
     bool IsRecentContainerState(const RefPtr<FrameNode>& node);
+    bool NoNeedSyncScenePanelGlobalPosition(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSNode> GetRSNode(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetGlobalGeometry(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetLocalGeometry(const RefPtr<FrameNode>& node);
