@@ -731,10 +731,10 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
             ++iter;
             continue;
         }
-        if (IsFocusNodeInItemPosition(child)) {
-            child->SetParentFocusable(true);
+        if (IsUseCustomAnimation() && hasTabsAncestor_) {
+            child->SetParentFocusable(child == showChildFocusHub);
         } else {
-            child->SetParentFocusable(false);
+            child->SetParentFocusable(IsFocusNodeInItemPosition(child));
         }
         ++iter;
     }
@@ -5477,7 +5477,10 @@ void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, 
     if (indexsInAnimation_.empty()) {
         currentProxyInAnimation_ = nullptr;
     }
-
+    auto curChildFrame = GetCurrentFrameNode(toIndex);
+    if (curChildFrame) {
+        FlushFocus(curChildFrame);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
