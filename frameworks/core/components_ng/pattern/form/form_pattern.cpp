@@ -1806,6 +1806,7 @@ void FormPattern::OnActionEvent(const std::string& action)
         EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
             cardInfo_.moduleName, cardInfo_.dimension);
         if ("router" == type) {
+            TAG_LOGI(AceLogTag::ACE_FORM, "postcardaction is not manually click.");
             return;
         }
     }
