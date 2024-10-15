@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "base/image/image_packer.h"
+#include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
 const constexpr char* CONVERT_PNG_FORMAT = "image/png";
@@ -579,5 +580,12 @@ std::string SpanToHtml::ToHtml(std::vector<uint8_t>& values)
 {
     auto spanString = SpanString::DecodeTlv(values);
     return ToHtml(*spanString);
+}
+
+std::string HtmlUtils::ToHtml(const SpanString* str)
+{
+    SpanToHtml sth;
+    const std::string html = sth.ToHtml(*str);
+    return html;
 }
 } // namespace OHOS::Ace
