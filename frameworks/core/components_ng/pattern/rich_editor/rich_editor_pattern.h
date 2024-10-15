@@ -865,7 +865,7 @@ public:
     }
 
     NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
-    bool IsTextEditableForStylus() const override;
+    bool IsTextEditableForStylus() override;
 
     void SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam);
 
