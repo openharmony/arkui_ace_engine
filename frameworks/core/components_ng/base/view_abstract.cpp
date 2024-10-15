@@ -259,9 +259,13 @@ void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize);
 }
 
-void ViewAbstract::SetBackgroundImageSize(FrameNode *frameNode, const BackgroundImageSize& bgImgSize)
+void ViewAbstract::SetBackgroundImageSize(FrameNode *frameNode, const std::optional<BackgroundImageSize>& bgImgSize)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize, frameNode);
+    if (bgImgSize) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSize.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImageSize, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition)
