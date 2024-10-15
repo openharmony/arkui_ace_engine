@@ -65,10 +65,8 @@
 
 namespace OHOS::Ace::NG {
 constexpr Dimension DRAG_BAR_RADIUS = 6.0_vp;
-constexpr Dimension DRAG_BAR_BLUR_RADIUS = 10.0_vp;
+constexpr Dimension DRAG_BAR_BLUR_RADIUS = 20.0_vp;
 constexpr Dimension DRAG_BAR_ITEM_RADIUS = 1.0_vp;
-constexpr Dimension DRAG_BAR_ITEM_WIDTH = 2.0_vp;
-constexpr Dimension DRAG_BAR_ITEM_HEIGHT = 24.0_vp;
 constexpr int32_t SECOND_ZINDEX_VALUE = 2;
 namespace {
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
@@ -1383,6 +1381,19 @@ void NavigationModelNG::SetRecoverable(bool recoverable)
     navigationGroupNode->SetRecoverable(recoverable);
 }
 
+void NavigationModelNG::SetEnableDragBar(FrameNode* frameNode, bool enableDragBar)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    DeviceType deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        enableDragBar = false;
+    }
+    pattern->SetEnableDragBar(enableDragBar);
+}
+
 void NavigationModelNG::SetEnableDragBar(bool enableDragBar)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1710,8 +1721,6 @@ RefPtr<FrameNode> NavigationModelNG::CreateDragBarItemNode()
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
     auto dragBarItemLayoutProperty = dragBarItemNode->GetLayoutProperty();
     CHECK_NULL_RETURN(dragBarItemLayoutProperty, nullptr);
-    dragBarItemLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(DRAG_BAR_ITEM_WIDTH), CalcLength(DRAG_BAR_ITEM_HEIGHT)));
     dragBarItemLayoutProperty->UpdateAlignment(Alignment::CENTER);
     auto renderContext = dragBarItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);

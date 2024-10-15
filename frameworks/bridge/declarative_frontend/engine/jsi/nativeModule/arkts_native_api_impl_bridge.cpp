@@ -3410,6 +3410,10 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetRecoverable));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRecoverable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetRecoverable));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDragBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetEnableDragBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDragBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetEnableDragBar));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "navigation"), navigation);
 }
 

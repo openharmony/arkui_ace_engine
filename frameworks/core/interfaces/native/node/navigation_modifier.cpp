@@ -372,6 +372,21 @@ void ResetNavigationRecoverable(ArkUINodeHandle node)
     NavigationModelNG::SetRecoverable(frameNode, false);
 }
 
+void SetEnableDragBar(ArkUINodeHandle node, ArkUI_Bool enableDragBar)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableDragBar(frameNode, enableDragBar);
+}
+
+void ResetEnableDragBar(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // default value of navigation's enableDragBar is false
+    NavigationModelNG::SetEnableDragBar(frameNode, false);
+}
+
 
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
@@ -411,6 +426,8 @@ const ArkUINavigationModifier* GetNavigationModifier()
         SetNavMenuItemSymbol,
         SetNavigationRecoverable,
         ResetNavigationRecoverable,
+        SetEnableDragBar,
+        ResetEnableDragBar,
     };
 
     return &modifier;
