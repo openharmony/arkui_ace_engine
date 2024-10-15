@@ -366,12 +366,11 @@ public:
 
     bool GetDefaultAutoResize()
     {
-        InitDefaultValue();
         return autoResizeDefault_;
     }
+
     ImageInterpolation GetDefaultInterpolation()
     {
-        InitDefaultValue();
         return interpolationDefault_;
     }
 
@@ -533,6 +532,7 @@ private:
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+    Color selectedColor_;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
 
