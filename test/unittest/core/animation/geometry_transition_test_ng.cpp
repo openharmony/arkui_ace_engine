@@ -717,4 +717,23 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest012, TestSize.Level1)
     gt_->doRegisterSharedTransition_ = false;
     EXPECT_FALSE(gt_->GetDoRegisterSharedTransition());
 }
+
+/**
+ * @tc.name: GeometryTransitionTest013
+ * @tc.desc: Test SyncGeometryPropertiesAfterLayout()
+ * @tc.type: FUNC
+ */
+HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GeometryTransition with node.
+     */
+    Create(weakNode1, true, true);
+    /**
+     * @tc.steps: step2. test SyncGeometryPropertiesAfterLayout().
+     * @tc.expected: pipeline not null
+     */
+    gt_->SyncGeometryPropertiesAfterLayout(weakNode1.Upgrade());
+    EXPECT_TRUE(PipelineContext::GetCurrentContext() != nullptr);
+}
 } // namespace OHOS::Ace::NG
