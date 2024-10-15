@@ -615,6 +615,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, CanStartAITask001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
     richEditorPattern->textDetectEnable_ = true;
     bool ret = false;
     ret = richEditorPattern->CanStartAITask();
@@ -665,6 +666,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, NeedShowAIDetect001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
     std::map<int32_t, AISpan> aiSpanMap;
     AISpan aiSpan0;
     aiSpanMap[0] = aiSpan0;
