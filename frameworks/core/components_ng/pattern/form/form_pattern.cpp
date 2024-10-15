@@ -1805,11 +1805,11 @@ void FormPattern::OnActionEvent(const std::string& action)
     if (!isManuallyClick_) {
         EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
             cardInfo_.moduleName, cardInfo_.dimension);
-    } else {
-        isManuallyClick_ = false;
+        return;
     }
 
     if ("router" == type) {
+        isManuallyClick_ = false;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
