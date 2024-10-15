@@ -42,14 +42,14 @@ namespace  {
 inline Ark_GuideLineStyle GetGuideLineStyle(const std::string& idValue, const Ark_Axis directionValue,
     const float startValue, const float endValue)
 {
-    return {
-        .id = Converter::ArkValue<Ark_String>(idValue),
-        .direction = directionValue,
-        .position = {
-            .start = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(startValue)),
-            .end = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(endValue))
-            },
+    Ark_GuideLineStyle style;
+    style.id = Converter::ArkValue<Ark_String>(idValue);
+    style.position = {
+        .start = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(startValue)),
+        .end = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(endValue))
     };
+    style.direction = directionValue;
+    return style;
 }
 
 inline Ark_BarrierStyle GetBarrierStyle(const std::string& idValue, const Ark_BarrierDirection directionValue,
@@ -116,7 +116,7 @@ void checkGuideLineData(ArkUINodeHandle node, std::vector<string> vecId,
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
         auto itemJson = jsonArray->GetArrayItem(i);
         EXPECT_EQ(itemJson->GetString(ATTR_GUIDE_LINE_ID), vecId[i]);
-        if (i < vecAxisDir.size()) {
+        if (vecAxisDir[i] == ARK_AXIS_VERTICAL || vecAxisDir[i] == ARK_AXIS_HORIZONTAL) {
             EXPECT_EQ(itemJson->GetString(ATTR_GUIDE_LINE_DIRECTION), ArkAxisToString(vecAxisDir[i]));
         } else {
             EXPECT_EQ(itemJson->GetString(ATTR_GUIDE_LINE_DIRECTION), "Axis.Vertical");
@@ -125,6 +125,15 @@ void checkGuideLineData(ArkUINodeHandle node, std::vector<string> vecId,
         EXPECT_EQ(posJson->GetString(ATTR_GUIDE_LINE_START), vecStart[i]);
         EXPECT_EQ(posJson->GetString(ATTR_GUIDE_LINE_END), vecEnd[i]);
     }
+}
+
+std::string ExpectedBarrierDirValue(Ark_BarrierDirection value)
+{
+    if (value == ARK_BARRIER_DIRECTION_LEFT || value == ARK_BARRIER_DIRECTION_RIGHT ||
+        value == ARK_BARRIER_DIRECTION_TOP || value == ARK_BARRIER_DIRECTION_BOTTOM) {
+        return ArkBarrierDirection(value);
+    }
+    return "BarrierDirection.LEFT";
 }
 
 void checkBarrierData(ArkUINodeHandle node, std::vector<string> vecId,
@@ -137,7 +146,8 @@ void checkBarrierData(ArkUINodeHandle node, std::vector<string> vecId,
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
         auto itemJson = jsonArray->GetArrayItem(i);
         EXPECT_EQ(itemJson->GetString(ATTR_BARRIER_ID), vecId[i]);
-        EXPECT_EQ(itemJson->GetString(ATTR_BARRIER_DIRECTION), ArkBarrierDirection(vecBarrierDir[i]));
+        auto expectedDir =  ExpectedBarrierDirValue(vecBarrierDir[i]);
+        EXPECT_EQ(itemJson->GetString(ATTR_BARRIER_DIRECTION), expectedDir);
         auto refIdJson = GetAttrValue<std::unique_ptr<JsonValue>>(itemJson, ATTR_BARRIER_REF_ID);
         for (int j = 0; j < refIdJson->GetArraySize(); j++) {
             auto refIdItem = refIdJson->GetArrayItem(j);
@@ -146,6 +156,14 @@ void checkBarrierData(ArkUINodeHandle node, std::vector<string> vecId,
     }
 }
 
+std::string ExpectedLocBarrierDirValue(Ark_LocalizedBarrierDirection value)
+{
+    if (value == ARK_LOCALIZED_BARRIER_DIRECTION_START || value == ARK_LOCALIZED_BARRIER_DIRECTION_END ||
+        value == ARK_LOCALIZED_BARRIER_DIRECTION_TOP || value == ARK_LOCALIZED_BARRIER_DIRECTION_BOTTOM) {
+        return ArkLocBarrierDirection(value);
+    }
+    return "BarrierDirection.START";
+}
 void checkLocBarrierData(ArkUINodeHandle node, std::vector<string> vecId,
                          std::vector<Ark_LocalizedBarrierDirection> vecBarrierDir,
                          std::vector<string> vecRedId)
@@ -156,7 +174,8 @@ void checkLocBarrierData(ArkUINodeHandle node, std::vector<string> vecId,
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
         auto itemJson = jsonArray->GetArrayItem(i);
         EXPECT_EQ(itemJson->GetString(ATTR_BARRIER_ID), vecId[i]);
-        EXPECT_EQ(itemJson->GetString(ATTR_BARRIER_DIRECTION), ArkLocBarrierDirection(vecBarrierDir[i]));
+        auto expectedDir =  ExpectedLocBarrierDirValue(vecBarrierDir[i]);
+        EXPECT_EQ(itemJson->GetString(ATTR_BARRIER_DIRECTION), expectedDir);
         auto refIdJson = GetAttrValue<std::unique_ptr<JsonValue>>(itemJson, ATTR_BARRIER_REF_ID);
         for (int j = 0; j < refIdJson->GetArraySize(); j++) {
             auto refIdItem = refIdJson->GetArrayItem(j);
@@ -274,7 +293,8 @@ HWTEST_F(RelativeContainerModifierTest, setGuideLineTestInvalidValues, TestSize.
     std::vector<Ark_GuideLineStyle> inputVec;
     std::vector<std::string>  vecId = {"-8", "-4", "-5-", "+9", "%100", "-10", "*&^", "abc", "40%", "-"};
     std::vector<Ark_Axis>  vecDir = {ARK_AXIS_VERTICAL, ARK_AXIS_VERTICAL, ARK_AXIS_VERTICAL,
-        ARK_AXIS_HORIZONTAL, ARK_AXIS_VERTICAL};
+        ARK_AXIS_HORIZONTAL, ARK_AXIS_VERTICAL, static_cast<Ark_Axis>(-1), static_cast<Ark_Axis>(-2),
+        static_cast<Ark_Axis>(3), static_cast<Ark_Axis>(10), static_cast<Ark_Axis>(-1)};
     std::vector<float> vecStart = {0.f, -4.f, 5, 9, 100, 0.f, -4.f, 5, 9, 100};
     std::vector<float> vecEnd = {-10.f, -4.f, 5, 9, -100, 0.f, -4.f, 5, 9, 100};
     for (int i = 0; i < vecId.size(); i++) {
@@ -398,7 +418,8 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier0TestInvalidValues2, TestSize.
 {
     std::vector<std::string> vecId = {"-10", "", "abc", "40%", "-"};
     std::vector<Ark_BarrierDirection> vecBarrierDir = {ARK_BARRIER_DIRECTION_LEFT, ARK_BARRIER_DIRECTION_RIGHT,
-        ARK_BARRIER_DIRECTION_TOP, ARK_BARRIER_DIRECTION_BOTTOM, ARK_BARRIER_DIRECTION_BOTTOM};
+        ARK_BARRIER_DIRECTION_TOP, static_cast<Ark_BarrierDirection>(-1),
+        static_cast<Ark_BarrierDirection>(100)};
     std::vector<string> vecDataRefIds = {"-10", "", "abc", "40%", "-"};
     Converter::ArkArrayHolder<Array_String> vecHolder(vecDataRefIds);
     Array_String vecRefIds = vecHolder.ArkValue();
@@ -482,8 +503,8 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier1TestInvalidValues3, TestSize.
     ARK_LOCALIZED_BARRIER_DIRECTION_START,
     ARK_LOCALIZED_BARRIER_DIRECTION_END,
     ARK_LOCALIZED_BARRIER_DIRECTION_TOP,
-    ARK_LOCALIZED_BARRIER_DIRECTION_BOTTOM,
-    ARK_LOCALIZED_BARRIER_DIRECTION_START};
+    static_cast<Ark_LocalizedBarrierDirection>(-1),
+    static_cast<Ark_LocalizedBarrierDirection>(100)};
     
     std::vector<Ark_LocalizedBarrierStyle> inputVec;
     std::vector<string> vecDataRefIds = {"-10", "", "abc", "40%", "-"};
