@@ -85,10 +85,6 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else if (layoutProperty->GetAutoHide().value_or(true)) {
             sideBarStatus_ = SideBarStatus::HIDDEN;
             autoHide_ = true;
-            auto sideBarContainerPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
-            CHECK_NULL_VOID(sideBarContainerPattern);
-            sideBarContainerPattern->SetSideBarStatus(sideBarStatus_);
-            sideBarContainerPattern->UpdateControlButtonIcon();
         }
     }
     if (type_ != SideBarContainerType::OVERLAY) {
