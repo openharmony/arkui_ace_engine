@@ -396,31 +396,10 @@ void TabsModelNG::SetBarOverlap(bool barOverlap)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarOverlap, barOverlap);
 
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarRenderContext = tabBarNode->GetRenderContext();
-    CHECK_NULL_VOID(tabBarRenderContext);
     if (barOverlap) {
-        tabBarRenderContext->UpdateBackBlurRadius(BAR_BLUR_RADIUS);
-        tabBarRenderContext->UpdateFrontSaturate(BAR_SATURATE);
+        SetBarBackgroundBlurStyle(BlurStyle::COMPONENT_THICK);
     } else {
-        tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
-        tabBarRenderContext->ResetFrontSaturate();
-    }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    auto defaultBgColorBlur = tabTheme->GetColorBottomTabSubBgBlur();
-    auto tabBarPaintProperty = GetTabBarPaintProperty();
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    if (barOverlap && !tabBarPaintProperty->GetBarBackgroundColor().has_value()) {
-        tabBarRenderContext->UpdateBackgroundColor(defaultBgColorBlur);
-    } else {
-        tabBarRenderContext->UpdateBackgroundColor(
-            tabBarPaintProperty->GetBarBackgroundColor().value_or(Color::BLACK.BlendOpacity(0.0f)));
+        SetBarBackgroundBlurStyle(BlurStyle::NO_MATERIAL);
     }
 }
 
@@ -803,31 +782,10 @@ void TabsModelNG::SetBarOverlap(FrameNode* frameNode, bool barOverlap)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarOverlap, barOverlap, frameNode);
 
-    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarRenderContext = tabBarNode->GetRenderContext();
-    CHECK_NULL_VOID(tabBarRenderContext);
     if (barOverlap) {
-        tabBarRenderContext->UpdateBackBlurRadius(BAR_BLUR_RADIUS);
-        tabBarRenderContext->UpdateFrontSaturate(BAR_SATURATE);
+        SetBarBackgroundBlurStyle(frameNode, BlurStyle::COMPONENT_THICK);
     } else {
-        tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
-        tabBarRenderContext->ResetFrontSaturate();
-    }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    auto defaultBgColorBlur = tabTheme->GetColorBottomTabSubBgBlur();
-    auto tabBarPaintProperty = GetTabBarPaintProperty(frameNode);
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    if (barOverlap && !tabBarPaintProperty->GetBarBackgroundColor().has_value()) {
-        tabBarRenderContext->UpdateBackgroundColor(defaultBgColorBlur);
-    } else {
-        tabBarRenderContext->UpdateBackgroundColor(
-            tabBarPaintProperty->GetBarBackgroundColor().value_or(Color::BLACK.BlendOpacity(0.0f)));
+        SetBarBackgroundBlurStyle(frameNode, BlurStyle::NO_MATERIAL);
     }
 }
 
