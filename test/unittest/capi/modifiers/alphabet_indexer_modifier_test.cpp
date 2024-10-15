@@ -180,11 +180,11 @@ const auto RES_COLOR_NAME = NamedResourceId{"color_name", NodeModifier::Resource
 const auto RES_COLOR_ID = IntResourceId{123456, NodeModifier::ResourceType::COLOR};
 const auto INVALID_ID_COLOR = IntResourceId{-1, NodeModifier::ResourceType::COLOR};
 const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_NAME)),
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
         COLOR_RED },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_ID)),
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_ID)),
         COLOR_RED },
-    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(INVALID_ID_COLOR)),
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(INVALID_ID_COLOR)),
         COLOR_RED }
 };
 
