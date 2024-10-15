@@ -49,7 +49,6 @@ struct SearchOptions {
     std::optional<std::string> value;
     std::optional<std::string> placeholder;
     std::optional<std::string> icon;
-    std::optional<TextFieldControllerBase*> controller;
 };
 
 using UnionButtonOptions = std::variant<Ark_CancelButtonOptions, Ark_CancelButtonSymbolOptions>;
@@ -65,7 +64,6 @@ SearchOptions Convert(const Type_SearchInterface_setSearchOptions_Arg0& src)
     options.value = Converter::OptConvert<std::string>(src.value);
     options.placeholder= Converter::OptConvert<std::string>(src.placeholder);
     options.icon = Converter::OptConvert<std::string>(src.icon);
-    //dst.controller = Converter::OptConvert<TextFieldControllerBase*>(src.controller);
     return options;
 }
 
@@ -131,7 +129,6 @@ void SetSearchOptionsImpl(Ark_NativePointer node,
         SearchModelNG::SetTextValue(frameNode, searchOptions->value);
         SearchModelNG::SetPlaceholder(frameNode, searchOptions->placeholder);
         SearchModelNG::SetIcon(frameNode, searchOptions->icon);
-        //SearchModelNG::SetSearchController(frameNode, searchOptions->controller);
     }
 }
 } // SearchInterfaceModifier

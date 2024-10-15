@@ -58,6 +58,7 @@ const auto SEARCH_ICON_ATTR("searchIcon");
 const auto SEARCH_ICON_SRC_ATTR("src");
 const auto SEARCH_ICON_COLOR_ATTR("color");
 const auto SEARCH_ICON_SIZE_ATTR("size");
+const auto SEARCH_PLACEHOLDER_OPTION("placeholder");
 const auto SELECTED_BACKGROUND_COLOR_ATTR("selectedBackgroundColor");
 const auto TEXT_FONT_ATTRS("textFont");
 const auto TEXT_FONT_SIZE_ATTR("fontSize");
@@ -192,6 +193,33 @@ public:
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
+
+/**
+ * @tc.name: setSearchOptionsResoruces
+ * @tc.desc: Check the default values of setSearchOptions
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierResourcesTest, setSearchOptionsResoruces, TestSize.Level1)
+{
+    Type_SearchInterface_setSearchOptions_Arg0 options = {};
+
+    const std::vector<StringResourceTest> testPlan = {
+        { CreateResourceUnion<ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
+        { CreateResourceUnion<ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
+        { CreateResourceUnion<ResourceStr>(INVALID_STRING_ID), "" },
+    };
+
+    for (const auto &[src, expected] : testPlan) {
+        options.placeholder = ArkValue<Opt_ResourceStr>(src);
+        auto optOptions = ArkValue<Opt_Type_SearchInterface_setSearchOptions_Arg0>(options);
+        modifier_->setSearchOptions(node_, &optOptions);
+        // default
+        auto jsonValue = GetJsonValue(node_);
+        auto placeholder = GetAttrValue<std::string>(jsonValue, SEARCH_PLACEHOLDER_OPTION);
+        EXPECT_EQ(placeholder, expected);
+    }
+}
 
 /**
  * @tc.name: setCancelButtonTestIconColorResource
