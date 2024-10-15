@@ -21,6 +21,8 @@
 
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 
+#include "core/components/image/image_theme.h"
+
 namespace OHOS::Ace::NG {
 
 using namespace testing;
@@ -32,6 +34,7 @@ public:
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
+        SetupTheme<ImageTheme>();
     }
 };
 
@@ -86,15 +89,24 @@ HWTEST_F(ImageModifierTest, Ctor_InitWithUrl, testing::ext::TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     std::string urlString = "https://www.example.com/xxx.png";
-    Union_CustomObject_Ark_ResourceStr_CustomObject url = {
-        .selector = 1,
-        .value1 = {
-            .selector = 0,
-            .value0 = {.chars = urlString.c_str(), .length = urlString.size()}
-        }
-    };
-    modifier_->setImageOptions0(node_, &url);
+    std::string resName = "image_url";
+    AddResource(resName, urlString);
+    const auto RES_ID = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
+    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(CreateResourceUnion(RES_ID));
+    const auto imageRc = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
+
+    modifier_->setImageOptions0(node_, &imageRc);
     auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
+
+    urlString = "https://www.example.com/xxx.jpg";
+    image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
+    const auto imageIm = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
+
+    modifier_->setImageOptions0(node_, &imageIm);
+    json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
