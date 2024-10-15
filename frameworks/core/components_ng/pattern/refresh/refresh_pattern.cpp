@@ -818,7 +818,8 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
                             : refreshOffset_.ConvertToPx();
     auto dealSpeed = 0.0f;
     if (!NearEqual(scrollOffset_, targetOffset)) {
-        dealSpeed = speed / (targetOffset - scrollOffset_);
+        auto pullDownRatio = CalculatePullDownRatio();
+        dealSpeed = (pullDownRatio * speed) / (targetOffset - scrollOffset_);
     }
     bool recycle = true;
     if (pullToRefresh_ && !isSourceFromAnimation_ && refreshStatus_ == RefreshStatus::OVER_DRAG) {
