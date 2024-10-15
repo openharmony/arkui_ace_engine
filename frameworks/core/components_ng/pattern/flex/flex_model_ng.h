@@ -54,10 +54,16 @@ public:
     static void SetFlexRow(FrameNode* frameNode);
     static void SetFlexWrap(FrameNode* frameNode);
     static void SetFlexDirection(FrameNode* frameNode, FlexDirection value);
+    static void SetFlexDirection(FrameNode* frameNode, std::optional<FlexDirection>& value);
     static void SetFlexWrapDirection(FrameNode* frameNode, WrapDirection value);
+    static void SetCrossAxisAlign(FrameNode* frameNode, std::optional<FlexAlign>& align);
+    static void SetMainAxisAlign(FrameNode* frameNode, std::optional<FlexAlign>&);
     static void SetFlexJustifyContent(FrameNode* frameNode, int32_t value);
+    static void SetWrapMainAlignment(FrameNode* frameNode, std::optional<WrapAlignment>&);
+    static void SetWrapCrossAlignment(FrameNode* frameNode, std::optional<WrapAlignment>&);
     static void SetFlexAlignItems(FrameNode* frameNode, int32_t value);
     static void SetFlexAlignContent(FrameNode* frameNode, int32_t value);
+    static void SetFlexAlignContent(FrameNode* frameNode, std::optional<WrapAlignment>& alignContent);
 
     static int GetFlexWrap(FrameNode* frameNode);
     static int GetFlexDirection(FrameNode* frameNode);
