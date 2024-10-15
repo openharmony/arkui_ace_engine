@@ -98,7 +98,6 @@ public:
     RefPtr<CustomNode> GetParentCustomNode() const;
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
-    void GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
 
     // Only for the currently loaded children, do not expand.
     void GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);

@@ -683,8 +683,9 @@ RefPtr<NG::FrameNode> FindInputFocus(const RefPtr<NG::UINode>& node, int32_t foc
         return frameNode;
     }
     auto focusHub = frameNode->GetFocusHub();
-    auto focusChildren = focusHub->GetChildren();
-    for (const auto& focusChild : focusChildren) {
+    RefPtr<NG::FrameNode> target;
+    focusHub->AnyChildFocusHub([&target, &info, context, focusType, uiExtensionOffset](
+                                   const RefPtr<NG::FocusHub>& focusChild) {
         auto extensionNode = focusChild->GetFrameNode();
         if ((extensionNode && IsIsolatedComponent(extensionNode)) &&
             !IsUIExtensionShowPlaceholder(extensionNode) &&
@@ -696,17 +697,16 @@ RefPtr<NG::FrameNode> FindInputFocus(const RefPtr<NG::UINode>& node, int32_t foc
             OHOS::Ace::Framework::FindFocusedExtensionElementInfoNG(
                 transferSearchParam, extensionNode, info);
             if (info.GetAccessibilityId() < 0) {
-                continue;
+                return false;
             }
             SetUiExtensionAbilityParentIdForFocus(extensionNode, uiExtensionOffset, info);
-            return extensionNode;
+            target = extensionNode;
+            return true;
         }
-        auto childNode = FindInputFocus(focusChild->GetFrameNode(), focusType, info, uiExtensionOffset, context);
-        if (childNode) {
-            return childNode;
-        }
-    }
-    return nullptr;
+        target = FindInputFocus(focusChild->GetFrameNode(), focusType, info, uiExtensionOffset, context);
+        return target ? true : false;
+    });
+    return target;
 }
 
 void FindText(

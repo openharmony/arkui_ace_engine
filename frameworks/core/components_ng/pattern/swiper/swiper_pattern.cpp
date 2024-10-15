@@ -718,31 +718,27 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
     CHECK_NULL_VOID(swiperFocusHub);
     auto showChildFocusHub = curShowFrame->GetFirstFocusHubChild();
     CHECK_NULL_VOID(showChildFocusHub);
-    auto focusChildren = swiperFocusHub->GetChildren();
-    CHECK_NULL_VOID(!focusChildren.empty());
-    auto iter = focusChildren.rbegin();
+    int32_t skipCnt = 0;
     if (IsShowIndicator()) {
-        ++iter;
+        ++skipCnt;
     }
     if (HasLeftButtonNode()) {
-        ++iter;
+        ++skipCnt;
     }
     if (HasRightButtonNode()) {
-        ++iter;
+        ++skipCnt;
     }
-    while (iter != focusChildren.rend()) {
-        auto child = *iter;
-        if (!child) {
-            ++iter;
-            continue;
-        }
-        if (IsUseCustomAnimation() && hasTabsAncestor_) {
-            child->SetParentFocusable(child == showChildFocusHub);
-        } else {
-            child->SetParentFocusable(IsFocusNodeInItemPosition(child));
-        }
-        ++iter;
-    }
+    swiperFocusHub->AllChildFocusHub<true>(
+        [&skipCnt, &showChildFocusHub, this](const RefPtr<FocusHub>& child) {
+            if (--skipCnt >= 0 || !child) {
+                return;
+            }
+            if (IsUseCustomAnimation() && hasTabsAncestor_) {
+                child->SetParentFocusable(child == showChildFocusHub);
+            } else {
+                child->SetParentFocusable(IsFocusNodeInItemPosition(child));
+            }
+        });
 
     RefPtr<FocusHub> needFocusNode = showChildFocusHub;
     if (IsShowIndicator() && isLastIndicatorFocused_) {
@@ -765,15 +761,16 @@ RefPtr<FocusHub> SwiperPattern::GetFocusHubChild(std::string childFrameName)
     CHECK_NULL_RETURN(swiperHost, nullptr);
     auto swiperFocusHub = swiperHost->GetFocusHub();
     CHECK_NULL_RETURN(swiperFocusHub, nullptr);
-    auto focusChildren = swiperFocusHub->GetChildren();
-    CHECK_NULL_RETURN(!focusChildren.empty(), nullptr);
-    for (const auto& child : focusChildren) {
-        CHECK_NULL_RETURN(child, nullptr);
+    RefPtr<FocusHub> target;
+    swiperFocusHub->AnyChildFocusHub([&target, childFrameName](const RefPtr<FocusHub>& child) {
+        CHECK_NULL_RETURN(child, true);
         if (child->GetFrameName() == childFrameName) {
-            return child;
+            target = child;
+            return true;
         }
-    }
-    return nullptr;
+        return false;
+    });
+    return target;
 }
 
 WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
@@ -2296,20 +2293,19 @@ bool SwiperPattern::IsContentFocused()
     CHECK_NULL_RETURN(swiperHost, true);
     auto swiperFocusHub = swiperHost->GetFocusHub();
     CHECK_NULL_RETURN(swiperFocusHub, true);
-    auto focusChildren = swiperFocusHub->GetChildren();
-    CHECK_NULL_RETURN(!focusChildren.empty(), true);
-    for (const auto& child : focusChildren) {
+    bool ret = true;
+    swiperFocusHub->AnyChildFocusHub([&ret](const RefPtr<FocusHub>& child) {
         if (!child || !child->IsCurrentFocus()) {
-            continue;
+            return false;
         }
         auto frameName = child->GetFrameName();
         if (frameName == V2::SWIPER_INDICATOR_ETS_TAG || frameName == V2::SWIPER_RIGHT_ARROW_ETS_TAG ||
             frameName == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
-            return false;
+            ret = false;
         }
-        break;
-    }
-    return true;
+        return true;
+    });
+    return ret;
 }
 
 bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
