@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
 
 namespace OHOS::Ace::NG {

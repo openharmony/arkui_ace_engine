@@ -237,6 +237,10 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     return true;
 }
 
+void SessionWrapperImpl::SetDensityDpiImpl(bool isDensityDpi)
+{
+}
+
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
 }
@@ -244,18 +248,5 @@ void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const
 {
     return 1;
-}
-
-void SessionWrapperImpl::UpdateSessionViewportConfig()
-{
-}
-
-uint32_t SessionWrapperImpl::GetReasonDump() const
-{
-    return 1;
-}
-
-void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
-{
 }
 } // namespace OHOS::Ace::NG
