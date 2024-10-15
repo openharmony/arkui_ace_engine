@@ -97,6 +97,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
     };
     auto hub = maximizeBtn->GetOrCreateGestureEventHub();
     auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(longPressCallback);
+    hub->SetLongPressEvent(longPressEvent, false, true);
 
     auto eventHub = maximizeBtn->GetOrCreateInputEventHub();
     auto hoverMoveFuc = [weakPattern](MouseInfo& info) {
