@@ -2779,10 +2779,22 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
     }
 }
 
-void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& container)
+void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& container,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
     auto dialogContainer = AceType::DynamicCast<Platform::DialogContainer>(container);
     if (dialogContainer) {
+        std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+        CHECK_NULL_VOID(context);
+        auto resourceManager = context->GetResourceManager();
+        if (resourceManager != nullptr) {
+            resourceManager->GetResConfig(*resConfig);
+            if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
+                SystemProperties::SetColorMode(ColorMode::DARK);
+            } else {
+                SystemProperties::SetColorMode(ColorMode::LIGHT);
+            }
+        }
         auto aceResCfg = dialogContainer->GetResourceConfiguration();
         aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
         aceResCfg.SetDensity(SystemProperties::GetResolution());
@@ -2823,7 +2835,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
         icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
         AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
         container = AceType::MakeRefPtr<Platform::DialogContainer>(instanceId_, FrontendType::DECLARATIVE_JS);
-        UpdateDialogResourceConfiguration(container);
+        UpdateDialogResourceConfiguration(container, context);
     } else {
 #ifdef NG_BUILD
         container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType,
