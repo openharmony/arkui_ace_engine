@@ -1284,7 +1284,7 @@ bool convertToLongLong(const std::string& str, long long& value)
 {
     char* end;
     errno = 0;
-
+    // 10 is integer base
     value = std::strtoll(str.c_str(), &end, 10);
     if (end == str.c_str()) {
         return false;
