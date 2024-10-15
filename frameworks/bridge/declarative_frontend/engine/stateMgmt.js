@@ -10710,14 +10710,24 @@ class __RepeatVirtualScrollImpl {
             
             // make sparse copy of this.arr_
             this.lastActiveRangeData_ = new Array(this.arr_.length);
-            from = Math.min(this.arr_.length - 1, from);
-            to = Math.min(this.arr_.length - 1, to);
-            from = Math.max(0, from);
-            to = Math.max(0, to);
-            for (let i = from; i <= to && i < this.arr_.length; i++) {
-                const item = this.arr_[i];
-                const ttype = this.typeGenFunc_(this.arr_[i], i);
-                this.lastActiveRangeData_[i] = { item, ttype };
+            if (from <= to) {
+                for (let i = Math.max(0, from); i <= to && i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
+            }
+            else {
+                for (let i = 0; i <= to && i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
+                for (let i = Math.max(0, from); i < this.arr_.length; i++) {
+                    const item = this.arr_[i];
+                    const ttype = this.typeGenFunc_(this.arr_[i], i);
+                    this.lastActiveRangeData_[i] = { item, ttype };
+                }
             }
         };
         
@@ -10752,7 +10762,6 @@ class __RepeatVirtualScrollImpl {
     }
     hasVisibleItemsChanged() {
         var _a, _b;
-        let lastActiveRangeIndex = 0;
         // has any item or ttype in the active range changed?
         for (let i in this.lastActiveRangeData_) {
             if (!(i in this.arr_)) {
@@ -10770,7 +10779,6 @@ class __RepeatVirtualScrollImpl {
                 
                 return true;
             }
-            lastActiveRangeIndex = +i;
         }
         
         return false;
