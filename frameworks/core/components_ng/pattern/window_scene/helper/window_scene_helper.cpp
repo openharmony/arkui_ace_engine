@@ -107,7 +107,7 @@ int32_t WindowSceneHelper::GetFocusSystemWindowId(const RefPtr<FrameNode>& focus
         return focusSystemWindowId;
     }
     if (isWindowScene) {
-        focusSystemWindowId = window2patternSession->GetPersistentId();
+        focusSystemWindowId = static_cast<int32_t>(window2patternSession->GetPersistentId());
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Get systemWindowScene id:%{public}d successfully.", focusSystemWindowId);
     }
 
