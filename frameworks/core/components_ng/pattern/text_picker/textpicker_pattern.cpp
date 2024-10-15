@@ -1153,7 +1153,9 @@ void TextPickerPattern::SetCanLoop(bool isLoop)
 
 bool TextPickerPattern::NeedAdaptForAging()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);
