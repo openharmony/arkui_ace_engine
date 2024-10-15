@@ -44,6 +44,10 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     CHECK_NULL_RETURN(pattern, value);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textField, value);
+    if (textField->GetIsPreviewText()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "no PreprocessString at previewing text");
+        return tmp;
+    }
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
     auto selectValue = GetSelectedValue(startIndex, endIndex);
     bool hasInputFilter =
@@ -166,6 +170,11 @@ void ContentController::FilterValue()
     CHECK_NULL_VOID(pattern);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
+    if (textField->GetIsPreviewText()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "no filter at previewing text");
+        return;
+    }
+
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
 
     bool hasInputFilter =
