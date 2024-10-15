@@ -248,4 +248,79 @@ HWTEST_F(ImageModifierTest, setOnErrorTest, TestSize.Level1)
     EXPECT_NEAR(checkEvent->height, height, FLT_EPSILON);
     EXPECT_EQ(checkEvent->error, error);
 }
+
+/**
+ * @tc.name: ObjectFit_SetFitType
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    modifier_->setObjectFit(frameNode, Ark_ImageFit::ARK_IMAGE_FIT_SCALE_DOWN);
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ("ImageFit.FitHeight", GetAttrValue<std::string>(json, "objectFit"));
+}
+
+/**
+ * @tc.name: ObjectFit_SetDefaultedFitType
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, ObjectFit_SetDefaultedFitType, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::string key = "objectFit";
+    std::string defaultedFit = "ImageFit.Cover";
+
+    modifier_->setObjectFit(frameNode, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::FILL) - 1));
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
+
+    modifier_->setObjectFit(frameNode, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::SCALE_DOWN) + 1));
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
+}
+
+/**
+ * @tc.name: Ctor_InitWithUrl
+ * @tc.desc: Test ImageModifierTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, Ctor_InitWithUrl, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    std::string urlString = "https://www.example.com/xxx.png";
+    std::string resName = "image_url";
+    AddResource(resName, urlString);
+    const auto RES_ID = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
+    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(CreateResourceUnion(RES_ID));
+    const auto imageRc = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
+
+    modifier_->setImageOptions0(node_, &imageRc);
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
+
+    urlString = "https://www.example.com/xxx.jpg";
+    image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
+    const auto imageIm = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
+
+    modifier_->setImageOptions0(node_, &imageIm);
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
+    ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "rawSrc"));
+}
+
 } // namespace OHOS::Ace::NG
