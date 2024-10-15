@@ -5384,7 +5384,7 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
     }
 
     if (dragData->IsDragNewStyle() && !webPattern->IsNewDragStyle()) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "OnDragAndDropDataUdmf not is new style");
+        TAG_LOGI(AceLogTag::ACE_WEB, "OnDragAndDropDataUdmf not a new style");
         auto context = context_.Upgrade();
         CHECK_NULL_RETURN(context, false);
         CHECK_NULL_RETURN(context->GetTaskExecutor(), false);

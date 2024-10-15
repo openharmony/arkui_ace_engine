@@ -518,7 +518,9 @@ void WebPattern::GetPreviewImageOffsetAndSize(bool isImage, Offset& previewOffse
         previewSize.SetWidth(drawSize_.Width());
         previewSize.SetHeight(drawSize_.Height());
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     previewSize.SetWidth(previewSize.Width() / pipeline->GetDipScale());
     previewSize.SetHeight(previewSize.Height() / pipeline->GetDipScale());
@@ -1795,10 +1797,6 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
     TAG_LOGI(AceLogTag::ACE_WEB,
         "HandleDragStart DragDrop event gestureHub actionStart, isW3cDragEvent_:%{public}d, isMouseEvent_:%{public}d",
         (int)isW3cDragEvent_, (int)isMouseEvent_);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
-    CHECK_NULL_VOID(pipeline);
     if (!isW3cDragEvent_ && !isMouseEvent_) {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);

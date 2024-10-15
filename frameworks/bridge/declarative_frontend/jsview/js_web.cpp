@@ -53,8 +53,8 @@ const std::string RAWFILE_PREFIX = "resource://RAWFILE/";
 const std::string BUNDLE_NAME_PREFIX = "bundleName:";
 const std::string MODULE_NAME_PREFIX = "moduleName:";
 
-const int32_t PARAM_LENGHT_THREE = 3;
-const int32_t PARAM_LENGHT_TWO = 2;
+const int32_t SELECTION_MENU_OPTION_PARAM_INDEX = 3;
+const int32_t SELECTION_MENU_CONTENT_PARAM_INDEX = 2;
 
 void EraseSpace(std::string& data)
 {
@@ -1555,7 +1555,6 @@ public:
 
     void GetPreviewWidth(const JSCallbackInfo& args)
     {
-        UpdatePreviewSize();
         auto ret = JSVal(ToJSValue(previewWidth_));
         auto descriptionRef = JSRef<JSVal>::Make(ret);
         args.SetReturnValue(descriptionRef);
@@ -1563,7 +1562,6 @@ public:
 
     void GetPreviewHeight(const JSCallbackInfo& args)
     {
-        UpdatePreviewSize();
         auto ret = JSVal(ToJSValue(previewHeight_));
         auto descriptionRef = JSRef<JSVal>::Make(ret);
         args.SetReturnValue(descriptionRef);
@@ -1572,6 +1570,7 @@ public:
     void SetParam(const ContextMenuEvent& eventInfo)
     {
         param_ = eventInfo.GetParam();
+        UpdatePreviewSize();
     }
 
     void GetXCoord(const JSCallbackInfo& args)
@@ -3275,7 +3274,7 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
 
 void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
 {
-    if (info.Length() < PARAM_LENGHT_THREE) {
+    if (info.Length() < SELECTION_MENU_OPTION_PARAM_INDEX) {
         return;
     }
     if (!info[0]->IsNumber() || !info[1]->IsObject()) {
@@ -3301,15 +3300,15 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     };
 
     ResponseType responseType = ResponseType::LONG_PRESS;
-    if (info[PARAM_LENGHT_TWO]->IsNumber()) {
-        auto response = info[PARAM_LENGHT_TWO]->ToNumber<int32_t>();
+    if (info[SELECTION_MENU_CONTENT_PARAM_INDEX]->IsNumber()) {
+        auto response = info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>();
         responseType = static_cast<ResponseType>(response);
     }
 
     std::function<void()> previewBuilder = nullptr;
     NG::MenuParam menuParam;
-    if (info.Length() > PARAM_LENGHT_THREE && info[PARAM_LENGHT_THREE]->IsObject()) {
-        ParseBindSelectionMenuOptionParam(info, info[PARAM_LENGHT_THREE], menuParam, previewBuilder);
+    if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
+        ParseBindSelectionMenuOptionParam(info, info[SELECTION_MENU_OPTION_PARAM_INDEX], menuParam, previewBuilder);
     }
 
     if (responseType != ResponseType::LONG_PRESS) {
