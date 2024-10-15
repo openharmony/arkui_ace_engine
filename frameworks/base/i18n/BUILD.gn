@@ -35,7 +35,7 @@ template("ace_base_i18n") {
       "$ace_root:ace_config",
     ]
     deps = [ "$ace_root/frameworks/base/resource:ace_resource" ]
-    external_deps = []
+    external_deps = [ "i18n:intl_util" ]
 
     if (defined(config.use_external_icu) &&
         config.use_external_icu == "static") {
