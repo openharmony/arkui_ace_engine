@@ -18,6 +18,8 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;
@@ -28,15 +30,22 @@ namespace  {
     const auto ATTRIBUTE_SELECT_NAME = "select";
     const auto ATTRIBUTE_SELECT_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
-    const auto ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE = "#FF000000";
+    const auto ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE = "#FF007DFF";
     const auto ATTRIBUTE_SHAPE_NAME = "shape";
-    const auto ATTRIBUTE_SHAPE_DEFAULT_VALUE = "CheckBoxShape.CIRCLE";
+    const auto ATTRIBUTE_SHAPE_DEFAULT_VALUE = "0";
     const auto ATTRIBUTE_UNSELECTED_COLOR_NAME = "unselectedColor";
     const auto ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE = "#FF000000";
 } // namespace
 
 class CheckboxModifierTest : public ModifierTestBase<GENERATED_ArkUICheckboxModifier,
     &GENERATED_ArkUINodeModifiers::getCheckboxModifier, GENERATED_ARKUI_CHECKBOX> {
+public:
+    static void SetUpTestCase()
+    {
+        ModifierTestBase::SetUpTestCase();
+
+        SetupTheme<CheckboxTheme>();
+    }
 };
 
 /*
@@ -103,8 +112,8 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestDefaultValues, TestSize.Level
 
 // Valid values for attribute 'selectedColor' of method 'selectedColor'
 static std::vector<std::tuple<std::string, ResourceColor, std::string>> selectedColorSelectedColorValidValues = {
-    { "blue", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-    { "red", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
+    { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
 };
 
 /*
@@ -153,6 +162,70 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestInvalidValues, TestSize.Level
 }
 
 /*
+ * @tc.name: setUnselectedColorTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setUnselectedColorTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNSELECTED_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE);
+}
+
+// Valid values for attribute 'unselectedColor' of method 'unselectedColor'
+static std::vector<std::tuple<std::string, ResourceColor, std::string>> unselectedColorUnselectedColorValidValues = {
+    { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+    { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
+};
+
+/*
+ * @tc.name: setUnselectedColorTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setUnselectedColorTestValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    ResourceColor inputValueUnselectedColor;
+    ResourceColor initValueUnselectedColor;
+
+    // Initial setup
+    initValueUnselectedColor = std::get<1>(unselectedColorUnselectedColorValidValues[0]);
+
+    // Verifying attribute's  values
+    inputValueUnselectedColor = initValueUnselectedColor;
+    for (auto&& value: unselectedColorUnselectedColorValidValues) {
+        inputValueUnselectedColor = std::get<1>(value);
+        modifier_->setUnselectedColor(node_, &inputValueUnselectedColor);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNSELECTED_COLOR_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setUnselectedColorTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setUnselectedColorTestInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+    ResourceColor initValueUnselectedColor;
+
+    // Initial setup
+    initValueUnselectedColor = std::get<1>(unselectedColorUnselectedColorValidValues[0]);
+}
+
+/*
  * @tc.name: setShapeTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -169,11 +242,9 @@ HWTEST_F(CheckboxModifierTest, setShapeTestDefaultValues, TestSize.Level1)
 // Valid values for attribute 'shape' of method 'shape'
 static std::vector<std::tuple<std::string, enum Ark_CheckBoxShape, std::string>> shapeShapeValidValues = {
     {"ARK_CHECK_BOX_SHAPE_CIRCLE",
-        Converter::ArkValue<enum Ark_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_CIRCLE),
-        "CheckBoxShape.CIRCLE"},
+        Converter::ArkValue<enum Ark_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_CIRCLE), "0"},
     {"ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE",
-        Converter::ArkValue<enum Ark_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE),
-        "CheckBoxShape.ROUNDED_SQUARE"},
+        Converter::ArkValue<enum Ark_CheckBoxShape>(ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE), "1"},
 };
 
 /*
@@ -237,68 +308,6 @@ HWTEST_F(CheckboxModifierTest, setShapeTestInvalidValues, TestSize.Level1)
         expectedStr = ATTRIBUTE_SHAPE_DEFAULT_VALUE;
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
-}
-
-/*
- * @tc.name: setUnselectedColorTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CheckboxModifierTest, setUnselectedColorTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNSELECTED_COLOR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE);
-}
-
-// Valid values for attribute 'unselectedColor' of method 'unselectedColor'
-static std::vector<std::tuple<std::string, ResourceColor, std::string>> unselectedColorUnselectedColorValidValues = {
-};
-
-/*
- * @tc.name: setUnselectedColorTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CheckboxModifierTest, setUnselectedColorTestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    std::string expectedStr;
-    ResourceColor inputValueUnselectedColor;
-    ResourceColor initValueUnselectedColor;
-
-    // Initial setup
-    initValueUnselectedColor = std::get<1>(unselectedColorUnselectedColorValidValues[0]);
-
-    // Verifying attribute's  values
-    inputValueUnselectedColor = initValueUnselectedColor;
-    for (auto&& value: unselectedColorUnselectedColorValidValues) {
-        inputValueUnselectedColor = std::get<1>(value);
-        modifier_->setUnselectedColor(node_, &inputValueUnselectedColor);
-        jsonValue = GetJsonValue(node_);
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNSELECTED_COLOR_NAME);
-        expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-}
-
-/*
- * @tc.name: setUnselectedColorTestInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CheckboxModifierTest, setUnselectedColorTestInvalidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::string resultStr;
-    std::string expectedStr;
-    ResourceColor initValueUnselectedColor;
-
-    // Initial setup
-    initValueUnselectedColor = std::get<1>(unselectedColorUnselectedColorValidValues[0]);
 }
 
 } // namespace OHOS::Ace::NG
