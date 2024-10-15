@@ -7646,8 +7646,8 @@ class SetMapProxyHandler {
             };
         }
         if (target instanceof Set || (this.isMakeObserved_ && SendableType.isSet(target))) {
-            return key === 'add' ?
-                (val) => {
+            if (key === 'add') {
+                return (val) => {
                     ObserveV2.getObserve().fireChange(conditionalTarget, val.toString());
                     ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
                     if (!target.has(val)) {
@@ -7655,9 +7655,20 @@ class SetMapProxyHandler {
                         target.add(val);
                     }
                     return receiver;
-                } : (typeof ret === 'function') ?
-                // Bind to target ==> functions not observed
-                ret.bind(target) : ret;
+                };
+            }
+            if (key === 'forEach') {
+                ObserveV2.getObserve().addRef(conditionalTarget, ObserveV2.OB_LENGTH);
+                return function (callbackFn) {
+                    // need to execute it target because it is the internal function for build-in type, and proxy does not have such slot.
+                    // if necessary, addref for each item in Set and also wrap proxy for makeObserved if it is Object.
+                    // currently, just execute it in target because there is no Component need to iterate Set, only Array
+                    const result = ret.call(target, callbackFn);
+                    return result;
+                };
+            }
+            // Bind to receiver ==> functions are observed
+            return (typeof ret === 'function') ? ret.bind(receiver) : ret;
         }
         if (target instanceof Map || (this.isMakeObserved_ && SendableType.isMap(target))) {
             if (key === 'get') {
@@ -7685,10 +7696,19 @@ class SetMapProxyHandler {
                     return receiver;
                 };
             }
+            if (key === 'forEach') {
+                ObserveV2.getObserve().addRef(conditionalTarget, ObserveV2.OB_LENGTH);
+                return function (callbackFn) {
+                    // need to execute it target because it is the internal function for build-in type, and proxy does not have such slot.
+                    // if necessary, addref for each item in Map and also wrap proxy for makeObserved if it is Object.
+                    // currently, just execute it in target because there is no Component need to iterate Map, only Array
+                    const result = ret.call(target, callbackFn);
+                    return result;
+                };
+            }
         }
-        return (typeof ret === 'function') ?
-            // Bind to target ==> functions not observed
-            ret.bind(target) : ret;
+        // Bind to receiver ==> functions are observed
+        return (typeof ret === 'function') ? ret.bind(receiver) : ret;
     }
     set(target, key, value) {
         if (typeof key === 'symbol') {
