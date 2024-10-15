@@ -184,10 +184,10 @@ class ArrayProxyHandler {
                     // so we must call "target" here to deal with the collections situations.
                     // But we also need to addref for each index.
                     ObserveV2.getObserve().addRef(conditionalTarget, index.toString());
-                    callbackFn(typeof value == 'object' ? RefInfo.get(value).proxy : value, index, receiver);
+                    callbackFn(typeof value === 'object' ? RefInfo.get(value).proxy : value, index, receiver);
                 });
                 return result;
-            }
+            };
         } else {
             return ret.bind(target); // SendableArray can't be bound -> functions not observed
         }
