@@ -105,7 +105,7 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     if (!selectOverlayInfo->isUsingMouse) {
         pattern->StopTwinkling();
     }
-    manager->MarkInfoChange(DIRTY_SELECT_TEXT);
+    manager->MarkInfoChange(DIRTY_SELECT_TEXT | DIRTY_SELECT_AREA);
     latestReqeust_.reset();
 }
 

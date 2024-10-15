@@ -589,6 +589,9 @@ void RichEditorSelectOverlay::OnHandleMouseEvent(const MouseInfo& event)
 void RichEditorSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 {
     handleIsHidden_ = false;
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_SELECT_AREA);
     if (IsSingleHandleShow()) {
         auto pattern = GetPattern<RichEditorPattern>();
         CHECK_NULL_VOID(pattern);
