@@ -31,16 +31,16 @@ public:
     TextInputAction GetDefaultTextInputAction() const override;
     void InitDragEvent() override;
     void ApplyNormalTheme() override;
-    bool IsTextEditableForStylus() const override;
+    bool IsTextEditableForStylus() override;
     void ProcessSelection() override;
     void SearchRequestStartTwinkling();
     void SearchRequestStopTwinkling();
     void ResetSearchRequestStopTwinkling();
+    bool IsNeedProcessAutoFill() override;
+    int32_t GetRequestKeyboardId() override;
 
 private:
     bool searchRequestStopTwinkling_ = false;
-    bool IsNeedProcessAutoFill() override;
-    int32_t GetRequestKeyboardId() override;
 };
 } // namespace OHOS::Ace::NG
 

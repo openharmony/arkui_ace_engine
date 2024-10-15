@@ -7991,7 +7991,7 @@ void TextFieldPattern::ReportEvent()
 #endif
 }
 
-bool TextFieldPattern::IsTextEditableForStylus() const
+bool TextFieldPattern::IsTextEditableForStylus()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
