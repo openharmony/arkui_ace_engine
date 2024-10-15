@@ -28478,16 +28478,16 @@ class ArkTabsComponent extends ArkComponent {
     }
     let arkBackgroundBlurStyle = new ArkBackgroundBlurStyle();
     arkBackgroundBlurStyle.blurStyle = value;
-    modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, value);
+    modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, arkBackgroundBlurStyle);
     return this;
   }
   barBackgroundBlurStyle(style, options) {
-    if (isUndefined(value)) {
+    if (isUndefined(style)) {
       modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, undefined);
       return this;
     }
     let arkBackgroundBlurStyle = new ArkBackgroundBlurStyle();
-    arkBackgroundBlurStyle.blurStyle = value;
+    arkBackgroundBlurStyle.blurStyle = style;
     if (typeof options === 'object') {
       arkBackgroundBlurStyle.colorMode = options.colorMode;
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
@@ -28501,7 +28501,7 @@ class ArkTabsComponent extends ArkComponent {
     return this;
   }
   barBackgroundEffect(options) {
-    modifierWithKey(this._modifiersWithKeys, BarBackgroundEffectModifier.identity, BarBackgroundEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, BarBackgroundEffectModifier.identity, BarBackgroundEffectModifier, options);
     return this;
   }
   barGridAlign(value) {
@@ -28786,10 +28786,11 @@ class BarBackgroundEffectModifier extends ModifierWithKey {
     super(options);
   }
   applyPeer(node, reset) {
+    let _a;
     if (reset) {
-      getUINativeModule().common.resetBarBackgroundEffect(node);
+      getUINativeModule().tabs.resetBarBackgroundEffect(node);
     } else {
-      getUINativeModule().common.setBarBackgroundEffect(node, this.value.radius, this.value.saturation,
+      getUINativeModule().tabs.setBarBackgroundEffect(node, this.value.radius, this.value.saturation,
         this.value.brightness, this.value.color, this.value.adaptiveColor,
         (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale,
         this.value.policy, this.value.inactiveColor, this.value.type);
