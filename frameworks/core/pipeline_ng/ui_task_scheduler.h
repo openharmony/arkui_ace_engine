@@ -105,6 +105,8 @@ public:
 
     bool isEmpty();
 
+    bool IsPredictTaskEmpty();
+
     void StartRecordFrameInfo(FrameInfo* info)
     {
         frameInfo_ = info;
