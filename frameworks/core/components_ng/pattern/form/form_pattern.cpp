@@ -1805,7 +1805,9 @@ void FormPattern::OnActionEvent(const std::string& action)
     if (!isManuallyClick_) {
         EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
             cardInfo_.moduleName, cardInfo_.dimension);
-        return;
+        if ("router" == type) {
+            return;
+        }
     }
 
     if ("router" == type) {
