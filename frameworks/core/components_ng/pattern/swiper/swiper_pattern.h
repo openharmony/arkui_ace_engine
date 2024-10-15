@@ -1130,7 +1130,6 @@ private:
     bool isIndicatorLongPress_ = false;
     bool stopIndicatorAnimation_ = true;
     bool isTouchPad_ = false;
-    bool isUsingTouchPad_ = false;
     bool fadeAnimationIsRunning_ = false;
     bool autoLinearReachBoundary = false;
     bool needAdjustIndex_ = false;

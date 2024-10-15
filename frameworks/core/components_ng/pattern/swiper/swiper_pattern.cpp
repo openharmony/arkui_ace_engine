@@ -2191,10 +2191,10 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
             }
-            pattern->isUsingTouchPad_ =
+            bool isUsingTouchPad =
                 (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD);
-            auto velocity = pattern->isUsingTouchPad_ ? info.GetMainVelocity() * pattern->GetVelocityCoefficient()
-                                                      : info.GetMainVelocity();
+            auto velocity =
+                isUsingTouchPad ? info.GetMainVelocity() * pattern->GetVelocityCoefficient() : info.GetMainVelocity();
 
             pattern->HandleDragEnd(velocity);
         }
