@@ -96,15 +96,15 @@ bool SaveButtonModelNG::InitSaveButton(FrameNode* frameNode,
 {
     CHECK_NULL_RETURN(frameNode, false);
 
-    auto text = style.text ? style.text.value() : SaveButtonSaveDescription::TEXT_NULL;
-    auto icon = style.icon ? style.icon.value() : SaveButtonIconStyle::ICON_NULL;
-    auto backgroundType = style.backgroundType ? style.backgroundType.value() : ButtonType::CAPSULE;
+    auto text = style.text.value_or(SaveButtonSaveDescription::TEXT_NULL);
+    auto icon = style.icon.value_or(SaveButtonIconStyle::ICON_NULL);
+    auto backgroundType = style.backgroundType.value_or(ButtonType::CAPSULE);
 
     if ((text == SaveButtonSaveDescription::TEXT_NULL) && (icon == SaveButtonIconStyle::ICON_NULL)) {
         // set default values
-        text = SaveButtonSaveDescription::DOWNLOAD;
-        icon = SaveButtonIconStyle::ICON_FULL_FILLED;
-        backgroundType = ButtonType::CAPSULE;
+        text = SaveButtonStyle::DEFAULT_TEXT;
+        icon = SaveButtonStyle::DEFAULT_ICON;
+        backgroundType = SaveButtonStyle::DEFAULT_BACKGROUND_TYPE;
     }
 
     SecurityComponentElementStyle secCompStyle = {
