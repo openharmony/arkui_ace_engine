@@ -38,7 +38,8 @@ public:
     }
 
     void StartCacheLayout() override;
-    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
+    bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
+    void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
     void EndCacheLayout() override;
 
 private:
@@ -174,6 +175,12 @@ private:
      */
     void LayoutSection(size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl);
     void LayoutFooter(const OffsetF& paddingOffset, bool reverse);
+
+    /**
+     * @brief shared implementation to preload a cache item.
+     * @return true if the item is successfully preloaded.
+     */
+    bool PreloadItemImpl(int32_t itemIdx);
 
     // convert FlowItem's index to children node index.
     inline int32_t nodeIdx(int32_t idx) const;

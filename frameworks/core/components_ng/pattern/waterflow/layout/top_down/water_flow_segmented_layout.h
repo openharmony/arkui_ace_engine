@@ -67,7 +67,8 @@ public:
         overScroll_ = value;
     }
 
-    bool AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
+    bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
+    void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
 
 private:
     /**

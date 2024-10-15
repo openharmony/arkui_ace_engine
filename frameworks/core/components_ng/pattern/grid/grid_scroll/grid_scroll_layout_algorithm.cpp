@@ -2206,9 +2206,9 @@ int32_t GridScrollLayoutAlgorithm::MeasureCachedChild(const SizeF& frameSize, in
 }
 
 void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
-    LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items)
+    LayoutWrapper* layoutWrapper, const std::map<int32_t, int32_t>& items)
 {
-    for (auto item : items) {
+    for (auto&& item : items) {
         auto currentIndex = item.second;
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper) {
