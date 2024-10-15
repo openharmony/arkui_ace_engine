@@ -933,6 +933,31 @@ TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
     return value;
 }
 
+void TextModelNG::SetCaretColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, CursorColor, value, frameNode);
+}
+
+Color TextModelNG::GetCaretColor(FrameNode* frameNode)
+{
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, Color::BLACK);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, Color::BLACK);
+    Color value = theme->GetCaretColor();
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, CursorColor, value, frameNode, value);
+    return value;
+}
+
+void TextModelNG::ResetCaretColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->ResetCursorColor();
+    }
+}
+
 void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
 {
     Color color = value;
