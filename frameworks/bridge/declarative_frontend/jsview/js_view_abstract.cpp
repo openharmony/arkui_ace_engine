@@ -3681,9 +3681,17 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
         }
         return;
     }
+
     if (jsVal->IsObject()) {
-        CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(jsVal);
+
+        CalcDimension length;
+        if (type == EdgeType::SAFE_AREA_PADDING && ParseJsLengthMetrics(paddingObj, length)) {
+            ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
+            return;
+        }
+        
+        CommonCalcDimension commonCalcDimension;
         auto useLengthMetrics = ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
@@ -3704,8 +3712,13 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
                         commonCalcDimension.left, commonCalcDimension.right);
                 }
             } else if (type == EdgeType::SAFE_AREA_PADDING) {
-                ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
-                    commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+                if (useLengthMetrics) {
+                    ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(GetLocalizedPadding(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
+                } else {
+                    ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
+                }
             }
             return;
         }
@@ -3720,8 +3733,6 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType t
         ViewAbstractModel::GetInstance()->SetMargin(length);
     } else if (type == EdgeType::PADDING) {
         ViewAbstractModel::GetInstance()->SetPadding(length);
-    } else if (type == EdgeType::SAFE_AREA_PADDING) {
-        ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
     }
 }
 
