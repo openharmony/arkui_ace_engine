@@ -1057,7 +1057,7 @@ class OperateItemStruct extends ViewPU {
             Button.createWithChild();
             Button.padding({ top: 0, bottom: 0 });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-            Button.hitTestBehavior(HitTestMode.Block);
+            Button.hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Block);
             Button.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Button.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_activated_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Button.constraintSize({
@@ -1111,7 +1111,7 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.shadow(CLEAR_SHADOW);
-            Button.hitTestBehavior(HitTestMode.Block);
+            Button.hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Block);
             Button.backgroundColor(Color.Transparent);
             Button.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
             Button.width(OPERATEITEM_ICON_CLICKABLE_SIZE);
@@ -1189,7 +1189,7 @@ class OperateItemStruct extends ViewPU {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.shadow(CLEAR_SHADOW);
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-            Button.hitTestBehavior(HitTestMode.Transparent);
+            Button.hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Transparent);
             Button.backgroundColor(Color.Transparent);
             Button.height(OPERATEITEM_ICONLIKE_SIZE);
             Button.width(OPERATEITEM_ARROW_WIDTH);
@@ -1262,7 +1262,7 @@ class OperateItemStruct extends ViewPU {
             Radio.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Radio.hitTestBehavior(HitTestMode.Block);
+            Radio.hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Block);
             Radio.onTouch((event) => {
                 if (!event) {
                     return;
@@ -1311,7 +1311,7 @@ class OperateItemStruct extends ViewPU {
             Checkbox.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Checkbox.hitTestBehavior(HitTestMode.Block);
+            Checkbox.hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Block);
             Checkbox.onTouch((event) => {
                 if (event.type === TouchType.Down) {
                     this.parentCanTouch = false;
@@ -1382,7 +1382,7 @@ class OperateItemStruct extends ViewPU {
                     this.switch?.onChange(isCheck);
                 }
             });
-            Toggle.hitTestBehavior(HitTestMode.Block);
+            Toggle.hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Block);
         }, Toggle);
         Toggle.pop();
         Row.pop();
@@ -1391,7 +1391,7 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.shadow(CLEAR_SHADOW);
-            Button.hitTestBehavior(HitTestMode.Transparent);
+            Button.hitTestBehavior(!IS_CLOSE_CHILD_FOCUS ? HitTestMode.None : HitTestMode.Transparent);
             Button.labelStyle({
                 maxLines: TEXT_MAX_LINE
             });
