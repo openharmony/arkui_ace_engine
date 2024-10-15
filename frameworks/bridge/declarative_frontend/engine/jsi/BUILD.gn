@@ -247,6 +247,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_image_bridge.cpp",
       "nativeModule/arkts_native_image_span_bridge.cpp",
       "nativeModule/arkts_native_line_bridge.cpp",
+      "nativeModule/arkts_native_linear_indicator.cpp",
       "nativeModule/arkts_native_list_bridge.cpp",
       "nativeModule/arkts_native_list_item_bridge.cpp",
       "nativeModule/arkts_native_list_item_group_bridge.cpp",
