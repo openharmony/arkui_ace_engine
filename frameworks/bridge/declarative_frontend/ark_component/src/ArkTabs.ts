@@ -98,16 +98,16 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     }
     let arkBackgroundBlurStyle = new ArkBackgroundBlurStyle();
     arkBackgroundBlurStyle.blurStyle = value;
-    modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, value);
+    modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, arkBackgroundBlurStyle);
     return this;
   }
   barBackgroundBlurStyle(style: BlurStyle, options: BackgroundBlurStyleOptions): TabsAttribute {
-    if (isUndefined(value)) {
+    if (isUndefined(style)) {
       modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, undefined);
       return this;
     }
     let arkBackgroundBlurStyle = new ArkBackgroundBlurStyle();
-    arkBackgroundBlurStyle.blurStyle = value;
+    arkBackgroundBlurStyle.blurStyle = style;
     if (typeof options === 'object') {
       arkBackgroundBlurStyle.colorMode = options.colorMode;
       arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
@@ -121,7 +121,7 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   barBackgroundEffect(options: BackgroundEffectOptions): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, BarBackgroundEffectModifier.identity, BarBackgroundEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, BarBackgroundEffectModifier.identity, BarBackgroundEffectModifier, options);
     return this;
   }
   barGridAlign(value: BarGridColumnOptions): TabsAttribute {
@@ -427,16 +427,20 @@ class BarBackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOption
   }
   static identity: Symbol = Symbol('barBackgroundEffect');
   applyPeer(node: KNode, reset: boolean): void {
+    let _a;
     if (reset) {
-      getUINativeModule().common.resetBarBackgroundEffect(node);
+      getUINativeModule().tabs.resetBarBackgroundEffect(node);
     } else {
-      getUINativeModule().common.setBarBackgroundEffect(node, this.value.radius, this.value.saturation,
-        this.value.brightness, this.value.color, this.value.adaptiveColor, this.value.blurOptions?.grayscale,
+      getUINativeModule().tabs.setBarBackgroundEffect(node, this.value.radius, this.value.saturation,
+        this.value.brightness, this.value.color, this.value.adaptiveColor,
+        (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale,
         this.value.policy, this.value.inactiveColor, this.value.type);
     }
   }
 
   checkObjectDiff(): boolean {
+    let _a;
+    let _b;
     return !(this.value.radius === this.stageValue.radius && this.value.saturation === this.stageValue.saturation &&
       this.value.brightness === this.stageValue.brightness &&
       isBaseOrResourceEqual(this.stageValue.color, this.value.color) &&
@@ -444,7 +448,8 @@ class BarBackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOption
       this.value.policy === this.stageValue.policy &&
       this.value.inactiveColor === this.stageValue.inactiveColor &&
       this.value.type === this.stageValue.type &&
-      this.value.blurOptions?.grayscale === this.stageValue.blurOptions?.grayscale);
+      ((_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale) === ((_b = this.stageValue.blurOptions) === null ||
+      _b === void 0 ? void 0 : _b.grayscale));
   }
 }
 
