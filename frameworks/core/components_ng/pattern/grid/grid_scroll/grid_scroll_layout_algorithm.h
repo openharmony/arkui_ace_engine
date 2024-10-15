@@ -189,6 +189,13 @@ private:
 
     bool SkipLargeLineHeightLines(float mainSize);
 
+    /**
+     * @brief immediately create & measure items in cache range.
+     * 
+     * @param cacheLineCnt number of lines to preload above and below viewport.
+     */
+    void SyncPreload(LayoutWrapper* wrapper, int32_t cacheLineCnt, float crossSize, float mainSize);
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;

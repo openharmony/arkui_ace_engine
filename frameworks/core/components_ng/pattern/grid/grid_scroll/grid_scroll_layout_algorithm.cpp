@@ -93,6 +93,12 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                      : gridLayoutInfo_.offsetEnd_;
 
     if (SystemProperties::GetGridCacheEnabled()) {
+        const bool sync = gridLayoutProperty->GetShowCachedItemsValue(false);
+        if (sync) {
+            SyncPreload(layoutWrapper, gridLayoutProperty->GetCachedCountValue(1), crossSize, mainSize);
+            return;
+        }
+
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
         AddCacheItemsInFront(gridLayoutInfo_.startIndex_, layoutWrapper, cacheCnt, predictBuildList_);
         if (!predictBuildList_.empty()) {
@@ -283,7 +289,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
-    auto cacheCount = props->GetCachedCountValue(1);
+    auto cacheCount = props->GetCachedCountValue(0);
     gridLayoutInfo_.totalHeightOfItemsInView_ = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
 
     if (SystemProperties::GetGridCacheEnabled()) {
@@ -2220,6 +2226,25 @@ void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
         }
         itemsCrossPosition_.try_emplace(currentIndex, ComputeItemCrossPosition(item.first));
     }
+}
+
+void GridScrollLayoutAlgorithm::SyncPreload(
+    LayoutWrapper* wrapper, int32_t cacheLineCnt, float crossSize, float mainSize)
+{
+    const int32_t subStart = gridLayoutInfo_.startIndex_;
+    const int32_t subStartLine = gridLayoutInfo_.startMainLineIndex_;
+    const int32_t subEnd = gridLayoutInfo_.endIndex_;
+    const int32_t subEndLine = gridLayoutInfo_.endMainLineIndex_;
+
+    for (int i = 0; i < cacheLineCnt; ++i) {
+        FillNewLineBackward(crossSize, mainSize, wrapper, false);
+        FillNewLineForward(crossSize, mainSize, wrapper);
+    }
+
+    gridLayoutInfo_.startIndex_ = subStart;
+    gridLayoutInfo_.startMainLineIndex_ = subStartLine;
+    gridLayoutInfo_.endIndex_ = subEnd;
+    gridLayoutInfo_.endMainLineIndex_ = subEndLine;
 }
 
 bool GridScrollLayoutAlgorithm::PredictBuildItem(
