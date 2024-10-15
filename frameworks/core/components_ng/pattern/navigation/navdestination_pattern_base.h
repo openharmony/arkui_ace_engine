@@ -247,7 +247,8 @@ public:
         bool needRunTitleBarAnimation, bool needRunToolBarAnimation);
     void StartAnimation(bool needRunTitleBarAnimation, bool hideTitle, bool needRunToolBarAnimation, bool hideTool);
     void HandleStartAnimation(bool needRunTitleBarAnimation, bool needRunToolBarAnimation);
-
+    bool IsNoTitleBarInAnimation(const RefPtr<NavDestinationPatternBase>& navBarPattern);
+    bool IsNoToolBarInAnimation(const RefPtr<NavDestinationPatternBase>& navBarPattern);
 protected:
     bool UpdateBarSafeAreaPadding();
 
