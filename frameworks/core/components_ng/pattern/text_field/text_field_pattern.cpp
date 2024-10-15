@@ -2911,7 +2911,7 @@ void TextFieldPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContextSafely();
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -2981,6 +2981,20 @@ void TextFieldPattern::OnModifyDone()
         UpdateTextFieldInfo();
     }
 
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    if (context->UsingCaretAvoidMode() && textFieldManager) {
+        context->AddAfterLayoutTask([weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+            auto textField = weak.Upgrade();
+            CHECK_NULL_VOID(textField);
+            auto textFieldManager = manager.Upgrade();
+            CHECK_NULL_VOID(textFieldManager);
+            auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
+            if (caretPos > textField->GetLastCaretPos()) {
+                TAG_LOGI(ACE_KEYBOARD, "Caret Position Goes Down, Retrigger Avoid");
+                textField->TriggerAvoidOnCaretChange();
+            }
+        });
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     isModifyDone_ = true;
 }
@@ -7868,6 +7882,13 @@ void TextFieldPattern::TriggerAvoidOnCaretChange()
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
+    CHECK_NULL_VOID(pipeline->UsingCaretAvoidMode());
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    if (!safeAreaManager || NearEqual(safeAreaManager->GetKeyboardInset().Length(), 0)) {
+        return;
+    }
+    auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
+    SetLastCaretPos(caretPos);
     textFieldManager->TriggerAvoidOnCaretChange();
 }
 
