@@ -46,8 +46,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension BAR_BLUR_RADIUS = 200.0_vp;
-constexpr Dimension BAR_SATURATE = 1.3_vp;
 constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
                                 static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
                                 static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
