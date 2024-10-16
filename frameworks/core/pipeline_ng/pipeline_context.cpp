@@ -2324,34 +2324,32 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
             keyboardHeight += context->safeAreaManager_->GetSystemSafeArea().bottom_.Length();
         }
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "origin positionY: %{public}f, height %{public}f", positionY, height);
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
         float caretPos = manager->GetFocusedNodeCaretRect().Top() - context->GetRootRect().GetOffset().GetY() -
             context->GetSafeAreaManager()->GetKeyboardOffset();
         auto onFocusField = manager->GetOnFocusTextField().Upgrade();
         float adjust = 0.0f;
         if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
-            auto adjustRect = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust();
-            adjust = adjustRect.Top();
+            adjust = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust().Top();
+            positionY = caretPos;
+            height = manager->GetHeight();
         }
-        caretPos += adjust;
-        positionY = caretPos;
-        height = manager->GetHeight();
+        positionY += adjust;
         auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
         auto newKeyboardOffset = context->CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
         if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
             (manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId() && !keyboardHeightChanged)) {
             context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
         } else {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Calculated offset %{public}f is smaller than current"
-                "keyboardOffset, so keep current keyboardOffset", newKeyboardOffset);
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "calc offset %{public}f is smaller, keep current", newKeyboardOffset);
         }
         manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
             "keyboardHeight: %{public}f, caretPos: %{public}f, caretHeight: %{public}f, "
-            "rootSize.Height() %{public}f adjust: %{public}f final calculate keyboard offset is %{public}f",
-            keyboardHeight, positionY, height, rootSize.Height(), adjust,
+            "rootSize.Height() %{public}f adjust: %{public}f lastOffset: %{public}f, "
+            "final calculate keyboard offset is %{public}f",
+            keyboardHeight, positionY, height, rootSize.Height(), adjust, lastKeyboardOffset,
             context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         manager->AvoidKeyBoardInNavigation();
