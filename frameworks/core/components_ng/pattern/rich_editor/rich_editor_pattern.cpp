@@ -7800,6 +7800,12 @@ bool RichEditorPattern::AdjustIndexSkipLineSeparator(int32_t& currentPosition)
         CHECK_NULL_BREAK(currentPosition > span->position);
     }
     auto contentText = wss.str();
+    auto contentLength = static_cast<int32_t>(contentText.length());
+    if (currentPosition > contentLength) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "currentPosition=%{public}d but contentLength=%{public}d",
+            currentPosition, contentLength);
+        return false;
+    }
     auto index = currentPosition - 1;
     while (index > 0) {
         CHECK_NULL_BREAK(contentText[index] == L'\n');
