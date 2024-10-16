@@ -619,11 +619,12 @@ void ClipboardImpl::ProcessSpanStringData(
             continue;
         }
         auto hasSpanString = false;
-        if (pasteDataRecord->GetCustomData() != nullptr) {
-            auto itemData = pasteDataRecord->GetCustomData()->GetItemData();
-            if (itemData.find(SPAN_STRING_TAG) != itemData.end()) {
-                arrays.emplace_back(itemData[SPAN_STRING_TAG]);
-            }
+        auto entryPtr = pasteDataRecord->GetEntryByMimeType(SPAN_STRING_TAG);
+        if (entryPtr) {
+            // entryValue InstanceOf OHOS::MiscServices::EntryValue.
+            auto entryValue = entryPtr->GetValue();
+            auto spanStringBuffer = std::get_if<std::vector<uint8_t>>(&entryValue);
+            arrays.emplace_back(*spanStringBuffer);
             hasSpanString = true;
         }
         if (pasteDataRecord->GetHtmlText() != nullptr && hasSpanString) {
