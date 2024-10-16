@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
@@ -830,7 +831,10 @@ void* createRectNode(ArkUI_Int32 nodeId)
 
 void* createRichEditorNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = RichEditorModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createRichTextNode(ArkUI_Int32 nodeId)

@@ -131,6 +131,18 @@ void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src)
     }
 }
 
+void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src)
+{
+    switch (src) {
+        case OHOS::Ace::FontStyle::NORMAL: dst = ARK_FONT_STYLE_NORMAL; break;
+        case OHOS::Ace::FontStyle::ITALIC: dst = ARK_FONT_STYLE_ITALIC; break;
+        default:
+            dst = static_cast<Ark_FontStyle>(-1);
+            LOGE("Unexpected enum value in FontStyle: %{public}d", src);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src)
 {
     switch (src) {
@@ -283,6 +295,45 @@ void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src)
         case V2::SwipeEdgeEffect::None: dst = ARK_SWIPE_EDGE_EFFECT_NONE; break;
         default: dst = static_cast<Ark_SwipeEdgeEffect>(-1);
             LOGE("Unexpected enum value in V2::SwipeEdgeEffect: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src)
+{
+    switch (src) {
+        case OHOS::Ace::TextDecorationStyle::SOLID: dst = ARK_TEXT_DECORATION_STYLE_SOLID; break;
+        case OHOS::Ace::TextDecorationStyle::DOUBLE: dst = ARK_TEXT_DECORATION_STYLE_DOUBLE; break;
+        case OHOS::Ace::TextDecorationStyle::DOTTED: dst = ARK_TEXT_DECORATION_STYLE_DOTTED; break;
+        case OHOS::Ace::TextDecorationStyle::DASHED: dst = ARK_TEXT_DECORATION_STYLE_DASHED; break;
+        case OHOS::Ace::TextDecorationStyle::WAVY: dst = ARK_TEXT_DECORATION_STYLE_WAVY; break;
+        default: LOGE("Unexpected enum value in Ark_TextDecorationStyle: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src)
+{
+    switch (src) {
+        case OHOS::Ace::TextDecoration::NONE: dst = ARK_TEXT_DECORATION_TYPE_NONE; break;
+        case OHOS::Ace::TextDecoration::UNDERLINE: dst = ARK_TEXT_DECORATION_TYPE_UNDERLINE; break;
+        case OHOS::Ace::TextDecoration::OVERLINE: dst = ARK_TEXT_DECORATION_TYPE_OVERLINE; break;
+        case OHOS::Ace::TextDecoration::LINE_THROUGH: dst = ARK_TEXT_DECORATION_TYPE_LINE_THROUGH; break;
+        default:
+            dst = static_cast<Ark_TextDecorationType>(-1);
+            LOGE("Unexpected enum value in TextDecoration: %{public}d", src);
+            break;
+    }
+}
+
+void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src)
+{
+    switch (src) {
+        case OHOS::Ace::NG::RichEditorDeleteDirection::BACKWARD:
+            dst = ARK_RICH_EDITOR_DELETE_DIRECTION_BACKWARD;
+            break;
+        case OHOS::Ace::NG::RichEditorDeleteDirection::FORWARD:
+            dst = ARK_RICH_EDITOR_DELETE_DIRECTION_FORWARD;
+            break;
+        default: dst = static_cast<Ark_RichEditorDeleteDirection>(-1);
     }
 }
 
