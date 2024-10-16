@@ -164,7 +164,7 @@ public:
 
     void SetUnstaticFriction(double friction)
     {
-        friction_ = friction > 0 ? friction : -1.0;
+        friction_ = friction > 0.0 ? friction : -1.0;
     }
 
     double GetFriction() const
