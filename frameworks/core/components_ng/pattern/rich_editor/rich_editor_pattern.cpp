@@ -2335,9 +2335,6 @@ void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 
 bool RichEditorPattern::HandleClickSelection(const OHOS::Ace::GestureEvent& info)
 {
-    if (info.GetSourceDevice() == SourceType::MOUSE || !BetweenSelection(info.GetGlobalLocation())) {
-        return false;
-    }
     CHECK_NULL_RETURN(!selectOverlay_->GetIsHandleMoving(), true);
     if (SelectOverlayIsOn()) {
         selectOverlay_->ToggleMenu();
@@ -2348,13 +2345,25 @@ bool RichEditorPattern::HandleClickSelection(const OHOS::Ace::GestureEvent& info
     return true;
 }
 
+bool RichEditorPattern::IsClickEventOnlyForMenuToggle(const OHOS::Ace::GestureEvent& info)
+{
+    CHECK_NULL_RETURN(info.GetSourceDevice() != SourceType::MOUSE, false);
+    // In preview state or single handle showing, clicking handle has toggled the menu display
+    bool hasHandledMenuToggleByClick =
+        selectOverlay_->IsClickAtHandle(info) && (!isEditing_ || selectOverlay_->IsSingleHandleShow());
+    CHECK_NULL_RETURN(!hasHandledMenuToggleByClick, true);
+    if (BetweenSelection(info.GetGlobalLocation())) {
+        return HandleClickSelection(info);
+    }
+    return false;
+}
+
 void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "handleSingleClick");
     hasClicked_ = true;
     lastClickTimeStamp_ = info.GetTimeStamp();
-    bool isClickSingleHandle = selectOverlay_->IsSingleHandleShow() && selectOverlay_->IsClickAtHandle(info);
-    CHECK_NULL_VOID(!HandleClickSelection(info) && !isClickSingleHandle);
+    CHECK_NULL_VOID(!IsClickEventOnlyForMenuToggle(info));
 
     Offset textOffset = ConvertTouchOffsetToTextOffset(info.GetLocalLocation());
     IF_TRUE(!isMousePressed_, HandleClickAISpanEvent(PointF(textOffset.GetX(), textOffset.GetY())));
