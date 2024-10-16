@@ -70,6 +70,8 @@ private:
     static bool CheckRenderEffect(RefPtr<FrameNode>& node);
     static bool CheckParentNodesEffect(RefPtr<FrameNode>& node,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
+    static void CheckLeftParentNodes(const RefPtr<UINode>& parentUINode, const RectF& frameRect,
+        OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static void GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect);
     static bool IsOutOfParentWithRound(const RectF& visibleRect, const RectF& renderRect,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
