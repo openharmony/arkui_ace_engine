@@ -1210,7 +1210,8 @@ void FormPattern::InitFormManagerDelegate()
     }
     int32_t instanceID = context->GetInstanceId();
     accessibilitySessionAdapter_ = AceType::MakeRefPtr<AccessibilitySessionAdapterForm>(formManagerBridge_);
-    formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t id, const std::string& path,
+    formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t id,
+                                                   const std::string& path,
                                                    const std::string& module, const std::string& data,
                                                    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&
                                                        imageDataMap,
@@ -1290,8 +1291,8 @@ void FormPattern::InitFormManagerDelegate()
                 }, "ArkUIFormFireSurfaceNodeCallback");
         });
 
-    formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID, pipeline](float width, float height,
-        float borderWidth) {
+    formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID, pipeline](float width,
+        float height, float borderWidth) {
         ContainerScope scope(instanceID);
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
