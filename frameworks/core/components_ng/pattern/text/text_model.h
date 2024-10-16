@@ -122,7 +122,7 @@ public:
     virtual void OnSetWidth() {};
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};
-    virtual void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) = 0;
+    virtual void SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold) = 0;
     virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;

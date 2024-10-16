@@ -3726,6 +3726,20 @@ void ResetFocusBox(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetFocusBoxStyle(node->uiNodeHandle);
 }
 
+int32_t SetClickDistance(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setClickDistance(
+        node->uiNodeHandle, item->value[0].f32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetClickDistance(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetClickDistance(node->uiNodeHandle);
+}
+
 const ArkUI_AttributeItem* GetTransition(ArkUI_NodeHandle node)
 {
     g_attributeItem.object = node->transitionOption;
@@ -12706,6 +12720,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetTransition,
         nullptr,
         SetFocusBox,
+        SetClickDistance,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -12926,6 +12941,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         nullptr,
         nullptr,
         ResetFocusBox,
+        ResetClickDistance,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

@@ -378,14 +378,14 @@ void TextModelNG::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
     textPattern->SetTextDetectConfig(textDetectConfig);
 }
 
-void TextModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click)
+void TextModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold)
 {
     auto clickFunc = [func = std::move(click)](GestureEvent& info) { func(&info); };
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    textPattern->SetOnClickEvent(std::move(clickFunc));
+    textPattern->SetOnClickEvent(std::move(clickFunc), distanceThreshold);
 }
 
 void TextModelNG::ClearOnClick()

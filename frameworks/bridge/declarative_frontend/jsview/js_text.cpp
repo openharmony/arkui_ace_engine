@@ -702,7 +702,12 @@ void JSText::JsOnClick(const JSCallbackInfo& info)
             JSInteractableView::ReportClickEvent(node, label);
 #endif
         };
-        TextModel::GetInstance()->SetOnClick(std::move(onClick));
+        double distanceThreshold = std::numeric_limits<double>::infinity();
+        if (info.Length() > 1 && info[1]->IsNumber()) {
+            distanceThreshold = info[1]->ToNumber<double>();
+            distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+        }
+        TextModel::GetInstance()->SetOnClick(std::move(onClick), distanceThreshold);
 
         auto focusHub = NG::ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -733,7 +738,12 @@ void JSText::JsOnClickWithoutNGBUILD(const JSCallbackInfo& info)
             PipelineContext::SetCallBackNode(node);
             func->Execute(newInfo);
         };
-        TextModel::GetInstance()->SetOnClick(std::move(onClickId));
+        double distanceThreshold = std::numeric_limits<double>::infinity();
+        if (info.Length() > 1 && info[1]->IsNumber()) {
+            distanceThreshold = info[1]->ToNumber<double>();
+            distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+        }
+        TextModel::GetInstance()->SetOnClick(std::move(onClickId), distanceThreshold);
     }
 #endif
 }

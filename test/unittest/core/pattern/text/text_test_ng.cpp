@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <limits>
 #include "gtest/gtest.h"
 #include "text_base.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
@@ -189,7 +190,7 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator003, TestSize.Level1)
     textStyle.SetFontWeight(FontWeight::W900);
     EXPECT_EQ(textStyle.GetFontWeight(), FontWeight::W900);
 
-    textModelNG.SetOnClick(onClickFunc);
+    textModelNG.SetOnClick(onClickFunc, std::numeric_limits<double>::infinity());
     textModelNG.SetRemoteMessage(onRemoteMessage);
     textModelNG.SetCopyOption(copyOption);
     textModelNG.SetOnDragStart(OnDragStartFunction);
