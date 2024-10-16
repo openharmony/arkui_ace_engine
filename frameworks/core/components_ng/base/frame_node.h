@@ -1072,6 +1072,13 @@ public:
         return childrenUpdatedFrom_;
     }
 
+    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
+    bool GetJSCustomProperty(const std::string& key, std::string& value);
+    bool GetCapiCustomProperty(const std::string& key, std::string& value);
+
+    void AddCustomProperty(const std::string& key, const std::string& value);
+    void RemoveCustomProperty(const std::string& key);
+
     LayoutConstraintF GetLayoutConstraint() const;
 
 protected:
@@ -1216,6 +1223,7 @@ private:
     std::set<std::string> allowDrop_;
     const static std::set<std::string> layoutTags_;
     std::function<void()> removeCustomProperties_;
+    std::function<std::string(const std::string& key)> getCustomProperty_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -1297,6 +1305,9 @@ private:
     std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
     DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
+
+    std::unordered_map<std::string, std::string> customPropertyMap_;
+    std::mutex customPropertyMapLock_;
 
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;
