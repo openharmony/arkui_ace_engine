@@ -73,6 +73,7 @@ ace_unittest("capi_all_modifiers_test") {
     "tabs_modifier_test.cpp",
     "text_area_modifier_test.cpp",
     "text_modifier_test.cpp",
+    "time_picker_modifier_test.cpp",
   ]
   sources += [ "generated/test_fixtures.cpp" ]
   extra_deps = []

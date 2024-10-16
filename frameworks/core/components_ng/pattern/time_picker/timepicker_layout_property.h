@@ -69,6 +69,19 @@ public:
         disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
         disappearFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
             GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
+        auto disappearFamilyVector = GetDisappearFontFamily().value_or(std::vector<std::string>());
+        std::string disappearFontFamily = "";
+        if (GreatNotEqual(static_cast<int32_t>(disappearFamilyVector.size()), 0)) {
+            disappearFontFamily = disappearFamilyVector.at(0);
+            for (uint32_t i = 1; i < disappearFamilyVector.size(); ++i) {
+                disappearFontFamily += ',' + disappearFamilyVector.at(i);
+            }
+        }
+        disappearFont->Put("family", disappearFontFamily.c_str());
+        disappearFont->Put("style",
+            GetDisappearFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+                ? "FontStyle.Normal"
+                : "FontStyle.Italic");
         auto disappearTextStyle = JsonUtil::Create(true);
         disappearTextStyle->Put("color", GetDisappearColor().value_or(Color::BLACK).ColorToString().c_str());
         disappearTextStyle->Put("font", disappearFont);
@@ -77,6 +90,19 @@ public:
         auto normalFont = JsonUtil::Create(true);
         normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
         normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
+        auto fontFamilyVector = GetFontFamily().value_or(std::vector<std::string>());
+        std::string fontFamily = "";
+        if (GreatNotEqual(static_cast<int32_t>(fontFamilyVector.size()), 0)) {
+            fontFamily = fontFamilyVector.at(0);
+            for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+                fontFamily += ',' + fontFamilyVector.at(i);
+            }
+        }
+        normalFont->Put("family", fontFamily.c_str());
+        normalFont->Put("style",
+            GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+                ? "FontStyle.Normal"
+                : "FontStyle.Italic");
         auto normalTextStyle = JsonUtil::Create(true);
         normalTextStyle->Put("color", GetColor().value_or(Color::BLACK).ColorToString().c_str());
         normalTextStyle->Put("font", normalFont);
@@ -86,6 +112,19 @@ public:
         selectedFont->Put("size", GetSelectedFontSizeValue(Dimension(0)).ToString().c_str());
         selectedFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
             GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
+        auto selectedFamilyVector = GetSelectedFontFamily().value_or(std::vector<std::string>());
+        std::string selectedFontFamily = "";
+        if (GreatNotEqual(static_cast<int32_t>(selectedFamilyVector.size()), 0)) {
+            selectedFontFamily = selectedFamilyVector.at(0);
+            for (uint32_t i = 1; i < selectedFamilyVector.size(); ++i) {
+                selectedFontFamily += ',' + selectedFamilyVector.at(i);
+            }
+        }
+        selectedFont->Put("family", selectedFontFamily.c_str());
+        selectedFont->Put("style",
+            GetSelectedFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+                ? "FontStyle.Normal"
+                : "FontStyle.Italic");
         auto selectedTextStyle = JsonUtil::Create(true);
         selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);

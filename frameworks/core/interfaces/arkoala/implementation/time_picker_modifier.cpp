@@ -13,47 +13,146 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
+#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
+#include "core/interfaces/arkoala/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat& src)
+{
+    switch (src) {
+        case ARK_TIME_PICKER_FORMAT_HOUR_MINUTE: dst = TimePickerFormat::HOUR_MINUTE; break;
+        case ARK_TIME_PICKER_FORMAT_HOUR_MINUTE_SECOND: dst = TimePickerFormat::HOUR_MINUTE_SECOND; break;
+        default: LOGE("Unexpected enum value in Ark_TimePickerFormat: %{public}d", src);
+    }
+}
+
+template<>
+PickerTextStyle Convert(const Ark_PickerTextStyle& src)
+{
+    PickerTextStyle style;
+    style.textColor = OptConvert<Color>(src.color);
+    auto font = OptConvert<Font>(src.font);
+    if (font.has_value()) {
+        style.fontSize = font.value().fontSize;
+        style.fontFamily = font.value().fontFamilies;
+        style.fontWeight = font.value().fontWeight;
+        style.fontStyle = font.value().fontStyle;
+    }
+    return style;
+}
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TimePickerInterfaceModifier {
 void SetTimePickerOptionsImpl(Ark_NativePointer node,
                               const Opt_TimePickerOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+
+    auto showSeconds = false;
+    auto pickerFormat = Converter::OptConvert<TimePickerFormat>(options->value.format);
+    if (pickerFormat.has_value() && pickerFormat.value() == TimePickerFormat::HOUR_MINUTE_SECOND) {
+        showSeconds = true;
+    }
+    auto pattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasSecond(showSeconds);
+
+    LOGE("TimePickerInterfaceModifier::SetTimePickerOptionsImpl - Ark_CustomObject isn't supported");
 }
 } // TimePickerInterfaceModifier
 namespace TimePickerAttributeModifier {
 void UseMilitaryTimeImpl(Ark_NativePointer node,
                          Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetHour24(frameNode, Converter::Convert<bool>(value));
 }
 void LoopImpl(Ark_NativePointer node,
               Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetWheelModeEnabled(frameNode, Converter::Convert<bool>(value));
 }
 void DisappearTextStyleImpl(Ark_NativePointer node,
                             const Ark_PickerTextStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    TimePickerModelNG::SetDisappearTextStyle(frameNode, theme, pickerStyle);
 }
 void TextStyleImpl(Ark_NativePointer node,
                    const Ark_PickerTextStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    TimePickerModelNG::SetNormalTextStyle(frameNode, theme, pickerStyle);
 }
 void SelectedTextStyleImpl(Ark_NativePointer node,
                            const Ark_PickerTextStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    TimePickerModelNG::SetSelectedTextStyle(frameNode, theme, pickerStyle);
 }
 void DateTimeOptionsImpl(Ark_NativePointer node,
                          const Ark_CustomObject* value)
 {
+    LOGE("TimePickerInterfaceModifier::DateTimeOptionsImpl - Ark_CustomObject isn't supported");
 }
 void OnChangeImpl(Ark_NativePointer node,
                   Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onChange = [frameNode](const BaseEventInfo* event) {
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+        auto resultStr = eventInfo->GetSelectedStr();
+        auto data = JsonUtil::ParseJsonString(resultStr);
+        auto hour = data->GetValue("hour")->GetInt();
+        auto minute = data->GetValue("minute")->GetInt();
+        auto second = data->GetValue("second")->GetInt();
+        Ark_TimePickerResult result = {
+            .hour = Converter::ArkValue<Ark_Number>(hour),
+            .minute = Converter::ArkValue<Ark_Number>(minute),
+            .second = Converter::ArkValue<Ark_Number>(second)
+        };
+        GetFullAPI()->getEventsAPI()->getTimePickerEventsReceiver()->onChange(frameNode->GetId(), result);
+    };
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               Ark_Boolean enable)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, Converter::Convert<bool>(enable));
 }
 } // TimePickerAttributeModifier
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
@@ -71,5 +170,4 @@ const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
     };
     return &ArkUITimePickerModifierImpl;
 }
-
 }
