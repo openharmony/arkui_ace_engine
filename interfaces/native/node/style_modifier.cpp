@@ -312,11 +312,11 @@ uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
     if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC)) {
         colorStr.erase(0, 1);
         constexpr int colorNumFormat = 16;
+        errno = 0;
         char* end = nullptr;
         unsigned long int value = strtoul(colorStr.c_str(), &end, colorNumFormat);
         if (errno == ERANGE) {
-            LOGF("%{public}s is out of range.", colorStr.c_str());
-            abort();
+            LOGE("%{public}s is out of range.", colorStr.c_str());
         }
         if (value == 0 && end == colorStr.c_str()) {
             LOGW("input %{public}s can not covert to number, use default color：0x00000000" , colorStr.c_str());
