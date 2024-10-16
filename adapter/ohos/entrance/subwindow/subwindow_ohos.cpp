@@ -154,7 +154,7 @@ void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
         auto parentPipeline = parentContainer->GetPipelineContext();
         CHECK_NULL_VOID(parentPipeline);
         auto hostWindowId = parentPipeline->GetFocusWindowId();
-        windowOption->SetIsUIExtensionSubWindowFlag(true);
+        windowOption->SetIsUIExtAnySubWindow(true);
         windowOption->SetParentId(hostWindowId);
     } else {
         windowOption->SetParentId(mainWindowId);
@@ -164,9 +164,9 @@ void SetToastWindowOption(RefPtr<Platform::AceContainer>& parentContainer,
 void SetUIExtensionSubwindowFlag(OHOS::sptr<OHOS::Rosen::WindowOption>& windowOption,
     bool isAppSubwindow, sptr<OHOS::Rosen::Window>& parentWindow)
 {
-    if (isAppSubwindow && (parentWindow->GetIsUIExtensionFlag() ||
-        parentWindow->GetIsUIExtensionSubWindowFlag())) {
-        windowOption->SetIsUIExtensionSubWindowFlag(true);
+    if (isAppSubwindow && (parentWindow->GetIsUIExtFirstSubWindow() ||
+        parentWindow->GetIsUIExtAnySubWindow())) {
+        windowOption->SetIsUIExtAnySubWindow(true);
     }
 }
 
@@ -205,7 +205,7 @@ bool SubwindowOhos::InitContainer()
                     "UIExtension Window failed to obtain host window information. Please check if permissions are enabled");
                 return false;
             }
-            windowOption->SetExtensionTag(true);
+            windowOption->SetIsUIExtFirstSubWindow(true);
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW);
             windowOption->SetParentId(hostWindowId);
             SetUIExtensionHostWindowId(hostWindowId);
