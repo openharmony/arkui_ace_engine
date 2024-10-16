@@ -1986,4 +1986,33 @@ HWTEST_F(WaterFlowTestNg, MarginPadding001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(1, 5, 480, 800)));
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2), RectF(3, 111, 237, 100)));
 }
+
+/**
+ * @tc.name: Jump001
+ * @tc.desc: Test jump function after changing dataSource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Jump001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    AddItemsAtSlot(1, 100.0f, 15);
+    frameNode_->ChildrenUpdatedFrom(15);
+    pattern_->ScrollToIndex(15, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 15);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 25);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 0.0f);
+
+    AddItemsAtSlot(1, 100.0f, 0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 11);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
 } // namespace OHOS::Ace::NG
