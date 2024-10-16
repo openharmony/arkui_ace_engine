@@ -31,8 +31,7 @@ inline void AssignArkValue(Ark_BadgePosition& dst, const BadgePosition& src)
         case BadgePosition::RIGHT_TOP: dst = ARK_BADGE_POSITION_RIGHT_TOP; break;
         case BadgePosition::RIGHT: dst = ARK_BADGE_POSITION_RIGHT; break;
         case BadgePosition::LEFT: dst = ARK_BADGE_POSITION_LEFT; break;
-        default:
-            dst = static_cast<Ark_BadgePosition>(-1);
+        default: dst = static_cast<Ark_BadgePosition>(-1);
             LOGE("Unexpected enum value in BadgePosition: %{public}d", src);
     }
 }
