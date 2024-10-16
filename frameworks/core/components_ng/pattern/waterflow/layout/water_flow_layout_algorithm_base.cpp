@@ -51,7 +51,7 @@ void WaterFlowLayoutBase::SyncPreloadItems(
 
     StartCacheLayout();
     for (auto&& item : list) {
-        PreloadItem(host, item, INT64_MAX);
+        SyncPreloadItem(host, item);
     }
     EndCacheLayout();
 }

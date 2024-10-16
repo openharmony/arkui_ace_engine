@@ -105,7 +105,10 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
                 std::move(predictBuildList_),
                 [param = GridPredictLayoutParam { cachedChildConstraint_, itemsCrossSize_, crossGap_ }](
-                    const RefPtr<FrameNode>& host, int32_t itemIdx) { return PredictBuildItem(host, itemIdx, param); });
+                    const RefPtr<FrameNode>& host, int32_t itemIdx) {
+                    CHECK_NULL_RETURN(host, false);
+                    return PredictBuildItem(*host, itemIdx, param);
+                });
             predictBuildList_.clear();
         }
     }
@@ -316,7 +319,6 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
-    const bool show = gridLayoutProperty->GetShowCachedItemsValue(false);
     float prevLineHeight = gridLayoutInfo_.totalHeightOfItemsInView_ + mainGap_;
     auto prevLineIter = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.endMainLineIndex_);
     std::map<int32_t, int32_t> prevLine;
@@ -380,11 +382,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
             translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
 
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
-            if (show && wrapper->CheckNeedForceMeasureAndLayout()) {
-                wrapper->Layout();
-            } else {
-                SyncGeometry(wrapper);
-            }
+            SyncGeometry(wrapper);
             wrapper->SetActive(false);
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
@@ -395,7 +393,6 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
-    const bool show = gridLayoutProperty->GetShowCachedItemsValue(false);
     // if in spring animation and all nodes are located above the page,
     // startMainLineIndex will greater than endMainLineIndex
     auto currentLine = std::min(gridLayoutInfo_.startMainLineIndex_, gridLayoutInfo_.endMainLineIndex_);
@@ -460,11 +457,7 @@ void GridScrollLayoutAlgorithm::LayoutForwardCachedLine(LayoutWrapper* layoutWra
             translate = Alignment::GetAlignPosition(blockSize, wrapper->GetGeometryNode()->GetMarginFrameSize(), align);
 
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset - translate);
-            if (show && wrapper->CheckNeedForceMeasureAndLayout()) {
-                wrapper->Layout();
-            } else {
-                SyncGeometry(wrapper);
-            }
+            SyncGeometry(wrapper);
             wrapper->SetActive(false);
         }
         nextLineHeight += gridLayoutInfo_.lineHeightMap_[currLine] + mainGap_;
@@ -2295,17 +2288,22 @@ void GridScrollLayoutAlgorithm::SyncPreload(
         }
     }
 
-    FillCacheLineAtEnd(mainSize, crossSize, wrapper);
+    // inefficient implementation. TODO: rewrite GridScroll, provide atomic measure abilities
+    FillCacheLineAtEnd(mainSize, crossSize, wrapper); // collect predictBuildList_
     CreateCachedChildConstraint(wrapper, mainSize, crossSize);
     GridPredictLayoutParam param { cachedChildConstraint_, itemsCrossSize_, crossGap_ };
-    for (auto&& item : predictBuildList_) {
-        PredictBuildItem(DynamicCast<FrameNode>(Claim(wrapper)), item.idx, param);
+    const auto newItemList = std::move(predictBuildList_);
+    for (auto&& item : newItemList) {
+        PredictBuildItem(*DynamicCast<FrameNode>(wrapper), item.idx, param);
     }
-    FillCacheLineAtEnd(mainSize, crossSize, wrapper);
+    FillCacheLineAtEnd(mainSize, crossSize, wrapper); // record newly created items
 
     const int32_t endBound = gridLayoutInfo_.endIndex_ + cacheLineCnt * crossCount_;
-    // FillNewLineBackward can't measure recorded items, do it manually
+    // FillCacheLineAtEnd skips existing items, manually measure them.
     for (int32_t i = gridLayoutInfo_.endIndex_ + 1; i <= endBound; ++i) {
+        if (newItemList.empty() || newItemList.begin()->idx == i) {
+            break;
+        }
         auto item = wrapper->GetChildByIndex(i);
         CHECK_NULL_BREAK(item);
         auto itemProperty = DynamicCast<GridItemLayoutProperty>(item->GetLayoutProperty());
@@ -2313,16 +2311,14 @@ void GridScrollLayoutAlgorithm::SyncPreload(
     }
 }
 
-bool GridScrollLayoutAlgorithm::PredictBuildItem(
-    const RefPtr<FrameNode>& host, int32_t itemIdx, const GridPredictLayoutParam& param)
+bool GridScrollLayoutAlgorithm::PredictBuildItem(FrameNode& host, int32_t itemIdx, const GridPredictLayoutParam& param)
 {
     // build callback
-    CHECK_NULL_RETURN(host, false);
-    auto wrapper = host->GetOrCreateChildByIndex(itemIdx, false, true);
+    auto wrapper = host.GetOrCreateChildByIndex(itemIdx, false, true);
     CHECK_NULL_RETURN(wrapper, false);
     auto itemProperty = DynamicCast<GridItemLayoutProperty>(wrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(itemProperty, false);
-    const Axis axis = host->GetPattern<GridPattern>()->GetAxis();
+    const Axis axis = host.GetPattern<GridPattern>()->GetAxis();
 
     auto constraint = GenerateCacheItemConstraint(*itemProperty, axis, param);
     wrapper->SetActive(false);

@@ -39,7 +39,6 @@ public:
 
     void StartCacheLayout() override;
     bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
-    void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
     void EndCacheLayout() override;
 
 private:
@@ -176,6 +175,7 @@ private:
     void LayoutSection(size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl);
     void LayoutFooter(const OffsetF& paddingOffset, bool reverse);
 
+    void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
     /**
      * @brief shared implementation to preload a cache item.
      * @return true if the item is successfully preloaded.

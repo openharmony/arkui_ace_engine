@@ -38,11 +38,6 @@ public:
      */
     virtual bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) = 0;
 
-    /**
-     * @brief immediately create / measure a cache item during LayoutTask
-     */
-    virtual void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) = 0;
-
     virtual void EndCacheLayout()
     { /* callback when cache layout ends */
     }
@@ -62,6 +57,11 @@ protected:
     static int32_t GetUpdateIdx(LayoutWrapper* host, int32_t footerIdx);
 
 private:
+    /**
+     * @brief immediately create / measure a cache item during LayoutTask
+     */
+    virtual void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) = 0;
+
     /**
      * @param force true if force to preload all items in cache range.
      */

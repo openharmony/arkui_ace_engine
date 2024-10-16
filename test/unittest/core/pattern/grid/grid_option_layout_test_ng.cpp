@@ -930,6 +930,8 @@ HWTEST_F(GridOptionLayoutTestNg, ShowCache002, TestSize.Level1)
     model.SetCachedCount(2, true);
     CreateDone(frameNode_);
     const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.endIndex_, 7);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
 
     UpdateCurrentOffset(-550.0f);
     EXPECT_EQ(info.startIndex_, 4);

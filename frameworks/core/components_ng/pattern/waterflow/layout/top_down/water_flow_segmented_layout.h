@@ -68,7 +68,6 @@ public:
     }
 
     bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
-    void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
 
 private:
     /**
@@ -154,6 +153,8 @@ private:
      * @return new offset after jumping.
      */
     float SolveJumpOffset(const WaterFlowLayoutInfo::ItemInfo& item) const;
+
+    void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
 
     RefPtr<WaterFlowSections> sections_;
 
