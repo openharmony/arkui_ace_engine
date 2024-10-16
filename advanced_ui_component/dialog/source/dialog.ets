@@ -1068,7 +1068,7 @@ struct CustomDialogContentComponent {
         .margin(this.customStyle ? {
           start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
           end: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_end')),
-          bottom: $r('sys.float.ohos_id_dialog_margin_bottom'),
+          bottom: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_bottom')),
         } : { left: 0, right: 0, bottom: 0 })
         .backgroundColor(this.customStyle ? $r('sys.color.ohos_id_color_dialog_bg') : Color.Transparent)
       }
