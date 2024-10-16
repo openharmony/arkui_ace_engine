@@ -290,21 +290,21 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetDefaultedFitType, testing::ext::TestSiz
 }
 
 /**
- * @tc.name: Ctor_InitWithUrl
+ * @tc.name: SetImageOptions_SetUrlOrUri
  * @tc.desc: Test ImageModifierTest
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, Ctor_InitWithUrl, testing::ext::TestSize.Level1)
+HWTEST_F(ImageModifierTest, SetImageOptions_SetUrlOrUri, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
     std::string urlString = "https://www.example.com/xxx.png";
-    std::string resName = "image_url";
+    std::string resName = "app.string.image_url";
     AddResource(resName, urlString);
     const auto RES_ID = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
     auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(CreateResourceUnion(RES_ID));
-    const auto imageRc = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
+    auto imageRc = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
 
     modifier_->setImageOptions0(node_, &imageRc);
     auto json = GetJsonValue(node_);
@@ -314,9 +314,9 @@ HWTEST_F(ImageModifierTest, Ctor_InitWithUrl, testing::ext::TestSize.Level1)
 
     urlString = "https://www.example.com/xxx.jpg";
     image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
-    const auto imageIm = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
+    imageRc = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
 
-    modifier_->setImageOptions0(node_, &imageIm);
+    modifier_->setImageOptions0(node_, &imageRc);
     json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ(urlString, GetAttrValue<std::string>(json, "src"));
