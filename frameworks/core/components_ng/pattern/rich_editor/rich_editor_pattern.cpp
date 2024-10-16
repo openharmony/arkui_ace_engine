@@ -1010,6 +1010,9 @@ void RichEditorPattern::OnAttachToFrameNode()
     frameNode->GetRenderContext()->UpdateClipEdge(true);
     frameNode->GetRenderContext()->SetClipToFrame(true);
     StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddWindowSizeChangeCallback(frameId_);
 }
 
 void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -1017,6 +1020,9 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
     TextPattern::OnDetachFromFrameNode(node);
     ScrollablePattern::OnDetachFromFrameNode(node);
     ClearOnFocusTextField();
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveWindowSizeChangeCallback(frameId_);
 }
 
 int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
@@ -3351,7 +3357,6 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
         static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
     HandleDoubleClickOrLongPress(info);
     caretUpdateType_ = CaretUpdateType::NONE;
-    TriggerAvoidOnCaretChange();
 }
 
 bool RichEditorPattern::HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color)
@@ -7074,6 +7079,11 @@ void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, Windo
         TaskExecutor::TaskType::UI, "ArkUIRichEditorOnWindowSizeChangedRotation");
 }
 
+void RichEditorPattern::OnFontScaleConfigurationUpdate()
+{
+    InitAvoidOnCaretChangeAfterLayoutTask();
+}
+
 void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType)
 {
     auto selectType = selectedType_.value_or(TextSpanType::NONE);
@@ -7485,7 +7495,7 @@ void RichEditorPattern::CloseSelectOverlay()
 
 void RichEditorPattern::CloseHandleAndSelect()
 {
-    selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
+    selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_DRAG_FLOATING);
     showSelect_ = false;
 }
 
