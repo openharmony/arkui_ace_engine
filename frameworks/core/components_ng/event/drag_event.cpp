@@ -751,6 +751,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     longPressRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
     SequencedRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     SequencedRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+    SequencedRecognizer_->SetIsEventHandoverNeeded(true);
     result.emplace_back(SequencedRecognizer_);
     result.emplace_back(previewLongPressRecognizer_);
 }
