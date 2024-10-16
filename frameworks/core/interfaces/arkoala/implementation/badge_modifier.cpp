@@ -20,7 +20,6 @@
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
 
-
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -71,6 +70,7 @@ Position Convert(const Ark_BadgePosition& src)
     }
     return dst;
 }
+
 template<>
 Position  Convert(const Opt_Union_BadgePosition_Position& src)
 {
@@ -90,74 +90,6 @@ Position  Convert(const Opt_Union_BadgePosition_Position& src)
     }
     return dst;
 }
-
-// template<>
-// Position  Convert1(const Opt_Union_BadgePosition_Position& src)
-// {
-//     Position dst;
-//         switch (src.value.selector) {
-//             case SELECTOR_ID_0: {
-//                 dst = Converter::Convert<Position>(src.value.value0);
-//                 break;
-//             }
-//             case SELECTOR_ID_1: {
-//                 dst = Converter::Convert<Position>(src.value.value1);
-//                 break;
-//             }
-//             default: {
-//                 LOGE("Unexpected src->selector: %{public}d\n", src.value.selector);
-//             }
-//         }
-//         return dst;
-// }
-
-// template<>
-// void AssignCast(std::optional<Position>& dst, const std::optional<Ark_Position>& src)
-// {
-//     dst->isPositionXy = true;
-//     dst->badgePositionX = Converter::OptConvert<Dimension>(src->x);
-//     dst->badgePositionY = Converter::OptConvert<Dimension>(src->y);
-//     Validator::ValidateNonNegative(dst->badgePositionX);
-//     Validator::ValidateNonNegative(dst->badgePositionY);
-// }
-
-// template<>
-// void AssignCast(std::optional<Position>& dst, const std::optional<Ark_BadgePosition>& src)
-// {
-//     switch (src.value()) {
-//         case ARK_BADGE_POSITION_RIGHT_TOP:
-//         case ARK_BADGE_POSITION_RIGHT:
-//         case ARK_BADGE_POSITION_LEFT:
-//             dst->isPositionXy = false;
-//             dst->badgePosition = src.value();
-//             break;
-//         default: LOGE("Unexpected enum value in Ark_BadgePosition: %{public}d", src.value());
-//     }
-// }
-
-// template<>
-// void AssignCast(std::optional<Position>& dst, const Ark_Position& src)
-// {
-//     dst->isPositionXy = true;
-//     dst->badgePositionX = Converter::OptConvert<Dimension>(src.x);
-//     dst->badgePositionY = Converter::OptConvert<Dimension>(src.y);
-//     Validator::ValidateNonNegative(dst->badgePositionX);
-//     Validator::ValidateNonNegative(dst->badgePositionY);
-// }
-
-// template<>
-// void AssignCast(std::optional<Position>& dst, const Ark_BadgePosition& src)
-// {
-//     switch (src) {
-//         case ARK_BADGE_POSITION_RIGHT_TOP:
-//         case ARK_BADGE_POSITION_RIGHT:
-//         case ARK_BADGE_POSITION_LEFT:
-//             dst->isPositionXy = false;
-//             dst->badgePosition = src;
-//             break;
-//         default: LOGE("Unexpected enum value in Ark_BadgePosition: %{public}d", src);
-//     }
-// }
 
 template<>
 Style Convert(const Ark_BadgeStyle& src)
