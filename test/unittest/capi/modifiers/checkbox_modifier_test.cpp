@@ -29,6 +29,12 @@ namespace OHOS::Ace::NG {
 namespace  {
     const auto ATTRIBUTE_MARK_NAME = "mark";
     const auto ATTRIBUTE_SELECT_NAME = "select";
+    const auto ATTRIBUTE_GROUP_NAME = "group";
+    const auto ATTRIBUTE_GROUP_TEST_VALUE = "group 1";
+    const auto ATTRIBUTE_GROUP_DEFAULT_VALUE = "";
+    const auto ATTRIBUTE_NAME_NAME = "name";
+    const auto ATTRIBUTE_NAME_TEST_VALUE = "name 1";
+    const auto ATTRIBUTE_NAME_DEFAULT_VALUE = "";
     const auto ATTRIBUTE_SELECT_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
     const auto ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE = "#FF007DFF";
@@ -59,6 +65,60 @@ public:
         SetupTheme<CheckboxTheme>();
     }
 };
+
+// Valid values for attribute 'options' of method 'setCheckboxOptions'
+static std::vector<std::tuple<std::string, Opt_CheckboxOptions, std::string>> setCheckboxOptionsOptionsValidValues = {
+
+};
+
+/*
+ * @tc.name: setCheckboxOptionsTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+
+    jsonValue = GetJsonValue(node_);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GROUP_NAME);
+    expectedStr = ATTRIBUTE_GROUP_DEFAULT_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NAME_NAME);
+    expectedStr = ATTRIBUTE_NAME_DEFAULT_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+}
+
+/*
+ * @tc.name: setCheckboxOptionsTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setCheckboxOptionsTestValidValues, TestSize.Level1)
+{
+    Opt_CheckboxOptions options;
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+
+    options.value.group = Converter::ArkValue<Opt_String>(ATTRIBUTE_GROUP_TEST_VALUE);
+    options.value.name = Converter::ArkValue<Opt_String>(ATTRIBUTE_NAME_TEST_VALUE);
+    modifier_->setCheckboxOptions(node_, &options);
+
+    jsonValue = GetJsonValue(node_);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GROUP_NAME);
+    expectedStr = ATTRIBUTE_GROUP_TEST_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NAME_NAME);
+    expectedStr = ATTRIBUTE_NAME_TEST_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+}
 
 /*
  * @tc.name: setSelectTestDefaultValues
@@ -323,11 +383,11 @@ HWTEST_F(CheckboxModifierTest, setShapeTestInvalidValues, TestSize.Level1)
 }
 
 /**
- * @tc.name: setMarkTestDefaultValidValues
+ * @tc.name: setMarkTestDefaultValues
  * @tc.desc: setMark test
  * @tc.type: FUNC
  */
-HWTEST_F(CheckboxModifierTest, setMarkTestDefaultValidValues, TestSize.Level1)
+HWTEST_F(CheckboxModifierTest, setMarkTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> resultMark;
     std::unique_ptr<JsonValue> jsonValue;
@@ -389,5 +449,43 @@ HWTEST_F(CheckboxModifierTest, setMarkTestValidValues, TestSize.Level1)
     EXPECT_EQ(resultStr, expectedStr);
 }
 
+/**
+ * @tc.name: setMarkTestDefaultValidValues
+ * @tc.desc: setMark test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setMarkTestInvalidValues, TestSize.Level1)
+{
+    Ark_MarkStyle style;
+    std::unique_ptr<JsonValue> resultMark;
+    std::unique_ptr<JsonValue> jsonValue;
+    ResourceColor color = Converter::ArkUnion<ResourceColor, Ark_Number>(0x00000000);
+    Ark_Length len1 = { .value = 0 };
+    Ark_Length len2 = { .value = 0 };
+    Opt_Length opt1 = { .tag = ARK_TAG_INT32, .value = len1 };
+    Opt_Length opt2 = { .tag = ARK_TAG_INT32, .value = len2 };
+    std::string resultStr;
+    std::string expectedStr;
+
+    style.strokeColor.value = color;
+    style.size = opt1;
+    style.strokeWidth = opt2;
+    modifier_->setMark(node_, &style);
+
+    jsonValue = GetJsonValue(node_);
+
+    resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
+    expectedStr = "#00000000";
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
+    expectedStr = "0.00px";
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
+    expectedStr = "0.00px";
+    EXPECT_EQ(resultStr, expectedStr);
+}
 
 } // namespace OHOS::Ace::NG
