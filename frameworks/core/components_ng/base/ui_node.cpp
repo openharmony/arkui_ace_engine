@@ -732,24 +732,24 @@ void UINode::DetachFromMainTree(bool recursive)
     isTraversing_ = false;
 }
 
-void UINode::SetFreeze(bool isFreeze)
+void UINode::SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
-    if (isOpenInvisibleFreeze && isFreeze_ != isFreeze) {
+    auto isNeedUpdateFreezeVaule = context->IsOpenInvisibleFreeze() || isForceUpdateFreezeVaule;
+    if (isNeedUpdateFreezeVaule && isFreeze_ != isFreeze) {
         isFreeze_ = isFreeze;
         OnFreezeStateChange();
-        UpdateChildrenFreezeState(isFreeze_);
+        UpdateChildrenFreezeState(isFreeze_, isForceUpdateFreezeVaule);
     }
 }
 
-void UINode::UpdateChildrenFreezeState(bool isFreeze)
+void UINode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)
 {
     const auto& children = GetChildren(true);
     for (const auto& child : children) {
         if (child) {
-            child->SetFreeze(isFreeze);
+            child->SetFreeze(isFreeze, isForceUpdateFreezeVaule);
         }
     }
 }
