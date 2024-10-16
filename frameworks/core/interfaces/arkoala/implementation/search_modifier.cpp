@@ -22,6 +22,7 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
+#include "core/interfaces/arkoala/implementation/search_controller_modifier_peer_impl.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "base/utils/utils.h"
 
@@ -49,6 +50,7 @@ struct SearchOptions {
     std::optional<std::string> value;
     std::optional<std::string> placeholder;
     std::optional<std::string> icon;
+    std::optional<Ark_NativePointer> controller;
 };
 
 using UnionButtonOptions = std::variant<Ark_CancelButtonOptions, Ark_CancelButtonSymbolOptions>;
@@ -64,6 +66,7 @@ SearchOptions Convert(const Ark_Type_SearchInterface_options& src)
     options.value = Converter::OptConvert<std::string>(src.value);
     options.placeholder= Converter::OptConvert<std::string>(src.placeholder);
     options.icon = Converter::OptConvert<std::string>(src.icon);
+    options.controller = Converter::OptConvert<Ark_NativePointer>(src.controller);
     return options;
 }
 
@@ -129,7 +132,14 @@ void SetSearchOptionsImpl(Ark_NativePointer node,
         SearchModelNG::SetTextValue(frameNode, searchOptions->value);
         SearchModelNG::SetPlaceholder(frameNode, searchOptions->placeholder);
         SearchModelNG::SetIcon(frameNode, searchOptions->icon);
-        LOGE("ARKOALA SearchAttributeModifier.setSearchOptions -> handling Ark_SearchController not implemented.");
+        auto internalSearchController = SearchModelNG::GetSearchController(frameNode);
+        CHECK_NULL_VOID(searchOptions->controller);
+        auto peerImplPtr = reinterpret_cast<GeneratedModifier::SearchControllerPeerImpl *>(
+            searchOptions->controller.value());
+        CHECK_NULL_VOID(peerImplPtr);
+
+        // pass the internal controller to external management
+        peerImplPtr->SetController(internalSearchController);
     }
 }
 } // SearchInterfaceModifier

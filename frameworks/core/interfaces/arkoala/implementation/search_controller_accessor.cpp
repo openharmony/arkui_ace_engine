@@ -15,30 +15,49 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/arkoala/utility/converter.h"
+#include "search_controller_modifier_peer_impl.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchControllerAccessor {
+
+static void DestroyPeer(SearchControllerPeerImpl *peerImpl)
+{
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
+}
 Ark_NativePointer CtorImpl()
 {
-    return 0;
+    auto peerImpl = Referenced::MakeRefPtr<SearchControllerPeerImpl>();
+    peerImpl->IncRefCount();
+    return Referenced::RawPtr(peerImpl);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<void *>(&DestroyPeer);
 }
 void CaretPositionImpl(SearchControllerPeer* peer,
                        const Ark_Number* value)
 {
+    auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerCaretPosition(value);
 }
 void StopEditingImpl(SearchControllerPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerStopEditing();
 }
 void SetTextSelectionImpl(SearchControllerPeer* peer,
                           const Ark_Number* selectionStart,
                           const Ark_Number* selectionEnd,
                           const Opt_SelectionOptions* options)
 {
+    auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerSetTextSelection(selectionStart, selectionEnd, options);
 }
 } // SearchControllerAccessor
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
