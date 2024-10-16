@@ -470,6 +470,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto hadCachedCapture = hasCachedCapture_;
     if (host->GetChildrenUpdated() != -1) {
         InitCapture();
         if (NeedAutoPlay() && !translateTask_) {
@@ -509,7 +510,8 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         needAdjustIndex_ = false;
     }
 
-    if (oldIndex_ != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)) {
+    if (oldIndex_ != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)
+        || hadCachedCapture != hasCachedCapture_) {
         jumpIndex_ = GetLoopIndex(currentIndex_);
         currentFirstIndex_ = jumpIndex_.value_or(0);
         turnPageRate_ = 0.0f;
