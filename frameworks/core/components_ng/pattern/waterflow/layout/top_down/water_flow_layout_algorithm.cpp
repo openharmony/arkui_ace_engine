@@ -438,14 +438,21 @@ bool WaterFlowLayoutAlgorithm::PreloadItem(LayoutWrapper* host, int32_t itemIdx,
 
 void WaterFlowLayoutAlgorithm::SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx)
 {
-    auto pos = GetItemPosition(itemIdx);
-    auto item = host->GetOrCreateChildByIndex(GetChildIndexWithFooter(itemIdx));
-    CHECK_NULL_VOID(item);
-    auto itemCrossSize = itemsCrossSize_.find(pos.crossIndex);
-    if (itemCrossSize == itemsCrossSize_.end()) {
-        return;
+    const int32_t lastItem = layoutInfo_->GetLastItem();
+    if (itemIdx <= lastItem) {
+        auto pos = GetItemPosition(itemIdx);
+        auto item = host->GetOrCreateChildByIndex(GetChildIndexWithFooter(itemIdx));
+        CHECK_NULL_VOID(item);
+        auto itemCrossSize = itemsCrossSize_.find(pos.crossIndex);
+        if (itemCrossSize == itemsCrossSize_.end()) {
+            return;
+        }
+        item->Measure(WaterFlowLayoutUtils::CreateChildConstraint({ itemCrossSize->second, mainSize_, axis_ },
+            DynamicCast<WaterFlowLayoutProperty>(host->GetLayoutProperty()), item));
+    } else {
+        layoutInfo_->targetIndex_ = itemIdx;
+        MeasureToTarget(host, lastItem, std::nullopt);
+        layoutInfo_->targetIndex_.reset();
     }
-    item->Measure(WaterFlowLayoutUtils::CreateChildConstraint({ itemCrossSize->second, mainSize_, axis_ },
-        DynamicCast<WaterFlowLayoutProperty>(host->GetLayoutProperty()), item));
 }
 } // namespace OHOS::Ace::NG

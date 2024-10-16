@@ -1877,4 +1877,41 @@ HWTEST_F(WaterFlowSWTest, DataChange001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 }
+
+/*
+ * @tc.name: ShowCache003
+ * @tc.desc: Test cache items immediately changing layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ShowCache003, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
+    model.SetCachedCount(3, true);
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    CreateDone();
+
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 13));
+    EXPECT_EQ(GetChildY(frameNode_, 13), 960.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 13), 245.0f);
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -300.0f);
+
+    layoutProperty_->UpdateColumnsTemplate("1fr");
+    FlushLayoutTask(frameNode_);
+    const auto info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->startIndex_, 2);
+    EXPECT_EQ(info->endIndex_, 8);
+    EXPECT_EQ(GetChildWidth(frameNode_, 1), 480.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 10), 480.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 10), 1090.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -510.0f);
+
+    UpdateCurrentOffset(-50.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -560.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 10), 1040.0f);
+}
 } // namespace OHOS::Ace::NG
