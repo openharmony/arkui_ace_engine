@@ -129,11 +129,5 @@ T CreateResourceUnion(const U& resId)
     return Converter::ArkUnion<T, Ark_Resource>(CreateResource(resId));
 }
 
-template<typename U>
-Ark_Resource CreateResourceUnion(const U& resId)
-{
-    return CreateResource(resId);
-}
-
 } // namespace OHOS::Ace::NG
 #endif

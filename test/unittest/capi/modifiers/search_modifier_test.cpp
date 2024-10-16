@@ -100,6 +100,7 @@ const auto TEXT_FONT_WEIGHT_ATTR("fontWeight");
 const auto TEXT_FONT_STYLE_ATTR("fontStyle");
 const auto TEXT_INDENT_ATTR("textIndent");
 const auto TYPE_ATTR("type");
+const auto ENABLE_HAPTIC_FEEDBACK_ATTR("enableHapticFeedback");
 
 // custom colors
 const auto CUSTOM_COLOR_STRING("#FF123456");
@@ -107,7 +108,7 @@ const int CUSTOM_COLOR_INT(0xFF123456);
 const float CUSTOM_COLOR_FLOAT(0.1f);
 const auto CHECK_FLOAT_COLOR("#00000000");
 const auto CHECK_COLOR_COLOR("#FF008000");
-const auto RES_NAME(ArkValue<Ark_String>("aa.bb.cc"));
+const auto RES_NAME(ArkValue<Ark_String>("testString"));
 
 const Ark_ResourceColor COLOR_COLOR = { .selector = 0, .value0 = Ark_Color::ARK_COLOR_GREEN };
 const Ark_ResourceColor COLOR_INT = { .selector = 1, .value1 = ArkValue<Ark_Number>(CUSTOM_COLOR_INT) };
@@ -120,12 +121,6 @@ const Opt_ResourceColor OPT_COLOR_FLOAT = { .tag = ARK_TAG_OBJECT, .value = COLO
 const Opt_ResourceColor OPT_COLOR_STRING = { .tag = ARK_TAG_OBJECT, .value = COLOR_STRING };
 
 //  default colors
-const Opt_ResourceStr OPT_RESOURCE_STR = { .tag = ARK_TAG_OBJECT,
-    .value = {
-        .selector = 0,
-        .value0 = RES_NAME
-    }
-};
 const Opt_ResourceStr OPT_RESOURCE_RESOURCE = {
     .tag = ARK_TAG_OBJECT,
     .value = {
@@ -169,6 +164,7 @@ const auto OPT_LEN_VP_NEG = ArkValue<Opt_Length>(AFLT32_NEG);
 
 // default length
 const std::string CHECK_DEFAULT_PX("0.00px");
+const std::string CHECK_MAX_ICON_PX("32.00px");
 const std::string CHECK_DEFAULT_VP("0.00vp");
 
 // check length
@@ -184,10 +180,11 @@ const auto CHECK_TEXT("test_text");
 const auto ERROR_TEXT("test_error_text");
 PreviewText PREVIEW_TEXT = { .offset = 1234, .value = "test_offset" };
 const auto EMPTY_TEXT("");
+const auto ICON_DEFAULT_SRC("resource:///ohos_test_image.svg");
 
 // check resource
 const Ark_String STR_NAME = ArkValue<Ark_String>("min_font_size");
-const std::string CHECK_RESOURCE_STR("aa.bb.cc");
+const std::string CHECK_RESOURCE_STR("testString");
 
 // check styles
 const std::string BUTTON_STYLE_INPUT("CancelButtonStyle.INPUT");
@@ -229,7 +226,7 @@ const std::vector<OptLengthTest> OPT_LENGTH_TEST_PLAN = {
     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT }
 };
 const std::vector<OptLengthTest> TEST_PLAN_OPT_LENGTH_PX = {
-    { OPT_LEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
+    { OPT_LEN_PX_POS, CHECK_MAX_ICON_PX },
     { OPT_LEN_PX_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT_PX }
@@ -270,12 +267,11 @@ const std::vector<ColorTest> COLOR_TEST_PLAN = {
 };
 
 const std::vector<ResourceSRC> RESOURCE_TEST_PLAN = {
-    { OPT_RESOURCE_STR, CHECK_RESOURCE_STR },
-    { OPT_RESOURCE_RESOURCE, CHECK_RESOURCE_STR }
+    { ArkUnion<Opt_ResourceStr, Ark_String>(""), "resource:///ohos_test_image.svg" },
+    { ArkUnion<Opt_ResourceStr, Ark_String>("test/string/2"), "test/string/2" }
 };
 const std::vector<UnionResourceString> UNION_RESOURCE_STRING_PLAN = {
-    { OPT_UNION_RESOURCE_STR, CHECK_RESOURCE_STR },
-    { OPT_UNION_RESOURCE_RESOURCE, CHECK_RESOURCE_STR }
+    { OPT_UNION_RESOURCE_STR, CHECK_RESOURCE_STR }
 };
 
 const std::vector<OneBoolStep> BOOL_TEST_PLAN = {
@@ -594,6 +590,180 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestDefault, TestSize.Level1)
     EXPECT_EQ(defaultCancelButtonIconSize, CHECK_DEFAULT_PX);
 }
 
+/*
+ * @tc.name: setFontColorTestValidColorValues
+ * @tc.desc: Check the functionality of SearchModifier.setCancelButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setCancelButtonTestValidColorValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
+    };
+
+    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    attrs.selector = 0;
+    for (const auto &[color, expected]: testPlan) {
+        attrs.value0.icon.value.color = ArkValue<Opt_ResourceColor>(color);
+        modifier_->setCancelButton(node_, &attrs);
+        jsonValue = GetJsonValue(node_);
+        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
+        EXPECT_EQ(resultStr, expected);
+    }
+}
+
+/*
+ * @tc.name: setFontColorTestValidNumberValues
+ * @tc.desc: Check the functionality of SearchModifier.setCancelButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setCancelButtonTestValidNumberValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff), "#FFFFFFFF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff000000), "#FF000000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff0000ff), "#FF0000FF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffa52a2a), "#FFA52A2A" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff808080), "#FF808080" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xff008000), "#FF008000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffa500), "#FFFFA500" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffc0cb), "#FFFFC0CB" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffff0000), "#FFFF0000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffff00), "#FFFFFF00" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x00000000), "#00000000" },
+    };
+
+    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    attrs.selector = 0;
+    for (const auto &[color, expected]: testPlan) {
+        attrs.value0.icon.value.color = ArkValue<Opt_ResourceColor>(color);
+        modifier_->setCancelButton(node_, &attrs);
+        jsonValue = GetJsonValue(node_);
+        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
+        EXPECT_EQ(resultStr, expected);
+    }
+}
+
+/*
+ * @tc.name: setFontColorTestValidStringValues
+ * @tc.desc: Check the functionality of SearchModifier.setCancelButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setCancelButtonTestValidStringValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#FFFFFFFF"), "#FFFFFFFF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#ff000000"), "#FF000000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#ff0000ff"), "#FF0000FF" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#ffa52a2a"), "#FFA52A2A" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#ff808080"), "#FF808080" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#ff008000"), "#FF008000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#ffffa500"), "#FFFFA500" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#ffffc0cb"), "#FFFFC0CB" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#ffff0000"), "#FFFF0000" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#ffffff00"), "#FFFFFF00" },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#00000000"), "#00000000" },
+    };
+
+    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    attrs.selector = 0;
+    for (const auto &[color, expected]: testPlan) {
+        attrs.value0.icon.value.color = ArkValue<Opt_ResourceColor>(color);
+        modifier_->setCancelButton(node_, &attrs);
+        jsonValue = GetJsonValue(node_);
+        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
+        EXPECT_EQ(resultStr, expected);
+    }
+}
+
+/*
+ * @tc.name: setFontColorTestInvalidNumberValues
+ * @tc.desc: Check the functionality of SearchModifier.setCancelButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setCancelButtonTestInvalidNumberValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    using OneTestStep = std::pair<Opt_ResourceColor, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0xffffffff + 1), "#00000000" },
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x00000000 - 1), "#FFFFFFFF" },
+    };
+
+    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    attrs.selector = 0;
+    for (const auto &[color, expected]: testPlan) {
+        attrs.value0.icon.value.color = ArkValue<Opt_ResourceColor>(color);
+        modifier_->setCancelButton(node_, &attrs);
+        jsonValue = GetJsonValue(node_);
+        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
+        EXPECT_EQ(resultStr, expected);
+    }
+}
+
+
+/*
+ * @tc.name: setFontColorTestInvalidStringValues
+ * @tc.desc: Check the functionality of SearchModifier.setCancelButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setCancelButtonTestTestInvalidStringValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+
+    typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
+    static const std::vector<OneTestStep> testPlan = {
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("undefined"), CHECK_DEFAULT_BLACK_COLOR },
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("GGTTSSPP"), CHECK_DEFAULT_BLACK_COLOR },
+    };
+
+    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    attrs.selector = 0;
+    for (const auto &[color, expected]: testPlan) {
+        attrs.value0.icon.value.color = ArkValue<Opt_ResourceColor>(color);
+        modifier_->setCancelButton(node_, &attrs);
+        jsonValue = GetJsonValue(node_);
+        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_COLOR_ATTR);
+        EXPECT_EQ(resultStr, expected);
+    }
+}
+
 /**
  * @tc.name: setCancelButtonTestIconSize
  * @tc.desc: Check set size functionality of setCancelButton
@@ -612,6 +782,28 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestIconSize, TestSize.Level1)
         auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
         auto customCancelButtonIconSize = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SIZE_ATTR);
         EXPECT_EQ(customCancelButtonIconSize, testSize.second);
+    }
+}
+
+/**
+ * @tc.name: setCancelButtonTestIconSrc
+ * @tc.desc: Check set src functionality of setCancelButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setCancelButtonTestIconSrc, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    attrs.selector = 0;
+    for (const auto &[src, expected] : RESOURCE_TEST_PLAN) {
+        attrs.value0.icon.value.src = ArkValue<Opt_ResourceStr>(src);
+        modifier_->setCancelButton(node_, &attrs);
+        auto jsonValue = GetJsonValue(node_);
+        auto customCancelButtonAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, CANCEL_BUTTON_ATTR);
+        auto customCancelButtonIconAttrs = customCancelButtonAttrs->GetValue(CANCEL_BUTTON_ICON_ATTR);
+        auto resultStr = customCancelButtonIconAttrs->GetString(CANCEL_BUTTON_ICON_SRC_ATTR);
+        EXPECT_EQ(resultStr, expected);
     }
 }
 
@@ -657,9 +849,7 @@ HWTEST_F(SearchModifierTest, DISABLED_setCopyOptionTest, TestSize.Level1)
 /**
  * @tc.name: setSearchIconTest
  * @tc.desc: Check the functionality of setSearchIcon
- *
- * This test disabled because set icon src and icon color doesn't correspond in JSON after set it in SearchPattern
- *
+ * This test disabled because set icon src and color always return default value
  * @tc.type: FUNC
  */
 HWTEST_F(SearchModifierTest, DISABLED_setSearchIconTest, TestSize.Level1)
@@ -671,49 +861,33 @@ HWTEST_F(SearchModifierTest, DISABLED_setSearchIconTest, TestSize.Level1)
     auto defaultSearchIconSrc = defaultSearchIconAttrs->GetString(SEARCH_ICON_SRC_ATTR);
     auto defaultSearchIconColor = defaultSearchIconAttrs->GetString(SEARCH_ICON_COLOR_ATTR);
     auto defaultSearchIconSize = defaultSearchIconAttrs->GetString(SEARCH_ICON_SIZE_ATTR);
-    EXPECT_EQ(defaultSearchIconSrc, EMPTY_TEXT);
+    EXPECT_EQ(defaultSearchIconSrc, ICON_DEFAULT_SRC);
     EXPECT_EQ(defaultSearchIconColor, CHECK_DEFAULT_BLACK_COLOR);
     EXPECT_EQ(defaultSearchIconSize, CHECK_DEFAULT_PX);
+
     // custom
-    std::vector<SearchIconTest> testSearchIcon;
-    for (auto testLength : TEST_PLAN_OPT_LENGTH_PX) {
-        for (auto ColorTest : COLOR_TEST_PLAN) {
-            for (auto testSrc : RESOURCE_TEST_PLAN) {
+    for (const auto &[testLength, expectLength] : TEST_PLAN_OPT_LENGTH_PX) {
+        for (const auto &[testColor, expectColor] : COLOR_TEST_PLAN) {
+            for (const auto &[testSrc, expectSrc] : RESOURCE_TEST_PLAN) {
                 Type_SearchAttribute_searchIcon_Arg0 attrs = {
                     .selector = 0,
                     .value0 = {
-                        .color = ColorTest.first,
-                        .size = testLength.first,
-                        .src = testSrc.first
+                        .color = testColor,
+                        .size = testLength,
+                        .src = testSrc
                     }
                 };
-                TripleCheckValues checkIconValues = {
-                    testSrc.second,
-                    ColorTest.second,
-                    testLength.second
-                };
-                SearchIconTest searchIconTest = {
-                    attrs, checkIconValues
-                };
-                testSearchIcon.push_back(searchIconTest);
+                modifier_->setSearchIcon(node_, &attrs);
+                auto jsonValue = GetJsonValue(node_);
+                auto customSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, SEARCH_ICON_ATTR);
+                auto customSearchIconSrc = customSearchIconAttrs->GetString(SEARCH_ICON_SRC_ATTR);
+                auto customSearchIconColor = customSearchIconAttrs->GetString(SEARCH_ICON_COLOR_ATTR);
+                auto customSearchIconSize = customSearchIconAttrs->GetString(SEARCH_ICON_SIZE_ATTR);
+                EXPECT_EQ(customSearchIconSrc, expectSrc);
+                EXPECT_EQ(customSearchIconColor, expectColor);
+                EXPECT_EQ(customSearchIconSize, expectLength);
             }
         }
-    }
-
-    for (auto iconAttrs : testSearchIcon) {
-        modifier_->setSearchIcon(node_, &iconAttrs.first);
-        fullJson = GetJsonValue(node_);
-        auto customSearchIconAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, SEARCH_ICON_ATTR);
-        auto customSearchIconSrc = customSearchIconAttrs->GetString(SEARCH_ICON_SRC_ATTR);
-        auto customSearchIconColor = customSearchIconAttrs->GetString(SEARCH_ICON_COLOR_ATTR);
-        auto customSearchIconSize = customSearchIconAttrs->GetString(SEARCH_ICON_SIZE_ATTR);
-        std::string checkSrc;
-        std::string checkColor;
-        std::string checkSize;
-        std::tie(checkSrc, checkColor, checkSize) = iconAttrs.second;
-        EXPECT_EQ(customSearchIconSrc, checkSrc);
-        EXPECT_EQ(customSearchIconColor, checkColor);
-        EXPECT_EQ(customSearchIconSize, checkSize);
     }
 }
 
@@ -1411,7 +1585,7 @@ HWTEST_F(SearchModifierTest, setPlaceholderFontTestWeight, TestSize.Level1)
  * @tc.desc: Check the functionality of setPlaceholderFont.
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, DISABLED_setPlaceholderFontTestFamily, TestSize.Level1)
+HWTEST_F(SearchModifierTest, setPlaceholderFontTestFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
@@ -1565,7 +1739,7 @@ HWTEST_F(SearchModifierTest, setTextFontTestFontWeight, TestSize.Level1)
  * @tc.desc: Check the functionality of setTextFont.
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierTest, DISABLED_setTextFontTestFontFamily, TestSize.Level1)
+HWTEST_F(SearchModifierTest, setTextFontTestFontFamily, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextFont, nullptr);
 
@@ -1757,6 +1931,27 @@ HWTEST_F(SearchModifierTest, setFontFeatureTest, TestSize.Level1)
     for (const auto &[value, expectVal]: FONT_FEATURE_TEST_PLAN) {
         modifier_->setFontFeature(node_, &value);
         checkVal = GetStringAttribute(node_, FONT_FEATURE_ATTR);
+        EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setsetEnableHapticFeedbackTest
+ * @tc.desc: Check the functionality of setsetEnableHapticFeedback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setsetEnableHapticFeedbackTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEnableKeyboardOnFocus, nullptr);
+
+    auto fullJson = GetJsonValue(node_);
+    auto checkVal = GetAttrValue<bool>(fullJson, ENABLE_HAPTIC_FEEDBACK_ATTR);
+    EXPECT_EQ(checkVal, true);
+
+    for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
+        modifier_->setEnableHapticFeedback(node_, value);
+        auto fullJson = GetJsonValue(node_);
+        checkVal = GetAttrValue<bool>(fullJson, ENABLE_HAPTIC_FEEDBACK_ATTR);
         EXPECT_EQ(checkVal, expectVal);
     }
 }

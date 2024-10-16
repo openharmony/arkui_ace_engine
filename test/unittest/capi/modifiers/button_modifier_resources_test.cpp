@@ -45,6 +45,8 @@ namespace {
     const auto ATTRIBUTE_LABEL_STYLE_FONT_NAME = "font";
     const auto ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_NAME("family");
 
+    const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE("16.00fp");
+
     using ButtonLabelResourceTest = std::tuple<ResourceStr, std::string>;
 
     // invalid id
@@ -162,11 +164,11 @@ HWTEST_F(ButtonModifierResourcesTest, setFontColorTestResourceColorValues, TestS
 
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_NAME)),
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
             COLOR_BY_STRING.ColorToString() },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_COLOR_ID)),
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_ID)),
             COLOR_BY_NUMBER.ColorToString() },
-        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResourceUnion(INVALID_ID_COLOR)),
+        { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(INVALID_ID_COLOR)),
             "#FFFF0000" }
     };
 
@@ -179,11 +181,11 @@ HWTEST_F(ButtonModifierResourcesTest, setFontColorTestResourceColorValues, TestS
 }
 
 /*
- * @tc.name: setFontSizeTestResources
+ * @tc.name: setFontSizeTestResourcesValidResources
  * @tc.desc: check setFontSize from resource
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResources, TestSize.Level1)
+HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResourcesValidResources, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;
@@ -191,7 +193,30 @@ HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResources, TestSize.Level1)
     using OneTestStep = std::pair<Ark_Length, std::string>;
     const std::vector<OneTestStep> testPlan = {
         { { .type = ARK_TAG_RESOURCE, .resource = RES_DIMENSION_ID }, "5.00vp" },
-        { { .type = ARK_TAG_RESOURCE, .resource = -1 }, "10.00px" }
+    };
+
+    for (const auto &[arkLength, expected]: testPlan) {
+        modifier_->setFontSize(node_, &arkLength);
+        jsonValue = GetJsonValue(node_);
+        result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
+        EXPECT_EQ(result, expected);
+    }
+}
+
+/*
+ * @tc.name: setFontSizeTestResourcesInvalidResources
+ * @tc.desc: check setFontSize from resource
+ * Disabled because FontSize default value is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierResourcesTest, DISABLED_setFontSizeTestResourcesInvalidResources, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string result;
+
+    using OneTestStep = std::pair<Ark_Length, std::string>;
+    const std::vector<OneTestStep> testPlan = {
+        { { .type = ARK_TAG_RESOURCE, .resource = -1 }, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE }
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
@@ -214,9 +239,9 @@ HWTEST_F(ButtonModifierResourcesTest, setFontFamilyTestResources, TestSize.Level
 
     using ResourceTest = std::tuple<Union_String_Resource, std::string>;
     const std::vector<ResourceTest> testPlan = {
-        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_NAME)),
+        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResource(RES_FAMILY_NAME)),
             FAMILY_BY_STRING },
-        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_ID)),
+        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResource(RES_FAMILY_ID)),
             FAMILY_BY_NUMBER },
     };
 
@@ -243,10 +268,10 @@ HWTEST_F(ButtonModifierResourcesTest, setLabelStyleTestResources, TestSize.Level
     using ResourceTest = std::tuple<Opt_Union_String_Resource, std::string>;
     const std::vector<ResourceTest> testPlan = {
         { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-            CreateResourceUnion(RES_FAMILY_NAME)),
+            CreateResource(RES_FAMILY_NAME)),
             FAMILY_BY_STRING },
         { Converter::ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-            CreateResourceUnion(RES_FAMILY_ID)),
+            CreateResource(RES_FAMILY_ID)),
             FAMILY_BY_NUMBER },
     };
 

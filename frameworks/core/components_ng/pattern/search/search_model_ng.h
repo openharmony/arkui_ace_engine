@@ -106,7 +106,7 @@ public:
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchSrcPath(FrameNode* frameNode, const std::string& src);
     static void SetSearchIconColor(FrameNode* frameNode, const Color& color);
-    static void SetSearchImageIcon(FrameNode* frameNode, IconOptions& iconOptions);
+    static void SetSearchImageIcon(FrameNode* frameNode, const std::optional<IconOptions>& iconOptions);
     static void SetSearchButton(FrameNode* frameNode, const std::string& text);
     static void SetSearchButtonFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
     static void SetSearchButtonFontColor(FrameNode* frameNode, const std::optional<Color>& color);
@@ -157,6 +157,7 @@ public:
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,

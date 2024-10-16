@@ -1179,14 +1179,21 @@ void SearchModelNG::SetSearchIconColor(FrameNode* frameNode, const Color& color)
     pattern->SetSearchIconColor(color);
 }
 
-void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, IconOptions &iconOptions)
+void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, const std::optional<IconOptions> &iconOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SearchPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetSearchImageIcon(iconOptions);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
-        pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)), frameNode);
+    IconOptions options;
+    if (iconOptions) {
+        options = iconOptions.value();
+        pattern->SetCancelImageIcon(options);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
+            pattern->ConvertImageIconSizeValue(options.GetSize().value_or(ICON_HEIGHT)), frameNode);
+    } else {
+        pattern->SetCancelImageIcon(options);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize, frameNode);
+    }
 }
 
 void SearchModelNG::SetSearchButton(FrameNode* frameNode, const std::string& text)
@@ -1960,4 +1967,15 @@ const Dimension SearchModelNG::ConvertTextFontScaleValue(const Dimension& fontSi
     }
     return fontSizeValue;
 }
+
+void SearchModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
+}
+
 } // namespace OHOS::Ace::NG
