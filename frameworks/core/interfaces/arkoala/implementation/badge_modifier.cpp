@@ -20,8 +20,11 @@
 #include "core/interfaces/arkoala/utility/validators.h"
 #include "arkoala_api_generated.h"
 
+
 namespace OHOS::Ace::NG {
 
+namespace {
+    using UnionBadgeOptions = std::variant<Ark_BadgePosition, Ark_Position>;
 struct Position {
     std::optional<int> badgePosition;
     std::optional<bool> isPositionXy = false;
@@ -37,6 +40,8 @@ struct Style {
     std::optional<Dimension> badgeBorderWidth;
     std::optional<FontWeight> badgeFontWeight;
 };
+}
+
 namespace Converter {
 
 template<>
@@ -66,74 +71,93 @@ Position Convert(const Ark_BadgePosition& src)
     }
     return dst;
 }
-
 template<>
 Position  Convert(const Opt_Union_BadgePosition_Position& src)
 {
     Position dst;
-        switch (src.value.selector) {
-            case SELECTOR_ID_0: {
-                dst = Converter::Convert<Position>(src.value.value0);
-                break;
-            }
-            case SELECTOR_ID_1: {
-                dst = Converter::Convert<Position>(src.value.value1);
-                break;
-            }
-            default: {
-                LOGE("Unexpected src->selector: %{public}d\n", src.value.selector);
-            }
+    auto cancelOptions = Converter::OptConvert<UnionBadgeOptions>(src);
+    if (cancelOptions) {
+        auto options = std::get_if<Ark_Position>(&cancelOptions.value());
+        if (options != nullptr) {
+            return Converter::Convert<Position>(*options);
         }
-        return dst;
-}
-
-template<>
-void AssignCast(std::optional<Position>& dst, const std::optional<Ark_Position>& src)
-{
-    dst->isPositionXy = true;
-    dst->badgePositionX = Converter::OptConvert<Dimension>(src->x);
-    dst->badgePositionY = Converter::OptConvert<Dimension>(src->y);
-    Validator::ValidateNonNegative(dst->badgePositionX);
-    Validator::ValidateNonNegative(dst->badgePositionY);
-}
-
-template<>
-void AssignCast(std::optional<Position>& dst, const std::optional<Ark_BadgePosition>& src)
-{
-    switch (src.value()) {
-        case ARK_BADGE_POSITION_RIGHT_TOP:
-        case ARK_BADGE_POSITION_RIGHT:
-        case ARK_BADGE_POSITION_LEFT:
-            dst->isPositionXy = false;
-            dst->badgePosition = src.value();
-            break;
-        default: LOGE("Unexpected enum value in Ark_BadgePosition: %{public}d", src.value());
+        auto values = std::get_if<Ark_BadgePosition>(&cancelOptions.value());
+        if (values != nullptr) {
+            return Converter::Convert<Position>(*values);
+        }
+    } else {
+        LOGE("ARKOALA SearchAttributeModifier.CancelButton -> handling OptCustomObject not implemented.");
     }
+    return dst;
 }
 
-template<>
-void AssignCast(std::optional<Position>& dst, const Ark_Position& src)
-{
-    dst->isPositionXy = true;
-    dst->badgePositionX = Converter::OptConvert<Dimension>(src.x);
-    dst->badgePositionY = Converter::OptConvert<Dimension>(src.y);
-    Validator::ValidateNonNegative(dst->badgePositionX);
-    Validator::ValidateNonNegative(dst->badgePositionY);
-}
+// template<>
+// Position  Convert1(const Opt_Union_BadgePosition_Position& src)
+// {
+//     Position dst;
+//         switch (src.value.selector) {
+//             case SELECTOR_ID_0: {
+//                 dst = Converter::Convert<Position>(src.value.value0);
+//                 break;
+//             }
+//             case SELECTOR_ID_1: {
+//                 dst = Converter::Convert<Position>(src.value.value1);
+//                 break;
+//             }
+//             default: {
+//                 LOGE("Unexpected src->selector: %{public}d\n", src.value.selector);
+//             }
+//         }
+//         return dst;
+// }
 
-template<>
-void AssignCast(std::optional<Position>& dst, const Ark_BadgePosition& src)
-{
-    switch (src) {
-        case ARK_BADGE_POSITION_RIGHT_TOP:
-        case ARK_BADGE_POSITION_RIGHT:
-        case ARK_BADGE_POSITION_LEFT:
-            dst->isPositionXy = false;
-            dst->badgePosition = src;
-            break;
-        default: LOGE("Unexpected enum value in Ark_BadgePosition: %{public}d", src);
-    }
-}
+// template<>
+// void AssignCast(std::optional<Position>& dst, const std::optional<Ark_Position>& src)
+// {
+//     dst->isPositionXy = true;
+//     dst->badgePositionX = Converter::OptConvert<Dimension>(src->x);
+//     dst->badgePositionY = Converter::OptConvert<Dimension>(src->y);
+//     Validator::ValidateNonNegative(dst->badgePositionX);
+//     Validator::ValidateNonNegative(dst->badgePositionY);
+// }
+
+// template<>
+// void AssignCast(std::optional<Position>& dst, const std::optional<Ark_BadgePosition>& src)
+// {
+//     switch (src.value()) {
+//         case ARK_BADGE_POSITION_RIGHT_TOP:
+//         case ARK_BADGE_POSITION_RIGHT:
+//         case ARK_BADGE_POSITION_LEFT:
+//             dst->isPositionXy = false;
+//             dst->badgePosition = src.value();
+//             break;
+//         default: LOGE("Unexpected enum value in Ark_BadgePosition: %{public}d", src.value());
+//     }
+// }
+
+// template<>
+// void AssignCast(std::optional<Position>& dst, const Ark_Position& src)
+// {
+//     dst->isPositionXy = true;
+//     dst->badgePositionX = Converter::OptConvert<Dimension>(src.x);
+//     dst->badgePositionY = Converter::OptConvert<Dimension>(src.y);
+//     Validator::ValidateNonNegative(dst->badgePositionX);
+//     Validator::ValidateNonNegative(dst->badgePositionY);
+// }
+
+// template<>
+// void AssignCast(std::optional<Position>& dst, const Ark_BadgePosition& src)
+// {
+//     switch (src) {
+//         case ARK_BADGE_POSITION_RIGHT_TOP:
+//         case ARK_BADGE_POSITION_RIGHT:
+//         case ARK_BADGE_POSITION_LEFT:
+//             dst->isPositionXy = false;
+//             dst->badgePosition = src;
+//             break;
+//         default: LOGE("Unexpected enum value in Ark_BadgePosition: %{public}d", src);
+//     }
+// }
 
 template<>
 Style Convert(const Ark_BadgeStyle& src)
@@ -197,6 +221,8 @@ BadgeParameters Convert(const Ark_BadgeParamWithNumber& src)
 } // namespace OHOS::Ace::NG::Converter
 
 } // namespace OHOS::Ace::NG
+
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BadgeInterfaceModifier {
 
