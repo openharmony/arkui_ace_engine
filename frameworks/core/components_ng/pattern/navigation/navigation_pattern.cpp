@@ -852,22 +852,25 @@ void NavigationPattern::CheckTopNavPathChange(
     TAG_LOGI(AceLogTag::ACE_NAVIGATION,
         "transition start, disableAllAnimation: %{public}d, animated: %{public}d, isPopPage: %{public}d",
         disableAllAnimation, animated, isPopPage);
-    if (isDialog && !isCustomAnimation_) {
-        // dialog navDestination no need transition animation.
-        StartTransition(preTopNavDestination, newTopNavDestination, true, isPopPage, isShow);
-        hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-        return;
-    }
     if (disableAllAnimation || !animated) {
         // transition without animation need to run before layout for geometryTransition.
         StartTransition(preTopNavDestination, newTopNavDestination, false, isPopPage, isShow);
         navigationStack_->UpdateAnimatedValue(true);
-    } else {
-        // before the animation of navDes replacing, update the zIndex of the previous navDes node
-        UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination, preLastStandardIndex);
-        // transition with animation need to run after layout task
-        StartTransition(preTopNavDestination, newTopNavDestination, true, isPopPage, isShow);
+        hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        return;
     }
+    if (isDialog && !isCustomAnimation_) {
+        StartTransition(preTopNavDestination, newTopNavDestination,
+            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN),
+            isPopPage, isShow);
+        hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+
+    // before the animation of navDes replacing, update the zIndex of the previous navDes node
+    UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination, preLastStandardIndex);
+    // transition with animation need to run after layout task
+    StartTransition(preTopNavDestination, newTopNavDestination, true, isPopPage, isShow);
     hostNode->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
 }
 
