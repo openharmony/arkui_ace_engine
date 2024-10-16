@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import { BlockTag } from '../model/BlockTag';
+import { tagDesRule } from '../utils';
+import { formatDate } from '../utils/timeUtil';
 import { Block } from './Block';
 
 export interface RadioItem {
@@ -22,32 +24,55 @@ export interface RadioItem {
 
 @Component
 export struct RadioBlock {
-  @Prop title: string
-  @Link isEnabled: boolean
-  @Link value: Object
-  @Prop dataSource: RadioItem[]
+  @Prop title: string;
+  @Link isEnabled: boolean;
+  @Link value: Object;
+  @Prop dataSource: RadioItem[];
+  @StorageLink('Block') listRadioBlockTags: Array<BlockTag> = [];
+  @State listRadioBlockTagsTemp: Array<BlockTag> = [];
 
   build() {
-    Column({ space: 8 }) {
+    Column() {
       Block({ title: this.title, isEnabled: $isEnabled }) {
         Flex({ wrap: FlexWrap.Wrap }) {
-          ForEach(this.dataSource, (item: RadioItem) => {
-            Row() {
+          ForEach(this.dataSource, (item: RadioItem, index: number) => {
+            Row({ space: 8 }) {
               Radio({ group: this.title, value: JSON.stringify(item.value) })
                 .checked(JSON.stringify(this.value) === JSON.stringify(item.value))
                 .enabled(this.isEnabled)
                 .onChange((checked) => {
                   if (checked) {
                     this.value = item.value;
+                    let time = formatDate(new Date(Date.now()))
+                    this.listRadioBlockTagsTemp.push(new BlockTag(time, tagDesRule(this.title, item.label.toString())))
                   }
                 })
-              Text(item.label)
-              Text('  ')
-            }
-          })
-        }.width('100%')
-      }
+                .onClick(() => {
+                  setTimeout(() => {
+                    if (AppStorage.get('Block')) {
+                      this.listRadioBlockTags = this.listRadioBlockTags.concat(this.listRadioBlockTagsTemp);
+                      this.listRadioBlockTagsTemp = [];
+                    } else {
+                      if (this.listRadioBlockTagsTemp) {
+                        this.listRadioBlockTags = this.listRadioBlockTags.concat(this.listRadioBlockTagsTemp);
+                      }
+                      if (this.listRadioBlockTags) {
+                        this.listRadioBlockTagsTemp = [];
+                      }
+                    }
+                  }, 200)
+                })
 
+              Text(item.label)
+                .fontSize($r('sys.float.Body_M'))
+                .fontWeight(FontWeight.Regular)
+                .fontColor($r('sys.color.font_primary'))
+            }
+            .margin(index % 3 !== 0 ? { left: 16 } : {})
+          })
+        }
+        .width('100%')
+      }
     }
   }
 }

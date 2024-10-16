@@ -65,21 +65,21 @@ export struct BindMenuBootcamp {
         builder: useEnabled<CustomBuilder>(this.showSecondaryMenu,
           this.showSecondaryMenu ? (): void => this.SubMenu() : undefined),
       })
-       .enabled(useEnabled<boolean>(this.enableAllowUse, this.allowUse))
-        MenuItem({
-          startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
-          content: '菜单选项2',
-          endIcon: useEnabled<ResourceStr>(this.enableEndIcon, this.endIcon),
-          builder: useEnabled<CustomBuilder>(this.showSecondaryMenu,
-            this.showSecondaryMenu ? (): void => this.SubMenu() : undefined),
-        })
-        MenuItem({
-          startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
-          content: '菜单选项3',
-          endIcon: useEnabled<ResourceStr>(this.enableEndIcon, this.endIcon),
-          builder: useEnabled<CustomBuilder>(this.showSecondaryMenu,
-            this.showSecondaryMenu ? (): void => this.SubMenu() : undefined),
-        })
+        .enabled(useEnabled<boolean>(this.enableAllowUse, this.allowUse))
+      MenuItem({
+        startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
+        content: '菜单选项2',
+        endIcon: useEnabled<ResourceStr>(this.enableEndIcon, this.endIcon),
+        builder: useEnabled<CustomBuilder>(this.showSecondaryMenu,
+          this.showSecondaryMenu ? (): void => this.SubMenu() : undefined),
+      })
+      MenuItem({
+        startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
+        content: '菜单选项3',
+        endIcon: useEnabled<ResourceStr>(this.enableEndIcon, this.endIcon),
+        builder: useEnabled<CustomBuilder>(this.showSecondaryMenu,
+          this.showSecondaryMenu ? (): void => this.SubMenu() : undefined),
+      })
       MenuItem({
         startIcon: useEnabled<ResourceStr>(this.enableStartIcon, this.startIcon),
         content: '菜单选项4',
@@ -92,16 +92,16 @@ export struct BindMenuBootcamp {
 
   @Builder
   Content() {
-      Column() {
-        Button(
-          this.enableLabelNum ? '弹出菜单'.repeat(this.labelNum / 2) : '弹出菜单',
-        )
-          .bindMenu(this.MyMenu)
-      }
-      .onDragStart(()=>{
-        ContextMenu.close()
-      })
+    Column() {
+      Button(
+        this.enableLabelNum ? '弹出菜单'.repeat(this.labelNum / 2) : '弹出菜单',
+      )
+        .bindMenu(this.MyMenu)
     }
+    .onDragStart(()=>{
+      ContextMenu.close()
+    })
+  }
 
   @Builder
   Parameters() {
@@ -140,7 +140,8 @@ export struct BindMenuBootcamp {
         })
 
       }.width('100%')
-    }.height('50%')
+    }
+    .height('52%')
   }
 }
 

@@ -15,12 +15,19 @@
 
 import { Block } from './Block'
 import { ColorPalette } from './ColorPalette';
+import { BlockTag } from '../model/BlockTag';
+import { formatDate } from '../utils/timeUtil';
+import { tagDesRule } from '../utils';
+import { ColorMetrics } from '@kit.ArkUI';
+
 
 @Component
 export struct ColorBlock {
   @Prop title: string;
   @Link isEnabled: boolean;
-  @Link color: ResourceColor
+  @Link color: ResourceColor;
+  @StorageLink('Block') listColorBlockTags: Array<BlockTag> = [];
+  @State listColorBlockTagsTemp: Array<BlockTag> = [];
 
   build() {
     Block({
@@ -29,14 +36,37 @@ export struct ColorBlock {
     }) {
       ColorPalette({
         color: this.color,
+        title: this.title,
         onChange: (color) => {
-          this.color = color
+          this.color = color;
+          const colors = ColorMetrics.resourceColor(color);
+          if (colors.red === 255 && colors.green === 255 && colors.blue === 255 && colors.alpha === 255) {
+            color = '#FFFFFF'
+          }
+          if (this.isEnabled) {
+            let time = formatDate(new Date(Date.now()))
+            this.listColorBlockTagsTemp.push(new BlockTag(time, tagDesRule(this.title, (color).toString())))
+            setTimeout(() => {
+              if (AppStorage.get('Block')) {
+                this.listColorBlockTags = this.listColorBlockTags.concat(this.listColorBlockTagsTemp);
+                this.listColorBlockTagsTemp = [];
+              } else {
+                if (this.listColorBlockTagsTemp) {
+                  this.listColorBlockTags = this.listColorBlockTags.concat(this.listColorBlockTagsTemp);
+                }
+                if (this.listColorBlockTags) {
+                  this.listColorBlockTagsTemp = [];
+                }
+              }
+            }, 200)
+          }
         },
         isEnabled: this.isEnabled
       })
     }
   }
 }
+
 
 @Preview
 @Component
