@@ -577,7 +577,7 @@ void TextFieldPattern::SetAccessibilityClearAction()
             auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
             auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
                               (cleanNodeStyle == CleanNodeStyle::INPUT && IsOperation());
-            textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelButton() : "");
+            textAccessibilityProperty->SetAccessibilityText(hasContent ? GetCancelImageText() : "");
         }
     }
 }
@@ -1422,6 +1422,15 @@ std::string TextFieldPattern::GetCancelButton()
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, "");
     return theme->GetCancelButton();
+}
+
+std::string TextFieldPattern::GetCancelImageText()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    return theme->GetCancelImageText();
 }
 
 std::string TextFieldPattern::GetPasswordIconPromptInformation(bool show)

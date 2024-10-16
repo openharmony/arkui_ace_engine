@@ -203,7 +203,8 @@ public:
 
             theme->placeholderLineSpacing_ = pattern->GetAttr<Dimension>("text_field_placeholder_linespacing", 0.0_vp);
 
-            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_property_clear", "");
+            theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_clear", "");
+            theme->cancelImageText_ = pattern->GetAttr<std::string>("textfield_accessibility_property_clear", "");
             theme->showPassword_ = pattern->GetAttr<std::string>("textfield_show_password_button", "");
             theme->hidePassword_ = pattern->GetAttr<std::string>("textfield_hide_password_button", "");
             theme->hasShowedPassword_ = pattern->GetAttr<std::string>("textfield_has_showed_password", "");
@@ -586,6 +587,11 @@ public:
         return cancelButton_;
     }
 
+    const std::string& GetCancelImageText() const
+    {
+        return cancelImageText_;
+    }
+
     const Dimension& getInlinePaddingRight() const
     {
         return inlinePaddingRight_;
@@ -729,6 +735,7 @@ private:
 
     std::string hasShowedPassword_;
     std::string hasHiddenPassword_;
+    std::string cancelImageText_;
     std::string showPassword_;
     std::string hidePassword_;
     std::string aiWriteBundleName_;

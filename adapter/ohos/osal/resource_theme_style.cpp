@@ -105,7 +105,8 @@ static const std::set<std::string> stringAttrs = {
     "textfield_show_password_button",
     "textfield_hide_password_button",
     "textfield_has_showed_password",
-    "textfield_has_hidden_password"
+    "textfield_has_hidden_password",
+    "textfield_accessibility_clear"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
