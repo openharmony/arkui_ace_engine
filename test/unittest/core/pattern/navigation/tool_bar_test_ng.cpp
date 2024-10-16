@@ -21,6 +21,8 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
@@ -34,17 +36,41 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr Color FRONT_COLOR = Color(0xff0000ff);
+constexpr Color FRONT_COLOR = Color(0xff0000ff);
+const std::string BAR_ITEM_ETS_TAG = "BarItem";
+const std::string FRAME_ITEM_ETS_TAG = "FrameItem";
+const std::string EMPTY_STRING = "";
+const std::string NAV_BAR_NODE_TITLE = "title";
+const std::string NAV_BAR_NODE_MENU = "menu";
+const std::string NAV_BAR_NODE_BACK_BUTTON = "back_button";
+const std::string NAVIGATION_GROUP_NODE = "navigation_group_node";
+const std::string MENU_ITEM_ICON = "menu_item_icon";
+const std::string MENU_ITEM_TEXT = "menu_item";
+struct TestParameters {
+    RefPtr<MockPipelineContext> pipeline = nullptr;
+    RefPtr<NavigationBarTheme> theme = nullptr;
+    RefPtr<NavBarLayoutProperty> navBarLayoutProperty = nullptr;
+    RefPtr<NavigationGroupNode> navigationGroupNode = nullptr;
+    NG::BarItem menuItem;
+    std::vector<NG::BarItem> menuItems;
+};
 } // namespace
 class ToolBarTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     static void MockPipelineContextGetTheme();
+    void CreateNavBar();
+    void CreateTitlebar();
+    void CreateToolbar();
+    void InitializationParameters(TestParameters& testParameters);
     void SetUp() override;
     void TearDown() override;
     RefPtr<NavToolbarPattern> toolBarPattern_;
     RefPtr<NavToolbarNode> toolBarNode_;
+    RefPtr<NavBarPattern> navBarpattern_;
+    RefPtr<NavBarNode> navBarNode_;
+    RefPtr<TitleBarNode> titleBarNode_;
 };
 
 void ToolBarTestNg::SetUpTestSuite()
@@ -74,6 +100,85 @@ void ToolBarTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+}
+
+void ToolBarTestNg::CreateNavBar()
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    auto navBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    navBarNode_ = NavBarNode::GetOrCreateNavBarNode(
+        barTag, navBarNodeId, []() { return AceType::MakeRefPtr<OHOS::Ace::NG::NavBarPattern>(); });
+    ASSERT_NE(navBarNode_, nullptr);
+    navBarpattern_ = navBarNode_->GetPattern<NavBarPattern>();
+    ASSERT_NE(navBarpattern_, nullptr);
+}
+
+void ToolBarTestNg::CreateTitlebar()
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    int32_t titleBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    titleBarNode_ = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, titleBarNodeId, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode_, nullptr);
+}
+
+void ToolBarTestNg::CreateToolbar()
+{
+    std::string barTag = BAR_ITEM_ETS_TAG;
+    int32_t toolBarNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    toolBarNode_ = NavToolbarNode::GetOrCreateToolbarNode(
+        V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolBarNode_, nullptr);
+}
+
+void ToolBarTestNg::InitializationParameters(TestParameters& testParameters)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    testParameters.pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(testParameters.pipeline, nullptr);
+    testParameters.pipeline->SetThemeManager(themeManager);
+    testParameters.theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(testParameters.theme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(testParameters.theme));
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(SelectTheme::TypeId())).WillRepeatedly(Return(selectTheme));
+
+    CreateNavBar();
+    CreateTitlebar();
+    CreateToolbar();
+
+    testParameters.navBarLayoutProperty = navBarNode_->GetLayoutProperty<NavBarLayoutProperty>();
+    ASSERT_NE(testParameters.navBarLayoutProperty, nullptr);
+    navBarNode_->SetTitleBarNode(titleBarNode_);
+    auto title = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(title, nullptr);
+    titleBarNode_->SetTitle(title);
+    navBarNode_->SetToolBarNode(toolBarNode_);
+    auto menu = AceType::MakeRefPtr<FrameNode>(
+        NAV_BAR_NODE_MENU, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menu, nullptr);
+    navBarNode_->SetMenu(menu);
+    auto backButton = AceType::MakeRefPtr<FrameNode>(
+        NAV_BAR_NODE_BACK_BUTTON, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(backButton, nullptr);
+    titleBarNode_->SetBackButton(backButton);
+    testParameters.navigationGroupNode = AceType::MakeRefPtr<NavigationGroupNode>(NAVIGATION_GROUP_NODE,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigationPattern>());
+    ASSERT_NE(testParameters.navigationGroupNode, nullptr);
+    auto navigationPattern = testParameters.navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    navigationPattern->SetNavigationMode(NavigationMode::AUTO);
+    navBarNode_->SetParent(testParameters.navigationGroupNode);
+    testParameters.menuItem.action = []() {};
+    testParameters.menuItem.icon = MENU_ITEM_ICON;
+    testParameters.menuItems.push_back(testParameters.menuItem);
+    navBarpattern_->SetTitleBarMenuItems(testParameters.menuItems);
 }
 
 /**
@@ -413,5 +518,67 @@ HWTEST_F(ToolBarTestNg, NavToolbarPatternShowDialogWithNode001, TestSize.Level1)
     applicationInfo.apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     EXPECT_TRUE(applicationInfo.GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE));
     toolbarPattern->ShowDialogWithNode(barItem1);
+}
+
+/**
+ * @tc.name: HandleTitleBarAndToolBarAnimation001
+ * @tc.desc: Test HandleTitleBarAndToolBarAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, HandleTitleBarAndToolBarAnimation001, TestSize.Level1)
+{
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+    auto navBarLayoutProperty = navBarNode_->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    ASSERT_NE(navBarLayoutProperty, nullptr);
+    navBarLayoutProperty->UpdateHideTitleBar(false);
+    navBarLayoutProperty->UpdateHideToolBar(false);
+    bool needRunTitleBarAnimation = true;
+    bool needRunToolBarAnimation = true;
+    navBarpattern_->HandleTitleBarAndToolBarAnimation(navBarNode_, needRunTitleBarAnimation, needRunToolBarAnimation);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode_->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    EXPECT_EQ(titleBarLayoutProperty->propVisibility_, VisibleType::VISIBLE);
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode_->GetToolBarNode());
+    ASSERT_NE(toolBarNode, nullptr);
+    auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty();
+    ASSERT_NE(toolBarLayoutProperty, nullptr);
+    EXPECT_EQ(toolBarLayoutProperty->propVisibility_, VisibleType::GONE);
+}
+
+/**
+ * @tc.name: HideOrShowTitleBarImmediately001
+ * @tc.desc: Test HideOrShowTitleBarImmediately function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, HideOrShowTitleBarImmediately001, TestSize.Level1)
+{
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+    navBarpattern_->HideOrShowTitleBarImmediately(navBarNode_, true);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode_->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    EXPECT_EQ(titleBarLayoutProperty->propVisibility_, VisibleType::GONE);
+}
+
+/**
+ * @tc.name: HideOrShowToolBarImmediately001
+ * @tc.desc: Test HideOrShowToolBarImmediately function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, HideOrShowToolBarImmediately001, TestSize.Level1)
+{
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+    navBarpattern_->HideOrShowToolBarImmediately(navBarNode_, true);
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode_->GetToolBarNode());
+    ASSERT_NE(toolBarNode, nullptr);
+    auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty();
+    ASSERT_NE(toolBarLayoutProperty, nullptr);
+    EXPECT_EQ(toolBarLayoutProperty->propVisibility_, VisibleType::GONE);
 }
 } // namespace OHOS::Ace::NG
