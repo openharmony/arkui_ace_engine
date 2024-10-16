@@ -312,7 +312,7 @@ HWTEST_F(MenuModifierTest, setRadiusTest, TestSize.Level1)
     auto bottomRight = GetAttrValue<std::string>(radiusObject, "bottomRight");
     EXPECT_EQ(bottomRight, "0.00vp");
 
-    auto radius = Converter::ArkUnion<Type_MenuAttribute_radius_Arg0, Ark_Length>(5);
+    auto radius = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(5);
     modifier_->setRadius(node_, &radius);
     fullJson = GetJsonValue(node_);
     radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
@@ -325,7 +325,7 @@ HWTEST_F(MenuModifierTest, setRadiusTest, TestSize.Level1)
     bottomRight = GetAttrValue<std::string>(radiusObject, "bottomRight");
     EXPECT_EQ(bottomRight, "5.00px");
 
-    radius = Converter::ArkUnion<Type_MenuAttribute_radius_Arg0, Ark_Length>(-5);
+    radius = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(-5);
     modifier_->setRadius(node_, &radius);
     fullJson = GetJsonValue(node_);
     radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
@@ -361,7 +361,7 @@ HWTEST_F(MenuModifierTest, setRadiusRadiusesValidTest, TestSize.Level1)
         .topLeft = Converter::ArkValue<Opt_Length>(5), .topRight = Converter::ArkValue<Opt_Length>(7),
         .bottomLeft = Converter::ArkValue<Opt_Length>(8), .bottomRight = Converter::ArkValue<Opt_Length>(0)
     };
-    auto radius = Converter::ArkUnion<Type_MenuAttribute_radius_Arg0, Ark_BorderRadiuses>(radiuses);
+    auto radius = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(radiuses);
     modifier_->setRadius(node_, &radius);
     fullJson = GetJsonValue(node_);
     radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
@@ -397,7 +397,7 @@ HWTEST_F(MenuModifierTest, setRadiusRadiusesNegativeOrEmptyTest, TestSize.Level1
         .topLeft = Converter::ArkValue<Opt_Length>(5), .topRight = Converter::ArkValue<Opt_Length>(7),
         .bottomLeft = Converter::ArkValue<Opt_Length>(-8), .bottomRight = Converter::ArkValue<Opt_Length>(-9)
     };
-    auto radius = Converter::ArkUnion<Type_MenuAttribute_radius_Arg0, Ark_BorderRadiuses>(radiuses);
+    auto radius = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(radiuses);
     modifier_->setRadius(node_, &radius);
     fullJson = GetJsonValue(node_);
     radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
@@ -415,7 +415,7 @@ HWTEST_F(MenuModifierTest, setRadiusRadiusesNegativeOrEmptyTest, TestSize.Level1
         .bottomLeft = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .bottomRight = Converter::ArkValue<Opt_Length>(Ark_Empty())
     };
-    radius = Converter::ArkUnion<Type_MenuAttribute_radius_Arg0, Ark_BorderRadiuses>(radiuses);
+    radius = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(radiuses);
     modifier_->setRadius(node_, &radius);
     fullJson = GetJsonValue(node_);
     radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
@@ -446,7 +446,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTest, TestSize.Level1)
         (Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE))
     };
     auto divider =
-        Converter::ArkUnion<Type_MenuAttribute_menuItemDivider_Arg0, Ark_DividerStyleOptions>(dividerOptions);
+        Converter::ArkUnion<Ark_Union_DividerStyleOptions_Undefined, Ark_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
@@ -464,7 +464,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTest, TestSize.Level1)
         (Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456))
     };
     divider =
-        Converter::ArkUnion<Type_MenuAttribute_menuItemDivider_Arg0, Ark_DividerStyleOptions>(dividerOptions);
+        Converter::ArkUnion<Ark_Union_DividerStyleOptions_Undefined, Ark_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
@@ -475,7 +475,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTest, TestSize.Level1)
         (Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"))
     };
     divider =
-        Converter::ArkUnion<Type_MenuAttribute_menuItemDivider_Arg0, Ark_DividerStyleOptions>(dividerOptions);
+        Converter::ArkUnion<Ark_Union_DividerStyleOptions_Undefined, Ark_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
@@ -490,7 +490,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerTest, TestSize.Level1)
  */
 HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerUndefinedTest, TestSize.Level1)
 {
-    Type_MenuAttribute_menuItemDivider_Arg0 divider =
+    Ark_Union_DividerStyleOptions_Undefined divider =
         {.selector = 1, .value1 = {.dummy = Converter::ArkValue<Ark_Int32>(0)}};
     modifier_->setMenuItemDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
@@ -509,7 +509,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemDividerUndefinedTest, TestSize.Le
         .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty())
     };
     divider =
-        Converter::ArkUnion<Type_MenuAttribute_menuItemDivider_Arg0, Ark_DividerStyleOptions>(dividerOptions);
+        Converter::ArkUnion<Ark_Union_DividerStyleOptions_Undefined, Ark_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemDivider");
@@ -540,7 +540,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerTest, TestSize.Level1
         (Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE))
     };
     auto divider =
-        Converter::ArkUnion<Type_MenuAttribute_menuItemGroupDivider_Arg0, Ark_DividerStyleOptions>(dividerOptions);
+        Converter::ArkUnion<Ark_Union_DividerStyleOptions_Undefined, Ark_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
@@ -558,7 +558,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerTest, TestSize.Level1
         (Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456))
     };
     divider =
-        Converter::ArkUnion<Type_MenuAttribute_menuItemGroupDivider_Arg0, Ark_DividerStyleOptions>(dividerOptions);
+        Converter::ArkUnion<Ark_Union_DividerStyleOptions_Undefined, Ark_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
@@ -569,7 +569,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerTest, TestSize.Level1
         (Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"))
     };
     divider =
-        Converter::ArkUnion<Type_MenuAttribute_menuItemGroupDivider_Arg0, Ark_DividerStyleOptions>(dividerOptions);
+        Converter::ArkUnion<Ark_Union_DividerStyleOptions_Undefined, Ark_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");
@@ -584,7 +584,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerTest, TestSize.Level1
  */
 HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerUndefinedTest, TestSize.Level1)
 {
-    Type_MenuAttribute_menuItemGroupDivider_Arg0 divider =
+    Ark_Union_DividerStyleOptions_Undefined divider =
         {.selector = 1, .value1 = {.dummy = Converter::ArkValue<Ark_Int32>(0)}};
     modifier_->setMenuItemGroupDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
@@ -603,7 +603,7 @@ HWTEST_F(MenuModifierTest, DISABLED_setMenuItemGroupDividerUndefinedTest, TestSi
         .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty())
     };
     divider =
-        Converter::ArkUnion<Type_MenuAttribute_menuItemGroupDivider_Arg0, Ark_DividerStyleOptions>(dividerOptions);
+        Converter::ArkUnion<Ark_Union_DividerStyleOptions_Undefined, Ark_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "itemGroupDivider");

@@ -13,23 +13,38 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PluginComponentInterfaceModifier {
 void SetPluginComponentOptionsImpl(Ark_NativePointer node,
-                                   const Type_PluginComponentInterface_setPluginComponentOptions_Arg0* value)
+                                   const Ark_Literal_PluginComponentTemplate_template_Any_data* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //PluginComponentModelNG::SetSetPluginComponentOptions(frameNode, convValue);
 }
 } // PluginComponentInterfaceModifier
 namespace PluginComponentAttributeModifier {
 void OnCompleteImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //PluginComponentModelNG::SetOnComplete(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 Ark_Function callback)
+                 Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //PluginComponentModelNG::SetOnError(frameNode, convValue);
 }
 } // PluginComponentAttributeModifier
 const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier()

@@ -13,20 +13,32 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HyperlinkInterfaceModifier {
 void SetHyperlinkOptionsImpl(Ark_NativePointer node,
-                             const Type_HyperlinkInterface_setHyperlinkOptions_Arg0* address,
-                             const Opt_Type_HyperlinkInterface_setHyperlinkOptions_Arg1* content)
+                             const Ark_Union_String_Resource* address,
+                             const Opt_Union_String_Resource* content)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(address);
+    //auto convValue = Converter::OptConvert<type>(address); // for enums
+    //HyperlinkModelNG::SetSetHyperlinkOptions(frameNode, convValue);
 }
 } // HyperlinkInterfaceModifier
 namespace HyperlinkAttributeModifier {
 void ColorImpl(Ark_NativePointer node,
-               const Type_HyperlinkAttribute_color_Arg0* value)
+               const Ark_Union_Color_Number_String_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //HyperlinkModelNG::SetColor(frameNode, convValue);
 }
 } // HyperlinkAttributeModifier
 const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()

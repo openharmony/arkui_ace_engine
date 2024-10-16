@@ -244,7 +244,7 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestDefaultValues, TestSize.
 HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestValidMinValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_NavigationAttribute_navBarWidthRange_Arg0 inputValue;
+    Ark_Tuple_Dimension_Dimension inputValue;
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -276,7 +276,7 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestValidMinValues, TestSize
 HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestValidMaxValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_NavigationAttribute_navBarWidthRange_Arg0 inputValue;
+    Ark_Tuple_Dimension_Dimension inputValue;
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -318,7 +318,7 @@ HWTEST_F(NavigationModifierTest, DISABLED_setNavBarWidthRangeTestValidResourceVa
 HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestInvalidMinValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_NavigationAttribute_navBarWidthRange_Arg0 inputValue;
+    Ark_Tuple_Dimension_Dimension inputValue;
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -349,7 +349,7 @@ HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestInvalidMinValues, TestSi
 HWTEST_F(NavigationModifierTest, setNavBarWidthRangeTestInvalidMaxValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_NavigationAttribute_navBarWidthRange_Arg0 inputValue;
+    Ark_Tuple_Dimension_Dimension inputValue;
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {

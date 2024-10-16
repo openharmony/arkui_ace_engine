@@ -44,6 +44,7 @@ void SetColumnOptionsImpl(Ark_NativePointer node,
                           const Opt_ColumnOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     auto opts = Converter::OptConvert<ColumnOptions>(*options);
     auto space = opts ? opts->space : std::nullopt;
     ColumnModelNG::SetSpace(frameNode, space.value_or(0.0_px));
@@ -54,27 +55,35 @@ void AlignItemsImpl(Ark_NativePointer node,
                     Ark_HorizontalAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     ColumnModelNG::SetAlignItems(frameNode, static_cast<FlexAlign>(value + 1));
 }
 void JustifyContentImpl(Ark_NativePointer node,
                         Ark_FlexAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     ColumnModelNG::SetJustifyContent(frameNode, static_cast<FlexAlign>(value));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     LOGE("ARKOALA ColumnAttribute_PointLightImpl -> Method is not FULLY "
         "implemented.");
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
     ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated,
         (float)Converter::ConvertOrDefault(value->illuminated, 0), frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
 }
 void ReverseImpl(Ark_NativePointer node,
-                 const Opt_Boolean* isReversed)
+                 const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ColumnModelNG::SetReverse(frameNode, convValue);
 }
 } // ColumnAttributeModifier
 const GENERATED_ArkUIColumnModifier* GetColumnModifier()

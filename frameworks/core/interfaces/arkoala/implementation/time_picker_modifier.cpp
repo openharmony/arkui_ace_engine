@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,40 +22,83 @@ namespace TimePickerInterfaceModifier {
 void SetTimePickerOptionsImpl(Ark_NativePointer node,
                               const Opt_TimePickerOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //TimePickerModelNG::SetSetTimePickerOptions(frameNode, convValue);
 }
 } // TimePickerInterfaceModifier
 namespace TimePickerAttributeModifier {
 void UseMilitaryTimeImpl(Ark_NativePointer node,
                          Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //TimePickerModelNG::SetUseMilitaryTime(frameNode, convValue);
 }
 void LoopImpl(Ark_NativePointer node,
               Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //TimePickerModelNG::SetLoop(frameNode, convValue);
 }
 void DisappearTextStyleImpl(Ark_NativePointer node,
                             const Ark_PickerTextStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TimePickerModelNG::SetDisappearTextStyle(frameNode, convValue);
 }
 void TextStyleImpl(Ark_NativePointer node,
                    const Ark_PickerTextStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TimePickerModelNG::SetTextStyle(frameNode, convValue);
 }
 void SelectedTextStyleImpl(Ark_NativePointer node,
                            const Ark_PickerTextStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TimePickerModelNG::SetSelectedTextStyle(frameNode, convValue);
 }
 void DateTimeOptionsImpl(Ark_NativePointer node,
                          const Ark_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TimePickerModelNG::SetDateTimeOptions(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //TimePickerModelNG::SetOnChange(frameNode, convValue);
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              Ark_Boolean enable)
+                              Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //TimePickerModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
 } // TimePickerAttributeModifier
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()

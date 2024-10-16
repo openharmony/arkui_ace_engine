@@ -955,7 +955,7 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
     };
-    auto divider = Converter::ArkUnion<Type_TabsAttribute_divider_Arg0, Ark_DividerStyle>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_DividerStyle_Undefined, Ark_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -975,7 +975,7 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)}
     };
-    divider = Converter::ArkUnion<Type_TabsAttribute_divider_Arg0, Ark_DividerStyle>(dividerOptions);
+    divider = Converter::ArkUnion<Ark_Union_DividerStyle_Undefined, Ark_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -997,7 +997,7 @@ HWTEST_F(TabsModifierTest, setDividerUndefinedTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .color = {.tag = ARK_TAG_UNDEFINED}
     };
-    auto divider = Converter::ArkUnion<Type_TabsAttribute_divider_Arg0, Ark_DividerStyle>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_DividerStyle_Undefined, Ark_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -1025,7 +1025,7 @@ HWTEST_F(TabsModifierTest, setDividerColorStringTest, TestSize.Level1)
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
         .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
     };
-    auto divider = Converter::ArkUnion<Type_TabsAttribute_divider_Arg0, Ark_DividerStyle>(dividerOptions);
+    auto divider = Converter::ArkUnion<Ark_Union_DividerStyle_Undefined, Ark_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
@@ -1046,7 +1046,7 @@ HWTEST_F(TabsModifierTest, setDividerColorStringTest, TestSize.Level1)
  */
 HWTEST_F(TabsModifierTest, setDividerNullTest, TestSize.Level1)
 {
-    Type_TabsAttribute_divider_Arg0 divider =
+    Ark_Union_DividerStyle_Undefined divider =
         {.selector = 1, .value1 = {.dummy = Converter::ArkValue<Ark_Int32>(0)}};
     modifier_->setDivider(node_, &divider);
     auto fullJson = GetJsonValue(node_);
@@ -1071,7 +1071,7 @@ HWTEST_F(TabsModifierTest, setBarBackgroundColorTestDefaultValues, TestSize.Leve
 }
 
 // Color values for attribute 'barBackgroundColor' of method 'barBackgroundColor'
-static std::vector<std::tuple<std::string, ResourceColor, std::string>> barBackgroundColorValues = {
+static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> barBackgroundColorValues = {
     {"ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), COLOR_BLUE},
     {"0x123456", Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456"},
     {"0.5f", Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0.5f), COLOR_TRANSPARENT},
@@ -1091,7 +1091,7 @@ HWTEST_F(TabsModifierTest, setBarBackgroundColorTest, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    ResourceColor inputValueBarBackgroundColor;
+    Ark_ResourceColor inputValueBarBackgroundColor;
 
     for (auto&& value: barBackgroundColorValues) {
         inputValueBarBackgroundColor = std::get<1>(value);
@@ -1103,7 +1103,7 @@ HWTEST_F(TabsModifierTest, setBarBackgroundColorTest, TestSize.Level1)
     }
 }
 
-static std::vector<std::tuple<std::string, ResourceColor, std::string>> barBackgroundColorResourceValues = {
+static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> barBackgroundColorResourceValues = {
     {"RED1", Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(CreateResource(RES_NAME)),
         COLOR_RED}, // Color::RED is result of mocked ThemeConstants::GetColorByName
     {"TRANSPARENT", Converter::ArkUnion<Ark_ResourceColor, struct Ark_Resource>(CreateResource(RES_STRING_FAKE_ID)),
@@ -1121,10 +1121,10 @@ static std::vector<std::tuple<std::string, ResourceColor, std::string>> barBackg
  */
 HWTEST_F(TabsModifierTest, setBarBackgroundColorTestResourceValues, TestSize.Level1)
 {
-        std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    ResourceColor inputValueBarBackgroundColor;
+    Ark_ResourceColor inputValueBarBackgroundColor;
 
     for (auto&& value: barBackgroundColorResourceValues) {
         inputValueBarBackgroundColor = std::get<1>(value);

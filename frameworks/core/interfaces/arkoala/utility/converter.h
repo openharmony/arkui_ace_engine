@@ -346,7 +346,7 @@ namespace Converter {
     }
 
     template<>
-    inline std::pair<Dimension, Dimension> Convert(const Tuple_Length_Length& src)
+    inline std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src)
     {
         return { Converter::Convert<Dimension>(src.value0), Converter::Convert<Dimension>(src.value1) };
     }

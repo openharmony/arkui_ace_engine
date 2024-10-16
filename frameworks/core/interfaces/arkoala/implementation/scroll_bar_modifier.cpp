@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,12 +22,21 @@ namespace ScrollBarInterfaceModifier {
 void SetScrollBarOptionsImpl(Ark_NativePointer node,
                              const Ark_ScrollBarOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ScrollBarModelNG::SetSetScrollBarOptions(frameNode, convValue);
 }
 } // ScrollBarInterfaceModifier
 namespace ScrollBarAttributeModifier {
 void EnableNestedScrollImpl(Ark_NativePointer node,
-                            const Opt_Boolean* enabled)
+                            const Opt_Boolean* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ScrollBarModelNG::SetEnableNestedScroll(frameNode, convValue);
 }
 } // ScrollBarAttributeModifier
 const GENERATED_ArkUIScrollBarModifier* GetScrollBarModifier()

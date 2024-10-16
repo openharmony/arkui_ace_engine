@@ -25,11 +25,16 @@ namespace AlphabetIndexerInterfaceModifier {
 void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node,
                                    const Ark_AlphabetIndexerOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    //auto convValue = Converter::OptConvert<type_name>(*options);
+    //AlphabetIndexerModelNG::SetSetAlphabetIndexerOptions(frameNode, convValue);
 }
 } // AlphabetIndexerInterfaceModifier
 namespace AlphabetIndexerAttributeModifier {
 void OnSelectedImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    Ark_Function value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -41,7 +46,7 @@ void OnSelectedImpl(Ark_NativePointer node,
     IndexerModelNG::SetOnSelected(frameNode, std::move(onEvent));
 }
 void ColorImpl(Ark_NativePointer node,
-               const ResourceColor* value)
+               const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -49,7 +54,7 @@ void ColorImpl(Ark_NativePointer node,
     IndexerModelNG::SetColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void SelectedColorImpl(Ark_NativePointer node,
-                       const ResourceColor* value)
+                       const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,7 +62,7 @@ void SelectedColorImpl(Ark_NativePointer node,
     IndexerModelNG::SetSelectedColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PopupColorImpl(Ark_NativePointer node,
-                    const ResourceColor* value)
+                    const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -65,7 +70,7 @@ void PopupColorImpl(Ark_NativePointer node,
     IndexerModelNG::SetPopupColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
-                                 const ResourceColor* value)
+                                 const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -73,7 +78,7 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
     IndexerModelNG::SetSelectedBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PopupBackgroundImpl(Ark_NativePointer node,
-                         const ResourceColor* value)
+                         const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -81,7 +86,7 @@ void PopupBackgroundImpl(Ark_NativePointer node,
     IndexerModelNG::SetPopupBackground(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PopupSelectedColorImpl(Ark_NativePointer node,
-                            const ResourceColor* value)
+                            const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -89,7 +94,7 @@ void PopupSelectedColorImpl(Ark_NativePointer node,
     IndexerModelNG::SetPopupSelectedColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PopupUnselectedColorImpl(Ark_NativePointer node,
-                              const ResourceColor* value)
+                              const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -97,7 +102,7 @@ void PopupUnselectedColorImpl(Ark_NativePointer node,
     IndexerModelNG::SetPopupUnselectedColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PopupItemBackgroundColorImpl(Ark_NativePointer node,
-                                  const ResourceColor* value)
+                                  const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -111,7 +116,8 @@ void UsingPopupImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetUsingPopup(frameNode, Converter::Convert<bool>(value));
 }
-void SelectedFontImpl(Ark_NativePointer node, const Ark_Font* value)
+void SelectedFontImpl(Ark_NativePointer node,
+                      const Ark_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -122,7 +128,8 @@ void SelectedFontImpl(Ark_NativePointer node, const Ark_Font* value)
             fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
     }
 }
-void PopupFontImpl(Ark_NativePointer node, const Ark_Font* value)
+void PopupFontImpl(Ark_NativePointer node,
+                   const Ark_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -133,7 +140,8 @@ void PopupFontImpl(Ark_NativePointer node, const Ark_Font* value)
             fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
     }
 }
-void PopupItemFontImpl(Ark_NativePointer node, const Ark_Font* value)
+void PopupItemFontImpl(Ark_NativePointer node,
+                       const Ark_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -144,8 +152,17 @@ void PopupItemFontImpl(Ark_NativePointer node, const Ark_Font* value)
         IndexerModelNG::SetFontWeight(frameNode, fontOpt.value().fontWeight.value_or(FontWeight::NORMAL));
     }
 }
-void ItemSizeImpl(Ark_NativePointer node, const Type_AlphabetIndexerAttribute_itemSize_Arg0* value) {}
-void FontImpl(Ark_NativePointer node, const Ark_Font* value)
+void ItemSizeImpl(Ark_NativePointer node,
+                  const Ark_Union_String_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //AlphabetIndexerModelNG::SetItemSize(frameNode, convValue);
+}
+void FontImpl(Ark_NativePointer node,
+              const Ark_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -156,30 +173,47 @@ void FontImpl(Ark_NativePointer node, const Ark_Font* value)
             fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
     }
 }
-void AlignStyleImpl(Ark_NativePointer node,
-                    enum Ark_IndexerAlign value,
-                    const Opt_Length* offset)
-{
-}
 void OnSelectImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //AlphabetIndexerModelNG::SetOnSelect(frameNode, convValue);
 }
 void OnRequestPopupDataImpl(Ark_NativePointer node,
-                            Ark_Function callback)
+                            Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //AlphabetIndexerModelNG::SetOnRequestPopupData(frameNode, convValue);
 }
 void OnPopupSelectImpl(Ark_NativePointer node,
-                       Ark_Function callback)
+                       Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //AlphabetIndexerModelNG::SetOnPopupSelect(frameNode, convValue);
 }
 void SelectedImpl(Ark_NativePointer node,
-                  const Ark_Number* index)
+                  const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //AlphabetIndexerModelNG::SetSelected(frameNode, convValue);
 }
 void PopupPositionImpl(Ark_NativePointer node,
                        const Ark_Position* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //AlphabetIndexerModelNG::SetPopupPosition(frameNode, convValue);
 }
 void AutoCollapseImpl(Ark_NativePointer node,
                       Ark_Boolean value)
@@ -191,18 +225,38 @@ void AutoCollapseImpl(Ark_NativePointer node,
 void PopupItemBorderRadiusImpl(Ark_NativePointer node,
                                const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //AlphabetIndexerModelNG::SetPopupItemBorderRadius(frameNode, convValue);
 }
 void ItemBorderRadiusImpl(Ark_NativePointer node,
                           const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //AlphabetIndexerModelNG::SetItemBorderRadius(frameNode, convValue);
 }
 void PopupBackgroundBlurStyleImpl(Ark_NativePointer node,
-                                  enum Ark_BlurStyle value)
+                                  Ark_BlurStyle value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //AlphabetIndexerModelNG::SetPopupBackgroundBlurStyle(frameNode, convValue);
 }
 void PopupTitleBackgroundImpl(Ark_NativePointer node,
-                              const ResourceColor* value)
+                              const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //AlphabetIndexerModelNG::SetPopupTitleBackground(frameNode, convValue);
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               Ark_Boolean value)
@@ -210,6 +264,16 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     IndexerModelNG::SetEnableHapticFeedback(frameNode, Converter::Convert<bool>(value));
+}
+void AlignStyleImpl(Ark_NativePointer node,
+                    Ark_IndexerAlign value,
+                    const Opt_Length* offset)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //AlphabetIndexerModelNG::SetAlignStyle(frameNode, convValue);
 }
 } // AlphabetIndexerAttributeModifier
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
@@ -231,7 +295,6 @@ const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         AlphabetIndexerAttributeModifier::PopupItemFontImpl,
         AlphabetIndexerAttributeModifier::ItemSizeImpl,
         AlphabetIndexerAttributeModifier::FontImpl,
-        AlphabetIndexerAttributeModifier::AlignStyleImpl,
         AlphabetIndexerAttributeModifier::OnSelectImpl,
         AlphabetIndexerAttributeModifier::OnRequestPopupDataImpl,
         AlphabetIndexerAttributeModifier::OnPopupSelectImpl,
@@ -243,6 +306,7 @@ const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         AlphabetIndexerAttributeModifier::PopupBackgroundBlurStyleImpl,
         AlphabetIndexerAttributeModifier::PopupTitleBackgroundImpl,
         AlphabetIndexerAttributeModifier::EnableHapticFeedbackImpl,
+        AlphabetIndexerAttributeModifier::AlignStyleImpl,
     };
     return &ArkUIAlphabetIndexerModifierImpl;
 }

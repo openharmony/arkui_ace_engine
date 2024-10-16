@@ -13,12 +13,19 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EffectComponentInterfaceModifier {
 void SetEffectComponentOptionsImpl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //EffectComponentModelNG::SetSetEffectComponentOptions(frameNode, convValue);
 }
 } // EffectComponentInterfaceModifier
 const GENERATED_ArkUIEffectComponentModifier* GetEffectComponentModifier()

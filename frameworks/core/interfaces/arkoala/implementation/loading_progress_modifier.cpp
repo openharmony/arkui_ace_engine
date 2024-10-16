@@ -23,13 +23,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LoadingProgressInterfaceModifier {
 void SetLoadingProgressOptionsImpl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //LoadingProgressModelNG::SetSetLoadingProgressOptions(frameNode, convValue);
 }
 } // LoadingProgressInterfaceModifier
 namespace LoadingProgressAttributeModifier {
 void ColorImpl(Ark_NativePointer node,
-               const ResourceColor* value)
+               const Ark_ResourceColor* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto color = Converter::OptConvert<Color>(*value);
@@ -38,13 +43,18 @@ void ColorImpl(Ark_NativePointer node,
 void EnableLoadingImpl(Ark_NativePointer node,
                        Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     LoadingProgressModelNG::SetEnableLoading(frameNode, Converter::Convert<bool>(value));
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* modifier)
+                         const Ark_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //LoadingProgressModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ARKOALA LoadingProgressAttributeModifier::ContentModifierImpl -> Method is not implemented");
 }
 } // LoadingProgressAttributeModifier

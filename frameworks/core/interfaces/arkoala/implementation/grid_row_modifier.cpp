@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,16 +22,29 @@ namespace GridRowInterfaceModifier {
 void SetGridRowOptionsImpl(Ark_NativePointer node,
                            const Opt_GridRowOptions* option)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = option ? Converter::OptConvert<type>(*option) : std::nullopt;
+    //GridRowModelNG::SetSetGridRowOptions(frameNode, convValue);
 }
 } // GridRowInterfaceModifier
 namespace GridRowAttributeModifier {
 void OnBreakpointChangeImpl(Ark_NativePointer node,
-                            Ark_Function callback)
+                            Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //GridRowModelNG::SetOnBreakpointChange(frameNode, convValue);
 }
 void AlignItemsImpl(Ark_NativePointer node,
-                    enum Ark_ItemAlign value)
+                    Ark_ItemAlign value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //GridRowModelNG::SetAlignItems(frameNode, convValue);
 }
 } // GridRowAttributeModifier
 const GENERATED_ArkUIGridRowModifier* GetGridRowModifier()

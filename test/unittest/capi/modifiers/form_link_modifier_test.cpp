@@ -52,7 +52,7 @@ inline Ark_FormLinkOptions FormLinkOpt(const char *actionName)
         .bundleName = ArkValue<Opt_String>(BUNDLE_NAME),
         .abilityName = ArkValue<Opt_String>(ABILITY_NAME),
         .uri = ArkValue<Opt_String>(URI),
-        .params = ArkValue<Opt_Object>(Ark_Object{}),
+        .params = ArkValue<Opt_CustomObject>(),
     };
 }
 } // namespace

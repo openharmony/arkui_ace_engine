@@ -80,7 +80,7 @@ void SetGridOptionsImpl(Ark_NativePointer node,
                         const Opt_Scroller* scroller,
                         const Opt_GridLayoutOptions* layoutOptions)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (layoutOptions) {
         GridLayoutOptions options;
@@ -117,62 +117,62 @@ namespace GridAttributeModifier {
 void ColumnsTemplateImpl(Ark_NativePointer node,
                          const Ark_String* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetColumnsTemplate(frameNode, Converter::Convert<std::string>(*value));
 }
 void RowsTemplateImpl(Ark_NativePointer node,
                       const Ark_String* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetRowsTemplate(frameNode, Converter::Convert<std::string>(*value));
 }
 void ColumnsGapImpl(Ark_NativePointer node,
                     const Ark_Length* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetColumnsGap(frameNode, Converter::Convert<Dimension>(*value));
 }
 void RowsGapImpl(Ark_NativePointer node,
                  const Ark_Length* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetRowsGap(frameNode, Converter::Convert<Dimension>(*value));
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
-                        const Type_GridAttribute_scrollBarWidth_Arg0* value)
+                        const Ark_Union_Number_String* value)
 {
-    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetScrollBarWidth(frameNode, Converter::OptConvert<Dimension>(*value));
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
-                        const Type_GridAttribute_scrollBarColor_Arg0* value)
+                        const Ark_Union_Color_Number_String* value)
 {
-    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetScrollBarColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void ScrollBarImpl(Ark_NativePointer node,
-                   enum Ark_BarState value)
+                   Ark_BarState value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetScrollBarMode(frameNode, Converter::OptConvert<DisplayMode>(value));
 }
 void OnScrollBarUpdateImpl(Ark_NativePointer node,
-                           Ark_Function event)
+                           Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onScrollBarUpdate = [frameNode](int32_t index, const Dimension& offset) {
         auto arkIndex = Converter::ArkValue<Ark_Number>(index);
@@ -187,9 +187,9 @@ void OnScrollBarUpdateImpl(Ark_NativePointer node,
     GridModelNG::SetOnScrollBarUpdate(frameNode, std::move(onScrollBarUpdate));
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
-                       Ark_Function event)
+                       Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onScrollIndex = [frameNode](const int32_t first, const int32_t last) {
         auto arkFirst = Converter::ArkValue<Ark_Number>(first);
@@ -202,67 +202,67 @@ void OnScrollIndexImpl(Ark_NativePointer node,
 void CachedCountImpl(Ark_NativePointer node,
                      const Ark_Number* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetCachedCount(frameNode, Converter::Convert<int32_t>(*value));
 }
 void EditModeImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetEditable(frameNode, Converter::Convert<bool>(value));
 }
 void MultiSelectableImpl(Ark_NativePointer node,
                          Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetMultiSelectable(frameNode, Converter::Convert<bool>(value));
 }
 void MaxCountImpl(Ark_NativePointer node,
                   const Ark_Number* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetMaxCount(frameNode, Converter::Convert<int32_t>(*value));
 }
 void MinCountImpl(Ark_NativePointer node,
                   const Ark_Number* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetMinCount(frameNode, Converter::Convert<int32_t>(*value));
 }
 void CellLengthImpl(Ark_NativePointer node,
                     const Ark_Number* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetCellLength(frameNode, Converter::Convert<int32_t>(*value));
 }
 void LayoutDirectionImpl(Ark_NativePointer node,
-                         enum Ark_GridDirection value)
+                         Ark_GridDirection value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetLayoutDirection(frameNode, Converter::OptConvert<FlexDirection>(value));
 }
 void SupportAnimationImpl(Ark_NativePointer node,
                           Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetSupportAnimation(frameNode, Converter::Convert<bool>(value));
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
-                         Ark_Function event)
+                         Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onItemDragStart = [frameNode](const ItemDragInfo& dragInfo, int32_t itemIndex) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
@@ -275,9 +275,9 @@ void OnItemDragStartImpl(Ark_NativePointer node,
     GridModelNG::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
 }
 void OnItemDragEnterImpl(Ark_NativePointer node,
-                         Ark_Function event)
+                         Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onItemDragEnter = [frameNode](const ItemDragInfo& dragInfo) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
@@ -287,9 +287,9 @@ void OnItemDragEnterImpl(Ark_NativePointer node,
     GridModelNG::SetOnItemDragEnter(frameNode, std::move(onItemDragEnter));
 }
 void OnItemDragMoveImpl(Ark_NativePointer node,
-                        Ark_Function event)
+                        Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onItemDragMove = [frameNode](const ItemDragInfo& dragInfo,
         int32_t itemIndex, int32_t insertIndex) {
@@ -302,9 +302,9 @@ void OnItemDragMoveImpl(Ark_NativePointer node,
     GridModelNG::SetOnItemDragMove(frameNode, std::move(onItemDragMove));
 }
 void OnItemDragLeaveImpl(Ark_NativePointer node,
-                         Ark_Function event)
+                         Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onItemDragLeave = [frameNode](const ItemDragInfo& dragInfo, int32_t itemIndex) {
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
@@ -317,7 +317,7 @@ void OnItemDragLeaveImpl(Ark_NativePointer node,
 void OnItemDropImpl(Ark_NativePointer node,
                     Ark_Function event)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onItemDrop = [frameNode](const ItemDragInfo& dragInfo,
         int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
@@ -330,51 +330,41 @@ void OnItemDropImpl(Ark_NativePointer node,
     };
     GridModelNG::SetOnItemDrop(frameNode, std::move(onItemDrop));
 }
-void EdgeEffectImpl(Ark_NativePointer node,
-                    enum Ark_EdgeEffect value,
-                    const Opt_EdgeEffectOptions* options)
-{
-    CHECK_NULL_VOID(options);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetEdgeEffect(
-        frameNode, Converter::OptConvert<EdgeEffect>(value), Converter::OptConvert<bool>(*options));
-}
 void NestedScrollImpl(Ark_NativePointer node,
                       const Ark_NestedScrollOptions* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetNestedScroll(frameNode, Converter::Convert<NestedScrollOptions>(*value));
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
                                  Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetScrollEnabled(frameNode, Converter::Convert<bool>(value));
 }
 void FrictionImpl(Ark_NativePointer node,
-                  const Type_GridAttribute_friction_Arg0* value)
+                  const Ark_Union_Number_Resource* value)
 {
-    CHECK_NULL_VOID(value);
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridModelNG::SetFriction(frameNode, Converter::OptConvert<float>(*value));
 }
 void AlignItemsImpl(Ark_NativePointer node,
-                    const Opt_GridItemAlignment* alignment)
+                    const Opt_GridItemAlignment* value)
 {
-    CHECK_NULL_VOID(alignment);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetAlignItems(frameNode, Converter::OptConvert<GridItemAlignment>(*alignment));
+    GridModelNG::SetAlignItems(frameNode,
+        value ? Converter::OptConvert<GridItemAlignment>(*value) : std::nullopt);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onScroll = [frameNode](const CalcDimension& scrollOffset, const ScrollState& scrollState) {
         auto arkScrollOffset = Converter::ArkValue<Ark_Number>(scrollOffset);
@@ -385,9 +375,9 @@ void OnScrollImpl(Ark_NativePointer node,
     GridModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
 void OnReachStartImpl(Ark_NativePointer node,
-                      Ark_Function event)
+                      Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onReachStart = [frameNode]() {
         GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onReachStart(frameNode->GetId());
@@ -395,9 +385,9 @@ void OnReachStartImpl(Ark_NativePointer node,
     GridModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
 }
 void OnReachEndImpl(Ark_NativePointer node,
-                    Ark_Function event)
+                    Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onReachEnd = [frameNode]() {
         GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onReachEnd(frameNode->GetId());
@@ -405,9 +395,9 @@ void OnReachEndImpl(Ark_NativePointer node,
     GridModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
 void OnScrollStartImpl(Ark_NativePointer node,
-                       Ark_Function event)
+                       Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onScrollStart = [frameNode]() {
         GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onScrollStart(frameNode->GetId());
@@ -415,9 +405,9 @@ void OnScrollStartImpl(Ark_NativePointer node,
     GridModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
 }
 void OnScrollStopImpl(Ark_NativePointer node,
-                      Ark_Function event)
+                      Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onScrollStop = [frameNode]() {
         GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onScrollStop(frameNode->GetId());
@@ -425,9 +415,9 @@ void OnScrollStopImpl(Ark_NativePointer node,
     GridModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            Ark_Function event)
+                            Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onScrollFrameBegin = [frameNode](const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
         ScrollFrameResult scrollRes { .offset = offset };
@@ -441,6 +431,15 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
         return scrollRes;
     };
     GridModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
+}
+void EdgeEffectImpl(Ark_NativePointer node,
+                    Ark_EdgeEffect value,
+                    const Opt_EdgeEffectOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetEdgeEffect(frameNode, Converter::OptConvert<EdgeEffect>(value),
+        options ? Converter::OptConvert<bool>(*options) : std::nullopt);
 }
 } // GridAttributeModifier
 const GENERATED_ArkUIGridModifier* GetGridModifier()
@@ -469,7 +468,6 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::OnItemDragMoveImpl,
         GridAttributeModifier::OnItemDragLeaveImpl,
         GridAttributeModifier::OnItemDropImpl,
-        GridAttributeModifier::EdgeEffectImpl,
         GridAttributeModifier::NestedScrollImpl,
         GridAttributeModifier::EnableScrollInteractionImpl,
         GridAttributeModifier::FrictionImpl,
@@ -480,6 +478,7 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::OnScrollStartImpl,
         GridAttributeModifier::OnScrollStopImpl,
         GridAttributeModifier::OnScrollFrameBeginImpl,
+        GridAttributeModifier::EdgeEffectImpl,
     };
     return &ArkUIGridModifierImpl;
 }

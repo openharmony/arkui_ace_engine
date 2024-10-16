@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,20 +22,39 @@ namespace GridColInterfaceModifier {
 void SetGridColOptionsImpl(Ark_NativePointer node,
                            const Opt_GridColOptions* option)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = option ? Converter::OptConvert<type>(*option) : std::nullopt;
+    //GridColModelNG::SetSetGridColOptions(frameNode, convValue);
 }
 } // GridColInterfaceModifier
 namespace GridColAttributeModifier {
 void SpanImpl(Ark_NativePointer node,
-              const Type_GridColAttribute_span_Arg0* value)
+              const Ark_Union_Number_GridColColumnOption* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GridColModelNG::SetSpan(frameNode, convValue);
 }
 void GridColOffsetImpl(Ark_NativePointer node,
-                       const Type_GridColAttribute_gridColOffset_Arg0* value)
+                       const Ark_Union_Number_GridColColumnOption* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GridColModelNG::SetGridColOffset(frameNode, convValue);
 }
 void OrderImpl(Ark_NativePointer node,
-               const Type_GridColAttribute_order_Arg0* value)
+               const Ark_Union_Number_GridColColumnOption* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //GridColModelNG::SetOrder(frameNode, convValue);
 }
 } // GridColAttributeModifier
 const GENERATED_ArkUIGridColModifier* GetGridColModifier()

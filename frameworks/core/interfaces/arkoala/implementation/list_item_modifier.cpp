@@ -62,7 +62,7 @@ namespace ListItemInterfaceModifier {
 void SetListItemOptions0Impl(Ark_NativePointer node,
                              const Opt_ListItemOptions* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto options = Converter::OptConvert<Converter::ListItemOptions>(*value);
@@ -73,7 +73,7 @@ void SetListItemOptions0Impl(Ark_NativePointer node,
 void SetListItemOptions1Impl(Ark_NativePointer node,
                              const Opt_String* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto optionsOpt = Converter::OptConvert<std::string>(*value);
@@ -84,17 +84,18 @@ void SetListItemOptions1Impl(Ark_NativePointer node,
 } // ListItemInterfaceModifier
 namespace ListItemAttributeModifier {
 void StickyImpl(Ark_NativePointer node,
-                enum Ark_Sticky value)
+                Ark_Sticky value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ListItemModelNG::SetSticky(frameNode, Converter::OptConvert<V2::StickyMode>(value));
 }
 void EditableImpl(Ark_NativePointer node,
-                  const Type_ListItemAttribute_editable_Arg0* value)
+                  const Ark_Union_Boolean_EditMode* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     // V2::EditMode non-standard enum so set default values in modifier
     auto editable = static_cast<uint32_t>(V2::EditMode::NONE);
     if (value != nullptr) {
@@ -113,14 +114,14 @@ void EditableImpl(Ark_NativePointer node,
 void SelectableImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ListItemModelNG::SetSelectable(frameNode, Converter::Convert<bool>(value));
 }
 void SelectedImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     ListItemModelNG::SetSelected(frameNode, Converter::Convert<bool>(value));
 }
@@ -128,15 +129,16 @@ void SwipeActionImpl(Ark_NativePointer node,
                      const Ark_SwipeActionOptions* value)
 {
     LOGE("ListItemModifier::SwipeActionImpl is not implemented yet!");
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto options = Converter::Convert<Converter::SwipeActionOptions>(*value);
     ListItemModelNG::SetSwiperAction(frameNode, nullptr, nullptr, nullptr, options.edgeEffect);
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onSelect = [frameNode](bool isSelected) {
         GetFullAPI()->getEventsAPI()->getListItemEventsReceiver()->onSelect(frameNode->GetId(), isSelected);

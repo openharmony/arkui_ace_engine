@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
@@ -28,7 +27,7 @@ struct NavigatorOptions {
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-NavigatorOptions Convert(const Literal_String_target_Opt_NavigationType_type& src)
+NavigatorOptions Convert(const Ark_Literal_String_target_NavigationType_type& src)
 {
     return {
         .target = Converter::Convert<std::string>(src.target),
@@ -51,7 +50,7 @@ void AssignCast(std::optional<NavigatorType>& dst, const Ark_NavigationType& src
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigatorInterfaceModifier {
 void SetNavigatorOptions0Impl(Ark_NativePointer node,
-                              const Opt_Type_NavigatorInterface_setNavigatorOptions_Arg0* value)
+                              const Opt_Literal_String_target_NavigationType_type* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -78,11 +77,10 @@ void ActiveImpl(Ark_NativePointer node,
     NavigatorModelNG::SetActive(frameNode, Converter::Convert<bool>(value));
 }
 void TypeImpl(Ark_NativePointer node,
-              enum Ark_NavigationType value)
+              Ark_NavigationType value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto typeOpt = Converter::OptConvert<NavigatorType>(value);
     CHECK_NULL_VOID(typeOpt);
     NavigatorModelNG::SetType(frameNode, *typeOpt);
@@ -98,6 +96,11 @@ void TargetImpl(Ark_NativePointer node,
 void ParamsImpl(Ark_NativePointer node,
                 const Ark_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavigatorModelNG::SetParams(frameNode, convValue);
     LOGE("NavigatorAttributeModifier::ParamsImpl - the CustomObjects is not implemented yet!");
 }
 } // NavigatorAttributeModifier

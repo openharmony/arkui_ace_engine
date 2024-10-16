@@ -204,9 +204,9 @@ typedef std::pair<Opt_ResourceStr, std::string> ResourceSRC;
 typedef std::pair<Opt_Union_String_Resource, std::string> UnionResourceString;
 typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTest;
 typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
-typedef std::pair<Type_SearchAttribute_searchIcon_Arg0, TripleCheckValues> SearchIconTest;
-typedef std::pair<Opt_Type_SearchInterface_setSearchOptions_Arg0, TripleCheckValues> OptionsTest;
-typedef std::pair<Union_Number_String_Resource, std::string> OneUnionNumStrResStep;
+typedef std::pair<Ark_Union_IconOptions_SymbolGlyphModifier, TripleCheckValues> SearchIconTest;
+typedef std::pair<Opt_Type_SearchInterface_options, TripleCheckValues> OptionsTest;
+typedef std::pair<Ark_Union_Number_String_Resource, std::string> OneUnionNumStrResStep;
 typedef std::pair<Ark_TextDecorationType, std::string> DecorationTypeTest;
 typedef std::pair<Ark_TextDecorationStyle, std::string> DecorationStyleTest;
 
@@ -298,14 +298,14 @@ const std::vector<ArkFontWeightTest> FONT_WEIGHT_TEST_PLAN = {
 };
 
 const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_RESOURCES = {
-    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(ArkRes(const_cast<Ark_String*>(&STR_NAME),
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(ArkRes(const_cast<Ark_String*>(&STR_NAME),
         1234, NodeModifier::ResourceType::STRING)),
       "0.00px"
     }
 };
 
 const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_WITH_PERCENT_RESOURCES = {
-    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(ArkRes(const_cast<Ark_String*>(&STR_NAME), 1234,
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(ArkRes(const_cast<Ark_String*>(&STR_NAME), 1234,
         NodeModifier::ResourceType::STRING)),
       "0.00px"
     }
@@ -354,7 +354,7 @@ public:
  */
 HWTEST_F(SearchModifierResourcesTest, DISABLED_setCancelButtonTestIconColor, TestSize.Level1)
 {
-    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
     attrs.selector = 0;
     for (auto colorTest : COLOR_TEST_PLAN) {
         attrs.value0.icon.value.color = colorTest.first;
@@ -375,7 +375,7 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setCancelButtonTestIconColor, Tes
  */
 HWTEST_F(SearchModifierResourcesTest, DISABLED_setCancelButtonTestIconColorResource, TestSize.Level1)
 {
-    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
     attrs.selector = 0;
     for (auto colorTest : COLOR_RESOURCE_TEST_PLAN) {
         attrs.value0.icon.value.color = colorTest.first;
@@ -396,7 +396,7 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setCancelButtonTestIconColorResou
  */
 HWTEST_F(SearchModifierResourcesTest, DISABLED_setCancelButtonTestIconSrc, TestSize.Level1)
 {
-    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
     attrs.selector = 0;
     for (auto testSrc : RESOURCE_TEST_PLAN) {
         attrs.value0.icon.value.src = testSrc.first;
@@ -434,7 +434,7 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setSearchIconTestResources, TestS
     for (auto testLength : TEST_PLAN_OPT_LENGTH_PX) {
         for (auto ColorTest : COLOR_RESOURCE_TEST_PLAN) {
             for (auto testSrc : RESOURCE_TEST_PLAN) {
-                Type_SearchAttribute_searchIcon_Arg0 attrs = {
+                Ark_Union_IconOptions_SymbolGlyphModifier attrs = {
                     .selector = 0,
                     .value0 = {
                         .color = ColorTest.first,

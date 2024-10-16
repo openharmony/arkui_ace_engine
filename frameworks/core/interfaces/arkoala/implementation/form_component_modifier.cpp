@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,48 +22,99 @@ namespace FormComponentInterfaceModifier {
 void SetFormComponentOptionsImpl(Ark_NativePointer node,
                                  const Ark_FormInfo* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //FormComponentModelNG::SetSetFormComponentOptions(frameNode, convValue);
 }
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {
 void SizeImpl(Ark_NativePointer node,
-              const Type_FormComponentAttribute_size_Arg0* value)
+              const Ark_Literal_Number_width_height* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //FormComponentModelNG::SetSize(frameNode, convValue);
 }
 void ModuleNameImpl(Ark_NativePointer node,
                     const Ark_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<std::string>(*value);
+    //FormComponentModelNG::SetModuleName(frameNode, convValue);
 }
 void DimensionImpl(Ark_NativePointer node,
-                   enum Ark_FormDimension value)
+                   Ark_FormDimension value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //FormComponentModelNG::SetDimension(frameNode, convValue);
 }
 void AllowUpdateImpl(Ark_NativePointer node,
                      Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //FormComponentModelNG::SetAllowUpdate(frameNode, convValue);
 }
 void VisibilityImpl(Ark_NativePointer node,
-                    enum Ark_Visibility value)
+                    Ark_Visibility value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //FormComponentModelNG::SetVisibility(frameNode, convValue);
 }
 void OnAcquiredImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //FormComponentModelNG::SetOnAcquired(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 Ark_Function callback)
+                 Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //FormComponentModelNG::SetOnError(frameNode, convValue);
 }
 void OnRouterImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //FormComponentModelNG::SetOnRouter(frameNode, convValue);
 }
 void OnUninstallImpl(Ark_NativePointer node,
-                     Ark_Function callback)
+                     Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //FormComponentModelNG::SetOnUninstall(frameNode, convValue);
 }
 void OnLoadImpl(Ark_NativePointer node,
-                Ark_Function callback)
+                Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //FormComponentModelNG::SetOnLoad(frameNode, convValue);
 }
 } // FormComponentAttributeModifier
 const GENERATED_ArkUIFormComponentModifier* GetFormComponentModifier()

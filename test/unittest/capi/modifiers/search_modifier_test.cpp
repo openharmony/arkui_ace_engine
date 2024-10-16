@@ -210,10 +210,10 @@ typedef std::pair<Ark_CopyOptions, std::string> ArkCopyOptionsTest;
 typedef std::pair<Ark_Int32, Ark_Int32> ArkNumberIntTest;
 typedef std::pair<float, float> ArkNumberFloatTest;
 typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
-typedef std::pair<Type_SearchAttribute_searchIcon_Arg0, TripleCheckValues> SearchIconTest;
+typedef std::pair<Ark_Union_IconOptions_SymbolGlyphModifier, TripleCheckValues> SearchIconTest;
 typedef std::tuple<Ark_Boolean, bool> OneBoolStep;
-typedef std::pair<Opt_Type_SearchInterface_setSearchOptions_Arg0, TripleCheckValues> OptionsTest;
-typedef std::pair<Union_Number_String_Resource, std::string> OneUnionNumStrResStep;
+typedef std::pair<Opt_Type_SearchInterface_options, TripleCheckValues> OptionsTest;
+typedef std::pair<Ark_Union_Number_String_Resource, std::string> OneUnionNumStrResStep;
 typedef std::pair<Ark_TextDecorationType, std::string> DecorationTypeTest;
 typedef std::pair<Ark_TextDecorationStyle, std::string> DecorationStyleTest;
 typedef std::pair<Ark_SearchType, std::string> ArkSearchTypeTest;
@@ -356,43 +356,43 @@ const std::vector<TextDeleteDirection> DELETE_DIRECTION_TEST_PLAN = {
 };
 
 const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN = {
-    { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(123)), "123.00vp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-123)), "0.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp")), "5.60vp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp")), "0.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45px")), "45.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px")), "0.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(1.23f)), "1.23vp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-1.23f)), "0.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45fp")), "45.00fp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("10%")), "0.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp")), "45.00fp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-10%")), "0.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal")), "0.00fp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45.3fp")), "45.30fp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("")), "0.00fp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp")), "0.00vp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111")), "0.00fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(123)), "123.00vp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-123)), "0.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp")), "5.60vp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp")), "0.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45px")), "45.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px")), "0.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(1.23f)), "1.23vp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-1.23f)), "0.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45fp")), "45.00fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("10%")), "0.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp")), "45.00fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-10%")), "0.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal")), "0.00fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45.3fp")), "45.30fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("")), "0.00fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp")), "0.00vp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111")), "0.00fp" },
 };
 
 const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_WITH_PERCENT = {
-    { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(123)), "123.00vp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-123)), "0.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp")), "5.60vp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp")), "0.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45px")), "45.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px")), "0.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(1.23f)), "1.23vp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-1.23f)), "0.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45fp")), "45.00fp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("10%")), "10.00%" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp")), "45.00fp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-10%")), "0.00px" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal")), "0.00fp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45.3fp")), "45.30fp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("")), "0.00fp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp")), "0.00vp" },
-    { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111")), "0.00fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(123)), "123.00vp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-123)), "0.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp")), "5.60vp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp")), "0.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45px")), "45.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px")), "0.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(1.23f)), "1.23vp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-1.23f)), "0.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45fp")), "45.00fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("10%")), "10.00%" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp")), "45.00fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-10%")), "0.00px" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal")), "0.00fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45.3fp")), "45.30fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("")), "0.00fp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp")), "0.00vp" },
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111")), "0.00fp" },
 };
 
 const std::vector<DecorationTypeTest> TEXT_DECORATION_TYPE_TEST_PLAN = {
@@ -602,7 +602,7 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestDefault, TestSize.Level1)
  */
 HWTEST_F(SearchModifierTest, setCancelButtonTestIconSize, TestSize.Level1)
 {
-    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
     attrs.selector = 0;
     for (auto testSize : ICON_SIZE_TEST_PLAN) {
         attrs.value0.icon.value.size = testSize.first;
@@ -623,7 +623,7 @@ HWTEST_F(SearchModifierTest, setCancelButtonTestIconSize, TestSize.Level1)
  */
 HWTEST_F(SearchModifierTest, setCancelButtonTestStyle, TestSize.Level1)
 {
-    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
     attrs.selector = 0;
     for (auto testStyleButton : BUTTON_STYLE_TEST_PLAN) {
         attrs.value0.style = ArkValue<Opt_CancelButtonStyle>(testStyleButton.first);
@@ -679,7 +679,7 @@ HWTEST_F(SearchModifierTest, DISABLED_setSearchIconTest, TestSize.Level1)
     for (auto testLength : TEST_PLAN_OPT_LENGTH_PX) {
         for (auto ColorTest : COLOR_TEST_PLAN) {
             for (auto testSrc : RESOURCE_TEST_PLAN) {
-                Type_SearchAttribute_searchIcon_Arg0 attrs = {
+                Ark_Union_IconOptions_SymbolGlyphModifier attrs = {
                     .selector = 0,
                     .value0 = {
                         .color = ColorTest.first,
@@ -815,7 +815,7 @@ HWTEST_F(SearchModifierTest, setInputFilterTest, TestSize.Level1)
     ASSERT_NE(modifier_->setInputFilter, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Opt_Callback func = {};
+    Opt_Function func = {};
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
 

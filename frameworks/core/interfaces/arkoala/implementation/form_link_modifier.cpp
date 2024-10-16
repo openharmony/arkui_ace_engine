@@ -51,7 +51,7 @@ namespace FormLinkInterfaceModifier {
 void SetFormLinkOptionsImpl(Ark_NativePointer node,
                             const Ark_FormLinkOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     FormLinkOptions formLinkOptions = Converter::Convert<FormLinkOptions>(*options);

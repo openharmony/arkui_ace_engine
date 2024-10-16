@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,12 +22,21 @@ namespace FlexInterfaceModifier {
 void SetFlexOptionsImpl(Ark_NativePointer node,
                         const Opt_FlexOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //FlexModelNG::SetSetFlexOptions(frameNode, convValue);
 }
 } // FlexInterfaceModifier
 namespace FlexAttributeModifier {
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //FlexModelNG::SetPointLight(frameNode, convValue);
 }
 } // FlexAttributeModifier
 const GENERATED_ArkUIFlexModifier* GetFlexModifier()

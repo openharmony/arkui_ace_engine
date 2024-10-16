@@ -42,9 +42,9 @@ namespace GridItemInterfaceModifier {
 void SetGridItemOptionsImpl(Ark_NativePointer node,
                             const Opt_GridItemOptions* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     std::optional<GridItemStyle> style = Converter::OptConvert<GridItemStyle>(*value);
     if (style) {
         GridItemModelNG::SetGridItemStyle(frameNode, style.value());
@@ -55,60 +55,60 @@ namespace GridItemAttributeModifier {
 void RowStartImpl(Ark_NativePointer node,
                   const Ark_Number* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridItemModelNG::SetRowStart(frameNode, Converter::Convert<int32_t>(*value));
 }
 void RowEndImpl(Ark_NativePointer node,
                 const Ark_Number* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridItemModelNG::SetRowEnd(frameNode, Converter::Convert<int32_t>(*value));
 }
 void ColumnStartImpl(Ark_NativePointer node,
                      const Ark_Number* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridItemModelNG::SetColumnStart(frameNode, Converter::Convert<int32_t>(*value));
 }
 void ColumnEndImpl(Ark_NativePointer node,
                    const Ark_Number* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     GridItemModelNG::SetColumnEnd(frameNode, Converter::Convert<int32_t>(*value));
 }
 void ForceRebuildImpl(Ark_NativePointer node,
                       Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetForceRebuild(frameNode, Converter::Convert<bool>(value));
 }
 void SelectableImpl(Ark_NativePointer node,
                     Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetSelectable(frameNode, Converter::Convert<bool>(value));
 }
 void SelectedImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     GridItemModelNG::SetSelected(frameNode, Converter::Convert<bool>(value));
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onSelect = [frameNode](bool isSelected) {
         GetFullAPI()->getEventsAPI()->getGridItemEventsReceiver()->onSelect(frameNode->GetId(), isSelected);

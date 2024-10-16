@@ -13,66 +13,133 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageAnimatorInterfaceModifier {
 void SetImageAnimatorOptionsImpl(Ark_NativePointer node)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(undefined);
+    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
+    //ImageAnimatorModelNG::SetSetImageAnimatorOptions(frameNode, convValue);
 }
 } // ImageAnimatorInterfaceModifier
 namespace ImageAnimatorAttributeModifier {
 void ImagesImpl(Ark_NativePointer node,
                 const Array_ImageFrameInfo* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageAnimatorModelNG::SetImages(frameNode, convValue);
 }
 void StateImpl(Ark_NativePointer node,
-               enum Ark_AnimationStatus value)
+               Ark_AnimationStatus value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ImageAnimatorModelNG::SetState(frameNode, convValue);
 }
 void DurationImpl(Ark_NativePointer node,
                   const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageAnimatorModelNG::SetDuration(frameNode, convValue);
 }
 void ReverseImpl(Ark_NativePointer node,
                  Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //ImageAnimatorModelNG::SetReverse(frameNode, convValue);
 }
 void FixedSizeImpl(Ark_NativePointer node,
                    Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //ImageAnimatorModelNG::SetFixedSize(frameNode, convValue);
 }
 void PreDecodeImpl(Ark_NativePointer node,
                    const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageAnimatorModelNG::SetPreDecode(frameNode, convValue);
 }
 void FillModeImpl(Ark_NativePointer node,
-                  enum Ark_FillMode value)
+                  Ark_FillMode value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ImageAnimatorModelNG::SetFillMode(frameNode, convValue);
 }
 void IterationsImpl(Ark_NativePointer node,
                     const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageAnimatorModelNG::SetIterations(frameNode, convValue);
 }
 void OnStartImpl(Ark_NativePointer node,
-                 Ark_Function event)
+                 Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ImageAnimatorModelNG::SetOnStart(frameNode, convValue);
 }
 void OnPauseImpl(Ark_NativePointer node,
-                 Ark_Function event)
+                 Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ImageAnimatorModelNG::SetOnPause(frameNode, convValue);
 }
 void OnRepeatImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ImageAnimatorModelNG::SetOnRepeat(frameNode, convValue);
 }
 void OnCancelImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ImageAnimatorModelNG::SetOnCancel(frameNode, convValue);
 }
 void OnFinishImpl(Ark_NativePointer node,
-                  Ark_Function event)
+                  Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ImageAnimatorModelNG::SetOnFinish(frameNode, convValue);
 }
 } // ImageAnimatorAttributeModifier
 const GENERATED_ArkUIImageAnimatorModifier* GetImageAnimatorModifier()

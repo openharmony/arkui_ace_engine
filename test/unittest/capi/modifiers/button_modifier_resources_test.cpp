@@ -45,7 +45,7 @@ namespace {
     const auto ATTRIBUTE_LABEL_STYLE_FONT_NAME = "font";
     const auto ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_NAME("family");
 
-    using ButtonLabelResourceTest = std::tuple<ResourceStr, std::string>;
+    using ButtonLabelResourceTest = std::tuple<Ark_ResourceStr, std::string>;
 
     // invalid id
     const auto INVALID_ID_STRING = IntResourceId{-1, NodeModifier::ResourceType::STRING};
@@ -76,9 +76,9 @@ namespace {
     const auto FAMILY_BY_NUMBER = "second";
 
     const std::vector<ButtonLabelResourceTest> BUTTON_LABEL_RESOURCES_TEST_PLAN = {
-        { CreateResourceUnion<ResourceStr>(RES_NAME), RESOURCE_BY_STRING },
-        { CreateResourceUnion<ResourceStr>(RES_ID), RESOURCE_BY_NUMBER },
-        { CreateResourceUnion<ResourceStr>(INVALID_ID_STRING), "" },
+        { CreateResourceUnion<Ark_ResourceStr>(RES_NAME), RESOURCE_BY_STRING },
+        { CreateResourceUnion<Ark_ResourceStr>(RES_ID), RESOURCE_BY_NUMBER },
+        { CreateResourceUnion<Ark_ResourceStr>(INVALID_ID_STRING), "" },
     };
 } // namespace
 
@@ -121,7 +121,7 @@ HWTEST_F(ButtonModifierResourcesTest, SetButtonOptions2TestLabelResource, TestSi
     inputValueOptions.buttonStyle = Converter::ArkValue<Opt_ButtonStyleMode>(ARK_BUTTON_STYLE_MODE_NORMAL);
     inputValueOptions.controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_SMALL);
     inputValueOptions.role = Converter::ArkValue<Opt_ButtonRole>(ARK_BUTTON_ROLE_NORMAL);
-    ResourceStr label;
+    Ark_ResourceStr label;
     std::string expectValue;
     std::tie(label, expectValue) = BUTTON_LABEL_RESOURCES_TEST_PLAN.front();
     auto optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
@@ -212,11 +212,11 @@ HWTEST_F(ButtonModifierResourcesTest, setFontFamilyTestResources, TestSize.Level
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
 
-    using ResourceTest = std::tuple<Union_String_Resource, std::string>;
+    using ResourceTest = std::tuple<Ark_Union_String_Resource, std::string>;
     const std::vector<ResourceTest> testPlan = {
-        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_NAME)),
+        { Converter::ArkUnion<Ark_Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_NAME)),
             FAMILY_BY_STRING },
-        { Converter::ArkUnion<Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_ID)),
+        { Converter::ArkUnion<Ark_Union_String_Resource, Ark_Resource>(CreateResourceUnion(RES_FAMILY_ID)),
             FAMILY_BY_NUMBER },
     };
 

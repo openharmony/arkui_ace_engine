@@ -230,7 +230,7 @@ HWTEST_F(MenuItemModifierTest, setSelectIconBoolTest, TestSize.Level1)
     auto selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
     EXPECT_EQ(selectIcon, "false");
 
-    auto icon = Converter::ArkUnion<Union_Boolean_Ark_ResourceStr_CustomObject, Ark_Boolean>(true);
+    auto icon = Converter::ArkUnion<Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_Boolean>(true);
     modifier_->setSelectIcon(node_, &icon);
     selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
     EXPECT_EQ(selectIcon, "true");
@@ -249,7 +249,7 @@ HWTEST_F(MenuItemModifierTest, setSelectIconStringTest, TestSize.Level1)
     auto str = Converter::ArkValue<Ark_String>("path_to_select_icon");
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str);
 
-    auto icon = Converter::ArkUnion<Union_Boolean_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(resStr);
+    auto icon = Converter::ArkUnion<Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
     modifier_->setSelectIcon(node_, &icon);
     selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
     EXPECT_EQ(selectIcon, "path_to_select_icon");
@@ -268,7 +268,7 @@ HWTEST_F(MenuItemModifierTest, setSelectIconResourceTest, TestSize.Level1)
     const Ark_String resName = Converter::ArkValue<Ark_String>("ic_public_ok");
     auto resource = ArkRes(const_cast<Ark_String*>(&resName), -1, NodeModifier::ResourceType::STRING);
     Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(resource);
-    auto icon = Converter::ArkUnion<Union_Boolean_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(resStr);
+    auto icon = Converter::ArkUnion<Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier, Ark_ResourceStr>(resStr);
     modifier_->setSelectIcon(node_, &icon);
     selectIcon = GetAttrValue<std::string>(node_, "selectIcon");
     EXPECT_EQ(selectIcon, "path_to_select_icon");

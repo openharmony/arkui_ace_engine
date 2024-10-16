@@ -13,35 +13,61 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace StepperInterfaceModifier {
 void SetStepperOptionsImpl(Ark_NativePointer node,
-                           const Opt_Type_StepperInterface_setStepperOptions_Arg0* value)
+                           const Opt_Literal_Number_index* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //StepperModelNG::SetSetStepperOptions(frameNode, convValue);
 }
 } // StepperInterfaceModifier
 namespace StepperAttributeModifier {
 void OnFinishImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //StepperModelNG::SetOnFinish(frameNode, convValue);
 }
 void OnSkipImpl(Ark_NativePointer node,
-                Ark_Function callback)
+                Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //StepperModelNG::SetOnSkip(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //StepperModelNG::SetOnChange(frameNode, convValue);
 }
 void OnNextImpl(Ark_NativePointer node,
-                Ark_Function callback)
+                Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //StepperModelNG::SetOnNext(frameNode, convValue);
 }
 void OnPreviousImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //StepperModelNG::SetOnPrevious(frameNode, convValue);
 }
 } // StepperAttributeModifier
 const GENERATED_ArkUIStepperModifier* GetStepperModifier()

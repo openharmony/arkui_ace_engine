@@ -691,7 +691,7 @@ HWTEST_F(CommonMethodModifierTest, setMarginTestValidLengthValues, TestSize.Leve
 {
     std::string strResult;
     for (const auto &[arkMargin, expected]: LENGTH_TEST_PLAN) {
-        auto value = Converter::ArkUnion<Type_CommonMethod_margin_Arg0, Ark_Length>(arkMargin);
+        auto value = Converter::ArkUnion<Ark_Union_Margin_Length_LocalizedMargin, Ark_Length>(arkMargin);
         modifier_->setMargin(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
         EXPECT_EQ(strResult, expected);
@@ -711,7 +711,7 @@ HWTEST_F(CommonMethodModifierTest, setMarginTestValidLeftLengthValues, TestSize.
         inputValue.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Type_CommonMethod_margin_Arg0, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Ark_Union_Margin_Length_LocalizedMargin, Ark_Padding>(inputValue);
         modifier_->setMargin(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -738,7 +738,7 @@ HWTEST_F(CommonMethodModifierTest, setMarginTestValidTopLengthValues, TestSize.L
         inputValue.top = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(arkMargin));
         inputValue.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Type_CommonMethod_margin_Arg0, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Ark_Union_Margin_Length_LocalizedMargin, Ark_Padding>(inputValue);
         modifier_->setMargin(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -765,7 +765,7 @@ HWTEST_F(CommonMethodModifierTest, setMarginTestValidTopRightValues, TestSize.Le
         inputValue.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.right = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(arkMargin));
         inputValue.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Type_CommonMethod_margin_Arg0, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Ark_Union_Margin_Length_LocalizedMargin, Ark_Padding>(inputValue);
         modifier_->setMargin(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -792,7 +792,7 @@ HWTEST_F(CommonMethodModifierTest, setMarginTestValidBottomLengthValues, TestSiz
         inputValue.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.bottom = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(arkMargin));
-        auto value = Converter::ArkUnion<Type_CommonMethod_margin_Arg0, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Ark_Union_Margin_Length_LocalizedMargin, Ark_Padding>(inputValue);
         modifier_->setMargin(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_MARGIN_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -837,7 +837,7 @@ HWTEST_F(CommonMethodModifierTest, setPaddingTestValidLengthValues, TestSize.Lev
 {
     std::string strResult;
     for (const auto &[arkPadding, expected]: LENGTH_TEST_PLAN) {
-        auto value = Converter::ArkUnion<Type_CommonMethod_padding_Arg0, Ark_Length>(arkPadding);
+        auto value = Converter::ArkUnion<Ark_Union_Padding_Length_LocalizedPadding, Ark_Length>(arkPadding);
         modifier_->setPadding(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_PADDING_NAME);
         EXPECT_EQ(strResult, expected);
@@ -857,7 +857,7 @@ HWTEST_F(CommonMethodModifierTest, setPaddingTestValidLeftLengthValues, TestSize
         inputValue.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Type_CommonMethod_padding_Arg0, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Ark_Union_Padding_Length_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setPadding(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_PADDING_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -884,7 +884,7 @@ HWTEST_F(CommonMethodModifierTest, setPaddingTestValidTopLengthValues, TestSize.
         inputValue.top = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(arkPadding));
         inputValue.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Type_CommonMethod_padding_Arg0, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Ark_Union_Padding_Length_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setPadding(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_PADDING_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -911,7 +911,7 @@ HWTEST_F(CommonMethodModifierTest, setPaddingTestValidTopRightValues, TestSize.L
         inputValue.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.right = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(arkPadding));
         inputValue.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Type_CommonMethod_padding_Arg0, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Ark_Union_Padding_Length_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setPadding(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_PADDING_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -938,7 +938,7 @@ HWTEST_F(CommonMethodModifierTest, setPaddingTestValidBottomLengthValues, TestSi
         inputValue.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         inputValue.bottom = Converter::ArkValue<Opt_Length>(std::optional<Ark_Length>(arkPadding));
-        auto value = Converter::ArkUnion<Type_CommonMethod_padding_Arg0, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Ark_Union_Padding_Length_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setPadding(node_, &value);
         auto strResult = GetStringAttribute(node_, ATTRIBUTE_PADDING_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_LEFT_NAME);
@@ -989,7 +989,7 @@ HWTEST_F(CommonMethodModifierTest, setOffsetTestValidPositionXValues, TestSize.L
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
         position.x = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
         position.y = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Type_CommonMethod_offset_Arg0, Ark_Position>(position);
+        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Position>(position);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto xResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_X_NAME);
@@ -1011,7 +1011,7 @@ HWTEST_F(CommonMethodModifierTest, setOffsetTestValidPositionYValues, TestSize.L
     for (const auto &[arkLength, expected]: LENGTH_TEST_PLAN) {
         position.x = Converter::ArkValue<Opt_Length>(Ark_Empty());
         position.y = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
-        auto value = Converter::ArkUnion<Type_CommonMethod_offset_Arg0, Ark_Position>(position);
+        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Position>(position);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto xResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_X_NAME);
@@ -1035,7 +1035,7 @@ HWTEST_F(CommonMethodModifierTest, setOffsetTestValidEdgesLeftValues, TestSize.L
         edges.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Type_CommonMethod_offset_Arg0, Ark_Edges>(edges);
+        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
@@ -1063,7 +1063,7 @@ HWTEST_F(CommonMethodModifierTest, setOffsetTestValidEdgesTopValues, TestSize.Le
         edges.top = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
         edges.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Type_CommonMethod_offset_Arg0, Ark_Edges>(edges);
+        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
@@ -1091,7 +1091,7 @@ HWTEST_F(CommonMethodModifierTest, setOffsetTestValidEdgesRightValues, TestSize.
         edges.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.right = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
         edges.bottom = Converter::ArkValue<Opt_Length>(Ark_Empty());
-        auto value = Converter::ArkUnion<Type_CommonMethod_offset_Arg0, Ark_Edges>(edges);
+        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
@@ -1119,7 +1119,7 @@ HWTEST_F(CommonMethodModifierTest, setOffsetTestValidEdgesBottomValues, TestSize
         edges.top = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.right = Converter::ArkValue<Opt_Length>(Ark_Empty());
         edges.bottom = Converter::ArkValue<Opt_Length>(std::optional(arkLength));
-        auto value = Converter::ArkUnion<Type_CommonMethod_offset_Arg0, Ark_Edges>(edges);
+        auto value = Converter::ArkUnion<Ark_Union_Position_Edges_LocalizedEdges, Ark_Edges>(edges);
         modifier_->setOffset(node_, &value);
         strResult = GetStringAttribute(node_, ATTRIBUTE_OFFSET_NAME);
         auto leftResult = GetAttrValue<std::string>(strResult, ATTRIBUTE_OFFSET_LEFT_NAME);
@@ -1163,13 +1163,13 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientTestDefaultValues, TestSize.
 HWTEST_F(CommonMethodModifierTest, setRadialGradientTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_CommonMethod_radialGradient_Arg0 inputValue;
+    Ark_Type_CommonMethod_radialGradient_value inputValue;
 
     // center
     inputValue.center.value0 = Converter::ArkValue<Ark_Length>(2.0_vp);
     inputValue.center.value1 = Converter::ArkValue<Ark_Length>(3.0_vp);
     // radius
-    inputValue.radius = Converter::ArkUnion<Union_Number_String, Ark_String>("4vp");
+    inputValue.radius = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("4vp");
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(std::optional(true));
     // color stops
@@ -1178,7 +1178,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientTestValidValues, TestSize.Le
         { ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), ArkValue<Ark_Number>(0.25f) },
         { ArkUnion<Ark_ResourceColor, Ark_String>("#11223344"), ArkValue<Ark_Number>(0.5f) },
     };
-    Converter::ArkArrayHolder<Array_Tuple_Ark_ResourceColor_Number> colorStepsHolder(colorSteps);
+    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
 
     // check value
@@ -1202,19 +1202,19 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientTestValidValues, TestSize.Le
 HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_CommonMethod_radialGradient_Arg0 inputValue;
+    Ark_Type_CommonMethod_radialGradient_value inputValue;
 
-    typedef std::pair<Union_Number_String, std::string> OneTestStep;
+    typedef std::pair<Ark_Union_Number_String, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Union_Number_String, Ark_Number>(1), "1.00vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_Number>(0), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_Number>(2.45f), "2.45vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("5px"), "5.00px" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("22.35px"), "22.35px" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("7vp"), "7.00vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("1.65vp"), "1.65vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("65fp"), "65.00fp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("4.3fp"), "4.30fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1), "1.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(0), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(2.45f), "2.45vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("5px"), "5.00px" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("22.35px"), "22.35px" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("7vp"), "7.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("1.65vp"), "1.65vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("65fp"), "65.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("4.3fp"), "4.30fp" },
     };
 
     // center
@@ -1227,7 +1227,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestValidValues, TestS
         { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
         { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
     };
-    Converter::ArkArrayHolder<Array_Tuple_Ark_ResourceColor_Number> colorStepsHolder(colorSteps);
+    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
 
     // check value
@@ -1248,18 +1248,18 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestValidValues, TestS
 HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_CommonMethod_radialGradient_Arg0 inputValue;
+    Ark_Type_CommonMethod_radialGradient_value inputValue;
 
-    typedef std::pair<Union_Number_String, std::string> OneTestStep;
+    typedef std::pair<Ark_Union_Number_String, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Union_Number_String, Ark_Number>(-1), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_Number>(-2.45f), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("-5px"), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("-22.35px"), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("-7vp"), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("-1.65vp"), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("-65fp"), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("-4.3fp"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(-1), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(-2.45f), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-5px"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-22.35px"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-7vp"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-1.65vp"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-65fp"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-4.3fp"), "0.00vp" },
     };
 
     // center
@@ -1272,7 +1272,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestInvalidValues, Tes
         { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
         { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
     };
-    Converter::ArkArrayHolder<Array_Tuple_Ark_ResourceColor_Number> colorStepsHolder(colorSteps);
+    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
 
     // check value
@@ -1293,7 +1293,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRadiusTestInvalidValues, Tes
 HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_CommonMethod_radialGradient_Arg0 inputValue;
+    Ark_Type_CommonMethod_radialGradient_value inputValue;
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -1318,7 +1318,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, Test
     };
 
     // radius
-    inputValue.radius = Converter::ArkUnion<Union_Number_String, Ark_String>("4vp");
+    inputValue.radius = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("4vp");
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
@@ -1326,7 +1326,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, Test
         { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
         { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
     };
-    Converter::ArkArrayHolder<Array_Tuple_Ark_ResourceColor_Number> colorStepsHolder(colorSteps);
+    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
 
     // check value
@@ -1349,7 +1349,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, Test
 HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_CommonMethod_radialGradient_Arg0 inputValue;
+    Ark_Type_CommonMethod_radialGradient_value inputValue;
 
     typedef std::pair<Ark_Length, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
@@ -1374,7 +1374,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, Test
     };
 
     // radius
-    inputValue.radius = Converter::ArkUnion<Union_Number_String, Ark_String>("4vp");
+    inputValue.radius = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("4vp");
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     // color stops
@@ -1382,7 +1382,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, Test
         { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
         { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
     };
-    Converter::ArkArrayHolder<Array_Tuple_Ark_ResourceColor_Number> colorStepsHolder(colorSteps);
+    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
 
     // check value
@@ -1405,19 +1405,19 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, Test
 HWTEST_F(CommonMethodModifierTest, setRadialGradientRepeatingTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_CommonMethod_radialGradient_Arg0 inputValue;
+    Ark_Type_CommonMethod_radialGradient_value inputValue;
 
     // center
     inputValue.center.value0 = Converter::ArkValue<Ark_Length>(2.0_vp);
     inputValue.center.value1 = Converter::ArkValue<Ark_Length>(3.0_vp);
     // radius
-    inputValue.radius = Converter::ArkUnion<Union_Number_String, Ark_String>("4vp");
+    inputValue.radius = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("4vp");
     // color stops
     std::vector<std::pair<Ark_ResourceColor, Ark_Number>> colorSteps {
         { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#112233"), Converter::ArkValue<Ark_Number>(0.5f) },
         { Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#223344"), Converter::ArkValue<Ark_Number>(0.9f) }
     };
-    Converter::ArkArrayHolder<Array_Tuple_Ark_ResourceColor_Number> colorStepsHolder(colorSteps);
+    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
 
     // check undefined repeating
@@ -1450,7 +1450,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientRepeatingTestValidValues, Te
 HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_CommonMethod_radialGradient_Arg0 inputValue;
+    Ark_Type_CommonMethod_radialGradient_value inputValue;
     static Ark_String resName = ArkValue<Ark_String>("aa.bb.cc");
     static const std::string EXPECTED_RESOURCE_COLOR =
         Color::RED.ToString(); // Color::RED is result of ThemeConstants::GetColorXxxx stubs
@@ -1459,7 +1459,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValid
     inputValue.center.value0 = Converter::ArkValue<Ark_Length>(2.0_vp);
     inputValue.center.value1 = Converter::ArkValue<Ark_Length>(3.0_vp);
     // radius
-    inputValue.radius = Converter::ArkUnion<Union_Number_String, Ark_String>("4vp");
+    inputValue.radius = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("4vp");
     // repeating
     inputValue.repeating = Converter::ArkValue<Opt_Boolean>(std::optional(true));
     // color stops
@@ -1467,7 +1467,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValid
         { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName)), ArkValue<Ark_Number>(0.5f) },
         { ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, FAKE_RES_ID)), ArkValue<Ark_Number>(0.9f)  },
     };
-    Converter::ArkArrayHolder<Array_Tuple_Ark_ResourceColor_Number> colorStepsHolder(colorSteps);
+    Converter::ArkArrayHolder<Array_Tuple_ResourceColor_Number> colorStepsHolder(colorSteps);
     inputValue.colors = colorStepsHolder.ArkValue();
 
     // check value

@@ -57,8 +57,12 @@ SelectIconType Convert(const Ark_CustomObject& src)
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemInterfaceModifier {
 void SetMenuItemOptionsImpl(Ark_NativePointer node,
-                            const Opt_Type_MenuItemInterface_setMenuItemOptions_Arg0* value)
+                            const Opt_Union_MenuItemOptions_CustomBuilder* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //MenuItemModelNG::SetSetMenuItemOptions(frameNode, convValue);
     LOGE("MenuItemModifier::SetMenuItemOptionsImpl is not implemented, Ark_CustomObject is not supported!");
 }
 } // MenuItemInterfaceModifier
@@ -66,14 +70,14 @@ namespace MenuItemAttributeModifier {
 void SelectedImpl(Ark_NativePointer node,
                   Ark_Boolean value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     MenuItemModelNG::SetSelected(frameNode, Converter::Convert<bool>(value));
 }
 void SelectIconImpl(Ark_NativePointer node,
-                    const Type_MenuItemAttribute_selectIcon_Arg0* value)
+                    const Ark_Union_Boolean_ResourceStr_SymbolGlyphModifier* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto iconOpt = Converter::OptConvert<SelectIconType>(*value);
@@ -89,9 +93,9 @@ void SelectIconImpl(Ark_NativePointer node,
     }
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function callback)
+                  Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onChange = [frameNode](bool selected) {
         GetFullAPI()->getEventsAPI()->getMenuItemEventsReceiver()->onChange(frameNode->GetId(), selected);
@@ -101,7 +105,7 @@ void OnChangeImpl(Ark_NativePointer node,
 void ContentFontImpl(Ark_NativePointer node,
                      const Ark_Font* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto fontOpt = Converter::OptConvert<Font>(*value);
@@ -118,7 +122,7 @@ void ContentFontImpl(Ark_NativePointer node,
     }
 }
 void ContentFontColorImpl(Ark_NativePointer node,
-                          const ResourceColor* value)
+                          const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -128,7 +132,7 @@ void ContentFontColorImpl(Ark_NativePointer node,
 void LabelFontImpl(Ark_NativePointer node,
                    const Ark_Font* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto fontOpt = Converter::OptConvert<Font>(*value);
@@ -145,7 +149,7 @@ void LabelFontImpl(Ark_NativePointer node,
     }
 }
 void LabelFontColorImpl(Ark_NativePointer node,
-                        const ResourceColor* value)
+                        const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

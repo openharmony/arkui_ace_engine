@@ -36,8 +36,8 @@ using namespace OHOS::Ace::NG::Converter;
 
 namespace {
 using OneTestColorStep = std::pair<Ark_ResourceColor, std::string>;
-using OneUnionNumStrResStep = std::pair<Union_Number_String_Resource, std::string>;
-using OneUnionNumStrStep = std::pair<Union_Number_String, double>;
+using OneUnionNumStrResStep = std::pair<Ark_Union_Number_String_Resource, std::string>;
+using OneUnionNumStrStep = std::pair<Ark_Union_Number_String, double>;
 
 // Names
 constexpr auto ATTRIBUTE_WIDTH_NAME = "width";
@@ -97,14 +97,14 @@ public:
     }
 };
 
-Type_ShapeAttribute_viewPort_Arg0 BuildViewPort(int x, int y, int width, int height)
+Ark_Literal_Union_Number_String_x_y_width_height BuildViewPort(int x, int y, int width, int height)
 {
-    Literal_Opt_Union_Number_String_x_y_width_height viewPort;
+    Ark_Literal_Union_Number_String_x_y_width_height viewPort;
     viewPort.x = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(x);
     viewPort.y = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(y);
     viewPort.width = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(width);
     viewPort.height = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(height);
-    return Converter::ArkValue<Type_ShapeAttribute_viewPort_Arg0>(viewPort);
+    return viewPort;
 }
 
 /**
@@ -182,24 +182,24 @@ HWTEST_F(ShapeModifierTest, setFillTest, TestSize.Level1)
  */
 HWTEST_F(ShapeModifierTest, setStrokeDashOffset, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Union_Number_String, std::string>;
+    using OneTestStep = std::pair<Ark_Union_Number_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Union_Number_String, Ark_Number>(1), "1.00vp" },
-        { ArkUnion<Union_Number_String, Ark_Number>(0), "0.00px" },
-        { ArkUnion<Union_Number_String, Ark_Number>(2.45f), "2.45vp" },
-        { ArkUnion<Union_Number_String, Ark_Number>(-2.45f), "0.00px" },
-        { ArkUnion<Union_Number_String, Ark_String>("5px"), "5.00px" },
-        { ArkUnion<Union_Number_String, Ark_String>("22.35px"), "22.35px" },
-        { ArkUnion<Union_Number_String, Ark_String>("7vp"), "7.00vp" },
-        { ArkUnion<Union_Number_String, Ark_String>("1.65vp"), "1.65vp" },
-        { ArkUnion<Union_Number_String, Ark_String>("65fp"), "65.00fp" },
-        { ArkUnion<Union_Number_String, Ark_String>("4.3fp"), "4.30fp" },
-        { ArkUnion<Union_Number_String, Ark_String>("11lpx"), "11.00lpx" },
-        { ArkUnion<Union_Number_String, Ark_String>("0.5lpx"), "0.50lpx" },
-        { ArkUnion<Union_Number_String, Ark_String>("3"), "3.00fp" },
-        { ArkUnion<Union_Number_String, Ark_String>(""), "0.00px" },
-        { ArkUnion<Union_Number_String, Ark_String>("10.65"), "10.65fp" },
-        { ArkUnion<Union_Number_String, Ark_String>("23%"), "0.00px" },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(1), "1.00vp" },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(0), "0.00px" },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(2.45f), "2.45vp" },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(-2.45f), "0.00px" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("5px"), "5.00px" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("22.35px"), "22.35px" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("7vp"), "7.00vp" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("1.65vp"), "1.65vp" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("65fp"), "65.00fp" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("4.3fp"), "4.30fp" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("11lpx"), "11.00lpx" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("0.5lpx"), "0.50lpx" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("3"), "3.00fp" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>(""), "0.00px" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("10.65"), "10.65fp" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("23%"), "0.00px" },
     };
 
     std::unique_ptr<JsonValue> jsonValue;
@@ -338,24 +338,24 @@ HWTEST_F(ShapeModifierTest, setStrokeLineJoinTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(ShapeModifierTest, setStrokeMiterLimitTest, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Union_Number_String, std::string>;
+    using OneTestStep = std::pair<Ark_Union_Number_String, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Union_Number_String, Ark_Number>(1), "1.000000" },
-        { ArkUnion<Union_Number_String, Ark_Number>(0), "1.000000" },
-        { ArkUnion<Union_Number_String, Ark_Number>(2.45f), "2.450000" },
-        { ArkUnion<Union_Number_String, Ark_String>("5px"), "4.000000" },
-        { ArkUnion<Union_Number_String, Ark_String>("22.35px"), "4.000000" },
-        { ArkUnion<Union_Number_String, Ark_String>("7vp"), "4.000000" },
-        { ArkUnion<Union_Number_String, Ark_String>("1.65vp"), "4.000000" },
-        { ArkUnion<Union_Number_String, Ark_String>("65fp"), "4.000000" },
-        { ArkUnion<Union_Number_String, Ark_String>("4.3fp"), "4.000000" },
-        { ArkUnion<Union_Number_String, Ark_String>("11lpx"), "4.000000" },
-        { ArkUnion<Union_Number_String, Ark_String>("0.5lpx"), "4.000000" },
-        { ArkUnion<Union_Number_String, Ark_String>("3"), "3.000000" },
-        { ArkUnion<Union_Number_String, Ark_String>("-3"), "1.000000" },
-        { ArkUnion<Union_Number_String, Ark_String>(""), "4.000000" },
-        { ArkUnion<Union_Number_String, Ark_String>("10.65"), "10.650000" },
-        { ArkUnion<Union_Number_String, Ark_String>("23%"), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(1), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(0), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(2.45f), "2.450000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("5px"), "4.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("22.35px"), "4.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("7vp"), "4.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("1.65vp"), "4.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("65fp"), "4.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("4.3fp"), "4.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("11lpx"), "4.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("0.5lpx"), "4.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("3"), "3.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("-3"), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>(""), "4.000000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("10.65"), "10.650000" },
+        { ArkUnion<Ark_Union_Number_String, Ark_String>("23%"), "1.000000" },
     };
 
     std::unique_ptr<JsonValue> jsonValue;
@@ -378,20 +378,20 @@ HWTEST_F(ShapeModifierTest, setStrokeMiterLimitTest, TestSize.Level1)
 HWTEST_F(ShapeModifierTest, setStrokeOpacityTest, TestSize.Level1)
 {
     static const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN = {
-        { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(123)), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-123)), "0.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45px")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(0.23f)), "0.230000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-0.23f)), "0.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("10%")), "0.100000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(123)), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-123)), "0.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45px")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(0.23f)), "0.230000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-0.23f)), "0.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("10%")), "0.100000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111")), "1.000000" },
     };
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN) {
@@ -409,20 +409,20 @@ HWTEST_F(ShapeModifierTest, setStrokeOpacityTest, TestSize.Level1)
 HWTEST_F(ShapeModifierTest, setFillOpacityTest, TestSize.Level1)
 {
     static const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN = {
-        { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(123)), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-123)), "0.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45px")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(0.23f)), "0.230000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-0.23f)), "0.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("10%")), "0.100000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp")), "1.000000" },
-        { ArkUnion<Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(123)), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-123)), "0.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("5.6vp")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-5.6vp")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45px")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("-45px")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(0.23f)), "0.230000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(ArkValue<Ark_Number>(-0.23f)), "0.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("10%")), "0.100000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("45dp")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("undefVal")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111vp")), "1.000000" },
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(ArkValue<Ark_String>("qw111")), "1.000000" },
     };
 
     for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN) {
@@ -443,17 +443,17 @@ HWTEST_F(ShapeModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
     double result;
 
     static const std::vector<OneUnionNumStrStep> UNION_NUM_STR_RES_TEST_PLAN = {
-        { ArkUnion<Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(1.0f)), 1.0f },
-        { ArkUnion<Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(2.45f)), 2.45f },
-        { ArkUnion<Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(5.0_px)), 5.0f },
-        { ArkUnion<Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(22.35_px)), 22.35f },
-        { ArkUnion<Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(0.23_pct)), 0.0f },
-        { ArkUnion<Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(7.0_vp)), 7.0f },
-        { ArkUnion<Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(1.65_vp)), 1.65f },
-        { ArkUnion<Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(-0.1f)), 0.0f },
-        { ArkUnion<Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(65.0_fp)), 65.0f },
-        { ArkUnion<Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(4.3_fp)), 4.30f },
-        { ArkUnion<Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(-5.0_px)), 0.0f },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(1.0f)), 1.0f },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(2.45f)), 2.45f },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(5.0_px)), 5.0f },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(22.35_px)), 22.35f },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(0.23_pct)), 0.0f },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(7.0_vp)), 7.0f },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(1.65_vp)), 1.65f },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(-0.1f)), 0.0f },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(65.0_fp)), 65.0f },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(4.3_fp)), 4.30f },
+        { ArkUnion<Ark_Union_Number_String, Ark_Number>(ArkValue<Ark_Number>(-5.0_px)), 0.0f },
     };
 
     for (const auto &[value, expected]: UNION_NUM_STR_RES_TEST_PLAN) {

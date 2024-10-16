@@ -54,10 +54,10 @@ HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsStringTest, TestSize.
 
     auto headerStr = Converter::ArkValue<Ark_String>("Header");
     auto headerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(headerStr);
-    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_Ark_CustomBuilder, Ark_ResourceStr>(headerResStr);
+    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, Ark_ResourceStr>(headerResStr);
     auto footerStr = Converter::ArkValue<Ark_String>("Footer");
     auto footerResStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(footerStr);
-    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_Ark_CustomBuilder, Ark_ResourceStr>(footerResStr);
+    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, Ark_ResourceStr>(footerResStr);
     Ark_MenuItemGroupOptions options = {.header = header, .footer = footer};
     auto optionsOpt = Converter::ArkValue<Opt_MenuItemGroupOptions>(options);
     modifier_->setMenuItemGroupOptions(node_, &optionsOpt);
@@ -81,11 +81,11 @@ HWTEST_F(MenuItemGroupModifierTest, setMenuItemGroupOptionsResourceTest, TestSiz
 
     const auto RES_NAME_HEADER = NamedResourceId{"header", NodeModifier::ResourceType::STRING};
     Ark_ResourceStr headerResStr = CreateResourceUnion<Ark_ResourceStr>(RES_NAME_HEADER);
-    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_Ark_CustomBuilder, Ark_ResourceStr>(headerResStr);
+    auto header = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, Ark_ResourceStr>(headerResStr);
 
     const auto RES_NAME_FOOTER = NamedResourceId{"footer", NodeModifier::ResourceType::STRING};
     Ark_ResourceStr footerResStr = CreateResourceUnion<Ark_ResourceStr>(RES_NAME_FOOTER);
-    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_Ark_CustomBuilder, Ark_ResourceStr>(footerResStr);
+    auto footer = Converter::ArkUnion<Opt_Union_ResourceStr_CustomBuilder, Ark_ResourceStr>(footerResStr);
 
     Ark_MenuItemGroupOptions options = {.header = header, .footer = footer};
     auto optionsOpt = Converter::ArkValue<Opt_MenuItemGroupOptions>(options);

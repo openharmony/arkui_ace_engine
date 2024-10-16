@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,16 +22,30 @@ namespace RichTextInterfaceModifier {
 void SetRichTextOptionsImpl(Ark_NativePointer node,
                             const Ark_String* content)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(content);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<std::string>(*content);
+    //RichTextModelNG::SetSetRichTextOptions(frameNode, convValue);
 }
 } // RichTextInterfaceModifier
 namespace RichTextAttributeModifier {
 void OnStartImpl(Ark_NativePointer node,
-                 Ark_Function callback)
+                 Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //RichTextModelNG::SetOnStart(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //RichTextModelNG::SetOnComplete(frameNode, convValue);
 }
 } // RichTextAttributeModifier
 const GENERATED_ArkUIRichTextModifier* GetRichTextModifier()
