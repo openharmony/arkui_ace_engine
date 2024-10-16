@@ -458,7 +458,6 @@ void WindowScene::OnConnect()
         context->SyncGeometryProperties(windowRect);
 
         self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
-        self->appWindow_->ForceSyncGeometryNode();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "[WMSMain] Add app window finished, id: %{public}d, node id: %{public}d, "
