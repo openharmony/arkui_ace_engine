@@ -48,4 +48,9 @@ std::optional<NG::SizeF> NG::PathLayoutAlgorithm::MeasureContent(
 
 void AnimationUtils::AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve,
     const PropertyCallback& callback) {}
+
+bool SystemProperties::IsFormAnimationLimited()
+{
+    return true;
+}
 } // namespace OHOS::Ace

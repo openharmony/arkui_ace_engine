@@ -75,6 +75,8 @@ const auto ATTRIBUTE_CENTER_NAME = "center";
 const auto ATTRIBUTE_RADIUS_NAME = "radius";
 const auto ATTRIBUTE_COLORS_NAME = "colors";
 const auto ATTRIBUTE_REPEATING_NAME = "repeating";
+const auto ATTRIBUTE_BACKGROUND_IMAGE_NAME = "backgroundImage";
+const auto ATTRIBUTE_BACKGROUND_IMAGE_DEFAULT_VALUE = "NONE";
 const auto ATTRIBUTE_BACKGROUND_IMAGE_SIZE_NAME = "backgroundImageSize";
 const auto ATTRIBUTE_BACKGROUND_IMAGE_SIZE_DEFAULT_VALUE = "ImageSize.Auto";
 const auto ATTRIBUTE_BACKGROUND_IMAGE_SIZE_WIDTH_NAME = "width";
@@ -172,6 +174,7 @@ public:
         ASSERT_NE(render_, nullptr);
         MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
+        AddResource("bi_public_ok", "path_to_background_image");
     }
     void TearDown()
     {
@@ -1532,6 +1535,85 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientResourcesColorStopsTestValid
 }
 
 /*
+ * @tc.name: setBackgroundImageDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setBackgroundImageDefaultValues, TestSize.Level1)
+{
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_BACKGROUND_IMAGE_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setBackgroundImageValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setBackgroundImageValidValues, TestSize.Level1)
+{
+    Ark_String str = Converter::ArkValue<Ark_String>("path");
+    Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str);
+    auto src = Converter::ArkUnion<Union_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(resStr);
+    Opt_ImageRepeat repeat = Converter::ArkValue<Opt_ImageRepeat>(Ark_Empty());
+
+    modifier_->setBackgroundImage(node_, &src, &repeat);
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
+    EXPECT_EQ(strResult, "path, ImageRepeat.NoRepeat");
+
+    const Ark_String resName = Converter::ArkValue<Ark_String>("bi_public_ok");
+    auto resource = ArkRes(const_cast<Ark_String*>(&resName), -1, NodeModifier::ResourceType::STRING);
+    resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(resource);
+    src = Converter::ArkUnion<Union_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(resStr);
+
+    modifier_->setBackgroundImage(node_, &src, nullptr);
+    strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
+    EXPECT_EQ(strResult, "path_to_background_image, ImageRepeat.NoRepeat");
+}
+
+/*
+ * @tc.name: setBackgroundImageRepeatValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setBackgroundImageRepeatValidValues, TestSize.Level1)
+{
+    Ark_String str = Converter::ArkValue<Ark_String>("path");
+    Ark_ResourceStr resStr = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(str);
+    auto src = Converter::ArkUnion<Union_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(resStr);
+    Opt_ImageRepeat repeat = Converter::ArkValue<Opt_ImageRepeat>(
+        std::optional<Ark_ImageRepeat>(ARK_IMAGE_REPEAT_X));
+    modifier_->setBackgroundImage(node_, &src, &repeat);
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
+    EXPECT_EQ(strResult, "path, ImageRepeat.X");
+
+    repeat = Converter::ArkValue<Opt_ImageRepeat>(std::optional<Ark_ImageRepeat>(ARK_IMAGE_REPEAT_Y));
+    modifier_->setBackgroundImage(node_, &src, &repeat);
+    strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
+    EXPECT_EQ(strResult, "path, ImageRepeat.Y");
+
+    repeat = Converter::ArkValue<Opt_ImageRepeat>(std::optional<Ark_ImageRepeat>(ARK_IMAGE_REPEAT_XY));
+    modifier_->setBackgroundImage(node_, &src, &repeat);
+    strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
+    EXPECT_EQ(strResult, "path, ImageRepeat.XY");
+
+    repeat = Converter::ArkValue<Opt_ImageRepeat>(std::optional<Ark_ImageRepeat>(ARK_IMAGE_REPEAT_NO_REPEAT));
+    modifier_->setBackgroundImage(node_, &src, &repeat);
+    strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_IMAGE_NAME);
+    EXPECT_EQ(strResult, "path, ImageRepeat.NoRepeat");
+}
+
+/*
+ * @tc.name: DISABLED_setBackgroundImagePixelmapValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, DISABLED_setBackgroundImagePixelmapValues, TestSize.Level1)
+{
+    // pixelmap attribute is not supported yet
+}
+
+/*
  * @tc.name: setBackgroundImageSizeDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -2155,5 +2237,151 @@ HWTEST_F(CommonMethodModifierTest, setOnVisibleAreaChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent.size(), 6);
     EXPECT_EQ(checkEvent[3].currentRatio, 0.0f);
     EXPECT_EQ(checkEvent[5].currentRatio, 1.0f);
+}
+
+/*
+ * @tc.name: setAnimationDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setAnimationDefaultValues, TestSize.Level1)
+{
+    Ark_AnimateParam param;
+    param.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.delay = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.iterations = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.tempo = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.playMode = Converter::ArkValue<Opt_PlayMode>(Ark_Empty());
+    param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(Ark_Empty());
+    param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());
+    param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(Ark_Empty());
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    frameNode->MarkBuildDone();
+    modifier_->setAnimation(node_, &param);
+    AnimationOption option = NG::ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    EXPECT_EQ(option.GetDuration(), 1000);
+    EXPECT_EQ(option.GetDelay(), 0);
+    EXPECT_EQ(option.GetIteration(), 1);
+    EXPECT_EQ(option.GetTempo(), 1.0f);
+    EXPECT_EQ(option.GetAnimationDirection(), AnimationDirection::NORMAL);
+    EXPECT_EQ(option.GetFinishCallbackType(), FinishCallbackType::REMOVED);
+    EXPECT_EQ(option.GetCurve(), Curves::EASE_IN_OUT);
+    RefPtr<FrameRateRange> frr = option.GetFrameRateRange();
+    EXPECT_NE(frr, nullptr);
+    EXPECT_EQ(frr->min_, 0);
+    EXPECT_EQ(frr->max_, 0);
+    EXPECT_EQ(frr->preferred_, 0);
+    EXPECT_EQ(option.GetOnFinishEvent(), nullptr);
+}
+
+/*
+ * @tc.name: setCloseAnimationValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setCloseAnimationValidValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    frameNode->MarkBuildDone();
+    modifier_->setAnimation(node_, nullptr);
+    AnimationOption option = NG::ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    EXPECT_EQ(option.GetDuration(), 0);
+    EXPECT_EQ(option.GetDelay(), 0);
+    EXPECT_EQ(option.GetIteration(), 1);
+    EXPECT_EQ(option.GetTempo(), 1.0f);
+    EXPECT_EQ(option.GetAnimationDirection(), AnimationDirection::NORMAL);
+    EXPECT_EQ(option.GetFinishCallbackType(), FinishCallbackType::REMOVED);
+    EXPECT_EQ(option.GetCurve(), nullptr);
+    EXPECT_EQ(option.GetFrameRateRange(), nullptr);
+    EXPECT_EQ(option.GetOnFinishEvent(), nullptr);
+}
+
+/*
+ * @tc.name: setOpenAnimationValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setOpenAnimationValidValues, TestSize.Level1)
+{
+    Ark_AnimateParam param;
+    param.duration = Converter::ArkValue<Opt_Number>(std::optional<int32_t>(5));
+    param.delay = Converter::ArkValue<Opt_Number>(std::optional<int32_t>(3));
+    param.iterations = Converter::ArkValue<Opt_Number>(std::optional<int32_t>(8));
+    param.tempo = Converter::ArkValue<Opt_Number>(std::optional<float>(2.5f));
+    param.playMode = Converter::ArkValue<Opt_PlayMode>(std::optional<Ark_PlayMode>(ARK_PLAY_MODE_REVERSE));
+    param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(
+        std::optional<Ark_FinishCallbackType>(ARK_FINISH_CALLBACK_TYPE_LOGICALLY));
+    param.curve = Converter::ArkUnion<Opt_Union_Curve_String_ICurve, Ark_Curve>(ARK_CURVE_EASE);
+    Ark_ExpectedFrameRateRange efrr;
+    efrr.min = Converter::ArkValue<Ark_Number>(30);
+    efrr.max = Converter::ArkValue<Ark_Number>(120);
+    efrr.expected = Converter::ArkValue<Ark_Number>(60);
+    param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(
+        std::optional<Ark_ExpectedFrameRateRange>(efrr));
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    frameNode->MarkBuildDone();
+    modifier_->setAnimation(node_, &param);
+    AnimationOption option = NG::ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    EXPECT_EQ(option.GetDuration(), 5);
+    EXPECT_EQ(option.GetDelay(), 3);
+    EXPECT_EQ(option.GetIteration(), 8);
+    EXPECT_NEAR(option.GetTempo(), 2.5f, FLT_EPSILON);
+    EXPECT_EQ(option.GetAnimationDirection(), AnimationDirection::REVERSE);
+    EXPECT_EQ(option.GetFinishCallbackType(), FinishCallbackType::LOGICALLY);
+    EXPECT_EQ(option.GetCurve(), Curves::EASE);
+    RefPtr<FrameRateRange> frr = option.GetFrameRateRange();
+    EXPECT_NE(frr, nullptr);
+    EXPECT_EQ(frr->min_, 30);
+    EXPECT_EQ(frr->max_, 120);
+    EXPECT_EQ(frr->preferred_, 60);
+    EXPECT_EQ(option.GetOnFinishEvent(), nullptr);
+}
+
+/*
+ * @tc.name: setAnimationInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, setAnimationInvalidValues, TestSize.Level1)
+{
+    Ark_AnimateParam param;
+    param.duration = Converter::ArkValue<Opt_Number>(std::optional<int32_t>(5000));
+    param.delay = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.iterations = Converter::ArkValue<Opt_Number>(Ark_Empty());
+    param.tempo = Converter::ArkValue<Opt_Number>(std::optional<float>(0.0f));
+    param.playMode = Converter::ArkValue<Opt_PlayMode>(Ark_Empty());
+    param.finishCallbackType = Converter::ArkValue<Opt_FinishCallbackType>(Ark_Empty());
+    param.curve = Converter::ArkValue<Opt_Union_Curve_String_ICurve>(Ark_Empty());
+    param.expectedFrameRateRange = Converter::ArkValue<Opt_ExpectedFrameRateRange>(Ark_Empty());
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    frameNode->MarkBuildDone();
+    modifier_->setAnimation(node_, &param);
+    AnimationOption option = NG::ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
+    EXPECT_EQ(option.GetDuration(), 0);
+    EXPECT_EQ(option.GetDelay(), 0);
+    EXPECT_EQ(option.GetIteration(), 1);
+    EXPECT_EQ(option.GetTempo(), 0.0f);
+    EXPECT_EQ(option.GetAnimationDirection(), AnimationDirection::NORMAL);
+    EXPECT_EQ(option.GetFinishCallbackType(), FinishCallbackType::REMOVED);
+    EXPECT_EQ(option.GetCurve(), Curves::EASE_IN_OUT);
+    RefPtr<FrameRateRange> frr = option.GetFrameRateRange();
+    EXPECT_NE(frr, nullptr);
+    EXPECT_EQ(frr->min_, 0);
+    EXPECT_EQ(frr->max_, 0);
+    EXPECT_EQ(frr->preferred_, 0);
+    EXPECT_EQ(option.GetOnFinishEvent(), nullptr);
+}
+
+/*
+ * @tc.name: DISABLED_setAnimationOnFinishEventValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest, DISABLED_setAnimationOnFinishEventValues, TestSize.Level1)
+{
+    // OnFinishEvent does not supported yet
 }
 } // namespace OHOS::Ace::NG
