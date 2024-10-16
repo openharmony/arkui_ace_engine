@@ -21,17 +21,9 @@
 
 #include "core/components/badge/badge_theme.h"
 
-namespace OHOS::Ace::NG {
-typedef struct Position {
-        std::optional<Dimension> x;
-         std::optional<Dimension> y;
-    } Position;
-
-}
 namespace OHOS::Ace::NG::Converter {
 
 inline void AssignArkValue(Ark_FontWeight& dst, const FontWeight& src);
-inline void AssignArkValue(Ark_Position& dst, const Position& src);
 
 inline void AssignArkValue(Ark_BadgePosition& dst, const BadgePosition& src)
 {

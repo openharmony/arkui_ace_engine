@@ -43,25 +43,10 @@ template<>
 void AssignCast(std::optional<Position>& dst, const Ark_Position& src)
 {
     dst->isPositionXy = true;
-    
     dst->badgePositionX = Converter::OptConvert<Dimension>(src.x);
     dst->badgePositionY = Converter::OptConvert<Dimension>(src.y);
-
-    if(dst->badgePositionX.has_value()) {
-        LOGE("ARKOALA DatePickerInterface:: x: %{public}s => ", dst->badgePositionX.value().ToString().c_str());
-    }else{
-        LOGE("ARKOALA DatePickerInterface:: x: no value => ");
-    }
-
     Validator::ValidateNonNegative(dst->badgePositionX);
     Validator::ValidateNonNegative(dst->badgePositionY);
-
-    if(dst->badgePositionX.has_value()) {
-        LOGE("ARKOALA DatePickerInterface:: => x: %{public}s ", dst->badgePositionX.value().ToString().c_str());    
-    }else{
-        LOGE("ARKOALA DatePickerInterface:: => x: no value ");
-    }
-
 }
 
 template<>
