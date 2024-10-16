@@ -27,6 +27,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace  {
+    const auto ATTRIBUTE_MARK_NAME = "mark";
     const auto ATTRIBUTE_SELECT_NAME = "select";
     const auto ATTRIBUTE_SELECT_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
@@ -35,6 +36,17 @@ namespace  {
     const auto ATTRIBUTE_SHAPE_DEFAULT_VALUE = "0";
     const auto ATTRIBUTE_UNSELECTED_COLOR_NAME = "unselectedColor";
     const auto ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE = "#FF000000";
+    const auto ATTRIBUTE_MARK_STROKE_COLOR_NAME = "strokeColor";
+    const auto ATTRIBUTE_MARK_STROKE_COLOR_DEFAULT_VALUE = "#FF000000";
+    const auto ATTRIBUTE_MARK_STROKE_COLOR_TEST_VALUE = "#FF123456";
+    const auto ATTRIBUTE_MARK_SIZE_NAME = "size";
+    const auto ATTRIBUTE_MARK_SIZE_DEFAULT_VALUE = "0.00vp";
+    const auto ATTRIBUTE_MARK_SIZE_TEST_VALUE = "111.00px";
+    const auto ATTRIBUTE_MARK_STROKE_WIDTH_NAME = "strokeWidth";
+    const auto ATTRIBUTE_MARK_STROKE_WIDTH_DEFAULT_VALUE = "0.00px";
+    const auto ATTRIBUTE_MARK_STROKE_WIDTH_TEST_VALUE = "222.00px";    
+    static constexpr int SIZE1 = 111;
+    static constexpr int SIZE2 = 222;
 } // namespace
 
 class CheckboxModifierTest : public ModifierTestBase<GENERATED_ArkUICheckboxModifier,
@@ -309,5 +321,73 @@ HWTEST_F(CheckboxModifierTest, setShapeTestInvalidValues, TestSize.Level1)
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
 }
+
+/**
+ * @tc.name: setMarkTestDefaultValidValues
+ * @tc.desc: setMark test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setMarkTestDefaultValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> resultMark;
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+
+    jsonValue = GetJsonValue(node_);
+
+    resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
+    expectedStr = ATTRIBUTE_MARK_STROKE_COLOR_DEFAULT_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
+    expectedStr = ATTRIBUTE_MARK_SIZE_DEFAULT_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
+    expectedStr = ATTRIBUTE_MARK_STROKE_WIDTH_DEFAULT_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+}
+
+/**
+ * @tc.name: setMarkTestValidValues
+ * @tc.desc: setMark test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxModifierTest, setMarkTestValidValues, TestSize.Level1)
+{
+    Ark_MarkStyle style;
+    ResourceColor color = Converter::ArkUnion<ResourceColor, Ark_Number>(0xFF123456);
+    Ark_Length len1 = { .value = SIZE1 };
+    Ark_Length len2 = { .value = SIZE2 };
+    Opt_Length opt1 = { .tag = ARK_TAG_INT32, .value = len1 };
+    Opt_Length opt2 = { .tag = ARK_TAG_INT32, .value = len2 };
+    std::unique_ptr<JsonValue> resultMark;
+    std::unique_ptr<JsonValue> jsonValue;
+    std::string resultStr;
+    std::string expectedStr;
+
+    style.strokeColor.value = color;
+    style.size = opt1;
+    style.strokeWidth = opt2;
+    modifier_->setMark(node_, &style);
+
+    jsonValue = GetJsonValue(node_);
+
+    resultMark = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MARK_NAME);
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_COLOR_NAME);
+    expectedStr = ATTRIBUTE_MARK_STROKE_COLOR_TEST_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_SIZE_NAME);
+    expectedStr = ATTRIBUTE_MARK_SIZE_TEST_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+
+    resultStr = GetAttrValue<std::string>(resultMark, ATTRIBUTE_MARK_STROKE_WIDTH_NAME);
+    expectedStr = ATTRIBUTE_MARK_STROKE_WIDTH_TEST_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
+}
+
 
 } // namespace OHOS::Ace::NG
