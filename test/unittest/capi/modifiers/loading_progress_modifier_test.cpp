@@ -46,9 +46,9 @@ public:
 
         SetupTheme<ProgressTheme>();
 
-        for (auto&& res : Fixtures::resourceInitTable) {
-            AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
-            AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
+        for (const auto &[resId, resName, value] : Fixtures::resourceInitTable) {
+            AddResource(resId, value);
+            AddResource(resName, value);
         }
     }
 };
@@ -107,9 +107,8 @@ HWTEST_F(LoadingProgressModifierTest, setColorTestResource, TestSize.Level1)
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
     };
 
-    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
-            std::get<2>(value));
+    for (const auto &[input, value, expectedStr]: Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(value), expectedStr);
     }
 }
 
