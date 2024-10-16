@@ -85,8 +85,6 @@ Position  Convert(const Opt_Union_BadgePosition_Position& src)
         if (positionOptions != nullptr) {
             return Converter::Convert<Position>(*positionOptions);
         }
-    } else {
-        LOGE("ARKOALA BadgeModifier -> convert Opt_Union_BadgePosition_Position not implemented.");
     }
     return dst;
 }
