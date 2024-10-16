@@ -311,14 +311,15 @@ void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Se
     isNotifyOccupiedAreaChange_ = want.GetBoolParam(OCCUPIED_AREA_CHANGE_KEY, true);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
-    Rosen::SessionInfo extensionSessionInfo;
-    extensionSessionInfo.bundleName_ = want.GetElement().GetBundleName();
-    extensionSessionInfo.abilityName_ = want.GetElement().GetAbilityName();
-    extensionSessionInfo.callerToken_ = callerToken;
-    extensionSessionInfo.rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken;
-    extensionSessionInfo.want = wantPtr;
-    extensionSessionInfo.uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage);
-    extensionSessionInfo.isAsyncModalBinding_ = config.isAsyncModalBinding;
+    Rosen::SessionInfo extensionSessionInfo = {
+        .bundleName_ = want.GetElement().GetBundleName(),
+        .abilityName_ = want.GetElement().GetAbilityName(),
+        .callerToken_ = callerToken,
+        .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
+        .want = wantPtr,
+        .uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage),
+        .isAsyncModalBinding_ = config.isAsyncModalBinding,
+    };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     lifecycleListener_ = std::make_shared<SecurityUIExtensionLifecycleListener>(
@@ -639,10 +640,12 @@ bool SecuritySessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
         int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), .0);
         keyboardHeight = static_cast<int32_t>(std::max(keyboardHeight - spaceWindow, 0));
     }
-    info->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
+    sptr<Rosen::OccupiedAreaChangeInfo> newInfo = new Rosen::OccupiedAreaChangeInfo(
+        info->type_, info->rect_, info->safeHeight_, info->textFieldPositionY_, info->textFieldHeight_);
+    newInfo->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
     PLATFORM_LOGD("The occcupied area with 'keyboardHeight = %{public}d' is notified to the provider.",
         keyboardHeight);
-    session_->NotifyOccupiedAreaChangeInfo(info);
+    session_->NotifyOccupiedAreaChangeInfo(newInfo);
     return true;
 }
 
