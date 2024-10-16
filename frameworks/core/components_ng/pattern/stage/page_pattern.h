@@ -108,6 +108,18 @@ public:
         pageTransitionFunc_ = std::move(pageTransitionFunc);
     }
 
+    void RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>&& callback)
+    {
+        dumpListener_ = std::move(callback);
+    }
+
+    void FireDumpListener(const std::vector<std::string>& params)
+    {
+        CHECK_NULL_VOID(dumpListener_);
+        auto dumpListener = dumpListener_;
+        dumpListener(params);
+    }
+
     // find pageTransition effect according to transition type
     RefPtr<PageTransitionEffect> FindPageTransitionEffect(PageTransitionType type);
 
@@ -289,6 +301,7 @@ protected:
     PageVisibilityChangeCallback visibilityChangeCallback_;
     std::shared_ptr<std::function<void()>> pageTransitionFinish_;
     std::list<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
+    std::function<void(const std::vector<std::string>&)> dumpListener_;
 
     bool isOnShow_ = false;
     bool isFirstLoad_ = true;
