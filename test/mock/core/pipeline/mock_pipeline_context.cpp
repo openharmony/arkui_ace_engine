@@ -1072,5 +1072,10 @@ void SetBoolStatus(bool value)
 {
     g_setBoolStatus = value;
 }
+
+void NG::PipelineContext::DumpUIExt() const
+{
+}
+
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

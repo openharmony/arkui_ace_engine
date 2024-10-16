@@ -502,6 +502,7 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
     // the first param is the key word of dump.
     if (params[0] == "-memory") {
         MemoryMonitor::GetInstance().Dump();
+        DumpUIExt();
         return true;
     }
     if (params[0] == "-jscrash") {
@@ -519,6 +520,7 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
     ContainerScope scope(instanceId_);
     if (params[0] == "-frontend") {
         DumpFrontend();
+        DumpUIExt();
         return true;
     }
     return OnDumpInfo(params);

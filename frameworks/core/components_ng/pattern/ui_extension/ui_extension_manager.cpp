@@ -69,6 +69,13 @@ bool UIExtensionManager::OnBackPressed()
     return HandleUnfocusedModalUecBackPressed();
 }
 
+void UIExtensionManager::DumpUIExt()
+{
+    auto pattern = uiExtensionFocused_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->DumpOthers();
+}
+
 bool UIExtensionManager::HandleUnfocusedModalUecBackPressed()
 {
     std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);

@@ -338,6 +338,8 @@ public:
     // Called by AceContainer.
     bool Dump(const std::vector<std::string>& params) const;
 
+    virtual void DumpUIExt() const {}
+
     virtual bool IsLastPage()
     {
         return false;

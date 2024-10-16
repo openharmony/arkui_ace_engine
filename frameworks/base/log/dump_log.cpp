@@ -25,7 +25,7 @@ DumpLog::~DumpLog() = default;
 
 void DumpLog::Print(int32_t depth, const std::string& className, int32_t childSize)
 {
-    if (!ostream_->good()) {
+    if (!ostream_ || !ostream_->good()) {
         return;
     }
     std::string space = "  ";
@@ -67,7 +67,7 @@ void DumpLog::Print(int32_t depth, const std::string& content)
     for (int32_t i = 0; i < depth; ++i) {
         ostream_->write(space.c_str(), space.length());
     }
-    std::string data = content + "\n";
+    std::string data = content + separator_;
     ostream_->write(data.c_str(), data.length());
 }
 
