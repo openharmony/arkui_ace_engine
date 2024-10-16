@@ -221,6 +221,11 @@ public:
         return focusLineColor_;
     }
 
+    const Dimension& GetDefaultRoundPaddingSize() const
+    {
+        return defaultRoundPaddingSize_;
+    }
+
 protected:
     CheckableTheme() = default;
 
@@ -251,6 +256,7 @@ protected:
     Dimension shadowWidth_;
     Dimension hoverRadius_;
     Dimension defaultPaddingSize_;
+    Dimension defaultRoundPaddingSize_;
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
     Dimension focusBoardSize_;
@@ -336,17 +342,7 @@ public:
             SetCheckboxSize(themeConstants, theme);
         }
 
-        void SetCheckboxSize(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const
-        {
-            RefPtr<ThemeStyle> checkboxPattern = themeConstants->GetPatternByName(THEME_PATTERN_CHECKBOX);
-            // width/height/borderRadius not exist in theme
-            theme->width_ = checkboxPattern->GetAttr<Dimension>("width", 26.0_vp);
-            theme->height_ = theme->width_;
-            theme->borderRadius_ = checkboxPattern->GetAttr<Dimension>("hover_border_radius", 4.0_vp);
-            theme->hotZoneHorizontalPadding_ =
-                checkboxPattern->GetAttr<Dimension>("hotzone_padding_horizontal", 11.0_vp);
-            theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
-        }
+        void SetCheckboxSize(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
 
         void SetCheckboxFocus(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
     };

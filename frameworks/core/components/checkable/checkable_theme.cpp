@@ -32,6 +32,21 @@ void CheckboxTheme::Builder::SetCheckboxFocus(const RefPtr<ThemeConstants>& them
     theme->roundFocusBoardSize_ = checkboxPattern->GetAttr<Dimension>("round_size_focused_bg", 2.0_vp);
     theme->whiteBorderRadius_ = checkboxPattern->GetAttr<Dimension>("focus_white_border_radius", 0.0_vp);
     theme->focusLineColor_ = checkboxPattern->GetAttr<Color>("checkbox_focus_color_sys", Color(0xff007dff));
+    theme->defaultRoundPaddingSize_ =
+        checkboxPattern->GetAttr<Dimension>("checkbox_default_round_padding_size", 2.0_vp);
+}
+
+void CheckboxTheme::Builder::SetCheckboxSize(const RefPtr<ThemeConstants>& themeConstants,
+    const RefPtr<CheckboxTheme>& theme) const
+{
+    RefPtr<ThemeStyle> checkboxPattern = themeConstants->GetPatternByName(THEME_PATTERN_CHECKBOX);
+    // width/height/borderRadius not exist in theme
+    theme->width_ = checkboxPattern->GetAttr<Dimension>("width", 26.0_vp);
+    theme->height_ = theme->width_;
+    theme->borderRadius_ = checkboxPattern->GetAttr<Dimension>("hover_border_radius", 4.0_vp);
+    theme->hotZoneHorizontalPadding_ =
+        checkboxPattern->GetAttr<Dimension>("hotzone_padding_horizontal", 11.0_vp);
+    theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
 }
 
 void SwitchTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>& themeConstants,

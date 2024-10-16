@@ -101,6 +101,7 @@ void CheckBoxModifier::InitializeParam()
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
     defaultPaddingSize_ = checkBoxTheme->GetDefaultPaddingSize();
+    defaultRoundPaddingSize_ = checkBoxTheme->GetDefaultRoundPaddingSize();
     shadowWidth_ = checkBoxTheme->GetShadowWidth();
     userActiveColor_ = activeColor_;
     hoverDuration_ = checkBoxTheme->GetHoverDuration();
@@ -186,11 +187,13 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     float originY;
     float endX;
     float endY;
+    auto defaultPadding = (checkBoxShape_->Get() == static_cast<int32_t>(CheckBoxStyle::SQUARE_STYLE)) ?
+        defaultPaddingSize_.ConvertToPx() : defaultRoundPaddingSize_.ConvertToPx();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        originX = offset.GetX() - defaultPaddingSize_.ConvertToPx();
-        originY = offset.GetY() - defaultPaddingSize_.ConvertToPx();
-        endX = size.Width() + originX + CHECKBOX_DOUBLE_RATIO * defaultPaddingSize_.ConvertToPx();
-        endY = size.Height() + originY + CHECKBOX_DOUBLE_RATIO * defaultPaddingSize_.ConvertToPx();
+        originX = offset.GetX() - defaultPadding;
+        originY = offset.GetY() - defaultPadding;
+        endX = size.Width() + originX + CHECKBOX_DOUBLE_RATIO * defaultPadding;
+        endY = size.Height() + originY + CHECKBOX_DOUBLE_RATIO * defaultPadding;
     } else {
         originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
         originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
