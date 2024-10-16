@@ -927,7 +927,7 @@ HWTEST_F(GridOptionLayoutTestNg, ShowCache002, TestSize.Level1)
     model.SetLayoutOptions({});
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
-    model.SetCachedCount(1, true);
+    model.SetCachedCount(2, true);
     CreateDone(frameNode_);
     const auto& info = pattern_->gridLayoutInfo_;
 
@@ -949,6 +949,16 @@ HWTEST_F(GridOptionLayoutTestNg, ShowCache002, TestSize.Level1)
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 14)->IsActive());
     EXPECT_EQ(GetChildY(frameNode_, 2), -340.0f);
     EXPECT_EQ(GetChildY(frameNode_, 14), 920.0f);
+    EXPECT_EQ(info.gridMatrix_.size(), 9);
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info.startIndex_, 8);
+    EXPECT_EQ(info.endIndex_, 15);
+    EXPECT_EQ(GetChildY(frameNode_, 4), -430.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 5), 105.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), 830.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 19), 1040.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 19), 95.0f);
 }
 
 /**
