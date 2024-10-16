@@ -15,6 +15,10 @@
 
 #include "list_test_ng.h"
 
+#include "bridge/common/utils/utils.h"
+#include "core/components_ng/pattern/list/list_item_group_paint_method.h"
+#include "core/components_ng/pattern/list/list_position_controller.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {

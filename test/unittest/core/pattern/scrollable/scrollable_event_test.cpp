@@ -13,16 +13,12 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
-
 #define protected public
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
-#include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 

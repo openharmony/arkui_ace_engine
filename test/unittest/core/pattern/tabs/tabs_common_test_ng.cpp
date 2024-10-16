@@ -15,6 +15,10 @@
 
 #include "tabs_test_ng.h"
 
+#include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/pattern/tabs/tab_bar_item_accessibility_property.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace

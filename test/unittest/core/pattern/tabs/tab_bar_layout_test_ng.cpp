@@ -15,6 +15,10 @@
 
 #include "tabs_test_ng.h"
 
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
