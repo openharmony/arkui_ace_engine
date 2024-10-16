@@ -251,7 +251,7 @@ static const std::vector<TestVector> VALID_0_TEST2_PLAN = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions0TestValidValues, TestSize.Level1)
+HWTEST_F(BadgeModifierTest, setBadgeOptions0TestValidValues, TestSize.Level1)
 {
     Ark_BadgeParamWithNumber inputValueOptions;
     InitNumberOptions(inputValueOptions);
@@ -407,13 +407,13 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestEmptyValues, TestSize.Level1)
 }
 
 static const std::vector<TestVector> VALID_1_TEST1_PLAN = {
-    { ATTRIBUTE_POSITION_NAME, "BadgePosition.RightTop" },
+    { ATTRIBUTE_POSITION_NAME, "BadgePosition.Left" },
     { ATTRIBUTE_VALUE_NAME, "badge_value" },
 };
 
 static const std::vector<TestVector> VALID_1_TEST2_PLAN = {
-    { ATTRIBUTE_SET_STYLE_X_NAME, "16.00vp" },
-    { ATTRIBUTE_SET_STYLE_Y_NAME, "24.00vp" },
+    { ATTRIBUTE_SET_STYLE_X_NAME, "0.00vp" },
+    { ATTRIBUTE_SET_STYLE_Y_NAME, "0.00vp" },
     { ATTRIBUTE_SET_STYLE_COLOR_NAME, "#FF00FFFF" },
     { ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME, "28.00vp" },
     { ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME, "#FF0000FF" },
@@ -428,7 +428,7 @@ static const std::vector<TestVector> VALID_1_TEST2_PLAN = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions1TestValidValues, TestSize.Level1)
+HWTEST_F(BadgeModifierTest, setBadgeOptions1TestValidValues, TestSize.Level1)
 {
     Ark_BadgeParamWithString inputValueOptions;
     InitStringOptions(inputValueOptions);
@@ -437,7 +437,9 @@ HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions1TestValidValues, TestSize.L
     position.x = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(16.00f)));
     position.y = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(24.00f)));
 
-    inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
+    inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_BadgePosition>(
+        Converter::ArkValue<Ark_BadgePosition>(BadgePosition::LEFT)
+        );
     inputValueOptions.style = {
         .color = Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF00FFFF)),
         .fontSize = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(28.00f),
