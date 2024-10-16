@@ -1802,7 +1802,8 @@ void FormPattern::OnActionEvent(const std::string& action)
     }
 
     RemoveDelayResetManuallyClickFlagTask();
-    if (!isManuallyClick_) {
+    auto subContainer = pattern->GetSubContainer();
+    if (!isManuallyClick_ && subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
         EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
             cardInfo_.moduleName, cardInfo_.dimension);
         if ("router" == type) {
