@@ -136,7 +136,11 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_core_animation",
         "$ace_root/test/unittest:ace_core_extra",
       ]
-      cflags = [ "-fvisibility=hidden" ]
+      if (defined(cflags)) {
+        cflags += [ "-fvisibility=hidden" ]
+      } else {
+        cflags = [ "-fvisibility=hidden" ]
+      }
       configs = []
       configs = ace_unittest_config
 
