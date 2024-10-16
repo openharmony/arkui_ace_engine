@@ -14,7 +14,10 @@
  */
 
 #include "swiper_test_ng.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
 
 namespace OHOS::Ace::NG {
 

@@ -14,6 +14,10 @@
  */
 
 #include "swiper_test_ng.h"
+#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/core/render/mock_render_context.h"
+
+#include "core/components/swiper/swiper_component.h"
 
 namespace OHOS::Ace::NG {
 

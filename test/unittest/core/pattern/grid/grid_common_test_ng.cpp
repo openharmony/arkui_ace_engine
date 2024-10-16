@@ -16,9 +16,9 @@
 #include "grid_test_ng.h"
 #include "test/mock/core/render/mock_render_context.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {

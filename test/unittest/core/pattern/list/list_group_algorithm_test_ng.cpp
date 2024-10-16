@@ -15,15 +15,18 @@
 
 #include "list_test_ng.h"
 
+#include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+
 namespace OHOS::Ace::NG {
 namespace {} // namespace
 
 class ListGroupAlgTestNg : public ListTestNg {
 public:
-    void CreateGroupWithHeader(int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle,
-        int32_t itemNumber = GROUP_ITEM_NUMBER);
-    void CreateGroupWithFooter(int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle,
-        int32_t itemNumber = GROUP_ITEM_NUMBER);
+    void CreateGroupWithHeader(
+        int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
+    void CreateGroupWithFooter(
+        int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
 };
 
 void ListGroupAlgTestNg::CreateGroupWithHeader(
@@ -215,9 +218,9 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_Layout, TestSize.Level
     RefPtr<LayoutWrapperNode> layoutWrapper_ = AceType::DynamicCast<LayoutWrapperNode>(layoutWrapper);
     // Set LayoutProperty null , CHECK_NULL_VOID eq null
     layoutWrapper_->layoutProperty_ = nullptr;
-    const auto &layoutProperty = layoutWrapper->GetLayoutProperty();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     EXPECT_EQ(layoutProperty, nullptr);
-    
+
     /* *
      * @tc.steps: step4. build a object about ListItemGroupLayoutAlgorithm
      */
