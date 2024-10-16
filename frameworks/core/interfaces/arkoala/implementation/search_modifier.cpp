@@ -129,6 +129,7 @@ void SetSearchOptionsImpl(Ark_NativePointer node,
         SearchModelNG::SetTextValue(frameNode, searchOptions->value);
         SearchModelNG::SetPlaceholder(frameNode, searchOptions->placeholder);
         SearchModelNG::SetIcon(frameNode, searchOptions->icon);
+        LOGE("ARKOALA SearchAttributeModifier.setSearchOptions -> handling Ark_SearchController not implemented.");
     }
 }
 } // SearchInterfaceModifier
