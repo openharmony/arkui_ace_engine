@@ -1238,6 +1238,7 @@ void SearchPattern::HandleFocusEvent(bool forwardFocusMovement, bool backwardFoc
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
 
+    focusChoice_ = FocusChoice::SEARCH;
     if (forwardFocusMovement || backwardFocusMovement) { // Don't update focus if no factical focus movement
         focusChoice_ = backwardFocusMovement ? FocusChoice::SEARCH_BUTTON : FocusChoice::SEARCH;
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON && !isSearchButtonEnabled_) {
