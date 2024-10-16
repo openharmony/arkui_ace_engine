@@ -388,11 +388,15 @@ public:
     bool OnBackPressed() const;
     bool OnBackPressedForFullScreen() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
+    bool NotifyStartDragTask(bool isDelayed = false);
+    void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext = true, bool result = false);
     void UpdateJavaScriptOnDocumentStart();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
     bool IsImageDrag();
     Offset GetDragOffset() const;
+    void RemovePreviewMenuNode();
+    void UpdateImagePreviewParam();
     void SetLayoutMode(WebLayoutMode mode)
     {
         layoutMode_ = mode;
@@ -455,6 +459,28 @@ public:
     {
         return onOpenAppLinkCallback_;
     }
+
+    void SetNewDragStyle(bool isNewDragStyle)
+    {
+        isNewDragStyle_ = isNewDragStyle;
+    }
+
+    bool IsNewDragStyle() const
+    {
+        return isNewDragStyle_;
+    }
+
+    bool IsDragging() const
+    {
+        return isDragging_;
+    }
+
+    void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
+
+    std::shared_ptr<WebPreviewSelectionMenuParam> GetPreviewSelectionMenuParams(
+        const WebElementType& type, const ResponseType& responseType);
+
+    bool IsPreviewMenuNotNeedShowPreview();
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -610,6 +636,14 @@ private:
     VkState isVirtualKeyBoardShow_ { VkState::VK_NONE };
     bool isDragging_ = false;
     bool isW3cDragEvent_ = false;
+    bool isNewDragStyle_ = false;
+    std::map<std::pair<WebElementType, ResponseType>, std::shared_ptr<WebPreviewSelectionMenuParam>>
+        previewSelectionMenuMap_;
+    std::optional<int32_t> previewImageNodeId_ = std::nullopt;
+    bool needUpdateImagePreviewParam_ = false;
+    WebElementType curElementType_ = WebElementType::NONE;
+    ResponseType curResponseType_ = ResponseType::LONG_PRESS;
+    bool curContextMenuResult_ = false;
     bool isWindowShow_ = true;
     bool isActive_ = true;
     bool isEnhanceSurface_ = false;
