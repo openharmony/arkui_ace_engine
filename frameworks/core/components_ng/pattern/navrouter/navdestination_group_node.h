@@ -196,6 +196,7 @@ public:
     void ReleaseTextNodeList();
     void CollectTextNodeAsRenderGroup();
 
+    void CleanContent();
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;

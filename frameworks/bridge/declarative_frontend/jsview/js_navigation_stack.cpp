@@ -810,6 +810,8 @@ int32_t JSNavigationStack::CheckNavDestinationExists(const JSRef<JSObject>& navP
         auto isEntryVal = navPathInfo->GetProperty("isEntry");
         bool isEntry = isEntryVal->IsBoolean() ? isEntryVal->ToBoolean() : false;
         auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
+        pattern->SetName(name);
+        pattern->SetIndex(GetSize() - 1);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
     }
@@ -1157,9 +1159,9 @@ JSRef<JSObject> JSNavigationStack::CreatePathInfoWithNecessaryProperty(
     pathInfo->SetProperty<std::string>("name", jsPathInfo->GetName());
     pathInfo->SetProperty<int32_t>("index", context->GetIndex());
     pathInfo->SetProperty<std::string>("navDestinationId", std::to_string(context->GetNavDestinationId()));
-    pathInfo->SetProperty("param", jsPathInfo->GetParam());
-    pathInfo->SetProperty("onPop", jsPathInfo->GetOnPop());
-    pathInfo->SetProperty("isEntry", jsPathInfo->GetIsEntry());
+    pathInfo->SetProperty<bool>("isEntry", jsPathInfo->GetIsEntry());
+    pathInfo->SetPropertyObject("param", jsPathInfo->GetParam());
+    pathInfo->SetPropertyObject("onPop", jsPathInfo->GetOnPop());
     return pathInfo;
 }
 

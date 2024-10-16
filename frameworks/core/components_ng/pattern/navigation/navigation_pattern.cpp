@@ -297,7 +297,7 @@ void NavigationPattern::InitFoldState()
     CHECK_NULL_VOID(container);
     container->InitIsFoldable();
     if (container->IsFoldable()) {
-        currentfoldStatus_ = container->GetCurrentFoldStatus();
+        currentFoldStatus_ = container->GetCurrentFoldStatus();
     }
 }
 
@@ -335,8 +335,10 @@ bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto foldStatus = container->GetCurrentFoldStatus();
-    if (foldStatus != currentfoldStatus_) {
-        currentfoldStatus_ = foldStatus;
+    TAG_LOGI(AceLogTag::ACE_SHEET, "newFoldStatus: %{public}d, currentFoldStatus: %{public}d.",
+        static_cast<int32_t>(foldStatus), static_cast<int32_t>(currentFoldStatus_));
+    if (foldStatus != currentFoldStatus_) {
+        currentFoldStatus_ = foldStatus;
         return true;
     }
     return false;
@@ -1040,16 +1042,9 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
+            preTopNavDestination->CleanContent();
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
-            auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
-            auto shallowBuilder = preTopNavDestinationPattern->GetShallowBuilder();
-            if (shallowBuilder) {
-                shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-            }
-            if (preTopNavDestination->GetContentNode()) {
-                preTopNavDestination->GetContentNode()->Clean(false, true);
-            }
             parent->RemoveChild(preTopNavDestination, true);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         } else {
@@ -1057,6 +1052,13 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             preTopNavDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
             DealTransitionVisibility(preTopNavDestination, needVisible, false);
+            if (preTopNavDestination->NeedRemoveInPush()) {
+                preTopNavDestination->CleanContent();
+                auto parent = preTopNavDestination->GetParent();
+                CHECK_NULL_VOID(parent);
+                parent->RemoveChild(preTopNavDestination, true);
+                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            }
         }
         navigationNode->RemoveDialogDestination();
         navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
@@ -2245,8 +2247,11 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         CHECK_NULL_VOID(preDestinationPattern);
         auto navDestinationName = preDestinationPattern->GetName();
         fromPathInfo += ", navDesitinationName: " + navDestinationName;
-        if (isPopPage && !isAnimated) {
-            // only pop page without animation need to post afterLayoutTask to delay old top's onDisappear
+        if ((isPopPage || preDestination->NeedRemoveInPush()) && !isAnimated) {
+            /**
+             * when transition without animation, 'pop' and 'push with remove' need to post
+             * afterLayoutTask to delay old top's onDisappear. So set this flag to 'false'
+             */
             preDestination->SetIsAnimated(false);
         }
     } else {
