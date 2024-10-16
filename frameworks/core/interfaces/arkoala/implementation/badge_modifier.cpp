@@ -40,6 +40,78 @@ struct Style {
 namespace Converter {
 
 template<>
+Position Convert(const Ark_Position& src)
+{
+    Position dst;
+    dst.isPositionXy = true;
+    dst.badgePositionX = Converter::OptConvert<Dimension>(src.x);
+    dst.badgePositionY = Converter::OptConvert<Dimension>(src.y);
+    Validator::ValidateNonNegative(dst.badgePositionX);
+    Validator::ValidateNonNegative(dst.badgePositionY);
+    return dst;
+}
+
+template<>
+Position Convert(const Ark_BadgePosition& src)
+{
+    Position dst;
+    switch (src) {
+        case ARK_BADGE_POSITION_RIGHT_TOP:
+        case ARK_BADGE_POSITION_RIGHT:
+        case ARK_BADGE_POSITION_LEFT:
+            dst.isPositionXy = false;
+            dst.badgePosition = src;
+            break;
+        default: LOGE("Unexpected enum value in Ark_BadgePosition: %{public}d", src);
+    }
+    return dst;
+}
+
+template<>
+Position  Convert(const Opt_Union_BadgePosition_Position& src)
+{
+    Position dst;
+        switch (src.value.selector) {
+            case SELECTOR_ID_0: {
+                dst = Converter::Convert<Position>(src.value.value0);
+                break;
+            }
+            case SELECTOR_ID_1: {
+                dst = Converter::Convert<Position>(src.value.value1);
+                break;
+            }
+            default: {
+                LOGE("Unexpected src->selector: %{public}d\n", src.value.selector);
+            }
+        }
+        return dst;
+}
+
+template<>
+void AssignCast(std::optional<Position>& dst, const std::optional<Ark_Position>& src)
+{
+    dst->isPositionXy = true;
+    dst->badgePositionX = Converter::OptConvert<Dimension>(src->x);
+    dst->badgePositionY = Converter::OptConvert<Dimension>(src->y);
+    Validator::ValidateNonNegative(dst->badgePositionX);
+    Validator::ValidateNonNegative(dst->badgePositionY);
+}
+
+template<>
+void AssignCast(std::optional<Position>& dst, const std::optional<Ark_BadgePosition>& src)
+{
+    switch (src.value()) {
+        case ARK_BADGE_POSITION_RIGHT_TOP:
+        case ARK_BADGE_POSITION_RIGHT:
+        case ARK_BADGE_POSITION_LEFT:
+            dst->isPositionXy = false;
+            dst->badgePosition = src.value();
+            break;
+        default: LOGE("Unexpected enum value in Ark_BadgePosition: %{public}d", src.value());
+    }
+}
+
+template<>
 void AssignCast(std::optional<Position>& dst, const Ark_Position& src)
 {
     dst->isPositionXy = true;
@@ -87,13 +159,13 @@ template<typename T>
 BadgeParameters ConverterHelper(const T& src)
 {
     BadgeParameters dst;
-    auto position = Converter::OptConvert<Position>(src.position);
+    auto position = Converter::Convert<Position>(src.position);
     Style style = Converter::Convert<Style>(src.style);
 
-    dst.isPositionXy = position->isPositionXy;
-    dst.badgePositionX = position->badgePositionX;
-    dst.badgePositionY = position->badgePositionY;
-    dst.badgePosition = position->badgePosition;
+    dst.isPositionXy = position.isPositionXy;
+    dst.badgePositionX = position.badgePositionX;
+    dst.badgePositionY = position.badgePositionY;
+    dst.badgePosition = position.badgePosition;
 
     dst.badgeColor = style.badgeColor;
     dst.badgeTextColor = style.badgeTextColor;
