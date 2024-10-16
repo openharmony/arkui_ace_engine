@@ -276,10 +276,35 @@ void TabBarPattern::OnAttachToFrameNode()
         // always swipe with physical curve, ignore animationDuration
         pattern->SetSwiperCurve(TabBarPhysicalCurve);
 
-        CHECK_NULL_VOID(pattern && pattern->scrollableEvent_);
-        auto scrollable = pattern->scrollableEvent_->GetScrollable();
-        if (scrollable) {
-            scrollable->StopScrollable();
+        if (pattern->scrollableEvent_) {
+            auto scrollable = pattern->scrollableEvent_->GetScrollable();
+            if (scrollable) {
+                scrollable->StopScrollable();
+            }
+        }
+
+        pattern->StopTranslateAnimation();
+        pattern->ResetIndicatorAnimationState();
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+        CHECK_NULL_VOID(tabsNode);
+        auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+        CHECK_NULL_VOID(swiperNode);
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(swiperPattern);
+        auto currentIndex = swiperPattern->GetCurrentIndex();
+        auto totalCount = swiperPattern->TotalCount();
+        if (currentIndex >= totalCount || currentIndex < 0) {
+            currentIndex = 0;
+        }
+        auto layoutProperty = pattern->GetLayoutProperty<TabBarLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (layoutProperty->GetIndicatorValue(0) != currentIndex) {
+            pattern->UpdateSubTabBoard(currentIndex);
+            pattern->UpdateTextColorAndFontWeight(currentIndex);
+            pattern->UpdateIndicator(currentIndex);
+            pattern->SetChangeByClick(false);
         }
     });
     InitSurfaceChangedCallback();
