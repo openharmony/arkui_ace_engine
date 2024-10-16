@@ -45,12 +45,28 @@ struct SearchButtonOptions {
     std::optional<Color> color;
 };
 
+struct SearchOptions {
+    std::optional<std::string> value;
+    std::optional<std::string> placeholder;
+    std::optional<std::string> icon;
+};
+
 using UnionButtonOptions = std::variant<Ark_CancelButtonOptions, Ark_CancelButtonSymbolOptions>;
 using UnionStringResource = std::variant<Ark_String, Ark_Resource>;
 using UnionIconOptionsObject = std::variant<Ark_IconOptions, Ark_CustomObject>;
 } // namespace
 
 namespace Converter {
+template<>
+SearchOptions Convert(const Type_SearchInterface_setSearchOptions_Arg0& src)
+{
+    SearchOptions options;
+    options.value = Converter::OptConvert<std::string>(src.value);
+    options.placeholder= Converter::OptConvert<std::string>(src.placeholder);
+    options.icon = Converter::OptConvert<std::string>(src.icon);
+    return options;
+}
+
 template<typename T>
 void AssignTo(Ark_IconOptions& dst, const Opt_IconOptions& src)
 {
@@ -106,7 +122,15 @@ namespace SearchInterfaceModifier {
 void SetSearchOptionsImpl(Ark_NativePointer node,
                           const Opt_Type_SearchInterface_setSearchOptions_Arg0* options)
 {
-    LOGE("ARKOALA SearchAttributeModifier.SetSearchOptionsImpl -> Method is not implemented.");
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto searchOptions = options ? Converter::OptConvert<SearchOptions>(*options) : std::nullopt;
+    if (searchOptions) {
+        SearchModelNG::SetTextValue(frameNode, searchOptions->value);
+        SearchModelNG::SetPlaceholder(frameNode, searchOptions->placeholder);
+        SearchModelNG::SetIcon(frameNode, searchOptions->icon);
+        LOGE("ARKOALA SearchAttributeModifier.setSearchOptions -> handling Ark_SearchController not implemented.");
+    }
 }
 } // SearchInterfaceModifier
 namespace SearchAttributeModifier {

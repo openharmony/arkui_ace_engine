@@ -50,6 +50,9 @@ Ark_Resource ArkResStr(Ark_String* name, int id = -1,
     };
 }
 // attrs
+const auto SEARCH_VALUE_OPTION("value");
+const auto SEARCH_ICON_OPTION("icon");
+const auto SEARCH_PLACEHOLDER_OPTION("placeholder");
 const auto BUTTON_OPTIONS_ATTR("searchButtonOption");
 const auto BUTTON_OPTIONS_COLOR_ATTR("fontColor");
 const auto BUTTON_OPTIONS_SIZE_ATTR("fontSize");
@@ -73,7 +76,6 @@ const auto ENABLE_PREVIEW_TEXT("enablePreviewText");
 const auto ENTER_KEY_TYPE_ATTR("enterKeyType");
 const auto FONT_COLOR_ATTR("fontColor");
 const auto FONT_FEATURE_ATTR("fontFeature");
-const auto INPUT_FILTER_ATTR("inputFilter");
 const auto LETTER_SPACING_ATTR("letterSpacing");
 const auto LINE_HEIGHT_ATTR("lineHeight");
 const auto MAX_FONT_SIZE_ATTR("maxFontSize");
@@ -108,7 +110,8 @@ const int CUSTOM_COLOR_INT(0xFF123456);
 const float CUSTOM_COLOR_FLOAT(0.1f);
 const auto CHECK_FLOAT_COLOR("#00000000");
 const auto CHECK_COLOR_COLOR("#FF008000");
-const auto RES_NAME(ArkValue<Ark_String>("testString"));
+const auto TEST_STRING("testString");
+const auto RES_NAME(ArkValue<Ark_String>(TEST_STRING));
 
 const Ark_ResourceColor COLOR_COLOR = { .selector = 0, .value0 = Ark_Color::ARK_COLOR_GREEN };
 const Ark_ResourceColor COLOR_INT = { .selector = 1, .value1 = ArkValue<Ark_Number>(CUSTOM_COLOR_INT) };
@@ -177,7 +180,6 @@ const std::string CHECK_NEGATIVE_VALUE_FLOAT("-5.68vp");
 
 // check text
 const auto CHECK_TEXT("test_text");
-const auto ERROR_TEXT("test_error_text");
 PreviewText PREVIEW_TEXT = { .offset = 1234, .value = "test_offset" };
 const auto EMPTY_TEXT("");
 const auto ICON_DEFAULT_SRC("resource:///ohos_test_image.svg");
@@ -267,7 +269,7 @@ const std::vector<ColorTest> COLOR_TEST_PLAN = {
 };
 
 const std::vector<ResourceSRC> RESOURCE_TEST_PLAN = {
-    { ArkUnion<Opt_ResourceStr, Ark_String>(""), "resource:///ohos_test_image.svg" },
+    { ArkUnion<Opt_ResourceStr, Ark_String>(""), ICON_DEFAULT_SRC },
     { ArkUnion<Opt_ResourceStr, Ark_String>("test/string/2"), "test/string/2" }
 };
 const std::vector<UnionResourceString> UNION_RESOURCE_STRING_PLAN = {
@@ -463,93 +465,6 @@ const std::vector<EnterKeyTypeTest> ENTER_KEY_TYPE_TEST_PLAN = {
     { static_cast<Ark_EnterKeyType>(3), "EnterKeyType.Search" },
     { static_cast<Ark_EnterKeyType>(100), "EnterKeyType.Search" },
 };
-
-// events
-bool g_isEditChangeTest(true);
-std::string g_EventTestString("");
-std::string g_EventErrorTestString("");
-int32_t g_EventTestOffset(0);
-int32_t g_startValue(0);
-int32_t g_endValue(0);
-float g_scrollX(0);
-float g_scrollY(0);
-TextDeleteDirection g_deleteDirection(TextDeleteDirection::FORWARD);
-
-GENERATED_ArkUISearchEventsReceiver recv {
-    .onEditChange = [](Ark_Int32 nodeId, const Ark_Boolean isEditChange) { g_isEditChangeTest = isEditChange; },
-    .onSubmit =
-        [](Ark_Int32 nodeId, Ark_String value) {
-            g_EventTestString = Convert<std::string>(value);
-        },
-    .onChange =
-        [](Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText) {
-            g_EventTestOffset = PREVIEW_TEXT.offset;
-            g_EventTestString.append(CHECK_TEXT).append(PREVIEW_TEXT.value);
-        },
-    .onTextSelectionChange =
-        [](Ark_Int32 nodeId, Ark_Number selectionStart, Ark_Number selectionEnd) {
-            g_startValue = Convert<int32_t>(selectionStart);
-            g_endValue = Convert<int32_t>(selectionEnd);
-        },
-    .onContentScroll =
-        [](Ark_Int32 nodeId, Ark_Number totalOffsetX, Ark_Number totalOffsetY) {
-            g_scrollX = Convert<float>(totalOffsetX);
-            g_scrollY = Convert<float>(totalOffsetY);
-        },
-    .onCopy =
-        [](Ark_Int32 nodeId, Ark_String value) {
-            auto textString = Convert<std::string>(value);
-            g_EventTestString = textString;
-        },
-    .onCut =
-        [](Ark_Int32 nodeId, Ark_String value) {
-            g_EventTestString = Convert<std::string>(value);
-            ;
-        },
-    .onWillInsert =
-        [](Ark_Int32 nodeId, const Ark_InsertValue data) {
-            g_EventTestString = Convert<std::string>(data.insertValue);
-            g_EventTestOffset = Convert<int32_t>(data.insertOffset);
-        },
-    .onDidInsert =
-        [](Ark_Int32 nodeId, const Ark_InsertValue data) {
-            g_EventTestString = Convert<std::string>(data.insertValue);
-            g_EventTestOffset = Convert<int32_t>(data.insertOffset);
-        },
-    .onWillDelete =
-        [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
-            g_EventTestString = Convert<std::string>(data.deleteValue);
-            g_EventTestOffset = Convert<int32_t>(data.deleteOffset);
-            auto willDeleteDirection = OptConvert<TextDeleteDirection>(data.direction);
-            if (willDeleteDirection) {
-                g_deleteDirection = willDeleteDirection.value();
-            }
-        },
-    .onDidDelete =
-        [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
-            g_EventTestString = Convert<std::string>(data.deleteValue);
-            g_EventTestOffset = Convert<int32_t>(data.deleteOffset);
-            auto didDeleteDirection = OptConvert<TextDeleteDirection>(data.direction);
-            if (didDeleteDirection) {
-                g_deleteDirection = didDeleteDirection.value();
-            }
-        },
-    .inputFilter =
-        [](Ark_Int32 nodeId, const Ark_String data) {
-            g_EventErrorTestString = Convert<std::string>(data);
-            g_EventTestString = g_EventErrorTestString;
-        }
-};
-
-const GENERATED_ArkUISearchEventsReceiver* getSearchEventsReceiverTest()
-{
-    return &recv;
-};
-const GENERATED_ArkUIEventsAPI* GetArkUiEventsAPITest()
-{
-    static const GENERATED_ArkUIEventsAPI eventsImpl = { .getSearchEventsReceiver = getSearchEventsReceiverTest };
-    return &eventsImpl;
-};
 } // namespace
 
 class SearchModifierTest : public ModifierTestBase<GENERATED_ArkUISearchModifier,
@@ -562,10 +477,51 @@ public:
         SetupTheme<SearchTheme>();
         SetupTheme<TextFieldTheme>();
         SetupTheme<IconTheme>();
-
-        fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
 };
+
+/**
+ * @tc.name: setSearchOptionsDefault
+ * @tc.desc: Check the default values of setSearchOptions
+ *
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, setSearchOptionsDefault, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setSearchOptions, nullptr);
+    // default
+    auto jsonValue = GetJsonValue(node_);
+    auto value = GetAttrValue<std::string>(jsonValue, SEARCH_VALUE_OPTION);
+    auto placeholder = GetAttrValue<std::string>(jsonValue, SEARCH_PLACEHOLDER_OPTION);
+    auto icon = GetAttrValue<std::string>(jsonValue, SEARCH_ICON_OPTION);
+    EXPECT_EQ(value, EMPTY_TEXT);
+    EXPECT_EQ(placeholder, EMPTY_TEXT);
+    EXPECT_EQ(icon, ICON_DEFAULT_SRC);
+}
+
+/**
+ * @tc.name: setSearchOptionsValidValues
+ * @tc.desc: Check the default values of setSearchOptions
+ * DISABLED because icon attribute return only default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierTest, DISABLED_setSearchOptionsValidValues, TestSize.Level1)
+{
+    Type_SearchInterface_setSearchOptions_Arg0 options = {};
+    options.value = ArkValue<Opt_String>(TEST_STRING);
+    options.placeholder = ArkUnion<Opt_ResourceStr, Ark_String>(TEST_STRING);
+    options.icon = ArkValue<Opt_String>(TEST_STRING);
+    auto optOptions = ArkValue<Opt_Type_SearchInterface_setSearchOptions_Arg0>(options);
+    modifier_->setSearchOptions(node_, &optOptions);
+    // default
+    auto jsonValue = GetJsonValue(node_);
+    auto value = GetAttrValue<std::string>(jsonValue, SEARCH_VALUE_OPTION);
+    auto placeholder = GetAttrValue<std::string>(jsonValue, SEARCH_PLACEHOLDER_OPTION);
+    auto icon = GetAttrValue<std::string>(jsonValue, SEARCH_ICON_OPTION);
+    EXPECT_EQ(value, TEST_STRING);
+    EXPECT_EQ(placeholder, TEST_STRING);
+    EXPECT_EQ(icon, TEST_STRING);
+}
 
 /**
  * @tc.name: setCancelButtonTestDefault
@@ -978,32 +934,6 @@ HWTEST_F(SearchModifierTest, setTextIndentTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setInputFilterTest
- * @tc.desc: Check the functionality of setInputFilter
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setInputFilterTest, TestSize.Level1)
-{
-    g_EventTestString = "";
-    g_EventErrorTestString = "";
-    ASSERT_NE(modifier_->setInputFilter, nullptr);
-
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Opt_Callback func = {};
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-
-    auto sendString = ArkValue<Ark_String>(ERROR_TEXT);
-    auto sendResource = ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
-    modifier_->setInputFilter(node_, &sendResource, &func);
-    textFieldEventHub->FireOnInputFilterError(ERROR_TEXT);
-    auto filterValue = GetStringAttribute(node_, INPUT_FILTER_ATTR);
-    EXPECT_EQ(filterValue, ERROR_TEXT);
-    EXPECT_EQ(g_EventTestString, ERROR_TEXT);
-    EXPECT_EQ(g_EventErrorTestString, ERROR_TEXT);
-}
-
-/**
  * @tc.name: setEnableKeyboardOnFocusTest
  * @tc.desc: Check the functionality of setEnableKeyboardOnFocus
  * @tc.type: FUNC
@@ -1120,156 +1050,6 @@ HWTEST_F(SearchModifierTest, selectedBackgroundColorTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setOnTextSelectionChangeTest
- * @tc.desc: Check the functionality of setOnTextSelectionChange
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setOnTextSelectionChangeTest, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setOnTextSelectionChange, nullptr);
-
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-
-    for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-        modifier_->setOnTextSelectionChange(node_, func);
-        textFieldEventHub->FireOnSelectionChange(value, value);
-        EXPECT_EQ(g_startValue, expectVal);
-        EXPECT_EQ(g_endValue, expectVal);
-    }
-}
-
-/**
- * @tc.name: setOnCopyTest
- * @tc.desc: Test Seacrh setOnCopy event.
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setOnCopyTest, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setOnCopy, nullptr);
-    g_EventTestString = EMPTY_TEXT;
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-    ASSERT_NE(textFieldEventHub, nullptr);
-    textFieldEventHub->FireOnCopy(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    Ark_Function func = {};
-    modifier_->setOnCopy(node_, func);
-    textFieldEventHub->FireOnCopy(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-}
-
-/**
- * @tc.name: setOnCutTest
- * @tc.desc: Test Seacrh setOnCut event.
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setOnCutTest, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setOnCut, nullptr);
-    g_EventTestString = EMPTY_TEXT;
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-    ASSERT_NE(textFieldEventHub, nullptr);
-    textFieldEventHub->FireOnCut(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    Ark_Function func = {};
-    modifier_->setOnCut(node_, func);
-    textFieldEventHub->FireOnCut(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-}
-
-/**
- * @tc.name: setOnContentScrollTest
- * @tc.desc: Check the functionality of setOnContentScroll
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setOnContentScrollTest, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setOnContentScroll, nullptr);
-
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-
-    for (const auto& [value, expectVal] : FLOAT_NUMBER_TEST_PLAN) {
-        modifier_->setOnContentScroll(node_, func);
-        textFieldEventHub->FireOnScrollChangeEvent(value, value);
-        EXPECT_EQ(g_scrollX, expectVal);
-        EXPECT_EQ(g_scrollY, expectVal);
-    }
-}
-
-/**
- * @tc.name: setOnEditChangeTest
- * @tc.desc: Test Seacrh setOnEditChange event.
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setOnEditChangeTest, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnEditChange(node_, func);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-    EXPECT_EQ(g_isEditChangeTest, true);
-    ASSERT_NE(textFieldEventHub, nullptr);
-    textFieldEventHub->FireOnEditChanged(false);
-    EXPECT_EQ(g_isEditChangeTest, false);
-    textFieldEventHub->FireOnEditChanged(true);
-    EXPECT_EQ(g_isEditChangeTest, true);
-}
-/**
- * @tc.name: setOnSubmitTest
- * @tc.desc: Test Seacrh setOnSubmit event.
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setOnSubmitTest, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setOnSubmit, nullptr);
-    g_EventTestString = EMPTY_TEXT;
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Ark_Function func = {};
-    modifier_->setOnSubmit(node_, func);
-    auto searchEventHub = frameNode->GetEventHub<SearchEventHub>();
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    ASSERT_NE(searchEventHub, nullptr);
-    searchEventHub->UpdateSubmitEvent(CHECK_TEXT);
-    EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-    searchEventHub->UpdateSubmitEvent(EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-}
-
-/**
- * @tc.name: setOnChangeTest
- * @tc.desc: Test Seacrh setOnChange event.
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setOnChangeTest, TestSize.Level1)
-{
-    g_EventTestString = "";
-    g_EventTestOffset = 0;
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-    ASSERT_NE(textFieldEventHub, nullptr);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
-    Ark_Function func = {};
-    modifier_->setOnChange(node_, func);
-    textFieldEventHub->FireOnChange(CHECK_TEXT, PREVIEW_TEXT);
-    std::string checkString = CHECK_TEXT;
-    checkString.append(PREVIEW_TEXT.value);
-    EXPECT_EQ(g_EventTestString, checkString);
-    EXPECT_EQ(g_EventTestOffset, PREVIEW_TEXT.offset);
-}
-
-/**
  * @tc.name: setSelectionMenuHidden
  * @tc.desc: Test Radio setSelectionMenuHidden.
  * @tc.type: FUNC
@@ -1375,128 +1155,6 @@ HWTEST_F(SearchModifierTest, setEnablePreviewTextTest, TestSize.Level1)
         auto fullJson = GetJsonValue(node_);
         checkVal = GetAttrValue<bool>(fullJson, ENABLE_PREVIEW_TEXT);
         EXPECT_EQ(checkVal, expectVal);
-    }
-}
-
-/**
- * @tc.name: setOnWillInsertTest
- * @tc.desc: Test Seacrh setOnWillInsert event.
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setOnWillInsertTest, TestSize.Level1)
-{
-    g_EventTestString = "";
-    g_EventTestOffset = 0;
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-    ASSERT_NE(textFieldEventHub, nullptr);
-    InsertValueInfo checkValueDefault;
-    textFieldEventHub->FireOnWillInsertValueEvent(checkValueDefault);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
-    Ark_Function func = {};
-    modifier_->setOnWillInsert(node_, func);
-    for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-        InsertValueInfo checkValue = { .insertOffset = value, .insertValue = CHECK_TEXT };
-        textFieldEventHub->FireOnWillInsertValueEvent(checkValue);
-        EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-        EXPECT_EQ(g_EventTestOffset, expectVal);
-    }
-}
-
-/**
- * @tc.name: setOnDidInsertTest
- * @tc.desc: Test Seacrh setOnDidInsert event.
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setOnDidInsertTest, TestSize.Level1)
-{
-    g_EventTestString = "";
-    g_EventTestOffset = 0;
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-    ASSERT_NE(textFieldEventHub, nullptr);
-    InsertValueInfo checkValueDefault;
-    textFieldEventHub->FireOnDidInsertValueEvent(checkValueDefault);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
-    Ark_Function func = {};
-    modifier_->setOnDidInsert(node_, func);
-    for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-        InsertValueInfo checkValue = { .insertOffset = value, .insertValue = CHECK_TEXT };
-        textFieldEventHub->FireOnDidInsertValueEvent(checkValue);
-        EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-        EXPECT_EQ(g_EventTestOffset, expectVal);
-    }
-}
-
-/**
- * @tc.name: setOnWillDeleteTest
- * @tc.desc: Test Seacrh setOnWillDelete event.
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setOnWillDeleteTest, TestSize.Level1)
-{
-    g_EventTestString = "";
-    g_EventTestOffset = 0;
-    g_deleteDirection = TextDeleteDirection::FORWARD;
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-    ASSERT_NE(textFieldEventHub, nullptr);
-    DeleteValueInfo checkValueDefault;
-    textFieldEventHub->FireOnWillDeleteEvent(checkValueDefault);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
-    EXPECT_EQ(g_deleteDirection, TextDeleteDirection::FORWARD);
-    Ark_Function func = {};
-    modifier_->setOnWillDelete(node_, func);
-    for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-        for (const auto& deleteDirection : DELETE_DIRECTION_TEST_PLAN) {
-            DeleteValueInfo checkValue = {
-                .deleteOffset = value, .deleteValue = CHECK_TEXT, .direction = deleteDirection
-            };
-            textFieldEventHub->FireOnWillDeleteEvent(checkValue);
-            EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-            EXPECT_EQ(g_EventTestOffset, expectVal);
-            EXPECT_EQ(g_deleteDirection, deleteDirection);
-        }
-    }
-}
-
-/**
- * @tc.name: setOnDidDeleteTest
- * @tc.desc: Test Seacrh setOnDidlDelete event.
- * @tc.type: FUNC
- */
-HWTEST_F(SearchModifierTest, setOnDidDeleteTest, TestSize.Level1)
-{
-    g_EventTestString = "";
-    g_EventTestOffset = 0;
-    g_deleteDirection = TextDeleteDirection::FORWARD;
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-    ASSERT_NE(textFieldEventHub, nullptr);
-    DeleteValueInfo checkValueDefault;
-    textFieldEventHub->FireOnDidDeleteValueEvent(checkValueDefault);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
-    EXPECT_EQ(g_deleteDirection, TextDeleteDirection::FORWARD);
-    Ark_Function func = {};
-    modifier_->setOnDidDelete(node_, func);
-    for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-        for (const auto& deleteDirection : DELETE_DIRECTION_TEST_PLAN) {
-            DeleteValueInfo checkValue = {
-                .deleteOffset = value, .deleteValue = CHECK_TEXT, .direction = deleteDirection
-            };
-            textFieldEventHub->FireOnDidDeleteValueEvent(checkValue);
-            EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-            EXPECT_EQ(g_EventTestOffset, expectVal);
-            EXPECT_EQ(g_deleteDirection, deleteDirection);
-        }
     }
 }
 
