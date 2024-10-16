@@ -7697,8 +7697,6 @@ bool RichEditorPattern::AdjustIndexSkipLineSeparator(int32_t& currentPosition)
     auto index = currentPosition - 1;
     while (index > 0) {
         CHECK_NULL_BREAK(contentText[index] == L'\n');
-
-
         index--;
     }
     if (index != currentPosition - 1) {
