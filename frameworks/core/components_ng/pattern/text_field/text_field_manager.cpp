@@ -153,7 +153,8 @@ void TextFieldManagerNG::TriggerAvoidOnCaretChange()
         auto keyboardInset = safeAreaManager->GetKeyboardInset();
         Rect keyboardRect;
         keyboardRect.SetRect(0, 0, 0, keyboardInset.Length());
-        pipeline->OnVirtualKeyboardAreaChange(keyboardRect, 0, 0);
+        pipeline->OnVirtualKeyboardAreaChange(keyboardRect,
+            GetFocusedNodeCaretRect().Top(), GetHeight());
     }
 }
             

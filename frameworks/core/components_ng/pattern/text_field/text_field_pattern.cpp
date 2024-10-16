@@ -2406,7 +2406,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     DoProcessAutoFill();
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-    TriggerAvoidOnCaretChange();
+    TriggerAvoidWhenCaretGoesDown();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -2975,9 +2975,19 @@ void TextFieldPattern::OnModifyDone()
     if (autoFillContainerNode) {
         UpdateTextFieldInfo();
     }
+    TriggerAvoidWhenCaretGoesDown();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    isModifyDone_ = true;
+}
 
+void TextFieldPattern::TriggerAvoidWhenCaretGoesDown()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
-    if (context->UsingCaretAvoidMode() && textFieldManager) {
+    if (context->UsingCaretAvoidMode() && HasFocus() && textFieldManager) {
         context->AddAfterLayoutTask([weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
             auto textField = weak.Upgrade();
             CHECK_NULL_VOID(textField);
@@ -2990,8 +3000,6 @@ void TextFieldPattern::OnModifyDone()
             }
         });
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    isModifyDone_ = true;
 }
 
 void TextFieldPattern::ApplyNormalTheme()
@@ -3280,7 +3288,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
         magnifierController_->SetLocalOffset({ localOffset.GetX(), localOffset.GetY() });
     }
     StartGestureSelection(start, end, localOffset);
-    TriggerAvoidOnCaretChange();
+    TriggerAvoidWhenCaretGoesDown();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -5670,6 +5678,7 @@ void TextFieldPattern::SetSelectionFlag(
             ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
         }
     }
+    TriggerAvoidWhenCaretGoesDown();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -7882,9 +7891,9 @@ void TextFieldPattern::TriggerAvoidOnCaretChange()
     if (!safeAreaManager || NearEqual(safeAreaManager->GetKeyboardInset().Length(), 0)) {
         return;
     }
+    textFieldManager->TriggerAvoidOnCaretChange();
     auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
     SetLastCaretPos(caretPos);
-    textFieldManager->TriggerAvoidOnCaretChange();
 }
 
 void TextFieldPattern::CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction)
