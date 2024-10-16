@@ -229,6 +229,9 @@ void XComponentPattern::InitSurface()
     if (type_ == XComponentType::TEXTURE) {
         renderSurface_->RegisterBufferCallback();
     }
+    if (isTypedNode_) {
+        InitNativeWindow(initSize_.Width(), initSize_.Height());
+    }
     surfaceId_ = renderSurface_->GetUniqueId();
 
     UpdateTransformHint();
@@ -1619,7 +1622,6 @@ void XComponentPattern::OnSurfaceCreated()
         CHECK_NULL_VOID(nativeXComponent_);
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] native OnSurfaceCreated", GetId().c_str());
         ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] NativeSurfaceCreated", GetId().c_str());
-        InitNativeWindow(width, height);
         nativeXComponentImpl_->SetXComponentWidth(static_cast<int32_t>(width));
         nativeXComponentImpl_->SetXComponentHeight(static_cast<int32_t>(height));
         nativeXComponentImpl_->SetSurface(nativeWindow_);
