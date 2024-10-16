@@ -42,7 +42,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension TITLEBAR_VERTICAL_PADDING = 56.0_vp;
-constexpr int32_t TITLEBAR_OPACITY_ANIMATION_DURATION = 180;
+constexpr int32_t TITLEBAR_OPACITY_ANIMATION_DURATION = 120;
 const RefPtr<CubicCurve> TITLEBAR_OPACITY_ANIMATION_CURVE = AceType::MakeRefPtr<CubicCurve>(0.4, 0.0, 0.4, 1.0);
 }
 
@@ -242,6 +242,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<Navigat
         menuItemLayoutProperty->UpdatePadding(padding);
         MarginProperty margin;
         margin.right = CalcLength(theme->GetCompPadding());
+        margin.end = CalcLength(theme->GetCompPadding());
         menuItemLayoutProperty->UpdateMargin(margin);
     } else {
         menuItemLayoutProperty->UpdateUserDefinedIdealSize(
@@ -375,6 +376,9 @@ void NavigationTitleUtil::InitTitleBarButtonEvent(const RefPtr<FrameNode>& butto
     auto buttonEvent = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isButtonEnabled);
+    auto focusHub = buttonNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetEnabled(isButtonEnabled);
 }
 
 void NavigationTitleUtil::UpdateBarItemNodeWithItem(
@@ -558,8 +562,9 @@ RefPtr<FrameNode> NavigationTitleUtil::CreatePopupDialogNode(
             message = accessibilityProperty->GetAccessibilityText();
         }
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-            dialogNode =
-                AgingAdapationDialogUtil::ShowLongPressDialog(message, SymbolSourceInfo(theme->GetMoreSymbolId()));
+            auto symbolNode = AceType::DynamicCast<FrameNode>(barItemNode->GetFirstChild());
+            CHECK_NULL_RETURN(symbolNode, nullptr);
+            dialogNode = AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolNode);
             return dialogNode;
         }
         imageSourceInfo.SetResourceId(theme->GetMoreResourceId());
@@ -592,10 +597,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateSymbolDialog(
     CHECK_NULL_RETURN(barItemNode, nullptr);
     auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetIconNode());
     CHECK_NULL_RETURN(iconNode, nullptr);
-    auto symbolProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(symbolProperty, nullptr);
-    return AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue(),
-        symbolProperty->GetSymbolColorListValue({}), symbolProperty->GetFontWeightValue(FontWeight::NORMAL));
+    return AgingAdapationDialogUtil::ShowLongPressDialog(message, iconNode);
 }
 
 void NavigationTitleUtil::SetAccessibility(const RefPtr<FrameNode>& node, const std::string& message)

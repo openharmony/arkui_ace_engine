@@ -43,6 +43,8 @@ const std::string REQUEST_LONG_CONTENT = "requestLongContent";
 const std::string LONG_SENTENCE_BUFFER = "longSentenceBuffer";
 const std::string LONG_SELECT_START = "longSelectStart";
 const std::string LONG_SELECT_END = "longSelectEnd";
+const std::string KEY_PACKAGE_NAME = "keyPackageApp";
+const std::string START_COMPONONT_TYPE = "startComponentType";
 
 bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value)
 {
@@ -105,6 +107,8 @@ void AIWriteAdapter::SetWantParams(const AIWriteInfo& info, AAFwk::Want& want)
     want.SetParam(SELECT_CONTENT_LENGTH, info.selectLength);
     want.SetParam(FIRST_HANDLE_RECT, info.firstHandle);
     want.SetParam(SECOND_HANDLE_RECT, info.secondHandle);
+    want.SetParam(KEY_PACKAGE_NAME, AceApplicationInfo::GetInstance().GetPackageName());
+    want.SetParam(START_COMPONONT_TYPE, info.componentType);
 }
 
 void AIWriteAdapter::BindModalUIExtensionCallback(

@@ -158,7 +158,7 @@ public:
 
     // It is used to init mediaplayer on background.
     void UpdateMediaPlayerOnBg();
-    void ResetMediaPlayer();
+    void ResetMediaPlayer(bool isResetByUser = false);
 
     void EnableDrag();
     void SetIsStop(bool isStop)
@@ -203,8 +203,11 @@ public:
     {
         mediaPlayer_.Reset();
         renderSurface_.Reset();
+        RemoveMediaPlayerSurfaceNode();
         renderContextForMediaPlayer_.Reset();
     }
+
+    void RemoveMediaPlayerSurfaceNode();
 
     void OnFullScreenChange(bool isFullScreen);
 
@@ -262,6 +265,26 @@ public:
         return isPrepared_;
     }
 
+    bool GetIsSeekingWhenNotPrepared() const
+    {
+        return isSeekingWhenNotPrepared_;
+    }
+    uint32_t GetSeekingPosWhenNotPrepared() const
+    {
+        return seekingPosWhenNotPrepared_;
+    }
+    SeekMode GetSeekingModeWhenNotPrepared() const
+    {
+        return seekingModeWhenNotPrepared_;
+    }
+    void UpdateVisibility(bool isVisible)
+    {
+        isVisible_ = isVisible;
+    }
+    VideoSourceInfo GetVideoSource()
+    {
+        return videoSrcInfo_;
+    }
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif
@@ -331,7 +354,7 @@ private:
     void PrintPlayerStatus(PlaybackStatus status);
 
     void UpdateFsState();
-    void checkNeedAutoPlay();
+    void CheckNeedPlay();
 
     // Fire error manually, eg. src is not existed. It must run on ui.
     void FireError();
@@ -363,6 +386,17 @@ private:
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void UpdateOverlayVisibility(VisibleType type);
 
+    void UpdateControlBar(uint32_t duration, bool isChangePlayBtn = false);
+    void SetSurfaceForMediaPlayer();
+    void StartPlay();
+    void SeekTo(float currentPos, OHOS::Ace::SeekMode seekMode);
+    bool IsVideoSourceChanged();
+    void RecordSeekingInfoBeforePlaying(float currentPos, OHOS::Ace::SeekMode seekMode, bool sliderChange = false);
+    void RegisterVisibleRatioCallback();
+    void ReleaseMediaPlayer();
+    bool ShouldPrepareMediaPlayer();
+    void UpdatePlayingFlags();
+    void CleanPlayingFlags();
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
 
@@ -405,6 +439,13 @@ private:
     Rect contentRect_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
+    bool isSeekingWhenNotPrepared_ = false;
+    uint32_t seekingPosWhenNotPrepared_ = 0;
+    SeekMode seekingModeWhenNotPrepared_;
+    bool isSetMediaSurfaceDone_ = false;
+    bool isStartByUser_ = false;
+    bool isVisible_ = false;
+    uint32_t playingFlagsAfterPrepared_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
 } // namespace OHOS::Ace::NG

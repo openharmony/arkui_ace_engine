@@ -666,7 +666,9 @@ void SetColorFilterObject(const EcmaVM* vm, const Local<JSValueRef>& jsObjArg, A
     if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
         GetArkUINodeModifiers()->getImageModifier()->setColorFilter(
             nativeNode, &(*colorFilter->GetColorFilterMatrix().begin()), COLOR_FILTER_MATRIX_SIZE);
-        return;
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            return;
+        }
     }
     GetArkUINodeModifiers()->getImageModifier()->setColorFilter(
         nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);

@@ -386,7 +386,7 @@ std::string SwiperHelper::GetDotIndicatorStyle(const std::shared_ptr<SwiperParam
     jsonValue->Put("bottom", params->dimBottom.value_or(0.0_vp).ToString().c_str());
     jsonValue->Put("itemWidth", params->itemWidth.value_or(6.0_vp).ToString().c_str());
     jsonValue->Put("itemHeight", params->itemHeight.value_or(6.0_vp).ToString().c_str());
-    jsonValue->Put("selectedItemWidth", params->selectedItemWidth.value_or(6.0_vp).ToString().c_str());
+    jsonValue->Put("selectedItemWidth", params->selectedItemWidth.value_or(12.0_vp).ToString().c_str());
     jsonValue->Put("selectedItemHeight", params->selectedItemHeight.value_or(6.0_vp).ToString().c_str());
     jsonValue->Put(
         "selectedColor", params->selectedColorVal.value_or(Color::FromString("#ff007dff")).ColorToString().c_str());

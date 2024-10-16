@@ -28,7 +28,7 @@ constexpr int NUM_0 = 1;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
-constexpr int NUM_8 = 8;
+constexpr int NUM_12 = 12;
 constexpr int DEFAULT_LENGTH = 4;
 constexpr int RESIZEABLE_VEC_LENGTH = 12;
 constexpr CopyOptions DEFAULT_IMAGE_COPYOPTION = CopyOptions::None;
@@ -599,7 +599,7 @@ void SetImageBorderWithValues(ArkUINodeHandle node, const ArkUI_Float32* values,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if ((values == nullptr) || (valuesSize != NUM_8)) {
+    if ((values == nullptr) || (valuesSize != NUM_12)) {
         return;
     }
 

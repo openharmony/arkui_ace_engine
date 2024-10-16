@@ -41,7 +41,6 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string CHILD_NODE = "ChildNode";
-constexpr int32_t DEFAULT_INSTANCE_ID = 1000000;
 } // namespace
 
 class NodeContainerTestNg : public testing::Test {
@@ -56,9 +55,6 @@ protected:
 void NodeContainerTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
-    auto context = MockPipelineContext::GetCurrent();
-    EXPECT_NE(context, nullptr);
-    context->instanceId_ = DEFAULT_INSTANCE_ID;
 }
 
 void NodeContainerTestNg::TearDownTestSuite()
@@ -109,10 +105,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerRemakeNode001, TestSize.Level1)
      * @tc.steps: step2.Fire RemakeNode return with a normal node.
      * @tc.expected: process success without crash, and does not change the child of NodeContainer.
      */
-    pattern->SetMakeFunction([childNode](int32_t instanceId) -> RefPtr<UINode> {
-        EXPECT_EQ(instanceId, DEFAULT_INSTANCE_ID);
-        return childNode;
-    });
+    pattern->SetMakeFunction([childNode]() -> RefPtr<UINode> { return childNode; });
     pattern->RemakeNode();
     ASSERT_EQ(nodeContainerNode->GetChildAtIndex(0), nullptr);
 
@@ -139,10 +132,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerRemakeNode001, TestSize.Level1)
     auto childNode_one = FrameNode::CreateFrameNode(CHILD_NODE, 1, AceType::MakeRefPtr<Pattern>());
     childNode_one->SetIsRootBuilderNode(false);
     childNode_one->SetIsArkTsFrameNode(true);
-    pattern->SetMakeFunction([childNode_one](int32_t instanceId) -> RefPtr<UINode> {
-        EXPECT_EQ(instanceId, DEFAULT_INSTANCE_ID);
-        return childNode_one;
-    });
+    pattern->SetMakeFunction([childNode_one]() -> RefPtr<UINode> { return childNode_one; });
     pattern->RemakeNode();
     ASSERT_EQ(nodeContainerNode->GetChildAtIndex(0)->GetId(), childNode_one->GetId());
 
@@ -153,44 +143,21 @@ HWTEST_F(NodeContainerTestNg, NodeContainerRemakeNode001, TestSize.Level1)
     auto childNode_two = FrameNode::CreateFrameNode(V2::CUSTOM_FRAME_NODE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     childNode_two->SetIsRootBuilderNode(false);
     childNode_two->SetIsArkTsFrameNode(true);
-    pattern->SetMakeFunction([childNode_two](int32_t instanceId) -> RefPtr<UINode> {
-        EXPECT_EQ(instanceId, DEFAULT_INSTANCE_ID);
-        return childNode_two;
-    });
+    pattern->SetMakeFunction([childNode_two]() -> RefPtr<UINode> { return childNode_two; });
     pattern->RemakeNode();
     ASSERT_EQ(nodeContainerNode->GetChildAtIndex(0)->GetId(), childNode_two->GetId());
-}
-
-/**
- * @tc.name: NodeContainerRemakeNode002
- * @tc.desc: Test the RemakeNode function of NodeContainer.
- * @tc.type: FUNC
- */
-HWTEST_F(NodeContainerTestNg, NodeContainerRemakeNode002, TestSize.Level1)
-{
-    RefPtr<FrameNode> nodeContainerNode = CreateNode();
-    ASSERT_NE(nodeContainerNode, nullptr);
-    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode(CHILD_NODE, 0, AceType::MakeRefPtr<Pattern>());
-    auto pattern = nodeContainerNode->GetPattern<NodeContainerPattern>();
-    ASSERT_NE(pattern, nullptr);
 
     /**
-     * @tc.steps: step1.Fire RemakeNode return with nullptr. When oldNode is not null.
+     * @tc.steps: step7.Fire RemakeNode return with nullptr. When oldNode is not null.
      * @tc.expected: process success without crash.
      */
     auto childNode_three = FrameNode::CreateFrameNode(CHILD_NODE, 3, AceType::MakeRefPtr<Pattern>());
     childNode_three->SetIsRootBuilderNode(false);
     childNode_three->SetIsArkTsFrameNode(true);
-    pattern->SetMakeFunction([childNode_three](int32_t instanceId) -> RefPtr<UINode> {
-        EXPECT_EQ(instanceId, DEFAULT_INSTANCE_ID);
-        return childNode_three;
-    });
+    pattern->SetMakeFunction([childNode_three]() -> RefPtr<UINode> { return childNode_three; });
     pattern->RemakeNode();
     ASSERT_EQ(nodeContainerNode->GetChildAtIndex(0)->GetId(), childNode_three->GetId());
-    pattern->SetMakeFunction([childNode](int32_t instanceId) -> RefPtr<UINode> {
-        EXPECT_EQ(instanceId, DEFAULT_INSTANCE_ID);
-        return nullptr;
-    });
+    pattern->SetMakeFunction([childNode]() -> RefPtr<UINode> { return nullptr; });
     pattern->RemakeNode();
     ASSERT_EQ(nodeContainerNode->GetChildAtIndex(0), nullptr);
 }
@@ -248,8 +215,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetMakeFunction001, TestSize.L
      */
     NodeContainerModelNG modelNg;
     modelNg.Create();
-    auto builderFunc = [](int32_t instanceId) -> RefPtr<UINode> {
-        EXPECT_EQ(instanceId, DEFAULT_INSTANCE_ID);
+    auto builderFunc = []() -> RefPtr<UINode> {
         auto node = FrameNode::CreateFrameNode("node", 0, AceType::MakeRefPtr<Pattern>(), true);
         auto childNode = FrameNode::CreateFrameNode("child", 1, AceType::MakeRefPtr<Pattern>(), true);
         node->AddChild(childNode);
@@ -264,7 +230,7 @@ HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetMakeFunction001, TestSize.L
     CHECK_NULL_VOID(frameNode);
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
-    auto node = pattern->FireMakeFunction(DEFAULT_INSTANCE_ID);
+    auto node = pattern->FireMakeFunction();
     EXPECT_EQ(node->GetChildren().size(), 1);
 }
 

@@ -141,6 +141,8 @@ public:
     static void UpdatePreviewPositionAndScale(
         const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset, float scale = -1.0f);
     static void UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
+    static void UpdateGatherAnimatePosition(
+        std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo, const OffsetF& GatherNodeOffset);
     static void CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
     static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
@@ -181,13 +183,15 @@ public:
         return distance_;
     }
 
+    bool IsNotNeedShowPreviewForWeb(const RefPtr<FrameNode>& frameNode);
     void StartDragTaskForWeb(const GestureEvent& info);
-    void StartLongPressActionForWeb();
+    void StartLongPressActionForWeb(bool isFloatImage = true);
     void CancelDragForWeb();
     void ResetDragActionForWeb() {
         if (isReceivedLongPress_) {
             isReceivedLongPress_ = false;
         }
+        isFloatImage_ = true;
     }
 
     void SetIsNotInPreviewState(bool isNotInPreviewState)
@@ -235,8 +239,8 @@ public:
     static RefPtr<FrameNode> GetOrCreateGatherNode(const RefPtr<NG::OverlayManager>& overlayManager,
         const RefPtr<DragEventActuator>& actuator, std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
     static RefPtr<FrameNode> CreateGatherNode(const RefPtr<DragEventActuator>& actuator);
-    static RefPtr<FrameNode> CreateImageNode(const RefPtr<FrameNode>& frameNode,
-        GatherNodeChildInfo& gatherNodeChildInfo);
+    static RefPtr<FrameNode> CreateImageNode(
+        const RefPtr<FrameNode>& frameNode, GatherNodeChildInfo& gatherNodeChildInfo);
     static void MarkDirtyGatherNode(const RefPtr<FrameNode>& gatherNode);
     static void ResetNode(const RefPtr<FrameNode>& frameNode);
     static void MountGatherNode(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,
@@ -289,6 +293,7 @@ private:
     // check the current node's status to decide if it can initiate one drag operation
     bool IsCurrentNodeStatusSuitableForDragging(
         const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+    bool IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode);
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
     void RecordMenuWrapperNodeForDrag(int32_t targetId);
@@ -313,6 +318,7 @@ private:
     std::function<void(Offset)> textDragCallback_;
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;
+    bool isFloatImage_ = true;
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     std::vector<DimensionRect> responseRegion_;

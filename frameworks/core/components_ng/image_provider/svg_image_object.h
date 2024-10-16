@@ -37,7 +37,7 @@ public:
     }
 
     void MakeCanvasImage(
-        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
+        const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
 
 private:
     // return true if process is successful

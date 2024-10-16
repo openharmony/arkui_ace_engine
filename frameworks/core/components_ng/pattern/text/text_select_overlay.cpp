@@ -28,6 +28,10 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(pipeline, false);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);
+    if (textPattern->GetTextSelector().SelectNothing()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "Don't show selectoverlay when nothing is selected.");
+        return false;
+    }
     SetUsingMouse(textPattern->IsUsingMouse());
     SetEnableHandleLevel(true);
     textPattern->CalculateHandleOffsetAndShowOverlay();
@@ -243,6 +247,10 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         ProcessOverlay({ .animation = true });
     }
     overlayManager->SetHandleCircleIsShow(isFirst, true);
+    if (textPattern->GetTextSelector().SelectNothing()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "Close the selectoverlay when nothing is selected.");
+        CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
+    }
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -267,6 +275,7 @@ RectF TextSelectOverlay::GetSelectArea()
     if (selectRects.empty()) {
         res.SetOffset(res.GetOffset() + textPaintOffset);
         GetSelectAreaFromHandle(res);
+        ApplySelectAreaWithKeyboard(res);
         return res;
     }
     auto contentRect = pattern->GetTextContentRect();
@@ -281,6 +290,7 @@ RectF TextSelectOverlay::GetSelectArea()
         intersectRect.SetOffset(intersectRect.GetOffset() - textPaintOffset);
         GetGlobalRectWithTransform(intersectRect);
     }
+    ApplySelectAreaWithKeyboard(intersectRect);
     return intersectRect;
 }
 
@@ -328,6 +338,9 @@ void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->CopySelectionMenuParams(overlayInfo);
+    auto layoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    overlayInfo.handlerColor = layoutProperty->GetCursorColor();
     OnUpdateOnCreateMenuCallback(overlayInfo);
     auto scrollableParent = FindScrollableParent();
     if (scrollableParent) {
@@ -443,6 +456,7 @@ void TextSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirs
     manager->SetHandleCircleIsShow(isFirst, false);
     isDraggingFirstHandle_ = isFirst;
     hostPaintOffset_ = GetHotPaintOffset();
+    textPattern->SetupMagnifier();
 }
 
 void TextSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isFirst)
@@ -462,19 +476,29 @@ void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
         return;
     }
     auto clipNode = host->GetAncestorNodeOfFrame(true);
+    RefPtr<FrameNode> prevNode;
     while (clipNode) {
         renderContext = clipNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (renderContext->GetClipEdge().value_or(false)) {
             break;
         }
+        prevNode = clipNode;
         clipNode = clipNode->GetAncestorNodeOfFrame(true);
     }
-    CHECK_NULL_VOID(clipNode);
-    RectF visibleRect;
-    RectF frameRect;
-    clipNode->GetVisibleRect(visibleRect, frameRect);
-    rect.SetHeight(visibleRect.Bottom() - rect.Top());
+    if (clipNode) {
+        RectF visibleRect;
+        RectF frameRect;
+        clipNode->GetVisibleRect(visibleRect, frameRect);
+        rect.SetHeight(visibleRect.Bottom() - rect.Top());
+        return;
+    }
+    // root node.
+    if (prevNode) {
+        auto geoNode = prevNode->GetGeometryNode();
+        CHECK_NULL_VOID(geoNode);
+        rect.SetHeight(geoNode->GetFrameRect().Height() - rect.Top());
+    }
 }
 
 void TextSelectOverlay::TriggerScrollableParentToScroll(
@@ -529,5 +553,14 @@ OffsetF TextSelectOverlay::GetHotPaintOffset()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, hostPaintOffset_);
     return renderContext->GetPaintRectWithTransform().GetOffset();
+}
+
+std::optional<Color> TextSelectOverlay::GetHandleColor()
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, std::nullopt);
+    auto layoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    return layoutProperty->GetCursorColor();
 }
 } // namespace OHOS::Ace::NG

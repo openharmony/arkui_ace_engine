@@ -251,6 +251,14 @@ public:
         };
         selectInfo.onCreateCallback.textRangeCallback = textRange;
     }
+    bool GetClipHandleViewPort(RectF& rect);
+    void MarkOverlayDirty();
+    void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
+    void UpdateHandleColor();
+    virtual std::optional<Color> GetHandleColor()
+    {
+        return std::nullopt;
+    }
 
 protected:
     RectF MergeSelectedBoxes(
@@ -290,13 +298,13 @@ protected:
         originalMenuIsShow_ = IsCurrentMenuVisibile();
     }
     virtual void UpdateMenuWhileAncestorNodeChanged(bool shouldHideMenu, bool shouldShowMenu);
-    bool GetClipHandleViewPort(RectF& rect);
     virtual void UpdateClipHandleViewPort(RectF& rect) {};
     bool GetFrameNodeContentRect(const RefPtr<FrameNode>& node, RectF& rect);
     virtual bool IsClipHandleWithViewPort()
     {
         return false;
     }
+    void ApplySelectAreaWithKeyboard(RectF& selectArea);
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;

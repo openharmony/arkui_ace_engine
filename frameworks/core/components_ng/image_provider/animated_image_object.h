@@ -29,7 +29,7 @@ public:
     ~AnimatedImageObject() override = default;
 
     void MakeCanvasImage(
-        const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
+        const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
 
     RefPtr<ImageObject> Clone() override;
 

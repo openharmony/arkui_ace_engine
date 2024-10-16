@@ -115,18 +115,18 @@ HWTEST_F(SheetPresentationTestNg, OnScrollStartRecursive001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     sheetPattern->animation_ = nullptr;
     EXPECT_EQ(sheetPattern->animation_, nullptr);
-    sheetPattern->OnScrollStartRecursive(0.0f, 0.0f);
+    sheetPattern->OnScrollStartRecursive(sheetPattern, 0.0f, 0.0f);
 
     AnimationOption option;
     sheetPattern->animation_ = AnimationUtils::StartAnimation(option, []() {}, []() {});
     sheetPattern->isAnimationProcess_ = false;
     EXPECT_NE(sheetPattern->animation_, nullptr);
     EXPECT_FALSE(sheetPattern->isAnimationProcess_);
-    sheetPattern->OnScrollStartRecursive(0.0f, 0.0f);
+    sheetPattern->OnScrollStartRecursive(sheetPattern, 0.0f, 0.0f);
 
     sheetPattern->isAnimationProcess_ = true;
     EXPECT_TRUE(sheetPattern->isAnimationProcess_);
-    sheetPattern->OnScrollStartRecursive(0.0f, 0.0f);
+    sheetPattern->OnScrollStartRecursive(sheetPattern, 0.0f, 0.0f);
 }
 
 /**
@@ -1544,10 +1544,10 @@ HWTEST_F(SheetPresentationTestNg, UpdateTitlePadding003, TestSize.Level1)
     ASSERT_NE(sheetNode, nullptr);
 
     /**
-     * @tc.steps: step2. set API13.
+     * @tc.steps: step2. set API14.
      */
     int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
 
     /**

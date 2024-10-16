@@ -111,13 +111,12 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto finalWidth = 0;
     if (pattern->IsNormalInlineState() && pattern->HasFocus()) {
-        finalWidth = LessOrEqual(contentWidth, 0) ? 0 :
-            contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY;
+        finalWidth = contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY;
         frameSize.SetWidth(finalWidth);
         frameSize.SetHeight(contentHeight + pattern->GetVerticalPaddingAndBorderSum() + PARAGRAPH_SAVE_BOUNDARY);
     } else {
         // The width after MeasureContent is already optimal, but the height needs to be constrained in Measure.
-        finalWidth = LessOrEqual(contentWidth, 0) ? 0 : contentWidth + pattern->GetHorizontalPaddingAndBorderSum();
+        finalWidth = contentWidth + pattern->GetHorizontalPaddingAndBorderSum();
         frameSize.SetWidth(finalWidth);
         ConstraintHeight(layoutWrapper, frameSize, contentHeight);
     }
@@ -138,12 +137,7 @@ void TextAreaLayoutAlgorithm::ConstraintHeight(LayoutWrapper* layoutWrapper, Opt
     auto textFieldContentConstraint =
         CalculateContentMaxSizeWithCalculateConstraint(contentConstraint, layoutWrapper);
     if (textFieldContentConstraint.selfIdealSize.Height().has_value()) {
-        if (LessOrEqual(textFieldContentConstraint.maxSize.Height(), 0)) {
-            frameSize.SetHeight(textFieldContentConstraint.maxSize.Height());
-        } else {
-            frameSize.SetHeight(
-                textFieldContentConstraint.maxSize.Height() + paddingAndBorder.Height());
-        }
+        frameSize.SetHeight(textFieldContentConstraint.maxSize.Height() + paddingAndBorder.Height());
     } else {
         frameSize.SetHeight(contentHeight + paddingAndBorder.Height());
     }

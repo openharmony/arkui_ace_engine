@@ -260,7 +260,8 @@ public:
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
     virtual void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) = 0;
-    virtual void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) = 0;
+    virtual void SetOnGestureRecognizerJudgeBegin(
+        NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) = 0;
     virtual void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) {}
@@ -382,8 +383,8 @@ public:
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
     virtual void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) = 0;
-    virtual void SetAccessibilitySelected(bool selected) = 0;
-    virtual void SetAccessibilityChecked(bool checked) = 0;
+    virtual void SetAccessibilitySelected(bool selected, bool resetValue) = 0;
+    virtual void SetAccessibilityChecked(bool checked, bool resetValue) = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
@@ -414,11 +415,6 @@ public:
     virtual void SetPositionLocalizedEdges(bool needLocalized) = 0;
     virtual void SetLocalizedMarkAnchor(bool needLocalized) = 0;
     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
-
-private:
-    static std::unique_ptr<ViewAbstractModel> instance_;
-    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

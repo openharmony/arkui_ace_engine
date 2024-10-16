@@ -211,6 +211,8 @@ public:
     bool DeregisterWebInteractionOperationAsChildTree(int32_t treeID) override;
     bool RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
         const WeakPtr<NG::WebPattern>& webPattern) override;
+    void GetWebCursorPosition(const int64_t elementId, const int32_t requestId,
+        AccessibilityElementOperatorCallback& callback, const RefPtr<NG::WebPattern>& webPattern);
 #endif //WEB_SUPPORTED
     void GetResultOfFocusMoveSearchNG(
         int64_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info);
@@ -531,6 +533,13 @@ private:
     void CreateNodeInfoJson(const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
         std::unique_ptr<JsonValue>& json, int32_t childSize);
 
+    void SendEventToAccessibilityWithNodeInner(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context);
+    void SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent);
+    int64_t GetDelayTimeBeforeSendEvent(const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node);
+    void UpdateChildrenNodeInCache(std::list<AccessibilityElementInfo>& infos,
+        const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
+        const SearchParameter& searchParam, std::list<RefPtr<NG::FrameNode>>& children);
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::shared_ptr<JsAccessibilityStateObserver> stateObserver_ = nullptr;

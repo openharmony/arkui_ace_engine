@@ -61,9 +61,6 @@ public:
 
     static void IsCloseKeyboard(const RefPtr<FrameNode>& frameNode);
 
-    static void InjectPointerEvent(const std::string& targetNodeName,
-        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
-
     static void InjectPointerEvent(const RefPtr<FrameNode>& node,
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
 

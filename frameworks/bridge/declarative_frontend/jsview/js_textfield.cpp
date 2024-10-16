@@ -57,21 +57,18 @@ std::mutex TextFieldModel::mutex_;
 
 TextFieldModel* TextFieldModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::TextFieldModelNG());
+    static NG::TextFieldModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::TextFieldModelNG());
-            } else {
-                instance_.reset(new Framework::TextFieldModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::TextFieldModelNG instance;
+        return &instance;
+    } else {
+        static Framework::TextFieldModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -950,19 +947,11 @@ void JSTextField::ParseBorderRadius(const JSRef<JSVal>& args)
     if (ParseJsDimensionVp(args, borderRadius)) {
         ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadius);
     } else if (args->IsObject()) {
-        auto textFieldTheme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(textFieldTheme);
-        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
-        NG::BorderRadiusProperty defaultBorderRadius {
-            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
-            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
-        };
-
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        CalcDimension topLeft = defaultBorderRadius.radiusTopLeft.value();
-        CalcDimension topRight = defaultBorderRadius.radiusTopRight.value();
-        CalcDimension bottomLeft = defaultBorderRadius.radiusBottomLeft.value();
-        CalcDimension bottomRight = defaultBorderRadius.radiusBottomRight.value();
+        CalcDimension topLeft;
+        CalcDimension topRight;
+        CalcDimension bottomLeft;
+        CalcDimension bottomRight;
         if (ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight)) {
             ViewAbstractModel::GetInstance()->SetBorderRadius(
                 JSViewAbstract::GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
@@ -1180,7 +1169,7 @@ void JSTextField::SetCopyOption(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetCopyOption(CopyOptions::Local);
         return;
     }
-    auto copyOptions = CopyOptions::None;
+    auto copyOptions = CopyOptions::Local;
     if (jsValue->IsNumber()) {
         auto emunNumber = jsValue->ToNumber<int>();
         copyOptions = static_cast<CopyOptions>(emunNumber);
@@ -1530,6 +1519,8 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     auto param = JSRef<JSObject>::Cast(info[0]);
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
+
+    // set style
     std::string styleStr;
     CleanNodeStyle cleanNodeStyle;
     auto styleProp = param->GetProperty("style");
@@ -1540,18 +1531,21 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetCleanNodeStyle(cleanNodeStyle);
     TextFieldModel::GetInstance()->SetIsShowCancelButton(true);
+
+    // set default icon
     auto iconJsVal = param->GetProperty("icon");
     if (iconJsVal->IsUndefined() || iconJsVal->IsNull() || !iconJsVal->IsObject()) {
-        if (SystemProperties::GetColorMode() == ColorMode::DARK) {
-            TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
-        } else {
-            TextFieldModel::GetInstance()->SetCancelIconColor(Color());
-        }
-        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
-        TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
+        SetCancelDefaultIcon();
         return;
     }
+
     auto iconParam = JSRef<JSObject>::Cast(iconJsVal);
+    bool isSymbolIcon = iconParam->HasProperty("fontColor"); // only SymbolGlyph has fontColor property
+    if (isSymbolIcon) {
+        SetCancelSymbolIcon(info);
+        return;
+    }
+
     // set icon size
     CalcDimension iconSize;
     auto iconSizeProp = iconParam->GetProperty("size");
@@ -1564,6 +1558,33 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     SetCancelIconColorAndIconSrc(iconParam);
+}
+
+void JSTextField::SetCancelDefaultIcon()
+{
+    auto theme = GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    if (SystemProperties::GetColorMode() == ColorMode::DARK) {
+        TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModel::GetInstance()->SetCancelIconColor(Color());
+    }
+    TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
+    TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
+    TextFieldModel::GetInstance()->SetCancelSymbolIcon(nullptr);
+    TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
+}
+
+void JSTextField::SetCancelSymbolIcon(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject()) {
+        std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = nullptr;
+        auto param = JSRef<JSObject>::Cast(info[0]);
+        auto iconProp = param->GetProperty("icon");
+        SetSymbolOptionApply(info, iconSymbol, iconProp);
+        TextFieldModel::GetInstance()->SetCancelSymbolIcon(iconSymbol);
+        TextFieldModel::GetInstance()->SetCancelButtonSymbol(true);
+    }
 }
 
 void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
@@ -1580,6 +1601,7 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
     }
     GetJsMediaBundleInfo(iconSrcProp, bundleName, moduleName);
     TextFieldModel::GetInstance()->SetCanacelIconSrc(iconSrc, bundleName, moduleName);
+    TextFieldModel::GetInstance()->SetCancelButtonSymbol(false);
     // set icon color
     Color iconColor;
     auto iconColorProp = iconParam->GetProperty("color");

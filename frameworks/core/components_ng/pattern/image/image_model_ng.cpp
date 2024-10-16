@@ -202,7 +202,7 @@ void ImageModelNG::CreateAnimation(const std::vector<ImageProperties>& imageList
         pattern->ResetImageProperties();
     }
     // set draggable for framenode
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto draggable = pipeline->GetDraggable<ImageTheme>();
     if (draggable && !frameNode->IsDraggable()) {

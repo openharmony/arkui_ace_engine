@@ -78,6 +78,8 @@ public:
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
 private:
+    void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
+
     float currentOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
     float viewPortLength_ = 0.0f;

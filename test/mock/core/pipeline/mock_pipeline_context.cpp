@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -29,10 +30,7 @@
 
 namespace OHOS::Ace {
 
-constexpr int32_t COUNTER_NUMBER_ZERO = 0;
-constexpr int32_t COUNTER_NUMBER_MAX = 9;
-constexpr int32_t MOCK_REGISTER_DIVISOR = 2;
-static int32_t registerStatus = 0;
+static bool g_setBoolStatus = false;
 class MockAccessibilityManager : public AccessibilityManager {
 public:
     MOCK_METHOD(void, SendAccessibilityAsyncEvent, (const AccessibilityEvent& accessibilityEvent), (override));
@@ -101,21 +99,12 @@ public:
     MOCK_METHOD(bool, DeregisterWebInteractionOperationAsChildTree, (int32_t treeId), (override));
 #endif
     void RegisterAccessibilityChildTreeCallback(
-        int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback>& callback) override
-    {}
+        int64_t elementId, const std::shared_ptr<AccessibilityChildTreeCallback>& callback) override {}
     void DeregisterAccessibilityChildTreeCallback(int64_t elementId) override {}
     void RegisterInteractionOperationAsChildTree(
         uint32_t parentWindowId, int32_t parentTreeId, int64_t parentElementId) override
     {
-        if (registerStatus % MOCK_REGISTER_DIVISOR == COUNTER_NUMBER_ZERO) {
-            registerStatus++;
-            Register(true);
-        } else {
-            registerStatus++;
-            Register(false);
-        }
-        if (registerStatus > COUNTER_NUMBER_MAX)
-            registerStatus = COUNTER_NUMBER_ZERO;
+        Register(g_setBoolStatus);
     }
     void SetAccessibilityGetParentRectHandler(std::function<void(int32_t&, int32_t&)>&& callback) override {}
     void SetAccessibilityGetParentRectHandler(std::function<void(AccessibilityParentRectInfo&)>&& callback) override {}
@@ -179,6 +168,11 @@ void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
     rootWidth_ = rootWidth;
     rootHeight_ = rootHeight;
+}
+
+void MockPipelineContext::SetInstanceId(int32_t instanceId)
+{
+    pipeline_->instanceId_ = instanceId;
 }
 
 void MockPipelineContext::SetCurrentWindowRect(Rect rect)
@@ -319,7 +313,11 @@ void PipelineContext::SendEventToAccessibilityWithNode(
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
 
+void PipelineContext::ReDispatch(KeyEvent& keyEvent) {}
+
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {};
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}
 
@@ -377,7 +375,7 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
 
 void PipelineContext::UpdateTitleInTargetPos(bool isShow, int32_t height) {}
 
-void PipelineContext::SetContainerWindow(bool isShow, Dimension contentBorderRadius) {}
+void PipelineContext::SetContainerWindow(bool isShow, RRect& rRect) {}
 
 void PipelineContext::SetAppBgColor(const Color& color) {}
 
@@ -672,7 +670,15 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
     safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
 }
 void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
-void PipelineContext::SetEnableKeyBoardAvoidMode(bool value) {};
+KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
+{
+    return KeyBoardAvoidMode::OFFSET;
+}
+void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {};
+bool PipelineContext::UsingCaretAvoidMode()
+{
+    return false;
+}
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
     return false;
@@ -1037,5 +1043,39 @@ bool NG::PipelineContext::CheckThreadSafe()
 {
     return false;
 }
+
+#ifdef NEED_PIPELINE_CONTEXT_BE_NULLPTR
+PipelineContext* TextPattern::GetContext()
+{
+    return nullptr;
+}
+#endif
+
+void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto layoutProperty = node->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = node->GetLayoutConstraint();
+    if (layoutProperty->GetLayoutRect()) {
+        node->SetActive(true, true);
+        node->Measure(std::nullopt);
+        node->Layout();
+    } else {
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame();
+        node->Measure(layoutConstraint);
+        node->Layout();
+    }
+}
+
+void SetBoolStatus(bool value)
+{
+    g_setBoolStatus = value;
+}
+
+void NG::PipelineContext::DumpUIExt() const
+{
+}
+
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

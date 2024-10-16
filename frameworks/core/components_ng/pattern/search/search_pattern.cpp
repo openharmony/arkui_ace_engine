@@ -814,6 +814,10 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     };
     constexpr int ONE = 1; // Only one focusable component on scene
     bool isOnlyOneFocusableComponent = getMaxFocusableCount(getMaxFocusableCount, parentHub) == ONE;
+    auto container = Container::Current();
+    if (container && container->IsUIExtensionWindow()) {
+        isOnlyOneFocusableComponent = false; // UI Extension Window
+    }
 
     if (event.action != KeyAction::DOWN) {
         if (event.code == KeyCode::KEY_TAB && focusChoice_ == FocusChoice::SEARCH) {
@@ -953,6 +957,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
                 textFieldPattern->NeedRequestKeyboard();
                 textFieldPattern->SearchRequestKeyboard();
                 textFieldPattern->HandleOnSelectAll(false); // Select all text
+                textFieldPattern->HandleFocusEvent(); // Show caret
                 searchTextFieldPattern->ResetSearchRequestStopTwinkling(); // reset flag
                 textFieldPattern->StopTwinkling(); // Hide caret
             } else {
@@ -1233,6 +1238,7 @@ void SearchPattern::HandleFocusEvent(bool forwardFocusMovement, bool backwardFoc
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
 
+    focusChoice_ = FocusChoice::SEARCH;
     if (forwardFocusMovement || backwardFocusMovement) { // Don't update focus if no factical focus movement
         focusChoice_ = backwardFocusMovement ? FocusChoice::SEARCH_BUTTON : FocusChoice::SEARCH;
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON && !isSearchButtonEnabled_) {
@@ -1323,7 +1329,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     textFontJson->Put("fontFamily", textFieldPattern->GetFontFamily().c_str());
     json->PutExtAttr("textFont", textFontJson->ToString().c_str(), filter);
     json->PutExtAttr("copyOption",
-        ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str(), filter);
+        ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::Local)).c_str(), filter);
     auto maxLength = GetMaxLength();
     json->PutExtAttr(
         "maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str(), filter);

@@ -163,14 +163,21 @@ bool SafeAreaManager::SetIgnoreSafeArea(bool value)
     return true;
 }
 
-bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
+bool SafeAreaManager::SetKeyBoardAvoidMode(KeyBoardAvoidMode value)
 {
-    if (keyboardSafeAreaEnabled_ == value) {
+    if (keyboardAvoidMode_ == value) {
         return false;
     }
-    keyboardSafeAreaEnabled_ = value;
+    keyboardAvoidMode_ = value;
+    keyboardSafeAreaEnabled_ = keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE
+        || keyboardAvoidMode_ == KeyBoardAvoidMode::RESIZE_WITH_CARET;
     TAG_LOGI(ACE_LAYOUT, "SetKeyBoardAvoidMode %{public}d", keyboardSafeAreaEnabled_);
     return true;
+}
+
+KeyBoardAvoidMode SafeAreaManager::GetKeyBoardAvoidMode()
+{
+    return keyboardAvoidMode_;
 }
 
 bool SafeAreaManager::SetIsAtomicService(bool value)

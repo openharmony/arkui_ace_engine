@@ -33,6 +33,11 @@ CanvasPattern::~CanvasPattern()
     }
 }
 
+void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    DetachRenderContext();
+}
+
 void CanvasPattern::AttachRenderContext()
 {
     FireOnContext2DAttach();

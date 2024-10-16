@@ -850,7 +850,9 @@ enum class RenderFit : int32_t {
 
 enum class KeyBoardAvoidMode : int32_t {
     OFFSET = 0,
-    RESIZE,
+    RESIZE = 1,
+    OFFSET_WITH_CARET = 2,
+    RESIZE_WITH_CARET = 3,
 };
 
 enum class SwipeActionState : uint32_t {

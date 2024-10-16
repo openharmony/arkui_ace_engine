@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/list/list_pattern.h"
 
-#include <cstdint>
-
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
@@ -43,6 +41,8 @@ constexpr double CHAIN_SPRING_DAMPING = 30.0;
 constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
+constexpr int DEFAULT_HEADER_VALUE = 2;
+constexpr int DEFAULT_FOOTER_VALUE = 3;
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -162,7 +162,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (predictSnapOffset.has_value()) {
         if (scrollable_ && !(NearZero(predictSnapOffset.value()) && NearZero(scrollSnapVelocity_)) &&
             !AnimateRunning()) {
-            scrollable_->StartScrollSnapMotion(predictSnapOffset.value(), scrollSnapVelocity_);
+            StartListSnapAnimation(predictSnapOffset.value(), scrollSnapVelocity_);
             if (snapTrigOnScrollStart_) {
                 FireOnScrollStart();
             }
@@ -198,15 +198,13 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     isNeedCheckOffset_ = false;
     prevStartOffset_ = startMainPos_;
     prevEndOffset_ = endMainPos_ - contentMainSize_ + contentEndOffset_;
-    float preEndMainPos = endMainPos_;
     contentMainSize_ = listLayoutAlgorithm->GetContentMainSize();
     contentStartOffset_ = listLayoutAlgorithm->GetContentStartOffset();
     contentEndOffset_ = listLayoutAlgorithm->GetContentEndOffset();
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
     crossMatchChild_ = listLayoutAlgorithm->IsCrossMatchChild();
-    bool sizeDiminished =
-        !chainAnimation_ && IsOutOfBoundary(false) && LessNotEqual(endMainPos_, preEndMainPos - relativeOffset);
+    auto endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
     CheckScrollable();
 
     bool indexChanged = false;
@@ -234,6 +232,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
+    bool sizeDiminished =
+        !chainAnimation_ && IsOutOfBoundary(false) && (endOffset + relativeOffset - prevEndOffset_ < -0.1f);
     CheckRestartSpring(sizeDiminished);
 
     DrivenRender(dirty);
@@ -323,12 +323,12 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
     }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, paint);
+    const auto& geometryNode = host->GetGeometryNode();
     if (!listContentModifier_) {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, paint);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, paint);
-        const auto& geometryNode = host->GetGeometryNode();
         auto size = renderContext->GetPaintRectWithoutTransform().GetSize();
         auto& padding = geometryNode->GetPadding();
         if (padding) {
@@ -340,6 +340,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetLaneGutter(laneGutter_);
     paint->SetItemsPosition(itemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
+    paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
     UpdateFadingEdge(paint);
     return paint;
 }
@@ -412,6 +413,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
             }
         }
     }
+    FireObserverOnDidScroll(finalOffset);
     auto onDidScroll = listEventHub->GetOnDidScroll();
     if (onDidScroll) {
         FireOnScroll(finalOffset, onDidScroll);
@@ -436,13 +438,15 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
 void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart);
+    CHECK_NULL_VOID(host);
     if (startIndex_ == 0) {
         bool scrollUpToStart =
             GreatNotEqual(prevStartOffset_, contentStartOffset_) && LessOrEqual(startMainPos_, contentStartOffset_);
         bool scrollDownToStart = (LessNotEqual(prevStartOffset_, contentStartOffset_) || !isInitialized_) &&
                                  GreatOrEqual(startMainPos_, contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
+            FireObserverOnReachStart();
+            CHECK_NULL_VOID(onReachStart);
             ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:List",
                 scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
             onReachStart();
@@ -454,7 +458,7 @@ void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void ListPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd);
+    CHECK_NULL_VOID(host);
     if (endIndex_ == maxListItemIndex_) {
         float endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
         // deltaOffset passes through multiple items also needs to fire reachEnd
@@ -463,6 +467,8 @@ void ListPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
         bool scrollDownToEnd = Negative(prevEndOffset_) && NonNegative(endOffset);
         auto scrollSource = GetScrollSource();
         if (scrollUpToEnd || (scrollDownToEnd && scrollSource != SCROLL_FROM_NONE)) {
+            FireObserverOnReachEnd();
+            CHECK_NULL_VOID(onReachEnd);
             ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, scrollSource:%d, id:%d, tag:List",
                 scrollUpToEnd, scrollDownToEnd, scrollSource, static_cast<int32_t>(host->GetAccessibilityId()));
             onReachEnd();
@@ -845,7 +851,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         // over scroll in drag update from normal to over scroll.
         float overScroll = std::max(res.start, res.end);
         // adjust offset.
-        auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / contentMainSize_);
+        auto friction = CalculateFriction(std::abs(overScroll) / contentMainSize_);
         currentDelta_ = currentDelta_ * friction;
     }
 
@@ -870,9 +876,6 @@ void ListPattern::OnScrollEndCallback()
     if (AnimateStoped()) {
         scrollStop_ = true;
         MarkDirtyNodeSelf();
-        if (chainAnimation_) {
-            chainAnimation_->SetOverDrag(false);
-        }
     }
 }
 
@@ -916,7 +919,7 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     return UpdateCurrentOffset(offset, source);
 }
 
-bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
+bool ListPattern::StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance)
 {
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, false);
@@ -930,10 +933,16 @@ bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
     if (!GetIsDragging()) {
         snapTrigOnScrollStart_ = true;
     }
-    predictSnapOffset_ = targetOffset;
-    scrollSnapVelocity_ = velocity;
+    predictSnapOffset_ = snapDelta;
+    scrollSnapVelocity_ = snapVelocity;
     MarkDirtyNodeSelf();
     return true;
+}
+
+void ListPattern::StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
+{
+    CHECK_NULL_VOID(scrollable_);
+    scrollable_->StartListSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
 }
 
 void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
@@ -1691,8 +1700,87 @@ bool ListPattern::GetGroupItemIndex(double x, double y, RefPtr<FrameNode> itemFr
                 return true;
             }
         }
+
+        int32_t areaValue = 0;
+        if (GetAxis() == Axis::VERTICAL) {
+            areaValue = ProcessAreaVertical(x, y, rect, index, groupItemPattern);
+        } else {
+            areaValue = ProcessAreaHorizontal(x, y, rect, index, groupItemPattern);
+        }
+        if (areaValue != -1) {
+            itemIndex.index = index;
+            itemIndex.area = areaValue;
+            itemIndex.indexInGroup = -1;
+            return true;
+        }
     }
+
     return false;
+}
+
+int32_t ListPattern::ProcessAreaVertical(double& x, double& y, Rect& groupRect, int32_t& index,
+    RefPtr<ListItemGroupPattern> groupItemPattern) const
+{
+    if (groupItemPattern->GetTotalItemCount() > 0) { // has item
+        Rect firstRect = GetItemRectInGroup(index, 0); //first item Rect
+        Rect endRect = GetItemRectInGroup(index, groupItemPattern->GetDisplayEndIndexInGroup()); //end item Rect
+
+        if (groupItemPattern->IsHasHeader() && LessOrEqual(y, firstRect.Top()) && GreatOrEqual(y, groupRect.Top())) {
+            return  DEFAULT_HEADER_VALUE;
+        }
+
+        if (groupItemPattern->IsHasFooter() && GreatOrEqual(y, endRect.Bottom()) &&
+            LessOrEqual(y, groupRect.Bottom())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (groupItemPattern->IsHasHeader() || groupItemPattern->IsHasFooter()) {
+        float headerHeight = groupItemPattern->GetHeaderMainSize();
+        float footerHeight = groupItemPattern->GetFooterMainSize();
+        float topPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->top.value_or(0.0f);
+        float bottomPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->bottom.value_or(0.0f);
+        if (LessOrEqual(y, groupRect.Top() + headerHeight + topPaddng)  && GreatOrEqual(y, groupRect.Top())) { //header
+            return  DEFAULT_HEADER_VALUE;
+        } else if (GreatOrEqual(y, groupRect.Bottom() - footerHeight - bottomPaddng) &&
+            LessOrEqual(y, groupRect.Bottom())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (GreatOrEqual(y, groupRect.Top())  && LessOrEqual(y, groupRect.Bottom())) {
+        return  0;
+    }
+
+    return -1;
+}
+
+int32_t ListPattern::ProcessAreaHorizontal(double& x, double& y, Rect& groupRect, int32_t& index,
+    RefPtr<ListItemGroupPattern> groupItemPattern) const
+{
+    if (groupItemPattern->GetTotalItemCount() > 0) { // has item
+        Rect firstRect = GetItemRectInGroup(index, 0); //first item Rect
+        Rect endRect = GetItemRectInGroup(index, groupItemPattern->GetDisplayEndIndexInGroup()); //end item Rect
+
+        if (groupItemPattern->IsHasHeader() && LessOrEqual(x, firstRect.Left()) && GreatOrEqual(x, groupRect.Left())) {
+            return  DEFAULT_HEADER_VALUE;
+        }
+
+        if (groupItemPattern->IsHasFooter() && GreatOrEqual(x, endRect.Right()) && LessOrEqual(x, groupRect.Right())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (groupItemPattern->IsHasHeader() || groupItemPattern->IsHasFooter()) {
+        float headerHeight = groupItemPattern->GetHeaderMainSize();
+        float footerHeight = groupItemPattern->GetFooterMainSize();
+        float leftPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->left.value_or(0.0f);
+        float rightPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->right.value_or(0.0f);
+        if (LessOrEqual(x, groupRect.Left() + headerHeight + leftPaddng)  && GreatOrEqual(x, groupRect.Left())) {
+            return  DEFAULT_HEADER_VALUE;
+        } else if (GreatOrEqual(x, groupRect.Right() - footerHeight - rightPaddng) &&
+            LessOrEqual(x, groupRect.Right())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (GreatOrEqual(x, groupRect.Left())  && LessOrEqual(x, groupRect.Right())) {
+        return  0;
+    }
+
+    return -1;
 }
 
 Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
@@ -1780,9 +1868,31 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     bool groupAtStart = (!groupInfo || groupInfo.value().atStart);
     if (startIndex == 0 && groupAtStart) {
         currentOffset_ = -startPos;
-    } else {
-        posMap_->UpdatePosMapStart(delta, currentOffset_, spaceWidth_, startIndex, startPos, groupAtStart);
+        UpdatePosMap(itemPos);
+        return;
     }
+    currentOffset_ += delta;
+    auto res = posMap_->GetStartIndexAndPos();
+    if (res.first >= 0) {
+        auto iter = itemPos.lower_bound(res.first);
+        // skip same line for lanes
+        if (iter->first == res.first && iter != itemPos.end()) {
+            do {
+                startPos = iter->second.startPos;
+                iter++;
+            } while (iter != itemPos.end() && NearEqual(iter->second.startPos, startPos));
+        }
+        if (iter != itemPos.end()) {
+            groupAtStart = iter->second.groupInfo ? iter->second.groupInfo.value().atStart : true;
+            startPos = iter->second.startPos;
+            posMap_->UpdatePosMapStart(delta, currentOffset_, spaceWidth_, iter->first, startPos, groupAtStart);
+        }
+    }
+    UpdatePosMap(itemPos);
+}
+
+void ListPattern::UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos)
+{
     for (auto& [index, pos] : itemPos) {
         float height = pos.endPos - pos.startPos;
         if (pos.groupInfo) {
@@ -1801,8 +1911,34 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     posMap_->UpdatePosMapEnd(itemPos.rbegin()->first, spaceWidth_, groupAtEnd);
 }
 
+void ListPattern::UpdateChildPosInfo(int32_t index, float delta, float sizeChange)
+{
+    if (itemPosition_.find(index) == itemPosition_.end()) {
+        return;
+    }
+    if (index == GetStartIndex()) {
+        sizeChange += delta;
+        float startPos = itemPosition_.begin()->second.startPos;
+        auto iter = itemPosition_.begin();
+        while (iter != itemPosition_.end() && NearEqual(startPos, iter->second.startPos)) {
+            iter->second.startPos += delta;
+            iter++;
+        }
+    }
+    if (index == GetEndIndex()) {
+        float endPos = itemPosition_.rbegin()->second.endPos;
+        auto iter = itemPosition_.rbegin();
+        while (iter != itemPosition_.rend() && NearEqual(endPos, iter->second.endPos)) {
+            iter->second.endPos += sizeChange;
+            iter++;
+        }
+    }
+    CalculateCurrentOffset(0.0f, ListLayoutAlgorithm::PositionMap());
+}
+
 void ListPattern::UpdateScrollBarOffset()
 {
+    CheckScrollBarOff();
     if (itemPosition_.empty()) {
         return;
     }
@@ -1875,7 +2011,6 @@ void ListPattern::SetChainAnimationCallback()
         auto list = weak.Upgrade();
         CHECK_NULL_VOID(list);
         if (!list->dragFromSpring_ && list->chainAnimation_) {
-            list->chainAnimation_->SetOverDrag(false);
             auto delta = list->chainAnimation_->SetControlIndex(list->IsAtTop() ? 0 : list->maxListItemIndex_);
             list->currentDelta_ -= delta;
             list->dragFromSpring_ = true;
@@ -1970,6 +2105,7 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
 
 void ListPattern::OnTouchDown(const TouchEventInfo& info)
 {
+    ScrollablePattern::OnTouchDown(info);
     auto& touches = info.GetTouches();
     if (touches.empty()) {
         return;
@@ -1998,17 +2134,12 @@ void ListPattern::ProcessDragStart(float startPosition)
     float delta = chainAnimation_->SetControlIndex(index);
     currentDelta_ -= delta;
     chainAnimation_->SetMaxIndex(maxListItemIndex_);
-    if (IsOutOfBoundary()) {
-        chainAnimation_->SetOverDrag(true);
-    }
 }
 
 void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
 {
     CHECK_NULL_VOID(chainAnimation_);
     if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR_FLING) {
-        bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
-        chainAnimation_->SetOverDrag(overDrag);
         return;
     }
     if (NeedScrollSnapAlignEffect()) {
@@ -2028,8 +2159,18 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
             currentDelta_ -= delta;
         }
     }
-    bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
-    chainAnimation_->SetDelta(-dragOffset, overDrag);
+    float overOffset = 0.0f;
+    if (!itemPosition_.empty()) {
+        auto res = GetOutBoundaryOffset(false);
+        overOffset = std::max(res.start, res.end);
+        if (!NearZero(res.end)) {
+            overOffset = -overOffset;
+        }
+    }
+    if (source == SCROLL_FROM_UPDATE && !NearZero(overOffset)) {
+        dragOffset = 0.0f;
+    }
+    chainAnimation_->SetDelta(-dragOffset, overOffset);
     if (source == SCROLL_FROM_UPDATE && GetCanOverScroll()) {
         float tempDelta = currentDelta_;
         currentDelta_ -= dragOffset;

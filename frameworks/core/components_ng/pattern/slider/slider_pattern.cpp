@@ -44,7 +44,8 @@ constexpr float HALF = 0.5;
 constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
-constexpr double STEP_OFFSET = 50.0;
+constexpr double DEFAULT_SLIP_FACTOR = 50.0;
+constexpr double SLIP_FACTOR_COEFFICIENT = 1.38;
 constexpr uint64_t ACCESSIBILITY_SENDEVENT_TIMESTAMP = 400;
 const std::string STR_ACCESSIBILITY_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
 
@@ -81,7 +82,6 @@ void SliderPattern::OnModifyDone()
     sliderInteractionMode_ =
         sliderPaintProperty->GetSliderInteractionModeValue(SliderModelNG::SliderInteraction::SLIDE_AND_CLICK);
     minResponse_ = sliderPaintProperty->GetMinResponsiveDistance().value_or(0.0f);
-    InitWindowSizeChanged(host);
     if (!panMoveFlag_) {
         UpdateToValidValue();
     }
@@ -98,6 +98,7 @@ void SliderPattern::OnModifyDone()
     SetAccessibilityAction();
     InitAccessibilityHoverEvent();
     AccessibilityVirtualNodeRenderTask();
+    InitOrRefreshSlipFactor();
 }
 
 void SliderPattern::HandleEnabled()
@@ -110,18 +111,19 @@ void SliderPattern::HandleEnabled()
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto enabled = eventHub->IsEnabled();
-    if (enabled) {
-        return;
-    }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto originalOpacity = renderContext->GetOpacityValue(1.0f);
+    if (enabled) {
+        renderContext->OnOpacityUpdate(originalOpacity);
+        return;
+    }
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
     auto alpha = theme->GetDisabledAlpha();
-    auto originalOpacity = renderContext->GetOpacityValue(1.0f);
-    renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
+    renderContext->OnOpacityUpdate(alpha * originalOpacity);
 }
 
 void SliderPattern::InitAccessibilityHoverEvent()
@@ -478,13 +480,6 @@ void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
     }
 }
 
-void SliderPattern::InitWindowSizeChanged(const RefPtr<FrameNode>& host)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
-}
-
 bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
 {
     if (skipMeasure || dirty->SkipMeasureContent()) {
@@ -783,10 +778,11 @@ void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
             }
         } else {
             auto offset = (direction_ == Axis::HORIZONTAL ? info.GetOffsetX() : info.GetOffsetY()) - axisOffset_;
-            if (std::abs(offset) > STEP_OFFSET) {
-                auto stepCount = static_cast<int32_t>(offset / STEP_OFFSET);
+            auto slipfactor = slipfactor_ > 0 ? slipfactor_ : DEFAULT_SLIP_FACTOR;
+            if (std::abs(offset) > slipfactor) {
+                auto stepCount = static_cast<int32_t>(offset / slipfactor);
                 MoveStep(reverse ? -stepCount : stepCount);
-                axisOffset_ += STEP_OFFSET * stepCount;
+                axisOffset_ += slipfactor * stepCount;
             }
         }
         if (hotFlag_) {
@@ -1761,6 +1757,7 @@ void SliderPattern::RegisterVisibleAreaChange()
     std::vector<double> ratioList = {0.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1890,6 +1887,31 @@ void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
+    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     hasVisibleChangeRegistered_ = false;
+}
+
+void SliderPattern::InitOrRefreshSlipFactor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    float min = sliderPaintProperty->GetMin().value_or(0.0f);
+    float max = sliderPaintProperty->GetMax().value_or(100.0f);
+    float step = sliderPaintProperty->GetStep().value_or(1.0f);
+    if (step == 0) {
+        return;
+    }
+    auto totalStepCount = static_cast<int32_t>((max - min) / step) + 1;
+    if (NearZero(totalStepCount)) {
+        return;
+    }
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
+    auto sliderPPI = theme->GetSliderPPI();
+    slipfactor_ = sliderPPI * SLIP_FACTOR_COEFFICIENT / totalStepCount;
 }
 } // namespace OHOS::Ace::NG

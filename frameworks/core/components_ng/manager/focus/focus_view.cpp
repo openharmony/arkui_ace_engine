@@ -22,7 +22,8 @@ namespace OHOS::Ace::NG {
 void FocusView::FocusViewShow(bool isTriggerByStep)
 {
     if (GetFrameName() == V2::NAVBAR_ETS_TAG ||
-        GetFrameName() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        GetFrameName() == V2::NAVDESTINATION_VIEW_ETS_TAG ||
+        GetFrameName() == V2::MENU_ETS_TAG) {
         if (!GetFocusViewFocusable()) {
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d is not focusable, cannot be shown",
                 GetFrameName().c_str(), GetFrameId());
@@ -165,9 +166,9 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
     CHECK_NULL_RETURN(focusViewFrame, nullptr);
     auto focusViewHub = focusViewFrame->GetFocusHub();
     CHECK_NULL_RETURN(focusViewHub, nullptr);
-    std::list<int32_t> rootScopeDepth = GetRouteOfFirstScope();
+    std::list<int32_t> rootScopeDeepth = GetRouteOfFirstScope();
     RefPtr<FocusHub> rootScope = focusViewHub;
-    for (const auto& index : rootScopeDepth) {
+    for (const auto& index : rootScopeDeepth) {
         CHECK_NULL_RETURN(rootScope, focusViewHub);
         auto children = rootScope->GetChildren();
         auto iter = children.begin();
@@ -246,9 +247,8 @@ bool FocusView::RequestDefaultFocus()
     auto viewRootScope = GetViewRootScope();
     CHECK_NULL_RETURN(viewRootScope, false);
     isViewHasFocused_ = true;
-
     auto defaultFocusNode = focusViewHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
-    
+
     auto isViewRootScopeHasChildFocused = viewRootScope->HasFocusedChild();
     if (neverShown_ && !isViewRootScopeHasChildFocused) {
         if (!defaultFocusNode) {

@@ -108,7 +108,7 @@ protected:
     }
     virtual void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) {}
     virtual void OnTextGenstureSelectionEnd() {}
-
+    virtual void DoTextSelectionTouchCancel() {}
 private:
     void DoTextSelectionTouchMove(const TouchEventInfo& info);
     int32_t start_ = -1;

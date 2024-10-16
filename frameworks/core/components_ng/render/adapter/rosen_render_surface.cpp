@@ -376,12 +376,13 @@ void RosenRenderSurface::ConsumeWebBuffer()
     OHOS::Rect damage;
 
     SurfaceError surfaceErr = consumerSurface_->AcquireBuffer(surfaceBuffer, fence, timestamp, damage);
-    auto errorCode = fence->Wait(WAIT_FENCE_TIME);
-    LOGD("RosenRenderSurface::ConsumeWebBuffer, wait Fence ,errorCode : %{public}d", errorCode);
     if (surfaceErr != SURFACE_ERROR_OK) {
         LOGE("cannot acquire buffer error = %{public}d", surfaceErr);
         return;
     }
+    CHECK_NULL_VOID(fence);
+    auto errorCode = fence->Wait(WAIT_FENCE_TIME);
+    LOGD("RosenRenderSurface::ConsumeWebBuffer, wait Fence ,errorCode : %{public}d", errorCode);
     PostRenderOnlyTaskToUI();
 
     int32_t bufferWidth = surfaceBuffer->GetSurfaceBufferWidth();
@@ -464,11 +465,15 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
         auto lastSurfaceNode = availableBufferList_.back();
         if (lastSurfaceNode && lastSurfaceNode->sendTimes_ <= 0) {
+            ACE_SCOPED_TRACE("ReleaseXComponentBuffer[id:%u][sendTimes:%d]", lastSurfaceNode->bufferId_,
+                lastSurfaceNode->sendTimes_);
             consumerSurface_->ReleaseBuffer(lastSurfaceNode->buffer_, SyncFence::INVALID_FENCE);
             availableBufferList_.pop_back();
         }
         availableBufferList_.emplace_back(surfaceNode);
     }
+    ACE_SCOPED_TRACE("ConsumeXComponentBuffer[id:%u][sendTimes:%d][size:%u]", surfaceNode->bufferId_,
+        surfaceNode->sendTimes_, static_cast<uint32_t>(availableBufferList_.size()));
 #endif
 }
 
@@ -515,7 +520,7 @@ void RosenRenderSurface::DrawBufferForXComponent(
         }
         ++surfaceNode->sendTimes_;
     }
-    ACE_SCOPED_TRACE("XComponent DrawBuffer");
+    ACE_SCOPED_TRACE("DrawXComponentBuffer[id:%u][sendTimes:%d]", surfaceNode->bufferId_, surfaceNode->sendTimes_);
 #ifndef USE_ROSEN_DRAWING
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_VOID(rsCanvas);
@@ -532,9 +537,6 @@ void RosenRenderSurface::DrawBufferForXComponent(
         static_cast<int32_t>(height), getpid(), GetUniqueIdNum() };
     recordingCanvas.DrawSurfaceBuffer(info);
 #endif
-    CHECK_NULL_VOID(recordingCanvas.GetDrawCmdList());
-    recordingCanvas.GetDrawCmdList()->SetWidth(static_cast<int32_t>(width));
-    recordingCanvas.GetDrawCmdList()->SetHeight(static_cast<int32_t>(height));
 #endif
 }
 
@@ -561,7 +563,10 @@ void RosenRenderSurface::ReleaseSurfaceBufferById(uint32_t bufferId)
             iter = availableBufferList_.erase(iter);
         } else if (surfaceNode->bufferId_ == bufferId) {
             // at least reserve one buffer
-            if (--surfaceNode->sendTimes_ <= 0 && (iter != std::prev(availableBufferList_.end()))) {
+            auto isLast = (iter == std::prev(availableBufferList_.end()));
+            ACE_SCOPED_TRACE(
+                "ReleaseXComponentBuffer[id:%u][sendTimes:%d][isLast:%d]", bufferId, surfaceNode->sendTimes_, isLast);
+            if (--surfaceNode->sendTimes_ <= 0 && !isLast) {
                 consumerSurface_->ReleaseBuffer(surfaceNode->buffer_, SyncFence::INVALID_FENCE);
                 availableBufferList_.erase(iter);
             }

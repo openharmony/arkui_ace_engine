@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,11 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
-#include "base/window/drag_window.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
-#include "core/gestures/velocity_tracker.h"
 #include "core/components_ng/manager/drag_drop/utils/internal_drag_action.h"
+#include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace {
 class UnifiedData;
@@ -54,8 +53,6 @@ public:
     DragDropManager() = default;
     ~DragDropManager() override = default;
 
-    RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<PixelMap>& pixelMap, const GestureEvent& info);
-    RefPtr<DragDropProxy> CreateAndShowDragWindow(const RefPtr<UINode>& customNode, const GestureEvent& info);
     RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
         const RefPtr<PixelMap>& pixelMap, const GestureEvent& info, const RefPtr<EventHub>& eventHub);
     RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
@@ -94,7 +91,6 @@ public:
         return eventStrictReportingEnabled_;
     }
 
-    void UpdateDragWindowPosition(int32_t globalX, int32_t globalY);
     void UpdateItemDragPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
@@ -307,6 +303,8 @@ public:
         double height { 0.0 };
         double maxWidth { 0.0 };
         double scale { -1.0 };
+        VectorF originScale { 1.0f, 1.0f };
+        OffsetF originOffset;
         RefPtr<FrameNode> imageNode { nullptr };
         RefPtr<FrameNode> textNode { nullptr };
     } DragPreviewInfo;
@@ -354,6 +352,7 @@ public:
         return isPullMoveReceivedForCurrentDrag_;
     }
 
+    static OffsetF GetTouchOffsetRelativeToSubwindow(int32_t containerId, int32_t x = 0, int32_t y = 0);
     static RectF GetMenuPreviewRect();
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager, const GatherAnimationInfo& info);
     static void UpdateGatherNodePosition(const RefPtr<OverlayManager>& overlayManager,
@@ -404,16 +403,6 @@ public:
         return isShowBadgeAnimation_;
     }
 
-    void SetBadgeNumber(int32_t badgeNumber)
-    {
-        badgeNumber_ = badgeNumber;
-    }
-
-    int32_t GetBadgeNumber() const
-    {
-        return badgeNumber_;
-    }
-
     bool IsDragWithContextMenu() const
     {
         return isDragWithContextMenu_;
@@ -424,14 +413,14 @@ public:
         isDragWithContextMenu_ = isDragWithContextMenu;
     }
 
-    bool IsBackPressedCleanLongPressNodes() const
+    void SetIsDragNodeNeedClean(bool isDragNodeNeedClean = false)
     {
-        return isBackPressedCleanLongPressNodes_;
+        isDragNodeNeedClean_ = isDragNodeNeedClean;
     }
 
-    void SetIsBackPressedCleanLongPressNodes(bool isBackPressedCleanLongPressNodes)
+    bool IsDragNodeNeedClean() const
     {
-        isBackPressedCleanLongPressNodes_ = isBackPressedCleanLongPressNodes;
+        return isDragNodeNeedClean_;
     }
 
     void UpdateDragMovePosition(const NG::OffsetF& offset, bool isRedragStart = false);
@@ -518,6 +507,8 @@ private:
     bool ReachMoveLimit(const PointerEvent& pointerEvent, const Point& point);
     bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
     bool IsUIExtensionComponent(const RefPtr<NG::UINode>& node);
+    void HandleUIExtensionDragEvent(
+        const RefPtr<FrameNode>& frameNode, const PointerEvent& pointerEvent, DragEventType type);
     int32_t GetWindowId();
     void AddItemDrag(const RefPtr<FrameNode>& frameNode, const RefPtr<EventHub>& eventHub);
     void RemoveItemDrag();
@@ -526,12 +517,10 @@ private:
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> textFieldDragFrameNodes_;
-    RefPtr<DragWindow> dragWindow_;
     RefPtr<FrameNode> draggedFrameNode_;
     RefPtr<FrameNode> preTargetFrameNode_;
     RefPtr<FrameNode> draggedGridFrameNode_;
     RefPtr<FrameNode> preGridTargetFrameNode_;
-    RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<FrameNode> itemDragOverlayNode_;
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
@@ -560,6 +549,7 @@ private:
     bool hasNotifiedTransformation_ = false;
     bool isPullMoveReceivedForCurrentDrag_ = false;
     bool isDragWindowSubWindow_ = false;
+    bool isDragNodeNeedClean_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
@@ -577,7 +567,6 @@ private:
     int32_t currentAnimationCnt_ = 0;
     int32_t allAnimationCnt_ = 0;
     bool isDragWithContextMenu_ = false;
-    bool isBackPressedCleanLongPressNodes_ = false;
     Point dragDampStartPoint_ { 1, 1 };
     OffsetF dragMovePosition_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMovePosition_ = OffsetF(0.0f, 0.0f);

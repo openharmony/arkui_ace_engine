@@ -324,7 +324,7 @@ bool TextContentModifier::DrawImage(const RefPtr<FrameNode>& imageNode, RSCanvas
     }
     if (AceType::InstanceOf<AnimatedImage>(canvasImage)) {
         auto animatedImage = DynamicCast<AnimatedImage>(canvasImage);
-        if (animatedImage->GetAnimatorStatus() == Animator::Status::PAUSED) {
+        if (!animatedImage->GetIsAnimating()) {
             animatedImage->ControlAnimation(true);
         }
     }
@@ -387,6 +387,11 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         return;
     }
     ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
+
+    PropertyChangeFlag flag = 0;
+    if (NeedMeasureUpdate(flag)) {
+        host->MarkDirtyNode(flag);
+    }
 
     if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
@@ -510,6 +515,7 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
 void TextContentModifier::ModifyFontSizeInTextStyle(TextStyle& textStyle)
 {
     if (fontSize_.has_value() && fontSizeFloat_) {
+        lastFontSize_ = fontSizeFloat_->Get();
         textStyle.SetFontSize(Dimension(fontSizeFloat_->Get(), DimensionUnit::PX));
     }
 }
@@ -599,8 +605,11 @@ void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
 
 void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
-    if (fontSize_.has_value() && fontSizeFloat_ && !NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get())) {
+    if (fontSize_.has_value() && fontSizeFloat_ &&
+        (!NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()) ||
+            !NearEqual(lastFontSize_, fontSizeFloat_->Get()))) {
         flag |= PROPERTY_UPDATE_MEASURE;
+        lastFontSize_ = fontSizeFloat_->Get();
     }
 }
 

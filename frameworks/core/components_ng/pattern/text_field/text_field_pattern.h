@@ -286,6 +286,8 @@ public:
     void InsertValueOperation(const SourceAndValueInfo& info);
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::string insertValue, int32_t maxLength);
     void UpdateObscure(const std::string& insertValue, bool hasInsertValue);
+    float MeasureCounterNodeHeight();
+    double CalcCounterBoundHeight();
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
@@ -378,6 +380,8 @@ public:
     }
     void UpdateCaretPositionByTouch(const Offset& offset);
     bool IsReachedBoundary(float offset);
+
+    virtual int32_t GetRequestKeyboardId();
 
     virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboardCrossPlatForm(bool isFocusViewChanged);
@@ -665,7 +669,17 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
-        if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_)) {
+        CHECK_NULL_VOID(HasFocus());
+        CHECK_NULL_VOID(!customKeyboard_ && !customKeyboardBuilder_);
+        auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipelineContext);
+        auto windowManager = pipelineContext->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
+
+        auto windowMode = windowManager->GetWindowMode();
+        TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed windowMode = %{public}d", windowMode);
+        if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
             FocusHub::LostFocusToViewRoot();
         }
     }
@@ -1505,6 +1519,8 @@ public:
 
     void ShowCaretAndStopTwinkling();
 
+    void TriggerAvoidOnCaretChange();
+
     bool IsTextEditableForStylus() const override;
     bool IsHandleDragging();
     bool IsLTRLayout()
@@ -1512,6 +1528,16 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, true);
         return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
+    }
+
+    float GetLastCaretPos()
+    {
+        return lastCaretPos_;
+    }
+
+    void SetLastCaretPos(float lastCaretPos)
+    {
+        lastCaretPos_ = lastCaretPos;
     }
 
     void SetEnableHapticFeedback(bool isEnabled)
@@ -1525,6 +1551,10 @@ public:
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
     void StopContentScroll();
     void UpdateContentScroller(const Offset& localOffset);
+    void SetIsInitTextRect(bool isInitTextRect)
+    {
+        initTextRect_ = isInitTextRect;
+    }
 
 protected:
     virtual void InitDragEvent();
@@ -1550,6 +1580,7 @@ protected:
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd() override;
+    void DoTextSelectionTouchCancel() override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
@@ -1718,12 +1749,14 @@ private:
 #endif
     void NotifyOnEditChanged(bool isChanged);
     void ProcessResponseArea();
+    void ProcessCancelButton();
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
     bool CheckAutoFill(bool isFromKeyBoard = false);
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
+    void AdjustTextRectByCleanNode(RectF& textRect);
     void RequestKeyboardAfterLongPress();
     void UpdatePasswordModeState();
     void InitDragDropCallBack();
@@ -1962,6 +1995,7 @@ private:
     int32_t previewTextEnd_ = -1;
     std::string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
+    std::string lastTextValue_ = "";
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
     bool isMoveCaretAnywhere_ = false;
@@ -1975,6 +2009,7 @@ private:
     uint32_t longPressFingerNum_ = 0;
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
+    float lastCaretPos_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

@@ -67,7 +67,7 @@ const TEXT_EDITABLE_DIALOG = '18.3fp';
 const IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
-const SYMBOL_SIZE = '25vp';
+const SYMBOL_SIZE = '24vp';
 const SYMBOL_TITLE_SIZE = '64vp';
 const TITLE_VP: number = 20;
 const SUBTITLE_VP: number = 14;
@@ -161,7 +161,6 @@ export struct EditableTitleBar {
     start: LengthMetrics.resource($r('sys.float.margin_left')),
     end: LengthMetrics.resource($r('sys.float.margin_right')),
   }
-  @State backActive: boolean = false;
   @State fontSize: number = 1;
 
   onWillApplyTheme(theme: Theme): void {
@@ -247,14 +246,11 @@ export struct EditableTitleBar {
   @Builder
   leftIconLayout(): void {
     if (this.leftIconStyle === EditableLeftIconType.Back) {
-      Navigator()
-        .active(this.backActive)
-
       ImageMenuItem({
         item: {
           value: PUBLIC_BACK,
           isEnabled: true,
-          action: () => this.onCancel ? this.onCancel() : this.backActive = true,
+          action: () => this.onCancel ? this.onCancel() : this.getUIContext()?.getRouter()?.back()
         },
         fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,

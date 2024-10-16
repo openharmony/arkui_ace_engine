@@ -272,6 +272,9 @@ void PatternLockPattern::HandleTouchEvent(const TouchEventInfo& info)
                 OnTouchMove(touchInfo);
             } else if (touchType == TouchType::UP) {
                 OnTouchUp();
+            } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+                       touchType == TouchType::CANCEL) {
+                OnTouchUp();
             }
             break;
         }

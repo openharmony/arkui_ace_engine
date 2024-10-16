@@ -112,7 +112,7 @@ void WebModelNG::SetOnConsoleLog(std::function<bool(const BaseEventInfo* info)>&
 {
     auto func = jsCallback;
     auto onConsole = [func](const std::shared_ptr<BaseEventInfo>& info) -> bool {
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_RETURN(context, false);
         bool result = false;
         context->PostSyncEvent([func, info, &result]() { result = func(info.get()); }, "ArkUIWebConsoleLogCallback");
@@ -364,6 +364,20 @@ void WebModelNG::SetOnContextMenuShow(std::function<bool(const BaseEventInfo* in
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnContextMenuShowEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetNewDragStyle(bool isNewDragStyle)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetNewDragStyle(isNewDragStyle);
+}
+
+void WebModelNG::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetPreviewSelectionMenu(param);
 }
 
 void WebModelNG::SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback)

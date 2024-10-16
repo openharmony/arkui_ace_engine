@@ -26,6 +26,8 @@ void GeometryNode::Reset()
     parentGlobalOffset_.Reset();
     parentAbsoluteOffset_.Reset();
     parentLayoutConstraint_.reset();
+    resolvedSingleSafeAreaPadding_.reset();
+    accumulatedSafeAreaExpand_.reset();
 }
 
 RefPtr<GeometryNode> GeometryNode::Clone() const
@@ -40,6 +42,12 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     }
     if (content_) {
         node->content_ = std::make_unique<GeometryProperty>(*content_);
+    }
+    if (accumulatedSafeAreaExpand_) {
+        node->accumulatedSafeAreaExpand_ = std::make_unique<PaddingPropertyF>(*accumulatedSafeAreaExpand_);
+    }
+    if (resolvedSingleSafeAreaPadding_) {
+        node->resolvedSingleSafeAreaPadding_ = std::make_unique<PaddingPropertyF>(*resolvedSingleSafeAreaPadding_);
     }
     node->parentGlobalOffset_ = parentGlobalOffset_;
     node->parentLayoutConstraint_ = parentLayoutConstraint_;

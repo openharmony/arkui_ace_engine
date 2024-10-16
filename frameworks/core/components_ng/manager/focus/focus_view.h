@@ -100,7 +100,6 @@ public:
         return isViewHasShow_;
     }
 
-    bool GetFocusViewFocusable();
     void FocusViewDidShow(const RefPtr<FocusHub>& focusHub);
 
 private:
@@ -110,6 +109,7 @@ private:
     bool isViewHasShow_ = false;
 
     WeakPtr<FocusHub> rootScopeSpecified_;
+    bool GetFocusViewFocusable();
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusView);
 };

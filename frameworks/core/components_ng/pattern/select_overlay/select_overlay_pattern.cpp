@@ -280,6 +280,8 @@ void SelectOverlayPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (changedPoint.GetTouchType() == TouchType::UP && isSimulateOnClick_) {
         isSimulateOnClick_ = false;
         GestureEvent gestureEvent;
+        gestureEvent.SetGlobalLocation(changedPoint.GetGlobalLocation());
+        gestureEvent.SetLocalLocation(changedPoint.GetLocalLocation());
         HandleOnClick(gestureEvent);
         clickConsumeBySimulate_ = true;
     }
@@ -499,8 +501,8 @@ bool SelectOverlayPattern::IsHandlesInSameLine()
 bool SelectOverlayPattern::IsFirstHandleMoveStart(const Offset& touchOffset)
 {
     if (isFirstHandleTouchDown_ && isSecondHandleTouchDown_) {
-        auto firstHandleCenter = Offset{ firstHandleRegion_.Center().GetX(), firstHandleRegion_.Center().GetX() };
-        auto secondHandleCenter = Offset{ secondHandleRegion_.Center().GetX(), secondHandleRegion_.Center().GetX() };
+        auto firstHandleCenter = Offset{ firstHandleRegion_.Center().GetX(), firstHandleRegion_.Center().GetY() };
+        auto secondHandleCenter = Offset{ secondHandleRegion_.Center().GetX(), secondHandleRegion_.Center().GetY() };
         auto distanceToFirstHandle = (firstHandleCenter - touchOffset).GetDistance();
         auto distanceToSecondHandle = (secondHandleCenter - touchOffset).GetDistance();
         return GreatNotEqual(distanceToSecondHandle, distanceToFirstHandle);

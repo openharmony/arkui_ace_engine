@@ -374,15 +374,15 @@ ArkUINativeModuleValue RadioBridge::SetRadioOptions(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> groupArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> indicatorTypeArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    ArkUI_CharPtr value;
-    ArkUI_CharPtr group;
+    std::string value;
+    std::string group;
     auto indicatorType = RadioIndicatorType::TICK;
 
     if (!valueArg.IsNull() && valueArg->IsString(vm)) {
-        value = valueArg->ToString(vm)->ToString(vm).c_str();
+        value = valueArg->ToString(vm)->ToString(vm);
     }
     if (!groupArg.IsNull() && groupArg->IsString(vm)) {
-        group = groupArg->ToString(vm)->ToString(vm).c_str();
+        group = groupArg->ToString(vm)->ToString(vm);
     }
     if (!indicatorTypeArg.IsNull() && indicatorTypeArg->IsNumber()) {
         indicatorType = static_cast<RadioIndicatorType>(indicatorTypeArg->Int32Value(vm));
@@ -396,7 +396,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioOptions(ArkUIRuntimeCallInfo* runtim
         auto nativeNode = nodePtr(pointer->Value());
         CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getRadioModifier()->setRadioOptions(
-            nativeNode, value, group, static_cast<int32_t>(indicatorType));
+            nativeNode, value.c_str(), group.c_str(), static_cast<int32_t>(indicatorType));
     }
     return panda::JSValueRef::Undefined(vm);
 }

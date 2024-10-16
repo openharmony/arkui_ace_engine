@@ -31,7 +31,6 @@ public:
         const WeakPtr<ScrollBarOverlayModifier>& scrollbarOverlayModifier, WeakPtr<ScrollEdgeEffect>&& edgeEffect);
     void SetCaretOffsetAndHeight(const OffsetF& cursorOffset, float height);
     void SetCaretColor(uint32_t caretColor);
-    void SetSelectedBackgroundColor(uint32_t selectedBackgroundColor);
     void SetCaretWidth(float width);
     void SetCaretVisible(bool value);
     void SetScrollOffset(float value);
@@ -58,7 +57,6 @@ private:
     RefPtr<PropertyFloat> caretHeight_;
     RefPtr<PropertyFloat> caretWidth_;
     RefPtr<PropertyInt> caretColor_;
-    RefPtr<PropertyInt> selectedBackgroundColor_;
     RefPtr<PropertyFloat> scrollOffset_;
     RefPtr<PropertyInt> scrollBarOpacityType_;
     RefPtr<PropertyFloat> textHeight_;

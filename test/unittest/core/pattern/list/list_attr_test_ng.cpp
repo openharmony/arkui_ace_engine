@@ -274,7 +274,7 @@ HWTEST_F(ListAttrTestNg, ListItemLayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("sticky"), "Sticky.Opacity");
     EXPECT_EQ(json->GetString("editable"), "EditMode.Movable");
     swipeAction = json->GetObject("swipeAction");
-    EXPECT_EQ(swipeAction->GetString("edgeEffect"), "SwipeEdgeEffect.Node");
+    EXPECT_EQ(swipeAction->GetString("edgeEffect"), "SwipeEdgeEffect.None");
 
     /**
      * @tc.steps: step4. Change some property, Call ToJsonValue()
@@ -1172,10 +1172,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign007, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
 {
     CreateSnapList(V2::ScrollSnapAlign::START);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 
@@ -1185,10 +1185,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 }
@@ -1201,10 +1201,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign008, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign009, TestSize.Level1)
 {
     CreateSnapList(V2::ScrollSnapAlign::END);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 
@@ -1214,10 +1214,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign009, TestSize.Level1)
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::END);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
 }
@@ -1231,10 +1231,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign010, TestSize.Level1)
 {
     float defaultOffset = -(LIST_HEIGHT - DEVIATION_HEIGHT - ITEM_HEIGHT) / 2; // -140.f
     CreateSnapList(V2::ScrollSnapAlign::CENTER);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
 
@@ -1245,10 +1245,10 @@ HWTEST_F(ListAttrTestNg, AttrScrollSnapAlign010, TestSize.Level1)
     model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone(frameNode_);
-    pattern_->OnScrollSnapCallback(-1000, 0.0);
+    pattern_->StartSnapAnimation(-1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
-    pattern_->OnScrollSnapCallback(1000, 0.0);
+    pattern_->StartSnapAnimation(1000, 0.0);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), defaultOffset);
 }
@@ -2157,5 +2157,59 @@ HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition006, TestSize.Level1)
     EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 0);
     EXPECT_EQ(pattern_->currentOffset_, 0);
     EXPECT_EQ(groupPattern->layoutedItemInfo_.value().startIndex, 0);
+}
+
+/**
+ * @tc.name: ListMaintainVisibleContentPosition007
+ * @tc.desc: Test Test maintain visible content position with ListItemGroup with header/footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAttrTestNg, ListMaintainVisibleContentPosition007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItem LazyForEach
+     * @tc.expected: Created successful
+     */
+    ListModelNG model = CreateList();
+    model.SetMaintainVisibleContentPosition(true);
+    auto groupModel = CreateListItemGroup();
+    groupModel.SetSpace(Dimension(10));
+    auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetHeader(std::move(header));
+    auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+    groupModel.SetFooter(std::move(footer));
+    CreateListItems(10);
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step1. Current start index is 0, insert 1 Item in 0.
+     * @tc.expected: Current index is 0, currentOffset = 0
+     */
+    auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+    groupPattern->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 0);
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+
+    /**
+     * @tc.steps: step2. Scroll to listItem1, insert 1 Item in 0.
+     * @tc.expected: Current index is 2, currentOffset = 260
+     */
+    UpdateCurrentOffset(-160);
+    EXPECT_EQ(pattern_->currentOffset_, 160);
+    groupPattern->NotifyDataChange(2, 1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 2);
+    EXPECT_EQ(pattern_->currentOffset_, 260);
+
+    /**
+     * @tc.steps: step3. Scroll to listItem1, delete 1 Item in 0.
+     * @tc.expected: Current index is 1, currentOffset = 260
+     */
+    groupPattern->NotifyDataChange(2, -1);
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(groupPattern->itemDisplayStartIndex_, 1);
+    EXPECT_EQ(pattern_->currentOffset_, 160);
 }
 } // namespace OHOS::Ace::NG

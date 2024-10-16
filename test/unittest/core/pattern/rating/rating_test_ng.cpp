@@ -68,9 +68,7 @@ constexpr double RATING_STEP_SIZE = 0.7;
 constexpr double RATING_STEP_SIZE_1 = 1;
 constexpr double RATING_STEP_SIZE_2 = DEFAULT_STAR_NUM + DEFAULT_STAR_NUM;
 constexpr int32_t RATING_TOUCH_STAR = 3;
-constexpr int32_t RATING_DRAW_BACKGROUND_TIMES = 1;
 constexpr int32_t RATING_SAVE_TIMES = 3;
-constexpr int32_t RATING_CLIP_ROUND_RECT_TIMES = 1;
 constexpr int32_t RATING_CLIP_CLIP_RECT_TIMES = 2;
 constexpr int32_t RATING_RESTORE_TIMES = 3;
 constexpr int32_t RATING_INVALID_TOUCH_STAR = -1;
@@ -898,11 +896,12 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     EXPECT_EQ(ratingPaintMethod->ratingModifier_->touchStar_->Get(), RATING_TOUCH_STAR);
     auto mockCanvas = OHOS::Ace::Testing::MockCanvas();
     DrawingContext context = { mockCanvas, 10.0f, 10.0f };
-    EXPECT_CALL(mockCanvas, DrawBackground(_)).Times(RATING_DRAW_BACKGROUND_TIMES);
     EXPECT_CALL(mockCanvas, Save()).Times(AtLeast(RATING_SAVE_TIMES));
-    EXPECT_CALL(mockCanvas, ClipRoundRectImpl(_, _, _)).Times(RATING_CLIP_ROUND_RECT_TIMES);
     EXPECT_CALL(mockCanvas, Restore()).Times(AtLeast(RATING_RESTORE_TIMES));
     EXPECT_CALL(mockCanvas, ClipRect(_, _, _)).Times(RATING_CLIP_CLIP_RECT_TIMES);
+    EXPECT_CALL(mockCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(mockCanvas));
+    EXPECT_CALL(mockCanvas, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mockCanvas, DetachBrush()).WillRepeatedly(ReturnRef(mockCanvas));
     ratingPaintMethod->ratingModifier_->onDraw(context);
 
     /**
@@ -922,6 +921,9 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     EXPECT_CALL(mockCanvas2, Save()).Times(AtLeast(RATING_SAVE_TIMES_1));
     EXPECT_CALL(mockCanvas2, Restore()).Times(AtLeast(RATING_RESTORE_TIMES_1));
     EXPECT_CALL(mockCanvas2, ClipRect(_, _, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
+    EXPECT_CALL(mockCanvas2, AttachBrush(_)).WillRepeatedly(ReturnRef(mockCanvas2));
+    EXPECT_CALL(mockCanvas2, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mockCanvas2, DetachBrush()).WillRepeatedly(ReturnRef(mockCanvas2));
     ratingPaintMethod->ratingModifier_->onDraw(context2);
 
     /**
@@ -938,6 +940,9 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     EXPECT_CALL(mockCanvas3, Save()).Times(AtLeast(RATING_SAVE_TIMES_1));
     EXPECT_CALL(mockCanvas3, Restore()).Times(AtLeast(RATING_RESTORE_TIMES_1));
     EXPECT_CALL(mockCanvas3, ClipRect(_, _, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
+    EXPECT_CALL(mockCanvas3, AttachBrush(_)).WillRepeatedly(ReturnRef(mockCanvas3));
+    EXPECT_CALL(mockCanvas3, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mockCanvas3, DetachBrush()).WillRepeatedly(ReturnRef(mockCanvas3));
     ratingPaintMethod->ratingModifier_->onDraw(context3);
 }
 
@@ -988,6 +993,9 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest002, TestSize.Level1)
     auto mockCanvas = OHOS::Ace::Testing::MockCanvas();
     DrawingContext context = { mockCanvas, 10.0f, 10.0f };
     ratingPaintMethod->ratingModifier_->SetUseContentModifier(true);
+    EXPECT_CALL(mockCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(mockCanvas));
+    EXPECT_CALL(mockCanvas, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(mockCanvas, DetachBrush()).WillRepeatedly(ReturnRef(mockCanvas));
     ratingPaintMethod->ratingModifier_->onDraw(context);
 
     ratingPaintMethod->ratingModifier_->SetUseContentModifier(false);

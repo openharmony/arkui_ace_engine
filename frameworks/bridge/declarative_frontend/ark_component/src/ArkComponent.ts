@@ -200,17 +200,22 @@ class ModifierWithKey<T extends number | string | boolean | object | Function> {
       this.applyPeer(node, true, component);
       return true;
     }
-    const stageTypeInfo: string = typeof this.stageValue;
-    const valueTypeInfo: string = typeof this.value;
-    let different: boolean = false;
-    if (stageTypeInfo !== valueTypeInfo) {
-      different = true;
-    } else if (stageTypeInfo === 'number' || stageTypeInfo === 'string' || stageTypeInfo === 'boolean') {
-      different = (this.stageValue !== this.value);
+    if (component._needDiff) {
+      const stageTypeInfo: string = typeof this.stageValue;
+      const valueTypeInfo: string = typeof this.value;
+      let different: boolean = false;
+      if (stageTypeInfo !== valueTypeInfo) {
+        different = true;
+      } else if (stageTypeInfo === 'number' || stageTypeInfo === 'string' || stageTypeInfo === 'boolean') {
+        different = (this.stageValue !== this.value);
+      } else {
+        different = this.checkObjectDiff();
+      }
+      if (different) {
+        this.value = this.stageValue;
+        this.applyPeer(node, false, component);
+      }
     } else {
-      different = this.checkObjectDiff();
-    }
-    if (different) {
       this.value = this.stageValue;
       this.applyPeer(node, false, component);
     }
@@ -1067,7 +1072,10 @@ class BorderModifier extends ModifierWithKey<ArkBorder> {
         this.value.arkRadius.topLeft, this.value.arkRadius.topRight, this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
         this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left,
         this.value.arkDashGap.left, this.value.arkDashGap.right, this.value.arkDashGap.top, this.value.arkDashGap.bottom,
-        this.value.arkDashWidth.left, this.value.arkDashWidth.right, this.value.arkDashWidth.top, this.value.arkDashWidth.bottom);
+        this.value.arkDashWidth.left, this.value.arkDashWidth.right, this.value.arkDashWidth.top, this.value.arkDashWidth.bottom,
+        this.value.arkWidth.start, this.value.arkWidth.end, this.value.arkColor.startColor, this.value.arkColor.endColor,
+        this.value.arkRadius.topStart, this.value.arkRadius.topEnd, this.value.arkRadius.bottomStart, this.value.arkRadius.bottomEnd,
+        isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius);
     }
   }
 
@@ -3169,11 +3177,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   _nativePtrChanged: boolean;
   _gestureEvent: UIGestureEvent;
   _instanceId: number;
+  _needDiff: boolean;
 
   constructor(nativePtr: KNode, classType?: ModifierType) {
     this.nativePtr = nativePtr;
     this._changed = false;
     this._classType = classType;
+    this._needDiff = true;
     if (classType === ModifierType.FRAME_NODE) {
       this._instanceId = -1;
       this._modifiersWithKeys = new ObservedMap();

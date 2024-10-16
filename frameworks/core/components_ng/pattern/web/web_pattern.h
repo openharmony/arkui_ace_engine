@@ -40,7 +40,6 @@
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/web/touch_event_listener.h"
 #include "core/components_ng/pattern/web/web_accessibility_property.h"
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
@@ -420,7 +419,7 @@ public:
     ScrollResult HandleScroll(RefPtr<NestableScrollContainer> parent, float offset, int32_t source, NestedState state);
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     bool HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity);
-    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
     void OnScrollStartRecursive(std::vector<float> positions);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
@@ -506,7 +505,7 @@ public:
     void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
-    void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);
+    void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext = true, bool result = false);
     void OnContextMenuHide();
     void QuickMenuIsNeedNewAvoid(
         SelectOverlayInfo& selectInfo,
@@ -579,7 +578,7 @@ public:
     bool OnBackPressed() override;
     bool OnBackPressedForFullScreen() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
-    bool NotifyStartDragTask();
+    bool NotifyStartDragTask(bool isDelayed = false);
     bool IsImageDrag();
     void UpdateJavaScriptOnDocumentStart();
     void UpdateJavaScriptOnDocumentEnd();
@@ -589,6 +588,8 @@ public:
         TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
     Offset GetDragOffset() const;
+    void RemovePreviewMenuNode();
+    void UpdateImagePreviewParam();
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
     void SetLayoutMode(WebLayoutMode mode);
@@ -704,8 +705,33 @@ public:
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
 
+    void SetNewDragStyle(bool isNewDragStyle)
+    {
+        isNewDragStyle_ = isNewDragStyle;
+    }
+
+    bool IsNewDragStyle() const
+    {
+        return isNewDragStyle_;
+    }
+
+    bool IsDragging() const
+    {
+        return isDragging_;
+    }
+
+    void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
+
+    std::shared_ptr<WebPreviewSelectionMenuParam> GetPreviewSelectionMenuParams(
+        const WebElementType& type, const ResponseType& responseType);
+
+    bool IsPreviewMenuNotNeedShowPreview();
+
 private:
     friend class WebContextSelectOverlay;
+
+    void GetPreviewImageOffsetAndSize(bool isImage, Offset& previewOffset, SizeF& previewSize);
+    RefPtr<FrameNode> CreatePreviewImageFrameNode(bool isImage);
     void ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
         TextResponseType responseType = TextResponseType::RIGHT_CLICK, bool handleReverse = false);
     void CloseContextSelectionMenu();
@@ -813,6 +839,7 @@ private:
     bool GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo);
     void HandleMouseEvent(MouseInfo& info);
     void WebOnMouseEvent(const MouseInfo& info);
+    void WebSendMouseEvent(const MouseInfo& info, int32_t clickNum);
     bool HandleDoubleClickEvent(const MouseInfo& info);
     void SendDoubleClickEvent(const MouseClickInfo& info);
     int32_t HandleMouseClickEvent(const MouseInfo& info);
@@ -865,9 +892,10 @@ private:
 
     void HandleTouchCancel(const TouchEventInfo& info);
 
-    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleTouchClickEvent(const GestureEvent& info, bool fromOverlay);
-    void OnSelectHandleStart(bool isFirst);
+    RectF ChangeHandleHeight(
+        const std::shared_ptr<SelectOverlayInfo>& info, const GestureEvent& event, bool isFirst);
+    void HandleTouchClickEventFromOverlay(const GestureEvent& info);
+    void OnSelectHandleStart(const GestureEvent& event, bool isFirst);
     void OnSelectHandleDone(const RectF& handleRect, bool isFirst);
     void OnSelectHandleMove(const RectF& handleRect, bool isFirst);
 
@@ -1043,6 +1071,16 @@ private:
     bool isDragging_ = false;
     bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;
+
+    bool isNewDragStyle_ = false;
+    std::map<std::pair<WebElementType, ResponseType>,
+        std::shared_ptr<WebPreviewSelectionMenuParam>> previewSelectionMenuMap_;
+    std::optional<int32_t> previewImageNodeId_ = std::nullopt;
+    bool needUpdateImagePreviewParam_ = false;
+    WebElementType curElementType_ = WebElementType::NONE;
+    ResponseType curResponseType_ = ResponseType::LONG_PRESS;
+    bool curContextMenuResult_ = false;
+
     bool isWindowShow_ = true;
     bool isActive_ = true;
     bool isEnhanceSurface_ = false;
@@ -1134,6 +1172,8 @@ private:
     int32_t instanceId_ = -1;
     int64_t focusedAccessibilityId_ = -1;
     std::vector<RefPtr<PageNodeInfoWrap>> pageNodeInfo_;
+    bool isLayoutModeInit_ = false;
+    bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
@@ -1147,9 +1187,7 @@ private:
     };
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
     bool imageOverlayIsSelected_ = false;
-    bool clickEventInitialized_ = false;
-    bool clickedFromOverlay_ = false;
-    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    bool isLayoutModeChanged = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

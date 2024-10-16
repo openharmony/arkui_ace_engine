@@ -43,6 +43,7 @@ public:
                     groupedItemHeight_ = pos.second.groupInfo.value().averageHeight;
                     groupHeaderHeight_ = pos.second.groupInfo.value().headerSize;
                     groupFooterHeight_ = pos.second.groupInfo.value().footerSize;
+                    groupSpaceWidth_ = pos.second.groupInfo.value().spaceWidth;
                     break;
                 }
             }
@@ -67,7 +68,7 @@ public:
                 currRowHeight_ = 0.0f;
             }
             estimateHeight_ += listItemGroupPatten->GetEstimateHeight(groupedItemHeight_,
-                groupHeaderHeight_, groupFooterHeight_);
+                groupHeaderHeight_, groupFooterHeight_, groupSpaceWidth_);
             currentIndex_++;
             return;
         }
@@ -141,7 +142,8 @@ public:
                     itor++;
                     continue;
                 }
-                totalHeight += group->GetEstimateHeight(groupedItemHeight_, groupHeaderHeight_, groupFooterHeight_);
+                totalHeight += group->GetEstimateHeight(
+                    groupedItemHeight_, groupHeaderHeight_, groupFooterHeight_, groupSpaceWidth_);
             } else {
                 totalHeight += itor->second.endPos - itor->second.startPos;
             }
@@ -265,6 +267,7 @@ private:
     float groupedItemHeight_ = DEFAULT_ITEM_HEIGHT;
     float groupHeaderHeight_ = 0.0f;
     float groupFooterHeight_ = 0.0f;
+    float groupSpaceWidth_ = 0.0f;
 
     int32_t lanes_ = 1;
     int32_t currLane_ = 0;

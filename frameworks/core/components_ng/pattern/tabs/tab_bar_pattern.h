@@ -27,6 +27,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
@@ -130,7 +131,7 @@ class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
 public:
-    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController) : swiperController_(swiperController) {};
+    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController);
     ~TabBarPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -483,6 +484,8 @@ private:
     void BeforeCreateLayoutWrapper() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool CustomizeExpandSafeArea() override;
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
 
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -529,6 +532,7 @@ private:
     void PlayTabBarTranslateAnimation(AnimationOption option, float targetCurrentOffset);
     void PlayIndicatorTranslateAnimation(AnimationOption option, RectF originalPaintRect, RectF targetPaintRect,
         float targetOffset);
+    void CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& host, const std::string& propertyName);
     void StopTranslateAnimation();
     float CalculateTargetOffset(int32_t targetIndex);
     void UpdateIndicatorCurrentOffset(float offset);
@@ -566,6 +570,17 @@ private:
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
+    RefPtr<SwiperPattern> GetSwiperPattern() const;
+
+    void StartShowTabBar(int32_t delay = 0);
+    void StopShowTabBar();
+    void InitTabBarProperty();
+    void UpdateTabBarHiddenRatio(float ratio);
+    void SetTabBarTranslate(const TranslateOptions& options);
+    void SetTabBarOpacity(float opacity);
+
+    RefPtr<NodeAnimatablePropertyFloat> showTabBarProperty_;
+    bool isTabBarShowing_ = false;
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;

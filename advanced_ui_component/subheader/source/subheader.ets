@@ -645,7 +645,6 @@ export struct SubHeader {
           fontColor: this.subHeaderTheme.fontPrimaryColor,
         })
         .attributeModifier(this.primaryTitleModifier)
-        .width('100%')
       Text($$.subContent)
         .secondaryTitleStyles({
           maxLines: DOUBLE_LINE_NUM,
@@ -653,12 +652,12 @@ export struct SubHeader {
           alignment: Alignment.Start,
           fontColor: this.subHeaderTheme.fontSecondaryColor,
         })
-        .width('100%')
         .margin({
           top: getResourceValue('sys.float.padding_level1'),
         })
         .attributeModifier(this.secondaryTitleModifier)
     }
+    .width('100%')
     .commonContentPadding()
     .alignItems(HorizontalAlign.Start)
   }
@@ -672,7 +671,6 @@ export struct SubHeader {
         alignment: Alignment.Start,
         fontColor: this.subHeaderTheme.fontSecondaryColor,
       })
-      .width('100%')
       .attributeModifier(this.secondaryTitleModifier)
       .commonListPadding()
   }
@@ -708,7 +706,6 @@ export struct SubHeader {
         alignment: Alignment.Start,
         fontColor: this.subHeaderTheme.fontPrimaryColor,
       })
-      .width('100%')
       .attributeModifier(this.primaryTitleModifier)
       .commonContentPadding()
   }

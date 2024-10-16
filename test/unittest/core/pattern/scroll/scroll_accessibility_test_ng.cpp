@@ -58,7 +58,7 @@ HWTEST_F(ScrollAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
     /**
      * @tc.steps: step3. scroll to bottom
      */
-    ScrollTo(CONTENT_MAIN_SIZE);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
     EXPECT_TRUE(pattern_->IsAtBottom());
     accessibilityProperty_->ResetSupportAction();
     expectActions = 0;
@@ -85,8 +85,8 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().SetTicks(TICK);
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT / TICK));
-    EXPECT_TRUE(VerifyTickPosition(-SCROLL_HEIGHT));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT));
 
     /**
      * @tc.steps: step2. ActActionScrollForward with SCROLL_HALF
@@ -96,8 +96,8 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
     EXPECT_EQ(currentOffset, -SCROLL_HEIGHT);
     accessibilityProperty_->ActActionScrollForward(AccessibilityScrollType::SCROLL_HALF);
     const int32_t scrollHalf = 2;
-    EXPECT_TRUE(VerifyTickPosition(currentOffset - SCROLL_HEIGHT / scrollHalf / TICK));
-    EXPECT_TRUE(VerifyTickPosition(currentOffset - SCROLL_HEIGHT / scrollHalf));
+    EXPECT_TRUE(TickPosition(currentOffset - SCROLL_HEIGHT / scrollHalf / TICK));
+    EXPECT_TRUE(TickPosition(currentOffset - SCROLL_HEIGHT / scrollHalf));
 
     /**
      * @tc.steps: step3. ActActionScrollBackward
@@ -106,8 +106,8 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
     currentOffset = pattern_->GetCurrentPosition();
     EXPECT_EQ(currentOffset, -(SCROLL_HEIGHT + SCROLL_HEIGHT / scrollHalf));
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(VerifyTickPosition(currentOffset + SCROLL_HEIGHT / TICK));
-    EXPECT_TRUE(VerifyTickPosition(currentOffset + SCROLL_HEIGHT));
+    EXPECT_TRUE(TickPosition(currentOffset + SCROLL_HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(currentOffset + SCROLL_HEIGHT));
 
     /**
      * @tc.steps: step4. ActActionScrollBackward with SCROLL_HALF
@@ -116,8 +116,8 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
     currentOffset = pattern_->GetCurrentPosition();
     EXPECT_EQ(currentOffset, -(SCROLL_HEIGHT / scrollHalf));
     accessibilityProperty_->ActActionScrollBackward(AccessibilityScrollType::SCROLL_HALF);
-    EXPECT_TRUE(VerifyTickPosition(currentOffset / TICK));
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(currentOffset / TICK));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -149,13 +149,13 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().SetTicks(1);
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
     accessibilityProperty_->ActActionScrollForward(AccessibilityScrollType::SCROLL_HALF);
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
     accessibilityProperty_->ActActionScrollBackward(AccessibilityScrollType::SCROLL_HALF);
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**
@@ -182,12 +182,12 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest003, TestSize.Level1)
      */
     MockAnimationManager::GetInstance().SetTicks(1);
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
     accessibilityProperty_->ActActionScrollForward(AccessibilityScrollType::SCROLL_HALF);
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
     accessibilityProperty_->ActActionScrollBackward(AccessibilityScrollType::SCROLL_HALF);
-    EXPECT_TRUE(VerifyTickPosition(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 } // namespace OHOS::Ace::NG

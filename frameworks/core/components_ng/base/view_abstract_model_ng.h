@@ -924,9 +924,10 @@ public:
         ViewAbstract::SetShouldBuiltInRecognizerParallelWith(std::move(shouldBuiltInRecognizerParallelWithFunc));
     }
 
-    void SetOnGestureRecognizerJudgeBegin(NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) override
+    void SetOnGestureRecognizerJudgeBegin(
+        NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override
     {
-        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
+        ViewAbstract::SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc), exposeInnerGestureFlag);
     }
 
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override
@@ -1285,8 +1286,8 @@ public:
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
-    void SetAccessibilitySelected(bool selected) override;
-    void SetAccessibilityChecked(bool checked) override;
+    void SetAccessibilitySelected(bool selected, bool resetValue) override;
+    void SetAccessibilityChecked(bool checked, bool resetValue) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1454,8 +1455,8 @@ public:
 
     static void SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance);
     static void SetAccessibilityDescription(FrameNode* frameNode, const std::string& description);
-    static void SetAccessibilitySelected(FrameNode* frameNode, bool selected);
-    static void SetAccessibilityChecked(FrameNode* frameNode, bool checked);
+    static void SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue);
+    static void SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {

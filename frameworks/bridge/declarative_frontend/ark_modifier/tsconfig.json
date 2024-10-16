@@ -82,8 +82,7 @@
         "src/water_flow_modifier.ts",
         "src/symbol_glyph_modifier.ts",
         "src/symbol_span_modifier.ts",
-        "src/container_span_modifier.ts",
-        "src/linear_indicator_modifitr.ts"
+        "src/container_span_modifier.ts"
     ],
     "compilerOptions": {
         "module": "none",

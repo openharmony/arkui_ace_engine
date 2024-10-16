@@ -263,11 +263,11 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
         spanTextStyle.SetEnableVariableFontWeight(false);
     }
     auto fontManager = pipelineContext->GetFontManager();
-    if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (textStyle.GetFontFamilies().empty())) {
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) && (spanTextStyle.GetFontFamilies().empty())) {
         spanTextStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
     }
     if (frameNode) {
-        FontRegisterCallback(frameNode, textStyle);
+        FontRegisterCallback(frameNode, spanTextStyle);
     }
     if (NearZero(spanTextStyle.GetFontSize().Value())) {
         return -1;
@@ -278,14 +278,8 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     CHECK_NULL_RETURN(pattern, -1);
     spanTextStyle.SetTextBackgroundStyle(backgroundStyle);
     if (!fontStyle->HasTextColor() && urlOnRelease) {
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_RETURN(theme, -1);
-        auto eventHub = frameNode->GetEventHub<EventHub>();
-        if (eventHub && !eventHub->IsEnabled()) {
-            spanTextStyle.SetTextColor(theme->GetUrlDisabledColor());
-        } else {
-            spanTextStyle.SetTextColor(theme->GetUrlDefaultColor());
-        }
+        auto urlSpanColor = pattern->GetUrlSpanColor();
+        spanTextStyle.SetTextColor(urlSpanColor);
         UpdateTextStyle(spanContent, builder, spanTextStyle, selectedStart, selectedEnd);
     } else if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
         TextStyle aiSpanStyle = spanTextStyle;

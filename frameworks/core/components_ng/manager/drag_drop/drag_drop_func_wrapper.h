@@ -46,7 +46,9 @@ public:
     static float RadiusToSigma(float radius);
     static std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     [[maybe_unused]] static double GetScaleWidth(int32_t containerId);
+    static std::string GetSummaryString(const std::map<std::string, int64_t>& summary);
     static void SetExtraInfo(int32_t containerId, std::string extraInfo);
+    static std::string GetAnonyString(const std::string &fullString);
 };
 } // namespace OHOS::Ace::NG
 

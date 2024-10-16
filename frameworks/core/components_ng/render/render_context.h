@@ -299,6 +299,11 @@ public:
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
     virtual void UpdateWindowFocusState(bool isFocused) {}
+    /**
+     * @brief Only clip the content & foreground layer by @c rect.
+     * @param rect - offset of @c rect is relative to FrameRect.
+     */
+    virtual void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
@@ -665,10 +670,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AttractionEffect, AttractionEffect);
 
     virtual void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) {}
-    virtual std::vector<double> GetTrans()
-    {
-        return std::vector<double>();
-    }
     virtual void SetFrameGravity(OHOS::Rosen::Gravity gravity) {}
 
     virtual int32_t CalcExpectedFrameRate(const std::string& scene, float speed)

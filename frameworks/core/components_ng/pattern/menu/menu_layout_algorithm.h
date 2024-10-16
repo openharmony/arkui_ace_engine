@@ -38,6 +38,7 @@ struct MenuDumpInfo {
     std::string targetNode;
     OffsetF targetOffset;
     SizeF targetSize;
+    Rect menuWindowRect;
     Rect wrapperRect;
     float previewBeginScale = 0.0f;
     float previewEndScale = 0.0f;
@@ -47,6 +48,7 @@ struct MenuDumpInfo {
     float right = 0.0f;
     OffsetF globalLocation;
     std::string originPlacement;
+    std::string defaultPlacement;
     OffsetF finalPosition;
     std::string finalPlacement = "NONE";
 };
@@ -75,9 +77,10 @@ public:
         return clipPath_;
     }
 
-    bool hierarchicalParameters_ = false;
-    void InitHierarchicalParameters(bool isShowInSubWindow, const RefPtr<MenuPattern>& menuPattern);
+    bool canExpandCurrentWindow_ = false;
+    void InitCanExpandCurrentWindow(bool isShowInSubWindow);
     bool CheckIsEmbeddedMode(LayoutWrapper* layoutWrapper);
+    Rect GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern);
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition, bool IsContextMenu = false);
@@ -93,6 +96,21 @@ protected:
     SizeF wrapperSize_;
     // rect is relative to menuWrapper
     Rect wrapperRect_;
+    struct PreviewMenuParam {
+        SizeF windowGlobalSizeF;
+        Rect menuWindowRect;
+        float windowsOffsetX = 0.0f;
+        float windowsOffsetY = 0.0f;
+        float top = 0.0f;
+        float bottom = 0.0f;
+        float left = 0.0f;
+        float right = 0.0f;
+        float topSecurity = 0.0f;
+        float bottomSecurity = 0.0f;
+        float previewMenuGap = 0.0f;
+        float menuItemTotalHeight = 0.0f;
+    };
+    PreviewMenuParam param_;
 
 private:
     enum class ErrorPositionType {
@@ -106,19 +124,6 @@ private:
         Right_Direction,
         Left_Direction,
         None_Direction,
-    };
-    struct PreviewMenuParam {
-        SizeF windowGlobalSizeF;
-        float windowsOffsetX = 0.0f;
-        float windowsOffsetY = 0.0f;
-        float top = 0.0f;
-        float bottom = 0.0f;
-        float left = 0.0f;
-        float right = 0.0f;
-        float topSecurity = 0.0f;
-        float bottomSecurity = 0.0f;
-        float previewMenuGap = 0.0f;
-        float menuItemTotalHeight = 0.0f;
     };
 
     void Initialize(LayoutWrapper* layoutWrapper);
@@ -160,6 +165,7 @@ private:
     OffsetF GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition);
     void InitTargetSizeAndPosition(const LayoutWrapper* layoutWrapper, bool isContextMenu,
         const RefPtr<MenuPattern>& menuPattern);
+    bool SkipUpdateTargetNodeSize(const RefPtr<FrameNode>& targetNode, const RefPtr<MenuPattern>& menuPattern);
     OffsetF GetChildPosition(const SizeF& childSize, bool didNeedArrow = false);
     OffsetF FitToScreen(const OffsetF& position, const SizeF& childSize, bool didNeedArrow = false);
     bool CheckPosition(const OffsetF& position, const SizeF& childSize);
@@ -194,8 +200,6 @@ private:
     void ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
     void GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& windowGlobalRect,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage);
-    void GetPreviewNodeTargetHoverImageChild(const RefPtr<LayoutWrapper>& child,
-        RefPtr<FrameNode>& hostNode, RefPtr<GeometryNode>& geometryNode, bool isShowHoverImage);
     SizeF GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<FrameNode>& frameNode,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
 
@@ -234,6 +238,8 @@ private:
     void UpdateChildConstraintByDevice(const RefPtr<MenuPattern>& menuPattern,
         LayoutConstraintF& childConstraint, const LayoutConstraintF& layoutConstraint);
     void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& windowGlobalRect);
+    void ModifyTargetOffset();
+
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
@@ -307,9 +313,13 @@ private:
     bool isHalfFoldHover_ = false;
     // previewScale_ must be greater than 0
     float previewScale_ = 1.0f;
-    PreviewMenuParam param_;
     MenuDumpInfo dumpInfo_;
     MarginPropertyF layoutRegionMargin_;
+    bool isExpandDisplay_ = false;
+    bool isFreeMultiWindow_ = false;
+    bool isUIExtensionSubWindow_ = false;
+    RectF displayWindowRect_;
+    RectF UIExtensionHostWindowRect_;
 
     OffsetF childOffset_;
     SizeF childMarginFrameSize_;

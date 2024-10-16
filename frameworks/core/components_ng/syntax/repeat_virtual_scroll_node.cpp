@@ -72,10 +72,16 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
     ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start [%d] - end [%d; cacheStart: [%d], cacheEnd: [%d]",
         start, end, cacheStart, cacheEnd);
 
+    // get normalized active range (with positive indices only)
+    const auto divisor = (totalCount_ > 0) ? totalCount_ : std::numeric_limits<int>::max();
+    const auto nStart = (start - cacheStart + totalCount_) % divisor;
+    const auto nEnd = (end + cacheEnd + totalCount_) % divisor;
+
     // memorize active range
-    caches_.SetLastActiveRange(start - cacheStart, end + cacheEnd);
+    caches_.SetLastActiveRange(nStart, nEnd);
+
     // notify TS side
-    onSetActiveRange_(start, end);
+    onSetActiveRange_(nStart, nEnd);
 
     bool needSync = caches_.RebuildL1([start, end, cacheStart, cacheEnd, this](
         int32_t index, const RefPtr<UINode>& node) -> bool {
@@ -126,11 +132,15 @@ bool RepeatVirtualScrollNode::CheckNode4IndexInL1(int32_t index, int32_t start, 
     }
 
     auto totalCount = static_cast<int32_t>(totalCount_);
-    if (((start - cacheStart <= index) && (index <= end + cacheEnd)) ||
-        ((start - cacheStart < 0) && (start - cacheStart + totalCount <= index)) ||
-        ((end + cacheEnd >= totalCount) && (end + cacheEnd - totalCount >= index)) ||
-        ((end < start) && (index <= end + cacheEnd || start - cacheStart <= index))) {
+    if ((start - cacheStart <= index) && (index <= end + cacheEnd)) {
         return true;
+    }
+    if (isLoop_) {
+        if (((end < start) && (start - cacheStart <= index || index <= end + cacheEnd)) ||
+            ((start - cacheStart < 0) && (index >= start - cacheStart + totalCount)) ||
+            ((end + cacheEnd >= totalCount) && (index <= end + cacheEnd - totalCount))) {
+            return true;
+        }
     }
     return false;
 }

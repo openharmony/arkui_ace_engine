@@ -19,6 +19,10 @@ import { TimePickerDialogBootcamp } from './TimePickerDialogBootcamp';
 import { DatePickerDialogBootcamp } from './DatePickerDialogBootcamp';
 import { CalendarPickerDialogBootcamp } from './CalendarPickerDialogBootcamp';
 import { ListItemGroupBootcamp } from './ListItemGroupBootcamp';
+import { ListBootcamp } from './ListBootcamp';
+import { GridBootcamp } from './GridBootcamp';
+import { ScrollBootcamp } from './ScrollBootcamp';
+import { WaterFlowBootcamp } from './WaterFlowBootcamp';
 
 export const containersRoute: RouteGroup = {
   name: 'containers',
@@ -29,6 +33,10 @@ export const containersRoute: RouteGroup = {
     { name: 'date-picker-dialog', label: '日期选择器弹窗/DatepickerDialog' },
     { name: 'calendar-picker-dialog', label: '日历选择器弹窗/CalendarPickerDialog' },
     { name: 'list-item-group', label: '分组列表/ListItemGroup'},
+    { name: 'list', label: '列表/List'},
+    { name: 'grid', label: '网格/Grid' },
+    { name: 'scroll', label: '滚动容器/Scroll' },
+    { name: 'waterFlow', label: '瀑布流容器/WaterFlow' }
   ]
 };
 
@@ -44,5 +52,13 @@ export function ContainersDestination(name: string, route: Route) {
     CalendarPickerDialogBootcamp({ title: route.label })
   } else if (name === 'containers/list-item-group') {
     ListItemGroupBootcamp({ title: route.label })
+  } else if (name === 'containers/list') {
+    ListBootcamp({ title: route.label })
+  } else if (name === 'containers/grid') {
+    GridBootcamp({ title: route.label })
+  } else if (name === 'containers/scroll') {
+    ScrollBootcamp({ title: route.label })
+  } else if (name === 'containers/waterFlow') {
+    WaterFlowBootcamp({ title: route.label })
   }
 }

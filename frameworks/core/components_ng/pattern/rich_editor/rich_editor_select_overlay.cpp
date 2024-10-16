@@ -212,10 +212,9 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     if (!IsSingleHandle()) {
         pattern->SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
     }
-    pattern->CalculateHandleOffsetAndShowOverlay();
     pattern->StopAutoScroll();
     pattern->magnifierController_->RemoveMagnifierFrameNode();
-    if (!IsSingleHandleShow() && textSelector.StartEqualToDest()) {
+    if (!IsSingleHandle() && textSelector.StartEqualToDest()) {
         HideMenu();
         CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
         pattern->StartTwinkling();
@@ -227,6 +226,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     if (!isFirstHandle && IsSingleHandle()) {
         overlayManager->SetIsHandleLineShow(true);
     }
+    pattern->CalculateHandleOffsetAndShowOverlay();
     overlayManager->MarkInfoChange((isFirstHandle ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
                             DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM);
     ProcessOverlay({ .animation = true });
@@ -404,6 +404,7 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
 
 void RichEditorSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
+    BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
     CHECK_NULL_VOID(IsMouseClickDown(sourceType, touchType) || IsTouchUp(sourceType, touchType));
     if (IsSingleHandle()) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
@@ -565,6 +566,9 @@ void RichEditorSelectOverlay::OnOverlayClick(const GestureEvent& event, bool isF
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
+    if (!pattern->IsEditing() && !IsSingleHandle()) {
+        ToggleMenu();
+    }
     auto globalOffset = pattern->GetGlobalOffset();
     auto overlayEvent = event;
     auto localLocation = Offset(overlayEvent.GetGlobalLocation().GetX() - globalOffset.GetX(),
@@ -585,6 +589,9 @@ void RichEditorSelectOverlay::OnHandleMouseEvent(const MouseInfo& event)
 void RichEditorSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
 {
     handleIsHidden_ = false;
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_SELECT_AREA);
     if (IsSingleHandleShow()) {
         auto pattern = GetPattern<RichEditorPattern>();
         CHECK_NULL_VOID(pattern);

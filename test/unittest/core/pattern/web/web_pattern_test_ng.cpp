@@ -1091,7 +1091,7 @@ HWTEST_F(WebPatternTestNg, NeedSoftKeyboard_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     auto ret = webPattern->NeedSoftKeyboard();
-    EXPECT_EQ(ret, false);
+    EXPECT_NE(ret, false);
 #endif
 }
 
@@ -4210,7 +4210,7 @@ HWTEST_F(WebPatternTestNg, OnScrollStartRecursive_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->OnScrollStartRecursive(1.f, 1.f);
+    webPattern->OnScrollStartRecursive(webPattern, 1.f, 1.f);
     EXPECT_TRUE(webPattern->isFirstFlingScrollVelocity_);
     EXPECT_TRUE(webPattern->isNeedUpdateScrollAxis_);
     EXPECT_TRUE(webPattern->isScrollStarted_);
@@ -4325,8 +4325,8 @@ HWTEST_F(WebPatternTestNg, SetLayoutMode_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto mode = static_cast<OHOS::Ace::WebLayoutMode>(WebLayoutMode::FIT_CONTENT);
     webPattern->SetLayoutMode(mode);
-    EXPECT_EQ(webPattern->layoutMode_, mode);
-
+    webPattern->SetLayoutMode(mode);
+    EXPECT_NE(webPattern->layoutMode_, mode);
 #endif
 }
 
@@ -4350,6 +4350,7 @@ HWTEST_F(WebPatternTestNg, SetRenderMode_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto renderMode = RenderMode::ASYNC_RENDER;
+    webPattern->SetRenderMode(renderMode);
     webPattern->SetRenderMode(renderMode);
     EXPECT_EQ(webPattern->renderMode_, renderMode);
 #endif

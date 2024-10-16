@@ -76,6 +76,15 @@ public:
         }
     }
 
+    void StoreConfig(T& config)
+    {
+        aceConfig_ = config;
+    }
+
+    bool IsConfigsEqual(const ViewportConfig& other)
+    {
+        return aceConfig_.config_ == other;
+    }
 private:
     void PostUpdateConfigTaskLocked(const T& config, CancelableCallback<void()> &&task,
         const RefPtr<Container>& container, const std::string& taskName, TaskExecutor::TaskType type)
@@ -97,6 +106,8 @@ private:
     std::mutex updateTaskMutex_;
 
     UpdateTask currentTask_;
+
+    T aceConfig_;
 };
 } // OHOS::Ace
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_COMMON_UPDATE_CONFIG_MANAGER_H

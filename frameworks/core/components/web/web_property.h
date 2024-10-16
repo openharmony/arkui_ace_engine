@@ -24,6 +24,7 @@
 #include "core/components/declaration/web/web_client.h"
 #include "core/components/web/resource/web_javascript_value.h"
 #include "core/components/web/web_event.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/event/key_event.h"
@@ -70,6 +71,28 @@ enum class WebKeyboardAvoidMode : int32_t {
     RESIZE_CONTENT,
     OVERLAYS_CONTENT,
     DEFAULT
+};
+
+enum class WebElementType : int32_t {
+    TEXT = 0,
+    IMAGE,
+    MIXED,
+    NONE,
+};
+
+struct WebPreviewSelectionMenuParam {
+    WebElementType type;
+    ResponseType responseType;
+    std::function<void()> menuBuilder;
+    std::function<void()> previewBuilder;
+    NG::MenuParam menuParam;
+
+    WebPreviewSelectionMenuParam(const WebElementType& _type, const ResponseType& _responseType,
+        const std::function<void()>& _menuBuilder, const std::function<void()>& _previewBuilder,
+        const NG::MenuParam& _menuParam)
+        : type(_type), responseType(_responseType), menuBuilder(_menuBuilder), previewBuilder(_previewBuilder),
+          menuParam(_menuParam)
+    {}
 };
 
 struct WebMenuOptionsParam {

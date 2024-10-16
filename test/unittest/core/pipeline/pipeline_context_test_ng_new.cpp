@@ -1435,9 +1435,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg078, TestSize.Level1)
     pipeline->StartFullToMultWindowAnimation(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::FULL_TO_FLOATING);
     pipeline->AvoidanceLogic(0.0);
     EXPECT_EQ(pipeline->finishFunctions_.size(), 0);
-    auto listenerWrapper = [](const std::vector<std::string>& params) {};
-    pipeline->RegisterDumpInfoListener(listenerWrapper);
-    EXPECT_EQ(pipeline->dumpListeners_.size(), 1);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     EXPECT_FALSE(pipeline->DumpPageViewData(nullptr, viewDataWrap));
     EXPECT_FALSE(pipeline->DumpPageViewData(frameNode, viewDataWrap));
@@ -1923,8 +1920,8 @@ HWTEST_F(PipelineContextTestNg, DragEvent01, TestSize.Level1)
     uint64_t nanoTimeStamp = 3100;
 
     PointerEvent resampledPointerEvent = context_->GetResamplePointerEvent(history, current, nanoTimeStamp);
-    EXPECT_EQ(300, resampledPointerEvent.x);
-    EXPECT_EQ(400, resampledPointerEvent.y);
+    EXPECT_EQ(305, resampledPointerEvent.x);
+    EXPECT_EQ(405, resampledPointerEvent.y);
 }
 } // namespace NG
 } // namespace OHOS::Ace

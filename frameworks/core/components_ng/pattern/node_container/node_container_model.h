@@ -26,7 +26,7 @@ public:
     virtual ~NodeContainerModel() = default;
 
     virtual void Create() = 0;
-    virtual void SetMakeFunction(std::function<RefPtr<NG::UINode>(int32_t)>&& makeFunc) = 0;
+    virtual void SetMakeFunction(std::function<RefPtr<NG::UINode>()>&& makeFunc) = 0;
     virtual void SetOnResize(std::function<void(const NG::SizeF& size)>&& resizeFunc) = 0;
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
     virtual void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) = 0;

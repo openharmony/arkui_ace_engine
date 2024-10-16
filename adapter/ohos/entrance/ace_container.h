@@ -315,8 +315,6 @@ public:
 
     void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
-    bool ParseThemeConfig(const std::string& themeConfig);
-
     void CheckAndSetFontFamily() override;
 
     void OnFinish()
@@ -381,6 +379,14 @@ public:
     float GetWindowScale() const override
     {
         return windowScale_;
+    }
+
+    double GetWindowDensity() const
+    {
+        if (!uiWindow_) {
+            return 0.0;
+        }
+        return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }
 
     int32_t GetParentId() const
@@ -539,6 +545,8 @@ public:
     sptr<IRemoteObject> GetToken();
     void SetParentToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetParentToken();
+    uint32_t GetParentWindowType() const;
+    uint32_t GetWindowType() const;
 
     std::string GetWebHapPath() const override
     {
@@ -685,6 +693,21 @@ public:
         return paramUie_;
     }
 
+    void UpdateResourceOrientation(int32_t orientation);
+    void UpdateResourceDensity(double density);
+
+    bool IsFreeMultiWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetFreeMultiWindowModeEnabledState();
+    }
+    Rect GetUIExtensionHostWindowRect(int32_t instanceId) override
+    {
+        CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());
+        auto rect = uiWindow_->GetHostWindowRect(instanceId);
+        return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -705,7 +728,10 @@ private:
     void FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
 
     void NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration);
-
+    void ProcessThemeUpdate(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
+    DeviceOrientation ProcessDirectionUpdate(
+        const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
+    void InitDragEventCallback();
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
