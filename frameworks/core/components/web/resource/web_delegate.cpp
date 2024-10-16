@@ -2985,6 +2985,22 @@ void WebDelegate::UpdateInitialScale(float scale)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateInitialScale");
 }
 
+void WebDelegate::SetSurfaceDensity(const double& density)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), density]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                delegate->nweb_->SetSurfaceDensity(density);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetSurfaceDensity");
+}
+
 void WebDelegate::Resize(const double& width, const double& height, bool isKeyboard)
 {
     if (width <= 0 || height <= 0) {
