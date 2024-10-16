@@ -1936,7 +1936,7 @@ uint32_t TextFieldModelNG::GetMaxLines(FrameNode* frameNode)
 void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding)
 {
     CHECK_NULL_VOID(frameNode);
-    NG::ViewAbstract::SetPadding(newPadding);
+    NG::ViewAbstract::SetPadding(frameNode, newPadding);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
