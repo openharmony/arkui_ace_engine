@@ -118,7 +118,6 @@ export class EditableTitleBar extends ViewPU {
             start: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_left'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
             end: LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.margin_right'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }),
         }, this, 'titleBarMargin');
-        this.__backActive = new ObservedPropertySimplePU(false, this, 'backActive');
         this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
         this.setInitiallyProvidedValue(n10);
         this.finalizeConstruction();
@@ -169,9 +168,6 @@ export class EditableTitleBar extends ViewPU {
         if (l10.titleBarMargin !== undefined) {
             this.titleBarMargin = l10.titleBarMargin;
         }
-        if (l10.backActive !== undefined) {
-            this.backActive = l10.backActive;
-        }
         if (l10.fontSize !== undefined) {
             this.fontSize = l10.fontSize;
         }
@@ -183,14 +179,12 @@ export class EditableTitleBar extends ViewPU {
         this.__editableTitleBarTheme.purgeDependencyOnElmtId(j10);
         this.__contentMargin.purgeDependencyOnElmtId(j10);
         this.__titleBarMargin.purgeDependencyOnElmtId(j10);
-        this.__backActive.purgeDependencyOnElmtId(j10);
         this.__fontSize.purgeDependencyOnElmtId(j10);
     }
     aboutToBeDeleted() {
         this.__editableTitleBarTheme.aboutToBeDeleted();
         this.__contentMargin.aboutToBeDeleted();
         this.__titleBarMargin.aboutToBeDeleted();
-        this.__backActive.aboutToBeDeleted();
         this.__fontSize.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
@@ -212,12 +206,6 @@ export class EditableTitleBar extends ViewPU {
     }
     set titleBarMargin(g10) {
         this.__titleBarMargin.set(g10);
-    }
-    get backActive() {
-        return this.__backActive.get();
-    }
-    set backActive(f10) {
-        this.__backActive.set(f10);
     }
     get fontSize() {
         return this.__fontSize.get();
@@ -337,11 +325,6 @@ export class EditableTitleBar extends ViewPU {
             If.create();
             if (this.leftIconStyle === EditableLeftIconType.Back) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((r8, s8) => {
-                        Navigator.create();
-                        Navigator.active(this.backActive);
-                    }, Navigator);
-                    Navigator.pop();
                     {
                         this.observeComponentCreation2((l8, m8) => {
                             if (m8) {
@@ -349,7 +332,7 @@ export class EditableTitleBar extends ViewPU {
                                     item: {
                                         value: PUBLIC_BACK,
                                         isEnabled: true,
-                                        action: () => this.onCancel ? this.onCancel() : this.backActive = true,
+                                        action: () => this.onCancel ? this.onCancel() : this.getUIContext()?.getRouter()?.back()
                                     },
                                     fontSize: this.fontSize,
                                     attribute: ItemType.LeftIcon,
@@ -361,7 +344,7 @@ export class EditableTitleBar extends ViewPU {
                                         item: {
                                             value: PUBLIC_BACK,
                                             isEnabled: true,
-                                            action: () => this.onCancel ? this.onCancel() : this.backActive = true,
+                                            action: () => this.onCancel ? this.onCancel() : this.getUIContext()?.getRouter()?.back()
                                         },
                                         fontSize: this.fontSize,
                                         attribute: ItemType.LeftIcon,

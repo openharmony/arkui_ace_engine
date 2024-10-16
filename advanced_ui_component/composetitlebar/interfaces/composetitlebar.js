@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,6 @@ class ComposeTitleBar extends ViewPU {
     this.subtitle = '';
     this.menuItems = [];
     this.__titleMaxWidth = new ObservedPropertySimplePU(0, this, 'titleMaxWidth');
-    this.__backActive = new ObservedPropertySimplePU(false, this, 'backActive');
     this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
     this.setInitiallyProvidedValue(p10);
     this.finalizeConstruction();
@@ -59,9 +58,6 @@ class ComposeTitleBar extends ViewPU {
     if (n10.titleMaxWidth !== undefined) {
       this.titleMaxWidth = n10.titleMaxWidth;
     }
-    if (n10.backActive !== undefined) {
-      this.backActive = n10.backActive;
-    }
     if (n10.fontSize !== undefined) {
       this.fontSize = n10.fontSize;
     }
@@ -70,12 +66,10 @@ class ComposeTitleBar extends ViewPU {
   }
   purgeVariableDependenciesOnElmtId(l10) {
     this.__titleMaxWidth.purgeDependencyOnElmtId(l10);
-    this.__backActive.purgeDependencyOnElmtId(l10);
     this.__fontSize.purgeDependencyOnElmtId(l10);
   }
   aboutToBeDeleted() {
     this.__titleMaxWidth.aboutToBeDeleted();
-    this.__backActive.aboutToBeDeleted();
     this.__fontSize.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
@@ -85,12 +79,6 @@ class ComposeTitleBar extends ViewPU {
   }
   set titleMaxWidth(k10) {
     this.__titleMaxWidth.set(k10);
-  }
-  get backActive() {
-    return this.__backActive.get();
-  }
-  set backActive(j10) {
-    this.__backActive.set(j10);
   }
   get fontSize() {
     return this.__fontSize.get();
@@ -144,16 +132,6 @@ class ComposeTitleBar extends ViewPU {
       }
       ViewStackProcessor.StopGetAccessRecording();
     });
-    this.observeComponentCreation((x9, y9) => {
-      ViewStackProcessor.StartGetAccessRecordingFor(x9);
-      Navigator.create();
-      Navigator.active(this.backActive);
-      if (!y9) {
-        Navigator.pop();
-      }
-      ViewStackProcessor.StopGetAccessRecording();
-    });
-    Navigator.pop();
     {
       this.observeComponentCreation((r9, s9) => {
         ViewStackProcessor.StartGetAccessRecordingFor(r9);
@@ -161,7 +139,7 @@ class ComposeTitleBar extends ViewPU {
           let t9 = new ImageMenuItem(this, { item: {
             value: PUBLIC_BACK,
             isEnabled: true,
-            action: () => this.backActive = true
+            action: () => this.getUIContext()?.getRouter()?.back()
           }, index: -1 }, undefined, r9, () => { }, { page: 'library/src/main/ets/components/mainpage/MainPage.ets', line: 64, col: 9 });
           ViewPU.create(t9);
           let u9 = () => {
@@ -169,7 +147,7 @@ class ComposeTitleBar extends ViewPU {
               item: {
                 value: PUBLIC_BACK,
                 isEnabled: true,
-                action: () => this.backActive = true
+                action: () => this.getUIContext()?.getRouter()?.back()
               },
               index: -1
             };
