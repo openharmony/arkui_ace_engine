@@ -30,6 +30,10 @@ class AccessibilityEventInfo;
 class AccessibilityElementOperator;
 } // namespace OHOS::Accessibility
 
+namespace OHOS::Ace::NG {
+class WebPattern;
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace {
 
 struct AccessibilityEvent {
@@ -106,6 +110,8 @@ public:
     ~AccessibilityManager() override = default;
 
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
+    virtual void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<NG::WebPattern>& webPattern) {}
     virtual void UpdateVirtualNodeFocus() = 0;
     virtual int64_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
@@ -159,11 +165,14 @@ public:
         const Accessibility::AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset) {}
 #endif
 #ifdef WEB_SUPPORTED
-    virtual void UpdateAccessibilityFocusId(const RefPtr<PipelineBase>& context, int64_t accessibilityId,
-        bool isFocus) {}
-    virtual int64_t GetAccessibilityFocusId() const
+    virtual bool RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
+        const WeakPtr<NG::WebPattern>& webPattern)
     {
-        return -1;
+        return false;
+    }
+    virtual bool DeregisterWebInteractionOperationAsChildTree(int32_t treeId)
+    {
+        return false;
     }
 #endif
     void SetVersion(AccessibilityVersion version)
