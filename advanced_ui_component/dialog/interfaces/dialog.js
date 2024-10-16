@@ -2844,13 +2844,13 @@ class CustomDialogContentComponent extends ViewPU {
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
                 }),
-                bottom: {
+                bottom: LengthMetrics.resource({
                     'id': -1,
                     'type': 10002,
                     params: ['sys.float.ohos_id_dialog_margin_bottom'],
                     'bundleName': '__harDefaultBundleName__',
                     'moduleName': '__harDefaultModuleName__'
-                },
+                }),
             } : { left: 0, right: 0, bottom: 0 });
             Column.backgroundColor(this.customStyle ? {
                 'id': -1,
