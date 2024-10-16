@@ -75,18 +75,18 @@ template<>
 Position  Convert(const Opt_Union_BadgePosition_Position& src)
 {
     Position dst;
-    auto cancelOptions = Converter::OptConvert<UnionBadgeOptions>(src);
-    if (cancelOptions) {
-        auto options = std::get_if<Ark_Position>(&cancelOptions.value());
-        if (options != nullptr) {
-            return Converter::Convert<Position>(*options);
+    auto options = Converter::OptConvert<UnionBadgeOptions>(src);
+    if (options) {
+        auto badgeOptions = std::get_if<Ark_Position>(&options.value());
+        if (badgeOptions != nullptr) {
+            return Converter::Convert<Position>(*badgeOptions);
         }
-        auto values = std::get_if<Ark_BadgePosition>(&cancelOptions.value());
-        if (values != nullptr) {
-            return Converter::Convert<Position>(*values);
+        auto positionOptions = std::get_if<Ark_BadgePosition>(&options.value());
+        if (positionOptions != nullptr) {
+            return Converter::Convert<Position>(*positionOptions);
         }
     } else {
-        LOGE("ARKOALA SearchAttributeModifier.CancelButton -> handling OptCustomObject not implemented.");
+        LOGE("ARKOALA BadgeModifier -> convert Opt_Union_BadgePosition_Position not implemented.");
     }
     return dst;
 }
