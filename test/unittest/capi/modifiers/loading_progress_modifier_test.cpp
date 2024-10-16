@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "generated/test_fixtures.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 
@@ -29,18 +30,7 @@ using namespace Converter;
 namespace {
 const Color THEME_LOADING_COLOR(0xFFAABBCC);
 
-inline Ark_Resource ArkRes(Ark_String *name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR,
-    const char *module = "", const char *bundle = "")
-{
-    return {
-        .id = {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
-        .type = {.tag= ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type)},
-        .moduleName = {.chars = module},
-        .bundleName = {.chars = bundle},
-        .params = { .tag = ARK_TAG_OBJECT, .value = {.array = name, .length = name ? 1 : 0} }
-    };
-}
+const auto ATTRIBUTE_COLOR_NAME = "color";
 } // namespace
 
 class LoadingProgressModifierTest : public ModifierTestBase<GENERATED_ArkUILoadingProgressModifier,
@@ -55,6 +45,11 @@ public:
         themeStyle->SetAttr("fg_progress_color", { .value = THEME_LOADING_COLOR });
 
         SetupTheme<ProgressTheme>();
+
+        for (auto&& res : Fixtures::resourceInitTable) {
+            AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
+            AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
+        }
     }
 };
 
@@ -95,17 +90,27 @@ HWTEST_F(LoadingProgressModifierTest, setColorTest, TestSize.Level1)
     modifier_->setColor(node_, &strNumber);
     auto checkVal6 = GetStringAttribute(node_, PROP_NAME);
     EXPECT_EQ(checkVal6, "#FF00FFFF");
+}
 
-    auto resName = ArkValue<Ark_String>("aa.bb.cc");
-    Ark_ResourceColor resNameColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(&resName));
-    modifier_->setColor(node_, &resNameColor);
-    auto checkVal7 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal7, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColorByName
+/**
+ * @tc.name: setColorTestResource
+ * @tc.desc: Test setColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressModifierTest, setColorTestResource, TestSize.Level1)
+{
+    auto checkValue = [this](const std::string& input, const Ark_ResourceColor& value,
+        const std::string& expectedStr) {
+        modifier_->setColor(node_, &value);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+    };
 
-    Ark_ResourceColor resIdColor = ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 1234));
-    modifier_->setColor(node_, &resIdColor);
-    auto checkVal8 = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal8, "#FFFF0000"); // Color::RED is result of mocked ThemeConstants::GetColor(int)
+    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
+            std::get<2>(value));
+    }
 }
 
 /**
