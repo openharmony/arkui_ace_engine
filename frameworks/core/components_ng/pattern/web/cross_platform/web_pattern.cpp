@@ -1329,23 +1329,6 @@ void WebPattern::StartVibraFeedback(const std::string& vibratorType)
     // cross platform is not support now;
 }
 
-void WebPattern::SetNewDragStyle(bool isNewDragStyle)
-{
-    // cross platform is not support now;
-}
-
-bool WebPattern::IsNewDragStyle()
-{
-    // cross platform is not support now;
-    return false;
-}
-
-bool WebPattern::IsDragging()
-{
-    // cross platform is not support now;
-    return false;
-}
-
 void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
 {
     // cross platform is not support now;
