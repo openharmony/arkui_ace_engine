@@ -27,6 +27,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
@@ -569,6 +570,7 @@ private:
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
+    RefPtr<SwiperPattern> GetSwiperPattern() const;
 
     void StartShowTabBar(int32_t delay = 0);
     void StopShowTabBar();
