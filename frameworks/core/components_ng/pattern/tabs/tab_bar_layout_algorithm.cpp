@@ -367,8 +367,12 @@ void TabBarLayoutAlgorithm::MeasureVisibleItems(LayoutWrapper* layoutWrapper, La
     endMainPos_ = contentMainSize_;
 
     if (targetIndex_) {
+        targetIndex_ = targetIndex_.value() % childCount_;
         MeasureTargetIndex(layoutWrapper, childLayoutConstraint);
     } else if (jumpIndex_) {
+        if (jumpIndex_.value() >= childCount_) {
+            jumpIndex_ = 0;
+        }
         MeasureJumpIndex(layoutWrapper, childLayoutConstraint);
         if (GreatNotEqual(visibleChildrenMainSize_, scrollMargin_ * TWO)) {
             jumpIndex_.reset();
@@ -493,6 +497,10 @@ void TabBarLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, LayoutCo
     // 3.If target index exists, measure items from the end index to target index.
     while (endIndex < childCount_ && (endIndex == 0 || LessNotEqual(endPos, endMainPos_) || isBarAdaptiveHeight_ ||
         (targetIndex_ && endIndex <= targetIndex_.value()))) {
+        if (endIndex < 0) {
+            endIndex = 0;
+            continue;
+        }
         MeasureItem(layoutWrapper, childLayoutConstraint, endIndex);
         visibleItemPosition_[endIndex] = { endPos, endPos + visibleItemLength_[endIndex] };
         endPos += visibleItemLength_[endIndex];
@@ -514,6 +522,10 @@ void TabBarLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, LayoutC
     // 3.If target index exists, measure items from the start index to target index.
     while (startIndex >= 0 && (startIndex == childCount_ - 1 || GreatNotEqual(startPos, startMainPos_) ||
         isBarAdaptiveHeight_ || (targetIndex_ && startIndex >= targetIndex_.value()))) {
+        if (startIndex >= childCount_) {
+            startIndex = childCount_ - 1;
+            continue;
+        }
         MeasureItem(layoutWrapper, childLayoutConstraint, startIndex);
         visibleItemPosition_[startIndex] = { startPos - visibleItemLength_[startIndex], startPos };
         startPos -= visibleItemLength_[startIndex];
