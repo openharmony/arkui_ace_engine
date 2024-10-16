@@ -35,7 +35,6 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 constexpr int32_t TITLE_RATIO = 2;

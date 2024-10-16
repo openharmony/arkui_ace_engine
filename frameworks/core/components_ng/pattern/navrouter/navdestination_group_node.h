@@ -106,7 +106,7 @@ public:
     }
 
     RefPtr<CustomNodeBase> GetNavDestinationCustomNode();
-    
+
     void SetNavDestinationCustomNode(WeakPtr<CustomNodeBase> customNode)
     {
         customNode_ = customNode;
@@ -192,6 +192,7 @@ public:
     void StartSystemTransitionPop(bool transitionIn);
     bool SystemTransitionPopCallback(bool transitionIn);
     void InitDialogTransition(bool isZeroY);
+
     void UpdateTextNodeListAsRenderGroup(bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
     void ReleaseTextNodeList();
     void CollectTextNodeAsRenderGroup();

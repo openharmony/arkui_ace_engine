@@ -36,6 +36,7 @@ NavDestinationGroupNode::~NavDestinationGroupNode()
     if (contentNode_) {
         contentNode_->Clean();
     }
+    ReleaseTextNodeList();
 }
 
 RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(

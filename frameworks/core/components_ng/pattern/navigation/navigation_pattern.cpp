@@ -867,6 +867,12 @@ bool NavigationPattern::CheckParentDestinationIsOnhide(const RefPtr<NavDestinati
     return !destinationNodePattern->GetIsOnShow();
 }
 
+bool NavigationPattern::CheckDestinationIsPush(const RefPtr<NavDestinationGroupNode>& destinationNode)
+{
+    CHECK_NULL_RETURN(destinationNode, false);
+    return destinationNode->GetIndex() != -1 || destinationNode->GetNavDestinationCustomNode();
+}
+
 void NavigationPattern::FireNavigationInner(const RefPtr<UINode>& node, bool isOnShow)
 {
     CHECK_NULL_VOID(node);
@@ -969,7 +975,8 @@ void NavigationPattern::FireNavigationLifecycleChange(const RefPtr<UINode>& node
         auto navigation = AceType::DynamicCast<NavigationGroupNode>(child);
         if (navigation) {
             auto destinationNode = navigation->GetParentDestinationNode().Upgrade();
-            if ((lifecycle == NavDestinationLifecycle::ON_SHOW) && CheckParentDestinationIsOnhide(destinationNode)) {
+            if ((lifecycle == NavDestinationLifecycle::ON_SHOW) && CheckParentDestinationIsOnhide(destinationNode) &&
+                CheckDestinationIsPush(destinationNode)) {
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation parent is onhide");
                 continue;
             }
@@ -1016,7 +1023,9 @@ void NavigationPattern::ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& 
         navigationNode->DealNavigationExit(navBarNode, true, false);
     }
     navigationNode->RemoveDialogDestination();
-    navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+    navigationNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
     navigationStack_->UpdateReplaceValue(0);
 }
 
@@ -1061,7 +1070,9 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             }
         }
         navigationNode->RemoveDialogDestination();
-        navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+        navigationNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
         return;
     }
 
@@ -1099,7 +1110,9 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     navigationNode->RemoveDialogDestination();
-    navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
+    navigationNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
 }
 
 void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -1749,6 +1762,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         return false;
     }
     ExecuteAddAnimation(preTopNavDestination, newTopNavDestination, isPopPage, proxy, navigationTransition);
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     if (navigationTransition.interactive) {
         auto finishCallback = [weakNavigation = WeakClaim(this),
@@ -1830,6 +1844,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "preDestination and topDestination is invalid");
         return;
     }
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page custom transition end");
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     auto replaceValue = navigationStack_->GetReplaceValue();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -1841,7 +1856,9 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
     if (newTopNavDestination) {
         newTopNavDestination->SetIsOnAnimation(false);
     }
-    hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
+    hostNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
     do {
         if (replaceValue != 0) {
             hostNode->DealNavigationExit(preTopNavDestination, preTopNavDestination == nullptr);
@@ -2344,7 +2361,7 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
         auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(navigationNode);
         auto parentDestinationNode = navigationNode->GetParentDestinationNode().Upgrade();
-        if (CheckParentDestinationIsOnhide(parentDestinationNode)) {
+        if (CheckParentDestinationIsOnhide(parentDestinationNode) && CheckDestinationIsPush(parentDestinationNode)) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "parentDestinationNode is onhide");
             return;
         }
@@ -2512,9 +2529,12 @@ void NavigationPattern::RecoveryToLastStack(
 
     // update name index
     navigationStack_->RecoveryNavigationStack();
+    ACE_SCOPED_TRACE_COMMERCIAL("Navigation page transition end");
     PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
     hostNode->SetIsOnAnimation(false);
-    hostNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+    auto id = hostNode->GetTopDestination() ? hostNode->GetTopDestination()->GetAccessibilityId() : -1;
+    hostNode->OnAccessibilityEvent(
+        AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
 }
 
 bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -2602,26 +2622,6 @@ bool NavigationPattern::GetIsFocusable(const RefPtr<FrameNode>& frameNode)
     return currentFocusHub->IsFocusableNode();
 }
 
-RefPtr<NavigationTransitionProxy> NavigationPattern::GetProxyById(uint64_t id) const
-{
-    for (auto proxy : proxyList_) {
-        if (proxy && proxy->GetProxyId() == id) {
-            return proxy;
-        }
-    }
-    return nullptr;
-}
-    
-void NavigationPattern::RemoveProxyById(uint64_t id)
-{
-    for (auto it = proxyList_.begin(); it != proxyList_.end(); ++it) {
-        if (*it && (*it)->GetProxyId() == id) {
-            it = proxyList_.erase(it);
-            return;
-        }
-    }
-}
-
 bool NavigationPattern::IsLastStdChange()
 {
     // check whether last std navdestination id is changed, change return true, not change return false
@@ -2706,5 +2706,25 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
         return;
     }
     FollowStdNavdestinationAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
+}
+
+RefPtr<NavigationTransitionProxy> NavigationPattern::GetProxyById(uint64_t id) const
+{
+    for (auto proxy : proxyList_) {
+        if (proxy && proxy->GetProxyId() == id) {
+            return proxy;
+        }
+    }
+    return nullptr;
+}
+
+void NavigationPattern::RemoveProxyById(uint64_t id)
+{
+    for (auto it = proxyList_.begin(); it != proxyList_.end(); ++it) {
+        if (*it && (*it)->GetProxyId() == id) {
+            it = proxyList_.erase(it);
+            return;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
