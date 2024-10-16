@@ -676,6 +676,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                         preNode->SetJSViewActive(false);
                         navigation->NotifyPageHide();
                     }
+                    navbar->GetRenderContext()->SetOpacity(1.0f);
                 } else {
                     auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
                     CHECK_NULL_VOID(preDestination);
@@ -684,6 +685,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                         break;
                     }
                     preDestination->SystemTransitionPushCallback(false);
+                    preDestination->GetRenderContext()->SetOpacity(1.0f);
                 }
                 break;
             }
