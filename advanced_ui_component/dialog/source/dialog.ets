@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-import { ButtonOptions } from '@ohos.arkui.advanced.Dialog';
 import { BusinessError, Callback } from '@ohos.base';
 import display from '@ohos.display';
 import hilog from '@ohos.hilog';
@@ -29,6 +28,16 @@ class CustomThemeImpl implements CustomTheme {
   constructor(colors: CustomColors) {
     this.colors = colors;
   }
+}
+
+export declare class ButtonOptions {
+  value: ResourceStr;
+  action?: () => void;
+  background?: ResourceColor;
+  fontColor?: ResourceColor;
+  buttonStyle?: ButtonStyleMode;
+  role?: ButtonRole;
+  defaultFocus?: boolean | undefined;
 }
 
 const TITLE_MAX_LINES: number = 2;
@@ -410,7 +419,6 @@ export struct SelectDialog {
     })
   }
 
-
   @Builder
   buildContent(): void {
     Scroll(this.contentScroller) {
@@ -461,6 +469,7 @@ export struct SelectDialog {
                 .borderRadius($r('sys.float.corner_radius_level8'))
                 .buttonStyle(ButtonStyleMode.TEXTUAL)
                 .paddingStyle()
+
                 if (index < this.radioContent.length - 1) {
                   Divider().color(this.dividerColorWithTheme).paddingStyle();
                 }
@@ -1325,26 +1334,26 @@ struct CustomDialogContentComponent {
   buildSingleButton(buttonOptions: ButtonOptions): void {
     if (this.isNewPropertiesHighPriority(buttonOptions)) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .backgroundColor(buttonOptions.background)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (buttonOptions.background !== undefined) {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .backgroundColor(buttonOptions.background)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else {
       Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.controller)
+        .setButtonProperties(buttonOptions, this.buttons, this.controller)
         .fontColor(buttonOptions.fontColor)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
@@ -1467,17 +1476,41 @@ struct CustomDialogContentComponent {
 }
 
 @Extend(Button)
-function setButtonProperties(buttonOptions: ButtonOptions, controller?: CustomDialogController) {
+function setButtonProperties(buttonOptions: ButtonOptions, buttonList?: ButtonOptions[],
+  controller?: CustomDialogController) {
   .onClick(() => {
     if (buttonOptions.action) {
       buttonOptions.action();
     }
     controller?.close();
   })
-  .defaultFocus(true)
+  .defaultFocus(buttonOptions.defaultFocus ? true : isHasDefaultFocus(buttonList) ? false : true)
   .buttonStyle(buttonOptions.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.ROUNDED_RECTANGLE)
+}
+
+/**
+ * is button list has default focus
+ *
+ * @param buttonList button list
+ * @returns boolean
+ */
+function isHasDefaultFocus(buttonList?: ButtonOptions[]): boolean {
+  try {
+    let isHasDefaultFocus: boolean = false;
+    buttonList?.forEach((button) => {
+      if (button.defaultFocus) {
+        isHasDefaultFocus = true;
+      }
+    })
+    return isHasDefaultFocus;
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `get defaultFocus exist error, code: ${code}, message: ${message}`);
+    return false;
+  }
 }
 
 /**
