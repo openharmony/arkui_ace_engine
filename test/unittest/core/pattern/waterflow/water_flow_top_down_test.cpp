@@ -699,12 +699,12 @@ HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
     FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -129.28963);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -128.9174);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.0f);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -97.779236);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -96.869041);
     MockAnimationManager::GetInstance().TickByVelocity(1000.0f);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);

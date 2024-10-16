@@ -137,7 +137,7 @@ public:
         return false;
     }
 
-    virtual void OnTouchDown(const TouchEventInfo& info) {}
+    virtual void OnTouchDown(const TouchEventInfo& info);
 
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
@@ -826,12 +826,15 @@ private:
     {
         return OutBoundaryCallback();
     }
+    void UpdateNestedScrollVelocity(float offset, NestedState state);
+    float GetNestedScrollVelocity();
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnScrollEndRecursiveInner(const std::optional<float>& velocity);
-    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
-    void OnScrollStartRecursiveInner(float position, float velocity = 0.f);
+    void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
+    void OnScrollStartRecursiveInner(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f);
     void OnScrollDragEndRecursive() override;
+    void StopScrollAnimation() override;
 
     ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);
     ScrollResult HandleScrollSelfFirst(float& offset, int32_t source, NestedState state);
@@ -858,6 +861,7 @@ private:
     void SetDragFRCSceneCallback(const RefPtr<Scrollable>& scrollable);
     void SetOnContinuousSliding(const RefPtr<Scrollable>& scrollable);
     void SetPanActionEndEvent(const RefPtr<Scrollable>& scrollable);
+    RefPtr<Scrollable> CreateScrollable();
 
     // Scrollable::UpdateScrollPosition
     bool HandleScrollImpl(float offset, int32_t source);
@@ -974,6 +978,8 @@ private:
     RefPtr<ClickRecognizer> clickRecognizer_;
     Offset locationInfo_;
     WeakPtr<NestableScrollContainer> scrollOriginChild_;
+    float nestedScrollVelocity_ = 0.0f;
+    uint64_t nestedScrollTimestamp_ = 0;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

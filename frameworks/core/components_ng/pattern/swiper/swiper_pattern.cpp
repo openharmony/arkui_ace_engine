@@ -2162,8 +2162,8 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->FireAndCleanScrollingListener();
             pattern->HandleDragStart(info);
             // notify scrollStart upwards
-            pattern->NotifyParentScrollStart(pattern->direction_ == Axis::HORIZONTAL ? info.GetGlobalLocation().GetX()
-                                                                                     : info.GetGlobalLocation().GetY());
+            pattern->NotifyParentScrollStart(weak, pattern->direction_ == Axis::HORIZONTAL ?
+                info.GetGlobalLocation().GetX() : info.GetGlobalLocation().GetY());
         }
     };
 
@@ -5055,7 +5055,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
     }
 }
 
-void SwiperPattern::OnScrollStartRecursive(float position, float /* velocity */)
+void SwiperPattern::OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float /* velocity */)
 {
     SetIsNestedInterrupt(false);
     if (IsDisableSwipe()) {
@@ -5064,10 +5064,10 @@ void SwiperPattern::OnScrollStartRecursive(float position, float /* velocity */)
     childScrolling_ = true;
     gestureSwipeIndex_ = currentIndex_;
     StopAnimationOnScrollStart(false);
-    NotifyParentScrollStart(position);
+    NotifyParentScrollStart(child, position);
 }
 
-void SwiperPattern::NotifyParentScrollStart(float position)
+void SwiperPattern::NotifyParentScrollStart(WeakPtr<NestableScrollContainer> child, float position)
 {
     if (!GetIsFixedNestedScrollMode()) {
         SetParentScrollable();
@@ -5076,7 +5076,7 @@ void SwiperPattern::NotifyParentScrollStart(float position)
     CHECK_NULL_VOID(parent);
     const auto& nestedScroll = GetNestedScroll();
     if (parent && nestedScroll.NeedParent()) {
-        parent->OnScrollStartRecursive(position);
+        parent->OnScrollStartRecursive(child, position);
     }
 }
 
