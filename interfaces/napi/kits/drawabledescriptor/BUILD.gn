@@ -29,6 +29,7 @@ if (is_arkui_x) {
       sources = [ "drawable_register.cpp" ]
       if (platform != "" && is_arkui_x) {
         deps = [ "//plugins/libs/napi:napi_$platform" ]
+        include_dirs += [ "//third_party/skia" ]
       }
       subsystem_name = "arkui"
       part_name = ace_engine_part
