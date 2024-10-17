@@ -91,7 +91,7 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
         auto taskExecutor = taskExecutor_.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [isClear, providerWpSet, name, wp = AceType::WeakClaim(this)]() {
+            [providerWpSet, name, wp = AceType::WeakClaim(this)]() {
                 auto sharedImageManager = wp.Upgrade();
                 CHECK_NULL_VOID(sharedImageManager);
                 size_t dataSize = 0;
