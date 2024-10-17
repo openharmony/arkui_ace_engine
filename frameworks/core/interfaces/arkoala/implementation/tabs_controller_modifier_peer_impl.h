@@ -18,7 +18,6 @@
 #include <optional>
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-//#include "core/components/tab_bar/tab_controller.h"
 #include "core/components/swiper/swiper_controller.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -31,44 +30,8 @@ public:
         CHECK_NULL_VOID(!controller.Invalid());
         controllerWeakPtr_ = controller;
     }
-/* 
-    void TriggerShowNext()
-    {
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->ShowNext();
-            }
-        }
-    }
 
-    void TriggerShowPrevios()
-    {
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->ShowPrevious();
-            }
-        }
-    }
-
-    void SetFinishCallback(const CommonFunc &callbackFunc)
-    {
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->SetFinishCallback(callbackFunc);
-            }
-        }
-    }
-
-    void TriggerFinishAnimation()
-    {
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->FinishAnimation();
-            }
-        }
-    }
-*/
-    void TriggerChangeIndex(int32_t index)
+    void TriggerChangeIndex(int32_t index) const
     {
         index = index < 0 ? 0 : index;
 
@@ -80,6 +43,13 @@ public:
             updateCubicCurveCallback();
         }
         swiperController->SwipeTo(index);
+    }
+
+    void TriggerPreloadItems(const std::set<int32_t>& indexSet) const
+    {
+        auto swiperController = controllerWeakPtr_.Upgrade();
+        CHECK_NULL_VOID(swiperController);
+        swiperController->PreloadItems(indexSet);
     }
 
 private:

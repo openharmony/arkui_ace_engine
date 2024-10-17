@@ -49,7 +49,15 @@ void ChangeIndexImpl(TabsControllerPeer* peer,
 Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer,
                                    const Opt_Array_Number* indices)
 {
-    return 0;
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    CHECK_NULL_RETURN(indices, nullptr);
+    auto indexVectOpt = Converter::OptConvert<std::vector<int32_t>>(*indices);
+    if (indexVectOpt) {
+        std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
+        peerImpl->TriggerPreloadItems(indexSet);
+    }
+    return nullptr;
 }
 } // TabsControllerModifier
 const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor()

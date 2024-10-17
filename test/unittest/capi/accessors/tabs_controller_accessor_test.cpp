@@ -36,9 +36,13 @@ public:
         SetSwipeToImpl(
             std::bind(&StubSwiperController::SwipeTo, this, std::placeholders::_1, std::placeholders::_2)
         );
+        SetPreloadItemsImpl(
+            std::bind(&StubSwiperController::PreloadItems, this, std::placeholders::_1)
+        );
     }
     ~StubSwiperController() override = default;
     virtual void SwipeTo(int, bool) {}
+    virtual void PreloadItems(std::set<int32_t>) {}
 };
 
 class MockSwiperController : public StubSwiperController {
@@ -46,6 +50,7 @@ public:
     MockSwiperController() = default;
     ~MockSwiperController() override = default;
     MOCK_METHOD(void, SwipeTo, (int, bool));
+    MOCK_METHOD(void, PreloadItems, (std::set<int32_t>));
 };
 } // namespace
 
@@ -78,34 +83,8 @@ public:
 };
 
 /**
- * @tc.name: showNextTest
- * @tc.desc: Check the functionality of SwiperControllerAccessor.showNext
- * @tc.type: FUNC
- */
-/* HWTEST_F(TabsControllerAccessorTest, showNextTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->showNext, nullptr);
-
-    EXPECT_CALL(*mockSwiperController_, ShowNext()).Times(1);
-    accessor_->showNext(peer_);
-}
- */
-/**
- * @tc.name: showPreviousTest
- * @tc.desc: Check the functionality of SwiperControllerAccessor.showPrevious
- * @tc.type: FUNC
- */
-/* HWTEST_F(TabsControllerAccessorTest, showPreviousTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->showPrevious, nullptr);
-
-    EXPECT_CALL(*mockSwiperController_, ShowPrevious()).Times(1);
-    accessor_->showPrevious(peer_);
-}
- */
-/**
  * @tc.name: changeIndexTest
- * @tc.desc: Check the functionality of SwiperControllerAccessor.ChangeIndex
+ * @tc.desc: Check the functionality of TabsControllerAccessor.ChangeIndex
  * @tc.type: FUNC
  */
 HWTEST_F(TabsControllerAccessorTest, changeIndexTest, TestSize.Level1)
@@ -129,36 +108,25 @@ HWTEST_F(TabsControllerAccessorTest, changeIndexTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: finishAnimationTest
- * @tc.desc: Check the functionality of SwiperControllerAccessor.finishAnimation
+ * @tc.name: preloadItemsTest
+ * @tc.desc: Check the functionality of TabsControllerAccessor.PreloadItemsImpl
  * @tc.type: FUNC
  */
-/* HWTEST_F(TabsControllerAccessorTest, finishAnimationTest, TestSize.Level1)
+HWTEST_F(TabsControllerAccessorTest, preloadItemsTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->finishAnimation, nullptr);
+    std::initializer_list<int32_t> indexList = {1, 20, 300};
+    std::set<int32_t> expectedIndexSet(indexList);
 
-    Opt_Function callbackValid = ArkValue<Opt_Function>(0);
-    Opt_Function callbackUndef = ArkValue<Opt_Function>();
+    ASSERT_NE(accessor_->preloadItems, nullptr);
 
-    EXPECT_CALL(*mockSwiperController_, FinishAnimation()).Times(3);
+    EXPECT_CALL(*mockSwiperController_, PreloadItems(expectedIndexSet)).Times(1);
+    Converter::ArkArrayHolder<Array_Number> arrayHolder(indexList);
+    auto arrayNumValidOpt = Converter::ArkValue<Opt_Array_Number>(arrayHolder.ArkValue());
+    accessor_->preloadItems(peer_, &arrayNumValidOpt);
 
-    // check initial callback state in target controller
-    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
-
-    // test the finish animation invoking with valid callback setting
-    accessor_->finishAnimation(peer_, &callbackValid);
-    EXPECT_TRUE(mockSwiperController_->GetFinishCallback());
-
-    // force reset and check no callback in target controller
-    mockSwiperController_->SetFinishCallback({});
-    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
-
-    // test the finish animation invoking with invalid callback setting
-    accessor_->finishAnimation(peer_, &callbackUndef);
-    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
-
-    // test the finish animation invoking without callback setting
-    accessor_->finishAnimation(peer_, nullptr);
-    EXPECT_FALSE(mockSwiperController_->GetFinishCallback());
+    // nothing calls expected when there are invalid params
+    auto arrayNumUndef = Converter::ArkValue<Opt_Array_Number>(Ark_Empty());
+    accessor_->preloadItems(peer_, &arrayNumUndef);
+    accessor_->preloadItems(peer_, nullptr);
 }
- */} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG
