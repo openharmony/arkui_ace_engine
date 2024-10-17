@@ -113,7 +113,6 @@ public:
     void SaveLayer();
     void RestoreLayer();
     void UpdateSize(int32_t width, int32_t height);
-    bool IsSucceed();
     void Reset();
     RefPtr<PixelMap> TransferToImageBitmap();
     void SetDensity(double density);

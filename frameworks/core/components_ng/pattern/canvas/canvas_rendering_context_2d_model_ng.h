@@ -125,7 +125,7 @@ private:
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
     void OnAttachToCanvas();
     void OnDetachFromCanvas();
-    RefPtr<CanvasPattern> pattern_;
+    WeakPtr<CanvasPattern> weakPattern_;
     bool isAttached_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasRenderingContext2DModelNG);
 };
