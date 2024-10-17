@@ -318,7 +318,7 @@ void ClipboardImpl::GetDataSync(const std::function<void(const std::string&)>& c
                 result = *textData;
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetTextDataAsync");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetTextDataSync");
     callback(result);
 }
 
