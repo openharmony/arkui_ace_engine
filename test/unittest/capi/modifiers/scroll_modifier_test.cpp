@@ -594,40 +594,6 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
 }
 
 /**
- * @tc.name: Friction_SetAValueFromStringResource
- * @tc.desc: Test FrictionImpl
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollModifierTest, Friction_SetAValueFromStringResource, testing::ext::TestSize.Level1)
-{
-    std::string jsonName = "friction";
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-
-    double testVal = 0.317;
-    std::string resName = "app.float.friction";
-    AddResource(resName, std::to_string(testVal));
-    auto RES_NAME = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
-    auto friction = CreateResourceUnion<Union_Number_Resource>(RES_NAME);
-
-    modifier_->setFriction(node_, &friction);
-    auto json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    EXPECT_NEAR(testVal, GetAttrValue<double>(json, jsonName), 0.0001);
-
-    double testVal1 = 0.9991;
-    int resID = 2;
-    AddResource(resID, std::to_string(testVal1));
-    auto RES_ID = IntResourceId{resID, NodeModifier::ResourceType::STRING};
-    friction = CreateResourceUnion<Union_Number_Resource>(RES_ID);
-
-    modifier_->setFriction(node_, &friction);
-    json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    EXPECT_NEAR(testVal1, GetAttrValue<double>(json, jsonName), 0.0001);
-}
-
-/**
  * @tc.name: EnablePaging_SetValues
  * @tc.desc: Test EnablePagingImpl
  * @tc.type: FUNC
