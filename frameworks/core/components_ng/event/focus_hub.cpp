@@ -31,19 +31,19 @@
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
-constexpr uint32_t FOCUS_PADDING = 5;
+Dimension FOCUS_SCROLL_MARGIN = 5.0_vp;
 namespace {
-float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode,
-    const RefPtr<FrameNode>& curFrameNode, bool isVertical)
+float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode, const RefPtr<FrameNode>& curFrameNode, bool isVertical)
 {
+    constexpr float notMove = 0.0f;
     auto parentGeometryNode = parentFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(parentGeometryNode, false);
+    CHECK_NULL_RETURN(parentGeometryNode, notMove);
     auto parentFrameSize = parentGeometryNode->GetFrameSize();
     auto curFrameOffsetToWindow = curFrameNode->GetTransformRelativeOffset();
     auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset();
     auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
     auto curGeometry = curFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(curGeometry, false);
+    CHECK_NULL_RETURN(curGeometry, notMove);
     auto curFrameSize = curGeometry->GetFrameSize();
     TAG_LOGD(AceLogTag::ACE_FOCUS,
         "Node: %{public}s/%{public}d - %{public}s-%{public}s on focus. Offset to target node: "
@@ -55,18 +55,22 @@ float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode,
 
     float diffToTarFrame = isVertical ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
     if (NearZero(diffToTarFrame)) {
-        return false;
+        return notMove;
     }
     float curFrameLength = isVertical ? curFrameSize.Height() : curFrameSize.Width();
     float parentFrameLength = isVertical ? parentFrameSize.Height() : parentFrameSize.Width();
-    float moveOffset = 0.0;
-    float focusPadding = PipelineBase::Vp2PxWithCurrentDensity(FOCUS_PADDING);
-    if (LessNotEqual(diffToTarFrame - focusPadding, 0)) {
-        moveOffset = -diffToTarFrame + focusPadding;
-    } else if (GreatNotEqual(diffToTarFrame + curFrameLength + focusPadding, parentFrameLength)) {
-        moveOffset = parentFrameLength - diffToTarFrame - curFrameLength - focusPadding;
+    float focusMargin = FOCUS_SCROLL_MARGIN.ConvertToPx();
+
+    bool totallyShow = LessOrEqual(curFrameLength + focusMargin + focusMargin, (parentFrameLength));
+    float startAlignOffset = -diffToTarFrame + focusMargin;
+    float endAlignOffset = parentFrameLength - diffToTarFrame - curFrameLength - focusMargin;
+    bool start2End = LessOrEqual(diffToTarFrame, focusMargin);
+    bool needScroll = !NearZero(startAlignOffset, 1.0f) && !NearZero(endAlignOffset, 1.0f) &&
+                      (std::signbit(startAlignOffset) == std::signbit(endAlignOffset));
+    if (needScroll) {
+        return (totallyShow ^ start2End) ? endAlignOffset : startAlignOffset;
     }
-    return moveOffset;
+    return notMove;
 }
 }
 
