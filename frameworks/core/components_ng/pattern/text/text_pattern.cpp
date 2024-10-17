@@ -2341,15 +2341,14 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
                 isSpanHasClick = true;
             }
             childNodes_.push_back(current.node);
-        }
-        if (tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            continue;
-        }
-        if (tag == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
+        } else if (tag == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
             placeholderCount_++;
             AddChildSpanItem(current.node);
             dataDetectorAdapter_->textForAI_.append("\n");
             childNodes_.emplace_back(current.node);
+        }
+        if (tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            continue;
         }
         const auto& nextChildren = current.node->GetChildren();
         if (nextChildren.empty()) {
