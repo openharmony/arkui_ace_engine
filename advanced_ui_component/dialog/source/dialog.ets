@@ -31,13 +31,13 @@ class CustomThemeImpl implements CustomTheme {
 }
 
 export declare class ButtonOptions {
-  value: ResourceStr;
-  action?: () => void;
-  background?: ResourceColor;
-  fontColor?: ResourceColor;
-  buttonStyle?: ButtonStyleMode;
-  role?: ButtonRole;
-  defaultFocus?: boolean | undefined;
+  public value: ResourceStr;
+  public action?: () => void;
+  public background?: ResourceColor;
+  public fontColor?: ResourceColor;
+  public buttonStyle?: ButtonStyleMode;
+  public role?: ButtonRole;
+  public defaultFocus?: boolean | undefined;
 }
 
 const TITLE_MAX_LINES: number = 2;
