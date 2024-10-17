@@ -72,6 +72,7 @@
 #include "core/components_ng/pattern/shape/line_model_ng.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -915,7 +916,10 @@ void* createWindowSceneNode(ArkUI_Int32 nodeId)
 
 void* createSideBarContainerNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = SideBarContainerModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createRemoteWindowNode(ArkUI_Int32 nodeId)
