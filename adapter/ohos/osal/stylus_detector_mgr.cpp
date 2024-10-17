@@ -369,7 +369,7 @@ NG::PositionWithAffinity StylusDetectorMgr::StylusDetectorCallBack::GetGlyphPosi
     }
     TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture localOffset:%{public}f, %{public}f", localOffset.GetX(),
         localOffset.GetY());
-    auto textDragBase = frameNode->GetPattern<NG::textDragBase>();
+    auto textDragBase = frameNode->GetPattern<NG::TextDragBase>();
     CHECK_NULL_RETURN(textDragBase, finalResult);
     auto textRect = textDragBase->GetTextRect();
     if (localOffset.GetY() < textRect.GetY() || localOffset.GetY() > textRect.GetY() + textRect.Height()) {
