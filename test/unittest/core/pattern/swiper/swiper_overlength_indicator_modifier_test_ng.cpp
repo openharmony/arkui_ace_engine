@@ -21,7 +21,6 @@
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.h"
 
 namespace OHOS::Ace::NG {
-
 class SwiperOverLengthIndicatorModifierTestNg : public SwiperTestNg {
 public:
 };
@@ -33,10 +32,11 @@ public:
  */
 HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetContentModifier001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDirection(Axis::VERTICAL);
-        model.SetIndicatorType(SwiperIndicatorType::DOT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
     auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
     paintMethod->SetMaxDisplayCount(7);
@@ -200,11 +200,11 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
 {
     OverlengthDotIndicatorModifier dotIndicatorModifier;
     dotIndicatorModifier.animationEndIndex_ = 1;
-    dotIndicatorModifier.turnPageRate_= 0.f;
+    dotIndicatorModifier.turnPageRate_ = 0.f;
     auto animationEndIndex = dotIndicatorModifier.CalcTargetIndexOnDrag();
     EXPECT_EQ(animationEndIndex, 1);
 
-    dotIndicatorModifier.turnPageRate_= 0.5f;
+    dotIndicatorModifier.turnPageRate_ = 0.5f;
     animationEndIndex = dotIndicatorModifier.CalcTargetIndexOnDrag();
     EXPECT_EQ(animationEndIndex, 1);
 
@@ -410,8 +410,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
      * @tc.steps: step2. Set NearEqual(width, height) and isCustomSize_ true
      * @tc.expected: Verify the result and result should be as expected
      */
-    contentProperty.unselectedIndicatorWidth = { 100.0f, 200.0f, 300.0f};
-    contentProperty.unselectedIndicatorHeight = { 100.0f, 200.0f, 300.0f};
+    contentProperty.unselectedIndicatorWidth = { 100.0f, 200.0f, 300.0f };
+    contentProperty.unselectedIndicatorHeight = { 100.0f, 200.0f, 300.0f };
     indicatorModifier->isCustomSize_ = true;
     indicatorModifier->PaintBlackPoint(context, contentProperty);
 
@@ -419,12 +419,11 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
      * @tc.steps: step3. Set NearEqual(width, height) and isCustomSize_ false
      * @tc.expected: Verify the result and result should be as expected
      */
-    contentProperty.unselectedIndicatorWidth = { 100.0f, 200.0f, 300.0f};
-    contentProperty.unselectedIndicatorHeight = { 100.0f, 200.0f, 300.0f};
+    contentProperty.unselectedIndicatorWidth = { 100.0f, 200.0f, 300.0f };
+    contentProperty.unselectedIndicatorHeight = { 100.0f, 200.0f, 300.0f };
     indicatorModifier->isCustomSize_ = false;
     indicatorModifier->PaintBlackPoint(context, contentProperty);
 }
-
 
 /**
  * @tc.name: OverlengthDotIndicatorModifier012
@@ -482,16 +481,16 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     indicatorModifier->isSwiperTouchDown_ = true;
     indicatorModifier->maxDisplayCount_ = 2;
     indicatorModifier->targetSelectedIndex_ = 1;
-    const LinearVector<float> itemHalfSizes = {5.0f, 7.0f};
+    const LinearVector<float> itemHalfSizes = { 5.0f, 7.0f };
     indicatorModifier->targetOverlongType_ = OverlongType::LEFT_NORMAL_RIGHT_FADEOUT;
-    indicatorModifier->animationStartCenterX_ = {50.0f, 80.0f, 110.0f, 140.0f, 170.0f};
-    indicatorModifier->animationStartIndicatorWidth_ = {20.0f, 20.0f, 20.0f, 20.0f, 20.0f};
-    indicatorModifier->animationStartIndicatorHeight_ = {20.0f, 20.0f, 20.0f, 20.0f, 20.0f};
-    indicatorModifier->animationEndCenterX_ = {60.0f, 90.0f, 110.0f, 140.0f, 170.0f};
-    indicatorModifier->animationEndIndicatorWidth_ = {60.0f, 90.0f, 110.0f, 140.0f, 170.0f};
-    indicatorModifier->animationEndIndicatorHeight_ = {60.0f, 90.0f, 110.0f, 140.0f, 170.0f};
+    indicatorModifier->animationStartCenterX_ = { 50.0f, 80.0f, 110.0f, 140.0f, 170.0f };
+    indicatorModifier->animationStartIndicatorWidth_ = { 20.0f, 20.0f, 20.0f, 20.0f, 20.0f };
+    indicatorModifier->animationStartIndicatorHeight_ = { 20.0f, 20.0f, 20.0f, 20.0f, 20.0f };
+    indicatorModifier->animationEndCenterX_ = { 60.0f, 90.0f, 110.0f, 140.0f, 170.0f };
+    indicatorModifier->animationEndIndicatorWidth_ = { 60.0f, 90.0f, 110.0f, 140.0f, 170.0f };
+    indicatorModifier->animationEndIndicatorHeight_ = { 60.0f, 90.0f, 110.0f, 140.0f, 170.0f };
 
-     /**
+    /**
      * @tc.steps: step2. Call UpdateUnselectedCenterXOnDrag
      * @tc.expected: Verify the result and result should be as expected
      */
@@ -521,8 +520,8 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, OverlengthDotIndicatorModifier
     int32_t realItemCount = 10;
     indicatorModifier->maxDisplayCount_ = maxDisplayCount;
     indicatorModifier->realItemCount_ = realItemCount;
-    
-     /**
+
+    /**
      * @tc.steps: step2. Call InitOverlongSelectedIndex
      * @tc.expected: Verify the result and result should be as expected
      */
@@ -628,8 +627,9 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetCo
      * @tc.steps: step1. Set OverlengthDotIndicatorPaintMethod and parameters
      * @tc.expected: parameters set successfully
      */
-    CreateWithItem([](SwiperModelNG model) {});
-    ASSERT_NE(indicatorNode_, nullptr);
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto modifier = AceType::MakeRefPtr<OverlengthDotIndicatorModifier>();
     auto paintMethod = AceType::MakeRefPtr<OverlengthDotIndicatorPaintMethod>(modifier);
     auto geometryNode = frameNode_->GetGeometryNode();
@@ -750,4 +750,4 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, SwiperOverLengthIndicatorGetCo
             (endVectorBlackPointCenterX[2] - startVectorBlackPointCenterX[2]) * blackPointCenterMoveRateSecond,
         0.001f);
 }
-}
+} // namespace OHOS::Ace::NG
