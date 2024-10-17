@@ -28,7 +28,6 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "base/web/webview/ohos_nweb/include/nweb_autofill.h"
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
-#include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
