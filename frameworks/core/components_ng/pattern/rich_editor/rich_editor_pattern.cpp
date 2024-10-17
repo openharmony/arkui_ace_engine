@@ -4196,6 +4196,7 @@ void RichEditorPattern::InsertStyledStringByPaste(const RefPtr<SpanString>& span
     if (changeLength > 0) {
         DeleteForwardInStyledString(changeLength, false);
     }
+    ResetSelection();
     styledString_->InsertSpanString(changeStart, spanString);
     SetCaretPosition(caretPosition_ + spanString->GetLength());
     AfterStyledStringChange(changeStart, changeLength, spanString->GetString());
