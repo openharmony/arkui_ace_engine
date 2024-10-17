@@ -784,6 +784,21 @@ void DragDropManager::ResetPreTargetFrameNode(int32_t instanceId)
     preTargetFrameNode_ = nullptr;
 }
 
+void DragDropManager::ResetDragEndOption(
+    const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent, int32_t currentId)
+{
+    SetDragResult(notifyMessage, dragEvent);
+    SetDragBehavior(notifyMessage, dragEvent);
+    DoDragReset();
+    SetIsDragged(false);
+    SetDraggingPointer(-1);
+    SetDraggingPressedState(false);
+    ResetDragPreviewInfo();
+    HideDragPreviewWindow(currentId);
+    CHECK_NULL_VOID(dragEvent);
+    dragEvent->SetPressedKeyCodes(GetDragDropPointerEvent().pressedKeyCodes_);
+}
+
 void DragDropManager::DoDragReset()
 {
     dragDropState_ = DragDropMgrState::IDLE;
