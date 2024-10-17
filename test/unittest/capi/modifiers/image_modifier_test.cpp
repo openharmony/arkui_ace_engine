@@ -302,8 +302,8 @@ HWTEST_F(ImageModifierTest, SetImageOptions_SetUrlOrUri, testing::ext::TestSize.
     std::string urlString = "https://www.example.com/xxx.png";
     std::string resName = "app.string.image_url";
     AddResource(resName, urlString);
-    const auto RES_ID = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
-    auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(CreateResourceUnion(RES_ID));
+    const auto RES_NAME = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
+    auto image = CreateResourceUnion<Ark_ResourceStr>(RES_NAME);
     auto imageRc = Converter::ArkUnion<Union_CustomObject_Ark_ResourceStr_CustomObject, Ark_ResourceStr>(image);
 
     modifier_->setImageOptions0(node_, &imageRc);
