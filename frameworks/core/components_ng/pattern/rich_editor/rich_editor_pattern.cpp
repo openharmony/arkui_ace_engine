@@ -2968,6 +2968,7 @@ bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSp
         auto focusHub = pattern->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->RequestFocusImmediately();
+        IF_TRUE(!pattern->isEditing_, pattern->CloseKeyboard(true));
         pattern->ShowSelectOverlay(firstHandle, secondHandle);
     };
 
@@ -3123,6 +3124,8 @@ void RichEditorPattern::HandleBlurEvent()
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || reason == BlurReason::FRAME_DESTROY) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RichEditor Blur, Close Keyboard.");
+        CloseSelectOverlay();
+        ResetSelection();
         CloseKeyboard(false);
     }
     if (magnifierController_) {
@@ -3149,7 +3152,6 @@ void RichEditorPattern::HandleFocusEvent()
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent, previewLongPress=%{public}d,"
             "OnlyRequestFocus=%{public}d", previewLongPress_, isOnlyRequestFocus_);
         isOnlyRequestFocus_ = false;
-        IF_TRUE(previewLongPress_, CloseKeyboard(true));
         return;
     }
     if (textSelector_.SelectNothing()) {
@@ -3190,13 +3192,13 @@ void RichEditorPattern::OnVisibleChange(bool isVisible)
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isVisible=%{public}d", isVisible);
     TextPattern::OnVisibleChange(isVisible);
     StopTwinkling();
+    CloseSelectOverlay();
+    ResetSelection();
     CloseKeyboard(false);
 }
 
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
 {
-    CloseSelectOverlay();
-    ResetSelection();
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
         return CloseCustomKeyboard();
     }
@@ -5535,6 +5537,7 @@ bool RichEditorPattern::OnBackPressed()
         return false;
     }
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ResetSelection();
     CloseKeyboard(false);
     FocusHub::LostFocusToViewRoot();
 #if defined(ANDROID_PLATFORM)
@@ -9386,6 +9389,8 @@ void RichEditorPattern::ResetKeyboardIfNeed()
     }
 #else
     if (needToResetKeyboard && HasConnection()) {
+        CloseSelectOverlay();
+        ResetSelection();
         CloseKeyboard(false);
         RequestKeyboard(false, true, true);
     }
@@ -10971,6 +10976,7 @@ void RichEditorPattern::HandleOnAIWrite()
     AIWriteInfo info;
     GetAIWriteInfo(info);
     CloseSelectOverlay();
+    ResetSelection();
     CloseKeyboard(false);
 
     auto callback = [weak = WeakClaim(this), info](std::vector<uint8_t>& buffer) {
