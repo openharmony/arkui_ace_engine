@@ -701,6 +701,8 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
+            auto pattern = navigation->GetPattern<NavigationPattern>();
+            pattern->CheckContentNeedMeasure(navigation);
         };
 
     CreateAnimationWithPush(preNode, curNode, callback, isNavBar);
