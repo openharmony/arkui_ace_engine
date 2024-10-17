@@ -196,18 +196,6 @@ void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
         napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
     }
 }
-
-void UpdateLanguage(const std::string& languageTag, ConfigurationChange& configurationChange)
-{
-    std::string language;
-    std::string script;
-    std::string region;
-    Localization::ParseLocaleTag(languageTag, language, script, region, false);
-    if (!language.empty() || !script.empty() || !region.empty()) {
-        configurationChange.languageUpdate = true;
-        AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
-    }
-}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -2588,11 +2576,6 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         SystemProperties::SetDeviceAccess(parsedConfig.deviceAccess == "true");
         resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
     }
-    if (!parsedConfig.preferredLanguage.empty()) {
-        UpdateLanguage(parsedConfig.preferredLanguage, configurationChange);
-    } else if (!parsedConfig.languageTag.empty()) {
-        UpdateLanguage(parsedConfig.languageTag, configurationChange);
-    }
     if (!parsedConfig.languageTag.empty()) {
         std::string language;
         std::string script;
@@ -2627,6 +2610,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.preferredLanguage.empty()) {
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
+        configurationChange.languageUpdate = true;
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
