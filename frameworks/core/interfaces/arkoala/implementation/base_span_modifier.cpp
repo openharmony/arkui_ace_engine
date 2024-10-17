@@ -13,17 +13,29 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseSpanModifier {
 void TextBackgroundStyleImpl(Ark_NativePointer node,
-                             const Ark_TextBackgroundStyle* style)
+                             const Ark_TextBackgroundStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //BaseSpanModelNG::SetTextBackgroundStyle(frameNode, convValue);
 }
 void BaselineOffsetImpl(Ark_NativePointer node,
                         const Ark_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //BaseSpanModelNG::SetBaselineOffset(frameNode, convValue);
 }
 } // BaseSpanModifier
 const GENERATED_ArkUIBaseSpanModifier* GetBaseSpanModifier()

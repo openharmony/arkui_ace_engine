@@ -206,7 +206,7 @@ public:
             if (attribute == ATTRIBUTE_DIVIDER_END_MARGIN) {
                 inputValue.endMargin = checkVal;
             }
-            auto divider = Converter::ArkUnion<Type_SideBarContainerAttribute_divider_Arg0,
+            auto divider = Converter::ArkUnion<Ark_Union_DividerStyle_Undefined,
                 Ark_DividerStyle>(inputValue);
             modifier_->setDivider(node_, &divider);
             jsonValue = GetJsonValue(node_);
@@ -224,7 +224,7 @@ public:
         Ark_DividerStyle inputValue;
         for (auto [passed, checkVal, expected]: styleArray) {
             inputValue.color = checkVal;
-            auto divider = Converter::ArkUnion<Type_SideBarContainerAttribute_divider_Arg0,
+            auto divider = Converter::ArkUnion<Ark_Union_DividerStyle_Undefined,
                 Ark_DividerStyle>(inputValue);
             modifier_->setDivider(node_, &divider);
             jsonValue = GetJsonValue(node_);

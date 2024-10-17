@@ -140,7 +140,7 @@ static const std::vector<ArkNumberTestStep> SELECTED_TEST_PLAN = {
     { ArkValue<Ark_Number>(1.0f), "1"}
 };
 
-typedef std::pair<Type_AlphabetIndexerAttribute_itemSize_Arg0, std::string> ItemSizeTestStep;
+typedef std::pair<Ark_Union_String_Number, std::string> ItemSizeTestStep;
 static const std::vector<ItemSizeTestStep> ITEM_SIZE_TEST_PLAN = {
     { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(45.0f) }, "45.00vp"},
     { { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(-45) }, ATTRIBUTE_ITEM_SIZE_DEFAULT_VALUE},
@@ -1293,7 +1293,7 @@ HWTEST_F(IndexerModifierTest, setAlignStyleOffset, TestSize.Level1)
     ASSERT_NE(modifier_->setAlignStyle, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_HORIZONTAL_SPACE);
     EXPECT_EQ(checkVal, ATTRIBUTE_POPUP_HORIZONTAL_SPACE_DEFAULT_VALUE);
-    
+
     for (const auto& [value, expectVal] : POPUP_HORIZONTAL_OFFSET_TEST_PLAN) {
         modifier_->setAlignStyle(node_, ARK_INDEXER_ALIGN_START, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_HORIZONTAL_SPACE);
@@ -1395,7 +1395,7 @@ HWTEST_F(IndexerModifierTest, setPopupPositionX, TestSize.Level1)
     auto posObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_POSITION);
     auto checkValX = GetAttrValue<std::string>(posObject, PROP_NAME_POPUP_POSITION_X);
     EXPECT_EQ(checkValX, ATTRIBUTE_POPUP_POSITION_DEFAULT_VALUE);
-    
+
     for (const auto &[value, expectVal] : POPUP_POSITION_TEST_PLAN) {
         const Ark_Position& position = {
             Converter::ArkValue<Opt_Length>(std::optional(value)),
@@ -1422,7 +1422,7 @@ HWTEST_F(IndexerModifierTest, setPopupPositionY, TestSize.Level1)
     auto posObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, PROP_NAME_POPUP_POSITION);
     auto checkValY = GetAttrValue<std::string>(posObject, PROP_NAME_POPUP_POSITION_Y);
     EXPECT_EQ(checkValY, ATTRIBUTE_POPUP_POSITION_DEFAULT_VALUE);
-    
+
     for (const auto &[value, expectVal] : POPUP_POSITION_TEST_PLAN) {
         const Ark_Position& position = {
             Converter::ArkValue<Opt_Length>(Ark_Empty()),
@@ -1509,7 +1509,7 @@ HWTEST_F(IndexerModifierTest, setPopupBackgroundBlurStyle, TestSize.Level1)
     ASSERT_NE(modifier_->setPopupBackgroundBlurStyle, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_BACKGROUND_BLUR_STYLE);
     EXPECT_EQ(checkVal, ATTRIBUTE_POPUP_BACKGROUND_BLUR_STYLE_DEFAULT_VALUE);
-    
+
     for (const auto& [value, expectVal] : BLUR_STYLE_TEST_PLAN) {
         modifier_->setPopupBackgroundBlurStyle(node_, value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_BACKGROUND_BLUR_STYLE);
@@ -1527,7 +1527,7 @@ HWTEST_F(IndexerModifierTest, setPopupTitleBackground, TestSize.Level1)
     ASSERT_NE(modifier_->setPopupTitleBackground, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_TITLE_BACKGROUND);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
-    
+
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_BLACK) {
         modifier_->setPopupTitleBackground(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_TITLE_BACKGROUND);
@@ -1545,7 +1545,7 @@ HWTEST_F(IndexerModifierTest, setPopupTitleBackgroundRes, TestSize.Level1)
     ASSERT_NE(modifier_->setPopupTitleBackground, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_POPUP_TITLE_BACKGROUND);
     EXPECT_EQ(checkVal, ATTRIBUTE_COLOR_DEFAULT_VALUE_BLACK);
-    
+
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPopupTitleBackground(node_, &value);
         checkVal = GetAttrValue<std::string>(node_, PROP_NAME_POPUP_TITLE_BACKGROUND);

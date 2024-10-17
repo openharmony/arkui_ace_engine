@@ -399,7 +399,7 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestDefaultValues, TestSi
 }
 
 // Valid values for attribute 'trackBackgroundColor' of method 'trackBackgroundColor'
-static std::vector<std::tuple<std::string, ResourceColor, std::string>>
+static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
     trackBackgroundColorValidValues = {
     { "#FF0000FF", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { "#FF123456", Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456), "#FF123456" },
@@ -419,8 +419,8 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestValidValues, TestSize
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    ResourceColor inputValueTrackBackgroundColor;
-    ResourceColor initValueTrackBackgroundColor;
+    Ark_ResourceColor inputValueTrackBackgroundColor;
+    Ark_ResourceColor initValueTrackBackgroundColor;
 
     // Initial setup
     initValueTrackBackgroundColor = std::get<1>(trackBackgroundColorValidValues[0]);
@@ -438,7 +438,7 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestValidValues, TestSize
 }
 
 // Color::RED is mocked by mocked theme constants
-static std::vector<std::tuple<std::string, ResourceColor, std::string>>
+static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
     trackBackgroundColorValidResourceValues = {{ Color::RED.ToString(),
         Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(12345, NodeModifier::ResourceType::COLOR)),
         Color::RED.ToString() },
@@ -454,8 +454,8 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestValidResourceValues, 
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    ResourceColor inputValueTrackBackgroundColor;
-    ResourceColor initValueTrackBackgroundColor;
+    Ark_ResourceColor inputValueTrackBackgroundColor;
+    Ark_ResourceColor initValueTrackBackgroundColor;
 
     // Initial setup
     initValueTrackBackgroundColor = std::get<1>(trackBackgroundColorValidResourceValues[0]);
@@ -472,7 +472,7 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestValidResourceValues, 
     }
 }
 
-static std::vector<std::tuple<std::string, ResourceColor, std::string>>
+static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>>
     trackBackgroundColorInvalidValues = {
     { ATTRIBUTE_TRACK_BACKGROUND_COLOR_DEFAULT_VALUE, Converter::ArkUnion<Ark_ResourceColor, Ark_String>(""),
         ATTRIBUTE_TRACK_BACKGROUND_COLOR_DEFAULT_VALUE },
@@ -491,12 +491,12 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestInvalidValues, TestSi
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    ResourceColor inputValueTrackBackgroundColor;
-    ResourceColor initValueTrackBackgroundColor;
+    Ark_ResourceColor inputValueTrackBackgroundColor;
+    Ark_ResourceColor initValueTrackBackgroundColor;
 
     // Initial setup
     initValueTrackBackgroundColor = std::get<1>(trackBackgroundColorInvalidValues[0]);
-    
+
     // Verifying attribute's  values
     inputValueTrackBackgroundColor = initValueTrackBackgroundColor;
     for (auto&& value: trackBackgroundColorInvalidValues) {

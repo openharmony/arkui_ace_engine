@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/node/nav_router_modifier.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
@@ -28,29 +29,33 @@ void SetNavRouterOptions0Impl(Ark_NativePointer node)
 void SetNavRouterOptions1Impl(Ark_NativePointer node,
                               const Ark_RouteInfo* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //NavRouterModelNG::SetSetNavRouterOptions1(frameNode, convValue);
     LOGE("ARKOALA SetNavRouterOptions1 -> Method is not implemented.");
 }
 } // NavRouterInterfaceModifier
 namespace NavRouterAttributeModifier {
 void OnStateChangeImpl(Ark_NativePointer node,
-                       Ark_Function callback)
+                       Ark_Function value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto onStateChangeCallback = [frameNode](const bool isActivated) {
-        auto arkIsActiveted = Converter::ArkValue<Ark_Boolean>(isActivated);
-        GetFullAPI()->getEventsAPI()->getNavRouterEventsReceiver()->onStateChange(frameNode->GetId(), arkIsActiveted);
+        auto arkIsActivated = Converter::ArkValue<Ark_Boolean>(isActivated);
+        GetFullAPI()->getEventsAPI()->getNavRouterEventsReceiver()->onStateChange(frameNode->GetId(), arkIsActivated);
     };
     NavRouterModelNG::SetOnStateChange(frameNode, onStateChangeCallback);
 }
 void ModeImpl(Ark_NativePointer node,
-              enum Ark_NavRouteMode mode)
+              Ark_NavRouteMode value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto enumMode = Converter::OptConvert<NavRouteMode>(mode);
-    auto value = EnumToInt(enumMode);
-    NavRouterModelNG::SetNavRouteMode(frameNode, value);
+    auto enumMode = Converter::OptConvert<NavRouteMode>(value);
+    NavRouterModelNG::SetNavRouteMode(frameNode, EnumToInt(enumMode));
 }
 } // NavRouterAttributeModifier
 const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier()

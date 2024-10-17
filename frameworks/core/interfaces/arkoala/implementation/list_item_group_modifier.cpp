@@ -37,7 +37,7 @@ namespace ListItemGroupInterfaceModifier {
 void SetListItemGroupOptionsImpl(Ark_NativePointer node,
                                  const Opt_ListItemGroupOptions* options)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto optionsOpt = Converter::OptConvert<Converter::ListItemGroupOptions>(*options);
@@ -51,9 +51,9 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
 } // ListItemGroupInterfaceModifier
 namespace ListItemGroupAttributeModifier {
 void DividerImpl(Ark_NativePointer node,
-                 const Type_ListItemGroupAttribute_divider_Arg0* value)
+                 const Ark_Union_ListDividerOptions_Undefined* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
@@ -62,6 +62,11 @@ void DividerImpl(Ark_NativePointer node,
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           const Ark_Materialized* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ListItemGroupModelNG::SetChildrenMainSize(frameNode, convValue);
     LOGE("ListItemGroupModifier::ChildrenMainSizeImpl is not implemented yet!");
 }
 } // ListItemGroupAttributeModifier

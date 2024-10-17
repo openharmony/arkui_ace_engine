@@ -111,29 +111,29 @@ const std::vector<ArkLengthTestStep> ARK_LENGTH_TEST_PLAN_RES = {
         "0.00px" } // Work with resource dos not have final solution. Test step can be changed.
 };
 
-typedef std::pair<Union_Number_String_Resource, std::string> UnionNumStrResTestStep;
+typedef std::pair<Ark_Union_Number_String_Resource, std::string> UnionNumStrResTestStep;
 const Ark_String STR_NAME = Converter::ArkValue<Ark_String>("min_font_size");
 const std::vector<UnionNumStrResTestStep> UNION_NUM_STR_RES_TEST_PLAN = {
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_Number>(123), "123.00vp" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_Number>(-123), "0.00px" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("5.6vp"), "5.60vp" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("-5.6vp"), "0.00px" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("45px"), "45.00px" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("-45px"), "0.00px" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_Number>(1.23f), "1.23vp" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_Number>(-1.23f), "0.00px" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("45fp"), "45.00fp" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("10%"), "0.00px" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("45dp"), "45.00fp" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("-10%"), "0.00px" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("undefVal"), "0.00fp" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("45.3fp"), "45.30fp" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>(""), "0.00fp"},
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("qw111vp"), "0.00vp" },
-    { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("qw111"), "0.00fp" }
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(123), "123.00vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-123), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("5.6vp"), "5.60vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-5.6vp"), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45px"), "45.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-45px"), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(1.23f), "1.23vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-1.23f), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45fp"), "45.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("10%"), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45dp"), "45.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-10%"), "0.00px" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("undefVal"), "0.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45.3fp"), "45.30fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(""), "0.00fp"},
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("qw111vp"), "0.00vp" },
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("qw111"), "0.00fp" }
 };
 const std::vector<UnionNumStrResTestStep> UNION_NUM_STR_RES_TEST_PLAN_RES = {
-    { Converter::ArkUnion<Union_Number_String_Resource, struct Ark_Resource>(
+    { Converter::ArkUnion<Ark_Union_Number_String_Resource, struct Ark_Resource>(
         ArkRes(const_cast<Ark_String*>(&STR_NAME), 1234, NodeModifier::ResourceType::STRING)),
         "0.00px" }
 };
@@ -964,23 +964,23 @@ HWTEST_F(TextAreaModifierTest, setLineHeightTest, TestSize.Level1)
     EXPECT_EQ(checkVal, "0.00vp");
 
     const std::vector<UnionNumStrResTestStep> testPlan = {
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_Number>(123), "123.00vp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_Number>(-123), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("5.6vp"), "5.60vp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("-5.6vp"), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("45px"), "45.00px" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("-45px"), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_Number>(1.23f), "1.23vp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_Number>(-1.23f), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("45fp"), "45.00fp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("10%"), "10.00%" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("45dp"), "45.00fp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("-10%"), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("undefVal"), "0.00fp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("45.3fp"), "45.30fp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>(""), "0.00fp"},
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("qw111vp"), "0.00vp" },
-        { Converter::ArkUnion<Union_Number_String_Resource, Ark_String>("qw111"), "0.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(123), "123.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-123), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("5.6vp"), "5.60vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-5.6vp"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45px"), "45.00px" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-45px"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(1.23f), "1.23vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(-1.23f), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45fp"), "45.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("10%"), "10.00%" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45dp"), "45.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("-10%"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("undefVal"), "0.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("45.3fp"), "45.30fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(""), "0.00fp"},
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("qw111vp"), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String_Resource, Ark_String>("qw111"), "0.00fp" },
     };
 
     for (const auto& [value, expectVal] : testPlan) {
@@ -1492,7 +1492,7 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTest, TestSize.Level1)
     ASSERT_NE(modifier_->setInputFilter, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Opt_Callback func = {};
+    Opt_Function func = {};
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
 

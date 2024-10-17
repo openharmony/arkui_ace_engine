@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,6 +22,11 @@ namespace ScreenInterfaceModifier {
 void SetScreenOptionsImpl(Ark_NativePointer node,
                           const Ark_Number* screenId)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(screenId);
+    //auto convValue = Converter::OptConvert<type_name>(*screenId);
+    //ScreenModelNG::SetSetScreenOptions(frameNode, convValue);
 }
 } // ScreenInterfaceModifier
 const GENERATED_ArkUIScreenModifier* GetScreenModifier()

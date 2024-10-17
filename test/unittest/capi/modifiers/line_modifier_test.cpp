@@ -62,12 +62,12 @@ public:
     }
 };
 
-Opt_Type_LineInterface_setLineOptions_Arg0 BuildLineOptions(int width, int height)
+Opt_Literal_Union_String_Number_width_height BuildLineOptions(int width, int height)
 {
-    Literal_Opt_Union_String_Number_width_height options;
+    Ark_Literal_Union_String_Number_width_height options;
     options.width = Converter::ArkUnion<Opt_Union_String_Number, Ark_Number>(width);
     options.height = Converter::ArkUnion<Opt_Union_String_Number, Ark_Number>(height);
-    return Converter::ArkValue<Opt_Type_LineInterface_setLineOptions_Arg0>(options);
+    return Converter::ArkValue<Opt_Literal_Union_String_Number_width_height>(options);
 }
 
 /**

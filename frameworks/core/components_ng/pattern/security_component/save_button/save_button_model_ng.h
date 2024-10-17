@@ -21,9 +21,9 @@
 
 namespace OHOS::Ace::NG {
 struct SaveButtonStyle {
-    static const auto DEFAULT_ICON = SaveButtonIconStyle::ICON_FULL_FILLED;
-    static const auto DEFAULT_TEXT = SaveButtonSaveDescription::DOWNLOAD;
-    static const auto DEFAULT_BACKGROUND_TYPE = ButtonType::CAPSULE;
+    inline static const auto DEFAULT_ICON = SaveButtonIconStyle::ICON_FULL_FILLED;
+    inline static const auto DEFAULT_TEXT = SaveButtonSaveDescription::DOWNLOAD;
+    inline static const auto DEFAULT_BACKGROUND_TYPE = ButtonType::CAPSULE;
 
     SaveButtonStyle()
     {

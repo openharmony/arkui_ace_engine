@@ -64,14 +64,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SaveButtonInterfaceModifier {
 void SetSaveButtonOptions0Impl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     SaveButtonModelNG::InitSaveButton(frameNode, SaveButtonStyle(), false);
 }
 void SetSaveButtonOptions1Impl(Ark_NativePointer node,
                                const Ark_SaveButtonOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto style = Converter::Convert<SaveButtonStyle>(*options);
@@ -80,8 +80,12 @@ void SetSaveButtonOptions1Impl(Ark_NativePointer node,
 } // SaveButtonInterfaceModifier
 namespace SaveButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
-                 Ark_Function event)
+                 Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //SaveButtonModelNG::SetOnClick(frameNode, convValue);
 }
 } // SaveButtonAttributeModifier
 const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()

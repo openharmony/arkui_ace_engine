@@ -211,7 +211,7 @@ void ScrollerPeerImpl::TriggerFling(const Ark_Number* velocity)
     scrollController->Fling(flingVelocity);
 }
 
-void ScrollerPeerImpl::TriggerScrollPage0(const Literal_Boolean_next* value)
+void ScrollerPeerImpl::TriggerScrollPage0(const Ark_Literal_Boolean_next* value)
 {
     CHECK_NULL_VOID(value);
     bool smooth = false;
@@ -225,12 +225,12 @@ void ScrollerPeerImpl::TriggerScrollPage0(const Literal_Boolean_next* value)
     scrollController->ScrollPage(!next, smooth);
 }
 
-void ScrollerPeerImpl::TriggerScrollPage1(const Literal_Boolean_next_Opt_Axis_direction* value)
+void ScrollerPeerImpl::TriggerScrollPage1(const Ark_Literal_Boolean_next_Axis_direction* value)
 {
     // deprecated since 9
     CHECK_NULL_VOID(value);
     LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollPage1 Deprecated method.");
-    Literal_Boolean_next tempValue;
+    Ark_Literal_Boolean_next tempValue;
     tempValue.next = value->next;
     TriggerScrollPage0(&tempValue);
 }

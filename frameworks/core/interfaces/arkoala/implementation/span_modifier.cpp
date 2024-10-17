@@ -13,59 +13,121 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SpanInterfaceModifier {
 void SetSpanOptionsImpl(Ark_NativePointer node,
-                        const Type_SpanInterface_setSpanOptions_Arg0* value)
+                        const Ark_Union_String_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SpanModelNG::SetSetSpanOptions(frameNode, convValue);
 }
 } // SpanInterfaceModifier
 namespace SpanAttributeModifier {
 void FontImpl(Ark_NativePointer node,
               const Ark_Font* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SpanModelNG::SetFont(frameNode, convValue);
 }
 void FontColorImpl(Ark_NativePointer node,
-                   const ResourceColor* value)
+                   const Ark_ResourceColor* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SpanModelNG::SetFontColor(frameNode, convValue);
 }
 void FontSizeImpl(Ark_NativePointer node,
-                  const Type_SpanAttribute_fontSize_Arg0* value)
+                  const Ark_Union_Number_String_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SpanModelNG::SetFontSize(frameNode, convValue);
 }
 void FontStyleImpl(Ark_NativePointer node,
-                   enum Ark_FontStyle value)
+                   Ark_FontStyle value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //SpanModelNG::SetFontStyle(frameNode, convValue);
 }
 void FontWeightImpl(Ark_NativePointer node,
-                    const Type_SpanAttribute_fontWeight_Arg0* value)
+                    const Ark_Union_Number_FontWeight_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SpanModelNG::SetFontWeight(frameNode, convValue);
 }
 void FontFamilyImpl(Ark_NativePointer node,
-                    const Type_SpanAttribute_fontFamily_Arg0* value)
+                    const Ark_Union_String_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SpanModelNG::SetFontFamily(frameNode, convValue);
 }
 void DecorationImpl(Ark_NativePointer node,
                     const Ark_DecorationStyleInterface* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SpanModelNG::SetDecoration(frameNode, convValue);
 }
 void LetterSpacingImpl(Ark_NativePointer node,
-                       const Type_SpanAttribute_letterSpacing_Arg0* value)
+                       const Ark_Union_Number_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SpanModelNG::SetLetterSpacing(frameNode, convValue);
 }
 void TextCaseImpl(Ark_NativePointer node,
-                  enum Ark_TextCase value)
+                  Ark_TextCase value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //SpanModelNG::SetTextCase(frameNode, convValue);
 }
 void LineHeightImpl(Ark_NativePointer node,
                     const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SpanModelNG::SetLineHeight(frameNode, convValue);
 }
 void TextShadowImpl(Ark_NativePointer node,
-                    const Type_SpanAttribute_textShadow_Arg0* value)
+                    const Ark_Union_ShadowOptions_Array_ShadowOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SpanModelNG::SetTextShadow(frameNode, convValue);
 }
 } // SpanAttributeModifier
 const GENERATED_ArkUISpanModifier* GetSpanModifier()

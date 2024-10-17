@@ -941,6 +941,10 @@ void* createLinearIndicatorNode(ArkUI_Int32 nodeId)
     return nullptr;
 }
 
+void* createCustomNodeNode(ArkUI_Int32 nodeId)
+{
+    return nullptr;
+}
 
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 

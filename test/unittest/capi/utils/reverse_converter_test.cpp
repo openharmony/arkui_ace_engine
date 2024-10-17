@@ -203,12 +203,12 @@ HWTEST_F(ReverseConvertorTest, OptionalTypes, TestSize.Level1)
  */
 HWTEST_F(ReverseConvertorTest, UnionTypes, TestSize.Level1)
 {
-    auto unionResult = Converter::ArkUnion<Union_Number_String, Ark_Number>(123);
+    auto unionResult = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(123);
     EXPECT_EQ(unionResult.selector, 0);
     EXPECT_EQ(unionResult.value0.tag, ARK_TAG_INT32);
     EXPECT_EQ(unionResult.value0.i32, 123);
 
-    unionResult = Converter::ArkUnion<Union_Number_String, Ark_String>("abc");
+    unionResult = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("abc");
     EXPECT_EQ(unionResult.selector, 1);
     EXPECT_EQ(unionResult.value1.chars, "abc"s);
 

@@ -13,39 +13,74 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageSpanInterfaceModifier {
 void SetImageSpanOptionsImpl(Ark_NativePointer node,
-                             const Type_ImageSpanInterface_setImageSpanOptions_Arg0* value)
+                             const Ark_Union_ResourceStr_PixelMap* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageSpanModelNG::SetSetImageSpanOptions(frameNode, convValue);
 }
 } // ImageSpanInterfaceModifier
 namespace ImageSpanAttributeModifier {
 void VerticalAlignImpl(Ark_NativePointer node,
-                       enum Ark_ImageSpanAlignment value)
+                       Ark_ImageSpanAlignment value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ImageSpanModelNG::SetVerticalAlign(frameNode, convValue);
 }
 void ColorFilterImpl(Ark_NativePointer node,
-                     const Type_ImageSpanAttribute_colorFilter_Arg0* filter)
+                     const Ark_Union_ColorFilter_DrawingColorFilter* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageSpanModelNG::SetColorFilter(frameNode, convValue);
 }
 void ObjectFitImpl(Ark_NativePointer node,
-                   enum Ark_ImageFit value)
+                   Ark_ImageFit value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ImageSpanModelNG::SetObjectFit(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    Ark_Function callback)
+                    Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ImageSpanModelNG::SetOnComplete(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 Ark_Function callback)
+                 Ark_Function value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //ImageSpanModelNG::SetOnError(frameNode, convValue);
 }
 void AltImpl(Ark_NativePointer node,
              const Ark_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageSpanModelNG::SetAlt(frameNode, convValue);
 }
 } // ImageSpanAttributeModifier
 const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()

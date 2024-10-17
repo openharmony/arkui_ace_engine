@@ -40,7 +40,7 @@ public:
         }
     }
 
-    void TriggerShowPrevios()
+    void TriggerShowPrevious()
     {
         for (auto &handler: handlers_) {
             if (auto controller = handler.Upgrade(); controller) {

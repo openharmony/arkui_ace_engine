@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,10 +22,20 @@ namespace BadgeInterfaceModifier {
 void SetBadgeOptions0Impl(Ark_NativePointer node,
                           const Ark_BadgeParamWithNumber* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //BadgeModelNG::SetSetBadgeOptions0(frameNode, convValue);
 }
 void SetBadgeOptions1Impl(Ark_NativePointer node,
                           const Ark_BadgeParamWithString* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //BadgeModelNG::SetSetBadgeOptions1(frameNode, convValue);
 }
 } // BadgeInterfaceModifier
 const GENERATED_ArkUIBadgeModifier* GetBadgeModifier()

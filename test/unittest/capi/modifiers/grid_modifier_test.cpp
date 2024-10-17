@@ -98,10 +98,10 @@ namespace {
     const auto RESOURCE_OPACITY_BY_STRING = 0.4f;
     const auto RESOURCE_OPACITY_BY_NUMBER = 0.5f;
 
-    using OneNumResStep = std::pair<Union_Number_Resource, float>;
+    using OneNumResStep = std::pair<Ark_Union_Number_Resource, float>;
     static const std::vector<OneNumResStep> UNION_NUMBER_RES_TEST_PLAN = {
-        { CreateResourceUnion<Union_Number_Resource>(RES_NAME), RESOURCE_OPACITY_BY_STRING },
-        { CreateResourceUnion<Union_Number_Resource>(RES_ID), RESOURCE_OPACITY_BY_NUMBER },
+        { CreateResourceUnion<Ark_Union_Number_Resource>(RES_NAME), RESOURCE_OPACITY_BY_STRING },
+        { CreateResourceUnion<Ark_Union_Number_Resource>(RES_ID), RESOURCE_OPACITY_BY_NUMBER },
     };
 
     const Ark_Int32 FAKE_RES_ID(1234);
@@ -615,21 +615,21 @@ HWTEST_F(GridModifierTest, setScrollBarWidthTestValidValues, TestSize.Level1)
 {
     std::string strResult;
 
-    typedef std::pair<Type_GridAttribute_scrollBarWidth_Arg0, std::string> OneTestStep;
+    typedef std::pair<Ark_Union_Number_String, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_Number>(1), "1.00vp" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_Number>(0), "0.00vp" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_Number>(2.45f), "2.45vp" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("5px"), "5.00px" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("22.35px"), "22.35px" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("7vp"), "7.00vp" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("1.65vp"), "1.65vp" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("65fp"), "65.00fp" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("4.3fp"), "4.30fp" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("11lpx"), "11.00lpx" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("0.5lpx"), "0.50lpx" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("3"), "3.00fp" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("10.65"), "10.65fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1), "1.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(0), "0.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(2.45f), "2.45vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("5px"), "5.00px" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("22.35px"), "22.35px" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("7vp"), "7.00vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("1.65vp"), "1.65vp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("65fp"), "65.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("4.3fp"), "4.30fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("11lpx"), "11.00lpx" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("0.5lpx"), "0.50lpx" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("3"), "3.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("10.65"), "10.65fp" },
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {
@@ -648,22 +648,22 @@ HWTEST_F(GridModifierTest, setScrollBarWidthTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
 
-    typedef std::pair<Type_GridAttribute_scrollBarWidth_Arg0, std::string> OneTestStep;
+    typedef std::pair<Ark_Union_Number_String, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_Number>(-1), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_Number>(-3.56f), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("invalid value"), "0.00fp" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("-8px"), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("-15.6px"), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("23%"), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("-21vp"), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("-8.6vp"), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("-32fp"), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("-9.99fp"), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("-22lpx"), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("-1.23lpx"), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("-6"), "" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarWidth_Arg0, Ark_String>("-16.2"), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(-1), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(-3.56f), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("invalid value"), "0.00fp" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-8px"), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-15.6px"), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("23%"), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-21vp"), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-8.6vp"), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-32fp"), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-9.99fp"), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-22lpx"), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-1.23lpx"), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-6"), "" },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-16.2"), "" },
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {
@@ -696,20 +696,20 @@ HWTEST_F(GridModifierTest, setScrollBarColorTestValidColorValues, TestSize.Level
     // test is disabled because Ark_Color can`t be converted to Color
     std::string strResult;
 
-    typedef std::pair<Type_GridAttribute_scrollBarColor_Arg0, std::string> OneTestStep;
+    typedef std::pair<Ark_Union_Color_Number_String, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_WHITE), "#FFFFFFFF" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_BLACK), "#FF000000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_BROWN), "#FFA52A2A" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_GRAY), "#FF808080" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_GREEN), "#FF008000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_GREY), "#FF808080" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_ORANGE), "#FFFFA500" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_PINK), "#FFFFC0CB" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_YELLOW), "#FFFFFF00" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Color>(ARK_COLOR_TRANSPARENT), "#00000000" },
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {
@@ -728,19 +728,19 @@ HWTEST_F(GridModifierTest, setScrollBarColorTestValidNumberValues, TestSize.Leve
 {
     std::string strResult;
 
-    typedef std::pair<Type_GridAttribute_scrollBarColor_Arg0, std::string> OneTestStep;
+    typedef std::pair<Ark_Union_Color_Number_String, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0xffffffff), "#FFFFFFFF" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0xff000000), "#FF000000" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0xff0000ff), "#FF0000FF" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0xffa52a2a), "#FFA52A2A" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0xff808080), "#FF808080" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0xff008000), "#FF008000" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0xffffa500), "#FFFFA500" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0xffffc0cb), "#FFFFC0CB" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0xffff0000), "#FFFF0000" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0xffffff00), "#FFFFFF00" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0x00000000), "#00000000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xffffffff), "#FFFFFFFF" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xff000000), "#FF000000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xff0000ff), "#FF0000FF" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xffa52a2a), "#FFA52A2A" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xff808080), "#FF808080" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xff008000), "#FF008000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xffffa500), "#FFFFA500" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xffffc0cb), "#FFFFC0CB" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xffff0000), "#FFFF0000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xffffff00), "#FFFFFF00" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0x00000000), "#00000000" },
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {
@@ -759,19 +759,19 @@ HWTEST_F(GridModifierTest, setScrollBarColorTestValidStringValues, TestSize.Leve
 {
     std::string strResult;
 
-    typedef std::pair<Type_GridAttribute_scrollBarColor_Arg0, std::string> OneTestStep;
+    typedef std::pair<Ark_Union_Color_Number_String, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_String>("#FFFFFFFF"), "#FFFFFFFF" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_String>("#ff000000"), "#FF000000" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_String>("#ff0000ff"), "#FF0000FF" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_String>("#ffa52a2a"), "#FFA52A2A" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_String>("#ff808080"), "#FF808080" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_String>("#ff008000"), "#FF008000" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_String>("#ffffa500"), "#FFFFA500" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_String>("#ffffc0cb"), "#FFFFC0CB" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_String>("#ffff0000"), "#FFFF0000" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_String>("#ffffff00"), "#FFFFFF00" },
-        { Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_String>("#00000000"), "#00000000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>("#FFFFFFFF"), "#FFFFFFFF" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>("#ff000000"), "#FF000000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>("#ff0000ff"), "#FF0000FF" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>("#ffa52a2a"), "#FFA52A2A" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>("#ff808080"), "#FF808080" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>("#ff008000"), "#FF008000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>("#ffffa500"), "#FFFFA500" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>("#ffffc0cb"), "#FFFFC0CB" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>("#ffff0000"), "#FFFF0000" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>("#ffffff00"), "#FFFFFF00" },
+        { Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_String>("#00000000"), "#00000000" },
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {
@@ -800,14 +800,14 @@ HWTEST_F(GridModifierTest, DISABLED_setScrollBarColorTestInvalidColorValues, Tes
 HWTEST_F(GridModifierTest, setScrollBarColorTestInvalidNumberValues, TestSize.Level1)
 {
     std::string strResult;
-    Type_GridAttribute_scrollBarColor_Arg0 inputValue;
+    Ark_Union_Color_Number_String inputValue;
 
-    inputValue = Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0xffffffff + 1);
+    inputValue = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0xffffffff + 1);
     modifier_->setScrollBarColor(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
     EXPECT_EQ(strResult, "#00000000");
 
-    inputValue = Converter::ArkUnion<Type_GridAttribute_scrollBarColor_Arg0, Ark_Number>(0x00000000 - 1);
+    inputValue = Converter::ArkUnion<Ark_Union_Color_Number_String, Ark_Number>(0x00000000 - 1);
     modifier_->setScrollBarColor(node_, &inputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_SCROLL_BAR_COLOR_NAME);
     EXPECT_EQ(strResult, "#FFFFFFFF");
@@ -1570,24 +1570,24 @@ HWTEST_F(GridModifierTest, setFrictionTestDefaultValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, setFrictionTestValidValues, TestSize.Level1)
 {
     double doubleResult;
-    Type_GridAttribute_friction_Arg0 inputValue;
+    Ark_Union_Number_Resource inputValue;
 
-    inputValue = Converter::ArkUnion<Type_GridAttribute_friction_Arg0, Ark_Number>(0.1f);
+    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(0.1f);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
     EXPECT_NEAR(doubleResult, 0.1f, FLT_EPSILON);
 
-    inputValue = Converter::ArkUnion<Type_GridAttribute_friction_Arg0, Ark_Number>(0.9f);
+    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(0.9f);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
     EXPECT_NEAR(doubleResult, 0.9f, FLT_EPSILON);
 
-    inputValue = Converter::ArkUnion<Type_GridAttribute_friction_Arg0, Ark_Number>(1.1f);
+    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(1.1f);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
     EXPECT_NEAR(doubleResult, 1.1f, FLT_EPSILON);
 
-    inputValue = Converter::ArkUnion<Type_GridAttribute_friction_Arg0, Ark_Number>(123456);
+    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(123456);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
     EXPECT_NEAR(doubleResult, 123456.f, FLT_EPSILON);
@@ -1616,19 +1616,19 @@ HWTEST_F(GridModifierTest, setFrictionTestValidResourceValues, TestSize.Level1)
 HWTEST_F(GridModifierTest, setFrictionTestInvalidValues, TestSize.Level1)
 {
     double doubleResult;
-    Type_GridAttribute_friction_Arg0 inputValue;
+    Ark_Union_Number_Resource inputValue;
 
-    inputValue = Converter::ArkUnion<Type_GridAttribute_friction_Arg0, Ark_Number>(0);
+    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(0);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
     EXPECT_NEAR(doubleResult, 0.6f, FLT_EPSILON);
 
-    inputValue = Converter::ArkUnion<Type_GridAttribute_friction_Arg0, Ark_Number>(-1);
+    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-1);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
     EXPECT_NEAR(doubleResult, 0.6f, FLT_EPSILON);
 
-    inputValue = Converter::ArkUnion<Type_GridAttribute_friction_Arg0, Ark_Number>(-0.1f);
+    inputValue = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-0.1f);
     modifier_->setFriction(node_, &inputValue);
     doubleResult = GetAttrValue<double>(node_, ATTRIBUTE_FRICTION_NAME);
     EXPECT_NEAR(doubleResult, 0.6f, FLT_EPSILON);

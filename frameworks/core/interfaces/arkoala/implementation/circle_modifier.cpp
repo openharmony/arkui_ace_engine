@@ -40,9 +40,9 @@ namespace CircleInterfaceModifier {
 void SetCircleOptionsImpl(Ark_NativePointer node,
                           const Opt_CircleOptions* value)
 {
-    CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto circleOptions = Converter::OptConvert<Converter::CircleOptions>(*value);
     if (circleOptions && circleOptions.value().width) {
         ShapeAbstractModelNG::SetWidth(frameNode, circleOptions.value().width.value());

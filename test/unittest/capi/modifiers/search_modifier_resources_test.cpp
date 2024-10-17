@@ -66,8 +66,8 @@ const auto TEXT_FONT_FAMILY_ATTR("fontFamily");
 const auto TEXT_INDENT_ATTR("textIndent");
 
 // test types
-using OneUnionNumStrResStep = std::pair<Union_Number_String_Resource, std::string>;
-using StringResourceTest = std::tuple<ResourceStr, std::string>;
+using OneUnionNumStrResStep = std::pair<Ark_Union_Number_String_Resource, std::string>;
+using StringResourceTest = std::tuple<Ark_ResourceStr, std::string>;
 using ArkResourceTest = std::tuple<Ark_ResourceStr, std::string>;
 
 // resource names and id
@@ -101,9 +101,9 @@ const auto FAMILY_BY_STRING = "first";
 const auto FAMILY_BY_NUMBER = "second";
 
 const std::vector<StringResourceTest> SRC_RESOURCES_TEST_PLAN = {
-    { CreateResourceUnion<ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
-    { CreateResourceUnion<ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
-    { CreateResourceUnion<ResourceStr>(INVALID_STRING_ID), RESOURCE_BY_NUMBER },
+    { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
+    { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
+    { CreateResourceUnion<Ark_ResourceStr>(INVALID_STRING_ID), RESOURCE_BY_NUMBER },
 };
 
 const std::vector<ArkResourceTest> ARK_RESOURCES_TEST_PLAN = {
@@ -115,13 +115,13 @@ const std::vector<ArkResourceTest> ARK_RESOURCES_TEST_PLAN = {
         "" },
 };
 
-using ResourceColorTestPlan = std::pair<ResourceColor, std::string>;
+using ResourceColorTestPlan = std::pair<Ark_ResourceColor, std::string>;
 static const std::vector<ResourceColorTestPlan> COLOR_RESOURCE_TEST_PLAN = {
-    { Converter::ArkUnion<ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME)),
         COLOR_BY_STRING.ColorToString() },
-    { Converter::ArkUnion<ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_ID)),
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_ID)),
         COLOR_BY_NUMBER.ColorToString() },
-    { Converter::ArkUnion<ResourceColor, Ark_Resource>(CreateResource(INVALID_COLOR_ID)),
+    { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(INVALID_COLOR_ID)),
         RESOURCE_DEFAULT_COLOR_DEFAULT },
 };
 
@@ -137,13 +137,13 @@ const std::vector<OneTestStep> ARK_SIZE_TEST_PLAN = {
 };
 
 const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_RESOURCES = {
-    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_ID)),
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_ID)),
       DIMENSION_BY_ID.ToString()
     },
-    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_NAME)),
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_NAME)),
       DIMENSION_BY_NAME.ToString()
     },
-    { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_INVALID)),
+    { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_INVALID)),
       DIMENSION_BY_INVALID.ToString()
     }
 };
@@ -195,24 +195,24 @@ public:
 };
 
 /**
- * @tc.name: setSearchOptionsResoruces
+ * @tc.name: setSearchOptionsResources
  * @tc.desc: Check the default values of setSearchOptions
  *
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierResourcesTest, setSearchOptionsResoruces, TestSize.Level1)
+HWTEST_F(SearchModifierResourcesTest, setSearchOptionsResources, TestSize.Level1)
 {
-    Type_SearchInterface_setSearchOptions_Arg0 options = {};
+    Ark_Type_SearchInterface_options options = {};
 
     const std::vector<StringResourceTest> testPlan = {
-        { CreateResourceUnion<ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
-        { CreateResourceUnion<ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
-        { CreateResourceUnion<ResourceStr>(INVALID_STRING_ID), "" },
+        { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
+        { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
+        { CreateResourceUnion<Ark_ResourceStr>(INVALID_STRING_ID), "" },
     };
 
     for (const auto &[src, expected] : testPlan) {
         options.placeholder = ArkValue<Opt_ResourceStr>(src);
-        auto optOptions = ArkValue<Opt_Type_SearchInterface_setSearchOptions_Arg0>(options);
+        auto optOptions = ArkValue<Opt_Type_SearchInterface_options>(options);
         modifier_->setSearchOptions(node_, &optOptions);
         // default
         auto jsonValue = GetJsonValue(node_);
@@ -230,7 +230,7 @@ HWTEST_F(SearchModifierResourcesTest, setCancelButtonTestIconColorResource, Test
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
     attrs.selector = 0;
     for (const auto &[color, expected] : COLOR_RESOURCE_TEST_PLAN) {
         attrs.value0.icon.value.color = ArkValue<Opt_ResourceColor>(color);
@@ -252,7 +252,7 @@ HWTEST_F(SearchModifierResourcesTest, setCancelButtonTestIconSrc, TestSize.Level
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
     attrs.selector = 0;
     for (const auto &[src, expected] : SRC_RESOURCES_TEST_PLAN) {
         attrs.value0.icon.value.src = ArkValue<Opt_ResourceStr>(src);
@@ -280,7 +280,7 @@ HWTEST_F(SearchModifierResourcesTest, DISABLED_setSearchIconTestResources, TestS
     for (const auto &[testLength, resultLength] : ARK_SIZE_TEST_PLAN) {
         for (const auto &[colorTest, resultColor] : COLOR_RESOURCE_TEST_PLAN) {
             for (const auto &[testSrc, resultSrc] : SRC_RESOURCES_TEST_PLAN) {
-                Type_SearchAttribute_searchIcon_Arg0 attrs = {
+                Ark_Union_IconOptions_SymbolGlyphModifier attrs = {
                     .selector = 0,
                     .value0 = {
                         .color = ArkValue<Opt_ResourceColor>(colorTest),
@@ -406,7 +406,7 @@ HWTEST_F(SearchModifierResourcesTest, setCaretStyleTestResources, TestSize.Level
 }
 
 /**
- * @tc.name: setInputFilterTestResoruces
+ * @tc.name: setInputFilterTestResources
  * @tc.desc: Check the functionality of setInputFilter
  * @tc.type: FUNC
  */
@@ -428,12 +428,12 @@ HWTEST_F(SearchModifierResourcesTest, setInputFilterTest, TestSize.Level1)
     };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Opt_Callback func = {};
+    Opt_Function func = {};
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
 
     std::unique_ptr<JsonValue> jsonValue;
-    Type_SearchAttribute_cancelButton_Arg0 attrs;
+    Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
     attrs.selector = 0;
     for (const auto &[src, expected] : ARK_RESOURCES_TEST_PLAN) {
         auto sendResource = src;
@@ -607,13 +607,13 @@ HWTEST_F(SearchModifierResourcesTest, setLineHeightTestResource, TestSize.Level1
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;
     const std::vector<OneUnionNumStrResStep> UNION_NUM_STR_RES_TEST_PLAN_RESOURCES = {
-        { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_ID)),
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_ID)),
             DIMENSION_BY_ID.ToString()
         },
-        { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_NAME)),
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_NAME)),
             DIMENSION_BY_NAME.ToString()
         },
-        { ArkUnion<Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_INVALID)),
+        { ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(CreateResource(RES_NUMBER_INVALID)),
             Dimension(0.0f, DimensionUnit::VP).ToString()
         }
     };

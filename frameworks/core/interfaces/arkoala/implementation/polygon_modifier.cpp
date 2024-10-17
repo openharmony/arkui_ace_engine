@@ -13,19 +13,30 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PolygonInterfaceModifier {
 void SetPolygonOptionsImpl(Ark_NativePointer node,
-                           const Opt_Type_PolygonInterface_setPolygonOptions_Arg0* value)
+                           const Opt_Literal_Union_String_Number_width_height* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //PolygonModelNG::SetSetPolygonOptions(frameNode, convValue);
 }
 } // PolygonInterfaceModifier
 namespace PolygonAttributeModifier {
 void PointsImpl(Ark_NativePointer node,
                 const Array_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //PolygonModelNG::SetPoints(frameNode, convValue);
 }
 } // PolygonAttributeModifier
 const GENERATED_ArkUIPolygonModifier* GetPolygonModifier()

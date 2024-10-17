@@ -68,7 +68,6 @@ void AlignItemsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto flexAlign = Converter::OptConvert<FlexAlign>(value);
     RowModelNG::SetAlignItems(frameNode, flexAlign);
 }
@@ -77,27 +76,26 @@ void JustifyContentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto flexAlign = Converter::OptConvert<FlexAlign>(value);
     RowModelNG::SetJustifyContent(frameNode, flexAlign);
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
-    CHECK_NULL_VOID(value);
-    LOGW("ARKOALA RowAttribute_PointLightImpl -> Method is not FULLY implemented.");
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    LOGW("ARKOALA RowAttribute_PointLightImpl -> Method is not FULLY implemented.");
     ACE_UPDATE_NODE_RENDER_CONTEXT(
         LightIlluminated, (float)Converter::ConvertOrDefault(value->illuminated, 0),
         frameNode);
 }
-void ReverseImpl(Ark_NativePointer node, const Opt_Boolean* isReversed)
+void ReverseImpl(Ark_NativePointer node,
+                 const Opt_Boolean* value)
 {
-    CHECK_NULL_VOID(isReversed);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    RowModelNG::SetIsReverse(frameNode, Converter::OptConvert<bool>(*isReversed));
+    RowModelNG::SetIsReverse(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
 }
 } // RowAttributeModifier
 const GENERATED_ArkUIRowModifier* GetRowModifier()

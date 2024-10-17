@@ -13,13 +13,19 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EllipseInterfaceModifier {
 void SetEllipseOptionsImpl(Ark_NativePointer node,
-                           const Opt_Type_EllipseInterface_setEllipseOptions_Arg0* value)
+                           const Opt_Literal_Union_String_Number_width_height* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //EllipseModelNG::SetSetEllipseOptions(frameNode, convValue);
 }
 } // EllipseInterfaceModifier
 const GENERATED_ArkUIEllipseModifier* GetEllipseModifier()

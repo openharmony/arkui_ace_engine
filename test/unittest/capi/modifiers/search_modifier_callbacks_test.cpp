@@ -115,7 +115,7 @@ HWTEST_F(SearchModifierCallbackTest, setInputFilterTest, TestSize.Level1)
         g_EventTestString = g_EventErrorTestString;
     };
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Opt_Callback func = {};
+    Opt_Function func = {};
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
 
