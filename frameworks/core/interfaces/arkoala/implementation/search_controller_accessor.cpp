@@ -12,19 +12,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/arkoala/utility/converter.h"
-#include "search_controller_modifier_peer_impl.h"
 #include "arkoala_api_generated.h"
+#include "search_controller_modifier_peer_impl.h"
+
+namespace OHOS::Ace::NG::Converter {
+template<>
+inline void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src)
+{
+    switch (src) {
+        case ARK_MENU_POLICY_DEFAULT:
+            dst = MenuPolicy::DEFAULT;
+            break;
+        case ARK_MENU_POLICY_HIDE:
+            dst = MenuPolicy::HIDE;
+            break;
+        case ARK_MENU_POLICY_SHOW:
+            dst = MenuPolicy::SHOW;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_MenuPolicy: %{public}d", src);
+    }
+}
+
+template<>
+inline SelectionOptions Convert(const Ark_SelectionOptions& options)
+{
+    SelectionOptions selectionOptions;
+    auto menuPolicy = OptConvert<MenuPolicy>(options.menuPolicy);
+    if (menuPolicy) {
+        selectionOptions.menuPolicy = *menuPolicy;
+    }
+    return selectionOptions;
+}
+} // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchControllerAccessor {
 
-static void DestroyPeer(SearchControllerPeerImpl *peerImpl)
+static void DestroyPeer(SearchControllerPeerImpl* peerImpl)
 {
     if (peerImpl) {
+        const auto& controller = peerImpl->GetController();
         peerImpl->DecRefCount();
+        if (controller) {
+            controller->Clear();
+        }
     }
 }
 Ark_NativePointer CtorImpl()
@@ -35,14 +67,20 @@ Ark_NativePointer CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeer);
+    return reinterpret_cast<void*>(&DestroyPeer);
 }
-void CaretPositionImpl(SearchControllerPeer* peer,
-                       const Ark_Number* value)
+void CaretPositionImpl(SearchControllerPeer* peer, const Ark_Number* value)
 {
+    CHECK_NULL_VOID(value);
     auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerCaretPosition(value);
+    auto caretPosition = Converter::Convert<int32_t>(*value);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        caretPosition = caretPosition < 0 ? 0 : caretPosition;
+    } else {
+        // do nothing
+    }
+    peerImpl->TriggerCaretPosition(caretPosition);
 }
 void StopEditingImpl(SearchControllerPeer* peer)
 {
@@ -50,14 +88,27 @@ void StopEditingImpl(SearchControllerPeer* peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerStopEditing();
 }
-void SetTextSelectionImpl(SearchControllerPeer* peer,
-                          const Ark_Number* selectionStart,
-                          const Ark_Number* selectionEnd,
-                          const Opt_SelectionOptions* options)
+void SetTextSelectionImpl(SearchControllerPeer* peer, const Ark_Number* selectionStart, const Ark_Number* selectionEnd,
+    const Opt_SelectionOptions* options)
 {
     auto peerImpl = reinterpret_cast<SearchControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    peerImpl->TriggerSetTextSelection(selectionStart, selectionEnd, options);
+    std::optional<SelectionOptions> selectionOptions = std::nullopt;
+    int32_t start = 0;
+    int32_t end = 0;
+    if (!selectionStart || !selectionEnd) {
+        LOGE("Arkoala SetTextSelection: The selectionStart or selectionEnd is NULL");
+    }
+    if (selectionStart != nullptr) {
+        start = Converter::Convert<int32_t>(*selectionStart);
+    }
+    if (selectionEnd != nullptr) {
+        end = Converter::Convert<int32_t>(*selectionEnd);
+    }
+    if (options != nullptr) {
+        selectionOptions = Converter::OptConvert<SelectionOptions>(*options);
+    }
+    peerImpl->TriggerSetTextSelection(start, end, selectionOptions);
 }
 } // SearchControllerAccessor
 const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
@@ -72,4 +123,4 @@ const GENERATED_ArkUISearchControllerAccessor* GetSearchControllerAccessor()
     return &SearchControllerAccessorImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier
