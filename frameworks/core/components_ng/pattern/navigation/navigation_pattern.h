@@ -435,7 +435,9 @@ public:
     }
 
     RefPtr<FrameNode> GetDragBarNode() const;
+    void BuildDragBar();
     void InitDragBarEvent();
+    void ClearDragBarEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown();
@@ -537,6 +539,9 @@ private:
         NavigationTransition navigationTransition);
     bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
     void GetOrCreateNavDestinationUINode();
+
+    void CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode);
+    RefPtr<FrameNode> CreateDragBarItemNode();
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

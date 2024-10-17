@@ -39,6 +39,10 @@ constexpr int32_t PAGE_NODES = 1000;
 constexpr int32_t PAGE_DEPTH = 300;
 constexpr int32_t HALF_POSITION = 50;
 constexpr int32_t END_POSITION = 100;
+constexpr Dimension DRAG_BAR_RADIUS = 6.0_vp;
+constexpr Dimension DRAG_BAR_BLUR_RADIUS = 20.0_vp;
+constexpr Dimension DRAG_BAR_ITEM_RADIUS = 1.0_vp;
+constexpr int32_t SECOND_ZINDEX_VALUE = 2;
 namespace {
 constexpr int32_t MODE_SWITCH_ANIMATION_DURATION = 500; // ms
 const RefPtr<CubicCurve> MODE_SWITCH_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
@@ -189,36 +193,38 @@ void NavigationPattern::DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>&
 
 void NavigationPattern::InitDragBarEvent()
 {
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
-        return;
-    }
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(GetDragBarNode());
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragGestureHub = dragBarNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dragGestureHub);
+    InitDragBarPanEvent(dragGestureHub);
+    InitTouchEvent(dragGestureHub);
+
+    // clear divider hover and pan event
     auto dividerNode = GetDividerNode();
     CHECK_NULL_VOID(dividerNode);
     auto dividerGestureHub = dividerNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dividerGestureHub);
     auto dividerInputHub = dividerNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(dividerInputHub);
-    auto dragBarNode = GetDragBarNode();
+    if (hoverEvent_) {
+        dividerInputHub->RemoveOnHoverEvent(hoverEvent_);
+        hoverEvent_.Reset();
+    }
+    if (panEvent_) {
+        dividerGestureHub->RemovePanEvent(panEvent_);
+        panEvent_.Reset();
+    }
+}
+
+void NavigationPattern::ClearDragBarEvent()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(GetDragBarNode());
     CHECK_NULL_VOID(dragBarNode);
     auto dragGestureHub = dragBarNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dragGestureHub);
-    if (enableDragBar_) {
-        InitDragBarPanEvent(dragGestureHub);
-        InitTouchEvent(dragGestureHub);
-
-        // clear divider hover and pan event
-        if (hoverEvent_) {
-            dividerInputHub->RemoveOnHoverEvent(hoverEvent_);
-            hoverEvent_.Reset();
-        }
-        if (panEvent_) {
-            dividerGestureHub->RemovePanEvent(panEvent_);
-            panEvent_.Reset();
-        }
-        return;
-    }
-    InitDividerPanEvent(dividerGestureHub);
-    InitDividerMouseEvent(dividerInputHub);
 
     // clear drag bar touch and pan event
     if (touchEvent_) {
@@ -228,6 +234,40 @@ void NavigationPattern::InitDragBarEvent()
     if (dragBarPanEvent_) {
         dragGestureHub->RemovePanEvent(dragBarPanEvent_);
         dragBarPanEvent_.Reset();
+    }
+
+    hostNode->RemoveChild(dragBarNode);
+    hostNode->SetDragBarNode(nullptr);
+}
+
+void NavigationPattern::BuildDragBar()
+{
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
+        return;
+    }
+    if (enableDragBar_) {
+        if (GetDragBarNode()) {
+            // if dragBar is already in navigation, do nothing
+            return;
+        }
+        // create drag bar and init drag bar gesture event
+        auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(hostNode);
+        CreateDragBarNode(hostNode);
+        InitDragBarEvent();
+        return;
+    }
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerGestureHub = dividerNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dividerGestureHub);
+    auto dividerInputHub = dividerNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(dividerInputHub);
+    InitDividerPanEvent(dividerGestureHub);
+    InitDividerMouseEvent(dividerInputHub);
+    if (GetDragBarNode()) {
+        // clear drag bar gesture event and remove dragBar
+        ClearDragBarEvent();
     }
 }
 
@@ -244,7 +284,7 @@ void NavigationPattern::OnModifyDone()
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    InitDragBarEvent();
+    BuildDragBar();
 
     auto layoutProperty = hostNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -2948,6 +2988,45 @@ void NavigationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
         return;
     }
     json->Put("size", std::to_string(navigationStack_->Size()).c_str());
+}
+
+void NavigationPattern::CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode)
+{
+    auto dragBarNode = FrameNode::GetOrCreateFrameNode("DragBar", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationDragBarPattern>(); });
+    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(dragBarLayoutProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto renderContext = dragBarNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackBlurRadius(DRAG_BAR_BLUR_RADIUS);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(DRAG_BAR_RADIUS));
+    renderContext->UpdateZIndex(1);
+    dragBarNode->MarkModifyDone();
+    auto dragBarItem = CreateDragBarItemNode();
+    dragBarItem->MountToParent(dragBarNode);
+    dragBarNode->MountToParent(navigationGroupNode);
+    navigationGroupNode->SetDragBarNode(dragBarNode);
+
+    auto dragBarPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
+    CHECK_NULL_VOID(dragBarPattern);
+    dragBarPattern->UpdateDefaultColor();
+}
+
+RefPtr<FrameNode> NavigationPattern::CreateDragBarItemNode()
+{
+    auto dragBarItemNode = FrameNode::GetOrCreateFrameNode("DragBarItem",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto dragBarItemLayoutProperty = dragBarItemNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(dragBarItemLayoutProperty, nullptr);
+    dragBarItemLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    auto renderContext = dragBarItemNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    renderContext->UpdateZIndex(SECOND_ZINDEX_VALUE);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(DRAG_BAR_ITEM_RADIUS));
+    dragBarItemNode->MarkModifyDone();
+    return dragBarItemNode;
 }
 
 RefPtr<NavigationTransitionProxy> NavigationPattern::GetProxyById(uint64_t id) const
