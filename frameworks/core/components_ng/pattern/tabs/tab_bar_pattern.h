@@ -155,7 +155,6 @@ public:
         }
         layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
         layoutAlgorithm->SetCanOverScroll(canOverScroll_);
-        layoutAlgorithm->SetLastFontScale(lastFontScale_);
         return layoutAlgorithm;
     }
 
@@ -462,20 +461,6 @@ public:
         labelStyles_.erase(tabBarItemId);
     }
 
-    std::optional<float> GetThirdLargeFontHeight()
-    {
-        return thirdLargeFontHeight_;
-    }
-
-    void SetThirdLargeFontHeight(std::optional<float> thirdLargeFontHeight)
-    {
-        if (thirdLargeFontHeight.has_value()) {
-            thirdLargeFontHeight_ = thirdLargeFontHeight;
-        } else {
-            thirdLargeFontHeight_.reset();
-        }
-    }
-
     void SetIsExecuteBuilder(bool isExecuteBuilder)
     {
         isExecuteBuilder_ = isExecuteBuilder;
@@ -661,8 +646,6 @@ private:
     float currentOffset_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
-    float lastFontScale_ = 0.0f;
-    std::optional<float> thirdLargeFontHeight_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG
