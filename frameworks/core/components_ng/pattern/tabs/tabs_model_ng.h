@@ -97,6 +97,7 @@ public:
     static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
     static void SetOnContentWillChange(FrameNode* frameNode, std::function<bool(int32_t, int32_t)>&& callback);
     static void SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation);
+    static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

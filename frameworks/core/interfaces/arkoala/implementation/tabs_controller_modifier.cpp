@@ -12,22 +12,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include "tabs_controller_modifier_peer_impl.h"
+#include "core/interfaces/arkoala/utility/converter.h"
+#include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TabsControllerModifier {
+
+static void DestroyPeer(TabsControllerPeerImpl *peerImpl)
+{
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
+}
+
 Ark_NativePointer CtorImpl()
 {
-    return 0;
+    auto peerImpl = Referenced::MakeRefPtr<TabsControllerPeerImpl>();
+    peerImpl->IncRefCount();
+    return Referenced::RawPtr(peerImpl);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return 0;
+    return reinterpret_cast<Ark_NativePointer>(&DestroyPeer);
 }
 void ChangeIndexImpl(TabsControllerPeer* peer,
                      const Ark_Number* value)
 {
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(value);
+    auto index = Converter::Convert<Ark_Int32>(*value);    
+    peerImpl->TriggerChangeIndex(index);
 }
 Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer,
                                    const Opt_Array_Number* indices)

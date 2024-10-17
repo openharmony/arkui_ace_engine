@@ -1160,4 +1160,16 @@ void TabsModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<int32_
         swiperPaintProperty->ResetEdgeEffect();
     }
 }
+
+RefPtr<SwiperController> TabsModelNG::GetSwiperController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_RETURN(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, nullptr);
+    return swiperPattern->GetSwiperController();
+}
 } // namespace OHOS::Ace::NG
