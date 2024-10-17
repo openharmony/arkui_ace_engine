@@ -383,12 +383,6 @@ namespace Converter {
     }
 
     template<>
-    inline ImageRepeat Convert(const Ark_ImageRepeat& src)
-    {
-        return static_cast<ImageRepeat>(src);
-    }
-
-    template<>
     inline ImageFit Convert(const Ark_ImageFit& src)
     {
         return static_cast<ImageFit>(src);
@@ -495,10 +489,12 @@ namespace Converter {
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> void AssignCast(std::optional<DisplayMode>& dst, const Ark_BarState& src);
     template<> void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src);
+    template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_HorizontalAlign& src);
     template<> void AssignCast(std::optional<FlexAlign>& dst, const Ark_FlexAlign& src);
     template<> void AssignCast(std::optional<FlexDirection>& dst, const Ark_GridDirection& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
+    template<> void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src);
     template<> void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src);
     template<> void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
     template<> void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src);

@@ -1533,6 +1533,11 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    bool GetEnableHapticFeedback()
+    {
+        return isEnableHapticFeedback_;
+    }
+
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(

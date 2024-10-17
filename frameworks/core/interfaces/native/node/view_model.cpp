@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
@@ -84,6 +85,8 @@
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
+#include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
+#include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -607,11 +610,6 @@ void* createCalendarNode(ArkUI_Int32 nodeId)
     return nullptr;
 }
 
-void* createColumnSplitNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
 void* createCommonMethodNode(ArkUI_Int32 nodeId)
 {
     return nullptr;
@@ -716,7 +714,10 @@ void* createLineNode(ArkUI_Int32 nodeId)
 
 void* createLocationButtonNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = LocationButtonModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createMediaCachedImageNode(ArkUI_Int32 nodeId)
@@ -781,7 +782,10 @@ void* createPanelNode(ArkUI_Int32 nodeId)
 
 void* createPasteButtonNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = PasteButtonModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createPathNode(ArkUI_Int32 nodeId)
@@ -822,7 +826,10 @@ void* createRectNode(ArkUI_Int32 nodeId)
 
 void* createRichEditorNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto frameNode = RichEditorModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createRichTextNode(ArkUI_Int32 nodeId)
@@ -831,11 +838,6 @@ void* createRichTextNode(ArkUI_Int32 nodeId)
 }
 
 void* createRootSceneNode(ArkUI_Int32 nodeId)
-{
-    return nullptr;
-}
-
-void* createRowSplitNode(ArkUI_Int32 nodeId)
 {
     return nullptr;
 }

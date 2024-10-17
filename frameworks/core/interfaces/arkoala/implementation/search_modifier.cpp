@@ -45,12 +45,28 @@ struct SearchButtonOptions {
     std::optional<Color> color;
 };
 
+struct SearchOptions {
+    std::optional<std::string> value;
+    std::optional<std::string> placeholder;
+    std::optional<std::string> icon;
+};
+
 using UnionButtonOptions = std::variant<Ark_CancelButtonOptions, Ark_CancelButtonSymbolOptions>;
 using UnionStringResource = std::variant<Ark_String, Ark_Resource>;
 using UnionIconOptionsObject = std::variant<Ark_IconOptions, Ark_CustomObject>;
 } // namespace
 
 namespace Converter {
+template<>
+SearchOptions Convert(const Type_SearchInterface_setSearchOptions_Arg0& src)
+{
+    SearchOptions options;
+    options.value = Converter::OptConvert<std::string>(src.value);
+    options.placeholder= Converter::OptConvert<std::string>(src.placeholder);
+    options.icon = Converter::OptConvert<std::string>(src.icon);
+    return options;
+}
+
 template<typename T>
 void AssignTo(Ark_IconOptions& dst, const Opt_IconOptions& src)
 {
@@ -64,14 +80,20 @@ NG::IconOptions Convert(const Ark_IconOptions& src)
     auto iconSize = Converter::OptConvert<Dimension>(src.size);
     auto iconSrc = Converter::OptConvert<UnionStringResource>(src.src);
     if (iconSrc) {
-        auto srcArkStr = std::get_if<Ark_String>(&iconSrc.value());
-        if (srcArkStr != nullptr) {
+        if (auto srcArkStr = std::get_if<Ark_String>(&iconSrc.value());
+            srcArkStr != nullptr) {
             auto srcStr = Converter::Convert<std::string>(*srcArkStr);
             if (!srcStr.empty()) {
                 options.UpdateSrc(srcStr, "", "");
             }
-        } else {
-            LOGE("ARKOALA SearchAttributeModifier.IconResource not implemented.");
+        } else if (auto srcArkStr = std::get_if<Ark_Resource>(&iconSrc.value());
+            srcArkStr != nullptr) {
+            auto srcStr = Converter::OptConvert<std::string>(*srcArkStr);
+            auto moduleName = Converter::Convert<std::string>(srcArkStr->moduleName);
+            auto bundleName = Converter::Convert<std::string>(srcArkStr->bundleName);
+            if (!srcStr->empty()) {
+                options.UpdateSrc(*srcStr, moduleName, bundleName);
+            }
         }
     }
     if (iconColor) {
@@ -100,7 +122,15 @@ namespace SearchInterfaceModifier {
 void SetSearchOptionsImpl(Ark_NativePointer node,
                           const Opt_Type_SearchInterface_setSearchOptions_Arg0* options)
 {
-    LOGE("ARKOALA SearchAttributeModifier.SetSearchOptionsImpl -> Method is not implemented.");
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto searchOptions = options ? Converter::OptConvert<SearchOptions>(*options) : std::nullopt;
+    if (searchOptions) {
+        SearchModelNG::SetTextValue(frameNode, searchOptions->value);
+        SearchModelNG::SetPlaceholder(frameNode, searchOptions->placeholder);
+        SearchModelNG::SetIcon(frameNode, searchOptions->icon);
+        LOGE("ARKOALA SearchAttributeModifier.setSearchOptions -> handling Ark_SearchController not implemented.");
+    }
 }
 } // SearchInterfaceModifier
 namespace SearchAttributeModifier {
@@ -142,7 +172,7 @@ void SearchIconImpl(Ark_NativePointer node,
     if (iconObjOpt) {
         auto arkIconOpt = std::get_if<Ark_IconOptions>(&iconObjOpt.value());
         if (arkIconOpt != nullptr) {
-            auto options = Converter::Convert<IconOptions>(*arkIconOpt);
+            auto options = Converter::OptConvert<NG::IconOptions>(*arkIconOpt);
             SearchModelNG::SetSearchImageIcon(frameNode, options);
         } else {
             LOGE("ARKOALA SearchAttributeModifier.SearchIcon -> handling CustomObject not implemented.");
@@ -530,6 +560,9 @@ void EnablePreviewTextImpl(Ark_NativePointer node,
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               Ark_Boolean isEnabled)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetEnableHapticFeedback(frameNode, Converter::Convert<bool>(isEnabled));
 }
 } // SearchAttributeModifier
 const GENERATED_ArkUISearchModifier* GetSearchModifier()

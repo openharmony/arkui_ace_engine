@@ -18,7 +18,20 @@
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
 
-namespace OHOS::Ace::NG::GeneratedModifier {
+namespace OHOS::Ace::NG {
+
+namespace Converter {
+    template<>
+    void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src)
+    {
+        switch (src) {
+            case ARK_CHECK_BOX_SHAPE_CIRCLE: dst = CheckBoxStyle::CIRCULAR_STYLE; break;
+            case ARK_CHECK_BOX_SHAPE_ROUNDED_SQUARE: dst = CheckBoxStyle::SQUARE_STYLE; break;
+            default: LOGE("Unexpected enum value in Ark_CheckBoxShape: %{public}d", src);
+        }
+    }
+}
+namespace GeneratedModifier {
 namespace CheckboxInterfaceModifier {
 void SetCheckboxOptionsImpl(Ark_NativePointer node,
                             const Opt_CheckboxOptions* options)
@@ -48,7 +61,7 @@ void SelectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxModelNG::SetSelect(frameNode, static_cast<bool>(value));
+    CheckBoxModelNG::SetSelect(frameNode, Converter::Convert<bool>(value));
 }
 void SelectedColorImpl(Ark_NativePointer node,
                        const ResourceColor* value)
@@ -66,7 +79,8 @@ void ShapeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxModelNG::SetCheckboxStyle(frameNode, static_cast<CheckBoxStyle>(value));
+    auto checkBoxStyle = Converter::OptConvert<CheckBoxStyle>(value);
+    CheckBoxModelNG::SetCheckboxStyle(frameNode, checkBoxStyle);
 }
 void UnselectedColorImpl(Ark_NativePointer node,
                          const ResourceColor* value)
@@ -130,5 +144,6 @@ const GENERATED_ArkUICheckboxModifier* GetCheckboxModifier()
         CheckboxAttributeModifier::ContentModifierImpl,
     };
     return &ArkUICheckboxModifierImpl;
+}
 }
 }

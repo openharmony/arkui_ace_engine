@@ -401,11 +401,11 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestResourceColorValues, TestSize.Level
 
     typedef std::pair<Opt_ResourceColor, std::string> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_NAME)),
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(RES_NAME)),
             COLOR_BY_STRING.ColorToString() },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResourceUnion(RES_ID)),
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(RES_ID)),
             COLOR_BY_NUMBER.ColorToString() },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResourceUnion(INVALID_ID)),
+        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(INVALID_ID)),
             RESOURCE_DEFAULT_COLOR_DEFAULT },
     };
 

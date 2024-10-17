@@ -233,9 +233,13 @@ void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImage, src);
 }
 
-void ViewAbstract::SetBackgroundImage(FrameNode *frameNode, const ImageSourceInfo& src)
+void ViewAbstract::SetBackgroundImage(FrameNode *frameNode, const std::optional<ImageSourceInfo>& src)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src, frameNode);
+    if (src) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImage, src.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImage, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
@@ -246,9 +250,13 @@ void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat);
 }
 
-void ViewAbstract::SetBackgroundImageRepeat(FrameNode *frameNode, const ImageRepeat& imageRepeat)
+void ViewAbstract::SetBackgroundImageRepeat(FrameNode *frameNode, const std::optional<ImageRepeat>& imageRepeat)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat, frameNode);
+    if (imageRepeat) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundImageRepeat, frameNode);
+    }
 }
 
 void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)

@@ -219,7 +219,13 @@ std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
     if (type_ == NodeModifier::ResourceType::FLOAT) {
-        return themeConstants_->GetDimension(id_);
+        if (id_ == -1 && params_.size() > 0) {
+            return themeConstants_->GetDimensionByName(params_.front());
+        } else if (id_ != -1) {
+            return themeConstants_->GetDimension(id_);
+        } else {
+            LOGE("ResourceConverter::ToFontFamilies Unknown resource value");
+        }
     }
     return std::nullopt;
 }
@@ -335,9 +341,9 @@ template<>
 Font Convert(const Ark_Font& src)
 {
     Font font;
-    auto fontFamalies = OptConvert<std::vector<std::string>>(src.family);
-    if (fontFamalies) {
-        font.fontFamilies = fontFamalies.value();
+    auto fontFamilies = OptConvert<std::vector<std::string>>(src.family);
+    if (fontFamilies) {
+        font.fontFamilies = fontFamilies.value();
     }
     auto fontSize = OptConvert<Dimension>(src.size);
     if (fontSize) {
