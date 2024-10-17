@@ -46,41 +46,6 @@ RefPtr<GestureReferee> GetCurrentGestureReferee(const RefPtr<NGGestureRecognizer
 
 } // namespace
 
-struct TransformInstance {
-    std::unordered_map<int, TransformConfig> transFormConfig;
-    std::unordered_map<int, AncestorNodeInfo> transFormIds;
-};
-
-TransformInstance g_emptyInstance;
-std::unordered_map<int, TransformInstance> globalTransFormInstance;
-
-std::unordered_map<int, TransformConfig>& NGGestureRecognizer::GetGlobalTransCfg()
-{
-    auto id = Container::CurrentId();
-    auto iter = globalTransFormInstance.find(id);
-    if (iter == globalTransFormInstance.end()) {
-        return g_emptyInstance.transFormConfig;
-    }
-    return iter->second.transFormConfig;
-}
-
-std::unordered_map<int, AncestorNodeInfo>& NGGestureRecognizer::GetGlobalTransIds()
-{
-    auto id = Container::CurrentId();
-    auto iter = globalTransFormInstance.find(id);
-    if (iter == globalTransFormInstance.end()) {
-        return g_emptyInstance.transFormIds;
-    }
-    return iter->second.transFormIds;
-}
-
-void NGGestureRecognizer::ResetGlobalTransCfg()
-{
-    auto id = Container::CurrentId();
-    globalTransFormInstance[id].transFormConfig.clear();
-    globalTransFormInstance[id].transFormIds.clear();
-}
-
 bool NGGestureRecognizer::ShouldResponse()
 {
     if (AceType::InstanceOf<RecognizerGroup>(this)) {

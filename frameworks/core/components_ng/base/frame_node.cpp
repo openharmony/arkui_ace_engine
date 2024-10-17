@@ -2407,32 +2407,15 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
-    auto& translateIds = NGGestureRecognizer::GetGlobalTransIds();
-    auto& translateCfg = NGGestureRecognizer::GetGlobalTransCfg();
     auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = renderContext_->GetLocalTransformMatrix();
-    auto param = renderContext_->GetTrans();
     if (!touchRestrict.touchEvent.isMouseTouchTest) {
         localMat_ = localMat;
-    }
-    if (param.empty()) {
-        translateCfg[GetId()] = { .id = GetId(), .localMat = localMat };
-    } else {
-        translateCfg[GetId()] = { param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7],
-            param[8], GetId(), localMat };
-    }
-
-    if (GetInspectorId().has_value() && GetInspectorId()->find("SCBScreen-Temp") != std::string::npos &&
-        static_cast<int>(translateCfg[GetId()].degree) != 0) {
-        translateCfg[GetId()].degree = 0.0;
-        translateCfg[GetId()].localMat = Matrix4();
     }
     int32_t parentId = -1;
     auto parent = GetAncestorNodeOfFrame();
     if (parent) {
-        AncestorNodeInfo ancestorNodeInfo { parent->GetId() };
-        translateIds[GetId()] = ancestorNodeInfo;
         parentId = parent->GetId();
     }
 

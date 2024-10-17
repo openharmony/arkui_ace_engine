@@ -1984,8 +1984,6 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     auto oldSize = rect.GetSize();
     auto newSize = SizeF(oldSize.Width() * scale[0], oldSize.Height() * scale[1]);
     rect.SetSize(newSize);
-    transInfo_ = { scale[0], scale[1], centerPos.GetX(), centerPos.GetY(), rect.GetX(), rect.GetY(), translate[0],
-        translate[1], degree };
     // calculate skew
     SkewRect(skew[0], skew[1], rect);
     // calculate rotate
@@ -2018,11 +2016,6 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
     }
     gRect = rect;
     return rect;
-}
-
-std::vector<double> RosenRenderContext::GetTrans()
-{
-    return transInfo_;
 }
 
 std::pair<RectF, bool> RosenRenderContext::GetPaintRectWithTranslate()
