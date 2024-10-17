@@ -18,6 +18,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_rendering_context_base.h"
 #include "bridge/declarative_frontend/jsview/models/canvas/canvas_model_impl.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -52,22 +53,15 @@ void JSCanvas::Create(const JSCallbackInfo& info)
 {
     auto pattern = CanvasModel::GetInstance()->Create();
     CHECK_NULL_VOID(pattern);
-    if (info[0]->IsObject()) {
-        if (JSRef<JSObject>::Cast(info[0])->HasProperty("canvas")) {
-            JSDrawingRenderingContext* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSDrawingRenderingContext>();
-            if (jsContext) {
-                jsContext->SetInstanceId(Container::CurrentId());
-                jsContext->SetCanvasPattern(pattern);
-                jsContext->SetRSCanvasCallback(pattern);
-            }
-        } else {
-            JSCanvasRenderer* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSCanvasRenderer>();
-            if (jsContext) {
-                jsContext->SetInstanceId(Container::CurrentId());
-                jsContext->SetCanvasPattern(pattern);
-                jsContext->SetAntiAlias();
-                jsContext->SetDensity();
-            }
+    if (info[0]->IsUndefined()) {
+        CanvasModel::GetInstance()->DetachRenderContext();
+    } else if (info[0]->IsObject()) {
+        JSRenderingContextBase* jsContext = JSRef<JSObject>::Cast(info[0])->Unwrap<JSRenderingContextBase>();
+        if (jsContext) {
+            jsContext->SetInstanceId(Container::CurrentId());
+            jsContext->SetCanvasPattern(pattern);
+            jsContext->SetAntiAlias();
+            jsContext->SetDensity();
         }
     }
 
