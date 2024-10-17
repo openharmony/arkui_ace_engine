@@ -962,6 +962,8 @@ public:
 
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
+    void OnFontScaleConfigurationUpdate() override;
+
     float GetLastCaretPos()
     {
         return lastCaretPos_;
