@@ -40,4 +40,25 @@ void* DrawingLatticePreview::GetDrawingLatticeSptrAddr()
 {
     return static_cast<void*>(&lattice_);
 }
+
+std::string DrawingLatticePreview::DumpToString()
+{
+    if (lattice_) {
+        std::string drawingConfigStr;
+        drawingConfigStr.append("fXCount = " + std::to_string(lattice_->fXCount));
+        drawingConfigStr.append("fXDivs = [");
+        for (int32_t idx = 0; idx < lattice_->fXCount; ++idx) {
+            drawingConfigStr.append(std::to_string(lattice_->fXDivs[idx]) + " ");
+        }
+        drawingConfigStr.append("] ");
+        drawingConfigStr.append("fYCount = " + std::to_string(lattice_->fYCount));
+        drawingConfigStr.append("fYDivs = [");
+        for (int32_t idx = 0; idx < lattice_->fYCount; ++idx) {
+            drawingConfigStr.append(std::to_string(lattice_->fYDivs[idx]) + " ");
+        }
+        drawingConfigStr.append("] ");
+        return drawingConfigStr;
+    }
+    return "Lattice is null";
+}
 } // namespace OHOS::Ace
