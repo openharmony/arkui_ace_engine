@@ -474,7 +474,7 @@ bool WaterFlowLayoutInfoSW::IsMisaligned() const
         }
         const float startPos = SectionStartPos(lanes_[i]);
         if (std::any_of(lanes_[i].begin(), lanes_[i].end(),
-                [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
+                        [&startPos](const auto& lane) { return !NearEqual(lane.startPos, startPos); })) {
             return true;
         }
         const int32_t sectionStart = (i == 0) ? 0 : segmentTails_[i - 1] + 1;
@@ -581,6 +581,7 @@ void WaterFlowLayoutInfoSW::InitSegmentsForKeepPositionMode(const std::vector<Wa
     synced_ = false;
     const size_t n = sections.size();
     if (n == 0) {
+        ClearData();
         return;
     }
 
@@ -615,7 +616,7 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
         // move old lanes_[prevSegIdx,...] to Lanes_[curSegIdx,...]
         if (n <= lanes_.size()) {
             // means curSegIdx <= prevSegIdx
-            for (size_t i = static_cast<size_t>(start); i < curSegIdx; ++i) {
+            for (size_t i = 0; i < curSegIdx; ++i) {
                 lanes_[i] = std::vector<Lane>(sections[i].crossCount.value_or(1));
             }
             for (size_t i = curSegIdx; i < n; ++i) {
@@ -629,7 +630,7 @@ bool WaterFlowLayoutInfoSW::AdjustLanes(const std::vector<WaterFlowSections::Sec
             for (size_t i = n - 1; i >= curSegIdx; i--) {
                 lanes_[i] = lanes_[oriSize--];
             }
-            for (size_t i = static_cast<size_t>(start); i < curSegIdx; ++i) {
+            for (size_t i = 0; i < curSegIdx; ++i) {
                 lanes_[i] = std::vector<Lane>(sections[i].crossCount.value_or(1));
             }
         }
@@ -659,7 +660,8 @@ void WaterFlowLayoutInfoSW::NotifyDataChange(int32_t index, int32_t count)
         return;
     }
     // 更新的index是否在newStartIndex_上方、是否会影响newStartIndex_
-    if (index >= newStartIndex_ || (count < 0 && newStartIndex_ <= index - count - 1)) {
+    if ((count == 0 && newStartIndex_ <= index) || (count > 0 && newStartIndex_ < index) ||
+        (count < 0 && newStartIndex_ <= index - count - 1)) {
         newStartIndex_ = INVALID_NEW_START_INDEX;
         return;
     }
@@ -684,5 +686,18 @@ void WaterFlowLayoutInfoSW::UpdateLanesIndex(int32_t updateIdx)
             }
         }
     }
+}
+
+void WaterFlowLayoutInfoSW::ClearData()
+{
+    segmentCache_.clear();
+    segmentTails_.clear();
+    lanes_.clear();
+    idxToLane_.clear();
+    margins_.clear();
+    maxHeight_ = 0.0f;
+    synced_ = false;
+    startIndex_ = 0;
+    endIndex_ = -1;
 }
 } // namespace OHOS::Ace::NG

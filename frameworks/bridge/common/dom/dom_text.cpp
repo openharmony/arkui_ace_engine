@@ -15,10 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_text.h"
 
-#include "core/common/ace_application_info.h"
-#include "core/components/declaration/text/text_declaration.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMText::DOMText(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
@@ -78,11 +74,9 @@ void DOMText::CheckAndSetSpanStyle(const RefPtr<DOMSpan>& dmoSpan, TextStyle& sp
         spanStyle.SetTextDecoration(textStyle.GetTextDecoration());
     }
     if (!dmoSpan->HasSetTextDecorationColor()) {
-        LOGD("Set Text Decoration Color to Span");
         spanStyle.SetTextDecorationColor(textStyle.GetTextDecorationColor());
     }
     if (!dmoSpan->HasSetTextDecorationStyle()) {
-        LOGD("Set Text Decoration Style to Span");
         spanStyle.SetTextDecorationStyle(textStyle.GetTextDecorationStyle());
     }
     if (!dmoSpan->HasSetFontFamily()) {

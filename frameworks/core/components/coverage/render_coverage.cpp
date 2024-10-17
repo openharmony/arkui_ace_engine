@@ -15,9 +15,6 @@
 
 #include "core/components/coverage/render_coverage.h"
 
-#include "base/log/log.h"
-#include "core/components/common/properties/alignment.h"
-
 namespace OHOS::Ace {
 
 RefPtr<RenderNode> RenderCoverage::Create()

@@ -16,7 +16,6 @@
 #include "core/components/badge/badge_component.h"
 
 #include "core/components/badge/badge_element.h"
-#include "core/components/badge/render_badge.h"
 
 namespace OHOS::Ace {
 

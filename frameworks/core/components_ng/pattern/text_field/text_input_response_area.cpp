@@ -198,6 +198,12 @@ void PasswordResponseArea::AddEvent(const RefPtr<FrameNode>& node)
         auto button = weak.Upgrade();
         CHECK_NULL_VOID(button);
         button->OnPasswordIconClicked();
+        auto context = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        auto node = button->GetFrameNode();
+        CHECK_NULL_VOID(node);
     };
     auto longPressCallback = [](GestureEvent& info) {
         LOGD("PasswordResponseArea long press");
@@ -605,14 +611,29 @@ void CleanNodeResponseArea::LoadingImageProperty()
     if (textFieldLayoutProperty->HasIconSrc()) {
         iconSrc_ = textFieldLayoutProperty->GetIconSrcValue();
     }
-    if (textFieldLayoutProperty->HasIconColor()) {
-        iconColor_ = textFieldLayoutProperty->GetIconColorValue();
-    }
+    LoadingCancelButtonColor();
     if (textFieldLayoutProperty->HasBundleName()) {
         bundleName_ = textFieldLayoutProperty->GetBundleNameValue();
     }
     if (textFieldLayoutProperty->HasModuleName()) {
         moduleName_ = textFieldLayoutProperty->GetModuleNameValue();
+    }
+}
+
+void CleanNodeResponseArea::LoadingCancelButtonColor()
+{
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (textFieldLayoutProperty->GetIsDisabledValue(false)) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID(theme);
+        iconColor_ = theme->GetTextColorDisable();
+    } else if (textFieldLayoutProperty->HasIconColor()) {
+        iconColor_ = textFieldLayoutProperty->GetIconColorValue();
     }
 }
 
@@ -626,7 +647,11 @@ ImageSourceInfo CleanNodeResponseArea::CreateImageSourceInfo()
     } else {
         info.SetSrc(iconSrc_);
     }
-    if (info.IsSvg()) {
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, info);
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, info);
+    if (info.IsSvg() && textFieldLayoutProperty->HasIconColor()) {
         info.SetFillColor(iconColor_);
         CHECK_NULL_RETURN(cleanNode_, info);
         auto imageNode = cleanNode_->GetFirstChild();

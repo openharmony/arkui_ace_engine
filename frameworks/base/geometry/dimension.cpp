@@ -15,11 +15,6 @@
 
 #include "base/geometry/dimension.h"
 
-#include <array>
-#include <functional>
-
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -174,14 +169,15 @@ DimensionUnit Dimension::GetAdaptDimensionUnit(const Dimension& dimension)
     return static_cast<int32_t>(unit_) <= static_cast<int32_t>(dimension.unit_) ? unit_ : dimension.unit_;
 }
 
-double Dimension::ConvertToPxDistribute(std::optional<float> minOptional, std::optional<float> maxOptional) const
+double Dimension::ConvertToPxDistribute(
+    std::optional<float> minOptional, std::optional<float> maxOptional, bool allowScale) const
 {
     if (unit_ != DimensionUnit::FP) {
         return ConvertToPx();
     }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, value_);
-    if (!pipeline->IsFollowSystem()) {
+    if (!allowScale) {
         return value_ * pipeline->GetDipScale();
     }
     auto minFontScale = minOptional.value_or(0.0f);
@@ -204,7 +200,6 @@ double Dimension::ConvertToPxByAppFontScale(float minFontScale) const
 {
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, value_);
-    CHECK_NULL_RETURN(pipeline->IsFollowSystem(), value_ * pipeline->GetDipScale());
     float maxFontScale = pipeline->GetMaxAppFontScale();
     float fontScale = std::clamp(pipeline->GetFontScale(), minFontScale, maxFontScale);
     return value_ * pipeline->GetDipScale() * fontScale;

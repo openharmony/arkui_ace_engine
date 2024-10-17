@@ -15,8 +15,6 @@
 
 #include "frameworks/core/components/svg/rosen_render_svg_fe_composite.h"
 
-#include "third_party/skia/include/effects/SkImageFilters.h"
-
 namespace OHOS::Ace {
 
 #ifndef USE_ROSEN_DRAWING

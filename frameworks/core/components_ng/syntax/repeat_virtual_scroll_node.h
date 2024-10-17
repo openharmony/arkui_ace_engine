@@ -43,7 +43,7 @@ public:
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
+        const std::function<void(int32_t, int32_t)>& onSetActiveRange);
 
     RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCount,
         const std::map<std::string, std::pair<bool, uint32_t>>& templateCacheCountMap,
@@ -51,7 +51,7 @@ public:
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
+        const std::function<void(int32_t, int32_t)>& onSetActiveRange);
 
     ~RepeatVirtualScrollNode() override = default;
 
@@ -90,6 +90,9 @@ public:
      * requests idle task
      */
     void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+
+    bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd,
+        RefPtr<FrameNode>& frameNode);
 
     /**
      * those items with index in cachedItems are marked active
@@ -153,7 +156,12 @@ public:
             child.item->PaintDebugBoundaryTreeAll(flag);
         }
     }
-
+    void SetIsLoop(bool isLoop)
+    {
+        isLoop_ = isLoop;
+    }
+protected:
+    void UpdateChildrenFreezeState(bool isFreeze) override;
 private:
     void PostIdleTask();
 
@@ -182,11 +190,14 @@ private:
     // size of data source when all data items loaded
     uint32_t totalCount_ = 0;
 
+    // loop property of the parent container
+    bool isLoop_ = false;
+
     // caches:
     mutable RepeatVirtualScrollCaches caches_;
 
     // get active child range
-    std::function<void(uint32_t, uint32_t)> onSetActiveRange_;
+    std::function<void(int32_t, int32_t)> onSetActiveRange_;
 
     // used by one of the unknown functions
     std::list<std::string> ids_;

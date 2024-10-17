@@ -165,13 +165,13 @@ HWTEST_F(NavigationAnimationTest, NavigationInteractiveTest001, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_NE(navigationPattern->currentProxy_, nullptr);
-    EXPECT_TRUE(navigationPattern->currentProxy_->GetInteractive());
+    ASSERT_NE(navigationPattern->GetTopNavigationProxy(), nullptr);
+    EXPECT_TRUE(navigationPattern->GetTopNavigationProxy()->GetInteractive());
 
     /**
      * @tc.steps: step3. set navigation transition callback, set interactive value false
     */
-    navigationPattern->currentProxy_->hasFinished_ = true;
+    navigationPattern->GetTopNavigationProxy()->hasFinished_ = true;
     navigationPattern->isFinishInteractiveAnimation_ = true;
     navigationPattern->SetNavigationTransition([](const RefPtr<NavDestinationContext>& preContext,
         const RefPtr<NavDestinationContext>& topContext, NavigationOperation operation) -> NavigationTransition {
@@ -192,8 +192,8 @@ HWTEST_F(NavigationAnimationTest, NavigationInteractiveTest001, TestSize.Level1)
     navigationPattern->OnModifyDone();
     navigationPattern->MarkNeedSyncWithJsStack();
     navigationPattern->SyncWithJsStackIfNeeded();
-    ASSERT_NE(navigationPattern->currentProxy_, nullptr);
-    EXPECT_FALSE(navigationPattern->currentProxy_->GetInteractive());
+    ASSERT_NE(navigationPattern->GetTopNavigationProxy(), nullptr);
+    EXPECT_FALSE(navigationPattern->GetTopNavigationProxy()->GetInteractive());
 }
 
 /**
@@ -236,8 +236,8 @@ HWTEST_F(NavigationAnimationTest, NavigationFinishAnimation002, TestSize.Level1)
     stack->Add("pageA", navDestinationA);
     pattern->MarkNeedSyncWithJsStack();
     pattern->SyncWithJsStackIfNeeded();
-    ASSERT_NE(pattern->currentProxy_, nullptr);
-    pattern->currentProxy_->FireCancelAnimation();
+    ASSERT_NE(pattern->GetTopNavigationProxy(), nullptr);
+    pattern->GetTopNavigationProxy()->FireCancelAnimation();
     auto targetPage = stack->Get();
     EXPECT_TRUE(targetPage == navDestinationA);
     ASSERT_EQ(stack->Size(), 1);
@@ -282,8 +282,8 @@ HWTEST_F(NavigationAnimationTest, NavigationCancelAnimation003, TestSize.Level1)
     stack->Add("pageA", destinationA);
     pattern->UpdateNavPathList();
     pattern->RefreshNavDestination();
-    ASSERT_NE(pattern->currentProxy_, nullptr);
-    pattern->currentProxy_->CancelInteractiveAnimation();
+    ASSERT_NE(pattern->GetTopNavigationProxy(), nullptr);
+    pattern->GetTopNavigationProxy()->CancelInteractiveAnimation();
     ASSERT_EQ(stack->Size(), 0);
 }
 
@@ -342,5 +342,114 @@ HWTEST_F(NavigationAnimationTest, NavigationFinishAnimation004, TestSize.Level1)
     auto navDestinationAProperty = topDestination->GetLayoutProperty();
     ASSERT_NE(navDestinationAProperty, nullptr);
     ASSERT_EQ(navDestinationAProperty->GetVisibilityValue(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: UpdateTextNodeListAsRenderGroup
+ * @tc.desc: Test NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, UpdateTextNodeListAsRenderGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
+    /**
+     * @tc.steps: step2. call the target function.
+     */
+    navDestinationNode->UpdateTextNodeListAsRenderGroup(true, proxy);
+}
+
+/**
+ * @tc.name: UpdateTextNodeListAsRenderGroup
+ * @tc.desc: Test NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, UpdateTextNodeListAsRenderGroup002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
+    /**
+     * @tc.steps: step2. call the target function.
+     */
+    navDestinationNode->UpdateTextNodeListAsRenderGroup(false, proxy);
+}
+
+/**
+ * @tc.name: CollectTextNodeAsRenderGroup
+ * @tc.desc: Test NavDestinationGroupNode::CollectTextNodeAsRenderGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, CollectTextNodeAsRenderGroup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 55, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    /**
+     * @tc.steps: step2. create contentNode for navDestination and add text node to content node.
+     */
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 1,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navDestinationNode->AddChild(navDestinationContentNode);
+    navDestinationNode->SetContentNode(navDestinationContentNode);
+    auto textNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 66, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    navDestinationContentNode->AddChild(textNode);
+    /**
+     * @tc.steps: step3. call the target function.
+     */
+    navDestinationNode->CollectTextNodeAsRenderGroup();
+    ASSERT_NE(navDestinationNode->textNodeList_.size(), 0);
+}
+
+/**
+ * @tc.name: ReleaseTextNodeList
+ * @tc.desc: Test NavDestinationGroupNode::ReleaseTextNodeList
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationAnimationTest, ReleaseTextNodeList001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination.
+     */
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        "navDestinationNode", 77, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestinationNode, nullptr);
+    /**
+     * @tc.steps: step2. create contentNode for navDestination and add text node to content node.
+     */
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 1,
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navDestinationNode->AddChild(navDestinationContentNode);
+    navDestinationNode->SetContentNode(navDestinationContentNode);
+    auto textNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 88, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    navDestinationContentNode->AddChild(textNode);
+    /**
+     * @tc.steps: step3. collect text nodes before release.
+     */
+    navDestinationNode->CollectTextNodeAsRenderGroup();
+    ASSERT_NE(navDestinationNode->textNodeList_.size(), 0);
+    /**
+     * @tc.steps: step4. call the target function.
+     */
+    navDestinationNode->ReleaseTextNodeList();
+    ASSERT_EQ(navDestinationNode->textNodeList_.size(), 0);
 }
 };

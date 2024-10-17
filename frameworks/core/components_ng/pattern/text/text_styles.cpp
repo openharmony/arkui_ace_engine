@@ -72,6 +72,7 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(textLineStyle, EllipsisMode, SetEllipsisMode);
         UPDATE_TEXT_STYLE(textLineStyle, LineSpacing, SetLineSpacing);
         UPDATE_TEXT_STYLE(textLineStyle, LineBreakStrategy, SetLineBreakStrategy);
+        UPDATE_TEXT_STYLE(textLineStyle, AllowScale, SetAllowScale);
     }
     return textStyle;
 }
@@ -198,23 +199,5 @@ std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions
         text = value.value().ToString();
     }
     return text;
-}
-
-void FontStyle::UpdateColorByResourceId()
-{
-    if (propTextColor) {
-        propTextColor->UpdateColorByResourceId();
-    }
-    if (propTextDecorationColor) {
-        propTextDecorationColor->UpdateColorByResourceId();
-    }
-    if (propTextShadow) {
-        auto& shadows = propTextShadow.value();
-        std::for_each(shadows.begin(), shadows.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
-    }
-    if (propSymbolColorList) {
-        auto& colors = propSymbolColorList.value();
-        std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
-    }
 }
 } // namespace OHOS::Ace::NG

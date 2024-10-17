@@ -15,9 +15,6 @@
 
 #include "core/gestures/long_press_recognizer.h"
 
-#include "core/event/ace_events.h"
-#include "core/gestures/gesture_referee.h"
-
 namespace OHOS::Ace {
 namespace {
 

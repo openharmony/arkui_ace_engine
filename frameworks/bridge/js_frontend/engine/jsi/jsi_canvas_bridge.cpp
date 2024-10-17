@@ -15,11 +15,6 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_canvas_bridge.h"
 
-#include "base/utils/linear_map.h"
-#include "base/utils/string_utils.h"
-
-#include "core/components/custom_paint/offscreen_canvas.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_offscreen_canvas_bridge.h"
 

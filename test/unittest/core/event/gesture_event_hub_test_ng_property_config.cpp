@@ -1312,7 +1312,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
     constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
     GestureEvent info = GestureEvent();
     auto size = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
     OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
@@ -1329,7 +1329,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
      * NearZero(size.Width()) is true.
      */
     size = SizeF(0, 0);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
     result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     EXPECT_TRUE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_TRUE(NearZero(size.Width()));
@@ -1345,7 +1345,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
      */
     size = SizeF(500, 600);
     gestureEventHub->frameNodeSize_ = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
     result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_FALSE(NearZero(size.Width()));
@@ -1357,7 +1357,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
      */
     size = SizeF(0, 0);
     gestureEventHub->frameNodeSize_ = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
     result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_TRUE(NearZero(size.Width()));
@@ -1388,7 +1388,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapScaleTest002, TestSize
     int32_t width = 600;
     GestureEvent info = GestureEvent();
     auto size = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();

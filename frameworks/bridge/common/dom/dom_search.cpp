@@ -15,12 +15,7 @@
 
 #include "frameworks/bridge/common/dom/dom_search.h"
 
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
-#include "core/common/ime/text_selection.h"
-#include "core/components/common/properties/radius.h"
 #include "core/components/search/search_theme.h"
-#include "core/components/text_field/textfield_theme.h"
 #include "frameworks/bridge/common/dom/input/dom_textfield_util.h"
 #include "frameworks/bridge/common/utils/utils.h"
 

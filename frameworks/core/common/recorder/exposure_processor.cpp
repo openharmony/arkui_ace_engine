@@ -14,7 +14,6 @@
  */
 #include "core/common/recorder/exposure_processor.h"
 
-#include "base/utils/time_util.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 

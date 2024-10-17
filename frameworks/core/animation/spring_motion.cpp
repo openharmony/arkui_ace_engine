@@ -15,8 +15,6 @@
 
 #include "core/animation/spring_motion.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 namespace {
 

@@ -15,9 +15,7 @@
 
 #include "core/common/platform_bridge.h"
 
-#include "base/log/log.h"
 #include "base/utils/utils.h"
-#include "frameworks/bridge/codec/function_call.h"
 #include "frameworks/bridge/codec/standard_function_codec.h"
 
 namespace OHOS::Ace {

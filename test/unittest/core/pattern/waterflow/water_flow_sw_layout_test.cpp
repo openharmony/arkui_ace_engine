@@ -12,8 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/unittest/core/pattern/waterflow/water_flow_test_ng.h"
+
 #include "water_flow_item_maps.h"
+#include "water_flow_test_ng.h"
 
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 
@@ -948,8 +949,8 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
     EXPECT_EQ(info_->newStartIndex_, 13);
 
     /**
-     * @tc.steps: step2. update the sections which in the lanes.
-     * @tc.expected: newStartIndex_ can be setted to -2.
+     * @tc.steps: step2. UPDATE the sections which in the lanes without the change of dataSource.
+     * @tc.expected: newStartIndex_ is -1.
      */
 
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -958,7 +959,7 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
 
     newSections = { WaterFlowSections::Section { .itemsCount = 2, .crossCount = 5 } };
     secObj->ChangeData(4, 1, newSections);
-    EXPECT_EQ(info_->newStartIndex_, -2);
+    EXPECT_EQ(info_->newStartIndex_, -1);
 
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 13);

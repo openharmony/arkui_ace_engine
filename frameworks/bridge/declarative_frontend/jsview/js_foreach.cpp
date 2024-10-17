@@ -27,27 +27,20 @@
 
 
 namespace OHOS::Ace {
-
-std::unique_ptr<ForEachModel> ForEachModel::instance = nullptr;
-std::mutex ForEachModel::mutex_;
-
 ForEachModel* ForEachModel::GetInstance()
 {
-    if (!instance) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance) {
 #ifdef NG_BUILD
-            instance.reset(new NG::ForEachModelNG());
+    static NG::ForEachModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance.reset(new NG::ForEachModelNG());
-            } else {
-                instance.reset(new Framework::ForEachModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ForEachModelNG instance;
+        return &instance;
+    } else {
+        static Framework::ForEachModelImpl instance;
+        return &instance;
     }
-    return instance.get();
+#endif
 }
 } // namespace OHOS::Ace
 

@@ -36,6 +36,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/udmf/udmf_client.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -318,6 +319,12 @@ int32_t TextPattern::GetTextContentLength()
     return 0;
 }
 
+void TextPattern::StartVibratorByLongPress()
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_);
+    VibratorUtils::StartVibraFeedback("longPress.light");
+}
+
 void TextPattern::HandleLongPress(GestureEvent& info)
 {
     HandleSpanLongPressEvent(info);
@@ -334,6 +341,12 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (selectOverlay_->HasRenderTransform()) {
         localOffset = ConvertGlobalToLocalOffset(info.GetGlobalLocation());
     }
+
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    if ((textLayoutProperty && textLayoutProperty->GetMaxLines() != 0) && GetWideText().length() != 0) {
+        StartVibratorByLongPress();
+    }
+
     if (IsDraggable(localOffset)) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
@@ -1955,13 +1968,8 @@ void TextPattern::OnModifyDone()
             ResetSelection();
         }
 
-        if (textDetectEnable_) {
-            auto entityJson = JsonUtil::ParseJsonString(textForDisplay_);
-            TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityJson->IsNull());
-            if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
-                dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
-                textLayoutProperty->UpdateContent(textForDisplay_);
-            }
+        if (CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
+            ParseOriText(textForDisplay_);
         }
     }
 
@@ -2035,6 +2043,22 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
         json->PutExtAttr("actualFontSize", GetFontSizeInJson(textLayoutProp->GetFontSize()).c_str(), filter);
     }
     json->PutExtAttr("font", GetFontInJson().c_str(), filter);
+    json->PutExtAttr("bindSelectionMenu", GetBindSelectionMenuInJson().c_str(), filter);
+}
+
+std::string TextPattern::GetBindSelectionMenuInJson() const
+{
+    auto jsonArray = JsonUtil::CreateArray(true);
+    for (auto& [spanResponsePair, params] : selectionMenuMap_) {
+        auto& [spanType, responseType] = spanResponsePair;
+        auto jsonItem = JsonUtil::Create(true);
+        jsonItem->Put("spanType", static_cast<int32_t>(spanType));
+        jsonItem->Put("responseType", static_cast<int32_t>(responseType));
+        jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType::SELECTION_MENU));
+        jsonArray->Put(jsonItem);
+    }
+    FillPreviewMenuInJson(jsonArray);
+    return StringUtils::RestoreBackslash(jsonArray->ToString());
 }
 
 std::string TextPattern::GetFontInJson() const
@@ -2265,8 +2289,9 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
 void TextPattern::ParseOriText(const std::string& currentText)
 {
     auto entityJson = JsonUtil::ParseJsonString(currentText);
-    TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityJson->IsNull());
-    if (!entityJson->IsNull() && !entityJson->GetValue("bundleName")->IsNull() &&
+    bool entityIsJson = !entityJson->IsNull();
+    TAG_LOGI(AceLogTag::ACE_TEXT, "text content is the json format: %{public}d", entityIsJson);
+    if (entityIsJson && !entityJson->GetValue("bundleName")->IsNull() &&
         dataDetectorAdapter_->ParseOriText(entityJson, textForDisplay_)) {
         if (childNodes_.empty()) {
             auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -3009,13 +3034,39 @@ void TextPattern::RemoveAreaChangeInner()
     pipeline->RemoveOnAreaChangeNode(host->GetId());
 }
 
-bool TextPattern::IsEnabled()
+void TextPattern::SetTextDetectEnable(bool enable)
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(eventHub, false);
-    return eventHub->IsEnabled();
+    CHECK_NULL_VOID(host);
+    dataDetectorAdapter_->frameNode_ = host;
+    if (enable == textDetectEnable_) {
+        return;
+    }
+    textDetectEnable_ = enable;
+    if (textDetectEnable_) {
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        auto callback = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->dataDetectorAdapter_->GetAIEntityMenu();
+        };
+        pipeline->SetConfigChangedCallback(host->GetId(), callback);
+    } else {
+        dataDetectorAdapter_->CancelAITask();
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+bool TextPattern::CanStartAITask()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        return textDetectEnable_ && enabled_ && !IsSetObscured() &&
+               textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE;
+    } else {
+        return textDetectEnable_ && enabled_;
+    }
 }
 
 bool TextPattern::NeedShowAIDetect()
@@ -3111,6 +3162,12 @@ void TextPattern::OnSelectionMenuOptionsUpdate(
     const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
     selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+}
+
+void TextPattern::StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex)
+{
+    CHECK_NULL_VOID(isEnableHapticFeedback_ && (currentIndex != preIndex));
+    VibratorUtils::StartVibraFeedback("slide");
 }
 
 void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
@@ -3243,7 +3300,10 @@ void TextPattern::SetStyledString(const RefPtr<SpanString>& value)
     CloseSelectOverlay();
     ProcessSpanString();
     auto length = styledString_->GetLength();
+    styledString_->RemoveCustomSpan();
     styledString_->ReplaceSpanString(0, length, value);
+    styledString_->AddCustomSpan();
+    styledString_->SetFramNode(WeakClaim(host.GetRawPtr()));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

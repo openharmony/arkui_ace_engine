@@ -119,6 +119,15 @@ void DynamicComponentRendererImpl::InitUiContent()
 
     uiContent_->InitializeDynamic(
         isolatedInfo_.reourcePath, isolatedInfo_.abcPath, isolatedInfo_.entryPoint, isolatedInfo_.registerComponents);
+
+    auto runtimeContext = Platform::AceContainer::GetRuntimeContext(hostInstanceId_);
+    if (runtimeContext) {
+        auto uiContentImpl = std::static_pointer_cast<UIContentImpl>(uiContent_);
+        if (uiContentImpl) {
+            uiContentImpl->UpdateFontScale(runtimeContext->GetConfiguration());
+        }
+    }
+
     ContainerScope scope(uiContent_->GetInstanceId());
     RegisterErrorEventHandler();
     RegisterSizeChangedCallback();
@@ -397,7 +406,8 @@ SizeF DynamicComponentRendererImpl::ComputeAdaptiveSize(const SizeF& size) const
     return SizeF(width, height);
 }
 
-void DynamicComponentRendererImpl::UpdateViewportConfig(const SizeF& size, float density, int32_t orientation)
+void DynamicComponentRendererImpl::UpdateViewportConfig(
+    const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt)
 {
     CHECK_NULL_VOID(uiContent_);
     auto adaptiveSize = ComputeAdaptiveSize(size);
@@ -407,10 +417,10 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const SizeF& size, float
     TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "[%{public}d] adaptive size: %{public}s -> [%{public}d x %{public}d]",
         uiContent_->GetInstanceId(), size.ToString().c_str(), vpConfig.Width(), vpConfig.Height());
 
-    auto task = [weak = WeakClaim(this), vpConfig]() {
+    auto task = [weak = WeakClaim(this), vpConfig, animationOpt]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
-        auto uiContent = renderer->uiContent_;
+        auto uiContent = std::static_pointer_cast<UIContentImpl>(renderer->uiContent_);
         CHECK_NULL_VOID(uiContent);
         ContainerScope scope(uiContent->GetInstanceId());
         ViewportConfig config(vpConfig.Width(), vpConfig.Height(), vpConfig.Density());
@@ -424,7 +434,7 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const SizeF& size, float
         renderer->viewport_.SetHeight(config.Height());
         TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "update card viewport: [%{public}d x %{public}d]",
             config.Width(), config.Height());
-        uiContent->UpdateViewportConfig(config, Rosen::WindowSizeChangeReason::UNDEFINED, nullptr);
+        uiContent->UpdateViewportConfigWithAnimation(config, Rosen::WindowSizeChangeReason::UNDEFINED, animationOpt);
     };
     bool contentReady = false;
     {

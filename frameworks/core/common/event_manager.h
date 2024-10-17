@@ -300,9 +300,9 @@ private:
         bool sendOnTouch);
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
     void SetResponseLinkRecognizers(const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers);
-    void MockCancelEventAndDispatch(const TouchEvent& touchPoint);
-    void MockCancelEventAndDispatch(const AxisEvent& axisEvent);
-    void MockHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
+    void FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint);
+    void FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent);
+    void FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
@@ -336,11 +336,14 @@ private:
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
     int64_t lastTouchEventEndTimestamp_ = 0;
-    std::set<int32_t> downFingerIds_;
+    std::unordered_map<int32_t, int32_t> downFingerIds_;
     std::set<WeakPtr<NG::FrameNode>> hittedFrameNode_;
     MarkProcessedEventInfo lastReceivedEvent_;
     MarkProcessedEventInfo lastConsumedEvent_;
     int32_t lastDownFingerNumber_ = 0;
+    SourceTool lastSourceTool_ = SourceTool::UNKNOWN;
+    // used to pseudo cancel event.
+    TouchEvent lastTouchEvent_;
 };
 
 } // namespace OHOS::Ace

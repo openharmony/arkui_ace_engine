@@ -100,13 +100,15 @@
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
+#include "interfaces/native/node/resource.h"
+
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_configuration.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/property/progress_mask_property.h"
-#include "interfaces/native/node/resource.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -1245,6 +1247,13 @@ std::string GetBundleNameFromContainer()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, "");
     return container->GetBundleName();
+}
+
+std::string GetModuleNameFromContainer()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, "");
+    return container->GetModuleName();
 }
 
 void CompleteResourceObjectFromParams(
@@ -2786,6 +2795,7 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 {
+    int32_t resId = 0;
     std::string src;
     std::string bundle;
     std::string module;
@@ -2796,7 +2806,7 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
         src = jsBackgroundImage->ToString();
         ViewAbstractModel::GetInstance()->SetBackgroundImage(
             ImageSourceInfo { src, bundle, module }, GetThemeConstants());
-    } else if (ParseJsMedia(jsBackgroundImage, src)) {
+    } else if (ParseJsMediaWithBundleName(jsBackgroundImage, src, bundle, module, resId)) {
         ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
     } else {
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -3625,6 +3635,8 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
         if (preview->ToNumber<int32_t>() == 1) {
             menuParam.previewMode = MenuPreviewMode::IMAGE;
             ParseContentPreviewAnimationOptionsParam(info, menuContentOptions, menuParam);
+        } else if (preview->ToNumber<int32_t>() == 0) {
+            menuParam.isSetPreviewNone = true;
         }
     } else {
         previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
@@ -5028,6 +5040,21 @@ bool JSViewAbstract::ConvertResourceType(const std::string& typeName, ResourceTy
 
 void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
 {
+    std::string bundleName;
+    std::string moduleName;
+    int32_t resId = -1;
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId);
+}
+
+void JSViewAbstract::CompleteResourceObjectWithBundleName(
+    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId)
+{
+    CompleteResourceObjectInner(jsObj, bundleName, moduleName, resId);
+}
+
+void JSViewAbstract::CompleteResourceObjectInner(
+    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resIdValue)
+{
     // dynamic $r raw input format is
     // {"id":"app.xxx.xxx", "params":[], "bundleName":"xxx", "moduleName":"xxx"}
     JSRef<JSVal> resId = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::ID));
@@ -5046,49 +5073,20 @@ void JSViewAbstract::CompleteResourceObject(JSRef<JSObject>& jsObj)
         }
         CompleteResourceObjectFromId(type, jsObj, resType, resName);
     } else if (resId->IsNumber()) {
-        int32_t resIdValue = resId->ToNumber<int32_t>();
+        resIdValue = resId->ToNumber<int32_t>();
         if (resIdValue == -1) {
             CompleteResourceObjectFromParams(resIdValue, jsObj, targetModule, resType, resName);
         }
     }
 
-    std::string bundleName;
-    std::string moduleName;
     JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
-    if (bundleName.empty() && !moduleName.empty()) {
+    if ((bundleName.empty() && !moduleName.empty()) || bundleName == DEFAULT_HAR_BUNDLE_NAME) {
         bundleName = GetBundleNameFromContainer();
         jsObj->SetProperty<std::string>(static_cast<int32_t>(ArkUIIndex::BUNDLE_NAME), bundleName);
     }
-}
-
-void JSViewAbstract::CompleteResourceObjectWithBundleName(
-    JSRef<JSObject>& jsObj, std::string& bundleName, std::string& moduleName, int32_t& resId)
-{
-    JSRef<JSVal> tmp = jsObj->GetProperty("id");
-    ResourceType resType;
-
-    std::string targetModule;
-    std::string resName;
-    if (tmp->IsString()) {
-        JSRef<JSVal> type = jsObj->GetProperty("type");
-        int32_t typeNum = -1;
-        if (type->IsNumber()) {
-            typeNum = type->ToNumber<int32_t>();
-        }
-        if (!ParseDollarResource(tmp, targetModule, resType, resName, typeNum == UNKNOWN_RESOURCE_TYPE)) {
-            return;
-        }
-        CompleteResourceObjectFromId(type, jsObj, resType, resName);
-    } else if (!tmp->IsNull() && tmp->IsNumber()) {
-        resId = tmp->ToNumber<int32_t>();
-        if (resId == -1) {
-            CompleteResourceObjectFromParams(resId, jsObj, targetModule, resType, resName);
-        }
-    }
-    JSViewAbstract::GetJsMediaBundleInfo(jsObj, bundleName, moduleName);
-    if (bundleName.empty() && !moduleName.empty()) {
-        bundleName = GetBundleNameFromContainer();
-        jsObj->SetProperty<std::string>("bundleName", bundleName);
+    if (moduleName == DEFAULT_HAR_MODULE_NAME) {
+        moduleName = GetModuleNameFromContainer();
+        jsObj->SetProperty<std::string>(static_cast<int32_t>(ArkUIIndex::MODULE_NAME), moduleName);
     }
 }
 
@@ -5534,7 +5532,6 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     }
     if (type == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber<uint32_t>());
-        result.SetResourceId(resId->ToNumber<uint32_t>());
         return true;
     }
     return false;
@@ -7000,6 +6997,53 @@ void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBlendApplyType(blendApplyType);
 }
 
+void JSViewAbstract::JsAdvancedBlendMode(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0) {
+        return;
+    }
+    BlendMode blendMode = BlendMode::NONE;
+    BlendApplyType blendApplyType = BlendApplyType::FAST;
+    // for backward compatible, we temporary add a magic number to trigger offscreen, will remove soon
+    constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN = 1000;
+    constexpr int BACKWARD_COMPAT_SOURCE_IN_NUMBER_OFFSCREEN = 2000;
+    constexpr int BACKWARD_COMPAT_DESTINATION_IN_NUMBER_OFFSCREEN = 3000;
+    constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN = 5000;
+    if (info[0]->IsNumber()) {
+        auto blendModeNum = info[0]->ToNumber<int32_t>();
+        if (blendModeNum >= 0 && blendModeNum < static_cast<int>(BlendMode::MAX)) {
+            blendMode = static_cast<BlendMode>(blendModeNum);
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::SRC_OVER;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_SOURCE_IN_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::SRC_IN;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_DESTINATION_IN_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::DST_IN;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_SRC_IN) {
+            blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
+        }
+    } else if (info[0]->IsObject()) {
+        auto blender = CreateRSBrightnessBlenderFromNapiValue(info[0]);
+        ViewAbstractModel::GetInstance()->SetBrightnessBlender(blender);
+    }
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
+        auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
+        if (blendApplyTypeNum >= 0 && blendApplyTypeNum < static_cast<int>(BlendApplyType::MAX)) {
+            blendApplyType = static_cast<BlendApplyType>(blendApplyTypeNum);
+        }
+    }
+    if (!info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    }
+    ViewAbstractModel::GetInstance()->SetBlendApplyType(blendApplyType);
+}
+
 void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -7622,6 +7666,17 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->BindBackground(std::move(buildFunc), alignment);
 }
 
+void UpdatePreviewModeForDraggableTarget(const WeakPtr<NG::FrameNode>& target, NG::MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuParam.previewMode == MenuPreviewMode::NONE && !menuParam.isSetPreviewNone);
+    auto targetNode = target.Upgrade();
+    CHECK_NULL_VOID(targetNode);
+    if (NG::GestureEventHub::IsAllowedDrag(targetNode)) {
+        menuParam.previewMode = MenuPreviewMode::IMAGE;
+        TAG_LOGI(AceLogTag::ACE_MENU, "targetNode is draggable, use image for preview");
+    }
+}
+
 void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
@@ -7661,6 +7716,7 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
+    UpdatePreviewModeForDraggableTarget(frameNode, menuParam);
 
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
@@ -8609,6 +8665,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("useSizeType", &JSViewAbstract::JsUseSizeType);
     JSClass<JSViewAbstract>::StaticMethod("shadow", &JSViewAbstract::JsShadow);
     JSClass<JSViewAbstract>::StaticMethod("blendMode", &JSViewAbstract::JsBlendMode);
+    JSClass<JSViewAbstract>::StaticMethod("advancedBlendMode", &JSViewAbstract::JsAdvancedBlendMode);
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
     JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
     JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
@@ -10441,45 +10498,84 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawCallback
     return drawCallback;
 }
 
+std::function<std::string(const std::string&)> ParseJsGetFunc(const JSCallbackInfo& info, int32_t nodeId)
+{
+    auto* vm = info.GetVm();
+    return [vm, nodeId](const std::string& key) -> std::string {
+        std::string resultString = std::string();
+        CHECK_NULL_RETURN(vm, resultString);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        auto getCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getCustomPropertyString__"));
+        if (getCustomProperty->IsUndefined() || !getCustomProperty->IsFunction(vm)) {
+            return resultString;
+        }
+        auto obj = getCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        panda::Local<panda::JSValueRef> params2[2] = { panda::NumberRef::New(vm, nodeId),
+            panda::StringRef::NewFromUtf8(vm, key.c_str()) };
+        auto function = panda::CopyableGlobal(vm, func);
+        auto callValue = function->Call(vm, function.ToLocal(), params2, 2);
+        if (callValue.IsNull() || callValue->IsUndefined() || !callValue->IsString(vm)) {
+            return resultString;
+        }
+        auto value = callValue->ToString(vm)->ToString(vm);
+        return value;
+    };
+}
+
+std::function<bool()> ParseJsFunc(const JSCallbackInfo& info, int32_t nodeId)
+{
+    auto* vm = info.GetVm();
+    panda::Local<panda::JSValueRef> params3[3] = { panda::NumberRef::New(vm, nodeId), info[0]->GetLocalHandle(),
+        info[1]->GetLocalHandle() };
+    return [vm, params3]() -> bool {
+        CHECK_NULL_RETURN(vm, false);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        auto setCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__setCustomProperty__"));
+        if (setCustomProperty->IsUndefined() || !setCustomProperty->IsFunction(vm)) {
+            return false;
+        }
+        auto obj = setCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
+        auto nodeId = frameNode->GetId();
+        auto function = panda::CopyableGlobal(vm, func);
+        auto customPropertyExisted = function->Call(vm, function.ToLocal(), params3, 3)->ToBoolean(vm)->Value();
+        if (customPropertyExisted) {
+            frameNode->SetRemoveCustomProperties([vm, nodeId]() -> void {
+                CHECK_NULL_VOID(vm);
+                panda::LocalScope scope(vm);
+                auto global = JSNApi::GetGlobalObject(vm);
+                auto removeCustomProperty =
+                    global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__removeCustomProperties__"));
+                if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction(vm)) {
+                    return;
+                }
+                auto obj = removeCustomProperty->ToObject(vm);
+                panda::Local<panda::FunctionRef> func = obj;
+                panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+                auto function = panda::CopyableGlobal(vm, func);
+                function->Call(vm, function.ToLocal(), params, 1);
+            });
+        }
+        return true;
+    };
+}
+
 void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
 {
     if (info[0]->GetLocalHandle()->IsUndefined()) {
         return;
     }
-
     auto* vm = info.GetVm();
     CHECK_NULL_VOID(vm);
-    auto global = JSNApi::GetGlobalObject(vm);
-    auto setCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__setCustomProperty__"));
-    if (setCustomProperty->IsUndefined() || !setCustomProperty->IsFunction(vm)) {
-        return;
-    }
-    auto obj = setCustomProperty->ToObject(vm);
-    panda::Local<panda::FunctionRef> func = obj;
-    auto thisObj = info.This()->GetLocalHandle();
     auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
     auto nodeId = frameNode->GetId();
-    panda::Local<panda::JSValueRef> params[3] = { panda::NumberRef::New(vm, nodeId), info[0]->GetLocalHandle(),
-        info[1]->GetLocalHandle()
-    };
-    auto customPropertyExisted = func->Call(vm, thisObj, params, 3)->ToBoolean(vm)->Value();
-    if (customPropertyExisted) {
-        frameNode->SetRemoveCustomProperties([vm, thisObj, nodeId]()->void {
-            CHECK_NULL_VOID(vm);
-            panda::LocalScope scope(vm);
-            auto global = JSNApi::GetGlobalObject(vm);
-            auto removeCustomProperty = global->Get(vm,
-                panda::StringRef::NewFromUtf8(vm, "__removeCustomProperties__"));
-            if (removeCustomProperty->IsUndefined() || !removeCustomProperty->IsFunction(vm)) {
-                return;
-            }
-
-            auto obj = removeCustomProperty->ToObject(vm);
-            panda::Local<panda::FunctionRef> func = obj;
-            panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
-            func->Call(vm, thisObj, params, 1);
-        });
-    }
+    auto getFunc = ParseJsGetFunc(info, nodeId);
+    auto func = ParseJsFunc(info, nodeId);
+    frameNode->SetJSCustomProperty(func, getFunc);
 }
 
 void JSViewAbstract::JsGestureModifier(const JSCallbackInfo& info)
@@ -10852,5 +10948,36 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseJsMedia(void* value, void* resour
     res->src = src;
     res->bundleName = bundleName;
     res->moduleName = moduleName;
+}
+
+void JSViewAbstract::SetTextStyleApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const JSRef<JSVal>& modifierObj)
+{
+    if (!modifierObj->IsObject()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyTextModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    if (!globalFuncRef->IsFunction()) {
+        textStyleApply = nullptr;
+        return;
+    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+    auto onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                    modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        JSRef<JSVal> params[2];
+        params[0] = modifierParam;
+        params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+        PipelineContext::SetCallBackNode(node);
+        func->ExecuteJS(2, params);
+    };
+    textStyleApply = onApply;
 }
 } // namespace OHOS::Ace::Framework

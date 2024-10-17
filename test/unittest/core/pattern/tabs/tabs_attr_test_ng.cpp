@@ -15,6 +15,10 @@
 
 #include "tabs_test_ng.h"
 
+#include "core/components/tab_bar/tab_theme.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -133,7 +137,6 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     FlushLayoutTask(frameNode_);
 
     auto dividerRenderContext = dividerNode_->GetRenderContext();
-    auto tabBarRenderContext = tabBarNode_->GetRenderContext();
     EXPECT_EQ(dividerRenderContext->GetOpacityValue(), 0.0);
     EXPECT_EQ(layoutProperty_->GetDividerValue(), divider);
     EXPECT_EQ(tabBarPattern_->animationDuration_, -1);
@@ -141,7 +144,7 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::HORIZONTAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(-1.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(-1.f));
-    EXPECT_FALSE(tabBarRenderContext->HasFrontSaturate());
+    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyle().value_or(BlurStyle::NO_MATERIAL), BlurStyle::NO_MATERIAL);
 
     /**
      * @tc.steps3: set valid properties
@@ -164,7 +167,7 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(60.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(60.f));
-    EXPECT_EQ(tabBarRenderContext->GetFrontSaturateValue(BAR_SATURATE), BAR_SATURATE);
+    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyle().value_or(BlurStyle::NO_MATERIAL), BlurStyle::COMPONENT_THICK);
 }
 
 /**

@@ -121,6 +121,7 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 
 void GridPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_VOID(gridLayoutProperty);
 
@@ -1405,6 +1406,7 @@ float GridPattern::GetTotalHeight() const
 
 void GridPattern::UpdateScrollBarOffset()
 {
+    CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
@@ -1603,7 +1605,10 @@ void GridPattern::SyncLayoutBeforeSpring()
 
     forceOverScroll_ = true;
     host->SetActive();
-    host->CreateLayoutTask();
+    auto context = host->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(host);
+    }
     forceOverScroll_ = false;
 }
 

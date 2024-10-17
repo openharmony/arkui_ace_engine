@@ -15,8 +15,6 @@
 
 #include "core/common/font_loader.h"
 
-#include "base/utils/utils.h"
-
 namespace OHOS::Ace {
 
 FontLoader::FontLoader(const std::string& familyName, const std::string& familySrc)

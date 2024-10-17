@@ -94,6 +94,7 @@ public:
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
     void OnMountToParentDone() override;
+    void AfterMountToParent() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
 
     void OnConnect();
@@ -138,12 +139,15 @@ public:
     int32_t GetSessionId();
     int32_t GetNodeId();
     int32_t GetUiExtensionId() override;
+    bool IsModalUec();
+    bool IsForeground();
     RefPtr<SessionWrapper> GetSessionWrapper()
     {
         return sessionWrapper_;
     }
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
+    void HandleVisibleAreaChange(bool visible, double ratio);
     void SetWantWrap(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     RefPtr<OHOS::Ace::WantWrap> GetWantWrap();
     bool IsShowPlaceholder()
@@ -155,6 +159,10 @@ public:
     void SetModalFlag(bool isModal)
     {
         isModal_ = isModal;
+    }
+    void SetNeedCheckWindowSceneId(bool needCheckWindowSceneId)
+    {
+        needCheckWindowSceneId_ = needCheckWindowSceneId;
     }
     void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
     void OnAccessibilityChildTreeDeregister();
@@ -211,6 +219,8 @@ private:
     void MountPlaceholderNode();
     void RemovePlaceholderNode();
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
+    void ReDispatchDisplayArea();
+    int32_t GetInstanceIdFromHost();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -247,9 +257,15 @@ private:
     // No multi-threading problem due to run js thread
     bool canFocusSendToUIExtension_ = true;
     bool needReSendFocusToUIExtension_ = false;
+    bool curVisible_ = false;
     int32_t callbackId_ = 0;
     RectF displayArea_;
     bool isKeyAsync_ = false;
+    // StartUIExtension should after mountToParent
+    bool hasMountToParent_ = false;
+    bool needReNotifyForeground_ = false;
+    bool needCheckWindowSceneId_ = false;
+    bool needReDispatchDisplayArea_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 

@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_input_bridge.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 namespace {
 

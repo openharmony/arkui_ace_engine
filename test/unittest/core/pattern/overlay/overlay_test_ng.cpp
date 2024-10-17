@@ -1254,10 +1254,11 @@ HWTEST_F(OverlayTestNg, ToastShowModeTest001, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto toastContext = toastNode->GetRenderContext();
     ASSERT_NE(toastContext, nullptr);
+    toastContext->UpdateOffset(OffsetT<Dimension>{0.0_vp, 0.0_vp});
     EXPECT_FALSE(pattern->IsDefaultToast());
     EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(toastNode->CreateLayoutWrapper(), DirtySwapConfig()));
-    EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 360.0);
-    EXPECT_EQ(toastContext->GetOffset()->GetY().ConvertToPx(), 1280.0);
+    EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 0.0);
+    EXPECT_EQ(toastContext->GetOffset()->GetY().ConvertToPx(), 0.0);
     /**
      * @tc.steps: step3. PopToast.
      */

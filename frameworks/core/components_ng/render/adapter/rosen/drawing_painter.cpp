@@ -15,9 +15,6 @@
 
 #include "core/components_ng/render/adapter/rosen/drawing_painter.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/shape/path_paint_property.h"
-
 namespace OHOS::Ace::NG {
 void DrawingPainter::DrawPath(
     RSCanvas& canvas, const std::string& commands, const ShapePaintProperty& shapePaintProperty)

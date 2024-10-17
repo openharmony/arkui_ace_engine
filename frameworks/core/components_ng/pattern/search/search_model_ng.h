@@ -100,6 +100,7 @@ public:
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
+    void UpdateInspectorId(const std::string& key) override;
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& font);
     static void SetSearchIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetSearchSrcPath(FrameNode* frameNode, const std::string& src);
@@ -154,6 +155,8 @@ public:
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void SetId(FrameNode* frameNode, const std::string& key);
+    void SetEnableHapticFeedback(bool state) override;
 
 private:
     static void CreateTextField(const RefPtr<SearchNode>& parentNode,

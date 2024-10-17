@@ -15,10 +15,6 @@
 
 #include "core/event/mouse_event.h"
 
-#include "base/log/log.h"
-#include "core/accessibility/accessibility_utils.h"
-#include "core/common/ace_application_info.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -47,7 +43,6 @@ void HoverEventTarget::HandleAccessibilityHoverEvent(bool isHovered, const Touch
     hoverInfo.SetDeviceId(event.deviceId);
     hoverInfo.SetSourceDevice(event.sourceType);
     hoverInfo.SetSourceTool(event.sourceTool);
-    hoverInfo.SetPressedKeyCodes(event.pressedKeyCodes_);
     NG::PointF lastLocalPoint(event.x, event.y);
     NG::NGGestureRecognizer::Transform(lastLocalPoint, GetAttachedNode(), false,
         isPostEventResult_, event.postEventNodeId);

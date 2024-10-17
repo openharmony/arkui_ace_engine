@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_svg_text.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMSvgText::DOMSvgText(NodeId nodeId, const std::string& nodeName) : DOMSvgBase(nodeId, nodeName) {}

@@ -200,6 +200,7 @@ public:
     void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) override;
     void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
     void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
+    void UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
@@ -260,6 +261,7 @@ public:
     void RemoveChild(const RefPtr<RenderContext>& renderContext) override;
     void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
+    void SetSecurityLayer(bool isSecure) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
@@ -301,6 +303,8 @@ public:
     void ScaleAnimation(const AnimationOption& option, double begin, double end) override;
 
     void PaintAccessibilityFocus() override;
+
+    void UpdateAccessibilityRoundRect() override;
 
     void ClearAccessibilityFocus() override;
 
@@ -400,6 +404,10 @@ public:
     void SuggestOpIncNode(bool isOpincNode, bool isNeedCalculate) override;
     Matrix4 GetRevertMatrix() override;
     void SetOpacityMultiplier(float opacity) override;
+    bool IsDisappearing() const override
+    {
+        return isDisappearing_;
+    }
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

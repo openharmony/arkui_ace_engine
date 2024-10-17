@@ -16,7 +16,6 @@
 #include "core/animation/property_animation.h"
 
 #include "core/animation/animatable_data.h"
-#include "core/components/box/render_box.h"
 
 namespace OHOS::Ace {
 

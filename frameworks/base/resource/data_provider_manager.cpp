@@ -15,11 +15,8 @@
 
 #include "base/resource/data_provider_manager.h"
 
-#include <shared_mutex>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#include "base/log/log.h"
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
@@ -115,5 +112,13 @@ std::string DataProviderManagerStandard::GetMovingPhotoImageUri(const std::strin
     std::shared_lock lock(helperMutex_);
     CHECK_NULL_RETURN(helper_, "");
     return helper_->GetMovingPhotoImageUri(uri);
+}
+
+int64_t DataProviderManagerStandard::GetMovingPhotoDateModified(const std::string& uri)
+{
+    InitHelper();
+    std::shared_lock lock(helperMutex_);
+    CHECK_NULL_RETURN(helper_, -1);
+    return helper_->GetMovingPhotoDateModified(uri);
 }
 } // namespace OHOS::Ace

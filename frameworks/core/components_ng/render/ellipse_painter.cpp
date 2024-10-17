@@ -15,9 +15,6 @@
 
 #include "core/components_ng/render/ellipse_painter.h"
 
-#include "base/geometry/ng/rect_t.h"
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/shape_painter.h"
 
 namespace OHOS::Ace::NG {

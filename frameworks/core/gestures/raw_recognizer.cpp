@@ -15,8 +15,6 @@
 
 #include "core/gestures/raw_recognizer.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 namespace {
 

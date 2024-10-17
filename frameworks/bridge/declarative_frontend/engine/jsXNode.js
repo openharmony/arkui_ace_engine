@@ -604,9 +604,10 @@ class NodeAdapter {
         if (!node.isModifiable()) {
             return false;
         }
-        if (node.attribute_ !== undefined) {
-            if (node.attribute_.allowChildCount !== undefined) {
-                const allowCount = node.attribute_.allowChildCount();
+        if (node.hasOwnProperty('attribute_')) {
+            let frameeNode = node;
+            if (frameeNode.attribute_.allowChildCount !== undefined) {
+                const allowCount = frameeNode.attribute_.allowChildCount();
                 if (allowCount <= 1) {
                     return false;
                 }
@@ -1124,7 +1125,15 @@ class FrameNode {
         return inspectorInfo;
     }
     getCustomProperty(key) {
-        return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
+        if (key === undefined) {
+            return undefined;
+        }
+        let value = __getCustomProperty__(this._nodeId, key);
+        if (value === undefined) {
+            const valueStr = getUINativeModule().frameNode.getCustomPropertyCapiByKey(this.getNodePtr(), key);
+            value = valueStr === undefined ? undefined : valueStr;
+        }
+        return value;
     }
     setMeasuredSize(size) {
         getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), Math.max(size.width, 0), Math.max(size.height, 0));

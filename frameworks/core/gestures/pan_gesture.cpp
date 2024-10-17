@@ -15,7 +15,6 @@
 
 #include "core/gestures/pan_gesture.h"
 
-#include "base/geometry/dimension.h"
 #include "core/gestures/pan_recognizer.h"
 
 namespace OHOS::Ace {

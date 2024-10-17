@@ -15,9 +15,6 @@
 
 #include "core/components/common/properties/text_style.h"
 
-#include "core/components_ng/base/inspector_filter.h"
-#include "core/pipeline/base/constants.h"
-
 namespace OHOS::Ace {
 const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
 const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
@@ -83,8 +80,6 @@ void TextStyle::UpdateColorByResourceId()
 {
     textColor_.UpdateColorByResourceId();
     textDecorationColor_.UpdateColorByResourceId();
-    std::for_each(renderColors_.begin(), renderColors_.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
-    std::for_each(textShadows_.begin(), textShadows_.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
 }
 
 std::string TextStyle::ToString() const

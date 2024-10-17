@@ -634,5 +634,7 @@ void DialogContainer::UpdateConfiguration(const ParsedConfig& parsedConfig)
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
     themeManager->LoadResourceThemes();
+    // change color mode and theme to clear image cache
+    pipelineContext_->ClearImageCache();
 }
 } // namespace OHOS::Ace::Platform

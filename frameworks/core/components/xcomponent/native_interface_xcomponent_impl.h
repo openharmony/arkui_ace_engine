@@ -17,15 +17,18 @@
 #define _NATIVE_INTERFACE_XCOMPONENT_IMPL_
 
 #include <functional>
+#include <memory>
 #include <string>
 #include <unistd.h>
 #include <vector>
 
+#include "interfaces/native/native_interface_accessibility.h"
 #include "interfaces/native/native_interface_xcomponent.h"
 #include "interfaces/native/ui_input_event.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/native_interface_accessibility_provider.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
 using NativeXComponent_Surface_Callback = void (*)(OH_NativeXComponent*, void*);
@@ -65,7 +68,10 @@ class NativeXComponentImpl : public virtual AceType {
     using NativeNode_Callback = void (*)(void*, void*);
 
 public:
-    NativeXComponentImpl() {}
+    NativeXComponentImpl()
+    {
+        accessbilityProvider_ = std::make_shared<ArkUI_AccessibilityProvider>();
+    }
 
     ~NativeXComponentImpl() {}
 
@@ -285,6 +291,11 @@ public:
         return &keyEvent_;
     }
 
+    std::shared_ptr<ArkUI_AccessibilityProvider> GetAccessbilityProvider()
+    {
+        return accessbilityProvider_;
+    }
+
     NativeXComponent_Callback GetFocusEventCallback() const
     {
         return focusEventCallback_;
@@ -433,6 +444,7 @@ private:
     OH_NativeXComponent_TouchEvent touchEvent_ {};
     OH_NativeXComponent_MouseEvent mouseEvent_ { .x = 0, .y = 0 };
     OH_NativeXComponent_KeyEvent keyEvent_;
+    std::shared_ptr<ArkUI_AccessibilityProvider> accessbilityProvider_;
     OH_NativeXComponent_Callback* callback_ = nullptr;
     OH_NativeXComponent_MouseEvent_Callback* mouseEventCallback_ = nullptr;
     NativeXComponent_Surface_Callback surfaceShowCallback_ = nullptr;
@@ -492,6 +504,7 @@ struct OH_NativeXComponent {
     int32_t RegisterOnTouchInterceptCallback(
         HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event));
     int32_t GetSourceType(int32_t pointId, OH_NativeXComponent_EventSourceType* sourceType);
+    int32_t GetAccessibilityProvider(ArkUI_AccessibilityProvider** handle);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

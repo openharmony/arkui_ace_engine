@@ -16,7 +16,6 @@
 #include "core/components/picker/picker_value_element.h"
 
 #include "core/components/box/box_element.h"
-#include "core/components/stack/stack_element.h"
 #include "core/pipeline/base/composed_element.h"
 
 namespace OHOS::Ace {

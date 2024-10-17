@@ -1057,6 +1057,12 @@ var RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType["SELECT"] = 2] = "SELECT";
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
+let MenuType;
+(function (MenuType) {
+  MenuType[MenuType.SELECTION_MENU = 0] = "SELECTION_MENU";
+  MenuType[MenuType.PREVIEW_MENU = 1] = "PREVIEW_MENU";
+})(MenuType || (MenuType = {}));
+
 var MenuPreviewMode;
 (function (MenuPreviewMode) {
   MenuPreviewMode[MenuPreviewMode["NONE"] = 0] = "NONE";
@@ -2013,6 +2019,10 @@ class TextMenuItemId {
 
   static get CAMERA_INPUT() {
     return new TextMenuItemId('OH_DEFAULT_CAMERA_INPUT');
+  }
+
+  static get AI_WRITER() {
+    return new TextMenuItemId('OH_DEFAULT_AI_WRITE');
   }
 }
 
@@ -3251,12 +3261,12 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["USER_DATA"] = 500] = "USER_DATA";
 })(StyledStringKey || (StyledStringKey = {}));
 
-class CustomSpan {
-  type_ = "CustomSpan"
+class CustomSpan extends NativeCustomSpan {
+  type_ = "CustomSpan";
 }
 
 class UserDataSpan {
-  type_ = "ExtSpan"
+  type_ = "ExtSpan";
 }
 
 let MenuPolicy;

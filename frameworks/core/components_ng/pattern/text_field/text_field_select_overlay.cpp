@@ -28,8 +28,8 @@
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "input_method_controller.h"
 #endif
 #endif
@@ -116,7 +116,7 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     }
 }
 
-void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType)
+void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
 {
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
     SetLastSourceType(sourceType);
@@ -284,10 +284,12 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showCopy = hasText && pattern->AllowCopy() && pattern->IsSelected();
     menuInfo.showCut = menuInfo.showCopy;
     menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
+    menuInfo.showAIWrite = pattern->IsShowAIWrite() && pattern->IsSelected();
 }
 
 void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode)
 {
+    overlayInfo.clipHandleDrawRect = IsClipHandleWithViewPort();
     BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     auto textFieldPattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
@@ -365,6 +367,9 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
             return;
+        case OptionMenuActionId::AI_WRITE:
+            pattern->HandleOnAIWrite();
+            return;
         default:
             return;
     }
@@ -428,6 +433,9 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         localOffset = localOffset - GetPaintOffsetWithoutTransform();
     }
     auto selectController = pattern->GetTextSelectController();
+    CHECK_NULL_VOID(selectController);
+    int32_t startIndex = selectController->GetFirstHandleIndex();
+    int32_t endIndex = selectController->GetSecondHandleIndex();
     if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
         auto magnifierLocalOffsetY = localOffset.GetY() + handleRect.Height() / 2.0f;
         auto magnifierLocalOffset = OffsetF(localOffset.GetX(), magnifierLocalOffsetY);
@@ -437,14 +445,18 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
         pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
     }
     if (IsSingleHandle()) {
+        int32_t preIndex = selectController->GetCaretIndex();
         selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()));
+        pattern->StartVibratorByIndexChange(selectController->GetCaretIndex(), preIndex);
         pattern->ShowCaretAndStopTwinkling();
     } else {
         auto position = GetCaretPositionOnHandleMove(localOffset);
         if (isFirst) {
+            pattern->StartVibratorByIndexChange(position, startIndex);
             selectController->MoveFirstHandleToContentRect(position, false);
             UpdateSecondHandleOffset();
         } else {
+            pattern->StartVibratorByIndexChange(position, endIndex);
             selectController->MoveSecondHandleToContentRect(position, false);
             UpdateFirstHandleOffset();
         }

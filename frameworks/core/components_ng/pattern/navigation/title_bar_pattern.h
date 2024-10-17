@@ -283,6 +283,23 @@ public:
 
     void UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& hostNode);
     void UpdateNavDesTitleProperty(const RefPtr<TitleBarNode>& hostNode);
+
+    bool IsFontSizeSettedByDeveloper() const
+    {
+        return isFontSizeSettedByDeveloper_;
+    }
+
+    void SetNeedResetMainTitleProperty(bool reset)
+    {
+        shouldResetMainTitleProperty_ = reset;
+    }
+    void SetNeedResetSubTitleProperty(bool reset)
+    {
+        shouldResetSubTitleProperty_ = reset;
+    }
+
+    float GetTitleBarHeightLessThanMaxBarHeight() const;
+
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
 
@@ -331,6 +348,16 @@ private:
         animation_.reset();
     }
     void UpdateBackgroundStyle(RefPtr<FrameNode>& host);
+    void MountSubTitle(const RefPtr<TitleBarNode>& hostNode);
+    void ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
+        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty,
+        NavigationTitleMode titleMode, bool hasSubTitle, bool parentIsNavDest);
+    void ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
+        NavigationTitleMode titleMode, bool parentIsNavDest);
+    void ApplyTitleModifierIfNeeded(const RefPtr<TitleBarNode>& hostNode);
+    void ApplyTitleModifier(const RefPtr<FrameNode>& textNode,
+        const TextStyleApplyFunc& applyFunc, bool needCheckFontSizeIsSetted);
+    void DumpInfo() override;
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
@@ -388,6 +415,10 @@ private:
 
     WeakPtr<FrameNode> largeFontPopUpDialogNode_;
     std::optional<int32_t> moveIndex_;
+
+    bool isFontSizeSettedByDeveloper_ = false;
+    bool shouldResetMainTitleProperty_ = true;
+    bool shouldResetSubTitleProperty_ = true;
 };
 
 } // namespace OHOS::Ace::NG

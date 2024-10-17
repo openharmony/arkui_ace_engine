@@ -1989,6 +1989,14 @@ void ViewAbstract::SetFgDynamicBrightness(const BrightnessOption& brightnessOpti
     ACE_UPDATE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption);
 }
 
+void ViewAbstract::SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender);
+}
+
 void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -3501,6 +3509,12 @@ void ViewAbstract::SetFgDynamicBrightness(FrameNode* frameNode, const Brightness
     ACE_UPDATE_NODE_RENDER_CONTEXT(FgDynamicBrightnessOption, brightnessOption, frameNode);
 }
 
+void ViewAbstract::SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen::BrightnessBlender* brightnessBlender)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender, frameNode);
+}
+
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
 {
     CHECK_NULL_VOID(frameNode);
@@ -3957,16 +3971,22 @@ RefPtr<BasicShape> ViewAbstract::GetMask(FrameNode* frameNode)
 {
     RefPtr<BasicShape> value = AceType::MakeRefPtr<BasicShape>();
     const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, value);
-    return target->GetClipMaskValue(value);
+    CHECK_NULL_RETURN(target, nullptr);
+    if (target->HasClipMask()) {
+        return target->GetClipMaskValue(value);
+    }
+    return nullptr;
 }
 
 RefPtr<ProgressMaskProperty> ViewAbstract::GetMaskProgress(FrameNode* frameNode)
 {
     RefPtr<ProgressMaskProperty> value = AceType::MakeRefPtr<ProgressMaskProperty>();
     const auto& target = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(target, value);
-    return target->GetProgressMaskValue(value);
+    CHECK_NULL_RETURN(target, nullptr);
+    if (target->HasProgressMask()) {
+        return target->GetProgressMaskValue(value);
+    }
+    return nullptr;
 }
 
 BlendMode ViewAbstract::GetBlendMode(FrameNode* frameNode)
@@ -4910,4 +4930,17 @@ void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<
     CHECK_NULL_VOID(frameNode);
     frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
 }
+
+void ViewAbstract::AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddCustomProperty(key, value);
+}
+
+void ViewAbstract::RemoveCustomProperty(FrameNode* frameNode, const std::string& key)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->RemoveCustomProperty(key);
+}
+
 } // namespace OHOS::Ace::NG

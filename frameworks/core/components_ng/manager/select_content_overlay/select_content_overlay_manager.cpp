@@ -147,6 +147,7 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     overlayInfo.menuCallback.onCut = MakeMenuCallback(OptionMenuActionId::CUT, overlayInfo);
     overlayInfo.menuCallback.onSelectAll = MakeMenuCallback(OptionMenuActionId::SELECT_ALL, overlayInfo);
     overlayInfo.menuCallback.onCameraInput = MakeMenuCallback(OptionMenuActionId::CAMERA_INPUT, overlayInfo);
+    overlayInfo.menuCallback.onAIWrite = MakeMenuCallback(OptionMenuActionId::AI_WRITE, overlayInfo);
     overlayInfo.menuCallback.onAppear = MakeMenuCallback(OptionMenuActionId::APPEAR, overlayInfo);
     overlayInfo.menuCallback.onDisappear = MakeMenuCallback(OptionMenuActionId::DISAPPEAR, overlayInfo);
     overlayInfo.isUseOverlayNG = true;
@@ -478,7 +479,7 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
     for (auto it = slotIt; it != children.end(); ++it) {
         // get keyboard index to put selet_overlay before keyboard node
         if ((*it)->GetTag() == V2::KEYBOARD_ETS_TAG) {
-            slot = index;
+            slot = std::min(slot, index);
             break;
         }
         // keep handle node before menu node
@@ -488,12 +489,14 @@ void SelectContentOverlayManager::MountNodeToRoot(const RefPtr<FrameNode>& overl
         }
         // keep handle and menu node before magnifier
         if ((*it)->GetTag() == V2::TEXTINPUT_ETS_TAG) {
-            slot = index;
+            slot = std::min(slot, index);
             break;
         }
         index++;
     }
 
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "MountNodeToRoot:%{public}s, id:%{public}d", rootNode->GetTag().c_str(),
+        rootNode->GetId());
     overlayNode->MountToParent(rootNode, slot);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (!shareOverlayInfo_->isUsingMouse) {
@@ -606,14 +609,13 @@ RefPtr<UINode> SelectContentOverlayManager::FindWindowScene(RefPtr<FrameNode> ta
     return parent;
 }
 
-void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, CloseReason reason)
+bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, CloseReason reason)
 {
-    CHECK_NULL_VOID(selectOverlayHolder_);
-    CHECK_NULL_VOID(selectOverlayHolder_->GetOwnerId() == id);
-    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Close selectoverlay, id:%{public}d, reason %{public}d",
-        id, reason);
+    CHECK_NULL_RETURN(selectOverlayHolder_, false);
+    CHECK_NULL_RETURN(selectOverlayHolder_->GetOwnerId() == id, false);
+    CHECK_NULL_RETURN(shareOverlayInfo_, false);
+    LOGI("SelectOverlay: Close selectoverlay by id %{public}d, reason %{public}d", id, reason);
     auto callback = selectOverlayHolder_->GetCallback();
-    CHECK_NULL_VOID(shareOverlayInfo_);
     auto menuType = shareOverlayInfo_->menuInfo.menuType;
     auto pattern = GetSelectHandlePattern(WeakClaim(this));
     RefPtr<OverlayInfo> info = nullptr;
@@ -640,6 +642,7 @@ void SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     if (callback) {
         callback->OnCloseOverlay(menuType, reason, info);
     }
+    return true;
 }
 
 void SelectContentOverlayManager::DestroySelectOverlayNodeWithAnimation(const RefPtr<FrameNode>& node)
@@ -706,8 +709,7 @@ bool SelectContentOverlayManager::CloseCurrent(bool animation, CloseReason reaso
 {
     CHECK_NULL_RETURN(selectOverlayHolder_, false);
     CHECK_NULL_RETURN(selectOverlayNode_.Upgrade() || menuNode_.Upgrade() || handleNode_.Upgrade(), false);
-    CloseInternal(selectOverlayHolder_->GetOwnerId(), animation, reason);
-    return true;
+    return CloseInternal(selectOverlayHolder_->GetOwnerId(), animation, reason);
 }
 
 void SelectContentOverlayManager::CloseWithOverlayId(int32_t overlayId, CloseReason reason, bool animation)

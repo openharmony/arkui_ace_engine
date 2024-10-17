@@ -15,7 +15,6 @@
 
 #include "core/components/common/properties/motion_path_evaluator.h"
 
-#include "base/utils/utils.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
 
 namespace OHOS::Ace {

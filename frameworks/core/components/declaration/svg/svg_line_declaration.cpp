@@ -15,9 +15,7 @@
 
 #include "core/components/declaration/svg/svg_line_declaration.h"
 
-#include "base/utils/string_utils.h"
 #include "core/components/declaration/common/declaration_constants.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace {
 

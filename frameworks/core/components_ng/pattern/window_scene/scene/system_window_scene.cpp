@@ -62,7 +62,7 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     session_->SetBounds(originBounds);
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
 }
 
 void SystemWindowScene::OnVisibleChange(bool visible)
@@ -83,24 +83,22 @@ void SystemWindowScene::OnVisibleChange(bool visible)
 void SystemWindowScene::OnAttachToFrameNode()
 {
     CHECK_NULL_VOID(session_);
-    auto surfaceNode = session_->GetSurfaceNode();
-    CHECK_NULL_VOID(surfaceNode);
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("OnAttachToFrameNode[id:%d][self:%d][type:%d][name:%s]",
+        session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "OnAttachToFrameNode id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
+        session_->GetPersistentId(), host->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
+
     host->SetWindowBoundary();
     session_->SetUINodeId(host->GetAccessibilityId());
+    auto surfaceNode = session_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
-
-    if (!session_->IsSystemInput()) {
-        context->SetRSNode(surfaceNode);
-        surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
-    } else {
-        auto rsNode = Rosen::RSCanvasNode::Create();
-        context->SetRSNode(rsNode);
-        rsNode->SetBoundsChangedCallback(boundsChangedCallback_);
-    }
+    context->SetRSNode(surfaceNode);
+    surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
     auto mouseEventHub = host->GetOrCreateInputEventHub();
     auto mouseCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](MouseInfo& info) {
@@ -133,6 +131,12 @@ void SystemWindowScene::OnAttachToFrameNode()
 void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(session_);
+    CHECK_NULL_VOID(frameNode);
+    ACE_SCOPED_TRACE("OnDetachFromFrameNode[id:%d][self:%d][type:%d][name:%s]",
+        session_->GetPersistentId(), frameNode->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "OnDetachFromFrameNode id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
+        session_->GetPersistentId(), frameNode->GetId(), session_->GetWindowType(), session_->GetWindowName().c_str());
     if (session_->NeedCheckContextTransparent()) {
         checkContextTransparentTask_.Cancel();
     }
@@ -239,6 +243,11 @@ void SystemWindowScene::RegisterResponseRegionCallback()
         session->SetTouchHotAreas(hotAreas);
     };
     gestureHub->SetResponseRegionFunc(responseRegionCallback);
+}
+
+uint32_t SystemWindowScene::GetWindowPatternType() const
+{
+    return static_cast<uint32_t>(WindowPatternType::SYSTEM_WINDOW_SCENE);
 }
 
 void SystemWindowScene::RegisterFocusCallback()

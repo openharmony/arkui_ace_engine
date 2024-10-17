@@ -15,8 +15,6 @@
 
 #include "frameworks/core/components/svg/render_svg_pattern.h"
 
-#include "frameworks/core/animation/curve_animation.h"
-#include "frameworks/core/components/svg/render_svg.h"
 #include "frameworks/core/components/svg/svg_pattern_component.h"
 
 namespace OHOS::Ace {

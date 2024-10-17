@@ -15,25 +15,8 @@
 
 #include "core/components/picker/picker_base_component.h"
 
-#include <chrono>
-#include <ctime>
-
 #include "base/i18n/localization.h"
-#include "base/utils/string_utils.h"
-#include "core/common/container.h"
-#include "core/components/box/box_component.h"
-#include "core/components/button/button_component.h"
-#include "core/components/button/button_theme.h"
-#include "core/components/dialog/dialog_theme.h"
-#include "core/components/display/display_component.h"
-#include "core/components/flex/flex_component.h"
-#include "core/components/flex/flex_item_component.h"
-#include "core/components/focus_collaboration/focus_collaboration_component.h"
-#include "core/components/focusable/focusable_component.h"
-#include "core/components/gesture_listener/gesture_listener_component.h"
-#include "core/components/padding/padding_component.h"
 #include "core/components/picker/picker_base_element.h"
-#include "core/components/picker/picker_theme.h"
 #include "core/components/picker/render_picker_base.h"
 #include "core/components/triangle/triangle_component.h"
 

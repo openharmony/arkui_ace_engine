@@ -37,6 +37,7 @@
 #include "core/common/asset_manager_impl.h"
 #include "core/common/render_boundary_manager.h"
 #include "core/common/update_config_manager.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/popup_param.h"
 #include "iremote_object.h"
 
@@ -92,7 +93,11 @@ public:
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr) override;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) override;
+    void UpdateViewportConfigWithAnimation(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        AnimationOption animationOpt, const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {});
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void UpdateDecorVisible(bool visible, bool hasDeco) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
@@ -111,8 +116,11 @@ public:
 
     void SetOnWindowFocused(const std::function<void()>& callback) override;
 
-    // Actually paint size of window
+    // Current paintSize of window
     void GetAppPaintSize(OHOS::Rosen::Rect& paintrect) override;
+
+    // Get paintSize of window by calculating
+    void GetWindowPaintSize(OHOS::Rosen::Rect& paintrect) override;
 
     void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
@@ -321,7 +329,7 @@ public:
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
 
     void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
-    
+
     sptr<IRemoteObject> GetRemoteObj() override
     {
         return instance_;

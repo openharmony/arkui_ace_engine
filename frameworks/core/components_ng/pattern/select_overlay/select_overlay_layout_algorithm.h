@@ -87,7 +87,7 @@ public:
     }
 
     void MeasureChild(LayoutWrapper* layoutWrapper);
-    void LayoutChild(LayoutWrapper* layoutWrapper);
+    void LayoutChild(LayoutWrapper* layoutWrapper, SelectOverlayMode mode);
 
 private:
     OffsetF ComputeSelectMenuPosition(LayoutWrapper* layoutWrapper);
@@ -103,6 +103,7 @@ private:
     void NewMenuAvoidStrategyGetY(const AvoidStrategyMember& avoidStrategyMember, float& offsetY);
     bool IsTextAreaSelectAll();
     bool IsReverseLayout(LayoutWrapper* layoutWrapper) const;
+    void CheckHandleIsInClipViewPort();
 
     std::shared_ptr<SelectOverlayInfo> info_;
 

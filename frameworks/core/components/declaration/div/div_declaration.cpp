@@ -15,10 +15,7 @@
 
 #include "core/components/declaration/div/div_declaration.h"
 
-#include "base/utils/string_utils.h"
 #include "core/components/declaration/common/declaration_constants.h"
-#include "core/components/scroll/scroll_fade_effect.h"
-#include "core/components/scroll/scroll_spring_effect.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace {

@@ -59,7 +59,9 @@ void SecurityComponentLayoutAlgorithm::UpdateChildPosition(LayoutWrapper* layout
     CHECK_NULL_VOID(childWrapper);
     auto childNode = childWrapper->GetHostNode();
     CHECK_NULL_VOID(childNode);
-    childNode->GetGeometryNode()->SetMarginFrameOffset(
+    auto geometryNode = childNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetMarginFrameOffset(
         OffsetF(std::round(offset.GetX()), std::round(offset.GetY())));
 }
 
@@ -101,7 +103,9 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
 
 void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayoutProperty>& property)
 {
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<SecurityComponentTheme>();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
     double borderWidth = property->GetBackgroundBorderWidth().value_or(Dimension(0.0)).ConvertToPx();
@@ -765,7 +769,9 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     icon_.DoMeasure();
     MeasureButton(layoutWrapper, securityComponentLayoutProperty);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(componentWidth_, componentHeight_));
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(SizeF(componentWidth_, componentHeight_));
     securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(securityComponentLayoutProperty,
         layoutWrapper));
 }

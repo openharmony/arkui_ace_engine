@@ -15,10 +15,7 @@
 
 #include "core/gestures/gesture_recognizer.h"
 
-#include "base/log/log.h"
 #include "core/common/container.h"
-#include "core/event/axis_event.h"
-#include "core/gestures/gesture_referee.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -53,6 +53,8 @@ constexpr char BACKGROUND_BLUR_STYLE_PROPERTY[] = "backgroundBlurStyle";
 constexpr char BAR_STYLE_PROPERTY[] = "barStyle";
 constexpr char PADDING_START_PROPERTY[] = "paddingStart";
 constexpr char PADDING_END_PROPERTY[] = "paddingEnd";
+constexpr char MAIN_TITLE_MODIFIER[] = "mainTitleModifier";
+constexpr char SUB_TITLE_MODIFIER[] = "subTitleModifier";
 } // namespace
 
 namespace {
@@ -181,6 +183,12 @@ const Rosen::Filter* CreateRSFilterFromNapiValue(JSRef<JSVal> obj)
 {
     auto filterPtr = static_cast<Rosen::Filter*>(UnwrapNapiValue(obj));
     return filterPtr;
+}
+
+const Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(JSRef<JSVal> obj)
+{
+    auto blenderPtr = static_cast<Rosen::BrightnessBlender*>(UnwrapNapiValue(obj));
+    return blenderPtr;
 }
 
 RefPtr<DrawingColorFilter> CreateDrawingColorFilter(JSRef<JSVal> obj)
@@ -435,5 +443,18 @@ napi_env GetCurrentEnv()
         return nullptr;
     }
     return reinterpret_cast<napi_env>(nativeEngine);
+}
+
+void ParseTextOptions(const JSCallbackInfo& info, const JSRef<JSVal>& obj, NG::NavigationTextOptions& options)
+{
+    options.Reset();
+    if (!obj->IsObject()) {
+        return;
+    }
+    auto optObj = JSRef<JSObject>::Cast(obj);
+    auto mainTitleModifierProperty = optObj->GetProperty(MAIN_TITLE_MODIFIER);
+    auto subTitleModifierProperty = optObj->GetProperty(SUB_TITLE_MODIFIER);
+    JSViewAbstract::SetTextStyleApply(info, options.mainTitleApplyFunc, mainTitleModifierProperty);
+    JSViewAbstract::SetTextStyleApply(info, options.subTitleApplyFunc, subTitleModifierProperty);
 }
 } // namespace OHOS::Ace::Framework

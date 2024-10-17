@@ -15,10 +15,7 @@
 
 #include "core/components/declaration/input/input_declaration.h"
 
-#include "base/utils/string_utils.h"
 #include "core/components/declaration/common/declaration_constants.h"
-#include "core/components/declaration/textfield/textfield_declaration.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"
 
 namespace OHOS::Ace {

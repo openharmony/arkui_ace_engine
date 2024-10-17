@@ -15,11 +15,6 @@
 
 #include "core/components/drag_bar/render_drag_bar.h"
 
-#include "core/animation/curve.h"
-#include "core/animation/curve_animation.h"
-#include "core/animation/curves.h"
-#include "core/animation/keyframe.h"
-#include "core/animation/keyframe_animation.h"
 #include "core/components/drag_bar/drag_bar_component.h"
 
 namespace OHOS::Ace {

@@ -94,7 +94,19 @@ static const std::set<std::string> stringAttrs = {
     "textfield_accessibility_show_password",
     "textfield_accessibility_hide_password",
     "rich_editor_show_handle",
-    "text_show_handle"
+    "textfield_writting_bundle_name",
+    "textfield_writting_ability_name",
+    "rich_editor_writting_bundle_name",
+    "rich_editor_writting_ability_name",
+    "textfield_writting_is_support",
+    "rich_editor_writting_is_support",
+    "ai_write_menu_name",
+    "text_show_handle",
+    "textfield_show_password_button",
+    "textfield_hide_password_button",
+    "textfield_has_showed_password",
+    "textfield_has_hidden_password",
+    "textfield_accessibility_clear"
 };
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)

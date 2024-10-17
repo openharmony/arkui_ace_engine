@@ -37,10 +37,16 @@ void UIObserverListener::OnNavigationStateChange(const NG::NavDestinationInfo& i
             "Handle navDestination state change failed, runtime or callback function invalid!");
         return;
     }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     napi_value argv[] = { CreateNavDestinationInfoObj(info) };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
 }
 
 void UIObserverListener::OnScrollEventStateChange(
@@ -78,6 +84,11 @@ void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pag
             "Handle router page state change failed, runtime or callback function invalid!");
         return;
     }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     napi_value objValue = nullptr;
@@ -101,6 +112,7 @@ void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pag
     napi_set_named_property(env_, objValue, "pageId", napiPageId);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
 }
 
 void UIObserverListener::OnDensityChange(double density)
@@ -141,11 +153,16 @@ void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchIn
             "Handle navDestination switch failed, runtime or callback function invalid!");
         return;
     }
-
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     napi_value argv[] = { CreateNavDestinationSwitchInfoObj(switchInfo) };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
 }
 
 napi_value UIObserverListener::CreateNavDestinationSwitchInfoObj(const NG::NavDestinationSwitchInfo& switchInfo)
@@ -189,7 +206,7 @@ void UIObserverListener::OnWillClick(
 
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
-    
+
     napi_value objValueClickEvent = nullptr;
     napi_create_object(env_, &objValueClickEvent);
 
@@ -231,7 +248,7 @@ void UIObserverListener::OnDidClick(
 
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
-    
+
     napi_value objValueClickEvent = nullptr;
     napi_create_object(env_, &objValueClickEvent);
 
@@ -521,7 +538,7 @@ void UIObserverListener::AddFingerListInfo(napi_value objValueClickEvent, const 
             napi_value napiLocalY = nullptr;
             napi_create_double(env_, localLocation.GetY() / scale, &napiLocalY);
             napi_set_named_property(env_, napiFinger, "localY", napiLocalY);
-        
+
             napi_set_element(env_, napiFingerList, index++, napiFinger);
         }
     }

@@ -15,23 +15,10 @@
 
 #include "core/components/grid_layout/render_grid_layout.h"
 
-#include <algorithm>
-#include <cmath>
 #include <numeric>
-#include <regex>
 
-#include "base/geometry/offset.h"
 #include "base/log/event_report.h"
-#include "base/log/log.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/animation/curve_animation.h"
-#include "core/components/grid_layout/grid_layout_component.h"
-#include "core/components/grid_layout/render_grid_layout_item.h"
-#include "core/event/ace_event_helper.h"
 #include "core/gestures/long_press_recognizer.h"
-#include "core/gestures/pan_recognizer.h"
 #include "core/gestures/sequenced_recognizer.h"
 
 namespace OHOS::Ace {

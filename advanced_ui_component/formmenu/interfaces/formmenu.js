@@ -27,7 +27,7 @@ async function querySnapshotAsync(want, componentId) {
   try {
     const imagePackageApi = image.createImagePacker();
     const packOpts = {
-      format: 'image/jpeg',
+      format: 'image/webp',
       quality: 50,
     };
     let packPixmap = await componentSnapshot.get(componentId);

@@ -266,6 +266,7 @@ public:
         }
     }
 
+    void OverlaySheetSpringBack();
     void OverlayDismissSheet();
     void DismissSheet()
     {
@@ -290,6 +291,7 @@ public:
     bool AdditionalScrollTo(const RefPtr<FrameNode>& scroll, float height);
     float InitialSingleGearHeight(NG::SheetStyle& sheetStyle);
     float GetSheetTopSafeArea();
+    float UpdateSheetTransitionOffset();
 
     // initial drag gesture event
     void InitPanEvent();
@@ -356,6 +358,8 @@ public:
     {
         return false;
     }
+
+    bool IsWindowSizeChangedWithUndefinedReason(int32_t width, int32_t height, WindowSizeChangeReason type);
 
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
@@ -502,6 +506,11 @@ public:
 
     void ProcessColumnRect(float height = 0.0f);
 
+    bool WillSpringBack() const
+    {
+        return isSpringBack_;
+    }
+
     void SetShowState(bool show)
     {
         show_ = show;
@@ -520,6 +529,15 @@ public:
     bool IsDragging() const
     {
         return isDrag_;
+    }
+
+    void UpdateMaskBackgroundColor();
+
+    void UpdateMaskBackgroundColorRender();
+
+    Color GetMaskBackgroundColor() const
+    {
+        return sheetMaskColor_;
     }
 
     void SetFoldStatusChanged(bool isFoldStatusChanged)
@@ -611,6 +629,8 @@ private:
     void SetColumnMinSize(bool reset = false);
     void UpdateDragBarStatus();
     void UpdateCloseIconStatus();
+    void UpdateTitlePadding();
+    RefPtr<FrameNode> GetTitleNode() const;
     float GetCloseIconPosX(const SizeF& sheetSize, const RefPtr<SheetTheme>& sheetTheme);
     void UpdateSheetTitle();
     void UpdateFontScaleStatus();
@@ -707,6 +727,7 @@ private:
     bool isNeedProcessHeight_ = false;
     bool isSheetNeedScroll_ = false; // true if Sheet is ready to receive scroll offset.
     bool isSheetPosChanged_ = false; // UpdateTransformTranslate end
+    bool isSpringBack_ = false; // sheet rebound
 
     double start_ = 0.0; // start position of detents changed
     RefPtr<NodeAnimatablePropertyFloat> property_;
@@ -714,7 +735,9 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationPattern);
 
     float preDetentsHeight_ = 0.0f;
+    std::optional<SizeT<int32_t>> windowSize_;
     float scale_ = 1.0;
+    Color sheetMaskColor_ = Color::TRANSPARENT;
 };
 } // namespace OHOS::Ace::NG
 

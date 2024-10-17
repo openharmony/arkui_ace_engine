@@ -28,6 +28,13 @@
 #include "core/pipeline/base/component.h"
 
 namespace OHOS::Ace {
+enum class ToastWindowType {
+    TOAST_IN_TYPE_APP_SUB_WINDOW = 0,
+    TOAST_IN_TYPE_SYSTEM_SUB_WINDOW,
+    TOAST_IN_TYPE_TOAST,
+    TOAST_IN_TYPE_SYSTEM_FLOAT,
+    TOAST_WINDOW_COUNT
+};
 
 class ACE_EXPORT Subwindow : public AceType {
     DECLARE_ACE_TYPE(Subwindow, AceType)
@@ -48,7 +55,7 @@ public:
     virtual void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) = 0;
     virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;
     virtual void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f),
-        float meunuScale = 1.0f, bool isRedragStart = false) = 0;
+        float meunuScale = 1.0f, bool isRedragStart = false, int32_t menuWrapperId = -1) = 0;
     virtual void UpdatePreviewPosition() = 0;
     virtual bool GetMenuPreviewCenter(NG::OffsetF& offset) = 0;
     virtual void ContextMenuSwitchDragPreviewAnimationtNG(const RefPtr<NG::FrameNode>& dragPreviewNode,
@@ -117,6 +124,27 @@ public:
         return isAboveApps_;
     }
 
+    void SetToastWindowType(const ToastWindowType& type)
+    {
+        toastWindowType_ = type;
+        SetAboveApps(true);
+    }
+
+    void SetMainWindowId(uint32_t mainWindowId)
+    {
+        mainWindowId_ = mainWindowId;
+    }
+
+    uint32_t GetMainWindowId() const
+    {
+        return mainWindowId_;
+    }
+
+    ToastWindowType GetToastWindowType() const
+    {
+        return toastWindowType_;
+    }
+
     void SetIsSystemTopMost(bool isSystemTopMost)
     {
         isSystemTopMost_ = isSystemTopMost;
@@ -162,6 +190,9 @@ private:
     int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
+    ToastWindowType toastWindowType_ = ToastWindowType::TOAST_IN_TYPE_TOAST;
+    // toast main window ID
+    uint32_t mainWindowId_ = 0;
     bool isRosenWindowCreate_ = false;
 };
 

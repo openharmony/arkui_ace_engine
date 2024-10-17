@@ -18,6 +18,7 @@
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/capability/html/html_to_span.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 
@@ -317,7 +318,7 @@ void ClipboardImpl::GetDataSync(const std::function<void(const std::string&)>& c
                 result = *textData;
             }
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetTextDataAsync");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetTextDataSync");
     callback(result);
 }
 
@@ -367,6 +368,7 @@ bool ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
     if (pasteDataRecord == nullptr) {
         return false;
     }
+    TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "mimeType:%{public}s", pasteDataRecord->GetMimeType().c_str());
     if (pasteDataRecord->GetHtmlText() != nullptr) {
         auto htmlText = pasteDataRecord->GetHtmlText();
         HtmlToSpan toSpan;

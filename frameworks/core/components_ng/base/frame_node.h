@@ -170,8 +170,9 @@ public:
 
     void MarkDirtyNode(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL) override;
 
-    void MarkDirtyNode(
-        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
+    void ProcessFreezeNode();
+
+    void onFreezeStateChange() override;
 
     void ProcessPropertyDiff()
     {
@@ -190,6 +191,8 @@ public:
     }
 
     void OnMountToParentDone();
+
+    void AfterMountToParent() override;
 
     bool GetIsLayoutNode();
 
@@ -433,7 +436,7 @@ public:
 
     OffsetF GetPositionToScreenWithTransform();
 
-    OffsetF GetPositionToWindowWithTransform() const;
+    OffsetF GetPositionToWindowWithTransform(bool fromBottom = false) const;
 
     OffsetF GetTransformRelativeOffset() const;
 
@@ -476,6 +479,9 @@ public:
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
 
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
+
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive) override;
@@ -487,6 +493,11 @@ public:
     void PushDestroyCallback(std::function<void()>&& callback)
     {
         destroyCallbacks_.emplace_back(callback);
+    }
+
+    void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
+    {
+        destroyCallbacksMap_[tag] = callback;
     }
 
     std::list<std::function<void()>> GetDestroyCallback() const
@@ -771,6 +782,16 @@ public:
 
     void SetActive(bool active = true, bool needRebuildRenderContext = false) override;
 
+    bool GetAccessibilityVisible() const
+    {
+        return accessibilityVisible_;
+    }
+
+    void SetAccessibilityVisible(const bool accessibilityVisible)
+    {
+        accessibilityVisible_ = accessibilityVisible;
+    }
+
     bool IsOutOfLayout() const override
     {
         return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
@@ -914,7 +935,7 @@ public:
     void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
-    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect) const;
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect);
 
     bool GetIsGeometryTransitionIn() const
     {
@@ -1005,6 +1026,8 @@ public:
         return changeInfoFlag_;
     }
 
+    void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false) override;
+
     void ClearChangeInfoFlag()
     {
         changeInfoFlag_ = FRAME_NODE_CHANGE_INFO_NONE;
@@ -1017,10 +1040,16 @@ public:
     void ProcessFrameNodeChangeFlag();
     void OnNodeTransformInfoUpdate(bool changed);
     void OnNodeTransitionInfoUpdate();
+    uint32_t GetWindowPatternType() const;
 
     void ResetLayoutAlgorithm()
     {
         layoutAlgorithm_.Reset();
+    }
+
+    bool HasLayoutAlgorithm()
+    {
+        return layoutAlgorithm_ != nullptr;
     }
 
     bool GetDragHitTestBlock() const
@@ -1043,10 +1072,23 @@ public:
         return childrenUpdatedFrom_;
     }
 
+    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
+    bool GetJSCustomProperty(const std::string& key, std::string& value);
+    bool GetCapiCustomProperty(const std::string& key, std::string& value);
+
+    void AddCustomProperty(const std::string& key, const std::string& value);
+    void RemoveCustomProperty(const std::string& key);
+
+    LayoutConstraintF GetLayoutConstraint() const;
+
 protected:
     void DumpInfo() override;
+    std::list<std::function<void()>> destroyCallbacks_;
+    std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
 
 private:
+    void MarkDirtyNode(
+        bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
     OPINC_TYPE_E IsOpIncValidNode(const SizeF& boundary, int32_t childNumber = 0);
     static int GetValidLeafChildNumber(const RefPtr<FrameNode>& host, int32_t thresh);
     void MarkNeedRender(bool isRenderBoundary);
@@ -1064,7 +1106,6 @@ private:
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
-    LayoutConstraintF GetLayoutConstraint() const;
     OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
@@ -1161,7 +1202,6 @@ private:
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
-    std::list<std::function<void()>> destroyCallbacks_;
     std::function<void()> colorModeUpdateCallback_;
     std::function<void(int32_t)> ndkColorModeUpdateCallback_;
     std::function<void(float, float)> ndkFontUpdateCallback_;
@@ -1183,6 +1223,7 @@ private:
     std::set<std::string> allowDrop_;
     const static std::set<std::string> layoutTags_;
     std::function<void()> removeCustomProperties_;
+    std::function<std::string(const std::string& key)> getCustomProperty_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -1204,6 +1245,7 @@ private:
     // for container, this flag controls only the last child in touch area is consuming event.
     bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
+    bool accessibilityVisible_ = true;
     bool isResponseRegion_ = false;
     bool isLayoutComplete_ = false;
     bool isFirstBuilding_ = true;
@@ -1263,6 +1305,9 @@ private:
     std::pair<uint64_t, CacheVisibleRectResult> cachedVisibleRectResult_ = { 0, CacheVisibleRectResult() };
 
     DragPreviewOption previewOption_ { true, false, false, false, false, false, { .isShowBadge = true } };
+
+    std::unordered_map<std::string, std::string> customPropertyMap_;
+    std::mutex customPropertyMapLock_;
 
     struct onSizeChangeDumpInfo {
         int64_t onSizeChangeTimeStamp;

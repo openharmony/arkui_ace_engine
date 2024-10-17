@@ -16,8 +16,6 @@
 #include "frameworks/bridge/common/dom/dom_switch.h"
 
 #include "base/i18n/localization.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

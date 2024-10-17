@@ -39,7 +39,8 @@ public:
     void CreateContent() override;
     void DestroyContent() override;
 
-    void UpdateViewportConfig(const SizeF& size, float density, int32_t orientation) override;
+    void UpdateViewportConfig(
+        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt) override;
 
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     bool TransferKeyEvent(const KeyEvent& event) override;

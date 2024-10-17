@@ -16,9 +16,7 @@
 #include "core/components/picker/render_picker_option.h"
 
 #include "base/log/event_report.h"
-#include "base/utils/system_properties.h"
 #include "core/components/picker/picker_option_component.h"
-#include "core/components/text/render_text.h"
 
 namespace OHOS::Ace {
 namespace {

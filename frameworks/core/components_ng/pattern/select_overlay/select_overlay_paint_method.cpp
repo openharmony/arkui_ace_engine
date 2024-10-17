@@ -59,7 +59,7 @@ void SelectOverlayPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
@@ -102,6 +102,7 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     selectOverlayContentModifier_->SetScale(info_.scale);
     selectOverlayContentModifier_->SetFirstCircleIsShow(info_.firstHandle.isCircleShow);
     selectOverlayContentModifier_->SetSecondCircleIsShow(info_.secondHandle.isCircleShow);
+    selectOverlayContentModifier_->SetClipHandleDrawRect(info_.clipHandleDrawRect && isOverlayMode);
 }
 
 void SelectOverlayPaintMethod::CheckCirclesAndBackArrowIsShown()

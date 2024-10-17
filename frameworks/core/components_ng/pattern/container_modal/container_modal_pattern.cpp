@@ -21,8 +21,8 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -273,8 +273,7 @@ void ContainerModalPattern::InitContainerEvent()
                     floatingContext->OnTransformTranslateUpdate(
                         { 0.0f, static_cast<float>(-titlePopupDistance), 0.0f });
                 },
-                [floatingLayoutProperty, id = Container::CurrentId()]() {
-                    ContainerScope scope(id);
+                [floatingLayoutProperty]() {
                     floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
                 });
         }
@@ -636,6 +635,18 @@ void ContainerModalPattern::SubscribeContainerModalButtonsRectChange(
     controlButtonsRectChangeCallback_ = std::move(callback);
 }
 
+void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto titleHeight = round(GetCustomTitleHeight().ConvertToPx());
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    rect.SetRect(padding.Offset().GetX(), padding.Offset().GetY() + titleHeight, rect.Width() - padding.Width(),
+        rect.Height() - padding.Height() - titleHeight);
+}
+
 void ContainerModalPattern::CallButtonsRectChange()
 {
     CHECK_NULL_VOID(controlButtonsRectChangeCallback_);
@@ -724,6 +735,7 @@ void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRo
 {
     CHECK_NULL_VOID(titleRow);
     auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(titleRowProperty);
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     titleRowProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));

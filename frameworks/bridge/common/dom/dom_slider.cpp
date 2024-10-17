@@ -15,12 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_slider.h"
 
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/slider/slider_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

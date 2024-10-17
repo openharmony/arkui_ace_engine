@@ -15,8 +15,6 @@
 
 #include "core/components/common/properties/scroll_bar.h"
 
-#include "core/animation/curve_animation.h"
-
 namespace OHOS::Ace {
 
 bool ScrollBar::InBarRegion(const Point& point) const

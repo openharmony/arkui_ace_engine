@@ -108,7 +108,7 @@ public:
     virtual void NotifyCreate() = 0;
     virtual void NotifyForeground() = 0;
     virtual void NotifyBackground() = 0;
-    virtual void NotifyDestroy() = 0;
+    virtual void NotifyDestroy(bool isHandleError = true) = 0;
     virtual void NotifyConfigurationUpdate() = 0;
 
     // The interface for responsing provider
@@ -131,7 +131,8 @@ public:
     virtual void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) = 0;
     virtual void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const = 0;
-    virtual bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const = 0;
+    virtual bool NotifyOccupiedAreaChangeInfo(
+        sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout = false) = 0;
     virtual void SetDensityDpiImpl(bool densityDpi) = 0;
 
     // The interface to send the data for ArkTS

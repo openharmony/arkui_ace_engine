@@ -13,13 +13,10 @@
  * limitations under the License.
  */
 
-#include "render_service_client/core/animation/rs_animation.h"
-#include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/animation/rs_interactive_implict_animator.h"
 
 #include "core/animation/native_curve_helper.h"
 #include "core/common/container.h"
-#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace {
 

@@ -722,6 +722,16 @@ public:
         return isFormRender_;
     }
 
+    void SetIsDynamicRender(bool isDynamicRender)
+    {
+        isDynamicRender_ = isDynamicRender;
+    }
+
+    bool IsDynamicRender() const
+    {
+        return isDynamicRender_;
+    }
+
     // Get the dp scale which used to covert dp to logic px.
     double GetDipScale() const
     {
@@ -769,6 +779,21 @@ public:
     bool IsFocusWindowIdSetted() const
     {
         return focusWindowId_.has_value();
+    }
+
+    void SetRealHostWindowId(uint32_t realHostWindowId)
+    {
+        realHostWindowId_ = realHostWindowId;
+    }
+
+    uint32_t GetRealHostWindowId() const
+    {
+        return realHostWindowId_.value_or(GetFocusWindowId());
+    }
+
+    bool IsRealHostWindowIdSetted() const
+    {
+        return realHostWindowId_.has_value();
     }
 
     float GetViewScale() const
@@ -1330,6 +1355,16 @@ public:
     {
         return dragNodeGrayscale_;
     }
+
+    void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
+    {
+        isOpenInvisibleFreeze_ = isOpenInvisibleFreeze;
+    }
+
+    bool IsOpenInvisibleFreeze()
+    {
+        return isOpenInvisibleFreeze_;
+    }
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1373,6 +1408,7 @@ protected:
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
     bool isFormRender_ = false;
+    bool isDynamicRender_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
     bool isAppWindow_ = true;
@@ -1381,6 +1417,7 @@ protected:
     bool isReloading_ = false;
 
     bool isJsPlugin_ = false;
+    bool isOpenInvisibleFreeze_ = false;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     std::unordered_map<int32_t, AceVsyncCallback> jsFormVsyncCallbacks_;
@@ -1388,6 +1425,7 @@ protected:
     uint32_t windowId_ = 0;
     // UIExtensionAbility need component windowID
     std::optional<uint32_t> focusWindowId_;
+    std::optional<uint32_t> realHostWindowId_;
 
     int32_t appLabelId_ = 0;
     float fontScale_ = 1.0f;

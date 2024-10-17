@@ -15,11 +15,7 @@
 
 #include "core/components/checkable/render_radio.h"
 
-#include "base/json/json_util.h"
 #include "base/log/event_report.h"
-#include "core/animation/curves.h"
-#include "core/common/frontend.h"
-#include "core/components/text/text_component.h"
 
 namespace OHOS::Ace {
 namespace {

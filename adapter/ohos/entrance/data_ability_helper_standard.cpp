@@ -70,6 +70,15 @@ std::string DataAbilityHelperStandard::GetMovingPhotoImageUri(const std::string&
 #endif
 }
 
+int64_t DataAbilityHelperStandard::GetMovingPhotoDateModified(const std::string& uri)
+{
+#ifdef MEDIA_LIBRARY_EXISTS
+    return mgr_.GetMovingPhotoDateModified(uri);
+#else
+    return -1;
+#endif
+}
+
 int32_t DataAbilityHelperStandard::OpenFile(const std::string& uriStr, const std::string& mode)
 {
     // FA model always uses DataAbility

@@ -15,9 +15,6 @@
 
 #include "core/gestures/pinch_recognizer.h"
 
-#include "base/geometry/offset.h"
-#include "base/log/log.h"
-#include "core/gestures/gesture_referee.h"
 #include "base/ressched/ressched_report.h"
 
 namespace OHOS::Ace {

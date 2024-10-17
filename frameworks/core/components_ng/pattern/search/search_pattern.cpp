@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/search/search_pattern.h"
 
 #include <cstdint>
+#include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -31,6 +32,7 @@
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/search/search_model.h"
+#include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -298,6 +300,7 @@ void SearchPattern::SetAccessibilityAction()
         return index;
     });
     SetSearchFieldAccessibilityAction();
+    SetSearchButtonAccessibilityAction();
 }
 
 void SearchPattern::SetSearchFieldAccessibilityAction()
@@ -325,6 +328,18 @@ void SearchPattern::SetSearchFieldAccessibilityAction()
         CHECK_NULL_VOID(textFieldPattern);
         textFieldPattern->InsertValue(value);
     });
+}
+
+void SearchPattern::SetSearchButtonAccessibilityAction()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto searchButtonAccessibilityProperty = buttonFrameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(searchButtonAccessibilityProperty);
+    searchButtonAccessibilityProperty->SetAccessibilityLevel("yes");
+    searchButtonAccessibilityProperty->SetAccessibilityGroup(true);
 }
 
 void SearchPattern::HandleBackgroundColor()
@@ -784,10 +799,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     constexpr int ONE = 1; // Only one focusable component on scene
     bool isOnlyOneFocusableComponent = getMaxFocusableCount(getMaxFocusableCount, parentHub) == ONE;
 
-    if (event.action == KeyAction::UP && event.code == KeyCode::KEY_TAB && focusChoice_ != FocusChoice::SEARCH) {
-        textFieldPattern->HandleSetSelection(0, 0, false); // Clear selection and caret when tab pressed
-    }
-
     if (event.action != KeyAction::DOWN) {
         if (event.code == KeyCode::KEY_TAB && focusChoice_ == FocusChoice::SEARCH) {
             textFieldPattern->OnKeyEvent(event);
@@ -917,6 +928,8 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
+    auto searchTextFieldPattern = DynamicCast<SearchTextFieldPattern>(textFieldPattern);
+    CHECK_NULL_VOID(searchTextFieldPattern);
 
     if (focusChoice_ == FocusChoice::SEARCH) {
         if (!recoverFlag) {
@@ -924,18 +937,19 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
                 textFieldPattern->NeedRequestKeyboard();
                 textFieldPattern->SearchRequestKeyboard();
                 textFieldPattern->HandleOnSelectAll(false); // Select all text
-                textFieldPattern->StopTwinkling();         // Hide caret
+                searchTextFieldPattern->ResetSearchRequestStopTwinkling(); // reset flag
+                textFieldPattern->StopTwinkling(); // Hide caret
             } else {
                 textFieldPattern->HandleFocusEvent(); // Show caret
+                searchTextFieldPattern->SearchRequestStartTwinkling();
             }
         } else {
             textFieldPattern->HandleFocusEvent();
+            searchTextFieldPattern->SearchRequestStartTwinkling();
         }
     } else {
-        if (textFieldPattern->IsSelected() || textFieldPattern->GetCursorVisible()) {
-            textFieldPattern->HandleSetSelection(0, 0, false); // Clear text selection & caret if focus has gone
-        }
         textFieldPattern->CloseKeyboard(true);
+        searchTextFieldPattern->SearchRequestStopTwinkling();
     }
 
     auto context = PipelineContext::GetCurrentContext();
@@ -1733,6 +1747,10 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
         index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconSize() : GetSearchNode()->GetCancelSymbolIconSize());
     layoutProperty->UpdateSymbolColorList({index == IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
                                                                 : GetSearchNode()->GetCancelSymbolIconColor()});
+    float maxFontScale = MAX_FONT_SCALE;
+    if (layoutProperty->GetFontSize()->Unit() != DimensionUnit::VP) {
+        maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
+    }
     layoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
     iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
@@ -2034,7 +2052,7 @@ void SearchPattern::UpdateIconChangeEvent()
 const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSizeValue)
 {
     if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
-        return ConvertImageIconScaleLimit(ICON_MAX_SIZE);
+        return ICON_MAX_SIZE;
     }
     return ConvertImageIconScaleLimit(iconSizeValue);
 }
@@ -2051,10 +2069,10 @@ const Dimension SearchPattern::ConvertImageIconScaleLimit(const Dimension& iconS
         return iconSizeValue;
     }
 
-    if (GreatOrEqualCustomPrecision(fontScale, MAX_FONT_SCALE)) {
-        if (iconSizeValue.Unit() != DimensionUnit::VP) {
-            return Dimension(iconSizeValue / fontScale * MAX_FONT_SCALE);
-        }
+    if (iconSizeValue.Unit() != DimensionUnit::VP) {
+        float maxFontScale = std::min(pipeline->GetMaxAppFontScale(), MAX_FONT_SCALE);
+        fontScale = std::clamp(fontScale, 0.0f, maxFontScale);
+        return iconSizeValue * fontScale;
     }
     return iconSizeValue;
 }

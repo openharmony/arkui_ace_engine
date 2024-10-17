@@ -15,17 +15,10 @@
 
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 
-#include "draw/core_canvas.h"
 #include "image_painter_utils.h"
-
-#include "base/image/pixel_map.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/image_provider/image_data.h"
-#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
 #ifdef USE_ROSEN_DRAWING
 #include "render_service_base/include/pipeline/rs_recording_canvas.h"
 #endif

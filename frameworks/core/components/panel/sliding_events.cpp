@@ -15,8 +15,6 @@
 
 #include "core/components/panel/sliding_events.h"
 
-#include "base/json/json_util.h"
-
 namespace OHOS::Ace {
 
 std::string SlidingPanelSizeChangeEvent::ToJSONString() const

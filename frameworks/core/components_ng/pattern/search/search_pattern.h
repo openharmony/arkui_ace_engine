@@ -199,6 +199,7 @@ private:
     void SetAccessibilityAction();
     void SetAccessibilityClearAction();
     void SetSearchFieldAccessibilityAction();
+    void SetSearchButtonAccessibilityAction();
     void InitButtonAndImageClickEvent();
     void InitCancelButtonClickEvent();
     void InitTextFieldClickEvent();

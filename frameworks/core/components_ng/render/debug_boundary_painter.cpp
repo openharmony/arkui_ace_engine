@@ -15,10 +15,6 @@
 
 #include "core/components_ng/render/debug_boundary_painter.h"
 
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float BOUNDARY_STROKE_WIDTH = 1.0;

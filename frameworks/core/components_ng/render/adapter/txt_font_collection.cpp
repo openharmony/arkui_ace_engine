@@ -15,12 +15,6 @@
 
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/components/font/rosen_font_collection.h"
-#include "core/components_ng/render/drawing.h"
-
 namespace OHOS::Ace::NG {
 
 RefPtr<FontCollection> TxtFontCollection::GetInstance()

@@ -32,6 +32,10 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+
+constexpr int32_t DEFAULT_ALPHA = 255;
+constexpr float DEFAULT_OPACITY = 0.2;
+
 void TextModelNG::Create(const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -947,7 +951,12 @@ TextSelectableMode TextModelNG::GetTextSelectableMode(FrameNode* frameNode)
 
 void TextModelNG::SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value, frameNode);
+    Color color = value;
+    if (color.GetAlpha() == DEFAULT_ALPHA) {
+        // Default setting of 20% opacity
+        color = color.ChangeOpacity(DEFAULT_OPACITY);
+    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, color, frameNode);
 }
 
 Color TextModelNG::GetSelectedBackgroundColor(FrameNode* frameNode)
@@ -1105,5 +1114,19 @@ void TextModelNG::SetHalfLeading(bool halfLeading)
 void TextModelNG::SetHalfLeading(FrameNode* frameNode, bool halfLeading)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, HalfLeading, halfLeading, frameNode);
+}
+
+bool TextModelNG::GetHalfLeading(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, HalfLeading, value, frameNode, value);
+    return value;
+}
+
+void TextModelNG::SetEnableHapticFeedback(bool state)
+{
+    auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetEnableHapticFeedback(state);
 }
 } // namespace OHOS::Ace::NG

@@ -349,3 +349,13 @@ int32_t OH_NativeXComponent::GetSourceType(int32_t pointId, OH_NativeXComponent_
                ? OH_NATIVEXCOMPONENT_RESULT_SUCCESS
                : OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
 }
+
+int32_t OH_NativeXComponent::GetAccessibilityProvider(ArkUI_AccessibilityProvider** handle)
+{
+    if (xcomponentImpl_ == nullptr || handle == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+
+    (*handle) = xcomponentImpl_->GetAccessbilityProvider().get();
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}

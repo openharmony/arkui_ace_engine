@@ -16,20 +16,29 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_ACCESSIBILITY_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_ACCESSIBILITY_MANAGER_H
 
+#include "base/geometry/ng/point_t.h"
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_node.h"
+#include "core/accessibility/accessibility_constants.h"
+#include "core/accessibility/accessibility_provider.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/pipeline/base/base_composed_component.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
+class AccessibilityElementOperator;
 } // namespace OHOS::Accessibility
+
+namespace OHOS::Ace::NG {
+class WebPattern;
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
 
 struct AccessibilityEvent {
     int64_t nodeId = 0;
+    int64_t stackNodeId = -1;
     uint32_t windowId = 0;
     WindowsContentChangeTypes windowContentChangeTypes = CONTENT_CHANGE_TYPE_INVALID;
     WindowUpdateType windowChangeTypes = WINDOW_UPDATE_INVALID;
@@ -40,6 +49,23 @@ struct AccessibilityEvent {
     double currentItemIndex = 0.0;
     double itemCount = 0.0;
     AccessibilityEventType type = AccessibilityEventType::UNKNOWN;
+};
+
+enum class OperatorType {
+    UNDEFINE = 1,
+    JS_UIEXTENSION,
+    JS_WEB,
+    JS_THIRD_PROVIDER,
+};
+
+struct Registration {
+    uint32_t windowId = 0;
+    uint32_t parentWindowId = 0;
+    int32_t parentTreeId = 0;
+    int64_t elementId = 0;
+    OperatorType operatorType = OperatorType::UNDEFINE;
+    WeakPtr<NG::FrameNode> hostNode;
+    WeakPtr<AccessibilityProvider> accessibilityProvider;
 };
 
 enum class AccessibilityVersion {
@@ -84,6 +110,8 @@ public:
     ~AccessibilityManager() override = default;
 
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
+    virtual void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<NG::WebPattern>& webPattern) {}
     virtual void UpdateVirtualNodeFocus() = 0;
     virtual int64_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
@@ -137,11 +165,14 @@ public:
         const Accessibility::AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset) {}
 #endif
 #ifdef WEB_SUPPORTED
-    virtual void UpdateAccessibilityFocusId(const RefPtr<PipelineBase>& context, int64_t accessibilityId,
-        bool isFocus) {}
-    virtual int64_t GetAccessibilityFocusId() const
+    virtual bool RegisterWebInteractionOperationAsChildTree(int64_t accessibilityId,
+        const WeakPtr<NG::WebPattern>& webPattern)
     {
-        return -1;
+        return false;
+    }
+    virtual bool DeregisterWebInteractionOperationAsChildTree(int32_t treeId)
+    {
+        return false;
     }
 #endif
     void SetVersion(AccessibilityVersion version)
@@ -164,6 +195,22 @@ public:
     virtual void DeregisterInteractionOperationAsChildTree() {};
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
+
+    virtual bool RegisterInteractionOperationAsChildTree(
+        const Registration& registration) { return false; };
+    virtual bool DeregisterInteractionOperationAsChildTree(
+        uint32_t windowId, int32_t treeId) { return false; };
+
+    virtual void TransferThirdProviderHoverEvent(
+        const WeakPtr<NG::FrameNode>& hostNode, const NG::PointF &point, SourceType source,
+        NG::AccessibilityHoverEventType eventType, TimeStamp time) {};
+
+    virtual bool OnDumpChildInfoForThird(
+        int64_t hostElementId, const std::vector<std::string> &params, std::vector<std::string> &info)
+    {
+        return false;
+    }
+
     bool IsRegister()
     {
         return isReg_;

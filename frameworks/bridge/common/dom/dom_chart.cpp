@@ -16,10 +16,6 @@
 #include "frameworks/bridge/common/dom/dom_chart.h"
 
 #include "frameworks/bridge/common/utils/utils.h"
-
-#include "base/utils/linear_map.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
 #include "core/components/common/properties/color_factory.h"
 
 namespace OHOS::Ace::Framework {

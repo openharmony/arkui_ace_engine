@@ -15,7 +15,6 @@
 
 #include "core/components/calendar/focusable_grid.h"
 
-#include "base/log/log.h"
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace {

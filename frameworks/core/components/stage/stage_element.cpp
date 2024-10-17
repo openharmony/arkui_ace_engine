@@ -15,15 +15,8 @@
 
 #include "core/components/stage/stage_element.h"
 
-#include "base/log/ace_trace.h"
-#include "base/utils/system_properties.h"
 #include "core/animation/card_transition_controller.h"
 #include "core/animation/shared_transition_controller.h"
-#include "core/components/display/display_element.h"
-#include "core/components/display/render_display.h"
-#include "core/components/page/page_element.h"
-#include "core/components/page_transition/page_transition_element.h"
-#include "core/components/stage/render_stage.h"
 
 namespace OHOS::Ace {
 namespace {

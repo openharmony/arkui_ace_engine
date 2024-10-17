@@ -104,6 +104,7 @@ void WaterFlowPattern::UpdateScrollBarOffset()
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
         return;
     }
+    CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
@@ -659,7 +660,10 @@ WeakPtr<FocusHub> WaterFlowPattern::GetNextFocusNode(FocusStep step, const WeakP
         if (itemIdx >= layoutInfo_->endIndex_ || itemIdx <= layoutInfo_->startIndex_) {
             ScrollToIndex(itemIdx, false, ScrollAlign::AUTO);
             host->SetActive();
-            host->CreateLayoutTask();
+            auto context = host->GetContext();
+            if (context) {
+                context->FlushUITaskWithSingleDirtyNode(host);
+            }
         }
         auto next = host->GetChildByIndex(idx);
         CHECK_NULL_RETURN(next, nullptr);

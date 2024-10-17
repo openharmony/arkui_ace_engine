@@ -407,6 +407,8 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
 
 void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
+void PipelineContext::AddDirtyFreezeNode(FrameNode* node) {}
+
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask(bool triggeredByImplicitAnimation) {}
 
@@ -861,6 +863,27 @@ void PipelineBase::SetFontScale(float fontScale)
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {
     return false;
+}
+
+bool NG::PipelineContext::CheckThreadSafe() const
+{
+    return false;
+}
+void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto layoutProperty = node->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = node->GetLayoutConstraint();
+    if (layoutProperty->GetLayoutRect()) {
+        node->SetActive(true, true);
+        node->Measure(std::nullopt);
+        node->Layout();
+    } else {
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame();
+        node->Measure(layoutConstraint);
+        node->Layout();
+    }
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

@@ -21,6 +21,7 @@
 #include <optional>
 #include <string>
 
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_client.h"
@@ -52,8 +53,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
-#if not defined(ACE_UNITTEST)
-#if defined(ENABLE_STANDARD_INPUT)
+#ifndef ACE_UNITTEST
+#ifdef ENABLE_STANDARD_INPUT
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 namespace OHOS::MiscServices {
@@ -203,6 +204,15 @@ public:
         }
     private:
         WeakPtr<RichEditorPattern> pattern_;
+    };
+
+    struct OneStepDragParam {
+        std::function<void()> menuBuilder = nullptr;
+        std::function<void()> previewBuilder = nullptr;
+        std::function<void(int32_t, int32_t)> onAppear = nullptr;
+        MenuParam menuParam;
+        OneStepDragParam(const std::function<void()>& builder, const SelectMenuParam& selectMenuParam);
+        MenuParam GetMenuParam(const RefPtr<ImageSpanNode>& imageNode);
     };
 
     int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
@@ -458,11 +468,8 @@ public:
     void UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const struct UpdateParagraphStyle& style);
     std::vector<ParagraphInfo> GetParagraphInfo(int32_t start, int32_t end);
     void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle);
-    std::optional<struct UpdateSpanStyle> GetTypingStyle();
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool updateCaret = true);
-    void DisableDrag(RefPtr<ImageSpanNode> imageNode);
-    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
     int32_t AddTextSpan(TextSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
@@ -698,7 +705,15 @@ public:
     }
 
     void HandleOnCameraInput() override;
-
+    void HandleOnAIWrite();
+    void GetAIWriteInfo(AIWriteInfo& info);
+    void HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer);
+    void InsertSpanByBackData(RefPtr<SpanString>& spanString);
+    void AddSpansAndReplacePlaceholder(RefPtr<SpanString>& spanString);
+    void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
+    void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
+    SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
+    bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
 
     void SetShowSelect(bool isShowSelect)
@@ -718,19 +733,19 @@ public:
 
     void SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>& spanItemList);
 
-    void SetCaretColor(const Color& caretColor)
+    void SetCaretColor(const DynamicColor& caretColor)
     {
         caretColor_ = caretColor;
     }
 
-    Color GetCaretColor();
+    DynamicColor GetCaretColor();
 
-    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
+    void SetSelectedBackgroundColor(const DynamicColor& selectedBackgroundColor)
     {
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
-    Color GetSelectedBackgroundColor();
+    DynamicColor GetSelectedBackgroundColor();
 
     void SetCustomKeyboardOption(bool supportAvoidance);
 
@@ -852,6 +867,8 @@ public:
     NG::DragDropInfo HandleDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     bool IsTextEditableForStylus() const override;
 
+    void SetImagePreviewMenuParam(std::function<void()>& builder, const SelectMenuParam& menuParam);
+
 protected:
     bool CanStartAITask() override;
     template<typename T>
@@ -943,11 +960,16 @@ private:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     std::string GetPlaceHolderInJson() const;
     std::string GetTextColorInJson(const std::optional<Color>& value) const;
+    void FillPreviewMenuInJson(const std::unique_ptr<JsonValue>& jsonValue) const override;
     void InsertValueInSpanOffset(const TextInsertValueInfo& info, std::wstring& text, const std::wstring& insertValue);
     void ResetSelectionAfterAddSpan(bool isPaste);
     void SetResultObjectText(ResultObject& resultObject, const RefPtr<SpanItem>& spanItem) override;
     SelectionInfo GetAdjustedSelectionInfo(const SelectionInfo& textSelectInfo);
-
+    void InitPlaceholderSpansMap(
+        RefPtr<SpanItem>& newSpanItem, const RefPtr<SpanItem>& spanItem, size_t& index, size_t& placeholderGains);
+    void ReplacePlaceholderWithCustomSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
+    void ReplacePlaceholderWithSymbolSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
+    void ReplacePlaceholderWithImageSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
         auto context = PipelineContext::GetCurrentContext();
@@ -1099,15 +1121,6 @@ private:
     ImageStyleResult GetImageStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
     void SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     void SetSubMap(RefPtr<SpanString>& spanString);
-    RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<ImageSpan> ToImageSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<TextShadowSpan> ToTextShadowSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<GestureSpan> ToGestureSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<LetterSpacingSpan> ToLetterSpacingSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<BaselineOffsetSpan> ToBaselineOffsetSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<DecorationSpan> ToDecorationSpan(const RefPtr<SpanItem>& spanItem);
-    RefPtr<FontSpan> ToFontSpan(const RefPtr<SpanItem>& spanItem);
     void OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData);
     void AddSpanByPasteData(const RefPtr<SpanString>& spanString);
     void CompleteStyledString(RefPtr<SpanString>& spanString);
@@ -1144,6 +1157,13 @@ private:
     }
 
     OffsetF GetGlobalOffset() const;
+    void EnableImageDrag(const RefPtr<ImageSpanNode>& imageNode, bool isEnable);
+    void DisableDrag(const RefPtr<ImageSpanNode>& imageNode);
+    void EnableOneStepDrag(const RefPtr<ImageSpanNode>& imageNode);
+    void SetImageSelfResponseEvent(bool isEnable);
+    void CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode);
+    void SetGestureOptions(UserGestureOptions userGestureOptions, RefPtr<SpanItem> spanItem);
+    void UpdateImagePreviewParam();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1198,11 +1218,12 @@ private:
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
     std::list<ResultObject> dragResultObjects_;
-    std::optional<Color> caretColor_;
-    std::optional<Color> selectedBackgroundColor_;
+    std::optional<DynamicColor> caretColor_;
+    std::optional<DynamicColor> selectedBackgroundColor_;
     std::function<void()> customKeyboardBuilder_;
     std::function<void(int32_t)> caretChangeListener_;
     RefPtr<OverlayManager> keyboardOverlay_;
+    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;
@@ -1253,6 +1274,10 @@ private:
     std::queue<std::function<void()>> tasks_;
     bool isModifyingContent_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
+    std::unordered_map<std::string, RefPtr<SpanItem>> placeholderSpansMap_;
+    std::shared_ptr<OneStepDragParam> oneStepDragParam_ = nullptr;
+    std::queue<WeakPtr<ImageSpanNode>> dirtyImageNodes;
+    bool isImageSelfResponseEvent_ = true;
 };
 } // namespace OHOS::Ace::NG
 

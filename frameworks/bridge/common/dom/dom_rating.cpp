@@ -15,8 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_rating.h"
 
-#include "core/components/rating/rating_theme.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

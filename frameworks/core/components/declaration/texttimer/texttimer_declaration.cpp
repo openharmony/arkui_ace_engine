@@ -15,9 +15,7 @@
 
 #include "core/components/declaration/texttimer/texttimer_declaration.h"
 
-#include "bridge/common/utils/utils.h"
 #include "core/components/declaration/common/declaration_constants.h"
-#include "core/components/texttimer/texttimer_controller.h"
 
 namespace OHOS::Ace {
 using namespace Framework;

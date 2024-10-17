@@ -40,24 +40,12 @@
 
 #include "base/image/file_uri_helper.h"
 #include "base/image/image_source.h"
-#include "base/log/ace_trace.h"
-#include "base/network/download_manager.h"
-#include "base/resource/ace_res_config.h"
-#include "base/resource/asset_manager.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
-#include "core/common/thread_checker.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/image_provider/image_data.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
 #endif
-#include "core/image/image_cache.h"
 #include "core/image/image_file_cache.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -206,11 +194,7 @@ std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& u
     return nullptr;
 }
 
-#ifndef USE_ROSEN_DRAWING
-sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
-#else
 std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
-#endif
 {
     ACE_LAYOUT_SCOPED_TRACE("QueryImageDataFromImageCache[%s]", sourceInfo.ToString().c_str());
     auto pipelineCtx = PipelineContext::GetCurrentContext();
@@ -219,14 +203,9 @@ std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSou
     CHECK_NULL_RETURN(imageCache, nullptr);
     auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetKey());
     CHECK_NULL_RETURN(cacheData, nullptr);
-#ifndef USE_ROSEN_DRAWING
-    const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(cacheData->GetDataWrapper());
-    return *skData;
-#else
     auto rosenCachedImageData = AceType::DynamicCast<NG::DrawingImageData>(cacheData);
     CHECK_NULL_RETURN(rosenCachedImageData, nullptr);
     return rosenCachedImageData->GetRSData();
-#endif
 }
 
 void ImageLoader::CacheImageData(const std::string& key, const RefPtr<NG::ImageData>& imageData)
@@ -247,21 +226,10 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 // NG ImageLoader entrance
 RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
 {
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("GetImageData %s", src.ToString().c_str());
     if (src.IsPixmap()) {
         return LoadDecodedImageData(src, context);
     }
-#ifndef USE_ROSEN_DRAWING
-    auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
-    if (cachedData) {
-        return NG::ImageData::MakeFromDataWrapper(&cachedData);
-    }
-    auto skData = LoadImageData(src, context);
-    CHECK_NULL_RETURN(skData, nullptr);
-    auto data = NG::ImageData::MakeFromDataWrapper(&skData);
-    ImageLoader::CacheImageData(src.GetKey(), data);
-    return data;
-#else
     std::shared_ptr<RSData> rsData = nullptr;
     do {
         rsData = ImageLoader::QueryImageDataFromImageCache(src);
@@ -271,9 +239,8 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
         rsData = LoadImageData(src, context);
         CHECK_NULL_RETURN(rsData, nullptr);
         ImageLoader::CacheImageData(src.GetKey(), AceType::MakeRefPtr<NG::DrawingImageData>(rsData));
-    } while (0);
+    } while (false);
     return AceType::MakeRefPtr<NG::DrawingImageData>(rsData);
-#endif
 }
 
 // NG ImageLoader entrance
@@ -648,13 +615,14 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     if (SystemProperties::GetResourceDecoupling()) {
         auto adapterInCache = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         CHECK_NULL_RETURN(adapterInCache, nullptr);
-        resourceAdapter = adapterInCache;
+        ResourceConfiguration resConfig;
         if (imageSourceInfo.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
-            ResourceConfiguration resConfig;
             resConfig.SetColorMode(imageSourceInfo.GetLocalColorMode());
-            ConfigurationChange configChange { .colorModeUpdate = true };
-            resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
+        } else {
+            resConfig.SetColorMode(SystemProperties::GetColorMode());
         }
+        ConfigurationChange configChange { .colorModeUpdate = true };
+        resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
     } else {
         auto themeManager = PipelineBase::CurrentThemeManager();
         CHECK_NULL_RETURN(themeManager, nullptr);

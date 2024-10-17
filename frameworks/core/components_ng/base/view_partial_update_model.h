@@ -75,10 +75,6 @@ public:
     virtual void FlushUpdateTask(const UpdateTask& task) = 0;
     virtual void FinishUpdate(
         const WeakPtr<AceType>& viewNode, int32_t id, std::function<void(const UpdateTask&)>&& emplaceTaskFunc) = 0;
-
-private:
-    static std::unique_ptr<ViewPartialUpdateModel> instance_;
-    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

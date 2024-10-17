@@ -76,7 +76,7 @@ struct WebMenuOptionsParam {
     std::vector<NG::MenuOptionsParam> menuOption;
     bool operator==(const WebMenuOptionsParam& webMenuOption) const
     {
-        return menuOption.data() == webMenuOption.menuOption.data();
+        return false;
     }
 };
 
@@ -804,4 +804,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_PROPERTY_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_PROPERTY_H

@@ -29,11 +29,13 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/multi_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
@@ -728,6 +730,10 @@ uint32_t MenuPattern::GetInnerMenuCount() const
         // found component <Menu>
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             child = child->GetFrameChildByIndex(0, false);
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child = child->GetChildAtIndex(0);
+                ++depth;
+            }
             continue;
         }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
@@ -755,6 +761,10 @@ RefPtr<FrameNode> MenuPattern::GetFirstInnerMenu() const
         // found component <Menu>
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             child = child->GetFrameChildByIndex(0, false);
+            if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                child = child->GetChildAtIndex(0);
+                ++depth;
+            }
             continue;
         }
         if (child->GetTag() == V2::MENU_ETS_TAG) {
@@ -1067,6 +1077,7 @@ void MenuPattern::ShowPreviewMenuAnimation()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    MenuView::ShowPixelMapAnimation(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
@@ -1387,6 +1398,8 @@ bool MenuPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         radius = CalcIdealBorderRadius(borderRadius, idealSize);
         UpdateBorderRadius(dirty->GetHostNode(), radius);
     }
+    auto menuWrapper = GetMenuWrapper();
+    DragAnimationHelper::ShowGatherAnimationWithMenu(menuWrapper);
     return true;
 }
 

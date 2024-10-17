@@ -17,17 +17,9 @@
 
 #include <unistd.h>
 
-#include "base/log/frame_report.h"
 #ifdef FFRT_EXISTS
 #include "base/longframe/long_frame_report.h"
 #endif
-#include "base/memory/referenced.h"
-#include "base/utils/time_util.h"
-#include "base/utils/utils.h"
-#include "core/common/thread_checker.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

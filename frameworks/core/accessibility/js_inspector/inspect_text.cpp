@@ -15,8 +15,6 @@
 
 #include "inspect_text.h"
 
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 InspectText::InspectText(NodeId nodeId, const std::string& nodeName) : InspectNode(nodeId, nodeName) {}
 

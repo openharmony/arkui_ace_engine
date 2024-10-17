@@ -15,10 +15,6 @@
 
 #include "frameworks/core/components/svg/parse/svg_dom.h"
 
-#include <string>
-
-#include "base/utils/system_properties.h"
-#include "frameworks/core/components/box/render_box.h"
 #include "frameworks/core/components/svg/parse/svg_animation.h"
 #include "frameworks/core/components/svg/parse/svg_circle.h"
 #include "frameworks/core/components/svg/parse/svg_clip_path.h"
@@ -28,27 +24,21 @@
 #include "frameworks/core/components/svg/parse/svg_fe_composite.h"
 #include "frameworks/core/components/svg/parse/svg_fe_gaussianblur.h"
 #include "frameworks/core/components/svg/parse/svg_fe_offset.h"
-#include "frameworks/core/components/svg/parse/svg_filter.h"
 #include "frameworks/core/components/svg/parse/svg_g.h"
 #include "frameworks/core/components/svg/parse/svg_gradient.h"
 #include "frameworks/core/components/svg/parse/svg_line.h"
-#include "frameworks/core/components/svg/parse/svg_mask.h"
 #include "frameworks/core/components/svg/parse/svg_path.h"
-#include "frameworks/core/components/svg/parse/svg_pattern.h"
 #include "frameworks/core/components/svg/parse/svg_polygon.h"
 #include "frameworks/core/components/svg/parse/svg_rect.h"
 #include "frameworks/core/components/svg/parse/svg_stop.h"
 #include "frameworks/core/components/svg/parse/svg_svg.h"
 #include "frameworks/core/components/svg/parse/svg_use.h"
-#include "frameworks/core/components/svg/render_svg_base.h"
 #include "frameworks/core/components/transform/transform_component.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "frameworks/core/components/svg/rosen_render_svg.h"
 #include "frameworks/core/pipeline/base/rosen_render_context.h"
 #endif
-
-#include <queue>
 
 namespace OHOS::Ace {
 namespace {

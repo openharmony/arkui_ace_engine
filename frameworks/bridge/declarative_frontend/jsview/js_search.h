@@ -76,6 +76,8 @@ public:
     static void SetInputFilter(const JSCallbackInfo& info);
     static void SetOnEditChange(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
+    static void SetId(const JSCallbackInfo& info);
+    static void SetKey(const std::string& key);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static void SetDragPreviewOptions(const JSCallbackInfo& info);
     static void EditMenuOptions(const JSCallbackInfo& info);
@@ -86,6 +88,7 @@ public:
     static void SetCancelDefaultIcon();
     static void SetCancelSymbolIcon(const JSCallbackInfo& info);
     static void SetCancelImageIcon(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

@@ -42,7 +42,8 @@ public:
     void SetLength(const JSCallbackInfo& info);
     void IsEqualToSpanString(const JSCallbackInfo& info);
     void GetSubSpanString(const JSCallbackInfo& info);
-    static std::vector<RefPtr<SpanBase>> ParseJsSpanBaseVector(const JSRef<JSObject>& obj, int32_t maxLength);
+    static std::vector<RefPtr<SpanBase>> ParseJsSpanBaseVector(const JSRef<JSObject>& obj, int32_t maxLength,
+        JsiRef<JsiObject> thisObj);
 
     static JSRef<JSObject> CreateJsSpanBaseObject(const RefPtr<SpanBase>& spanObject);
     static JSRef<JSObject> CreateJsSpanObject(const RefPtr<SpanBase>& spanObject);
@@ -89,8 +90,11 @@ public:
     void SetController(const RefPtr<SpanString>& spanString);
 
     static void FromHtml(const JSCallbackInfo& info);
-
+    static void Marshalling(const JSCallbackInfo& info);
+    static void Unmarshalling(const JSCallbackInfo& info);
 private:
+    static void UnmarshallingExec(napi_env env, void *data);
+    static void UnmarshallingComplete(napi_env env, napi_status status, void *data);
     ACE_DISALLOW_COPY_AND_MOVE(JSSpanString);
     RefPtr<SpanString> spanString_;
 };

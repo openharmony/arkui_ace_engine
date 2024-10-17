@@ -49,8 +49,8 @@ using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
-using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
+using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
@@ -622,6 +622,13 @@ public:
     * param: {node}, {info} should be not-null
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
+
+    /*
+    * Judge whether a node's tag is default accessibility focusable.
+    * return: if a node's tag is default accessibility focusable, return true.
+    * param: {tag} should be not-null
+    */
+    static bool IsAccessibilityFocusableTag(const std::string &tag);
 
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 

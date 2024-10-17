@@ -15,6 +15,7 @@
 
 #include "text_input_base.h"
 
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -2000,9 +2001,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern085, TestSize.Level0)
 
     pattern->moveCaretState_.isTouchCaret = true;
     pattern->hasPreviewText_ = true;
-    pattern->HandleTouchMove(touchEventInfo);
+    pattern->HandleTouchMove(touchLocationInfo);
     pattern->hasPreviewText_ = false;
-    pattern->HandleTouchMove(touchEventInfo);
+    pattern->HandleTouchMove(touchLocationInfo);
 }
 
 /**
@@ -2028,7 +2029,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern086, TestSize.Level0)
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
 
     pattern->hasPreviewText_ = true;
-    pattern->UpdateCaretByTouchMove(touchEventInfo);
+    pattern->UpdateCaretByTouchMove(touchLocationInfo);
 }
 
 /**
@@ -2163,5 +2164,63 @@ HWTEST_F(TextFieldPatternTest, TextPattern093, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
     pattern->GetFocusHub()->currentFocus_ = false;
     pattern->TwinklingByFocus();
+}
+/**
+ * @tc.name: HandleAIWrite001
+ * @tc.desc: test GetAIWriteInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleAIWrite001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. test GetAIWriteInfo
+     */
+    pattern_->HandleSetSelection(5, 10, false);
+    auto selectController = pattern_->GetTextSelectController();
+    AIWriteInfo info;
+    pattern_->GetAIWriteInfo(info);
+    EXPECT_EQ(info.selectStart, 5);
+    EXPECT_EQ(info.selectEnd, 10);
+    EXPECT_EQ(info.selectLength, 5);
+    EXPECT_EQ(info.firstHandle, selectController->GetFirstHandleRect().ToString());
+    EXPECT_EQ(info.secondHandle, selectController->GetSecondHandleRect().ToString());
+    RefPtr<SpanString> spanString = SpanString::DecodeTlv(info.selectBuffer);
+    ASSERT_NE(spanString, nullptr);
+    auto textContent = spanString->GetString();
+    EXPECT_EQ(textContent.empty(), false);
+}
+
+/**
+ * @tc.name: HandleAIWrite001
+ * @tc.desc: test HandleOnAIWrite
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleAIWrite002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. test HandleOnAIWrite
+     */
+    pattern_->HandleSetSelection(0, 5, false);
+    pattern_->HandleOnAIWrite();
+
+    std::vector<uint8_t> buff;
+    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd结果回填123456");
+    spanStr->EncodeTlv(buff);
+    pattern_->HandleAIWriteResult(0, 5, buff);
+    auto contentController = pattern_->GetTextContentController();
+    auto sentenceContent = contentController->GetSelectedValue(0, spanStr->GetLength());
+    ASSERT_EQ(sentenceContent, spanStr->GetString());
 }
 } // namespace OHOS::Ace::NG

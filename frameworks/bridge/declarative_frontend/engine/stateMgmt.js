@@ -10074,8 +10074,9 @@ class JSONCoder {
  */
 class RefInfo {
     static get(target) {
-        if (typeof (target) !== 'object') {
-            throw new Error('target must be a object');
+        if (!target || typeof target !== 'object') {
+            stateMgmtConsole.warn(`makeObserved target is not a valid object, return target directly`);
+            return { proxy: target };
         }
         // makeObserved does not support @Observed, @ObservedV2/@Trace class or makeObserved proxy, will return target directly
         if (ObservedObject.IsObservedObject(target) || ObserveV2.IsObservedObjectV2(target) || ObserveV2.IsMakeObserved(target)) {
@@ -10647,6 +10648,10 @@ class __RepeatVirtualScrollImpl {
             
             // make sparse copy of this.arr_
             this.lastActiveRangeData_ = new Array(this.arr_.length);
+            from = Math.min(this.arr_.length - 1, from);
+            to = Math.min(this.arr_.length - 1, to);
+            from = Math.max(0, from);
+            to = Math.max(0, to);
             for (let i = from; i <= to && i < this.arr_.length; i++) {
                 const item = this.arr_[i];
                 const ttype = this.typeGenFunc_(this.arr_[i], i);

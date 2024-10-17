@@ -32,7 +32,6 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
-#include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/property/measure_property.h"
 
 
@@ -405,6 +404,15 @@ public:
     float GetGroupLayoutOffset(int32_t startIndex, float startPos)
     {
         return posMap_[startIndex].mainPos - startPos;
+    }
+
+    PositionInfo GetPositionInfo(int32_t index) const
+    {
+        auto it = posMap_.find(index);
+        if (it == posMap_.end()) {
+            return { -1.0f, -1.0f };
+        }
+        return it->second;
     }
 
     std::pair<int32_t, float> GetStartIndexAndPos() const

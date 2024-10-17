@@ -583,6 +583,13 @@ void WebModelNG::SetScreenCaptureRequestEventId(std::function<void(const BaseEve
     webEventHub->SetOnScreenCaptureRequestEvent(std::move(uiCallback));
 }
 
+Color WebModelNG::GetDefaultBackgroundColor()
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_RETURN(webPattern, Color::WHITE);
+    return webPattern->GetDefaultBackgroundColor();
+}
+
 void WebModelNG::SetBackgroundColor(Color backgroundColor)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1164,5 +1171,12 @@ void WebModelNG::SetKeyboardAvoidMode(const WebKeyboardAvoidMode& mode)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateKeyboardAvoidMode(mode);
+}
+
+void WebModelNG::SetEnabledHapticFeedback(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnabledHapticFeedback(isEnabled);
 }
 } // namespace OHOS::Ace::NG

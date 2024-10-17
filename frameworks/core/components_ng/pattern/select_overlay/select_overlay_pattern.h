@@ -60,17 +60,18 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (!selectOverlayModifier_ && CheckIfNeedMenu()) {
-            selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_);
-        }
-        if (!selectOverlayContentModifier_ && CheckIfNeedHandle()) {
-            selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>();
-        }
-        SetContentModifierBounds(selectOverlayContentModifier_);
-        SetSelectMenuHeight();
         auto layoutProps = GetLayoutProperty<LayoutProperty>();
         CHECK_NULL_RETURN(layoutProps, nullptr);
         bool isReverse = layoutProps->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        if (!selectOverlayModifier_ && CheckIfNeedMenu()) {
+            selectOverlayModifier_ = AceType::MakeRefPtr<SelectOverlayModifier>(defaultMenuEndOffset_, isReverse);
+        }
+        if (!selectOverlayContentModifier_ && CheckIfNeedHandle()) {
+            selectOverlayContentModifier_ = AceType::MakeRefPtr<SelectOverlayContentModifier>(WeakClaim(this));
+        }
+        SetContentModifierBounds(selectOverlayContentModifier_);
+        SetSelectMenuHeight();
+
         if (paintMethodCreated_) {
             return MakeRefPtr<SelectOverlayPaintMethod>(selectOverlayModifier_, selectOverlayContentModifier_, *info_,
                 defaultMenuEndOffset_, selectMenuHeight_, hasExtensionMenu_, hasShowAnimation_, true, isHiddenHandle_,
@@ -192,6 +193,14 @@ public:
 
     static float GetHandleDiameter();
     void OnDpiConfigurationUpdate() override;
+    bool IsDraggingHandle(bool isFirst)
+    {
+        if (isFirst) {
+            return firstHandleDrag_;
+        } else {
+            return secondHandleDrag_;
+        }
+    }
 
 protected:
     virtual void CheckHandleReverse();

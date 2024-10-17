@@ -15,15 +15,11 @@
 
 #include "core/components_ng/render/adapter/animated_image.h"
 
-#include <mutex>
-
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_bitmap.h"
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
 #endif
-
-#include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
@@ -32,7 +28,6 @@
 #endif
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/image/sk_image_cache.h"
-#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t STANDARD_FRAME_DURATION = 100;

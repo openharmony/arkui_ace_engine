@@ -640,7 +640,7 @@ public:
     {
         rootNodeId_ = rootNodeId;
     }
-    
+
     virtual bool HasVirtualNodeAccessibilityProperty()
     {
         return false;
@@ -665,6 +665,8 @@ public:
     {
         return rootNodeType_;
     }
+
+    virtual void ClearSubtreeLayoutAlgorithm(bool includeSelf = true, bool clearEntireTree = false);
 
     void GetPageNodeCountAndDepth(int32_t* count, int32_t* depth);
 
@@ -760,6 +762,23 @@ public:
     virtual void NotifyWebPattern(bool isRegister);
     void GetContainerComponentText(std::string& text);
 
+    // Used to mark freeze and block dirty mark.
+    virtual void SetFreeze(bool isFreeze);
+    bool IsFreeze() const
+    {
+        return isFreeze_;
+    }
+
+    bool IsCNode() const
+    {
+        return isCNode_;
+    }
+
+    void setIsCNode(bool createByCapi)
+    {
+        isCNode_ = createByCapi;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -785,6 +804,7 @@ protected:
         }
     }
 
+    virtual void AfterMountToParent() {}
     virtual void OnContextAttached() {}
     // dump self info.
     virtual void DumpInfo() {}
@@ -798,6 +818,10 @@ protected:
     virtual void OnAttachToMainTree(bool recursive = false);
     virtual void OnDetachFromMainTree(bool recursive = false);
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
+
+    virtual void onFreezeStateChange() {}
+    virtual void UpdateChildrenFreezeState(bool isFreeze);
+
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
 
@@ -868,6 +892,8 @@ private:
 
     bool useOffscreenProcess_ = false;
 
+    bool isCNode_ = false;
+
     std::function<void(int32_t)> updateJSInstanceCallback_;
     std::function<void()> lazyBuilderFunc_;
     std::function<void(int32_t, RefPtr<UINode>&)> updateNodeFunc_;
@@ -885,6 +911,8 @@ private:
     bool isAccessibilityVirtualNode_ = false;
     WeakPtr<UINode> parentForAccessibilityVirtualNode_;
     bool isFirstAccessibilityVirtualNode_ = false;
+    // the flag to block dirty mark.
+    bool isFreeze_ = false;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

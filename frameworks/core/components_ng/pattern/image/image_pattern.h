@@ -208,7 +208,7 @@ public:
     void DumpLayoutInfo();
     void DumpRenderInfo();
     void DumpAdvanceInfo() override;
-
+    void DumpSvgInfo();
     WeakPtr<ImageLoadingContext> GetImageLoadingContext()
     {
         return WeakClaim(AceType::RawPtr(loadingCtx_));
@@ -366,13 +366,17 @@ public:
 
     bool GetDefaultAutoResize()
     {
-        InitDefaultValue();
         return autoResizeDefault_;
     }
+
     ImageInterpolation GetDefaultInterpolation()
     {
-        InitDefaultValue();
         return interpolationDefault_;
+    }
+
+    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode = true)
+    {
+        isComponentSnapshotNode_ = isComponentSnapshotNode;
     }
 protected:
     void RegisterWindowStateChangedCallback();
@@ -528,6 +532,7 @@ private:
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+    Color selectedColor_;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
 
@@ -553,6 +558,7 @@ private:
     bool isFormAnimationEnd_ = false;
     bool isPixelMapChanged_ = false;
     bool isSrcUndefined_ = false;
+    bool isComponentSnapshotNode_ = false;
 
     std::function<void(const uint32_t& dlNow, const uint32_t& dlTotal)> onProgressCallback_ = nullptr;
 };

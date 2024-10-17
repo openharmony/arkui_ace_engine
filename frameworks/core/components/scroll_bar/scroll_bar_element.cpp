@@ -15,7 +15,6 @@
 
 #include "core/components/scroll_bar/scroll_bar_element.h"
 
-#include "core/components/scroll_bar/render_scroll_bar.h"
 #include "core/components/scroll_bar/scroll_bar_component.h"
 
 namespace OHOS::Ace {

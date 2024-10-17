@@ -16,7 +16,6 @@
 #include "core/components/declaration/common/event.h"
 
 #include "core/event/ace_event_helper.h"
-#include "core/event/back_end_event_manager.h"
 
 namespace OHOS::Ace {
 

@@ -231,6 +231,7 @@ public:
     bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter = false);
     bool RemoveBubble(const RefPtr<FrameNode>& overlay);
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
+    bool RemoveDragPreview(const RefPtr<FrameNode>& overlay, bool isBackPressed = false);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
     bool RemoveAllModalInOverlayByStack();
@@ -276,6 +277,16 @@ public:
         hasPixelMap_ = hasPixelMap;
     }
 
+    bool GetHasDragPixelMap() const
+    {
+        return hasDragPixelMap_;
+    }
+
+    void SetHasDragPixelMap(bool hasDragPixelMap)
+    {
+        hasDragPixelMap_ = hasDragPixelMap;
+    }
+
     bool GetHasGatherNode()
     {
         return hasGatherNode_;
@@ -290,7 +301,11 @@ public:
 
     RefPtr<FrameNode> GetPixelMapContentNodeForSubwindow() const;
 
+    RefPtr<FrameNode> GetDragPixelMapContentNode() const;
+
     RefPtr<FrameNode> GetPixelMapBadgeNode() const;
+
+    RefPtr<FrameNode> GetDragPixelMapBadgeNode() const;
 
     bool GetHasFilter()
     {
@@ -327,19 +342,21 @@ public:
         filterColumnNodeWeak_ = columnNode;
     }
     void MountFilterToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
-    void MountPixelMapToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
+    void MountPixelMapToWindowScene(
+        const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene, bool isDragPixelMap = false);
     void MountEventToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
-    void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode);
+    void MountPixelMapToRootNode(const RefPtr<FrameNode>& columnNode, bool isDragPixelMap = false);
     void MountEventToRootNode(const RefPtr<FrameNode>& columnNode);
     void RemovePixelMap();
     void RemovePixelMapAnimation(bool startDrag, double x, double y, bool isSubwindowOverlay = false);
+    void RemoveDragPixelMap();
     void UpdatePixelMapScale(float& scale);
     void RemoveFilter();
     void RemoveFilterAnimation();
     void RemoveEventColumn();
     void UpdatePixelMapPosition(bool isSubwindowOverlay = false);
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset, float menuScale = 1.0f,
-	    bool isRedragStart = false);
+	    bool isRedragStart = false, int32_t menuWrapperId = -1);
     void ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::FrameNode>& dragPreviewNode,
         const NG::OffsetF& offset);
     bool GetMenuPreviewCenter(NG::OffsetF& offset);
@@ -566,6 +583,14 @@ public:
     const std::vector<GatherNodeChildInfo>& GetGatherNodeChildrenInfo()
     {
         return gatherNodeChildrenInfo_;
+    }
+    bool IsGatherWithMenu() const
+    {
+        return isGatherWithMenu_;
+    }
+    void SetIsGatherWithMenu(bool isGatherWithMenu)
+    {
+        isGatherWithMenu_ = isGatherWithMenu;
     }
     void RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode);
     void RemovePreviewBadgeNode();
@@ -809,10 +834,12 @@ private:
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_ = -1;
     bool hasPixelMap_ { false };
+    bool hasDragPixelMap_ { false };
     bool hasFilter_ { false };
     bool hasEvent_ { false };
     bool isOnAnimation_ { false };
     WeakPtr<FrameNode> pixmapColumnNodeWeak_;
+    WeakPtr<FrameNode> dragPixmapColumnNodeWeak_;
     WeakPtr<FrameNode> filterColumnNodeWeak_;
     WeakPtr<FrameNode> eventColumnNodeWeak_;
     bool isContextMenuDragHideFinished_ = false;
@@ -840,6 +867,7 @@ private:
     int32_t dismissPopupId_ = 0;
 
     bool hasGatherNode_ { false };
+    bool isGatherWithMenu_ { false };
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;

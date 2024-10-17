@@ -32,6 +32,15 @@ public:
     void InitDragEvent() override;
     void ApplyNormalTheme() override;
     bool IsTextEditableForStylus() const override;
+    void ProcessSelection() override;
+    void SearchRequestStartTwinkling();
+    void SearchRequestStopTwinkling();
+    void ResetSearchRequestStopTwinkling();
+    bool IsNeedProcessAutoFill() override;
+    int32_t GetRequestKeyboardId() override;
+
+private:
+    bool searchRequestStopTwinkling_ = false;
 };
 } // namespace OHOS::Ace::NG
 

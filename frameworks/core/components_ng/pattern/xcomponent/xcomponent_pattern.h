@@ -34,6 +34,7 @@
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_provider.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_layout_property.h"
@@ -286,6 +287,17 @@ public:
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
     void ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHeight);
 
+    // accessibility
+    void InitializeAccessibility();
+    void UninitializeAccessibility();
+    bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId);
+    bool OnAccessibilityChildTreeDeregister();
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
+    void SetAccessibilityState(bool state) {}
+    RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
+    void InitializeAccessibilityCallback();
+    void HandleRegisterAccessibilityEvent(bool isRegister);
+
     void SetIdealSurfaceWidth(float surfaceWidth);
     void SetIdealSurfaceHeight(float surfaceHeight);
     void SetIdealSurfaceOffsetX(float offsetX);
@@ -302,6 +314,7 @@ public:
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
     void OnSurfaceDestroyed();
     void SetRenderFit(RenderFit renderFit);
+    void EnableSecure(bool isSecure);
 
 private:
     void OnAttachToFrameNode() override;
@@ -367,11 +380,6 @@ private:
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void ReleaseImageAnalyzer();
     void SetRotation(uint32_t rotation);
-#ifdef OHOS_PLATFORM
-    float GetUpVelocity(OH_NativeXComponent_TouchEvent lastMoveInfo, OH_NativeXComponent_TouchEvent upEventInfo);
-    int GetFlingDuration(float velocity);
-    void ReportSlideToRss();
-#endif
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -418,6 +426,11 @@ private:
     void* nativeWindow_ = nullptr;
 
     bool isSurfaceLock_ = false;
+    uint32_t windowId_ = 0;
+    int32_t treeId_ = 0;
+    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
+    RefPtr<XComponentAccessibilityProvider> accessibilityProvider_;
+    RefPtr<AccessibilitySessionAdapter> accessibilitySessionAdapter_;
 
     // for export texture
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
@@ -427,12 +440,6 @@ private:
     bool isEnableAnalyzer_ = false;
     std::optional<int32_t> transformHintChangedCallbackId_;
     uint32_t rotation_ = 0;
-#ifdef OHOS_PLATFORM
-    int64_t startIncreaseTime_ = 0;
-    OH_NativeXComponent_TouchEvent lastTouchInfo_ {};
-    int32_t slideCount_  = 0;
-    double physicalCoeff_ = 0.0;
-#endif
     bool isTypedNode_ = false;
     bool isNativeXComponent_ = false;
     bool hasLoadNativeDone_ = false;

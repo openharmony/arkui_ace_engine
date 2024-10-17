@@ -15,6 +15,8 @@
 
 #include "swiper_test_ng.h"
 
+#include "core/animation/spring_curve.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace

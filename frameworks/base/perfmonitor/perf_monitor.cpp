@@ -12,16 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <sys/time.h>
 
 #include "base/perfmonitor/perf_monitor.h"
 
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
-#include "base/log/jank_frame_report.h"
-#include "base/log/log.h"
 #include "base/perfmonitor/perf_constants.h"
-#include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
 
@@ -277,6 +273,7 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     }
     ACE_SCOPED_TRACE("Animation start and current sceneId=%s", sceneId.c_str());
     if (record == nullptr) {
+        currentSceneId = sceneId;
         record = new SceneRecord();
         record->InitRecord(sceneId, type, mSourceType, note, inputTime);
         mRecords.insert(std::pair<std::string, SceneRecord*> (sceneId, record));
@@ -344,7 +341,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank,
             if ((it->second)->IsTimeOut(vsyncTime + duration)) {
                 CheckTimeOutOfExceptAnimatorStatus(it->second->sceneId);
                 delete it->second;
-                mRecords.erase(it++);
+                it = mRecords.erase(it);
                 continue;
             }
             if ((it->second)->IsFirstFrame()) {
@@ -605,13 +602,22 @@ void PerfMonitor::ProcessJank(double jank, const std::string& windowName)
 
 void PerfMonitor::ReportJankFrame(double jank, const std::string& windowName)
 {
-    if (jank >= static_cast<double>(DEFAULT_JANK_REPORT_THRESHOLD) && !IsExclusionFrame()) {
+    if (jank >= static_cast<double>(DEFAULT_JANK_REPORT_THRESHOLD)) {
         JankInfo jankInfo;
         jankInfo.skippedFrameTime = static_cast<int64_t>(jank * SINGLE_FRAME_TIME);
         jankInfo.windowName = windowName;
         RecordBaseInfo(nullptr);
         jankInfo.baseInfo = baseInfo;
-        EventReport::ReportJankFrameFiltered(jankInfo);
+        jankInfo.filterType = GetFilterType();
+        if (!mRecords.empty()) {
+            jankInfo.sceneId = currentSceneId;
+        } else {
+            jankInfo.sceneId = DEFAULT_SCENE_ID;
+        }
+        EventReport::ReportJankFrameUnFiltered(jankInfo);
+        if (!IsExclusionFrame()) {
+            EventReport::ReportJankFrameFiltered(jankInfo);
+        }
     }
 }
 
@@ -636,4 +642,12 @@ void PerfMonitor::CheckTimeOutOfExceptAnimatorStatus(const std::string& sceneId)
         isExceptAnimator = false;
     }
 }
+
+int32_t PerfMonitor::GetFilterType() const
+{
+    int32_t filterType = (isBackgroundApp << 4) | (isResponseExclusion << 3) | (isStartAppFrame << 2)
+        | (isExclusionWindow << 1) | isExceptAnimator;
+    return filterType;
+}
+
 } // namespace OHOS::Ace

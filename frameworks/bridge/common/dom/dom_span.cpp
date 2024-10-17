@@ -15,10 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_span.h"
 
-#include "core/common/ace_application_info.h"
-#include "core/components/declaration/span/span_declaration.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 
 DOMSpan::DOMSpan(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)

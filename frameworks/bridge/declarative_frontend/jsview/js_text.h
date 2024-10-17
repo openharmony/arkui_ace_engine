@@ -85,6 +85,7 @@ public:
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);
     static void SetHalfLeading(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

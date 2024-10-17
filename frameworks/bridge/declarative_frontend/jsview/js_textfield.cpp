@@ -32,8 +32,8 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
+#include "bridge/declarative_frontend/jsview/js_textarea.h"
 #include "bridge/declarative_frontend/jsview/js_textinput.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -42,13 +42,14 @@
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace {
 
@@ -479,6 +480,9 @@ void JSTextField::SetMaxLength(const JSCallbackInfo& info)
         return;
     }
     maxLength = jsValue->ToNumber<int32_t>();
+    if (std::isinf(jsValue->ToNumber<float>())) {
+        maxLength = INT32_MAX; // Infinity
+    }
     if (GreatOrEqual(maxLength, 0)) {
         TextFieldModel::GetInstance()->SetMaxLength(maxLength);
     } else {
@@ -751,30 +755,13 @@ NG::PaddingProperty JSTextField::GetNewPadding(const JSCallbackInfo& info)
     NG::PaddingProperty padding;
     auto jsValue = info[0];
     if (jsValue->IsObject()) {
-        std::optional<CalcDimension> left;
-        std::optional<CalcDimension> right;
-        std::optional<CalcDimension> top;
-        std::optional<CalcDimension> bottom;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(jsValue);
-
-        CalcDimension leftDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("left"), leftDimen)) {
-            left = leftDimen;
-        }
-        CalcDimension rightDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("right"), rightDimen)) {
-            right = rightDimen;
-        }
-        CalcDimension topDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("top"), topDimen)) {
-            top = topDimen;
-        }
-        CalcDimension bottomDimen;
-        if (ParseJsDimensionVp(paddingObj->GetProperty("bottom"), bottomDimen)) {
-            bottom = bottomDimen;
-        }
-        if (left.has_value() || right.has_value() || top.has_value() || bottom.has_value()) {
-            padding = SetPaddings(top, bottom, left, right);
+        CommonCalcDimension commonCalcDimension;
+        ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
+        if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
+            commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
+            padding = SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom, commonCalcDimension.left,
+                commonCalcDimension.right);
             return padding;
         }
     }
@@ -1471,6 +1458,11 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
         TextFieldModel::GetInstance()->SetCancelIconColor(iconColor);
         return;
     }
+    auto info = ImageSourceInfo(iconSrc, bundleName, moduleName);
+    if (info.IsSvg() && iconSrc != "") {
+        // svg need not default color, otherwise multi color svg will render fault
+        return;
+    }
     if (SystemProperties::GetColorMode() == ColorMode::DARK) {
         TextFieldModel::GetInstance()->SetCancelIconColor(theme->GetCancelButtonIconColor());
     } else {
@@ -1753,4 +1745,14 @@ void JSTextField::SetEnablePreviewText(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetEnablePreviewText(jsValue->ToBoolean());
 }
+
+void JSTextField::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool state = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        state = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetEnableHapticFeedback(state);
+}
+
 } // namespace OHOS::Ace::Framework

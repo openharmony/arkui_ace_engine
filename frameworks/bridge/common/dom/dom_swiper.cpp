@@ -15,11 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_swiper.h"
 
-#include "base/utils/linear_map.h"
-#include "base/utils/utils.h"
-#include "core/components/common/properties/color.h"
-#include "frameworks/bridge/common/utils/utils.h"
-
 namespace OHOS::Ace::Framework {
 namespace {
 

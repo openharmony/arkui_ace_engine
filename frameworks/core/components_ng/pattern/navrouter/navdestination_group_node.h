@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 
 class CustomNodeBase;
+class NavigationTransitionProxy;
 
 using NavDestinationBackButtonEvent = std::function<bool(GestureEvent&)>;
 
@@ -105,7 +106,7 @@ public:
     }
 
     RefPtr<CustomNodeBase> GetNavDestinationCustomNode();
-    
+
     void SetNavDestinationCustomNode(WeakPtr<CustomNodeBase> customNode)
     {
         customNode_ = customNode;
@@ -179,6 +180,24 @@ public:
         return needRemoveInPush_;
     }
 
+    float GetLanguageDirection()
+    {
+        return AceApplicationInfo::GetInstance().IsRightToLeft() ? -1.0f : 1.0f;
+    }
+
+    void InitSystemTransitionPush(bool transitionIn);
+    void StartSystemTransitionPush(bool transitionIn);
+    void SystemTransitionPushCallback(bool transitionIn);
+    void InitSystemTransitionPop(bool isTransitionIn);
+    void StartSystemTransitionPop(bool transitionIn);
+    bool SystemTransitionPopCallback(bool transitionIn);
+    void InitDialogTransition(bool isZeroY);
+
+    void UpdateTextNodeListAsRenderGroup(bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
+    void ReleaseTextNodeList();
+    void CollectTextNodeAsRenderGroup();
+
+    void CleanContent();
 private:
     RefPtr<UINode> titleBarNode_;
     RefPtr<UINode> contentNode_;
@@ -194,6 +213,7 @@ private:
     std::string navDestinationPathInfo_;
     std::string navDestinationModuleName_;
     bool needRemoveInPush_ = false;
+    std::list<WeakPtr<UINode>> textNodeList_;
 };
 
 } // namespace OHOS::Ace::NG

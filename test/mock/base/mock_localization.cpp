@@ -18,6 +18,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t DAY_COUNTS_OF_WEEK = 7;
+constexpr int32_t MONTH_COUNTS_OF_YEAR = 12;
 } // namespace
 
 struct LocaleProxy final {};
@@ -90,6 +91,9 @@ const std::string Localization::FormatDuration(uint32_t duration, bool needShowH
 std::vector<std::string> Localization::GetMonths(bool isShortType, const std::string& calendarType)
 {
     std::vector<std::string> months;
+    for (int32_t i = 0; i < MONTH_COUNTS_OF_YEAR; i++) {
+        months.push_back(std::to_string(i));
+    }
     return months;
 }
 

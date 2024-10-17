@@ -38,10 +38,32 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TEXTFIELD_INDEX = 0;
+constexpr int32_t IMAGE_INDEX = 1;
+constexpr int32_t CANCEL_IMAGE_INDEX = 2;
+constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr float MAX_FONT_SCALE = 2.0f;
 const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
 constexpr Dimension ICON_HEIGHT = 16.0_vp;
+const std::string INSPECTOR_PREFIX = "__SearchField__";
+const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
+    "Button__" };
+
+void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
+{
+    auto updateInspectorCallback = [id = key](FrameNode* parentNode, int32_t index) {
+        auto currentNode = AceType::DynamicCast<FrameNode>(parentNode->GetChildAtIndex(index));
+        if (currentNode) {
+            auto test = INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + id;
+            currentNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + id);
+        }
+    };
+    updateInspectorCallback(frameNode, TEXTFIELD_INDEX);
+    updateInspectorCallback(frameNode, IMAGE_INDEX);
+    updateInspectorCallback(frameNode, CANCEL_IMAGE_INDEX);
+    updateInspectorCallback(frameNode, CANCEL_BUTTON_INDEX);
+    updateInspectorCallback(frameNode, BUTTON_INDEX);
+}
 } // namespace
 
 RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::string>& value,
@@ -651,6 +673,17 @@ void SearchModelNG::SetEnablePreviewText(bool enablePreviewText)
     pattern->SetSupportPreviewText(enablePreviewText);
 }
 
+void SearchModelNG::SetEnableHapticFeedback(bool state)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
+}
+
 void SearchModelNG::SetOnPaste(std::function<void(const std::string&)>&& func)
 {
     auto searchTextField = GetSearchTextFieldFrameNode();
@@ -712,7 +745,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
     frameNode->SetAllowDrop(allowDropSet);
-    
+    auto parentInspector = parentNode->GetInspectorIdValue("");
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[TEXTFIELD_INDEX] + parentInspector);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     auto textValue = pattern->GetTextValue();
     if (textFieldLayoutProperty) {
@@ -784,6 +818,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     if (hasButtonNode) {
         return;
     }
+    auto parentInspector = parentNode->GetInspectorIdValue("");
 
     auto searchTheme = PipelineBase::GetCurrentContext()->GetTheme<SearchTheme>();
     auto nodeId = parentNode->GetButtonId();
@@ -818,6 +853,7 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     searchButtonEvent->SetEnabled(false);
     auto pattern = parentNode->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[BUTTON_INDEX] + parentInspector);
     pattern->SetButtonNode(frameNode);
     frameNode->MountToParent(parentNode);
     frameNode->MarkModifyDone();
@@ -860,6 +896,7 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     if (hasCancelButtonNode) {
         return;
     }
+    auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetCancelButtonId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -869,6 +906,8 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
         CHECK_NULL_VOID(textNode);
         frameNode->AddChild(textNode);
     }
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[CANCEL_BUTTON_INDEX] +
+        parentInspector);
     auto cancelButtonRenderContext = frameNode->GetRenderContext();
     cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -884,6 +923,13 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     pattern->SetCancelButtonNode(frameNode);
     frameNode->MountToParent(parentNode);
     frameNode->MarkModifyDone();
+}
+
+void SearchModelNG::UpdateInspectorId(const std::string& key)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    UpdateInnerInspector(frameNode, key);
 }
 
 RefPtr<SearchNode> SearchModelNG::GetOrCreateSearchNode(
@@ -1791,5 +1837,11 @@ const Dimension SearchModelNG::ConvertTextFontScaleValue(const Dimension& fontSi
         }
     }
     return fontSizeValue;
+}
+
+void SearchModelNG::SetId(FrameNode* frameNode, const std::string& id)
+{
+    NG::ViewAbstract::SetInspectorId(frameNode, id);
+    UpdateInnerInspector(frameNode, id);
 }
 } // namespace OHOS::Ace::NG

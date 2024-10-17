@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_option.h"
 
-#include "frameworks/bridge/common/dom/dom_reflect_map.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

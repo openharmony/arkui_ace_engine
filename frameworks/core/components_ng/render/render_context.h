@@ -49,6 +49,7 @@ class DrawCmdList;
 class VisualEffect;
 class Filter;
 enum class Gravity;
+class BrightnessBlender;
 }
 
 namespace OHOS::Ace::NG {
@@ -177,7 +178,7 @@ public:
         std::optional<std::string> surfaceName;
         PatternType patternType = PatternType::DEFAULT;
     };
-    
+
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
 
     virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) {}
@@ -278,6 +279,7 @@ public:
     virtual void ClearChildren() {}
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
     virtual void SetContentRectToFrame(RectF rect) {}
+    virtual void SetSecurityLayer(bool isSecure) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
@@ -301,6 +303,7 @@ public:
     virtual void UpdateBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter) {}
     virtual void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) {}
     virtual void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) {}
+    virtual void UpdateBrightnessBlender(const OHOS::Rosen::BrightnessBlender* brightnessBlender) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
@@ -447,6 +450,8 @@ public:
     virtual void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& modifier) {};
 
     virtual void PaintAccessibilityFocus() {};
+
+    virtual void UpdateAccessibilityRoundRect() {};
 
     virtual void ClearAccessibilityFocus() {};
 
@@ -696,6 +701,11 @@ public:
     void SetNeedAnimateFlag(bool isNeedAnimate)
     {
         isNeedAnimate_ = isNeedAnimate;
+    }
+
+    virtual bool IsDisappearing() const
+    {
+        return false;
     }
 
     virtual void SetRenderFit(RenderFit renderFit) {}

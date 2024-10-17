@@ -67,6 +67,9 @@ void WaterFlowSections::ReplaceFrom(size_t start, const std::vector<WaterFlowSec
 void WaterFlowSections::NotifySectionChange(
     int32_t start, int32_t deleteCount, const std::vector<WaterFlowSections::Section>& newSections)
 {
+    if (deleteCount == 1 && newSections.size() == 1) {
+        return;
+    }
     int32_t addItemCount = 0;
     int32_t n = static_cast<int32_t>(sections_.size());
     for (int32_t i = 0; i < static_cast<int32_t>(newSections.size()) - 1; i++) {

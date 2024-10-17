@@ -43,6 +43,7 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "adapter/ohos/osal/system_bar_style_ohos.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
+#include "adapter/ohos/osal/window_utils.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
@@ -507,6 +508,17 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
             ContainerScope scope(instanceId);
             auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_RETURN(subPipelineContext, false);
+            auto textfieldMgr = DynamicCast<NG::TextFieldManagerNG>(subPipelineContext->GetTextFieldManager());
+            if (textfieldMgr) {
+                auto lastRequestKeyboardNodeId = textfieldMgr->GetLastRequestKeyboardId();
+                auto lastRequestKeyboardNode = DynamicCast<NG::FrameNode>(
+                    ElementRegister::GetInstance()->GetUINodeById(lastRequestKeyboardNodeId));
+                if (lastRequestKeyboardNode && lastRequestKeyboardNode->GetPageId() == -1 &&
+                    textfieldMgr->OnBackPressed()) {
+                    LOGI("textfield consumed backpressed event");
+                    return true;
+                }
+            }
             auto overlayManager = subPipelineContext->GetOverlayManager();
             CHECK_NULL_RETURN(overlayManager, false);
             if (overlayManager->RemoveOverlayInSubwindow()) {
@@ -945,6 +957,7 @@ void AceContainer::InitializeCallback()
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
+                aceContainer->UpdateResourceDensity(density);
                 aceContainer->NotifyDensityUpdate();
             }
         };
@@ -1382,15 +1395,6 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
     return hintToTypeWrap;
 }
 
-bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
-{
-    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    CHECK_NULL_RETURN(viewDataWrap, false);
-    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
-    CHECK_NULL_RETURN(viewDataWrapOhos, false);
-    return viewDataWrapOhos->GetPlaceHolderValue(viewData);
-}
-
 void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap)
 {
     CHECK_NULL_VOID(node);
@@ -1402,13 +1406,22 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPt
     auto autoFillNewPassword = pattern->GetAutoFillNewPassword();
     if (!autoFillUserName.empty()) {
         for (auto nodeInfoWrap : nodeInfoWraps) {
-            if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
+            if (!nodeInfoWrap) {
+                continue;
+            }
+            auto metadataObject = JsonUtil::ParseJsonString(nodeInfoWrap->GetMetadata());
+            if (nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
                 nodeInfoWrap->SetValue(autoFillUserName);
                 viewDataWrap->SetUserSelected(true);
-                pattern->SetAutoFillUserName("");
                 break;
+            } else if (nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_UNSPECIFIED && metadataObject &&
+                       metadataObject->Contains("type")) {
+                metadataObject->Put("username", autoFillUserName.c_str());
+                nodeInfoWrap->SetMetadata(metadataObject->ToString());
+                viewDataWrap->SetUserSelected(true);
             }
         }
+        pattern->SetAutoFillUserName("");
     }
     if (!autoFillNewPassword.empty()) {
         for (auto nodeInfoWrap : nodeInfoWraps) {
@@ -1502,7 +1515,6 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
-    ChangeType(viewData);
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isNewPassWord is: %{public}d", isNewPassWord);
     if (isNewPassWord) {
         callback->OnFillRequestSuccess(viewData);
@@ -1922,6 +1934,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
 #ifdef FORM_SUPPORTED
     if (isFormRender_) {
         pipelineContext_->SetIsFormRender(isFormRender_);
+        pipelineContext_->SetIsDynamicRender(isDynamicRender_);
         auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
         if (cardFrontend) {
             cardFrontend->SetTaskExecutor(taskExecutor_);
@@ -2537,6 +2550,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
     }
+    if (!parsedConfig.preferredLanguage.empty()) {
+        resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
+    }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
     themeManager->UpdateConfig(resConfig);
@@ -2554,6 +2570,8 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);
+    // change color mode and theme to clear image cache
+    pipelineContext_->ClearImageCache();
 }
 
 void AceContainer::NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration)
@@ -2890,6 +2908,72 @@ bool AceContainer::IsMainWindow() const
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
 }
 
+bool AceContainer::IsSubWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+}
+
+bool AceContainer::IsDialogWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_DIALOG;
+}
+
+bool AceContainer::IsSystemWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
+        uiWindow_->GetType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+bool AceContainer::IsHostMainWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
+
+bool AceContainer::IsHostSubWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+}
+
+bool AceContainer::IsHostDialogWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_DIALOG;
+}
+
+bool AceContainer::IsHostSystemWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
+        uiWindow_->GetParentWindowType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+bool AceContainer::IsHostScenceBoardWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
+}
+
+uint32_t AceContainer::GetParentMainWindowId(uint32_t currentWindowId) const
+{
+    uint32_t parentMainWindowId = 0;
+    if (uiWindow_) {
+        parentMainWindowId = uiWindow_->GetParentMainWindowId(currentWindowId);
+        if (parentMainWindowId == 0) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW,
+                "GetParentMainWindowId, current windowId: %{public}d, main windowId: %{public}d",
+                currentWindowId, parentMainWindowId);
+        }
+    } else {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Window in container is nullptr when getting main windowId");
+    }
+    return parentMainWindowId;
+}
+
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
@@ -3193,5 +3277,26 @@ void AceContainer::NotifyDirectionUpdate()
         ConfigurationChange configurationChange { .directionUpdate = true };
         pipelineContext_->FlushReload(configurationChange, fullUpdate);
     }
+}
+
+void AceContainer::UpdateResourceOrientation(int32_t orientation)
+{
+    DeviceOrientation newOrientation = WindowUtils::GetDeviceOrientation(orientation);
+    auto resConfig = GetResourceConfiguration();
+    resConfig.SetOrientation(newOrientation);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+    }
+    SetResourceConfiguration(resConfig);
+}
+
+void AceContainer::UpdateResourceDensity(double density)
+{
+    auto resConfig = GetResourceConfiguration();
+    resConfig.SetDensity(density);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+    }
+    SetResourceConfiguration(resConfig);
 }
 } // namespace OHOS::Ace::Platform

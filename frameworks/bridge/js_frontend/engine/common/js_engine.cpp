@@ -18,7 +18,6 @@
 
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 
-#include "frameworks/bridge/js_frontend/engine/common/runtime_constants.h"
 #include "native_engine/native_engine.h"
 
 extern "C" void* OHOS_MEDIA_GetPixelMap(napi_env env, napi_value value);

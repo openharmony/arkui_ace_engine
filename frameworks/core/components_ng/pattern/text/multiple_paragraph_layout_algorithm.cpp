@@ -170,8 +170,9 @@ void MultipleParagraphLayoutAlgorithm::GetChildrenPlaceholderIndex(std::vector<i
 }
 
 void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
-    const std::unique_ptr<TextLineStyle>& lineStyle, ParagraphStyle& pStyle)
+    LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle)
 {
+    const auto& lineStyle = spanItem->textLineStyle;
     CHECK_NULL_VOID(lineStyle);
     if (lineStyle->HasTextAlign()) {
         pStyle.align = lineStyle->GetTextAlignValue();
@@ -200,6 +201,11 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     if (lineStyle->HasLineHeight()) {
         pStyle.lineHeight = lineStyle->GetLineHeightValue();
     }
+    if (layoutWrapper) {
+        pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
+    } else {
+        pStyle.direction = GetTextDirectionByContent(spanItem->content);
+    }
 }
 
 void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
@@ -226,7 +232,6 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
                 isCustomFont = true;
             }
         }
-        fontManager->AddVariationNodeNG(frameNode);
         if (isCustomFont || fontManager->IsDefaultFontChanged()) {
             auto pattern = frameNode->GetPattern<TextPattern>();
             CHECK_NULL_VOID(pattern);
@@ -365,6 +370,11 @@ TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(
         return TextDirection::RTL;
     }
 
+    return GetTextDirectionByContent(content);
+}
+
+TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirectionByContent(const std::string& content)
+{
     TextDirection textDirection = TextDirection::LTR;
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
@@ -433,10 +443,10 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         ParagraphStyle spanParagraphStyle = paraStyle;
         RefPtr<SpanItem> paraStyleSpanItem = GetParagraphStyleSpanItem(group);
         if (paraStyleSpanItem) {
-            GetSpanParagraphStyle(paraStyleSpanItem->textLineStyle, spanParagraphStyle);
+            GetSpanParagraphStyle(layoutWrapper, paraStyleSpanItem, spanParagraphStyle);
             if (paraStyleSpanItem->fontStyle->HasFontSize()) {
-                spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().
-                    ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+                spanParagraphStyle.fontSize = paraStyleSpanItem->fontStyle->GetFontSizeValue().ConvertToPxDistribute(
+                    textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
             }
         }
         if (paraStyle.maxLines != UINT32_MAX && !spanStringHasMaxLines_ && isSpanStringMode_) {
@@ -548,12 +558,13 @@ void MultipleParagraphLayoutAlgorithm::AddImageToParagraph(RefPtr<ImageSpanItem>
     placeholderStyle.width = geometryNode->GetMarginFrameSize().Width();
     placeholderStyle.height = geometryNode->GetMarginFrameSize().Height();
     placeholderStyle.paragraphFontSize = Dimension(paragraphFontSize_);
+    placeholderStyle.paragraphTextColor = textStyle_.value_or(TextStyle()).GetTextColor();
     if (NearZero(baselineOffset.Value())) {
         imageSpanItem->placeholderIndex =
             imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
     } else {
         placeholderStyle.baselineOffset = baselineOffset.ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         imageSpanItem->placeholderIndex =
             imageSpanItem->UpdateParagraph(frameNode, paragraph, isSpanStringMode_, placeholderStyle);
     }
@@ -644,7 +655,8 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         if (indentValue.Unit() != DimensionUnit::PERCENT) {
-            value = indentValue.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+            value = indentValue.ConvertToPxDistribute(
+                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         } else {
             value = static_cast<float>(width * indentValue.Value());
             paragraphStyle.indent = Dimension(value);
@@ -655,7 +667,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
     std::vector<float> indents;
     if (paragraphStyle.leadingMargin.has_value()) {
         leadingMarginValue = paragraphStyle.leadingMargin->size.Width().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }
     indents.emplace_back(indent + leadingMarginValue);
     indents.emplace_back(leadingMarginValue);

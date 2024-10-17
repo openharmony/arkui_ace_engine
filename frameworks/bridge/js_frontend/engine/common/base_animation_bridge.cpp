@@ -15,17 +15,6 @@
 
 #include "frameworks/bridge/js_frontend/engine/common/base_animation_bridge.h"
 
-#include <functional>
-#include <unordered_map>
-#include <utility>
-
-#include "base/json/json_util.h"
-#include "base/utils/linear_map.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/utils.h"
-#include "core/animation/keyframe_animation.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/bridge/common/utils/transform_convertor.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

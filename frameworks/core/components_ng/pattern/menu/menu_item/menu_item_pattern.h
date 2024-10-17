@@ -224,6 +224,7 @@ public:
     }
     RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
     void OnHover(bool isHover);
+    void NotifyPressStatus(bool isPress);
 
 protected:
     void RegisterOnKeyEvent();

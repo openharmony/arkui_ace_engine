@@ -62,7 +62,6 @@ constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 constexpr int32_t SIDEBAR_DURATION = 500;
 const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
-constexpr Dimension DEFAULT_DIVIDER_START_MARGIN_VP = 0.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VP = 2.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 constexpr static int32_t PLATFORM_VERSION_TEN = 10;
@@ -123,7 +122,7 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
     }
 
     auto newShowSideBar = layoutProperty->GetShowSideBar().value_or(true);
-    if (newShowSideBar == showSideBar_) {
+    if (newShowSideBar == userSetShowSideBar_) {
         return;
     }
 
@@ -132,6 +131,7 @@ void SideBarContainerPattern::OnUpdateShowSideBar(const RefPtr<SideBarContainerL
         FireChangeEvent(newShowSideBar);
     }
 
+    userSetShowSideBar_ = newShowSideBar;
     SetSideBarStatus(newShowSideBar ? SideBarStatus::SHOW : SideBarStatus::HIDDEN);
     UpdateControlButtonIcon();
     auto host = GetHost();
@@ -974,11 +974,9 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     auto dividerHeight = geometryNode->GetFrameSize().Height();
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto dividerStartMagin = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN_VP);
 
     OffsetF hotZoneOffset;
     hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VP.ConvertToPx());
-    hotZoneOffset.SetY(-dividerStartMagin.ConvertToPx());
     SizeF hotZoneSize;
     auto baseWidth = NearZero(realDividerWidth_, 0.0f) ?
         DEFAULT_DIVIDER_STROKE_WIDTH.ConvertToPx() : realDividerWidth_;
@@ -1132,14 +1130,6 @@ void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>&
 
 void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
 {
-    if (info.GetAction() == MouseAction::PRESS) {
-        isMousePressing_ = true;
-        TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider mouse pressed.");
-    } else if (info.GetAction() == MouseAction::RELEASE) {
-        isMousePressing_ = false;
-        TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider mouse released.");
-    }
-
     // release the mouse button, to check if still in the divider's region
     if (info.GetAction() != MouseAction::RELEASE) {
         return;
@@ -1166,7 +1156,6 @@ void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
     if (currentPointerStyle != static_cast<int32_t>(format)) {
         mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
     }
-    isResizeMouseStyle_ = false;
 }
 
 void SideBarContainerPattern::OnHover(bool isHover)
@@ -1185,13 +1174,6 @@ void SideBarContainerPattern::OnHover(bool isHover)
         return;
     }
     isDividerDraggable_ = true;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        if (isResizeMouseStyle_ && isMousePressing_) {
-            // we enterned the resizing status and leaves ther divider region with mouse button pressing,
-            // do not change the style back, the mouse up event will cover the change checking
-            return;
-        }
-    }
 
     MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -1203,7 +1185,6 @@ void SideBarContainerPattern::OnHover(bool isHover)
     if (currentPointerStyle != static_cast<int32_t>(format) && sideBarStatus_ == SideBarStatus::SHOW) {
         mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
     }
-    isResizeMouseStyle_ = (format == MouseFormat::RESIZE_LEFT_RIGHT);
 }
 
 SideBarPosition SideBarContainerPattern::GetSideBarPositionWithRtl(

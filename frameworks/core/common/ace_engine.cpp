@@ -16,13 +16,7 @@
 #include "core/common/ace_engine.h"
 
 #include <csignal>
-#include <cstdio>
-
-#include "base/log/log.h"
-#include "base/memory/memory_monitor.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
-#include "core/image/image_cache.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif

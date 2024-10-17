@@ -36,6 +36,7 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -56,6 +57,7 @@ constexpr int32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t CRITICAL_TIME = 50;      // ms. If show time of image is less than this, use more cacheImages.
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
+constexpr int32_t MEMORY_LEVEL_LOW_STATUS = 1;
 } // namespace
 
 constexpr float BOX_EPSILON = 0.5f;
@@ -169,6 +171,9 @@ void ImagePattern::OnCompleteInDataReady()
 
 void ImagePattern::TriggerFirstVisibleAreaChange()
 {
+    if (isComponentSnapshotNode_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RectF frameRect;
@@ -530,7 +535,7 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         sensitive = host->IsPrivacySensitive();
     }
     if (!overlayMod_) {
-        overlayMod_ = MakeRefPtr<ImageOverlayModifier>();
+        overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
     }
     if (image_) {
         return MakeRefPtr<ImagePaintMethod>(image_, isSelected_, overlayMod_, sensitive, interpolationDefault_);
@@ -934,25 +939,14 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
     // when image component is [onShow], do not clean image data
-    if (isShow_) {
+    if (isShow_ || level <= static_cast<int32_t>(MEMORY_LEVEL_LOW_STATUS)) {
         return;
     }
-
     // clean image data
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
-
-    // clean rs node to release the sk_sp<SkImage> held by it
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto rsRenderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(rsRenderContext);
-    rsRenderContext->ClearDrawCommands();
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->FlushMessages();
 }
 
 // when recycle image component, release the pixelmap resource
@@ -1055,6 +1049,8 @@ void ImagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderCtx = host->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     if (GetIsAnimation()) {
         renderCtx->SetClipToFrame(true);
     } else {
@@ -1063,11 +1059,12 @@ void ImagePattern::OnAttachToFrameNode()
 
         // register image frame node to pipeline context to receive memory level notification and window state change
         // notification
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
         pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
         pipeline->AddWindowStateChangedCallback(host->GetId());
     }
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    selectedColor_ = theme->GetSelectedColor();
 }
 
 void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1360,6 +1357,21 @@ void ImagePattern::DumpRenderInfo()
     }
 }
 
+void ImagePattern::DumpSvgInfo()
+{
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    CHECK_NULL_VOID(imageSourceInfo);
+    if (!imageSourceInfo->IsSvg()|| !loadingCtx_) {
+        return;
+    }
+    auto imageObject = loadingCtx_->GetImageObject();
+    CHECK_NULL_VOID(imageObject);
+    DumpLog::GetInstance().AddDesc(
+        std::string("Svg:").append(imageObject->GetDumpInfo()));
+}
+
 void ImagePattern::DumpInfo()
 {
     DumpLayoutInfo();
@@ -1384,6 +1396,7 @@ void ImagePattern::DumpInfo()
     }
 
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
+    DumpSvgInfo();
 }
 
 void ImagePattern::DumpAdvanceInfo()
@@ -1447,18 +1460,15 @@ void ImagePattern::OnIconConfigurationUpdate()
 void ImagePattern::OnConfigurationUpdate()
 {
     CHECK_NULL_VOID(loadingCtx_);
-
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
-    src.GenerateCacheKey();
     UpdateInternalResource(src);
 
     LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
         imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        altImageSourceInfo.GenerateCacheKey();
         if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }
@@ -1570,7 +1580,7 @@ void ImagePattern::CreateAnalyzerOverlay()
     if (imageAnalyzerManager_->IsOverlayCreated()) {
         return;
     }
- 
+
     CHECK_NULL_VOID(image_);
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);

@@ -19,6 +19,7 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -242,9 +243,9 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
     if (transactionController && (session_->GetSessionRect() != windowRect)) {
         session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED,
-            transactionController->GetRSTransaction());
+            "OnBoundsChanged", transactionController->GetRSTransaction());
     } else {
-        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
     }
 }
 
@@ -256,6 +257,10 @@ void WindowScene::BufferAvailableCallback()
         CHECK_NULL_VOID(self);
 
         CHECK_NULL_VOID(self->startingWindow_);
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        if (!self->IsWindowSizeEqual(true) || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
+            return;
+        }
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
         if (config.enabled_ && self->session_->NeedStartingWindowExitAnimation()) {
@@ -446,12 +451,18 @@ void WindowScene::OnConnect()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSize = geometryNode->GetFrameSize();
+        RectF windowRect(0, 0, frameSize.Width(), frameSize.Height());
+        context->SyncGeometryProperties(windowRect);
+
         self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
-        self->appWindow_->ForceSyncGeometryNode();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "[WMSMain] Add app window finished, id: %{public}d, node id: %{public}d, name: %{public}s",
-            self->session_->GetPersistentId(), host->GetId(), self->session_->GetSessionInfo().bundleName_.c_str());
+            "[WMSMain] Add app window finished, id: %{public}d, node id: %{public}d, "
+            "name: %{public}s, rect: %{public}s", self->session_->GetPersistentId(), host->GetId(),
+            self->session_->GetSessionInfo().bundleName_.c_str(), windowRect.ToString().c_str());
 
         surfaceNode->SetBufferAvailableCallback(self->callback_);
     };
@@ -500,6 +511,9 @@ void WindowScene::OnLayoutFinished()
         CHECK_NULL_VOID(self);
 
         CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
+        if (self->startingWindow_) {
+            self->BufferAvailableCallback();
+        }
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("WindowScene::OnLayoutFinished[id:%d][self:%d][enabled:%d]",
@@ -547,7 +561,7 @@ void WindowScene::OnDrawingCompleted()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDrawingCompleted", TaskExecutor::TaskType::UI);
 }
 
-bool WindowScene::IsWindowSizeEqual()
+bool WindowScene::IsWindowSizeEqual(bool allowEmpty)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -557,6 +571,7 @@ bool WindowScene::IsWindowSizeEqual()
     ACE_SCOPED_TRACE("WindowScene::IsWindowSizeEqual[id:%d][self:%d][%s][%s]",
         session_->GetPersistentId(), host->GetId(),
         frameSize.ToString().c_str(), session_->GetLayoutRect().ToString().c_str());
+    CHECK_EQUAL_RETURN(allowEmpty && session_->GetLayoutRect().IsEmpty(), true, true);
     if (NearEqual(frameSize.Width(), session_->GetLayoutRect().width_, 1.0f) &&
         NearEqual(frameSize.Height(), session_->GetLayoutRect().height_, 1.0f)) {
         return true;
@@ -653,5 +668,10 @@ void WindowScene::SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rose
         session->SetBufferAvailable(true);
     };
     surfaceNode->SetBufferAvailableCallback(subWindowCallback);
+}
+
+uint32_t WindowScene::GetWindowPatternType() const
+{
+    return static_cast<uint32_t>(WindowPatternType::WINDOW_SCENE);
 }
 } // namespace OHOS::Ace::NG

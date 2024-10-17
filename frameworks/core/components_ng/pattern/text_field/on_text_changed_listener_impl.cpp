@@ -145,6 +145,18 @@ void OnTextChangedListenerImpl::SendKeyboardStatus(const MiscServices::KeyboardS
     HandleKeyboardStatus(keyboardStatus);
 }
 
+void OnTextChangedListenerImpl::NotifyKeyboardHeight(uint32_t height)
+{
+    auto task = [textField = pattern_, height] {
+        ACE_SCOPED_TRACE("NotifyKeyboardHeight");
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->GetInstanceId());
+        client->NotifyKeyboardHeight(height);
+    };
+    PostTaskToUI(task, "ArkUITextFieldNotifyKeyboardHeight");
+}
+
 void OnTextChangedListenerImpl::SendFunctionKey(const MiscServices::FunctionKey& functionKey)
 {
     HandleFunctionKey(functionKey);
@@ -311,6 +323,7 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
                 client->NotifyKeyboardClosedByUser();
             }
             client->NotifyKeyboardClosed();
+            client->NotifyKeyboardHeight(0);
         };
         PostTaskToUI(task, "ArkUITextFieldKeyboardClosedByUser");
     }
@@ -333,7 +346,7 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         ContainerScope scope(id);
         auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
         CHECK_NULL_VOID(textFieldManager);
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo SetImeShow:%d", keyboardInfo.visible);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyPanelStatusInfo SetImeShow:%{public}d", keyboardInfo.visible);
         textFieldManager->SetImeShow(keyboardInfo.visible);
     };
     PostTaskToUI(task, "ArkUITextFieldSetImeShow");
@@ -351,21 +364,18 @@ void OnTextChangedListenerImpl::AutoFillReceivePrivateCommand(
     if (privateCommand.find(AUTO_FILL_PARAMS_USERNAME) != privateCommand.end()) {
         auto userName = privateCommand.find(AUTO_FILL_PARAMS_USERNAME);
         textFieldPattern->SetAutoFillUserName(std::get<std::string>(userName->second));
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "111111111");
         textFieldPattern->ProcessAutoFill(isPopup, true);
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.userName : %{private}s",
             std::get<std::string>(userName->second).c_str());
     } else if (privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD) != privateCommand.end()) {
         auto newPassword = privateCommand.find(AUTO_FILL_PARAMS_NEWPASSWORD);
         textFieldPattern->SetAutoFillNewPassword(std::get<std::string>(newPassword->second));
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "22222222");
         textFieldPattern->ProcessAutoFill(isPopup, true, true);
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.newPassword : %{private}s",
             std::get<std::string>(newPassword->second).c_str());
     } else if (privateCommand.find(AUTO_FILL_PARAMS_OTHERACCOUNT) != privateCommand.end()) {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "com.autofill.params.otherAccount");
         textFieldPattern->SetAutoFillOtherAccount(true);
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "33333333333333");
         textFieldPattern->ProcessAutoFill(isPopup, true);
     } else {
         TAG_LOGW(AceLogTag::ACE_AUTO_FILL, "invalid autofill data privateCommand");

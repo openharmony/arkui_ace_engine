@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,8 +16,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("indexer_test_ng") {
   type = "new"
   sources = [
-    "indexer_model_test_ng.cpp",
-    "indexer_pattern_test_ng.cpp",
+    "indexer_accessibility_test_ng.cpp",
+    "indexer_layout_test_ng.cpp",
+    "indexer_select_test_ng.cpp",
     "indexer_test_ng.cpp",
   ]
 }

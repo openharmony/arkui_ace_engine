@@ -44,6 +44,10 @@ public:
     std::wstring GetWideString();
     int32_t GetLength() const;
     void SetString(const std::string& text);
+    void SetFramNode(const WeakPtr<NG::FrameNode>& frameNode);
+    void MarkDirtyFrameNode();
+    void AddCustomSpan();
+    void RemoveCustomSpan();
     void SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems);
     void SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap);
     const std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>& GetSpansMap() const;
@@ -62,6 +66,19 @@ public:
     static void DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr);
     void ClearSpans();
     void AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem);
+    void UpdateSpansMap();
+    RefPtr<LineHeightSpan> ToLineHeightSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<ParagraphStyleSpan> ToParagraphStyleSpan(
+        const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<ImageSpan> ToImageSpan(const RefPtr<NG::SpanItem>& spanItem);
+    RefPtr<TextShadowSpan> ToTextShadowSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<GestureSpan> ToGestureSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<LetterSpacingSpan> ToLetterSpacingSpan(
+        const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<BaselineOffsetSpan> ToBaselineOffsetSpan(
+        const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<DecorationSpan> ToDecorationSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
+    RefPtr<FontSpan> ToFontSpan(const RefPtr<NG::SpanItem>& spanItem, int32_t start, int32_t end);
     void ChangeStartAndEndToCorrectNum(int32_t& start, int32_t& end);
     void ChangeStartToCorrectNum(int32_t& start);
     void ChangeEndToCorrectNum(int32_t& end);
@@ -97,6 +114,7 @@ protected:
     std::string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
     std::list<RefPtr<NG::SpanItem>> spans_;
+    WeakPtr<NG::FrameNode> framNode_;
 };
 } // namespace OHOS::Ace
 

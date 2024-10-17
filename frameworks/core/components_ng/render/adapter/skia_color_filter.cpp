@@ -15,8 +15,6 @@
 
 #include "core/components_ng/render/adapter/skia_color_filter.h"
 
-#include "base/memory/referenced.h"
-
 namespace OHOS::Ace::NG {
 
 RefPtr<ColorFilter> ColorFilter::MakeFromMatrix(const float rowMajor[20])

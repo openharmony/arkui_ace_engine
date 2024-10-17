@@ -183,9 +183,10 @@ class NodeAdapter {
         if (!node.isModifiable()) {
             return false;
         }
-        if (node.attribute_ !== undefined) {
-            if (node.attribute_.allowChildCount !== undefined) {
-                const allowCount = node.attribute_.allowChildCount();
+        if (node.hasOwnProperty('attribute_')) {
+            let frameeNode = node as TypedFrameNode<any>;
+            if (frameeNode.attribute_.allowChildCount !== undefined) {
+                const allowCount = frameeNode.attribute_.allowChildCount();
                 if (allowCount <= 1) {
                     return false;
                 }

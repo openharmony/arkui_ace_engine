@@ -89,6 +89,7 @@ public:
     virtual void SetType(TextInputType value);
     virtual void SetDragPreviewOptions(const NG::DragPreviewOption option) {};
     virtual void SetSelectedBackgroundColor(const Color& value) {};
+    virtual void UpdateInspectorId(const std::string& key) {};
 
     virtual void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) {};
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) {};
@@ -96,6 +97,7 @@ public:
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
+    virtual void SetEnableHapticFeedback(bool state) = 0;
 private:
     static std::unique_ptr<SearchModel> instance_;
     static std::mutex mutex_;

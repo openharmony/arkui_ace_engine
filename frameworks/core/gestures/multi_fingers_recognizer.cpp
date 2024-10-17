@@ -14,8 +14,6 @@
 */
 
 #include "core/gestures/multi_fingers_recognizer.h"
-#include "base/memory/ace_type.h"
-#include "core/gestures/pinch_recognizer.h"
 
 namespace OHOS::Ace {
 

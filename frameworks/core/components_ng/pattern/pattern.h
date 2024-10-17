@@ -94,7 +94,7 @@ public:
     {
         return false;
     }
-    
+
     virtual bool CheckCustomAvoidKeyboard() const
     {
         return false;
@@ -271,6 +271,8 @@ public:
     virtual void OnAfterModifyDone() {}
 
     virtual void OnMountToParentDone() {}
+
+    virtual void AfterMountToParent() {}
 
     virtual void OnSensitiveStyleChange(bool isSensitive) {}
 
@@ -608,6 +610,11 @@ public:
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
 
+    virtual bool OnAccessibilityHoverEvent(const PointF& point)
+    {
+        return false;
+    }
+
     virtual bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const
     {
         return false;
@@ -617,7 +624,7 @@ public:
     {
         return RectF();
     }
-    
+
     virtual void NotifyDataChange(int32_t index, int32_t count) {};
 
     virtual bool TriggerAutoSaveWhenInvisible()
@@ -625,6 +632,11 @@ public:
         return false;
     }
 
+    virtual uint32_t GetWindowPatternType() const
+    {
+        return 0;
+    }
+    
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

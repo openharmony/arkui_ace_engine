@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_image_animator.h"
 
-#include "base/log/event_report.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {

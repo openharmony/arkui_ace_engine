@@ -21,11 +21,8 @@
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkShader.h"
 #endif
-#include "render_service_client/core/ui/rs_node.h"
 
-#include "core/pipeline/base/rosen_render_context.h"
 #include "frameworks/core/components/common/painter/rosen_svg_painter.h"
-#include "frameworks/core/components/svg/svg_transform.h"
 #include "frameworks/core/components/transform/rosen_render_transform.h"
 
 namespace OHOS::Ace {

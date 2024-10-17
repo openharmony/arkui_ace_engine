@@ -826,6 +826,20 @@ void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
     SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 
+void SetSearchInspectorId(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetId(frameNode, key);
+}
+
+void ResetSearchInspectorId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetId(frameNode, "");
+}
+
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -838,24 +852,20 @@ const ArkUISearchModifier* GetSearchModifier()
         ResetSearchCopyOption, SetSearchEnterKeyType, ResetSearchEnterKeyType, SetSearchHeight, ResetSearchHeight,
         SetSearchFontFeature, ResetSearchFontFeature, SetSearchDecoration, ResetSearchDecoration,
         SetSearchLetterSpacing, ResetSearchLetterSpacing, SetSearchLineHeight, ResetSearchLineHeight,
-        SetSearchAdaptMinFontSize, ResetSearchAdaptMinFontSize,
-        SetSearchAdaptMaxFontSize, ResetSearchAdaptMaxFontSize,
+        SetSearchAdaptMinFontSize, ResetSearchAdaptMinFontSize, SetSearchAdaptMaxFontSize, ResetSearchAdaptMaxFontSize,
         SetSearchSelectedBackgroundColor, ResetSearchSelectedBackgroundColor, SetSearchTextIndent,
-        ResetSearchTextIndent,
-        SetSearchMaxLength, ResetSearchMaxLength, SetSearchType, ResetSearchType,
+        ResetSearchTextIndent, SetSearchMaxLength, ResetSearchMaxLength, SetSearchType, ResetSearchType,
         SetSearchOnEditChange, ResetSearchOnEditChange, SetSearchOnSubmitWithEvent, ResetSearchOnSubmitWithEvent,
-        SetSearchOnCopy, ResetSearchOnCopy, SetSearchOnCut, ResetSearchOnCut,
-        SetSearchOnPaste, ResetSearchOnPaste, SetSearchOnChange, ResetSearchOnChange,
-        SetSearchOnTextSelectionChange, ResetSearchOnTextSelectionChange,
-        SetSearchOnContentScroll, ResetSearchOnContentScroll,
-        SetSearchShowCounterOptions, ResetSearchShowCounterOptions, GetSearchController, SetSearchValue,
-        ResetSearchValue, SetSearchPlaceholder, ResetSearchPlaceholder, SetSearchIcon, ResetSearchIcon,
-        SetSearchOnWillInsert, ResetSearchOnWillInsert,
-        SetSearchOnDidInsert, ResetSearchOnDidInsert,
-        SetSearchOnWillDelete, ResetSearchOnWillDelete,
+        SetSearchOnCopy, ResetSearchOnCopy, SetSearchOnCut, ResetSearchOnCut, SetSearchOnPaste, ResetSearchOnPaste,
+        SetSearchOnChange, ResetSearchOnChange, SetSearchOnTextSelectionChange, ResetSearchOnTextSelectionChange,
+        SetSearchOnContentScroll, ResetSearchOnContentScroll, SetSearchShowCounterOptions,
+        ResetSearchShowCounterOptions, GetSearchController, SetSearchValue, ResetSearchValue, SetSearchPlaceholder,
+        ResetSearchPlaceholder, SetSearchIcon, ResetSearchIcon, SetSearchOnWillInsert, ResetSearchOnWillInsert,
+        SetSearchOnDidInsert, ResetSearchOnDidInsert, SetSearchOnWillDelete, ResetSearchOnWillDelete,
         SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText, ResetSearchEnablePreviewText,
         SetSearchCaretPosition, ResetSearchCaretPosition,
-        SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions };
+        SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions,
+        SetSearchInspectorId, ResetSearchInspectorId };
     return &modifier;
 }
 

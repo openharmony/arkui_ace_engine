@@ -15,18 +15,8 @@
 
 #include "core/components/option/option_component.h"
 
-#include "base/utils/string_utils.h"
-#include "base/utils/system_properties.h"
-#include "core/common/container.h"
-#include "core/components/box/box_component.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/flex/flex_item_component.h"
-#include "core/components/image/image_component.h"
-#include "core/components/list/list_component.h"
 #include "core/components/option/option_element.h"
 #include "core/components/option/render_option.h"
-#include "core/components/positioned/positioned_component.h"
-#include "core/components/select/select_theme.h"
 
 namespace OHOS::Ace {
 namespace {

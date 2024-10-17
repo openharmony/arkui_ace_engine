@@ -36,6 +36,7 @@ constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
 constexpr int32_t LONG_PRESS_DELAY = 300;
 constexpr float HALF_FLOAT = 0.5f;
+constexpr float MAX_FONT_SCALE = 2.0f;
 } // namespace
 
 void SwiperIndicatorPattern::OnAttachToFrameNode()
@@ -439,6 +440,7 @@ void SwiperIndicatorPattern::UpdateTextContent(const RefPtr<SwiperIndicatorLayou
     firstTextLayoutProperty->UpdateTextColor(selectedFontColor);
     firstTextLayoutProperty->UpdateFontSize(selectedFontSize);
     firstTextLayoutProperty->UpdateFontWeight(selectedFontWeight);
+    firstTextLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
     UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
 }
 
@@ -468,14 +470,10 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     CHECK_NULL_VOID(swiperNode);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto currentIndex = swiperPattern->GetCurrentFirstIndex() + 1;
     if (currentIndex > swiperPattern->RealTotalCount()) {
         currentIndex = 1;
@@ -493,9 +491,11 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     std::string lastContent = isRtl ? std::to_string(currentIndex) + "\\" :
         "/" + std::to_string(swiperPattern->RealTotalCount());
 
+    auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(firstTextLayoutProperty);
     firstTextLayoutProperty->UpdateContent(firstContent);
-    lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(lastTextLayoutProperty);
+    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
     auto fontColor = layoutProperty->GetFontColorValue(theme->GetDigitalIndicatorTextStyle().GetTextColor());
     auto fontSize = layoutProperty->GetFontSizeValue(theme->GetDigitalIndicatorTextStyle().GetFontSize());
     if (!fontSize.IsValid()) {
@@ -506,6 +506,7 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     lastTextLayoutProperty->UpdateFontSize(fontSize);
     lastTextLayoutProperty->UpdateFontWeight(fontWeight);
     lastTextLayoutProperty->UpdateContent(lastContent);
+    lastTextLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
     firstTextNode->MarkModifyDone();
     firstTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     lastTextNode->MarkModifyDone();

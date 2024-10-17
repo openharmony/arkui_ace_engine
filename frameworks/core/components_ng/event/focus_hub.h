@@ -474,6 +474,7 @@ public:
         if (!focusPaintParamsPtr_) {
             focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
+        CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintRect(rect);
     }
     void SetPaintColor(const Color& color)
@@ -481,6 +482,7 @@ public:
         if (!focusPaintParamsPtr_) {
             focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
+        CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintColor(color);
     }
     void SetPaintWidth(const Dimension& width)
@@ -488,6 +490,7 @@ public:
         if (!focusPaintParamsPtr_) {
             focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
+        CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetPaintWidth(width);
     }
     void SetFocusPadding(const Dimension& padding)
@@ -495,6 +498,7 @@ public:
         if (!focusPaintParamsPtr_) {
             focusPaintParamsPtr_ = std::make_unique<FocusPaintParam>();
         }
+        CHECK_NULL_VOID(focusPaintParamsPtr_);
         focusPaintParamsPtr_->SetFocusPadding(padding);
     }
 
@@ -540,6 +544,7 @@ public:
     bool IsFocusableScopeByTab();
 
     bool IsFocusableWholePath();
+    bool IsSelfFocusableWholePath();
     bool IsOnRootTree() const;
 
     bool IsFocusable();
@@ -1034,6 +1039,7 @@ public:
 
     bool FocusToHeadOrTailChild(bool isHead);
 
+    WeakPtr<FocusHub> GetUnfocusableParentFocusNode();
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
@@ -1064,6 +1070,8 @@ protected:
     }
 
 private:
+    friend class FocusView;
+ 
     bool CalculatePosition();
 
     void SetScopeFocusAlgorithm();
@@ -1092,6 +1100,14 @@ private:
     void SetLastWeakFocusNodeWholeScope(const std::string &focusScopeId);
 
     void RaiseZIndex(); // Recover z-index in ClearFocusState
+
+    bool RequestFocusImmediatelyInner(bool isJudgeRootTree = false);
+    bool OnKeyEventNodeInternal(const KeyEvent& keyEvent);
+    bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
+    bool RequestNextFocusByKey(const KeyEvent& keyEvent);
+
+    // donot move focus before detach if has focus view child
+    bool SkipFocusMoveBeforeRemove() const;
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

@@ -52,7 +52,7 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
         const auto& touches = info.GetTouches();
         const auto& changeTouches = info.GetChangedTouches();
         if (touches.empty() || changeTouches.empty()) {
-            LOGW("the touch info is illegal");
+            TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "the touch info is illegal");
             return;
         }
 
