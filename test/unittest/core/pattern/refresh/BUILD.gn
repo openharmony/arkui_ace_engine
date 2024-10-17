@@ -16,8 +16,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("refresh_test_ng") {
   type = "new"
   sources = [
+    "refresh_accessibility_test_ng.cpp",
+    "refresh_event_test_ng.cpp",
+    "refresh_layout_test_ng.cpp",
     "refresh_test_ng.cpp",
-    "refresh_version_eleven_test_ng.cpp",
-    "refresh_version_twelve_test_ng.cpp",
   ]
 }
