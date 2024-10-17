@@ -2082,6 +2082,21 @@ void TabBarPattern::UpdateSymbolStats(int32_t index, int32_t preIndex)
     }
 }
 
+void TabBarPattern::AdjustSymbolStats(int32_t index)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+
+    for (uint32_t i = 0; i < tabBarNode->GetChildren().size(); i++) {
+        if (i == index) {
+            UpdateSymbolStats(index, -1);
+            continue;
+        }
+
+        UpdateSymbolStats(-1, i);
+    }
+}
+
 void TabBarPattern::UpdateSymbolApply(const RefPtr<NG::FrameNode>& symbolNode,
     RefPtr<TextLayoutProperty>& symbolProperty, int32_t index, std::string type)
 {
@@ -3181,5 +3196,46 @@ void TabBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("swiperStartIndex", swiperStartIndex_);
     json->Put("scrollMargin", scrollMargin_);
     SetRegionInfo(json);
+}
+
+void TabBarPattern::AdjustTabBarInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (tabBarItemIds_.size() <= host->TotalChildCount() - MASK_COUNT) {
+        return;
+    }
+
+    std::set<int32_t> retainedIndex;
+    for (auto i = 0; i < tabBarItemIds_.size(); i++) {
+        auto itemId = tabBarItemIds_[i];
+        if (host->GetChildIndexById(itemId) == -1) {
+            continue;
+        }
+
+        retainedIndex.insert(i);
+    }
+
+    UpdateTabBarInfo<int32_t>(tabBarItemIds_, retainedIndex);
+    UpdateTabBarInfo<SelectedMode>(selectedModes_, retainedIndex);
+    UpdateTabBarInfo<IndicatorStyle>(indicatorStyles_, retainedIndex);
+    UpdateTabBarInfo<TabBarStyle>(tabBarStyles_, retainedIndex);
+    UpdateTabBarInfo<IconStyle>(iconStyles_, retainedIndex);
+    UpdateTabBarInfo<TabBarSymbol>(symbolArray_, retainedIndex);
+}
+
+template<typename T>
+void TabBarPattern::UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex)
+{
+    std::vector<T> newInfo;
+    for (auto index : retainedIndex) {
+        if (index >= info.size()) {
+            continue;
+        }
+
+        newInfo.emplace_back(info[index]);
+    }
+
+    std::swap(newInfo, info);
 }
 } // namespace OHOS::Ace::NG
