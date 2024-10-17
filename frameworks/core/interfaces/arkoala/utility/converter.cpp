@@ -503,4 +503,19 @@ void AssignCast(std::optional<Color>& dst, const Ark_String& src)
         dst = result;
     }
 }
+
+template<>
+PickerTextStyle Convert(const Ark_PickerTextStyle& src)
+{
+    PickerTextStyle style;
+    style.textColor = OptConvert<Color>(src.color);
+    auto font = OptConvert<Font>(src.font);
+    if (font.has_value()) {
+        style.fontSize = font->fontSize;
+        style.fontFamily = font->fontFamilies;
+        style.fontWeight = font->fontWeight;
+        style.fontStyle = font->fontStyle;
+    }
+    return style;
+}
 } // namespace OHOS::Ace::NG::Converter
