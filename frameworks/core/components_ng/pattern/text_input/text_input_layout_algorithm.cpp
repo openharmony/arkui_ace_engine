@@ -86,9 +86,6 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto paddingAndBorder = textFieldLayoutProperty->CreatePaddingAndBorder();
     float contentWidth = 0.0f;
     float contentHeight = 0.0f;
     if (content) {
@@ -108,21 +105,21 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (pattern->GetResponseArea()) {
         responseAreaWidth += pattern->GetResponseArea()->GetFrameSize().Width();
     }
-    frameSize.SetWidth(contentWidth + paddingAndBorder.Width() + responseAreaWidth);
+    frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingAndBorderSum() + responseAreaWidth);
 
     if (textFieldContentConstraint_.selfIdealSize.Height().has_value()) {
         if (LessOrEqual(contentWidth, 0)) {
             frameSize.SetHeight(textFieldContentConstraint_.maxSize.Height());
         } else {
             frameSize.SetHeight(
-                textFieldContentConstraint_.maxSize.Height() + paddingAndBorder.Height());
+                textFieldContentConstraint_.maxSize.Height() + pattern->GetVerticalPaddingAndBorderSum());
         }
     } else {
         auto defaultHeight =
             GetDefaultHeightByType(layoutWrapper) + pattern->GetPaddingBottom() + pattern->GetPaddingTop();
         auto actualHeight = contentHeight + pattern->GetVerticalPaddingAndBorderSum();
         auto height =
-            LessNotEqual(actualHeight, defaultHeight) ? defaultHeight : contentHeight + paddingAndBorder.Height();
+            LessNotEqual(actualHeight, defaultHeight)? defaultHeight : actualHeight;
         frameSize.SetHeight(height);
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
