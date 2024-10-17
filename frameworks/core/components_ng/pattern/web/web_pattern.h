@@ -913,6 +913,7 @@ private:
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const;
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
+    void SetSurfaceDensity(double density);
     void InitInOfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
     bool FilterScrollEventHandleOffset(const float offset);
@@ -1118,6 +1119,7 @@ private:
     ViewDataCommon viewDataCommon_;
     bool isPasswordFill_ = false;
     bool isEnabledHapticFeedback_ = true;
+    int32_t densityCallbackId_ = 0;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

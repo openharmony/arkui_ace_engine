@@ -394,6 +394,10 @@ WebPattern::~WebPattern()
         imageAnalyzerManager_->ReleaseImageAnalyzer();
     }
     UninitializeAccessibility();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
+    }
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -2714,6 +2718,23 @@ void WebPattern::OnModifyDone()
     // offline mode
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
         InitInOfflineMode();
+    }
+
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        densityCallbackId_ = pipeline->RegisterDensityChangedCallback([weak = WeakClaim(this)](double density) {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->SetSurfaceDensity(density);
+        });
+        SetSurfaceDensity(pipeline->GetDensity());
+    }
+}
+
+void WebPattern::SetSurfaceDensity(double density)
+{
+    if (delegate_) {
+        delegate_->SetSurfaceDensity(density);
     }
 }
 
