@@ -4533,9 +4533,8 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         return;
     }
     // build content
-    auto buildNode = buildNodeFunc();
-    CHECK_NULL_VOID(buildNode);
-    auto sheetContentNode = AceType::DynamicCast<FrameNode>(buildNode->GetFrameChildByIndex(0, true));
+    RefPtr<UINode> sheetContentNode = buildNodeFunc();
+    CHECK_NULL_VOID(sheetContentNode);
     OnBindSheetInner(std::move(callback), sheetContentNode, std::move(buildtitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
@@ -4707,7 +4706,7 @@ void OverlayManager::CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& shee
 }
 
 void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& callback,
-    const RefPtr<FrameNode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+    const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
     std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
     std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
@@ -4717,7 +4716,6 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     std::function<void()>&& sheetSpringBack, const RefPtr<FrameNode>& targetNode, bool isStartByUIContext)
 {
     CHECK_NULL_VOID(sheetContentNode);
-    sheetContentNode->GetRenderContext()->SetIsModalRootNode(true);
     auto titleBuilder = AceType::DynamicCast<FrameNode>(buildtitleNodeFunc());
     if (titleBuilder) {
         titleBuilder->GetRenderContext()->SetIsModalRootNode(true);
@@ -4794,7 +4792,7 @@ void OverlayManager::SetSheetProperty(
 }
 
 void OverlayManager::SaveSheePageNode(
-    const RefPtr<FrameNode>& sheetPageNode, const RefPtr<FrameNode>& sheetContentNode,
+    const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
     const RefPtr<FrameNode>& targetNode, bool isStartByUIContext)
 {
     int32_t targetId = targetNode->GetId();

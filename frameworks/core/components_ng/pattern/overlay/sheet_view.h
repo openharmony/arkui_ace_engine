@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SheetView {
 public:
-    static RefPtr<FrameNode> CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<FrameNode> builder,
+    static RefPtr<FrameNode> CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<UINode> builder,
         RefPtr<FrameNode> titleBuilder, std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle);
     static RefPtr<FrameNode> CreateScrollNode();
 
