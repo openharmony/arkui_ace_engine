@@ -698,6 +698,7 @@ public:
         return treeId_;
     }
     bool CloseImageOverlaySelection();
+    void SetDrawSize(double width, double height);
     void SetImageOverlaySelectedStatus(bool isSelected)
     {
         imageOverlayIsSelected_ = isSelected;

@@ -7073,6 +7073,12 @@ bool WebPattern::CloseImageOverlaySelection()
     return false;
 }
 
+void WebPattern::SetDrawSize(double width, double height)
+{
+    drawSize_.SetWidth(width);
+    drawSize_.SetHeight(height);
+}
+
 void WebPattern::OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> parent)
 {
     if (isDragEnd_) {
