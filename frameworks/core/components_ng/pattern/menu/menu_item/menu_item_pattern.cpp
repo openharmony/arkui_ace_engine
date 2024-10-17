@@ -49,9 +49,9 @@ constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
 constexpr float OPACITY_EFFECT = 0.99;
 const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
 // id of system resource start from 0x07000000
-constexpr unsigned long MIN_SYSTEM_RESOURCE_ID = 0x07000000;
+constexpr uint64_t MIN_SYSTEM_RESOURCE_ID = 0x07000000;
 // id of system resource end to 0x07FFFFFF
-constexpr unsigned long MAX_SYSTEM_RESOURCE_ID = 0x07FFFFFF;
+constexpr uint64_t MAX_SYSTEM_RESOURCE_ID = 0x07FFFFFF;
 
 void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
     const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
@@ -1280,34 +1280,17 @@ void MenuItemPattern::UpdateImageIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>&
     }
 }
 
-bool convertToLongLong(const std::string& str, long long& value)
-{
-    char* end;
-    errno = 0;
-
-    int integerBase = 10;
-    value = std::strtoll(str.c_str(), &end, integerBase);
-    if (end == str.c_str()) {
-        return false;
-    }
-    if (errno == ERANGE && (value == LLONG_MAX || value == LONG_MIN)) {
-        return false;
-    }
-    if (*end != '\0') {
-        return false;
-    }
-    return true;
-}
-
 bool MenuItemPattern::UseDefaultThemeIcon(const ImageSourceInfo& imageSourceInfo)
 {
     if (imageSourceInfo.IsSvg()) {
         auto src = imageSourceInfo.GetSrc();
         auto srcId = src.substr(SYSTEM_RESOURCE_PREFIX.size(),
             src.substr(0, src.rfind(".svg")).size() - SYSTEM_RESOURCE_PREFIX.size());
-        long long parsedSrcId;
-        return (srcId.find("ohos_") != std::string::npos)
-            || (convertToLongLong(srcId, parsedSrcId)
+        if (srcId.find("ohos_") != std::string::npos) {
+            return true;
+        }
+        uint64_t parsedSrcId = StringUtils::StringToLongUint(srcId);
+        return (parsedSrcId != 0
             && (parsedSrcId >= MIN_SYSTEM_RESOURCE_ID)
             && (parsedSrcId <= MAX_SYSTEM_RESOURCE_ID));
     }
