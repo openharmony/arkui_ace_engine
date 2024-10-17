@@ -666,6 +666,7 @@ void PipelineContext::FlushDragEvents()
     decltype(dragEvents_) dragEvents(std::move(dragEvents_));
     if (dragEvents.empty()) {
         canUseLongPredictTask_ = true;
+        nodeToPointEvent_.clear();
         return ;
     }
     canUseLongPredictTask_ = false;
@@ -718,20 +719,23 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
     std::unordered_map<int, PointerEvent> &idToPoints,
     const RefPtr<FrameNode>& node)
 {
+    std::map<RefPtr<FrameNode>, std::vector<PointerEvent>> nodeToPointEvent;
     std::list<PointerEvent> dragPoint;
     for (const auto& iter : idToPoints) {
         lastDispatchTime_[iter.first] = GetVsyncTime();
         auto it = newIdPoints.find(iter.first);
         if (it != newIdPoints.end()) {
             dragPoint.emplace_back(it->second);
+            nodeToPointEvent[node].emplace_back(it->second);
         } else {
             dragPoint.emplace_back(iter.second);
+            nodeToPointEvent[node].emplace_back(iter.second);
         }
     }
     for (auto iter = dragPoint.rbegin(); iter != dragPoint.rend(); ++iter) {
         manager->OnDragMove(*iter, extraInfo, node);
     }
-    idToDragPoints_ = std::move(idToPoints);
+    nodeToPointEvent_ = std::move(nodeToPointEvent);
 }
 
 PointerEvent PipelineContext::GetResamplePointerEvent(const std::vector<PointerEvent>& history,
@@ -3381,8 +3385,82 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         RequestFrame();
         return;
     }
+    if (event.action == MouseAction::RELEASE || event.action == MouseAction::CANCEL) {
+        lastMouseTime_ = GetTimeFromExternalTimer();
+        CompensateMouseMoveEvent(event, node);
+    }
+    DispatchMouseEvent(event, node);
+}
 
-    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS) &&
+void PipelineContext::CompensateMouseMoveEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
+{
+    if (CompensateMouseMoveEventFromUnhandledEvents(event, node)) {
+        return;
+    }
+    auto lastEventIter = nodeToMousePoints_.find(node);
+    if (lastEventIter == nodeToMousePoints_.end() || lastEventIter->second.empty()) {
+        return;
+    }
+    MouseEvent mouseEvent = lastEventIter->second.back();
+    auto iter = lastDispatchTime_.find(mouseEvent.id);
+    if (iter != lastDispatchTime_.end()) {
+        if (static_cast<uint64_t>(mouseEvent.time.time_since_epoch().count()) > iter->second) {
+            TouchRestrict touchRestrict { TouchRestrict::NONE };
+            touchRestrict.sourceType = event.sourceType;
+            touchRestrict.hitTestType = SourceType::MOUSE;
+            touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+            eventManager_->MouseTest(mouseEvent, node, touchRestrict);
+            eventManager_->DispatchMouseEventNG(mouseEvent);
+            eventManager_->DispatchMouseHoverEventNG(mouseEvent);
+            eventManager_->DispatchMouseHoverAnimationNG(mouseEvent);
+        }
+    }
+}
+
+bool PipelineContext::CompensateMouseMoveEventFromUnhandledEvents(
+    const MouseEvent& event, const RefPtr<FrameNode>& node)
+{
+    if (mouseEvents_.empty()) {
+        return false;
+    }
+
+    auto iter = mouseEvents_.find(node);
+    if (iter == mouseEvents_.end()) {
+        return false;
+    }
+    std::vector<MouseEvent> history;
+    for (auto mouseIter = iter->second.begin(); mouseIter != iter->second.end();) {
+        if (event.id == mouseIter->id) {
+            history.emplace_back(*mouseIter);
+            mouseIter = iter->second.erase(mouseIter);
+        } else {
+            mouseIter++;
+        }
+    }
+    mouseEvents_.erase(iter);
+
+    if (history.empty()) {
+        return false;
+    }
+
+    MouseEvent lastMoveEvent(history.back());
+    lastMoveEvent.history.swap(history);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::MOUSE_BUTTON;
+    eventManager_->MouseTest(lastMoveEvent, node, touchRestrict);
+    eventManager_->DispatchMouseEventNG(lastMoveEvent);
+    eventManager_->DispatchMouseHoverEventNG(lastMoveEvent);
+    eventManager_->DispatchMouseHoverAnimationNG(lastMoveEvent);
+    return true;
+}
+
+void PipelineContext::DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
+            event.action == MouseAction::MOVE) &&
             (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
         event.action == MouseAction::CANCEL) {
         auto touchPoint = event.CreateTouchPoint();
@@ -3396,12 +3474,6 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         auto rootOffset = GetRootRect().GetOffset();
         eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
     }
-    DispatchMouseEvent(event, node);
-}
-
-void PipelineContext::DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node)
-{
-    CHECK_NULL_VOID(node);
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     if (scaleEvent.action != MouseAction::MOVE &&
         historyMousePointsById_.find(scaleEvent.id) != historyMousePointsById_.end()) {
@@ -3463,6 +3535,7 @@ void PipelineContext::OnFlushMouseEvent(TouchRestrict& touchRestrict)
     decltype(mouseEvents_) mouseEvents(std::move(mouseEvents_));
     if (mouseEvents.empty()) {
         canUseLongPredictTask_ = true;
+        nodeToMousePoints_.clear();
         return;
     }
     canUseLongPredictTask_ = false;
@@ -3482,10 +3555,12 @@ void PipelineContext::OnFlushMouseEvent(
     std::unordered_map<int, MouseEvent> idToMousePoints;
     bool needInterpolation = true;
     std::unordered_map<int32_t, MouseEvent> newIdMousePoints;
+    std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints;
     for (auto iter = mouseEvents.rbegin(); iter != mouseEvents.rend(); ++iter) {
         auto scaleEvent = (*iter).CreateScaleEvent(GetViewScale());
         idToMousePoints.emplace(scaleEvent.id, scaleEvent);
         idToMousePoints[scaleEvent.id].history.insert(idToMousePoints[scaleEvent.id].history.begin(), scaleEvent);
+        nodeToMousePoints[node].emplace_back(idToMousePoints[scaleEvent.id]);
         needInterpolation = iter->action != MouseAction::MOVE ? false : true;
     }
     if (focusWindowId_.has_value()) {
@@ -3542,7 +3617,6 @@ void PipelineContext::DispatchMouseEvent(
         eventManager_->DispatchMouseHoverEventNG(scaleEvent);
         eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
     }
-    idToMousePoints_ = std::move(idToMousePoints);
 }
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isByPass)
@@ -4125,6 +4199,8 @@ void PipelineContext::Destroy()
     focusManager_.Reset();
     selectOverlayManager_.Reset();
     fullScreenManager_.Reset();
+    nodeToMousePoints_.clear();
+    nodeToPointEvent_.clear();
     touchEvents_.clear();
     mouseEvents_.clear();
     dragEvents_.clear();
@@ -4293,7 +4369,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    std::string extraInfo;
+    std::string extraInfo = manager->GetExtraInfo();
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (!manager->IsDragged() && manager->IsWindowConsumed()) {
@@ -4307,6 +4383,8 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         return;
     }
     if (action == DragEventAction::DRAG_EVENT_OUT) {
+        lastDragTime_ = GetTimeFromExternalTimer();
+        CompensatePointerMoveEvent(pointerEvent, node);
         manager->OnDragMoveOut(pointerEvent);
         manager->ClearSummary();
         manager->ClearExtraInfo();
@@ -4320,8 +4398,9 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
         TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
     }
-    extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_END) {
+        lastDragTime_ = GetTimeFromExternalTimer();
+        CompensatePointerMoveEvent(pointerEvent, node);
         manager->OnDragEnd(pointerEvent, extraInfo, node);
         return;
     }
@@ -4337,6 +4416,60 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     if (action != DragEventAction::DRAG_EVENT_MOVE) {
         manager->OnDragMove(pointerEvent, extraInfo, node);
     }
+}
+
+void PipelineContext::CompensatePointerMoveEvent(const PointerEvent& event, const RefPtr<FrameNode>& node)
+{
+    auto manager = GetDragDropManager();
+    std::string extraInfo = manager->GetExtraInfo();
+    if (CompensatePointerMoveEventFromUnhandledEvents(event, node)) {
+        return;
+    }
+    auto lastEventIter = nodeToPointEvent_.find(node);
+    if (lastEventIter == nodeToPointEvent_.end() || lastEventIter->second.empty()) {
+        return;
+    }
+    PointerEvent pointerEvent = lastEventIter->second.back();
+    auto iter = lastDispatchTime_.find(pointerEvent.pointerEventId);
+    if (iter != lastDispatchTime_.end()) {
+        if (static_cast<uint64_t>(pointerEvent.time.time_since_epoch().count()) > iter->second) {
+            manager->OnDragMove(pointerEvent, extraInfo, node);
+        }
+    }
+}
+
+bool PipelineContext::CompensatePointerMoveEventFromUnhandledEvents(
+    const PointerEvent& event, const RefPtr<FrameNode>& node)
+{
+    auto manager = GetDragDropManager();
+    std::string extraInfo = manager->GetExtraInfo();
+    std::vector<PointerEvent> history;
+    if (dragEvents_.empty()) {
+        return false;
+    }
+    
+    auto iter = dragEvents_.find(node);
+    if (iter == dragEvents_.end()) {
+        return false;
+    }
+    for (auto dragIter = iter->second.begin(); dragIter != iter->second.end();) {
+        if (event.pointerEventId == dragIter->pointerEventId) {
+            history.emplace_back(*dragIter);
+            dragIter = iter->second.erase(dragIter);
+        } else {
+            dragIter++;
+        }
+    }
+    dragEvents_.erase(iter);
+
+    if (history.empty()) {
+        return false;
+    }
+
+    auto lastePointerEvent(history.back());
+    lastePointerEvent.history.swap(history);
+    manager->OnDragMove(lastePointerEvent, extraInfo, node);
+    return true;
 }
 
 void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId)

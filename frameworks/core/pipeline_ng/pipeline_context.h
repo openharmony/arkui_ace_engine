@@ -1040,6 +1040,14 @@ private:
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
 
+    void CompensateMouseMoveEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
+
+    bool CompensateMouseMoveEventFromUnhandledEvents(const MouseEvent& event, const RefPtr<FrameNode>& node);
+
+    void CompensatePointerMoveEvent(const PointerEvent& event, const RefPtr<FrameNode>& node);
+
+    bool CompensatePointerMoveEventFromUnhandledEvents(const PointerEvent& event, const RefPtr<FrameNode>& node);
+
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     // only used for static form.
@@ -1225,6 +1233,8 @@ private:
 
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, MouseEvent> idToMousePoints_;
+    std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
+    std::map<RefPtr<FrameNode>, std::vector<PointerEvent>> nodeToPointEvent_;
     std::unordered_map<int32_t, PointerEvent> idToDragPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::vector<Ace::RectF> overlayNodePositions_;
