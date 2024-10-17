@@ -3113,8 +3113,9 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
             return OVERLAY_REMOVE;
         } else if (dialogPattern->ShouldDismiss()) {
             SetDismissDialogId(overlay->GetId());
-            dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK));
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss");
+            auto currentId = Container::CurrentId();
+            dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK), currentId);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss, currentId: %{public}d", currentId);
             return OVERLAY_REMOVE;
         }
         return RemoveDialog(overlay, isBackPressed, isPageRouter) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
