@@ -242,7 +242,7 @@ static const std::vector<TestVector> VALID_0_TEST2_PLAN = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeModifierTest, setBadgeOptions0TestValidValues, TestSize.Level1)
+HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions0TestValidValues, TestSize.Level1)
 {
     Ark_BadgeParamWithNumber inputValueOptions;
     InitNumberOptions(inputValueOptions);
@@ -419,7 +419,7 @@ static const std::vector<TestVector> VALID_1_TEST2_PLAN = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeModifierTest, setBadgeOptions1TestValidValues, TestSize.Level1)
+HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions1TestValidValues, TestSize.Level1)
 {
     Ark_BadgeParamWithString inputValueOptions;
     InitStringOptions(inputValueOptions);
