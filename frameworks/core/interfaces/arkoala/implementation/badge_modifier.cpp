@@ -148,11 +148,13 @@ void SetBadgeParamBase(Ark_NativePointer node, const T* value)
     BadgeModelNG::SetBadgeParam(frameNode, badgeParameters, isDefaultFontSize, isDefaultBadgeSize);
 }
 
-void SetBadgeOptions0Impl(Ark_NativePointer node, const Ark_BadgeParamWithNumber* value)
+void SetBadgeOptions0Impl(Ark_NativePointer node,
+                          const Ark_BadgeParamWithNumber* value)
 {
     SetBadgeParamBase(node, value);
 }
-void SetBadgeOptions1Impl(Ark_NativePointer node, const Ark_BadgeParamWithString* value)
+void SetBadgeOptions1Impl(Ark_NativePointer node,
+                          const Ark_BadgeParamWithString* value)
 {
     SetBadgeParamBase(node, value);
 }
