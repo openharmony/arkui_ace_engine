@@ -513,6 +513,28 @@ HWTEST_F(ListLayoutTestNg, ContentOffset006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ContentOffset007
+ * @tc.desc: Test List edge check
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ContentOffset007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign START
+     * @tc.expected: not OutOfBoundary
+     */
+    const float contentStartOffset = 50;
+    const float contentEndOffset = 50;
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(contentStartOffset);
+    model.SetContentEndOffset(contentEndOffset);
+    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    CreateDone(frameNode_);
+
+    EXPECT_FALSE(pattern_->IsOutOfBoundary());
+}
+
+/**
  * @tc.name: PaintMethod001
  * @tc.desc: Test paint method when has no ListItem in List and in ListItemGroup
  * @tc.type: FUNC
