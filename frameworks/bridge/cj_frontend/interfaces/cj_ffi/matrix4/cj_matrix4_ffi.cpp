@@ -35,6 +35,9 @@ extern "C" {
 int64_t FfiOHOSMatrix4Init(VectorFloat32Ptr array)
 {
     auto nativeMatrix = FFIData::Create<NativeMatrix>();
+    if (nativeMatrix == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     Matrix4 matrix = Matrix4::CreateIdentity();
 
     const auto& vector = *reinterpret_cast<std::vector<float>*>(array);
@@ -59,6 +62,9 @@ int64_t FfiOHOSMatrix4Init(VectorFloat32Ptr array)
 int64_t FfiOHOSMatrix4Identity()
 {
     auto nativeMatrix = FFIData::Create<NativeMatrix>();
+    if (nativeMatrix == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     nativeMatrix->SetMatrix4(Matrix4::CreateIdentity());
     return nativeMatrix->GetID();
 }
@@ -66,6 +72,9 @@ int64_t FfiOHOSMatrix4Identity()
 int64_t FfiOHOSMatrix4Copy(int64_t id)
 {
     auto nativeMatrix = FFIData::GetData<NativeMatrix>(id);
+    if (nativeMatrix == nullptr) {
+        return FFI_ERROR_CODE;
+    }
     if (nativeMatrix != nullptr) {
         auto copyMatrix = nativeMatrix->GetMatrix4();
         auto result = FFIData::Create<NativeMatrix>();
@@ -80,6 +89,9 @@ int64_t FfiOHOSMatrix4Copy(int64_t id)
 void FfiOHOSMatrix4Invert(int64_t id)
 {
     auto nativeMatrix = FFIData::GetData<NativeMatrix>(id);
+    if (nativeMatrix == nullptr) {
+        return;
+    }
     if (nativeMatrix != nullptr) {
         auto invertMatrix = Matrix4::Invert(nativeMatrix->GetMatrix4());
         nativeMatrix->SetMatrix4(std::move(invertMatrix));
