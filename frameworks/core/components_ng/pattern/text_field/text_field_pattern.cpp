@@ -8162,6 +8162,14 @@ bool TextFieldPattern::IsShowAIWrite()
         return false;
     }
 
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (layoutProperty->GetCopyOptionsValue(CopyOptions::Local) == CopyOptions::None) {
+        return false;
+    }
+
     auto textFieldTheme = GetTheme();
     CHECK_NULL_RETURN(textFieldTheme, false);
     auto bundleName = textFieldTheme->GetAIWriteBundleName();
