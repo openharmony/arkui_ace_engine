@@ -35,6 +35,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t COLOR_BLACK = 0xff000000;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
+constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
+constexpr uint32_t COLOR_TRANSLUCENT_BLACK = 0x66000000;
+constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
 constexpr uint32_t ASENGINE_ATTRIBUTIONS_COUNT = 3;
@@ -54,9 +57,6 @@ constexpr Dimension IMAGE_NODE_OFFSET = Dimension(-36, DimensionUnit::VP);
 const Rosen::RSAnimationTimingCurve NODE_ANIMATION_TIMING_CURVE =
     Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.40f, 0.08f, 0.60f, 0.92f);
 #endif
-
-constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
-constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -415,7 +415,9 @@ void WindowPattern::UpdateSnapshotWindowProperty()
         borderRadius.SetRadius(SNAPSHOT_RADIUS);
         borderRadius.multiValued = false;
         renderContext->UpdateBorderRadius(borderRadius);
-        renderContext->UpdateBackgroundColor(Color(COLOR_TRANSLUCENT_WHITE));
+        auto backgroundColor =
+            SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_TRANSLUCENT_BLACK : COLOR_TRANSLUCENT_WHITE;
+        renderContext->UpdateBackgroundColor(Color(backgroundColor));
         imagePattern->SetNeedBorderRadius(true);
         imageRenderProperty->UpdateNeedBorderRadius(true);
     }
