@@ -88,6 +88,12 @@ void ProgressPattern::InitAnimatableProperty(ProgressAnimatableProperty& progres
     progressAnimatableProperty.borderColor = borderColor;
     progressAnimatableProperty.strokeWidth = strokeWidth_;
     progressAnimatableProperty.strokeRadius = strokeRadius;
+
+    if (paintProperty->HasGradientColor()) {
+        progressAnimatableProperty.ringProgressColor = paintProperty->GetGradientColorValue();
+    } else {
+        progressAnimatableProperty.ringProgressColor = convertGradient(color);
+    }
 }
 
 void ProgressPattern::CalculateStrokeWidth(const SizeF& contentSize)
