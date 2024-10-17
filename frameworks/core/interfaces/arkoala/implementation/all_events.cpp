@@ -37,299 +37,298 @@ enum PeerEventKind {
     KindCheckbox_onChange = 16,
     KindCheckboxGroup_onChange = 17,
     KindCommonMethod_onChildTouchTest = 18,
-    KindCommonMethod_onClick0 = 19,
-    KindCommonMethod_onClick1 = 20,
-    KindCommonMethod_onHover = 21,
-    KindCommonMethod_onAccessibilityHover = 22,
-    KindCommonMethod_onMouse = 23,
-    KindCommonMethod_onTouch = 24,
-    KindCommonMethod_onKeyEvent = 25,
-    KindCommonMethod_onKeyPreIme = 26,
-    KindCommonMethod_onFocus = 27,
-    KindCommonMethod_onBlur = 28,
-    KindCommonMethod_onAppear = 29,
-    KindCommonMethod_onDisAppear = 30,
-    KindCommonMethod_onAttach = 31,
-    KindCommonMethod_onDetach = 32,
-    KindCommonMethod_onAreaChange = 33,
-    KindCommonMethod_onDragStart = 34,
-    KindCommonMethod_onDragEnter = 35,
-    KindCommonMethod_onDragMove = 36,
-    KindCommonMethod_onDragLeave = 37,
-    KindCommonMethod_onDrop = 38,
-    KindCommonMethod_onDragEnd = 39,
-    KindCommonMethod_onPreDrag = 40,
-    KindCommonMethod_onGestureJudgeBegin = 41,
-    KindCommonMethod_onGestureRecognizerJudgeBegin = 42,
-    KindCommonMethod_shouldBuiltInRecognizerParallelWith = 43,
-    KindCommonMethod_onTouchIntercept = 44,
-    KindCommonMethod_onSizeChange = 45,
-    KindCommonMethod_onVisibleAreaChange = 46,
-    KindCommonMethod_keyboardShortcut = 47,
-    KindScrollableCommonMethod_onScroll = 48,
-    KindScrollableCommonMethod_onDidScroll = 49,
-    KindScrollableCommonMethod_onReachStart = 50,
-    KindScrollableCommonMethod_onReachEnd = 51,
-    KindScrollableCommonMethod_onScrollStart = 52,
-    KindScrollableCommonMethod_onScrollStop = 53,
-    KindCounter_onInc = 54,
-    KindCounter_onDec = 55,
-    KindDatePicker_onChange = 56,
-    KindDatePicker_onDateChange = 57,
-    KindFolderStack_onFolderStateChange = 58,
-    KindFolderStack_onHoverStatusChange = 59,
-    KindFormComponent_onAcquired = 60,
-    KindFormComponent_onError = 61,
-    KindFormComponent_onRouter = 62,
-    KindFormComponent_onUninstall = 63,
-    KindFormComponent_onLoad = 64,
-    KindGrid_onScrollBarUpdate = 65,
-    KindGrid_onScrollIndex = 66,
-    KindGrid_onItemDragStart = 67,
-    KindGrid_onItemDragEnter = 68,
-    KindGrid_onItemDragMove = 69,
-    KindGrid_onItemDragLeave = 70,
-    KindGrid_onItemDrop = 71,
-    KindGrid_onScroll = 72,
-    KindGrid_onReachStart = 73,
-    KindGrid_onReachEnd = 74,
-    KindGrid_onScrollStart = 75,
-    KindGrid_onScrollStop = 76,
-    KindGrid_onScrollFrameBegin = 77,
-    KindGridItem_onSelect = 78,
-    KindGridRow_onBreakpointChange = 79,
-    KindImage_onComplete = 80,
-    KindImage_onError = 81,
-    KindImage_onFinish = 82,
-    KindImageAnimator_onStart = 83,
-    KindImageAnimator_onPause = 84,
-    KindImageAnimator_onRepeat = 85,
-    KindImageAnimator_onCancel = 86,
-    KindImageAnimator_onFinish = 87,
-    KindImageSpan_onComplete = 88,
-    KindImageSpan_onError = 89,
-    KindList_onScroll = 90,
-    KindList_onScrollIndex = 91,
-    KindList_onScrollVisibleContentChange = 92,
-    KindList_onReachStart = 93,
-    KindList_onReachEnd = 94,
-    KindList_onScrollStart = 95,
-    KindList_onScrollStop = 96,
-    KindList_onItemDelete = 97,
-    KindList_onItemMove = 98,
-    KindList_onItemDragStart = 99,
-    KindList_onItemDragEnter = 100,
-    KindList_onItemDragMove = 101,
-    KindList_onItemDragLeave = 102,
-    KindList_onItemDrop = 103,
-    KindList_onScrollFrameBegin = 104,
-    KindListItem_onSelect = 105,
-    KindLocationButton_onClick = 106,
-    KindMarquee_onStart = 107,
-    KindMarquee_onBounce = 108,
-    KindMarquee_onFinish = 109,
-    KindMenuItem_onChange = 110,
-    KindNavDestination_onShown = 111,
-    KindNavDestination_onHidden = 112,
-    KindNavDestination_onBackPressed = 113,
-    KindNavDestination_onWillAppear = 114,
-    KindNavDestination_onWillDisappear = 115,
-    KindNavDestination_onWillShow = 116,
-    KindNavDestination_onWillHide = 117,
-    KindNavRouter_onStateChange = 118,
-    KindNavigation_onTitleModeChange = 119,
-    KindNavigation_onNavBarStateChange = 120,
-    KindNavigation_onNavigationModeChange = 121,
-    KindNavigation_navDestination = 122,
-    KindNavigation_customNavContentTransition = 123,
-    KindPanel_onChange = 124,
-    KindPanel_onHeightChange = 125,
-    KindPasteButton_onClick = 126,
-    KindPatternLock_onPatternComplete = 127,
-    KindPluginComponent_onComplete = 128,
-    KindPluginComponent_onError = 129,
-    KindRadio_onChange = 130,
-    KindRating_onChange = 131,
-    KindRefresh_onStateChange = 132,
-    KindRefresh_onRefreshing = 133,
-    KindRefresh_onOffsetChange = 134,
-    KindRichEditor_onReady = 135,
-    KindRichEditor_onSelect = 136,
-    KindRichEditor_onSelectionChange = 137,
-    KindRichEditor_aboutToIMEInput = 138,
-    KindRichEditor_onIMEInputComplete = 139,
-    KindRichEditor_onDidIMEInput = 140,
-    KindRichEditor_aboutToDelete = 141,
-    KindRichEditor_onDeleteComplete = 142,
-    KindRichEditor_onPaste = 143,
-    KindRichEditor_onEditingChange = 144,
-    KindRichEditor_onSubmit = 145,
-    KindRichEditor_onWillChange = 146,
-    KindRichEditor_onDidChange = 147,
-    KindRichEditor_onCut = 148,
-    KindRichEditor_onCopy = 149,
-    KindRichText_onStart = 150,
-    KindRichText_onComplete = 151,
-    KindSaveButton_onClick = 152,
-    KindScroll_onScroll = 153,
-    KindScroll_onDidScroll = 154,
-    KindScroll_onScrollEdge = 155,
-    KindScroll_onScrollStart = 156,
-    KindScroll_onScrollEnd = 157,
-    KindScroll_onScrollStop = 158,
-    KindScroll_onScrollFrameBegin = 159,
-    KindSearch_onEditChange = 160,
-    KindSearch_onSubmit = 161,
-    KindSearch_onChange = 162,
-    KindSearch_onTextSelectionChange = 163,
-    KindSearch_onContentScroll = 164,
-    KindSearch_onCopy = 165,
-    KindSearch_onCut = 166,
-    KindSearch_onPaste = 167,
-    KindSearch_onWillInsert = 168,
-    KindSearch_onDidInsert = 169,
-    KindSearch_onWillDelete = 170,
-    KindSearch_onDidDelete = 171,
-    KindSearch_inputFilter = 172,
-    KindSelect_onSelect = 173,
-    KindSlider_onChange = 174,
-    KindStepper_onFinish = 175,
-    KindStepper_onSkip = 176,
-    KindStepper_onChange = 177,
-    KindStepper_onNext = 178,
-    KindStepper_onPrevious = 179,
-    KindSwiper_onChange = 180,
-    KindSwiper_onAnimationStart = 181,
-    KindSwiper_onAnimationEnd = 182,
-    KindSwiper_onGestureSwipe = 183,
-    KindSwiper_onContentDidScroll = 184,
-    KindTabs_onChange = 185,
-    KindTabs_onTabBarClick = 186,
-    KindTabs_onAnimationStart = 187,
-    KindTabs_onAnimationEnd = 188,
-    KindTabs_onGestureSwipe = 189,
-    KindTabs_customContentTransition = 190,
-    KindTabs_onContentWillChange = 191,
-    KindTabContent_onWillShow = 192,
-    KindTabContent_onWillHide = 193,
-    KindText_onCopy = 194,
-    KindText_onTextSelectionChange = 195,
-    KindTextArea_onSubmit = 196,
-    KindTextArea_onChange = 197,
-    KindTextArea_onTextSelectionChange = 198,
-    KindTextArea_onContentScroll = 199,
-    KindTextArea_onEditChange = 200,
-    KindTextArea_onCopy = 201,
-    KindTextArea_onCut = 202,
-    KindTextArea_onPaste = 203,
-    KindTextArea_onWillInsert = 204,
-    KindTextArea_onDidInsert = 205,
-    KindTextArea_onWillDelete = 206,
-    KindTextArea_onDidDelete = 207,
-    KindTextArea_inputFilter = 208,
-    KindTextClock_onDateChange = 209,
-    KindTextInput_onEditChanged = 210,
-    KindTextInput_onEditChange = 211,
-    KindTextInput_onSubmit = 212,
-    KindTextInput_onChange = 213,
-    KindTextInput_onTextSelectionChange = 214,
-    KindTextInput_onContentScroll = 215,
-    KindTextInput_onCopy = 216,
-    KindTextInput_onCut = 217,
-    KindTextInput_onPaste = 218,
-    KindTextInput_onSecurityStateChange = 219,
-    KindTextInput_onWillInsert = 220,
-    KindTextInput_onDidInsert = 221,
-    KindTextInput_onWillDelete = 222,
-    KindTextInput_onDidDelete = 223,
-    KindTextInput_inputFilter = 224,
-    KindTextPicker_onAccept = 225,
-    KindTextPicker_onCancel = 226,
-    KindTextPicker_onChange = 227,
-    KindTextTimer_onTimer = 228,
-    KindTimePicker_onChange = 229,
-    KindToggle_onChange = 230,
-    KindVideo_onStart = 231,
-    KindVideo_onPause = 232,
-    KindVideo_onFinish = 233,
-    KindVideo_onFullscreenChange = 234,
-    KindVideo_onPrepared = 235,
-    KindVideo_onSeeking = 236,
-    KindVideo_onSeeked = 237,
-    KindVideo_onUpdate = 238,
-    KindVideo_onError = 239,
-    KindVideo_onStop = 240,
-    KindWeb_onPageEnd = 241,
-    KindWeb_onPageBegin = 242,
-    KindWeb_onProgressChange = 243,
-    KindWeb_onTitleReceive = 244,
-    KindWeb_onGeolocationHide = 245,
-    KindWeb_onGeolocationShow = 246,
-    KindWeb_onRequestSelected = 247,
-    KindWeb_onAlert = 248,
-    KindWeb_onBeforeUnload = 249,
-    KindWeb_onConfirm = 250,
-    KindWeb_onPrompt = 251,
-    KindWeb_onConsole = 252,
-    KindWeb_onErrorReceive = 253,
-    KindWeb_onHttpErrorReceive = 254,
-    KindWeb_onDownloadStart = 255,
-    KindWeb_onRefreshAccessedHistory = 256,
-    KindWeb_onUrlLoadIntercept = 257,
-    KindWeb_onSslErrorReceive = 258,
-    KindWeb_onRenderExited0 = 259,
-    KindWeb_onRenderExited1 = 260,
-    KindWeb_onShowFileSelector = 261,
-    KindWeb_onFileSelectorShow = 262,
-    KindWeb_onResourceLoad = 263,
-    KindWeb_onFullScreenExit = 264,
-    KindWeb_onFullScreenEnter = 265,
-    KindWeb_onScaleChange = 266,
-    KindWeb_onHttpAuthRequest = 267,
-    KindWeb_onInterceptRequest = 268,
-    KindWeb_onPermissionRequest = 269,
-    KindWeb_onScreenCaptureRequest = 270,
-    KindWeb_onContextMenuShow = 271,
-    KindWeb_onContextMenuHide = 272,
-    KindWeb_onSearchResultReceive = 273,
-    KindWeb_onScroll = 274,
-    KindWeb_onSslErrorEventReceive = 275,
-    KindWeb_onSslErrorEvent = 276,
-    KindWeb_onClientAuthenticationRequest = 277,
-    KindWeb_onWindowNew = 278,
-    KindWeb_onWindowExit = 279,
-    KindWeb_onInterceptKeyEvent = 280,
-    KindWeb_onTouchIconUrlReceived = 281,
-    KindWeb_onFaviconReceived = 282,
-    KindWeb_onPageVisible = 283,
-    KindWeb_onDataResubmitted = 284,
-    KindWeb_onAudioStateChanged = 285,
-    KindWeb_onFirstContentfulPaint = 286,
-    KindWeb_onFirstMeaningfulPaint = 287,
-    KindWeb_onLargestContentfulPaint = 288,
-    KindWeb_onLoadIntercept = 289,
-    KindWeb_onControllerAttached = 290,
-    KindWeb_onOverScroll = 291,
-    KindWeb_onSafeBrowsingCheckResult = 292,
-    KindWeb_onNavigationEntryCommitted = 293,
-    KindWeb_onIntelligentTrackingPreventionResult = 294,
-    KindWeb_onNativeEmbedLifecycleChange = 295,
-    KindWeb_onNativeEmbedVisibilityChange = 296,
-    KindWeb_onNativeEmbedGestureEvent = 297,
-    KindWeb_onOverrideUrlLoading = 298,
-    KindWeb_onRenderProcessNotResponding = 299,
-    KindWeb_onRenderProcessResponding = 300,
-    KindWeb_onViewportFitChanged = 301,
-    KindWeb_onInterceptKeyboardAttach = 302,
-    KindWeb_onAdsBlocked = 303,
-    KindXComponent_onLoad = 304,
-    KindXComponent_onDestroy = 305,
-    KindSideBarContainer_onChange = 306,
-    KindWaterFlow_onReachStart = 307,
-    KindWaterFlow_onReachEnd = 308,
-    KindWaterFlow_onScrollFrameBegin = 309,
-    KindWaterFlow_onScrollIndex = 310,
-    KindUIExtensionComponent_onTerminated = 311,
+    KindCommonMethod_onClick = 19,
+    KindCommonMethod_onHover = 20,
+    KindCommonMethod_onAccessibilityHover = 21,
+    KindCommonMethod_onMouse = 22,
+    KindCommonMethod_onTouch = 23,
+    KindCommonMethod_onKeyEvent = 24,
+    KindCommonMethod_onKeyPreIme = 25,
+    KindCommonMethod_onFocus = 26,
+    KindCommonMethod_onBlur = 27,
+    KindCommonMethod_onAppear = 28,
+    KindCommonMethod_onDisAppear = 29,
+    KindCommonMethod_onAttach = 30,
+    KindCommonMethod_onDetach = 31,
+    KindCommonMethod_onAreaChange = 32,
+    KindCommonMethod_onDragStart = 33,
+    KindCommonMethod_onDragEnter = 34,
+    KindCommonMethod_onDragMove = 35,
+    KindCommonMethod_onDragLeave = 36,
+    KindCommonMethod_onDrop = 37,
+    KindCommonMethod_onDragEnd = 38,
+    KindCommonMethod_onPreDrag = 39,
+    KindCommonMethod_onGestureJudgeBegin = 40,
+    KindCommonMethod_onGestureRecognizerJudgeBegin = 41,
+    KindCommonMethod_shouldBuiltInRecognizerParallelWith = 42,
+    KindCommonMethod_onTouchIntercept = 43,
+    KindCommonMethod_onSizeChange = 44,
+    KindCommonMethod_onVisibleAreaChange = 45,
+    KindCommonMethod_keyboardShortcut = 46,
+    KindScrollableCommonMethod_onScroll = 47,
+    KindScrollableCommonMethod_onDidScroll = 48,
+    KindScrollableCommonMethod_onReachStart = 49,
+    KindScrollableCommonMethod_onReachEnd = 50,
+    KindScrollableCommonMethod_onScrollStart = 51,
+    KindScrollableCommonMethod_onScrollStop = 52,
+    KindCounter_onInc = 53,
+    KindCounter_onDec = 54,
+    KindDatePicker_onChange = 55,
+    KindDatePicker_onDateChange = 56,
+    KindFolderStack_onFolderStateChange = 57,
+    KindFolderStack_onHoverStatusChange = 58,
+    KindFormComponent_onAcquired = 59,
+    KindFormComponent_onError = 60,
+    KindFormComponent_onRouter = 61,
+    KindFormComponent_onUninstall = 62,
+    KindFormComponent_onLoad = 63,
+    KindGrid_onScrollBarUpdate = 64,
+    KindGrid_onScrollIndex = 65,
+    KindGrid_onItemDragStart = 66,
+    KindGrid_onItemDragEnter = 67,
+    KindGrid_onItemDragMove = 68,
+    KindGrid_onItemDragLeave = 69,
+    KindGrid_onItemDrop = 70,
+    KindGrid_onScroll = 71,
+    KindGrid_onReachStart = 72,
+    KindGrid_onReachEnd = 73,
+    KindGrid_onScrollStart = 74,
+    KindGrid_onScrollStop = 75,
+    KindGrid_onScrollFrameBegin = 76,
+    KindGridItem_onSelect = 77,
+    KindGridRow_onBreakpointChange = 78,
+    KindImage_onComplete = 79,
+    KindImage_onError = 80,
+    KindImage_onFinish = 81,
+    KindImageAnimator_onStart = 82,
+    KindImageAnimator_onPause = 83,
+    KindImageAnimator_onRepeat = 84,
+    KindImageAnimator_onCancel = 85,
+    KindImageAnimator_onFinish = 86,
+    KindImageSpan_onComplete = 87,
+    KindImageSpan_onError = 88,
+    KindList_onScroll = 89,
+    KindList_onScrollIndex = 90,
+    KindList_onScrollVisibleContentChange = 91,
+    KindList_onReachStart = 92,
+    KindList_onReachEnd = 93,
+    KindList_onScrollStart = 94,
+    KindList_onScrollStop = 95,
+    KindList_onItemDelete = 96,
+    KindList_onItemMove = 97,
+    KindList_onItemDragStart = 98,
+    KindList_onItemDragEnter = 99,
+    KindList_onItemDragMove = 100,
+    KindList_onItemDragLeave = 101,
+    KindList_onItemDrop = 102,
+    KindList_onScrollFrameBegin = 103,
+    KindListItem_onSelect = 104,
+    KindLocationButton_onClick = 105,
+    KindMarquee_onStart = 106,
+    KindMarquee_onBounce = 107,
+    KindMarquee_onFinish = 108,
+    KindMenuItem_onChange = 109,
+    KindNavDestination_onShown = 110,
+    KindNavDestination_onHidden = 111,
+    KindNavDestination_onBackPressed = 112,
+    KindNavDestination_onWillAppear = 113,
+    KindNavDestination_onWillDisappear = 114,
+    KindNavDestination_onWillShow = 115,
+    KindNavDestination_onWillHide = 116,
+    KindNavRouter_onStateChange = 117,
+    KindNavigation_onTitleModeChange = 118,
+    KindNavigation_onNavBarStateChange = 119,
+    KindNavigation_onNavigationModeChange = 120,
+    KindNavigation_navDestination = 121,
+    KindNavigation_customNavContentTransition = 122,
+    KindPanel_onChange = 123,
+    KindPanel_onHeightChange = 124,
+    KindPasteButton_onClick = 125,
+    KindPatternLock_onPatternComplete = 126,
+    KindPluginComponent_onComplete = 127,
+    KindPluginComponent_onError = 128,
+    KindRadio_onChange = 129,
+    KindRating_onChange = 130,
+    KindRefresh_onStateChange = 131,
+    KindRefresh_onRefreshing = 132,
+    KindRefresh_onOffsetChange = 133,
+    KindRichEditor_onReady = 134,
+    KindRichEditor_onSelect = 135,
+    KindRichEditor_onSelectionChange = 136,
+    KindRichEditor_aboutToIMEInput = 137,
+    KindRichEditor_onIMEInputComplete = 138,
+    KindRichEditor_onDidIMEInput = 139,
+    KindRichEditor_aboutToDelete = 140,
+    KindRichEditor_onDeleteComplete = 141,
+    KindRichEditor_onPaste = 142,
+    KindRichEditor_onEditingChange = 143,
+    KindRichEditor_onSubmit = 144,
+    KindRichEditor_onWillChange = 145,
+    KindRichEditor_onDidChange = 146,
+    KindRichEditor_onCut = 147,
+    KindRichEditor_onCopy = 148,
+    KindRichText_onStart = 149,
+    KindRichText_onComplete = 150,
+    KindSaveButton_onClick = 151,
+    KindScroll_onScroll = 152,
+    KindScroll_onDidScroll = 153,
+    KindScroll_onScrollEdge = 154,
+    KindScroll_onScrollStart = 155,
+    KindScroll_onScrollEnd = 156,
+    KindScroll_onScrollStop = 157,
+    KindScroll_onScrollFrameBegin = 158,
+    KindSearch_onEditChange = 159,
+    KindSearch_onSubmit = 160,
+    KindSearch_onChange = 161,
+    KindSearch_onTextSelectionChange = 162,
+    KindSearch_onContentScroll = 163,
+    KindSearch_onCopy = 164,
+    KindSearch_onCut = 165,
+    KindSearch_onPaste = 166,
+    KindSearch_onWillInsert = 167,
+    KindSearch_onDidInsert = 168,
+    KindSearch_onWillDelete = 169,
+    KindSearch_onDidDelete = 170,
+    KindSearch_inputFilter = 171,
+    KindSelect_onSelect = 172,
+    KindSlider_onChange = 173,
+    KindStepper_onFinish = 174,
+    KindStepper_onSkip = 175,
+    KindStepper_onChange = 176,
+    KindStepper_onNext = 177,
+    KindStepper_onPrevious = 178,
+    KindSwiper_onChange = 179,
+    KindSwiper_onAnimationStart = 180,
+    KindSwiper_onAnimationEnd = 181,
+    KindSwiper_onGestureSwipe = 182,
+    KindSwiper_onContentDidScroll = 183,
+    KindTabs_onChange = 184,
+    KindTabs_onTabBarClick = 185,
+    KindTabs_onAnimationStart = 186,
+    KindTabs_onAnimationEnd = 187,
+    KindTabs_onGestureSwipe = 188,
+    KindTabs_customContentTransition = 189,
+    KindTabs_onContentWillChange = 190,
+    KindTabContent_onWillShow = 191,
+    KindTabContent_onWillHide = 192,
+    KindText_onCopy = 193,
+    KindText_onTextSelectionChange = 194,
+    KindTextArea_onSubmit = 195,
+    KindTextArea_onChange = 196,
+    KindTextArea_onTextSelectionChange = 197,
+    KindTextArea_onContentScroll = 198,
+    KindTextArea_onEditChange = 199,
+    KindTextArea_onCopy = 200,
+    KindTextArea_onCut = 201,
+    KindTextArea_onPaste = 202,
+    KindTextArea_onWillInsert = 203,
+    KindTextArea_onDidInsert = 204,
+    KindTextArea_onWillDelete = 205,
+    KindTextArea_onDidDelete = 206,
+    KindTextArea_inputFilter = 207,
+    KindTextClock_onDateChange = 208,
+    KindTextInput_onEditChanged = 209,
+    KindTextInput_onEditChange = 210,
+    KindTextInput_onSubmit = 211,
+    KindTextInput_onChange = 212,
+    KindTextInput_onTextSelectionChange = 213,
+    KindTextInput_onContentScroll = 214,
+    KindTextInput_onCopy = 215,
+    KindTextInput_onCut = 216,
+    KindTextInput_onPaste = 217,
+    KindTextInput_onSecurityStateChange = 218,
+    KindTextInput_onWillInsert = 219,
+    KindTextInput_onDidInsert = 220,
+    KindTextInput_onWillDelete = 221,
+    KindTextInput_onDidDelete = 222,
+    KindTextInput_inputFilter = 223,
+    KindTextPicker_onAccept = 224,
+    KindTextPicker_onCancel = 225,
+    KindTextPicker_onChange = 226,
+    KindTextTimer_onTimer = 227,
+    KindTimePicker_onChange = 228,
+    KindToggle_onChange = 229,
+    KindVideo_onStart = 230,
+    KindVideo_onPause = 231,
+    KindVideo_onFinish = 232,
+    KindVideo_onFullscreenChange = 233,
+    KindVideo_onPrepared = 234,
+    KindVideo_onSeeking = 235,
+    KindVideo_onSeeked = 236,
+    KindVideo_onUpdate = 237,
+    KindVideo_onError = 238,
+    KindVideo_onStop = 239,
+    KindWeb_onPageEnd = 240,
+    KindWeb_onPageBegin = 241,
+    KindWeb_onProgressChange = 242,
+    KindWeb_onTitleReceive = 243,
+    KindWeb_onGeolocationHide = 244,
+    KindWeb_onGeolocationShow = 245,
+    KindWeb_onRequestSelected = 246,
+    KindWeb_onAlert = 247,
+    KindWeb_onBeforeUnload = 248,
+    KindWeb_onConfirm = 249,
+    KindWeb_onPrompt = 250,
+    KindWeb_onConsole = 251,
+    KindWeb_onErrorReceive = 252,
+    KindWeb_onHttpErrorReceive = 253,
+    KindWeb_onDownloadStart = 254,
+    KindWeb_onRefreshAccessedHistory = 255,
+    KindWeb_onUrlLoadIntercept = 256,
+    KindWeb_onSslErrorReceive = 257,
+    KindWeb_onRenderExited0 = 258,
+    KindWeb_onRenderExited1 = 259,
+    KindWeb_onShowFileSelector = 260,
+    KindWeb_onFileSelectorShow = 261,
+    KindWeb_onResourceLoad = 262,
+    KindWeb_onFullScreenExit = 263,
+    KindWeb_onFullScreenEnter = 264,
+    KindWeb_onScaleChange = 265,
+    KindWeb_onHttpAuthRequest = 266,
+    KindWeb_onInterceptRequest = 267,
+    KindWeb_onPermissionRequest = 268,
+    KindWeb_onScreenCaptureRequest = 269,
+    KindWeb_onContextMenuShow = 270,
+    KindWeb_onContextMenuHide = 271,
+    KindWeb_onSearchResultReceive = 272,
+    KindWeb_onScroll = 273,
+    KindWeb_onSslErrorEventReceive = 274,
+    KindWeb_onSslErrorEvent = 275,
+    KindWeb_onClientAuthenticationRequest = 276,
+    KindWeb_onWindowNew = 277,
+    KindWeb_onWindowExit = 278,
+    KindWeb_onInterceptKeyEvent = 279,
+    KindWeb_onTouchIconUrlReceived = 280,
+    KindWeb_onFaviconReceived = 281,
+    KindWeb_onPageVisible = 282,
+    KindWeb_onDataResubmitted = 283,
+    KindWeb_onAudioStateChanged = 284,
+    KindWeb_onFirstContentfulPaint = 285,
+    KindWeb_onFirstMeaningfulPaint = 286,
+    KindWeb_onLargestContentfulPaint = 287,
+    KindWeb_onLoadIntercept = 288,
+    KindWeb_onControllerAttached = 289,
+    KindWeb_onOverScroll = 290,
+    KindWeb_onSafeBrowsingCheckResult = 291,
+    KindWeb_onNavigationEntryCommitted = 292,
+    KindWeb_onIntelligentTrackingPreventionResult = 293,
+    KindWeb_onNativeEmbedLifecycleChange = 294,
+    KindWeb_onNativeEmbedVisibilityChange = 295,
+    KindWeb_onNativeEmbedGestureEvent = 296,
+    KindWeb_onOverrideUrlLoading = 297,
+    KindWeb_onRenderProcessNotResponding = 298,
+    KindWeb_onRenderProcessResponding = 299,
+    KindWeb_onViewportFitChanged = 300,
+    KindWeb_onInterceptKeyboardAttach = 301,
+    KindWeb_onAdsBlocked = 302,
+    KindXComponent_onLoad = 303,
+    KindXComponent_onDestroy = 304,
+    KindSideBarContainer_onChange = 305,
+    KindWaterFlow_onReachStart = 306,
+    KindWaterFlow_onReachEnd = 307,
+    KindWaterFlow_onScrollFrameBegin = 308,
+    KindWaterFlow_onScrollIndex = 309,
+    KindUIExtensionComponent_onTerminated = 310,
 };
 
 namespace AbilityComponent {
@@ -467,12 +466,14 @@ void onRequestDataImpl(Ark_Int32 nodeId,
 }
 }
 namespace CalendarPicker {
-void onChangeImpl(Ark_Int32 nodeId)
+void onChangeImpl(Ark_Int32 nodeId,
+                  const Ark_CustomObject parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindCalendarPicker_onChange);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeCustomObject("Date", parameter);
     sendEvent(&_eventBuffer);
 }
 }
@@ -526,22 +527,14 @@ void onChildTouchTestImpl(Ark_Int32 nodeId,
     }
     sendEvent(&_eventBuffer);
 }
-void onClick0Impl(Ark_Int32 nodeId,
-                  const Ark_ClickEvent event)
+void onClickImpl(Ark_Int32 nodeId,
+                 const Ark_ClickEvent event)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
-    _eventBufferSerializer.writeInt32(KindCommonMethod_onClick0);
+    _eventBufferSerializer.writeInt32(KindCommonMethod_onClick);
     _eventBufferSerializer.writeInt32(nodeId);
     _eventBufferSerializer.writeClickEvent(event);
-    sendEvent(&_eventBuffer);
-}
-void onClick1Impl(Ark_Int32 nodeId)
-{
-    EventBuffer _eventBuffer;
-    Serializer _eventBufferSerializer(_eventBuffer.buffer);
-    _eventBufferSerializer.writeInt32(KindCommonMethod_onClick1);
-    _eventBufferSerializer.writeInt32(nodeId);
     sendEvent(&_eventBuffer);
 }
 void onHoverImpl(Ark_Int32 nodeId,
@@ -599,13 +592,13 @@ void onKeyEventImpl(Ark_Int32 nodeId,
     sendEvent(&_eventBuffer);
 }
 void onKeyPreImeImpl(Ark_Int32 nodeId,
-                     const Ark_Boolean parameter_0)
+                     const Ark_KeyEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindCommonMethod_onKeyPreIme);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeKeyEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onFocusImpl(Ark_Int32 nodeId)
@@ -776,12 +769,14 @@ void onDragEndImpl(Ark_Int32 nodeId,
     }
     sendEvent(&_eventBuffer);
 }
-void onPreDragImpl(Ark_Int32 nodeId)
+void onPreDragImpl(Ark_Int32 nodeId,
+                   const Ark_PreDragStatus parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindCommonMethod_onPreDrag);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeInt32(parameter);
     sendEvent(&_eventBuffer);
 }
 void onGestureJudgeBeginImpl(Ark_Int32 nodeId,
@@ -833,13 +828,13 @@ void shouldBuiltInRecognizerParallelWithImpl(Ark_Int32 nodeId,
     sendEvent(&_eventBuffer);
 }
 void onTouchInterceptImpl(Ark_Int32 nodeId,
-                          const Ark_HitTestMode parameter_0)
+                          const Ark_TouchEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindCommonMethod_onTouchIntercept);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeInt32(parameter_0);
+    _eventBufferSerializer.writeTouchEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onSizeChangeImpl(Ark_Int32 nodeId,
@@ -962,12 +957,14 @@ void onChangeImpl(Ark_Int32 nodeId,
     _eventBufferSerializer.writeDatePickerResult(value);
     sendEvent(&_eventBuffer);
 }
-void onDateChangeImpl(Ark_Int32 nodeId)
+void onDateChangeImpl(Ark_Int32 nodeId,
+                      const Ark_CustomObject parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindDatePicker_onDateChange);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeCustomObject("Date", parameter);
     sendEvent(&_eventBuffer);
 }
 }
@@ -994,12 +991,14 @@ void onHoverStatusChangeImpl(Ark_Int32 nodeId,
 }
 }
 namespace FormComponent {
-void onAcquiredImpl(Ark_Int32 nodeId)
+void onAcquiredImpl(Ark_Int32 nodeId,
+                    const Ark_FormCallbackInfo parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindFormComponent_onAcquired);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeFormCallbackInfo(parameter);
     sendEvent(&_eventBuffer);
 }
 void onErrorImpl(Ark_Int32 nodeId,
@@ -1025,12 +1024,14 @@ void onRouterImpl(Ark_Int32 nodeId,
     _eventBufferSerializer.writeCustomObject("Any", info);
     sendEvent(&_eventBuffer);
 }
-void onUninstallImpl(Ark_Int32 nodeId)
+void onUninstallImpl(Ark_Int32 nodeId,
+                     const Ark_FormCallbackInfo parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindFormComponent_onUninstall);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeFormCallbackInfo(parameter);
     sendEvent(&_eventBuffer);
 }
 void onLoadImpl(Ark_Int32 nodeId)
@@ -1190,13 +1191,13 @@ void onScrollFrameBeginImpl(Ark_Int32 nodeId,
 }
 namespace GridItem {
 void onSelectImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean isSelected)
+                  const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindGridItem_onSelect);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(isSelected);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 }
@@ -1501,13 +1502,13 @@ void onScrollFrameBeginImpl(Ark_Int32 nodeId,
 }
 namespace ListItem {
 void onSelectImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean isSelected)
+                  const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindListItem_onSelect);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(isSelected);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 }
@@ -1553,13 +1554,13 @@ void onFinishImpl(Ark_Int32 nodeId)
 }
 namespace MenuItem {
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean isSelected)
+                  const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindMenuItem_onChange);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(isSelected);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 }
@@ -1623,13 +1624,13 @@ void onWillHideImpl(Ark_Int32 nodeId)
 }
 namespace NavRouter {
 void onStateChangeImpl(Ark_Int32 nodeId,
-                       const Ark_Boolean isSelected)
+                       const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindNavRouter_onStateChange);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(isSelected);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 }
@@ -1645,13 +1646,13 @@ void onTitleModeChangeImpl(Ark_Int32 nodeId,
     sendEvent(&_eventBuffer);
 }
 void onNavBarStateChangeImpl(Ark_Int32 nodeId,
-                             const Ark_Boolean isSelected)
+                             const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindNavigation_onNavBarStateChange);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(isSelected);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 void onNavigationModeChangeImpl(Ark_Int32 nodeId,
@@ -1773,13 +1774,13 @@ void onErrorImpl(Ark_Int32 nodeId,
 }
 namespace Radio {
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean isSelected)
+                  const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRadio_onChange);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(isSelected);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 }
@@ -1814,12 +1815,14 @@ void onRefreshingImpl(Ark_Int32 nodeId)
     _eventBufferSerializer.writeInt32(nodeId);
     sendEvent(&_eventBuffer);
 }
-void onOffsetChangeImpl(Ark_Int32 nodeId)
+void onOffsetChangeImpl(Ark_Int32 nodeId,
+                        const Ark_Number index)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRefresh_onOffsetChange);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeNumber(index);
     sendEvent(&_eventBuffer);
 }
 }
@@ -1832,56 +1835,64 @@ void onReadyImpl(Ark_Int32 nodeId)
     _eventBufferSerializer.writeInt32(nodeId);
     sendEvent(&_eventBuffer);
 }
-void onSelectImpl(Ark_Int32 nodeId)
+void onSelectImpl(Ark_Int32 nodeId,
+                  const Ark_RichEditorSelection parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRichEditor_onSelect);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeRichEditorSelection(parameter);
     sendEvent(&_eventBuffer);
 }
-void onSelectionChangeImpl(Ark_Int32 nodeId)
+void onSelectionChangeImpl(Ark_Int32 nodeId,
+                           const Ark_RichEditorRange parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRichEditor_onSelectionChange);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeRichEditorRange(parameter);
     sendEvent(&_eventBuffer);
 }
 void aboutToIMEInputImpl(Ark_Int32 nodeId,
-                         const Ark_Boolean parameter_0)
+                         const Ark_RichEditorInsertValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRichEditor_aboutToIMEInput);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeRichEditorInsertValue(parameter);
     sendEvent(&_eventBuffer);
 }
-void onIMEInputCompleteImpl(Ark_Int32 nodeId)
+void onIMEInputCompleteImpl(Ark_Int32 nodeId,
+                            const Ark_RichEditorTextSpanResult parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRichEditor_onIMEInputComplete);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeRichEditorTextSpanResult(parameter);
     sendEvent(&_eventBuffer);
 }
-void onDidIMEInputImpl(Ark_Int32 nodeId)
+void onDidIMEInputImpl(Ark_Int32 nodeId,
+                       const Ark_TextRange parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRichEditor_onDidIMEInput);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeTextRange(parameter);
     sendEvent(&_eventBuffer);
 }
 void aboutToDeleteImpl(Ark_Int32 nodeId,
-                       const Ark_Boolean parameter_0)
+                       const Ark_RichEditorDeleteValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRichEditor_aboutToDelete);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeRichEditorDeleteValue(parameter);
     sendEvent(&_eventBuffer);
 }
 void onDeleteCompleteImpl(Ark_Int32 nodeId)
@@ -1908,12 +1919,14 @@ void onPasteImpl(Ark_Int32 nodeId,
     }
     sendEvent(&_eventBuffer);
 }
-void onEditingChangeImpl(Ark_Int32 nodeId)
+void onEditingChangeImpl(Ark_Int32 nodeId,
+                         const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRichEditor_onEditingChange);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 void onSubmitImpl(Ark_Int32 nodeId,
@@ -1929,13 +1942,13 @@ void onSubmitImpl(Ark_Int32 nodeId,
     sendEvent(&_eventBuffer);
 }
 void onWillChangeImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean parameter_0)
+                      const Ark_RichEditorChangeValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRichEditor_onWillChange);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeRichEditorChangeValue(parameter);
     sendEvent(&_eventBuffer);
 }
 void onDidChangeImpl(Ark_Int32 nodeId,
@@ -1950,20 +1963,24 @@ void onDidChangeImpl(Ark_Int32 nodeId,
     _eventBufferSerializer.writeTextRange(rangeAfter);
     sendEvent(&_eventBuffer);
 }
-void onCutImpl(Ark_Int32 nodeId)
+void onCutImpl(Ark_Int32 nodeId,
+               const Ark_CutEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRichEditor_onCut);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeCutEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onCopyImpl(Ark_Int32 nodeId)
+void onCopyImpl(Ark_Int32 nodeId,
+                const Ark_CopyEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindRichEditor_onCopy);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeCopyEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 }
@@ -2074,12 +2091,14 @@ void onScrollFrameBeginImpl(Ark_Int32 nodeId,
 }
 }
 namespace Search {
-void onEditChangeImpl(Ark_Int32 nodeId)
+void onEditChangeImpl(Ark_Int32 nodeId,
+                      const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindSearch_onEditChange);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 void onSubmitImpl(Ark_Int32 nodeId,
@@ -2167,47 +2186,53 @@ void onPasteImpl(Ark_Int32 nodeId,
     sendEvent(&_eventBuffer);
 }
 void onWillInsertImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean parameter_0)
+                      const Ark_InsertValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindSearch_onWillInsert);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeInsertValue(parameter);
     sendEvent(&_eventBuffer);
 }
-void onDidInsertImpl(Ark_Int32 nodeId)
+void onDidInsertImpl(Ark_Int32 nodeId,
+                     const Ark_InsertValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindSearch_onDidInsert);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeInsertValue(parameter);
     sendEvent(&_eventBuffer);
 }
 void onWillDeleteImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean parameter_0)
+                      const Ark_DeleteValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindSearch_onWillDelete);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeDeleteValue(parameter);
     sendEvent(&_eventBuffer);
 }
-void onDidDeleteImpl(Ark_Int32 nodeId)
+void onDidDeleteImpl(Ark_Int32 nodeId,
+                     const Ark_DeleteValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindSearch_onDidDelete);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeDeleteValue(parameter);
     sendEvent(&_eventBuffer);
 }
-void inputFilterImpl(Ark_Int32 nodeId)
+void inputFilterImpl(Ark_Int32 nodeId,
+                     const Ark_String breakpoints)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindSearch_inputFilter);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeString(breakpoints);
     sendEvent(&_eventBuffer);
 }
 }
@@ -2539,13 +2564,13 @@ void onContentScrollImpl(Ark_Int32 nodeId,
     sendEvent(&_eventBuffer);
 }
 void onEditChangeImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean isSelected)
+                      const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextArea_onEditChange);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(isSelected);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 void onCopyImpl(Ark_Int32 nodeId,
@@ -2581,39 +2606,43 @@ void onPasteImpl(Ark_Int32 nodeId,
     sendEvent(&_eventBuffer);
 }
 void onWillInsertImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean parameter_0)
+                      const Ark_InsertValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextArea_onWillInsert);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeInsertValue(parameter);
     sendEvent(&_eventBuffer);
 }
-void onDidInsertImpl(Ark_Int32 nodeId)
+void onDidInsertImpl(Ark_Int32 nodeId,
+                     const Ark_InsertValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextArea_onDidInsert);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeInsertValue(parameter);
     sendEvent(&_eventBuffer);
 }
 void onWillDeleteImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean parameter_0)
+                      const Ark_DeleteValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextArea_onWillDelete);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeDeleteValue(parameter);
     sendEvent(&_eventBuffer);
 }
-void onDidDeleteImpl(Ark_Int32 nodeId)
+void onDidDeleteImpl(Ark_Int32 nodeId,
+                     const Ark_DeleteValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextArea_onDidDelete);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeDeleteValue(parameter);
     sendEvent(&_eventBuffer);
 }
 void inputFilterImpl(Ark_Int32 nodeId,
@@ -2641,23 +2670,23 @@ void onDateChangeImpl(Ark_Int32 nodeId,
 }
 namespace TextInput {
 void onEditChangedImpl(Ark_Int32 nodeId,
-                       const Ark_Boolean isSelected)
+                       const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextInput_onEditChanged);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(isSelected);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 void onEditChangeImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean isSelected)
+                      const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextInput_onEditChange);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(isSelected);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 void onSubmitImpl(Ark_Int32 nodeId,
@@ -2746,48 +2775,54 @@ void onPasteImpl(Ark_Int32 nodeId,
     _eventBufferSerializer.writePasteEvent(event);
     sendEvent(&_eventBuffer);
 }
-void onSecurityStateChangeImpl(Ark_Int32 nodeId)
+void onSecurityStateChangeImpl(Ark_Int32 nodeId,
+                               const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextInput_onSecurityStateChange);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 void onWillInsertImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean parameter_0)
+                      const Ark_InsertValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextInput_onWillInsert);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeInsertValue(parameter);
     sendEvent(&_eventBuffer);
 }
-void onDidInsertImpl(Ark_Int32 nodeId)
+void onDidInsertImpl(Ark_Int32 nodeId,
+                     const Ark_InsertValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextInput_onDidInsert);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeInsertValue(parameter);
     sendEvent(&_eventBuffer);
 }
 void onWillDeleteImpl(Ark_Int32 nodeId,
-                      const Ark_Boolean parameter_0)
+                      const Ark_DeleteValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextInput_onWillDelete);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeDeleteValue(parameter);
     sendEvent(&_eventBuffer);
 }
-void onDidDeleteImpl(Ark_Int32 nodeId)
+void onDidDeleteImpl(Ark_Int32 nodeId,
+                     const Ark_DeleteValue parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindTextInput_onDidDelete);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeDeleteValue(parameter);
     sendEvent(&_eventBuffer);
 }
 void inputFilterImpl(Ark_Int32 nodeId,
@@ -2895,13 +2930,13 @@ void onChangeImpl(Ark_Int32 nodeId,
 }
 namespace Toggle {
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean isSelected)
+                  const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindToggle_onChange);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(isSelected);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 }
@@ -3003,36 +3038,44 @@ void onStopImpl(Ark_Int32 nodeId)
 }
 }
 namespace Web {
-void onPageEndImpl(Ark_Int32 nodeId)
+void onPageEndImpl(Ark_Int32 nodeId,
+                   const Ark_OnPageEndEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onPageEnd);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnPageEndEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onPageBeginImpl(Ark_Int32 nodeId)
+void onPageBeginImpl(Ark_Int32 nodeId,
+                     const Ark_OnPageBeginEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onPageBegin);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnPageBeginEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onProgressChangeImpl(Ark_Int32 nodeId)
+void onProgressChangeImpl(Ark_Int32 nodeId,
+                          const Ark_OnProgressChangeEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onProgressChange);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnProgressChangeEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onTitleReceiveImpl(Ark_Int32 nodeId)
+void onTitleReceiveImpl(Ark_Int32 nodeId,
+                        const Ark_OnTitleReceiveEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onTitleReceive);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnTitleReceiveEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onGeolocationHideImpl(Ark_Int32 nodeId)
@@ -3043,12 +3086,14 @@ void onGeolocationHideImpl(Ark_Int32 nodeId)
     _eventBufferSerializer.writeInt32(nodeId);
     sendEvent(&_eventBuffer);
 }
-void onGeolocationShowImpl(Ark_Int32 nodeId)
+void onGeolocationShowImpl(Ark_Int32 nodeId,
+                           const Ark_OnGeolocationShowEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onGeolocationShow);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnGeolocationShowEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onRequestSelectedImpl(Ark_Int32 nodeId)
@@ -3060,85 +3105,93 @@ void onRequestSelectedImpl(Ark_Int32 nodeId)
     sendEvent(&_eventBuffer);
 }
 void onAlertImpl(Ark_Int32 nodeId,
-                 const Ark_Boolean parameter_0)
+                 const Ark_OnAlertEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onAlert);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeOnAlertEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onBeforeUnloadImpl(Ark_Int32 nodeId,
-                        const Ark_Boolean parameter_0)
+                        const Ark_OnBeforeUnloadEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onBeforeUnload);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeOnBeforeUnloadEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onConfirmImpl(Ark_Int32 nodeId,
-                   const Ark_Boolean parameter_0)
+                   const Ark_OnConfirmEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onConfirm);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeOnConfirmEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onPromptImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean parameter_0)
+                  const Ark_OnPromptEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onPrompt);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeOnPromptEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onConsoleImpl(Ark_Int32 nodeId,
-                   const Ark_Boolean parameter_0)
+                   const Ark_OnConsoleEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onConsole);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeOnConsoleEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onErrorReceiveImpl(Ark_Int32 nodeId)
+void onErrorReceiveImpl(Ark_Int32 nodeId,
+                        const Ark_OnErrorReceiveEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onErrorReceive);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnErrorReceiveEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onHttpErrorReceiveImpl(Ark_Int32 nodeId)
+void onHttpErrorReceiveImpl(Ark_Int32 nodeId,
+                            const Ark_OnHttpErrorReceiveEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onHttpErrorReceive);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnHttpErrorReceiveEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onDownloadStartImpl(Ark_Int32 nodeId)
+void onDownloadStartImpl(Ark_Int32 nodeId,
+                         const Ark_OnDownloadStartEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onDownloadStart);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnDownloadStartEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onRefreshAccessedHistoryImpl(Ark_Int32 nodeId)
+void onRefreshAccessedHistoryImpl(Ark_Int32 nodeId,
+                                  const Ark_OnRefreshAccessedHistoryEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onRefreshAccessedHistory);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnRefreshAccessedHistoryEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onUrlLoadInterceptImpl(Ark_Int32 nodeId,
@@ -3188,12 +3241,14 @@ void onSslErrorReceiveImpl(Ark_Int32 nodeId,
     }
     sendEvent(&_eventBuffer);
 }
-void onRenderExited0Impl(Ark_Int32 nodeId)
+void onRenderExited0Impl(Ark_Int32 nodeId,
+                         const Ark_OnRenderExitedEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onRenderExited0);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnRenderExitedEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onRenderExited1Impl(Ark_Int32 nodeId,
@@ -3214,13 +3269,13 @@ void onRenderExited1Impl(Ark_Int32 nodeId,
     sendEvent(&_eventBuffer);
 }
 void onShowFileSelectorImpl(Ark_Int32 nodeId,
-                            const Ark_Boolean parameter_0)
+                            const Ark_OnShowFileSelectorEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onShowFileSelector);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeOnShowFileSelectorEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onFileSelectorShowImpl(Ark_Int32 nodeId,
@@ -3242,12 +3297,14 @@ void onFileSelectorShowImpl(Ark_Int32 nodeId,
     }
     sendEvent(&_eventBuffer);
 }
-void onResourceLoadImpl(Ark_Int32 nodeId)
+void onResourceLoadImpl(Ark_Int32 nodeId,
+                        const Ark_OnResourceLoadEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onResourceLoad);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnResourceLoadEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onFullScreenExitImpl(Ark_Int32 nodeId)
@@ -3268,58 +3325,64 @@ void onFullScreenEnterImpl(Ark_Int32 nodeId,
     _eventBufferSerializer.writeFullScreenEnterEvent(event);
     sendEvent(&_eventBuffer);
 }
-void onScaleChangeImpl(Ark_Int32 nodeId)
+void onScaleChangeImpl(Ark_Int32 nodeId,
+                       const Ark_OnScaleChangeEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onScaleChange);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnScaleChangeEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onHttpAuthRequestImpl(Ark_Int32 nodeId,
-                           const Ark_Boolean parameter_0)
+                           const Ark_OnHttpAuthRequestEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onHttpAuthRequest);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeOnHttpAuthRequestEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onInterceptRequestImpl(Ark_Int32 nodeId,
-                            const Ark_Materialized parameter_0)
+                            const Ark_OnInterceptRequestEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onInterceptRequest);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeMaterialized(parameter_0);
+    _eventBufferSerializer.writeOnInterceptRequestEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onPermissionRequestImpl(Ark_Int32 nodeId)
+void onPermissionRequestImpl(Ark_Int32 nodeId,
+                             const Ark_OnPermissionRequestEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onPermissionRequest);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnPermissionRequestEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onScreenCaptureRequestImpl(Ark_Int32 nodeId)
+void onScreenCaptureRequestImpl(Ark_Int32 nodeId,
+                                const Ark_OnScreenCaptureRequestEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onScreenCaptureRequest);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnScreenCaptureRequestEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onContextMenuShowImpl(Ark_Int32 nodeId,
-                           const Ark_Boolean parameter_0)
+                           const Ark_OnContextMenuShowEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onContextMenuShow);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeOnContextMenuShowEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onContextMenuHideImpl(Ark_Int32 nodeId)
@@ -3330,28 +3393,34 @@ void onContextMenuHideImpl(Ark_Int32 nodeId)
     _eventBufferSerializer.writeInt32(nodeId);
     sendEvent(&_eventBuffer);
 }
-void onSearchResultReceiveImpl(Ark_Int32 nodeId)
+void onSearchResultReceiveImpl(Ark_Int32 nodeId,
+                               const Ark_OnSearchResultReceiveEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onSearchResultReceive);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnSearchResultReceiveEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onScrollImpl(Ark_Int32 nodeId)
+void onScrollImpl(Ark_Int32 nodeId,
+                  const Ark_OnScrollEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onScroll);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnScrollEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onSslErrorEventReceiveImpl(Ark_Int32 nodeId)
+void onSslErrorEventReceiveImpl(Ark_Int32 nodeId,
+                                const Ark_OnSslErrorEventReceiveEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onSslErrorEventReceive);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnSslErrorEventReceiveEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onSslErrorEventImpl(Ark_Int32 nodeId,
@@ -3364,20 +3433,24 @@ void onSslErrorEventImpl(Ark_Int32 nodeId,
     _eventBufferSerializer.writeSslErrorEvent(sslErrorEvent);
     sendEvent(&_eventBuffer);
 }
-void onClientAuthenticationRequestImpl(Ark_Int32 nodeId)
+void onClientAuthenticationRequestImpl(Ark_Int32 nodeId,
+                                       const Ark_OnClientAuthenticationEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onClientAuthenticationRequest);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnClientAuthenticationEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onWindowNewImpl(Ark_Int32 nodeId)
+void onWindowNewImpl(Ark_Int32 nodeId,
+                     const Ark_OnWindowNewEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onWindowNew);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnWindowNewEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onWindowExitImpl(Ark_Int32 nodeId)
@@ -3389,61 +3462,73 @@ void onWindowExitImpl(Ark_Int32 nodeId)
     sendEvent(&_eventBuffer);
 }
 void onInterceptKeyEventImpl(Ark_Int32 nodeId,
-                             const Ark_KeyEvent event)
+                             const Ark_KeyEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onInterceptKeyEvent);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeKeyEvent(event);
+    _eventBufferSerializer.writeKeyEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onTouchIconUrlReceivedImpl(Ark_Int32 nodeId)
+void onTouchIconUrlReceivedImpl(Ark_Int32 nodeId,
+                                const Ark_OnTouchIconUrlReceivedEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onTouchIconUrlReceived);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnTouchIconUrlReceivedEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onFaviconReceivedImpl(Ark_Int32 nodeId)
+void onFaviconReceivedImpl(Ark_Int32 nodeId,
+                           const Ark_OnFaviconReceivedEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onFaviconReceived);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnFaviconReceivedEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onPageVisibleImpl(Ark_Int32 nodeId)
+void onPageVisibleImpl(Ark_Int32 nodeId,
+                       const Ark_OnPageVisibleEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onPageVisible);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnPageVisibleEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onDataResubmittedImpl(Ark_Int32 nodeId)
+void onDataResubmittedImpl(Ark_Int32 nodeId,
+                           const Ark_OnDataResubmittedEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onDataResubmitted);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnDataResubmittedEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onAudioStateChangedImpl(Ark_Int32 nodeId)
+void onAudioStateChangedImpl(Ark_Int32 nodeId,
+                             const Ark_OnAudioStateChangedEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onAudioStateChanged);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnAudioStateChangedEvent(parameter);
     sendEvent(&_eventBuffer);
 }
-void onFirstContentfulPaintImpl(Ark_Int32 nodeId)
+void onFirstContentfulPaintImpl(Ark_Int32 nodeId,
+                                const Ark_OnFirstContentfulPaintEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onFirstContentfulPaint);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnFirstContentfulPaintEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onFirstMeaningfulPaintImpl(Ark_Int32 nodeId,
@@ -3467,13 +3552,13 @@ void onLargestContentfulPaintImpl(Ark_Int32 nodeId,
     sendEvent(&_eventBuffer);
 }
 void onLoadInterceptImpl(Ark_Int32 nodeId,
-                         const Ark_Boolean parameter_0)
+                         const Ark_OnLoadInterceptEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onLoadIntercept);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(parameter_0);
+    _eventBufferSerializer.writeOnLoadInterceptEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onControllerAttachedImpl(Ark_Int32 nodeId)
@@ -3484,12 +3569,14 @@ void onControllerAttachedImpl(Ark_Int32 nodeId)
     _eventBufferSerializer.writeInt32(nodeId);
     sendEvent(&_eventBuffer);
 }
-void onOverScrollImpl(Ark_Int32 nodeId)
+void onOverScrollImpl(Ark_Int32 nodeId,
+                      const Ark_OnOverScrollEvent parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindWeb_onOverScroll);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeOnOverScrollEvent(parameter);
     sendEvent(&_eventBuffer);
 }
 void onSafeBrowsingCheckResultImpl(Ark_Int32 nodeId,
@@ -3639,13 +3726,13 @@ void onDestroyImpl(Ark_Int32 nodeId)
 }
 namespace SideBarContainer {
 void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean isSelected)
+                  const Ark_Boolean parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindSideBarContainer_onChange);
     _eventBufferSerializer.writeInt32(nodeId);
-    _eventBufferSerializer.writeBoolean(isSelected);
+    _eventBufferSerializer.writeBoolean(parameter);
     sendEvent(&_eventBuffer);
 }
 }
@@ -3692,12 +3779,14 @@ void onScrollIndexImpl(Ark_Int32 nodeId,
 }
 }
 namespace UIExtensionComponent {
-void onTerminatedImpl(Ark_Int32 nodeId)
+void onTerminatedImpl(Ark_Int32 nodeId,
+                      const Ark_TerminationInfo parameter)
 {
     EventBuffer _eventBuffer;
     Serializer _eventBufferSerializer(_eventBuffer.buffer);
     _eventBufferSerializer.writeInt32(KindUIExtensionComponent_onTerminated);
     _eventBufferSerializer.writeInt32(nodeId);
+    _eventBufferSerializer.writeTerminationInfo(parameter);
     sendEvent(&_eventBuffer);
 }
 }
@@ -3779,8 +3868,7 @@ const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver()
 {
     static const GENERATED_ArkUICommonMethodEventsReceiver GENERATED_ArkUICommonMethodEventsReceiverImpl {
         CommonMethod::onChildTouchTestImpl,
-        CommonMethod::onClick0Impl,
-        CommonMethod::onClick1Impl,
+        CommonMethod::onClickImpl,
         CommonMethod::onHoverImpl,
         CommonMethod::onAccessibilityHoverImpl,
         CommonMethod::onMouseImpl,

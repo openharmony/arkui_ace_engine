@@ -351,23 +351,15 @@ void ForegroundColorImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetForegroundColor(frameNode, convValue);
 }
-void OnClick0Impl(Ark_NativePointer node,
-                  Ark_Function value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
-    //CommonMethodModelNG::SetOnClick0(frameNode, convValue);
-}
-void OnClick1Impl(Ark_NativePointer node,
-                  Ark_Function event,
-                  const Ark_Number* distanceThreshold)
+void OnClickImpl(Ark_NativePointer node,
+                 Ark_Function event,
+                 const Opt_Number* distanceThreshold)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(event);
     //auto convValue = Converter::OptConvert<type>(event); // for enums
-    //CommonMethodModelNG::SetOnClick1(frameNode, convValue);
+    //CommonMethodModelNG::SetOnClick(frameNode, convValue);
 }
 void OnHoverImpl(Ark_NativePointer node,
                  Ark_Function value)
@@ -1691,8 +1683,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OutlineColorImpl,
         CommonMethodModifier::OutlineRadiusImpl,
         CommonMethodModifier::ForegroundColorImpl,
-        CommonMethodModifier::OnClick0Impl,
-        CommonMethodModifier::OnClick1Impl,
+        CommonMethodModifier::OnClickImpl,
         CommonMethodModifier::OnHoverImpl,
         CommonMethodModifier::OnAccessibilityHoverImpl,
         CommonMethodModifier::HoverEffectImpl,
