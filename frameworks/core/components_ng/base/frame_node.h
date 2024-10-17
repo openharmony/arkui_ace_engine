@@ -897,6 +897,10 @@ public:
 
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
 
+    std::vector<RectF> GetResponseRegionListForTouch(const RectF& rect);
+
+    void GetResponseRegionListByTraversal(std::vector<RectF>& responseRegionList);
+
     bool IsWindowBoundary() const
     {
         return isWindowBoundary_;
