@@ -50,6 +50,8 @@ inline std::string GetAttrValue(const std::unique_ptr<JsonValue> &jsonVal, const
         auto result = jsonVal->GetValue(attrKey);
         if (result->IsObject() || result->IsArray()) {
             return result->ToString();
+        } else if (result->IsBool()) {
+            return result->GetBool() ? "true" : "false";
         }
         return jsonVal->GetString(attrKey);
     }

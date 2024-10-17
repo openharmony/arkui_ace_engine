@@ -498,6 +498,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ImageRepeat>& dst, const Ark_ImageRepeat& src);
     template<> void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src);
+    template<> void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src);
     template<> void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
     template<> void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src);
     template<> void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src);
@@ -517,6 +518,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<TextDecorationStyle>& dst, const Ark_TextDecorationStyle& src);
     template<> void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src);
     template<> void AssignCast(std::optional<TextInputAction>& dst, const Ark_EnterKeyType& src);
+    template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_InputType& src);
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src);
     template<> void AssignCast(std::optional<TextInputType>& dst, const Ark_TextAreaType& src);
     template<> void AssignCast(std::optional<V2::EditMode>& dst, const Ark_EditMode& src);
@@ -527,6 +529,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<V2::StickyMode>& dst, const Ark_Sticky& src);
     template<> void AssignCast(std::optional<V2::StickyStyle>& dst, const Ark_StickyStyle& src);
     template<> void AssignCast(std::optional<V2::SwipeEdgeEffect>& dst, const Ark_SwipeEdgeEffect& src);
+    template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
 
     template<>
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);

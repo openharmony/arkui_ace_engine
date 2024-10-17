@@ -609,7 +609,7 @@ HWTEST_F(TextAreaModifierTest, setEnableKeyboardOnFocusTest, TestSize.Level1)
     ASSERT_NE(modifier_->setEnableKeyboardOnFocus, nullptr);
 
     auto checkVal = GetAttrValue<bool>(GetJsonValue(node_), PROP_NAME);
-    EXPECT_EQ(checkVal, false);
+    EXPECT_EQ(checkVal, true);
 
     for (const auto& [value, expectVal] : BOOL_TEST_PLAN) {
         modifier_->setEnableKeyboardOnFocus(node_, value);

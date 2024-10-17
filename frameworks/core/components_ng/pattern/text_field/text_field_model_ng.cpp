@@ -929,9 +929,13 @@ void TextFieldModelNG::SetTextIndent(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, value);
 }
 
-void TextFieldModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value)
+void TextFieldModelNG::SetTextOverflow(FrameNode* frameNode, const std::optional<Ace::TextOverflow>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextOverflow, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextOverflow, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextOverflow, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const std::optional<Dimension>& valueOpt)
@@ -963,9 +967,13 @@ void TextFieldModelNG::RequestKeyboardOnFocus(FrameNode* frameNode, bool needToR
     pattern->SetNeedToRequestKeyboardOnFocus(needToRequest);
 }
 
-void TextFieldModelNG::SetBarState(FrameNode* frameNode, OHOS::Ace::DisplayMode value)
+void TextFieldModelNG::SetBarState(FrameNode* frameNode, const std::optional<OHOS::Ace::DisplayMode>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, DisplayMode, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetPasswordIcon(FrameNode* frameNode, const PasswordIcon& passwordIcon)
@@ -1126,9 +1134,13 @@ void TextFieldModelNG::SetCaretPosition(FrameNode* frameNode, const int32_t& val
     pattern->SetCaretPosition(value);
 }
 
-void TextFieldModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)
+void TextFieldModelNG::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ItalicFontStyle, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ItalicFontStyle, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ItalicFontStyle, frameNode);
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true, frameNode);
 }
 
@@ -1728,14 +1740,22 @@ void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& val
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value, frameNode);
 }
 
-void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
+void TextFieldModelNG::SetWordBreak(FrameNode* frameNode, const std::optional<Ace::WordBreak>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WordBreak, frameNode);
+    }
 }
 
-void TextFieldModelNG::SetLineBreakStrategy(FrameNode* frameNode, LineBreakStrategy value)
+void TextFieldModelNG::SetLineBreakStrategy(FrameNode* frameNode, const std::optional<LineBreakStrategy>& valueOpt)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineBreakStrategy, value, frameNode);
+    if (valueOpt) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineBreakStrategy, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineBreakStrategy, frameNode);
+    }
 }
 
 void TextFieldModelNG::SetSelectAllValue(FrameNode* frameNode, bool isSelectAllValue)
@@ -2157,6 +2177,14 @@ void TextFieldModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePre
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSupportPreviewText(enablePreviewText);
+}
+
+void TextFieldModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableHapticFeedback(state);
 }
 
 PaddingProperty TextFieldModelNG::GetPadding(FrameNode* frameNode)
