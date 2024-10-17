@@ -369,6 +369,13 @@ NG::PositionWithAffinity StylusDetectorMgr::StylusDetectorCallBack::GetGlyphPosi
     }
     TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture localOffset:%{public}f, %{public}f", localOffset.GetX(),
         localOffset.GetY());
+    auto textDragBase = frameNode->GetPattern<NG::textDragBase>();
+    CHECK_NULL_RETURN(textDragBase, finalResult);
+    auto textRect = textDragBase->GetTextRect();
+    if (localOffset.GetY() < textRect.GetY() || localOffset.GetY() > textRect.GetY() + textRect.Height()) {
+        TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture point outside the area");
+        return finalResult;
+    }
     // calculate the start and end indexes of the intersecting region.
     auto layoutInfo = StylusDetectorMgr::GetInstance()->layoutInfo_.Upgrade();
     CHECK_NULL_RETURN(layoutInfo, finalResult);
