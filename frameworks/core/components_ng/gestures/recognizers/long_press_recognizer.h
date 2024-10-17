@@ -118,6 +118,8 @@ public:
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
 
+    void PrintCurrentFingersInfo();
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
