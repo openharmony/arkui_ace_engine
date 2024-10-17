@@ -9285,7 +9285,7 @@ RectF RichEditorPattern::ExpandDefaultResponseRegion(RectF& rect)
            NG::OffsetF(0, -OHOS::Ace::HOT_AREA_ADJUST_SIZE.ConvertToPx());
 }
 
-bool RichEditorPattern::IsTextEditableForStylus()
+bool RichEditorPattern::IsTextEditableForStylus() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);

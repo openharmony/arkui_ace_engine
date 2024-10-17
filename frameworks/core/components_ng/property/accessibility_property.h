@@ -49,8 +49,8 @@ using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
 using ActionsImpl = std::function<void((uint32_t actionType))>;
-using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 using GetRelatedElementInfoImpl = std::function<void(Accessibility::ExtraElementInfo& extraElementInfo)>;
+using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;

@@ -1436,7 +1436,7 @@ public:
     }
 
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
-    bool IsTextEditableForStylus() override;
+    bool IsTextEditableForStylus() const override;
 
     virtual void ProcessSelection();
     void AfterLayoutProcessCleanResponse(
