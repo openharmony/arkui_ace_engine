@@ -990,6 +990,10 @@ void PipelineContext::RegisterRootEvent()
     if (!IsFormRender()) {
         return;
     }
+    auto accessibilityProperty = rootNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty != nullptr) {
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+    }
 
     // To avoid conflicts between longPress and click events on the card,
     // use an empty longPress event placeholder in the EtsCard scenario
