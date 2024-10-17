@@ -299,6 +299,14 @@ std::optional<float> ResourceConverter::ToFloat()
         } else {
             optFloat = static_cast<float>(themeConstants_->GetDouble(id_));
         }
+    } else if (type_ == NodeModifier::ResourceType::STRING) {
+        if (id_ != -1) {
+            optFloat = static_cast<float>(strtod(themeConstants_->GetString(id_).c_str(), nullptr));
+        } else if (!params_.empty()) {
+            optFloat = static_cast<float>(strtod(themeConstants_->GetStringByName(params_.front()).c_str(), nullptr));
+        } else {
+            LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
+        }
     }
     return optFloat;
 }

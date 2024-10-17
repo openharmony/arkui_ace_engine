@@ -38,6 +38,11 @@ inline OffsetT<CalcDimension> Convert(const Ark_OffsetOptions& value)
     }
     return dst;
 }
+template<>
+inline bool Convert(const Ark_EdgeEffectOptions& value)
+{
+    return Converter::Convert<bool>(value.alwaysEnabled);
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -178,11 +183,13 @@ void EdgeEffectImpl(Ark_NativePointer node,
                     Ark_EdgeEffect edgeEffect,
                     const Opt_EdgeEffectOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(edgeEffect);
-    //auto convValue = Converter::OptConvert<type>(edgeEffect); // for enums
-    //ScrollModelNG::SetEdgeEffect(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+
+    auto effect = Converter::ConvertOrDefault<EdgeEffect>(edgeEffect, EdgeEffect::NONE);
+    auto always = Converter::ConvertOrDefault<bool>(*options, false);
+    ScrollModelNG::SetEdgeEffect(frameNode, effect, always);
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
                             const OnScrollFrameBeginCallback* value)

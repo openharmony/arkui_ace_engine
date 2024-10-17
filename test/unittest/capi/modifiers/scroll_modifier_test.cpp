@@ -581,17 +581,50 @@ HWTEST_F(ScrollModifierTest, Friction_SetAValueFromResource, testing::ext::TestS
     ASSERT_NE(frameNode, nullptr);
 
     double testVal = 0.317;
-    std::string resName = "friction";
+    std::string resName = "app.float.friction";
     AddResource(resName, testVal);
-    const auto RES_ID = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::FLOAT};
-    const Union_Number_Resource friction =
-        Converter::ArkUnion<Union_Number_Resource, Ark_Resource>(CreateResourceUnion(RES_ID));
+    auto RES_NAME = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::FLOAT};
+    auto friction = CreateResourceUnion<Union_Number_Resource>(RES_NAME);
 
     modifier_->setFriction(node_, &friction);
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     std::string jsonName = "friction";
     EXPECT_NEAR(testVal, GetAttrValue<double>(json, jsonName), 0.0001);
+}
+
+/**
+ * @tc.name: Friction_SetAValueFromStringResource
+ * @tc.desc: Test FrictionImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, Friction_SetAValueFromStringResource, testing::ext::TestSize.Level1)
+{
+    std::string jsonName = "friction";
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    double testVal = 0.317;
+    std::string resName = "app.float.friction";
+    AddResource(resName, std::to_string(testVal));
+    auto RES_NAME = NamedResourceId{resName.c_str(), NodeModifier::ResourceType::STRING};
+    auto friction = CreateResourceUnion<Union_Number_Resource>(RES_NAME);
+
+    modifier_->setFriction(node_, &friction);
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    EXPECT_NEAR(testVal, GetAttrValue<double>(json, jsonName), 0.0001);
+
+    double testVal1 = 0.9991;
+    int resID = 2;
+    AddResource(resID, std::to_string(testVal1));
+    auto RES_ID = IntResourceId{resID, NodeModifier::ResourceType::STRING};
+    friction = CreateResourceUnion<Union_Number_Resource>(RES_ID);
+
+    modifier_->setFriction(node_, &friction);
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    EXPECT_NEAR(testVal1, GetAttrValue<double>(json, jsonName), 0.0001);
 }
 
 /**
@@ -763,5 +796,82 @@ HWTEST_F(ScrollModifierTest, InitialOffset_SetOneCoordinateDisabled, testing::ex
     EXPECT_EQ(xBefore, xAfter);
     EXPECT_EQ(value1.GetY().ToString(), yAfter);
 }
+
+/**
+ * @tc.name: EdgeEffect_SetValues
+ * @tc.desc: Test EdgeEffectImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, EdgeEffect_SetValues, testing::ext::TestSize.Level1)
+{
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    auto edgeEffectOptions = json->GetValue("edgeEffectOptions");
+
+    bool testVal1 = edgeEffectOptions ? !GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled") : false;
+    auto options = Converter::ArkValue<Opt_EdgeEffectOptions>(std::optional(testVal1));
+    Ark_EdgeEffect effect = Converter::ArkValue<Ark_EdgeEffect>(EdgeEffect::FADE);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    modifier_->setEdgeEffect(node_, effect, &options);
+
+    ASSERT_EQ("EdgeEffect.Fade", GetStringAttribute(node_, "edgeEffect"));
+
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    edgeEffectOptions = json->GetValue("edgeEffectOptions");
+    ASSERT_TRUE(edgeEffectOptions);
+    ASSERT_EQ(testVal1, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
+}
+
+/**
+ * @tc.name: EdgeEffect_SetBadValues
+ * @tc.desc: Test EdgeEffectImpl
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    auto edgeEffectOptions = json->GetValue("edgeEffectOptions");
+    ASSERT_TRUE(edgeEffectOptions);
+    auto defaultAlways = GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled");
+    auto defaultEffect = GetStringAttribute(node_, "edgeEffect");
+
+    auto options = Converter::ArkValue<Opt_EdgeEffectOptions>(std::optional(defaultAlways));
+    Ark_EdgeEffect effect = static_cast<Ark_EdgeEffect>(static_cast<int>(EdgeEffect::NONE) + 2);
+    modifier_->setEdgeEffect(node_, effect, &options);
+
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    edgeEffectOptions = json->GetValue("edgeEffectOptions");
+    ASSERT_TRUE(edgeEffectOptions);
+    ASSERT_EQ(defaultAlways, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
+    ASSERT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
+
+    effect = static_cast<Ark_EdgeEffect>(static_cast<int>(EdgeEffect::SPRING) - 1);
+    modifier_->setEdgeEffect(node_, effect, &options);
+
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    edgeEffectOptions = json->GetValue("edgeEffectOptions");
+    ASSERT_TRUE(edgeEffectOptions);
+    ASSERT_EQ(defaultAlways, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
+    ASSERT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
+
+    modifier_->setEdgeEffect(node_, effect, nullptr);
+
+    json = GetJsonValue(node_);
+    ASSERT_TRUE(json);
+    edgeEffectOptions = json->GetValue("edgeEffectOptions");
+    ASSERT_TRUE(edgeEffectOptions);
+    ASSERT_EQ(defaultAlways, GetAttrValue<bool>(edgeEffectOptions, "alwaysEnabled"));
+    ASSERT_EQ(defaultEffect, GetStringAttribute(node_, "edgeEffect"));
+}
+
 
 } // namespace OHOS::Ace::NG
