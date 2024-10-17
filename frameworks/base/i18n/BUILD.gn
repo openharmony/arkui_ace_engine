@@ -35,7 +35,7 @@ template("ace_base_i18n") {
       "$ace_root:ace_config",
     ]
     deps = [ "$ace_root/frameworks/base/resource:ace_resource" ]
-    external_deps = [ "i18n:intl_util" ]
+    external_deps = []
 
     if (defined(config.use_external_icu) &&
         config.use_external_icu == "static") {
@@ -55,6 +55,10 @@ template("ace_base_i18n") {
         "icu:shared_icui18n",
         "icu:shared_icuuc",
       ]
+    }
+
+    if (!is_arkui_x) {
+      external_deps += [ "i18n:intl_util" ]
     }
 
     # add base source file here
