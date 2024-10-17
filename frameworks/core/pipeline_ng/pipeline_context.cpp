@@ -2347,6 +2347,9 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
             height = manager->GetHeight();
         }
         positionY += adjust;
+        if (rootSize.Height() - positionY - height < 0 && manager->IsScrollableChild()) {
+            height = rootSize.Height() - positionY;
+        }
         auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
         auto newKeyboardOffset = context->CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
         if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||

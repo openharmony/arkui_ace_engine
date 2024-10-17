@@ -42,6 +42,7 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
         focusFieldIsInline = false;
         optionalPosition_ = std::nullopt;
         usingCustomKeyboardAvoid_ = false;
+        isScrollableChild_ = false;
     }
 }
 
