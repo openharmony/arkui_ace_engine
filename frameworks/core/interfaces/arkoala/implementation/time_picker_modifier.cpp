@@ -17,7 +17,6 @@
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
-#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/generated/interface/node_api.h"
@@ -41,10 +40,10 @@ PickerTextStyle Convert(const Ark_PickerTextStyle& src)
     style.textColor = OptConvert<Color>(src.color);
     auto font = OptConvert<Font>(src.font);
     if (font.has_value()) {
-        style.fontSize = font.value().fontSize;
-        style.fontFamily = font.value().fontFamilies;
-        style.fontWeight = font.value().fontWeight;
-        style.fontStyle = font.value().fontStyle;
+        style.fontSize = font->fontSize;
+        style.fontFamily = font->fontFamilies;
+        style.fontWeight = font->fontWeight;
+        style.fontStyle = font->fontStyle;
     }
     return style;
 }
@@ -57,16 +56,15 @@ void SetTimePickerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
 
     auto showSeconds = false;
-    auto pickerFormat = Converter::OptConvert<TimePickerFormat>(options->value.format);
+    auto pickerFormat = options ?
+        Converter::OptConvert<TimePickerFormat>(options->value.format) :
+        std::nullopt;
     if (pickerFormat.has_value() && pickerFormat.value() == TimePickerFormat::HOUR_MINUTE_SECOND) {
         showSeconds = true;
     }
-    auto pattern = frameNode->GetPattern<TimePickerRowPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetHasSecond(showSeconds);
+    TimePickerModelNG::SetHasSecond(frameNode, showSeconds);
 
     LOGE("TimePickerInterfaceModifier::SetTimePickerOptionsImpl - Ark_CustomObject isn't supported");
 }
@@ -170,4 +168,5 @@ const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()
     };
     return &ArkUITimePickerModifierImpl;
 }
+
 }
