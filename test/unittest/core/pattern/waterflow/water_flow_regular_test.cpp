@@ -451,10 +451,7 @@ HWTEST_F(WaterFlowTestNg, ShowCachedItems001, TestSize.Level1)
     CreateItemsInRepeat(50, [](int32_t i) { return i % 2 ? 100.0f : 200.0f; });
     CreateDone();
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 10);
-    EXPECT_FALSE(GetChildFrameNode(frameNode_, 12));
-
-    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
-    FlushLayoutTask(frameNode_);
+    ASSERT_TRUE(GetChildFrameNode(frameNode_, 12));
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 12)->IsActive());
     EXPECT_EQ(GetChildY(frameNode_, 12), 800.0f);

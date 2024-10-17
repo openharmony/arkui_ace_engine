@@ -164,9 +164,9 @@ private:
     void LayoutForwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     void CreateCachedChildConstraint(LayoutWrapper* layoutWrapper, float mainSize, float crossSize);
 
-    static bool PredictBuildItem(const RefPtr<FrameNode>& host, int32_t itemIdx, const GridPredictLayoutParam& param);
+    static bool PredictBuildItem(FrameNode& host, int32_t itemIdx, const GridPredictLayoutParam& param);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
-    void CompleteItemCrossPosition(LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items);
+    void CompleteItemCrossPosition(LayoutWrapper* layoutWrapper, const std::map<int32_t, int32_t>& items);
     /**
      * @brief Updates the main line during ReloadToStartIndex based on the new crossCount_.
      *
@@ -188,6 +188,13 @@ private:
     void MergeRemainingLines(std::map<int32_t, std::map<int32_t, int32_t>> matrix, int32_t forwardLines);
 
     bool SkipLargeLineHeightLines(float mainSize);
+
+    /**
+     * @brief immediately create & measure items in cache range.
+     *
+     * @param cacheLineCnt number of lines to preload above and below viewport.
+     */
+    void SyncPreload(LayoutWrapper* wrapper, int32_t cacheLineCnt, float crossSize, float mainSize);
 
 protected:
     uint32_t crossCount_ = 0;
