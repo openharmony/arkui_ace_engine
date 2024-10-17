@@ -910,6 +910,11 @@ void ParsePopupCommonParam(
         popupParam->SetEnableHoverMode(enableHoverModeValue->ToBoolean());
     }
 
+    auto followTransformOfTargetValue = popupObj->GetProperty("followTransformOfTarget");
+    if (followTransformOfTargetValue->IsBoolean()) {
+        popupParam->SetFollowTransformOfTarget(followTransformOfTargetValue->ToBoolean());
+    }
+
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
     if (maskValue->IsBoolean()) {
         if (popupParam) {
