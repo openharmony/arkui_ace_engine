@@ -44,49 +44,27 @@ struct Style {
 namespace Converter {
 
 template<>
-Position Convert(const Ark_Position& src)
+void AssignCast(std::optional<Position>& dst, const Ark_Position& src)
 {
-    Position dst;
-    dst.isPositionXy = true;
-    dst.badgePositionX = Converter::OptConvert<Dimension>(src.x);
-    dst.badgePositionY = Converter::OptConvert<Dimension>(src.y);
-    Validator::ValidateNonNegative(dst.badgePositionX);
-    Validator::ValidateNonNegative(dst.badgePositionY);
-    return dst;
+    dst->isPositionXy = true;
+    dst->badgePositionX = Converter::OptConvert<Dimension>(src.x);
+    dst->badgePositionY = Converter::OptConvert<Dimension>(src.y);
+    Validator::ValidateNonNegative(dst->badgePositionX);
+    Validator::ValidateNonNegative(dst->badgePositionY);
 }
 
 template<>
-Position Convert(const Ark_BadgePosition& src)
+void AssignCast(std::optional<Position>& dst, const Ark_BadgePosition& src)
 {
-    Position dst;
     switch (src) {
         case ARK_BADGE_POSITION_RIGHT_TOP:
         case ARK_BADGE_POSITION_RIGHT:
         case ARK_BADGE_POSITION_LEFT:
-            dst.isPositionXy = false;
-            dst.badgePosition = src;
+            dst->isPositionXy = false;
+            dst->badgePosition = src;
             break;
         default: LOGE("Unexpected enum value in Ark_BadgePosition: %{public}d", src);
     }
-    return dst;
-}
-
-template<>
-Position  Convert(const Opt_Union_BadgePosition_Position& src)
-{
-    Position dst;
-    auto options = Converter::OptConvert<UnionBadgeOptions>(src);
-    if (options) {
-        auto badgeOptions = std::get_if<Ark_Position>(&options.value());
-        if (badgeOptions != nullptr) {
-            return Converter::Convert<Position>(*badgeOptions);
-        }
-        auto positionOptions = std::get_if<Ark_BadgePosition>(&options.value());
-        if (positionOptions != nullptr) {
-            return Converter::Convert<Position>(*positionOptions);
-        }
-    }
-    return dst;
 }
 
 template<>
@@ -113,13 +91,13 @@ template<typename T>
 BadgeParameters ConverterHelper(const T& src)
 {
     BadgeParameters dst;
-    auto position = Converter::Convert<Position>(src.position);
+    auto position = Converter::OptConvert<Position>(src.position);
     Style style = Converter::Convert<Style>(src.style);
 
-    dst.isPositionXy = position.isPositionXy;
-    dst.badgePositionX = position.badgePositionX;
-    dst.badgePositionY = position.badgePositionY;
-    dst.badgePosition = position.badgePosition;
+    dst.isPositionXy = position->isPositionXy;
+    dst.badgePositionX = position->badgePositionX;
+    dst.badgePositionY = position->badgePositionY;
+    dst.badgePosition = position->badgePosition;
 
     dst.badgeColor = style.badgeColor;
     dst.badgeTextColor = style.badgeTextColor;
