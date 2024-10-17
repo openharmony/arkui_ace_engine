@@ -330,10 +330,6 @@ class SearchLetterSpacingModifier extends ModifierWithKey<number | string> {
       getUINativeModule().search.setLetterSpacing(node, this.value);
     }
   }
-
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
 }
 class SearchIdModifier extends ModifierWithKey<string> {
   constructor(value: string) {

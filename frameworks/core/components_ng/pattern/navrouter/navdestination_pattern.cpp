@@ -312,11 +312,11 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
     auto titleBarUINode = hostNode->GetTitleBarNode();
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(titleBarUINode);
     CHECK_NULL_VOID(titleBarNode);
- 
+
     auto backButtonUINode = titleBarNode->GetBackButton();
     auto backButtonNode = AceType::DynamicCast<FrameNode>(backButtonUINode);
     CHECK_NULL_VOID(backButtonNode);
- 
+
     auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
@@ -327,18 +327,22 @@ void NavDestinationPattern::InitBackButtonLongPressEvent(RefPtr<NavDestinationGr
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
     gestureHub->SetLongPressEvent(longPressEvent_);
- 
+
     auto longPressRecognizer = gestureHub->GetLongPressRecognizer();
     CHECK_NULL_VOID(longPressRecognizer);
- 
+
     auto longPressEndCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleLongPressActionEnd();
     };
     longPressRecognizer->SetOnActionEnd(longPressEndCallback);
+
+    auto accessibilityProperty = backButtonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
 }
- 
+
 void NavDestinationPattern::HandleLongPress()
 {
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
@@ -378,7 +382,7 @@ void NavDestinationPattern::HandleLongPress()
     ImageSourceInfo imageSourceInfo = backButtonImageLayoutProperty->GetImageSourceInfoValue();
     dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, imageSourceInfo);
 }
- 
+
 void NavDestinationPattern::HandleLongPressActionEnd()
 {
     CHECK_NULL_VOID(dialogNode_);
