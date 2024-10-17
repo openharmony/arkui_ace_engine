@@ -48,6 +48,10 @@ public:
 
     void CleanRecognizerState() override;
     void ForceCleanRecognizer() override;
+    void SetIsEventHandoverNeeded(bool isEventHandoverNeeded)
+    {
+        isEventHandoverNeeded_ = isEventHandoverNeeded;
+    }
     
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};
@@ -65,6 +69,7 @@ private:
     void SendTouchEventToNextRecognizer(const RefPtr<NGGestureRecognizer> curRecognizer, int64_t beforeDuration = 0);
     bool CheckBetweenTwoLongPressRecognizer(int32_t currentIndex = 0);
 
+    bool isEventHandoverNeeded_ = false;
     int32_t currentIndex_ = 0;
     AxisEvent lastAxisEvent_;
     std::list<std::string> childTouchTestList_;
