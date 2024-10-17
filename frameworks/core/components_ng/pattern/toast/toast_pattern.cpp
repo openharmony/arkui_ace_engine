@@ -101,20 +101,6 @@ void ToastPattern::UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastP
             break;
     }
 }
-void ToastPattern::FoldStatusChangedAnimation()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    AnimationOption option;
-    auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
-    option.SetCurve(curve);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    AnimationUtils::Animate(option, [host, context]() {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        context->FlushUITasks();
-    });
-}
 
 bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig)
 {
@@ -157,7 +143,10 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
         context->Animate(option, option.GetCurve(), func);
     } else {
-        func();
+        // animation effect of the toast position change
+        AnimationOption option;
+        auto translationCurve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+        context->Animate(option, translationCurve, func);
     }
     return true;
 }
@@ -367,8 +356,10 @@ void ToastPattern::OnAttachToFrameNode()
         pipeline->RegisterHalfFoldHoverChangedCallback([weak = WeakClaim(this)](bool isHoverMode) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
             if (isHoverMode != pattern->isHoverMode_) {
-                pattern->FoldStatusChangedAnimation();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
         });
     UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);
