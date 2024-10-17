@@ -1172,4 +1172,56 @@ RefPtr<SwiperController> TabsModelNG::GetSwiperController(FrameNode* frameNode)
     CHECK_NULL_RETURN(swiperPattern, nullptr);
     return swiperPattern->GetSwiperController();
 }
+
+// the combination of the TabsModelNG::Create (part that related to Index) and TabsModelNG::SetIndex
+// provides the Index initialzation into given Tabs frame node
+void TabsModelNG::InitIndex(FrameNode* frameNode, const std::optional<int32_t>& indexOpt)
+{
+    auto index = (indexOpt && (*indexOpt >= 0)) ? *indexOpt : 0;
+
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+
+    // Create part
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    auto hasTabBarNode = tabsNode->HasTabBarNode();
+    if (!hasTabBarNode) {
+        tabsLayoutProperty->UpdateIndex(index);
+        return;
+    }
+    auto preIndex = tabsLayoutProperty->GetIndexValue(0);
+    CHECK_NULL_VOID(preIndex != index);
+
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    if (tabsPattern && tabsPattern->GetInterceptStatus()) {
+        auto ret = tabsPattern->OnContentWillChange(preIndex, index);
+        CHECK_NULL_VOID(ret && !(*ret));
+    }
+
+    // SetIndex part
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    tabsLayoutProperty->UpdateIndex(index);
+    swiperLayoutProperty->UpdateIndex(index);
+    tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->UpdateTextColorAndFontWeight(index);
+    swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    // end of SetIndex part
+
+    // continue of the Create part
+    tabBarPattern->SetMaskAnimationByCreate(true);
+    tabBarPattern->UpdateImageColor(index);
+    tabBarPattern->UpdateSymbolStats(index, -1);
+    tabBarPattern->UpdateSymbolStats(-1, preIndex);
+}
 } // namespace OHOS::Ace::NG

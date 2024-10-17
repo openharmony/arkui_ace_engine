@@ -111,20 +111,18 @@ void SetTabsOptionsImpl(Ark_NativePointer node,
                         const Opt_Type_TabsInterface_setTabsOptions_Arg0* value)
 {
     CHECK_NULL_VOID(value);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
     auto tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*value);
     CHECK_NULL_VOID(tabsOptionsOpt);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
 
     TabsModelNG::SetTabBarPosition(frameNode, tabsOptionsOpt->barPosOpt);
 
-    // if (tabsOptionsOpt->indexOpt) {
-    //     TabsModelNG::SetIndex(frameNode, *(tabsOptionsOpt->indexOpt));
-    // }
+    TabsModelNG::InitIndex(frameNode, tabsOptionsOpt->indexOpt);
 
     if (tabsOptionsOpt->controllerOpt) {
         // obtain the external TabController peer
-        if (auto peerImplPtr = *(tabsOptionsOpt->controllerOpt); peerImplPtr){
+        if (auto peerImplPtr = *(tabsOptionsOpt->controllerOpt); peerImplPtr) {
             // obtain the internal SwiperController
             auto internalSwiperController = TabsModelNG::GetSwiperController(frameNode);
             // pass the internal controller to external management
