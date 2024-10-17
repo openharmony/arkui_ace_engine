@@ -1118,8 +1118,8 @@ frameworks/bridge/declarative_frontend/jsview/js_loading_progress.cpp @arkui_ima
 frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_local_storage.cpp @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_local_storage.h @arkuistatemgmt
-frameworks/bridge/declarative_frontend/jsview/js_location_button.cpp
-frameworks/bridge/declarative_frontend/jsview/js_location_button.h
+frameworks/bridge/declarative_frontend/jsview/js_location_button.cpp @harylee
+frameworks/bridge/declarative_frontend/jsview/js_location_button.h @harylee
 frameworks/bridge/declarative_frontend/jsview/js_marquee.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_marquee.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_menu.cpp @arkuipopupwindow
@@ -1152,8 +1152,8 @@ frameworks/bridge/declarative_frontend/jsview/js_pan_handler.cpp @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_pan_handler.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_particle.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/jsview/js_particle.h @arkuiframework
-frameworks/bridge/declarative_frontend/jsview/js_paste_button.cpp
-frameworks/bridge/declarative_frontend/jsview/js_paste_button.h
+frameworks/bridge/declarative_frontend/jsview/js_paste_button.cpp @harylee
+frameworks/bridge/declarative_frontend/jsview/js_paste_button.h @harylee
 frameworks/bridge/declarative_frontend/jsview/js_path.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_path.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_path_shape.cpp @arkuilayout
@@ -1204,8 +1204,8 @@ frameworks/bridge/declarative_frontend/jsview/js_row.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_row.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_row_split.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_row_split.h @arkuilayout
-frameworks/bridge/declarative_frontend/jsview/js_save_button.cpp
-frameworks/bridge/declarative_frontend/jsview/js_save_button.h
+frameworks/bridge/declarative_frontend/jsview/js_save_button.cpp @harylee
+frameworks/bridge/declarative_frontend/jsview/js_save_button.h @harylee
 frameworks/bridge/declarative_frontend/jsview/js_sceneview.cpp
 frameworks/bridge/declarative_frontend/jsview/js_sceneview.h
 frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp @arkuiframework
@@ -1220,8 +1220,8 @@ frameworks/bridge/declarative_frontend/jsview/js_scroller.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_scroll.h @arkuiscroll
 frameworks/bridge/declarative_frontend/jsview/js_search.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_search.h @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_sec_button_base.cpp
-frameworks/bridge/declarative_frontend/jsview/js_sec_button_base.h
+frameworks/bridge/declarative_frontend/jsview/js_sec_button_base.cpp @harylee
+frameworks/bridge/declarative_frontend/jsview/js_sec_button_base.h @harylee
 frameworks/bridge/declarative_frontend/jsview/js_security_ui_extension.cpp
 frameworks/bridge/declarative_frontend/jsview/js_security_ui_extension.h
 frameworks/bridge/declarative_frontend/jsview/js_select.cpp @arkuipopupwindow
@@ -2418,7 +2418,7 @@ frameworks/core/components_ng/pattern/scrollable/ @arkuiscroll
 frameworks/core/components_ng/pattern/scroll_bar/ @arkuiscroll
 frameworks/core/components_ng/pattern/scroll/ @arkuiscroll
 frameworks/core/components_ng/pattern/search/ @huawei_g_five
-frameworks/core/components_ng/pattern/security_component/ 
+frameworks/core/components_ng/pattern/security_component/ @harylee
 frameworks/core/components_ng/pattern/select_content_overlay/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/select_overlay/ @huawei_g_five
 frameworks/core/components_ng/pattern/select/ @arkuipopupwindow
@@ -3054,8 +3054,8 @@ test/unittest/core/pattern/scroll/ @arkuiscroll
 test/unittest/core/pattern/scroll_bar/ @arkuiscroll 
 test/unittest/core/pattern/scrollable/ @arkuiscroll 
 test/unittest/core/pattern/search/ @huawei_g_five 
-test/unittest/core/pattern/security_component/ @arkuilayout
-test/unittest/core/pattern/security_component/mock/ @arkuilayout
+test/unittest/core/pattern/security_component/ @harylee
+test/unittest/core/pattern/security_component/mock/ @harylee
 test/unittest/core/pattern/select/ @arkuipopupwindow
 test/unittest/core/pattern/select_overlay/ @huawei_g_five
 test/unittest/core/pattern/shape/ @arkuilayout
