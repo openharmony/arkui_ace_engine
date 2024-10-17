@@ -504,7 +504,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of scroll motion is %{public}f, velocity is %{public}f",
         mainPosition, correctVelocity);
     double frictionTmp = friction_;
-    if (friction_ == -1.0) {
+    if (NearEqual(friction_, -1.0)) {
         double ret = SystemProperties::GetSrollableFriction();
         frictionTmp = !NearZero(ret) ? ret : defaultFriction_;
     }
