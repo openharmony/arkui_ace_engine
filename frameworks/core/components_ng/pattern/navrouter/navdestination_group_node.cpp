@@ -214,18 +214,22 @@ void NavDestinationGroupNode::StartSystemTransitionPush(bool transitionIn)
     }
 }
 
-void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn)
+void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn, const int32_t animationId)
 {
+    if (animationId != animationId_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "push animation invalid,curId: %{public}d, targetId: %{public}d",
+            animationId_, animationId);
+        return;
+    }
+    SetIsOnAnimation(false);
     if (transitionIn) {
         if (GetTransitionType() != PageTransitionType::ENTER_PUSH) {
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "curNode has another transition");
             return;
         }
         GetRenderContext()->RemoveClipWithRRect();
-        SetIsOnAnimation(false);
         return;
     }
-    SetIsOnAnimation(false);
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
     if (GetTransitionType() == PageTransitionType::EXIT_PUSH) {
@@ -290,8 +294,15 @@ void NavDestinationGroupNode::StartSystemTransitionPop(bool transitionIn)
     }
 }
 
-bool NavDestinationGroupNode::SystemTransitionPopCallback()
+bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animationId)
 {
+    if (animationId_ != animationId) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+            "animation id is invalid, curId: %{public}d, targetId: %{public}d",
+            animationId_, animationId);
+        return false;
+    }
+    SetIsOnAnimation(false);
     if (GetTransitionType() != PageTransitionType::EXIT_POP) {
         // has another transition, just return
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "preNavDesNode has another transition");
@@ -308,7 +319,6 @@ bool NavDestinationGroupNode::SystemTransitionPopCallback()
     if (!IsCacheNode() && GetContentNode()) {
         GetContentNode()->Clean();
     }
-    SetIsOnAnimation(false);
     GetEventHub<EventHub>()->SetEnabledInternal(true);
     GetRenderContext()->RemoveClipWithRRect();
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
