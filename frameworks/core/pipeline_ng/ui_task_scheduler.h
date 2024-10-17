@@ -23,8 +23,10 @@
 #include <set>
 
 #include "base/log/frame_info.h"
+#include "base/log/log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -143,6 +145,13 @@ public:
 
     void SetIsLayouting(bool layouting)
     {
+        if (isLayouting_ && layouting) {
+            if (SystemProperties::GetLayoutDetectEnabled()) {
+                abort();
+            } else {
+                LogBacktrace();
+            }
+        }
         isLayouting_ = layouting;
     }
 
