@@ -6287,6 +6287,7 @@ void OverlayManager::RemoveGatherNode()
     CHECK_EQUAL_VOID(hasGatherNode_, false);
     auto frameNode = gatherNodeWeak_.Upgrade();
     CHECK_NULL_VOID(frameNode);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Remove gather node");
     auto rootNode = frameNode->GetParent();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(frameNode);
@@ -6301,6 +6302,7 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
     if (!hasGatherNode_) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Remove gather node with animation");
     AnimationOption option;
     option.SetDuration(PIXELMAP_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);

@@ -61,7 +61,7 @@ public:
 
     void CleanRecognizerState() override;
 
-    int32_t GetValidFingersCount()
+    int32_t GetValidFingersCount() const
     {
         return std::count_if(touchPoints_.begin(), touchPoints_.end(),
             [](const auto& item) { return item.second.type != TouchType::UNKNOWN; });
