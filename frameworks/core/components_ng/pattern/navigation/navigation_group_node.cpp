@@ -32,7 +32,6 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
-#include "core/event/package/package_event_proxy.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1045,14 +1044,6 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
     if (!findNavdestination) {
         pipelineContext->AddNavigationNode(pageId, WeakClaim(this));
-    }
-    auto* eventProxy = PackageEventProxy::GetInstance();
-    if (eventProxy) {
-        auto container = OHOS::Ace::Container::CurrentSafely();
-        CHECK_NULL_VOID(container);
-        auto navigationRoute = container->GetNavigationRoute();
-        CHECK_NULL_VOID(navigationRoute);
-        eventProxy->Register(WeakClaim(AceType::RawPtr(navigationRoute)));
     }
 }
 
