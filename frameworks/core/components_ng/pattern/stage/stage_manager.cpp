@@ -95,9 +95,11 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
             });
         return;
     }
+    ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition Start");
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
     pagePattern->TriggerPageTransition(
         transitionType, [weak = WeakPtr<FrameNode>(page)]() {
+            ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition End");
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto page = weak.Upgrade();
             CHECK_NULL_VOID(page);
@@ -211,10 +213,12 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         .GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
     if (!children.empty() && needHideLast) {
         hidePageNode = children.back();
+        outPageNode = AceType::DynamicCast<FrameNode>(hidePageNode);
+        FireAutoSave(outPageNode, node);
         if (!isNewLifecycle) {
             FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
         }
-        outPageNode = AceType::DynamicCast<FrameNode>(children.back());
+
     }
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
     rect.SetOffset({});
@@ -255,7 +259,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     // close keyboard
     PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, node);
-    FireAutoSave(outPageNode, node);
     if (needTransition) {
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {

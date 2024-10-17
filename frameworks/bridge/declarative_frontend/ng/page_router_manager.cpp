@@ -215,7 +215,9 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
         return;
     }
     RouterOptScope scope(this);
-    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE && !context->GetForceSplitEnable()) {
         LOGW("router stack size is larger than max size 32.");
         if (target.errorCallback != nullptr) {
             target.errorCallback("The pages are pushed too much.", ERROR_CODE_PAGE_STACK_FULL);
@@ -1079,7 +1081,9 @@ void PageRouterManager::StartBack(const RouterPageInfo& target)
         size_t pageRouteSize = pageRouterStack_.size();
         if (pageRouteSize <= 1) {
             if (!restorePageStack_.empty()) {
-                StartRestore(RouterPageInfo());
+                auto newInfo = RouterPageInfo();
+                newInfo.params = target.params;
+                StartRestore(newInfo);
                 return;
             }
             LOGI("Router back start ExitToDesktop");

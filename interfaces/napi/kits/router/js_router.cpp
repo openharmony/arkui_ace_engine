@@ -69,7 +69,10 @@ static void ParseParams(napi_env env, napi_value params, std::string& paramsStri
     napi_get_named_property(env, jsonValue, "stringify", &stringifyValue);
     napi_value funcArgv[1] = { params };
     napi_value returnValue;
-    napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue);
+    if (napi_call_function(env, jsonValue, stringifyValue, 1, funcArgv, &returnValue) != napi_ok) {
+        TAG_LOGE(AceLogTag::ACE_ROUTER,
+            "Router parse param failed, probably caused by invalid format of JSON object 'params'");
+    }
     size_t len = 0;
     napi_get_value_string_utf8(env, returnValue, nullptr, 0, &len);
     std::unique_ptr<char[]> paramsChar = std::make_unique<char[]>(len + 1);
@@ -85,19 +88,19 @@ static napi_value ParseJSONParams(napi_env env, const std::string& paramsStr)
     napi_get_named_property(env, globalValue, "JSON", &jsonValue);
     napi_value parseValue;
     napi_get_named_property(env, jsonValue, "parse", &parseValue);
-    
+
     napi_value paramsNApi;
     napi_create_string_utf8(env, paramsStr.c_str(), NAPI_AUTO_LENGTH, &paramsNApi);
     napi_value funcArgv[1] = { paramsNApi };
     napi_value result;
     napi_call_function(env, jsonValue, parseValue, 1, funcArgv, &result);
-    
+
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, result, &valueType);
     if (valueType != napi_object) {
         return nullptr;
     }
-    
+
     return result;
 }
 
@@ -405,7 +408,7 @@ static napi_value JsBackToIndex(napi_env env, napi_callback_info info)
     napi_value thisVar = nullptr;
     void* data = nullptr;
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
- 
+
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
@@ -564,7 +567,7 @@ static napi_value JSGetStateByIndex(napi_env env, napi_callback_info info)
     napi_create_int32(env, routeIndex, &resultArray[RESULT_ARRAY_INDEX_INDEX]);
     napi_create_string_utf8(env, routeName.c_str(), routeNameLen, &resultArray[RESULT_ARRAY_NAME_INDEX]);
     napi_create_string_utf8(env, routePath.c_str(), routePathLen, &resultArray[RESULT_ARRAY_PATH_INDEX]);
-    
+
     napi_value parsedParams = nullptr;
     if (!routeParams.empty()) {
         parsedParams = ParseJSONParams(env, routeParams);
@@ -811,12 +814,12 @@ static napi_value JSRouterGetParams(napi_env env, napi_callback_info info)
         NapiThrow(env, "UI execution context not found.", ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    
+
     std::string paramsStr = delegate->GetParams();
     if (paramsStr.empty()) {
         return nullptr;
     }
-    
+
     napi_value result = ParseJSONParams(env, paramsStr);
     return result;
 }
