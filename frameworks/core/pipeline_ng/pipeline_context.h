@@ -1001,6 +1001,7 @@ protected:
     void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
         const std::function<void()>& func);
     void StartFoldStatusDelayTask(FoldStatus foldStatus);
+    void PostKeyboardAvoidTask();
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
