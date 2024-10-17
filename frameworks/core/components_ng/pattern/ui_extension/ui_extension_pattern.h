@@ -275,6 +275,7 @@ private:
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
     int32_t GetInstanceIdFromHost();
+    void ResetAccessibilityChildTreeCallback();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
