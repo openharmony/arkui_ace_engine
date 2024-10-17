@@ -1131,7 +1131,6 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
-    lastFontScale_ = pipelineContext->GetFontScale();
     if (swiperPattern->IsUseCustomAnimation()) {
         UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, false);
