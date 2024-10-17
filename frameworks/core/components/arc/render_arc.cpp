@@ -16,11 +16,6 @@
 #include "core/components/arc/render_arc.h"
 
 namespace OHOS::Ace {
-namespace {
-
-constexpr double ROOT = 0.5;
-
-} // namespace
 
 void RenderArc::PerformLayout()
 {
@@ -166,7 +161,7 @@ double RenderArc::GetPositionAngle(const Offset& position, double correctOffset)
 
 bool RenderArc::IsInRegion(const Point& point) const
 {
-    double distance = pow(pow(point.GetX() - arcRadiusX_, SQUARE) + pow(point.GetY() - arcRadiusY_, SQUARE), ROOT);
+    double distance = GetDistance(point);
     double outArcAngle = width_ / (outerRadius_ - width_ / ARC_RADIUS_TO_DIAMETER) / ARC_RADIUS_TO_DIAMETER;
     double angle = GetPositionAngle(Offset(point.GetX(), point.GetY()), outArcAngle);
     if (distance > outerRadius_ || distance < outerRadius_ - width_) {
@@ -181,6 +176,16 @@ bool RenderArc::IsInRegion(const Point& point) const
 double RenderArc::GetShadowWidth() const
 {
     return shadowWidth_;
+}
+
+double RenderArc::GetDistance(const Point& point) const
+{
+    double sum = 0;
+    double diff = point.GetX() - arcRadiusX_;
+    sum += diff * diff;
+    diff = point.GetY() - arcRadiusY_;
+    sum += diff * diff;
+    return std::sqrt(sum);
 }
 
 } // namespace OHOS::Ace
