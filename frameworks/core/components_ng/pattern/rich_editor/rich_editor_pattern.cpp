@@ -6340,7 +6340,7 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
     CHECK_NULL_VOID(host);
     ProcessDeleteNodes(deleteSpans);
     UpdateSpanPosition();
-    SetCaretPosition(info.GetOffset());
+    SetCaretPosition(info.GetOffset(), false);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     OnModifyDone();
 }
