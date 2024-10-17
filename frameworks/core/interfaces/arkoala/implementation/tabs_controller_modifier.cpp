@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
@@ -43,7 +44,7 @@ void ChangeIndexImpl(TabsControllerPeer* peer,
     auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(value);
-    auto index = Converter::Convert<Ark_Int32>(*value);    
+    auto index = Converter::Convert<Ark_Int32>(*value);
     peerImpl->TriggerChangeIndex(index);
 }
 Ark_NativePointer PreloadItemsImpl(TabsControllerPeer* peer,
