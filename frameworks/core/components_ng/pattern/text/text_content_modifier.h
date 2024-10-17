@@ -146,6 +146,7 @@ private:
     {
         return marqueeState_ == state;
     }
+    int32_t GetDuration() const;
 
     std::optional<Dimension> fontSize_;
     float lastFontSize_ = 0.0f;
