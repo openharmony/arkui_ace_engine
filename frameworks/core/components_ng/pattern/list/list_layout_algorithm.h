@@ -514,6 +514,8 @@ private:
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
     std::optional<ListItemGroupLayoutInfo> GetListItemGroupLayoutInfo(
         const RefPtr<LayoutWrapper>& wrapper) const;
+    void GetStartIndexInfo(int32_t& index, float& pos, bool& isGroup);
+    void GetEndIndexInfo(int32_t& index, float& pos, bool& isGroup);
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
