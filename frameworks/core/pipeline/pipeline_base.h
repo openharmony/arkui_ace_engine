@@ -282,7 +282,7 @@ public:
         if (windowDensityCallback_) {
             return windowDensityCallback_();
         }
-        return 0.0;
+        return 1.0;
     }
 
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
