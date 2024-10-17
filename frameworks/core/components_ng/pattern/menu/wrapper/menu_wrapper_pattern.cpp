@@ -414,8 +414,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
     } else if (touch.GetTouchType() == TouchType::UP && currentTouchItem_) {
         auto currentTouchItemPattern = currentTouchItem_->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(currentTouchItemPattern);
-        currentTouchItemPattern->SetBgBlendColor(Color::TRANSPARENT);
-        currentTouchItemPattern->PlayBgColorAnimation(false);
+        currentTouchItemPattern->NotifyPressStatus(false);
         currentTouchItem_ = nullptr;
     }
 }
