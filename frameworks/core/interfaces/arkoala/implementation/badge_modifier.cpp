@@ -159,7 +159,7 @@ namespace BadgeInterfaceModifier {
 template<typename T>
 void SetBadgeParamBase(Ark_NativePointer node, const T* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 

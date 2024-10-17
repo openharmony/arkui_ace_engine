@@ -30,10 +30,6 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 
-inline Ark_Resource ArkRes(Ark_String* name, int id = -1,
-    NodeModifier::ResourceType type = NodeModifier::ResourceType::COLOR, const char* module = "",
-    const char* bundle = "");
-
 const auto ATTRIBUTE_POSITION_NAME = "position";
 const auto ATTRIBUTE_POSITION_DEFAULT_VALUE = "BadgePosition.RightTop";
 const auto ATTRIBUTE_SET_STYLE_NAME = "style";
@@ -62,16 +58,9 @@ const auto ATTRIBUTE_MAX_COUNT_DEFAULT_VALUE = "99";
 const auto ATTRIBUTE_VALUE_NAME = "value";
 const auto ATTRIBUTE_VALUE_DEFAULT_VALUE = "";
 
-inline Ark_Resource ArkRes(Ark_String* name, int id, NodeModifier::ResourceType type,
-    const char* module, const char* bundle)
-    {
-    return { .id = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(id) },
-        .type = { .tag = ARK_TAG_INT32, .i32 = static_cast<Ark_Int32>(type) },
-        .moduleName = { .chars = module },
-        .bundleName = { .chars = bundle },
-        .params = { .tag = ARK_TAG_OBJECT, .value = { .array = name, .length = name ? 1 : 0 } }
-    };
-}
+// resource names and id
+const auto RES_COLOR_NAME = NamedResourceId{"color_name", NodeModifier::ResourceType::COLOR};
+const auto COLOR_BY_STRING = Color(0xFF123456);
 
 template<typename T>
 void FillEmptyOptions(T& options)
@@ -134,6 +123,8 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<BadgeTheme>();
+
+        AddResource(RES_COLOR_NAME, COLOR_BY_STRING);
     }
 };
 
@@ -418,7 +409,7 @@ static const std::vector<TestVector> VALID_1_TEST2_PLAN = {
     { ATTRIBUTE_SET_STYLE_FONT_SIZE_NAME, "28.00vp" },
     { ATTRIBUTE_SET_STYLE_BADGE_COLOR_NAME, "#FF0000FF" },
     { ATTRIBUTE_SET_STYLE_BADGE_SIZE_NAME, "32.00px" },
-    { ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME, "#FFFF0000" },
+    { ATTRIBUTE_SET_STYLE_BORDER_COLOR_NAME, "#FF123456" },
     { ATTRIBUTE_SET_STYLE_BORDER_WIDTH_NAME, "10.00px" },
     { ATTRIBUTE_SET_STYLE_FONT_WEIGHT_NAME, "100" },
 };
@@ -436,7 +427,7 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestValidValues, TestSize.Level1)
     Ark_Position position;
     position.x = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(16.00f)));
     position.y = Converter::ArkValue<Opt_Length>(std::optional(Converter::ArkValue<Ark_Length>(24.00f)));
-
+    
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_BadgePosition>(
         Converter::ArkValue<Ark_BadgePosition>(BadgePosition::LEFT)
         );
@@ -447,7 +438,7 @@ HWTEST_F(BadgeModifierTest, setBadgeOptions1TestValidValues, TestSize.Level1)
         .badgeColor =
             Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE)),
         .borderColor =Converter::ArkValue<Opt_ResourceColor>(
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(ArkRes(nullptr, 150001))),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(CreateResource(RES_COLOR_NAME))),
         .borderWidth = Converter::ArkValue<Opt_Length>(10),
         .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>("100"),
     };
