@@ -319,7 +319,7 @@ class SetMapProxyHandler {
                         target.add(val);
                     }
                     return receiver;
-                }
+                };
             }
 
             if (key === 'forEach') {
@@ -330,7 +330,7 @@ class SetMapProxyHandler {
                     // currently, just execute it in target because there is no Component need to iterate Set, only Array
                     const result = ret.call(target, callbackFn);
                     return result;
-                }
+                };
             }
             // Bind to receiver ==> functions are observed
             return (typeof ret === 'function') ? ret.bind(receiver) : ret;
@@ -368,7 +368,7 @@ class SetMapProxyHandler {
                     // currently, just execute it in target because there is no Component need to iterate Map, only Array
                     const result = ret.call(target, callbackFn);
                     return result;
-                }
+                };
             }
         }
         // Bind to receiver ==> functions are observed

@@ -407,52 +407,20 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     public setActiveInternal(newState: boolean): void {
         stateMgmtProfiler.begin('ViewV2.setActive');
 
-        if (!this.isCompFreezeAllowed()) {
-            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive. Component freeze state is ${this.isCompFreezeAllowed()} - ignoring`);
-            stateMgmtProfiler.end();
-            return;
+        if (this.isCompFreezeAllowed()) {
+            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
+            this.isActive_ = newState;
+            if (this.isActive_) {
+                this.performDelayedUpdate();
+            }
         }
-
-        stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
-        this.isActive_ = newState;
-        if (this.isActive_) {
-          this.onActiveInternal();
-        } else {
-          this.onInactiveInternal();
-        }
+        for (const child of this.childrenWeakrefMap_.values()) {
+            const childView: IView | undefined = child.deref();
+            if (childView) {
+              childView.setActiveInternal(newState);
+            }
+          }
         stateMgmtProfiler.end();
-    }
-
-    private onActiveInternal(): void {
-        if (!this.isActive_) {
-          return;
-        }
-
-        stateMgmtConsole.debug(`${this.debugInfo__()}: onActiveInternal`);
-        this.performDelayedUpdate();
-
-        // Set 'isActive_' state for all descendant child Views
-        for (const child of this.childrenWeakrefMap_.values()) {
-          const childView: IView | undefined = child.deref();
-          if (childView) {
-            childView.setActiveInternal(this.isActive_);
-          }
-        }
-    }
-
-    private onInactiveInternal(): void {
-        if (this.isActive_) {
-          return;
-        }
-        stateMgmtConsole.debug(`${this.debugInfo__()}: onInactiveInternal`);
-
-        // Set 'isActive_' state for all descendant child Views
-        for (const child of this.childrenWeakrefMap_.values()) {
-          const childView: IView | undefined = child.deref();
-          if (childView) {
-            childView.setActiveInternal(this.isActive_);
-          }
-        }
     }
 
     private performDelayedUpdate(): void {
