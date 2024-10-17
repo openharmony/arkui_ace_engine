@@ -88,7 +88,6 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
         } else {
             sharedImageMap_.emplace(name, std::move(sharedImage));
         }
-        bool isClear = IsClearImageAfter30s(sharedImage);
         auto taskExecutor = taskExecutor_.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
@@ -113,16 +112,11 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
                         provider->UpdateData(std::string(MEMORY_IMAGE_HEAD).append(name), imageDataIter->second);
                     }
                 }
-                if (isClear) {
+                if (sharedImageManager->GetSharedImageMap().size() > MAX_NUM_OF_IMAGE || dataSize > MAX_SIZE_FOR_EACH_IMAGE) {
                     sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
                 }
             },
             TaskExecutor::TaskType::UI, "ArkUIImageAddSharedImageData");
-}
-
-bool SharedImageManager::IsClearImageAfter30s(const SharedImage& sharedImage)
-{
-    return sharedImageMap_.size() > MAX_NUM_OF_IMAGE || sharedImage.size() > MAX_SIZE_FOR_EACH_IMAGE;
 }
 
 void SharedImageManager::AddPictureNamesToReloadMap(std::string&& name)

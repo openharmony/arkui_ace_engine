@@ -62,7 +62,6 @@ public:
 private:
     void PostDelayedTaskToClearImageData(const std::string& name, size_t dataSize);
     std::function<void()> GenerateClearImageDataCallback(const std::string& name, size_t dataSize);
-    bool IsClearImageAfter30s(const SharedImage& sharedImage);
 
     std::mutex sharedImageMapMutex_;
     std::mutex providerMapMutex_;
