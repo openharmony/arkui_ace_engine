@@ -40,6 +40,16 @@ void Font0Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //TextModelNG::SetFont0(frameNode, convValue);
 }
+void Font1Impl(Ark_NativePointer node,
+               const Ark_Font* fontValue,
+               const Opt_FontSettingOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(fontValue);
+    //auto convValue = Converter::OptConvert<type>(fontValue); // for enums
+    //TextModelNG::SetFont1(frameNode, convValue);
+}
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
 {
@@ -111,6 +121,16 @@ void FontWeight0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //TextModelNG::SetFontWeight0(frameNode, convValue);
+}
+void FontWeight1Impl(Ark_NativePointer node,
+                     const Ark_Union_Number_FontWeight_String* weight,
+                     const Opt_FontSettingOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(weight);
+    //auto convValue = Converter::OptConvert<type>(weight); // for enums
+    //TextModelNG::SetFontWeight1(frameNode, convValue);
 }
 void LineSpacingImpl(Ark_NativePointer node,
                      const Ark_CustomObject* value)
@@ -363,26 +383,6 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     //TextModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
-void Font1Impl(Ark_NativePointer node,
-               const Ark_Font* fontValue,
-               const Opt_FontSettingOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(fontValue);
-    //auto convValue = Converter::OptConvert<type>(fontValue); // for enums
-    //TextModelNG::SetFont1(frameNode, convValue);
-}
-void FontWeight1Impl(Ark_NativePointer node,
-                     const Ark_Union_Number_FontWeight_String* weight,
-                     const Opt_FontSettingOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(weight);
-    //auto convValue = Converter::OptConvert<type>(weight); // for enums
-    //TextModelNG::SetFontWeight1(frameNode, convValue);
-}
 void SelectionImpl(Ark_NativePointer node,
                    const Ark_Number* selectionStart,
                    const Ark_Number* selectionEnd)
@@ -411,6 +411,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
     static const GENERATED_ArkUITextModifier ArkUITextModifierImpl {
         TextInterfaceModifier::SetTextOptionsImpl,
         TextAttributeModifier::Font0Impl,
+        TextAttributeModifier::Font1Impl,
         TextAttributeModifier::FontColorImpl,
         TextAttributeModifier::FontSizeImpl,
         TextAttributeModifier::MinFontSizeImpl,
@@ -419,6 +420,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::MaxFontScaleImpl,
         TextAttributeModifier::FontStyleImpl,
         TextAttributeModifier::FontWeight0Impl,
+        TextAttributeModifier::FontWeight1Impl,
         TextAttributeModifier::LineSpacingImpl,
         TextAttributeModifier::TextAlignImpl,
         TextAttributeModifier::LineHeightImpl,
@@ -447,8 +449,6 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::EditMenuOptionsImpl,
         TextAttributeModifier::HalfLeadingImpl,
         TextAttributeModifier::EnableHapticFeedbackImpl,
-        TextAttributeModifier::Font1Impl,
-        TextAttributeModifier::FontWeight1Impl,
         TextAttributeModifier::SelectionImpl,
         TextAttributeModifier::BindSelectionMenuImpl,
     };

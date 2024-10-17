@@ -351,15 +351,23 @@ void ForegroundColorImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetForegroundColor(frameNode, convValue);
 }
-void OnClickImpl(Ark_NativePointer node,
-                 Ark_Function event,
-                 const Opt_Number* distanceThreshold)
+void OnClick0Impl(Ark_NativePointer node,
+                  Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //CommonMethodModelNG::SetOnClick0(frameNode, convValue);
+}
+void OnClick1Impl(Ark_NativePointer node,
+                  Ark_Function event,
+                  const Ark_Number* distanceThreshold)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(event);
     //auto convValue = Converter::OptConvert<type>(event); // for enums
-    //CommonMethodModelNG::SetOnClick(frameNode, convValue);
+    //CommonMethodModelNG::SetOnClick1(frameNode, convValue);
 }
 void OnHoverImpl(Ark_NativePointer node,
                  Ark_Function value)
@@ -505,6 +513,16 @@ void Transition0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetTransition0(frameNode, convValue);
+}
+void Transition1Impl(Ark_NativePointer node,
+                     const Ark_TransitionEffect* effect,
+                     const Opt_Function* onFinish)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(effect);
+    //auto convValue = Converter::OptConvert<type>(effect); // for enums
+    //CommonMethodModelNG::SetTransition1(frameNode, convValue);
 }
 void MotionBlurImpl(Ark_NativePointer node,
                     const Ark_MotionBlurOptions* value)
@@ -1091,6 +1109,16 @@ void GeometryTransition0Impl(Ark_NativePointer node,
     auto convValue = Converter::Convert<std::string>(*value);
     //CommonMethodModelNG::SetGeometryTransition0(frameNode, convValue);
 }
+void GeometryTransition1Impl(Ark_NativePointer node,
+                             const Ark_String* id,
+                             const Opt_GeometryTransitionOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(id);
+    //auto convValue = Converter::OptConvert<type>(id); // for enums
+    //CommonMethodModelNG::SetGeometryTransition1(frameNode, convValue);
+}
 void StateStylesImpl(Ark_NativePointer node,
                      const Ark_StateStyles* value)
 {
@@ -1387,16 +1415,6 @@ void FocusScopePriorityImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(scopeId); // for enums
     //CommonMethodModelNG::SetFocusScopePriority(frameNode, convValue);
 }
-void Transition1Impl(Ark_NativePointer node,
-                     const Ark_TransitionEffect* effect,
-                     const Opt_Function* onFinish)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(effect);
-    //auto convValue = Converter::OptConvert<type>(effect); // for enums
-    //CommonMethodModelNG::SetTransition1(frameNode, convValue);
-}
 void GestureImpl(Ark_NativePointer node,
                  Ark_GestureControl_GestureType gesture,
                  const Opt_GestureMask* mask)
@@ -1524,16 +1542,6 @@ void AdvancedBlendModeImpl(Ark_NativePointer node,
     //auto convValue = Converter::Convert<type>(effect);
     //auto convValue = Converter::OptConvert<type>(effect); // for enums
     //CommonMethodModelNG::SetAdvancedBlendMode(frameNode, convValue);
-}
-void GeometryTransition1Impl(Ark_NativePointer node,
-                             const Ark_String* id,
-                             const Opt_GeometryTransitionOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(id);
-    //auto convValue = Converter::OptConvert<type>(id); // for enums
-    //CommonMethodModelNG::SetGeometryTransition1(frameNode, convValue);
 }
 void BindPopupImpl(Ark_NativePointer node,
                    Ark_Boolean show,
@@ -1683,7 +1691,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OutlineColorImpl,
         CommonMethodModifier::OutlineRadiusImpl,
         CommonMethodModifier::ForegroundColorImpl,
-        CommonMethodModifier::OnClickImpl,
+        CommonMethodModifier::OnClick0Impl,
+        CommonMethodModifier::OnClick1Impl,
         CommonMethodModifier::OnHoverImpl,
         CommonMethodModifier::OnAccessibilityHoverImpl,
         CommonMethodModifier::HoverEffectImpl,
@@ -1701,6 +1710,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::FocusBoxImpl,
         CommonMethodModifier::AnimationImpl,
         CommonMethodModifier::Transition0Impl,
+        CommonMethodModifier::Transition1Impl,
         CommonMethodModifier::MotionBlurImpl,
         CommonMethodModifier::BrightnessImpl,
         CommonMethodModifier::ContrastImpl,
@@ -1767,6 +1777,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::KeyImpl,
         CommonMethodModifier::IdImpl,
         CommonMethodModifier::GeometryTransition0Impl,
+        CommonMethodModifier::GeometryTransition1Impl,
         CommonMethodModifier::StateStylesImpl,
         CommonMethodModifier::RestoreIdImpl,
         CommonMethodModifier::SphericalEffectImpl,
@@ -1799,7 +1810,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::ForegroundBlurStyleImpl,
         CommonMethodModifier::FocusScopeIdImpl,
         CommonMethodModifier::FocusScopePriorityImpl,
-        CommonMethodModifier::Transition1Impl,
         CommonMethodModifier::GestureImpl,
         CommonMethodModifier::PriorityGestureImpl,
         CommonMethodModifier::ParallelGestureImpl,
@@ -1813,7 +1823,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OverlayImpl,
         CommonMethodModifier::BlendModeImpl,
         CommonMethodModifier::AdvancedBlendModeImpl,
-        CommonMethodModifier::GeometryTransition1Impl,
         CommonMethodModifier::BindPopupImpl,
         CommonMethodModifier::BindMenu0Impl,
         CommonMethodModifier::BindMenu1Impl,

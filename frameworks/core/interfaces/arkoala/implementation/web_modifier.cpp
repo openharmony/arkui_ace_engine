@@ -399,14 +399,6 @@ void OnRenderExited0Impl(Ark_NativePointer node,
     //auto convValue = [frameNode](input values) { code }
     //WebModelNG::SetOnRenderExited0(frameNode, convValue);
 }
-void OnShowFileSelectorImpl(Ark_NativePointer node,
-                            Ark_Function value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = [frameNode](input values) { code }
-    //WebModelNG::SetOnShowFileSelector(frameNode, convValue);
-}
 void OnRenderExited1Impl(Ark_NativePointer node,
                          Ark_Function value)
 {
@@ -414,6 +406,14 @@ void OnRenderExited1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     //auto convValue = [frameNode](input values) { code }
     //WebModelNG::SetOnRenderExited1(frameNode, convValue);
+}
+void OnShowFileSelectorImpl(Ark_NativePointer node,
+                            Ark_Function value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //WebModelNG::SetOnShowFileSelector(frameNode, convValue);
 }
 void OnFileSelectorShowImpl(Ark_NativePointer node,
                             Ark_Function value)
@@ -1104,8 +1104,8 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::OnUrlLoadInterceptImpl,
         WebAttributeModifier::OnSslErrorReceiveImpl,
         WebAttributeModifier::OnRenderExited0Impl,
-        WebAttributeModifier::OnShowFileSelectorImpl,
         WebAttributeModifier::OnRenderExited1Impl,
+        WebAttributeModifier::OnShowFileSelectorImpl,
         WebAttributeModifier::OnFileSelectorShowImpl,
         WebAttributeModifier::OnResourceLoadImpl,
         WebAttributeModifier::OnFullScreenExitImpl,

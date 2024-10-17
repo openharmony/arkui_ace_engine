@@ -38,6 +38,16 @@ void HideTitleBar0Impl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     //NavDestinationModelNG::SetHideTitleBar0(frameNode, convValue);
 }
+void HideTitleBar1Impl(Ark_NativePointer node,
+                       Ark_Boolean hide,
+                       Ark_Boolean animated)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(hide);
+    //auto convValue = Converter::OptConvert<type>(hide); // for enums
+    //NavDestinationModelNG::SetHideTitleBar1(frameNode, convValue);
+}
 void OnShownImpl(Ark_NativePointer node,
                  Ark_Function value)
 {
@@ -164,16 +174,6 @@ void TitleImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //NavDestinationModelNG::SetTitle(frameNode, convValue);
 }
-void HideTitleBar1Impl(Ark_NativePointer node,
-                       Ark_Boolean hide,
-                       Ark_Boolean animated)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(hide);
-    //auto convValue = Converter::OptConvert<type>(hide); // for enums
-    //NavDestinationModelNG::SetHideTitleBar1(frameNode, convValue);
-}
 void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
                               const Opt_Array_LayoutSafeAreaType* types,
                               const Opt_Array_LayoutSafeAreaEdge* edges)
@@ -190,6 +190,7 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
     static const GENERATED_ArkUINavDestinationModifier ArkUINavDestinationModifierImpl {
         NavDestinationInterfaceModifier::SetNavDestinationOptionsImpl,
         NavDestinationAttributeModifier::HideTitleBar0Impl,
+        NavDestinationAttributeModifier::HideTitleBar1Impl,
         NavDestinationAttributeModifier::OnShownImpl,
         NavDestinationAttributeModifier::OnHiddenImpl,
         NavDestinationAttributeModifier::OnBackPressedImpl,
@@ -205,7 +206,6 @@ const GENERATED_ArkUINavDestinationModifier* GetNavDestinationModifier()
         NavDestinationAttributeModifier::RecoverableImpl,
         NavDestinationAttributeModifier::SystemTransitionImpl,
         NavDestinationAttributeModifier::TitleImpl,
-        NavDestinationAttributeModifier::HideTitleBar1Impl,
         NavDestinationAttributeModifier::IgnoreLayoutSafeAreaImpl,
     };
     return &ArkUINavDestinationModifierImpl;

@@ -65,6 +65,26 @@ void BarMode0Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //TabsModelNG::SetBarMode0(frameNode, convValue);
 }
+void BarMode1Impl(Ark_NativePointer node,
+                  Ark_BarMode value,
+                  const Ark_ScrollableBarModeOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //TabsModelNG::SetBarMode1(frameNode, convValue);
+}
+void BarMode2Impl(Ark_NativePointer node,
+                  Ark_BarMode value,
+                  const Opt_ScrollableBarModeOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //TabsModelNG::SetBarMode2(frameNode, convValue);
+}
 void BarWidthImpl(Ark_NativePointer node,
                   const Ark_Length* value)
 {
@@ -218,26 +238,6 @@ void OnContentWillChangeImpl(Ark_NativePointer node,
     //auto convValue = [frameNode](input values) { code }
     //TabsModelNG::SetOnContentWillChange(frameNode, convValue);
 }
-void BarMode1Impl(Ark_NativePointer node,
-                  Ark_BarMode value,
-                  const Ark_ScrollableBarModeOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TabsModelNG::SetBarMode1(frameNode, convValue);
-}
-void BarMode2Impl(Ark_NativePointer node,
-                  Ark_BarMode value,
-                  const Opt_ScrollableBarModeOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TabsModelNG::SetBarMode2(frameNode, convValue);
-}
 } // TabsAttributeModifier
 const GENERATED_ArkUITabsModifier* GetTabsModifier()
 {
@@ -247,6 +247,8 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::BarPositionImpl,
         TabsAttributeModifier::ScrollableImpl,
         TabsAttributeModifier::BarMode0Impl,
+        TabsAttributeModifier::BarMode1Impl,
+        TabsAttributeModifier::BarMode2Impl,
         TabsAttributeModifier::BarWidthImpl,
         TabsAttributeModifier::BarHeightImpl,
         TabsAttributeModifier::AnimationDurationImpl,
@@ -265,8 +267,6 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::CustomContentTransitionImpl,
         TabsAttributeModifier::BarBackgroundBlurStyleImpl,
         TabsAttributeModifier::OnContentWillChangeImpl,
-        TabsAttributeModifier::BarMode1Impl,
-        TabsAttributeModifier::BarMode2Impl,
     };
     return &ArkUITabsModifierImpl;
 }
