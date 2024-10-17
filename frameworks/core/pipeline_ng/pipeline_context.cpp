@@ -1270,7 +1270,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushFrameRate()
 {
-    frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate());
+    frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate(), window_->HasFirstFrameAnimation());
     int32_t currAnimatorExpectedFrameRate = GetOrCreateUIDisplaySyncManager()->GetAnimatorRate();
     if (frameRateManager_->IsRateChanged() || currAnimatorExpectedFrameRate != lastAnimatorExpectedFrameRate_) {
         auto [rate, rateType] = frameRateManager_->GetExpectedRate();

@@ -61,6 +61,11 @@ public:
         return rsUIDirector_->FlushAnimation(timeStamp);
     }
 
+    bool HasFirstFrameAnimation() override
+    {
+        return rsUIDirector_->HasFirstFrameAnimation();
+    }
+
     void FlushAnimationStartTime(uint64_t timeStamp) override
     {
         rsUIDirector_->FlushAnimationStartTime(timeStamp);
