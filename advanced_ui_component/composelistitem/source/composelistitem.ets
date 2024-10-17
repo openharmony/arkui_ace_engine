@@ -179,9 +179,15 @@ struct ContentItemStruct {
     } else {
       this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
     }
-    this.primaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_text_color') : this.primaryTextColor;
-    this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_left_secondary_description_text_color') : this.secondaryTextColor;
-    this.descriptionColors = this.isFocus ? $r('sys.color.composeListItem_left_secondary_description_text_color') : this.descriptionColor;
+    if (!IS_CLOSE_CHILD_FOCUS){
+      this.primaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_left_text_color') : this.primaryTextColor;
+      this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_left_secondary_description_text_color') : this.secondaryTextColor;
+      this.descriptionColors = this.isFocus ? $r('sys.color.composeListItem_left_secondary_description_text_color') : this.descriptionColor;
+    } else {
+      this.primaryTextColors = this.primaryTextColor;
+      this.secondaryTextColors = this.secondaryTextColor;
+      this.descriptionColors = this.descriptionColor;
+    }
   }
 
   onWrapChange(){
@@ -380,7 +386,11 @@ struct OperateItemStruct {
   }
 
   onFocusChange(){
-    this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_right_text_color') : this.secondaryTextColor;
+    if (!IS_CLOSE_CHILD_FOCUS){
+      this.secondaryTextColors = this.isFocus ? $r('sys.color.composeListItem_focused_right_text_color') : this.secondaryTextColor;
+    } else {
+      this.secondaryTextColors = this.secondaryTextColor;
+    }
     this.iconColor = this.isFocus ? $r('sys.color.composeListItem_focused_right_icon_color') : $r('sys.color.composeListItem_normal_right_icon_color');
   }
 
