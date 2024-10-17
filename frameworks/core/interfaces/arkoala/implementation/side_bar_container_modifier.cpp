@@ -73,24 +73,6 @@ void SideBarWidth0Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SideBarContainerModelNG::SetSideBarWidth0(frameNode, convValue);
 }
-void MinSideBarWidth0Impl(Ark_NativePointer node,
-                          const Ark_Number* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SideBarContainerModelNG::SetMinSideBarWidth0(frameNode, convValue);
-}
-void MaxSideBarWidth0Impl(Ark_NativePointer node,
-                          const Ark_Number* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SideBarContainerModelNG::SetMaxSideBarWidth0(frameNode, convValue);
-}
 void SideBarWidth1Impl(Ark_NativePointer node,
                        const Ark_Length* value)
 {
@@ -100,6 +82,15 @@ void SideBarWidth1Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SideBarContainerModelNG::SetSideBarWidth1(frameNode, convValue);
 }
+void MinSideBarWidth0Impl(Ark_NativePointer node,
+                          const Ark_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SideBarContainerModelNG::SetMinSideBarWidth0(frameNode, convValue);
+}
 void MinSideBarWidth1Impl(Ark_NativePointer node,
                           const Ark_Length* value)
 {
@@ -108,6 +99,15 @@ void MinSideBarWidth1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SideBarContainerModelNG::SetMinSideBarWidth1(frameNode, convValue);
+}
+void MaxSideBarWidth0Impl(Ark_NativePointer node,
+                          const Ark_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //SideBarContainerModelNG::SetMaxSideBarWidth0(frameNode, convValue);
 }
 void MaxSideBarWidth1Impl(Ark_NativePointer node,
                           const Ark_Length* value)
@@ -164,10 +164,10 @@ const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier()
         SideBarContainerAttributeModifier::ShowControlButtonImpl,
         SideBarContainerAttributeModifier::OnChangeImpl,
         SideBarContainerAttributeModifier::SideBarWidth0Impl,
-        SideBarContainerAttributeModifier::MinSideBarWidth0Impl,
-        SideBarContainerAttributeModifier::MaxSideBarWidth0Impl,
         SideBarContainerAttributeModifier::SideBarWidth1Impl,
+        SideBarContainerAttributeModifier::MinSideBarWidth0Impl,
         SideBarContainerAttributeModifier::MinSideBarWidth1Impl,
+        SideBarContainerAttributeModifier::MaxSideBarWidth0Impl,
         SideBarContainerAttributeModifier::MaxSideBarWidth1Impl,
         SideBarContainerAttributeModifier::AutoHideImpl,
         SideBarContainerAttributeModifier::SideBarPositionImpl,

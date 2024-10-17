@@ -41,7 +41,7 @@ void ClearHistoryImpl(WebControllerPeer* peer)
 {
 }
 void RunJavaScriptImpl(WebControllerPeer* peer,
-                       const Ark_Literal_String_script_Callback_result_String_Void_callback* options)
+                       const Ark_Literal_String_script_Callback_String_Void_callback* options)
 {
 }
 void LoadDataImpl(WebControllerPeer* peer,

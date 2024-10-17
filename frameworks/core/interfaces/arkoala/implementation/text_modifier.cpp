@@ -93,6 +93,18 @@ void Font0Impl(Ark_NativePointer node,
 {
     FontImplInternal(node, value);
 }
+void Font1Impl(Ark_NativePointer node,
+               const Ark_Font* fontValue,
+               const Opt_FontSettingOptions* options)
+{
+    if (options) {
+        if (auto settings = Converter::OptConvert<Converter::FontSettingOptions>(*options); settings) {
+            FontImplInternal(node, fontValue, settings->enableVariableFontWeight);
+        }
+    } else {
+        FontImplInternal(node, fontValue);
+    }
+}
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
 {
@@ -183,7 +195,21 @@ void FontWeight0Impl(Ark_NativePointer node,
         TextModelNG::SetFontWeight(frameNode, weight.value());
     }
 }
+void FontWeight1Impl(Ark_NativePointer node,
+                     const Ark_Union_Number_FontWeight_String* weight,
+                     const Opt_FontSettingOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    FontWeight0Impl(node, weight);
 
+    if (options) {
+        auto settings = Converter::OptConvert<Converter::FontSettingOptions>(*options);
+        if (settings && settings->enableVariableFontWeight) {
+            TextModelNG::SetEnableVariableFontWeight(frameNode, settings->enableVariableFontWeight.value());
+        }
+    }
+}
 void LineSpacingImpl(Ark_NativePointer node,
                      const Ark_CustomObject* value)
 {
@@ -455,33 +481,6 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetEnableHapticFeedback(frameNode, Converter::Convert<bool>(value));
 }
-void Font1Impl(Ark_NativePointer node,
-               const Ark_Font* fontValue,
-               const Opt_FontSettingOptions* options)
-{
-    if (options) {
-        if (auto settings = Converter::OptConvert<Converter::FontSettingOptions>(*options); settings) {
-            FontImplInternal(node, fontValue, settings->enableVariableFontWeight);
-        }
-    } else {
-        FontImplInternal(node, fontValue);
-    }
-}
-void FontWeight1Impl(Ark_NativePointer node,
-                     const Ark_Union_Number_FontWeight_String* weight,
-                     const Opt_FontSettingOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    FontWeight0Impl(node, weight);
-
-    if (options) {
-        auto settings = Converter::OptConvert<Converter::FontSettingOptions>(*options);
-        if (settings && settings->enableVariableFontWeight) {
-            TextModelNG::SetEnableVariableFontWeight(frameNode, settings->enableVariableFontWeight.value());
-        }
-    }
-}
 void SelectionImpl(Ark_NativePointer node,
                    const Ark_Number* selectionStart,
                    const Ark_Number* selectionEnd)
@@ -513,6 +512,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
     static const GENERATED_ArkUITextModifier ArkUITextModifierImpl {
         TextInterfaceModifier::SetTextOptionsImpl,
         TextAttributeModifier::Font0Impl,
+        TextAttributeModifier::Font1Impl,
         TextAttributeModifier::FontColorImpl,
         TextAttributeModifier::FontSizeImpl,
         TextAttributeModifier::MinFontSizeImpl,
@@ -521,6 +521,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::MaxFontScaleImpl,
         TextAttributeModifier::FontStyleImpl,
         TextAttributeModifier::FontWeight0Impl,
+        TextAttributeModifier::FontWeight1Impl,
         TextAttributeModifier::LineSpacingImpl,
         TextAttributeModifier::TextAlignImpl,
         TextAttributeModifier::LineHeightImpl,
@@ -549,8 +550,6 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::EditMenuOptionsImpl,
         TextAttributeModifier::HalfLeadingImpl,
         TextAttributeModifier::EnableHapticFeedbackImpl,
-        TextAttributeModifier::Font1Impl,
-        TextAttributeModifier::FontWeight1Impl,
         TextAttributeModifier::SelectionImpl,
         TextAttributeModifier::BindSelectionMenuImpl,
     };

@@ -124,6 +124,43 @@ void BarMode0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     BarMode2Impl(node, ARK_BAR_MODE_FIXED, nullptr);
 }
+void BarMode1Impl(Ark_NativePointer node,
+                  Ark_BarMode value,
+                  const Ark_ScrollableBarModeOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (options) {
+        auto optionsOpt = Converter::ArkValue<Opt_ScrollableBarModeOptions>(*options);
+        BarMode2Impl(node, ARK_BAR_MODE_SCROLLABLE, &optionsOpt);
+    } else {
+        BarMode2Impl(node, ARK_BAR_MODE_SCROLLABLE, nullptr);
+    }
+}
+void BarMode2Impl(Ark_NativePointer node,
+                  Ark_BarMode value,
+                  const Opt_ScrollableBarModeOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value == ARK_BAR_MODE_SCROLLABLE) {
+        ScrollableBarModeOptions barModeOptions;
+        auto defaultMargin = barModeOptions.margin;
+        auto defaultStyle = barModeOptions.nonScrollableLayoutStyle;
+        if (options) {
+            auto optionsOpt = Converter::OptConvert<Ark_ScrollableBarModeOptions>(*options);
+            if (optionsOpt) {
+                auto marginOpt = Converter::OptConvert<Dimension>(optionsOpt.value().margin);
+                Validator::ValidateNonPercent(marginOpt);
+                auto styleOpt = Converter::OptConvert<LayoutStyle>(optionsOpt.value().nonScrollableLayoutStyle);
+                barModeOptions.margin = marginOpt.value_or(defaultMargin);
+                barModeOptions.nonScrollableLayoutStyle = styleOpt.value_or(defaultStyle);
+            }
+        }
+        TabsModelNG::SetScrollableBarModeOptions(frameNode, barModeOptions);
+    }
+    TabsModelNG::SetTabBarMode(frameNode, Converter::OptConvert<TabBarMode>(value));
+}
 void BarWidthImpl(Ark_NativePointer node,
                   const Ark_Length* value)
 {
@@ -327,43 +364,6 @@ void OnContentWillChangeImpl(Ark_NativePointer node,
     };
     TabsModelNG::SetOnContentWillChange(frameNode, std::move(callback));
 }
-void BarMode1Impl(Ark_NativePointer node,
-                  Ark_BarMode value,
-                  const Ark_ScrollableBarModeOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (options) {
-        auto optionsOpt = Converter::ArkValue<Opt_ScrollableBarModeOptions>(*options);
-        BarMode2Impl(node, ARK_BAR_MODE_SCROLLABLE, &optionsOpt);
-    } else {
-        BarMode2Impl(node, ARK_BAR_MODE_SCROLLABLE, nullptr);
-    }
-}
-void BarMode2Impl(Ark_NativePointer node,
-                  Ark_BarMode value,
-                  const Opt_ScrollableBarModeOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (value == ARK_BAR_MODE_SCROLLABLE) {
-        ScrollableBarModeOptions barModeOptions;
-        auto defaultMargin = barModeOptions.margin;
-        auto defaultStyle = barModeOptions.nonScrollableLayoutStyle;
-        if (options) {
-            auto optionsOpt = Converter::OptConvert<Ark_ScrollableBarModeOptions>(*options);
-            if (optionsOpt) {
-                auto marginOpt = Converter::OptConvert<Dimension>(optionsOpt.value().margin);
-                Validator::ValidateNonPercent(marginOpt);
-                auto styleOpt = Converter::OptConvert<LayoutStyle>(optionsOpt.value().nonScrollableLayoutStyle);
-                barModeOptions.margin = marginOpt.value_or(defaultMargin);
-                barModeOptions.nonScrollableLayoutStyle = styleOpt.value_or(defaultStyle);
-            }
-        }
-        TabsModelNG::SetScrollableBarModeOptions(frameNode, barModeOptions);
-    }
-    TabsModelNG::SetTabBarMode(frameNode, Converter::OptConvert<TabBarMode>(value));
-}
 } // TabsAttributeModifier
 const GENERATED_ArkUITabsModifier* GetTabsModifier()
 {
@@ -373,6 +373,8 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::BarPositionImpl,
         TabsAttributeModifier::ScrollableImpl,
         TabsAttributeModifier::BarMode0Impl,
+        TabsAttributeModifier::BarMode1Impl,
+        TabsAttributeModifier::BarMode2Impl,
         TabsAttributeModifier::BarWidthImpl,
         TabsAttributeModifier::BarHeightImpl,
         TabsAttributeModifier::AnimationDurationImpl,
@@ -391,8 +393,6 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::CustomContentTransitionImpl,
         TabsAttributeModifier::BarBackgroundBlurStyleImpl,
         TabsAttributeModifier::OnContentWillChangeImpl,
-        TabsAttributeModifier::BarMode1Impl,
-        TabsAttributeModifier::BarMode2Impl,
     };
     return &ArkUITabsModifierImpl;
 }
