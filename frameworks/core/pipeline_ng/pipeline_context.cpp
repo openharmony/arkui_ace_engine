@@ -5462,8 +5462,8 @@ bool PipelineContext::CheckThreadSafe()
 uint64_t PipelineContext::AdjustVsyncTimeStamp(uint64_t nanoTimestamp)
 {
     auto period = window_->GetVSyncPeriod();
-    if (period > 0 && static_cast<uint64_t>(recvTime_) > nanoTimestamp + MAX_MISS_COUNT * period) {
-        return recvTime_ - ((recvTime_ - nanoTimestamp) % period);
+    if (period > 0 && recvTime_ > static_cast<int64_t>(nanoTimestamp) + MAX_MISS_COUNT * period) {
+        return static_cast<uint64_t>(recvTime_ - ((recvTime_ - static_cast<int64_t>(nanoTimestamp)) % period));
     }
     return nanoTimestamp;
 }
