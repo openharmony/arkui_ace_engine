@@ -145,6 +145,9 @@ class ContentItemStruct extends ViewPU {
         this.declareWatch("isWrapFristText", this.onWrapChange);
         this.declareWatch("isWrapSecondText", this.onWrapChange);
         this.declareWatch("isWrapThirdText", this.onWrapChange);
+        this.declareWatch("primaryTextColor", this.onPropChange);
+        this.declareWatch("secondaryTextColor", this.onPropChange);
+        this.declareWatch("descriptionColor", this.onPropChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
@@ -692,6 +695,7 @@ class OperateItemStruct extends ViewPU {
         this.declareWatch("text", this.onPropChange);
         this.declareWatch("isFocus", this.onFocusChange);
         this.declareWatch("isChecked", this.onPropChange);
+        this.declareWatch("secondaryTextColor", this.onFocusChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {

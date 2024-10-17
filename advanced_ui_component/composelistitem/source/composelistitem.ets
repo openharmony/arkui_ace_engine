@@ -148,9 +148,9 @@ struct ContentItemStruct {
   @Prop @Watch('onPropChange') description: ResourceStr | null = null;
   @State itemRowSpace: number = NORMAL_ITEM_ROW_SPACE;
   @Prop leftWidth: string = LEFT_PART_WIDTH;
-  @State primaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary');
-  @State secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
-  @State descriptionColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+  @State @Watch('onPropChange') primaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_primary');
+  @State @Watch('onPropChange') secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+  @State @Watch('onPropChange') descriptionColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
   @Prop fontSizeScale: number;
   @Prop parentDirection: FlexDirection;
   @Prop itemDirection: FlexDirection;
@@ -356,7 +356,7 @@ struct OperateItemStruct {
   @State radioState: boolean = false
   @State checkBoxState: boolean = false
   @Prop rightWidth: string = RIGHT_PART_WIDTH;
-  @State secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
+  @State @Watch('onFocusChange') secondaryTextColor: ResourceColor = $r('sys.color.ohos_id_color_text_secondary');
   @State hoveringColor: ResourceColor = '#0d000000';
   @State activedColor: ResourceColor = '#1a0a59f7';
   @Link parentCanFocus: boolean
