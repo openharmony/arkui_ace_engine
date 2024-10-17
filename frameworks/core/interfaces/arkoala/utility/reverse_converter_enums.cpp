@@ -143,6 +143,19 @@ void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src)
     }
 }
 
+void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src)
+{
+    switch (src) {
+        case FoldStatus::UNKNOWN: dst = ARK_FOLD_STATUS_FOLD_STATUS_UNKNOWN; break;
+        case FoldStatus::EXPAND: dst = ARK_FOLD_STATUS_FOLD_STATUS_EXPANDED; break;
+        case FoldStatus::FOLDED: dst = ARK_FOLD_STATUS_FOLD_STATUS_FOLDED; break;
+        case FoldStatus::HALF_FOLD: dst = ARK_FOLD_STATUS_FOLD_STATUS_HALF_FOLDED; break;
+        default:
+            LOGE("Unexpected enum value in FoldStatus: %{public}d", src);
+            dst = static_cast<Ark_FoldStatus>(-1);
+    }
+}
+
 void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src)
 {
     switch (src) {
