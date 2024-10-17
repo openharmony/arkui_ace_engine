@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-
+import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
+
 
 @Component
 export struct CalendarPickerBootcamp {
@@ -98,8 +98,9 @@ export struct CalendarPickerBootcamp {
           min: 0,
           max: 16
         })
-      }.width('100%').height('100%')
-    }.height('50%')
+      }.width('100%')
+    }
+    .height('52%')
   }
 }
 

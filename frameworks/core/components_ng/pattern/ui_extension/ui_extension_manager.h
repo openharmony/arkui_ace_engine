@@ -114,6 +114,8 @@ public:
 
     void UpdateSessionViewportConfig(const ViewportConfig& config);
 
+    void DumpUIExt();
+
 private:
     class UIExtensionIdUtility {
     public:

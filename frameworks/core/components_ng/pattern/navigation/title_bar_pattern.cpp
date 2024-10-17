@@ -1502,10 +1502,7 @@ void TitleBarPattern::HandleLongPress(const RefPtr<FrameNode>& backButtonNode)
     auto backButtonIconNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetFirstChild());
     CHECK_NULL_VOID(backButtonIconNode);
     if (backButtonIconNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        auto symbolProperty = backButtonIconNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(symbolProperty);
-        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, symbolProperty->GetSymbolSourceInfoValue(),
-            symbolProperty->GetSymbolColorListValue({}), symbolProperty->GetFontWeightValue(FontWeight::NORMAL));
+        dialogNode_ = AgingAdapationDialogUtil::ShowLongPressDialog(message, backButtonIconNode);
         return;
     }
     auto imageProperty = backButtonIconNode->GetLayoutProperty<ImageLayoutProperty>();

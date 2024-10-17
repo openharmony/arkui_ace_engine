@@ -187,7 +187,7 @@ public:
 
     void UpdateTextNodeListAsRenderGroup(bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy);
     void ReleaseTextNodeList();
-    void CollectTextNodeAsRenderGroup();
+    void CollectTextNodeAsRenderGroup(bool isPopPage);
 
     void CleanContent();
 private:

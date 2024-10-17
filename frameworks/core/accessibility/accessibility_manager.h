@@ -259,12 +259,23 @@ public:
         return treeId_;
     }
 
+    void SetUiextensionId(int64_t uiExtensionId)
+    {
+        uiExtensionId_  = uiExtensionId;
+    }
+
+    int64_t GetUiextensionId() const
+    {
+        return uiExtensionId_;
+    }
+
 protected:
     int32_t treeId_ = 0;
 
 private:
     AccessibilityVersion version_ = AccessibilityVersion::JS_VERSION;
     bool isReg_ = false;
+    int64_t uiExtensionId_ = 0;
 };
 
 } // namespace OHOS::Ace

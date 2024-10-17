@@ -111,7 +111,9 @@ public:
 
     void SetControlDistance(float controlDistance)
     {
-        controlDistanceChanged_ = Positive(controlDistance_) ? !Positive(controlDistance) : Positive(controlDistance);
+        if (Positive(controlDistance_)) {
+            controlDistanceChanged_ = true;
+        }
         controlDistance_ = controlDistance;
     }
 

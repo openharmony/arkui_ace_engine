@@ -520,9 +520,10 @@ RefPtr<AceType> NavDestinationModelNG::CreateEmpty()
     return uiNode;
 }
 
-void NavDestinationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar)
+void NavDestinationModelNG::SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, HideTitleBar, hideTitleBar, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavDestinationLayoutProperty, IsAnimatedTitleBar, animated, frameNode);
 }
 
 void NavDestinationModelNG::SetBackButtonIcon(
@@ -784,7 +785,7 @@ void NavDestinationModelNG::SetHideToolBar(bool hideToolBar, bool animated)
     navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
-void NavDestinationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar)
+void NavDestinationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated)
 {
     CHECK_NULL_VOID(frameNode);
     auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
@@ -792,6 +793,7 @@ void NavDestinationModelNG::SetHideToolBar(FrameNode* frameNode, bool hideToolBa
     auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     navDestinationLayoutProperty->UpdateHideToolBar(hideToolBar);
+    navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
 void NavDestinationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems)

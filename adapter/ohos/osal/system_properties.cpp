@@ -899,4 +899,16 @@ std::string SystemProperties::GetDebugInspectorId()
 {
     return system::GetParameter("ace.debug.inspectorId", INVALID_PARAM);
 }
+
+double SystemProperties::GetSrollableVelocityScale()
+{
+    auto ret = system::GetParameter("persist.scrollable.velocityScale", "");
+    return StringUtils::StringToDouble(ret);
+}
+
+double SystemProperties::GetSrollableFriction()
+{
+    auto ret = system::GetParameter("persist.scrollable.friction", "");
+    return StringUtils::StringToDouble(ret);
+}
 } // namespace OHOS::Ace

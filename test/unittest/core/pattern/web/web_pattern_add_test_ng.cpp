@@ -45,57 +45,9 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::NWeb {
-class NWebDateTimeChooserCallbackMock : public NWebDateTimeChooserCallback {
+class NWebDateTimeChooserCallbackImpl : public NWebDateTimeChooserCallback {
 public:
     void Continue(bool success, const DateTime& value) override {}
-};
-
-class NWebSelectPopupMenuCallbackMock : public NWebSelectPopupMenuCallback {
-public:
-    void Continue(const std::vector<int32_t>& indices) override {}
-
-    void Cancel() override {}
-};
-
-class NWebSelectPopupMenuParamMock : public NWebSelectPopupMenuParam {
-public:
-    std::vector<std::shared_ptr<NWebSelectPopupMenuItem>> GetMenuItems() override
-    {
-        return value;
-    }
-
-    int GetItemHeight() override
-    {
-        return 0;
-    }
-
-    int GetSelectedItem() override
-    {
-        return ret_;
-    }
-
-    double GetItemFontSize() override
-    {
-        return 0;
-    }
-
-    bool GetIsRightAligned() override
-    {
-        return true;
-    }
-
-    std::shared_ptr<NWebSelectMenuBound> GetSelectMenuBound() override
-    {
-        return nWebSelect;
-    }
-
-    bool GetIsAllowMultipleSelection() override
-    {
-        return true;
-    }
-    int ret_ = 0;
-    std::shared_ptr<NWebSelectMenuBound> nWebSelect = nullptr;
-    std::vector<std::shared_ptr<NWebSelectPopupMenuItem>> value;
 };
 
 class MockNWebSelectMenuBound : public NWebSelectMenuBound {
@@ -118,50 +70,10 @@ class MockNWebSelectMenuBound : public NWebSelectMenuBound {
     int ret = -1;
 };
 
-class MockNWebSelectPopupMenuItem : public NWebSelectPopupMenuItem {
-    SelectPopupMenuItemType GetType() override
-    {
-        return type_;
-    }
-    std::string GetLabel() override
-    {
-        return menuItem;
-    }
-    uint32_t GetAction() override
-    {
-        return action;
-    }
-    std::string GetToolTip() override
-    {
-        return menuItem;
-    }
-    bool GetIsChecked() override
-    {
-        return isRet_;
-    }
-    bool GetIsEnabled() override
-    {
-        return isRet_;
-    }
-    TextDirection GetTextDirection() override
-    {
-        return direction;
-    }
-    bool GetHasTextDirectionOverride() override
-    {
-        return isRet_;
-    }
-    SelectPopupMenuItemType type_ = SP_OPTION;
-    std::string menuItem = "";
-    uint32_t action = 0;
-    bool isRet_ = false;
-    TextDirection direction = SP_UNKNOWN;
-};
-
-class MockTaskExecutorTest : public Ace::TaskExecutor {
+class TaskExecutorImpl : public Ace::TaskExecutor {
 public:
-    MockTaskExecutorTest() = default;
-    explicit MockTaskExecutorTest(bool delayRun) : delayRun_(delayRun) {}
+    TaskExecutorImpl() = default;
+    explicit TaskExecutorImpl(bool delayRun) : delayRun_(delayRun) {}
 
     bool OnPostTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
         Ace::PriorityType priorityType = Ace::PriorityType::LOW) const override
@@ -213,7 +125,7 @@ constexpr double ROOT_HEIGHT_VALUE = 10.0;
 } // namespace
 
 namespace OHOS::Ace::NG {
-class UnifiedDataMock : public Ace::UnifiedData {
+class UnifiedDataImpl : public Ace::UnifiedData {
 public:
     int64_t GetSize() override
     {
@@ -221,7 +133,7 @@ public:
     }
 };
 
-class MockPixelMap : public OHOS::Ace::PixelMap {
+class PixelMapImpl : public OHOS::Ace::PixelMap {
 public:
     int32_t GetWidth() const override
     {
@@ -439,9 +351,9 @@ void WebPatternAddTestNg::TearDown()
     MockPipelineContext::TearDown();
 }
 
-class NWebDateTimeChooserMock : public NWeb::NWebDateTimeChooser {
+class NWebDateTimeChooserTestImpl : public NWeb::NWebDateTimeChooser {
 public:
-    NWebDateTimeChooserMock() = default;
+    NWebDateTimeChooserTestImpl() = default;
     NWeb::DateTimeChooserType GetType()
     {
         return ret;
@@ -528,17 +440,17 @@ HWTEST_F(WebPatternAddTestNg, ShowDateTimeDialog, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    std::shared_ptr<NWebDateTimeChooserMock> chooser = std::make_shared<NWebDateTimeChooserMock>();
+    std::shared_ptr<NWebDateTimeChooserTestImpl> chooser = std::make_shared<NWebDateTimeChooserTestImpl>();
     ASSERT_NE(chooser, nullptr);
-    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallbackMock> callback =
-        std::make_shared<OHOS::NWeb::NWebDateTimeChooserCallbackMock>();
+    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallbackImpl> callback =
+        std::make_shared<OHOS::NWeb::NWebDateTimeChooserCallbackImpl>();
     ASSERT_NE(callback, nullptr);
     std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>> suggestions;
     suggestions.clear();
     EXPECT_EQ(suggestions.size(), 0);
     EXPECT_CALL(*chooser, GetHasSelected).WillRepeatedly(Return(false));
     MockContainer::SetUp();
-    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<NWeb::MockTaskExecutorTest>();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<NWeb::TaskExecutorImpl>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
     MockContainer::Current()->pipelineContext_->SetupRootElement();
@@ -571,15 +483,15 @@ HWTEST_F(WebPatternAddTestNg, OnDateTimeChooserPopup, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    std::shared_ptr<NWebDateTimeChooserMock> chooser = std::make_shared<NWebDateTimeChooserMock>();
+    std::shared_ptr<NWebDateTimeChooserTestImpl> chooser = std::make_shared<NWebDateTimeChooserTestImpl>();
     ASSERT_NE(chooser, nullptr);
-    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallbackMock> callback =
-        std::make_shared<OHOS::NWeb::NWebDateTimeChooserCallbackMock>();
+    std::shared_ptr<OHOS::NWeb::NWebDateTimeChooserCallbackImpl> callback =
+        std::make_shared<OHOS::NWeb::NWebDateTimeChooserCallbackImpl>();
     ASSERT_NE(callback, nullptr);
     std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>> suggestions;
     EXPECT_CALL(*chooser, GetHasSelected).WillRepeatedly(Return(false));
     MockContainer::SetUp();
-    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<NWeb::MockTaskExecutorTest>();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<NWeb::TaskExecutorImpl>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
     MockContainer::Current()->pipelineContext_->SetupRootElement();
@@ -637,7 +549,7 @@ HWTEST_F(WebPatternAddTestNg, GetDragPixelMapSize, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->delegate_->pixelMap_ = AccessibilityManager::MakeRefPtr<MockPixelMap>();
+    webPattern->delegate_->pixelMap_ = AccessibilityManager::MakeRefPtr<PixelMapImpl>();
     SizeF pixelMapSize = webPattern->GetDragPixelMapSize();
     EXPECT_EQ(pixelMapSize, SizeF(0, 0));
 #endif
@@ -663,7 +575,7 @@ HWTEST_F(WebPatternAddTestNg, OnDragFileNameStart, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->delegate_->tempDir_ = "abc";
-    RefPtr<UnifiedDataMock> aceUnifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
+    RefPtr<UnifiedDataImpl> aceUnifiedData = AceType::MakeRefPtr<UnifiedDataImpl>();
     ASSERT_NE(aceUnifiedData, nullptr);
     auto mockUdmfClient = AceType::DynamicCast<MockUdmfClient>(UdmfClient::GetInstance());
     ASSERT_NE(mockUdmfClient, nullptr);
@@ -778,8 +690,8 @@ HWTEST_F(WebPatternAddTestNg, GenerateDragDropInfo, TestSize.Level1)
     webpattern.delegate_ = nullptr;
     ASSERT_EQ(webpattern.delegate_, nullptr);
     NG::DragDropInfo dragDropInfo;
-    auto mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
-    dragDropInfo.pixelMap = mockPixelMap;
+    auto pixelMapImpl = AceType::MakeRefPtr<PixelMapImpl>();
+    dragDropInfo.pixelMap = pixelMapImpl;
     bool result = webpattern.GenerateDragDropInfo(dragDropInfo);
     EXPECT_TRUE(result);
 #endif
@@ -1028,10 +940,10 @@ HWTEST_F(WebPatternAddTestNg, HandleOnDragStart_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->delegate_->pixelMap_ = AccessibilityManager::MakeRefPtr<MockPixelMap>();
+    webPattern->delegate_->pixelMap_ = AccessibilityManager::MakeRefPtr<PixelMapImpl>();
     auto mockNWebDragData = std::make_shared<NWebDragDataDummy>();
     webPattern->delegate_->dragData_ = mockNWebDragData;
-    RefPtr<UnifiedDataMock> aceUnifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
+    RefPtr<UnifiedDataImpl> aceUnifiedData = AceType::MakeRefPtr<UnifiedDataImpl>();
     ASSERT_NE(aceUnifiedData, nullptr);
     auto mockUdmfClient = AceType::DynamicCast<MockUdmfClient>(UdmfClient::GetInstance());
     ASSERT_NE(mockUdmfClient, nullptr);
@@ -1061,10 +973,10 @@ HWTEST_F(WebPatternAddTestNg, HandleOnDragStart_002, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->delegate_->pixelMap_ = AccessibilityManager::MakeRefPtr<MockPixelMap>();
+    webPattern->delegate_->pixelMap_ = AccessibilityManager::MakeRefPtr<PixelMapImpl>();
     auto mockNWebDragData = std::make_shared<NWebDragDataTrueDummy>();
     webPattern->delegate_->dragData_ = mockNWebDragData;
-    RefPtr<UnifiedDataMock> aceUnifiedData = AceType::MakeRefPtr<UnifiedDataMock>();
+    RefPtr<UnifiedDataImpl> aceUnifiedData = AceType::MakeRefPtr<UnifiedDataImpl>();
     ASSERT_NE(aceUnifiedData, nullptr);
     auto mockUdmfClient = AceType::DynamicCast<MockUdmfClient>(UdmfClient::GetInstance());
     ASSERT_NE(mockUdmfClient, nullptr);
@@ -1085,6 +997,150 @@ HWTEST_F(WebPatternAddTestNg, HandleOnDragStart_002, TestSize.Level1)
     RefPtr<OHOS::Ace::DragEvent> info = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     webPattern->HandleOnDragStart(info);
     EXPECT_FALSE(webPattern->isDragEndMenuShow_);
+#endif
+}
+
+/**
+ * @tc.name: OnParentScrollStartOrEndCallback_001
+ * @tc.desc: OnParentScrollStartOrEndCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnParentScrollStartOrEndCallback_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto g_webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(g_webPattern, nullptr);
+    MockPipelineContext::SetUp();
+    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
+    g_webPattern->selectTemporarilyHidden_ = true;
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSelectOverlayManager();
+    EXPECT_NE(manager, nullptr);
+    SelectOverlayInfo info;
+    info.isSingleHandle = true;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
+    auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    manager->selectOverlayItem_ = selectOverlayNode;
+    auto current = manager->selectOverlayItem_.Upgrade();
+    EXPECT_NE(current, nullptr);
+    g_webPattern->selectOverlayProxy_->selectOverlayId_ = current->GetId();
+    g_webPattern->OnParentScrollStartOrEndCallback(false);
+    MockPipelineContext::TearDown();
+    EXPECT_EQ(g_webPattern->selectTemporarilyHiddenByScroll_, false);
+#endif
+}
+
+/**
+ * @tc.name: OnParentScrollStartOrEndCallback_002
+ * @tc.desc: OnParentScrollStartOrEndCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnParentScrollStartOrEndCallback_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto g_webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(g_webPattern, nullptr);
+    MockPipelineContext::SetUp();
+    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
+    g_webPattern->selectTemporarilyHidden_ = true;
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSelectOverlayManager();
+    EXPECT_NE(manager, nullptr);
+    SelectOverlayInfo info;
+    info.isSingleHandle = true;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
+    auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    manager->selectOverlayItem_ = selectOverlayNode;
+    auto current = manager->selectOverlayItem_.Upgrade();
+    EXPECT_NE(current, nullptr);
+    g_webPattern->selectOverlayProxy_->selectOverlayId_ = current->GetId();
+    g_webPattern->OnParentScrollStartOrEndCallback(true);
+    MockPipelineContext::TearDown();
+    EXPECT_EQ(g_webPattern->selectTemporarilyHiddenByScroll_, false);
+#endif
+}
+
+/**
+ * @tc.name: OnParentScrollStartOrEndCallback_003
+ * @tc.desc: OnParentScrollStartOrEndCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnParentScrollStartOrEndCallback_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto g_webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(g_webPattern, nullptr);
+    MockPipelineContext::SetUp();
+    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
+    g_webPattern->selectTemporarilyHidden_ = true;
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSelectOverlayManager();
+    EXPECT_NE(manager, nullptr);
+    SelectOverlayInfo info;
+    info.isSingleHandle = false;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
+    auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    manager->selectOverlayItem_ = selectOverlayNode;
+    auto current = manager->selectOverlayItem_.Upgrade();
+    EXPECT_NE(current, nullptr);
+    g_webPattern->selectOverlayProxy_->selectOverlayId_ = current->GetId();
+    g_webPattern->OnParentScrollStartOrEndCallback(true);
+    MockPipelineContext::TearDown();
+    EXPECT_EQ(g_webPattern->selectTemporarilyHiddenByScroll_, false);
+#endif
+}
+
+/**
+ * @tc.name: OnParentScrollStartOrEndCallback_004
+ * @tc.desc: OnParentScrollStartOrEndCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternAddTestNg, OnParentScrollStartOrEndCallback_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto g_webPattern = frameNode->GetPattern<WebPattern>();
+    EXPECT_NE(g_webPattern, nullptr);
+    MockPipelineContext::SetUp();
+    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
+    g_webPattern->selectTemporarilyHidden_ = false;
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSelectOverlayManager();
+    EXPECT_NE(manager, nullptr);
+    SelectOverlayInfo info;
+    info.isSingleHandle = false;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
+    auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    manager->selectOverlayItem_ = selectOverlayNode;
+    auto current = manager->selectOverlayItem_.Upgrade();
+    EXPECT_NE(current, nullptr);
+    g_webPattern->selectOverlayProxy_->selectOverlayId_ = current->GetId();
+    g_webPattern->OnParentScrollStartOrEndCallback(true);
+    MockPipelineContext::TearDown();
+    EXPECT_EQ(g_webPattern->selectTemporarilyHiddenByScroll_, false);
 #endif
 }
 } // namespace OHOS::Ace::NG

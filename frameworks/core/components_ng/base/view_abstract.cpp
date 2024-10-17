@@ -1312,7 +1312,7 @@ void ViewAbstract::SetDragPreviewOptions(const DragPreviewOption& previewOption)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreviewOptions(previewOption);
+    frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
 void ViewAbstract::SetOnDragStart(
@@ -1811,10 +1811,6 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
             SubwindowManager::GetInstance()->HidePopupNG(targetId);
         }
         return;
-    }
-    if (!popupInfo.isCurrentOnShow) {
-        targetNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE,
-            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     }
     if (isShow) {
         if (popupInfo.isCurrentOnShow != isShow) {
@@ -3577,7 +3573,7 @@ void ViewAbstract::SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen:
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreviewOptions(previewOption);
+    frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
 void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo)

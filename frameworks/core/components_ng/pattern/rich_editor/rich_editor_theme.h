@@ -238,8 +238,8 @@ private:
     Dimension scrollbarMinHeight_ = 4.0_vp;
     Edge padding_;
 
-    // UX::insert cursor offset up by 32vp
-    Dimension insertCursorOffset_ = 32.0_vp;
+    // UX::insert cursor offset up by 24vp
+    Dimension insertCursorOffset_ = 24.0_vp;
     TextStyle textStyle_;
     Color placeholderColor_ = Color(0x99000000);
     Color caretColor_ = Color(0xff007dff);

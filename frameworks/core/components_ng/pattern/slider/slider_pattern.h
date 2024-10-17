@@ -250,6 +250,7 @@ private:
     void SetStepPointAccessibilityVirtualNode(
         const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
     void SendAccessibilityValueEvent(int32_t mode);
+    void InitOrRefreshSlipFactor();
 
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -325,6 +326,7 @@ private:
     uint64_t lastAccessibilityValueTime_ = 0;
     float accessibilityValue_ = 0.0f;
     
+    double slipfactor_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -100,6 +100,7 @@ public:
     void SetCanacelIconSrc(
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName) override;
     void SetCancelIconColor(const Color& iconColor) override;
+    void SetCancelSymbolIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol) override;
     void SetCancelButtonSymbol(bool isShowSymbol) override;
     void SetIsShowCancelButton(bool isShowCancelButton) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;
@@ -191,6 +192,8 @@ public:
     static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);
     static void SetCancelButtonSymbol(FrameNode* frameNode, bool isShowSymbol);
+    static void SetCancelSymbolIcon(FrameNode* frameNode,
+        const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static std::string GetPlaceholderText(FrameNode* frameNode);
     static std::string GetTextFieldText(FrameNode* frameNode);

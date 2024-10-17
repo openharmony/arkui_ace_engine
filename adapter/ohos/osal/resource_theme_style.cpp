@@ -77,8 +77,6 @@ static const std::set<std::string> stringAttrs = {
     "multiple_dialog_display",
     "menu_expand_display",
     "popup_double_border_enable",
-    "popup_outer_border_color",
-    "popup_inner_border_color",
     "dialog_expand_display",
     "show_password_directly",
     "textfield_show_handle",

@@ -818,7 +818,8 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
                             : refreshOffset_.ConvertToPx();
     auto dealSpeed = 0.0f;
     if (!NearEqual(scrollOffset_, targetOffset)) {
-        dealSpeed = speed / (targetOffset - scrollOffset_);
+        auto pullDownRatio = CalculatePullDownRatio();
+        dealSpeed = (pullDownRatio * speed) / (targetOffset - scrollOffset_);
     }
     bool recycle = true;
     if (pullToRefresh_ && !isSourceFromAnimation_ && refreshStatus_ == RefreshStatus::OVER_DRAG) {
@@ -1202,7 +1203,7 @@ ScrollResult RefreshPattern::HandleScroll(float offset, int32_t source, NestedSt
     return result;
 }
 
-void RefreshPattern::OnScrollStartRecursive(float position, float velocity)
+void RefreshPattern::OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity)
 {
     SetIsNestedInterrupt(false);
     if (!GetIsFixedNestedScrollMode()) {
@@ -1213,7 +1214,7 @@ void RefreshPattern::OnScrollStartRecursive(float position, float velocity)
     auto parent = GetNestedScrollParent();
     if (parent && nestedScroll.NeedParent() &&
         (nestedScroll.forward != NestedScrollMode::PARALLEL || nestedScroll.backward != NestedScrollMode::PARALLEL)) {
-        parent->OnScrollStartRecursive(position, velocity);
+        parent->OnScrollStartRecursive(child, position, velocity);
     }
 }
 

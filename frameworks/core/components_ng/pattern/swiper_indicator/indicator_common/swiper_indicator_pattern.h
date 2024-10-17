@@ -177,7 +177,7 @@ public:
     void OnModifyDone() override;
     void SetIndicatorOnChange();
     void IndicatorOnChange();
-    virtual bool GetDigitFrameSize(SizeF& frameSize) const;
+    virtual bool GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& frameSize) const;
     virtual int32_t RealTotalCount() const;
     virtual int32_t GetCurrentIndex() const;
 

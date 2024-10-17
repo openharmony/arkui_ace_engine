@@ -300,6 +300,64 @@ HWTEST_F(TextTestThreeNg, SetFontSize001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetTextCaretColor001
+ * @tc.desc: test text_model_ng.cpp SetTextCaretColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, SetTextCaretColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTextCaretColor with black color.
+     * @tc.expected: the caretColor will be Color::BLACK.
+     */
+    textModelNG.SetTextCaretColor(Color::BLACK);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    std::optional<Color> cursorColor = textLayoutProperty->GetCursorColorValue(Color::BLACK);
+    ASSERT_NE(cursorColor, std::nullopt);
+    EXPECT_EQ(cursorColor.value(), Color::BLACK);
+}
+
+/**
+ * @tc.name: SetSelectedBackgroundColor001
+ * @tc.desc: test text_model_ng.cpp SetSelectedBackgroundColor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, SetSelectedBackgroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetSelectedBackgroundColor with black color.
+     * @tc.expected: the selectedBackgroundColor will be Color::BLACK.
+     */
+    textModelNG.SetSelectedBackgroundColor(Color::BLACK);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    std::optional<Color> selectedBackgroundColor = textLayoutProperty->GetSelectedBackgroundColorValue(Color::BLACK);
+    ASSERT_NE(selectedBackgroundColor, std::nullopt);
+    EXPECT_EQ(selectedBackgroundColor.value(), Color::BLACK);
+}
+
+/**
  * @tc.name: GetLineCount001
  * @tc.desc: test text_layout_algorithm.cpp GetLineCount function
  * @tc.type: FUNC

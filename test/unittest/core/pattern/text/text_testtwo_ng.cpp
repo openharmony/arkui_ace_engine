@@ -40,6 +40,7 @@ HWTEST_F(TextTestTwoNg, TextOverlayModifierTest001, TestSize.Level1)
     TextOverlayModifier textOverlayModifier;
     OffsetF paintOffset;
     textOverlayModifier.SetPrintOffset(paintOffset);
+    textOverlayModifier.SetCursorColor(CURSOR_COLOR);
     textOverlayModifier.SetSelectedColor(SELECTED_COLOR);
     std::vector<RectF> rectList;
     rectList.push_back(RectF(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE));
@@ -58,6 +59,7 @@ HWTEST_F(TextTestTwoNg, TextOverlayModifierTest001, TestSize.Level1)
     textOverlayModifier.SetContentRect(contentRect);
     textOverlayModifier.onDraw(context);
     EXPECT_EQ(textOverlayModifier.paintOffset_->Get(), paintOffset);
+    EXPECT_EQ(textOverlayModifier.cursorColor_->Get(), CURSOR_COLOR);
     EXPECT_EQ(textOverlayModifier.selectedColor_->Get(), SELECTED_COLOR);
     EXPECT_EQ(textOverlayModifier.IsSelectedRectsChanged(rectList), true);
     EXPECT_EQ(textOverlayModifier.contentRect_, contentRect);

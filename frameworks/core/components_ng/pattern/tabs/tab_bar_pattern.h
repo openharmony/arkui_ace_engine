@@ -27,6 +27,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
@@ -476,6 +477,11 @@ public:
         }
     }
 
+    void SetIsExecuteBuilder(bool isExecuteBuilder)
+    {
+        isExecuteBuilder_ = isExecuteBuilder;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -483,6 +489,8 @@ private:
     void BeforeCreateLayoutWrapper() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool CustomizeExpandSafeArea() override;
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
 
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -567,8 +575,9 @@ private:
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
+    RefPtr<SwiperPattern> GetSwiperPattern() const;
 
-    void StartShowTabBar(int32_t delay);
+    void StartShowTabBar(int32_t delay = 0);
     void StopShowTabBar();
     void InitTabBarProperty();
     void UpdateTabBarHiddenRatio(float ratio);
@@ -642,6 +651,7 @@ private:
     bool clickRepeat_ = false;
     float scrollMargin_ = 0.0f;
     bool isFirstLayout_ = true;
+    bool isExecuteBuilder_ = false;
     std::optional<int32_t> animationTargetIndex_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;

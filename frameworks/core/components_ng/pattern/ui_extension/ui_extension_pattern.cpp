@@ -236,7 +236,7 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
 
 void UIExtensionPattern::MountPlaceholderNode(PlaceholderType type)
 {
-    if (IsShowPlaceholder()) {
+    if (!IsCanMountPlaceholder(type)) {
         return;
     }
     RefPtr<NG::FrameNode> placeholderNode = nullptr;
@@ -258,7 +258,6 @@ void UIExtensionPattern::RemovePlaceholderNode()
     if (!IsShowPlaceholder()) {
         return;
     }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->RemoveChildAtIndex(0);
@@ -300,6 +299,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         CHECK_NULL_VOID(host);
         host->RemoveChildAtIndex(0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        SetCurPlaceholderType(PlaceholderType::NONE);
         NotifyDestroy();
     }
 
@@ -424,7 +424,11 @@ PlaceholderType UIExtensionPattern::GetSizeChangeReason()
         SetFoldStatusChanged(false);
         return PlaceholderType::FOLD_TO_EXPAND;
     }
-    return static_cast<PlaceholderType>(sessionWrapper_->GetSizeChangeReason());
+    if (IsRotateStatusChanged()) {
+        SetRotateStatusChanged(false);
+        return PlaceholderType::ROTATION;
+    }
+    return PlaceholderType::UNDEFINED;
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
@@ -450,6 +454,7 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
     CHECK_NULL_VOID(host);
     host->RemoveChildAtIndex(0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    SetCurPlaceholderType(PlaceholderType::NONE);
 }
 
 void UIExtensionPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
@@ -485,6 +490,13 @@ void UIExtensionPattern::OnWindowHide()
     UIEXT_LOGI("The window is being hidden and the component is %{public}s.", isVisible_ ? "visible" : "invisible");
     if (isVisible_) {
         NotifyBackground();
+    }
+}
+
+void UIExtensionPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*height*/, WindowSizeChangeReason type)
+{
+    if (WindowSizeChangeReason::ROTATION == type) {
+        SetRotateStatusChanged(true);
     }
 }
 
@@ -548,6 +560,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
     pipeline->AddOnAreaChangeNode(host->GetId());
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
     surfacePositionCallBackId_ =
         pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
@@ -570,6 +583,7 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveOnAreaChangeNode(id);
+    pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionCallBackId_);
     pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayCallBackId_);
@@ -1375,6 +1389,40 @@ void UIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
         sessionWrapper_->NotifyUieDump(params, dumpInfo);
         for (std::string info : dumpInfo) {
             json->Put("UI Extension info: ", info.c_str());
+        }
+    }
+}
+
+void UIExtensionPattern::DumpOthers()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    // Use -nouie to choose not dump extra uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        UIEXT_LOGI("Not Support Dump Extra UIE Info");
+    } else {
+        if (params.back() == "-json") {
+            params.insert(params.end() - 1, std::to_string(getpid()));
+            if (!container->IsUIExtensionWindow()) {
+                params.insert(params.end() - 1, PID_FLAG);
+            }
+        } else {
+            if (!container->IsUIExtensionWindow()) {
+                params.push_back(PID_FLAG);
+            }
+            params.push_back(std::to_string(getpid()));
+        }
+        std::vector<std::string> dumpInfo;
+        sessionWrapper_->NotifyUieDump(params, dumpInfo);
+        for (std::string info : dumpInfo) {
+            std::stringstream ss(info);
+            std::string line;
+            DumpLog::GetInstance().Print("\n------ UIExtension Dump ------");
+            while (getline(ss, line, ';')) {
+                DumpLog::GetInstance().Print(line);
+            }
         }
     }
 }

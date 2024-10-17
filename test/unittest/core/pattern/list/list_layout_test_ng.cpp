@@ -1075,6 +1075,45 @@ HWTEST_F(ListLayoutTestNg, Pattern011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Pattern014
+ * @tc.desc: Test add a listItem and scroll to the added listItem within the same frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, Pattern014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create an empty list
+     */
+    ListModelNG model = CreateList();
+    CreateDone(frameNode_);
+
+    /**
+     * @tc.steps: step2. add a listItem and scroll to the added listItem within the same frame.
+     * @tc.expected: layoutDirection = LayoutDirection::NONE
+     */
+    ViewStackProcessor::GetInstance()->Push(frameNode_);
+    CreateListItems(1);
+    auto startIndex = pattern_->GetStartIndex();
+    ScrollToIndex(0, true, ScrollAlign::END);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 1);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, frameNode_->GetGeometryNode(), layoutProperty_);
+    auto layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+
+    CreateListItems(1);
+    startIndex = pattern_->GetStartIndex();
+    ScrollToIndex(1, true, ScrollAlign::END);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 2);
+    layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    ViewStackProcessor::GetInstance()->Pop();
+}
+
+/**
  * @tc.name: ListItemGroupCreateForCardModeTest001
  * @tc.desc: Test the initialization of listItem in card mode.
  * @tc.type: FUNC
@@ -1644,6 +1683,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount001, TestSize.Level1)
     EXPECT_EQ(childrenCount, 5);
     auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), LIST_HEIGHT);
 
     /**
      * @tc.steps: step2. Flush Idle Task
@@ -1657,6 +1697,8 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount001, TestSize.Level1)
     EXPECT_EQ(cachedItem->IsActive(), false);
     cachedItem = frameNode_->GetChildByIndex(7)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -150.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 7), 450.0f);
 }
 
 /**
@@ -1694,8 +1736,12 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(childrenCount, 10);
     auto item8 = frameNode_->GetChildByIndex(8)->GetHostNode();
     EXPECT_EQ(item8->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 8), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 8), LIST_HEIGHT);
     auto item9 = frameNode_->GetChildByIndex(9)->GetHostNode();
     EXPECT_EQ(item9->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 9), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(frameNode_, 9), LIST_HEIGHT);
 
     /**
      * @tc.steps: step2. Flush Idle Task
@@ -1707,12 +1753,20 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
     EXPECT_EQ(childrenCount, 14);
     auto item2 = frameNode_->GetChildByIndex(2)->GetHostNode();
     EXPECT_EQ(item2->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 2), -150.0f);
     auto item3 = frameNode_->GetChildByIndex(3)->GetHostNode();
     EXPECT_EQ(item3->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 3), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(frameNode_, 3), -150.0f);
     auto item14 = frameNode_->GetChildByIndex(14)->GetHostNode();
     EXPECT_EQ(item14->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 14), 0.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 14), 450.0f);
     auto item15 = frameNode_->GetChildByIndex(15)->GetHostNode();
     EXPECT_EQ(item15->IsActive(), false);
+    EXPECT_EQ(GetChildX(frameNode_, 15), LIST_WIDTH / 2);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 450.0f);
 }
 
 /**

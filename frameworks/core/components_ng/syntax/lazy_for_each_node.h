@@ -182,7 +182,7 @@ public:
      */
     void ParseOperations(const std::list<V2::Operation>& dataOperations);
 protected:
-    void UpdateChildrenFreezeState(bool isFreeze) override;
+    void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
 private:
     void OnAttachToMainTree(bool recursive) override
     {

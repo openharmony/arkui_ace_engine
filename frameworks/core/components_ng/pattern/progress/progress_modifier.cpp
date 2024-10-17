@@ -51,7 +51,8 @@ ProgressModifier::ProgressModifier(const ProgressAnimatableProperty& progressAni
       bgColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.bgColor))),
       borderColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(progressAnimatableProperty_.borderColor))),
       value_(AceType::MakeRefPtr<AnimatablePropertyFloat>(progressAnimatableProperty_.value)),
-      ringProgressColors_(AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic())),
+      ringProgressColors_(AceType::MakeRefPtr<AnimatablePropertyVectorColor>(
+        GradientArithmetic(progressAnimatableProperty_.ringProgressColor))),
       sweepingDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingHeadDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       trailingTailDate_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
@@ -710,7 +711,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
     double radius = strokeRadius_->Get();
     if (contentSize.Width() >= contentSize.Height()) {
         double barLength = contentSize.Width() - radius * INT32_TWO;
-        CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
+        CHECK_NULL_VOID(Positive(barLength));
         double dateLength = std::min(barLength * value_->Get() / maxValue_->Get(), barLength);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect(
@@ -719,7 +720,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
             radius, radius });
         canvas.DetachBrush();
         // progress selected part
-        CHECK_NULL_VOID(!NearEqual(dateLength, 0.0));
+        CHECK_NULL_VOID(Positive(dateLength));
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
 #ifndef USE_ROSEN_DRAWING
@@ -741,7 +742,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
         PaintLinearSweeping(canvas, offset, path, true, contentSize);
     } else {
         double barLength = contentSize.Height() - radius * INT32_TWO;
-        CHECK_NULL_VOID(!NearEqual(barLength, 0.0));
+        CHECK_NULL_VOID(Positive(barLength));
         double dateLength = std::min(barLength * value_->Get() / maxValue_->Get(), barLength);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect(
@@ -750,7 +751,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
             radius, radius });
         canvas.DetachBrush();
         // progress selected part
-        CHECK_NULL_VOID(!NearEqual(dateLength, 0.0));
+        CHECK_NULL_VOID(Positive(dateLength));
         brush.SetColor(ToRSColor((color_->Get())));
         canvas.AttachBrush(brush);
 #ifndef USE_ROSEN_DRAWING

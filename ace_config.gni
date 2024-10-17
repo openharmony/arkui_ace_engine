@@ -56,9 +56,6 @@ declare_args() {
   # Enable when build for text engine adapter
   enable_graphic_text_gine = true
 
-  # Don't use currentIdSafely in some function
-  use_origin_scope = false
-
   # Enable split_mode support
   ace_engine_feature_enable_split_mode = false
 
@@ -263,6 +260,14 @@ if (defined(global_parts_info) &&
   uiservice_xcollie_enable = false
 }
 
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.graphic_graphic_2d_ext)) {
+  aps_enable = true
+  ace_common_defines += [ "APS_ENABLE" ]
+} else {
+  aps_enable = false
+}
+
 if (ace_engine_feature_asbng_path == "") {
   ace_engine_feature_asbng_path_enable = false
 } else {
@@ -300,11 +305,6 @@ foreach(item, ace_platforms) {
       (use_mac && item.name == "mac") || (use_linux && item.name == "linux")) {
     current_platform = item
   }
-}
-
-if ((defined(use_origin_scope) && use_origin_scope) ||
-    (defined(force_scope) && force_scope)) {
-  ace_common_defines += [ "USE_ORIGIN_SCOPE" ]
 }
 
 if (ace_engine_feature_enable_split_mode) {

@@ -726,6 +726,18 @@ public:
     }
 
     virtual Color GetUrlSpanColor();
+    void DoTextSelectionTouchCancel() override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
+
+    void RegisterAfterLayoutCallback(std::function<void()> callback)
+    {
+        afterLayoutCallback_ = callback;
+    }
+
+    void UnRegisterAfterLayoutCallback()
+    {
+        afterLayoutCallback_ = std::nullopt;
+    }
 
 protected:
     int32_t GetClickedSpanPosition()
@@ -748,9 +760,12 @@ protected:
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     void HandleClickAISpanEvent(const PointF& info);
-    void HandleSpanSingleClickEvent(GestureEvent& info, RectF textContentRect, bool& isClickOnSpan);
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
+    void HandleClickOnTextAndSpan(GestureEvent& info);
+    void RecordClickEvent();
+    void ActTextOnClick(GestureEvent& info);
+    void RecordSpanClickEvent(const RefPtr<SpanItem>& span);
     bool ShowAIEntityMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
     void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
@@ -865,6 +880,7 @@ protected:
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
     bool ShowShadow(const PointF& textOffset, const Color& color);
+    virtual PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect);
     bool hasUrlSpan_ = false;
 
 private:
@@ -978,6 +994,7 @@ private:
     WeakPtr<PipelineContext> pipeline_;
     WeakPtr<ScrollablePattern> scrollableParent_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
+    std::optional<std::function<void()>> afterLayoutCallback_;
 };
 } // namespace OHOS::Ace::NG
 

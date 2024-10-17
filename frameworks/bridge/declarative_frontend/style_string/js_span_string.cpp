@@ -191,6 +191,7 @@ void JSSpanString::JSBind(BindingTarget globalObj)
     JSClass<JSSpanString>::CustomMethod("subStyledString", &JSSpanString::GetSubSpanString);
     JSClass<JSSpanString>::CustomMethod("getStyles", &JSSpanString::GetSpans);
     JSClass<JSSpanString>::StaticMethod("fromHtml", &JSSpanString::FromHtml);
+    JSClass<JSSpanString>::StaticMethod("toHtml", &JSSpanString::ToHtml);
     JSClass<JSSpanString>::StaticMethod("marshalling", &JSSpanString::Marshalling);
     JSClass<JSSpanString>::StaticMethod("unmarshalling", &JSSpanString::Unmarshalling);
     JSClass<JSSpanString>::Bind(globalObj, JSSpanString::Constructor, JSSpanString::Destructor);
@@ -769,6 +770,23 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
 }
 
+void JSSpanString::ToHtml(const JSCallbackInfo& info)
+{
+    auto arg = info[0];
+    if (info.Length() != 1 || !arg->IsObject()) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+
+    auto* spanString = JSRef<JSObject>::Cast(arg)->Unwrap<JSSpanString>();
+    CHECK_NULL_VOID(spanString);
+    auto spanStringController = spanString->GetController();
+    CHECK_NULL_VOID(spanStringController);
+    auto html = HtmlUtils::ToHtml(spanStringController.GetRawPtr());
+    auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(html)));
+    info.SetReturnValue(ret);
+}
+
 void JSSpanString::Marshalling(const JSCallbackInfo& info)
 {
     auto arg = info[0];
@@ -836,7 +854,7 @@ void JSSpanString::Unmarshalling(const JSCallbackInfo& info)
     auto asyncContext = new AsyncContext();
     asyncContext->buffer = buff;
 
-    auto engine = EngineHelper::GetCurrentEngine();
+    auto engine = EngineHelper::GetCurrentEngineSafely();
     CHECK_NULL_VOID(engine);
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     CHECK_NULL_VOID(nativeEngine);

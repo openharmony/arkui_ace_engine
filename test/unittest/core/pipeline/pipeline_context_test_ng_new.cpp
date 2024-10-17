@@ -1435,9 +1435,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg078, TestSize.Level1)
     pipeline->StartFullToMultWindowAnimation(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::FULL_TO_FLOATING);
     pipeline->AvoidanceLogic(0.0);
     EXPECT_EQ(pipeline->finishFunctions_.size(), 0);
-    auto listenerWrapper = [](const std::vector<std::string>& params) {};
-    pipeline->RegisterDumpInfoListener(listenerWrapper);
-    EXPECT_EQ(pipeline->dumpListeners_.size(), 1);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     EXPECT_FALSE(pipeline->DumpPageViewData(nullptr, viewDataWrap));
     EXPECT_FALSE(pipeline->DumpPageViewData(frameNode, viewDataWrap));

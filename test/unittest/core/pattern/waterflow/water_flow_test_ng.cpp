@@ -879,6 +879,86 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest014, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(420.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
 }
 
+/**
+ * @tc.name: WaterFlowTest015
+ * @tc.desc: In less-than fillViewport scene, test GetOverScrollOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest015, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(2);
+    CreateDone();
+    EXPECT_FALSE(NEAR_ZERO(pattern_->layoutInfo_->GetContentHeight()));
+    EXPECT_LT(pattern_->layoutInfo_->GetContentHeight(), pattern_->layoutInfo_->lastMainSize_);
+
+    /**
+     * @tc.steps: step1. input a delta(>0), make overScroll at top.
+     * @tc.expected: offset.start is equal to this delta, offset.end is zero.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(100.0f), { 100.0f, 0 }));
+
+    /**
+     * @tc.steps: step2. input a delta(<0), make overScroll at bottom.
+     * @tc.expected: offset.start is zero, offset.end is equal to this delta.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.f), { 0, -100.f }));
+
+    // enable overScroll, layout in overScroll status at top.
+    pattern_->SetAnimateCanOverScroll(true);
+    pattern_->layoutInfo_->UpdateOffset(100.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 100.0f);
+
+    /**
+     * @tc.steps: step1. input a delta(>0), make overScroll at top.
+     * @tc.expected: offset.start is equal to this delta, offset.end is zero.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(100.0f), { 100.0f, 0 }));
+
+    /**
+     * @tc.steps: step2. input a delta(<0), make overScroll at top.
+     * @tc.expected: offset.start is equal to this delta, offset.end is zero.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.0f), { -100.0f, 0 }));
+
+    /**
+     * @tc.steps: step3. input a delta(<0), make overScroll at bottom.
+     * @tc.expected: offset.start is equal to overScroll offset at top, offset.end is equal to overScroll offset at
+     * bottom.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-400.0f), { -100.0f, -300.0f }));
+
+    // layout in overScroll status at bottom.
+    pattern_->layoutInfo_->UpdateOffset(-150.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -50.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+
+    /**
+     * @tc.steps: step1. input a delta(>0), make overScroll at bottom.
+     * @tc.expected: offset.start is zero, offset.end is equal to this delta.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(20.0f), { 0, 20.0f }));
+
+    /**
+     * @tc.steps: step2. input a delta(<0), make overScroll at bottom.
+     * @tc.expected: offset.start is equal to this delta, offset.end is zero.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.0f), { 0, -100.0f }));
+
+    /**
+     * @tc.steps: step3. input a delta(>0), make overScroll at top.
+     * @tc.expected: offset.start is equal to overScroll offset at top, offset.end is equal to overScroll offset at
+     * bottom.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(400.0f), { 350.0f, 50.0f }));
+}
+
 namespace {
 constexpr float SCROLL_FIXED_VELOCITY_005 = 400.f;
 constexpr float OFFSET_TIME_005 = 100.f;
@@ -2032,5 +2112,34 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest019, TestSize.Level1)
         EXPECT_TRUE(IsEqual(pattern_->GetItemRect(i),
             Rect(i % 2 == 0 ? 0 : WATER_FLOW_WIDTH / 2, -5.0f + 100.f * ((i - 10) / 2), WATER_FLOW_WIDTH / 2, 100.0f)));
     }
+}
+
+/**
+ * @tc.name: Jump001
+ * @tc.desc: Test jump function after changing dataSource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Jump001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    AddItemsAtSlot(1, 100.0f, 15);
+    frameNode_->ChildrenUpdatedFrom(15);
+    pattern_->ScrollToIndex(15, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 15);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 25);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 0.0f);
+
+    AddItemsAtSlot(1, 100.0f, 0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 11);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 }
 } // namespace OHOS::Ace::NG

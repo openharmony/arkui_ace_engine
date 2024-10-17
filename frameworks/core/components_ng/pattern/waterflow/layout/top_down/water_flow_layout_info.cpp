@@ -257,11 +257,15 @@ void WaterFlowLayoutInfo::Reset()
     segmentCache_.clear();
 }
 
+void WaterFlowLayoutInfo::ResetFooter()
+{
+    footerIndex_ = -1;
+}
+
 void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
 {
     TAG_LOGI(AceLogTag::ACE_WATERFLOW, "reset. updateIdx:%{public}d,endIndex:%{public}d", resetFrom, endIndex_);
     maxHeight_ = 0.0f;
-    jumpIndex_ = EMPTY_JUMP_INDEX;
     startIndex_ = resetFrom;
     ClearCacheAfterIndex(resetFrom - 1);
 }

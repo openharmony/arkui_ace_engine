@@ -154,7 +154,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshNestedSwiper001, TestSize.Level1)
      * @tc.expected: isSourceFromAnimation_ of refresh  is false,
      *               the nestedOption of swiper is PARENT_FIRST and SELF_FIRST.
      */
-    swiperPattern_->OnScrollStartRecursive(0.f, 0.f);
+    swiperPattern_->OnScrollStartRecursive(swiperPattern_, 0.f, 0.f);
     EXPECT_FALSE(pattern_->isSourceFromAnimation_);
     auto swiperNestedOption = swiperPattern_->GetNestedScroll();
     EXPECT_EQ(swiperNestedOption.forward, NestedScrollMode::PARENT_FIRST);
@@ -233,7 +233,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshNestedSwiper002, TestSize.Level1)
      *               the nestedOption of swiper is PARENT_FIRST and SELF_FIRST,
      *               the nestedOption of refresh is SELF_FIRST.
      */
-    swiperPattern_->OnScrollStartRecursive(0.f, 0.f);
+    swiperPattern_->OnScrollStartRecursive(swiperPattern_, 0.f, 0.f);
     EXPECT_FALSE(pattern_->isSourceFromAnimation_);
     auto swiperNestedOption = swiperPattern_->GetNestedScroll();
     EXPECT_EQ(swiperNestedOption.forward, NestedScrollMode::PARENT_FIRST);

@@ -219,16 +219,28 @@ RegisterType JSSecurityUIExtensionProxy::GetRegisterType(const std::string& strT
     return type;
 }
 
-void JSSecurityUIExtensionProxy::On(const JSCallbackInfo& info)
+void CreateInstanceAndSet(NG::UIExtensionConfig& config)
+{
+    UIExtensionModel::GetInstance()->Create(config);
+    ViewAbstractModel::GetInstance()->SetMinWidth(SECURITY_UEC_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetMinHeight(SECURITY_UEC_MIN_HEIGHT);
+}
+
+bool JSSecurityUIExtensionProxy::CanTurnOn(const JSCallbackInfo& info)
 {
     if (!info[0]->IsString() || !info[1]->IsFunction()) {
+        return false;
+    }
+    const RegisterType registerType = GetRegisterType(info[0]->ToString());
+    return registerType != RegisterType::UNKNOWN;
+}
+
+void JSSecurityUIExtensionProxy::On(const JSCallbackInfo& info)
+{
+    if (!CanTurnOn(info)) {
         return;
     }
     const RegisterType registerType = GetRegisterType(info[0]->ToString());
-    if (registerType == RegisterType::UNKNOWN) {
-        return;
-    }
-
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(
         NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
@@ -388,9 +400,7 @@ void JSSecurityUIExtension::Create(const JSCallbackInfo& info)
             config.placeholderNode = AceType::Claim(frameNode);
         } while (false);
     }
-    UIExtensionModel::GetInstance()->Create(config);
-    ViewAbstractModel::GetInstance()->SetMinWidth(SECURITY_UEC_MIN_WIDTH);
-    ViewAbstractModel::GetInstance()->SetMinHeight(SECURITY_UEC_MIN_HEIGHT);
+    CreateInstanceAndSet(config);
 }
 
 void JSSecurityUIExtension::OnRemoteReady(const JSCallbackInfo& info)

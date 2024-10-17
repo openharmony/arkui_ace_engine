@@ -96,6 +96,7 @@ public:
     void SetController(const RefPtr<SpanString>& spanString);
 
     static void FromHtml(const JSCallbackInfo& info);
+    static void ToHtml(const JSCallbackInfo& info);
     static void Marshalling(const JSCallbackInfo& info);
     static void Unmarshalling(const JSCallbackInfo& info);
 private:

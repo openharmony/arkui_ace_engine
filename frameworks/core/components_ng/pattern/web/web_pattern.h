@@ -419,7 +419,7 @@ public:
     ScrollResult HandleScroll(RefPtr<NestableScrollContainer> parent, float offset, int32_t source, NestedState state);
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     bool HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity);
-    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
     void OnScrollStartRecursive(std::vector<float> positions);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
@@ -435,6 +435,7 @@ public:
     {
         return nestedScroll_;
     }
+    void OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> parent);
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
@@ -505,7 +506,7 @@ public:
     void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     bool RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
         std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback);
-    void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);
+    void OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, bool isRichtext = true, bool result = false);
     void OnContextMenuHide();
     void QuickMenuIsNeedNewAvoid(
         SelectOverlayInfo& selectInfo,
@@ -578,7 +579,7 @@ public:
     bool OnBackPressed() override;
     bool OnBackPressedForFullScreen() const;
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
-    bool NotifyStartDragTask();
+    bool NotifyStartDragTask(bool isDelayed = false);
     bool IsImageDrag();
     void UpdateJavaScriptOnDocumentStart();
     void UpdateJavaScriptOnDocumentEnd();
@@ -588,6 +589,8 @@ public:
         TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
     Offset GetDragOffset() const;
+    void RemovePreviewMenuNode();
+    void UpdateImagePreviewParam();
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
     void SetLayoutMode(WebLayoutMode mode);
@@ -695,6 +698,7 @@ public:
         return treeId_;
     }
     bool CloseImageOverlaySelection();
+    void SetDrawSize(double width, double height);
     void SetImageOverlaySelectedStatus(bool isSelected)
     {
         imageOverlayIsSelected_ = isSelected;
@@ -703,8 +707,33 @@ public:
     OffsetF GetTextPaintOffset() const override;
     void OnColorConfigurationUpdate() override;
 
+    void SetNewDragStyle(bool isNewDragStyle)
+    {
+        isNewDragStyle_ = isNewDragStyle;
+    }
+
+    bool IsNewDragStyle() const
+    {
+        return isNewDragStyle_;
+    }
+
+    bool IsDragging() const
+    {
+        return isDragging_;
+    }
+
+    void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
+
+    std::shared_ptr<WebPreviewSelectionMenuParam> GetPreviewSelectionMenuParams(
+        const WebElementType& type, const ResponseType& responseType);
+
+    bool IsPreviewMenuNotNeedShowPreview();
+
 private:
     friend class WebContextSelectOverlay;
+
+    void GetPreviewImageOffsetAndSize(bool isImage, Offset& previewOffset, SizeF& previewSize);
+    RefPtr<FrameNode> CreatePreviewImageFrameNode(bool isImage);
     void ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
         TextResponseType responseType = TextResponseType::RIGHT_CLICK, bool handleReverse = false);
     void CloseContextSelectionMenu();
@@ -1044,6 +1073,16 @@ private:
     bool isDragging_ = false;
     bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;
+
+    bool isNewDragStyle_ = false;
+    std::map<std::pair<WebElementType, ResponseType>,
+        std::shared_ptr<WebPreviewSelectionMenuParam>> previewSelectionMenuMap_;
+    std::optional<int32_t> previewImageNodeId_ = std::nullopt;
+    bool needUpdateImagePreviewParam_ = false;
+    WebElementType curElementType_ = WebElementType::NONE;
+    ResponseType curResponseType_ = ResponseType::LONG_PRESS;
+    bool curContextMenuResult_ = false;
+
     bool isWindowShow_ = true;
     bool isActive_ = true;
     bool isEnhanceSurface_ = false;
@@ -1151,6 +1190,7 @@ private:
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
     bool imageOverlayIsSelected_ = false;
     bool isLayoutModeChanged = false;
+    bool isDragEnd_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

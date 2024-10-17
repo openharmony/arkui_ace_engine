@@ -151,7 +151,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateBlockEvent(param->IsBlockEvent());
     popupProp->UpdateIsCaretMode(param->IsCaretMode());
     popupProp->UpdateEnableHoverMode(param->EnableHoverMode());
-    
+
     if (param->GetArrowHeight().has_value()) {
         popupProp->UpdateArrowHeight(param->GetArrowHeight().value());
     }
@@ -161,6 +161,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     if (param->GetRadius().has_value()) {
         popupProp->UpdateRadius(param->GetRadius().value());
     }
+    popupProp->UpdateFollowTransformOfTarget(param->IsFollowTransformOfTarget());
     SetHitTestMode(popupNode, param->IsBlockEvent());
     if (param->GetTargetSpace().has_value()) {
         popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
@@ -306,6 +307,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     if (param->GetRadius().has_value()) {
         layoutProps->UpdateRadius(param->GetRadius().value());
     }
+    layoutProps->UpdateFollowTransformOfTarget(param->IsFollowTransformOfTarget());
     SetHitTestMode(popupNode, param->IsBlockEvent());
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     layoutProps->UpdateDisplayWindowOffset(displayWindowOffset);
@@ -416,8 +418,8 @@ void BubbleView::UpdateBubbleContent(int32_t popupId, const RefPtr<PopupParam>& 
         auto combinedChild = columnNode->GetFirstChild();
         CHECK_NULL_VOID(combinedChild);
         const auto& children = combinedChild->GetChildren();
-        for (const auto& child: children) {
-            if (child->GetTag() == V2::TEXT_ETS_TAG) {  // API10
+        for (const auto& child : children) {
+            if (child->GetTag() == V2::TEXT_ETS_TAG) { // API10
                 auto textNode = AceType::DynamicCast<FrameNode>(child);
                 auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
                 layoutProperty->UpdateContent(message);
@@ -516,13 +518,28 @@ void BubbleView::GetPopupMaxWidthAndHeight(const RefPtr<PopupParam>& param, floa
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup GetDisplayWindowRectInfo: %{public}s", windowGlobalRect.ToString().c_str());
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
     auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto maxHeight = windowGlobalRect.Height();
+    auto theme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(theme);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto isFreeMultiWindow = container->IsFreeMultiWindow();
+    auto isExpandDisplay = theme->GetPopupDoubleBorderEnable() || isFreeMultiWindow;
     if (param->IsShowInSubWindow()) {
-        maxHeight = SystemProperties::GetDeviceHeight();
+        if (isExpandDisplay) {
+            maxHeight = SystemProperties::GetDeviceHeight();
+        } else if (container->IsUIExtensionWindow()) {
+            auto focusWindowId = pipelineContext->GetFocusWindowId();
+            auto rect = container->GetUIExtensionHostWindowRect(focusWindowId);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "popup GetUIExtensionHostWindowRect: %{public}s",
+                rect.ToString().c_str());
+            maxHeight = rect.Height();
+        }
     }
     popupMaxHeight = maxHeight - OUT_RANGE_SPACE.ConvertToPx() - OUT_RANGE_SPACE.ConvertToPx() - bottom - top;
     popupMaxWidth = GetMaxWith().Value();
@@ -564,6 +581,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     if (param->GetRadius().has_value()) {
         popupLayoutProp->UpdateRadius(param->GetRadius().value());
     }
+    popupLayoutProp->UpdateFollowTransformOfTarget(param->IsFollowTransformOfTarget());
     SetHitTestMode(popupNode, param->IsBlockEvent());
     popupLayoutProp->UpdatePositionOffset(OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY()));
     if (param->IsMaskColorSetted()) {
@@ -695,11 +713,11 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
         if (fontScale == AGE_SCALE_NUMBER) {
             scrollProps->UpdateCalcMaxSize(CalcSize(
                 std::nullopt, CalcLength(Dimension(popupMaxHeight) - GetAgeFontSize(buttonFontSize) *
-                AGE_BUTTONS_LAYOUT_HEIGHT_RATE * DOUBLENESS)));
+                                                                         AGE_BUTTONS_LAYOUT_HEIGHT_RATE * DOUBLENESS)));
         } else {
             scrollProps->UpdateCalcMaxSize(
                 CalcSize(std::nullopt, CalcLength(Dimension(popupMaxHeight) -
-                GetAgeFontSize(buttonFontSize) * AGE_BUTTONS_LAYOUT_HEIGHT_RATE)));
+                                                  GetAgeFontSize(buttonFontSize) * AGE_BUTTONS_LAYOUT_HEIGHT_RATE)));
         }
         scrollNode->MarkModifyDone();
         message->MountToParent(scrollNode);

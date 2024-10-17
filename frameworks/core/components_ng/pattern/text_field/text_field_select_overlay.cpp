@@ -39,7 +39,6 @@ namespace {
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
 constexpr uint32_t REQUEST_SELECT_ALL = 1 << 1;
-constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 } // namespace
 
 bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
@@ -104,9 +103,13 @@ void TextFieldSelectOverlay::OnAfterSelectOverlayShow(bool isCreate)
     auto selectOverlayInfo = manager->GetSelectOverlayInfo();
     CHECK_NULL_VOID(selectOverlayInfo);
     if (!selectOverlayInfo->isUsingMouse) {
-        pattern->StopTwinkling();
+        if (manager->IsHiddenHandle()) {
+            pattern->StartTwinkling();
+        } else {
+            pattern->StopTwinkling();
+        }
     }
-    manager->MarkInfoChange(DIRTY_SELECT_TEXT);
+    manager->MarkInfoChange(DIRTY_SELECT_TEXT | DIRTY_SELECT_AREA);
     latestReqeust_.reset();
 }
 
@@ -119,6 +122,7 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
         OnResetTextSelection();
         if (info && info->isSingleHandle) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SingleHandle OnCloseOverlayv");
             pattern->OnBackPressed();
         }
     }
@@ -622,26 +626,13 @@ void TextFieldSelectOverlay::TriggerContentToScroll(const OffsetF& localOffset, 
     }
 }
 
-void TextFieldSelectOverlay::OnHandleMarkInfoChange(
-    std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
+std::optional<Color> TextFieldSelectOverlay::GetHandleColor()
 {
-    auto manager = GetManager<SelectContentOverlayManager>();
-    CHECK_NULL_VOID(manager);
-    if ((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG) {
-        auto textFieldPattern = GetPattern<TextFieldPattern>();
-        CHECK_NULL_VOID(textFieldPattern);
-        auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        info->handlerColor = paintProperty->GetCursorColor();
-        manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
-}
-
-void TextFieldSelectOverlay::UpdateHandleColor()
-{
-    auto manager = GetManager<SelectContentOverlayManager>();
-    CHECK_NULL_VOID(manager);
-    manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
+    auto textFieldPattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, std::nullopt);
+    auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, std::nullopt);
+    return paintProperty->GetCursorColor();
 }
 
 void TextFieldSelectOverlay::UpdateAllHandlesOffset()

@@ -707,6 +707,7 @@ void SetTextInputCancelButton(ArkUINodeHandle node, ArkUI_Int32 style, const str
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetCleanNodeStyle(frameNode, static_cast<CleanNodeStyle>(style));
     TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
+    TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
     TextFieldModelNG::SetCancelButtonSymbol(frameNode, false);
     // set icon size
     CalcDimension iconSize = CalcDimension(size->value, static_cast<DimensionUnit>(size->unit));
@@ -731,6 +732,32 @@ void resetTextInputCancelButton(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetCleanNodeStyle(frameNode, CleanNodeStyle::INPUT);
     TextFieldModelNG::SetIsShowCancelButton(frameNode, false);
+    TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
+}
+
+void SetTextInputCancelSymbolIcon(ArkUINodeHandle node, ArkUI_Int32 style, void* symbolFunction)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCleanNodeStyle(frameNode, static_cast<CleanNodeStyle>(style));
+    TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
+    if (symbolFunction) {
+        auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction);
+        TextFieldModelNG::SetCancelSymbolIcon(frameNode, std::move(*symbolCallback));
+    } else {
+        TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
+    }
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
+}
+
+void ResetTextInputCancelSymbolIcon(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCleanNodeStyle(frameNode, CleanNodeStyle::INPUT);
+    TextFieldModelNG::SetIsShowCancelButton(frameNode, false);
+    TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
     TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
 }
 
@@ -1833,7 +1860,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         GetTextInputNumberOfLines, ResetTextInputNumberOfLines, SetTextInputMargin, ResetTextInputMargin,
         SetTextInputCaret, GetTextInputController, GetTextInputMargin, SetTextInputEnablePreviewText,
         ResetTextInputEnablePreviewText, SetTextInputSelectionMenuOptions, ResetTextInputSelectionMenuOptions,
-        SetTextInputWidth, ResetTextInputWidth };
+        SetTextInputWidth, ResetTextInputWidth, SetTextInputCancelSymbolIcon, ResetTextInputCancelSymbolIcon };
     return &modifier;
 }
 

@@ -818,4 +818,131 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions002, TestSize.Level1)
     EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
     EXPECT_EQ(options.brOptions.paddingEnd.value(), DEFAULT_PADDING);
 }
+
+/**
+ * @tc.name: SetToolbarConfiguration001
+ * @tc.desc: Test SetToolbarConfiguration and cover all conditions of "GetPrevToolBarIsCustom.value_or".
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetToolbarConfiguration001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModelNG", false);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    // Make GetPrevToolBarIsCustom.value_or return false
+    navDestinationGroupNode->propPrevToolBarIsCustom_ = false;
+    EXPECT_FALSE(navDestinationGroupNode->GetPrevToolBarIsCustom().value_or(false));
+    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navDestinationGroupNode->GetPreToolBarNode());
+    ASSERT_NE(toolbarNode, nullptr);
+    EXPECT_EQ(toolbarNode->GetToolbarContainerNode(), nullptr);
+    std::vector<NG::BarItem> toolBarItems;
+    navDestinationModelNG.SetToolbarConfiguration(std::move(toolBarItems));
+
+    // Make containerNode not NULL
+    toolbarNode->toolbarContainerNode_ = FrameNode::CreateFrameNode("text", 101, AceType::MakeRefPtr<TextPattern>());
+    EXPECT_NE(toolbarNode->GetToolbarContainerNode(), nullptr);
+    navDestinationModelNG.SetToolbarConfiguration(std::move(toolBarItems));
+
+    navDestinationGroupNode->propPrevToolBarIsCustom_ = true;
+    EXPECT_TRUE(navDestinationGroupNode->GetPrevToolBarIsCustom().value_or(false));
+    navDestinationModelNG.SetToolbarConfiguration(std::move(toolBarItems));
+}
+
+/**
+ * @tc.name: SetToolbarConfiguration002
+ * @tc.desc: Test SetToolbarConfiguration and cover all conditions of "LessThanAPIVersion".
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetToolbarConfiguration002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModelNG", false);
+
+    std::vector<NG::BarItem> toolBarItems;
+    auto context = PipelineBase::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    int32_t preVersion = context->GetMinPlatformVersion();
+    context->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN) - 1;
+    EXPECT_TRUE(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN));
+    navDestinationModelNG.SetToolbarConfiguration(std::move(toolBarItems));
+
+    context->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN) + 1;
+    EXPECT_FALSE(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN));
+    navDestinationModelNG.SetToolbarConfiguration(std::move(toolBarItems));
+    context->minPlatformVersion_ = preVersion;
+    EXPECT_EQ(preVersion, context->GetMinPlatformVersion());
+}
+
+/**
+ * @tc.name: SetToolbarConfiguration003
+ * @tc.desc: Test SetToolbarConfiguration and cover all conditions of "LessThanAPIVersion".
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetToolbarConfiguration003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModelNG", false);
+
+    std::vector<NG::BarItem> toolBarItems;
+    NG::BarItem newBar1;
+    toolBarItems.push_back(newBar1);
+    EXPECT_TRUE(toolBarItems.size() <= MAXIMUM_TOOLBAR_ITEMS_IN_BAR);
+    navDestinationModelNG.SetToolbarConfiguration(std::move(toolBarItems));
+
+    NG::BarItem newBars[MAXIMUM_TOOLBAR_ITEMS_IN_BAR];
+    toolBarItems.insert(toolBarItems.end(), std::begin(newBars), std::end(newBars));
+    EXPECT_TRUE(toolBarItems.size() > MAXIMUM_TOOLBAR_ITEMS_IN_BAR);
+    navDestinationModelNG.SetToolbarConfiguration(std::move(toolBarItems));
+}
+
+/**
+ * @tc.name: SetHideToolBar001
+ * @tc.desc: Test Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetHideToolBar001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG NavDestinationModelNG;
+    NavDestinationModelNG.Create();
+    NavDestinationModelNG.SetHideToolBar(true, false);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+    auto hideToolBarValue = navDestinationLayoutProperty->GetHideToolBarValue(false);
+    ASSERT_EQ(hideToolBarValue, true);
+}
+
+/**
+ * @tc.name: SetHideToolBar002
+ * @tc.desc: Test Create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetHideToolBar002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG NavDestinationModelNG;
+    NavDestinationModelNG.Create();
+    NavDestinationModelNG.SetHideToolBar(false, false);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+    auto hideToolBarValue = navDestinationLayoutProperty->GetHideToolBarValue(false);
+    ASSERT_EQ(hideToolBarValue, false);
+}
 } // namespace OHOS::Ace::NG

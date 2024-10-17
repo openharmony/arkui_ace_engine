@@ -92,7 +92,36 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     return this;
   }
   barBackgroundBlurStyle(value: BlurStyle): TabsAttribute {
-    modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, value);
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, undefined);
+      return this;
+    }
+    let arkBackgroundBlurStyle = new ArkBackgroundBlurStyle();
+    arkBackgroundBlurStyle.blurStyle = value;
+    modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, arkBackgroundBlurStyle);
+    return this;
+  }
+  barBackgroundBlurStyle(style: BlurStyle, options: BackgroundBlurStyleOptions): TabsAttribute {
+    if (isUndefined(style)) {
+      modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, undefined);
+      return this;
+    }
+    let arkBackgroundBlurStyle = new ArkBackgroundBlurStyle();
+    arkBackgroundBlurStyle.blurStyle = style;
+    if (typeof options === 'object') {
+      arkBackgroundBlurStyle.colorMode = options.colorMode;
+      arkBackgroundBlurStyle.adaptiveColor = options.adaptiveColor;
+      arkBackgroundBlurStyle.scale = options.scale;
+      arkBackgroundBlurStyle.blurOptions = options.blurOptions;
+      arkBackgroundBlurStyle.policy = options.policy;
+      arkBackgroundBlurStyle.inactiveColor = options.inactiveColor;
+      arkBackgroundBlurStyle.type = options.type;
+    }
+    modifierWithKey(this._modifiersWithKeys, BarBackgroundBlurStyleModifier.identity, BarBackgroundBlurStyleModifier, arkBackgroundBlurStyle);
+    return this;
+  }
+  barBackgroundEffect(options: BackgroundEffectOptions): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, BarBackgroundEffectModifier.identity, BarBackgroundEffectModifier, options);
     return this;
   }
   barGridAlign(value: BarGridColumnOptions): TabsAttribute {
@@ -101,6 +130,10 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
   }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, TabClipModifier.identity, TabClipModifier, value);
+    return this;
+  }
+  edgeEffect(value: EdgeEffect): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, TabEdgeEffectModifier.identity, TabEdgeEffectModifier, value);
     return this;
   }
   width(value: Length): this {
@@ -371,8 +404,8 @@ class BarBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class BarBackgroundBlurStyleModifier extends ModifierWithKey<BlurStyle> {
-  constructor(value: BlurStyle) {
+class BarBackgroundBlurStyleModifier extends ModifierWithKey<ArkBackgroundBlurStyle> {
+  constructor(value: ArkBackgroundBlurStyle) {
     super(value);
   }
   static identity: Symbol = Symbol('barbackgroundblurstyle');
@@ -381,12 +414,42 @@ class BarBackgroundBlurStyleModifier extends ModifierWithKey<BlurStyle> {
     if (reset) {
       getUINativeModule().tabs.resetBarBackgroundBlurStyle(node);
     } else {
-      getUINativeModule().tabs.setBarBackgroundBlurStyle(node, this.value);
+      getUINativeModule().tabs.setBarBackgroundBlurStyle(node,
+        this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale,
+        this.value.blurOptions?.grayscale, this.value.policy, this.value.inactiveColor, this.value.type);
+    }
+  }
+}
+
+class BarBackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOptions> {
+  constructor(options: BackgroundEffectOptions) {
+    super(options);
+  }
+  static identity: Symbol = Symbol('barBackgroundEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    let _a;
+    if (reset) {
+      getUINativeModule().tabs.resetBarBackgroundEffect(node);
+    } else {
+      getUINativeModule().tabs.setBarBackgroundEffect(node, this.value.radius, this.value.saturation,
+        this.value.brightness, this.value.color, this.value.adaptiveColor,
+        (_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale,
+        this.value.policy, this.value.inactiveColor, this.value.type);
     }
   }
 
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    let _a;
+    let _b;
+    return !(this.value.radius === this.stageValue.radius && this.value.saturation === this.stageValue.saturation &&
+      this.value.brightness === this.stageValue.brightness &&
+      isBaseOrResourceEqual(this.stageValue.color, this.value.color) &&
+      this.value.adaptiveColor === this.stageValue.adaptiveColor &&
+      this.value.policy === this.stageValue.policy &&
+      this.value.inactiveColor === this.stageValue.inactiveColor &&
+      this.value.type === this.stageValue.type &&
+      ((_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale) === ((_b = this.stageValue.blurOptions) === null ||
+      _b === void 0 ? void 0 : _b.grayscale));
   }
 }
 

@@ -34,10 +34,6 @@ public:
     SvgMask();
     ~SvgMask() override = default;
     static RefPtr<SvgNode> Create();
-    void SetBoundingBoxRectOpt(const std::optional<RectF>& boundingBoxRectOpt)
-    {
-        boundingBoxRectOpt_ = boundingBoxRectOpt;
-    }
 
 protected:
     void OnInitStyle() override;
@@ -56,7 +52,6 @@ private:
     bool isDefaultMaskContentUnits_ = true;
 
     SvgMaskAttribute maskAttr_;
-    std::optional<RectF> boundingBoxRectOpt_;
 
 #ifndef USE_ROSEN_DRAWING
     SkRect maskBounds_;

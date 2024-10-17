@@ -348,7 +348,9 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    bool OnScrollSnapCallback(double targetOffset, double velocity) override;
+    bool StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance = 0.f) override;
+
+    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
 
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);

@@ -1104,6 +1104,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     navDestination(builder: (name: string, param: unknown) => void): NavigationAttribute;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): NavigationAttribute;
     recoverable(value: boolean | undefined): NavigationAttribute;
+    enableDragBar(value: boolean | undefined): NavigationAttribute;
 }
 declare class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1857,6 +1858,8 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barOverlap(value: boolean): TabsAttribute;
     barBackgroundColor(value: ResourceColor): TabsAttribute;
     barBackgroundBlurStyle(value: BlurStyle): TabsAttribute;
+    barBackgroundBlurStyle(style: BlurStyle, options: BackgroundBlurStyleOptions): TabsAttribute;
+    barBackgroundEffect(options: BackgroundEffectOptions): TabsAttribute;
     barGridAlign(value: BarGridColumnOptions): TabsAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect): TabsAttribute;

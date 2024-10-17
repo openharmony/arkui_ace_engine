@@ -286,9 +286,9 @@ public:
         return childLayoutConstraint_;
     }
 
-    void SetNextMarginIgnoreBlank(bool nextMarginIgnoreBlank)
+    float GetIgnoreBlankOffset() const
     {
-        nextMarginIgnoreBlank_ = nextMarginIgnoreBlank;
+        return ignoreBlankOffset_;
     }
 
     void SetIgnoreBlankOffset(float ignoreBlankOffset)
@@ -336,7 +336,6 @@ private:
     void CaptureMeasure(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     void CaptureLayout(LayoutWrapper* layoutWrapper);
     bool IsNormalItem(const RefPtr<LayoutWrapper>& wrapper) const;
-    bool CheckIsSingleCase(const RefPtr<SwiperLayoutProperty>& property);
     void UpdateLayoutInfoBeforeMeasureSwiper(
         const RefPtr<SwiperLayoutProperty>& property, const LayoutConstraintF& layoutConstraint);
     void IndicatorAndArrowMeasure(LayoutWrapper* layoutWrapper, const OptionalSizeF& parentIdealSize);
@@ -394,7 +393,6 @@ private:
     bool isNeedUpdateCapture_ = false;
     bool isMeasureOneMoreItem_ = false;
     bool isFrameAnimation_ = false;
-    bool nextMarginIgnoreBlank_ = false;
     float ignoreBlankOffset_ = 0.0f;
     std::set<int32_t> measuredItems_;
     std::set<int32_t> activeItems_;

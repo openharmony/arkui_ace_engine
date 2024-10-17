@@ -36,8 +36,6 @@ public:
     std::vector<Rosen::Rect> GetHotAreas();
     sptr<Rosen::Session> GetSession();
 
-    static int32_t CalculateTranslateDegree(int32_t hostId);
-
 protected:
     void OnAttachToFrameNode() override;
 
@@ -96,23 +94,12 @@ protected:
     std::function<void(const Rosen::Vector4f&)> boundsChangedCallback_;
 
 private:
-    void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
-    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleMouseEvent(const MouseInfo& info);
-    void HandleTouchEvent(const TouchEventInfo& info);
-    bool IsFilterTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    bool IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void SetWindowSceneConsumed(int32_t action);
-    void FilterInvalidPointerItem(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void UpdateSnapshotWindowProperty();
     bool IsSnapshotSizeChanged();
     void UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
         Color &color, ImageSourceInfo &sourceInfo);
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
-    RefPtr<TouchEventImpl> touchEvent_;
-    RefPtr<InputEvent> mouseEvent_;
-
     friend class LifecycleListener;
     friend class WindowEventProcess;
 

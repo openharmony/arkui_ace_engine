@@ -50,6 +50,11 @@ public:
 
     void SetController(const RefPtr<ScrollControllerBase>& controller)
     {
+        auto oldController = controllerWeak_.Upgrade();
+        if (oldController) {
+            ScrollerObserver observer;
+            oldController->SetObserver(observer);
+        }
         if (controller) {
             controller->SetObserver(observer_);
         }

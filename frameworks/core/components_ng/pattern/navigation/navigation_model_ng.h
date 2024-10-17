@@ -70,10 +70,11 @@ public:
     void SetCustomTransition(NavigationTransitionEvent&& animationTransition) override;
     void SetIsCustomAnimation(bool isCustom) override;
     void SetRecoverable(bool recoverable) override;
+    void SetEnableDragBar(bool enableDragBar) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavigationStack(FrameNode* frameNode);
-    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar);
+    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
     static void SetMinContentWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value);
@@ -83,11 +84,12 @@ public:
     static void SetBackButtonIcon(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply,
         const std::string& src, const ImageOption& imageOption, RefPtr<PixelMap>& pixMap);
     static void SetHideNavBar(FrameNode* frameNode, bool hideNavBar);
-    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
+    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
     static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
     static void SetRecoverable(FrameNode* frameNode, bool recoverable);
+    static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
 
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
@@ -106,6 +108,8 @@ private:
     bool CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     bool CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     static void SetHideNavBarInner(const RefPtr<NavigationGroupNode>& navigationGroupNode, bool hideNavBar);
+    static void CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode);
+    static RefPtr<FrameNode> CreateDragBarItemNode();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H
