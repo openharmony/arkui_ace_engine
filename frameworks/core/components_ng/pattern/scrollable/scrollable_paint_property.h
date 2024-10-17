@@ -33,6 +33,7 @@ struct ScrollBarProperty {
 };
 struct FadingEdgeProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FadingEdge, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FadingEdgeFromUser, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FadingEdgeLength, Dimension);
 };
 
@@ -67,6 +68,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ScrollBarProperty, ScrollBarColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_GROUP(FadingEdgeProperty, FadingEdgeProperty);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, FadingEdge, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, FadingEdgeFromUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, FadingEdgeLength, Dimension, PROPERTY_UPDATE_RENDER);
     Dimension GetBarWidth() const;
     Color GetBarColor() const;

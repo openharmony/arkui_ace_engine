@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components/list/list_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -93,9 +94,26 @@ void ListPattern::OnModifyDone()
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
     }
+    UpdateScrollable(paintProperty);
     auto overlayNode = host->GetOverlayNode();
     if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
         CreateAnalyzerOverlay(host);
+    }
+}
+
+void ListPattern::UpdateScrollable(RefPtr<ScrollablePaintProperty>& paintProperty)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if ((paintProperty->GetFadingEdgeFromUser().value_or(false) || !paintProperty->HasFadingEdge()) &&
+        (GetAxis() != Axis::HORIZONTAL)) {
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        auto listTheme = context->GetTheme<ListTheme>();
+        CHECK_NULL_VOID(listTheme);
+        auto listFadingEdge = listTheme->GetFadingEdge();
+        paintProperty->UpdateFadingEdgeFromUser(true);
+        paintProperty->UpdateFadingEdge(listFadingEdge);
     }
 }
 
