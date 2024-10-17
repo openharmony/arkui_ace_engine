@@ -1963,4 +1963,30 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout0
     EXPECT_FALSE(IsEqual(firstLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(8.00, 558.00)));
     EXPECT_FALSE(IsEqual(lastLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(682.00, 553.00)));
 }
+
+/**
+ * @tc.name: SwiperIndicatorPaintHoverIndicator009
+ * @tc.desc: Test DotIndicatorPaintMethod::PaintHoverIndicator for specific conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator009, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    ASSERT_NE(indicatorNode_, nullptr);
+    auto wrapper = FlushLayoutTask(indicatorNode_);
+    auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);
+    ASSERT_NE(paintMethod, nullptr);
+    paintMethod->currentIndex_ = 9;
+    paintMethod->itemCount_ = 11;
+    paintMethod->displayCount_ = 2;
+    paintMethod->isLoop_ = false;
+    paintMethod->mouseClickIndex_ = 10;
+    LinearVector<float> itemHalfSizes = { 5.0f, 5.0f, 10.0f, 10.0f };
+    Dimension paddingSide = Dimension(5.0f);
+    /**
+     * @tc.expected: PaintHoverIndicator longPointCenterX_ first eq 177.0f
+     */
+    paintMethod->PaintHoverIndicator(itemHalfSizes, paddingSide);
+    EXPECT_NEAR(paintMethod->longPointCenterX_.first, 177.0f, 0.001f);
+}
 } // namespace OHOS::Ace::NG
