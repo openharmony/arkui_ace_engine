@@ -878,7 +878,8 @@ const std::unique_ptr<ChartValue>& AccessibilityNode::GetChartValue() const
     return chartValue_;
 }
 
-void AccessibilityNode::PutChartValue(const std::string& groupName, const std::vector<std::pair<std::string, double>>& values)
+void AccessibilityNode::PutChartValue(
+    const std::string& groupName, const std::vector<std::pair<std::string, double>>& values)
 {
     if (!chartValue_) {
         chartValue_ = std::make_unique<ChartValue>();
