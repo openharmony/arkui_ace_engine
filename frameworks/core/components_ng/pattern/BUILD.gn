@@ -49,6 +49,7 @@ build_component_ng("pattern_ng") {
     "calendar/calendar_month_pattern.cpp",
     "calendar/calendar_paint_method.cpp",
     "calendar/calendar_pattern.cpp",
+    "calendar_picker/calendar_dialog_layout_algorithm.cpp",
     "calendar_picker/calendar_dialog_pattern.cpp",
     "calendar_picker/calendar_dialog_view.cpp",
     "calendar_picker/calendar_picker_layout_algorithm.cpp",
