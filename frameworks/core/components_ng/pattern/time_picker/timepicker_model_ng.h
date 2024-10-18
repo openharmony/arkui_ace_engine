@@ -46,6 +46,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 
     static void SetSelectedTime(FrameNode* frameNode, const PickerTime& value);
+    static void SetHasSecond(FrameNode* frameNode, bool hasSecond);
     static void SetDisappearTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetNormalTextStyle(

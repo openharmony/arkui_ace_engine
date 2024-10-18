@@ -320,6 +320,7 @@ namespace Converter {
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
+    template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
 
     // Converter implementations
     template<>
