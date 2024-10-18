@@ -518,7 +518,7 @@ void RichEditorPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    InitAvoidOnCaretChangeAfterLayoutTask();
+    TriggerAvoidOnCaretChangeAfterLayoutTask();
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -5067,17 +5067,14 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     }
     if (needCreateNewSpan) {
         CreateTextSpanNode(targetSpanNode, info, insertValue, isIME);
-        IF_TRUE(isIME, TriggerAvoidOnCaretChange());
         return;
     }
     if (typingStyle_.has_value() && !HasSameTypingStyle(targetSpanNode) && operationType != OperationType::DRAG) {
         InsertDiffStyleValueInSpan(targetSpanNode, info, insertValue, isIME);
-        IF_TRUE(isIME, TriggerAvoidOnCaretChange());
         return;
     }
     InsertValueToSpanNode(targetSpanNode, insertValue, info);
     AfterInsertValue(targetSpanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), false, isIME);
-    IF_TRUE(isIME, TriggerAvoidOnCaretChange());
 }
 
 void RichEditorPattern::DeleteSelectOperation(OperationRecord* const record)
@@ -7054,9 +7051,9 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
     if (!safeAreaManager || NearZero(safeAreaManager->GetKeyboardInset().Length(), 0)) {
         return;
     }
+    textFieldManager->TriggerAvoidOnCaretChange();
     auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
     SetLastCaretPos(caretPos);
-    textFieldManager->TriggerAvoidOnCaretChange();
 }
 
 void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -7089,7 +7086,7 @@ void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, Windo
 
 void RichEditorPattern::OnFontScaleConfigurationUpdate()
 {
-    InitAvoidOnCaretChangeAfterLayoutTask();
+    TriggerAvoidOnCaretChangeAfterLayoutTask();
 }
 
 void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType)
@@ -7215,7 +7212,7 @@ void RichEditorPattern::EncodeTlvDataByResultObject(const ResultObject& result, 
     spanString->EncodeTlv(tlvData);
 }
 
-void RichEditorPattern::InitAvoidOnCaretChangeAfterLayoutTask()
+void RichEditorPattern::TriggerAvoidOnCaretChangeAfterLayoutTask()
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -7228,8 +7225,8 @@ void RichEditorPattern::InitAvoidOnCaretChangeAfterLayoutTask()
         auto textFieldManager = manager.Upgrade();
         CHECK_NULL_VOID(textFieldManager);
         auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
-        if (caretPos > textField->GetLastCaretPos()) {
-            TAG_LOGI(ACE_KEYBOARD, "Caret Position Goes Down, Retrigger Avoid");
+        if (caretPos != textField->GetLastCaretPos()) {
+            TAG_LOGI(ACE_KEYBOARD, "Caret Position Change, Retrigger Avoid");
             textField->TriggerAvoidOnCaretChange();
         }
     });
