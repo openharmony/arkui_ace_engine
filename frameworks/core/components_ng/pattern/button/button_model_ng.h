@@ -50,6 +50,9 @@ public:
     void SetBorderRadius(const Dimension& radius) override;
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
+    void SetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
+        const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
+        const std::optional<Dimension>& radiusBottomEnd) override;
     void ResetBorderRadius() override;
     void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) override;
     void SetControlSize(const std::optional<ControlSize>& controlSize) override;

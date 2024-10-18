@@ -49,6 +49,9 @@ public:
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight) = 0;
+    virtual void SetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight) {}
     virtual void ResetBorderRadius() {}
     virtual void SetRemoteMessage(RemoteCallback&& remoteCallback) {}
     virtual void SetButtonStyle(const std::optional<ButtonStyleMode>& buttonStyle) {}

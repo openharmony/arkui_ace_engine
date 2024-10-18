@@ -370,6 +370,19 @@ void ButtonModelNG::SetBorderRadius(const std::optional<Dimension>& radiusTopLef
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius);
 }
 
+void ButtonModelNG::SetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
+    const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
+    const std::optional<Dimension>& radiusBottomEnd)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopStart = radiusTopStart;
+    borderRadius.radiusTopEnd = radiusTopEnd;
+    borderRadius.radiusBottomStart = radiusBottomStart;
+    borderRadius.radiusBottomEnd = radiusBottomEnd;
+    borderRadius.multiValued = true;
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius, borderRadius);
+}
+
 void ButtonModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
     const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
     const std::optional<Dimension>& radiusBottomRight)
