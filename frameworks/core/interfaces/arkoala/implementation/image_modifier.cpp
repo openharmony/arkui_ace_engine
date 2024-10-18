@@ -32,6 +32,9 @@ Ark_ImageError ArkValue(const LoadImageFailEvent& event)
 }
 } // OHOS::Ace::NG::Converter
 
+namespace OHOS::Ace::NG::Validator {
+} // OHOS::Ace::NG::Validator
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
@@ -93,12 +96,7 @@ void ObjectFitImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Ark_ImageFit strippedValue = Ark_ImageFit::ARK_IMAGE_FIT_COVER;
-    if ((static_cast<int>(value) >= static_cast<int>(Ark_ImageFit::ARK_IMAGE_FIT_CONTAIN))
-        || (static_cast<int>(value) >= static_cast<int>(Ark_ImageFit::ARK_IMAGE_FIT_NONE))) {
-            strippedValue = value;
-    }
-    auto fit = Converter::ConvertOrDefault<ImageFit>(strippedValue, ImageFit::COVER);
+    auto fit = Converter::ConvertOrDefault<ImageFit>(value, ImageFit::COVER);
     ImageModelNG::SetImageFit(frameNode, fit);
 }
 void ObjectRepeatImpl(Ark_NativePointer node,
