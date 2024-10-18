@@ -39,7 +39,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/slider/slider_pattern.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -534,7 +534,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src);
     template<> void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src);
     template<> void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src);
-    template<> void AssignCast(std::optional<SliderPattern::SliderChangeMode>& dst, const Ark_SliderChangeMode& src);
+    template<> void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src);
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 

@@ -15,7 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
-#include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
 #include "core/interfaces/arkoala/utility/validators.h"
@@ -226,7 +225,7 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto onChange = [frameNode](float value, int32_t mode) {
         auto arkValue = Converter::ArkValue<Ark_Number>(value);
-        auto arkMode = Converter::ArkValue<Ark_SliderChangeMode>(static_cast<SliderPattern::SliderChangeMode>(mode));
+        auto arkMode = Converter::ArkValue<Ark_SliderChangeMode>(static_cast<SliderModel::SliderChangeMode>(mode));
         GetFullAPI()->getEventsAPI()->getSliderEventsReceiver()->onChange(
             frameNode->GetId(), arkValue, arkMode);
     };

@@ -19,7 +19,7 @@
 #include "modifiers_test_utils.h"
 #include "test/unittest/capi/modifiers/generated/test_fixtures.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
-#include "core/components_ng/pattern/slider/slider_pattern.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/interfaces/arkoala/utility/converter.h"
 #include "core/interfaces/arkoala/utility/reverse_converter.h"
@@ -969,15 +969,15 @@ HWTEST_F(SliderModifierTest, setBlockColorTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Level1)
 {
-    ResourceColor initValueBlockColor;
+    Ark_ResourceColor initValueBlockColor;
 
     // Initial setup
     initValueBlockColor =
-        Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
 
     auto checkValue = [this, &initValueBlockColor](
-                          const std::string& input, const ResourceColor& value, const std::string& expectedStr) {
-        ResourceColor inputValueBlockColor = initValueBlockColor;
+                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
+        Ark_ResourceColor inputValueBlockColor = initValueBlockColor;
 
         inputValueBlockColor = value;
         modifier_->setBlockColor(node_, &inputValueBlockColor);
@@ -989,19 +989,19 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Le
 
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Resource>(std::get<1>(value)),
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -1012,14 +1012,14 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorValidValues, TestSize.Le
  */
 HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.Level1)
 {
-    ResourceColor initValueBlockColor;
+    Ark_ResourceColor initValueBlockColor;
 
     // Initial setup
     initValueBlockColor =
-        Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
 
-    auto checkValue = [this, &initValueBlockColor](const std::string& input, const ResourceColor& value) {
-        ResourceColor inputValueBlockColor = initValueBlockColor;
+    auto checkValue = [this, &initValueBlockColor](const std::string& input, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueBlockColor = initValueBlockColor;
 
         modifier_->setBlockColor(node_, &inputValueBlockColor);
         inputValueBlockColor = value;
@@ -1031,13 +1031,13 @@ HWTEST_F(SliderModifierTest, setBlockColorTestBlockColorInvalidValues, TestSize.
     };
 
     for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
 /*
@@ -1081,15 +1081,15 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestSize.Level1)
 {
-    ResourceColor initValueSelectedColor;
+    Ark_ResourceColor initValueSelectedColor;
 
     // Initial setup
     initValueSelectedColor =
-        Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
 
     auto checkValue = [this, &initValueSelectedColor](
-                          const std::string& input, const ResourceColor& value, const std::string& expectedStr) {
-        ResourceColor inputValueSelectedColor = initValueSelectedColor;
+                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
+        Ark_ResourceColor inputValueSelectedColor = initValueSelectedColor;
 
         inputValueSelectedColor = value;
         modifier_->setSelectedColor(node_, &inputValueSelectedColor);
@@ -1101,19 +1101,19 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
 
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Resource>(std::get<1>(value)),
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -1124,14 +1124,14 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorValidValues, TestS
  */
 HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorInvalidValues, TestSize.Level1)
 {
-    ResourceColor initValueSelectedColor;
+    Ark_ResourceColor initValueSelectedColor;
 
     // Initial setup
     initValueSelectedColor =
-        Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
 
-    auto checkValue = [this, &initValueSelectedColor](const std::string& input, const ResourceColor& value) {
-        ResourceColor inputValueSelectedColor = initValueSelectedColor;
+    auto checkValue = [this, &initValueSelectedColor](const std::string& input, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueSelectedColor = initValueSelectedColor;
 
         modifier_->setSelectedColor(node_, &inputValueSelectedColor);
         inputValueSelectedColor = value;
@@ -1143,13 +1143,13 @@ HWTEST_F(SliderModifierTest, setSelectedColorTestSelectedColorInvalidValues, Tes
     };
 
     for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
 /*
@@ -1302,11 +1302,11 @@ HWTEST_F(SliderModifierTest, setShowTipsTestDefaultValues, TestSize.Level1)
 HWTEST_F(SliderModifierTest, setShowTipsTestShowTipsValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueShowTips;
-    ResourceStr initValueContent;
+    Ark_ResourceStr initValueContent;
 
     // Initial setup
     initValueShowTips = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-    initValueContent = Converter::ArkUnion<ResourceStr, Ark_Resource>(
+    initValueContent = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(
         std::get<1>(Fixtures::testFixtureStringResValidValues[0]));
 
     auto checkValue = [this, &initValueShowTips, &initValueContent](
@@ -1335,12 +1335,12 @@ HWTEST_F(SliderModifierTest, setShowTipsTestShowTipsValidValues, TestSize.Level1
 HWTEST_F(SliderModifierTest, setShowTipsTestContentValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueShowTips;
-    ResourceStr initValueContent;
+    Ark_ResourceStr initValueContent;
 
     // Initial setup
     initValueShowTips = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     initValueContent =
-        Converter::ArkUnion<ResourceStr, Ark_Resource>(std::get<1>(Fixtures::testFixtureStringResValidValues[0]));
+        Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(std::get<1>(Fixtures::testFixtureStringResValidValues[0]));
 
     auto checkValue = [this, &initValueShowTips, &initValueContent](
                           const std::string& input, const Opt_ResourceStr& value, const std::string& expectedStr) {
@@ -1370,12 +1370,12 @@ HWTEST_F(SliderModifierTest, setShowTipsTestContentValidValues, TestSize.Level1)
 HWTEST_F(SliderModifierTest, setShowTipsTestContentInvalidValues, TestSize.Level1)
 {
     Ark_Boolean initValueShowTips;
-    ResourceStr initValueContent;
+    Ark_ResourceStr initValueContent;
 
     // Initial setup
     initValueShowTips = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
     initValueContent =
-        Converter::ArkUnion<ResourceStr, Ark_Resource>(std::get<1>(Fixtures::testFixtureStringResValidValues[0]));
+        Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(std::get<1>(Fixtures::testFixtureStringResValidValues[0]));
 
     auto checkValue = [this, &initValueShowTips, &initValueContent](
                           const std::string& input, const Opt_ResourceStr& value) {
@@ -1487,15 +1487,15 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestDefaultValues, TestSize.Leve
  */
 HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues, TestSize.Level1)
 {
-    ResourceColor initValueBlockBorderColor;
+    Ark_ResourceColor initValueBlockBorderColor;
 
     // Initial setup
     initValueBlockBorderColor =
-        Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
 
     auto checkValue = [this, &initValueBlockBorderColor](
-                          const std::string& input, const ResourceColor& value, const std::string& expectedStr) {
-        ResourceColor inputValueBlockBorderColor = initValueBlockBorderColor;
+                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
+        Ark_ResourceColor inputValueBlockBorderColor = initValueBlockBorderColor;
 
         inputValueBlockBorderColor = value;
         modifier_->setBlockBorderColor(node_, &inputValueBlockBorderColor);
@@ -1507,19 +1507,19 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues,
 
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Resource>(std::get<1>(value)),
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
             std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -1530,14 +1530,14 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorValidValues,
  */
 HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorInvalidValues, TestSize.Level1)
 {
-    ResourceColor initValueBlockBorderColor;
+    Ark_ResourceColor initValueBlockBorderColor;
 
     // Initial setup
     initValueBlockBorderColor =
-        Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
 
-    auto checkValue = [this, &initValueBlockBorderColor](const std::string& input, const ResourceColor& value) {
-        ResourceColor inputValueBlockBorderColor = initValueBlockBorderColor;
+    auto checkValue = [this, &initValueBlockBorderColor](const std::string& input, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueBlockBorderColor = initValueBlockBorderColor;
 
         modifier_->setBlockBorderColor(node_, &inputValueBlockBorderColor);
         inputValueBlockBorderColor = value;
@@ -1549,13 +1549,13 @@ HWTEST_F(SliderModifierTest, setBlockBorderColorTestBlockBorderColorInvalidValue
     };
 
     for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
 /*
@@ -1647,15 +1647,15 @@ HWTEST_F(SliderModifierTest, setStepColorTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Level1)
 {
-    ResourceColor initValueStepColor;
+    Ark_ResourceColor initValueStepColor;
 
     // Initial setup
     initValueStepColor =
-        Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
 
     auto checkValue = [this, &initValueStepColor](
-                          const std::string& input, const ResourceColor& value, const std::string& expectedStr) {
-        ResourceColor inputValueStepColor = initValueStepColor;
+                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
+        Ark_ResourceColor inputValueStepColor = initValueStepColor;
 
         inputValueStepColor = value;
         modifier_->setStepColor(node_, &inputValueStepColor);
@@ -1667,19 +1667,19 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Leve
 
     for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_Resource>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)), std::get<2>(value));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(std::get<0>(value),
-            Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
     }
 }
 
@@ -1690,14 +1690,14 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorValidValues, TestSize.Leve
  */
 HWTEST_F(SliderModifierTest, setStepColorTestStepColorInvalidValues, TestSize.Level1)
 {
-    ResourceColor initValueStepColor;
+    Ark_ResourceColor initValueStepColor;
 
     // Initial setup
-    initValueStepColor = Converter::ArkUnion<ResourceColor, Ark_String>(
+    initValueStepColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(
         std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
 
-    auto checkValue = [this, &initValueStepColor](const std::string& input, const ResourceColor& value) {
-        ResourceColor inputValueStepColor = initValueStepColor;
+    auto checkValue = [this, &initValueStepColor](const std::string& input, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueStepColor = initValueStepColor;
 
         modifier_->setStepColor(node_, &inputValueStepColor);
         inputValueStepColor = value;
@@ -1709,13 +1709,13 @@ HWTEST_F(SliderModifierTest, setStepColorTestStepColorInvalidValues, TestSize.Le
     };
 
     for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_String>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
     }
     for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(std::get<0>(value), Converter::ArkUnion<ResourceColor, Ark_Color>(std::get<1>(value)));
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
     }
     // Check invalid union
-    checkValue("invalid union", Converter::ArkUnion<ResourceColor, Ark_Empty>(nullptr));
+    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
 /*
@@ -2037,7 +2037,7 @@ HWTEST_F(SliderModifierTest, setBlockStyleTestValidValues, TestSize.Level1)
         std::get<1>(Fixtures::testFixtureEnumSliderBlockTypeValidValuesSlider[0]));
     initValueBlockStyle.image = Converter::ArkValue<Opt_ResourceStr>();
     initValueBlockStyle.shape =
-        Converter::ArkValue<Opt_Union_CircleAttribute_EllipseAttribute_PathAttribute_RectAttribute>();
+        Converter::ArkValue<Opt_Type_SliderBlockStyle_shape>();
 
     auto checkValue = [this, &initValueBlockStyle](const std::string& input, const Ark_SliderBlockType& value,
         const std::string& expectedStr) {
@@ -2445,15 +2445,11 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
         checkEvent = {
             .nodeId = nodeId,
             .value = Converter::Convert<float>(value),
-            .mode = EnumToInt(Converter::OptConvert<SliderPattern::SliderChangeMode>(mode)),
+            .mode = EnumToInt(Converter::OptConvert<SliderModel::SliderChangeMode>(mode)),
         };
     };
 
-    // auto onChange = eventHub->GetOnChange();
-    // EXPECT_EQ(onChange, nullptr);
     modifier_->setOnChange(node_, func);
-    //onChange = eventHub->GetOnChange();
-    //EXPECT_NE(onChange, nullptr);
     EXPECT_EQ(checkEvent.has_value(), false);
     eventHub->FireChangeEvent(10, 0);
     EXPECT_EQ(checkEvent.has_value(), true);

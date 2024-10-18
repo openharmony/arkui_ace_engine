@@ -31,7 +31,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
-#include "core/components_ng/pattern/slider/slider_pattern.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -214,7 +214,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
     void AssignArkValue(Ark_TextRange& dst, const TextRange& src);
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
-    void AssignArkValue(Ark_SliderChangeMode& dst, const SliderPattern::SliderChangeMode& src);
+    void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src);
 
     inline void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src)
     {

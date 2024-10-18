@@ -152,7 +152,7 @@ public:
     }
 
     void SetSliderValue(double value, int32_t mode);
-    enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -268,6 +268,7 @@ private:
     }
 
     Axis direction_ = Axis::HORIZONTAL;
+    enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;
     float minResponse_ = 0.0f;
     bool skipGestureEvents_ = false;
