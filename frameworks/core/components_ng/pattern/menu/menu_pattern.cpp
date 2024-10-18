@@ -192,35 +192,20 @@ void MenuPattern::OnAttachToFrameNode()
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     halfFoldHoverCallbackId_ = RegisterHalfFoldHover(targetNode);
-    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
-                                              const OffsetF& oldOrigin, const RectF& /* rect */,
+    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
+                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
-        // Not handle first change
-        if (oldRect.IsEmpty() && oldOrigin.NonOffset()) {
-            return;
+        auto menuNode = menuNodeWk.Upgrade();
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        auto menuWarpper = menuPattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWarpper);
+        auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(warpperPattern);
+        if (!warpperPattern->IsHide()) {
+            menuWarpper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        AnimationOption option;
-        option.SetCurve(pipelineContext->GetSafeAreaManager()->GetSafeAreaCurve());
-        AnimationUtils::Animate(
-            option,
-            [weakPipeline = WeakPtr<PipelineContext>(pipelineContext), weakMenu = menuNodeWk]() {
-                auto menu = weakMenu.Upgrade();
-                CHECK_NULL_VOID(menu);
-                auto menuPattern = menu->GetPattern<MenuPattern>();
-                CHECK_NULL_VOID(menuPattern);
-                auto menuWarpper = menuPattern->GetMenuWrapper();
-                CHECK_NULL_VOID(menuWarpper);
-                auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
-                CHECK_NULL_VOID(warpperPattern);
-                if (!warpperPattern->IsHide()) {
-                    auto pipeline = weakPipeline.Upgrade();
-                    CHECK_NULL_VOID(pipeline);
-                    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-                    pipeline->FlushUITasks();
-                }
-            });
-        pipelineContext->FlushPipelineImmediately();
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
