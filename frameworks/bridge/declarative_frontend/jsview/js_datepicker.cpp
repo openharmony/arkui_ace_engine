@@ -886,6 +886,10 @@ JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>
     if (minute && minute->IsNumber()) {
         dateTime.tm_min = minute->GetInt();
     }
+    auto second = selectedJson->GetValue("second");
+    if (second && second->IsNumber()) {
+        dateTime.tm_sec = second->GetInt();
+    }
     if (!isDatePicker) {
         auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
         auto dateObj = JSDate::New(milliseconds);
