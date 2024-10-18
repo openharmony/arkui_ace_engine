@@ -36,13 +36,12 @@ public:
 
     RefPtr<VideoControllerV2> GetController() const
     {
-        return handler_.Invalid() ? nullptr : handler_.Upgrade();
+        return videoController_;
     }
 
-    void SetController(const WeakPtr<VideoControllerV2>& videoController)
+    void SetController(const RefPtr<VideoControllerV2>& videoController)
     {
-        CHECK_NULL_VOID(!videoController.Invalid());
-        handler_ = videoController;
+        videoController_ = videoController;
     }
 
     void SetInstanceId(int32_t id)
@@ -52,7 +51,7 @@ public:
 
 private:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
-    WeakPtr<VideoControllerV2> handler_;
+    RefPtr<VideoControllerV2> videoController_;
     ACE_DISALLOW_COPY_AND_MOVE(VideoControllerPeerImpl);
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
