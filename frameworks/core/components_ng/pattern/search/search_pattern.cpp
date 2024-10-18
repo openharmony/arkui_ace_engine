@@ -1544,21 +1544,22 @@ void SearchPattern::UpdateDividerColorMode()
 
 void SearchPattern::UpdateCancelButtonColorMode()
 {
-    CHECK_NULL_VOID(cancelButtonNode_);
-    auto pipeline = cancelButtonNode_->GetContext();
+    auto cancelButtonNode = cancelButtonNode_.Upgrade();
+    CHECK_NULL_VOID(cancelButtonNode);
+    auto pipeline = cancelButtonNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
-    auto cancelButtonRenderContext = cancelButtonNode_->GetRenderContext();
+    auto cancelButtonRenderContext = cancelButtonNode->GetRenderContext();
     CHECK_NULL_VOID(cancelButtonRenderContext);
     cancelButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    auto textFrameNode = AceType::DynamicCast<FrameNode>(cancelButtonNode_->GetChildren().front());
+    auto textFrameNode = AceType::DynamicCast<FrameNode>(cancelButtonNode->GetChildren().front());
     CHECK_NULL_VOID(textFrameNode);
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
-    cancelButtonNode_->MarkModifyDone();
-    cancelButtonNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    cancelButtonNode->MarkModifyDone();
+    cancelButtonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void SearchPattern::OnColorConfigurationUpdate()
@@ -1577,25 +1578,27 @@ void SearchPattern::OnColorConfigurationUpdate()
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
     UpdateCancelButtonColorMode();
-    if (buttonNode_) {
-        auto buttonRenderContext = buttonNode_->GetRenderContext();
+    auto buttonNode = buttonNode_.Upgrade();
+    if (buttonNode) {
+        auto buttonRenderContext = buttonNode->GetRenderContext();
         CHECK_NULL_VOID(buttonRenderContext);
         buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonNode_->GetChildren().front());
+        auto textFrameNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
         CHECK_NULL_VOID(textFrameNode);
         auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
-        buttonNode_->MarkModifyDone();
-        buttonNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        buttonNode->MarkModifyDone();
+        buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (textField_) {
-        auto textFieldLayoutProperty = textField_->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto textField = textField_.Upgrade();
+    if (textField) {
+        auto textFieldLayoutProperty = textField->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(textFieldLayoutProperty);
         textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
         textFieldLayoutProperty->UpdatePlaceholderTextColor(searchTheme->GetPlaceholderColor());
-        textField_->MarkModifyDone();
-        textField_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        textField->MarkModifyDone();
+        textField->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     UpdateDividerColorMode();
 }
