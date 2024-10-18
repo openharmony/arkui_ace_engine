@@ -64,6 +64,9 @@ void ListPattern::OnModifyDone()
         CHECK_NULL_VOID(scrollableEvent);
         scrollable_ = scrollableEvent->GetScrollable();
         scrollable_->SetSnapMode(true);
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
 
     SetEdgeEffect();

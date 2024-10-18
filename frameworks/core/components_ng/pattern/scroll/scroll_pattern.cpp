@@ -45,6 +45,9 @@ void ScrollPattern::OnModifyDone()
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
     SetEdgeEffect();
     SetScrollBar(paintProperty->GetScrollBarProperty());

@@ -135,6 +135,9 @@ void GridPattern::OnModifyDone()
     SetAxis(gridLayoutInfo_.axis_);
     if (!GetScrollableEvent()) {
         AddScrollEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
 
     SetEdgeEffect();
