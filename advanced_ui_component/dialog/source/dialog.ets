@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import { ButtonOptions } from '@ohos.arkui.advanced.Dialog';
 import { BusinessError, Callback } from '@ohos.base';
 import display from '@ohos.display';
 import hilog from '@ohos.hilog';
@@ -28,16 +29,6 @@ class CustomThemeImpl implements CustomTheme {
   constructor(colors: CustomColors) {
     this.colors = colors;
   }
-}
-
-export declare class ButtonOptions {
-  public value: ResourceStr;
-  public action?: () => void;
-  public background?: ResourceColor;
-  public fontColor?: ResourceColor;
-  public buttonStyle?: ButtonStyleMode;
-  public role?: ButtonRole;
-  public defaultFocus?: boolean | undefined;
 }
 
 const TITLE_MAX_LINES: number = 2;
