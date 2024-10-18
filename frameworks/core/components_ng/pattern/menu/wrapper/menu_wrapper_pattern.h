@@ -489,6 +489,7 @@ private:
     void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
     void StartShowAnimation();
     void HandleInteraction(const TouchEventInfo& info);
+    void ChangeTouchItem(const TouchEventInfo& info, TouchType touchType);
     void ChangeCurMenuItemBgColor();
     void ClearLastMenuItem();
     RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
@@ -526,6 +527,7 @@ private:
     float hoverImageToPreviewScale_ = -1.0;
     MenuParam menuParam_;
     bool isShowFromUser_ = false;
+    int32_t fingerId_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

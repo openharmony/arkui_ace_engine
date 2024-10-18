@@ -245,8 +245,12 @@ private:
     // register menu item's callback
     void RegisterOnClick();
     void RegisterOnHover();
-    virtual void OnTouch(const TouchEventInfo& info);
+    virtual void OnTouch(const TouchEventInfo& info) {};
     virtual bool OnKeyEvent(const KeyEvent& event);
+    virtual bool IsCustomMenuItem()
+    {
+        return false;
+    }
     void OnClick();
 
     void RegisterWrapperMouseEvent();
@@ -347,6 +351,10 @@ private:
     void OnTouch(const TouchEventInfo& info) override;
     void HandleOnChange();
     bool OnKeyEvent(const KeyEvent& event) override;
+    bool IsCustomMenuItem() override
+    {
+        return true;
+    }
     std::unique_ptr<Offset> lastTouchOffset_;
 };
 } // namespace OHOS::Ace::NG
