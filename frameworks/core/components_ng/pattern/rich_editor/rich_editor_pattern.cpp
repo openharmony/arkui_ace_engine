@@ -2925,6 +2925,10 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
+    if (info.GetFingerList().size() > 1) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "More than one finger detected, ignoring this long press event");
+        return;
+    }
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleLongPress");
     moveCaretState_.Reset();
     caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
