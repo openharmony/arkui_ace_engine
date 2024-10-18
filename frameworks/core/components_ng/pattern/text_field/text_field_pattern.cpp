@@ -1408,7 +1408,9 @@ void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
 
 bool TextFieldPattern::IsShowHandle()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -5804,7 +5806,7 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
         } else if (CheckSelectAreaVisible()) {
             isTextSelectionMenuShow_ = false;
         }
-        selectOverlay_->HideMenu();
+        selectOverlay_->HideMenu(true);
         return true;
     }
     if (IsReachedBoundary(offset)) {

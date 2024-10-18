@@ -59,7 +59,7 @@ RefPtr<SelectContentOverlayPattern> GetSelectHandlePattern(const WeakPtr<SelectC
 const RefPtr<SelectContentOverlayManager> SelectContentOverlayManager::GetOverlayManager(
     const RefPtr<SelectOverlayHolder>& holder)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto overlayManager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_RETURN(overlayManager, nullptr);
@@ -446,7 +446,7 @@ void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
     menuNode_ = menuNode;
     auto handleNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_, SelectOverlayMode::HANDLE_ONLY);
     handleNode_ = handleNode;
-    auto taskExecutor = Container::CurrentTaskExecutor();
+    auto taskExecutor = Container::CurrentTaskExecutorSafely();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [animation, weak = WeakClaim(this), menuNode, handleNode, mode] {
