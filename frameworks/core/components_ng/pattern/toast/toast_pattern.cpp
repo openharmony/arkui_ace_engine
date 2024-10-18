@@ -57,8 +57,14 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     float safeAreaBottom =
         safeArea ? safeArea->bottom_.Length() : safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
     wrapperRect_ = pipelineContext->GetDisplayWindowRectInfo();
-    wrapperRect_.SetRect(wrapperRect_.Left(), safeAreaTop,
-        pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight() - safeAreaTop - safeAreaBottom);
+    if (IsSystemTopMost()) {
+        wrapperRect_.SetRect(0, safeAreaTop, static_cast<double>(SystemProperties::GetDeviceWidth()),
+            static_cast<double>(SystemProperties::GetDeviceHeight()) - safeAreaTop - safeAreaBottom);
+    } else {
+        wrapperRect_.SetRect(wrapperRect_.Left(), safeAreaTop,
+            pipelineContext->GetRootWidth(), pipelineContext->GetRootHeight() - safeAreaTop - safeAreaBottom);
+    }
+    
     isHoverMode_ = pipelineContext->IsHalfFoldHoverStatus();
     if (isHoverMode_ && toastInfo_.enableHoverMode) {
         UpdateHoverModeRect(toastProps, safeAreaManager, safeAreaTop, safeAreaBottom);
@@ -385,7 +391,9 @@ double ToastPattern::GetTextMaxHeight()
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     double deviceHeight = 0.0;
-    if (IsUIExtensionSubWindow()) {
+    if (IsSystemTopMost()) {
+        deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
+    } else if (IsUIExtensionSubWindow()) {
         auto toastNode = GetHost();
         CHECK_NULL_RETURN(toastNode, 0.0);
         auto nodeContext = toastNode->GetContextWithCheck();
@@ -415,7 +423,9 @@ double ToastPattern::GetTextMaxWidth()
     auto pipelineContext = IsDefaultToast() ? PipelineContext::GetCurrentContext() : GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0);
     double deviceWidth = 0.0;
-    if (IsUIExtensionSubWindow()) {
+    if (IsSystemTopMost()) {
+        deviceWidth = static_cast<double>(SystemProperties::GetDeviceWidth());
+    } else if (IsUIExtensionSubWindow()) {
         auto toastNode = GetHost();
         CHECK_NULL_RETURN(toastNode, 0.0);
         auto nodeContext = toastNode->GetContextWithCheck();
