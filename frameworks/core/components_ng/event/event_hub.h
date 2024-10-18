@@ -252,6 +252,11 @@ public:
     void FireOnDetach();
     void ClearStateStyle();
     void OnDetachClear();
+    void HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
+        const std::unique_ptr<OffsetF>& lastParentOffsetToWindow,
+        const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow);
+    void FireUntriggeredInnerOnAreaChanged(
+        const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin);
 
 protected:
     virtual void OnModifyDone() {}
@@ -294,6 +299,7 @@ private:
     bool enabled_ { true };
     bool developerEnabled_ { true };
     std::vector<KeyboardShortcut> keyboardShortcut_;
+    std::vector<int32_t> hasInnerAreaChangeUntriggered_;
 
     std::vector<double> visibleAreaUserRatios_;
     VisibleCallbackInfo visibleAreaUserCallback_;

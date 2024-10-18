@@ -1501,18 +1501,8 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
                     ? "non-execution"
                     : "execution");
         }
-        if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
-            if (eventHub_->HasInnerOnAreaChanged()) {
-                eventHub_->FireInnerOnAreaChanged(
-                    *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
-            }
-            if (eventHub_->HasOnAreaChanged()) {
-                eventHub_->FireOnAreaChanged(*lastFrameRect_, *lastParentOffsetToWindow_,
-                    GetFrameRectWithSafeArea(true), GetParentGlobalOffsetWithSafeArea(true, true));
-            }
-            *lastFrameRect_ = currFrameRect;
-            *lastParentOffsetToWindow_ = currParentOffsetToWindow;
-        }
+        eventHub_->HandleOnAreaChange(
+            lastFrameRect_, lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
     }
     pattern_->OnAreaChangedInner();
 }
