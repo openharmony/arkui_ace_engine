@@ -2698,4 +2698,19 @@ HWTEST_F(TextTestFiveNg, ResumeAnimation001, TestSize.Level1)
     textContentModifier->PauseAnimation();
     EXPECT_EQ(textContentModifier->marqueeState_, MarqueeState::PAUSED);
 }
+
+/**
+ * @tc.name: UnRegisterAfterLayoutCallback001
+ * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->RegisterAfterLayoutCallback([]() {});
+    EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), true);
+    pattern->UnRegisterAfterLayoutCallback();
+    EXPECT_EQ(pattern->afterLayoutCallback_.has_value(), false);
+}
 } // namespace OHOS::Ace::NG
