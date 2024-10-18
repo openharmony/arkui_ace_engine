@@ -189,6 +189,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::DeleteText(int32_t nodeId, vo
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
+            ContainerScope scope(frameNode->GetInstanceId());
             auto pipeline = frameNode->GetContextRefPtr();
             CHECK_NULL_VOID(pipeline);
             auto windowRect = pipeline->GetCurrentWindowRect();
@@ -227,11 +228,10 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::ChoiceText(int32_t nodeId, vo
     taskScheduler->PostSyncTask(
         [&resultCode, nodeId, choiceTextOption]() {
             auto rect = choiceTextOption.rect;
-            TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture global rect:%{public}f, %{public}f, %{public}f, %{public}f",
-                rect.Left, rect.Top, rect.Width, rect.Height);
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
+            ContainerScope scope(frameNode->GetInstanceId());
             auto pipeline = frameNode->GetContextRefPtr();
             CHECK_NULL_VOID(pipeline);
             auto windowRect = pipeline->GetCurrentWindowRect();
@@ -247,6 +247,14 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::ChoiceText(int32_t nodeId, vo
             CHECK_NULL_VOID(textBase);
             auto wtextLength = textBase->GetContentWideTextLength();
             TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture wtextLength:%{public}d", wtextLength);
+            if (StylusDetectorMgr::GetInstance()->sInd_ == static_cast<int32_t>(sInd.position_) &&
+                StylusDetectorMgr::GetInstance()->eInd_ == static_cast<int32_t>(eInd.position_) &&
+                StylusDetectorMgr::GetInstance()->showMenu_ == choiceTextOption.showMenu) {
+                return;
+            }
+            StylusDetectorMgr::GetInstance()->sInd_ = static_cast<int32_t>(sInd.position_);
+            StylusDetectorMgr::GetInstance()->eInd_ = static_cast<int32_t>(eInd.position_);
+            StylusDetectorMgr::GetInstance()->showMenu_ = choiceTextOption.showMenu;
             auto ret = CalculateIntersectedRegion(sInd, eInd, wtextLength);
             if (std::get<0>(ret) == 0) {
                 auto textInputClient = frameNode->GetPattern<TextInputClient>();
@@ -277,6 +285,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::InsertSpace(int32_t nodeId, v
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
+            ContainerScope scope(frameNode->GetInstanceId());
             auto pipeline = frameNode->GetContextRefPtr();
             CHECK_NULL_VOID(pipeline);
             auto windowRect = pipeline->GetCurrentWindowRect();
@@ -310,6 +319,7 @@ int32_t StylusDetectorMgr::StylusDetectorCallBack::MoveCursor(int32_t nodeId, vo
             auto UiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
+            ContainerScope scope(frameNode->GetInstanceId());
             auto pipeline = frameNode->GetContextRefPtr();
             CHECK_NULL_VOID(pipeline);
             auto windowRect = pipeline->GetCurrentWindowRect();
@@ -359,6 +369,13 @@ NG::PositionWithAffinity StylusDetectorMgr::StylusDetectorCallBack::GetGlyphPosi
     }
     TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture localOffset:%{public}f, %{public}f", localOffset.GetX(),
         localOffset.GetY());
+    auto textDragBase = frameNode->GetPattern<NG::TextDragBase>();
+    CHECK_NULL_RETURN(textDragBase, finalResult);
+    auto textRect = textDragBase->GetTextRect();
+    if (localOffset.GetY() < textRect.GetY() || localOffset.GetY() > textRect.GetY() + textRect.Height()) {
+        TAG_LOGI(AceLogTag::ACE_STYLUS, "stylusGesture point outside the area");
+        return finalResult;
+    }
     // calculate the start and end indexes of the intersecting region.
     auto layoutInfo = StylusDetectorMgr::GetInstance()->layoutInfo_.Upgrade();
     CHECK_NULL_RETURN(layoutInfo, finalResult);
@@ -585,10 +602,11 @@ bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(
     info.x = touchEvent.screenX;
     info.y = touchEvent.screenY;
     info.bundleName = bundleName;
-    if (!isRegistered_) {
-        auto stylusDetectorCallback = std::make_shared<StylusDetectorCallBack>();
-        isRegistered_ = RegisterStylusInteractionListener(bundleName, stylusDetectorCallback);
-    }
+    auto stylusDetectorCallback = std::make_shared<StylusDetectorCallBack>();
+    isRegistered_ = RegisterStylusInteractionListener(bundleName, stylusDetectorCallback);
+    sInd_ = -1;
+    eInd_ = -1;
+    showMenu_ = false;
     return Notify(info);
 }
 
