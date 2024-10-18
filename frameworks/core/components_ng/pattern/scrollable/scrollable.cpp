@@ -503,11 +503,12 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
     StopSnapController();
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of scroll motion is %{public}f, velocity is %{public}f",
         mainPosition, correctVelocity);
-    if (friction_ == -1.0) {
+    double frictionTmp = friction_;
+    if (NearEqual(friction_, -1.0)) {
         double ret = SystemProperties::GetSrollableFriction();
-        friction_ = !NearZero(ret) ? ret : defaultFriction_;
+        frictionTmp = !NearZero(ret) ? ret : defaultFriction_;
     }
-    float friction = sFriction_.value_or(friction_);
+    float friction = sFriction_.value_or(frictionTmp);
     initVelocity_ = correctVelocity;
     finalPosition_ = mainPosition + correctVelocity / (friction * -FRICTION_SCALE);
     currentPos_ = mainPosition;

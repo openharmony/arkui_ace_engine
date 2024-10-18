@@ -828,11 +828,6 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-
-        auto parent = pattern->GetNestedScrollParent();
-        if (parent) {
-            parent->OnScrollDragEndRecursive();
-        }
         pattern->HandleFlingMove(info);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
@@ -5749,16 +5744,22 @@ bool WebPattern::HandleScrollVelocity(float velocity, const RefPtr<NestableScrol
 bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity)
 {
     CHECK_NULL_RETURN(parent, false);
+    if (!NestedScrollOutOfBoundary()) {
+        OnParentScrollDragEndRecursive(parent);
+    }
     if (InstanceOf<SwiperPattern>(parent)) {
         // When scrolling to the previous SwiperItem, that item needs to be visible. Update the offset slightly to make
         // it visible before calling HandleScrollVelocity.
         float tweak = (velocity > 0.0f) ? 1.0f : -1.0f;
         parent->HandleScroll(tweak, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
+        OnParentScrollDragEndRecursive(parent);
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::HandleScrollVelocity, to parent scroll velocity=%{public}f", velocity);
     if (parent->HandleScrollVelocity(velocity)) {
+        OnParentScrollDragEndRecursive(parent);
         return true;
     }
+    OnParentScrollDragEndRecursive(parent);
     return false;
 }
 
@@ -5835,8 +5836,7 @@ void WebPattern::OnOverScrollFlingVelocityHandler(float velocity, bool isFling)
             if (CheckOverParentScroll(velocity, NestedScrollMode::SELF_FIRST)) {
                 result = HandleScroll(parent.Upgrade(), -velocity, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
                 remain = result.remain;
-            } else if (InstanceOf<RefreshPattern>(parent.Upgrade()) &&
-                       CheckOverParentScroll(velocity, NestedScrollMode::PARENT_FIRST)) {
+            } else if (CheckOverParentScroll(velocity, NestedScrollMode::PARENT_FIRST)) {
                 remain = -velocity;
             }
             if (!NearZero(remain)) {
@@ -5964,7 +5964,7 @@ void WebPattern::SetNestedScrollExt(const NestedScrollOptionsExt &nestedScroll)
     if (pattern) {
         pattern->SetNestedScroll(nestedOpt);
     }
-    TAG_LOGD(
+    TAG_LOGI(
         AceLogTag::ACE_WEB, "SetNestedScrollExt nestedScroll: %{public}s", nestedScroll.ToString().c_str());
     nestedScroll_ = nestedScroll;
 }
@@ -6040,6 +6040,10 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
+    if (parent.Upgrade() && parent.Upgrade()->NestedScrollOutOfBoundary()) {
+        HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+        return true;
+    }
     if (CheckParentScroll(offset, NestedScrollMode::PARENT_FIRST)) {
         auto result = HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
         if (!NearZero(result.remain)) {
@@ -6053,11 +6057,9 @@ bool WebPattern::FilterScrollEventHandleOffset(const float offset)
         return true;
     } else if (CheckParentScroll(offset, NestedScrollMode::PARALLEL)) {
         HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
-    } else if (CheckParentScroll(offset, NestedScrollMode::SELF_FIRST)) {
-        if (parent.Upgrade() && parent.Upgrade()->NestedScrollOutOfBoundary()) {
-            HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
-            return true;
-        }
+    } else if (CheckParentScroll(offset, NestedScrollMode::SELF_FIRST) && NestedScrollOutOfBoundary()) {
+        HandleScroll(parent.Upgrade(), offset, SCROLL_FROM_UPDATE, NestedState::CHILD_OVER_SCROLL);
+        return true;
     }
     UpdateFlingReachEdgeState(offset, false);
     return false;
@@ -6094,6 +6096,9 @@ bool WebPattern::FilterScrollEventHandlevVlocity(const float velocity)
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_RETURN(it, parentsMap_.end(), false);
     auto parent = it->second;
+    if (parent.Upgrade() && parent.Upgrade()->NestedScrollOutOfBoundary()) {
+        return HandleScrollVelocity(parent.Upgrade(), velocity);
+    }
     if (CheckParentScroll(velocity, NestedScrollMode::PARENT_FIRST)) {
         if (isParentReachEdge_ &&
             ((Negative(velocity) && !isFlingReachEdge_.atEnd) || (Positive(velocity) && !isFlingReachEdge_.atStart))) {
@@ -7066,5 +7071,23 @@ bool WebPattern::CloseImageOverlaySelection()
         return true;
     }
     return false;
+}
+
+void WebPattern::SetDrawSize(double width, double height)
+{
+    drawSize_.SetWidth(width);
+    drawSize_.SetHeight(height);
+}
+
+void WebPattern::OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> parent)
+{
+    if (isDragEnd_) {
+        return;
+    }
+    if (parent) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnParentScrollDragEndRecursive");
+        parent->OnScrollDragEndRecursive();
+    }
+    isDragEnd_ = true;
 }
 } // namespace OHOS::Ace::NG

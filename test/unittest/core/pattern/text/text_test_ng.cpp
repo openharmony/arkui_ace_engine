@@ -237,6 +237,12 @@ HWTEST_F(TextTestNg, SetTextDetectEnable003, TestSize.Level1)
     ASSERT_EQ(textModelNG.GetFontFeature(frameNode), value);
     ASSERT_EQ(textModelNG.GetLineBreakStrategy(frameNode), TEXT_LINE_BREAK_STRATEGY);
 
+    textModelNG.SetCaretColor(frameNode, Color::BLACK);
+    ASSERT_EQ(textModelNG.GetCaretColor(frameNode), Color::BLACK);
+
+    textModelNG.ResetCaretColor(frameNode);
+    ASSERT_EQ(textModelNG.GetCaretColor(frameNode), Color::BLACK);
+
     textModelNG.SetSelectedBackgroundColor(frameNode, Color::BLACK);
     ASSERT_EQ(textModelNG.GetSelectedBackgroundColor(frameNode), Color::BLACK);
 

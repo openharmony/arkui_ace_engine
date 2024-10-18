@@ -1199,6 +1199,8 @@ void FormPattern::InitFormManagerDelegate()
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
     formManagerBridge_->AddRenderDelegate();
     formManagerBridge_->RegisterRenderDelegateEvent();
@@ -1208,21 +1210,16 @@ void FormPattern::InitFormManagerDelegate()
     }
     int32_t instanceID = context->GetInstanceId();
     accessibilitySessionAdapter_ = AceType::MakeRefPtr<AccessibilitySessionAdapterForm>(formManagerBridge_);
-    formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID](int64_t id, const std::string& path,
+    formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t id,
+                                                   const std::string& path,
                                                    const std::string& module, const std::string& data,
                                                    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&
                                                        imageDataMap,
                                                    const AppExecFwk::FormJsInfo& formJsInfo,
                                                    const FrontendType& frontendType, const FrontendType& uiSyntax) {
         ContainerScope scope(instanceID);
-        auto form = weak.Upgrade();
-        CHECK_NULL_VOID(form);
-        auto host = form->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak, instanceID, frontendType,
                                     uiSyntax] {
             ContainerScope scope(instanceID);
@@ -1236,17 +1233,11 @@ void FormPattern::InitFormManagerDelegate()
     });
 
     formManagerBridge_->AddFormUpdateCallback(
-        [weak = WeakClaim(this), instanceID](int64_t id, const std::string& data,
+        [weak = WeakClaim(this), instanceID, pipeline](int64_t id, const std::string& data,
             const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap) {
             ContainerScope scope(instanceID);
-            auto form = weak.Upgrade();
-            CHECK_NULL_VOID(form);
-            auto host = form->GetHost();
-            CHECK_NULL_VOID(host);
-            auto context = host->GetContext();
-            CHECK_NULL_VOID(context);
             auto uiTaskExecutor =
-                SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+                SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask([id, data, imageDataMap, weak, instanceID] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
@@ -1258,16 +1249,10 @@ void FormPattern::InitFormManagerDelegate()
         });
 
     formManagerBridge_->AddFormErrorCallback(
-        [weak = WeakClaim(this), instanceID](const std::string& code, const std::string& msg) {
+        [weak = WeakClaim(this), instanceID, pipeline](const std::string& code, const std::string& msg) {
             ContainerScope scope(instanceID);
-            auto form = weak.Upgrade();
-            CHECK_NULL_VOID(form);
-            auto host = form->GetHost();
-            CHECK_NULL_VOID(host);
-            auto context = host->GetContext();
-            CHECK_NULL_VOID(context);
             auto uiTaskExecutor =
-                SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+                SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask([code, msg, weak, instanceID] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
@@ -1276,16 +1261,10 @@ void FormPattern::InitFormManagerDelegate()
                 }, "ArkUIFormFireErrorEvent");
         });
 
-    formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID](int64_t formId) {
+    formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t formId) {
         ContainerScope scope(instanceID);
-        auto form = weak.Upgrade();
-        CHECK_NULL_VOID(form);
-        auto host = form->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([formId, weak, instanceID] {
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
@@ -1312,17 +1291,11 @@ void FormPattern::InitFormManagerDelegate()
                 }, "ArkUIFormFireSurfaceNodeCallback");
         });
 
-    formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height,
-        float borderWidth) {
+    formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID, pipeline](float width,
+        float height, float borderWidth) {
         ContainerScope scope(instanceID);
-        auto form = weak.Upgrade();
-        CHECK_NULL_VOID(form);
-        auto host = form->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID, width, height, borderWidth] {
             ContainerScope scope(instanceID);
             auto form = weak.Upgrade();
@@ -1346,16 +1319,10 @@ void FormPattern::InitFormManagerDelegate()
         formPattern->OnActionEvent(action);
     });
 
-    formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID]() {
+    formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID, pipeline]() {
         ContainerScope scope(instanceID);
-        auto formPattern = weak.Upgrade();
-        CHECK_NULL_VOID(formPattern);
-        auto host = formPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID] {
             ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
@@ -1397,16 +1364,10 @@ void FormPattern::InitFormManagerDelegate()
                 }, "ArkUIFormGetRectRelativeToWindow");
         });
 
-    formManagerBridge_->AddEnableFormCallback([weak = WeakClaim(this), instanceID](const bool enable) {
+    formManagerBridge_->AddEnableFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool enable) {
         ContainerScope scope(instanceID);
-        auto formPattern = weak.Upgrade();
-        CHECK_NULL_VOID(formPattern);
-        auto host = formPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([weak, instanceID, enable] {
             ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
@@ -1414,7 +1375,6 @@ void FormPattern::InitFormManagerDelegate()
             formPattern->HandleEnableForm(enable);
             }, "ArkUIFormHandleEnableForm");
         });
-
     const std::function<void(bool isRotate,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback = [this](bool isRotate,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
@@ -1596,6 +1556,8 @@ void FormPattern::CreateCardContainer()
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto hasContainer = false;
@@ -1617,15 +1579,9 @@ void FormPattern::CreateCardContainer()
     subContainer_->Initialize();
     subContainer_->SetNodeId(host->GetId());
 
-    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](int64_t id) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
+    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this), pipeline](int64_t id) {
         auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask([id, weak] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1639,13 +1595,9 @@ void FormPattern::CreateCardContainer()
         pattern->OnLoadEvent();
     });
 
-    subContainer_->AddFormVisiableCallback([weak = WeakClaim(this)]() {
+    subContainer_->AddFormVisiableCallback([weak = WeakClaim(this), layoutProperty]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
         auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
         layoutProperty->UpdateVisibility(visible);
         pattern->isLoaded_ = true;
@@ -1673,13 +1625,13 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
 {
     auto drawDelegate = std::make_unique<DrawDelegate>();
 #ifdef ENABLE_ROSEN_BACKEND
+    auto host = GetHost();
     drawDelegate->SetDrawRSFrameCallback(
-        [weak = WeakClaim(this)](std::shared_ptr<RSNode>& node, const Rect& /* dirty */) {
+        [weak = WeakClaim(this), host](std::shared_ptr<RSNode>& node, const Rect& /* dirty */) {
+            CHECK_NULL_VOID(host);
             CHECK_NULL_VOID(node);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
-            auto host = form->GetHost();
-            CHECK_NULL_VOID(host);
             auto context = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
             CHECK_NULL_VOID(context);
             auto rsNode = context->GetRSNode();
@@ -1689,15 +1641,13 @@ std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
         });
 
     drawDelegate->SetDrawRSFrameByRenderContextCallback(
-        [weak = WeakClaim(this)](RefPtr<OHOS::Ace::NG::RenderContext>& renderContext) {
+        [weak = WeakClaim(this), host](RefPtr<OHOS::Ace::NG::RenderContext>& renderContext) {
             auto context = DynamicCast<NG::RosenRenderContext>(renderContext);
             CHECK_NULL_VOID(context);
             auto node = context->GetRSNode();
             CHECK_NULL_VOID(node);
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
-            auto host = form->GetHost();
-            CHECK_NULL_VOID(host);
             auto formContext = DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
             CHECK_NULL_VOID(formContext);
             auto rsNode = formContext->GetRSNode();
@@ -1802,7 +1752,9 @@ void FormPattern::OnActionEvent(const std::string& action)
     }
 
     RemoveDelayResetManuallyClickFlagTask();
-    if (!isManuallyClick_) {
+    auto subContainer = GetSubContainer();
+    CHECK_NULL_VOID(subContainer);
+    if (!isManuallyClick_ && subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
         EventReport::ReportNonManualPostCardActionInfo(cardInfo_.cardName, cardInfo_.bundleName, cardInfo_.abilityName,
             cardInfo_.moduleName, cardInfo_.dimension);
         if ("router" == type) {

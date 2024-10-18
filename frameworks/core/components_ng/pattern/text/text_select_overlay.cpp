@@ -28,10 +28,6 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(pipeline, false);
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);
-    if (textPattern->GetTextSelector().SelectNothing()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT, "Don't show selectoverlay when nothing is selected.");
-        return false;
-    }
     SetUsingMouse(textPattern->IsUsingMouse());
     SetEnableHandleLevel(true);
     textPattern->CalculateHandleOffsetAndShowOverlay();

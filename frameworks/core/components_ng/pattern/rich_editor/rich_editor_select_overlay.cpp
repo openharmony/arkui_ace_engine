@@ -387,7 +387,8 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
     isHandleMoving_ = false;
-    auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus();
+    auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus() &&
+        reason != CloseReason::CLOSE_REASON_DRAG_FLOATING;
     auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;
     auto isHoldByOther = reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER;
     needResetSelection = needResetSelection || isBackPressed || isHoldByOther;

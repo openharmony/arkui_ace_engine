@@ -94,6 +94,12 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 
 void UINode::DetachContext(bool recursive)
 {
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    if (PipelineContext::IsPipelineDestroyed(instanceId_)) {
+        LOGE("pipeline is destruct,not allow detach");
+        return;
+    }
+#endif
     CHECK_NULL_VOID(context_);
     context_->DetachNode(Claim(this));
     context_ = nullptr;
@@ -626,24 +632,6 @@ void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const
     }
 }
 
-void UINode::GetChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
-{
-    for (const auto& uiChild : GetChildren(true)) {
-        if (uiChild && !uiChild->IsOnMainTree()) {
-            continue;
-        }
-        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild.GetRawPtr());
-        if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
-            const auto focusHub = frameChild->GetFocusHub();
-            if (focusHub) {
-                focusNodes.emplace_back(focusHub);
-            }
-        } else {
-            uiChild->GetChildrenFocusHub(focusNodes);
-        }
-    }
-}
-
 void UINode::GetCurrentChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes)
 {
     for (const auto& uiChild : children_) {
@@ -726,24 +714,24 @@ void UINode::DetachFromMainTree(bool recursive)
     isTraversing_ = false;
 }
 
-void UINode::SetFreeze(bool isFreeze)
+void UINode::SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    auto isOpenInvisibleFreeze = context->IsOpenInvisibleFreeze();
-    if (isOpenInvisibleFreeze && isFreeze_ != isFreeze) {
+    auto isNeedUpdateFreezeVaule = context->IsOpenInvisibleFreeze() || isForceUpdateFreezeVaule;
+    if (isNeedUpdateFreezeVaule && isFreeze_ != isFreeze) {
         isFreeze_ = isFreeze;
         OnFreezeStateChange();
-        UpdateChildrenFreezeState(isFreeze_);
+        UpdateChildrenFreezeState(isFreeze_, isForceUpdateFreezeVaule);
     }
 }
 
-void UINode::UpdateChildrenFreezeState(bool isFreeze)
+void UINode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)
 {
     const auto& children = GetChildren(true);
     for (const auto& child : children) {
         if (child) {
-            child->SetFreeze(isFreeze);
+            child->SetFreeze(isFreeze, isForceUpdateFreezeVaule);
         }
     }
 }

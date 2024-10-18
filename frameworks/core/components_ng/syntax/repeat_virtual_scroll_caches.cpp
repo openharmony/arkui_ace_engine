@@ -72,12 +72,12 @@ std::optional<std::string> RepeatVirtualScrollCaches::GetKey4Index(uint32_t inde
  */
 bool RepeatVirtualScrollCaches::HasOverlapWithLastActiveRange(uint32_t from, uint32_t to)
 {
-    const auto a = lastActiveRanges_[0].first;
-    const auto b = lastActiveRanges_[0].second;
-    if (a <= b) {
-        return to >= a && from <= b;
+    const auto lastFrom = lastActiveRanges_[0].first;
+    const auto lastTo = lastActiveRanges_[0].second;
+    if (lastFrom <= lastTo) {
+        return to >= lastFrom && from <= lastTo;
     } else {
-        return to <= b || to >= a || from <= b || from >= a;
+        return to <= lastTo || to >= lastFrom || from <= lastTo || from >= lastFrom;
     }
 }
 

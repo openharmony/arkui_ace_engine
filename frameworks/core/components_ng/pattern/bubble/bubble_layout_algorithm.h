@@ -268,6 +268,7 @@ private:
     bool showArrow_ = false;
     bool enableArrow_ = false;
     bool isCaretMode_ = true;
+    bool followTransformOfTarget_ = false;
     bool enableFoldedArea_ = false;
     float scaledBubbleSpacing_ = 0.0f;
     float arrowHeight_ = 0.0f;

@@ -892,17 +892,16 @@ HWTEST_F(GridOptionLayoutTestNg, ShowCache001, TestSize.Level1)
     const auto& info = pattern_->gridLayoutInfo_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 7);
-    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 8)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 9)->IsActive());
+    EXPECT_EQ(GetChildWidth(frameNode_, 8), 235.0f);
     EXPECT_EQ(GetChildY(frameNode_, 8), 840.0f);
     EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
 
     UpdateCurrentOffset(-400.0f);
     EXPECT_EQ(info.startIndex_, 2);
     EXPECT_EQ(info.endIndex_, 11);
-    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 12)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 13)->IsActive());
@@ -914,6 +913,54 @@ HWTEST_F(GridOptionLayoutTestNg, ShowCache001, TestSize.Level1)
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 1)->IsActive());
     EXPECT_EQ(GetChildY(frameNode_, 0), -400.0f);
     EXPECT_EQ(GetChildY(frameNode_, 1), -400.0f);
+}
+
+/**
+ * @tc.name: ShowCache002
+ * @tc.desc: Test Grid showCache items and change width
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, ShowCache002, TestSize.Level1)
+{
+    GridModelNG model = CreateRepeatGrid(50, [](uint32_t idx) { return 200.0f; });
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetRowsGap(Dimension(10));
+    model.SetColumnsGap(Dimension(10));
+    model.SetCachedCount(2, true);
+    CreateDone(frameNode_);
+    const auto& info = pattern_->gridLayoutInfo_;
+    EXPECT_EQ(info.endIndex_, 7);
+    EXPECT_EQ(GetChildY(frameNode_, 9), 840.0f);
+
+    UpdateCurrentOffset(-550.0f);
+    EXPECT_EQ(info.startIndex_, 4);
+    EXPECT_EQ(info.endIndex_, 13);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildWidth(frameNode_, 15), 235.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 15), 245.0f);
+
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(200.0f), CalcLength(800.0f)));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildWidth(frameNode_, 14), 95.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 15), 95.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 15), 105.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 3), 95.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 3), 105.0f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 3)->IsActive());
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 14)->IsActive());
+    EXPECT_EQ(GetChildY(frameNode_, 2), -340.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 14), 920.0f);
+    EXPECT_EQ(info.gridMatrix_.size(), 9);
+
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info.startIndex_, 8);
+    EXPECT_EQ(info.endIndex_, 15);
+    EXPECT_EQ(GetChildY(frameNode_, 4), -430.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 5), 105.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), 830.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 19), 1040.0f);
+    EXPECT_EQ(GetChildWidth(frameNode_, 19), 95.0f);
 }
 
 /**

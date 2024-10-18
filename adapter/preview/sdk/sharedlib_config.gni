@@ -74,6 +74,12 @@ common_bin = [
     lib_names = [ "hmicuuc" ]
   },
   {
+    label = "//base/global/i18n/frameworks/intl:intl_util"
+    subsystem_name = "global"
+    part_name = "i18n"
+    lib_names = [ "intl_util" ]
+  },
+  {
     label = "//third_party/libuv:uv"
     subsystem_name = "thirdparty"
     part_name = "libuv"

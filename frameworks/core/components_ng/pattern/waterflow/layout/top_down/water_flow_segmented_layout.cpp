@@ -75,7 +75,13 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     }
     info_->lastMainSize_ = mainSize_;
 
-    wrapper_->SetCacheCount(props->GetCachedCountValue(1));
+    const int32_t cacheCnt = props->GetCachedCountValue(1);
+    wrapper_->SetCacheCount(cacheCnt);
+    if (props->GetShowCachedItemsValue(false)) {
+        SyncPreloadItems(wrapper_, info_, cacheCnt);
+    } else {
+        PreloadItems(wrapper_, info_, cacheCnt);
+    }
 }
 
 void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
@@ -115,8 +121,6 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
 
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;
-
-    PreloadItems(wrapper_, info_, cacheCount);
 }
 
 namespace {
@@ -491,7 +495,7 @@ void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const Off
     }
 }
 
-bool WaterFlowSegmentedLayout::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline)
+bool WaterFlowSegmentedLayout::PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline)
 {
     wrapper_ = host;
     if (itemIdx < static_cast<int32_t>(info_->itemInfos_.size())) {
@@ -499,5 +503,17 @@ bool WaterFlowSegmentedLayout::AppendCacheItem(LayoutWrapper* host, int32_t item
     }
     MeasureToTarget(itemIdx, deadline);
     return true;
+}
+
+void WaterFlowSegmentedLayout::SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx)
+{
+    if (itemIdx >= static_cast<int32_t>(info_->itemInfos_.size())) {
+        MeasureToTarget(itemIdx, std::nullopt);
+    } else {
+        int32_t seg = info_->GetSegment(itemIdx);
+        auto props = DynamicCast<WaterFlowLayoutProperty>(host->GetLayoutProperty());
+        MeasureItem(props, itemIdx, info_->itemInfos_[itemIdx].crossIdx,
+            WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, itemIdx), false);
+    }
 }
 } // namespace OHOS::Ace::NG

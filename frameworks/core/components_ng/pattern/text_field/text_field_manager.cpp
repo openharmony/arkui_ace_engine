@@ -42,6 +42,7 @@ void TextFieldManagerNG::ClearOnFocusTextField(int32_t id)
         focusFieldIsInline = false;
         optionalPosition_ = std::nullopt;
         usingCustomKeyboardAvoid_ = false;
+        isScrollableChild_ = false;
     }
 }
 
@@ -153,7 +154,8 @@ void TextFieldManagerNG::TriggerAvoidOnCaretChange()
         auto keyboardInset = safeAreaManager->GetKeyboardInset();
         Rect keyboardRect;
         keyboardRect.SetRect(0, 0, 0, keyboardInset.Length());
-        pipeline->OnVirtualKeyboardAreaChange(keyboardRect, 0, 0);
+        pipeline->OnVirtualKeyboardAreaChange(keyboardRect,
+            GetFocusedNodeCaretRect().Top(), GetHeight());
     }
 }
             

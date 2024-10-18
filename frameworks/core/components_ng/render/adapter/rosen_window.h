@@ -77,6 +77,11 @@ public:
         return rsUIDirector_->FlushAnimation(timeStamp, vsyncPeriod);
     }
 
+    bool HasFirstFrameAnimation() override
+    {
+        return rsUIDirector_->HasFirstFrameAnimation();
+    }
+
     void FlushAnimationStartTime(uint64_t timeStamp) override
     {
         rsUIDirector_->FlushAnimationStartTime(timeStamp);

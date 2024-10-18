@@ -860,47 +860,6 @@ HWTEST_F(SheetPresentationTestNg, GetOverlayManager001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DeleteOverlay001
- * @tc.desc: Increase the coverage of SheetPresentationPattern::DeleteOverlay function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestNg, DeleteOverlay001, TestSize.Level1)
-{
-    SheetPresentationTestNg::SetUpTestCase();
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
-        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    SheetStyle sheetStyle;
-    sheetStyle.showInPage = true;
-    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
-    layoutProperty->propSheetStyle_ = sheetStyle;
-    auto rootNode = FrameNode::CreateFrameNode("Root", 101, AceType::MakeRefPtr<RootPattern>());
-    auto stageNode = FrameNode::CreateFrameNode("Stage", 201, AceType::MakeRefPtr<StagePattern>());
-    stageNode->MountToParent(rootNode);
-    sheetNode->MountToParent(stageNode);
-    EXPECT_NE(rootNode->GetTag(), V2::PAGE_ETS_TAG);
-    EXPECT_NE(rootNode->GetTag(), V2::NAVDESTINATION_VIEW_ETS_TAG);
-    EXPECT_NE(rootNode->GetTag(), V2::WINDOW_SCENE_ETS_TAG);
-    sheetPattern->DeleteOverlay();
-
-    rootNode->tag_ = V2::WINDOW_SCENE_ETS_TAG;
-    EXPECT_EQ(rootNode->GetTag(), V2::WINDOW_SCENE_ETS_TAG);
-    sheetPattern->DeleteOverlay();
-
-    rootNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
-    EXPECT_EQ(rootNode->GetTag(), V2::NAVDESTINATION_VIEW_ETS_TAG);
-    sheetPattern->DeleteOverlay();
-
-    rootNode->tag_ = V2::PAGE_ETS_TAG;
-    rootNode->pattern_ = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
-    rootNode->GetPattern<PagePattern>()->overlayManager_ = PipelineContext::GetCurrentContext()->overlayManager_;
-    EXPECT_EQ(rootNode->GetTag(), V2::PAGE_ETS_TAG);
-    sheetPattern->DeleteOverlay();
-    SheetPresentationTestNg::TearDownTestCase();
-}
-
-/**
  * @tc.name: OnWindowSizeChanged001
  * @tc.desc: Increase the coverage of SheetPresentationPattern::OnWindowSizeChanged function.
  * @tc.type: FUNC

@@ -238,7 +238,10 @@ void PatternLockPattern::UpdateAccessibilityTextNode(
     float offsetX = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * (x + 1) - 1);
     float offsetY = sideLength / PATTERN_LOCK_COL_COUNT / scale * (scale * (y + 1) - 1);
     int32_t index = y * PATTERN_LOCK_COL_COUNT + x + 1;
-    std::string message = Localization::GetInstance()->GetEntryLetters("patternlock.accessibilitypasspoint");
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto patternLockTheme = pipeline->GetTheme<V2::PatternLockTheme>();
+    auto message = patternLockTheme->GetPassPointTxt();
     std::string text = message + std::to_string(index);
     CHECK_NULL_VOID(frameNode);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();

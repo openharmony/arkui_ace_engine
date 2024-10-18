@@ -187,6 +187,7 @@ public:
             }
             napi_delete_reference(asyncCtx_->env, customBuilderValue);
         }
+        asyncCtx_->dragAction = nullptr;
         asyncCtx_ = nullptr;
     }
 

@@ -3021,6 +3021,7 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebResize");
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
+    webPattern->SetDrawSize(width, height);
     webPattern->DestroyAnalyzerOverlay();
 }
 

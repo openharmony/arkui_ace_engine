@@ -218,9 +218,15 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         CapabilityRegistry::Register();
         AceApplicationInfo::GetInstance().SetPackageName(abilityContext->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
-        AceApplicationInfo::GetInstance().SetApiTargetVersion(abilityContext->GetApplicationInfo()->apiTargetVersion);
-        AceApplicationInfo::GetInstance().SetAppVersionName(abilityContext->GetApplicationInfo()->versionName);
-        AceApplicationInfo::GetInstance().SetAppVersionCode(abilityContext->GetApplicationInfo()->versionCode);
+        auto applicationInfo = abilityContext->GetApplicationInfo();
+        if (applicationInfo) {
+            AceApplicationInfo::GetInstance().SetApiTargetVersion(applicationInfo->apiTargetVersion);
+            AceApplicationInfo::GetInstance().SetAppVersionName(applicationInfo->versionName);
+            AceApplicationInfo::GetInstance().SetAppVersionCode(applicationInfo->versionCode);
+        } else {
+            LOGE("ability start set application info failed,it may cause exception");
+            return;
+        }
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
         ImageFileCache::GetInstance().SetImageCacheFilePath(cacheDir);

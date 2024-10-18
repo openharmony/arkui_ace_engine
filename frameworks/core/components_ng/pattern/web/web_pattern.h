@@ -435,6 +435,7 @@ public:
     {
         return nestedScroll_;
     }
+    void OnParentScrollDragEndRecursive(RefPtr<NestableScrollContainer> parent);
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, JsEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
@@ -697,6 +698,7 @@ public:
         return treeId_;
     }
     bool CloseImageOverlaySelection();
+    void SetDrawSize(double width, double height);
     void SetImageOverlaySelectedStatus(bool isSelected)
     {
         imageOverlayIsSelected_ = isSelected;
@@ -1188,6 +1190,7 @@ private:
     VisibleType componentVisibility_ = VisibleType::VISIBLE;
     bool imageOverlayIsSelected_ = false;
     bool isLayoutModeChanged = false;
+    bool isDragEnd_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

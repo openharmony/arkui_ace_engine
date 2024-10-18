@@ -662,7 +662,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         if (childSize > 1) {
             recordsSize = childSize;
         }
-        textNode = DragEventActuator::CreateBadgeTextNode(frameNode, childSize, previewScale, true);
+        textNode = DragEventActuator::CreateBadgeTextNode(imageNode, childSize, previewScale, true);
         {
             ACE_SCOPED_TRACE("drag: sub window show");
             auto mainPipeline = PipelineContext::GetMainPipelineContext();
@@ -945,15 +945,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 }
                 TAG_LOGI(
                     AceLogTag::ACE_DRAG, "handle drag end callback, windowId is %{public}d.", container->GetWindowId());
-                dragDropManager->SetDragResult(notifyMessage, dragEvent);
-                dragDropManager->SetDragBehavior(notifyMessage, dragEvent);
-                dragDropManager->DoDragReset();
-                dragDropManager->SetIsDragged(false);
-                dragDropManager->SetDraggingPointer(-1);
-                dragDropManager->SetDraggingPressedState(false);
-                dragDropManager->ResetDragPreviewInfo();
-                dragDropManager->HideDragPreviewWindow(id);
-                dragEvent->SetPressedKeyCodes(dragDropManager->GetDragDropPointerEvent().pressedKeyCodes_);
+                dragDropManager->ResetDragEndOption(notifyMessage, dragEvent, id);
                 auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
                 if (ret != 0) {
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Unregister coordination listener failed, error is %{public}d", ret);

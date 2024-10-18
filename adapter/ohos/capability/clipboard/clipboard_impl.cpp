@@ -460,6 +460,8 @@ bool ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
     TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "mimeType:%{public}s", pasteDataRecord->GetMimeType().c_str());
     if (pasteDataRecord->GetHtmlText() != nullptr) {
         auto htmlText = pasteDataRecord->GetHtmlText();
+        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "htmlText:%{private}s, length=%{public}zu", htmlText->c_str(),
+            htmlText->length());
         HtmlToSpan toSpan;
         auto spanStr = toSpan.ToSpanString(*htmlText);
         if (spanStr) {
@@ -479,6 +481,8 @@ bool ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
     }
     if (pasteDataRecord->GetPlainText() != nullptr) {
         auto textData = pasteDataRecord->GetPlainText();
+        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "textData:%{private}s, length:%{public}zu", textData->c_str(),
+            textData->length());
         resText.append(*textData);
     }
     return false;
@@ -619,11 +623,12 @@ void ClipboardImpl::ProcessSpanStringData(
             continue;
         }
         auto hasSpanString = false;
-        if (pasteDataRecord->GetCustomData() != nullptr) {
-            auto itemData = pasteDataRecord->GetCustomData()->GetItemData();
-            if (itemData.find(SPAN_STRING_TAG) != itemData.end()) {
-                arrays.emplace_back(itemData[SPAN_STRING_TAG]);
-            }
+        auto entryPtr = pasteDataRecord->GetEntryByMimeType(SPAN_STRING_TAG);
+        if (entryPtr) {
+            // entryValue InstanceOf OHOS::MiscServices::EntryValue.
+            auto entryValue = entryPtr->GetValue();
+            auto spanStringBuffer = std::get_if<std::vector<uint8_t>>(&entryValue);
+            arrays.emplace_back(*spanStringBuffer);
             hasSpanString = true;
         }
         if (pasteDataRecord->GetHtmlText() != nullptr && hasSpanString) {

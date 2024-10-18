@@ -102,6 +102,8 @@ public:
         const RefPtr<FrameNode>& dragFrameNode);
     void HandleOnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo,
         const RefPtr<FrameNode>& dragFrameNode);
+    void ResetDragEndOption(
+        const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent, int32_t currentId);
     void DoDragReset();
     void DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent,
         const RefPtr<UnifiedData>& unifiedData, const std::string& udKey);

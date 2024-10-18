@@ -1010,6 +1010,9 @@ void RichEditorPattern::OnAttachToFrameNode()
     frameNode->GetRenderContext()->UpdateClipEdge(true);
     frameNode->GetRenderContext()->SetClipToFrame(true);
     StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddWindowSizeChangeCallback(frameId_);
 }
 
 void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
@@ -1017,6 +1020,9 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
     TextPattern::OnDetachFromFrameNode(node);
     ScrollablePattern::OnDetachFromFrameNode(node);
     ClearOnFocusTextField();
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveWindowSizeChangeCallback(frameId_);
 }
 
 int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
@@ -2962,6 +2968,7 @@ bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSp
         auto focusHub = pattern->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->RequestFocusImmediately();
+        IF_TRUE(!pattern->isEditing_, pattern->CloseKeyboard(true));
         pattern->ShowSelectOverlay(firstHandle, secondHandle);
     };
 
@@ -3117,6 +3124,8 @@ void RichEditorPattern::HandleBlurEvent()
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || reason == BlurReason::FRAME_DESTROY) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RichEditor Blur, Close Keyboard.");
+        CloseSelectOverlay();
+        ResetSelection();
         CloseKeyboard(false);
     }
     if (magnifierController_) {
@@ -3143,7 +3152,6 @@ void RichEditorPattern::HandleFocusEvent()
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent, previewLongPress=%{public}d,"
             "OnlyRequestFocus=%{public}d", previewLongPress_, isOnlyRequestFocus_);
         isOnlyRequestFocus_ = false;
-        IF_TRUE(previewLongPress_, CloseKeyboard(true));
         return;
     }
     if (textSelector_.SelectNothing()) {
@@ -3184,13 +3192,13 @@ void RichEditorPattern::OnVisibleChange(bool isVisible)
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isVisible=%{public}d", isVisible);
     TextPattern::OnVisibleChange(isVisible);
     StopTwinkling();
+    CloseSelectOverlay();
+    ResetSelection();
     CloseKeyboard(false);
 }
 
 bool RichEditorPattern::CloseKeyboard(bool forceClose)
 {
-    CloseSelectOverlay();
-    ResetSelection();
     if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
         return CloseCustomKeyboard();
     }
@@ -3351,7 +3359,6 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
         static_cast<float>(info.GetGlobalLocation().GetX()), static_cast<float>(info.GetGlobalLocation().GetY()));
     HandleDoubleClickOrLongPress(info);
     caretUpdateType_ = CaretUpdateType::NONE;
-    TriggerAvoidOnCaretChange();
 }
 
 bool RichEditorPattern::HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color)
@@ -4191,6 +4198,7 @@ void RichEditorPattern::InsertStyledStringByPaste(const RefPtr<SpanString>& span
     if (changeLength > 0) {
         DeleteForwardInStyledString(changeLength, false);
     }
+    ResetSelection();
     styledString_->InsertSpanString(changeStart, spanString);
     SetCaretPosition(caretPosition_ + spanString->GetLength());
     AfterStyledStringChange(changeStart, changeLength, spanString->GetString());
@@ -5529,6 +5537,7 @@ bool RichEditorPattern::OnBackPressed()
         return false;
     }
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    ResetSelection();
     CloseKeyboard(false);
     FocusHub::LostFocusToViewRoot();
 #if defined(ANDROID_PLATFORM)
@@ -6340,7 +6349,7 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
     CHECK_NULL_VOID(host);
     ProcessDeleteNodes(deleteSpans);
     UpdateSpanPosition();
-    SetCaretPosition(info.GetOffset());
+    SetCaretPosition(info.GetOffset(), false);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     OnModifyDone();
 }
@@ -7074,6 +7083,11 @@ void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, Windo
         TaskExecutor::TaskType::UI, "ArkUIRichEditorOnWindowSizeChangedRotation");
 }
 
+void RichEditorPattern::OnFontScaleConfigurationUpdate()
+{
+    InitAvoidOnCaretChangeAfterLayoutTask();
+}
+
 void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType)
 {
     auto selectType = selectedType_.value_or(TextSpanType::NONE);
@@ -7485,7 +7499,7 @@ void RichEditorPattern::CloseSelectOverlay()
 
 void RichEditorPattern::CloseHandleAndSelect()
 {
-    selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
+    selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_DRAG_FLOATING);
     showSelect_ = false;
 }
 
@@ -9375,6 +9389,8 @@ void RichEditorPattern::ResetKeyboardIfNeed()
     }
 #else
     if (needToResetKeyboard && HasConnection()) {
+        CloseSelectOverlay();
+        ResetSelection();
         CloseKeyboard(false);
         RequestKeyboard(false, true, true);
     }
@@ -10960,6 +10976,7 @@ void RichEditorPattern::HandleOnAIWrite()
     AIWriteInfo info;
     GetAIWriteInfo(info);
     CloseSelectOverlay();
+    ResetSelection();
     CloseKeyboard(false);
 
     auto callback = [weak = WeakClaim(this), info](std::vector<uint8_t>& buffer) {

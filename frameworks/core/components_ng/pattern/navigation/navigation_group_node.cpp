@@ -676,6 +676,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                         preNode->SetJSViewActive(false);
                         navigation->NotifyPageHide();
                     }
+                    navbar->GetRenderContext()->SetOpacity(1.0f);
                 } else {
                     auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
                     CHECK_NULL_VOID(preDestination);
@@ -684,6 +685,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                         break;
                     }
                     preDestination->SystemTransitionPushCallback(false);
+                    preDestination->GetRenderContext()->SetOpacity(1.0f);
                 }
                 break;
             }
@@ -699,6 +701,8 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                 AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
+            auto pattern = navigation->GetPattern<NavigationPattern>();
+            pattern->CheckContentNeedMeasure(navigation);
         };
 
     CreateAnimationWithPush(preNode, curNode, callback, isNavBar);

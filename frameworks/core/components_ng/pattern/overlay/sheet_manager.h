@@ -55,6 +55,8 @@ public:
         return sheetDismissId_;
     }
 
+    void DeleteOverlayForWindowScene(int32_t rootNodeId, RootNodeType rootNodeType);
+
 private:
     struct SheetContentKey {
         SheetContentKey() {}

@@ -28,13 +28,13 @@ CanvasModifier::CanvasModifier()
 
 void CanvasModifier::onDraw(DrawingContext& drawingContext)
 {
-    ACE_SCOPED_TRACE("CanvasModifier::onDraw");
     CHECK_NULL_VOID(rsRecordingCanvas_);
     auto& recordingCanvas = drawingContext.canvas;
     auto drawCmdList = rsRecordingCanvas_->GetDrawCmdList();
     CHECK_NULL_VOID(drawCmdList);
     auto rsDrawCmdList = static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList();
     CHECK_NULL_VOID(rsDrawCmdList);
+    ACE_SCOPED_TRACE("CanvasModifier::onDraw Op count: %zu.", drawCmdList->GetOpItemSize());
     if (SystemProperties::GetCanvasDebugMode() > 0) {
         TAG_LOGI(AceLogTag::ACE_CANVAS,
             "Canvas Size: [%{public}d, %{public}d]->[%{public}d, %{public}d]; Command Size: %{public}zu.",

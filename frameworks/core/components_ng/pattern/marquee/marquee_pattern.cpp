@@ -40,6 +40,7 @@ void MarqueePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowSizeChangeCallback(host->GetId());
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    ProcessVisibleAreaCallback();
 }
 
 void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -48,6 +49,7 @@ void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }
 
 MarqueePattern::~MarqueePattern()
@@ -61,9 +63,7 @@ void MarqueePattern::OnWindowHide()
     if (!playStatus_) {
         return;
     }
-    CHECK_NULL_VOID(animation_);
-    playStatus_ = false;
-    AnimationUtils::PauseAnimation(animation_);
+    PauseAnimation();
 }
 
 void MarqueePattern::OnWindowShow()
@@ -71,9 +71,7 @@ void MarqueePattern::OnWindowShow()
     if (playStatus_) {
         return;
     }
-    CHECK_NULL_VOID(animation_);
-    playStatus_ = true;
-    AnimationUtils::ResumeAnimation(animation_);
+    ResumeAnimation();
 }
 
 bool MarqueePattern::OnDirtyLayoutWrapperSwap(
@@ -385,12 +383,12 @@ float MarqueePattern::GetTextOffset()
 
 void MarqueePattern::OnVisibleChange(bool isVisible)
 {
-    CHECK_NULL_VOID(!playStatus_);
-    CHECK_NULL_VOID(animation_);
     if (isVisible) {
-        AnimationUtils::ResumeAnimation(animation_);
+        CHECK_NULL_VOID(!playStatus_);
+        ResumeAnimation();
     } else {
-        AnimationUtils::PauseAnimation(animation_);
+        CHECK_NULL_VOID(playStatus_);
+        PauseAnimation();
     }
 }
 
@@ -425,12 +423,9 @@ void MarqueePattern::ChangeAnimationPlayStatus()
             StartMarqueeAnimation();
             return;
         }
-        playStatus_ = true;
-        AnimationUtils::ResumeAnimation(animation_);
+        ResumeAnimation();
     } else {
-        CHECK_NULL_VOID(animation_);
-        playStatus_ = false;
-        AnimationUtils::PauseAnimation(animation_);
+        PauseAnimation();
     }
 }
 
@@ -682,5 +677,34 @@ void MarqueePattern::UpdateTextDirection(
     auto textDirection = GetTextDirection(src, direction);
     textLayoutProperty->UpdateLayoutDirection(textDirection);
     CheckTextDirectionChange(textDirection);
+}
+
+void MarqueePattern::ProcessVisibleAreaCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnVisibleChange(visible);
+    };
+    std::vector<double> ratioList = { 0.0 };
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+}
+
+void MarqueePattern::PauseAnimation()
+{
+    CHECK_NULL_VOID(animation_);
+    playStatus_ = false;
+    AnimationUtils::PauseAnimation(animation_);
+}
+
+void MarqueePattern::ResumeAnimation()
+{
+    CHECK_NULL_VOID(animation_);
+    playStatus_ = true;
+    AnimationUtils::ResumeAnimation(animation_);
 }
 } // namespace OHOS::Ace::NG

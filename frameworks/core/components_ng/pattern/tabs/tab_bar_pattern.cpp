@@ -36,7 +36,6 @@
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
@@ -276,10 +275,29 @@ void TabBarPattern::OnAttachToFrameNode()
         // always swipe with physical curve, ignore animationDuration
         pattern->SetSwiperCurve(TabBarPhysicalCurve);
 
-        CHECK_NULL_VOID(pattern && pattern->scrollableEvent_);
-        auto scrollable = pattern->scrollableEvent_->GetScrollable();
-        if (scrollable) {
-            scrollable->StopScrollable();
+        if (pattern->scrollableEvent_) {
+            auto scrollable = pattern->scrollableEvent_->GetScrollable();
+            if (scrollable) {
+                scrollable->StopScrollable();
+            }
+        }
+
+        pattern->StopTranslateAnimation();
+        pattern->ResetIndicatorAnimationState();
+        auto swiperPattern = pattern->GetSwiperPattern();
+        CHECK_NULL_VOID(swiperPattern);
+        auto currentIndex = swiperPattern->GetCurrentIndex();
+        auto totalCount = swiperPattern->TotalCount();
+        if (currentIndex >= totalCount || currentIndex < 0) {
+            currentIndex = 0;
+        }
+        auto layoutProperty = pattern->GetLayoutProperty<TabBarLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        if (layoutProperty->GetIndicatorValue(0) != currentIndex) {
+            pattern->UpdateSubTabBoard(currentIndex);
+            pattern->UpdateTextColorAndFontWeight(currentIndex);
+            pattern->UpdateIndicator(currentIndex);
+            pattern->SetChangeByClick(false);
         }
     });
     InitSurfaceChangedCallback();
@@ -329,6 +347,10 @@ void TabBarPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(layoutProperty);
     if (targetIndex_) {
         targetIndex_ = GetLoopIndex(targetIndex_.value());
+    }
+    if (isExecuteBuilder_) {
+        jumpIndex_ = layoutProperty->GetIndicatorValue(0);
+        isExecuteBuilder_ = false;
     }
 }
 
@@ -1100,11 +1122,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto layoutProperty = DynamicCast<TabBarLayoutProperty>(dirty->GetLayoutProperty());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_RETURN(tabsFrameNode, false);
-    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetTabs());
-    CHECK_NULL_RETURN(swiperFrameNode, false);
-    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_RETURN(swiperPattern, false);
     int32_t indicator = swiperPattern->GetCurrentIndex();
     int32_t totalCount = swiperPattern->TotalCount();
@@ -1113,7 +1131,6 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
-    lastFontScale_ = pipelineContext->GetFontScale();
     if (swiperPattern->IsUseCustomAnimation()) {
         UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, false);
@@ -1894,6 +1911,7 @@ void TabBarPattern::OnTabBarIndexChange(int32_t index)
             tabBarPattern->ResetIndicatorAnimationState();
             tabBarLayoutProperty->UpdateIndicator(index);
         }
+        tabBarPattern->isTouchingSwiper_ = false;
         tabBarPattern->SetClickRepeat(false);
         if (tabBarPattern->GetChangeByClick()) {
             tabBarPattern->SetChangeByClick(false);
@@ -2849,18 +2867,22 @@ void TabBarPattern::TabBarClickEvent(int32_t index) const
 
 void TabBarPattern::OnCustomContentTransition(int32_t fromIndex, int32_t toIndex)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(tabsPattern);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_VOID(swiperPattern);
 
     swiperPattern->OnCustomContentTransition(toIndex);
+}
+
+RefPtr<SwiperPattern> TabBarPattern::GetSwiperPattern() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    return swiperPattern;
 }
 
 bool TabBarPattern::CheckSwiperDisable() const
@@ -3110,13 +3132,7 @@ void TabBarPattern::DumpAdvanceInfo()
 
 bool TabBarPattern::ContentWillChange(int32_t comingIndex)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, true);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_RETURN(tabsNode, true);
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_RETURN(swiperNode, true);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_RETURN(swiperPattern, true);
     int32_t currentIndex = swiperPattern->GetCurrentIndex();
     return ContentWillChange(currentIndex, comingIndex);

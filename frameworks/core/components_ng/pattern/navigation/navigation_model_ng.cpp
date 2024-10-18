@@ -64,10 +64,6 @@
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
-constexpr Dimension DRAG_BAR_RADIUS = 6.0_vp;
-constexpr Dimension DRAG_BAR_BLUR_RADIUS = 20.0_vp;
-constexpr Dimension DRAG_BAR_ITEM_RADIUS = 1.0_vp;
-constexpr int32_t SECOND_ZINDEX_VALUE = 2;
 namespace {
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
@@ -370,7 +366,6 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         CHECK_NULL_RETURN(theme, false);
         dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
         dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
-        CreateDragBarNode(navigationGroupNode);
     }
 
     return true;
@@ -1561,7 +1556,6 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
         dividerLayoutProperty->UpdateVertical(true);
         auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
         CHECK_NULL_RETURN(dividerRenderProperty, nullptr);
-        CreateDragBarNode(navigationGroupNode);
     }
     auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
     if (!navigationLayoutProperty->HasNavigationMode()) {
@@ -1689,44 +1683,5 @@ void NavigationModelNG::SetMenuItemSymbol(FrameNode* frameNode,
         menuItems.at(index).iconSymbol = symbol;
         navBarPattern->SetTitleBarMenuItems(menuItems);
     }
-}
-
-void NavigationModelNG::CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode)
-{
-    auto dragBarNode = FrameNode::GetOrCreateFrameNode("DragBar", ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<NavigationDragBarPattern>(); });
-    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
-    CHECK_NULL_VOID(dragBarLayoutProperty);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    auto renderContext = dragBarNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackBlurRadius(DRAG_BAR_BLUR_RADIUS);
-    renderContext->UpdateBorderRadius(BorderRadiusProperty(DRAG_BAR_RADIUS));
-    renderContext->UpdateZIndex(1);
-    dragBarNode->MarkModifyDone();
-    auto dragBarItem = CreateDragBarItemNode();
-    dragBarItem->MountToParent(dragBarNode);
-    dragBarNode->MountToParent(navigationGroupNode);
-    navigationGroupNode->SetDragBarNode(dragBarNode);
-
-    auto dragBarPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
-    CHECK_NULL_VOID(dragBarPattern);
-    dragBarPattern->UpdateDefaultColor();
-}
-
-RefPtr<FrameNode> NavigationModelNG::CreateDragBarItemNode()
-{
-    auto dragBarItemNode = FrameNode::GetOrCreateFrameNode("DragBarItem",
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
-    auto dragBarItemLayoutProperty = dragBarItemNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(dragBarItemLayoutProperty, nullptr);
-    dragBarItemLayoutProperty->UpdateAlignment(Alignment::CENTER);
-    auto renderContext = dragBarItemNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateZIndex(SECOND_ZINDEX_VALUE);
-    renderContext->UpdateBorderRadius(BorderRadiusProperty(DRAG_BAR_ITEM_RADIUS));
-    dragBarItemNode->MarkModifyDone();
-    return dragBarItemNode;
 }
 } // namespace OHOS::Ace::NG

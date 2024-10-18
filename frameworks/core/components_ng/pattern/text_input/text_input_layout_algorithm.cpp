@@ -100,7 +100,6 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
-    auto defaultHeight = GetDefaultHeightByType(layoutWrapper);
 
     auto responseAreaWidth = 0.0f;
     if (pattern->GetCleanNodeResponseArea()) {
@@ -119,9 +118,11 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 textFieldContentConstraint_.maxSize.Height() + paddingAndBorder.Height());
         }
     } else {
-        auto height = LessNotEqual(contentHeight, defaultHeight)
-                          ? defaultHeight + paddingAndBorder.Height()
-                          : contentHeight + paddingAndBorder.Height();
+        auto defaultHeight =
+            GetDefaultHeightByType(layoutWrapper) + pattern->GetPaddingBottom() + pattern->GetPaddingTop();
+        auto actualHeight = contentHeight + pattern->GetVerticalPaddingAndBorderSum();
+        auto height =
+            LessNotEqual(actualHeight, defaultHeight) ? defaultHeight : contentHeight + paddingAndBorder.Height();
         frameSize.SetHeight(height);
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
