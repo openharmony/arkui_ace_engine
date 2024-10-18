@@ -174,6 +174,11 @@ public:
         return isSearchButtonEnabled_;
     }
 
+    const SizeF GetButtonSize() const
+    {
+        return buttonSize_;
+    }
+
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
 

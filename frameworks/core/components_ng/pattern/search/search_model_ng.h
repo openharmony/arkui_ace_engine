@@ -90,6 +90,7 @@ public:
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
+    void SetEnableHapticFeedback(bool state) override;
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
     static void SetIcon(FrameNode* frameNode, const std::optional<std::string>& icon);
@@ -156,7 +157,6 @@ public:
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetId(FrameNode* frameNode, const std::string& key);
-    void SetEnableHapticFeedback(bool state) override;
 
 private:
     static void CreateTextField(const RefPtr<SearchNode>& parentNode,
