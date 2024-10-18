@@ -259,10 +259,21 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    modifier_->setObjectFit(frameNode, Ark_ImageFit::ARK_IMAGE_FIT_SCALE_DOWN);
-    auto json = GetJsonValue(node_);
-    ASSERT_TRUE(json);
-    ASSERT_EQ("ImageFit.FitHeight", GetAttrValue<std::string>(json, "objectFit"));
+    std::vector<std::pair<std::string, Ark_ImageFit>> testMap = {
+        {"ImageFit.Contain", Ark_ImageFit::ARK_IMAGE_FIT_CONTAIN},
+        {"ImageFit.Cover", Ark_ImageFit::ARK_IMAGE_FIT_COVER},
+        {"ImageFit.Auto", Ark_ImageFit::ARK_IMAGE_FIT_AUTO},
+        {"ImageFit.Fill", Ark_ImageFit::ARK_IMAGE_FIT_FILL},
+        {"ImageFit.ScaleDown", Ark_ImageFit::ARK_IMAGE_FIT_SCALE_DOWN},
+        {"ImageFit.None", Ark_ImageFit::ARK_IMAGE_FIT_NONE},
+    };
+
+    for(auto& tv : testMap) {
+        modifier_->setObjectFit(frameNode, tv.second);
+        auto json = GetJsonValue(node_);
+        ASSERT_TRUE(json);
+        ASSERT_EQ(tv.first, GetAttrValue<std::string>(json, "objectFit"));
+    }
 }
 
 /**
@@ -278,12 +289,12 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetDefaultedFitType, testing::ext::TestSiz
     std::string key = "objectFit";
     std::string defaultedFit = "ImageFit.Cover";
 
-    modifier_->setObjectFit(frameNode, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::FILL) - 1));
+    modifier_->setObjectFit(frameNode, static_cast<Ark_ImageFit>(static_cast<int>(Ark_ImageFit::ARK_IMAGE_FIT_CONTAIN) - 1));
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));
 
-    modifier_->setObjectFit(frameNode, static_cast<Ark_ImageFit>(static_cast<int>(ImageFit::SCALE_DOWN) + 1));
+    modifier_->setObjectFit(frameNode, static_cast<Ark_ImageFit>(static_cast<int>(Ark_ImageFit::ARK_IMAGE_FIT_NONE) + 1));
     json = GetJsonValue(node_);
     ASSERT_TRUE(json);
     ASSERT_EQ(defaultedFit, GetAttrValue<std::string>(json, key));

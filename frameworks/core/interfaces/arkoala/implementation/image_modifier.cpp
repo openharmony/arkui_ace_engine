@@ -93,11 +93,13 @@ void ObjectFitImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageFit objectFitValue = static_cast<ImageFit>(value);
-    if (objectFitValue < ImageFit::FILL || objectFitValue > ImageFit::SCALE_DOWN) {
-        objectFitValue = ImageFit::COVER;
+    Ark_ImageFit strippedValue = Ark_ImageFit::ARK_IMAGE_FIT_COVER;
+    if ((static_cast<int>(value) >= static_cast<int>(Ark_ImageFit::ARK_IMAGE_FIT_CONTAIN))
+        || (static_cast<int>(value) >= static_cast<int>(Ark_ImageFit::ARK_IMAGE_FIT_NONE))) {
+            strippedValue = value;
     }
-    ImageModelNG::SetImageFit(frameNode, Converter::ConvertOrDefault((Ark_ImageFit)objectFitValue, ImageFit::COVER));
+    auto fit = Converter::ConvertOrDefault<ImageFit>(strippedValue, ImageFit::COVER);
+    ImageModelNG::SetImageFit(frameNode, fit);
 }
 void ObjectRepeatImpl(Ark_NativePointer node,
                       Ark_ImageRepeat value)
