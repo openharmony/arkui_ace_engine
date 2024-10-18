@@ -63,6 +63,14 @@ struct SwiperDigitalParameters {
     std::optional<FontWeight> selectedFontWeight;
 };
 
+struct SwiperArcDotParameters {
+    std::optional<SwiperArcDirection> arcDirection;
+    std::optional<Color> itemColor;
+    std::optional<Color> selectedItemColor;
+    std::optional<Color> containerColor;
+    std::optional<NG::Gradient> maskColor;
+};
+
 struct SwiperArrowParameters {
     std::optional<bool> isShowBackground;
     std::optional<bool> isSidebarMiddle;
@@ -97,7 +105,7 @@ public:
     static SwiperModel* GetInstance();
     virtual ~SwiperModel() = default;
 
-    virtual RefPtr<SwiperController> Create();
+    virtual RefPtr<SwiperController> Create(bool isCreateArc = false);
     virtual void SetDirection(Axis axis);
     virtual void SetIndex(uint32_t index);
     virtual void SetIndicatorInteractive(bool interactive) {}
@@ -132,6 +140,7 @@ public:
     virtual void SetIndicatorType(SwiperIndicatorType indicatorType) {}
     virtual void SetIsIndicatorCustomSize(bool isCustomSize) {}
     virtual void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) {}
+    virtual void SetArcDotIndicatorStyle(const SwiperArcDotParameters& swiperArcDotParameters) {}
     virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
     virtual void SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank) {}
     virtual void SetNextMargin(const Dimension& nextMargin, bool ignoreBlank) {}
