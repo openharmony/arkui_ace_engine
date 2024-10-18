@@ -96,7 +96,7 @@ HWTEST_F(CheckboxModifierTest, setChackboxOnChangeTest, TestSize.Level1)
         bool value;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::checkboxEventReceiver.onChange = [](Ark_Int32 nodeId, const Ark_Boolean value) { 
+    EventsTracker::checkboxEventReceiver.onChange = [](Ark_Int32 nodeId, const Ark_Boolean value) {
         checkEvent = {
            .value = value,
         };
