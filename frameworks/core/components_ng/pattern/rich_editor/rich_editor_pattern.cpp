@@ -6805,6 +6805,10 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
     isMouseSelect_ = false;
     isFirstMouseSelect_ = true;
     isOnlyImageDrag_ = false;
+    if (!showSelect_) {
+        showSelect_ = true;
+        ResetSelection();
+    }
     if (dataDetectorAdapter_->pressedByLeftMouse_ && oldMouseStatus != MouseStatus::MOVE && !IsDragging()) {
         dataDetectorAdapter_->ResponseBestMatchItem(dataDetectorAdapter_->clickedAISpan_);
         dataDetectorAdapter_->pressedByLeftMouse_ = false;
