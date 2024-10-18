@@ -948,7 +948,7 @@ void UIExtensionPattern::FireOnReleaseCallback(int32_t releaseCode)
     }
     // Release the session.
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        sessionWrapper_->DestroySession();
+        sessionWrapper_->OnReleaseDone();
     }
 }
 
