@@ -48,16 +48,16 @@ void StepSizeImpl(Ark_NativePointer node,
     //RatingModelNG::SetStepSize(frameNode, convValue);
 }
 void StarStyleImpl(Ark_NativePointer node,
-                   const Ark_StarStyleOptions* value)
+                   const Ark_StarStyleOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(options);
+    //auto convValue = Converter::OptConvert<type_name>(*options);
     //RatingModelNG::SetStarStyle(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -65,12 +65,12 @@ void OnChangeImpl(Ark_NativePointer node,
     //RatingModelNG::SetOnChange(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Ark_CustomObject* modifier)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(modifier);
+    //auto convValue = Converter::OptConvert<type_name>(*modifier);
     //RatingModelNG::SetContentModifier(frameNode, convValue);
 }
 } // RatingAttributeModifier

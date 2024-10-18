@@ -203,7 +203,7 @@ void EdgeAntialiasingImpl(Ark_NativePointer node,
     //ImageModelNG::SetEdgeAntialiasing(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    Ark_Function value)
+                    Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -211,7 +211,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     //ImageModelNG::SetOnComplete(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 Ark_Function value)
+                 Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -219,7 +219,7 @@ void OnErrorImpl(Ark_NativePointer node,
     //ImageModelNG::SetOnError(frameNode, convValue);
 }
 void OnFinishImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -227,21 +227,21 @@ void OnFinishImpl(Ark_NativePointer node,
     //ImageModelNG::SetOnFinish(frameNode, convValue);
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
-                        Ark_Boolean value)
+                        Ark_Boolean enable)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(value);
+    auto convValue = Converter::Convert<bool>(enable);
     //ImageModelNG::SetEnableAnalyzer(frameNode, convValue);
 }
 void AnalyzerConfigImpl(Ark_NativePointer node,
-                        const Ark_ImageAnalyzerConfig* value)
+                        const Ark_ImageAnalyzerConfig* config)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(config);
+    //auto convValue = Converter::OptConvert<type_name>(*config);
     //ImageModelNG::SetAnalyzerConfig(frameNode, convValue);
 }
 void ResizableImpl(Ark_NativePointer node,
@@ -254,21 +254,21 @@ void ResizableImpl(Ark_NativePointer node,
     //ImageModelNG::SetResizable(frameNode, convValue);
 }
 void PrivacySensitiveImpl(Ark_NativePointer node,
-                          Ark_Boolean value)
+                          Ark_Boolean supported)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(value);
+    auto convValue = Converter::Convert<bool>(supported);
     //ImageModelNG::SetPrivacySensitive(frameNode, convValue);
 }
 void EnhancedImageQualityImpl(Ark_NativePointer node,
-                              const Ark_CustomObject* value)
+                              const Ark_CustomObject* imageQuality)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(imageQuality);
+    //auto convValue = Converter::OptConvert<type_name>(*imageQuality);
     //ImageModelNG::SetEnhancedImageQuality(frameNode, convValue);
 }
 } // ImageAttributeModifier

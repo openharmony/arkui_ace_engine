@@ -48,7 +48,7 @@ void SelectIconImpl(Ark_NativePointer node,
     //MenuItemModelNG::SetSelectIcon(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

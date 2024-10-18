@@ -39,7 +39,7 @@ void SetNavRouterOptions1Impl(Ark_NativePointer node,
 } // NavRouterInterfaceModifier
 namespace NavRouterAttributeModifier {
 void OnStateChangeImpl(Ark_NativePointer node,
-                       Ark_Function value)
+                       Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -47,12 +47,12 @@ void OnStateChangeImpl(Ark_NativePointer node,
     //NavRouterModelNG::SetOnStateChange(frameNode, convValue);
 }
 void ModeImpl(Ark_NativePointer node,
-              Ark_NavRouteMode value)
+              Ark_NavRouteMode mode)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //auto convValue = Converter::Convert<type>(mode);
+    //auto convValue = Converter::OptConvert<type>(mode); // for enums
     //NavRouterModelNG::SetMode(frameNode, convValue);
 }
 } // NavRouterAttributeModifier

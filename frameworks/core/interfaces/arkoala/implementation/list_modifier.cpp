@@ -29,6 +29,16 @@ void SetListOptionsImpl(Ark_NativePointer node,
 }
 } // ListInterfaceModifier
 namespace ListAttributeModifier {
+void LanesImpl(Ark_NativePointer node,
+               const Ark_Union_Number_LengthConstrain* value,
+               const Opt_Length* gutter)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ListModelNG::SetLanes(frameNode, convValue);
+}
 void AlignListItemImpl(Ark_NativePointer node,
                        Ark_ListItemAlign value)
 {
@@ -55,6 +65,16 @@ void ScrollBarImpl(Ark_NativePointer node,
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //ListModelNG::SetScrollBar(frameNode, convValue);
+}
+void EdgeEffectImpl(Ark_NativePointer node,
+                    Ark_EdgeEffect value,
+                    const Opt_EdgeEffectOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //ListModelNG::SetEdgeEffect(frameNode, convValue);
 }
 void ContentStartOffsetImpl(Ark_NativePointer node,
                             const Ark_Number* value)
@@ -183,16 +203,16 @@ void ChildrenMainSizeImpl(Ark_NativePointer node,
     //ListModelNG::SetChildrenMainSize(frameNode, convValue);
 }
 void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
-                                        Ark_Boolean value)
+                                        Ark_Boolean enabled)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(value);
+    auto convValue = Converter::Convert<bool>(enabled);
     //ListModelNG::SetMaintainVisibleContentPosition(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -200,7 +220,7 @@ void OnScrollImpl(Ark_NativePointer node,
     //ListModelNG::SetOnScroll(frameNode, convValue);
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
-                       Ark_Function value)
+                       Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -208,7 +228,7 @@ void OnScrollIndexImpl(Ark_NativePointer node,
     //ListModelNG::SetOnScrollIndex(frameNode, convValue);
 }
 void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
-                                      Ark_Function value)
+                                      Ark_Function handler)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -216,7 +236,7 @@ void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
     //ListModelNG::SetOnScrollVisibleContentChange(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -224,7 +244,7 @@ void OnReachStartImpl(Ark_NativePointer node,
     //ListModelNG::SetOnReachStart(frameNode, convValue);
 }
 void OnReachEndImpl(Ark_NativePointer node,
-                    Ark_Function value)
+                    Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -232,7 +252,7 @@ void OnReachEndImpl(Ark_NativePointer node,
     //ListModelNG::SetOnReachEnd(frameNode, convValue);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
-                       Ark_Function value)
+                       Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -240,7 +260,7 @@ void OnScrollStartImpl(Ark_NativePointer node,
     //ListModelNG::SetOnScrollStart(frameNode, convValue);
 }
 void OnScrollStopImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -248,7 +268,7 @@ void OnScrollStopImpl(Ark_NativePointer node,
     //ListModelNG::SetOnScrollStop(frameNode, convValue);
 }
 void OnItemDeleteImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -256,7 +276,7 @@ void OnItemDeleteImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDelete(frameNode, convValue);
 }
 void OnItemMoveImpl(Ark_NativePointer node,
-                    Ark_Function value)
+                    Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -264,7 +284,7 @@ void OnItemMoveImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemMove(frameNode, convValue);
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
-                         Ark_Function value)
+                         Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -272,7 +292,7 @@ void OnItemDragStartImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDragStart(frameNode, convValue);
 }
 void OnItemDragEnterImpl(Ark_NativePointer node,
-                         Ark_Function value)
+                         Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -280,7 +300,7 @@ void OnItemDragEnterImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDragEnter(frameNode, convValue);
 }
 void OnItemDragMoveImpl(Ark_NativePointer node,
-                        Ark_Function value)
+                        Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -288,7 +308,7 @@ void OnItemDragMoveImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDragMove(frameNode, convValue);
 }
 void OnItemDragLeaveImpl(Ark_NativePointer node,
-                         Ark_Function value)
+                         Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -296,7 +316,7 @@ void OnItemDragLeaveImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDragLeave(frameNode, convValue);
 }
 void OnItemDropImpl(Ark_NativePointer node,
-                    Ark_Function value)
+                    Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -304,41 +324,23 @@ void OnItemDropImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemDrop(frameNode, convValue);
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            Ark_Function value)
+                            Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = [frameNode](input values) { code }
     //ListModelNG::SetOnScrollFrameBegin(frameNode, convValue);
 }
-void LanesImpl(Ark_NativePointer node,
-               const Ark_Union_Number_LengthConstrain* value,
-               const Opt_Length* gutter)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //ListModelNG::SetLanes(frameNode, convValue);
-}
-void EdgeEffectImpl(Ark_NativePointer node,
-                    Ark_EdgeEffect value,
-                    const Opt_EdgeEffectOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //ListModelNG::SetEdgeEffect(frameNode, convValue);
-}
 } // ListAttributeModifier
 const GENERATED_ArkUIListModifier* GetListModifier()
 {
     static const GENERATED_ArkUIListModifier ArkUIListModifierImpl {
         ListInterfaceModifier::SetListOptionsImpl,
+        ListAttributeModifier::LanesImpl,
         ListAttributeModifier::AlignListItemImpl,
         ListAttributeModifier::ListDirectionImpl,
         ListAttributeModifier::ScrollBarImpl,
+        ListAttributeModifier::EdgeEffectImpl,
         ListAttributeModifier::ContentStartOffsetImpl,
         ListAttributeModifier::ContentEndOffsetImpl,
         ListAttributeModifier::DividerImpl,
@@ -369,8 +371,6 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::OnItemDragLeaveImpl,
         ListAttributeModifier::OnItemDropImpl,
         ListAttributeModifier::OnScrollFrameBeginImpl,
-        ListAttributeModifier::LanesImpl,
-        ListAttributeModifier::EdgeEffectImpl,
     };
     return &ArkUIListModifierImpl;
 }

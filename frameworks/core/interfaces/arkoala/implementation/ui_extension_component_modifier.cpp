@@ -32,7 +32,7 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
 } // UIExtensionComponentInterfaceModifier
 namespace UIExtensionComponentAttributeModifier {
 void OnRemoteReadyImpl(Ark_NativePointer node,
-                       Ark_Function value)
+                       Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -40,7 +40,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnRemoteReady(frameNode, convValue);
 }
 void OnReceiveImpl(Ark_NativePointer node,
-                   Ark_Function value)
+                   Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -48,7 +48,7 @@ void OnReceiveImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnReceive(frameNode, convValue);
 }
 void OnResultImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -56,7 +56,7 @@ void OnResultImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnResult(frameNode, convValue);
 }
 void OnReleaseImpl(Ark_NativePointer node,
-                   Ark_Function value)
+                   Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -64,16 +64,16 @@ void OnReleaseImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnRelease(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_CustomObject* value)
+                 const Ark_CustomObject* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
     //UIExtensionComponentModelNG::SetOnError(frameNode, convValue);
 }
 void OnTerminatedImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

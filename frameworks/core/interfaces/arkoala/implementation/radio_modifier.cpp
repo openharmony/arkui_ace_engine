@@ -40,7 +40,7 @@ void CheckedImpl(Ark_NativePointer node,
     //RadioModelNG::SetChecked(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -56,12 +56,12 @@ void RadioStyleImpl(Ark_NativePointer node,
     //RadioModelNG::SetRadioStyle(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Ark_CustomObject* modifier)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(modifier);
+    //auto convValue = Converter::OptConvert<type_name>(*modifier);
     //RadioModelNG::SetContentModifier(frameNode, convValue);
 }
 } // RadioAttributeModifier

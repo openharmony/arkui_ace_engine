@@ -39,7 +39,7 @@ void AlignContentImpl(Ark_NativePointer node,
     //FolderStackModelNG::SetAlignContent(frameNode, convValue);
 }
 void OnFolderStateChangeImpl(Ark_NativePointer node,
-                             Ark_Function value)
+                             Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -47,7 +47,7 @@ void OnFolderStateChangeImpl(Ark_NativePointer node,
     //FolderStackModelNG::SetOnFolderStateChange(frameNode, convValue);
 }
 void OnHoverStatusChangeImpl(Ark_NativePointer node,
-                             Ark_Function value)
+                             Ark_Function handler)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

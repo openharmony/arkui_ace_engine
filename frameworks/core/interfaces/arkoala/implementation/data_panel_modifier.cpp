@@ -76,12 +76,12 @@ void TrackShadowImpl(Ark_NativePointer node,
     //DataPanelModelNG::SetTrackShadow(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Ark_CustomObject* modifier)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(modifier);
+    //auto convValue = Converter::OptConvert<type_name>(*modifier);
     //DataPanelModelNG::SetContentModifier(frameNode, convValue);
 }
 } // DataPanelAttributeModifier

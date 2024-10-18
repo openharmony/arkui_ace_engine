@@ -32,27 +32,27 @@ void SetLinearIndicatorOptionsImpl(Ark_NativePointer node,
 } // LinearIndicatorInterfaceModifier
 namespace LinearIndicatorAttributeModifier {
 void IndicatorStyleImpl(Ark_NativePointer node,
-                        const Opt_LinearIndicatorStyle* value)
+                        const Opt_LinearIndicatorStyle* style)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = style ? Converter::OptConvert<type>(*style) : std::nullopt;
     //LinearIndicatorModelNG::SetIndicatorStyle(frameNode, convValue);
 }
 void IndicatorLoopImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
+                       const Opt_Boolean* loop)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = loop ? Converter::OptConvert<type>(*loop) : std::nullopt;
     //LinearIndicatorModelNG::SetIndicatorLoop(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Opt_Function* value)
+                  const Opt_Function* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = callback ? Converter::OptConvert<type>(*callback) : std::nullopt;
     //LinearIndicatorModelNG::SetOnChange(frameNode, convValue);
 }
 } // LinearIndicatorAttributeModifier

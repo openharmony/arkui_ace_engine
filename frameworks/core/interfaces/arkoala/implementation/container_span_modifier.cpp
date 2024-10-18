@@ -30,12 +30,12 @@ void SetContainerSpanOptionsImpl(Ark_NativePointer node)
 } // ContainerSpanInterfaceModifier
 namespace ContainerSpanAttributeModifier {
 void TextBackgroundStyleImpl(Ark_NativePointer node,
-                             const Ark_TextBackgroundStyle* value)
+                             const Ark_TextBackgroundStyle* style)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(style);
+    //auto convValue = Converter::OptConvert<type_name>(*style);
     //ContainerSpanModelNG::SetTextBackgroundStyle(frameNode, convValue);
 }
 } // ContainerSpanAttributeModifier

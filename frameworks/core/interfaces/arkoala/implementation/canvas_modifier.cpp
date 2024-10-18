@@ -40,7 +40,7 @@ void SetCanvasOptions1Impl(Ark_NativePointer node,
 } // CanvasInterfaceModifier
 namespace CanvasAttributeModifier {
 void OnReadyImpl(Ark_NativePointer node,
-                 Ark_Function value)
+                 Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -48,12 +48,12 @@ void OnReadyImpl(Ark_NativePointer node,
     //CanvasModelNG::SetOnReady(frameNode, convValue);
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
-                        Ark_Boolean value)
+                        Ark_Boolean enable)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(value);
+    auto convValue = Converter::Convert<bool>(enable);
     //CanvasModelNG::SetEnableAnalyzer(frameNode, convValue);
 }
 } // CanvasAttributeModifier

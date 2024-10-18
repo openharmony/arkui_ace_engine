@@ -31,7 +31,7 @@ void SetAlphabetIndexerOptionsImpl(Ark_NativePointer node,
 } // AlphabetIndexerInterfaceModifier
 namespace AlphabetIndexerAttributeModifier {
 void OnSelectedImpl(Ark_NativePointer node,
-                    Ark_Function value)
+                    Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -164,8 +164,18 @@ void FontImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //AlphabetIndexerModelNG::SetFont(frameNode, convValue);
 }
+void AlignStyleImpl(Ark_NativePointer node,
+                    Ark_IndexerAlign value,
+                    const Opt_Length* offset)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //AlphabetIndexerModelNG::SetAlignStyle(frameNode, convValue);
+}
 void OnSelectImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -173,7 +183,7 @@ void OnSelectImpl(Ark_NativePointer node,
     //AlphabetIndexerModelNG::SetOnSelect(frameNode, convValue);
 }
 void OnRequestPopupDataImpl(Ark_NativePointer node,
-                            Ark_Function value)
+                            Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -181,7 +191,7 @@ void OnRequestPopupDataImpl(Ark_NativePointer node,
     //AlphabetIndexerModelNG::SetOnRequestPopupData(frameNode, convValue);
 }
 void OnPopupSelectImpl(Ark_NativePointer node,
-                       Ark_Function value)
+                       Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -189,12 +199,12 @@ void OnPopupSelectImpl(Ark_NativePointer node,
     //AlphabetIndexerModelNG::SetOnPopupSelect(frameNode, convValue);
 }
 void SelectedImpl(Ark_NativePointer node,
-                  const Ark_Number* value)
+                  const Ark_Number* index)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(index);
+    //auto convValue = Converter::OptConvert<type_name>(*index);
     //AlphabetIndexerModelNG::SetSelected(frameNode, convValue);
 }
 void PopupPositionImpl(Ark_NativePointer node,
@@ -260,16 +270,6 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     //AlphabetIndexerModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
-void AlignStyleImpl(Ark_NativePointer node,
-                    Ark_IndexerAlign value,
-                    const Opt_Length* offset)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //AlphabetIndexerModelNG::SetAlignStyle(frameNode, convValue);
-}
 } // AlphabetIndexerAttributeModifier
 const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
@@ -290,6 +290,7 @@ const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         AlphabetIndexerAttributeModifier::PopupItemFontImpl,
         AlphabetIndexerAttributeModifier::ItemSizeImpl,
         AlphabetIndexerAttributeModifier::FontImpl,
+        AlphabetIndexerAttributeModifier::AlignStyleImpl,
         AlphabetIndexerAttributeModifier::OnSelectImpl,
         AlphabetIndexerAttributeModifier::OnRequestPopupDataImpl,
         AlphabetIndexerAttributeModifier::OnPopupSelectImpl,
@@ -301,7 +302,6 @@ const GENERATED_ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
         AlphabetIndexerAttributeModifier::PopupBackgroundBlurStyleImpl,
         AlphabetIndexerAttributeModifier::PopupTitleBackgroundImpl,
         AlphabetIndexerAttributeModifier::EnableHapticFeedbackImpl,
-        AlphabetIndexerAttributeModifier::AlignStyleImpl,
     };
     return &ArkUIAlphabetIndexerModifierImpl;
 }

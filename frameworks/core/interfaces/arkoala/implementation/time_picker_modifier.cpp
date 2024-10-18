@@ -84,7 +84,7 @@ void DateTimeOptionsImpl(Ark_NativePointer node,
     //TimePickerModelNG::SetDateTimeOptions(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -92,12 +92,12 @@ void OnChangeImpl(Ark_NativePointer node,
     //TimePickerModelNG::SetOnChange(frameNode, convValue);
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              Ark_Boolean value)
+                              Ark_Boolean enable)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(value);
+    auto convValue = Converter::Convert<bool>(enable);
     //TimePickerModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
 } // TimePickerAttributeModifier

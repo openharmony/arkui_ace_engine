@@ -85,7 +85,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     //TextTimerModelNG::SetFontFamily(frameNode, convValue);
 }
 void OnTimerImpl(Ark_NativePointer node,
-                 Ark_Function value)
+                 Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -102,12 +102,12 @@ void TextShadowImpl(Ark_NativePointer node,
     //TextTimerModelNG::SetTextShadow(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Ark_CustomObject* modifier)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(modifier);
+    //auto convValue = Converter::OptConvert<type_name>(*modifier);
     //TextTimerModelNG::SetContentModifier(frameNode, convValue);
 }
 } // TextTimerAttributeModifier

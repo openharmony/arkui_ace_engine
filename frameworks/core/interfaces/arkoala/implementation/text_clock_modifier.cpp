@@ -40,7 +40,7 @@ void FormatImpl(Ark_NativePointer node,
     //TextClockModelNG::SetFormat(frameNode, convValue);
 }
 void OnDateChangeImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -112,20 +112,20 @@ void FontFeatureImpl(Ark_NativePointer node,
     //TextClockModelNG::SetFontFeature(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Ark_CustomObject* modifier)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(modifier);
+    //auto convValue = Converter::OptConvert<type_name>(*modifier);
     //TextClockModelNG::SetContentModifier(frameNode, convValue);
 }
 void DateTimeOptionsImpl(Ark_NativePointer node,
-                         const Opt_CustomObject* value)
+                         const Opt_CustomObject* dateTimeOptions)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = dateTimeOptions ? Converter::OptConvert<type>(*dateTimeOptions) : std::nullopt;
     //TextClockModelNG::SetDateTimeOptions(frameNode, convValue);
 }
 } // TextClockAttributeModifier

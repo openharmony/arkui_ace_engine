@@ -75,7 +75,7 @@ void MarkImpl(Ark_NativePointer node,
     //CheckboxModelNG::SetMark(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -83,12 +83,12 @@ void OnChangeImpl(Ark_NativePointer node,
     //CheckboxModelNG::SetOnChange(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Ark_CustomObject* modifier)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(modifier);
+    //auto convValue = Converter::OptConvert<type_name>(*modifier);
     //CheckboxModelNG::SetContentModifier(frameNode, convValue);
 }
 } // CheckboxAttributeModifier
