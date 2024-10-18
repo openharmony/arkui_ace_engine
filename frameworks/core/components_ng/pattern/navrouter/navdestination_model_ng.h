@@ -24,7 +24,7 @@ class ACE_EXPORT NavDestinationModelNG : public OHOS::Ace::NavDestinationModel {
 public:
     void Create() override;
     void Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) override;
-    void SetHideTitleBar(bool hideTitleBar) override;
+    void SetHideTitleBar(bool hideTitleBar, bool animated) override;
     void SetTitle(const std::string& title, bool hasSubTitle) override;
     void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) override;
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, const std::string& src,
@@ -39,14 +39,22 @@ public:
     void SetOnWillHide(std::function<void()>&& willHide) override;
     void SetOnWillDisAppear(std::function<void()>&& willDisAppear) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
+    void SetHideToolBar(bool hideToolBar, bool animated) override;
+    static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
+    void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
+    void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
+    void SetToolBarOptions(NavigationToolbarOptions&& opt) override;
     void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
-    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
+    static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::string& src,
         bool noPixMap, RefPtr<PixelMap>& pixMap);
     static void SetNavDestinationMode(FrameNode* frameNode, NavDestinationMode mode);
+    static void SetRecoverable(FrameNode* frameNode, bool recoverable);
+
     void SetNavDestinationMode(NavDestinationMode mode) override;
+    void SetRecoverable(bool recoverable) override;
     bool ParseCommonTitle(
         bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
@@ -56,8 +64,7 @@ public:
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
     void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
-    static void ParseCommonTitle(FrameNode* frameNode, bool hasSubTitle, bool hasMainTitle,
-        const std::string& subtitle, const std::string& title);
+    static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo);
     static void SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt);
     static void SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems);
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);

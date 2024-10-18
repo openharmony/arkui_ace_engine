@@ -51,12 +51,14 @@ public:
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
     void OnHandleLevelModeChanged(HandleLevelMode mode) override;
+    void OnHandleMarkInfoChange(std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
+    void UpdateHandleColor();
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo();
     bool IsSingleHandleShow();
     void UpdateMenuOffset();
     bool IsBothHandlesShow();
     bool IsHandleShow();
-    void OnHandleMoveStart(bool isFirst) override;
+    void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void UpdateHandleOffset();
     void UpdateSelectOverlayOnAreaChanged();
     void ToggleMenu();
@@ -66,6 +68,7 @@ public:
     }
     void OnHandleIsHidden() override;
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
+    void OnHandleMouseEvent(const MouseInfo& event) override;
     void OnAfterSelectOverlayShow(bool isCreate) override;
     bool IsRegisterTouchCallback() override
     {
@@ -78,7 +81,7 @@ private:
     void CloseMagnifier();
     void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle) override;
     void CheckMenuParamChange(SelectOverlayInfo& selectInfo, TextSpanType selectType, TextResponseType responseType);
-    void SwitchCaretState();
+    void SwitchCaretState(std::shared_ptr<SelectOverlayInfo> info);
     void ResumeTwinkling();
     std::shared_ptr<SelectionMenuParams> lastMenuParams_ = nullptr;
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;

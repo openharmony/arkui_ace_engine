@@ -26,7 +26,7 @@ RefPtr<RepeatVirtualScrollNode> RepeatVirtualScrollNode::GetOrCreateRepeatNode(i
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-    const std::function<void(uint32_t, uint32_t)>& onSetActiveRange)
+    const std::function<void(int32_t, int32_t)>& onSetActiveRange)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScrollNode>(nodeId);
     if (node) {
@@ -48,7 +48,7 @@ RepeatVirtualScrollNode::RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCo
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-    const std::function<void(uint32_t, uint32_t)>& onSetActiveRange)
+    const std::function<void(int32_t, int32_t)>& onSetActiveRange)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), totalCount_(totalCount),
       caches_(templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range),
       onSetActiveRange_(onSetActiveRange),
@@ -72,10 +72,16 @@ void RepeatVirtualScrollNode::DoSetActiveChildRange(int32_t start, int32_t end, 
     ACE_SCOPED_TRACE("Repeat.DoSetActiveChildRange start [%d] - end [%d; cacheStart: [%d], cacheEnd: [%d]",
         start, end, cacheStart, cacheEnd);
 
+    // get normalized active range (with positive indices only)
+    const auto divisor = (totalCount_ > 0) ? totalCount_ : std::numeric_limits<int>::max();
+    const auto nStart = (start - cacheStart + totalCount_) % divisor;
+    const auto nEnd = (end + cacheEnd + totalCount_) % divisor;
+
     // memorize active range
-    caches_.SetLastActiveRange(start - cacheStart, end + cacheEnd);
+    caches_.SetLastActiveRange(nStart, nEnd);
+
     // notify TS side
-    onSetActiveRange_(start, end);
+    onSetActiveRange_(nStart, nEnd);
 
     bool needSync = caches_.RebuildL1([start, end, cacheStart, cacheEnd, this](
         int32_t index, const RefPtr<UINode>& node) -> bool {
@@ -126,11 +132,15 @@ bool RepeatVirtualScrollNode::CheckNode4IndexInL1(int32_t index, int32_t start, 
     }
 
     auto totalCount = static_cast<int32_t>(totalCount_);
-    if (((start - cacheStart <= index) && (index <= end + cacheEnd)) ||
-        (isLoop_ && (start - cacheStart < 0 && start - cacheStart + totalCount <= index)) ||
-        (isLoop_ && (end + cacheEnd >= totalCount && index <= end + cacheEnd - totalCount)) ||
-        ((end < start) && (index <= end + cacheEnd || start - cacheStart <= index))) {
+    if ((start - cacheStart <= index) && (index <= end + cacheEnd)) {
         return true;
+    }
+    if (isLoop_) {
+        if (((end < start) && (start - cacheStart <= index || index <= end + cacheEnd)) ||
+            ((start - cacheStart < 0) && (index >= start - cacheStart + totalCount)) ||
+            ((end + cacheEnd >= totalCount) && (index <= end + cacheEnd - totalCount))) {
+            return true;
+        }
     }
     return false;
 }
@@ -229,22 +239,6 @@ void RepeatVirtualScrollNode::UpdateRenderState(bool visibleItemsChanged)
     MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
-/**
- * a index -> key -> node does not exists, caller has verified before calling this function
- *
- * Ask TS to update a Node, if possible
- * If no suitable node, request to crete a new node
- */
-RefPtr<UINode> RepeatVirtualScrollNode::CreateOrUpdateFrameChild4Index(uint32_t forIndex, const std::string& forKey)
-{
-    RefPtr<UINode> node4Index = caches_.UpdateFromL2(forIndex);
-    if (node4Index) {
-        return node4Index;
-    }
-
-    return caches_.CreateNewNode(forIndex);
-}
-
 // STATE_MGMT_NOTE: added
 // index N-th item
 // needBuild: true - if found in cache, then return, if not in cache then return newly build
@@ -261,6 +255,9 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     ACE_SCOPED_TRACE("Repeat.GetFrameChildByIndex index[%d], needBuild[%d] isCache[%d] "
                      "addToRenderTree[%d]",
         index, static_cast<int32_t>(needBuild), static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
+
+    // whether child is reused or created
+    bool isChildReused = true;
 
     const auto& key = caches_.GetKey4Index(index, true);
     if (!key) {
@@ -293,8 +290,13 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
             "CreateOrUpdateFrameChild4Index ....",
             static_cast<int32_t>(index), key->c_str());
 
-        // TS to either make new or update existing nodes
-        node4Index = CreateOrUpdateFrameChild4Index(index, key.value());
+        // ask TS to update a Node, if possible
+        // if no suitable node, request to crete a new node
+        node4Index = caches_.UpdateFromL2(index);
+        if (!node4Index) {
+            node4Index = caches_.CreateNewNode(index);
+            isChildReused = false;
+        }
 
         if (!node4Index) {
             TAG_LOGW(AceLogTag::ACE_REPEAT, "index %{public}d -> key '%{public}s' not in caches and failed to build.",
@@ -323,7 +325,8 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     }
 
     // if the item was in L2 cache, move item to L1 cache.
-    caches_.AddKeyToL1(key.value());
+    caches_.AddKeyToL1(key.value(), isChildReused);
+
     if (node4Index->GetDepth() != GetDepth() + 1) {
         node4Index->SetDepth(GetDepth() + 1);
     }
@@ -371,9 +374,20 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
     caches_.ForEachL1IndexUINode(
         [&children](int32_t index, const RefPtr<UINode>& node) -> void { children.emplace(index, node); });
     for (const auto& [index, child] : children) {
+        const_cast<RepeatVirtualScrollNode*>(this)->RemoveDisappearingChild(child);
         children_.emplace_back(child);
     }
     return children_;
+}
+
+void RepeatVirtualScrollNode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)
+{
+    const auto& allChildren = caches_.GetAllNodes();
+    for (auto& child : allChildren) {
+        if (child.second.item) {
+            child.second.item->SetFreeze(isFreeze);
+        }
+    }
 }
 
 void RepeatVirtualScrollNode::RecycleItems(int32_t from, int32_t to)

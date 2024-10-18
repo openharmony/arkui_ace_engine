@@ -13,53 +13,23 @@
  * limitations under the License.
  */
 
-#include <functional>
-#include <optional>
-#include <utility>
 
 #include "gtest/gtest.h"
-
-#define private public
-#define protected public
+#include "test/unittest/core/pattern/test_ng.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/dimension_offset.h"
-#include "base/geometry/point.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/system_properties.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/dialog/dialog_properties.h"
-#include "core/components/picker/picker_data.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/input_event.h"
-#include "core/components_ng/event/touch_event.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/picker/date_time_animation_controller.h"
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
-#include "core/components_ng/pattern/picker/picker_model.h"
-#include "core/components_ng/pattern/picker/picker_type_define.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/ace_events.h"
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -205,11 +175,14 @@ HWTEST_F(DatePickerTestTwoNg, SetDatePickerDialogShow001, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
     auto tmpVersion = pipeline->minPlatformVersion_;
     pipeline->minPlatformVersion_ = 0;
+    auto container = MockContainer::Current();
+    container->pipelineContext_ = MockPipelineContext::GetCurrent();
+    container->pipelineContext_->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     datePickerDialogNg_->SetDatePickerDialogShow(pickerDialog, settingData, std::move(cancelEvent),
         std::move(acceptEvent), std::move(changeEvent), std::move(dateAcceptEvent), std::move(dateChangeEvent),
         pickerType, pickerDialogEvent, buttonInfos);
-    EXPECT_FALSE(pickerDialog.alignment.has_value());
     pipeline->minPlatformVersion_ = tmpVersion;
+    EXPECT_FALSE(pickerDialog.alignment.has_value());
 }
 
 /**
@@ -252,9 +225,78 @@ HWTEST_F(DatePickerTestTwoNg, SetDatePickerDialogShow002, TestSize.Level1)
     pickerDialog.alignment = DialogAlignment::DEFAULT;
     pickerDialog.offset = DimensionOffset(Offset(0, -1.0f));
     pickerDialog.backgroundColor = Color::FromString("#FFFF0000");
+    auto container = MockContainer::Current();
+    container->pipelineContext_ = MockPipelineContext::GetCurrent();
+    container->pipelineContext_->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     datePickerDialogNg_->SetDatePickerDialogShow(pickerDialog, settingData, std::move(cancelEvent),
         std::move(acceptEvent), std::move(changeEvent), std::move(dateAcceptEvent), std::move(dateChangeEvent),
         pickerType, pickerDialogEvent, buttonInfos);
-    EXPECT_EQ(pickerDialog.isEndDate, true);
+    auto it = settingData.datePickerProperty.find("end");
+    EXPECT_EQ(it != settingData.datePickerProperty.end(), true);
+}
+
+/**
+ * @tc.name: ConvertFontScaleValue001
+ * @tc.desc: Test SetDatePickerDialogShow.  3
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, ConvertFontScaleValue001, TestSize.Level1)
+{
+    Dimension tstDimension;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    float tstScale = pipeline->fontScale_;
+    pipeline->fontScale_ = 0;
+    datePickerNg_->ConvertFontScaleValue(tstDimension);
+    EXPECT_EQ(pipeline->GetFontScale(), 0);
+    tstDimension.SetUnit(DimensionUnit::VP);
+    datePickerNg_->ConvertFontScaleValue(tstDimension);
+    EXPECT_EQ(tstDimension.Unit() == DimensionUnit::VP, true);
+    pipeline->fontScale_ = 0.6f;
+    datePickerNg_->ConvertFontScaleValue(tstDimension);
+    pipeline->fontScale_ = tstScale;
+    EXPECT_TRUE(GreatOrEqualCustomPrecision(pipeline->fontScale_, 1.0f));
+}
+
+/**
+ * @tc.name: CreateFrameNode001
+ * @tc.desc: Test DatePickerModel CreateFrameNode.  5
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, CreateFrameNode001, TestSize.Level1)
+{
+    auto ret = datePickerNg_->CreateFrameNode(1);
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: CreateDatePicker001
+ * @tc.desc: Test DatePickerModel CreateDatePicker.  10
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, CreateDatePicker001, TestSize.Level1)
+{
+    auto tstTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(tstTheme, nullptr);
+    datePickerNg_->CreateDatePicker(tstTheme);
+    auto ret = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(ret, nullptr);
+}
+
+/**
+ * @tc.name: CreateDatePicker002
+ * @tc.desc: Test DatePickerModel CreateDatePicker.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, CreateDatePicker002, TestSize.Level1)
+{
+    auto tstTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(tstTheme, nullptr);
+    auto tmpLanguage = AceApplicationInfo::GetInstance().GetLanguage();
+    AceApplicationInfo::GetInstance().language_ = "ug";
+    datePickerNg_->CreateDatePicker(tstTheme);
+    auto ret = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    AceApplicationInfo::GetInstance().language_ = tmpLanguage;
+    ASSERT_NE(ret, nullptr);
 }
 } // namespace OHOS::Ace::NG

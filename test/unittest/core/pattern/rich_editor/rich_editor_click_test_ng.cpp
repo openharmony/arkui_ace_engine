@@ -463,9 +463,9 @@ HWTEST_F(RichEditorClickTestNg, OnHover001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     richEditorPattern->OnHover(true);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_, id);
+    EXPECT_EQ(pipeline->mouseStyleNodeId_.value(), id);
     richEditorPattern->OnHover(false);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_, -1);
+    EXPECT_FALSE(pipeline->mouseStyleNodeId_.has_value());
 }
 
 /**

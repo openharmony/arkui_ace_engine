@@ -68,9 +68,13 @@ private:
     static bool CheckLightUpEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckPixelStretchEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckRenderEffect(RefPtr<FrameNode>& node);
-    static bool CheckParentNodesEffect(RefPtr<FrameNode>& node);
+    static bool CheckParentNodesEffect(RefPtr<FrameNode>& node,
+        OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
+    static void CheckLeftParentNodes(const RefPtr<UINode>& parentUINode, const RectF& frameRect,
+        OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static void GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect);
-    static double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
+    static bool IsOutOfParentWithRound(const RectF& visibleRect, const RectF& renderRect,
+        OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static bool GetWindowSceneWindowId(RefPtr<FrameNode>& node, uint32_t& windId);
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
@@ -87,6 +91,8 @@ private:
     static bool IsInModalPage(const RefPtr<UINode>& node);
     static int32_t GetNodeZIndex(const RefPtr<UINode>& root);
     static void UpdateAllZindex(const RefPtr<UINode>& root, std::unordered_map<int32_t, int32_t>& nodeId2Zindex);
+    static void WriteButtonInfo(const RefPtr<OHOS::Ace::NG::SecurityComponentLayoutProperty>& layoutProperty,
+        RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H

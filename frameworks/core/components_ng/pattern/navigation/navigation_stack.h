@@ -135,9 +135,9 @@ public:
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     RefPtr<UINode> Get();
-    std::string GetNavDesNameByIndex(int32_t index);
     bool Get(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
     bool GetFromPreBackup(const std::string& name, RefPtr<UINode>& navDestinationNode, int32_t& index);
+    std::string GetNavDesNameByIndex(int32_t index);
     RefPtr<UINode> Get(int32_t index);
     RefPtr<UINode> GetPre(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     virtual bool IsEmpty();
@@ -153,7 +153,7 @@ public:
     virtual void Clear();
     virtual void UpdateReplaceValue(int32_t replaceValue) const;
     virtual int32_t GetReplaceValue() const;
-    virtual RefPtr<UINode> CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode);
+    virtual bool CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode, RefPtr<UINode>& node);
     virtual RefPtr<UINode> CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo, const WeakPtr<UINode>& node);
     virtual bool GetDisableAnimation() const
     {
@@ -180,12 +180,17 @@ public:
 
     virtual void OnAttachToParent(RefPtr<NavigationStack> parent) {}
     virtual void OnDetachFromParent() {}
-    virtual void ClearPreBuildNodeList() {}
 
     virtual std::vector<std::string> DumpStackInfo() const;
 
     virtual int32_t GetJsIndexFromNativeIndex(int32_t index) { return -1; }
     virtual void MoveIndexToTop(int32_t index) {}
+
+    virtual std::string GetStringifyParamByIndex(int32_t index) const { return ""; }
+    virtual void SetPathArray(const std::vector<NavdestinationRecoveryInfo>& navdestinationsInfo) {}
+    virtual void SetFromRecovery(int32_t index, bool fromRecovery) {}
+    virtual bool IsFromRecovery(int32_t index) { return false; }
+    virtual int32_t GetRecoveredDestinationMode(int32_t index) { return false; }
 
     const WeakPtr<UINode>& GetNavigationNode()
     {
@@ -209,6 +214,11 @@ public:
     virtual void RecoveryNavigationStack() {}
     virtual bool NeedBuildNewInstance(int32_t index) { return false; }
     virtual void SetNeedBuildNewInstance(int32_t index, bool need) {}
+    virtual void SetRecoveryFromReplaceDestination(int32_t index, bool value) {}
+    virtual bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex)
+    {
+        return false;
+    }
 
     void UpdateRecoveryList()
     {

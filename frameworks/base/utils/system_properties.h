@@ -471,6 +471,8 @@ public:
         return astcEnabled_;
     }
 
+    static bool GetWindowRectResizeEnabled();
+
     static int32_t GetAstcMaxError()
     {
         return astcMax_;
@@ -591,6 +593,12 @@ public:
 
     static std::string GetWebDebugRenderMode();
 
+    static std::string GetDebugInspectorId();
+
+    static double GetSrollableVelocityScale();
+
+    static double GetSrollableFriction();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -660,6 +668,7 @@ private:
     static float dragStartPanDisThreshold_;
     static float fontScale_;
     static float fontWeightScale_;
+    static bool windowRectResizeEnabled_;
     static FoldScreenType foldScreenType_;
 };
 

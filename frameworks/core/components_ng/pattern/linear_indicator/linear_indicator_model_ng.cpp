@@ -126,5 +126,4 @@ void LinearIndicatorModelNG::SetOnChange(FrameNode* frameNode, std::function<voi
     CHECK_NULL_VOID(pattern);
     pattern->GetController()->OnChange(std::move(event));
 }
-
 } // namespace OHOS::Ace::NG

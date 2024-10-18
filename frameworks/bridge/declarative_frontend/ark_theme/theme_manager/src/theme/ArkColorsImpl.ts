@@ -78,7 +78,7 @@ class ArkColorsImpl implements Colors {
         baselineColors: Colors
     ) {
         const customAttribute = this as Object;
-        for(let attribute in colors) {
+        for (let attribute in colors) {
             customAttribute[attribute] = colors[attribute];
         }
         this.brand = colors?.brand ?? baselineColors.brand;

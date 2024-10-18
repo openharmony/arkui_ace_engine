@@ -66,9 +66,9 @@ void ParsePosition(const EcmaVM* vm, const ArkUIRuntimeCallInfo* runtimeCallInfo
     CHECK_NULL_VOID(vm);
     CHECK_NULL_VOID(runtimeCallInfo);
     Local<JSValueRef> position = runtimeCallInfo->GetCallArgRef(1);
-    Local<JSValueRef> positionX = runtimeCallInfo->GetCallArgRef(2);
-    Local<JSValueRef> positionY = runtimeCallInfo->GetCallArgRef(3);
-    Local<JSValueRef> positionObj = runtimeCallInfo->GetCallArgRef(11);
+    Local<JSValueRef> positionX = runtimeCallInfo->GetCallArgRef(2);    // 2: parameter index
+    Local<JSValueRef> positionY = runtimeCallInfo->GetCallArgRef(3);    // 3: parameter index
+    Local<JSValueRef> positionObj = runtimeCallInfo->GetCallArgRef(11); // 11: parameter index
     if (!position->IsNull() && position->IsNumber()) {
         param.isPositionXy = false;
         param.position = position->Int32Value(vm);
@@ -92,7 +92,7 @@ void ParseFontSize(const EcmaVM* vm, const ArkUIRuntimeCallInfo* runtimeCallInfo
 {
     CHECK_NULL_VOID(vm);
     CHECK_NULL_VOID(runtimeCallInfo);
-    Local<JSValueRef> fontSize = runtimeCallInfo->GetCallArgRef(9);
+    Local<JSValueRef> fontSize = runtimeCallInfo->GetCallArgRef(9); // 9: parameter index
     CalcDimension fontSizeVal;
     if (ArkTSUtils::ParseJsDimensionNG(vm, fontSize, fontSizeVal, DimensionUnit::FP)) {
         if (fontSizeVal.IsNonNegative() && fontSizeVal.Unit() != DimensionUnit::PERCENT) {
@@ -110,7 +110,7 @@ void ParseBadgeSize(const EcmaVM* vm, const ArkUIRuntimeCallInfo* runtimeCallInf
 {
     CHECK_NULL_VOID(vm);
     CHECK_NULL_VOID(runtimeCallInfo);
-    Local<JSValueRef> badgeSize = runtimeCallInfo->GetCallArgRef(5);
+    Local<JSValueRef> badgeSize = runtimeCallInfo->GetCallArgRef(5); // 5: parameter index
     CalcDimension badgeSizeVal;
     if (ArkTSUtils::ParseJsDimensionNG(vm, badgeSize, badgeSizeVal, DimensionUnit::FP)) {
         if (badgeSizeVal.IsNonNegative() && badgeSizeVal.Unit() != DimensionUnit::PERCENT) {
@@ -127,11 +127,11 @@ bool ParseBadgeBaseParam(const EcmaVM* vm, const ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(vm, false);
     CHECK_NULL_RETURN(runtimeCallInfo, false);
     CHECK_NULL_RETURN(badgeTheme, false);
-    Local<JSValueRef> badgeColor = runtimeCallInfo->GetCallArgRef(4);
-    Local<JSValueRef> borderColor = runtimeCallInfo->GetCallArgRef(6);
-    Local<JSValueRef> borderWidth = runtimeCallInfo->GetCallArgRef(7);
-    Local<JSValueRef> textColor = runtimeCallInfo->GetCallArgRef(8);
-    Local<JSValueRef> fontWeight = runtimeCallInfo->GetCallArgRef(10);
+    Local<JSValueRef> badgeColor = runtimeCallInfo->GetCallArgRef(4);  // 4: parameter index
+    Local<JSValueRef> borderColor = runtimeCallInfo->GetCallArgRef(6); // 6: parameter index
+    Local<JSValueRef> borderWidth = runtimeCallInfo->GetCallArgRef(7); // 7: parameter index
+    Local<JSValueRef> textColor = runtimeCallInfo->GetCallArgRef(8);   // 8: parameter index
+    Local<JSValueRef> fontWeight = runtimeCallInfo->GetCallArgRef(10); // 10: parameter index
     if (!InitBadgeParam(badgeTheme, param)) {
         return false;
     }
@@ -172,8 +172,8 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithNumber(ArkUIRuntimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> countArg = runtimeCallInfo->GetCallArgRef(12);
-    Local<JSValueRef> maxCountArg = runtimeCallInfo->GetCallArgRef(13);
+    Local<JSValueRef> countArg = runtimeCallInfo->GetCallArgRef(12);    // 12: parameter index
+    Local<JSValueRef> maxCountArg = runtimeCallInfo->GetCallArgRef(13); // 13: parameter index
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     ArkUIBadgeParam style;
@@ -204,7 +204,7 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithString(ArkUIRuntimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(12);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(12); // 12: parameter index
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     ArkUIBadgeParam style;

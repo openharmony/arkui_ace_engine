@@ -71,21 +71,29 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     auto lastViewSize = scrollPattern->GetViewSize();
     auto lastViewPortExtent = scrollPattern->GetViewPortExtent();
-    if (!layoutWrapper->IsConstraintNoChanged() || lastViewSize != selfSize || lastViewPortExtent != childSize) {
+    if (layoutWrapper->ConstraintChanged() || lastViewSize != selfSize || lastViewPortExtent != childSize) {
         scrollPattern->AddScrollMeasureInfo(constraint, childLayoutConstraint, selfSize, childSize);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(selfSize);
-    //set initial offset
+    UseInitialOffset(axis, selfSize, layoutWrapper);
+}
+
+void ScrollLayoutAlgorithm::UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper)
+{
+    auto scrollNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
     if (scrollPattern->NeedSetInitialOffset()) {
         auto initialOffset = scrollPattern->GetInitialOffset();
         if (axis == Axis::VERTICAL) {
             auto offset = initialOffset.GetY();
-            currentOffset_ = offset.Unit() == DimensionUnit::PERCENT ?
-                             -offset.Value() * selfSize.Height() : -offset.ConvertToPx();
+            currentOffset_ =
+                offset.Unit() == DimensionUnit::PERCENT ? -offset.Value() * selfSize.Height() : -offset.ConvertToPx();
         } else {
             auto offset = initialOffset.GetX();
-            currentOffset_ = offset.Unit() == DimensionUnit::PERCENT ?
-                             -offset.Value() * selfSize.Width() : -offset.ConvertToPx();
+            currentOffset_ =
+                offset.Unit() == DimensionUnit::PERCENT ? -offset.Value() * selfSize.Width() : -offset.ConvertToPx();
         }
     }
 }
@@ -139,6 +147,26 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
+    UpdateOverlay(layoutWrapper);
+}
+
+void ScrollLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
+{
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->GetFadingEdge().value_or(false)) {
+        return;
+    }
+    auto overlayNode = frameNode->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto scrollFrameSize = geometryNode->GetMarginFrameSize();
+    auto overlayGeometryNode = overlayNode->GetGeometryNode();
+    CHECK_NULL_VOID(overlayGeometryNode);
+    overlayGeometryNode->SetFrameSize(scrollFrameSize);
 }
 
 void ScrollLayoutAlgorithm::UpdateScrollAlignment(Alignment& scrollAlignment)

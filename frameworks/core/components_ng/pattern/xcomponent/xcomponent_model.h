@@ -38,9 +38,6 @@ public:
     static bool IsBackGroundColorAvailable(const XComponentType& type)
     {
         return type == XComponentType::TEXTURE || type == XComponentType::NODE ||
-#ifdef PLATFORM_VIEW_SUPPORTED
-                type == XComponentType::PLATFORM_VIEW ||
-#endif
                (type == XComponentType::SURFACE && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
     }
     static bool IsCommonEventAvailable(const XComponentType& type, std::optional<std::string>& libraryName)
@@ -82,11 +79,8 @@ public:
     virtual void SetControllerOnCreated(SurfaceCreatedEvent&& onCreated) {}
     virtual void SetControllerOnChanged(SurfaceChangedEvent&& onChanged) {}
     virtual void SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestroyed) {}
-
-private:
-    static std::unique_ptr<XComponentModel> instance_;
-    static std::mutex mutex_;
+    virtual void SetRenderFit(RenderFit renderFit) {}
+    virtual void EnableSecure(bool isSecure) {}
 };
-
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_H

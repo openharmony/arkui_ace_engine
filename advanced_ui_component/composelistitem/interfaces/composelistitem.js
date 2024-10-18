@@ -66,6 +66,7 @@ const SPECIAL_ICON_SIZE = 0;
 const DEFAULT_ROW_SPACE = 0;
 const SPECICAL_ROW_SPACE = 4;
 const OPERATEITEM_ICONLIKE_SIZE = 24;
+const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
 const OPERATEITEM_ARROW_WIDTH = 12;
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
@@ -75,6 +76,7 @@ const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
 const LEFT_ONLY_ARROW_WIDTH = 'calc(100% - 40vp)';
 const RIGHT_ONLY_ARROW_WIDTH = '24vp';
+const ACCESSIBILITY_LEVEL_NO = 'no';
 const ICON_SIZE_MAP = new Map([
     [IconType.BADGE, BADGE_SIZE],
     [IconType.NORMAL_ICON, SMALL_ICON_SIZE],
@@ -85,6 +87,7 @@ const ICON_SIZE_MAP = new Map([
     [IconType.LONGITUDINAL, LONGITUDINAL_SIZE],
     [IconType.VERTICAL, VERTICAL_SIZE]
 ]);
+
 class ContentItemStruct extends ViewPU {
     constructor(a11, b11, c11, d11 = -1, e11 = undefined, f11) {
         super(a11, c11, d11, f11);
@@ -352,6 +355,7 @@ class ContentItemStruct extends ViewPU {
             Text.fontWeight(FontWeight.Medium);
             Text.focusable(true);
             Text.draggable(false);
+            Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
         }, Text);
         Text.pop();
         this.observeComponentCreation2((k9, l9) => {
@@ -365,6 +369,7 @@ class ContentItemStruct extends ViewPU {
                         Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.draggable(false);
+                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
                 });
@@ -386,6 +391,7 @@ class ContentItemStruct extends ViewPU {
                         Text.maxLines(TEXT_MAX_LINE);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.draggable(false);
+                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
                 });
@@ -437,6 +443,7 @@ class ContentItemStruct extends ViewPU {
 }
 class CreateIconParam {
 }
+
 class OperateItemStruct extends ViewPU {
     constructor(p8, q8, r8, s8 = -1, t8 = undefined, u8) {
         super(p8, r8, s8, u8);
@@ -786,14 +793,6 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Button.onTouch((d1) => {
-                if (d1.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (d1.type === TouchType.Up || d1.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
-            });
             Button.onHover((c1) => {
                 this.parentCanHover = false;
                 if (c1 && this.parentFrontColor === this.hoveringColor) {
@@ -833,14 +832,6 @@ class OperateItemStruct extends ViewPU {
             Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Button.onFocus(() => {
                 this.parentCanFocus = false;
-            });
-            Button.onTouch((y6) => {
-                if (y6.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (y6.type === TouchType.Up || y6.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
             });
             Button.onHover((x6) => {
                 this.parentCanHover = false;
@@ -885,6 +876,7 @@ class OperateItemStruct extends ViewPU {
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
             Text.draggable(false);
             Text.flexShrink(1);
+            Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
         }, Text);
         Text.pop();
     }
@@ -892,7 +884,7 @@ class OperateItemStruct extends ViewPU {
         this.observeComponentCreation2((x5, y5) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
-            Button.hitTestBehavior(HitTestMode.Transparent);
+            Button.hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent);
             Button.backgroundColor(Color.Transparent);
             Button.height(OPERATEITEM_ICONLIKE_SIZE);
             Button.width(OPERATEITEM_ARROW_WIDTH);
@@ -900,17 +892,6 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Button.stateEffect(this.arrow?.action !== undefined);
-            Button.onTouch((d6) => {
-                if (this.arrow?.action === undefined) {
-                    return;
-                }
-                if (d6.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (d6.type === TouchType.Up || d6.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
-            });
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
             Button.onHover((c6) => {
                 if (this.arrow?.action === undefined) {
@@ -949,18 +930,11 @@ class OperateItemStruct extends ViewPU {
             Radio.onChange(this.radio?.onChange);
             Radio.height(OPERATEITEM_ICONLIKE_SIZE);
             Radio.width(OPERATEITEM_ICONLIKE_SIZE);
+            Radio.padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE);
             Radio.onFocus(() => {
                 this.parentCanFocus = false;
             });
             Radio.hitTestBehavior(HitTestMode.Block);
-            Radio.onTouch((r5) => {
-                if (r5.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (r5.type === TouchType.Up || r5.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
-            });
             Radio.onHover((q5) => {
                 this.parentCanHover = false;
                 if (q5 && this.parentFrontColor === this.hoveringColor) {
@@ -984,18 +958,11 @@ class OperateItemStruct extends ViewPU {
             Checkbox.onChange(this.checkBox?.onChange);
             Checkbox.height(OPERATEITEM_ICONLIKE_SIZE);
             Checkbox.width(OPERATEITEM_ICONLIKE_SIZE);
+            Checkbox.padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE);
             Checkbox.onFocus(() => {
                 this.parentCanFocus = false;
             });
             Checkbox.hitTestBehavior(HitTestMode.Block);
-            Checkbox.onTouch((i5) => {
-                if (i5.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (i5.type === TouchType.Up || i5.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
-            });
             Checkbox.onHover((h5) => {
                 this.parentCanHover = false;
                 if (h5 && this.parentFrontColor === this.hoveringColor) {
@@ -1021,14 +988,6 @@ class OperateItemStruct extends ViewPU {
             Row.justifyContent(FlexAlign.Center);
             Row.onFocus(() => {
                 this.parentCanFocus = false;
-            });
-            Row.onTouch((z4) => {
-                if (z4.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (z4.type === TouchType.Up || z4.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
             });
             Row.onHover((y4) => {
                 this.parentCanHover = false;
@@ -1058,7 +1017,7 @@ class OperateItemStruct extends ViewPU {
     createTextArrow(v3 = null) {
         this.observeComponentCreation2((g4, h4) => {
             Button.createWithChild({ type: ButtonType.Normal });
-            Button.hitTestBehavior(HitTestMode.Transparent);
+            Button.hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent);
             Button.labelStyle({
                 maxLines: TEXT_MAX_LINE
             });
@@ -1075,17 +1034,6 @@ class OperateItemStruct extends ViewPU {
                 right: 0
             });
             Button.stateEffect(this.arrow?.action !== undefined);
-            Button.onTouch((b1) => {
-                if (this.arrow?.action === undefined) {
-                    return;
-                }
-                if (b1.type === TouchType.Down) {
-                    this.parentCanTouch = false;
-                }
-                if (b1.type === TouchType.Up || b1.type === TouchType.Cancel) {
-                    this.parentCanTouch = true;
-                }
-            });
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
             Button.onHover((a1) => {
                 if (this.arrow?.action === undefined) {
@@ -1119,12 +1067,13 @@ class OperateItemStruct extends ViewPU {
                     this.observeComponentCreation2((l11, m11) => {
                         Text.create(this.text);
                         Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.focusable(true);
                         Text.draggable(false);
                         Text.constraintSize({
                             maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
                         });
+                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((j11, k11) => {
@@ -1134,6 +1083,7 @@ class OperateItemStruct extends ViewPU {
                         Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Image.focusable(false);
                         Image.draggable(false);
+                        Image.matchTextDirection(true);
                     }, Image);
                     Flex.pop();
                 });
@@ -1150,12 +1100,13 @@ class OperateItemStruct extends ViewPU {
                     this.observeComponentCreation2((v6, a7) => {
                         Text.create(this.text);
                         Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Text.fontColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
                         Text.focusable(true);
                         Text.draggable(false);
                         Text.constraintSize({
                             maxWidth: `calc(100% - ${OPERATEITEM_ARROW_WIDTH}vp)`
                         });
+                        Text.accessibilityLevel(ACCESSIBILITY_LEVEL_NO);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((o6, u6) => {
@@ -1165,6 +1116,7 @@ class OperateItemStruct extends ViewPU {
                         Image.fillColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_fourth'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Image.focusable(false);
                         Image.draggable(false);
+                        Image.matchTextDirection(true);
                     }, Image);
                     Row.pop();
                 });
@@ -1294,6 +1246,7 @@ export class ComposeListItem extends ViewPU {
         this.__textArrowLeftSafeOffset = new ObservedPropertySimplePU(0, this, "textArrowLeftSafeOffset");
         this.isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
         this.maxFontScale = this.getUIContext().getMaxFontScale();
+        this.__accessibilityTextBuilder = new ObservedPropertySimplePU('', this, "accessibilityTextBuilder");
         this.setInitiallyProvidedValue(u2);
         this.declareWatch("contentItem", this.onPropChange);
         this.declareWatch("operateItem", this.onPropChange);
@@ -1364,6 +1317,9 @@ export class ComposeListItem extends ViewPU {
         if (s2.maxFontScale !== undefined) {
             this.maxFontScale = s2.maxFontScale;
         }
+        if (s2.accessibilityTextBuilder !== undefined) {
+            this.accessibilityTextBuilder = s2.accessibilityTextBuilder;
+        }
     }
     updateStateVars(r2) {
         this.__contentItem.reset(r2.contentItem);
@@ -1389,6 +1345,7 @@ export class ComposeListItem extends ViewPU {
         this.__contentItemDirection.purgeDependencyOnElmtId(q2);
         this.__containerPadding.purgeDependencyOnElmtId(q2);
         this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(q2);
+        this.__accessibilityTextBuilder.purgeDependencyOnElmtId(q2);
     }
     aboutToBeDeleted() {
         this.__contentItem.aboutToBeDeleted();
@@ -1410,6 +1367,7 @@ export class ComposeListItem extends ViewPU {
         this.__contentItemDirection.aboutToBeDeleted();
         this.__containerPadding.aboutToBeDeleted();
         this.__textArrowLeftSafeOffset.aboutToBeDeleted();
+        this.__accessibilityTextBuilder.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -1527,6 +1485,12 @@ export class ComposeListItem extends ViewPU {
     set textArrowLeftSafeOffset(o4) {
         this.__textArrowLeftSafeOffset.set(o4);
     }
+    get accessibilityTextBuilder() {
+        return this.__accessibilityTextBuilder.get();
+    }
+    set accessibilityTextBuilder(t15) {
+        this.__accessibilityTextBuilder.set(t15);
+    }
     onWillApplyTheme(b2) {
         this.hoveringColor = b2.colors.interactiveHover;
         this.touchDownColor = b2.colors.interactivePressed;
@@ -1566,6 +1530,12 @@ export class ComposeListItem extends ViewPU {
         if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle) >= this.itemHeight) {
             this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle) + SAFE_LIST_PADDING;
         }
+        this.accessibilityTextBuilder = `
+          ${this.contentItem?.primaryText ?? ''}
+          ${this.contentItem?.secondaryText ?? ''}
+          ${this.contentItem?.description ?? ''}
+          ${this.operateItem?.text ?? ''}
+        `;
     }
     aboutToAppear() {
         this.onPropChange();
@@ -1704,6 +1674,7 @@ export class ComposeListItem extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((z1, a2) => {
             Stack.create();
+            Stack.accessibilityText(this.accessibilityTextBuilder);
             Stack.padding({
                 left: STACK_PADDING,
                 right: STACK_PADDING
@@ -1715,7 +1686,13 @@ export class ComposeListItem extends ViewPU {
                 minHeight: this.itemHeight
             });
             Flex.focusable(true);
-            Flex.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+            Flex.borderRadius({
+                "id": -1,
+                "type": 10002,
+                params: ['sys.float.ohos_id_corner_radius_default_m'],
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
+            });
             Flex.backgroundColor(ObservedObject.GetRawObject(this.frontColor));
             Flex.onFocus(() => {
                 this.canFocus = true;
@@ -1730,27 +1707,33 @@ export class ComposeListItem extends ViewPU {
                         (this.isActive ? this.activedColor : Color.Transparent.toString());
                 }
             });
-            Flex.onTouch((x1) => {
-                if (x1.type === TouchType.Down && this.canTouch) {
-                    this.frontColor = this.touchDownColor;
-                }
-                if (x1.type === TouchType.Up || x1.type === TouchType.Cancel) {
-                    this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
-                }
-            });
             ViewStackProcessor.visualState("focused");
             Flex.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: {
+                    "id": -1,
+                    "type": 10002,
+                    params: ['sys.float.ohos_id_corner_radius_default_m'],
+                    "bundleName": "__harDefaultBundleName__",
+                    "moduleName": "__harDefaultModuleName__"
+                },
                 width: ITEM_BORDER_SHOWN,
                 color: this.focusOutlineColor,
                 style: BorderStyle.Solid
             });
             ViewStackProcessor.visualState("normal");
             Flex.border({
-                radius: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+                radius: {
+                    "id": -1,
+                    "type": 10002,
+                    params: ['sys.float.ohos_id_corner_radius_default_m'],
+                    "bundleName": "__harDefaultBundleName__",
+                    "moduleName": "__harDefaultModuleName__"
+                },
                 width: ITEM_BORDER_SHOWN,
                 color: Color.Transparent
             });
+            ViewStackProcessor.visualState("pressed");
+            Flex.backgroundColor(ObservedObject.GetRawObject(this.touchDownColor));
             ViewStackProcessor.visualState();
             Flex.padding(ObservedObject.GetRawObject(this.containerPadding));
         }, Flex);
@@ -1787,9 +1770,9 @@ export class ComposeListItem extends ViewPU {
             if (this.contentItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((z, f1) => {
-                            if (f1) {
-                                let t1 = new ContentItemStruct(this, {
+                        this.observeComponentCreation2((d, o) => {
+                            if (o) {
+                                let p = new ContentItemStruct(this, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
@@ -1799,9 +1782,10 @@ export class ComposeListItem extends ViewPU {
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection,
-                                }, undefined, z, () => { }, { page: "library/src/main/ets/components/composelistitem.ets", line: 942, col: 11 });
-                                ViewPU.create(t1);
-                                let a4 = () => {
+                                }, undefined, d, () => { },
+                                    { page: 'library/src/main/ets/components/composelistitem.ets', line: 942, col: 11 });
+                                ViewPU.create(p);
+                                let t = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
@@ -1814,10 +1798,10 @@ export class ComposeListItem extends ViewPU {
                                         itemDirection: this.contentItemDirection
                                     };
                                 };
-                                t1.paramsGenerator_ = a4;
+                                p.paramsGenerator_ = t;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(z, {
+                                this.updateStateVarsOfChildByElmtId(d, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,

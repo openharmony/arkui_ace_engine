@@ -247,24 +247,25 @@ float DatePickerColumnLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& us
     auto systemFontScale = static_cast<double>(pipeline->GetFontScale());
     auto themePadding = pickerTheme->GetPickerDialogFontPadding();
     auto userSetHeightValue = AdjustFontSizeScale(userSetHeight, systemFontScale).ConvertToPx();
-    double adjustedScale = std::clamp(systemFontScale, pickerTheme->GetNormalFontScale(),
-        pickerTheme->GetMaxTwoFontScale());
-    if (!NearZero(adjustedScale)) {
-        userSetHeightValue = userSetHeightValue / adjustedScale * PERCENT_120 +
-            (themePadding.ConvertToPx() * DIVIDER_SIZE);
-    } else {
+    double adjustedScale =
+        std::clamp(systemFontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetMaxTwoFontScale());
+    if (NearZero(adjustedScale)) {
         return fontScale;
     }
-
-    auto themeHeightLimit = isDividerSpacing ? pickerTheme->GetDividerSpacingLimit() :
-        pickerTheme->GetGradientHeightLimit();
-    auto themeHeight = isDividerSpacing ? pickerTheme->GetDividerSpacing() :
-        pickerTheme->GetGradientHeight();
+    userSetHeightValue = userSetHeightValue / adjustedScale * PERCENT_120 + (themePadding.ConvertToPx() * DIVIDER_SIZE);
+    auto themeHeightLimit =
+        isDividerSpacing ? pickerTheme->GetDividerSpacingLimit() : pickerTheme->GetGradientHeightLimit();
+    auto themeHeight = isDividerSpacing ? pickerTheme->GetDividerSpacing() : pickerTheme->GetGradientHeight();
     if (GreatOrEqualCustomPrecision(userSetHeightValue, themeHeightLimit.ConvertToPx())) {
         userSetHeightValue = themeHeightLimit.ConvertToPx();
     } else {
         userSetHeightValue = std::max(userSetHeightValue, themeHeight.ConvertToPx());
     }
+
+    if (NearZero(themeHeight.ConvertToPx())) {
+        return fontScale;
+    }
+
     fontScale = std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), fontScale);
     return fontScale;
 }

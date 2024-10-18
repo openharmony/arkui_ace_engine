@@ -170,5 +170,6 @@ HWTEST_F(UObjectTest, UObjectTest003, TestSize.Level1)
     const char* buffer = nullptr;
     int32_t bufferLen = 100;
     uObject.Deserialize(buffer, bufferLen);
+    EXPECT_EQ(uObject.offset_, 0);
 }
 } // namespace OHOS::Ace

@@ -28,7 +28,7 @@ void NodeContainerModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
 }
 
-void NodeContainerModelNG::SetMakeFunction(std::function<RefPtr<UINode>(int32_t)>&& makeFunc)
+void NodeContainerModelNG::SetMakeFunction(std::function<RefPtr<UINode>()>&& makeFunc)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

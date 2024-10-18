@@ -916,6 +916,50 @@ HWTEST_F(MenuTestNg, MenuViewTestNgCreate004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuViewTestNgCreate005
+ * @tc.desc: Verify Create SubMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNgCreate005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create custom node and menuWrapper node
+     * @tc.expected: menuWrapperNode not null
+     */
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    MenuParam menuParam;
+    menuParam.enableHoverMode = true;
+    RefPtr<NG::UINode> customNode;
+    auto menuWrapperNode =
+        MenuView::Create(textNode, TARGET_ID, V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    /**
+     * @tc.steps: step2: create custom menu node
+     * @tc.expected: menuNode not null,menuWrapperNode->GetChildren() size is 1
+     */
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    /**
+     * @tc.steps: step3: create custom menu pattern
+     * @tc.expected: enableFold is ture
+     */
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_EQ(menuPattern->enableFold_, true);
+    ASSERT_EQ(menuPattern->GetHoverMode(), true);
+
+    /**
+     * @tc.steps: step4: menu pattern SetFold
+     * @tc.expected: enableFold is fasle/ture
+     */
+    menuPattern->SetHoverMode(true);
+    ASSERT_EQ(menuPattern->enableFold_, true);
+    menuPattern->SetHoverMode(false);
+    ASSERT_EQ(menuPattern->enableFold_, false);
+}
+
+/**
  * @tc.name: MenuViewTestNgSetFontSize001
  * @tc.desc: Verify SetFontSize.
  * @tc.type: FUNC
@@ -1173,7 +1217,7 @@ HWTEST_F(MenuTestNg, MenuViewTestNgSetMenuPlacement002, TestSize.Level1)
 
 /**
  * @tc.name: MenuPaintMethodTestNg001
- * @tc.desc: Verify MenuPaintMethod::GetOverlayDrawFunction.
+ * @tc.desc: Verify MenuPaintMethod::GetContentDrawFunction.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, MenuPaintMethodTestNg001, TestSize.Level1)
@@ -1184,15 +1228,12 @@ HWTEST_F(MenuTestNg, MenuPaintMethodTestNg001, TestSize.Level1)
     RefPtr<MenuPaintProperty> paintProp = AceType::MakeRefPtr<MenuPaintProperty>();
     RefPtr<MenuPaintMethod> paintMethod = AceType::MakeRefPtr<MenuPaintMethod>();
     PaintWrapper* paintWrapperNoMenu = GetPaintWrapper(paintProp);
-    paintMethod->GetOverlayDrawFunction(paintWrapperNoMenu);
+    paintMethod->GetContentDrawFunction(paintWrapperNoMenu);
     delete paintWrapperNoMenu;
     paintWrapperNoMenu = nullptr;
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
-    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     /**
-     * @tc.steps: step2. update paint property and excute GetOverlayDrawFunction.
+     * @tc.steps: step2. update paint property and excute GetContentDrawFunction.
      * @tc.expected:  return value are as expected.
      */
     paintProp->UpdateEnableArrow(true);
@@ -1201,7 +1242,7 @@ HWTEST_F(MenuTestNg, MenuPaintMethodTestNg001, TestSize.Level1)
     for (Placement placementValue : placements) {
         paintProp->UpdateArrowPlacement(placementValue);
         PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
-        auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+        auto result = paintMethod->GetContentDrawFunction(paintWrapper);
         EXPECT_NE(result, nullptr);
         result(canvas);
         delete paintWrapper;
@@ -1213,40 +1254,9 @@ HWTEST_F(MenuTestNg, MenuPaintMethodTestNg001, TestSize.Level1)
      */
     paintProp->UpdateEnableArrow(false);
     PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
-    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
+    auto result = paintMethod->GetContentDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
     result(canvas);
-    delete paintWrapper;
-    paintWrapper = nullptr;
-}
-
-/**
- * @tc.name: MenuPaintMethodTestNg002
- * @tc.desc: Verify MenuPaintMethod::UpdateArrowPath.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuTestNg, MenuPaintMethodTestNg002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. prepare paint method object.
-     */
-    RefPtr<MenuPaintProperty> paintProp = AceType::MakeRefPtr<MenuPaintProperty>();
-    RefPtr<MenuPaintMethod> paintMethod = AceType::MakeRefPtr<MenuPaintMethod>();
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
-    /**
-     * @tc.steps: step2. execute functions.
-     * @tc.expected:  return value are as expected.
-     */
-    auto arrowX = 0.0;
-    auto arrowY = 0.0;
-    RSPath path;
-    Placement placements[] = { Placement::TOP, Placement::TOP_RIGHT, Placement::BOTTOM_RIGHT, Placement::RIGHT_TOP,
-        Placement::LEFT_TOP, Placement::NONE };
-    for (Placement placementValue : placements) {
-        paintMethod->UpdateArrowPath(placementValue, arrowX, arrowY, path);
-    }
-    auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
-    EXPECT_NE(result, nullptr);
     delete paintWrapper;
     paintWrapper = nullptr;
 }
@@ -1980,7 +1990,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest1, TestSize.Level1)
      * @tc.steps: step3. call the InitializePaddingAPI12 method.
      * @tc.expected: padding is not zero
      */
-    algorithm->hierarchicalParameters_ = true;
+    algorithm->canExpandCurrentWindow_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->menuMediumMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI12(wrapper);
@@ -2048,7 +2058,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest2, TestSize.Level1)
      * @tc.steps: step3. call the InitializePaddingAPI12 method.
      * @tc.expected: padding is not zero
      */
-    algorithm->hierarchicalParameters_ = false;
+    algorithm->canExpandCurrentWindow_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
     selectTheme->menuLargeMargin_ = 10.0_vp;

@@ -141,9 +141,6 @@ public:
 
     float GetPreviewAfterAnimationScale() const
     {
-        if (isShowHoverImage_) {
-            return 1.0f;
-        }
         return previewAnimationOptions_.scaleTo;
     }
 
@@ -155,26 +152,6 @@ public:
     bool GetIsShowHoverImage() const
     {
         return isShowHoverImage_;
-    }
-
-    void SetHoverImageBeforeAnimationScale(float scaleBeforeAnimation)
-    {
-        hoverImageAnimationOptions_.scaleFrom = scaleBeforeAnimation;
-    }
-
-    float GetHoverImageBeforeAnimationScale() const
-    {
-        return hoverImageAnimationOptions_.scaleFrom;
-    }
-
-    void SetHoverImageAfterAnimationScale(float scaleAfterAnimation)
-    {
-        hoverImageAnimationOptions_.scaleTo = scaleAfterAnimation;
-    }
-
-    float GetHoverImageAfterAnimationScale() const
-    {
-        return hoverImageAnimationOptions_.scaleTo;
     }
 
     bool IsNavigationMenu() const
@@ -419,6 +396,16 @@ public:
         return targetSize_;
     }
 
+    void SetTargetOffset(const OffsetF& offset)
+    {
+        targetOffset_ = offset;
+    }
+
+    OffsetF GetTargetOffset() const
+    {
+        return targetOffset_;
+    }
+
     void SetIsHeightModifiedBySelect(bool isModified)
     {
         isHeightModifiedBySelect_ = isModified;
@@ -480,6 +467,16 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
+    void SetHoverMode(bool enableFold)
+    {
+        enableFold_ = enableFold;
+    }
+
+    bool GetHoverMode() const
+    {
+        return enableFold_.value_or(false);
+    }
+
     void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
 
     RefPtr<FrameNode> GetLastSelectedItem()
@@ -529,7 +526,9 @@ protected:
 
 private:
     void OnAttachToFrameNode() override;
+    int32_t RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
     void RegisterOnTouch();
     void OnTouchEvent(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -565,6 +564,7 @@ private:
 
     RefPtr<FrameNode> BuildContentModifierNode(int index);
     bool IsMenuScrollable() const;
+    void UpdateClipPath(const RefPtr<LayoutWrapper>& dirty);
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
@@ -579,12 +579,12 @@ private:
     RefPtr<FrameNode> parentMenuItem_;
     RefPtr<FrameNode> showedSubMenu_;
     std::vector<RefPtr<FrameNode>> options_;
+    std::optional<int32_t> halfFoldHoverCallbackId_;
 
     bool isSelectMenu_ = false;
     MenuPreviewMode previewMode_ = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions_;
     bool isShowHoverImage_ = false;
-    MenuPreviewAnimationOptions hoverImageAnimationOptions_;
     bool isFirstShow_ = false;
     bool isExtensionMenuShow_ = false;
     bool isSubMenuShow_ = false;
@@ -596,12 +596,15 @@ private:
     OffsetF originOffset_;
     OffsetF endOffset_;
     OffsetF previewOriginOffset_;
+    OffsetF statusOriginOffset_;
+    std::optional<bool> enableFold_;
 
     WeakPtr<FrameNode> builderNode_;
     bool isWidthModifiedBySelect_ = false;
     bool isHeightModifiedBySelect_ = false;
     bool hasLaid_ = false;
     bool hasOptionWidth_ = false;
+    OffsetF targetOffset_;
     SizeF targetSize_;
     bool expandDisplay_ = false;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
@@ -621,6 +624,7 @@ public:
     ~InnerMenuPattern() override = default;
     void OnModifyDone() override;
     void BeforeCreateLayoutWrapper() override;
+    bool isHalfFoldStatus_ = false;
 
     const std::list<WeakPtr<UINode>>& GetItemsAndGroups() const
     {

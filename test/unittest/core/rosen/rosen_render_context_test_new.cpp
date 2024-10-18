@@ -829,4 +829,47 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew024, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBackgroundColor(),
         OHOS::Rosen::RSColor::FromArgbInt((Color::BLACK).GetValue()));
 }
+
+/**
+ * @tc.name: RosenRenderContextTestNew025
+ * @tc.desc: PaintAccessibilityFocus().
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew025, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    auto fgModifier = AceType::MakeRefPtr<Modifier>();
+    rosenRenderContext->FlushForegroundModifier(fgModifier);
+    auto overlayModifier = AceType::MakeRefPtr<Modifier>();
+    rosenRenderContext->FlushOverlayModifier(overlayModifier);
+    std::function<void(RSCanvas & canvas)> func = [](RSCanvas& canvas) {};
+    rosenRenderContext->FlushOverlayDrawFunction(std::move(func));
+    auto rect = RectF(1.0, 1.0, 1.0, 1.0);
+    RoundRect roundRect;
+    roundRect.SetRect(rect);
+    roundRect.SetCornerRadius(1.0);
+    rosenRenderContext->PaintFocusState(roundRect, Color::BLUE, 1.0_vp, true);
+    rosenRenderContext->SetShadowRadius(1.0);
+    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowRadius(), 1.0);
+    rosenRenderContext->SetShadowElevation(1.0);
+    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowElevation(), 1.0);
+    rosenRenderContext->FlushForegroundDrawFunction(std::move(func));
+    auto contentModifier = AceType::MakeRefPtr<Modifier>();
+    rosenRenderContext->FlushContentModifier(contentModifier);
+    rosenRenderContext->FlushContentDrawFunction(std::move(func));
+    rosenRenderContext->ClearFocusState();
+    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp);
+    EXPECT_FALSE(rosenRenderContext->IsUniRenderEnabled());
+    rosenRenderContext->SetOpacity(1.0);
+    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetAlpha(), 1.0);
+    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp);
+    rosenRenderContext->SetBounds(0.0, 1.0, -2.0, -2.0);
+    rosenRenderContext->PaintAccessibilityFocus();
+    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame().data_[2], 0.0);
+    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame().data_[3], 0.0);
+    rosenRenderContext->SetRenderPivot(1.0, 0.0);
+    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetPivot().x_, 1.0);
+}
 } // namespace OHOS::Ace::NG

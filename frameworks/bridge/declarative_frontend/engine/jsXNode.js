@@ -1127,7 +1127,15 @@ class FrameNode {
         return inspectorInfo;
     }
     getCustomProperty(key) {
-        return key === undefined ? undefined : __getCustomProperty__(this._nodeId, key);
+        if (key === undefined) {
+            return undefined;
+        }
+        let value = __getCustomProperty__(this._nodeId, key);
+        if (value === undefined) {
+            const valueStr = getUINativeModule().frameNode.getCustomPropertyCapiByKey(this.getNodePtr(), key);
+            value = valueStr === undefined ? undefined : valueStr;
+        }
+        return value;
     }
     setMeasuredSize(size) {
         getUINativeModule().frameNode.setMeasuredSize(this.getNodePtr(), Math.max(size.width, 0), Math.max(size.height, 0));
@@ -1167,6 +1175,12 @@ class FrameNode {
     updateInstance(uiContext) {
         this.uiContext_ = uiContext;
         this.instanceId_ = uiContext.instanceId_;
+    }
+    triggerOnReuse() {
+        getUINativeModule().frameNode.triggerOnReuse(this.getNodePtr());
+    }
+    triggerOnRecycle() {
+        getUINativeModule().frameNode.triggerOnRecycle(this.getNodePtr());
     }
 }
 class ImmutableFrameNode extends FrameNode {
@@ -1487,6 +1501,21 @@ const __creatorMap__ = new Map([
             return new TypedFrameNode(context, 'Rating', (node, type) => {
                 return new ArkRatingComponent(node, type);
             });
+        }],
+    ['Slider', (context) => {
+            return new TypedFrameNode(context, 'Slider', (node, type) => {
+                return new ArkSliderComponent(node, type);
+            });
+        }],
+    ['Select', (context) => {
+            return new TypedFrameNode(context, 'Select', (node, type) => {
+                return new ArkSelectComponent(node, type);
+            });
+        }],
+    ['Toggle', (context, options) => {
+            return new TypedFrameNode(context, 'Toggle', (node, type) => {
+                return new ArkToggleComponent(node, type);
+            }, options);
         }],
 ]);
 class typeNode {

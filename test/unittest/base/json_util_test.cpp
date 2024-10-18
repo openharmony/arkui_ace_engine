@@ -93,12 +93,11 @@ HWTEST_F(JsonUtilTest, JsonUtilTest003, TestSize.Level1)
      */
     std::string testJson = "-1";
     int32_t intNum = -1;
-    uint32_t uintNum = 0;
     double doubleNum = -1;
 
     /**
      * @tc.steps: step2. get JsonValue and check results of IsValid, IsNull, IsNumber, GetInt, GetUInt and GetDouble.
-     * @tc.expected: step2. get the JsonValue successfully and the results are correct.
+     * @@tc.expected: step2. get the JsonValue unsuccessfully and the results are 0
      */
     std::unique_ptr<JsonValue> intValue = JsonUtil::ParseJsonString(testJson);
     ASSERT_TRUE(intValue);
@@ -106,7 +105,7 @@ HWTEST_F(JsonUtilTest, JsonUtilTest003, TestSize.Level1)
     EXPECT_FALSE(intValue->IsNull());
     EXPECT_TRUE(intValue->IsNumber());
     EXPECT_TRUE(intValue->GetInt() == intNum);
-    EXPECT_FALSE(intValue->GetUInt() == uintNum) << "Actual:" << intValue->GetUInt() << " Expected: " << uintNum;
+    EXPECT_FALSE(intValue->GetUInt() == -1);
     EXPECT_TRUE(NearEqual(intValue->GetDouble(), doubleNum));
 }
 

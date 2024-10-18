@@ -250,13 +250,10 @@ float TimePickerColumnLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& us
     auto userSetHeightValue = AdjustFontSizeScale(userSetHeight, systemFontScale).ConvertToPx();
     double adjustedScale =
         std::clamp(systemFontScale, pickerTheme->GetNormalFontScale(), pickerTheme->GetMaxTwoFontScale());
-    if (!NearZero(adjustedScale)) {
-        userSetHeightValue =
-            userSetHeightValue / adjustedScale * PERCENT_120 + (themePadding.ConvertToPx() * DIVIDER_SIZE);
-    } else {
+    if (NearZero(adjustedScale)) {
         return fontScale;
     }
-
+    userSetHeightValue = userSetHeightValue / adjustedScale * PERCENT_120 + (themePadding.ConvertToPx() * DIVIDER_SIZE);
     auto themeHeightLimit =
         isDividerSpacing ? pickerTheme->GetDividerSpacingLimit() : pickerTheme->GetGradientHeightLimit();
     auto themeHeight = isDividerSpacing ? pickerTheme->GetDividerSpacing() : pickerTheme->GetGradientHeight();
@@ -265,6 +262,11 @@ float TimePickerColumnLayoutAlgorithm::ReCalcItemHeightScale(const Dimension& us
     } else {
         userSetHeightValue = std::max(userSetHeightValue, themeHeight.ConvertToPx());
     }
+
+    if (NearZero(themeHeight.ConvertToPx())) {
+        return fontScale;
+    }
+
     fontScale = std::max(static_cast<float>(userSetHeightValue / themeHeight.ConvertToPx()), fontScale);
     return fontScale;
 }

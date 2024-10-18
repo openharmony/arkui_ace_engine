@@ -77,6 +77,7 @@ if (is_arkui_x) {
         "graphic_2d:2d_graphics",
         "image_framework:image",
         "image_framework:image_native",
+        "resource_management:global_resmgr",
       ]
     } else {
       defines = [ "PREVIEW" ]

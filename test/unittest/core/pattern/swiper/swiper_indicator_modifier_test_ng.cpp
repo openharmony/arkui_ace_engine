@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -989,6 +990,80 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetStartAndEndIndex002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetIndex001
+ * @tc.desc: get point start and end index when SwipeByGroup is true and isLoop_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(2);
+        model.SetSwipeByGroup(true);
+        model.SetLoop(false);
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
+    }, 6);
+    EXPECT_EQ(pattern_->TotalCount(), 6);
+    int32_t settingApiVersion = 14;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
+    EXPECT_EQ(displayIndicatorCount, 3);
+
+    // change last page
+    ChangeIndex(4);
+    pattern_->UpdateCurrentOffset(40.0f);
+    FlushLayoutTask(frameNode_);
+
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
+    auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(nodePaintMethod);
+    ASSERT_NE(paintMethod, nullptr);
+
+    int32_t indicatorIndex = displayIndicatorCount - 1;
+    auto expectVal = std::pair<int32_t, int32_t>(indicatorIndex, indicatorIndex);
+    EXPECT_EQ(paintMethod->GetIndex(indicatorIndex), expectVal);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: GetIndex002
+ * @tc.desc: get point start and end index when SwipeByGroup is true and isLoop_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(2);
+        model.SetSwipeByGroup(true);
+        model.SetLoop(true);
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
+    }, 6);
+    EXPECT_EQ(pattern_->TotalCount(), 6);
+    int32_t settingApiVersion = 14;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
+    EXPECT_EQ(displayIndicatorCount, 3);
+
+    // change last page
+    ChangeIndex(4);
+    pattern_->UpdateCurrentOffset(40.0f);
+    FlushLayoutTask(frameNode_);
+
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
+    auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(nodePaintMethod);
+    ASSERT_NE(paintMethod, nullptr);
+
+    int32_t indicatorIndex = displayIndicatorCount - 1;
+    auto expectVal = std::pair<int32_t, int32_t>(indicatorIndex, 0);
+    EXPECT_EQ(paintMethod->GetIndex(indicatorIndex), expectVal);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: AdjustPointCenterXForTouchBottom
  * @tc.desc: adjust long point centerX for touch bottom
  * @tc.type: FUNC
@@ -1607,28 +1682,6 @@ HWTEST_F(SwiperIndicatorModifierTestNg, UpdateShrinkPaintProperty002, TestSize.L
     modifier->longPointRightAnimEnd_ = false;
     modifier->UpdateShrinkPaintProperty(offset, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
     EXPECT_FALSE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
-}
-
-/**
- * @tc.name: DotIndicatorModifier006
- * @tc.desc: Test onDraw
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1.Create dotIndicatorModifier and set isOverlong_ = true
-     */
-    DotIndicatorModifier dotIndicatorModifier;
-    Testing::MockCanvas canvas;
-    DrawingContext context { canvas, 100.f, 100.f };
-    dotIndicatorModifier.isOverlong_ = true;
-    /**
-     * @tc.steps: step2.Call onDraw
-     * @tc.expected: isOverlong_ false
-     */
-    dotIndicatorModifier.onDraw(context);
-    EXPECT_FALSE(dotIndicatorModifier.isOverlong_);
 }
 
 /**

@@ -22,7 +22,8 @@ namespace OHOS::Ace::NG {
 void FocusView::FocusViewShow(bool isTriggerByStep)
 {
     if (GetFrameName() == V2::NAVBAR_ETS_TAG ||
-        GetFrameName() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        GetFrameName() == V2::NAVDESTINATION_VIEW_ETS_TAG ||
+        GetFrameName() == V2::MENU_ETS_TAG) {
         if (!GetFocusViewFocusable()) {
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view: %{public}s/%{public}d is not focusable, cannot be shown",
                 GetFrameName().c_str(), GetFrameId());
@@ -124,7 +125,7 @@ RefPtr<FocusHub> FocusView::GetFocusHub()
 
 RefPtr<FocusView> FocusView::GetCurrentFocusView()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto focusManager = pipeline->GetFocusManager();
     CHECK_NULL_RETURN(focusManager, nullptr);
@@ -165,19 +166,21 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
     CHECK_NULL_RETURN(focusViewFrame, nullptr);
     auto focusViewHub = focusViewFrame->GetFocusHub();
     CHECK_NULL_RETURN(focusViewHub, nullptr);
-    std::list<int32_t> rootScopeDepth = GetRouteOfFirstScope();
+    std::list<int32_t> rootScopeDeepth = GetRouteOfFirstScope();
     RefPtr<FocusHub> rootScope = focusViewHub;
-    for (const auto& index : rootScopeDepth) {
-        CHECK_NULL_RETURN(rootScope, focusViewHub);
-        auto children = rootScope->GetChildren();
-        auto iter = children.begin();
-        std::advance(iter, index);
-        if (iter == children.end()) {
+    for (auto index : rootScopeDeepth) {
+        bool hit = rootScope->AnyChildFocusHub([&rootScope, &index](const RefPtr<FocusHub>& focusNode) {
+            if (--index < 0) {
+                rootScope = focusNode;
+                return true;
+            }
+            return false;
+        });
+        if (!hit) {
             TAG_LOGD(AceLogTag::ACE_FOCUS, "Index: %{public}d of %{public}s/%{public}d 's children is invalid.", index,
                 rootScope->GetFrameName().c_str(), rootScope->GetFrameId());
-            return focusViewHub;
         }
-        rootScope = *iter;
+        return focusViewHub;
     }
     CHECK_NULL_RETURN(rootScope, nullptr);
     auto node = GetFrameNode();
@@ -246,9 +249,8 @@ bool FocusView::RequestDefaultFocus()
     auto viewRootScope = GetViewRootScope();
     CHECK_NULL_RETURN(viewRootScope, false);
     isViewHasFocused_ = true;
-
     auto defaultFocusNode = focusViewHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
-    
+
     auto isViewRootScopeHasChildFocused = viewRootScope->HasFocusedChild();
     if (neverShown_ && !isViewRootScopeHasChildFocused) {
         if (!defaultFocusNode) {

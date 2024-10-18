@@ -84,6 +84,10 @@ extern const char _binary_jsEnumStyle_abc_start[];
 extern const char _binary_jsUIContext_abc_start[];
 extern const char _binary_arkComponent_abc_start[];
 extern const char _binary_arkTheme_abc_start[];
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+extern const char _binary_jsPreload_abc_start[];
+extern const char _binary_jsPreload_abc_end[];
+#endif
 #if !defined(IOS_PLATFORM)
 extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_jsEnumStyle_abc_end[];
@@ -106,9 +110,9 @@ const std::string OHMURL_START_TAG = "@bundle:";
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.so";
 #elif defined(APP_USE_ARM)
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/platformsdk/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.z.so";
 #else
-const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/platformsdk/libark_inspector.z.so";
+const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.z.so";
 #endif
 const std::string FORM_ES_MODULE_CARD_PATH = "ets/widgets.abc";
 const std::string FORM_ES_MODULE_PATH = "ets/modules.abc";
@@ -199,8 +203,13 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
 {
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
     int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
+#else
+    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsPreload_abc_start));
+    int32_t codeLength = _binary_jsPreload_abc_end - _binary_jsPreload_abc_start;
+#endif
     return runtime->EvaluateJsCode(codeStart, codeLength);
 }
 
@@ -395,7 +404,7 @@ thread_local bool isDynamicModulePreloaded_ = false;
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("Declarative instance destroyed");
 
     if (runningPage_) {
         runningPage_->OnJsEngineDestroy();
@@ -594,6 +603,18 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     // preload requireNative
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     JSMock::PreloadWorkerRequireNative(arkRuntime, global);
+}
+
+void JsiDeclarativeEngineInstance::ResetModulePreLoadFlag()
+{
+    isModulePreloaded_ = false;
+    isModuleInitialized_ = false;
+}
+
+void JsiDeclarativeEngineInstance::PrepareForResetModulePreLoadFlag()
+{
+    ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(nullptr);
+    JsiDeclarativeEngine::ResetNamedRouterRegisterMap();
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
@@ -1145,7 +1166,7 @@ thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 JsiDeclarativeEngine::~JsiDeclarativeEngine()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("Declarative engine destroyed");
 }
 
 void JsiDeclarativeEngine::Destroy()
@@ -2176,6 +2197,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         auto objXComp = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName().value(), true, arguments,
             OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent.get()), soPath);
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
+            napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
             return;
         }
         auto objContext = JsiObject(objXComp);
@@ -2261,6 +2283,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
     auto objXComp = arkNativeEngine->LoadModuleByName(xcomponent->GetLibraryName(), true, arguments,
         OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent_), soPath);
     if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
+        napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
         return;
     }
 
@@ -2486,6 +2509,11 @@ std::string JsiDeclarativeEngine::GetPagePath(const std::string& url)
         return iter->second.pagePath;
     }
     return "";
+}
+
+void JsiDeclarativeEngine::ResetNamedRouterRegisterMap()
+{
+    namedRouterRegisterMap_.clear();
 }
 
 std::string JsiDeclarativeEngine::GetFullPathInfo(const std::string& url)
@@ -2793,7 +2821,7 @@ void JsiDeclarativeEngineInstance::ReloadAceModuleCard(
     RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // reload js views
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList, true);
-    JSNApi::TriggerGC(vm, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
+    JSNApi::HintGC(vm, JSNApi::MemoryReduceDegree::MIDDLE, panda::ecmascript::GCReason::TRIGGER_BY_ARKUI);
     TAG_LOGI(AceLogTag::ACE_FORM, "Card model was reloaded successfully.");
 }
 #endif

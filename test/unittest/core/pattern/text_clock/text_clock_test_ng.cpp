@@ -290,7 +290,7 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
      * @tc.steps: step1. Initialize the format property of textClock.
      */
     TestProperty testProperty;
-    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.format = std::make_optional("M-d-yy-y E EEEE HH:mm:ss.SSS aa");
 
     /**
      * @tc.steps: step2. create frameNode to get layout properties.
@@ -312,6 +312,26 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
     EXPECT_EQ(std::isnan(pattern->GetHoursWest()), true);
     textClockLayoutProperty->UpdateHoursWest(HOURS_WEST);
     EXPECT_EQ(pattern->GetHoursWest(), HOURS_WEST);
+    /**
+     * @tc.steps: step4. call the format and datetime split, and datetime splice function.
+     * @tc.expected: check whether the value is correct.
+     */
+    pattern->ParseInputFormat();
+    std::vector<std::string> curDateTime = { "1900", "0", "1", "0", "0", "0", "0", "", "2" };
+    std::string dateTimeValue = "2023/07/08, 下午8:35:07.007";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    dateTimeValue = "7/8/2023, 8:35:07.67 am";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    dateTimeValue = "07/08/2023, 20:35:07.007";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    pattern->SpliceDateTime(curDateTime);
+    pattern->CheckDateTimeElement(curDateTime, 'y', 0, true);
+    pattern->CheckDateTimeElement(curDateTime, 'M', 1, true);
+    pattern->CheckDateTimeElement(curDateTime, 'd', 2, true);
+    pattern->CheckDateTimeElement(curDateTime, 'm', 4, true);
+    pattern->CheckDateTimeElement(curDateTime, 'E', 13, true);
+    pattern->CheckDateTimeElement(curDateTime, 'E', 8, true);
+    EXPECT_EQ(pattern->is24H_, true);
 }
 
 /**
@@ -897,6 +917,56 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
     EXPECT_EQ(layoutProperty->GetFontWeight(), FONT_WEIGHT_VALUE);
     EXPECT_EQ(layoutProperty->GetFontFamily(), FONT_FAMILY_VALUE);
+}
+
+/**
+ * @tc.name: TextClockTest014
+ * @tc.desc: Test TextClock property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode and Init.
+     */
+    MockPipelineContext::SetUp();
+    auto frameNode = TextClockModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto controller = TextClockModelNG::InitTextController(node);
+    ASSERT_NE(controller, nullptr);
+    /**
+     * @tc.steps: step2. SetHoursWest.
+     */
+    TextClockModelNG::SetHoursWest(node, HOURS_WEST);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetHoursWestValue(), HOURS_WEST);
+    /**
+     * @tc.steps: step3. Set InitFontDefault.
+     */
+    TextStyle textStyle;
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+    textStyle.SetFontWeight(FONT_WEIGHT_VALUE);
+    textStyle.SetTextColor(TEXT_COLOR_VALUE);
+    textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
+    textStyle.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
+
+    TextClockModelNG::InitFontDefault(node, textStyle);
+    EXPECT_EQ(layoutProperty->GetFontSizeValue(), FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontWeightValue(), FONT_WEIGHT_VALUE);
+    EXPECT_EQ(layoutProperty->GetTextColorValue(), TEXT_COLOR_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontFamilyValue(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle(), ITALIC_FONT_STYLE_VALUE);
+
+    /**
+     * @tc.steps: step4. SetJSTextClockController.
+     */
+    TextClockModelNG::SetJSTextClockController(node, controller);
+    auto result = TextClockModelNG::GetJSTextClockController(node);
+    ASSERT_NE(result, nullptr);
+    MockPipelineContext::TearDown();
 }
 
 /**

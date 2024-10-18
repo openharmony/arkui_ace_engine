@@ -27,6 +27,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
@@ -130,7 +131,7 @@ class TabBarPattern : public Pattern {
     DECLARE_ACE_TYPE(TabBarPattern, Pattern);
 
 public:
-    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController) : swiperController_(swiperController) {};
+    explicit TabBarPattern(const RefPtr<SwiperController>& swiperController);
     ~TabBarPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -155,7 +156,6 @@ public:
         }
         layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
         layoutAlgorithm->SetCanOverScroll(canOverScroll_);
-        layoutAlgorithm->SetLastFontScale(lastFontScale_);
         return layoutAlgorithm;
     }
 
@@ -174,7 +174,7 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         FocusPaintParam focusPaintParams;
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, FocusPattern());
         auto focusTheme = pipeline->GetTheme<FocusAnimationTheme>();
         CHECK_NULL_RETURN(focusTheme, FocusPattern());
@@ -254,6 +254,17 @@ public:
     {
         changeByClick_ = changeByClick;
     }
+
+    bool GetClickRepeat() const
+    {
+        return clickRepeat_;
+    }
+
+    void SetClickRepeat(bool clickRepeat)
+    {
+        clickRepeat_ = clickRepeat;
+    }
+
     void SetSelectedMode(SelectedMode selectedMode, uint32_t position)
     {
         if (selectedModes_.size() <= position) {
@@ -451,26 +462,20 @@ public:
         labelStyles_.erase(tabBarItemId);
     }
 
-    std::optional<float> GetThirdLargeFontHeight()
+    void SetIsExecuteBuilder(bool isExecuteBuilder)
     {
-        return thirdLargeFontHeight_;
-    }
-
-    void SetThirdLargeFontHeight(std::optional<float> thirdLargeFontHeight)
-    {
-        if (thirdLargeFontHeight.has_value()) {
-            thirdLargeFontHeight_ = thirdLargeFontHeight;
-        } else {
-            thirdLargeFontHeight_.reset();
-        }
+        isExecuteBuilder_ = isExecuteBuilder;
     }
 
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void BeforeCreateLayoutWrapper() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool CustomizeExpandSafeArea() override;
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
 
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -517,6 +522,7 @@ private:
     void PlayTabBarTranslateAnimation(AnimationOption option, float targetCurrentOffset);
     void PlayIndicatorTranslateAnimation(AnimationOption option, RectF originalPaintRect, RectF targetPaintRect,
         float targetOffset);
+    void CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& host, const std::string& propertyName);
     void StopTranslateAnimation();
     float CalculateTargetOffset(int32_t targetIndex);
     void UpdateIndicatorCurrentOffset(float offset);
@@ -553,6 +559,18 @@ private:
     bool CanScroll() const;
     bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
+    int32_t GetLoopIndex(int32_t originalIndex) const;
+    RefPtr<SwiperPattern> GetSwiperPattern() const;
+
+    void StartShowTabBar(int32_t delay = 0);
+    void StopShowTabBar();
+    void InitTabBarProperty();
+    void UpdateTabBarHiddenRatio(float ratio);
+    void SetTabBarTranslate(const TranslateOptions& options);
+    void SetTabBarOpacity(float opacity);
+
+    RefPtr<NodeAnimatablePropertyFloat> showTabBarProperty_;
+    bool isTabBarShowing_ = false;
 
     std::map<int32_t, RefPtr<ClickEvent>> clickEvents_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -615,8 +633,10 @@ private:
     std::vector<bool> gradientRegions_ = {false, false, false, false};
     bool isAnimating_ = false;
     bool changeByClick_ = false;
+    bool clickRepeat_ = false;
     float scrollMargin_ = 0.0f;
     bool isFirstLayout_ = true;
+    bool isExecuteBuilder_ = false;
     std::optional<int32_t> animationTargetIndex_;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<WindowSizeChangeReason> windowSizeChangeReason_;
@@ -628,8 +648,6 @@ private:
     float currentOffset_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
-    float lastFontScale_ = 0.0f;
-    std::optional<float> thirdLargeFontHeight_;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

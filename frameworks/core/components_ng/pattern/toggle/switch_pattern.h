@@ -70,7 +70,6 @@ public:
         paintMethod_->SetUseContentModifier(UseContentModifier());
         paintMethod_->SetDirection(direction_);
         paintMethod_->SetIsSelect(isOn_.value_or(false));
-        paintMethod_->SetEnabled(enabled_);
         paintMethod_->SetDragOffsetX(dragOffsetX_);
         paintMethod_->SetTouchHoverAnimationType(touchHoverType_);
         paintMethod_->SetIsDragEvent(isDragEvent_);
@@ -144,6 +143,7 @@ public:
     void SetSwitchIsOn(bool value);
 
 private:
+    void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
@@ -161,6 +161,7 @@ private:
     float GetSwitchContentOffsetX() const;
 
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
+    void HandleEnabled();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitClickEvent();
     void InitTouchEvent();
@@ -199,7 +200,6 @@ private:
     bool isHover_ = false;
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
-    bool enabled_ = true;
 
     float width_ = 0.0f;
     float height_ = 0.0f;

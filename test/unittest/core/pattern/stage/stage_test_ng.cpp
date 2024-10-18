@@ -1528,7 +1528,7 @@ HWTEST_F(StageTestNg, PagePatternTest015, TestSize.Level1)
     testStageManager->stageNode_->children_.push_back(UInode);
     testStageManager->stageInTrasition_ = true;
     auto nodeTest = testStageManager->GetPrevPageWithTransition();
-    SUCCEED();
+    EXPECT_EQ(testStageManager->stageInTrasition_, true);
 }
 
 /**
@@ -1545,7 +1545,7 @@ HWTEST_F(StageTestNg, PagePatternTest016, TestSize.Level1)
     testStageManager->stageNode_->children_.push_back(UInode);
     testStageManager->stageInTrasition_ = false;
     auto nodeTest = testStageManager->GetPrevPageWithTransition();
-    SUCCEED();
+    EXPECT_EQ(testStageManager->stageInTrasition_, false);
 }
 
 /**
@@ -1563,7 +1563,7 @@ HWTEST_F(StageTestNg, PagePatternTest017, TestSize.Level1)
     testStageManager->stageInTrasition_ = false;
     testStageManager->stageNode_->children_.clear();
     auto nodeTest = testStageManager->GetLastPageWithTransition();
-    SUCCEED();
+    EXPECT_EQ(testStageManager->stageInTrasition_, false);
 }
 
 /**
@@ -1581,6 +1581,6 @@ HWTEST_F(StageTestNg, PagePatternTest018, TestSize.Level1)
     testStageManager->stageInTrasition_ = false;
     testStageManager->stageNode_->children_.clear();
     auto nodeTest = testStageManager->GetPrevPageWithTransition();
-    SUCCEED();
+    EXPECT_EQ(testStageManager->stageInTrasition_, false);
 }
 } // namespace OHOS::Ace::NG

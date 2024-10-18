@@ -79,10 +79,8 @@ bool LinearIndicatorPattern::IsChangeLayoutPropertyAndUpdate(RefPtr<LinearIndica
     TextDirection direction = layoutProperty->GetLayoutDirection();
 
     float progressWidth = .0f;
-    if (CalcProgressWidth(progressWidth)) {
-        if (strokeWidth.ConvertToPx() > progressWidth) {
-            strokeWidth = Dimension(progressWidth, DimensionUnit::PX);
-        }
+    if (CalcProgressWidth(progressWidth) && GreatNotEqual(strokeWidth.ConvertToPx(), progressWidth)) {
+        strokeWidth = Dimension(progressWidth, DimensionUnit::PX);
     }
     if (strokeWidth != strokeWidth_) {
         strokeWidth_ = strokeWidth;

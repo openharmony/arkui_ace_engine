@@ -254,6 +254,28 @@ void XComponentModelNG::SetControllerOnDestroyed(SurfaceDestroyedEvent&& onDestr
     eventHub->SetControllerDestroyedEvent(std::move(onDestroyed));
 }
 
+void XComponentModelNG::SetRenderFit(RenderFit renderFit)
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto type = GetTypeImpl(frameNode);
+    if (type != XComponentType::SURFACE) {
+        return;
+    }
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetRenderFit(renderFit);
+}
+
+void XComponentModelNG::EnableSecure(bool isSecure)
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->EnableSecure(isSecure);
+}
+
 bool XComponentModelNG::IsTexture(FrameNode *frameNode)
 {
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
@@ -462,5 +484,13 @@ void XComponentModelNG::SetImageAIOptions(FrameNode* frameNode, void* options)
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     xcPattern->SetImageAIOptions(options);
+}
+
+void XComponentModelNG::EnableSecure(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->EnableSecure(enable);
 }
 } // namespace OHOS::Ace::NG

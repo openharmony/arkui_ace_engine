@@ -24,6 +24,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
+constexpr float URL_DISA_OPACITY = 0.4f;
 } // namespace
 
 /**
@@ -63,6 +64,7 @@ public:
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
                                                .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
+            theme->caretColor_ = pattern->GetAttr<Color>("text_caret_color", Color(0xff3f97e9));
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color(0x33007dff));
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);
@@ -75,6 +77,11 @@ public:
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
+            auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
+            theme->urlDefaultColor_ = pattern->GetAttr<Color>("font_emphasize", Color(0xff007dff));
+            theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(disabledOpacity);
+            theme->urlHoverColor_ = pattern->GetAttr<Color>("interactive_hover", Color(0x33007dff));
+            theme->urlPressColor_ = pattern->GetAttr<Color>("interactive_pressed", Color(0x19182431));
         }
     };
 
@@ -83,6 +90,11 @@ public:
     const TextStyle& GetTextStyle() const
     {
         return textStyle_;
+    }
+
+    const Color& GetCaretColor() const
+    {
+        return caretColor_;
     }
 
     const Color& GetSelectedColor() const
@@ -109,17 +121,41 @@ public:
     {
         return dragBackgroundColor_;
     }
+    const Color& GetUrlDisabledColor() const
+    {
+        return urlDisabledColor_;
+    }
+
+    const Color& GetUrlDefaultColor() const
+    {
+        return urlDefaultColor_;
+    }
+
+    const Color& GetUrlHoverColor() const
+    {
+        return urlHoverColor_;
+    }
+
+    const Color& GetUrlPressColor() const
+    {
+        return urlPressColor_;
+    }
 
 protected:
     TextTheme() = default;
 
 private:
     TextStyle textStyle_;
+    Color caretColor_;
     Color selectedColor_;
     Color dragBackgroundColor_ = Color::WHITE;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
     bool isShowHandle_ = false;
+    Color urlDisabledColor_;
+    Color urlDefaultColor_;
+    Color urlHoverColor_;
+    Color urlPressColor_;
 };
 
 } // namespace OHOS::Ace

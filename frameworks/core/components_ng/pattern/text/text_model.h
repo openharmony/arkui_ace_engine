@@ -137,6 +137,8 @@ public:
 
     virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
     virtual void SetTextSelectableMode(TextSelectableMode textSelectable) = 0;
+    virtual void SetTextCaretColor(const Color& value) = 0;
+    virtual void SetSelectedBackgroundColor(const Color& value) = 0;
     virtual void BindSelectionMenu(NG::TextSpanType& spanType, NG::TextResponseType& responseType,
         std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) {};
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) {};
@@ -150,6 +152,7 @@ public:
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetResponseRegion(bool isUserSetResponseRegion) {};
     virtual void SetHalfLeading(bool halfLeading) = 0;
+    virtual void SetEnableHapticFeedback(bool state) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

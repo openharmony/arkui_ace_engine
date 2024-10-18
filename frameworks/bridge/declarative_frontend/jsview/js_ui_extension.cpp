@@ -42,6 +42,11 @@ UIExtensionModel* UIExtensionModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+
+const char UI_EXTENSION_PLACEHOLDER_TYPE_UNDEFINED[] = "UNDEFINED";
+const char UI_EXTENSION_PLACEHOLDER_TYPE_ROTATION[] = "ROTATION";
+const char UI_EXTENSION_PLACEHOLDER_TYPE_FOLD_TO_EXPAND[] = "FOLD_TO_EXPAND";
+
 void JSUIExtensionProxy::JSBind(BindingTarget globalObj)
 {
     JSClass<JSUIExtensionProxy>::Declare("UIExtensionProxy ");
@@ -335,6 +340,47 @@ void JSUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
+void JSUIExtension::ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
+    std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
+{
+    static const std::map<std::string, NG::PlaceholderType> placeholderTypeTable = {
+        { UI_EXTENSION_PLACEHOLDER_TYPE_UNDEFINED, NG::PlaceholderType::UNDEFINED },
+        { UI_EXTENSION_PLACEHOLDER_TYPE_ROTATION, NG::PlaceholderType::ROTATION },
+        { UI_EXTENSION_PLACEHOLDER_TYPE_FOLD_TO_EXPAND, NG::PlaceholderType::FOLD_TO_EXPAND }
+    };
+    do {
+        JSRef<JSVal> componentContentMap = obj->GetProperty("areaChangePlaceholder");
+        if (!componentContentMap->IsObject()) {
+            break;
+        }
+        auto contentMapObj = JSRef<JSObject>::Cast(componentContentMap);
+        for (auto [strName, type] : placeholderTypeTable) {
+            JSRef<JSVal> typeContent = contentMapObj->GetProperty(strName.c_str());
+            if (!typeContent->IsObject()) {
+                continue;
+            }
+            auto componentContentObj = JSRef<JSObject>::Cast(typeContent);
+            JSRef<JSVal> builderNode = componentContentObj->GetProperty("builderNode_");
+            if (!builderNode->IsObject()) {
+                continue;
+            }
+            auto builderNodeObj = JSRef<JSObject>::Cast(builderNode);
+            JSRef<JSVal> nodePtr = builderNodeObj->GetProperty("nodePtr_");
+            if (nodePtr.IsEmpty()) {
+                continue;
+            }
+            const auto* vm = nodePtr->GetEcmaVM();
+            auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+            if (!frameNode) {
+                continue;
+            }
+            RefPtr<NG::FrameNode> placeholderNode = AceType::Claim(frameNode);
+            placeholderMap.insert({type, placeholderNode});
+        }
+    } while (false);
+}
+
 void JSUIExtension::Create(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
@@ -345,7 +391,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
 
     bool transferringCaller = false;
     bool densityDpi = false;
-    RefPtr<NG::FrameNode> placeholderNode = nullptr;
+    std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
     if (info.Length() > 1 && info[1]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[1]);
         JSRef<JSVal> transferringCallerValue = obj->GetProperty("isTransferringCaller");
@@ -357,6 +403,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
             densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
         }
         do {
+            RefPtr<NG::FrameNode> placeholderNode = nullptr;
             JSRef<JSVal> componentContent = obj->GetProperty("placeholder");
             if (!componentContent->IsObject()) {
                 break;
@@ -378,9 +425,11 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
                 break;
             }
             placeholderNode = AceType::Claim(frameNode);
+            placeholderMap.insert({NG::PlaceholderType::INITIAL, placeholderNode});
         } while (false);
+        ResolveAreaPlaceholderParams(obj, placeholderMap);
     }
-    UIExtensionModel::GetInstance()->Create(want, placeholderNode, transferringCaller, densityDpi);
+    UIExtensionModel::GetInstance()->Create(want, placeholderMap, transferringCaller, densityDpi);
 }
 
 void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)

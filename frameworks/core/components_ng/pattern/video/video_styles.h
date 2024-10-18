@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,35 @@
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
+struct VideoSourceInfo {
+    std::string src;
+    std::string bundleName = "";
+    std::string moduleName = "";
+    bool operator==(const VideoSourceInfo& videoSrcInfo) const
+    {
+        return src == videoSrcInfo.src && bundleName == videoSrcInfo.bundleName &&
+            moduleName == videoSrcInfo.moduleName;
+    }
+    bool operator!=(const VideoSourceInfo& videoSrcInfo) const
+    {
+        return !operator==(videoSrcInfo);
+    }
+    const std::string& GetSrc()
+    {
+        return src;
+    }
+    const std::string& GetBundleName()
+    {
+        return bundleName;
+    }
+    const std::string& GetModuleName()
+    {
+        return moduleName;
+    }
+};
 
 struct VideoStyle {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(VideoSource, std::string);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(VideoSource, VideoSourceInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(PosterImageInfo, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Controls, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ObjectFit, ImageFit);

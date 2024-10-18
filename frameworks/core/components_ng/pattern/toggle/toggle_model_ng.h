@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 
 namespace OHOS::Ace::NG {
@@ -27,6 +28,11 @@ class ToggleConfiguration : public CommonConfiguration {
             : CommonConfiguration(enabled), isOn_(isOn)
         {}
         bool isOn_;
+};
+class ArkUI_Toggle_Params final : public ArkUI_Params {
+public:
+    ToggleType toggleType;
+    bool isOn;
 };
 using SwitchMakeCallback = std::function<RefPtr<FrameNode>(const ToggleConfiguration& toggleConfiguration)>;
 class ACE_EXPORT ToggleModelNG : public OHOS::Ace::ToggleModel {
@@ -66,6 +72,7 @@ public:
     static void SetSwitchIsOn(FrameNode* frameNode, bool isOn);
     static void SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
+    static void SetToggleState(FrameNode* frameNode, bool isOn = false);
 
     static Color GetSelectedColor(FrameNode* frameNode);
     static Color GetSwitchPointColor(FrameNode* frameNode);

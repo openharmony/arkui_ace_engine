@@ -45,6 +45,7 @@ public:
         static constexpr Dimension OUTSET_HOT_BLOCK_SHADOW_WIDTH = 4.0_vp;
         static constexpr Dimension INSET_HOT_BLOCK_SHADOW_WIDTH = 6.0_vp;
         static constexpr Dimension FOCUS_SIDE_DISTANCE = 2.0_vp;
+        static constexpr double DEFAULT_SLIDER_PPI = 775.0;
 
         RefPtr<SliderTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -86,6 +87,8 @@ public:
                 theme->hoverAnimationDuration_ = pattern->GetAttr<double>("hover_animation_duration", 0.0);
                 theme->pressAnimationDuration_ = pattern->GetAttr<double>("press_animation_duration", 0.0);
                 theme->moveAnimationDuration_ = pattern->GetAttr<double>("move_animation_duration", 0.0);
+                theme->disabledAlpha_ = pattern->GetAttr<double>("slider_disable_alpha", 0.0);
+                theme->sliderPPI_ = pattern->GetAttr<double>("slider_pixels_per_inch", DEFAULT_SLIDER_PPI);
                 theme->outsetBlockSize_ = pattern->GetAttr<Dimension>("outset_block_size", 16.0_vp);
                 theme->outsetBlockHotSize_ = pattern->GetAttr<Dimension>("outset_block_hot_region_size", 40.0_vp);
                 theme->blockColor_ = pattern->GetAttr<Color>("block_color", Color(0xffffffff));
@@ -259,6 +262,17 @@ public:
     {
         return moveAnimationDuration_;
     }
+
+    double GetDisabledAlpha() const
+    {
+        return disabledAlpha_;
+    }
+
+    double GetSliderPPI() const
+    {
+        return sliderPPI_;
+    }
+
     std::string GetSelectedTxt() const
     {
         return selectedTxt_;
@@ -319,6 +333,8 @@ private:
     double hoverAnimationDuration_ = 0.0;
     double pressAnimationDuration_ = 0.0;
     double moveAnimationDuration_ = 0.0;
+    double disabledAlpha_ = 1.0;
+    double sliderPPI_ = 0.0;
 
     // accessibility
     std::string selectedTxt_ = "";

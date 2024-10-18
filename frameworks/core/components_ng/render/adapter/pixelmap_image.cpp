@@ -296,20 +296,21 @@ void PixelMapImage::DrawToRSCanvas(
 {
     auto pixmap = GetPixelMap();
     auto dfxConfig = GetImageDfxConfig();
+    const auto& src = dfxConfig.imageSrc_;
+    const auto& nodeId = dfxConfig.nodeId_;
+    long long accessId = dfxConfig.accessibilityId_;
     if (!pixmap || !pixmap->GetPixelMapSharedPtr()) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "Empty pixmap, src:%{public}s, nodeId = %{public}d, accessId = %{public}lld",
-            dfxConfig.imageSrc_.c_str(), dfxConfig.nodeId_, static_cast<long long>(dfxConfig.accessibilityId_));
+        TAG_LOGE(
+            AceLogTag::ACE_IMAGE, "pixmap null, %{public}s-[%{public}d-%{public}lld]", src.c_str(), nodeId, accessId);
         return;
     }
-    const auto& config = GetPaintConfig();
-
 #ifdef ENABLE_ROSEN_BACKEND
     if (CheckIfNeedForStretching(canvas, srcRect, dstRect, radiusXY)) {
         return;
     }
-    ACE_IMAGE_SCOPED_TRACE("DrawToRSCanvas [%d]-[%lld]-[%d x %d], src:[%s]", dfxConfig.nodeId_,
-        static_cast<long long>(dfxConfig.accessibilityId_), pixmap->GetWidth(), pixmap->GetHeight(),
-        dfxConfig.imageSrc_.c_str());
+    const auto& config = GetPaintConfig();
+    ACE_SCOPED_TRACE("DrawToRSCanvas [%d]-[%lld]-[%d x %d], src:[%s], [%s]", nodeId, accessId, pixmap->GetWidth(),
+        pixmap->GetHeight(), src.c_str(), dfxConfig.borderRadiusValue_.c_str());
     RSBrush brush;
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);
@@ -333,69 +334,14 @@ void PixelMapImage::DrawToRSCanvas(
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE,
-            "pixmap, sourceInfo:%{public}s, nodeId = %{public}d, accessId = %{public}lld, width=%{public}d * "
-            "height=%{public}d, dynamicRangeMode = %{public}s",
-            dfxConfig.imageSrc_.c_str(), dfxConfig.nodeId_, static_cast<long long>(dfxConfig.accessibilityId_),
-            pixmap->GetWidth(), pixmap->GetHeight(), GetDynamicModeString(config.dynamicMode).c_str());
-        pixmap->SavePixelMapToFile(
-            std::to_string(dfxConfig.nodeId_) + "_" + std::to_string(dfxConfig.accessibilityId_) + "_ToRS_");
+            "pixmap, src:%{public}s, [%{public}d-%{public}lld]-[%{public}d * "
+            "%{public}d]-[%{public}s][%{public}s]",
+            src.c_str(), nodeId, accessId, pixmap->GetWidth(), pixmap->GetHeight(),
+            dfxConfig.borderRadiusValue_.c_str(), GetDynamicModeString(config.dynamicMode).c_str());
+        pixmap->SavePixelMapToFile(std::to_string(nodeId) + "_" + std::to_string(accessId) + "_ToRS_");
     }
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
-#endif
-}
-
-void PixelMapImage::DrawToRSCanvasWithBrush(
-    RSCanvas& canvas, RSBrush& brush, const RSRect& srcRect, const RSRect& dstRect)
-{
-    auto pixmap = GetPixelMap();
-    CHECK_NULL_VOID(pixmap);
-    const auto& config = GetPaintConfig();
-
-#ifdef ENABLE_ROSEN_BACKEND
-#ifndef USE_ROSEN_DRAWING
-    if (config.frameCount_ == 1 && config.resizableSlice_.Valid() &&
-        StretchImageWithSlice(canvas, srcRect, dstRect, BorderRadiusArray())) {
-        return;
-    }
-    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    CHECK_NULL_VOID(rsCanvas);
-    auto skCanvas = rsCanvas->ExportSkCanvas();
-    CHECK_NULL_VOID(skCanvas);
-    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    CHECK_NULL_VOID(recordingCanvas);
-    SkPaint paint;
-
-    SkSamplingOptions options;
-    ImagePainterUtils::AddFilter(paint, options, config);
-    recordingCanvas->scale(config.scaleX_, config.scaleY_);
-
-    Rosen::RsImageInfo rsImageInfo(
-        static_cast<int>(config.imageFit_), static_cast<int>(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
-    recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
-#else
-    if (config.frameCount_ == 1 &&config.resizableSlice_.Valid() &&
-        StretchImageWithSlice(canvas, srcRect, dstRect, BorderRadiusArray())) {
-        return;
-    }
-    RSSamplingOptions options;
-    ImagePainterUtils::AddFilter(brush, options, config);
-    auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
-    recordingCanvas.Scale(config.scaleX_, config.scaleY_);
-    CHECK_NULL_VOID(pixmap->GetPixelMapSharedPtr());
-    RSPoint pointRadius(0, 0);
-    Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
-        static_cast<int32_t>(config.imageRepeat_), { pointRadius, pointRadius, pointRadius, pointRadius },
-        1.0, 0, 0, 0 };
-    recordingCanvas.AttachBrush(brush);
-    if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, sourceInfo:%{public}s ,width=%{public}d * height=%{public}d",
-            config.sourceInfo_.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight());
-        pixmap->SavePixelMapToFile("_ToRS_");
-    }
-    recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
-    recordingCanvas.DetachBrush();
-#endif
 #endif
 }
 
@@ -442,7 +388,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRe
     CHECK_NULL_VOID(rsCanvas);
     auto skCanvas = rsCanvas->ExportSkCanvas();
     CHECK_NULL_VOID(skCanvas);
-    
+
     auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
     CHECK_NULL_VOID(recordingCanvas);
     SkPaint paint;

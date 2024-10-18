@@ -33,6 +33,45 @@ CanvasPattern::~CanvasPattern()
     }
 }
 
+void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    DetachRenderContext();
+}
+
+void CanvasPattern::AttachRenderContext()
+{
+    FireOnContext2DAttach();
+}
+
+void CanvasPattern::DetachRenderContext()
+{
+    FireOnContext2DDetach();
+}
+
+void CanvasPattern::SetOnContext2DAttach(std::function<void()>&& callback)
+{
+    onContext2DAttach_ = std::move(callback);
+}
+
+void CanvasPattern::SetOnContext2DDetach(std::function<void()>&& callback)
+{
+    onContext2DDetach_ = std::move(callback);
+}
+
+void CanvasPattern::FireOnContext2DAttach()
+{
+    if (onContext2DAttach_) {
+        onContext2DAttach_();
+    }
+}
+
+void CanvasPattern::FireOnContext2DDetach()
+{
+    if (onContext2DDetach_) {
+        onContext2DDetach_();
+    }
+}
+
 void CanvasPattern::OnAttachToFrameNode()
 {
 #ifndef ACE_UNITTEST
@@ -1166,6 +1205,14 @@ void CanvasPattern::Reset()
     SetTextDirection(TextDirection::INHERIT);
 }
 
+void CanvasPattern::SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform)
+{
+    auto task = [pattern, transform](CanvasPaintMethod& paintMethod) {
+        paintMethod.SetTransform(pattern, transform);
+    };
+    paintMethod_->PushTask(task);
+}
+
 void CanvasPattern::OnLanguageConfigurationUpdate()
 {
     UpdateTextDefaultDirection();
@@ -1188,6 +1235,13 @@ void CanvasPattern::UpdateTextDefaultDirection()
 void CanvasPattern::SetDensity(double density)
 {
     paintMethod_->SetDensity(density);
+}
+
+int32_t CanvasPattern::GetId()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
 }
 
 void CanvasPattern::DumpInfo(std::unique_ptr<JsonValue>& json)

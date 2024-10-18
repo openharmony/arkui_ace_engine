@@ -69,11 +69,19 @@ std::string AccessibilityProperty::GetText() const
 std::string AccessibilityProperty::GetGroupText(bool forceGetChildren) const
 {
     std::string text;
-    GetGroupTextRecursive(forceGetChildren, text);
+    GetGroupTextRecursive(forceGetChildren, text, false);
     return text;
 }
 
-void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::string& text) const
+std::string AccessibilityProperty::GetGroupPreferAccessibilityText(bool forceGetChildren) const
+{
+    std::string text;
+    GetGroupTextRecursive(forceGetChildren, text, true);
+    return text;
+}
+
+void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::string& text,
+                                                  bool preferAccessibilityText) const
 {
     auto node = host_.Upgrade();
     CHECK_NULL_VOID(node);
@@ -82,7 +90,8 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
     }
     auto level = GetAccessibilityLevel();
     if (level == Level::AUTO || level == Level::YES_STR) {
-        auto nodeText = GetText();
+        std::string accessibilityText = GetAccessibilityText();
+        auto nodeText = preferAccessibilityText && !accessibilityText.empty() ? accessibilityText : GetText();
         if (!text.empty() && !nodeText.empty()) {
             text += ", ";
         }
@@ -101,7 +110,8 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
         if (child == nullptr) {
             continue;
         }
-        child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text);
+        child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text,
+                                                                                        preferAccessibilityText);
     }
 }
 
@@ -289,6 +299,22 @@ void UpdateSearchStrategyByHitTestMode(HitTestMode hitTestMode, bool& shouldSear
     }
 }
 
+static const std::set<std::string> TAGS_SUBTREE_COMPONENT = {
+    V2::XCOMPONENT_ETS_TAG,
+    V2::UI_EXTENSION_COMPONENT_ETS_TAG,
+    V2::EMBEDDED_COMPONENT_ETS_TAG,
+    V2::FORM_ETS_TAG,
+    V2::ISOLATED_COMPONENT_ETS_TAG
+};
+
+bool AccessibilityProperty::IsTagInSubTreeComponent(const std::string& tag)
+{
+    if (TAGS_SUBTREE_COMPONENT.find(tag) != TAGS_SUBTREE_COMPONENT.end()) {
+        return true;
+    }
+    return false;
+}
+
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
     bool& ancestorGroupFlag)
 {
@@ -331,7 +357,7 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
             shouldSearchChildren = true;
         }
     } while (0);
-
+    shouldSearchSelf = IsTagInSubTreeComponent(node->GetTag()) ? true : shouldSearchSelf;
     if (ancestorGroupFlag == true) {
         if (level != AccessibilityProperty::Level::YES_STR) {
             shouldSearchSelf = false;
@@ -371,6 +397,14 @@ static const std::set<std::string> TAGS_FOCUSABLE = {
     V2::EMBEDDED_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG
 };
+
+bool AccessibilityProperty::IsAccessibilityFocusableTag(const std::string &tag)
+{
+    if (TAGS_FOCUSABLE.find(tag) != TAGS_FOCUSABLE.end()) {
+        return true;
+    }
+    return false;
+}
 
 bool AccessibilityProperty::IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node,
     std::unique_ptr<JsonValue>& info)
@@ -451,6 +485,9 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
             break;
         }
     } while (0);
+    if (IsTagInSubTreeComponent(node->GetTag())) {
+        focusable = true;
+    }
     return focusable;
 }
 
@@ -556,6 +593,11 @@ bool AccessibilityProperty::IsUserSelected()
     return isSelected_.value_or(false);
 }
 
+void AccessibilityProperty::ResetUserSelected()
+{
+    isSelected_.reset();
+}
+
 void AccessibilityProperty::SetUserCheckedType(const int32_t& checkedType)
 {
     checkedType_ = checkedType;
@@ -569,6 +611,31 @@ bool AccessibilityProperty::HasUserCheckedType()
 int32_t AccessibilityProperty::GetUserCheckedType()
 {
     return checkedType_.value_or(0);
+}
+
+void AccessibilityProperty::ResetUserCheckedType()
+{
+    checkedType_.reset();
+}
+
+void AccessibilityProperty::SetUserCheckable(const bool& checkable)
+{
+    isUserCheckable_ = checkable;
+}
+
+bool AccessibilityProperty::HasUserCheckable()
+{
+    return isUserCheckable_.has_value();
+}
+
+bool AccessibilityProperty::IsUserCheckable()
+{
+    return isUserCheckable_.value_or(false);
+}
+
+void AccessibilityProperty::ResetUserCheckable()
+{
+    isUserCheckable_.reset();
 }
 
 void AccessibilityProperty::SetUserMinValue(const int32_t& minValue)
@@ -629,5 +696,240 @@ bool AccessibilityProperty::HasUserTextValue()
 std::string AccessibilityProperty::GetUserTextValue()
 {
     return textValue_.value_or("");
+}
+
+bool AccessibilityProperty::GetAccessibilityFocusState() const
+{
+    return isAccessibilityFocused_;
+}
+
+void AccessibilityProperty::SetAccessibilityFocusState(bool state)
+{
+    isAccessibilityFocused_ = state;
+}
+
+void AccessibilityProperty::SetAccessibilityGroup(bool accessibilityGroup)
+{
+    accessibilityGroup_ = accessibilityGroup;
+}
+
+void AccessibilityProperty::SetChildTreeId(int32_t childTreeId)
+{
+    childTreeId_ = childTreeId;
+}
+
+void AccessibilityProperty::SetChildWindowId(int32_t childWindowId)
+{
+    childWindowId_ = childWindowId;
+}
+
+void AccessibilityProperty::SetAccessibilityText(const std::string& text)
+{
+    accessibilityText_ = text;
+}
+
+void AccessibilityProperty::SetAccessibilityTextHint(const std::string& text)
+{
+    textTypeHint_ = text;
+}
+
+void AccessibilityProperty::SetAccessibilityDescription(const std::string& accessibilityDescription)
+{
+    accessibilityDescription_ = accessibilityDescription;
+}
+
+bool AccessibilityProperty::IsAccessibilityGroup() const
+{
+    return accessibilityGroup_;
+}
+
+int32_t AccessibilityProperty::GetChildTreeId() const
+{
+    return childTreeId_;
+}
+
+int32_t AccessibilityProperty::GetChildWindowId() const
+{
+    return childWindowId_;
+}
+
+void AccessibilityProperty::SaveAccessibilityVirtualNode(const RefPtr<UINode>& node)
+{
+    accessibilityVirtualNode_ = node;
+}
+
+RefPtr<UINode> AccessibilityProperty::GetAccessibilityVirtualNode()
+{
+    return accessibilityVirtualNode_;
+}
+
+NG::UINode* AccessibilityProperty::GetAccessibilityVirtualNodePtr()
+{
+    return Referenced::RawPtr(accessibilityVirtualNode_);
+}
+
+bool AccessibilityProperty::HasAccessibilityVirtualNode() const
+{
+    return accessibilityVirtualNode_ != nullptr;
+}
+
+std::string AccessibilityProperty::GetAccessibilityDescription() const
+{
+    return accessibilityDescription_.value_or("");
+}
+
+std::string AccessibilityProperty::GetTextType() const
+{
+    return textTypeHint_.value_or("");
+}
+
+void AccessibilityProperty::SetAccessibilityLevel(const std::string& accessibilityLevel)
+{
+    if (accessibilityLevel == Level::YES_STR ||
+        accessibilityLevel == Level::NO_STR ||
+        accessibilityLevel == Level::NO_HIDE_DESCENDANTS) {
+        accessibilityLevel_ = accessibilityLevel;
+    } else {
+        accessibilityLevel_ = Level::AUTO;
+    }
+}
+
+void AccessibilityProperty::SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)
+{
+    getRelatedElementInfoImpl_ = getRelatedElementInfoImpl;
+}
+
+void AccessibilityProperty::GetAllExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
+{
+    if (getRelatedElementInfoImpl_) {
+        getRelatedElementInfoImpl_(extraElementInfo);
+    }
+    GetExtraElementInfo(extraElementInfo);
+}
+
+void AccessibilityProperty::OnAccessibilityFocusCallback(bool isFocus)
+{
+    if (onAccessibilityFocusCallbackImpl_) {
+        onAccessibilityFocusCallbackImpl_(isFocus);
+    }
+}
+
+void AccessibilityProperty::SetOnAccessibilityFocusCallback(
+    const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl)
+{
+    onAccessibilityFocusCallbackImpl_ = onAccessibilityFocusCallbackImpl;
+}
+
+bool AccessibilityProperty::ActActionClearSelection()
+{
+    if (actionClearSelectionImpl_) {
+        actionClearSelectionImpl_();
+        return true;
+    }
+    return false;
+}
+
+void AccessibilityProperty::SetActionClearSelection(const ActionClearSelectionImpl& actionClearSelectionImpl)
+{
+    actionClearSelectionImpl_ = actionClearSelectionImpl;
+}
+
+bool AccessibilityProperty::ActActionSelect()
+{
+    if (actionSelectImpl_) {
+        actionSelectImpl_();
+        return true;
+    }
+    return false;
+}
+
+void AccessibilityProperty::SetActionSelect(const ActionSelectImpl& actionSelectImpl)
+{
+    actionSelectImpl_ = actionSelectImpl;
+}
+
+bool AccessibilityProperty::ActActionClick()
+{
+    if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CLICK))) {
+        actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CLICK));
+        return true;
+    }
+    if (actionClickImpl_) {
+        actionClickImpl_();
+        return true;
+    }
+    return false;
+}
+
+void AccessibilityProperty::SetActionClick(const ActionClickImpl& actionClickImpl)
+{
+    actionClickImpl_ = actionClickImpl;
+}
+
+bool AccessibilityProperty::ActActionLongClick()
+{
+    if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_LONG_CLICK))) {
+        actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_LONG_CLICK));
+        return true;
+    }
+    if (actionLongClickImpl_) {
+        actionLongClickImpl_();
+        return true;
+    }
+    return false;
+}
+
+void AccessibilityProperty::SetActionLongClick(const ActionLongClickImpl& actionLongClickImpl)
+{
+    actionLongClickImpl_ = actionLongClickImpl;
+}
+
+bool AccessibilityProperty::ActActionPaste()
+{
+    if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_PASTE))) {
+        actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_PASTE));
+        return true;
+    }
+    if (actionPasteImpl_) {
+        actionPasteImpl_();
+        return true;
+    }
+    return false;
+}
+
+void AccessibilityProperty::SetActionPaste(const ActionPasteImpl& actionPasteImpl)
+{
+    actionPasteImpl_ = actionPasteImpl;
+}
+
+bool AccessibilityProperty::ActActionCut()
+{
+    if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CUT))) {
+        actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CUT));
+        return true;
+    }
+    if (actionCutImpl_) {
+        actionCutImpl_();
+        return true;
+    }
+    return false;
+}
+
+void AccessibilityProperty::SetActionCut(const ActionCutImpl& actionCutImpl)
+{
+    actionCutImpl_ = actionCutImpl;
+}
+
+bool AccessibilityProperty::ActActionCopy()
+{
+    if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_COPY))) {
+        actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_COPY));
+        return true;
+    }
+    if (actionCopyImpl_) {
+        actionCopyImpl_();
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

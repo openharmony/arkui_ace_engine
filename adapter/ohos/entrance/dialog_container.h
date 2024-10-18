@@ -191,6 +191,7 @@ public:
 
     void SetFontScaleAndWeightScale(int32_t instanceId);
     void UpdateConfiguration(const ParsedConfig& parsedConfig);
+    void CheckAndSetFontFamily() override;
 
 private:
     void InitPipelineContext(std::shared_ptr<Window> window, int32_t instanceId, double density, int32_t width,

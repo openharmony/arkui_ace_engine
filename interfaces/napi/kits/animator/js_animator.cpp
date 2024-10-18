@@ -493,7 +493,7 @@ static napi_value JSSetExpectedFrameRateRange(napi_env env, napi_callback_info i
     FrameRateRange frameRateRange;
     ParseExpectedFrameRateRange(env, info, frameRateRange);
     animator->SetExpectedFrameRateRange(frameRateRange);
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "animator id:%{public}d SetExpectedFrameRateRange"
+    TAG_LOGD(AceLogTag::ACE_ANIMATION, "animator id:%{public}d SetExpectedFrameRateRange"
         "{%{public}d, %{public}d, %{public}d}", animator->GetId(), frameRateRange.min_, frameRateRange.max_,
         frameRateRange.preferred_);
     return nullptr;

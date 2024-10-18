@@ -33,7 +33,7 @@ void XcomponentAccessibilitySessionAdapter::TransferHoverEvent(
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->TransferThirdProviderHoverEvent(
-        host->GetAccessibilityId(), point, source,  eventType, time);
+        host_, point, source,  eventType, time);
 }
 
 bool XcomponentAccessibilitySessionAdapter::IgnoreHostNode() const

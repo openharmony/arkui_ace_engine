@@ -107,7 +107,10 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
     svgDom_->SetFuncNormalizeToPx(
         [pipeline = WeakPtr(PipelineContext::GetCurrentContext())](const Dimension& value) -> double {
             auto context = pipeline.Upgrade();
-            CHECK_NULL_RETURN(context, 0.0);
+            if (!context) {
+                TAG_LOGW(AceLogTag::ACE_IMAGE, "Svg Get Value Failed.(Reason: pipline is null).");
+                return 0.0;
+            }
             return context->NormalizeToPx(value);
         });
     return svgDom_;

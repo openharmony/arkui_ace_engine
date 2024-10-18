@@ -60,6 +60,12 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
+        LOGI("root node OnAttachToFrameNode, id:%{public}d", host->GetId());
+    }
+
+    void OnDetachFromFrameNode(FrameNode* frameNode) override
+    {
+        LOGI("root node OnDetachFromFrameNode, id:%{public}d", frameNode->GetId());
     }
 
     FocusPattern GetFocusPattern() const override

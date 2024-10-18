@@ -20,7 +20,9 @@ float ParagraphManager::GetHeight() const
 {
     float res = 0.0f;
     for (auto&& info : paragraphs_) {
-        res += info.paragraph->GetHeight();
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        res += paragraph->GetHeight();
     }
     return res;
 }
@@ -29,7 +31,9 @@ float ParagraphManager::GetMaxIntrinsicWidth() const
 {
     float res = 0.0f;
     for (auto &&info : paragraphs_) {
-        res = std::max(res, info.paragraph->GetMaxIntrinsicWidth());
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        res = std::max(res, paragraph->GetMaxIntrinsicWidth());
     }
     return res;
 }
@@ -37,7 +41,9 @@ bool ParagraphManager::DidExceedMaxLines() const
 {
     bool res = false;
     for (auto &&info : paragraphs_) {
-        res |= info.paragraph->DidExceedMaxLines();
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, false);
+        res |= paragraph->DidExceedMaxLines();
     }
     return res;
 }
@@ -45,7 +51,9 @@ float ParagraphManager::GetLongestLine() const
 {
     float res = 0.0f;
     for (auto &&info : paragraphs_) {
-        res = std::max(res, info.paragraph->GetLongestLine());
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        res = std::max(res, paragraph->GetLongestLine());
     }
     return res;
 }
@@ -53,7 +61,9 @@ float ParagraphManager::GetMaxWidth() const
 {
     float res = 0.0f;
     for (auto &&info : paragraphs_) {
-        res = std::max(res, info.paragraph->GetMaxWidth());
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        res = std::max(res, paragraph->GetMaxWidth());
     }
     return res;
 }
@@ -61,7 +71,9 @@ float ParagraphManager::GetTextWidth() const
 {
     float res = 0.0f;
     for (auto &&info : paragraphs_) {
-        res = std::max(res, info.paragraph->GetTextWidth());
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        res = std::max(res, paragraph->GetTextWidth());
     }
     return res;
 }
@@ -70,8 +82,10 @@ float ParagraphManager::GetTextWidthIncludeIndent() const
 {
     float res = 0.0f;
     for (auto &&info : paragraphs_) {
-        auto width = info.paragraph->GetTextWidth();
-        if (info.paragraph->GetLineCount() == 1) {
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0.0f);
+        auto width = paragraph->GetTextWidth();
+        if (paragraph->GetLineCount() == 1) {
             width += static_cast<float>(info.paragraphStyle.indent.ConvertToPx());
         }
         if (info.paragraphStyle.leadingMargin.has_value()) {
@@ -86,7 +100,9 @@ size_t ParagraphManager::GetLineCount() const
 {
     size_t count = 0;
     for (auto &&info : paragraphs_) {
-        count += info.paragraph->GetLineCount();
+        auto paragraph = info.paragraph;
+        CHECK_NULL_RETURN(paragraph, 0);
+        count += paragraph->GetLineCount();
     }
     return count;
 }

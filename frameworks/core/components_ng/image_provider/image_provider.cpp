@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #include "core/image/image_loader.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -126,7 +127,11 @@ void ImageProvider::FailCallback(const std::string& key, const std::string& erro
             ctx->FailCallback(errorMsg);
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyLoadFailTask = [ctx, errorMsg] { ctx->FailCallback(errorMsg); };
+            auto notifyLoadFailTask = [it, errorMsg] {
+                auto ctx = it.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                ctx->FailCallback(errorMsg);
+            };
             ImageUtils::PostToUI(std::move(notifyLoadFailTask), "ArkUIImageProviderFail", ctx->GetContainerId());
         }
     }
@@ -146,7 +151,11 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
             ctx->SuccessCallback(canvasImage->Clone());
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyLoadSuccess = [ctx, canvasImage] { ctx->SuccessCallback(canvasImage->Clone()); };
+            auto notifyLoadSuccess = [it, canvasImage] {
+                auto ctx = it.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                ctx->SuccessCallback(canvasImage->Clone());
+            };
             ImageUtils::PostToUI(std::move(notifyLoadSuccess), "ArkUIImageProviderSuccess", ctx->GetContainerId());
         }
     }
@@ -162,18 +171,13 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
     // load image data
     auto imageLoader = ImageLoader::CreateImageLoader(src);
     if (!imageLoader) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Failed to create image loader, Image source type not supported. src = %{private}s, nodeId = "
-            "%{public}d-%{public}lld.", src.ToString().c_str(), nodeId, static_cast<long long>(accessId));
-        std::string errorMessage("Failed to create image loader, Image source type not supported");
+        std::string errorMessage("Failed to create image loader.");
         FailCallback(src.GetKey(), src.ToString() + errorMessage, sync);
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
     RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
     if (!data) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Fail load imageData. src = %{private}s, nodeId = %{public}d-%{public}lld.",
-            src.ToString().c_str(), nodeId, static_cast<long long>(accessId));
         FailCallback(src.GetKey(), "Failed to load image data", sync);
         return;
     }
@@ -206,7 +210,11 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
             ctx->DataReadyCallback(imageObj);
         } else {
             // NOTE: contexts may belong to different arkui pipelines
-            auto notifyDataReadyTask = [ctx, imageObj, src] { ctx->DataReadyCallback(imageObj); };
+            auto notifyDataReadyTask = [it, imageObj, src] {
+                auto ctx = it.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                ctx->DataReadyCallback(imageObj);
+            };
             ImageUtils::PostToUI(std::move(notifyDataReadyTask), "ArkUIImageProviderDataReady", ctx->GetContainerId());
         }
     }
@@ -270,7 +278,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
         std::scoped_lock<std::mutex> lock(taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
-        task.Reset([src, ctxWp] { ImageProvider::CreateImageObjHelper(src); });
+        task.Reset([src] { ImageProvider::CreateImageObjHelper(src); });
         tasks_[src.GetKey()].bgTask_ = task;
         auto ctx = ctxWp.Upgrade();
         CHECK_NULL_VOID(ctx);

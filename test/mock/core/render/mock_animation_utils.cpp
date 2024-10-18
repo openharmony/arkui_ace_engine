@@ -60,6 +60,14 @@ bool AnimationUtils::CloseImplicitAnimation()
     return false;
 }
 
+bool AnimationUtils::CloseImplicitCancelAnimation()
+{
+#ifdef ENHANCED_ANIMATION
+    AnimManager::GetInstance().CloseAnimation();
+#endif
+    return true;
+}
+
 bool AnimationUtils::IsImplicitAnimationOpen()
 {
     return false;

@@ -44,6 +44,8 @@ public:
         value->propIconStyle_ = CloneIconStyle();
         value->propIconSize_ = CloneIconSize();
         value->propFontSize_ = CloneFontSize();
+        value->propStateEffect_ = CloneStateEffect();
+        value->propHoverEffect_ = CloneHoverEffect();
         value->propFontStyle_ = CloneFontStyle();
         value->propFontWeight_ = CloneFontWeight();
         value->propFontFamily_ = CloneFontFamily();
@@ -51,7 +53,7 @@ public:
         value->propBackgroundBorderRadius_ = CloneBackgroundBorderRadius();
         value->propBackgroundType_ = CloneBackgroundType();
         value->propIsArkuiComponent_ = CloneIsArkuiComponent();
-        value->propHasCustomPadding_ = CloneHasCustomPadding();
+        value->propIsFontColorSet_ = CloneIsFontColorSet();
         value->propIsTextLimitExceeded_ = CloneIsTextLimitExceeded();
         value->propTextIconLayoutDirection_ = CloneTextIconLayoutDirection();
         return value;
@@ -69,6 +71,8 @@ public:
         ResetIconStyle();
         ResetIconSize();
         ResetFontSize();
+        ResetStateEffect();
+        ResetHoverEffect();
         ResetFontStyle();
         ResetFontWeight();
         ResetFontFamily();
@@ -76,7 +80,7 @@ public:
         ResetBackgroundBorderRadius();
         ResetBackgroundType();
         ResetIsArkuiComponent();
-        ResetHasCustomPadding();
+        ResetIsFontColorSet();
         ResetIsTextLimitExceeded();
         ResetTextIconLayoutDirection();
     }
@@ -91,6 +95,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconStyle, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StateEffect, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HoverEffect, HoverEffectType, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
@@ -98,7 +104,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundType, int32_t, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsArkuiComponent, bool, PROPERTY_UPDATE_NORMAL);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasCustomPadding, bool, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsFontColorSet, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsTextLimitExceeded, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextIconLayoutDirection,
         SecurityComponentLayoutDirection, PROPERTY_UPDATE_MEASURE);

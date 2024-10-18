@@ -43,7 +43,7 @@ public:
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
+        const std::function<void(int32_t, int32_t)>& onSetActiveRange);
 
     RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCount,
         const std::map<std::string, std::pair<bool, uint32_t>>& templateCacheCountMap,
@@ -51,7 +51,7 @@ public:
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-        const std::function<void(uint32_t, uint32_t)>& onSetActiveRange);
+        const std::function<void(int32_t, int32_t)>& onSetActiveRange);
 
     ~RepeatVirtualScrollNode() override = default;
 
@@ -156,12 +156,12 @@ public:
             child.item->PaintDebugBoundaryTreeAll(flag);
         }
     }
-
     void SetIsLoop(bool isLoop)
     {
         isLoop_ = isLoop;
     }
-
+protected:
+    void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
 private:
     void PostIdleTask();
 
@@ -170,11 +170,6 @@ private:
     {
         return caches_.GetCachedNode4Index(forIndex);
     }
-
-    // index is not in L1 or L2 cache, need to make it
-    // either by TS rendering new children or by TS updating
-    // a L2 cache item from old to new index
-    RefPtr<UINode> CreateOrUpdateFrameChild4Index(uint32_t index, const std::string& forKey);
 
     // get farthest (from L1 indexes) index in L2 cache or -1
     int32_t GetFarthestL2CacheIndex();
@@ -197,7 +192,7 @@ private:
     mutable RepeatVirtualScrollCaches caches_;
 
     // get active child range
-    std::function<void(uint32_t, uint32_t)> onSetActiveRange_;
+    std::function<void(int32_t, int32_t)> onSetActiveRange_;
 
     // used by one of the unknown functions
     std::list<std::string> ids_;

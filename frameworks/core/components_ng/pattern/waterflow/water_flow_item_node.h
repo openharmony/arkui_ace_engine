@@ -29,6 +29,8 @@ public:
 
     static RefPtr<FrameNode> GetOrCreateFlowItem(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+    static RefPtr<FrameNode> CreateFlowItem(
+        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern);
 
 private:
     /**

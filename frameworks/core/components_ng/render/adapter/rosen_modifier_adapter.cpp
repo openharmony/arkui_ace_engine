@@ -117,6 +117,7 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_PROP(property, PropertyString, std::string);
     CONVERT_PROP(property, PropertyColor, Color);
     CONVERT_PROP(property, PropertyRectF, RectF);
+    CONVERT_PROP(property, PropertyCanvasImageModifierWrapper, CanvasImageModifierWrapper);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyOffsetF, OffsetF);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyUint8, uint8_t);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyFloat, float);
@@ -154,12 +155,12 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
 void ContentModifierAdapter::AttachProperties()
 {
     auto modifier = modifier_.Upgrade();
-    if (!attachedProperties_.size() && modifier) {
+    if (!hasAttached_ && modifier && modifier->GetAttachedProperties().size()) {
         for (const auto& property : modifier->GetAttachedProperties()) {
             auto rsProperty = ConvertToRSProperty(property);
             AttachProperty(rsProperty);
-            attachedProperties_.emplace_back(rsProperty);
         }
+        hasAttached_ = true;
     }
 }
 
@@ -185,12 +186,12 @@ void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
 void OverlayModifierAdapter::AttachProperties()
 {
     auto modifier = modifier_.Upgrade();
-    if (attachedProperties_.empty() && modifier) {
+    if (!hasAttached_ && modifier && modifier->GetAttachedProperties().size()) {
         for (const auto& property : modifier->GetAttachedProperties()) {
             auto rsProperty = ConvertToRSProperty(property);
             AttachProperty(rsProperty);
-            attachedProperties_.emplace_back(rsProperty);
         }
+        hasAttached_ = true;
     }
 }
 
@@ -216,12 +217,12 @@ void ForegroundModifierAdapter::Draw(RSDrawingContext& context) const
 void ForegroundModifierAdapter::AttachProperties()
 {
     auto modifier = modifier_.Upgrade();
-    if (attachedProperties_.empty() && modifier) {
+    if (!hasAttached_ && modifier && modifier->GetAttachedProperties().size()) {
         for (const auto& property : modifier->GetAttachedProperties()) {
             auto rsProperty = ConvertToRSProperty(property);
             AttachProperty(rsProperty);
-            attachedProperties_.emplace_back(rsProperty);
         }
+        hasAttached_ = true;
     }
 }
 

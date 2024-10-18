@@ -38,7 +38,7 @@ const MIN_DIALOG = '216vp'
 
 @Component
 export struct SelectTitleBar {
-  @State selected: number = 0
+  @Prop selected: number = 0
 
   options: Array<SelectOption> = [];
   menuItems: Array<SelectTitleBarMenuItem> = [];
@@ -59,7 +59,6 @@ export struct SelectTitleBar {
   private static instanceCount = 0;
 
   @State selectMaxWidth: number = 0;
-  @State backActive: boolean = false;
   @State fontSize: number = 1;
 
   build() {
@@ -69,13 +68,10 @@ export struct SelectTitleBar {
     }) {
       Row() {
         if (!this.hidesBackButton) {
-          Navigator()
-            .active(this.backActive);
-
           ImageMenuItem({ item: {
             value: PUBLIC_BACK,
             isEnabled: true,
-            action: () => this.backActive = true
+            action: () => this.getUIContext()?.getRouter()?.back()
           }, index: -1 });
         }
 

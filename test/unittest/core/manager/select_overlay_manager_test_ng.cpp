@@ -1332,8 +1332,9 @@ HWTEST_F(SelectOverlayManagerTestNg, InitSelectOverlay, TestSize.Level1)
     EXPECT_FALSE(client.SelectOverlayIsOn());
 
     bool isFirst = true;
+    GestureEvent info;
     client.InitSelectOverlay();
-    client.selectOverlayInfo_.onHandleMoveStart(isFirst);
+    client.selectOverlayInfo_.onHandleMoveStart(info, isFirst);
     EXPECT_TRUE(isFirst);
 
     RectF area;

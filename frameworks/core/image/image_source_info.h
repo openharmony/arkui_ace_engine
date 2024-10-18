@@ -91,7 +91,7 @@ public:
     bool IsSourceDimensionValid() const;
     const std::string& GetBundleName() const;
     const std::string& GetModuleName() const;
-    std::string ToString() const;
+    std::string ToString(bool isNeedTruncated = true) const;
     InternalResource::ResourceId GetResourceId() const;
     SrcType GetSrcType() const;
     Size GetSourceSize() const;
@@ -121,7 +121,6 @@ public:
     {
         isFromReset_ = isFromReset;
     }
-    const std::string GetColorModeToString();
 
     void SetImageDfxConfig(const NG::ImageDfxConfig& imageDfxConfig)
     {

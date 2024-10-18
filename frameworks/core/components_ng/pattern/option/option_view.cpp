@@ -179,6 +179,8 @@ void OptionView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>&
     pasteLayoutProperty->UpdateBackgroundBorderRadius(theme->GetInnerBorderRadius());
     pasteLayoutProperty->UpdateIconSize(theme->GetIconSideLength());
     pastePaintProperty->UpdateIconColor(theme->GetMenuIconColor());
+    pasteLayoutProperty->UpdateStateEffect(false);
+    pasteLayoutProperty->UpdateHoverEffect(HoverEffectType::NONE);
     if (optionsHasIcon) {
         pasteLayoutProperty->UpdateTextIconSpace(theme->GetIconContentPadding());
     }

@@ -50,6 +50,7 @@ private:
     static void Constructor(const JSCallbackInfo& info);
     static void Destructor(JSSecurityUIExtensionProxy* uiExtensionProxy);
 
+    bool CanTurnOn(const JSCallbackInfo& info);
     SecurityCallbackFuncPairList::const_iterator FindCbList(napi_env env, napi_value cb,
         SecurityCallbackFuncPairList& callbackFuncPairList);
     void AddCallbackToList(napi_env env, napi_value cb, napi_handle_scope scope, RegisterType type,

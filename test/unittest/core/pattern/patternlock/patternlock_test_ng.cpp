@@ -446,6 +446,8 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest006, TestSize.Level1)
      */
     pattern_->autoReset_ = false;
     pattern_->choosePoint_.push_back(PatternLockCell(1, 1));
+    pattern_->patternLockModifier_->choosePoint_.push_back(PatternLockCell(1, 1));
+    pattern_->patternLockModifier_->choosePoint_.push_back(PatternLockCell(2, 2));
     pattern_->isMoveEventValid_ = false;
     pattern_->OnTouchUp();
     pattern_->isMoveEventValid_ = true;
@@ -472,7 +474,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest007, TestSize.Level1)
     pattern_->isMoveEventValid_ = false;
     TouchLocationInfo locationInfo(0);
     locationInfo.SetTouchType(TouchType::MOVE);
-    locationInfo.SetScreenLocation(offset);
+    locationInfo.SetLocalLocation(offset);
     pattern_->OnTouchMove(locationInfo);
     EXPECT_EQ(pattern_->cellCenter_.GetX(), .0f);
     EXPECT_EQ(pattern_->cellCenter_.GetY(), .0f);
@@ -503,7 +505,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest008, TestSize.Level1)
     pattern_->choosePoint_.push_back(PatternLockCell(1, 1));
     pattern_->isMoveEventValid_ = false;
     TouchLocationInfo locationInfo(0);
-    locationInfo.SetScreenLocation(offset);
+    locationInfo.SetLocalLocation(offset);
     pattern_->isMoveEventValid_ = true;
     pattern_->OnTouchDown(locationInfo);
     EXPECT_EQ(pattern_->cellCenter_.GetX(), offset.GetX());
@@ -528,7 +530,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest009, TestSize.Level1)
     float offsetY = 1.0f;
     Offset offset(offsetX, offsetY);
     TouchLocationInfo locationInfoTouchDown(0);
-    locationInfoTouchDown.SetScreenLocation(offset);
+    locationInfoTouchDown.SetLocalLocation(offset);
     locationInfoTouchDown.SetTouchType(TouchType::DOWN);
     TouchEventInfo touchEventInfoTouchDown("onTouchDown");
     touchEventInfoTouchDown.AddChangedTouchLocationInfo(std::move(locationInfoTouchDown));
@@ -540,7 +542,7 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest009, TestSize.Level1)
 
     pattern_->isMoveEventValid_ = true;
     TouchLocationInfo locationInfoTouchMove(0);
-    locationInfoTouchMove.SetScreenLocation(offset);
+    locationInfoTouchMove.SetLocalLocation(offset);
     locationInfoTouchMove.SetTouchType(TouchType::MOVE);
     TouchEventInfo touchEventInfoTouchMove("onTouchMove");
     touchEventInfoTouchMove.AddChangedTouchLocationInfo(std::move(locationInfoTouchMove));
@@ -555,6 +557,8 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest009, TestSize.Level1)
     locationInfoTouchUp.SetTouchType(TouchType::UP);
     TouchEventInfo touchEventInfoUp("onTouchUp");
     touchEventInfoUp.AddChangedTouchLocationInfo(std::move(locationInfoTouchUp));
+    pattern_->patternLockModifier_->choosePoint_.push_back(PatternLockCell(2, 1));
+    pattern_->patternLockModifier_->choosePoint_.push_back(PatternLockCell(2, 2));
     pattern_->HandleTouchEvent(touchEventInfoUp);
     EXPECT_FALSE(pattern_->isMoveEventValid_);
     EXPECT_EQ(pattern_->fingerId_, -1);
@@ -977,13 +981,13 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest018, TestSize.Level1)
     mockRenderContext->rect_ = RectF(40, 100, PATTERNLOCK_WIDTH, PATTERNLOCK_HEIGHT);
 
     TouchLocationInfo locationInfo(0);
-    locationInfo.SetScreenLocation(Offset(200, 200));
+    locationInfo.SetLocalLocation(Offset(200, 200));
     patternLockPattern->OnTouchDown(locationInfo);
-    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(160, 100)));
+    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(200, 200)));
 
-    locationInfo.SetScreenLocation(Offset(300, 300));
+    locationInfo.SetLocalLocation(Offset(300, 300));
     patternLockPattern->OnTouchMove(locationInfo);
-    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(260, 200)));
+    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(300, 300)));
     patternLockPattern->OnTouchUp();
 
     /**
@@ -995,13 +999,13 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest018, TestSize.Level1)
     EXPECT_EQ(scrollPattern->GetTotalOffset(), 100);
     mockRenderContext->rect_ = RectF(40, 0, PATTERNLOCK_WIDTH, PATTERNLOCK_HEIGHT);
 
-    locationInfo.SetScreenLocation(Offset(200, 200));
+    locationInfo.SetLocalLocation(Offset(200, 200));
     patternLockPattern->OnTouchDown(locationInfo);
-    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(160, 200)));
+    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(200, 200)));
 
-    locationInfo.SetScreenLocation(Offset(300, 300));
+    locationInfo.SetLocalLocation(Offset(300, 300));
     patternLockPattern->OnTouchMove(locationInfo);
-    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(260, 300)));
+    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(300, 300)));
     patternLockPattern->OnTouchUp();
 }
 
@@ -1022,9 +1026,9 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest019, TestSize.Level1)
     mockRenderContext->paintRect_ = RectF(40, 0, PATTERNLOCK_WIDTH, PATTERNLOCK_HEIGHT);
 
     TouchLocationInfo locationInfo(0);
-    locationInfo.SetScreenLocation(Offset(200, 200));
+    locationInfo.SetLocalLocation(Offset(200, 200));
     pattern_->OnTouchDown(locationInfo);
-    EXPECT_TRUE(IsEqual(pattern_->cellCenter_, OffsetF(160, 200)));
+    EXPECT_TRUE(IsEqual(pattern_->cellCenter_, OffsetF(200, 200)));
 
     /**
      * @tc.steps: step2. Reduce patternloack size, call OnTouchMove
@@ -1039,9 +1043,9 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest019, TestSize.Level1)
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect().Height(), height));
 
     mockRenderContext->paintRect_ = RectF(90, 0, width, height);
-    locationInfo.SetScreenLocation(Offset(300, 300));
+    locationInfo.SetLocalLocation(Offset(300, 300));
     pattern_->OnTouchMove(locationInfo);
-    EXPECT_TRUE(IsEqual(pattern_->cellCenter_, OffsetF(210, 300)));
+    EXPECT_TRUE(IsEqual(pattern_->cellCenter_, OffsetF(300, 300)));
     pattern_->OnTouchUp();
 }
 

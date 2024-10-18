@@ -16,7 +16,6 @@
 #include "adapter/ohos/entrance/ace_container.h"
 
 #include <cerrno>
-#include <dirent.h>
 #include <fstream>
 #include <functional>
 #include <memory>
@@ -45,6 +44,7 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "adapter/ohos/osal/system_bar_style_ohos.h"
 #include "adapter/ohos/osal/view_data_wrap_ohos.h"
+#include "adapter/ohos/osal/window_utils.h"
 #include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
@@ -100,6 +100,7 @@ constexpr uint32_t POPUPSIZE_WIDTH = 0;
 constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t POPUP_EDGE_INTERVAL = 48;
+constexpr uint32_t DEFAULT_WINDOW_TYPE = 1;
 const char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 const char ENABLE_TRACE_LAYOUT_KEY[] = "persist.ace.trace.layout.enabled";
 const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled";
@@ -195,6 +196,18 @@ void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
         napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
     }
 }
+
+void UpdateLanguage(const std::string& languageTag, ConfigurationChange& configurationChange)
+{
+    std::string language;
+    std::string script;
+    std::string region;
+    Localization::ParseLocaleTag(languageTag, language, script, region, false);
+    if (!language.empty() || !script.empty() || !region.empty()) {
+        configurationChange.languageUpdate = true;
+        AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
+    }
+}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -266,7 +279,7 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
 AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
-    LOG_DESTROY();
+    LOGI("Container Destroyed");
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
@@ -361,6 +374,7 @@ void AceContainer::Destroy()
             taskExecutor_->PostTask(jsTask, TaskExecutor::TaskType::JS, "ArkUIFrontendDestroy");
         }
     }
+    DestroyToastSubwindow(instanceId_);
     resRegister_.Reset();
     assetManager_.Reset();
 }
@@ -981,6 +995,7 @@ void AceContainer::InitializeCallback()
                 CHECK_NULL_VOID(container);
                 auto aceContainer = DynamicCast<AceContainer>(container);
                 CHECK_NULL_VOID(aceContainer);
+                aceContainer->UpdateResourceDensity(density);
                 aceContainer->NotifyDensityUpdate();
             }
         };
@@ -1024,10 +1039,14 @@ void AceContainer::InitializeCallback()
             [context]() { context->OnSurfaceDestroyed(); }, TaskExecutor::TaskType::UI, "ArkUISurfaceDestroyed");
     };
     aceView_->RegisterSurfaceDestroyCallback(surfaceDestroyCallback);
+    InitDragEventCallback();
+}
 
+void AceContainer::InitDragEventCallback()
+{
     if (!isFormRender_) {
-        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](
-            const PointerEvent& pointerEvent, const DragEventAction& action, const RefPtr<NG::FrameNode>& node) {
+        auto&& dragEventCallback = [context = pipelineContext_, id = instanceId_](const PointerEvent& pointerEvent,
+                                       const DragEventAction& action, const RefPtr<NG::FrameNode>& node) {
             ContainerScope scope(id);
             CHECK_NULL_VOID(context);
             auto callback = [context, pointerEvent, action, node]() {
@@ -1303,45 +1322,9 @@ public:
         if (isNative_ || !config.targetSize.has_value() || !config.placement.has_value()) {
             return;
         }
-        auto node = node_.Upgrade();
-        CHECK_NULL_VOID(node);
-        auto rectf = node->GetRectWithRender();
         AbilityRuntime::AutoFill::PopupOffset offset;
-        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
-        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
-        if ((windowRect_.height_ - rectf.Height()) > (size.height + POPUP_EDGE_INTERVAL)) {
-            // popup will display at the bottom of the container
-            offset.deltaY = rect_.top + rect_.height - rectf.Height();
-        } else {
-            // popup will display in the middle of the container
-            if (placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
-                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
-                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-                offset.deltaY = rect_.top + rect_.height -
-                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO);
-            } else {
-                offset.deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO);
-            }
-        }
-
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
-            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            offset.deltaX = rect_.left - edgeDist;
-            if (offset.deltaX > edgeDist) {
-                offset.deltaX = edgeDist;
-            }
-        }
-
-        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
-            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
-            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
-            offset.deltaX = edgeDist + rect_.left + rect_.width - rectf.Width();
-            if ((offset.deltaX < -DBL_EPSILON) && (std::fabs(offset.deltaX) > edgeDist)) {
-                offset.deltaX = -edgeDist;
-            }
-        }
-
+        offset.deltaX = GetPopupConfigWillUpdateX(config);
+        offset.deltaY = GetPopupConfigWillUpdateY(config);
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "PopupOffset x:%{public}f,y:%{public}f", offset.deltaX, offset.deltaY);
         config.targetOffset = offset;
         config.placement = AbilityRuntime::AutoFill::PopupPlacement::BOTTOM;
@@ -1357,6 +1340,95 @@ public:
         windowRect_ = rect;
     }
 private:
+    double GetPopupConfigWillUpdateY(AbilityRuntime::AutoFill::AutoFillCustomConfig& config)
+    {
+        auto node = node_.Upgrade();
+        CHECK_NULL_RETURN(node, 0);
+        auto rectf = node->GetRectWithRender();
+        double deltaY = 0;
+        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
+        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
+
+        auto trans = node->GetTransformRelativeOffset();
+        auto bottomAvoidHeight = GetBottomAvoidHeight();
+
+        bool isBottom = placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT ||
+                placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT;
+
+        if ((windowRect_.height_ - rectf.Height() - trans.GetY()) >
+            (size.height + POPUP_EDGE_INTERVAL + bottomAvoidHeight)) {
+            // popup will display at the bottom of the container
+            if (isBottom) {
+                deltaY = rect_.top + rect_.height - rectf.Height() - trans.GetY();
+            } else {
+                deltaY = rect_.top - rectf.Height() - size.height - trans.GetY() - POPUP_EDGE_INTERVAL;
+            }
+        } else {
+            // popup will display in the middle of the container
+            if (isBottom) {
+                deltaY = rect_.top + rect_.height -
+                    ((rectf.Height() - size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+            } else {
+                deltaY = rect_.top - ((rectf.Height() + size.height) / POPUP_CALCULATE_RATIO) - trans.GetY();
+            }
+        }
+        return deltaY;
+    }
+
+    double GetPopupConfigWillUpdateX(AbilityRuntime::AutoFill::AutoFillCustomConfig& config)
+    {
+        auto node = node_.Upgrade();
+        CHECK_NULL_RETURN(node, 0);
+        auto rectf = node->GetRectWithRender();
+        double deltaX = 0;
+        AbilityRuntime::AutoFill::PopupPlacement placement = config.placement.value();
+        AbilityRuntime::AutoFill::PopupSize size = config.targetSize.value();
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_LEFT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_LEFT) {
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            deltaX = rect_.left - edgeDist;
+            if (deltaX > edgeDist) {
+                deltaX = edgeDist;
+            }
+            if (rect_.left + size.width > windowRect_.width_) {
+                deltaX = windowRect_.width_ - size.width - edgeDist;
+            }
+            if (edgeDist + size.width > windowRect_.width_) {
+                deltaX = 0;
+            }
+        }
+
+        if (placement == AbilityRuntime::AutoFill::PopupPlacement::TOP_RIGHT ||
+            placement == AbilityRuntime::AutoFill::PopupPlacement::BOTTOM_RIGHT) {
+            double edgeDist = (rectf.Width() - size.width) / POPUP_CALCULATE_RATIO;
+            deltaX = edgeDist + rect_.left + rect_.width - rectf.Width();
+            if ((deltaX < -DBL_EPSILON) && (std::fabs(deltaX) > edgeDist)) {
+                deltaX = -edgeDist;
+            }
+        }
+        return deltaX;
+    }
+
+    uint32_t GetBottomAvoidHeight()
+    {
+        auto containerId = Container::CurrentId();
+        RefPtr<NG::PipelineContext> pipelineContext;
+        if (containerId >= MIN_SUBCONTAINER_ID) {
+            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+            auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+            CHECK_NULL_RETURN(parentContainer, 0);
+            pipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentContainer->GetPipelineContext());
+        } else {
+            pipelineContext = NG::PipelineContext::GetCurrentContext();
+        }
+        CHECK_NULL_RETURN(pipelineContext, 0);
+        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+        CHECK_NULL_RETURN(safeAreaManager, 0);
+        return safeAreaManager->GetSystemSafeArea().bottom_.Length();
+    }
+
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
@@ -1418,15 +1490,6 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
     return hintToTypeWrap;
 }
 
-bool AceContainer::ChangeType(AbilityBase::ViewData& viewData)
-{
-    auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    CHECK_NULL_RETURN(viewDataWrap, false);
-    auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
-    CHECK_NULL_RETURN(viewDataWrapOhos, false);
-    return viewDataWrapOhos->GetPlaceHolderValue(viewData);
-}
-
 void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap)
 {
     CHECK_NULL_VOID(node);
@@ -1438,13 +1501,22 @@ void AceContainer::FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPt
     auto autoFillNewPassword = pattern->GetAutoFillNewPassword();
     if (!autoFillUserName.empty()) {
         for (auto nodeInfoWrap : nodeInfoWraps) {
-            if (nodeInfoWrap && nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
+            if (!nodeInfoWrap) {
+                continue;
+            }
+            auto metadataObject = JsonUtil::ParseJsonString(nodeInfoWrap->GetMetadata());
+            if (nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_USER_NAME) {
                 nodeInfoWrap->SetValue(autoFillUserName);
                 viewDataWrap->SetUserSelected(true);
-                pattern->SetAutoFillUserName("");
                 break;
+            } else if (nodeInfoWrap->GetAutoFillType() == AceAutoFillType::ACE_UNSPECIFIED && metadataObject &&
+                       metadataObject->Contains("type")) {
+                metadataObject->Put("username", autoFillUserName.c_str());
+                nodeInfoWrap->SetMetadata(metadataObject->ToString());
+                viewDataWrap->SetUserSelected(true);
             }
         }
+        pattern->SetAutoFillUserName("");
     }
     if (!autoFillNewPassword.empty()) {
         for (auto nodeInfoWrap : nodeInfoWraps) {
@@ -1538,7 +1610,6 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
     CHECK_NULL_RETURN(viewDataWrapOhos, false);
     auto viewData = viewDataWrapOhos->GetViewData();
-    ChangeType(viewData);
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isNewPassWord is: %{public}d", isNewPassWord);
     if (isNewPassWord) {
         callback->OnFillRequestSuccess(viewData);
@@ -1698,9 +1769,13 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     ContainerScope scope(instanceId_);
     auto result = false;
+    paramUie_.assign(params.begin(), params.end());
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    if (IsUIExtensionWindow()) {
+        DumpLog::GetInstance().SetSeparator(";");
+    }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
     DumpLog::GetInstance().Print("moduleName:" + context->GetHapModuleInfo()->moduleName);
@@ -1827,7 +1902,7 @@ void AceContainer::SetLocalStorage(
     NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
     ContainerScope scope(instanceId_);
-    taskExecutor_->PostTask(
+    taskExecutor_->PostSyncTask(
         [frontend = WeakPtr<Frontend>(frontend_), storage,
             contextWeak = std::weak_ptr<OHOS::AbilityRuntime::Context>(context), id = instanceId_,
             sharedRuntime = sharedRuntime_] {
@@ -1965,6 +2040,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         }
     }
 #endif
+
+    auto windowDensityCallback = [weak = WeakClaim(this)]() {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, 0.0);
+        return container->GetWindowDensity();
+    };
+    pipelineContext_->RegisterWindowDensityCallback(std::move(windowDensityCallback));
 
     pipelineContext_->SetRootSize(density, width, height);
     if (isFormRender_) {
@@ -2171,22 +2253,6 @@ bool AceContainer::IsTransparentBg() const
     return bgColor == Color::TRANSPARENT || bgOpacity == transparentOpacity;
 }
 
-bool AceContainer::ParseThemeConfig(const std::string& themeConfig)
-{
-    std::regex pattern("\"font\":(\\d+)");
-    std::smatch match;
-    if (std::regex_search(themeConfig, match, pattern)) {
-        std::string fontValue = match[1].str();
-        if (fontValue.length() > 1) {
-            LOGE("ParseThemeConfig error value");
-            return false;
-        }
-        int font = std::stoi(fontValue);
-        return font == 1;
-    }
-    return false;
-}
-
 void AceContainer::SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme)
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
@@ -2264,6 +2330,8 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+    windowManager->SetGetWindowStartMoveFlagCallBack(
+        [window = uiWindow_]() -> uint32_t { return static_cast<uint32_t>(window->GetStartMoveFlag()); });
     windowManager->SetWindowSplitPrimaryCallBack(
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
     windowManager->SetWindowSplitSecondaryCallBack(
@@ -2288,6 +2356,10 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_](const RefPtr<SystemBarStyle>& style) {
             SystemBarStyleOhos::SetSystemBarStyle(window, style);
         });
+    windowManager->SetGetFreeMultiWindowModeEnabledStateCallback(
+        [window = uiWindow_]() -> bool {
+            return window->GetFreeMultiWindowModeEnabledState();
+        });
 
     pipelineContext_->SetGetWindowRectImpl([window = uiWindow_]() -> Rect {
         Rect rect;
@@ -2305,8 +2377,8 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
     if (ret == Rosen::WMError::WM_OK) {
         auto safeAreaInsets = ConvertAvoidArea(avoidArea);
-        LOGI("SafeArea get success, area type is:%{public}d insets area is:%{public}s", static_cast<int32_t>(type),
-            safeAreaInsets.ToString().c_str());
+        TAG_LOGI(ACE_LAYOUT, "SafeArea get success, area type is:%{public}d insets area is:%{public}s",
+            static_cast<int32_t>(type), safeAreaInsets.ToString().c_str());
         return safeAreaInsets;
     }
     return {};
@@ -2408,76 +2480,9 @@ void AceContainer::CheckAndSetFontFamily()
     }
 }
 
-bool AceContainer::IsFontFileExistInPath(std::string path)
-{
-    DIR* dir;
-    struct dirent* ent;
-    bool isFlagFileExist = false;
-    bool isFontDirExist = false;
-    if ((dir = opendir(path.c_str())) == nullptr) {
-        if (errno == ENOENT) {
-            LOGE("ERROR ENOENT");
-        } else if (errno == EACCES) {
-            LOGE("ERROR EACCES");
-        } else {
-            LOGE("ERROR Other");
-        }
-        return false;
-    }
-    while ((ent = readdir(dir)) != nullptr) {
-        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-            continue;
-        }
-        if (strcmp(ent->d_name, "flag") == 0) {
-            isFlagFileExist = true;
-        } else if (strcmp(ent->d_name, "fonts") == 0) {
-            isFontDirExist = true;
-        }
-    }
-    closedir(dir);
-    if (isFlagFileExist && isFontDirExist) {
-        LOGI("font path exist");
-        return true;
-    }
-    return false;
-}
-
-std::string AceContainer::GetFontFamilyName(std::string path)
-{
-    std::string fontFamilyName = "";
-    DIR* dir;
-    struct dirent* ent;
-    if ((dir = opendir(path.c_str())) == nullptr) {
-        return fontFamilyName;
-    }
-    while ((ent = readdir(dir)) != nullptr) {
-        if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0) {
-            continue;
-        }
-        if (endsWith(ent->d_name, ".ttf")) {
-            fontFamilyName = ent->d_name;
-            break;
-        }
-    }
-    closedir(dir);
-    return fontFamilyName;
-}
-
-bool AceContainer::endsWith(std::string str, std::string suffix)
-{
-    if (str.length() < suffix.length()) {
-        return false;
-    }
-    return str.substr(str.length() - suffix.length()) == suffix;
-}
-
 void AceContainer::SetFontScaleAndWeightScale(
     const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
 {
-    if (IsKeyboard()) {
-        TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "Keyboard does not adjust font");
-        return;
-    }
     if (!parsedConfig.fontScale.empty()) {
         TAG_LOGD(AceLogTag::ACE_AUTO_FILL, "parsedConfig fontScale: %{public}s", parsedConfig.fontScale.c_str());
         CHECK_NULL_VOID(pipelineContext_);
@@ -2523,6 +2528,38 @@ void AceContainer::ReleaseResourceAdapter()
     }
 }
 
+DeviceOrientation AceContainer::ProcessDirectionUpdate(
+    const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
+{
+    if (!parsedConfig.direction.empty()) {
+        auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
+        if (parsedConfig.direction == "horizontal") {
+            resDirection = DeviceOrientation::LANDSCAPE;
+        } else if (parsedConfig.direction == "vertical") {
+            resDirection = DeviceOrientation::PORTRAIT;
+        }
+        configurationChange.directionUpdate = true;
+        return resDirection;
+    }
+    return DeviceOrientation::ORIENTATION_UNDEFINED;
+}
+
+void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
+{
+    if (!parsedConfig.themeTag.empty()) {
+        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
+        int fontUpdate = json->GetInt("fonts");
+        configurationChange.fontUpdate = configurationChange.fontUpdate || fontUpdate;
+        int iconUpdate = json->GetInt("icons");
+        configurationChange.iconUpdate = iconUpdate;
+        int skinUpdate = json->GetInt("skin");
+        configurationChange.skinUpdate = skinUpdate;
+        if (fontUpdate) {
+            CheckAndSetFontFamily();
+        }
+    }
+}
+
 void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
 {
     if (!parsedConfig.IsValid()) {
@@ -2551,6 +2588,11 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         SystemProperties::SetDeviceAccess(parsedConfig.deviceAccess == "true");
         resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
     }
+    if (!parsedConfig.preferredLanguage.empty()) {
+        UpdateLanguage(parsedConfig.preferredLanguage, configurationChange);
+    } else if (!parsedConfig.languageTag.empty()) {
+        UpdateLanguage(parsedConfig.languageTag, configurationChange);
+    }
     if (!parsedConfig.languageTag.empty()) {
         std::string language;
         std::string script;
@@ -2568,30 +2610,12 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         fontManager->SetAppCustomFont(parsedConfig.fontFamily);
     }
     if (!parsedConfig.direction.empty()) {
-        auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
-        if (parsedConfig.direction == "horizontal") {
-            resDirection = DeviceOrientation::LANDSCAPE;
-        } else if (parsedConfig.direction == "vertical") {
-            resDirection = DeviceOrientation::PORTRAIT;
-        }
-        configurationChange.directionUpdate = true;
-        resConfig.SetOrientation(resDirection);
+        resConfig.SetOrientation(ProcessDirectionUpdate(parsedConfig, configurationChange));
     }
     if (!parsedConfig.densitydpi.empty()) {
         configurationChange.dpiUpdate = true;
     }
-    if (!parsedConfig.themeTag.empty()) {
-        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
-        int fontUpdate = json->GetInt("fonts");
-        configurationChange.fontUpdate = configurationChange.fontUpdate || fontUpdate;
-        int iconUpdate = json->GetInt("icons");
-        configurationChange.iconUpdate = iconUpdate;
-        int skinUpdate = json->GetInt("skin");
-        configurationChange.skinUpdate = skinUpdate;
-        if (fontUpdate) {
-            CheckAndSetFontFamily();
-        }
-    }
+    ProcessThemeUpdate(parsedConfig, configurationChange);
     if (!parsedConfig.colorModeIsSetByApp.empty()) {
         resConfig.SetColorModeIsSetByApp(true);
     }
@@ -2600,6 +2624,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     }
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
+    }
+    if (!parsedConfig.preferredLanguage.empty()) {
+        resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
@@ -2618,6 +2645,8 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);
+    // change color mode and theme to clear image cache
+    pipelineContext_->ClearImageCache();
 }
 
 void AceContainer::NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration)
@@ -2907,6 +2936,84 @@ bool AceContainer::IsMainWindow() const
 {
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
+
+bool AceContainer::IsSubWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+}
+
+bool AceContainer::IsDialogWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_DIALOG;
+}
+
+bool AceContainer::IsSystemWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
+        uiWindow_->GetType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+uint32_t AceContainer::GetParentWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetParentWindowType());
+}
+
+uint32_t AceContainer::GetWindowType() const
+{
+    CHECK_NULL_RETURN(uiWindow_, DEFAULT_WINDOW_TYPE);
+    return static_cast<uint32_t>(uiWindow_->GetType());
+}
+
+bool AceContainer::IsHostMainWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW;
+}
+
+bool AceContainer::IsHostSubWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_APP_SUB_WINDOW;
+}
+
+bool AceContainer::IsHostDialogWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_DIALOG;
+}
+
+bool AceContainer::IsHostSystemWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() >= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_BASE &&
+        uiWindow_->GetParentWindowType() <= Rosen::WindowType::ABOVE_APP_SYSTEM_WINDOW_END;
+}
+
+bool AceContainer::IsHostSceneBoardWindow() const
+{
+    CHECK_NULL_RETURN(uiWindow_, false);
+    return uiWindow_->GetParentWindowType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
+}
+
+uint32_t AceContainer::GetParentMainWindowId(uint32_t currentWindowId) const
+{
+    uint32_t parentMainWindowId = 0;
+    if (uiWindow_) {
+        parentMainWindowId = uiWindow_->GetParentMainWindowId(currentWindowId);
+        if (parentMainWindowId == 0) {
+            TAG_LOGE(AceLogTag::ACE_SUB_WINDOW,
+                "GetParentMainWindowId, current windowId: %{public}d, main windowId: %{public}d",
+                currentWindowId, parentMainWindowId);
+        }
+    } else {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Window in container is nullptr when getting main windowId");
+    }
+    return parentMainWindowId;
 }
 
 void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent)
@@ -3260,5 +3367,26 @@ void AceContainer::RemoveWatchSystemParameter()
         ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
+}
+
+void AceContainer::UpdateResourceOrientation(int32_t orientation)
+{
+    DeviceOrientation newOrientation = WindowUtils::GetDeviceOrientation(orientation);
+    auto resConfig = GetResourceConfiguration();
+    resConfig.SetOrientation(newOrientation);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+    }
+    SetResourceConfiguration(resConfig);
+}
+
+void AceContainer::UpdateResourceDensity(double density)
+{
+    auto resConfig = GetResourceConfiguration();
+    resConfig.SetDensity(density);
+    if (SystemProperties::GetResourceDecoupling()) {
+        ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
+    }
+    SetResourceConfiguration(resConfig);
 }
 } // namespace OHOS::Ace::Platform

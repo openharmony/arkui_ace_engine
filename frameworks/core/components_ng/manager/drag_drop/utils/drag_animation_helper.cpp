@@ -90,10 +90,12 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
     const RefPtr<OverlayManager>& overlayManager)
 {
     CHECK_NULL_VOID(actuator);
+    CHECK_NULL_VOID(overlayManager);
     AnimationOption option;
     option.SetDuration(BEFORE_LIFTING_TIME);
     option.SetCurve(Curves::SHARP);
     auto frameNode = actuator->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto gatherNodeCenter = frameNode->GetPaintRectCenter();
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
 
@@ -156,9 +158,7 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     DragEventActuator::MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
     actuator->ClearGatherNodeChildrenInfo();
     pipeline->FlushSyncGeometryNodeTasks();
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetIsTouchGatherAnimationPlaying(true);
+    manager->SetIsGatherWithMenu(false);
     PlayGatherNodeOpacityAnimation(manager);
     PlayGatherNodeTranslateAnimation(actuator, manager);
 }
@@ -238,23 +238,21 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
     const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(GATHER_SPRING_RESPONSE,
         GATHER_SPRING_DAMPING_FRACTION, 0.0f);
     option.SetCurve(curve);
-
-    option.SetOnFinishEvent([]() {
-        auto pipelineContext = PipelineContext::GetMainPipelineContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto dragDropManager = pipelineContext->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->SetIsTouchGatherAnimationPlaying(false);
-    });
-
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameNodeSize = geometryNode->GetFrameSize();
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    GatherAnimationInfo gatherAnimationInfo = { PIXELMAP_DRAG_SCALE_MULTIPLE, frameNodeSize.Width(),
+        frameNodeSize.Height(), gatherNodeCenter, renderContext->GetBorderRadius() };
     AnimationUtils::Animate(
         option,
-        [overlayManager, gatherNodeCenter, frameNodeSize]() {
-            DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherNodeCenter, PIXELMAP_DRAG_SCALE_MULTIPLE,
-                frameNodeSize.Width(), frameNodeSize.Height());
+        [weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager)), gatherAnimationInfo,
+            weak = AceType::WeakClaim(AceType::RawPtr(frameNode))]() {
+            auto overlayManager = weakOverlayManager.Upgrade();
+            auto frameNode = weak.Upgrade();
+            DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
+            DragDropManager::UpdateGatherNodePosition(overlayManager, frameNode);
         },
         option.GetOnFinishEvent());
 }
@@ -311,12 +309,15 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
 {
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(textNode);
+    CHECK_NULL_VOID(menuPattern);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    auto badgeNumber = dragDropManager->GetBadgeNumber();
-    auto childSize = badgeNumber > 0 ? static_cast<size_t>(badgeNumber) :
+    auto frameNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+    CHECK_NULL_VOID(frameNode);
+    auto badgeNumber = frameNode->GetDragPreviewOption().GetCustomerBadgeNumber();
+    auto childSize = badgeNumber.has_value() ? static_cast<size_t>(badgeNumber.value()) :
                                         manager->GetGatherNodeChildrenInfo().size() + 1;
     auto badgeLength = std::to_string(childSize).size();
     UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
@@ -330,7 +331,10 @@ void DragAnimationHelper::CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuP
     textNode->MarkModifyDone();
     textNode->SetLayoutDirtyMarked(true);
     textNode->SetActive(true);
-    textNode->CreateLayoutTask();
+    auto context = textNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(textNode);
+    }
     pipeline->FlushSyncGeometryNodeTasks();
 }
 
@@ -360,5 +364,40 @@ void DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(BADGE_DEFAULT_SIZE);
     textRenderContext->UpdateBorderRadius(borderRadius);
+}
+
+void DragAnimationHelper::UpdateGatherNodeToTop()
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto manager = mainPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->UpdateGatherNodeToTop();
+}
+
+void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& menuWrapperNode)
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto manager = mainPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->SetIsGatherWithMenu(true);
+
+    mainPipeline->AddAfterRenderTask([weakWrapperNode = AceType::WeakClaim(AceType::RawPtr(menuWrapperNode)),
+        weakManager = AceType::WeakClaim(AceType::RawPtr(manager))]() {
+        auto menuWrapperNode = weakWrapperNode.Upgrade();
+        CHECK_NULL_VOID(menuWrapperNode);
+        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto manager = weakManager.Upgrade();
+        auto textNode = menuWrapperPattern->GetBadgeNode();
+        auto imageNode = menuWrapperPattern->GetPreview();
+        auto menuNode = menuWrapperPattern->GetMenu();
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
+        DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
+        DragAnimationHelper::ShowBadgeAnimation(textNode);
+    });
 }
 }

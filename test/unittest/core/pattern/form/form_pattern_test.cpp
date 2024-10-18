@@ -259,7 +259,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level1)
     pipeline->taskExecutor_ = nullptr;
     auto taskExecutor = pipeline->GetTaskExecutor();
     EXPECT_EQ(taskExecutor, nullptr);
-    pattern->HandleSnapshot(delayTime);
+    pattern->HandleSnapshot(delayTime, "1");
     pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     EXPECT_NE(pipeline->taskExecutor_, nullptr);
     taskExecutor = pipeline->GetTaskExecutor();
@@ -269,7 +269,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_007, TestSize.Level1)
     WeakPtr<FormPattern> weak = Referenced::WeakClaim(Referenced::RawPtr(pattern));
     RefCounter* refBak = pattern->refCounter_;
     weak.refCounter_ = nullptr;
-    pattern->HandleSnapshot(delayTime);
+    pattern->HandleSnapshot(delayTime, "1");
     uint32_t taskNum1 = taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::UI);
     EXPECT_EQ(taskNum, taskNum1);
 

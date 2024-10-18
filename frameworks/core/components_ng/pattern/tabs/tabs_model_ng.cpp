@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -44,8 +45,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension BAR_BLUR_RADIUS = 200.0_vp;
-constexpr Dimension BAR_SATURATE = 1.3_vp;
 constexpr uint8_t PIXEL_ROUND = static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
                                 static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
                                 static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END) |
@@ -99,7 +98,7 @@ RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode
 {
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, nullptr);
@@ -113,9 +112,11 @@ RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode
         { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP + SAFE_AREA_EDGE_BOTTOM });
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, nullptr);
-    auto controller = swiperController ? swiperController : swiperPattern->GetSwiperController();
-    if (!controller) {
-        controller = AceType::MakeRefPtr<SwiperController>();
+    RefPtr<SwiperController> controller;
+    if (swiperController) {
+        controller = swiperController;
+    } else {
+        controller = AceType::MakeRefPtr<TabsControllerNG>();
     }
     swiperPattern->SetSwiperController(controller);
     swiperPattern->SetFinishCallbackType(FinishCallbackType::LOGICALLY);
@@ -212,15 +213,11 @@ void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, tabBarPosition);
 }
 
-void TabsModelNG::SetBarBackgroundBlurStyle(BlurStyle tabBarBlurStyle)
+void TabsModelNG::SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption)
 {
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    tabBarPaintProperty->UpdateTabBarBlurStyle(tabBarBlurStyle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBarBackgroundBlurStyle(frameNode, styleOption);
 }
 
 void TabsModelNG::SetTabBarMode(TabBarMode tabBarMode)
@@ -345,6 +342,7 @@ void TabsModelNG::SetIndex(int32_t index)
         index = 0;
     }
     tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->SetClickRepeat(false);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     swiperLayoutProperty->UpdateIndex(index);
     auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
@@ -394,32 +392,11 @@ void TabsModelNG::SetBarOverlap(bool barOverlap)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarOverlap, barOverlap);
 
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarRenderContext = tabBarNode->GetRenderContext();
-    CHECK_NULL_VOID(tabBarRenderContext);
+    BlurStyleOption option;
     if (barOverlap) {
-        tabBarRenderContext->UpdateBackBlurRadius(BAR_BLUR_RADIUS);
-        tabBarRenderContext->UpdateFrontSaturate(BAR_SATURATE);
-    } else {
-        tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
-        tabBarRenderContext->ResetFrontSaturate();
+        option.blurStyle = BlurStyle::COMPONENT_THICK;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    auto defaultBgColorBlur = tabTheme->GetColorBottomTabSubBgBlur();
-    auto tabBarPaintProperty = GetTabBarPaintProperty();
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    if (barOverlap && !tabBarPaintProperty->GetBarBackgroundColor().has_value()) {
-        tabBarRenderContext->UpdateBackgroundColor(defaultBgColorBlur);
-    } else {
-        tabBarRenderContext->UpdateBackgroundColor(
-            tabBarPaintProperty->GetBarBackgroundColor().value_or(Color::BLACK.BlendOpacity(0.0f)));
-    }
+    SetBarBackgroundBlurStyle(option);
 }
 
 void TabsModelNG::SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange)
@@ -571,8 +548,11 @@ void TabsModelNG::Pop()
     CHECK_NULL_VOID(tabsFocusNode);
     auto tabBarFocusNode = tabBarNode->GetFocusHub();
     CHECK_NULL_VOID(tabBarFocusNode);
-    if (tabBarPosition == BarPosition::START) {
-        tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
+    if (tabBarPosition == BarPosition::START && !tabsFocusNode->IsCurrentFocus()) {
+        auto lastWeakFocusNode = tabsFocusNode->GetLastWeakFocusNode().Upgrade();
+        if (!lastWeakFocusNode) {
+            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
+        }
     }
 
     auto tabContentNum = swiperNode->TotalChildCount();
@@ -580,6 +560,7 @@ void TabsModelNG::Pop()
         index = 0;
     }
     tabBarLayoutProperty->UpdateIndicator(index);
+    tabBarPattern->SetClickRepeat(false);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     swiperLayoutProperty->UpdateIndex(index);
 
@@ -782,7 +763,7 @@ void TabsModelNG::SetBarBackgroundColor(FrameNode* frameNode, const Color& backg
     tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
 }
 
-void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, BlurStyle tabBarBlurStyle)
+void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption)
 {
     CHECK_NULL_VOID(frameNode);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -791,39 +772,35 @@ void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, BlurStyle tabB
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
     CHECK_NULL_VOID(tabBarPaintProperty);
-    tabBarPaintProperty->UpdateTabBarBlurStyle(tabBarBlurStyle);
+    tabBarPaintProperty->UpdateTabBarBlurStyleOption(styleOption);
+    auto pipeline = tabBarNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(tabBarNode->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(tabBarNode->GetId());
+    }
+    auto target = tabBarNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackgroundEffect().has_value()) {
+            target->UpdateBackgroundEffect(std::nullopt);
+        }
+        target->UpdateBackBlurStyle(styleOption);
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+    }
 }
 
 void TabsModelNG::SetBarOverlap(FrameNode* frameNode, bool barOverlap)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, BarOverlap, barOverlap, frameNode);
 
-    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
-    CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarRenderContext = tabBarNode->GetRenderContext();
-    CHECK_NULL_VOID(tabBarRenderContext);
+    BlurStyleOption option;
     if (barOverlap) {
-        tabBarRenderContext->UpdateBackBlurRadius(BAR_BLUR_RADIUS);
-        tabBarRenderContext->UpdateFrontSaturate(BAR_SATURATE);
-    } else {
-        tabBarRenderContext->UpdateBackBlurRadius(0.0_vp);
-        tabBarRenderContext->ResetFrontSaturate();
+        option.blurStyle = BlurStyle::COMPONENT_THICK;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    auto defaultBgColorBlur = tabTheme->GetColorBottomTabSubBgBlur();
-    auto tabBarPaintProperty = GetTabBarPaintProperty(frameNode);
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    if (barOverlap && !tabBarPaintProperty->GetBarBackgroundColor().has_value()) {
-        tabBarRenderContext->UpdateBackgroundColor(defaultBgColorBlur);
-    } else {
-        tabBarRenderContext->UpdateBackgroundColor(
-            tabBarPaintProperty->GetBarBackgroundColor().value_or(Color::BLACK.BlendOpacity(0.0f)));
-    }
+    SetBarBackgroundBlurStyle(frameNode, option);
 }
 
 void TabsModelNG::SetIsVertical(FrameNode* frameNode, bool isVertical)
@@ -1016,5 +993,41 @@ void TabsModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect)
     auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+}
+
+void TabsModelNG::SetBarBackgroundEffect(const EffectOption& effectOption)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBarBackgroundEffect(frameNode, effectOption);
+}
+
+void TabsModelNG::SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(tabBarPaintProperty);
+    tabBarPaintProperty->UpdateTabBarEffectOption(effectOption);
+    auto pipeline = tabBarNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+        pipeline->AddWindowFocusChangedCallback(tabBarNode->GetId());
+    } else {
+        pipeline->RemoveWindowFocusChangedCallback(tabBarNode->GetId());
+    }
+    auto target = tabBarNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+        target->UpdateBackgroundEffect(effectOption);
+    }
 }
 } // namespace OHOS::Ace::NG

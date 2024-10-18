@@ -25,6 +25,7 @@
 #include "core/components/theme/theme_attributes.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_style.h"
+#include "core/components_ng/pattern/security_component/security_component_log.h"
 
 namespace OHOS::Ace::NG {
 class SecurityComponentTheme : public virtual Theme {
@@ -41,7 +42,7 @@ public:
         {
             RefPtr<SecurityComponentTheme> theme = AceType::Claim(new SecurityComponentTheme());
             if (!themeConstants) {
-                LOGE("Build SecurityComponentTheme error, themeConstants is null!");
+                SC_LOG_ERROR("Build SecurityComponentTheme error, themeConstants is null!");
                 return theme;
             }
             ParsePattern(themeConstants, theme);
@@ -166,26 +167,6 @@ public:
     uint32_t GetDefaultTextMaxLines() const
     {
         return defaultTextMaxLines_;
-    }
-
-    float GetBigFontSizeScale() const
-    {
-        return bigFontSizeScale_;
-    }
-
-    float GetLargeFontSizeScale() const
-    {
-        return largeFontSizeScale_;
-    }
-
-    float GetMaxFontSizeScale() const
-    {
-        return maxFontSizeScale_;
-    }
-
-    const Dimension& GetAgingPadding() const
-    {
-        return agingPadding_;
     }
 
 private:
@@ -313,10 +294,6 @@ private:
     std::vector<std::string> pasteDescriptions_;
     std::vector<std::string> saveDescriptions_;
     std::string emptyString_;
-    float bigFontSizeScale_ = 1.75f;
-    float largeFontSizeScale_ = 2.0f;
-    float maxFontSizeScale_ = 3.2f;
-    Dimension agingPadding_ = 8.0_vp;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_APP_BAR_THEME_H

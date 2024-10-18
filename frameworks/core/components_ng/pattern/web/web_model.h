@@ -20,6 +20,7 @@
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/web/web_property.h"
+#include "core/components_ng/property/menu_property.h"
 
 namespace OHOS::Ace {
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
@@ -35,6 +36,7 @@ public:
         std::function<void(const std::string&)>&& setHapPathCallback, int32_t parentWebId, bool popup,
         RenderMode renderMode = RenderMode::ASYNC_RENDER, bool incognitoMode = false,
         const std::string& sharedRenderProcessToken = "") = 0;
+    virtual Color GetDefaultBackgroundColor() { return Color::WHITE; }
     virtual void SetCustomScheme(const std::string& cmdLine) = 0;
     virtual void SetFocusable(bool focusable) {};
     virtual void SetFocusNode(bool isFocusNode) {};
@@ -65,6 +67,8 @@ public:
     virtual void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnContextMenuShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnContextMenuHide(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetNewDragStyle(bool isNewDragStyle) {}
+    virtual void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param) {}
     virtual void SetJsEnabled(bool isJsEnabled) = 0;
     virtual void SetFileAccessEnabled(bool isFileAccessEnabled) = 0;
     virtual void SetOnLineImageAccessEnabled(bool isOnLineImageAccessEnabled) = 0;

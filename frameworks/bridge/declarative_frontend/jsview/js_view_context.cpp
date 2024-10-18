@@ -30,7 +30,9 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "bridge/declarative_frontend/jsview/js_tabs_feature.h"
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
+#include "core/animation/animation_pub.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -79,18 +81,6 @@ constexpr int32_t LENGTH_ONE = 1;
 constexpr int32_t LENGTH_TWO = 2;
 constexpr int32_t LENGTH_THREE = 3;
 int32_t g_animationCount = 0;
-enum class AnimationInterface : int32_t {
-    ANIMATION = 0,
-    ANIMATE_TO,
-    ANIMATE_TO_IMMEDIATELY,
-    KEYFRAME_ANIMATE_TO,
-};
-const char* g_animationInterfaceNames[] = {
-    "animation",
-    "animateTo",
-    "animateToImmediately",
-    "keyframeAnimateTo",
-};
 
 std::unordered_map<int32_t, std::string> BIND_SHEET_ERROR_MAP = {
     { ERROR_CODE_BIND_SHEET_CONTENT_ERROR, "The bindSheetContent is incorrect." },
@@ -189,6 +179,28 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
     pipelineContext->SetSyncAnimationOption(previousOption);
 }
 
+void CheckDirtyNodes(const RefPtr<PipelineBase>& pipelineContext,
+    const AnimationOption& option, const std::optional<int32_t>& count)
+{
+    bool isDirtyNodesEmpty = pipelineContext->IsDirtyNodesEmpty();
+    bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
+    if (!isDirtyNodesEmpty) {
+        pipelineContext->FlushBuild();
+        pipelineContext->FlushUITasks(true);
+    } else if (!isDirtyLayoutNodesEmpty) {
+        pipelineContext->FlushUITasks(true);
+    }
+    isDirtyNodesEmpty = pipelineContext->IsDirtyNodesEmpty();
+    isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
+    if (!isDirtyNodesEmpty || !isDirtyLayoutNodesEmpty) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "option:%{public}s, finish cnt:%{public}d,"
+                "dirtyNodes is empty:%{public}d, dirtyLayoutNodes is empty:%{public}d",
+                 option.ToString().c_str(), count.value_or(-1),
+                 isDirtyNodesEmpty,
+                 isDirtyLayoutNodesEmpty);
+    }
+}
+
 void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, const AnimationOption& option,
     JSRef<JSFunc> jsAnimateToFunc, const std::optional<int32_t>& count, bool immediately)
 {
@@ -216,6 +228,7 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
         context->PrepareOpenImplicitAnimation();
     });
     pipelineContext->PrepareOpenImplicitAnimation();
+    CheckDirtyNodes(pipelineContext, option, count);
     if (!pipelineContext->CatchInteractiveAnimations([pipelineContext, option, jsAnimateToFunc, triggerId]() {
         AnimateToForStageMode(pipelineContext, option, jsAnimateToFunc, triggerId);
     })) {
@@ -484,7 +497,7 @@ const AnimationOption JSViewContext::CreateAnimation(const JSRef<JSObject>& anim
         fRRmin = rateRangeObj->GetPropertyValue<int32_t>("min", -1);
         fRRmax = rateRangeObj->GetPropertyValue<int32_t>("max", -1);
         fRRExpected = rateRangeObj->GetPropertyValue<int32_t>("expected", -1);
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[animation/animateTo] SetExpectedFrameRateRange"
+        TAG_LOGD(AceLogTag::ACE_ANIMATION, "[animation/animateTo] SetExpectedFrameRateRange"
             "{%{public}d, %{public}d, %{public}d}", fRRmin, fRRmax, fRRExpected);
     }
     RefPtr<FrameRateRange> frameRateRange = AceType::MakeRefPtr<FrameRateRange>(fRRmin, fRRmax, fRRExpected);
@@ -579,11 +592,8 @@ void JSViewContext::JSAnimateToImmediately(const JSCallbackInfo& info)
 
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 {
-#ifdef USE_ORIGIN_SCOPE
-    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
-#else
+    ContainerScope scope(Container::CurrentIdSafelyWithCheck());
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
-#endif
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
         const char* funcName = immediately ? "animateToImmediately" : "animateTo";
@@ -744,7 +754,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
             keyframe.animationClosure();
             pipelineContext->FlushBuild();
             if (!pipelineContext->IsLayouting()) {
-                pipelineContext->FlushUITasks();
+                pipelineContext->FlushUITasks(true);
             } else {
                 TAG_LOGI(AceLogTag::ACE_ANIMATION, "isLayouting, maybe some layout keyframe animation not generated");
             }
@@ -752,6 +762,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
         AceTraceEnd();
     }
     pipelineContext->CloseImplicitAnimation();
+    pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
 }
 
 void JSViewContext::SetDynamicDimming(const JSCallbackInfo& info)
@@ -934,6 +945,11 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("closeBindSheet", JSCloseBindSheet);
     JSClass<JSViewContext>::StaticMethod("isFollowingSystemFontScale", IsFollowingSystemFontScale);
     JSClass<JSViewContext>::StaticMethod("getMaxFontScale", GetMaxFontScale);
+    JSClass<JSViewContext>::StaticMethod("bindTabsToScrollable", JSTabsFeature::BindTabsToScrollable);
+    JSClass<JSViewContext>::StaticMethod("unbindTabsFromScrollable", JSTabsFeature::UnbindTabsFromScrollable);
+    JSClass<JSViewContext>::StaticMethod("bindTabsToNestedScrollable", JSTabsFeature::BindTabsToNestedScrollable);
+    JSClass<JSViewContext>::StaticMethod(
+        "unbindTabsFromNestedScrollable", JSTabsFeature::UnbindTabsFromNestedScrollable);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

@@ -115,12 +115,11 @@ public:
     void UpdatePosMapStart(float delta, float& listCurrentPos, float space,
         int32_t startIndex, float startPos, bool groupAtStart)
     {
-        listCurrentPos += delta;
         auto it = posMap_.find(startIndex);
         if (it == posMap_.begin() || it == posMap_.end()) {
             return;
         }
-        startPos = it->second.mainPos;
+        startPos = startPos + listCurrentPos;
         it--;
         float prevPos = it->second.mainPos + it->second.mainSize + space;
         int32_t prevIndex = it->first;
@@ -407,6 +406,15 @@ public:
     float GetGroupLayoutOffset(int32_t startIndex, float startPos)
     {
         return posMap_[startIndex].mainPos - startPos;
+    }
+
+    PositionInfo GetPositionInfo(int32_t index) const
+    {
+        auto it = posMap_.find(index);
+        if (it == posMap_.end()) {
+            return { -1.0f, -1.0f };
+        }
+        return it->second;
     }
 
     std::pair<int32_t, float> GetStartIndexAndPos() const

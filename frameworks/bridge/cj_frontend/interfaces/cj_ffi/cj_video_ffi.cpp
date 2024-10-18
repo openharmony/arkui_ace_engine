@@ -81,7 +81,7 @@ void FfiOHOSAceFrameworkVideoCreate(const char* src, double progressRate, const 
     auto controller = FFIData::GetData<NativeVideoController>(controllerId);
     if (controller) {
         VideoModel::GetInstance()->Create(controller->GetController());
-        VideoModel::GetInstance()->SetSrc(src);
+        VideoModel::GetInstance()->SetSrc(src, "", "");
         VideoModel::GetInstance()->SetProgressRate(progressRate);
         VideoModel::GetInstance()->SetPosterSourceInfo(preview, "", "");
     } else {

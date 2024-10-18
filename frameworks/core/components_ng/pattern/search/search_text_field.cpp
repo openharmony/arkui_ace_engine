@@ -37,7 +37,9 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateSubmitEvent(GetTextValue());
     CloseKeyboard(forceCloseKeyboard);
-    FocusHub::LostFocusToViewRoot();
+    if (HasFocus()) {
+        FocusHub::LostFocusToViewRoot();
+    }
 }
 
 TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction() const
@@ -127,5 +129,14 @@ void SearchTextFieldPattern::ResetSearchRequestStopTwinkling()
 bool SearchTextFieldPattern::IsNeedProcessAutoFill()
 {
     return false;
+}
+
+int32_t SearchTextFieldPattern::GetRequestKeyboardId()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    auto searchHost = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_RETURN(searchHost, -1);
+    return searchHost->GetId();
 }
 } // namespace OHOS::Ace::NG

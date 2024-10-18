@@ -87,7 +87,7 @@ public:
      * @param prevPos previous layout position.
      * @return true if current position just reached content bottom.
      */
-    virtual bool ReachEnd(float prevPos) const = 0;
+    virtual bool ReachEnd(float prevPos, bool firstLayout) const = 0;
 
     virtual bool OutOfBounds() const = 0;
 
@@ -127,6 +127,7 @@ public:
     /* ========================================== */
 
     virtual void Reset() = 0;
+    virtual void ResetFooter() = 0;
 
     // for compatibility
     virtual void UpdateStartIndex() {};

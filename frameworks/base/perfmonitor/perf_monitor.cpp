@@ -25,26 +25,25 @@ namespace OHOS::Ace {
 using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
-constexpr int64_t RESPONSE_TIMEOUT = 60000000;
-constexpr int64_t STARTAPP_FRAME_TIMEOUT = 100000000;
+constexpr int64_t RESPONSE_TIMEOUT = 600000000;
+constexpr int64_t STARTAPP_FRAME_TIMEOUT = 1000000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
 const int32_t DEFAULT_JANK_REPORT_THRESHOLD = 3;
 // Obtain the last three digits of the full path
-constexpr int32_t PATH_DEPTH = 3;
+constexpr uint32_t PATH_DEPTH = 3;
 
 std::string ParsePageUrl(const std::string& pagePath)
 {
     std::string res;
     std::vector<std::string> paths;
     StringUtils::StringSplitter(pagePath, '/', paths);
-    if (paths.empty() || paths.size() < PATH_DEPTH) {
+    uint32_t pathSize = paths.size();
+    if (pathSize < PATH_DEPTH) {
         return pagePath;
     }
-    vector<string>::iterator it = paths.end();
-    for (int i = 0; i < PATH_DEPTH; i++) {
-        it--;
-        res = '/' + *it + res;
+    for (uint32_t i = pathSize - PATH_DEPTH; i < pathSize; i++) {
+        res = res + "/" + paths[i];
     }
     return res;
 }
@@ -137,7 +136,7 @@ void ReportPerfEventToRS(DataBase& data)
             }
         case EVENT_COMPLETE:
             {
-                if (data.isDisplayAnimator) {
+                if (data.needReportRs) {
                     ACE_SCOPED_TRACE("EVENT_REPORT_COMPLETE_RS sceneId = %s, uniqueId = %lld",
                         dataRs.sceneId.c_str(), static_cast<long long> (dataRs.uniqueId));
                     Rosen::RSInterfaces::GetInstance().ReportEventComplete(dataRs);
@@ -247,6 +246,7 @@ bool SceneRecord::IsDisplayAnimator(const std::string& sceneId)
         || sceneId == PerfConstants::SNAP_RECENT_ANI
         || sceneId == PerfConstants::WINDOW_RECT_RESIZE
         || sceneId == PerfConstants::WINDOW_RECT_MOVE
+        || sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH_INTERACTIVE
         || sceneId == PerfConstants::LAUNCHER_SPRINGBACK_SCROLL) {
         return true;
     }
@@ -284,6 +284,10 @@ PerfMonitor* PerfMonitor::GetPerfMonitor()
 void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, true);
+    }
+
     int64_t inputTime = GetInputTime(sceneId, type, note);
     SceneRecord* record = GetRecord(sceneId);
     if (IsSceneIdInSceneWhiteList(sceneId)) {
@@ -303,6 +307,10 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
 void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
+    if (apsMonitor_ != nullptr) {
+        apsMonitor_->SetApsScene(sceneId, false);
+    }
+
     SceneRecord* record = GetRecord(sceneId);
     ACE_SCOPED_TRACE("Animation end and current sceneId=%s", sceneId.c_str());
     if (record != nullptr) {
@@ -667,6 +675,25 @@ int32_t PerfMonitor::GetFilterType() const
     int32_t filterType = (isBackgroundApp << 4) | (isResponseExclusion << 3) | (isStartAppFrame << 2)
         | (isExclusionWindow << 1) | isExceptAnimator;
     return filterType;
+}
+
+void PerfMonitor::RecordWindowRectResize(OHOS::Ace::WindowSizeChangeReason reason, const std::string& bundleName)
+{
+    switch (reason) {
+        case OHOS::Ace::WindowSizeChangeReason::DRAG_START:
+            Start(PerfConstants::WINDOW_RECT_RESIZE, PerfActionType::LAST_DOWN, bundleName.c_str());
+            break;
+        case OHOS::Ace::WindowSizeChangeReason::DRAG_END:
+            End(PerfConstants::WINDOW_RECT_RESIZE, true);
+            break;
+        default:
+            break;
+    }
+}
+
+void PerfMonitor::SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor)
+{
+    apsMonitor_ = apsMonitor;
 }
 
 } // namespace OHOS::Ace

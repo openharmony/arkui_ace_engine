@@ -119,6 +119,20 @@ public:
         return focusOnNodeCallback_;
     }
 
+    void SetSizeChangeByRotateCallback(const std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback)
+    {
+        sizeChangeByRotateCallback_ = callback;
+    }
+
+    void FireSizeChangeByRotateCallback(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    {
+        if (sizeChangeByRotateCallback_) {
+            sizeChangeByRotateCallback_(isRotate, rsTransaction);
+        }
+    }
+
     const RefPtr<FrameNode>& GetRootElement() const
     {
         return rootNode_;
@@ -143,7 +157,10 @@ public:
 
     void HandlePenHoverOut(const TouchEvent& point) override;
 
+    void OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
+
     void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) override;
+    void DispatchMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
@@ -166,6 +183,25 @@ public:
 
     // Do mouse event actively.
     void FlushMouseEvent();
+    void OnFlushMouseEvent(TouchRestrict& touchRestrict);
+    void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
+        const std::list<MouseEvent>& moseEvents, TouchRestrict& touchRestric);
+    void DispatchMouseEvent(
+        std::unordered_map<int, MouseEvent>& idToMousePoints,
+        std::unordered_map<int32_t, MouseEvent> &newIdMousePoints,
+        const std::list<MouseEvent> &mouseEvents,
+        TouchRestrict& touchRestrict,
+        const RefPtr<FrameNode> &node);
+    void FlushDragEvents();
+    void FlushDragEvents(const RefPtr<DragDropManager>& manager,
+        std::string extraInfo,
+        const RefPtr<FrameNode>& node,
+        const std::list<PointerEvent>& pointEvent);
+    void FlushDragEvents(const RefPtr<DragDropManager>& manager,
+        std::unordered_map<int32_t, PointerEvent> newIdPoints,
+        std::string& extraInfo,
+        std::unordered_map<int, PointerEvent> &idToPoints,
+        const RefPtr<FrameNode>& node);
 
     // Called by view when axis event received.
     void OnAxisEvent(const AxisEvent& event) override;
@@ -275,6 +311,8 @@ public:
 
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
+    void AddDirtyFreezeNode(FrameNode* node);
+
     void AddPredictTask(PredictTask&& task);
 
     void AddAfterLayoutTask(std::function<void()>&& task, bool isFlushInImplicitAnimationTask = false);
@@ -295,6 +333,8 @@ public:
 
     void FlushOnceVsyncTask() override;
 
+    void FlushFreezeNode();
+    void FlushDirtyPropertyNodes();
     void FlushDirtyNodeUpdate();
     void FlushSafeAreaPaddingProcess();
 
@@ -326,7 +366,18 @@ public:
     {
         return displayAvailableRect_;
     }
-    void SetEnableKeyBoardAvoidMode(bool value) override;
+
+    void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) override;
+
+    KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() override;
+
+    bool UsingCaretAvoidMode();
+
+    void OnCaretPositionChangeOrKeyboardHeightChange(float keyboardHeight, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
+    float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
+        float height, SizeF rootSize);
+
     bool IsEnableKeyBoardAvoidMode() override;
 
     void RequireSummary() override;
@@ -423,7 +474,8 @@ public:
         return isFocusActive_;
     }
 
-    bool SetIsFocusActive(bool isFocusActive);
+    bool SetIsFocusActive(bool isFocusActive,
+        FocusActiveReason reason = FocusActiveReason::KEYBOARD_EVENT, bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
@@ -445,7 +497,7 @@ public:
     void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
-    void SetContainerWindow(bool isShow) override;
+    void SetContainerWindow(bool isShow, RRect& rRect);
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetCloseButtonStatus(bool isEnabled);
 
@@ -456,6 +508,7 @@ public:
     void FlushMessages() override;
 
     void FlushUITasks(bool triggeredByImplicitAnimation = false) override;
+    void FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& node);
 
     void FlushAfterLayoutCallbackInImplicitAnimationTask() override;
 
@@ -613,8 +666,8 @@ public:
 
     void AddAnimationClosure(std::function<void()>&& animation);
     void FlushAnimationClosure();
-    void RegisterDumpInfoListener(const std::function<void(const std::vector<std::string>&)>& callback);
     void DumpJsInfo(const std::vector<std::string>& params) const;
+    void DumpUIExt() const override;
 
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
         bool skipSubAutoFillContainer = false, bool needsRecordData = false);
@@ -710,12 +763,12 @@ public:
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
 
+    void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
+
     const SerializedGesture& GetSerializedGesture() const override;
     // return value means whether it has printed info
     bool PrintVsyncInfoIfNeed() const override;
     void SetUIExtensionImeShow(bool imeShow);
-
-    void CheckVirtualKeyboardHeight() override;
 
     void StartWindowAnimation() override
     {
@@ -887,6 +940,32 @@ public:
 
     void CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touchEvents);
 
+    bool IsDirtyNodesEmpty() const override
+    {
+        return dirtyNodes_.empty();
+    }
+
+    bool IsDirtyLayoutNodesEmpty() const override
+    {
+        return taskScheduler_->IsDirtyLayoutNodesEmpty();
+    }
+
+    void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
+    bool CheckThreadSafe();
+
+    bool IsHoverModeChange() const
+    {
+        return isHoverModeChanged_;
+    }
+
+    void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
+    static bool IsPipelineDestroyed(int32_t instanceId)
+    {
+        return aliveInstanceSet_.find(instanceId) == aliveInstanceSet_.end();
+    }
+
+    void AnimateOnSafeAreaUpdate();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -922,6 +1001,7 @@ protected:
     void DoKeyboardAvoidAnimate(const KeyboardAnimationConfig& keyboardAnimationConfig, float keyboardHeight,
         const std::function<void()>& func);
     void StartFoldStatusDelayTask(FoldStatus foldStatus);
+    void PostKeyboardAvoidTask();
 
 private:
     void ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight, WindowSizeChangeReason type);
@@ -955,14 +1035,21 @@ private:
 
     void ResetDraggingStatus(const TouchEvent& touchPoint, const RefPtr<FrameNode>& node = nullptr);
 
+    void CancelDragIfRightBtnPressed(const MouseEvent& event);
+
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
 
-    FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
+    void CompensateMouseMoveEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
-    void AnimateOnSafeAreaUpdate();
-    void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
+    bool CompensateMouseMoveEventFromUnhandledEvents(const MouseEvent& event, const RefPtr<FrameNode>& node);
+
+    void CompensatePointerMoveEvent(const PointerEvent& event, const RefPtr<FrameNode>& node);
+
+    bool CompensatePointerMoveEventFromUnhandledEvents(const PointerEvent& event, const RefPtr<FrameNode>& node);
+
+    FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     // only used for static form.
     void UpdateFormLinkInfos();
@@ -999,18 +1086,42 @@ private:
 
     std::tuple<float, float, uint64_t> GetAvgPoint(const std::vector<TouchEvent>& events, const bool isScreen);
 
-    TouchEvent GetResampleTouchEvent(
-        const std::vector<TouchEvent>& history, const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+    bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
+        const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
 
     TouchEvent GetLatestPoint(const std::vector<TouchEvent>& current, const uint64_t nanoTimeStamp);
+    
+    PointerEvent GetResamplePointerEvent(const std::vector<PointerEvent>& history,
+        const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp);
 
+    std::tuple<float, float, float, float> GetResamplePointerCoord(const std::vector<PointerEvent>& history,
+        const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
+
+    PointerEvent GetPointerLatestPoint(const std::vector<PointerEvent>& current, const uint64_t nanoTimeStamp);
+
+    std::tuple<float, float, uint64_t> GetPointerAvgPoint(const std::vector<PointerEvent>& events, const bool isScreen);
+
+    MouseEvent GetResampleMouseEvent(
+        const std::vector<MouseEvent>& history, const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp);
+
+    std::tuple<float, float, float, float> GetMouseResampleCoord(const std::vector<MouseEvent>& history,
+        const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp, const bool isScreen);
+
+    MouseEvent GetMouseLatestPoint(const std::vector<MouseEvent>& current, const uint64_t nanoTimeStamp);
+ 
+    std::tuple<float, float, uint64_t> GetMouseAvgPoint(const std::vector<MouseEvent>& events, const bool isScreen);
+    
     void FlushNodeChangeFlag();
     void CleanNodeChangeFlag();
+
+    uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
+    bool FlushModifierAnimation(uint64_t nanoTimestamp);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
 
+    std::list<WeakPtr<FrameNode>> dirtyFreezeNode_; // used in freeze feature.
     std::set<RefPtr<FrameNode>, NodeCompare<RefPtr<FrameNode>>> dirtyPropertyNodes_; // used in node api.
     std::set<RefPtr<UINode>, NodeCompare<RefPtr<UINode>>> dirtyNodes_;
     std::list<std::function<void()>> buildFinishCallbacks_;
@@ -1025,12 +1136,17 @@ private:
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
     std::list<TouchEvent> touchEvents_;
-
+    
+    std::map<RefPtr<FrameNode>, std::list<PointerEvent>> dragEvents_;
+    std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
 
     RefPtr<FrameNode> rootNode_;
 
     int32_t curFocusNodeId_ = -1;
+
+    bool preIsHalfFoldHoverStatus_ = false;
+    bool isHoverModeChanged_ = false;
 
     std::set<WeakPtr<FrameNode>> needRenderNode_;
 
@@ -1046,7 +1162,8 @@ private:
     std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
-
+    std::unordered_map<int32_t, std::vector<MouseEvent>> historyMousePointsById_;
+    std::unordered_map<int32_t, std::vector<PointerEvent>> historyPointsEventById_;
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
@@ -1071,6 +1188,7 @@ private:
     uint32_t nextScheduleTaskId_ = 0;
     std::optional<int32_t> mouseStyleNodeId_;
     uint64_t resampleTimeStamp_ = 0;
+    uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isFocusActive_ = false;
@@ -1090,6 +1208,8 @@ private:
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
+    std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> sizeChangeByRotateCallback_;
     std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;
@@ -1113,6 +1233,10 @@ private:
     RefPtr<PostEventManager> postEventManager_;
 
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
+    std::unordered_map<int32_t, MouseEvent> idToMousePoints_;
+    std::map<RefPtr<FrameNode>, std::vector<MouseEvent>> nodeToMousePoints_;
+    std::map<RefPtr<FrameNode>, std::vector<PointerEvent>> nodeToPointEvent_;
+    std::unordered_map<int32_t, PointerEvent> idToDragPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::vector<Ace::RectF> overlayNodePositions_;
     std::function<void(std::vector<Ace::RectF>)> overlayNodePositionUpdateCallback_;
@@ -1143,6 +1267,10 @@ private:
     std::list<WeakPtr<FrameNode>> changedNodes_;
     bool isHalfFoldHoverStatus_ = false;
     CancelableCallback<void()> foldStatusDelayTask_;
+    bool isFirstRootLayout_ = true;
+    bool isFirstFlushMessages_ = true;
+    bool autoFocusInactive_ = true;
+    static std::unordered_set<int32_t> aliveInstanceSet_;
 };
 } // namespace OHOS::Ace::NG
 

@@ -418,6 +418,7 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
+    textLayoutProperty->UpdateAdaptFontSizeStep(Dimension(1.0, DimensionUnit::FP));
 }
 
 void ButtonModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
@@ -577,7 +578,7 @@ void ButtonModelNG::TriggerClick(FrameNode* frameNode, double xPos, double yPos)
 
 void ButtonModelNG::ResetBorderRadius()
 {
-    ACE_RESET_LAYOUT_PROPERTY(ButtonLayoutProperty, BorderRadius);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(ButtonLayoutProperty, BorderRadius, PROPERTY_UPDATE_MEASURE);
 }
 
 ButtonType ButtonModelNG::GetType(FrameNode* frameNode)

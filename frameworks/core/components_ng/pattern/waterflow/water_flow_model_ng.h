@@ -54,7 +54,7 @@ public:
     void SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex) override;
 
     void SetFriction(double friction) override;
-    void SetCachedCount(int32_t value) override;
+    void SetCachedCount(int32_t value, bool show = false) override;
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
 
     void SetScrollBarMode(DisplayMode value) override;

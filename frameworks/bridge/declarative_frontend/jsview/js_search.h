@@ -43,6 +43,12 @@ public:
     static void JsBorderWidth(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void JsBorderStyle(const JSCallbackInfo& info);
+
+    static void GetBorderRadiusByLengthMetrics(const char* key,
+        JSRef<JSObject>& object, std::optional<CalcDimension>& radius);
+    static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft,
+        CalcDimension& topRight, CalcDimension& bottomLeft, CalcDimension& bottomRight);
+    static void ParseBorderRadius(const JSRef<JSVal>& args);
     static void JsBorderRadius(const JSCallbackInfo& info);
     static void OnSubmit(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJsOnChangeObj(const PreviewText& previewText);
@@ -88,6 +94,7 @@ public:
     static void SetCancelDefaultIcon();
     static void SetCancelSymbolIcon(const JSCallbackInfo& info);
     static void SetCancelImageIcon(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

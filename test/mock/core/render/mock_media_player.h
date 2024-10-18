@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ public:
     }
 
     MOCK_METHOD0(IsMediaPlayerValid, bool());
-    MOCK_METHOD1(SetSource, bool(const std::string&));
+    MOCK_METHOD3(SetSource, bool(const std::string&, const std::string&, const std::string&));
     MOCK_METHOD0(SetSurface, int32_t());
     MOCK_METHOD0(PrepareAsync, int32_t());
     MOCK_METHOD0(Pause, int32_t());

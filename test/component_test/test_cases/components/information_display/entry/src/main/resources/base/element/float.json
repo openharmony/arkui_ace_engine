@@ -1,0 +1,16 @@
+{
+  "float": [
+    {
+      "name": "qr_code_contentOpacity",
+      "value": "0.800000"
+    },
+    {
+      "name": "data_panel_offset_min",
+      "value": "0.100000"
+    },
+    {
+      "name": "data_panel_offset_max",
+      "value": "0.800000"
+    }
+  ]
+}

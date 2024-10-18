@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text/image_span_view.h"
+#include <cstdint>
 
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -45,6 +46,14 @@ void ImageSpanView::SetBaselineOffset(FrameNode* frameNode, const Dimension& val
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, BaselineOffset, value, frameNode);
 }
 
+float ImageSpanView::GetBaselineOffset(FrameNode* frameNode, int32_t unit)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ImageLayoutProperty, BaselineOffset,
+        value, frameNode, value);
+    return value.GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
 void ImageSpanView::SetAlt(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
 {
     auto srcInfo = ImageSourceInfo(pixMap);
@@ -66,9 +75,9 @@ void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
 void ImageSpanView::SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyle& style)
 {
     style.groupId = frameNode->GetId();
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style);
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
-        style.backgroundColor.has_value() || style.backgroundRadius.has_value());
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
+        style.backgroundColor.has_value() || style.backgroundRadius.has_value(), frameNode);
     auto frameNodeRef = AceType::Claim<FrameNode>(frameNode);
     SpanNode::RequestTextFlushDirty(AceType::Claim<FrameNode>(frameNode));
 }

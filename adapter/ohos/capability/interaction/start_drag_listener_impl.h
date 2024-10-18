@@ -1,6 +1,5 @@
-
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,17 +20,17 @@
 
 #include "i_start_drag_listener.h"
 
-using DragingCallback = std::function<void(const OHOS::Msdp::DeviceStatus::DragNotifyMsg&)>;
+using DragEndingCallback = std::function<void(const OHOS::Msdp::DeviceStatus::DragNotifyMsg&)>;
 
 namespace OHOS::Ace {
 class StartDragListenerImpl : public OHOS::Msdp::DeviceStatus::IStartDragListener {
 public:
     StartDragListenerImpl() = default;
-    StartDragListenerImpl(DragingCallback callback) : callback_(callback) { }
+    explicit StartDragListenerImpl(DragEndingCallback callback) : callback_(callback) { }
 
     void OnDragEndMessage(const OHOS::Msdp::DeviceStatus::DragNotifyMsg &msg) override
     {
-        if (callback_) {
+        if (callback_ != nullptr) {
             callback_(msg);
         }
     }
@@ -39,8 +38,7 @@ public:
     {
     }
 private:
-    DragingCallback callback_;
+    DragEndingCallback callback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_INTERACTION_START_DRAG_LISTENER_IMPL_H
-

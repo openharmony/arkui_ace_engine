@@ -72,11 +72,13 @@ struct ParsedConfig {
     std::string colorModeIsSetByApp;
     std::string mcc;
     std::string mnc;
+    std::string preferredLanguage;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
-                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontFamily.empty() &&
-                 fontWeightScale.empty() && colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty());
+                 densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
+                 colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
+                 preferredLanguage.empty());
     }
 };
 
@@ -313,9 +315,7 @@ public:
 
     void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
-    bool ParseThemeConfig(const std::string& themeConfig);
-
-    void CheckAndSetFontFamily();
+    void CheckAndSetFontFamily() override;
 
     void OnFinish()
     {
@@ -379,6 +379,14 @@ public:
     float GetWindowScale() const override
     {
         return windowScale_;
+    }
+
+    double GetWindowDensity() const
+    {
+        if (!uiWindow_) {
+            return 0.0;
+        }
+        return static_cast<double>(uiWindow_->GetVirtualPixelRatio());
     }
 
     int32_t GetParentId() const
@@ -537,6 +545,8 @@ public:
     sptr<IRemoteObject> GetToken();
     void SetParentToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetParentToken();
+    uint32_t GetParentWindowType() const;
+    uint32_t GetWindowType() const;
 
     std::string GetWebHapPath() const override
     {
@@ -567,6 +577,15 @@ public:
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;
     bool IsMainWindow() const override;
+    bool IsSubWindow() const override;
+    bool IsDialogWindow() const override;
+    bool IsSystemWindow() const override;
+    bool IsHostMainWindow() const override;
+    bool IsHostSubWindow() const override;
+    bool IsHostDialogWindow() const override;
+    bool IsHostSystemWindow() const override;
+    bool IsHostSceneBoardWindow() const override;
+    uint32_t GetParentMainWindowId(uint32_t currentWindowId) const override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
     bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
@@ -582,7 +601,6 @@ public:
         int32_t instanceId = -1) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
     void OverwritePageNodeInfo(const RefPtr<NG::FrameNode>& frameNode, AbilityBase::ViewData& viewData);
-    bool ChangeType(AbilityBase::ViewData& viewData);
     HintToTypeWrap PlaceHolderToType(const std::string& onePlaceHolder) override;
 
     void SearchElementInfoByAccessibilityIdNG(
@@ -670,15 +688,32 @@ public:
     void AddWatchSystemParameter();
     void RemoveWatchSystemParameter();
 
+    const std::vector<std::string>& GetUieParams() const
+    {
+        return paramUie_;
+    }
+
+    void UpdateResourceOrientation(int32_t orientation);
+    void UpdateResourceDensity(double density);
+
+    bool IsFreeMultiWindow() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->GetFreeMultiWindowModeEnabledState();
+    }
+    Rect GetUIExtensionHostWindowRect(int32_t instanceId) override
+    {
+        CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());
+        auto rect = uiWindow_->GetHostWindowRect(instanceId);
+        return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper = nullptr);
     void InitWindowCallback();
-    bool IsFontFileExistInPath(std::string path);
-    std::string GetFontFamilyName(std::string path);
-    bool endsWith(std::string str, std::string suffix);
 
     void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
         float height, uint32_t windowId, UIEnvCallback callback = nullptr);
@@ -693,7 +728,10 @@ private:
     void FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
 
     void NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration);
-
+    void ProcessThemeUpdate(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
+    DeviceOrientation ProcessDirectionUpdate(
+        const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
+    void InitDragEventCallback();
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -764,6 +802,9 @@ private:
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
     RefPtr<RenderBoundaryManager> renderBoundaryManager_ = Referenced::MakeRefPtr<RenderBoundaryManager>();
+
+    // for Ui Extension dump param get
+    std::vector<std::string> paramUie_;
 };
 
 } // namespace OHOS::Ace::Platform

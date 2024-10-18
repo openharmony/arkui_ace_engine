@@ -812,25 +812,21 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubModifierTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. call AttachGesture
      *            case: recreateGesture_ is true & modifierGestures_.size() != gestureHierarchy_.size()
-     * @tc.expected: recreateGesture_ = false
-     *               modifierGestures_ has one element & gestureHierarchy_ has one element
+     * @tc.expected: modifierGestures_ has one element & gestureHierarchy_ has zero element
      */
     auto longPressGesture = AceType::MakeRefPtr<LongPressGesture>(FINGERS, false, 1);
     gestureEventHub->AttachGesture(longPressGesture);
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     auto sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     auto sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 1);
-    EXPECT_EQ(sizeGestureHierarchy, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 0);
 
     /**
      * @tc.steps: step3. call RemoveGesture
      *            case: recreateGesture_ is true & modifierGestures_.size() != gestureHierarchy_.size()
-     * @tc.expected: recreateGesture_ = false
-     *               modifierGestures_ has zero element & gestureHierarchy_ has zero element
+     * @tc.expected: modifierGestures_ has zero element & gestureHierarchy_ has zero element
      */
     gestureEventHub->RemoveGesture(longPressGesture);
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 0);
@@ -839,18 +835,15 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubModifierTest001, TestSize.Level1)
     /**
      * @tc.steps: step4. call AttachGesture & ClearModifierGesture
      *            case: recreateGesture_ is true & gestures_.size() != gestureHierarchy_.size()
-     * @tc.expected: recreateGesture_ = false
-     *               modifierGestures_ has cleared & gestureHierarchy_ has cleared
+     * @tc.expected: modifierGestures_ has cleared & gestureHierarchy_ has cleared
      */
     gestureEventHub->AttachGesture(longPressGesture);
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 1);
-    EXPECT_EQ(sizeGestureHierarchy, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 0);
 
     gestureEventHub->ClearModifierGesture();
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 0);
@@ -877,8 +870,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubModifierTest002, TestSize.Level1)
 
     /**
      * @tc.steps: step4. call RemoveGesturesByTag
-     * @tc.expected: recreateGesture_ = false
-     *               modifierGestures_ one element & gestureHierarchy_ has one element & group has one child
+     * @tc.expected: modifierGestures_ one element & gestureHierarchy_ has zero element & group has one child
      */
     std::vector<RefPtr<Gesture>> gestures;
     auto longPressGestureOne = AceType::MakeRefPtr<LongPressGesture>(FINGERS, false, 1);
@@ -888,18 +880,16 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubModifierTest002, TestSize.Level1)
     gestures.emplace_back(longPressGestureTwo);
     auto group = AceType::MakeRefPtr<GestureGroup>(GestureMode::Exclusive, gestures);
     gestureEventHub->AttachGesture(group);
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     auto sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     auto sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 1);
-    EXPECT_EQ(sizeGestureHierarchy, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 0);
 
     gestureEventHub->RemoveGesturesByTag(CHECK_TAG_1);
-    EXPECT_FALSE(gestureEventHub->recreateGesture_);
     sizeModifierGestures = static_cast<int32_t>(gestureEventHub->modifierGestures_.size());
     sizeGestureHierarchy = static_cast<int32_t>(gestureEventHub->gestureHierarchy_.size());
     EXPECT_EQ(sizeModifierGestures, 1);
-    EXPECT_EQ(sizeGestureHierarchy, 1);
+    EXPECT_EQ(sizeGestureHierarchy, 0);
     EXPECT_EQ(group->gestures_.size(), 1);
 }
 
@@ -983,7 +973,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubAddGestureToGestureHierarchyTest0
      * @tc.steps: step2. Invoke AddGestureToGestureHierarchy.
      * @tc.expected: gesture is null.
      */
-    guestureEventHub->AddGestureToGestureHierarchy(nullptr);
+    guestureEventHub->AddGestureToGestureHierarchy(nullptr, false);
 }
 
 /**
@@ -1322,7 +1312,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
     constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
     GestureEvent info = GestureEvent();
     auto size = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
     OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
@@ -1339,7 +1329,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
      * NearZero(size.Width()) is true.
      */
     size = SizeF(0, 0);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
     result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     EXPECT_TRUE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_TRUE(NearZero(size.Width()));
@@ -1355,7 +1345,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
      */
     size = SizeF(500, 600);
     gestureEventHub->frameNodeSize_ = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
     result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_FALSE(NearZero(size.Width()));
@@ -1367,7 +1357,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
      */
     size = SizeF(0, 0);
     gestureEventHub->frameNodeSize_ = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
     result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_TRUE(NearZero(size.Width()));
@@ -1398,7 +1388,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapScaleTest002, TestSize
     int32_t width = 600;
     GestureEvent info = GestureEvent();
     auto size = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f, true);
+    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();

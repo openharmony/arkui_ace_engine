@@ -67,7 +67,8 @@ constexpr int32_t DOT_INDICATOR_LEFT = 8;
 constexpr int32_t DOT_INDICATOR_TOP = 9;
 constexpr int32_t DOT_INDICATOR_RIGHT = 10;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 11;
-constexpr int32_t DOT_INDICATOR_INFO_SIZE = 11;
+constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 12;
+constexpr int32_t DOT_INDICATOR_INFO_SIZE = 12;
 constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
 constexpr int32_t NUM_2 = 2;
@@ -191,6 +192,16 @@ std::optional<Dimension> ParseIndicatorDimension(const std::string& value)
     return indicatorDimension;
 }
 
+void ParseMaxDisplayCount(const std::vector<std::string>& dotIndicatorInfo, SwiperParameters& swiperParameters)
+{
+    auto maxDisplayCount = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_MAX_DISPLAY_COUNT);
+    if (maxDisplayCount.empty()) {
+        return;
+    }
+
+    swiperParameters.maxDisplayCountVal = StringUtils::StringToInt(maxDisplayCount);
+}
+
 SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo)
 {
     auto itemWidthValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_ITEM_WIDTH);
@@ -241,6 +252,9 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
     parseOk = Color::ParseColorString(selectedColorValue, colorVal);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
+
+    ParseMaxDisplayCount(dotIndicatorInfo, swiperParameters);
+
     return swiperParameters;
 }
 

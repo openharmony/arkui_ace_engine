@@ -784,7 +784,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest017, TestSize.Level1)
      * @tc.expected: mediaPlayer_'s functions is called. and PlaybackStatus is PREPARED
      */
     movingphoto.SetImageSrc(MOVINGPHOTO_IMAGE_SRC);
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(movingphotoPattern->mediaPlayer_)), SetSource(_))
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(movingphotoPattern->mediaPlayer_)), SetSource(_, _, _))
         .WillRepeatedly(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(movingphotoPattern->mediaPlayer_)), PrepareAsync())
         .WillRepeatedly(Return(0));

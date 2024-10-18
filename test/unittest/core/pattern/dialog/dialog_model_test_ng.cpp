@@ -798,7 +798,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg019, TestSize.Level1)
     /**
      * @tc.steps: step4. Test dialogNode's BuildChild.
      * @tc.expected: Check contentNodeMap_ value.
-    */
+     */
     pattern->BuildChild(props);
     EXPECT_TRUE(pattern->contentNodeMap_.size() > 0);
     pattern->customNode_ = dialogNode;
@@ -806,7 +806,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg019, TestSize.Level1)
     /**
      * @tc.steps: step5. Test dialogNode's ToJsonValue.
      * @tc.expected: Check value.
-    */
+     */
     auto json = JsonUtil::Create(true);
     pattern->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("title"), TITLE);
@@ -816,7 +816,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg019, TestSize.Level1)
     /**
      * @tc.steps: step5. Test dialogNode's OnLanguageConfigurationUpdate.
      * @tc.expected: The result is set as expected.
-    */
+     */
     pattern->OnLanguageConfigurationUpdate();
     EXPECT_EQ(pattern->title_, TITLE);
     EXPECT_EQ(pattern->subtitle_, SUBTITLE);
@@ -1328,12 +1328,12 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg033, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
     auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
     ASSERT_NE(dialogLayoutAlgorithm, nullptr);
-    
+
     auto maxSize = CONTAINER_SIZE;
     SafeAreaInsets::Inset insetLeftAndRight = {};
     SafeAreaInsets::Inset insetTopAndBottom = { .end = 100.f };
-    SafeAreaInsets SYSTEM_SAFE_AREA_INSET = { insetLeftAndRight, insetTopAndBottom,
-        insetLeftAndRight, insetTopAndBottom };
+    SafeAreaInsets SYSTEM_SAFE_AREA_INSET = { insetLeftAndRight, insetTopAndBottom, insetLeftAndRight,
+        insetTopAndBottom };
     dialogLayoutAlgorithm->foldCreaseRect = FOLD_CREASE_RECT;
     dialogLayoutAlgorithm->safeAreaInsets_ = SYSTEM_SAFE_AREA_INSET;
     dialogLayoutAlgorithm->isHoverMode_ = false;
@@ -1371,7 +1371,7 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
     dialogLayoutAlgorithm->isHoverMode_ = true;
     dialogLayoutAlgorithm->foldCreaseRect = FOLD_CREASE_RECT;
     OffsetF topLeftPoint;
-    
+
     /**
      * @tc.steps: step2. call SetAlignmentSwitch function.
      * @tc.expected: the results are correct.
@@ -1384,5 +1384,110 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg034, TestSize.Level1)
     dialogLayoutAlgorithm->SetAlignmentSwitch(maxSize, childSize, topLeftPoint);
     dialogLayoutAlgorithm->AdjustChildPosition(topLeftPoint, topLeftPoint, childSize, true);
     EXPECT_EQ(topLeftPoint.GetY(), 0);
+}
+
+/**
+ * @tc.name: ComputeInnerLayoutSizeParam001
+ * @tc.desc: Test ComputeInnerLayoutSizeParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, ComputeInnerLayoutSizeParam001, TestSize.Level1)
+{
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    DialogProperties props;
+    auto dialog = DialogView::CreateDialogNode(props, nullptr);
+    ASSERT_NE(dialog, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dialog, dialog->GetGeometryNode(), dialog->GetLayoutProperty());
+    auto innerLayout = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    dialogLayoutAlgorithm->gridCount_ = 1;
+    EXPECT_EQ(dialogLayoutAlgorithm->ComputeInnerLayoutSizeParam(innerLayout, dialogProp), false);
+}
+
+/**
+ * @tc.name: IsGetExpandDisplayValidHeight001
+ * @tc.desc: Test IsGetExpandDisplayValidHeight function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, IsGetExpandDisplayValidHeight001, TestSize.Level1)
+{
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    dialogLayoutAlgorithm->expandDisplay_ = true;
+    dialogLayoutAlgorithm->isShowInSubWindow_ = true;
+    EXPECT_FALSE(dialogLayoutAlgorithm->IsGetExpandDisplayValidHeight());
+}
+
+/**
+ * @tc.name: GetMaxWidthBasedOnGridType001
+ * @tc.desc: Test GetMaxWidthBasedOnGridType function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, GetMaxWidthBasedOnGridType001, TestSize.Level1)
+{
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+
+    auto gridColumninfo = AceType::MakeRefPtr<GridColumnInfo>();
+    auto parent = AceType::MakeRefPtr<GridContainerInfo>();
+    parent->columns_ = 0;
+    gridColumninfo->parent_ = parent;
+    dialogLayoutAlgorithm->gridCount_ = 1;
+    auto type = GridSizeType::UNDEFINED;
+    auto deviceType = DeviceType::PHONE;
+    EXPECT_EQ(dialogLayoutAlgorithm->GetMaxWidthBasedOnGridType(gridColumninfo, type, deviceType), 0);
+}
+
+/**
+ * @tc.name: IsDialogTouchingBoundary001
+ * @tc.desc: Test IsDialogTouchingBoundary function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, IsDialogTouchingBoundary001, TestSize.Level1)
+{
+    auto dialogLayoutAlgorithm = AceType::MakeRefPtr<DialogLayoutAlgorithm>();
+    OffsetF topLeftPoint = OffsetF(100, -1);
+    SizeF childSize = SizeF(500.0f, -1.0f);
+    SizeF selfSize = SizeF(1.0f, 100.0f);
+    dialogLayoutAlgorithm->IsDialogTouchingBoundary(topLeftPoint, childSize, selfSize);
+    EXPECT_EQ(dialogLayoutAlgorithm->touchingBoundaryFlag_, TouchingBoundaryType::TouchRightBoundary);
+
+    topLeftPoint = OffsetF(-1, -1);
+    childSize = SizeF(-1.0f, -1.0f);
+    selfSize = SizeF(100.0f, 100.0f);
+    auto result = dialogLayoutAlgorithm->IsDialogTouchingBoundary(topLeftPoint, childSize, selfSize);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetOpenDialogWithNode001
+ * @tc.desc: Test SetOpenDialogWithNode function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTestNg, SetOpenDialogWithNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogModel with theme.
+     */
+    CustomDialogControllerModelNG controllerModel;
+
+    DialogProperties props {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+    };
+    /**
+     * @tc.steps: step2.Build prerequisite conditions and operational parameters
+     */
+    controllerModel.SetOpenDialogWithNode(props, nullptr);
+    props.isShowInSubWindow = true;
+    props.isModal = true;
+    props.isScenceBoardDialog = true;
+    /**
+     * @tc.steps: step3. Call  SetOpenDialogWithNode.
+     * @tc.desc: Covering branch isScenceBoardDialog is true
+     * @tc.expected: running result(dialog) is nullptr.
+     */
+    auto result = controllerModel.SetOpenDialogWithNode(props, nullptr);
+    EXPECT_EQ(result, nullptr);
 }
 } // namespace OHOS::Ace::NG

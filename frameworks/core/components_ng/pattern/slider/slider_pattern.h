@@ -131,7 +131,6 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     OffsetF CalculateGlobalSafeOffset();
     void UpdateValue(float value);
-    void OnVisibleChange(bool isVisible) override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void SetBuilderFunc(SliderMakeCallback&& makeFunc)
@@ -187,11 +186,11 @@ private:
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
+    void HandleEnabled();
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandlingGestureStart(const GestureEvent& info);
     void HandlingGestureEvent(const GestureEvent& info);
     void HandledGestureEvent();
-    void InitWindowSizeChanged(const RefPtr<FrameNode>& host);
 
     void UpdateValueByLocalLocation(const std::optional<Offset>& localLocation);
     void FireChangeEvent(int32_t mode);
@@ -251,6 +250,7 @@ private:
     void SetStepPointAccessibilityVirtualNode(
         const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
     void SendAccessibilityValueEvent(int32_t mode);
+    void InitOrRefreshSlipFactor();
 
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -286,7 +286,6 @@ private:
     bool panMoveFlag_ = false;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisibleArea_ = true;
-    bool isVisible_ = true;
     bool isShow_ = true;
     SliderModelNG::SliderInteraction sliderInteractionMode_ = SliderModelNG::SliderInteraction::SLIDE_AND_CLICK;
     bool allowDragEvents_ = true;
@@ -327,6 +326,7 @@ private:
     uint64_t lastAccessibilityValueTime_ = 0;
     float accessibilityValue_ = 0.0f;
     
+    double slipfactor_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
 } // namespace OHOS::Ace::NG

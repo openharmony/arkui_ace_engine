@@ -1,0 +1,36 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "alert_color1",
+      "value": "#FF3C1687"
+    },
+    {
+      "name": "alert_color2",
+      "value": "#699999"
+    },
+    {
+      "name": "dialog_show_background_color",
+      "value": "#EEE9BF"
+    },
+    {
+      "name": "color_red",
+      "value": "#FF0000"
+    },
+    {
+      "name": "color_blue",
+      "value": "#0000FF"
+    },
+    {
+      "name": "time_picker_dialog",
+      "value": "#FFFF8080"
+    },
+    {
+      "name": "action_sheet_color",
+      "value": "#FF3C1687"
+    }
+  ]
+}

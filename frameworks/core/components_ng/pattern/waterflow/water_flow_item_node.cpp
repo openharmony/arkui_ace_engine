@@ -33,6 +33,15 @@ RefPtr<FrameNode> WaterFlowItemNode::GetOrCreateFlowItem(
     return node;
 }
 
+RefPtr<FrameNode> WaterFlowItemNode::CreateFlowItem(
+    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+{
+    auto frameNode = MakeRefPtr<WaterFlowItemNode>(tag, nodeId, pattern);
+    ElementRegister::GetInstance()->AddUINode(frameNode);
+    frameNode->InitializePatternAndContext();
+    return frameNode;
+}
+
 bool WaterFlowItemNode::RequestParentDirty()
 {
     auto parent = GetAncestorNodeOfFrame();

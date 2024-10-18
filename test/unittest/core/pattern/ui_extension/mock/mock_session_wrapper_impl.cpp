@@ -85,7 +85,10 @@ int32_t SessionWrapperImpl::GetSessionId() const
 
 const std::shared_ptr<AAFwk::Want> SessionWrapperImpl::GetWant()
 {
-    return nullptr;
+    RefPtr<WantWrap> wantWrap = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
+    auto wantWrapOhos = AceType::DynamicCast<WantWrapOhos>(wantWrap);
+    auto want = wantWrapOhos->GetWant();
+    return std::make_shared<AAFwk::Want>(want);
 }
 
 bool SessionWrapperImpl::NotifyFocusEventSync(bool isFocus)
@@ -231,7 +234,8 @@ void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea
 {
 }
 
-bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const
+bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
+    sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout)
 {
     return true;
 }
@@ -247,5 +251,19 @@ int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AA
 
 void SessionWrapperImpl::UpdateSessionViewportConfig()
 {
+}
+
+uint32_t SessionWrapperImpl::GetReasonDump() const
+{
+    return 1;
+}
+
+void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+}
+
+WindowSizeChangeReason SessionWrapperImpl::GetSizeChangeReason() const
+{
+    return static_cast<WindowSizeChangeReason>(0);
 }
 } // namespace OHOS::Ace::NG

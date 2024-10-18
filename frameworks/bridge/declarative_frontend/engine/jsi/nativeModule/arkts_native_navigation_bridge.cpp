@@ -32,13 +32,18 @@ ArkUINativeModuleValue NavigationBridge::SetHideToolBar(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
+    const int32_t argsNum = 2; // 2: parameter index
+    Local<JSValueRef> animatedArg = runtimeCallInfo->GetCallArgRef(argsNum);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (hideArg->IsNull() || hideArg->IsUndefined() || !hideArg->IsBoolean()) {
-        GetArkUINodeModifiers()->getNavigationModifier()->resetHideToolBar(nativeNode);
-    } else {
-        bool hide = hideArg->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getNavigationModifier()->setHideToolBar(nativeNode, hide);
+    bool hide = false;
+    bool animated = false;
+    if (!hideArg->IsNull() && !hideArg->IsUndefined() && hideArg->IsBoolean()) {
+        hide = hideArg->ToBoolean(vm)->Value();
     }
+    if (!animatedArg->IsNull() && !animatedArg->IsUndefined() && animatedArg->IsBoolean()) {
+        animated = animatedArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->setHideToolBar(nativeNode, hide, animated);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -189,13 +194,18 @@ ArkUINativeModuleValue NavigationBridge::SetHideTitleBar(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> hideArg = runtimeCallInfo->GetCallArgRef(1);
+    const int32_t argsNum = 2; // 2: parameter index
+    Local<JSValueRef> animatedArg = runtimeCallInfo->GetCallArgRef(argsNum);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    if (hideArg->IsBoolean()) {
-        bool hide = hideArg->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getNavigationModifier()->setNavHideTitleBar(nativeNode, hide);
-    } else {
-        GetArkUINodeModifiers()->getNavigationModifier()->resetNavHideTitleBar(nativeNode);
+    bool hide = false;
+    bool animated = false;
+    if (!hideArg->IsNull() && !hideArg->IsUndefined() && hideArg->IsBoolean()) {
+        hide = hideArg->ToBoolean(vm)->Value();
     }
+    if (!animatedArg->IsNull() && !animatedArg->IsUndefined() && animatedArg->IsBoolean()) {
+        animated = animatedArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->setNavHideTitleBar(nativeNode, hide, animated);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -463,8 +473,8 @@ ArkUINativeModuleValue NavigationBridge::SetTitle(ArkUIRuntimeCallInfo* runtimeC
     if (optionsArg->IsObject(vm)) {
         NativeNavigationUtils::ParseTitleOptions(vm, optionsArg, options);
     }
-    GetArkUINodeModifiers()->getNavigationModifier()->
-        setNavTitle(nativeNode, hasSub, hasMain, subtitle.c_str(), title.c_str(), options);
+    ArkUINavigationTitleInfo titleInfo = { hasSub, hasMain, subtitle.c_str(), title.c_str() };
+    GetArkUINodeModifiers()->getNavigationModifier()->setNavTitle(nativeNode, titleInfo, options);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -509,6 +519,58 @@ ArkUINativeModuleValue NavigationBridge::ResetMenus(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getNavigationModifier()->resetNavMenus(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::SetRecoverable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> recoverableArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (recoverableArg->IsNull() || recoverableArg->IsUndefined() || !recoverableArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getNavigationModifier()->resetRecoverable(nativeNode);
+    } else {
+        bool recoverable = recoverableArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getNavigationModifier()->setRecoverable(nativeNode, recoverable);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::ResetRecoverable(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetRecoverable(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::SetEnableDragBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> enableDragBarArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (enableDragBarArg->IsNull() || enableDragBarArg->IsUndefined() || !enableDragBarArg->IsBoolean()) {
+        GetArkUINodeModifiers()->getNavigationModifier()->resetEnableDragBar(nativeNode);
+    } else {
+        bool enableDragBar = enableDragBarArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getNavigationModifier()->setEnableDragBar(nativeNode, enableDragBar);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::ResetEnableDragBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavigationModifier()->resetEnableDragBar(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

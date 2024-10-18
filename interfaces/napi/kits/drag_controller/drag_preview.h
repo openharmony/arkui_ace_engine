@@ -36,8 +36,8 @@ using PreviewType = Msdp::DeviceStatus::PreviewType;
 using PreviewStyle = Msdp::DeviceStatus::PreviewStyle;
 using PreviewAnimation = Msdp::DeviceStatus::PreviewAnimation;
 namespace {
-constexpr int32_t argCount1 = 1;
-constexpr int32_t argCount2 = 2;
+constexpr int32_t ARG_COUNT_1 = 1;
+constexpr int32_t ARG_COUNT_2 = 2;
 constexpr int32_t DEFAULT_DURATION_VALUE = 1000;
 } // namespace
 
@@ -51,22 +51,27 @@ public:
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         CHECK_NULL_RETURN(scope, nullptr);
-        size_t argc = argCount1;
-        napi_value argv[argCount1] = { 0 };
+        size_t argc = ARG_COUNT_1;
+        napi_value argv[ARG_COUNT_1] = { 0 };
         napi_value result = nullptr;
         void* data = nullptr;
         napi_get_cb_info(env, info, &argc, argv, &result, &data);
-        NAPI_ASSERT(env, argc == argCount1, "require 1 parameter");
+        NAPI_ASSERT(env, argc == ARG_COUNT_1, "require 1 parameter");
 
         Color foregroundColor;
         if (!ParseColor(env, argv[0], foregroundColor)) {
             LOGE("Parse foregroundColor failed");
+            napi_close_handle_scope(env, scope);
             return nullptr;
         }
 
         DragPreview* dragPreview = nullptr;
         napi_unwrap(env, result, (void**)&dragPreview);
-
+        if (dragPreview == nullptr) {
+            LOGE("dragPreview is nullptr");
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
         dragPreview->SetColor(foregroundColor);
         LOGI("foregroundColor is %{public}x", dragPreview->previewStyle_.foregroundColor);
         if (!dragPreview->hasAnimation_) {
@@ -94,15 +99,20 @@ public:
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
         CHECK_NULL_RETURN(scope, nullptr);
-        size_t argc = argCount2;
-        napi_value argv[argCount2] = { 0 };
+        size_t argc = ARG_COUNT_2;
+        napi_value argv[ARG_COUNT_2] = { 0 };
         napi_value result = nullptr;
         void* data = nullptr;
         napi_get_cb_info(env, info, &argc, argv, &result, &data);
-        NAPI_ASSERT(env, argc == argCount2, "require 2 parameter");
+        NAPI_ASSERT(env, argc == ARG_COUNT_2, "require 2 parameter");
 
         DragPreview* dragPreview = nullptr;
         napi_unwrap(env, result, (void**)&dragPreview);
+        if (dragPreview == nullptr) {
+            LOGE("dragPreview is nullptr");
+            napi_close_handle_scope(env, scope);
+            return nullptr;
+        }
         dragPreview->hasAnimation_ = true;
         PreviewAnimation previewAnimation;
         ParseAnimationInfo(env, argv[0], previewAnimation);
@@ -123,6 +133,7 @@ public:
             TaskExecutor::TaskType::JS, "ArkUIDragUpdatePreviewAnimationStyle");
         dragPreview->hasAnimation_ = false;
         dragPreview->previewStyle_.types.clear();
+        napi_close_handle_scope(env, scope);
         return nullptr;
     }
 

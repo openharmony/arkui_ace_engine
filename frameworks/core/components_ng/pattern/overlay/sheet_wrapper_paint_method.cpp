@@ -93,8 +93,8 @@ void SheetWrapperPaintMethod::GetBorderDrawPath(
     auto sheetSize = geometryNode->GetFrameSize();
     auto targetOffset = sheetNode->GetPositionToParentWithTransform();
     auto sheetRadius = GetSheetRadius(sheetSize, sheetTheme->GetSheetRadius()).ConvertToPx();
-    auto borderRadius = sheetRadius + borderWidth * 0.2f;
-    auto borderOffset = borderWidth * 0.2f;
+    auto borderRadius = sheetRadius + borderWidth * 0.5f;
+    auto borderOffset = borderWidth * 0.5f;
     auto arrowOffset = sheetPattern->GetSheetArrowOffset().GetX();
     path.Reset();
     path.MoveTo(

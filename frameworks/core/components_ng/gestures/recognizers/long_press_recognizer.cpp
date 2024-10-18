@@ -233,6 +233,10 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
         SendCancelMsg();
         refereeState_ = RefereeState::READY;
+    } else if (refereeState_ == RefereeState::SUCCEED) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "LongPressRecognizer touchPoints size not equal 0, not send cancel callback.");
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     } else {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
@@ -358,6 +362,7 @@ void LongPressRecognizer::SendCallbackMsg(
         info.SetPointerEvent(lastPointEvent_);
         Platform::UpdatePressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+        info.SetInputEventType(inputEventType_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

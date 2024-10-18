@@ -205,6 +205,12 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         jsonLinearGradientBlur->Put("options", options);
         json->Put("linearGradientBlur", jsonLinearGradientBlur);
     }
+    if (propFgDynamicBrightnessOption.has_value()) {
+        propFgDynamicBrightnessOption->ToJsonValue(json, filter, "foregroundBrightness");
+    }
+    if (propBgDynamicBrightnessOption.has_value()) {
+        propBgDynamicBrightnessOption->ToJsonValue(json, filter, "backgroundBrightnessInternal");
+    }
 }
 
 void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

@@ -567,6 +567,17 @@ export class ToolBar extends ViewPU {
       });
       Button.focusable(!(this.toolBarList[t4]?.state === ItemState.DISABLE));
       Button.focusOnTouch(!(this.toolBarList[t4]?.state === ItemState.DISABLE));
+      Button.focusBox({
+        margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
+        strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
+        strokeColor: ColorMetrics.resourceColor({
+          'id': -1,
+          'type': 10001,
+          params: ['sys.color.ohos_id_color_focused_outline'],
+          'bundleName': '',
+          'moduleName': '',
+        })
+      });
       Button.backgroundColor(this.toolBarItemBackground[t4]);
       Button.onHover((r5) => {
         if (r5 && this.toolBarList[t4]?.state !== ItemState.DISABLE) {

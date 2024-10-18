@@ -22,6 +22,8 @@ namespace OHOS::Ace::NG {
 bool PostEventManager::PostEvent(const RefPtr<NG::UINode>& uiNode, TouchEvent& touchEvent)
 {
     if (!CheckPointValidity(touchEvent)) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+            "PostEvent event is invalid, possible reason is event timeStamp is the same as the previous event");
         return false;
     }
     CHECK_NULL_RETURN(uiNode, false);
@@ -60,6 +62,8 @@ bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const
                 PostUpEvent(lastItem->second.targetNode, event);
                 break;
             }
+            TAG_LOGW(
+                AceLogTag::ACE_INPUTKEYFLOW, "PostEvent receive DOWN event twice, id is %{public}d", touchEvent.id);
             return false;
         }
     }
@@ -68,12 +72,15 @@ bool PostEventManager::PostDownEvent(const RefPtr<NG::UINode>& targetNode, const
     auto eventManager = pipelineContext->GetEventManager();
     CHECK_NULL_RETURN(eventManager, false);
     auto scalePoint = touchEvent.CreateScalePoint(pipelineContext->GetViewScale());
+    eventManager->GetEventTreeRecord(EventTreeType::POST_EVENT).AddTouchPoint(scalePoint);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = touchEvent.sourceType;
     touchRestrict.touchEvent = touchEvent;
     touchRestrict.inputEventType = InputEventType::TOUCH_SCREEN;
+    touchRestrict.touchTestType = EventTreeType::POST_EVENT;
     auto result = eventManager->PostEventTouchTest(scalePoint, targetNode, touchRestrict);
     if (!result) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "PostDownEvent id: %{public}d touch test result is empty", touchEvent.id);
         return false;
     }
     HandlePostEvent(targetNode, touchEvent);
@@ -85,6 +92,8 @@ bool PostEventManager::PostMoveEvent(const RefPtr<NG::UINode>& targetNode, const
     CHECK_NULL_RETURN(targetNode, false);
 
     if (!HaveReceiveDownEvent(targetNode, touchEvent.id) || HaveReceiveUpOrCancelEvent(targetNode, touchEvent.id)) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+            "PostMoveEvent id: %{public}d doesn't receive down event or has receive up or cancel event", touchEvent.id);
         return false;
     }
 
@@ -97,6 +106,8 @@ bool PostEventManager::PostUpEvent(const RefPtr<NG::UINode>& targetNode, const T
     CHECK_NULL_RETURN(targetNode, false);
 
     if (!HaveReceiveDownEvent(targetNode, touchEvent.id) || HaveReceiveUpOrCancelEvent(targetNode, touchEvent.id)) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW,
+            "PostUpEvent id: %{public}d doesn't receive down event or has receive up or cancel event", touchEvent.id);
         return false;
     }
 
@@ -115,6 +126,9 @@ void PostEventManager::HandlePostEvent(const RefPtr<NG::UINode>& targetNode, con
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto eventManager = pipelineContext->GetEventManager();
+    if (touchEvent.type != TouchType::DOWN && touchEvent.type != TouchType::MOVE) {
+        eventManager->GetEventTreeRecord(EventTreeType::POST_EVENT).AddTouchPoint(touchEvent);
+    }
     eventManager->PostEventFlushTouchEventEnd(touchEvent);
     eventManager->PostEventDispatchTouchEvent(touchEvent);
     // when receive UP event, clear DispatchAction which is same targetNode and same id

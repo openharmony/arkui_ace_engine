@@ -97,7 +97,7 @@ public:
 
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
-    void OnScrollStartRecursive(float position, float velocity = 0.f) override;
+    void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
 
     bool NestedScrollOutOfBoundary() override
     {
@@ -170,6 +170,7 @@ private:
     bool pullToRefresh_ = true;
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
+    std::optional<float> ratio_;
     // API version 10
     void InitLowVersionOffset();
     void UpdateChild();

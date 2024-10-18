@@ -22,6 +22,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 
 namespace OHOS::Ace::NG {
 using OnStateChangeEvent = std::function<void(bool)>;
@@ -79,9 +80,10 @@ public:
 
     void FireOnAppear() override;
 
-    void FireDisappearCallback()
+    void FireDisappearCallback(const RefPtr<NavDestinationGroupNode>& navDestination)
     {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onDisappear state.", name_.c_str());
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle Respond user onDisappear. id is %{public}d",
+            name_.c_str(), navDestination->GetId());
         EventHub::FireOnDisappear();
     }
 

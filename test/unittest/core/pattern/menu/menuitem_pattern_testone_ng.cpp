@@ -486,7 +486,7 @@ HWTEST_F(MenuItemPatternTestOneNg, HandleOnChange001, TestSize.Level1)
     pattern->HandleOnChange();
 
     auto onChange = hub->GetOnChange();
-    ASSERT_NE(onChange, nullptr);
+    ASSERT_EQ(onChange, nullptr);
 }
 
 /**

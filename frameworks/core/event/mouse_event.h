@@ -112,6 +112,7 @@ struct MouseEvent final {
     int32_t touchEventId = 0;
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
+    std::vector<MouseEvent> history;
     bool isInjected = false;
     bool isPrivacyMode = false;
 
@@ -144,7 +145,8 @@ struct MouseEvent final {
 
     MouseEvent CloneWith(float scale) const
     {
-        return { .x = x / scale,
+        return {.id = id,
+            .x = x / scale,
             .y = y / scale,
             .z = z / scale,
             .deltaX = deltaX / scale,

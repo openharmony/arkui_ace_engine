@@ -155,11 +155,6 @@ public:
     bool TryShrinkTextWidth(SizeF& point, SizeF& circlePoint, bool maxSpaceToShrink, float maxDistance,
         float threshold);
 
-    bool IsExist()
-    {
-        return isExist_;
-    }
-
     float pow(float value)
     {
         return value * value;

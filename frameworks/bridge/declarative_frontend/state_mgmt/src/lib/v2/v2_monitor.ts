@@ -28,24 +28,37 @@ class MonitorValueV2<T> {
   public before?: T;
   public now?: T;
   public path: string;
+  public id: number;
   // properties on the path
-  public props : string[];
+  public props: string[];
 
-  private dirty : boolean;
+  private dirty: boolean;
+  private isPresent: boolean;
 
-  constructor(path: string) {
+  constructor(path: string, id: number) {
     this.path = path;
-    this.dirty = false;
+    this.id = id;
     this.props = path.split('.');
+    this.dirty = false;
+    this.isPresent = false;
   }
 
   setValue(isInit: boolean, newValue: T): boolean {
     this.now = newValue;
     if (isInit) {
       this.before = this.now;
+      this.isPresent = true;
+      return false; // not dirty at init
     }
-    this.dirty = this.before !== this.now;
+    // Consider value dirty if it wasn't present before setting the new value
+    this.dirty = !this.isPresent || this.before !== this.now;
+    this.isPresent = true;
     return this.dirty;
+  }
+
+  setNotFound(): void {
+    this.isPresent = false;
+    this.before = undefined;
   }
 
   // mv newValue to oldValue, set dirty to false
@@ -61,7 +74,7 @@ class MonitorValueV2<T> {
 
 /**
  * MonitorV2
- * one MonitorV2 object per @monitor function
+ * one MonitorV2 object per @Monitor function
  * watchId - similar to elmtId, identify one MonitorV2 in Observe.idToCmp Map
  * observeObjectAccess = get each object on the 'path' to create dependency and add them with Observe.addRef
  * fireChange - exec @Monitor function and re-new dependencies with observeObjectAccess
@@ -78,7 +91,7 @@ class MonitorV2 {
 
 
   private values_: Array<MonitorValueV2<unknown>> = new Array<MonitorValueV2<unknown>>();
-  private target_: object; // @monitor function 'this': data object or ViewV2
+  private target_: object; // @Monitor function 'this': data object or ViewV2
   private monitorFunction: (m: IMonitor) => void;
   private watchId_: number; // unique id, similar to elmtId but identifies this object
 
@@ -89,11 +102,11 @@ class MonitorV2 {
 
     // split space separated array of paths
     let paths = pathsString.split(/\s+/g);
-    paths.forEach(path => this.values_.push(new MonitorValueV2<unknown>(path)));
+    paths.forEach(path => this.values_.push(new MonitorValueV2<unknown>(path, ++MonitorV2.nextWatchId_)));
 
     // add watchId to owning ViewV2 or view model data object
     // ViewV2 uses to call clearBinding(id)
-    // FIXME data object leave data inside ObservedV3, because they can not 
+    // FIXME data object leave data inside ObservedV2, because they can not 
     // call clearBinding(id) before they get deleted.
     const meta = target[MonitorV2.WATCH_INSTANCE_PREFIX] ??= {};
     meta[pathsString] = this.watchId_;
@@ -131,23 +144,52 @@ class MonitorV2 {
   }
 
   InitRun(): MonitorV2 {
-    this.bindRun(true);
+    // Register this Monitor to known components
+    ObserveV2.getObserve().registerMonitor(this, this.watchId_);
+
+    // Record dependencies for all the paths
+    this.values_.forEach((item) => {
+      ObserveV2.getObserve().startRecordDependencies(this, item.id);
+      const [success, value] = this.analysisProp(true, item);
+      ObserveV2.getObserve().stopRecordDependencies();
+
+      if (!success) {
+        stateMgmtConsole.debug(`@Monitor path '${item.path}' not initially found`);
+        return;
+      }
+      item.setValue(true, value);
+    });
+
     return this;
   }
 
-  public notifyChange(): void {
-    if (this.bindRun(/* is init / first run */ false)) {
-      stateMgmtConsole.debug(`@Monitor function '${this.monitorFunction.name}' exec ...`);
+  // Called by ObserveV2 when a monitor path has changed.
+  // Analyze the changed path and return this Monitor's
+  // watchId if the path was dirty and the monitor function
+  // needs to be executed later.
+  public notifyChange(pathId: number): number {
+    let value = this.values_.find((item) => item.id === pathId);
+    stateMgmtConsole.debug(`@Monitor notifyChange for path ${value.path}`);
+    return this.recordDependenciesForProp(value) ? this.watchId_ : -1;
+  }
 
-      try {
-        // exec @Monitor function
-        this.monitorFunction.call(this.target_, this);
-      } catch(e) {
-        stateMgmtConsole.applicationError(`@Monitor exception caught for ${this.monitorFunction.name}`, e.toString());
-        throw e;
-      } finally {
-        this.reset();
-      }
+  // Called by ObserveV2 once if any monitored path was dirty.
+  // Executes the monitor function.
+  public runMonitorFunction(): void {
+    if (this.dirty.length === 0) {
+      stateMgmtConsole.debug(`No dirty values! not firing!`);
+      return;
+    }
+
+    stateMgmtConsole.debug(`@Monitor function '${this.monitorFunction.name}' exec ...`);
+    try {
+      // exec @Monitor function
+      this.monitorFunction.call(this.target_, this);
+    } catch(e) {
+      stateMgmtConsole.applicationError(`@Monitor exception caught for ${this.monitorFunction.name}`, e.toString());
+      throw e;
+    } finally {
+      this.reset();
     }
   }
 
@@ -156,27 +198,24 @@ class MonitorV2 {
     this.values_.forEach(item => item.reset());
   }
 
-  // analysisProp for each monitored path
-  private bindRun(isInit: boolean = false): boolean {
-    ObserveV2.getObserve().startRecordDependencies(this, this.watchId_);
-    let ret = false;
-    this.values_.forEach((item) => {
-      const [ success, value ] = this.analysisProp(isInit, item)
-      if (!success ) {
-        stateMgmtConsole.debug(`@Monitor path no longer valid.`);
-        return;
-      }
-      let dirty = item.setValue(isInit, value);
-      ret = ret || dirty;
-    });
-
+  // record dependencies for given MonitorValue, when any monitored path
+  // has changed and notifyChange is called
+  private recordDependenciesForProp<T>(monitoredValue: MonitorValueV2<T>): boolean {
+    ObserveV2.getObserve().startRecordDependencies(this, monitoredValue.id);
+    const [success, value] = this.analysisProp(false, monitoredValue);
     ObserveV2.getObserve().stopRecordDependencies();
-    return ret;
+
+    if (!success) {
+      stateMgmtConsole.debug(`@Monitor path '${monitoredValue.path}' no longer valid.`);
+      monitoredValue.setNotFound();
+      return false;
+    }
+    return monitoredValue.setValue(false, value); // dirty?
   }
 
   // record / update object dependencies by reading each object along the path
   // return the value, i.e. the value of the last path item
-  private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): [ success: boolean, value : T ]  {
+  private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): [success: boolean, value : T] {
     let parentObj = this.target_; // main pointer
     let specialCur; // special pointer for Array
     let obj; // main property
@@ -185,7 +224,7 @@ class MonitorV2 {
     let props = monitoredValue.props; // get the props
     for (let i = 0; i < props.length; i++) {
       lastProp = props[i]; // get the current property name
-      if (typeof parentObj === 'object' && Reflect.has(parentObj, lastProp)) {
+      if (parentObj && typeof parentObj === 'object' && Reflect.has(parentObj, lastProp)) {
         obj = parentObj[lastProp]; // store property value, obj maybe Proxy added by V2
         if (Array.isArray(UIUtilsImpl.instance().getTarget(obj))) {
           // if obj is Array, store the infomation at the 'first' time.
@@ -211,7 +250,7 @@ class MonitorV2 {
         }
       } else {
         isInit && stateMgmtConsole.warn(`@Monitor prop ${monitoredValue.path} initialize not found, make sure it exists!`);
-        return [ false, undefined ];
+        return [false, undefined];
       }
     }
     if (specialCur) {
@@ -221,9 +260,9 @@ class MonitorV2 {
     }
     if (!ObserveV2.IsMakeObserved(obj) && !ObserveV2.IsTrackedProperty(parentObj, lastProp)) {
       stateMgmtConsole.applicationError(`@Monitor "${monitoredValue.path}" cannot be monitored, make sure it is decorated !!`);
-      return [ false, undefined ];
+      return [false, undefined];
     }
-    return [ true, obj as unknown as T ];
+    return [true, obj as unknown as T];
   }
 
   public static clearWatchesFromTarget(target: Object): void {
@@ -249,7 +288,7 @@ class AsyncAddMonitorV2 {
       .then(AsyncAddMonitorV2.run)
       .catch(error => {
         stateMgmtConsole.applicationError(`Exception caught in @Monitor function ${name}`, error);
-        throw error;
+        _arkUIUncaughtPromiseError(error);
       });
     }
     AsyncAddMonitorV2.watches.push([target, name]);

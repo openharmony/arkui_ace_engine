@@ -25,12 +25,15 @@ public:
     static constexpr uint8_t MAX_DETECT_COUNT = 2;
 
     static TransparentNodeDetector& GetInstance();
-    void PostCheckNodeTransparentTask(const RefPtr<FrameNode>& node, uint8_t detectCount = MAX_DETECT_COUNT);
+    void PostCheckNodeTransparentTask(const RefPtr<FrameNode>& node, const std::string& pageUrl,
+        uint8_t detectCount = MAX_DETECT_COUNT);
 private:
     TransparentNodeDetector() = default;
     ~TransparentNodeDetector() = default;
     TransparentNodeDetector(const TransparentNodeDetector& instance) = delete;
     const TransparentNodeDetector& operator = (const TransparentNodeDetector& instance) = delete;
+
+    void DumpNodeInfo(const RefPtr<FrameNode>& node, Window* window);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_TRANSPARENT_NODE_DETECTOR_H

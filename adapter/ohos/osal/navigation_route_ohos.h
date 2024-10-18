@@ -48,10 +48,12 @@ public:
 
 private:
     bool GetRouteItemFromBundle(const std::string& name, AppExecFwk::RouterItem& routeItem);
+    int32_t LoadPageFromHapModule(const std::string& name);
     void InitRouteMap();
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
     AppExecFwk::RouterItem GetRouteItem(const std::string name);
     std::vector<AppExecFwk::RouterItem> allRouteItems_;
+    std::vector<AppExecFwk::HapModuleInfo> moduleInfos_;
     std::vector<std::string> names_;
 };
 } // namespace OHOS::Ace

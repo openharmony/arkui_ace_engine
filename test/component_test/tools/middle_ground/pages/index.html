@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Test case management</title>
+    <script src="index.js"></script>
+    <link rel="stylesheet" href="page.css">
+</head>
+
+<body>
+<div class="allPage">
+    <div class="prAddress">
+        <button class="custom-button" id="buttonEleAdd" onclick="allCheckBoxT()">全选</button>
+        <button class="custom-button" id="buttonEleDel" onclick="deleteCheckBox()">置空</button>
+        <button class="custom-button checkBoxClass" onclick="closeCheckBox()">折叠</button>
+        <button class="custom-button checkBoxClass" onclick="openCheckBox()">展开</button>
+        <input id="prInput" class='middle-input__inner' type="text"
+               value="https://gitee.com/openharmony/arkui_ace_engine/pulls/36631">
+    </div>
+    <div id="divId" class="divClass">
+        <table id="tableEle">
+            <tr>
+                <th>Project Name</th>
+                <th>Component Name</th>
+                <th>File Name</th>
+            </tr>
+        </table>
+    </div>
+</div>
+<div class="hsize2">
+    <H5 id="tooltip" style="margin-left: 30px;"></H5>
+</div>
+<div class="hsize">
+    <H3>执行结果：</H3>
+</div>
+<div class="execute">
+    <div id="executeMes"></div>
+    <button class="custom-button" id="buttonEle" onclick="execute()">开始执行</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+    let projectMap = new Map();
+    let componentMap = new Map();
+    let testCase = [];
+    let checkboxLst = [];
+    let isCaseStatus = false;
+    let isInterval = false;
+    window.onload = async function () {
+        await readCSV();
+        await execute('refresh');
+    };
+
+    async function readCSV() {
+        await readCsv().then((res) => {
+            testCase = res;
+            showTable(testCase);
+        })
+    }
+
+    function showTable(caseList) {
+        const tableEle = document.getElementById('tableEle');
+        const caseTree = listToTree(caseList);
+        for (let index = 0; index < caseTree.length; index++) {
+            projectMap.set(`${caseTree[index].name}`, `${caseTree[index].id}`);
+            for (let j = 0; j < caseTree[index].value.length; j++) {
+                componentMap.set(`${caseTree[index].name}_${caseTree[index].value[j].name}`, caseTree[index].value[j].id);
+            }
+        }
+        for (let i = 0; i < caseList.length; i++) {
+            let id;
+            const trEle = document.createElement('tr');
+            ['Project Name', 'Component Name', 'File Name'].forEach((name) => {
+                let tdEle;
+                if (name === 'Project Name') {
+                    id = projectMap.get(caseList[i]['Project Name']);
+                } else if (name === 'Component Name') {
+                    id = componentMap.get(`${caseList[i]['Project Name']}_${caseList[i]['Component Name']}`);
+                } else {
+                    id = caseList[i]['File Name'];
+                }
+                if (i === 0 || caseList[i][name] !== caseList[i - 1][name]) {
+                    tdEle = createCheckboxCell(name, caseList[i][name], caseTree, id);
+                } else {
+                    if (caseList[i]['Project Name'] !== caseList[i - 1]['Project Name'] &&
+                        caseList[i]['Component Name'] === caseList[i - 1]['Component Name'] && i !== 0) {
+                        tdEle = createCheckboxCell(name, caseList[i][name], caseTree, id);
+                    } else {
+                        tdEle = document.createElement('td');
+                    }
+                }
+                trEle.appendChild(tdEle);
+            });
+            trEle.setAttribute(`${caseList[i]['Project Name']}`, '');
+            trEle.setAttribute(`${id}`, '');
+            tableEle.appendChild(trEle);
+        }
+
+        document.querySelectorAll('td').forEach(function (td) {
+            td.addEventListener('mouseenter', function () {
+                const tooltip = document.getElementById('tooltip');
+                let inputData;
+                let a = td.querySelectorAll('input')[0].attributes;
+                if (td.querySelectorAll('input')[0]) {
+                    inputData = td.querySelectorAll('input')[0].getAttribute('value');
+                } else {
+                    return;
+                }
+                let jsonData = JSON.parse(inputData);
+                let shows = jsonData[2];
+                if (inputData) {
+                    tooltip.textContent = td.getAttribute('data-tooltip');
+                    tooltip.style.display = 'block';
+                    if ("File Name" === jsonData[1]) {
+                        tooltip.innerHTML = `<span style="color: brown;font-size: 20px;width: 347px;display: inline-block">${shows[0][0]}</span>
+                         <span style="color: #2640c5;font-size: 20px;width: 380px;display: inline-block">${shows[0][1]}</span>
+                         <span style="color: #7dbbd8;font-size: 20px">${shows[0][2]}</span>`;
+                    } else if ("Component Name" === jsonData[1]) {
+                        tooltip.innerHTML = `<span style="color: brown;font-size: 20px;width: 347px;display: inline-block">${shows[0][0]}</span>
+                         <span style="color: #2640c5;font-size: 20px;width: 380px">${shows[0][1]}</span>`;
+                    }
+                }
+            });
+        });
+    }
+
+    function allCheckBoxT() {
+        checkboxLst = this.addCheckBox();
+    }
+
+    function deleteCheckBox() {
+        this.removeCheckBox();
+        checkboxLst = [];
+    }
+
+    function closeCheckBox() {
+        let array = uniqueArray(testCase);
+        let projectName = '';
+        let tempName;
+        let index = 0;
+        for (let i = 0; i < array.length; i++) {
+            tempName = array[i]["Project Name"];
+            let ent = {
+                target: {
+                    textContent: '-'
+                }
+            };
+            if (projectName !== tempName) {
+                foldTr(tempName, "Project Name", ent);
+                document.getElementsByClassName('checkBoxButton')[index].innerHTML = '+';
+                projectName = array[i]["Project Name"];
+                index++;
+            }
+        }
+    }
+
+    function openCheckBox() {
+        let array = uniqueArray(testCase);
+        let projectName = '';
+        let tempName;
+        let index = 0;
+        for (let i = 0; i < array.length; i++) {
+            tempName = array[i]["Project Name"];
+            let ent = {
+                target: {
+                    textContent: '+'
+                }
+            };
+            if (projectName !== tempName) {
+                foldTr(tempName, "Project Name", ent);
+                document.getElementsByClassName('checkBoxButton')[index].innerHTML = '-';
+                projectName = array[i]["Project Name"];
+                index++;
+            }
+        }
+    }
+
+    function uniqueArray(arr) {
+        return [...new Set(arr)];
+    }
+
+    function startInterval() {
+        const executeMes = document.getElementById('executeMes');
+        isInterval = true;
+        return new Promise(() => {
+            let setIntervalId = setInterval(() => {
+                fetch('/api/getExecuteStatus')
+                    .then(response => response.json())
+                    .then(status => {
+                        if (status.execResult === -1) {
+                            document.getElementById('buttonEle').innerHTML = '开始执行';
+                        } else if (status.execResult === 0) {
+                            executeMes.style.color = '#2ef604';
+                            executeMes.innerText = 'Success';
+                            this.removeCheckBox();
+                        } else if (status.execResult === 1) {
+                            executeMes.style.color = '#fd0026';
+                            executeMes.innerText = status.mes;
+                        } else if (status.execResult === 2) {
+                            return;
+                        }
+                        updateUI();
+                    })
+                    .catch((error) => {
+                        updateUI();
+                        throw error;
+                    });
+            }, 1500);
+
+            function updateUI() {
+                clearInterval(setIntervalId);
+                isCaseStatus = false;
+                isInterval = false;
+                document.getElementById('buttonEle').innerText = '开始执行';
+            }
+        })
+    }
+
+    function execute(refresh_status) {
+        let tempList = checkboxLst;
+        document.getElementById('executeMes').innerText = '';
+        fetch('/api/getExecuteStatus')
+            .then(response => response.json())
+            .then(status => {
+                if (status.execResult === 2 || isCaseStatus) {
+                    document.getElementById('buttonEle').innerHTML = '用例执行中...';
+                    if (refresh_status !== 'refresh') {
+                        alert("请等待用例执行完成在继续操作！！！");
+                    }
+                    if (!isCaseStatus && !isInterval) {
+                        startInterval();
+                    }
+                } else {
+                    if (tempList.length !== 0) {
+                        tempList = uniqueArray(tempList);
+                        isCaseStatus = true;
+                        document.getElementById('buttonEle').innerHTML = '用例执行中...';
+                        startInterval();
+                        run(tempList, document.getElementById('prInput').value);
+                    }
+                }
+            });
+    }
+
+    function removeCheckBox() {
+        let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        for (let i = 0; i <= checkedCheckboxes.length - 1; i++)
+            if (checkedCheckboxes[i].checked) {
+                checkedCheckboxes[i].checked = false;
+            }
+    }
+
+    function addCheckBox() {
+        let dataArray = [];
+        let checkedCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+        for (let i = 0; i <= checkedCheckboxes.length - 1; i++)
+            if (!checkedCheckboxes[i].checked) {
+                checkedCheckboxes[i].checked = true;
+            }
+        let checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+        checkboxes.forEach((e) => {
+            let val = e.value;
+            let array = [];
+            if (e.value.includes("File Name")) {
+                let t = [];
+                t = JSON.parse(e.value)[2];
+                if (t.length > 0) {
+                    dataArray.push(t[0]);
+                }
+            }
+        })
+        return dataArray;
+    }
+
+
+</script>
+<style>
+    .allPage {
+        width: 1376px;
+        height: 600px;
+        background-color: #f0f8ff;
+    }
+
+    body {
+        display: block;
+        margin: 8px;
+        height: 100%;
+    }
+
+    .middle-input__inner {
+        margin: 70px;
+        -webkit-appearance: none;
+        background-color: #fff;
+        background-image: none;
+        border-radius: 4px;
+        border: 1px solid #dcdfe6;
+        box-sizing: border-box;
+        color: #606266;
+        display: inline-block;
+        font-size: inherit;
+        height: 60px;
+        line-height: 60px;
+        outline: none;
+        padding: 0 15px;
+        transition: border-color .2s cubic-bezier(.645, .045, .355, 1);
+        width: 100%;
+    }
+
+    #prInput {
+        width: 400px;
+        background-color: #e3ebf3;
+        height: 28px;
+        font-size: 15px;
+        margin-left: 30px;
+        margin-top: 80px;
+    }
+
+    table {
+        height: auto;
+    }
+
+    .titles {
+        margin: 80px;
+    }
+
+    .prAddress {
+        margin-top: -70px;
+        margin-bottom: 15px;
+        width: 1200px;
+        margin-left: 188px;
+    }
+
+    table {
+        position: relative;
+        box-sizing: border-box;
+        flex: 1;
+        width: 1280px;
+        height: 50px;
+        background-color: #fff;
+        font-size: 14px;
+        color: #606266;
+        border: 1px solid #ebeef5;
+        border-right: none;
+        border-bottom: none;
+        position: absolute;
+        z-index: 0;
+    }
+
+    th {
+        background-color: #a0d6fb;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        word-break: break-all;
+        line-height: 23px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        word-break: break-all;
+        line-height: 23px;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    #executeMes {
+        background-color: #F6F7F2;
+        width: 1000px;
+        margin-left: 30px;
+        border-radius: 5px;
+        border: 1px solid #3b3030;
+        position: relative;
+        display: inline-block;
+        vertical-align: bottom;
+        font-size: 14px;
+    }
+
+    .hsize {
+        float: left;
+        margin-left: 30px;
+        height: 40px;
+        width: 50%;
+    }
+
+    .hsize2 {
+        float: left;
+        margin-right: 100px;
+        height: 40px;
+        width: 80%;
+    }
+
+    .custom-button {
+        display: inline-block;
+        line-height: 1;
+        white-space: nowrap;
+        cursor: pointer;
+        background: #5084ec;
+        border: 1px solid #dcdfe6;
+        color: #fff;
+        -webkit-appearance: none;
+        text-align: center;
+        box-sizing: border-box;
+        outline: none;
+        margin: 0;
+        transition: .1s;
+        font-weight: 300;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        padding: 12px 20px;
+        font-size: 14px;
+        border-radius: 4px;
+        margin-right: -5px;
+        margin-top: 80px;
+    }
+
+    #buttonEleAdd {
+        margin-top: 30px;
+        margin-left: 30px;
+    }
+
+    #buttonEleDel {
+        margin-top: 30px;
+        margin-left: 30px;
+        background-color: rgba(211, 30, 30, 0.829);
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f0f8ff;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #f0f8ff;
+        border-radius: 5px;
+        opacity: 0.8;
+    }
+
+    #buttonEle {
+        margin-right: 140px;
+        margin-top: 103px;
+        width: 12%;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #7dbbd8;
+        opacity: 0.8;
+    }
+
+    .execute {
+        width: 100%;
+        margin-left: 0px;
+        margin-top: 27px;
+    }
+
+    body,
+    html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #f0f8ff;
+        font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, SimSun, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .demo-block {
+        margin-bottom: 24px;
+    }
+
+    .execute {
+        width: 96%;
+    }
+
+    .divClass {
+        position: relative;
+        overflow-y: auto;
+        box-sizing: border-box;
+        flex: 1;
+        background-color: #f0f8ff;
+        font-size: 14px;
+        width: 1300px;
+        height: 500px;
+        color: #606266;
+        margin-top: -70px;
+        margin-left: 30px;
+        z-index: 1;
+    }
+
+    #tableEle {
+        z-index: 0;
+    }
+
+    .checkBoxClass {
+        margin-top: 30px;
+        margin-left: 30px;
+    }
+</style>
+</body>
+
+</html>

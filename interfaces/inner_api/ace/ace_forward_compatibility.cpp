@@ -16,6 +16,7 @@
 #include "ace_forward_compatibility.h"
 
 #include <fstream>
+#include <unordered_set>
 
 #include "arkui_log.h"
 #ifdef OHOS_PLATFORM
@@ -39,6 +40,10 @@ constexpr char ARKUI_LIB_NAME[] = "libace.so";
 constexpr char ARKUI_LIB_NAME_COMPATIBLE[] = "libace_compatible.z.so";
 constexpr char ARKUI_LIB_NAME[] = "libace.z.so";
 #endif
+const std::unordered_set<std::string> FORCE_OLD_PIPELINE {
+    "com.ohos.launcher",
+    "com.ohos.sceneboard"
+};
 #ifdef OHOS_PLATFORM
 const std::string KERNEL_TYPE_HM = "hongmeng";
 const std::string RECLAIM_FILEPAGE_STRING_FOR_HM = "1";
@@ -46,15 +51,19 @@ const std::string RECLAIM_FILEPAGE_STRING_FOR_HM = "1";
 const std::string RECLAIM_FILEPAGE_STRING_FOR_LINUX = "file";
 } // namespace
 
-void AceForwardCompatibility::Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool deprecated)
+void AceForwardCompatibility::Init(const std::string& bundleName, const uint32_t apiCompatibleVersion, bool forceFullUpdate)
 {
+    if (FORCE_OLD_PIPELINE.find(bundleName) != FORCE_OLD_PIPELINE.end()) {
+        isForceOldPipeline_ = true;
+    } else {
 #ifdef OHOS_PLATFORM
-    isForceOldPipeline_ = OHOS::system::GetBoolParameter("persist.arkui.libace.og", true);
+        isForceOldPipeline_ = OHOS::system::GetBoolParameter("persist.arkui.libace.og", true);
 #else
-    isForceOldPipeline_ = true;
+        isForceOldPipeline_ = true;
 #endif
+    }
 
-    isNewPipeline_ = (apiCompatibleVersion >= ARKUI_NEW_PIPELINE_MIN_VERSION) && !deprecated;
+    isNewPipeline_ = (apiCompatibleVersion >= ARKUI_NEW_PIPELINE_MIN_VERSION) && !forceFullUpdate;
     isInited_ = true;
     LOGI("AceForwardCompatibility [%{public}s] force:%{public}d newpipe:%{public}d", bundleName.c_str(),
         isForceOldPipeline_, isNewPipeline_);

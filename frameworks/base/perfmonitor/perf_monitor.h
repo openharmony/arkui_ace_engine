@@ -21,8 +21,11 @@
 #include <map>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 #include "base/utils/macros.h"
+#include "base/utils/aps_monitor.h"
+#include "core/common/window_animation_config.h"
 
 namespace OHOS::Ace {
 constexpr int32_t US_TO_MS = 1000;
@@ -145,8 +148,11 @@ public:
     void SetAppStartStatus();
     static PerfMonitor* GetPerfMonitor();
     static PerfMonitor* pMonitor;
+    void SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor);
     void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                            const std::string& pageName);
+    void RecordWindowRectResize(OHOS::Ace::WindowSizeChangeReason reason,
+                           const std::string& bundleName);
 
 private:
     SceneRecord* GetRecord(const std::string& sceneId);
@@ -159,6 +165,7 @@ private:
     bool IsExceptResponseTime(int64_t time, const std::string& sceneId);
     int32_t GetFilterType() const;
 private:
+    std::shared_ptr<ApsMonitor> apsMonitor_ = nullptr;
     std::map<PerfActionType, int64_t> mInputTime;
     int64_t mVsyncTime {0};
     PerfSourceType mSourceType {UNKNOWN_SOURCE};

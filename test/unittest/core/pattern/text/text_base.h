@@ -102,7 +102,9 @@ const std::string TEXT_CONTENT = "text";
 constexpr int32_t TEXT_ERROR = -1;
 constexpr int32_t TEXT_SIZE_INT = 10;
 constexpr int32_t MAX_LINES = 500;
+constexpr int32_t CURSOR_COLOR = 0;
 constexpr int32_t SELECTED_COLOR = 0;
+constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 constexpr Dimension BASELINE_OFFSET_VALUE = Dimension(20, DimensionUnit::PX);
 constexpr Dimension ADAPT_MIN_FONT_SIZE_VALUE = Dimension(50, DimensionUnit::PX);
 constexpr Dimension ADAPT_OVER_MIN_FONT_SIZE_VALUE = Dimension(100, DimensionUnit::PX);
@@ -152,9 +154,10 @@ constexpr float TEXT_RECT_TOP_ONE = 10.0f;
 constexpr float TEXT_RECT_TOP_TWO = 20.0f;
 constexpr float TEXT_CONTENT_SIZE = 50.0f;
 const std::string TEXT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\":\"16.00fp\",\"weight\":"
-                                       "\"FontWeight.Normal\",\"family\":\"HarmonyOS Sans\"}";
-const std::string TEXT_EQUALS_VALUE =
-    R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
+    "\"FontWeight.Normal\",\"variableFontWeight\":\"0\",\"enableVariableFontWeight\":\"false\",\"family\":"
+    "\"HarmonyOS Sans\"}";
+const std::string TEXT_EQUALS_VALUE = R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold",)"
+    R"("variableFontWeight":"0","enableVariableFontWeight":"false","family":"cursive"})";
 const Ace::WordBreak TEXT_WORD_BREAK = Ace::WordBreak::BREAK_ALL;
 const Ace::LineBreakStrategy TEXT_LINE_BREAK_STRATEGY = Ace::LineBreakStrategy::GREEDY;
 const std::string TEXT_FOR_AI_SINGLE = "phone: 18888888888";

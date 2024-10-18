@@ -39,10 +39,6 @@ constexpr float HALF_FLOAT = 0.5f;
 
 void OverlengthDotIndicatorModifier::onDraw(DrawingContext& context)
 {
-    if (maxDisplayCount_ <= 0) {
-        return;
-    }
-
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.unselectedIndicatorWidth = unselectedIndicatorWidth_->Get();

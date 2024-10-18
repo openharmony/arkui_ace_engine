@@ -91,7 +91,7 @@ int32_t GetOverlayAndTargetNode(int32_t targetId, const SheetStyle& sheetStyle, 
             CHECK_NULL_VOID(overlayManager);
             overlayManager->DeleteModal(id);
         };
-    targetNode->PushDestroyCallback(destructor);
+    targetNode->PushDestroyCallbackWithTag(destructor, V2::SHEET_WRAPPER_TAG);
     return ERROR_CODE_NO_ERROR;
 }
 } // namespace
@@ -180,6 +180,19 @@ int32_t SheetManager::CloseBindSheetByUIContext(
         return ERROR_CODE_NO_ERROR;
     }
     return ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND;
+}
+
+void SheetManager::DeleteOverlayForWindowScene(int32_t rootNodeId, RootNodeType rootNodeType)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (rootNodeType == RootNodeType::WINDOW_SCENE_ETS_TAG) {
+        auto windowSceneNode = FrameNode::GetFrameNode(V2::WINDOW_SCENE_ETS_TAG, rootNodeId);
+        CHECK_NULL_VOID(windowSceneNode);
+        auto pattern = windowSceneNode->GetPattern<SystemWindowScene>();
+        CHECK_NULL_VOID(pattern);
+        pattern->DeleteOverlayManager();
+    }
+#endif
 }
 
 RefPtr<OverlayManager> SheetManager::FindPageNodeOverlay(

@@ -16,18 +16,28 @@
 #include "core/common/stylus/stylus_detector_mgr.h"
 
 namespace OHOS::Ace {
-void StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(int32_t nodeId) {}
-
-void StylusDetectorMgr::StylusDetectorCallBack::SetText(int32_t nodeId, std::string args) {}
-
-std::string StylusDetectorMgr::StylusDetectorCallBack::GetText(int32_t nodeId)
+int32_t StylusDetectorMgr::StylusDetectorCallBack::RequestFocus(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler)
 {
-    return "";
+    return 0;
 }
 
-void StylusDetectorMgr::StylusDetectorCallBack::OnDetector(
-    const CommandType& command, std::string args, std::shared_ptr<IAceStylusCallback> callback)
-{}
+int32_t StylusDetectorMgr::StylusDetectorCallBack::SetText(int32_t nodeId, void* data,
+    RefPtr<TaskExecutor> taskScheduler, std::shared_ptr<IAceStylusCallback> callback)
+{
+    return 0;
+}
+
+int32_t StylusDetectorMgr::StylusDetectorCallBack::GetText(int32_t nodeId, RefPtr<TaskExecutor> taskScheduler,
+    std::shared_ptr<IAceStylusCallback> callback)
+{
+    return 0;
+}
+
+int32_t StylusDetectorMgr::StylusDetectorCallBack::OnDetector(
+    const CommandType& command, void* data, std::shared_ptr<IAceStylusCallback> callback)
+{
+    return 0;
+}
 
 bool StylusDetectorMgr::StylusDetectorCallBack::OnDetectorSync(const CommandType& command)
 {
@@ -70,7 +80,8 @@ bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(
     return false;
 }
 
-void StylusDetectorMgr::AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& frameNode) {}
+void StylusDetectorMgr::AddTextFieldFrameNode(const RefPtr<NG::FrameNode>& frameNode,
+    const WeakPtr<NG::LayoutInfoInterface>& layoutInfo) {}
 void StylusDetectorMgr::RemoveTextFieldFrameNode(const int32_t id) {}
 
 StylusDetectorMgr::StylusDetectorMgr() : engine_(nullptr), isRegistered_(false) {}

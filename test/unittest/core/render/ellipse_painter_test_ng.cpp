@@ -38,7 +38,6 @@ namespace {
 const Dimension STROKE_WIDTH { 0.0, DimensionUnit::PX };
 const NG::RectF TEST_RECT { 10.0f, 20.0f, 15.0f, 15.0f };
 
-Testing::MockCanvas canvas;
 } // namespace
 
 class EllipsePainterTestNg : public testing::Test {
@@ -61,6 +60,8 @@ void EllipsePainterTestNg::CallBack(Testing::MockCanvas& rSCanvas)
  */
 HWTEST_F(EllipsePainterTestNg, EllipsePainterTestNg001, TestSize.Level1)
 {
+    Testing::MockCanvas* canvasPtr = new Testing::MockCanvas();
+    Testing::MockCanvas& canvas = *canvasPtr;
     /**
      * @tc.steps1: create canvas and shapePaintProperty object.
      */
@@ -82,5 +83,6 @@ HWTEST_F(EllipsePainterTestNg, EllipsePainterTestNg001, TestSize.Level1)
     CallBack(canvas);
     NG::EllipsePainter::DrawEllipse(canvas, TEST_RECT, shapePaintProperty);
     EXPECT_TRUE(shapePaintProperty.HasStrokeWidth());
+    testing::Mock::AllowLeak(canvasPtr);
 }
 } // namespace OHOS::Ace

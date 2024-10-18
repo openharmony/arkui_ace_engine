@@ -180,6 +180,11 @@ struct TextSelector {
         return baseOffset == destinationOffset;
     }
 
+    bool StartGreaterDest() const
+    {
+        return baseOffset > destinationOffset;
+    }
+
     std::string ToString()
     {
         std::string result;
@@ -231,6 +236,11 @@ enum class TextResponseType : int32_t {
     LONG_PRESS,
     SELECTED_BY_MOUSE,
     NONE,
+};
+
+enum class SelectionMenuType : int32_t {
+    SELECTION_MENU = 0,
+    PREVIEW_MENU = 1,
 };
 
 struct SelectMenuParam {

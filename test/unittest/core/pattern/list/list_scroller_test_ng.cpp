@@ -1113,6 +1113,102 @@ HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollToItemInGroup014
+ * @tc.desc: Test ScrollToItemInGroup With Margin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create list with margin.
+     */
+    ListModelNG model = CreateList();
+    CreateListItemGroups(4);
+    CreateDone(frameNode_);
+
+    MarginProperty groupMargin = { CalcLength(10), CalcLength(10), CalcLength(0), CalcLength(10) };
+    MarginProperty itemMargin = { CalcLength(5), CalcLength(5), CalcLength(0), CalcLength(5) };
+    for (int i = 0; i < 4; ++i) {
+        auto groupNode = GetChildFrameNode(frameNode_, i);
+        for (int j = 0; j < GROUP_ITEM_NUMBER; ++j) {
+            auto itemLayoutProperty = GetChildLayoutProperty<ListItemLayoutProperty>(groupNode, j);
+            itemLayoutProperty->UpdateMargin(itemMargin);
+        }
+        auto itemGroupLayoutProperty = groupNode->GetLayoutProperty();
+        itemGroupLayoutProperty->UpdateMargin(groupMargin);
+    }
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(GetChildHeight(frameNode_, 0), 210); // GROUP_ITEM_NUMBER * (ITEM_HEIGHT + 5)
+    EXPECT_EQ(pattern_->GetTotalHeight(), 880);    // 4 * (210 + 10)
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 220);
+
+    /**
+     * @tc.steps: step2. ScrollToItemInGroup.
+     * @tc.expected: Each test scroll the correct distance.
+     */
+    ScrollToItemInGroup(1, 1, false, ScrollAlign::START);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->endIndex_, 3);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 0);
+
+    ScrollToItemInGroup(2, 1, false, ScrollAlign::CENTER);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->endIndex_, 3);
+    EXPECT_FLOAT_EQ(pattern_->itemPosition_[1].startPos, -72.5f);
+
+    ScrollToItemInGroup(1, 1, false, ScrollAlign::END);
+    EXPECT_EQ(pattern_->startIndex_, 0);
+    EXPECT_EQ(pattern_->endIndex_, 1);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 190);
+}
+
+/**
+ * @tc.name: ScrollToItemInGroup015
+ * @tc.desc: Test ScrollToItemInGroup With Padding
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToItemInGroup015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create list with padding.
+     */
+    ListModelNG model = CreateList();
+    CreateListItemGroups(4);
+    CreateDone(frameNode_);
+
+    MarginProperty listPadding = { CalcLength(10), CalcLength(10), CalcLength(10), CalcLength(10) };
+    MarginProperty groupPadding = { CalcLength(5), CalcLength(5), CalcLength(5), CalcLength(5) };
+    layoutProperty_->UpdatePadding(listPadding);
+    for (int i = 0; i < 4; ++i) {
+        auto groupLayoutProperty = GetChildLayoutProperty<ListItemGroupLayoutProperty>(frameNode_, i);
+        groupLayoutProperty->UpdatePadding(groupPadding);
+    }
+    FlushLayoutTask(frameNode_, true);
+    EXPECT_EQ(GetChildHeight(frameNode_, 0), 210); // GROUP_ITEM_NUMBER * ITEM_HEIGHT + groupPadding
+    EXPECT_EQ(pattern_->GetTotalHeight(), 840); // 4 * 210
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 210);
+
+    /**
+     * @tc.steps: step2. ScrollToItemInGroup.
+     * @tc.expected: Each test scroll the correct distance.
+     */
+    ScrollToItemInGroup(1, 1, false, ScrollAlign::START);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->endIndex_, 3);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -5);
+
+    ScrollToItemInGroup(2, 1, false, ScrollAlign::CENTER);
+    EXPECT_EQ(pattern_->startIndex_, 1);
+    EXPECT_EQ(pattern_->endIndex_, 3);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, -75);
+
+    ScrollToItemInGroup(1, 1, false, ScrollAlign::END);
+    EXPECT_EQ(pattern_->startIndex_, 0);
+    EXPECT_EQ(pattern_->endIndex_, 1);
+    EXPECT_EQ(pattern_->itemPosition_[1].startPos, 175);
+}
+
+/**
  * @tc.name: PositionController001
  * @tc.desc: Test PositionController function with Axis::VERTICAL
  * @tc.type: FUNC

@@ -218,14 +218,24 @@ void InputMethodManager::HideKeyboardAcrossProcesses()
 {
 #if defined(ENABLE_STANDARD_INPUT)
     // If Nav, close it
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav CloseKeyboard FrameNode notNeedSoftKeyboard.");
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard FrameNode notNeedSoftKeyboard.");
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
         inputMethod->RequestHideInput();
         inputMethod->Close();
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav CloseKeyboard SoftKeyboard Closes Successfully.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "across processes CloseKeyboard SoftKeyboard Closes Successfully.");
     }
 #endif
+}
+
+void InputMethodManager::CloseKeyboardInProcess()
+{
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyboardInProcess Ready to close SoftKeyboard.");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CloseKeyboardInProcess Close SoftKeyboard Successfully.");
+    }
 }
 
 void InputMethodManager::ProcessModalPageScene()
@@ -235,7 +245,7 @@ void InputMethodManager::ProcessModalPageScene()
     if (currentFocusNode && currentFocusNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         HideKeyboardAcrossProcesses();
     } else {
-        CloseKeyboard();
+        CloseKeyboardInProcess();
     }
 }
 } // namespace OHOS::Ace

@@ -1163,7 +1163,8 @@ HWTEST_F(RichEditorBaseTestOneNg, RichEditorLayoutAlgorithm004, TestSize.Level1)
     std::string str = "\n";
     spanItem->content = str;
     spans.emplace_back(spanItem);
-    auto layoutAlgorithm = AceType::MakeRefPtr<RichEditorLayoutAlgorithm>(spans, AceType::RawPtr(paragraphManager));
+    auto layoutAlgorithm = AceType::MakeRefPtr<RichEditorLayoutAlgorithm>(spans, AceType::RawPtr(paragraphManager),
+        std::nullopt);
     ASSERT_NE(layoutAlgorithm, nullptr);
     EXPECT_NE(*(layoutAlgorithm->allSpans_.begin()), nullptr);
 }

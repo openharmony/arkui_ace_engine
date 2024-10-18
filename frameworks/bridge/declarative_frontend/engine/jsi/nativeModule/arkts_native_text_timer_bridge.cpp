@@ -340,18 +340,19 @@ ArkUINativeModuleValue TextTimerBridge::SetTextTimerOptions(ArkUIRuntimeCallInfo
                                  ->Unwrap<Framework::JSTextTimerController>();
         if (jsController) {
             auto pointer = TextTimerModelNG::GetJSTextTimerController(frameNode);
-            auto preController = reinterpret_cast<Framework::JSTextTimerController*>(Referenced::RawPtr(pointer));
+            auto preController = static_cast<Framework::JSTextTimerController*>(Referenced::RawPtr(pointer));
             if (preController) {
                 preController->SetController(nullptr);
             }
-            TextTimerModelNG::SetJSTextTimerController(frameNode, Referenced::Claim((Referenced*)jsController));
+            TextTimerModelNG::SetJSTextTimerController(
+                frameNode, Referenced::Claim(static_cast<Referenced*>(jsController)));
             auto controller = TextTimerModelNG::InitTextController(frameNode);
             jsController->SetInstanceId(Container::CurrentId());
             jsController->SetController(controller);
         }
     } else {
         auto pointer = TextTimerModelNG::GetJSTextTimerController(frameNode);
-        auto preController = reinterpret_cast<Framework::JSTextTimerController*>(Referenced::RawPtr(pointer));
+        auto preController = static_cast<Framework::JSTextTimerController*>(Referenced::RawPtr(pointer));
         if (preController) {
             preController->SetController(nullptr);
         }

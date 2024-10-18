@@ -259,6 +259,32 @@ class UIContext {
         return this.UIInspector_;
     }
 
+    getFilteredInspectorTree(filter) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof filter === 'undefined') {
+            let result_ = globalThis.getFilteredInspectorTree();
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        } else {
+            let result_ = globalThis.getFilteredInspectorTree(filter);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+    }
+
+    getFilteredInspectorTreeById(id, depth, filter) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof filter === 'undefined') {
+            let result_ = globalThis.getFilteredInspectorTreeById(id, depth);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        } else {
+            let result_ = globalThis.getFilteredInspectorTreeById(id, depth, filter);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+    }
+
     getComponentSnapshot() {
         this.ComponentSnapshot_ = new ComponentSnapshot(this.instanceId_);
         return this.ComponentSnapshot_;
@@ -601,14 +627,14 @@ class UIContext {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const windowName = getUINativeModule().common.getWindowName();
         __JSScopeUtil__.restoreInstanceId();
-        return windowName
+        return windowName;
     }
 
     getWindowWidthBreakpoint() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         const breakpoint = getUINativeModule().common.getWindowWidthBreakpoint();
         __JSScopeUtil__.restoreInstanceId();
-        return breakpoint
+        return breakpoint;
     }
 
     getWindowHeightBreakpoint() {
@@ -641,12 +667,12 @@ class UIContext {
             __JSScopeUtil__.restoreInstanceId();
             return [];
         }
-        if (dynamicSceneInfo.tag == 'Swiper') {
+        if (dynamicSceneInfo.tag === 'Swiper') {
             __JSScopeUtil__.restoreInstanceId();
             let nodeRef = dynamicSceneInfo.nativeRef;
             return SwiperDynamicSyncScene.createInstances(nodeRef);
         }
-        if (dynamicSceneInfo.tag == 'Marquee') {
+        if (dynamicSceneInfo.tag === 'Marquee') {
             __JSScopeUtil__.restoreInstanceId();
             let nodeRef = dynamicSceneInfo.nativeRef;
             return MarqueeDynamicSyncScene.createInstances(nodeRef);
@@ -667,6 +693,30 @@ class UIContext {
         let maxFontScale = Context.getMaxFontScale();
         __JSScopeUtil__.restoreInstanceId();
         return maxFontScale;
+    }
+
+    bindTabsToScrollable(tabsController, scroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.bindTabsToScrollable(tabsController, scroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    unbindTabsFromScrollable(tabsController, scroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.unbindTabsFromScrollable(tabsController, scroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    bindTabsToNestedScrollable(tabsController, parentScroller, childScroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.bindTabsToNestedScrollable(tabsController, parentScroller, childScroller);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller);
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 
@@ -776,6 +826,19 @@ class FocusController {
         let result = this.ohos_focusController.requestFocus(value);
         __JSScopeUtil__.restoreInstanceId();
         return result;
+    }
+
+    activate(isActive, autoInactive) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (arguments.length === 2) {
+            let result = this.ohos_focusController.activate(isActive, autoInactive);
+            __JSScopeUtil__.restoreInstanceId();
+            return result;
+        } else {
+            let result = this.ohos_focusController.activate(isActive);
+            __JSScopeUtil__.restoreInstanceId();
+            return result;
+        }
     }
 }
 

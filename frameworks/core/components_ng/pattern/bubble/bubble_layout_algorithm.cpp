@@ -593,6 +593,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     positionOffset_ = layoutProp->GetPositionOffset().value_or(OffsetF());
     auto constraint = layoutProp->GetLayoutConstraint();
     enableArrow_ = layoutProp->GetEnableArrow().value_or(true);
+    followTransformOfTarget_ = layoutProp->GetFollowTransformOfTarget().value_or(false);
     auto wrapperIdealSize =
         CreateIdealSize(constraint.value(), Axis::FREE, layoutProp->GetMeasureType(MeasureType::MATCH_PARENT), true);
     wrapperSize_ = wrapperIdealSize;
@@ -922,7 +923,7 @@ OffsetF BubbleLayoutAlgorithm::GetAdjustPosition(std::vector<Placement>& current
                 height += BUBBLE_ARROW_HEIGHT.ConvertToPx();
             }
         }
-        position = AdjustPosition(childPosition, width, height, targetSecurity_);
+        position = AdjustPosition(childPosition, width, height, targetSpace_.ConvertToPx());
         if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
             i += step;
             continue;
@@ -1044,18 +1045,10 @@ OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacementNew(
 OffsetF BubbleLayoutAlgorithm::FitToScreenNew(
     const OffsetF& position, size_t step, size_t& i, const SizeF& childSize, bool didNeedArrow)
 {
-    OffsetF afterOffsetPosition;
-    auto originPosition = position;
-    if (NearEqual(positionOffset_, OffsetF(0.0f, 0.0f)) && (!didNeedArrow || arrowPlacement_ == Placement::NONE)) {
-        afterOffsetPosition = AddTargetSpace(originPosition);
-    } else {
-        afterOffsetPosition = originPosition;
-    }
-    if (!CheckPosition(afterOffsetPosition, childSize, step, i)) {
+    if (!CheckPosition(position, childSize, step, i)) {
         return OffsetF(0.0f, 0.0f);
     }
-
-    return afterOffsetPosition;
+    return position;
 }
 
 OffsetF BubbleLayoutAlgorithm::AddTargetSpace(const OffsetF& position)
@@ -1066,29 +1059,29 @@ OffsetF BubbleLayoutAlgorithm::AddTargetSpace(const OffsetF& position)
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
         case Placement::BOTTOM: {
-            y += targetSecurity_;
+            y += targetSpace_.ConvertToPx();
             break;
         }
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
         case Placement::TOP: {
-            y -= targetSecurity_;
+            y -= targetSpace_.ConvertToPx();
             break;
         }
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
         case Placement::RIGHT: {
-            x += targetSecurity_;
+            x += targetSpace_.ConvertToPx();
             break;
         }
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
         case Placement::LEFT: {
-            x -= targetSecurity_;
+            x -= targetSpace_.ConvertToPx();
             break;
         }
         default: {
-            y += targetSecurity_;
+            y += targetSpace_.ConvertToPx();
             break;
         }
     }
@@ -1108,10 +1101,7 @@ void BubbleLayoutAlgorithm::UpdateChildPosition(OffsetF& childOffset)
 {
     double arrowWidth = BUBBLE_ARROW_WIDTH.ConvertToPx();
     double twoRadiusPx = borderRadius_.ConvertToPx() * 2.0;
-    float movingDistance = BUBBLE_ARROW_HEIGHT.ConvertToPx() + BUBBLE_ARROW_HEIGHT.ConvertToPx();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        movingDistance = BUBBLE_ARROW_HEIGHT.ConvertToPx();
-    }
+    float movingDistance = BUBBLE_ARROW_HEIGHT.ConvertToPx();
     switch (placement_) {
         case Placement::TOP:
         case Placement::TOP_LEFT:
@@ -1224,9 +1214,16 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow)
     if (!targetNode->IsOnMainTree() && !targetNode->IsVisible()) {
         return;
     }
-    auto rect = targetNode->GetPaintRectToWindowWithTransform();
-    targetSize_ = rect.GetSize();
-    targetOffset_ = rect.GetOffset();
+    if (followTransformOfTarget_) {
+        auto rect = targetNode->GetPaintRectToWindowWithTransform();
+        targetSize_ = rect.GetSize();
+        targetOffset_ = rect.GetOffset();
+    } else {
+        auto geometryNode = targetNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        targetSize_ = geometryNode->GetFrameSize();
+        targetOffset_ = targetNode->GetPaintRectOffset();
+    }
     auto pipelineContext = GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     

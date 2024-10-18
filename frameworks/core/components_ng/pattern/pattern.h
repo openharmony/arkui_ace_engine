@@ -143,6 +143,11 @@ public:
         OnAttachToFrameNode();
     }
 
+    virtual bool CustomizeExpandSafeArea()
+    {
+        return false;
+    }
+    
     virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
     {
         return MakeRefPtr<AccessibilityProperty>();
@@ -647,6 +652,9 @@ public:
     {
         return false;
     }
+
+    virtual void AddInnerOnGestureRecognizerJudgeBegin(
+        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
 
 protected:
     virtual void OnAttachToFrameNode() {}

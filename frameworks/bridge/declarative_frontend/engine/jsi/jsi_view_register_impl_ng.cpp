@@ -395,6 +395,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSView::JSBind(globalObj);
     JSShapeAbstract::JSBind(globalObj);
     JSText::JSBind(globalObj);
+    JSTextController::JSBind(globalObj);
     JSColumn::JSBind(globalObj);
     JSRow::JSBind(globalObj);
     JSStack::JSBind(globalObj);
@@ -408,6 +409,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSEnvironment::JSBind(globalObj);
     JSFlexImpl::JSBind(globalObj);
     JSSpan::JSBind(globalObj);
+    JSNativeCustomSpan::JSBind(globalObj);
     JSSpanString::JSBind(globalObj);
     JSMutableSpanString::JSBind(globalObj);
     JSFontSpan::JSBind(globalObj);

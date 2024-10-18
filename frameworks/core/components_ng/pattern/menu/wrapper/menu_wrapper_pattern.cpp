@@ -144,9 +144,7 @@ void MenuWrapperPattern::ChangeCurMenuItemBgColor()
     if (curMenuItemPattern->IsDisabled() || curMenuItemPattern->IsStackSubmenuHeader()) {
         return;
     }
-    curMenuItemPattern->SetBgBlendColor(
-        curMenuItemPattern->GetSubBuilder() ? theme->GetHoverColor() : theme->GetClickedColor());
-    curMenuItemPattern->PlayBgColorAnimation(false);
+    curMenuItemPattern->NotifyPressStatus(true);
 }
 
 void MenuWrapperPattern::ClearLastMenuItem()
@@ -154,8 +152,7 @@ void MenuWrapperPattern::ClearLastMenuItem()
     if (lastTouchItem_) {
         auto lastMenuItemPattern = lastTouchItem_->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(lastMenuItemPattern);
-        lastMenuItemPattern->SetBgBlendColor(Color::TRANSPARENT);
-        lastMenuItemPattern->PlayBgColorAnimation(false);
+        lastMenuItemPattern->NotifyPressStatus(false);
         lastTouchItem_ = nullptr;
     }
 }
@@ -205,6 +202,25 @@ void MenuWrapperPattern::HideMenu()
     HideMenu(menuNode);
 }
 
+void MenuWrapperPattern::GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode,
+    bool& hasAnimation)
+{
+    CHECK_NULL_VOID(subMenu);
+    auto subMenuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    hasAnimation = subMenuPattern->GetDisappearAnimation();
+    auto menuItem = FrameNode::GetFrameNode(subMenuPattern->GetTargetTag(), subMenuPattern->GetTargetId());
+    CHECK_NULL_VOID(menuItem);
+    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    auto menuNode = menuItemPattern->GetMenu();
+    CHECK_NULL_VOID(menuNode);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    expandingMode = menuProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    menuItemPattern->SetIsSubMenuShowed (false);
+}
+
 void MenuWrapperPattern::HideSubMenu()
 {
     auto host = GetHost();
@@ -219,16 +235,6 @@ void MenuWrapperPattern::HideSubMenu()
     CHECK_NULL_VOID(menuPattern);
     menuPattern->SetShowedSubMenu(nullptr);
     auto subMenu = host->GetChildren().back();
-    auto subMenuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
-    if (subMenuPattern) {
-        subMenuPattern->RemoveParentHoverStyle();
-        auto frameNode = FrameNode::GetFrameNode(subMenuPattern->GetTargetTag(), subMenuPattern->GetTargetId());
-        CHECK_NULL_VOID(frameNode);
-        auto menuItem = frameNode->GetPattern<MenuItemPattern>();
-        if (menuItem) {
-            menuItem->SetIsSubMenuShowed(false);
-        }
-    }
     auto focusMenu = MenuFocusViewShow();
     CHECK_NULL_VOID(focusMenu);
     auto innerMenu = GetMenuChild(focusMenu);
@@ -239,7 +245,6 @@ void MenuWrapperPattern::HideSubMenu()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         return;
     }
-    CHECK_NULL_VOID(innerMenu);
     auto innerMenuPattern = innerMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(innerMenuPattern);
     auto layoutProps = innerMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
@@ -248,8 +253,11 @@ void MenuWrapperPattern::HideSubMenu()
     auto outterMenuPattern = focusMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(outterMenuPattern);
     bool hasAnimation = outterMenuPattern->GetDisappearAnimation();
+    GetExpandingMode(subMenu, expandingMode, hasAnimation);
     if (expandingMode == SubMenuExpandingMode::STACK && hasAnimation) {
         HideStackExpandMenu(subMenu);
+        host->RemoveChild(subMenu);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } else {
         UpdateMenuAnimation(host);
         SendToAccessibility(subMenu, false);
@@ -427,8 +435,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
     } else if (touch.GetTouchType() == TouchType::UP && currentTouchItem_) {
         auto currentTouchItemPattern = currentTouchItem_->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(currentTouchItemPattern);
-        currentTouchItemPattern->SetBgBlendColor(Color::TRANSPARENT);
-        currentTouchItemPattern->PlayBgColorAnimation(false);
+        currentTouchItemPattern->NotifyPressStatus(false);
         currentTouchItem_ = nullptr;
     }
 }
@@ -504,6 +511,16 @@ void MenuWrapperPattern::CheckAndShowAnimation()
     }
 }
 
+void MenuWrapperPattern::MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    gestureEventHub->SetDragForbiddenForcely(true);
+}
+
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -524,6 +541,8 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     if ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide())) {
         SetHotAreas(dirty);
     }
+    MarkWholeSubTreeNoDraggable(GetMenu());
+    MarkWholeSubTreeNoDraggable(GetPreview());
     CheckAndShowAnimation();
     return false;
 }
@@ -775,13 +794,17 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("TargetNode: " + dumpInfo_.targetNode);
     DumpLog::GetInstance().AddDesc("TargetOffset: " + dumpInfo_.targetOffset.ToString());
     DumpLog::GetInstance().AddDesc("TargetSize: " + dumpInfo_.targetSize.ToString());
+    DumpLog::GetInstance().AddDesc("MenuWindowRect: " + dumpInfo_.menuWindowRect.ToString());
     DumpLog::GetInstance().AddDesc("WrapperRect: " + dumpInfo_.wrapperRect.ToString());
     DumpLog::GetInstance().AddDesc("PreviewBeginScale: " + std::to_string(dumpInfo_.previewBeginScale));
     DumpLog::GetInstance().AddDesc("PreviewEndScale: " + std::to_string(dumpInfo_.previewEndScale));
     DumpLog::GetInstance().AddDesc("Top: " + std::to_string(dumpInfo_.top));
     DumpLog::GetInstance().AddDesc("Bottom: " + std::to_string(dumpInfo_.bottom));
+    DumpLog::GetInstance().AddDesc("Left: " + std::to_string(dumpInfo_.left));
+    DumpLog::GetInstance().AddDesc("Right: " + std::to_string(dumpInfo_.right));
     DumpLog::GetInstance().AddDesc("GlobalLocation: " + dumpInfo_.globalLocation.ToString());
     DumpLog::GetInstance().AddDesc("OriginPlacement: " + dumpInfo_.originPlacement);
+    DumpLog::GetInstance().AddDesc("DefaultPlacement: " + dumpInfo_.defaultPlacement);
     DumpLog::GetInstance().AddDesc("FinalPosition: " + dumpInfo_.finalPosition.ToString());
     DumpLog::GetInstance().AddDesc("FinalPlacement: " + dumpInfo_.finalPlacement);
 }
@@ -795,14 +818,17 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("TargetOffset", dumpInfo_.targetOffset.ToString().c_str());
 
     json->Put("TargetSize", dumpInfo_.targetSize.ToString().c_str());
+    json->Put("MenuWindowRect", dumpInfo_.menuWindowRect.ToString().c_str());
     json->Put("WrapperRect", dumpInfo_.wrapperRect.ToString().c_str());
     json->Put("PreviewBeginScale", std::to_string(dumpInfo_.previewBeginScale).c_str());
     json->Put("PreviewEndScale", std::to_string(dumpInfo_.previewEndScale).c_str());
     json->Put("Top", std::to_string(dumpInfo_.top).c_str());
-
     json->Put("Bottom", std::to_string(dumpInfo_.bottom).c_str());
+    json->Put("Left", std::to_string(dumpInfo_.left).c_str());
+    json->Put("Right", std::to_string(dumpInfo_.right).c_str());
     json->Put("GlobalLocation", dumpInfo_.globalLocation.ToString().c_str());
     json->Put("OriginPlacement", dumpInfo_.originPlacement.c_str());
+    json->Put("DefaultPlacement", dumpInfo_.defaultPlacement.c_str());
     json->Put("FinalPosition", dumpInfo_.finalPosition.ToString().c_str());
     json->Put("FinalPlacement", dumpInfo_.finalPlacement.c_str());
 }

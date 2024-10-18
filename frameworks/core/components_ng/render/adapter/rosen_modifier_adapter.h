@@ -65,7 +65,7 @@ public:
 
 private:
     WeakPtr<ContentModifier> modifier_;
-    std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
+    bool hasAttached_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
 };
@@ -88,7 +88,7 @@ public:
 
 private:
     WeakPtr<OverlayModifier> modifier_;
-    std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
+    bool hasAttached_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayModifierAdapter);
 };
@@ -107,7 +107,7 @@ public:
 
 private:
     WeakPtr<ForegroundModifier> modifier_;
-    std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
+    bool hasAttached_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ForegroundModifierAdapter);
 };

@@ -61,9 +61,7 @@ public:
 
     void Update(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty);
 
-
     void AppendChild(const RefPtr<LayoutWrapperNode>& child, bool isOverlayNode = false);
-
 
     void SetLayoutWrapperBuilder(const RefPtr<LayoutWrapperBuilder>& builder)
     {
@@ -119,7 +117,9 @@ public:
 
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
-    void SetActiveChildRange(int32_t start, int32_t end,  int32_t cacheStart = 0, int32_t cacheEnd = 0) override {}
+    void SetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0, bool showCached = false) override
+    {}
     void RecycleItemsByIndex(int32_t start, int32_t end) override {}
 
     void ResetHostNode();
@@ -172,9 +172,9 @@ public:
 
     bool SkipMeasureContent() const override;
 
-    bool IsConstraintNoChanged() const
+    bool ConstraintChanged() const
     {
-        return isConstraintNotChanged_;
+        return !isConstraintNotChanged_;
     }
 
     // dirty layoutBox mount to host and switch layoutBox.

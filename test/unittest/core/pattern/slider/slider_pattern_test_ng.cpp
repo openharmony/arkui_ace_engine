@@ -1111,7 +1111,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest018, TestSize.Level1)
      */
     sliderPattern->sliderContentModifier_->isVisible_ = false;
     sliderPattern->isVisibleArea_ = true;
-    sliderPattern->isVisible_ = true;
     sliderPattern->isShow_ = true;
     sliderPattern->StartAnimation();
     EXPECT_TRUE(sliderPattern->sliderContentModifier_->GetVisible());
@@ -1143,7 +1142,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest019, TestSize.Level1)
      */
     sliderPattern->showTips_ = true;
     sliderPattern->isVisibleArea_ = true;
-    sliderPattern->isVisible_ = true;
     sliderPattern->isShow_ = true;
     sliderPattern->UpdateTipState();
     EXPECT_FALSE(sliderPattern->isFocusActive_);

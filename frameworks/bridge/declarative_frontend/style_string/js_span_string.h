@@ -42,7 +42,8 @@ public:
     void SetLength(const JSCallbackInfo& info);
     void IsEqualToSpanString(const JSCallbackInfo& info);
     void GetSubSpanString(const JSCallbackInfo& info);
-    static std::vector<RefPtr<SpanBase>> ParseJsSpanBaseVector(const JSRef<JSObject>& obj, int32_t maxLength);
+    static std::vector<RefPtr<SpanBase>> ParseJsSpanBaseVector(const JSRef<JSObject>& obj, int32_t maxLength,
+        JsiRef<JsiObject> thisObj);
 
     static JSRef<JSObject> CreateJsSpanBaseObject(const RefPtr<SpanBase>& spanObject);
     static JSRef<JSObject> CreateJsSpanObject(const RefPtr<SpanBase>& spanObject);
@@ -83,7 +84,7 @@ public:
 
     static RefPtr<SpanBase> ParseJsExtSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
 
-    static JSRef<JSObject> CreateJsURLStyleSpan(const RefPtr<SpanBase>& spanObject);
+    static JSRef<JSObject> CreateJsUrlSpan(const RefPtr<SpanBase>& spanObject);
     static RefPtr<SpanBase> ParseJsUrlSpan(int32_t start, int32_t length, const JSRef<JSObject>& obj);
 
     static bool CheckSpanType(int32_t spanType);
@@ -95,6 +96,7 @@ public:
     void SetController(const RefPtr<SpanString>& spanString);
 
     static void FromHtml(const JSCallbackInfo& info);
+    static void ToHtml(const JSCallbackInfo& info);
     static void Marshalling(const JSCallbackInfo& info);
     static void Unmarshalling(const JSCallbackInfo& info);
 private:

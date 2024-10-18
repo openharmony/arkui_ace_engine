@@ -269,6 +269,11 @@ export struct ToolBar {
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE))
     .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+    .focusBox({
+      margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
+      strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
+      strokeColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_focused_outline'))
+    })
     .backgroundColor(this.toolBarItemBackground[index])
     .onHover((isHover: boolean) => {
       if (isHover && this.toolBarList[index]?.state !== ItemState.DISABLE) {

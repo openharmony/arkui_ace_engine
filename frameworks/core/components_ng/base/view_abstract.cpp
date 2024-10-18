@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1034,8 +1035,13 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 
-void ViewAbstract::SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc)
+void ViewAbstract::SetOnGestureRecognizerJudgeBegin(
+    GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetExposeInnerGestureFlag(exposeInnerGestureFlag);
+
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
@@ -1306,7 +1312,7 @@ void ViewAbstract::SetDragPreviewOptions(const DragPreviewOption& previewOption)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreviewOptions(previewOption);
+    frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
 void ViewAbstract::SetOnDragStart(
@@ -1806,10 +1812,6 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam>& param, const RefPtr<Frame
         }
         return;
     }
-    if (!popupInfo.isCurrentOnShow) {
-        targetNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE,
-            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-    }
     if (isShow) {
         if (popupInfo.isCurrentOnShow != isShow) {
             overlayManager->ShowPopup(targetId, popupInfo, param->GetOnWillDismiss(), param->GetInteractiveDismiss());
@@ -1908,7 +1910,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     // unable to use the subWindow in the Previewer.
     menuParam.type = MenuType::MENU;
 #endif
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter");
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter %{public}d", menuParam.type);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -2098,6 +2100,7 @@ void ViewAbstract::SetLinearGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR);
     ACE_UPDATE_RENDER_CONTEXT(LinearGradient, gradient);
 }
 
@@ -2106,6 +2109,7 @@ void ViewAbstract::SetSweepGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP);
     ACE_UPDATE_RENDER_CONTEXT(SweepGradient, gradient);
 }
 
@@ -2114,6 +2118,7 @@ void ViewAbstract::SetRadialGradient(const NG::Gradient& gradient)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
+    ACE_UPDATE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL);
     ACE_UPDATE_RENDER_CONTEXT(RadialGradient, gradient);
 }
 
@@ -2526,8 +2531,15 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
             auto customNode = ViewStackProcessor::GetInstance()->Finish();
             return customNode;
         };
-        auto overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunc());
-        CHECK_NULL_VOID(overlayNode);
+        auto node = buildNodeFunc();
+        auto overlayNode = AceType::DynamicCast<FrameNode>(node);
+        if (!overlayNode && node) {
+            auto* stack = ViewStackProcessor::GetInstance();
+            auto nodeId = stack->ClaimNodeId();
+            auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
+            stackNode->AddChild(node);
+            overlayNode = stackNode;
+        }
         AddOverlayToFrameNode(overlayNode, align, offsetX, offsetY);
     } else {
         AddOverlayToFrameNode(nullptr, align, offsetX, offsetY);
@@ -2650,6 +2662,7 @@ void ViewAbstract::SetForegroundColor(const Color& color)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetForegroundColorStrategy().has_value()) {
         renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::NONE);
         renderContext->ResetForegroundColorStrategy();
@@ -2920,16 +2933,19 @@ void ViewAbstract::SetZIndex(FrameNode *frameNode, int32_t value)
 
 void ViewAbstract::SetLinearGradient(FrameNode *frameNode, const NG::Gradient& gradient)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::LINEAR, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(LinearGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::SWEEP, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(SweepGradient, gradient, frameNode);
 }
 
 void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient)
 {
+    ACE_UPDATE_NODE_RENDER_CONTEXT(LastGradientType, NG::GradientType::RADIAL, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
 }
 
@@ -3246,7 +3262,7 @@ void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
         layoutProperty->UpdateVisibility(visible, true);
     }
 
-    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     if (focusHub) {
         focusHub->SetShow(visible == VisibleType::VISIBLE);
     }
@@ -3557,7 +3573,7 @@ void ViewAbstract::SetBrightnessBlender(FrameNode* frameNode, const OHOS::Rosen:
 void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->SetDragPreviewOptions(previewOption);
+    frameNode->SetDragPreviewOptions(previewOption, false);
 }
 
 void ViewAbstract::SetDragPreview(FrameNode* frameNode, const DragDropInfo& dragDropInfo)
@@ -3773,7 +3789,7 @@ void ViewAbstract::SetOnClick(FrameNode* frameNode, GestureEventFunc&& clickEven
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick(std::move(clickEventFunc), distanceThreshold);
 
-    auto focusHub = frameNode->GetFocusHub();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusable(true, false);
 }
@@ -4440,6 +4456,9 @@ void ViewAbstract::SetJSFrameNodeOnClick(FrameNode* frameNode, GestureEventFunc&
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetJSFrameNodeOnClick(std::move(clickEventFunc));
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(true, false);
 }
 
 void ViewAbstract::ClearJSFrameNodeOnClick(FrameNode* frameNode)
@@ -4872,11 +4891,11 @@ bool ViewAbstract::GetFocusOnTouch(FrameNode* frameNode)
     return focusHub->IsFocusOnTouch().value_or(false);
 }
 
-void ViewAbstract::SetFocusScopeId(const std::string& focusScopeId, bool isGroup)
+void ViewAbstract::SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusScopeId(focusScopeId, isGroup);
+    focusHub->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
 }
 
 void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority)
@@ -4886,12 +4905,13 @@ void ViewAbstract::SetFocusScopePriority(const std::string& focusScopeId, const 
     focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 
-void ViewAbstract::SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup)
+void ViewAbstract::SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup,
+    bool arrowKeyStepOut)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusScopeId(focusScopeId, isGroup);
+    focusHub->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
 }
 
 void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
@@ -4970,4 +4990,17 @@ void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<
     CHECK_NULL_VOID(frameNode);
     frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
 }
+
+void ViewAbstract::AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddCustomProperty(key, value);
+}
+
+void ViewAbstract::RemoveCustomProperty(FrameNode* frameNode, const std::string& key)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->RemoveCustomProperty(key);
+}
+
 } // namespace OHOS::Ace::NG

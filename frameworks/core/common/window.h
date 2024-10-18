@@ -80,6 +80,11 @@ public:
         return false;
     }
 
+    virtual bool HasFirstFrameAnimation()
+    {
+        return false;
+    }
+
     virtual void FlushAnimationStartTime(uint64_t timeStamp) {}
 
     virtual void FlushModifier() {}

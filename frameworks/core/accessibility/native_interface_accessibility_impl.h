@@ -58,16 +58,6 @@ struct ArkUI_AccessibilityElementInfo {
         this->elementId = elementId;
     }
 
-    void SetComponentId(int64_t componentId)
-    {
-        this->componentId = componentId;
-    }
-
-    int64_t GetComponentId() const
-    {
-        return componentId;
-    }
-
     void SetTextBeginSelected(int32_t textBeginSelected)
     {
         this->textBeginSelected = textBeginSelected;
@@ -458,7 +448,6 @@ private:
     int32_t zIndex = 0;
     float opacity = 0.0f;
 
-    int64_t componentId = 0;
     int64_t parentId = 0;
     int32_t elementId = 0;
 
@@ -554,7 +543,7 @@ public:
     }
 
 private:
-    ArkUI_AccessibilityEventType eventType = ARKUI_NATIVE_ACCESSIBILITY_TYPE_VIEW_INVALID;
+    ArkUI_AccessibilityEventType eventType = ARKUI_ACCESSIBILITY_NATIVE_EVENT_TYPE_INVALID;
     int32_t pageId = 0;
     int32_t requestFocusId = 0;
     ArkUI_AccessibilityElementInfo* elementInfo = nullptr;

@@ -104,11 +104,13 @@ struct CJUICommonModifier {
     void (*setLinearGradientBlur)(ArkUINodeHandle node, ArkUI_Float32 blurRadius, const ArkUI_Float32* stops,
         ArkUI_Uint32 stopsLength, ArkUI_Int32 directionValue);
     void (*resetLinearGradientBlur)(ArkUINodeHandle node);
-    void (*setBackgroundBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
-        const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
+    void (*setBackgroundBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], ArkUI_Float32 scale,
+        const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor,
+        ArkUI_Uint32 inactiveColorArg);
     void (*resetBackgroundBlurStyle)(ArkUINodeHandle node);
     void (*setBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
-        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
+        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize, ArkUI_Bool isLocalizedBorderWidth,
+        ArkUI_Bool isLocalizedBorderColor, ArkUI_Bool isLocalizedBorderRadius);
     void (*resetBorder)(ArkUINodeHandle node);
     void (*setBackgroundImagePosition)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
         ArkUI_Bool isAlign, ArkUI_Int32 size);
@@ -238,7 +240,8 @@ struct CJUICommonModifier {
     void (*resetForegroundEffect)(ArkUINodeHandle node);
     void (*setBackgroundEffect)(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 saturation,
         ArkUI_Float32 brightness, ArkUI_Uint32 color, ArkUI_Int32 adaptiveColor, const ArkUI_Float32* blurValues,
-        ArkUI_Int32 blurValuesSize);
+        ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Int32 blurType, ArkUI_Bool isValidColor,
+        ArkUI_Uint32 inactiveColorArg);
     void (*resetBackgroundEffect)(ArkUINodeHandle node);
     void (*setBackgroundBrightness)(ArkUINodeHandle node, ArkUI_Float32 rate, ArkUI_Float32 lightUpDegree);
     void (*resetBackgroundBrightness)(ArkUINodeHandle node);
@@ -449,7 +452,7 @@ struct CJUICommonModifier {
     void (*setAccessibilityRole)(ArkUINodeHandle node, ArkUI_CharPtr role);
     void (*resetAccessibilityRole)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getAccessibilityRole)(ArkUINodeHandle node);
-    void (*setFocusScopeId)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup);
+    void (*setFocusScopeId)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup, ArkUI_Bool arrowKeyStepOut);
     void (*resetFocusScopeId)(ArkUINodeHandle node);
     void (*setFocusScopePriority)(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority);
     void (*resetFocusScopePriority)(ArkUINodeHandle node);
@@ -1257,7 +1260,7 @@ struct CJUITabsModifier {
         ArkUI_Int32 length);
     void (*setFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge);
     void (*setBarBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*setBarBackgroundBlurStyle)(ArkUINodeHandle node, ArkUI_Int32 blurStyle);
+    void (*setBarBackgroundBlurStyle)(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption);
     void (*setBarOverlap)(ArkUINodeHandle node, ArkUI_Bool overlap);
     void (*setIsVertical)(ArkUINodeHandle node, ArkUI_Bool isVertical);
     void (*setTabBarPosition)(ArkUINodeHandle node, ArkUI_Int32 barVal);
@@ -1283,12 +1286,16 @@ struct CJUITabsModifier {
     void (*resetAnimationDuration)(ArkUINodeHandle node);
     void (*setTabClip)(ArkUINodeHandle node, ArkUI_Bool clipEdge);
     void (*resetTabClip)(ArkUINodeHandle node);
+    void (*setTabEdgeEffect)(ArkUINodeHandle node, ArkUI_Uint32 edgeEffect);
+    void (*resetTabEdgeEffect)(ArkUINodeHandle node);
     void (*setTabWidthAuto)(ArkUINodeHandle node);
     void (*resetTabWidthAuto)(ArkUINodeHandle node);
     void (*setTabHeightAuto)(ArkUINodeHandle node);
     void (*resetTabHeightAuto)(ArkUINodeHandle node);
     void (*setAnimateMode)(ArkUINodeHandle node, ArkUI_Uint32 mode);
     void (*resetAnimateMode)(ArkUINodeHandle node);
+    void (*setBarBackgroundEffect)(ArkUINodeHandle node, ArkUITabBarBackgroundEffect* effectOption);
+    void (*resetBarBackgroundEffect)(ArkUINodeHandle node);
 };
 
 struct CJUIStepperItemModifier {
@@ -1453,8 +1460,10 @@ struct CJUIPluginModifier {
 };
 
 struct CJUINavDestinationModifier {
-    void (*setHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle);
+    void (*setHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle, ArkUI_Bool animated);
     void (*resetHideTitleBar)(ArkUINodeHandle node);
+    void (*setNavDestinationHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated);
+    void (*resetNavDestinationHideToolBar)(ArkUINodeHandle node);
     void (*setNavDestinationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
     void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);
@@ -2045,7 +2054,7 @@ struct CJUIToggleModifier {
 };
 
 struct CJUINavigationModifier {
-    void (*setHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide);
+    void (*setHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated);
     void (*resetHideToolBar)(ArkUINodeHandle node);
     void (*setHideNavBar)(ArkUINodeHandle node, ArkUI_Bool hideNavBar);
     void (*resetHideNavBar)(ArkUINodeHandle node);
@@ -2057,7 +2066,7 @@ struct CJUINavigationModifier {
     void (*resetSubtitle)(ArkUINodeHandle node);
     void (*resetUsrNavigationMode)(ArkUINodeHandle node);
     void (*setUsrNavigationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
-    void (*setNavHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle);
+    void (*setNavHideTitleBar)(ArkUINodeHandle node, ArkUI_Bool hideTitle, ArkUI_Bool animated);
     void (*resetNavHideTitleBar)(ArkUINodeHandle node);
     void (*setNavBarPosition)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavBarPosition)(ArkUINodeHandle node);
@@ -2806,6 +2815,8 @@ struct CJUIRichEditorModifier {
     void (*resetRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*setRichEditorEnterKeyType)(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType);
     void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);
+    void (*setRichEditorBarState)(ArkUINodeHandle node, ArkUI_Uint32 barStateValue);
+    void (*resetRichEditorBarState)(ArkUINodeHandle node);
 };
 
 struct CJUIRichEditorControllerModifier {

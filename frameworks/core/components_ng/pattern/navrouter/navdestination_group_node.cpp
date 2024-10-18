@@ -16,19 +16,31 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 constexpr double HALF = 0.5;
 constexpr float CONTENT_OFFSET_PERCENT = 0.2f;
 constexpr float TITLE_OFFSET_PERCENT = 0.02f;
 constexpr float REMOVE_CLIP_SIZE = 10000.0f;
+constexpr int32_t OPACITY_TITLE_OUT_DELAY = 17;
+constexpr int32_t OPACITY_TITLE_IN_DELAY = 33;
+constexpr int32_t OPACITY_TITLE_DURATION = 150;
+constexpr int32_t OPACITY_BACKBUTTON_IN_DELAY = 150;
+constexpr int32_t OPACITY_BACKBUTTON_IN_DURATION = 200;
+constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
+constexpr int32_t MAX_RENDER_GROUP_TEXT_NODE_COUNT = 50;
+constexpr float MAX_RENDER_GROUP_TEXT_NODE_HEIGHT = 150.0f;
 
 NavDestinationGroupNode::~NavDestinationGroupNode()
 {
     if (contentNode_) {
         contentNode_->Clean();
     }
+    ReleaseTextNodeList();
 }
 
 RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
@@ -79,6 +91,7 @@ void NavDestinationGroupNode::OnAttachToMainTree(bool recursive)
         ProcessShallowBuilder();
     }
     FrameNode::OnAttachToMainTree(recursive);
+    SetFreeze(false, true);
 }
 
 void NavDestinationGroupNode::OnOffscreenProcess(bool recursive)
@@ -162,18 +175,20 @@ void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)
                 RadiusF(EdgeF(0.0f, 0.0f)));
         }
         GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
-        CHECK_NULL_VOID(titleBarNode);
-        titleBarNode->GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
+        if (titleBarNode) {
+            titleBarNode->GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
+        }
         return;
     }
     SetTransitionType(PageTransitionType::EXIT_PUSH);
     SetIsOnAnimation(true);
+    GetRenderContext()->RemoveClipWithRRect();
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-    GetEventHub<EventHub>()->SetEnabledInternal(false);
-    CHECK_NULL_VOID(titleBarNode);
-    titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     if (NeedRemoveInPush()) {
         GetEventHub<EventHub>()->SetEnabledInternal(false);
+    }
+    if (titleBarNode) {
+        titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     }
 }
 
@@ -186,15 +201,17 @@ void NavDestinationGroupNode::StartSystemTransitionPush(bool transitionIn)
         GetRenderContext()->ClipWithRRect(
             RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
         GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-        CHECK_NULL_VOID(titleBarNode);
-        titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        if (titleBarNode) {
+            titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        }
         return;
     }
     GetRenderContext()->UpdateTranslateInXY(
         { -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
-    CHECK_NULL_VOID(titleBarNode);
-    titleBarNode->GetRenderContext()->UpdateTranslateInXY(
-        { frameSize.Width() * TITLE_OFFSET_PERCENT  * isRTL, 0.0f });
+    if (titleBarNode) {
+        titleBarNode->GetRenderContext()->UpdateTranslateInXY(
+            { frameSize.Width() * TITLE_OFFSET_PERCENT  * isRTL, 0.0f });
+    }
 }
 
 void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn)
@@ -204,19 +221,21 @@ void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn)
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "curNode has another transition");
             return;
         }
-        SetIsOnAnimation(false);
         GetRenderContext()->RemoveClipWithRRect();
+        SetIsOnAnimation(false);
         return;
     }
+    SetIsOnAnimation(false);
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
-    SetIsOnAnimation(false);
     if (GetTransitionType() == PageTransitionType::EXIT_PUSH) {
         GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+        SetJSViewActive(false);
     }
-    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    if (titleBarNode) {
+        titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    }
 }
 
 void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
@@ -228,9 +247,10 @@ void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
         SetTransitionType(PageTransitionType::ENTER_POP);
         GetRenderContext()->RemoveClipWithRRect();
         GetRenderContext()->UpdateTranslateInXY({ -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
-        CHECK_NULL_VOID(titleBarNode);
-        titleBarNode->GetRenderContext()->UpdateTranslateInXY(
-            { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
+        if (titleBarNode) {
+            titleBarNode->GetRenderContext()->UpdateTranslateInXY(
+                { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
+        }
         return;
     }
     SetIsOnAnimation(true);
@@ -239,8 +259,9 @@ void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
     GetRenderContext()->ClipWithRRect(RectF(0.0f, 0.0f, frameSize.Width(), REMOVE_CLIP_SIZE),
         RadiusF(EdgeF(0.0f, 0.0f)));
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-    CHECK_NULL_VOID(titleBarNode);
-    titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    if (titleBarNode) {
+        titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    }
 }
 
 void NavDestinationGroupNode::StartSystemTransitionPop(bool transitionIn)
@@ -248,8 +269,9 @@ void NavDestinationGroupNode::StartSystemTransitionPop(bool transitionIn)
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     if (transitionIn) {
         GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-        CHECK_NULL_VOID(titleBarNode);
-        titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        if (titleBarNode) {
+            titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+        }
         return;
     }
     auto frameSize = GetGeometryNode()->GetFrameSize();
@@ -263,13 +285,14 @@ void NavDestinationGroupNode::StartSystemTransitionPop(bool transitionIn)
     }
     float isRTL = GetLanguageDirection();
     GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
-    CHECK_NULL_VOID(titleBarNode);
-    titleBarNode->GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
+    if (titleBarNode) {
+        titleBarNode->GetRenderContext()->UpdateTranslateInXY({ frameSize.Width() * HALF * isRTL, 0.0f });
+    }
 }
 
-bool NavDestinationGroupNode::SystemTransitionPopCallback(bool transitionIn)
+bool NavDestinationGroupNode::SystemTransitionPopCallback()
 {
-    if (GetTransitionType() != PageTransitionType::EXIT_POP || transitionIn) {
+    if (GetTransitionType() != PageTransitionType::EXIT_POP) {
         // has another transition, just return
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "preNavDesNode has another transition");
         return false;
@@ -279,7 +302,7 @@ bool NavDestinationGroupNode::SystemTransitionPopCallback(bool transitionIn)
 
     // NavRouter will restore the preNavDesNode and needs to set the initial state after the animation ends.
     auto shallowBuilder = preNavDesPattern->GetShallowBuilder();
-    if (shallowBuilder) {
+    if (shallowBuilder && !IsCacheNode()) {
         shallowBuilder->MarkIsExecuteDeepRenderDone(false);
     }
     if (!IsCacheNode() && GetContentNode()) {
@@ -315,5 +338,171 @@ void NavDestinationGroupNode::InitDialogTransition(bool isZeroY)
     }
     context->UpdateTransformTranslate({ 0.0f,
         contentNode->GetGeometryNode()->GetFrameSize().Height(), 0.0f });
+}
+
+std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacityAnimation(bool isTransitionIn)
+{
+    CHECK_NULL_RETURN(GetTitleBarNode(), nullptr);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(GetTitleBarNode());
+    CHECK_NULL_RETURN(titleNode, nullptr);
+    auto titleRenderContext = titleNode->GetRenderContext();
+    CHECK_NULL_RETURN(titleRenderContext, nullptr);
+    AnimationOption opacityOption;
+    opacityOption.SetCurve(Curves::SHARP);
+    opacityOption.SetDuration(OPACITY_TITLE_DURATION);
+    if (isTransitionIn) {
+        opacityOption.SetDelay(OPACITY_TITLE_IN_DELAY);
+        titleRenderContext->SetOpacity(0.0f);
+        return AnimationUtils::StartAnimation(opacityOption,
+            [weakRender = WeakPtr<RenderContext>(titleRenderContext)]() {
+            auto renderContext = weakRender.Upgrade();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->SetOpacity(1.0f);
+        });
+    }
+    // recover after transition animation.
+    opacityOption.SetDelay(OPACITY_TITLE_OUT_DELAY);
+    titleRenderContext->SetOpacity(1.0f);
+    return AnimationUtils::StartAnimation(opacityOption,
+        [weakRender = WeakPtr<RenderContext>(titleRenderContext)]() {
+        auto renderContext = weakRender.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetOpacity(0.0f);
+    });
+}
+
+std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAnimation(bool isTransitionIn)
+{
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(GetTitleBarNode());
+    CHECK_NULL_RETURN(titleNode, nullptr);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleNode->GetBackButton());
+    CHECK_NULL_RETURN(backButtonNode, nullptr);
+    AnimationOption transitionOption;
+    transitionOption.SetCurve(Curves::SHARP);
+    auto backButtonNodeContext = backButtonNode->GetRenderContext();
+    CHECK_NULL_RETURN(backButtonNodeContext, nullptr);
+    if (isTransitionIn) {
+        transitionOption.SetDelay(OPACITY_BACKBUTTON_IN_DELAY);
+        transitionOption.SetDuration(OPACITY_BACKBUTTON_IN_DURATION);
+        backButtonNodeContext->SetOpacity(0.0f);
+        return AnimationUtils::StartAnimation(transitionOption,
+            [weakRender = WeakPtr<RenderContext>(backButtonNodeContext)]() {
+            auto renderContext = weakRender.Upgrade();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->SetOpacity(1.0f);
+        });
+    }
+    transitionOption.SetDuration(OPACITY_BACKBUTTON_OUT_DURATION);
+    backButtonNodeContext->SetOpacity(1.0f);
+    return AnimationUtils::StartAnimation(transitionOption,
+        [weakRender = WeakPtr<RenderContext>(backButtonNodeContext)]() {
+        auto renderContext = weakRender.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetOpacity(0.0f);
+    });
+}
+
+void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(
+    bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy)
+{
+    if (isPopPage) {
+        CollectTextNodeAsRenderGroup(isPopPage);
+    } else {
+        CHECK_NULL_VOID(proxy);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAfterLayoutTask([weakNavDestiniation = WeakClaim(this),
+            weakProxy = WeakPtr<NavigationTransitionProxy>(proxy)] () {
+            auto navDestination = weakNavDestiniation.Upgrade();
+            CHECK_NULL_VOID(navDestination);
+            auto proxy = weakProxy.Upgrade();
+            if (proxy && proxy->GetIsFinished()) {
+                return;
+            }
+            navDestination->CollectTextNodeAsRenderGroup(false);
+        });
+        pipeline->RequestFrame();
+    }
+}
+
+void NavDestinationGroupNode::CollectTextNodeAsRenderGroup(bool isPopPage)
+{
+    ReleaseTextNodeList();
+    std::queue<RefPtr<UINode>> childrenLoopQueue;
+    childrenLoopQueue.push(contentNode_);
+
+    // only the first 50 text nodes will be marked, avoid too much time for traversal
+    // and off-screen drawing at first few frames
+    int32_t remainTextNodeNeedRenderGroup = MAX_RENDER_GROUP_TEXT_NODE_COUNT;
+    while (!childrenLoopQueue.empty() && remainTextNodeNeedRenderGroup > 0) {
+        auto currentNode = childrenLoopQueue.front();
+        childrenLoopQueue.pop();
+        CHECK_NULL_CONTINUE(currentNode);
+        for (auto& child : currentNode->GetChildren()) {
+            if (remainTextNodeNeedRenderGroup <= 0) {
+                break;
+            }
+            CHECK_NULL_CONTINUE(child);
+            childrenLoopQueue.push(child);
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            if (!frameNode || (frameNode->GetTag() != V2::TEXT_ETS_TAG)) {
+                continue;
+            }
+            auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+            if (!layoutProperty ||
+                (layoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE)) {
+                continue;
+            }
+            auto& renderContext = frameNode->GetRenderContext();
+            if (!renderContext || renderContext->GetRenderGroupValue(false)) {
+                continue;
+            }
+            renderContext->SetMarkNodeGroup(isPopPage ||
+                (renderContext->GetPaintRectWithoutTransform().Height() < MAX_RENDER_GROUP_TEXT_NODE_HEIGHT));
+            textNodeList_.emplace_back(WeakPtr<UINode>(child));
+            --remainTextNodeNeedRenderGroup;
+            auto pattern = AceType::DynamicCast<TextPattern>(frameNode->GetPattern());
+            CHECK_NULL_CONTINUE(pattern);
+            pattern->RegisterAfterLayoutCallback([weakRenderContext = WeakPtr<RenderContext>(renderContext)]() {
+                auto renderContext = weakRenderContext.Upgrade();
+                if (renderContext && !(renderContext->GetRenderGroupValue(false))) {
+                    renderContext->SetMarkNodeGroup(
+                        renderContext->GetPaintRectWithoutTransform().Height() < MAX_RENDER_GROUP_TEXT_NODE_HEIGHT);
+                }
+            });
+        }
+    }
+}
+
+void NavDestinationGroupNode::ReleaseTextNodeList()
+{
+    for (auto& child : textNodeList_) {
+        auto textNode = AceType::DynamicCast<FrameNode>(child.Upgrade());
+        if (!textNode) {
+            continue;
+        }
+        auto pattern = AceType::DynamicCast<TextPattern>(textNode->GetPattern());
+        if (pattern) {
+            pattern->UnRegisterAfterLayoutCallback();
+        }
+        auto renderContext = textNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetMarkNodeGroup(renderContext->GetRenderGroupValue(false));
+        }
+    }
+    textNodeList_.clear();
+}
+
+void NavDestinationGroupNode::CleanContent()
+{
+    auto pattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto shallowBuilder = pattern->GetShallowBuilder();
+    if (shallowBuilder) {
+        shallowBuilder->MarkIsExecuteDeepRenderDone(false);
+    }
+    if (GetContentNode()) {
+        GetContentNode()->Clean(false, true);
+    }
 }
 } // namespace OHOS::Ace::NG

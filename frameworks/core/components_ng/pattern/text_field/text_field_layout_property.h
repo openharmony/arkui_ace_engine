@@ -79,6 +79,7 @@ public:
         ResetBundleName();
         ResetModuleName();
         ResetIconColor();
+        ResetIsShowSymbol();
         ResetSelectAllValue();
         ResetShowHighlightBorder();
         ResetSetCounter();
@@ -131,6 +132,16 @@ public:
         json->PutExtAttr("textOverflow",
             V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
         json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
+    }
+
+    const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const
+    {
+        return cancelIconSymbol_;
+    }
+
+    void SetCancelIconSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& cancelIconSymbol)
+    {
+        cancelIconSymbol_ = cancelIconSymbol;
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
@@ -226,6 +237,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BundleName, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ModuleName, std::string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IconColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowSymbol, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowCancelButton, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetCounter, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowHighlightBorder, bool, PROPERTY_UPDATE_MEASURE);
@@ -265,6 +277,7 @@ protected:
         value->propCleanNodeStyle_ = CloneCleanNodeStyle();
         value->propIconSize_ = CloneIconSize();
         value->propIconColor_ = CloneIconColor();
+        value->propIsShowSymbol_ = CloneIsShowSymbol();
         value->propSelectAllValue_ = CloneSelectAllValue();
         value->propSetCounter_ = CloneSetCounter();
         value->propShowHighlightBorder_ = CloneShowHighlightBorder();
@@ -273,6 +286,9 @@ protected:
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutProperty);
+
+private:
+    std::function<void(WeakPtr<NG::FrameNode>)> cancelIconSymbol_;
 };
 } // namespace OHOS::Ace::NG
 

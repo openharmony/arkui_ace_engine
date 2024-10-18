@@ -23,6 +23,7 @@
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #endif
+#include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -104,6 +105,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
         if (style.text != static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) {
             auto textNode = FrameNode::CreateFrameNode(
                 V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+            CHECK_NULL_RETURN(textNode, nullptr);
             textNode->SetInternal();
             std::string textStr = "";
             GetTextResource(style.text, textStr);
@@ -247,6 +249,15 @@ bool SecurityComponentModelNG::IsArkuiComponent()
     return false;
 }
 
+void SecurityComponentModelNG::NotifyFontColorSet()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto prop = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_VOID(prop);
+    prop->UpdateIsFontColorSet(true);
+}
+
 bool SecurityComponentModelNG::IsInReleaseList(uint32_t value)
 {
     return (RELEASE_ATTRIBUTE_LIST.find(value) != RELEASE_ATTRIBUTE_LIST.end());
@@ -290,12 +301,13 @@ void SecurityComponentModelNG::SetFontFamily(const std::vector<std::string>& fon
 void SecurityComponentModelNG::SetFontColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, FontColor, value);
+    NotifyFontColorSet();
 }
 
 void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("background is not exist");
+        SC_LOG_WARN("background is not exist");
         return;
     }
 
@@ -313,7 +325,7 @@ void SecurityComponentModelNG::SetBackgroundColor(const Color& value)
 void SecurityComponentModelNG::SetBackgroundBorderWidth(const Dimension& value)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("background is not exist");
+        SC_LOG_WARN("background is not exist");
         return;
     }
 
@@ -323,7 +335,7 @@ void SecurityComponentModelNG::SetBackgroundBorderWidth(const Dimension& value)
 void SecurityComponentModelNG::SetBackgroundBorderColor(const Color& value)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("background is not exist");
+        SC_LOG_WARN("background is not exist");
         return;
     }
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundBorderColor, value);
@@ -332,7 +344,7 @@ void SecurityComponentModelNG::SetBackgroundBorderColor(const Color& value)
 void SecurityComponentModelNG::SetBackgroundBorderStyle(const BorderStyle& value)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("background is not exist");
+        SC_LOG_WARN("background is not exist");
         return;
     }
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, BackgroundBorderStyle, value);
@@ -341,7 +353,7 @@ void SecurityComponentModelNG::SetBackgroundBorderStyle(const BorderStyle& value
 void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("background is not exist");
+        SC_LOG_WARN("background is not exist");
         return;
     }
 
@@ -353,7 +365,7 @@ void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimensio
     const std::optional<Dimension>& bottom)
 {
     if (!IsBackgroundVisible()) {
-        LOGW("Can not set background padding without background");
+        SC_LOG_WARN("Can not set background padding without background");
         return;
     }
 
@@ -377,11 +389,6 @@ void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimensio
         ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty,
             BackgroundBottomPadding, bottom.value());
     }
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
-    CHECK_NULL_VOID(property);
-    property->UpdateHasCustomPadding(true);
 }
 
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& padding)
@@ -393,7 +400,7 @@ void SecurityComponentModelNG::SetTextIconSpace(const Dimension& value)
 {
     if ((GetCurSecCompChildNode(V2::TEXT_ETS_TAG) == nullptr) ||
         (GetCurSecCompChildNode(V2::IMAGE_ETS_TAG) == nullptr)) {
-        LOGW("Can not set text icon padding without text and icon");
+        SC_LOG_WARN("Can not set text icon padding without text and icon");
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconSpace, value);

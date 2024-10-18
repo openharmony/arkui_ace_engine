@@ -958,6 +958,32 @@ void ResetTextLineSpacing(ArkUINodeHandle node)
     TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING);
 }
 
+void SetTextCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetCaretColor(frameNode, Color(color));
+}
+
+ArkUI_Uint32 GetTextCaretColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
+    return TextModelNG::GetCaretColor(frameNode).GetValue();
+}
+
+void ResetTextCaretColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto caretColor = static_cast<int32_t>(theme->GetCaretColor().GetValue());
+    TextModelNG::SetCaretColor(frameNode, Color(caretColor));
+}
+
 void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1122,18 +1148,15 @@ void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallbac
     NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
         onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
+        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(*onCreateMenu));
+    } else {
+        TextModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
         onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
-    }
-    if (onCreateMenu != nullptr && onMenuItemClick != nullptr) {
-        TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), std::move(*onMenuItemClick));
-    } else if (onCreateMenu != nullptr && onMenuItemClick == nullptr) {
-        TextModelNG::SetSelectionMenuOptions(frameNode, std::move(*onCreateMenu), nullptr);
-    } else if (onCreateMenu == nullptr && onMenuItemClick != nullptr) {
-        TextModelNG::SetSelectionMenuOptions(frameNode, nullptr, std::move(*onMenuItemClick));
+        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(*onMenuItemClick));
     } else {
-        TextModelNG::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
+        TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
 }
 
@@ -1143,7 +1166,8 @@ void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    TextModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
+    TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 
 void SetTextHalfLeading(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1189,6 +1213,7 @@ const ArkUITextModifier* GetTextModifier()
         SetTextFontFeature, ResetTextFontFeature, SetTextLineSpacing, GetTextLineSpacing, ResetTextLineSpacing,
         GetTextFontFeature, GetTextDetectEnable, SetTextDataDetectorConfig, GetTextDataDetectorConfig,
         ResetTextDataDetectorConfig, SetLineBreakStrategy, ResetLineBreakStrategy, GetTextLineBreakStrategy,
+        SetTextCaretColor, GetTextCaretColor, ResetTextCaretColor,
         SetTextSelectedBackgroundColor, GetTextSelectedBackgroundColor, ResetTextSelectedBackgroundColor,
         SetTextContentWithStyledString, ResetTextContentWithStyledString, SetTextSelection, ResetTextSelection,
         SetTextSelectableMode, ResetTextSelectableMode, SetTextDataDetectorConfigWithEvent,

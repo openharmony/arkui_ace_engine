@@ -113,6 +113,9 @@ public:
      * @return: result number
      */
     virtual int32_t UnregisterWebUnfocusEventCallback() = 0;
+
+    /* Not Used Ipc Interface*/
+    virtual bool IsConnect() = 0;
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:

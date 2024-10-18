@@ -333,6 +333,13 @@ ArkUI_Uint32 GetToggleUnselectedColor(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
     return ToggleModelNG::GetUnselectedColor(frameNode).GetValue();
 }
+
+void SetToggleState(ArkUINodeHandle node, ArkUI_Bool isOn)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::SetToggleState(frameNode, static_cast<bool>(isOn));
+}
 } // namespace
 namespace NodeModifier {
 const ArkUIToggleModifier* GetToggleModifier()
@@ -364,6 +371,7 @@ const ArkUIToggleModifier* GetToggleModifier()
         SetToggleTrackBorderRadius,
         ResetToggleTrackBorderRadius,
         GetToggleUnselectedColor,
+        SetToggleState,
     };
 
     return &modifier;

@@ -72,35 +72,6 @@ void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuT
         scaleOption.GetOnFinishEvent());
 }
 
-void ShowGatherAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& menuNode)
-{
-    auto mainPipeline = PipelineContext::GetMainPipelineContext();
-    CHECK_NULL_VOID(mainPipeline);
-    auto manager = mainPipeline->GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    manager->UpdateGatherNodeToTop();
-    auto gatherNode = manager->GetGatherNode();
-    CHECK_NULL_VOID(gatherNode);
-    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto textNode = menuWrapperPattern->GetBadgeNode();
-    CHECK_NULL_VOID(textNode);
-    auto menuPattern = GetMenuPattern(menuNode);
-    CHECK_NULL_VOID(menuPattern);
-    mainPipeline->AddAfterRenderTask([weakImageNode = AceType::WeakClaim(AceType::RawPtr(imageNode)),
-        weakManager = AceType::WeakClaim(AceType::RawPtr(manager)),
-        weakTextNode = AceType::WeakClaim(AceType::RawPtr(textNode)),
-        weakMenuPattern = AceType::WeakClaim(AceType::RawPtr(menuPattern))]() {
-        auto imageNode = weakImageNode.Upgrade();
-        auto manager = weakManager.Upgrade();
-        auto textNode = weakTextNode.Upgrade();
-        auto menuPattern = weakMenuPattern.Upgrade();
-        DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
-        DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
-        DragAnimationHelper::ShowBadgeAnimation(textNode);
-    });
-}
-
 } // namespace
 void MenuPreviewPattern::OnModifyDone()
 {
@@ -158,7 +129,7 @@ bool MenuPreviewPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
         option.GetOnFinishEvent());
     auto menuWrapper = GetMenuWrapper();
     auto menuPattern = GetMenuPattern(menuWrapper);
-    ShowGatherAnimation(host, menuWrapper);
+    DragAnimationHelper::UpdateGatherNodeToTop();
     UpdateShowScale(context, menuTheme, menuPattern);
 
     isFirstShow_ = false;

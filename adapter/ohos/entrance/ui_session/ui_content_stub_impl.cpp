@@ -80,4 +80,9 @@ int32_t UIContentServiceStubImpl::UnregisterWebUnfocusEventCallback()
     UiSessionManager::GetInstance().NotifyAllWebPattern(false);
     return NO_ERROR;
 }
+
+bool UIContentServiceStubImpl::IsConnect()
+{
+    return false;
+}
 } // namespace OHOS::Ace

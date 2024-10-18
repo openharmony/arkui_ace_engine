@@ -1,0 +1,20 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "listItemGroup_color",
+      "value": "#FF3C1687"
+    },
+    {
+      "name": "ListDivider_One_color",
+      "value": "#FFBC3535"
+    },
+    {
+      "name": "ListDivider_Two_color",
+      "value": "#FF5B7357"
+    }
+  ]
+}

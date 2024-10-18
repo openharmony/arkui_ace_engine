@@ -268,7 +268,8 @@ public:
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
     static void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
-    static void SetOnGestureRecognizerJudgeBegin(GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
+    static void SetOnGestureRecognizerJudgeBegin(
+        GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag);
     static void SetOnTouch(TouchEventFunc &&touchEventFunc);
     static void SetOnMouse(OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(OnHoverFunc &&onHoverEventFunc);
@@ -740,9 +741,10 @@ public:
     static RenderFit GetRenderFit(FrameNode* frameNode);
     static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
     static bool GetRenderGroup(FrameNode* frameNode);
-    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut);
     static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
-    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup,
+        bool arrowKeyStepOut);
     static void SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
         const uint32_t focusPriority);
     static void ResetBias(FrameNode* frameNode);
@@ -762,6 +764,8 @@ public:
     static void SetPositionLocalizedEdges(bool needLocalized);
     static void SetLocalizedMarkAnchor(bool needLocalized);
     static void SetOffsetLocalizedEdges(bool needLocalized);
+    static void AddCustomProperty(FrameNode* frameNode, const std::string& key, const std::string& value);
+    static void RemoveCustomProperty(FrameNode* frameNode, const std::string& key);
 
 private:
     static void AddDragFrameNodeToManager();

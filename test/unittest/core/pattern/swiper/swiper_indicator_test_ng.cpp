@@ -164,6 +164,40 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMouseClick002
+ * @tc.desc: Test SwiperIndicator HandleMouseClick when SwipeByGroup is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(3);
+        model.SetSwipeByGroup(true);
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
+    }, 6);
+    EXPECT_EQ(pattern_->TotalCount(), 6);
+    int32_t settingApiVersion = 14;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
+
+    /**
+     * @tc.steps: step1. Click item(index:1)
+     * @tc.expected: Swipe to item(index:3)
+     */
+    MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
+
+    /**
+     * @tc.steps: step2. Click item(index:0)
+     * @tc.expected: Swipe to item(index:0)
+     */
+    MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: HandleTouchClick001
  * @tc.desc: Test SwiperIndicator HandleTouchClick
  * @tc.type: FUNC
@@ -729,5 +763,100 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0020, TestSize.Level
     touchEventInfo.touches_.front().localLocation_.SetX(2.0f);
     indicatorPattern->dragStartPoint_.SetX(1.0f);
     EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
+}
+
+/**
+ * @tc.name: SwiperPatternDisplayIndicatorTotalCount001
+ * @tc.desc: DisplayIndicatorTotalCount when SwipeByGroup is false and loop is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperPatternDisplayIndicatorTotalCount001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(3);
+        model.SetSwipeByGroup(false);
+        model.SetLoop(false);
+    }, 6);
+    EXPECT_EQ(pattern_->TotalCount(), 6);
+    int32_t settingApiVersion = 14;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 4);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SwiperPatternDisplayIndicatorTotalCount002
+ * @tc.desc: DisplayIndicatorTotalCount when SwipeByGroup is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperPatternDisplayIndicatorTotalCount002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(4);
+        model.SetSwipeByGroup(true);
+        model.SetLoop(false);
+    }, 6);
+    EXPECT_EQ(pattern_->TotalCount(), 8);
+    int32_t settingApiVersion = 14;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: CalculateGroupTurnPageRate001
+ * @tc.desc: Test SwiperPattern CalculateGroupTurnPageRate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalculateGroupTurnPageRate001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDisplayCount(2);
+        model.SetSwipeByGroup(true);
+        model.SetLoop(true);
+    });
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    float additionalOffset = 0.0f;
+    pattern_->contentMainSize_ = SWIPER_WIDTH;
+
+    pattern_->UpdateCurrentOffset(-120.0f);
+    FlushLayoutTask(frameNode_);
+
+    auto groupTurnPageRate = pattern_->CalculateGroupTurnPageRate(additionalOffset);
+    EXPECT_EQ(groupTurnPageRate, -0.25f);
+}
+
+/**
+ * @tc.name: UpdateFocusable001
+ * @tc.desc: Test UpdateFocusable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, UpdateFocusable001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {}, 3);
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 3);
+
+    auto indicatorFocusHub = indicatorNode_->GetOrCreateFocusHub();
+    EXPECT_TRUE(indicatorFocusHub->GetFocusable());
+    auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), "auto");
+
+    frameNode_->RemoveChildAtIndex(0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(indicatorFocusHub->GetFocusable());
+
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->RemoveChildAtIndex(0);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->TotalCount(), 0);
+
+    FlushLayoutTask(indicatorNode_);
+    EXPECT_FALSE(indicatorFocusHub->GetFocusable());
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), "no");
 }
 } // namespace OHOS::Ace::NG

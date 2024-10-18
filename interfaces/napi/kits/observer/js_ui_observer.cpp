@@ -372,6 +372,11 @@ napi_value ObserverProcess::ProcessNavigationRegister(napi_env env, napi_callbac
 {
     GET_PARAMS(env, info, PARAM_SIZE_THREE);
 
+    if (!isNavigationHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFunc(&UIObserver::HandleNavigationStateChange);
+        isNavigationHandleFuncSetted_ = true;
+    }
+
     if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
         auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
         UIObserver::RegisterNavigationCallback(listener);
@@ -477,6 +482,11 @@ napi_value ObserverProcess::ProcessScrollEventUnRegister(napi_env env, napi_call
 napi_value ObserverProcess::ProcessRouterPageRegister(napi_env env, napi_callback_info info)
 {
     GET_PARAMS(env, info, PARAM_SIZE_THREE);
+
+    if (!isRouterPageHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFunc(&UIObserver::HandleRouterPageStateChange);
+        isRouterPageHandleFuncSetted_ = true;
+    }
 
     if (argc == PARAM_SIZE_TWO && MatchValueType(env, argv[PARAM_INDEX_ONE], napi_function)) {
         auto listener = std::make_shared<UIObserverListener>(env, argv[PARAM_INDEX_ONE]);
@@ -720,6 +730,11 @@ napi_value ObserverProcess::ProcessNavDestinationSwitchRegister(napi_env env, na
     NavDestinationSwitchParams params;
     if (!ParseNavDestSwitchRegisterParams(env, info, params)) {
         return nullptr;
+    }
+
+    if (!isDestinationSwitchHandleFuncSetted_) {
+        NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFunc(&UIObserver::HandleNavDestinationSwitch);
+        isDestinationSwitchHandleFuncSetted_ = true;
     }
 
     auto listener = std::make_shared<UIObserverListener>(env, params.callback);
@@ -1017,13 +1032,10 @@ napi_value AddToTabContentState(napi_env env)
 
 static napi_value UIObserverExport(napi_env env, napi_value exports)
 {
-    NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFunc(&UIObserver::HandleNavigationStateChange);
     NG::UIObserverHandler::GetInstance().SetHandleScrollEventChangeFunc(&UIObserver::HandleScrollEventStateChange);
-    NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFunc(&UIObserver::HandleRouterPageStateChange);
     NG::UIObserverHandler::GetInstance().SetHandleDensityChangeFunc(&UIObserver::HandleDensityChange);
     NG::UIObserverHandler::GetInstance().SetLayoutDoneHandleFunc(&UIObserver::HandLayoutDoneChange);
     NG::UIObserverHandler::GetInstance().SetDrawCommandSendHandleFunc(&UIObserver::HandDrawCommandSendChange);
-    NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFunc(&UIObserver::HandleNavDestinationSwitch);
     NG::UIObserverHandler::GetInstance().SetWillClickFunc(&UIObserver::HandleWillClick);
     NG::UIObserverHandler::GetInstance().SetDidClickFunc(&UIObserver::HandleDidClick);
     NG::UIObserverHandler::GetInstance().SetHandleTabContentStateUpdateFunc(&UIObserver::HandleTabContentStateChange);

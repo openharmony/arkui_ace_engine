@@ -69,11 +69,15 @@ namespace NG {
 class FrameNode;
 } // namespace NG
 
-struct KeyboardAnimationConfig {
+struct KeyboardAnimationCurve {
     std::string curveType_;
     std::vector<float> curveParams_;
-    uint32_t durationIn_ = 0;
-    uint32_t durationOut_ = 0;
+    uint32_t duration_ = 0;
+};
+
+struct KeyboardAnimationConfig {
+    KeyboardAnimationCurve curveIn_;
+    KeyboardAnimationCurve curveOut_;
 };
 
 struct FontInfo;
@@ -193,6 +197,8 @@ public:
     // Called by ohos AceContainer when mouse event received.
     virtual void OnMouseEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {}
 
+    virtual void OnMouseMoveEventForAxisEvent(const MouseEvent& event, const RefPtr<NG::FrameNode>& node) {};
+
     // Called by view when axis event received.
     virtual void OnAxisEvent(const AxisEvent& event) = 0;
 
@@ -266,6 +272,19 @@ public:
         accessibilityManager->UpdateVirtualNodeFocus();
     }
 
+    void RegisterWindowDensityCallback(std::function<double()>&& callback)
+    {
+        windowDensityCallback_ = callback;
+    }
+
+    double GetWindowDensity() const
+    {
+        if (windowDensityCallback_) {
+            return windowDensityCallback_();
+        }
+        return 0.0;
+    }
+
     int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
     {
         if (callback) {
@@ -318,6 +337,8 @@ public:
 
     // Called by AceContainer.
     bool Dump(const std::vector<std::string>& params) const;
+
+    virtual void DumpUIExt() const {}
 
     virtual bool IsLastPage()
     {
@@ -991,7 +1012,11 @@ public:
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+    virtual void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {}
+
+    virtual KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() {
+        return KeyBoardAvoidMode::OFFSET;
+    }
 
     virtual bool IsEnableKeyBoardAvoidMode() {
         return false;
@@ -1025,7 +1050,6 @@ public:
         displayWindowRectInfo_ = displayWindowRectInfo;
     }
 
-    virtual void SetContainerWindow(bool isShow) = 0;
 
     // This method can get the coordinates and size of the current window,
     // which can be added to the return value of the GetGlobalOffset method to get the window coordinates of the node.
@@ -1293,8 +1317,6 @@ public:
         return false;
     }
 
-    virtual void CheckVirtualKeyboardHeight() {}
-
     virtual void StartWindowAnimation() {}
 
     virtual void StopWindowAnimation() {}
@@ -1381,6 +1403,53 @@ public:
     {
         return dragNodeGrayscale_;
     }
+
+    virtual bool IsDirtyNodesEmpty() const
+    {
+        return true;
+    }
+
+    virtual bool IsDirtyLayoutNodesEmpty() const
+    {
+        return true;
+    }
+    bool IsWaitFlushFinish() const
+    {
+        return isWaitFlushFinish_;
+    }
+
+    void EnWaitFlushFinish()
+    {
+        isWaitFlushFinish_ = true;
+    }
+
+    void UnWaitFlushFinish()
+    {
+        isWaitFlushFinish_ = false;
+    }
+
+    void SetUIExtensionFlushFinishCallback(std::function<void(void)>&& callback)
+    {
+        uiExtensionFlushFinishCallback_ = callback;
+    }
+
+    void FireUIExtensionFlushFinishCallback()
+    {
+        if (uiExtensionFlushFinishCallback_) {
+            uiExtensionFlushFinishCallback_();
+        }
+    }
+
+    void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
+    {
+        isOpenInvisibleFreeze_ = isOpenInvisibleFreeze;
+    }
+
+    bool IsOpenInvisibleFreeze() const
+    {
+        return isOpenInvisibleFreeze_;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1433,6 +1502,7 @@ protected:
     bool isReloading_ = false;
 
     bool isJsPlugin_ = false;
+    bool isOpenInvisibleFreeze_ = false;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     std::unordered_map<int32_t, AceVsyncCallback> jsFormVsyncCallbacks_;
@@ -1505,6 +1575,8 @@ protected:
     std::atomic<bool> isForegroundCalled_ = false;
     std::atomic<bool> onFocus_ = false;
     uint64_t lastTouchTime_ = 0;
+    uint64_t lastMouseTime_ = 0;
+    uint64_t lastDragTime_ = 0;
     std::map<int32_t, std::string> formLinkInfoMap_;
     struct FunctionHash {
         std::size_t operator()(const std::shared_ptr<std::function<void()>>& functionPtr) const
@@ -1559,11 +1631,14 @@ private:
     bool followSystem_ = false;
     float maxAppFontScale_ = static_cast<float>(INT32_MAX);
     float dragNodeGrayscale_ = 0.0f;
-    
+
     // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker thread.
     std::mutex densityChangeMutex_;
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
+    bool isWaitFlushFinish_ = false;
+    std::function<double()> windowDensityCallback_;
+    std::function<void(void)> uiExtensionFlushFinishCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

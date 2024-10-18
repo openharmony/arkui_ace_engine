@@ -29,6 +29,14 @@
 
 namespace OHOS::Ace {
 
+enum class ToastWindowType {
+    TOAST_IN_TYPE_APP_SUB_WINDOW = 0,
+    TOAST_IN_TYPE_SYSTEM_SUB_WINDOW,
+    TOAST_IN_TYPE_TOAST,
+    TOAST_IN_TYPE_SYSTEM_FLOAT,
+    TOAST_WINDOW_COUNT
+};
+
 class ACE_EXPORT Subwindow : public AceType {
     DECLARE_ACE_TYPE(Subwindow, AceType)
 
@@ -86,6 +94,10 @@ public:
     // Add interface to provide the size and offset of the parent window
     virtual Rect GetParentWindowRect() const = 0;
     virtual Rect GetUIExtensionHostWindowRect() const = 0;
+    virtual NG::RectF GetWindowRect() const
+    {
+        return NG::RectF();
+    }
     virtual bool IsFreeMultiWindow() const = 0;
     virtual void OnFreeMultiWindowSwitch(bool enable) = 0;
     virtual int32_t RegisterFreeMultiWindowSwitchCallback(std::function<void(bool)>&& callback) = 0;
@@ -121,6 +133,27 @@ public:
         return isAboveApps_;
     }
 
+    void SetToastWindowType(const ToastWindowType& type)
+    {
+        toastWindowType_ = type;
+        SetAboveApps(true);
+    }
+
+    void SetMainWindowId(uint32_t mainWindowId)
+    {
+        mainWindowId_ = mainWindowId;
+    }
+
+    uint32_t GetMainWindowId() const
+    {
+        return mainWindowId_;
+    }
+
+    ToastWindowType GetToastWindowType() const
+    {
+        return toastWindowType_;
+    }
+
     void SetIsSystemTopMost(bool isSystemTopMost)
     {
         isSystemTopMost_ = isSystemTopMost;
@@ -151,11 +184,16 @@ public:
     virtual void ResizeWindowForFoldStatus() = 0;
     virtual void ResizeWindowForFoldStatus(int32_t parentContainerId) = 0;
     virtual bool Close() = 0;
+    virtual bool IsToastSubWindow() = 0;
+    virtual void DestroyWindow() = 0;
 private:
     int32_t subwindowId_ = 0;
     int32_t uiExtensionHostWindowId_ = 0;
     bool isAboveApps_ = false;
     bool isSystemTopMost_ = false;
+    ToastWindowType toastWindowType_ = ToastWindowType::TOAST_IN_TYPE_TOAST;
+    // toast main window ID
+    uint32_t mainWindowId_ = 0;
 };
 
 } // namespace OHOS::Ace

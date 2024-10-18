@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
+#include "core/components_ng/pattern/image/image_content_modifier.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
@@ -112,6 +113,7 @@ public:
         return GetHost();
     }
 
+    void CreateModifier();
     void CreateObscuredImage();
     void LoadImageDataIfNeed();
     void OnNotifyMemoryLevel(int32_t level) override;
@@ -213,12 +215,27 @@ public:
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
     void DumpLayoutInfo();
+    inline void DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpAltSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpImageFit(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpFitOriginalSize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpSourceSize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
+    inline void DumpAutoResize(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp);
     void DumpLayoutInfo(std::unique_ptr<JsonValue>& json);
     void DumpRenderInfo();
+    inline void DumpRenderMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpImageRepeat(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpImageColorFilter(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpDynamicRangeMode(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpMatchTextDirection(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpSmoothEdge(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    inline void DumpResizable(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
+    void DumpBorderRadiusProperties(const RefPtr<OHOS::Ace::NG::ImageRenderProperty>& renderProp);
     void DumpRenderInfo(std::unique_ptr<JsonValue>& json);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
-
+    void DumpSvgInfo();
     WeakPtr<ImageLoadingContext> GetImageLoadingContext()
     {
         return WeakClaim(AceType::RawPtr(loadingCtx_));
@@ -377,7 +394,7 @@ public:
     }
     void InitOnKeyEvent();
 
-    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode = true)
+    void SetIsComponentSnapshotNode(bool isComponentSnapshotNode)
     {
         isComponentSnapshotNode_ = isComponentSnapshotNode;
     }
@@ -387,6 +404,7 @@ protected:
     bool isShow_ = true;
     bool gifAnimation_ = false;
     RefPtr<ImageOverlayModifier> overlayMod_;
+    RefPtr<ImageContentModifier> contentMod_;
 
 private:
     class ObscuredImage : public CanvasImage {
@@ -429,6 +447,7 @@ private:
     void OnCompleteInDataReady();
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
+    void ApplyAIModificationsToImage();
     void SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect,
         const ImageSourceInfo& sourceInfo, int32_t frameCount = 1);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -539,6 +558,7 @@ private:
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
     Color selectedColor_;
+    float smoothEdge_ = 0.0f;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
 

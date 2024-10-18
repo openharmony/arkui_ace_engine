@@ -132,6 +132,10 @@ void RosenWindow::RequestFrame()
     auto taskExecutor = taskExecutor_.Upgrade();
     if (rsWindow_) {
         isRequestVsync_ = true;
+        if (isFirstRequestVsync_) {
+            isFirstRequestVsync_ = false;
+            LOGI("ArkUI requests first Vsync.");
+        }
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifdef VSYNC_TIMEOUT_CHECK
@@ -178,7 +182,7 @@ void RosenWindow::OnHide()
 
 void RosenWindow::Destroy()
 {
-    LOG_DESTROY();
+    LOGI("RosenWindow destroyed");
     rsWindow_ = nullptr;
     vsyncCallback_.reset();
     rsUIDirector_->Destroy();

@@ -14,13 +14,15 @@
  */
 
 import curves from '@ohos.curves';
-import { Route, RouteGroup } from '../common/route';
-import { ContainersDestination, containersRoute } from './containers';
-import { DisplaysDestination, displaysRoute } from './displays';
-import { OperatesDestination, operatesRoute } from './operates';
-import { PickersDestination, pickersRoute } from './pickers';
-import { InputsDestination, inputsRoute } from './inputs';
+import { Route, RouteGroup } from 'common/src/main/ets/common/route';
+import { ContainersDestination, containersRoute } from 'feature/src/main/ets/pages/containers';
+import { DisplaysDestination, displaysRoute } from 'feature/src/main/ets/pages/displays';
+import { OperatesDestination, operatesRoute } from 'feature/src/main/ets/pages/operates';
+import { PickersDestination, pickersRoute } from 'feature/src/main/ets/pages/pickers';
+import { InputsDestination, inputsRoute } from 'feature/src/main/ets/pages/inputs';
+import { NavigatesDestination, navigatesRoute } from 'feature/src/main/ets/pages/navigates';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
+import { BlankAndDividerDestination, blankAndDividerRoute } from 'feature/src/main/ets/pages/blankanddivider';
 
 @Styles
 function CardPressedStyle() {
@@ -56,6 +58,10 @@ function Destination(name: string, route: Route) {
     PickersDestination(name, route)
   } else if (name.startsWith('inputs/')) {
     InputsDestination(name, route)
+  } else if (name.startsWith('navigates/')) {
+    NavigatesDestination(name, route)
+  } else if (name.startsWith('blankanddivider/')) {
+    BlankAndDividerDestination(name, route)
   }
 }
 
@@ -69,6 +75,8 @@ struct Index {
     operatesRoute,
     pickersRoute,
     inputsRoute,
+    navigatesRoute,
+    blankAndDividerRoute
   ];
   @State selection: string | null = null;
 

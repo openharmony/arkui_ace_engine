@@ -32,6 +32,7 @@
 
 namespace OHOS::Ace::NG {
 using BorderRadiusArray = std::array<PointF, 4>;
+
 struct ImageColorFilter {
     std::shared_ptr<std::vector<float>> colorFilterMatrix_;
     RefPtr<DrawingColorFilter> colorFilterDrawing_;
@@ -41,27 +42,27 @@ struct ImageColorFilter {
         colorFilterDrawing_.Reset();
     }
 };
+
 struct ImagePaintConfig {
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
+    float smoothEdge_ = 0.0f;
+    bool flipHorizontally_ = false;
+    bool isSvg_ = false;
+    int32_t frameCount_ = 1;
     RectF srcRect_;
     RectF dstRect_;
     std::optional<Color> svgFillColor_;
     ImageColorFilter colorFilter_;
-    std::shared_ptr<BorderRadiusArray> borderRadiusXY_ = nullptr;
-    float scaleX_ = 1.0f;
-    float scaleY_ = 1.0f;
     ImageRenderMode renderMode_ = ImageRenderMode::ORIGINAL;
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
-    float smoothEdge_ = 0.0f;
     DynamicRangeMode dynamicMode = DynamicRangeMode::STANDARD;
-    bool flipHorizontally_ = false;
-    bool isSvg_ = false;
-    int32_t frameCount_ = 1;
     std::vector<ObscuredReasons> obscuredReasons_;
     ImageResizableSlice resizableSlice_;
+    std::shared_ptr<BorderRadiusArray> borderRadiusXY_ = nullptr;
     RefPtr<DrawingLattice> resizableLattice_ = nullptr;
-    ImageSourceInfo sourceInfo_;
 };
 
 // CanvasImage is interface for drawing image.
@@ -149,6 +150,48 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasImage);
 };
+
+class CanvasImageModifierWrapper final {
+public:
+    CanvasImageModifierWrapper() = default;
+    ~CanvasImageModifierWrapper() = default;
+
+    explicit CanvasImageModifierWrapper(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
+
+    void SetCanvasImage(const RefPtr<CanvasImage>& canvasImage)
+    {
+        canvasImage_ = canvasImage;
+    }
+
+    RefPtr<CanvasImage> GetCanvasImage() const
+    {
+        return canvasImage_;
+    }
+
+    CanvasImageModifierWrapper operator+(const CanvasImageModifierWrapper& /* other */) const
+    {
+        return CanvasImageModifierWrapper(canvasImage_);
+    }
+
+    CanvasImageModifierWrapper operator-(const CanvasImageModifierWrapper& /* other */) const
+    {
+        return CanvasImageModifierWrapper(canvasImage_);
+    }
+
+    CanvasImageModifierWrapper operator*(const CanvasImageModifierWrapper& /* other */) const
+    {
+        return CanvasImageModifierWrapper(canvasImage_);
+    }
+
+    bool operator==(const CanvasImageModifierWrapper& /* other */) const
+    {
+        return false;
+    }
+
+private:
+    RefPtr<CanvasImage> canvasImage_;
+};
+
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_CANVAS_IMAGE_H

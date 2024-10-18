@@ -32,6 +32,11 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr float MAX_FONT_SCALE = 2.0f;
+} // namespace
+
 // TextInputResponseArea begin
 void TextInputResponseArea::LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth)
 {
@@ -244,18 +249,63 @@ void PasswordResponseArea::Refresh()
         }
     }
 
-    if (IsShowSymbol()) {
+    // update node symbol
+    if (IsShowSymbol() && IsSymbolIcon()) {
+        InitSymbolEffectOptions();
+        UpdateSymbolSource();
         return;
     }
 
-    auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    auto currentSrc = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
-    LoadImageSourceInfo();
-    auto src = isObscured_ ? hideIcon_->GetSrc() : showIcon_->GetSrc();
-    if (currentSrc != src) {
-        UpdateImageSource();
+    // update node image
+    if (!IsShowSymbol() && !IsSymbolIcon()) {
+        auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto currentSrc = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
+        LoadImageSourceInfo();
+        auto src = isObscured_ ? hideIcon_->GetSrc() : showIcon_->GetSrc();
+        if (currentSrc != src) {
+            UpdateImageSource();
+        }
+        return;
     }
+
+    ReplaceNode();
+}
+
+void PasswordResponseArea::ReplaceNode()
+{
+    auto oldFrameNode = passwordNode_.Upgrade();
+    CHECK_NULL_VOID(oldFrameNode);
+
+    if (IsShowSymbol()) {
+        auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_VOID(symbolNode);
+        stackNode_->ReplaceChild(oldFrameNode, symbolNode);
+        passwordNode_ = symbolNode;
+        InitSymbolEffectOptions();
+        UpdateSymbolSource();
+        return;
+    }
+
+    auto iconSize = GetIconSize();
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_VOID(imageNode);
+    imageNode->SetDraggable(false);
+    LoadImageSourceInfo();
+    auto currentImageSourceInfo = GetCurrentSourceInfo();
+    CHECK_NULL_VOID(currentImageSourceInfo);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfo(currentImageSourceInfo.value());
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+    stackNode_->ReplaceChild(oldFrameNode, imageNode);
+    passwordNode_ = imageNode;
+    AddImageEventOnError();
+    imageNode->MarkModifyDone();
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void PasswordResponseArea::OnPasswordIconClicked()
@@ -268,7 +318,7 @@ void PasswordResponseArea::ChangeObscuredState()
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (IsShowSymbol()) {
+    if (IsSymbolIcon()) {
         UpdateSymbolSource();
     } else {
         UpdateImageSource();
@@ -421,6 +471,7 @@ void PasswordResponseArea::UpdateSymbolSource()
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(currentSymbolId));
     symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
     symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
+    symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
 
     symbolNode->MarkModifyDone();
     symbolNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -445,6 +496,13 @@ bool PasswordResponseArea::IsShowSymbol()
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_RETURN(textFieldPattern, false);
     return textFieldPattern->IsShowPasswordSymbol();
+}
+
+bool PasswordResponseArea::IsSymbolIcon()
+{
+    auto iconFrameNode = passwordNode_.Upgrade();
+    CHECK_NULL_RETURN(iconFrameNode, false);
+    return iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG;
 }
 
 bool PasswordResponseArea::IsShowPasswordIcon()
@@ -526,6 +584,24 @@ bool CleanNodeResponseArea::IsShowClean()
     return textFieldPattern->IsShowCancelButtonMode();
 }
 
+bool CleanNodeResponseArea::IsShowSymbol()
+{
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+    return textFieldLayoutProperty->GetIsShowSymbolValue(true);
+}
+
+bool CleanNodeResponseArea::IsSymbolIcon()
+{
+    CHECK_NULL_RETURN(cleanNode_, false);
+    CHECK_NULL_RETURN(cleanNode_->GetFirstChild(), false);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(cleanNode_->GetFirstChild());
+    CHECK_NULL_RETURN(iconFrameNode, false);
+    return iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG;
+}
+
 void CleanNodeResponseArea::Layout(LayoutWrapper *layoutWrapper, int32_t index, float &nodeWidth)
 {
     if (!IsShowClean()) {
@@ -552,21 +628,75 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
     stackNode->MarkModifyDone();
-    auto cleanNode = FrameNode::CreateFrameNode(
+
+    if (IsShowSymbol()) {
+        auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_RETURN(symbolNode, nullptr);
+        cleanNode_ = stackNode;
+        symbolNode->MountToParent(stackNode);
+        InitClickEvent(stackNode);
+        UpdateSymbolSource();
+        return stackNode;
+    }
+
+    auto imageNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    CHECK_NULL_RETURN(cleanNode, nullptr);
-    cleanNode->SetDraggable(false);
+    CHECK_NULL_RETURN(imageNode, nullptr);
+    imageNode->SetDraggable(false);
     cleanNode_ = stackNode;
     auto info = CreateImageSourceInfo();
-    auto imageLayoutProperty = cleanNode->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(info);
     imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
-    cleanNode->MarkModifyDone();
-    cleanNode->MountToParent(stackNode);
+    imageNode->MarkModifyDone();
+    imageNode->MountToParent(stackNode);
     InitClickEvent(stackNode);
     return stackNode;
+}
+
+void CleanNodeResponseArea::UpdateSymbolSource()
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto symbolNode = cleanNode_->GetFirstChild();
+    CHECK_NULL_VOID(symbolNode);
+    auto symbolFrameNode = AceType::DynamicCast<FrameNode>(symbolNode);
+    CHECK_NULL_VOID(symbolFrameNode);
+    auto symbolProperty = symbolFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolProperty);
+    symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(textFieldTheme->GetCancelSymbolId()));
+    symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
+    symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
+    symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto iconSymbol = layoutProperty->GetCancelIconSymbol();
+    if (iconSymbol &&
+        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolFrameNode)));
+        // reset symbol effect
+        auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+        symbolEffectOptions.SetIsTxtActive(false);
+        symbolProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
+    }
+
+    auto fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetSymbolSize());
+    iconSize_ = fontSize;
+
+    symbolFrameNode->MarkModifyDone();
+    symbolFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void CleanNodeResponseArea::InitClickEvent(const RefPtr<FrameNode>& frameNode)
@@ -600,12 +730,12 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
     CHECK_NULL_VOID(cleanNode_);
     auto stackLayoutProperty = cleanNode_->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(stackLayoutProperty);
-    auto imageNode = cleanNode_->GetFirstChild();
-    CHECK_NULL_VOID(imageNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
-    CHECK_NULL_VOID(imageFrameNode);
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(imageLayoutProperty);
+    auto iconNode = cleanNode_->GetFirstChild();
+    CHECK_NULL_VOID(iconNode);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(iconNode);
+    CHECK_NULL_VOID(iconFrameNode);
+    auto iconLayoutProperty = iconFrameNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(iconLayoutProperty);
     if (isShow) {
         auto host = textFieldPattern->GetHost();
         CHECK_NULL_VOID(host);
@@ -620,19 +750,40 @@ void CleanNodeResponseArea::UpdateCleanNode(bool isShow)
         auto geometryNode = host->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto frameSize = geometryNode->GetFrameSize();
-        auto iconSize = std::min(iconSize_.ConvertToPx(), static_cast<double>(frameSize.Height()));
-        if (NearZero(iconSize)) {
-            isShow_ = false;
+        auto iconSize = GetIconSize();
+        if (!NearZero(frameSize.Height())) {
+            iconSize = std::min(iconSize, frameSize.Height());
         }
-        auto hotZoneSize = iconSize + rightOffset;
+        auto hotZoneSize = NearZero(iconSize) ? 0.0f : iconSize + rightOffset;
         stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
-        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+        iconLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
+        if (IsSymbolIcon()) {
+            auto symbolProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(symbolProperty);
+            symbolProperty->UpdateFontSize(CalcDimension(iconSize));
+        }
     } else {
         stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), std::nullopt));
-        imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+        iconLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
     }
-    imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    iconFrameNode->MarkModifyDone();
+    iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+bool CleanNodeResponseArea::CheckUpdateCleanNode()
+{
+    CHECK_NULL_RETURN(cleanNode_, false);
+    auto cleanNodeGeometryNode = cleanNode_->GetGeometryNode();
+    CHECK_NULL_RETURN(cleanNodeGeometryNode, false);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto textFieldFrameSize = geometryNode->GetFrameSize();
+    auto cleanNodeFrameSize = cleanNodeGeometryNode->GetFrameSize();
+    return GreatNotEqual(cleanNodeFrameSize.Height(), textFieldFrameSize.Height());
 }
 
 void CleanNodeResponseArea::ClearArea()
@@ -657,18 +808,63 @@ void CleanNodeResponseArea::Refresh()
             stackLayoutProperty->UpdateAlignment(GetStackAlignment(layoutProperty->GetLayoutDirection()));
         }
     }
-    LoadingImageProperty();
-    auto info = CreateImageSourceInfo();
+
+    // update node symbol
+    if (IsShowSymbol() && IsSymbolIcon()) {
+        UpdateSymbolSource();
+        return;
+    }
+
+    // update node image
+    if (!IsShowSymbol() && !IsSymbolIcon()) {
+        LoadingImageProperty();
+        auto info = CreateImageSourceInfo();
+        CHECK_NULL_VOID(cleanNode_);
+        auto imageNode = cleanNode_->GetFirstChild();
+        CHECK_NULL_VOID(imageNode);
+        auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
+        CHECK_NULL_VOID(imageFrameNode);
+        auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        imageLayoutProperty->UpdateImageSourceInfo(info);
+        imageFrameNode->MarkModifyDone();
+        imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        return;
+    }
+
+    ReplaceNode();
+}
+
+void CleanNodeResponseArea::ReplaceNode()
+{
     CHECK_NULL_VOID(cleanNode_);
-    auto imageNode = cleanNode_->GetFirstChild();
+    CHECK_NULL_VOID(cleanNode_->GetFirstChild());
+    auto oldFrameNode = AceType::DynamicCast<FrameNode>(cleanNode_->GetFirstChild());
+    CHECK_NULL_VOID(oldFrameNode);
+
+    if (IsShowSymbol()) {
+        auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_VOID(symbolNode);
+        cleanNode_->ReplaceChild(oldFrameNode, symbolNode);
+        UpdateSymbolSource();
+        return;
+    }
+
+    LoadingImageProperty();
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_VOID(imageNode);
-    auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
-    CHECK_NULL_VOID(imageFrameNode);
-    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    imageNode->SetDraggable(false);
+    auto info = CreateImageSourceInfo();
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     imageLayoutProperty->UpdateImageSourceInfo(info);
-    imageFrameNode->MarkModifyDone();
-    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    imageLayoutProperty->UpdateImageFit(ImageFit::COVER);
+    imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), CalcLength(0.0f)));
+    cleanNode_->ReplaceChild(oldFrameNode, imageNode);
+    imageNode->MarkModifyDone();
+    imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void CleanNodeResponseArea::LoadingImageProperty()
@@ -699,7 +895,9 @@ void CleanNodeResponseArea::LoadingCancelButtonColor()
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (textFieldLayoutProperty->GetIsDisabledValue(false)) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
@@ -719,7 +917,11 @@ ImageSourceInfo CleanNodeResponseArea::CreateImageSourceInfo()
     } else {
         info.SetSrc(iconSrc_);
     }
-    if (info.IsSvg()) {
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, info);
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, info);
+    if (info.IsSvg() && textFieldLayoutProperty->HasIconColor()) {
         info.SetFillColor(iconColor_);
         CHECK_NULL_RETURN(cleanNode_, info);
         auto imageNode = cleanNode_->GetFirstChild();

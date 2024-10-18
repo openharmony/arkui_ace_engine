@@ -1,0 +1,100 @@
+{
+  "string": [
+    {
+      "name": "data_panel_number",
+      "value": "20.000000"
+    },
+    {
+      "name": "data_panel_strokeWidth",
+      "value": "20.00vp"
+    },
+    {
+      "name": "data_panel_offset_radius1",
+      "value": "10"
+    },
+    {
+      "name": "data_panel_offset_radius2",
+      "value": "30"
+    },
+    {
+      "name": "data_panel_offset_radius3",
+      "value": "50"
+    },
+    {
+      "name": "marquee_fontSize",
+      "value": "20.00fp"
+    },
+    {
+      "name": "text_timer_fontSize",
+      "value": "20.00fp"
+    },
+    {
+      "name": "text_timer_radius",
+      "value": "10.000000"
+    },
+    {
+      "name": "text_timer_offsetX1",
+      "value": "10.000000"
+    },
+    {
+      "name": "text_timer_offsetX2",
+      "value": "30.000000"
+    },
+    {
+      "name": "text_timer_offsetX3",
+      "value": "60"
+    },
+    {
+      "name": "text_timer_offsetY1",
+      "value": "10.000000"
+    },
+    {
+      "name": "text_timer_offsetY2",
+      "value": "30.000000"
+    },
+    {
+      "name": "text_timer_offsetY3",
+      "value": "60"
+    },
+    {
+      "name": "Number",
+      "value": "20"
+    },
+    {
+      "name": "Min",
+      "value": "2"
+    },
+    {
+      "name": "stroke_width_length",
+      "value": "20"
+    },
+    {
+      "name": "scale_width_length",
+      "value": "5"
+    },
+    {
+      "name": "scale_radius",
+      "value": "10"
+    },
+    {
+      "name": "offset_radius1",
+      "value": "10"
+    },
+    {
+      "name": "offset_radius2",
+      "value": "30"
+    },
+    {
+      "name": "offset_radius3",
+      "value": "60"
+    },
+    {
+      "name": "border_width_length",
+      "value": "5"
+    },
+    {
+      "name": "font_size_progress",
+      "value": "5"
+    }
+  ]
+}

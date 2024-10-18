@@ -77,6 +77,8 @@ template("ace_core_source_set") {
       "accessibility/accessibility_node.cpp",
       "accessibility/accessibility_session_adapter.cpp",
       "accessibility/accessibility_utils.cpp",
+      "accessibility/native_interface_accessibility_impl.cpp",
+      "accessibility/native_interface_accessibility_provider.cpp",
 
       # animation
       "animation/animatable_data.cpp",
@@ -236,6 +238,7 @@ template("ace_core_source_set") {
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",
       "event/mouse_raw_recognizer.cpp",
+      "event/touch_event.cpp",
 
       # focus
       "focus/focus_node.cpp",
@@ -661,6 +664,8 @@ template("ace_core_ng_source_set") {
       "accessibility/accessibility_node.cpp",
       "accessibility/accessibility_session_adapter.cpp",
       "accessibility/accessibility_utils.cpp",
+      "accessibility/native_interface_accessibility_impl.cpp",
+      "accessibility/native_interface_accessibility_provider.cpp",
 
       # animation
       "animation/animatable_data.cpp",
@@ -731,6 +736,7 @@ template("ace_core_ng_source_set") {
       "event/key_event_recognizer.cpp",
       "event/mouse_event.cpp",
       "event/mouse_raw_recognizer.cpp",
+      "event/touch_event.cpp",
 
       # gestures
       "gestures/click_recognizer.cpp",
@@ -835,6 +841,7 @@ template("ace_core_ng_source_set") {
       "components/theme/app_theme.cpp",
       "components/theme/blur_style_theme.cpp",
       "components/theme/icon_theme.cpp",
+      "components/theme/shadow_theme.cpp",
       "components/theme/theme_attributes.cpp",
       "components/theme/theme_constants.cpp",
       "components/theme/theme_manager_impl.cpp",
@@ -871,7 +878,6 @@ template("ace_core_ng_source_set") {
       sources -= [ "components/declaration/common/declaration.cpp" ]
       sources += [
         "animation/card_transition_controller.cpp",
-        "common/platformview/platform_view_proxy.cpp",
         "components/common/properties/animatable_path.cpp",
         "components/common/properties/border_image_edge.cpp",
         "components/common/properties/color_factory.cpp",

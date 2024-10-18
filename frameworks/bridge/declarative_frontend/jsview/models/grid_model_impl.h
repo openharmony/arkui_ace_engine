@@ -35,7 +35,7 @@ public:
     void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
-    void SetCachedCount(int32_t value) override;
+    void SetCachedCount(int32_t value, bool show) override;
     void SetIsRTL(TextDirection direction) override;
     void SetLayoutDirection(FlexDirection value) override;
     void SetMaxCount(int32_t value) override;

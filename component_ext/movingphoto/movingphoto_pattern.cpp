@@ -34,7 +34,7 @@ constexpr int64_t PERIOD_START = 0;
 constexpr int32_t PREPARE_RETURN = 0;
 constexpr int64_t VIDEO_PLAYTIME_START_POSITION = 0;
 constexpr int64_t VIDEO_PLAYTIME_END_POSITION = 3000;
-constexpr int32_t IMAGE_LOADING_COMPLETE = 1;
+constexpr int32_t IMAGE_LOADING_COMPLETE = 0;
 constexpr int32_t DURATION_FLAG = -1;
 }
 MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& controller)
@@ -239,6 +239,9 @@ void MovingPhotoPattern::UpdateImageNode()
     CHECK_NULL_VOID(movingPhoto);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_VOID(image);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, DynamicRangeMode::HIGH, image);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, DynamicRangeMode::HIGH, image);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto set HDR.");
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->HasImageSourceInfo()) {
@@ -1300,7 +1303,7 @@ void MovingPhotoPattern::RegisterVisibleAreaChange()
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    std::vector<double> ratioList = {0.0};
+    std::vector<double> ratioList = {1.0};
     pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
     hasVisibleChangeRegistered_ = true;
 }

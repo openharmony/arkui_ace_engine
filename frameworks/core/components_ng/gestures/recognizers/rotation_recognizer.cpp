@@ -162,6 +162,7 @@ void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (!event.isRotationEvent) {
         return;
     }
+    UpdateTouchPointWithAxisEvent(event);
     lastAxisEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -273,6 +274,9 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
         SendCancelMsg();
         refereeState_ = RefereeState::READY;
+    } else if (refereeState_ == RefereeState::SUCCEED) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            "RotationRecognizer touchPoints size not equal fingers_, not send cancel callback.");
     }
 }
 
@@ -356,6 +360,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
             info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
         }
         info.SetPointerEvent(lastPointEvent_);
+        info.SetInputEventType(inputEventType_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

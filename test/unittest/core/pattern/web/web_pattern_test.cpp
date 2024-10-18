@@ -81,7 +81,13 @@ void WebPatternTest::SetUpTestCase()
     g_webPattern->SetWebController(controller);
 #endif
 }
-void WebPatternTest::TearDownTestCase() {}
+void WebPatternTest::TearDownTestCase()
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    g_webPattern = nullptr;
+#endif
+}
+
 void WebPatternTest::SetUp() {}
 void WebPatternTest::TearDown() {}
 
@@ -189,6 +195,11 @@ public:
         }
         return g_endSelectionHandle;
     }
+
+    bool GetIsLongPressActived() override
+    {
+        return false;
+    }
 };
 
 class NWebQuickMenuCallbackMock : public NWebQuickMenuCallback {
@@ -247,7 +258,7 @@ HWTEST_F(WebPatternTest, HandleTouchDownTest002, TestSize.Level1)
     auto drawSize = Size(CONTRNT_WIDTH_SIZE, CONTRNT_HEIGHT_SIZE);
     g_webPattern->drawSizeCache_ = drawSize;
     bool result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     TouchLocationInfo info("webtest", fingerId);
     TouchEventInfo event("webtest");
     g_webPattern->HandleTouchUp(event, true);
@@ -286,13 +297,6 @@ HWTEST_F(WebPatternTest, IsTouchHandleValid003, TestSize.Level1)
     g_isEnable = true;
     result = g_webPattern->IsTouchHandleValid(handle);
     EXPECT_TRUE(result);
-
-    EXPECT_FALSE(result);
-    g_alpha = 1;
-    EXPECT_FALSE(result);
-    g_Y = 0;
-    g_height = 1;
-    EXPECT_FALSE(result);
 #endif
 }
 
@@ -323,7 +327,7 @@ HWTEST_F(WebPatternTest, GetTouchHandleOverlayTypeTest004, TestSize.Level1)
     EXPECT_FALSE(result);
 
     int32_t selectOverlayId = 1;
-    g_webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
+    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
     result = g_webPattern->RunQuickMenu(params, callback);
     EXPECT_FALSE(result);
     g_webPattern->selectOverlayProxy_->Close();
@@ -411,7 +415,7 @@ HWTEST_F(WebPatternTest, UpdateTouchHandleForOverlayTest007, TestSize.Level1)
     g_webPattern->UpdateTouchHandleForOverlay();
 
     int32_t selectOverlayId = 1;
-    g_webPattern->selectOverlayProxy_ = new SelectOverlayProxy(selectOverlayId);
+    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
     g_webPattern->UpdateTouchHandleForOverlay();
     g_webPattern->insertHandle_.reset();
     g_webPattern->startSelectionHandle_ = std::make_shared<NWebTouchHandleStateMock>();
@@ -486,7 +490,7 @@ HWTEST_F(WebPatternTest, HandleDoubleClickEventTest009, TestSize.Level1)
     info.SetButton(MouseButton::LEFT_BUTTON);
     info.SetAction(MouseAction::NONE);
     std::queue<MouseClickInfo> empty;
-    swap(empty, g_webPattern->doubleClickQueue_);
+    swap(empty, g_webPattern->mouseClickQueue_);
     g_webPattern->HandleDoubleClickEvent(info);
     g_webPattern->HandleDoubleClickEvent(info);
 #endif

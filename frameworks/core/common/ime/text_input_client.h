@@ -23,6 +23,8 @@
 #include "core/common/ime/text_editing_value.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/event/key_event.h"
+#include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {
 
@@ -93,6 +95,7 @@ public:
     virtual void SetInputMethodStatus(bool keyboardShown) {}
     virtual void NotifyKeyboardClosedByUser() {}
     virtual void NotifyKeyboardClosed() {}
+    virtual void NotifyKeyboardHeight(uint32_t height);
     virtual std::u16string GetLeftTextOfCursor(int32_t number)
     {
         return StringUtils::DEFAULT_USTRING;
@@ -202,6 +205,18 @@ public:
 
     static std::map<KeyComb, std::function<void(TextInputClient*)>> keyboardShortCuts_;
 
+    virtual bool SetCaretOffset(int32_t caretPosition)
+    {
+        return false;
+    }
+
+    virtual void SetSelection(int32_t start, int32_t end,
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) {}
+
+    virtual bool InsertOrDeleteSpace(int32_t index)
+    {
+        return false;
+    }
 protected:
     int32_t instanceId_ = -1;
 };

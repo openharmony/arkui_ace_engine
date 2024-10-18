@@ -14,11 +14,14 @@
  */
 #include "style_modifier.h"
 
+#include <cstdlib>
+
 #include "frame_information.h"
 #include "node_model.h"
 #include "node_transition.h"
 #include "waterflow_section_option.h"
 
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NodeModel {
@@ -309,7 +312,16 @@ uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
     if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC)) {
         colorStr.erase(0, 1);
         constexpr int colorNumFormat = 16;
-        auto value = stoul(colorStr, nullptr, colorNumFormat);
+        char* end = nullptr;
+        unsigned long int value = strtoul(colorStr.c_str(), &end, colorNumFormat);
+        if (errno == ERANGE) {
+            LOGF("%{public}s is out of range.", colorStr.c_str());
+            abort();
+        }
+        if (value == 0 && end == colorStr.c_str()) {
+            LOGW("input %{public}s can not covert to number, use default color：0x00000000" , colorStr.c_str());
+        }
+    
         return value;
     }
     return defaultValue;
@@ -5526,6 +5538,26 @@ int32_t SetScrollBy(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     return ERROR_CODE_NO_ERROR;
 }
 
+int32_t SetScrollFling(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < NUM_0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    DimensionUnit unit = static_cast<DimensionUnit>(GetDefaultUnit(node, UNIT_VP));
+    if (unit != DimensionUnit::VP && unit != DimensionUnit::PX) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    double value = item->value[NUM_0].f32;
+    if (unit == DimensionUnit::VP) {
+        value = OHOS::Ace::NodeModel::GetFullImpl()->getBasicAPI()->convertLengthMetricsUnit(value,
+            static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_VP), static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_PX));
+    }
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollFling(node->uiNodeHandle, value);
+    return ERROR_CODE_NO_ERROR;
+}
+
 const ArkUI_AttributeItem* GetListDirection(ArkUI_NodeHandle node)
 {
     auto value = GetFullImpl()->getNodeModifiers()->getListModifier()->getListDirection(node->uiNodeHandle);
@@ -8582,15 +8614,17 @@ int32_t SetBackgroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
             return ERROR_CODE_PARAM_INVALID;
         }
     }
-    int32_t intArray[NUM_3];
+    int32_t intArray[NUM_5];
     intArray[NUM_0] = blurStyle;
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
     std::vector<float> greyVector(NUM_2);
     greyVector[NUM_0] = grayScaleStart;
     greyVector[NUM_1] = grayScaleEnd;
+    bool isValidColor = false;
+    Color inactiveColor = Color::TRANSPARENT;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
-        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2);
+        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2, isValidColor, inactiveColor.GetValue());
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -9743,6 +9777,38 @@ int32_t SetImageSpanSrc(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     } else {
         return SetImageSrc(node, item);
     }
+}
+
+int32_t SetImageSpanBaselineOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->setImageSpanBaselineOffset(
+        node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetImageSpanBaselineOffset(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getImageSpanModifier()->
+        resetImageSpanBaselineOffset(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetImageSpanBaselineOffset(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    int32_t unit = GetDefaultUnit(node, UNIT_FP);
+    g_numberValues[0].f32 = fullImpl->getNodeModifiers()->getImageSpanModifier()->
+        getImageSpanBaselineOffset(node->uiNodeHandle, unit);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
 }
 
 int32_t SetObjectFit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -12948,7 +13014,7 @@ void ResetSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* value)
 {
-    static Setter* setters[] = { SetImageSpanSrc, SetVerticalAlign, SetAlt };
+    static Setter* setters[] = { SetImageSpanSrc, SetVerticalAlign, SetAlt, SetImageSpanBaselineOffset };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -12958,7 +13024,7 @@ int32_t SetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 
 const ArkUI_AttributeItem* GetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetImageSpanSrc, GetVerticalAlign, GetAlt };
+    static Getter* getters[] = { GetImageSpanSrc, GetVerticalAlign, GetAlt, GetImageSpanBaselineOffset };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -12968,7 +13034,7 @@ const ArkUI_AttributeItem* GetImageSpanAttribute(ArkUI_NodeHandle node, int32_t 
 
 void ResetImageSpanAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetImageSpanSrc, ResetVerticalAlign, ResetAlt };
+    static Resetter* resetters[] = { ResetImageSpanSrc, ResetVerticalAlign, ResetAlt, ResetImageSpanBaselineOffset };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "image span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -13664,7 +13730,7 @@ int32_t SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
     static Setter* setters[] = { SetScrollScrollBar, SetScrollScrollBarWidth, SetScrollScrollBarColor,
         SetScrollScrollable, SetScrollEdgeEffect, SetScrollEnableScrollInteraction, SetScrollFriction,
         SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge, SetScrollEnablePaging,
-        SetScrollPage, SetScrollBy };
+        SetScrollPage, SetScrollBy, SetScrollFling };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "scroll node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -13677,7 +13743,7 @@ const ArkUI_AttributeItem* GetScrollAttribute(ArkUI_NodeHandle node, int32_t sub
     static Getter* getters[] = { GetScrollScrollBar, GetScrollScrollBarWidth, GetScrollScrollBarColor,
         GetScrollScrollable, GetScrollEdgeEffect, GetScrollEnableScrollInteraction, GetScrollFriction,
         GetScrollScrollSnap, GetScrollNestedScroll, GetScrollOffset, GetScrollEdge, GetScrollEnablePaging,
-        nullptr, nullptr };
+        nullptr, nullptr, nullptr };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -13691,7 +13757,7 @@ void ResetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetScrollScrollBar, ResetScrollScrollBarWidth, ResetScrollScrollBarColor,
         ResetScrollScrollable, ResetScrollEdgeEffect, ResetScrollEnableScrollInteraction, ResetScrollFriction,
         ResetScrollScrollSnap, ResetScrollNestedScroll, ResetScrollTo, ResetScrollEdge, ResetScrollEnablePaging,
-        nullptr, nullptr };
+        nullptr, nullptr, nullptr };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

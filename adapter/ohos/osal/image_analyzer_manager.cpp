@@ -380,4 +380,10 @@ bool ImageAnalyzerManager::NeedUpdateOverlayOffset()
            holder_ == ImageAnalyzerHolder::VIDEO_CUSTOM ||
            holder_ == ImageAnalyzerHolder::XCOMPONENT;
 }
+
+void ImageAnalyzerManager::SetNotifySelectedCallback(
+    OnNotifySelectedStatusCallback&& callback)
+{
+    analyzerUIConfig_.onNotifySelectedStatus = std::move(callback);
+}
 } // namespace OHOS::Ace

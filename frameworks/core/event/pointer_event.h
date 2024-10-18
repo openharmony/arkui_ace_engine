@@ -75,6 +75,7 @@ struct PointerEvent final {
     std::shared_ptr<MMI::PointerEvent> rawPointerEvent;
     std::vector<KeyCode> pressedKeyCodes_;
     PointerAction action = PointerAction::UNKNOWN;
+    std::vector<PointerEvent> history;
 
     PointerEvent() = default;
     PointerEvent(int32_t x, int32_t y) : x(x), y(y) {}

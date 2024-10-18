@@ -47,6 +47,8 @@ public:
         return false;
     }
 
+    void CallSetContainerWindow(bool considerFloatingWindow);
+
     void OnAttachToFrameNode() override
     {
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -79,11 +81,6 @@ public:
     bool GetIsFocus() const
     {
         return isFocus_;
-    }
-
-    void SetIsFocus(bool isFocus)
-    {
-        isFocus_ = isFocus;
     }
 
     std::string GetAppLabel()
@@ -161,21 +158,14 @@ public:
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
+    void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
+    void GetWindowPaintRectWithoutMeasureAndLayout(Rect& rect, bool isContainerModal);
     void CallButtonsRectChange();
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&, const DirtySwapConfig&) override
-    {
-        CallButtonsRectChange();
-        return false;
-    }
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&, const DirtySwapConfig&) override;
 
     void OnLanguageConfigurationUpdate() override;
 
     void InitColumnTouchTestFunc();
-
-    void SetIsHoveredMenu(bool isHoveredMenu)
-    {
-        isHoveredMenu_ = isHoveredMenu;
-    }
 
     bool GetIsHoveredMenu()
     {
@@ -220,7 +210,7 @@ protected:
     Color activeColor_;
     Color inactiveColor_;
     void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
-private:
+protected:
     void WindowFocus(bool isFocus);
     void SetTitleButtonHide(
         const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize,
@@ -242,6 +232,9 @@ private:
     bool isFocus_ = false;
     bool hideSplitButton_ = false;
     bool isHoveredMenu_;
+    bool isTitleShow_ = false;
+    RRect windowPaintRect_;
+    bool isCustomColor_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_H

@@ -1,0 +1,40 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "BenchMark"
+    },
+    {
+      "name": "length",
+      "value": "10.00vp"
+    },
+    {
+      "name": "grid_length",
+      "value": "25"
+    },
+    {
+      "name": "grid_friction",
+      "value": "0.6"
+    },
+    {
+      "name": "listItemGroup_endMargin",
+      "value": "50.00vp"
+    },
+    {
+      "name": "listItemGroup_startMargin",
+      "value": "100.00vp"
+    },
+    {
+      "name": "listItemGroup_strokeWidth",
+      "value": "50.00vp"
+    }
+  ]
+}

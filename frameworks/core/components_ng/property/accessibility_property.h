@@ -45,7 +45,7 @@ using ActionSelectImpl = ActionNoParam;
 using ActionClearSelectionImpl = ActionNoParam;
 using ActionMoveTextImpl = std::function<void(int32_t moveUnit, bool forward)>;
 using ActionSetCursorIndexImpl = std::function<void(int32_t index)>;
-using ActionExecSubComponentImpl = std::function<void(int32_t spanId)>;
+using ActionExecSubComponentImpl = std::function<bool(int32_t spanId)>;
 using ActionGetCursorIndexImpl = std::function<int32_t(void)>;
 using ActionClickImpl = ActionNoParam;
 using ActionLongClickImpl = ActionNoParam;
@@ -67,6 +67,8 @@ public:
     virtual std::string GetText() const;
 
     virtual std::string GetGroupText(bool forceGetChildren = false) const;
+
+    virtual std::string GetGroupPreferAccessibilityText(bool forceGetChildren = false) const;
 
     virtual void SetText(const std::string& text)
     {
@@ -265,7 +267,7 @@ public:
     {
         actionSetCursorIndexImpl_ = actionSetCursorIndexImpl;
     }
-    
+
     bool ActActionSetIndex(int32_t index)
     {
         if (actionSetCursorIndexImpl_) {
@@ -283,8 +285,7 @@ public:
     bool ActActionExecSubComponent(int32_t spanId)
     {
         if (actionExecSubComponentImpl_) {
-            actionExecSubComponentImpl_(spanId);
-            return true;
+            return actionExecSubComponentImpl_(spanId);
         }
         return false;
     }
@@ -377,210 +378,74 @@ public:
         actionCopyImpl_ = actionCopyImpl;
     }
 
-    bool ActActionCopy()
-    {
-        if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_COPY))) {
-            actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_COPY));
-            return true;
-        }
-        if (actionCopyImpl_) {
-            actionCopyImpl_();
-            return true;
-        }
-        return false;
-    }
+    bool ActActionCopy();
 
-    void SetActionCut(const ActionCutImpl& actionCutImpl)
-    {
-        actionCutImpl_ = actionCutImpl;
-    }
+    void SetActionCut(const ActionCutImpl& actionCutImpl);
 
-    bool ActActionCut()
-    {
-        if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CUT))) {
-            actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CUT));
-            return true;
-        }
-        if (actionCutImpl_) {
-            actionCutImpl_();
-            return true;
-        }
-        return false;
-    }
+    bool ActActionCut();
 
-    void SetActionPaste(const ActionPasteImpl& actionPasteImpl)
-    {
-        actionPasteImpl_ = actionPasteImpl;
-    }
+    void SetActionPaste(const ActionPasteImpl& actionPasteImpl);
 
-    bool ActActionPaste()
-    {
-        if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_PASTE))) {
-            actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_PASTE));
-            return true;
-        }
-        if (actionPasteImpl_) {
-            actionPasteImpl_();
-            return true;
-        }
-        return false;
-    }
+    bool ActActionPaste();
 
-    void SetActionLongClick(const ActionLongClickImpl& actionLongClickImpl)
-    {
-        actionLongClickImpl_ = actionLongClickImpl;
-    }
+    void SetActionLongClick(const ActionLongClickImpl& actionLongClickImpl);
 
-    bool ActActionLongClick()
-    {
-        if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_LONG_CLICK))) {
-            actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_LONG_CLICK));
-            return true;
-        }
-        if (actionLongClickImpl_) {
-            actionLongClickImpl_();
-            return true;
-        }
-        return false;
-    }
+    bool ActActionLongClick();
 
-    void SetActionClick(const ActionClickImpl& actionClickImpl)
-    {
-        actionClickImpl_ = actionClickImpl;
-    }
+    void SetActionClick(const ActionClickImpl& actionClickImpl);
 
-    bool ActActionClick()
-    {
-        if (ActionsDefined(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CLICK))) {
-            actionsImpl_(static_cast<uint32_t>(ARKUI_ACCESSIBILITY_ACTION_CLICK));
-            return true;
-        }
-        if (actionClickImpl_) {
-            actionClickImpl_();
-            return true;
-        }
-        return false;
-    }
+    bool ActActionClick();
 
-    void SetActionSelect(const ActionSelectImpl& actionSelectImpl)
-    {
-        actionSelectImpl_ = actionSelectImpl;
-    }
+    void SetActionSelect(const ActionSelectImpl& actionSelectImpl);
 
-    bool ActActionSelect()
-    {
-        if (actionSelectImpl_) {
-            actionSelectImpl_();
-            return true;
-        }
-        return false;
-    }
+    bool ActActionSelect();
 
-    void SetActionClearSelection(const ActionClearSelectionImpl& actionClearSelectionImpl)
-    {
-        actionClearSelectionImpl_ = actionClearSelectionImpl;
-    }
+    void SetActionClearSelection(const ActionClearSelectionImpl& actionClearSelectionImpl);
 
-    bool ActActionClearSelection()
-    {
-        if (actionClearSelectionImpl_) {
-            actionClearSelectionImpl_();
-            return true;
-        }
-        return false;
-    }
+    bool ActActionClearSelection();
 
-    void SetOnAccessibilityFocusCallback(const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl)
-    {
-        onAccessibilityFocusCallbackImpl_ = onAccessibilityFocusCallbackImpl;
-    }
+    void SetOnAccessibilityFocusCallback(const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl);
 
-    void OnAccessibilityFocusCallback(bool isFocus)
-    {
-        if (onAccessibilityFocusCallbackImpl_) {
-            onAccessibilityFocusCallbackImpl_(isFocus);
-        }
-    }
+    void OnAccessibilityFocusCallback(bool isFocus);
 
-    void SetAccessibilityGroup(bool accessibilityGroup)
-    {
-        accessibilityGroup_ = accessibilityGroup;
-    }
+    bool GetAccessibilityFocusState() const;
 
-    void SetChildTreeId(int32_t childTreeId)
-    {
-        childTreeId_ = childTreeId;
-    }
+    void SetAccessibilityFocusState(bool state);
 
-    void SetChildWindowId(int32_t childWindowId)
-    {
-        childWindowId_ = childWindowId;
-    }
+    void SetAccessibilityGroup(bool accessibilityGroup);
 
-    void SetAccessibilityText(const std::string& text)
-    {
-        accessibilityText_ = text;
-    }
+    void SetChildTreeId(int32_t childTreeId);
 
-    void SetAccessibilityTextHint(const std::string& text)
-    {
-        textTypeHint_ = text;
-    }
+    void SetChildWindowId(int32_t childWindowId);
 
-    void SetAccessibilityDescription(const std::string& accessibilityDescription)
-    {
-        accessibilityDescription_ = accessibilityDescription;
-    }
+    void SetAccessibilityText(const std::string& text);
 
-    bool IsAccessibilityGroup() const
-    {
-        return accessibilityGroup_;
-    }
+    void SetAccessibilityTextHint(const std::string& text);
 
-    int32_t GetChildTreeId() const
-    {
-        return childTreeId_;
-    }
+    void SetAccessibilityDescription(const std::string& accessibilityDescription);
 
-    int32_t GetChildWindowId() const
-    {
-        return childWindowId_;
-    }
+    bool IsAccessibilityGroup() const;
 
-    void SaveAccessibilityVirtualNode(const RefPtr<UINode>& node)
-    {
-        accessibilityVirtualNode_ = node;
-    }
+    int32_t GetChildTreeId() const;
 
-    RefPtr<UINode> GetAccessibilityVirtualNode()
-    {
-        return accessibilityVirtualNode_;
-    }
+    int32_t GetChildWindowId() const;
 
-    NG::UINode* GetAccessibilityVirtualNodePtr()
-    {
-        return Referenced::RawPtr(accessibilityVirtualNode_);
-    }
+    void SaveAccessibilityVirtualNode(const RefPtr<UINode>& node);
 
-    bool HasAccessibilityVirtualNode() const
-    {
-        return accessibilityVirtualNode_ != nullptr;
-    }
+    RefPtr<UINode> GetAccessibilityVirtualNode();
+
+    NG::UINode* GetAccessibilityVirtualNodePtr();
+
+    bool HasAccessibilityVirtualNode() const;
 
     virtual std::string GetAccessibilityText() const
     {
         return accessibilityText_.value_or("");
     }
 
-    std::string GetAccessibilityDescription() const
-    {
-        return accessibilityDescription_.value_or("");
-    }
+    std::string GetAccessibilityDescription() const;
 
-    std::string GetTextType() const
-    {
-        return textTypeHint_.value_or("");
-    }
+    std::string GetTextType() const;
 
     class Level {
     public:
@@ -598,16 +463,7 @@ public:
         return accessibilityLevel_.value();
     }
 
-    void SetAccessibilityLevel(const std::string& accessibilityLevel)
-    {
-        if (accessibilityLevel == Level::YES_STR ||
-            accessibilityLevel == Level::NO_STR ||
-            accessibilityLevel == Level::NO_HIDE_DESCENDANTS) {
-            accessibilityLevel_ = accessibilityLevel;
-        } else {
-            accessibilityLevel_ = Level::AUTO;
-        }
-    }
+    void SetAccessibilityLevel(const std::string& accessibilityLevel);
 
 
     struct HoverTestDebugTraceInfo {
@@ -637,20 +493,20 @@ public:
     */
     static bool IsAccessibilityFocusableDebug(const RefPtr<FrameNode>& node, std::unique_ptr<JsonValue>& info);
 
+    /*
+    * Judge whether a node's tag is default accessibility focusable.
+    * return: if a node's tag is default accessibility focusable, return true.
+    * param: {tag} should be not-null
+    */
+    static bool IsAccessibilityFocusableTag(const std::string &tag);
+
+    static bool IsTagInSubTreeComponent(const std::string& tag);
+
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 
-    void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)
-    {
-        getRelatedElementInfoImpl_ = getRelatedElementInfoImpl;
-    }
-    
-    void GetAllExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo)
-    {
-        if (getRelatedElementInfoImpl_) {
-            getRelatedElementInfoImpl_(extraElementInfo);
-        }
-        GetExtraElementInfo(extraElementInfo);
-    }
+    void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl);
+
+    void GetAllExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo);
 
     void SetAccessibilityActions(uint32_t actions);
     void ResetAccessibilityActions();
@@ -672,10 +528,12 @@ public:
     void SetUserSelected(const bool& isSelected);
     bool HasUserSelected();
     bool IsUserSelected();
+    void ResetUserSelected();
 
     void SetUserCheckedType(const int32_t& checkedType);
     bool HasUserCheckedType();
     int32_t GetUserCheckedType();
+    void ResetUserCheckedType();
 
     void SetUserMinValue(const int32_t& minValue);
     bool HasUserMinValue();
@@ -692,6 +550,11 @@ public:
     void SetUserTextValue(const std::string& textValue);
     bool HasUserTextValue();
     std::string GetUserTextValue();
+
+    void SetUserCheckable(const bool& checkable);
+    bool HasUserCheckable();
+    bool IsUserCheckable();
+    void ResetUserCheckable();
 
 private:
     // node should be not-null
@@ -723,7 +586,7 @@ private:
     */
     static std::tuple<bool, bool, bool> GetSearchStrategy(const RefPtr<FrameNode>& node, bool& ancestorGroupFlag);
 
-    void GetGroupTextRecursive(bool forceGetChildren, std::string& text) const;
+    void GetGroupTextRecursive(bool forceGetChildren, std::string& text, bool preferAccessibilityText) const;
 
     bool HasAccessibilityTextOrDescription() const;
 
@@ -754,6 +617,7 @@ protected:
     ActionsImpl actionsImpl_;
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
+    bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
     int32_t childTreeId_ = -1;
     int32_t childWindowId_ = 0;
@@ -769,6 +633,7 @@ protected:
     std::optional<bool> isDisabled_;
     std::optional<bool> isSelected_;
     std::optional<int32_t> checkedType_;
+    std::optional<bool> isUserCheckable_;
 
     std::optional<int32_t> minValue_;
     std::optional<int32_t> maxValue_;

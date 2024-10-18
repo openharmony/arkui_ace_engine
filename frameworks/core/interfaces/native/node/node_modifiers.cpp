@@ -103,8 +103,8 @@
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_container_span_modifier.h"
-#include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/node_scroll_bar_modifier.h"
+#include "core/interfaces/native/node/linear_indicator_modifier.h"
 
 #ifdef MODEL_COMPONENT_SUPPORTED
 #include "core/interfaces/native/node/node_component3d_modifier.h"

@@ -23,7 +23,6 @@ class LinearIndicatorController;
 }
 
 namespace OHOS::Ace {
-
 class ACE_EXPORT LinearIndicatorModel {
 public:
     static LinearIndicatorModel* GetInstance();
@@ -41,7 +40,5 @@ public:
 private:
     static std::unique_ptr<LinearIndicatorModel> instance_;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_INDICATOR_MODEL_H

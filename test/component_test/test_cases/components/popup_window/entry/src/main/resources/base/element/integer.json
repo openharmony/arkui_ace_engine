@@ -1,0 +1,52 @@
+{
+  "integer": [
+    {
+      "name": "dialog_show_offset_dx",
+      "value": 10
+    },
+    {
+      "name": "dialog_show_offset_dy",
+      "value": 20
+    },
+    {
+      "name": "dialog_show_mask_rect_x",
+      "value": 5
+    },
+    {
+      "name": "dialog_show_mask_rect_y",
+      "value": 5
+    },
+    {
+      "name": "font_size",
+      "value": 20
+    },
+    {
+      "name": "offset_size",
+      "value": 50
+    },
+    {
+      "name": "textPickerDialog_maskRect_x",
+      "value": 150
+    },
+    {
+      "name": "textPickerDialog_maskRect_y",
+      "value": 150
+    },
+    {
+      "name": "textPickerDialog_maskRect_width",
+      "value": 800
+    },
+    {
+      "name": "textPickerDialog_maskRect_height",
+      "value": 400
+    },
+    {
+      "name": "actionSheet_maskRect_width",
+      "value": 150
+    },
+    {
+      "name": "actionSheet_maskRect_height",
+      "value": 180
+    }
+  ]
+}

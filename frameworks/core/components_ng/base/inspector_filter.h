@@ -44,7 +44,7 @@ public:
     bool CheckFilterAttr(const FixedAttrBit fixedAttrBit, const char* extAttr) const;
     bool IsFastFilter() const;
     void AddFilterAttr(const std::string& attr);
-    void SetFilterID(const std::string& id);
+    void SetFilterID(std::string& id);
     std::string GetFilterID(void) const;
     void SetFilterDepth(size_t depth);
     size_t GetFilterDepth() const;

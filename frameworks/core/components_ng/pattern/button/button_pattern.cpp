@@ -40,13 +40,13 @@ Color ButtonPattern::GetColorFromType(const RefPtr<ButtonTheme>& theme, const in
 
 void ButtonPattern::OnAttachToFrameNode()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
     clickedColor_ = buttonTheme->GetClickedColor();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetAlphaOffscreen(true);
@@ -90,7 +90,7 @@ void ButtonPattern::UpdateTextLayoutProperty(
 {
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(textLayoutProperty);
-
+    UpdateTextFontScale(layoutProperty, textLayoutProperty);
     auto label = layoutProperty->GetLabelValue("");
     textLayoutProperty->UpdateContent(label);
     if (layoutProperty->GetFontSize().has_value()) {
@@ -141,7 +141,9 @@ void ButtonPattern::UpdateTextLayoutProperty(
 void ButtonPattern::UpdateTextStyle(
     RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = layoutProperty->GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
@@ -185,21 +187,16 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
-        textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
-    } else {
-        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-        CHECK_NULL_VOID(pipeline);
-        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
-        textLayoutProperty->UpdateMaxFontScale(buttonTheme->GetMaxFontSizeScale());
-    }
     UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
     auto buttonRenderContext = host->GetRenderContext();
     CHECK_NULL_VOID(buttonRenderContext);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(false));
+    } else {
+        textRenderContext->UpdateClipEdge(buttonRenderContext->GetClipEdgeValue(true));
+    }
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 }
@@ -361,7 +358,7 @@ void ButtonPattern::HandleBackgroundColor()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -396,7 +393,7 @@ void ButtonPattern::HandleEnabled()
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
@@ -408,7 +405,9 @@ void ButtonPattern::HandleEnabled()
 void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo,
     int32_t duration, const RefPtr<Curve>& curve)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
@@ -509,6 +508,7 @@ RefPtr<FrameNode> ButtonPattern::BuildContentModifierNode()
 void ButtonPattern::OnColorConfigurationUpdate()
 {
     auto node = GetHost();
+    CHECK_NULL_VOID(node);
     if (isColorUpdateFlag_) {
         node->SetNeedCallChildrenUpdate(false);
         return;
@@ -518,12 +518,13 @@ void ButtonPattern::OnColorConfigurationUpdate()
     if (buttonLayoutProperty->GetCreateWithLabelValue(true)) {
         node->SetNeedCallChildrenUpdate(false);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = node->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     ButtonStyleMode buttonStyle = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
     ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
         auto color = buttonTheme->GetBgColor(buttonStyle, buttonRole);
         renderContext->UpdateBackgroundColor(color);
@@ -555,5 +556,49 @@ void ButtonPattern::SetBuilderFunc(ButtonMakeCallback&& makeFunc)
         return;
     }
     makeFunc_ = std::move(makeFunc);
+}
+
+void ButtonPattern::UpdateTextFontScale(
+    RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (layoutProperty->HasType() && layoutProperty->GetType() == ButtonType::CIRCLE) {
+        textLayoutProperty->UpdateMaxFontScale(NORMAL_SCALE);
+    } else {
+        textLayoutProperty->ResetMaxFontScale();
+    }
+}
+
+void ButtonPattern::OnFontScaleConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (NeedAgingUpdateText(layoutProperty)) {
+        if (!layoutProperty->GetMaxFontSize().has_value()) {
+            textLayoutProperty->ResetAdaptMaxFontSize();
+        } else {
+            textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+        }
+        if (!layoutProperty->GetMinFontSize().has_value()) {
+            textLayoutProperty->ResetAdaptMinFontSize();
+        } else {
+            textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+        }
+    } else {
+        if (layoutProperty->GetMaxFontSize().has_value()) {
+            textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+        }
+        if (layoutProperty->GetMinFontSize().has_value()) {
+            textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+        }
+    }
+    textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

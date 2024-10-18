@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -158,7 +158,7 @@ public:
 
     // It is used to init mediaplayer on background.
     void UpdateMediaPlayerOnBg();
-    void ResetMediaPlayer();
+    void ResetMediaPlayer(bool isResetByUser = false);
 
     void EnableDrag();
     void SetIsStop(bool isStop)
@@ -188,7 +188,7 @@ public:
 
     const std::string& GetSrc() const
     {
-        return src_;
+        return videoSrcInfo_.src;
     }
 
     void UpdateMediaParam(const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderSurface>& renderSurface,
@@ -203,8 +203,11 @@ public:
     {
         mediaPlayer_.Reset();
         renderSurface_.Reset();
+        RemoveMediaPlayerSurfaceNode();
         renderContextForMediaPlayer_.Reset();
     }
+
+    void RemoveMediaPlayerSurfaceNode();
 
     void OnFullScreenChange(bool isFullScreen);
 
@@ -248,7 +251,40 @@ public:
     {
         isSeeking_ = isSeeking;
     }
+    bool GetIsSeeking() const
+    {
+        return isSeeking_;
+    }
 
+    void SetIsPrepared(bool isPrepared)
+    {
+        isPrepared_ = isPrepared;
+    }
+    bool GetIsPrepared() const
+    {
+        return isPrepared_;
+    }
+
+    bool GetIsSeekingWhenNotPrepared() const
+    {
+        return isSeekingWhenNotPrepared_;
+    }
+    uint32_t GetSeekingPosWhenNotPrepared() const
+    {
+        return seekingPosWhenNotPrepared_;
+    }
+    SeekMode GetSeekingModeWhenNotPrepared() const
+    {
+        return seekingModeWhenNotPrepared_;
+    }
+    void UpdateVisibility(bool isVisible)
+    {
+        isVisible_ = isVisible;
+    }
+    VideoSourceInfo GetVideoSource()
+    {
+        return videoSrcInfo_;
+    }
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif
@@ -318,7 +354,7 @@ private:
     void PrintPlayerStatus(PlaybackStatus status);
 
     void UpdateFsState();
-    void checkNeedAutoPlay();
+    void CheckNeedPlay();
 
     // Fire error manually, eg. src is not existed. It must run on ui.
     void FireError();
@@ -350,6 +386,17 @@ private:
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void UpdateOverlayVisibility(VisibleType type);
 
+    void UpdateControlBar(uint32_t duration, bool isChangePlayBtn = false);
+    void SetSurfaceForMediaPlayer();
+    void StartPlay();
+    void SeekTo(float currentPos, OHOS::Ace::SeekMode seekMode);
+    bool IsVideoSourceChanged();
+    void RecordSeekingInfoBeforePlaying(float currentPos, OHOS::Ace::SeekMode seekMode, bool sliderChange = false);
+    void RegisterVisibleRatioCallback();
+    void ReleaseMediaPlayer();
+    bool ShouldPrepareMediaPlayer();
+    void UpdatePlayingFlags();
+    void CleanPlayingFlags();
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
 
@@ -358,9 +405,10 @@ private:
     HiddenChangeEvent hiddenChangeEvent_;
 
     // Video src.
-    std::string src_;
+    VideoSourceInfo videoSrcInfo_;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
     bool isPlaying_ = false;
+    bool isPrepared_ = false;
 
     bool isStop_ = false;
     bool isDrag_ = false;
@@ -391,6 +439,13 @@ private:
     Rect contentRect_;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
 
+    bool isSeekingWhenNotPrepared_ = false;
+    uint32_t seekingPosWhenNotPrepared_ = 0;
+    SeekMode seekingModeWhenNotPrepared_;
+    bool isSetMediaSurfaceDone_ = false;
+    bool isStartByUser_ = false;
+    bool isVisible_ = false;
+    uint32_t playingFlagsAfterPrepared_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
 } // namespace OHOS::Ace::NG

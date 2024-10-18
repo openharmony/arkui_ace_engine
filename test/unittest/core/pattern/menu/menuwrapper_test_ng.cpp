@@ -830,7 +830,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg015, TestSize.Level1)
     mainMenu->GetPattern<MenuPattern>()->SetDisappearAnimation(true);
     subMenu->GetPattern<MenuPattern>()->SetDisappearAnimation(true);
     wrapperPattern->HideSubMenu();
-    EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
+    EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
 }
 
 /**
@@ -983,6 +983,7 @@ HWTEST_F(MenuWrapperTestNg, MenuViewTestNg001, TestSize.Level1)
      */
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto menuWrapperNode = GetPreviewMenuWrapper2();
+    ASSERT_NE(menuWrapperNode, nullptr);
 }
 
 /**

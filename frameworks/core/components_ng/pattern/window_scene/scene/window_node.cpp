@@ -46,7 +46,11 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
         if (windowNode->GetTag() == tag) {
             return windowNode;
         }
-        ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
+        bool removed = ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
+        if (!removed) {
+            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE,
+                "Remove item silently failed, node id: %{public}d, sessionId: %{public}d", nodeId, sessionId);
+        }
         auto parent = windowNode->GetParent();
         if (parent) {
             parent->RemoveChild(windowNode);
@@ -64,7 +68,11 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
     auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
     windowNode = AceType::MakeRefPtr<WindowNode>(tag, nodeId, sessionId, pattern, false);
     windowNode->InitializePatternAndContext();
-    ElementRegister::GetInstance()->AddUINode(windowNode);
+    bool added = ElementRegister::GetInstance()->AddUINode(windowNode);
+    if (!added) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "Add UINode failed, node id: %{public}d, sessionId: %{public}d",
+            nodeId, sessionId);
+    }
     g_windowNodeMap.emplace(sessionId, WeakPtr<WindowNode>(windowNode));
     return windowNode;
 }

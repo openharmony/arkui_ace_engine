@@ -105,12 +105,12 @@ Rect TextFieldController::GetTextContentRect()
 int32_t TextFieldController::GetTextContentLinesNum()
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    int lines = 0;
+    int32_t lines = 0;
     if (textFieldPattern) {
         if (!textFieldPattern->IsOperation()) {
             return lines;
         }
-        lines = textFieldPattern->GetLineCount();
+        lines = static_cast<int32_t>(textFieldPattern->GetLineCount());
         return lines;
     }
     lines = getTextContentLinesNum_();

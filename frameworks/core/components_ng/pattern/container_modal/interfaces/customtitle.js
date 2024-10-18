@@ -152,6 +152,8 @@ export class Index extends ViewPU {
       Text.textAlign(TextAlign.Start);
       Text.layoutWeight(1.0);
       Text.opacity(this.iconOpacity);
+      Text.minFontScale(0.85);
+      Text.maxFontScale(1.45);
       if (!isInitialRender) {
         Text.pop();
       }

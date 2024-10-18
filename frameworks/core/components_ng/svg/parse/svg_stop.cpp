@@ -54,6 +54,7 @@ bool SvgStop::ParseAndSetSpecializedAttr(const std::string& name, const std::str
             [](const std::string& val, SvgStopAttribute& attribute) {
                 Color color = (val == VALUE_NONE ? Color::TRANSPARENT : SvgAttributesParser::GetColor(val));
                 attribute.gradientColor.SetColor(color);
+                
                 if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
                     SvgAttributesParser::CheckColorAlpha(val, color);
                     attribute.gradientColor.SetColor(color);

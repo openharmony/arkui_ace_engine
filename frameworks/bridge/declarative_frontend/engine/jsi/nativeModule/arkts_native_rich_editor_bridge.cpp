@@ -905,7 +905,7 @@ std::optional<uint32_t> ParseColorResourceId(const EcmaVM* vm, const Local<JSVal
     if (!resIdArg->IsNumber()) {
         return std::nullopt;
     }
-    auto typeValue = -1;
+    uint32_t typeValue = 0;
     auto typeArg = colorObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
     if (typeArg->IsNumber()) {
         typeValue = typeArg->Uint32Value(vm);
@@ -1589,6 +1589,32 @@ ArkUINativeModuleValue RichEditorBridge::ResetEnterKeyType(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorEnterKeyType(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::SetBarState(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsNumber()) {
+        uint32_t barStateValue = secondArg->Uint32Value(vm);
+        GetArkUINodeModifiers()->getRichEditorModifier()->setRichEditorBarState(nativeNode, barStateValue);
+    } else {
+        GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorBarState(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RichEditorBridge::ResetBarState(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRichEditorModifier()->resetRichEditorBarState(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

@@ -36,7 +36,7 @@ export class SelectTitleBar extends ViewPU {
     if (typeof b10 === 'function') {
       this.paramsGenerator_ = b10;
     }
-    this.__selected = new ObservedPropertySimplePU(0, this, 'selected');
+    this.__selected = new SynchedPropertySimpleOneWayPU(y9.selected, this, 'selected');
     this.options = [];
     this.menuItems = [];
     this.subtitle = '';
@@ -44,15 +44,14 @@ export class SelectTitleBar extends ViewPU {
     this.hidesBackButton = false;
     this.onSelected = () => { };
     this.__selectMaxWidth = new ObservedPropertySimplePU(0, this, 'selectMaxWidth');
-    this.__backActive = new ObservedPropertySimplePU(false, this, 'backActive');
     this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
     this.setInitiallyProvidedValue(y9);
     this.finalizeConstruction();
   }
 
   setInitiallyProvidedValue(w9) {
-    if (w9.selected !== undefined) {
-      this.selected = w9.selected;
+    if (w9.selected === undefined) {
+      this.__selected.set(0);
     }
     if (w9.options !== undefined) {
       this.options = w9.options;
@@ -75,28 +74,24 @@ export class SelectTitleBar extends ViewPU {
     if (w9.selectMaxWidth !== undefined) {
       this.selectMaxWidth = w9.selectMaxWidth;
     }
-    if (w9.backActive !== undefined) {
-      this.backActive = w9.backActive;
-    }
     if (w9.fontSize !== undefined) {
       this.fontSize = w9.fontSize;
     }
   }
 
   updateStateVars(v9) {
+    this.__selected.reset(v9.selected);
   }
 
   purgeVariableDependenciesOnElmtId(u9) {
     this.__selected.purgeDependencyOnElmtId(u9);
     this.__selectMaxWidth.purgeDependencyOnElmtId(u9);
-    this.__backActive.purgeDependencyOnElmtId(u9);
     this.__fontSize.purgeDependencyOnElmtId(u9);
   }
 
   aboutToBeDeleted() {
     this.__selected.aboutToBeDeleted();
     this.__selectMaxWidth.aboutToBeDeleted();
-    this.__backActive.aboutToBeDeleted();
     this.__fontSize.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
@@ -116,14 +111,6 @@ export class SelectTitleBar extends ViewPU {
 
   set selectMaxWidth(s9) {
     this.__selectMaxWidth.set(s9);
-  }
-
-  get backActive() {
-    return this.__backActive.get();
-  }
-
-  set backActive(r9) {
-    this.__backActive.set(r9);
   }
 
   get fontSize() {
@@ -181,18 +168,13 @@ export class SelectTitleBar extends ViewPU {
       If.create();
       if (!this.hidesBackButton) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((f9, g9) => {
-            Navigator.create();
-            Navigator.active(this.backActive);
-          }, Navigator);
-          Navigator.pop();
           {
             this.observeComponentCreation2((z8, a9) => {
               if (a9) {
                 let b9 = new ImageMenuItem(this, { item: {
                   value: PUBLIC_BACK,
                   isEnabled: true,
-                  action: () => this.backActive = true,
+                  action: () => this.getUIContext()?.getRouter()?.back()
                 }, index: -1 }, undefined, z8, () => { },
                   { page: 'library/src/main/ets/components/MainPage.ets', line: 73, col: 11 });
                 ViewPU.create(b9);
@@ -201,7 +183,7 @@ export class SelectTitleBar extends ViewPU {
                     item: {
                       value: PUBLIC_BACK,
                       isEnabled: true,
-                      action: () => this.backActive = true,
+                      action: () => this.getUIContext()?.getRouter()?.back()
                     },
                     index: -1,
                   };

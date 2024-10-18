@@ -126,7 +126,7 @@ FrontendDelegateDeclarative::FrontendDelegateDeclarative(const RefPtr<TaskExecut
 FrontendDelegateDeclarative::~FrontendDelegateDeclarative()
 {
     CHECK_RUN_ON(JS);
-    LOG_DESTROY();
+    LOGI("DelegateDeclarative destroyed");
 }
 
 int32_t FrontendDelegateDeclarative::GetMinPlatformVersion()
@@ -1869,13 +1869,19 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
 void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& node,
     std::function<void(int32_t)> &&callback)
 {
-    auto task = [node, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
-        CHECK_NULL_VOID(overlayManager);
-        TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
-        overlayManager->CloseCustomDialog(node, std::move(callback));
-    };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
-    return;
+    auto nodePtr = node.Upgrade();
+    CHECK_NULL_VOID(nodePtr);
+    auto context = nodePtr->GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    context->GetTaskExecutor()->PostTask(
+        [node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
+            overlayManager->CloseCustomDialog(node, std::move(callback));
+        },
+        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
 }
 
 void FrontendDelegateDeclarative::UpdateCustomDialog(
@@ -1892,14 +1898,20 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
     }
-    auto task = [dialogProperties, node, callback]
-        (const RefPtr<NG::OverlayManager>& overlayManager) mutable {
-        CHECK_NULL_VOID(overlayManager);
-        LOGI("begin to update custom dialog.");
-        overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
-    };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayUpdateCustomDialog");
-    return;
+
+    auto nodePtr = node.Upgrade();
+    CHECK_NULL_VOID(nodePtr);
+    auto context = nodePtr->GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    context->GetTaskExecutor()->PostTask(
+        [dialogProperties, node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
+            overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
+        },
+        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
 }
 
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
@@ -3305,6 +3317,12 @@ std::pair<RouterRecoverRecord, UIContentErrorCode> FrontendDelegateDeclarative::
             pageRouterManager_->RestoreFullPathInfo(std::move(fullPathInfo));
         }
     }
+    // restore navigation info
+    auto pipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
+    if (pipelineContextNG && pipelineContextNG->GetNavigationManager()) {
+        auto navigationRecoveryInfo = jsonContentInfo->GetValue("navigationInfo");
+        pipelineContextNG->GetNavigationManager()->StorageNavigationRecoveryInfo(std::move(navigationRecoveryInfo));
+    }
     return pageRouterManager_->RestoreRouterStack(std::move(routerStack), type);
 }
 
@@ -3330,6 +3348,11 @@ std::string FrontendDelegateDeclarative::GetContentInfo(ContentInfoType type)
             auto fullPathInfo = pageRouterManager_->GetFullPathInfo();
             if (fullPathInfo) {
                 jsonContentInfo->Put("fullPathInfo", std::move(fullPathInfo));
+            }
+            // add navigation stack info
+            auto navigationRecoveryInfo = GetNavigationJsonInfo();
+            if (navigationRecoveryInfo) {
+                jsonContentInfo->Put("navigationInfo", navigationRecoveryInfo);
             }
         }
     }
@@ -3455,4 +3478,14 @@ RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEf
 
     return JSViewAbstract::ParseNapiChainedTransition(transitionObj, context);
 }
+
+std::unique_ptr<JsonValue> FrontendDelegateDeclarative::GetNavigationJsonInfo()
+{
+    auto pipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_RETURN(pipelineContextNG, nullptr);
+    auto navigationManager = pipelineContextNG->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, nullptr);
+    return navigationManager->GetNavigationJsonInfo();
+}
+
 } // namespace OHOS::Ace::Framework

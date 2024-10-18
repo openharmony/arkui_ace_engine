@@ -19,6 +19,7 @@
 #include <optional>
 
 #include "base/log/dump_log.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/counter/counter_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -76,7 +77,10 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+        }
+        return { FocusType::SCOPE, true, FocusStyleType::OUTER_BORDER };
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override

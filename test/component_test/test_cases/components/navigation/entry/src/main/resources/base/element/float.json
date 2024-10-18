@@ -1,0 +1,12 @@
+{
+  "float": [
+    {
+      "name": "navigation_min_width",
+      "value": "150.00vp"
+    },
+    {
+      "name": "navigation_max_width",
+      "value": "300.00vp"
+    }
+  ]
+}

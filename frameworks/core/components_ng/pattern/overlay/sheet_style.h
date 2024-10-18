@@ -42,6 +42,7 @@ enum SheetType {
     SHEET_POPUP,
     SHEET_BOTTOMLANDSPACE,
     SHEET_BOTTOM_FREE_WINDOW,
+    SHEET_BOTTOM_OFFSET,
 };
 
 struct SheetKey {
@@ -98,6 +99,13 @@ struct SheetHeight {
     }
 };
 
+enum class SheetKeyboardAvoidMode {
+    NONE,
+    TRANSLATE_AND_RESIZE,
+    RESIZE_ONLY,
+    TRANSLATE_AND_SCROLL,
+};
+
 struct SheetStyle {
     std::optional<Dimension> height;
     std::optional<SheetMode> sheetMode;
@@ -107,6 +115,7 @@ struct SheetStyle {
     std::optional<SheetType> sheetType;
     std::optional<Color> backgroundColor;
     std::optional<Color> maskColor;
+    std::optional<OffsetF> bottomOffset;
     std::optional<BlurStyleOption> backgroundBlurStyle;
     std::optional<std::string> sheetTitle;
     std::optional<std::string> sheetSubtitle;
@@ -114,6 +123,7 @@ struct SheetStyle {
     std::optional<bool> interactive;
     std::optional<bool> showInPage;
     std::optional<ScrollSizeMode> scrollSizeMode;
+    std::optional<SheetKeyboardAvoidMode> sheetKeyboardAvoidMode;
     std::optional<NG::BorderWidthProperty> borderWidth; // border width
     std::optional<NG::BorderColorProperty> borderColor; // border color
     std::optional<NG::BorderStyleProperty> borderStyle;  // border style
@@ -132,7 +142,8 @@ struct SheetStyle {
                 interactive == sheetStyle.interactive && showInPage == sheetStyle.showInPage &&
                 borderWidth == sheetStyle.borderWidth && borderColor == sheetStyle.borderColor &&
                 borderStyle == sheetStyle.borderStyle && shadow == sheetStyle.shadow && width == sheetStyle.width &&
-                instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode);
+                instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode &&
+                sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode && bottomOffset == sheetStyle.bottomOffset);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -159,11 +170,14 @@ struct SheetStyle {
         detents = !sheetStyle.detents.empty() ? sheetStyle.detents : detents;
         interactive = sheetStyle.interactive.has_value() ? sheetStyle.interactive : interactive;
         scrollSizeMode = sheetStyle.scrollSizeMode.has_value() ? sheetStyle.scrollSizeMode : scrollSizeMode;
+        sheetKeyboardAvoidMode =
+            sheetStyle.sheetKeyboardAvoidMode.has_value() ? sheetStyle.sheetKeyboardAvoidMode : sheetKeyboardAvoidMode;
         borderWidth = sheetStyle.borderWidth.has_value() ? sheetStyle.borderWidth : borderWidth;
         borderColor = sheetStyle.borderColor.has_value() ? sheetStyle.borderColor : borderColor;
         borderStyle = sheetStyle.borderStyle.has_value() ? sheetStyle.borderStyle : borderStyle;
         shadow = sheetStyle.shadow.has_value() ? sheetStyle.shadow : shadow;
         width = sheetStyle.width.has_value() ? sheetStyle.width : width;
+        bottomOffset = sheetStyle.bottomOffset.has_value() ? sheetStyle.bottomOffset : bottomOffset;
     }
 };
 } // namespace OHOS::Ace::NG

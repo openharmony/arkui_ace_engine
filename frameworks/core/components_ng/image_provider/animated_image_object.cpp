@@ -24,8 +24,10 @@
 
 namespace OHOS::Ace::NG {
 void AnimatedImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& size, bool forceResize, bool /*syncLoad*/)
+    const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& size, bool forceResize, bool /*syncLoad*/)
 {
+    auto ctx = ctxWp.Upgrade();
+    CHECK_NULL_VOID(ctx);
     AnimatedImage::ResizeParam params { .width = size.Width(),
         .height = size.Height(),
         .forceResize = forceResize,

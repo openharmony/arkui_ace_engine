@@ -14,7 +14,8 @@
  */
 
 #include "core/pipeline/pipeline_context.h"
-
+#include <cstdlib>
+#include "base/utils/utils.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_base/include/platform/common/rs_system_properties.h"
@@ -130,7 +131,7 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
 
 PipelineContext::~PipelineContext()
 {
-    LOG_DESTROY();
+    LOGI("PipelineContext destroyed");
 }
 
 void PipelineContext::FlushPipelineWithoutAnimation()
@@ -325,15 +326,6 @@ void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco, bool needUpd
     if (containerModal) {
         containerModal->ShowTitle(isShow, hasDeco);
     }
-}
-
-void PipelineContext::SetContainerWindow(bool isShow)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SetContainerWindow(isShow, density_); // set container window show state to render service
-    }
-#endif
 }
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
@@ -1578,11 +1570,13 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 
     std::optional<TouchEvent> lastMoveEvent;
     if (scalePoint.type == TouchType::UP && !touchEvents_.empty()) {
-        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end(); ++iter) {
+        for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
             auto movePoint = (*iter).CreateScalePoint(GetViewScale());
             if (scalePoint.id == movePoint.id) {
                 lastMoveEvent = movePoint;
                 iter = touchEvents_.erase(iter);
+            } else {
+                ++iter;
             }
         }
         if (lastMoveEvent.has_value()) {
@@ -3533,7 +3527,12 @@ void PipelineContext::RestoreNodeInfo(std::unique_ptr<JsonValue> nodeInfo)
     while (child->IsValid()) {
         auto key = child->GetKey();
         auto value = child->GetString();
-        restoreNodeInfo_.try_emplace(std::stoi(key), value);
+        int vital = std::atoi(key.c_str());
+        if (vital == 0) {
+            LOGF("input %{public}s can not be converted to number.", key.c_str());
+            abort();
+        }
+        restoreNodeInfo_.try_emplace(vital, value);
         child = child->GetNext();
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -171,7 +171,7 @@ RefPtr<FrameNode> VideoPropertyTestNg::CreateVideoNode(TestProperty& testPropert
         .WillRepeatedly(Return(true));
 
     if (testProperty.src.has_value()) {
-        VideoModelNG().SetSrc(testProperty.src.value());
+        VideoModelNG().SetSrc(testProperty.src.value(), "", "");
     }
     if (testProperty.progressRate.has_value()) {
         VideoModelNG().SetProgressRate(testProperty.progressRate.value());
@@ -217,7 +217,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPropertyTest002, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPatternTemp->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(false));
 
-    video.SetSrc(VIDEO_SRC);
+    video.SetSrc(VIDEO_SRC, "", "");
     video.SetProgressRate(VIDEO_PROGRESS_RATE);
     video.SetPosterSourceInfo(VIDEO_POSTER_URL, "", "");
     video.SetMuted(MUTED_VALUE);
@@ -233,7 +233,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPropertyTest002, TestSize.Level1)
     auto videoPattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_NE(videoPattern, nullptr);
 
-    EXPECT_EQ(videoLayoutProperty->GetVideoSource().value_or(""), VIDEO_SRC);
+    EXPECT_EQ(videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo()).GetSrc(), VIDEO_SRC);
     EXPECT_EQ(videoPattern->GetProgressRate(), VIDEO_PROGRESS_RATE);
     EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(ImageSourceInfo("")), ImageSourceInfo(VIDEO_POSTER_URL));
     EXPECT_EQ(videoPattern->GetMuted(), MUTED_VALUE);
@@ -564,7 +564,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPropertyTest016, TestSize.Level1)
     ImageSourceInfo secondPixelMapImage = ImageSourceInfo(secondPixelMap);
     ImageSourceInfo urlImage = ImageSourceInfo(VIDEO_POSTER_URL);
 
-    video.SetSrc(VIDEO_SRC);
+    video.SetSrc(VIDEO_SRC, "", "");
     video.SetProgressRate(VIDEO_PROGRESS_RATE);
     video.SetPosterSourceByPixelMap(pixelMap);
 
@@ -573,7 +573,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPropertyTest016, TestSize.Level1)
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
     EXPECT_FALSE(videoLayoutProperty == nullptr);
 
-    EXPECT_EQ(videoLayoutProperty->GetVideoSource().value_or(""), VIDEO_SRC);
+    EXPECT_EQ(videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo()).GetSrc(), VIDEO_SRC);
     EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), pixelMapImage);
 
     /**
@@ -828,7 +828,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest020, TestSize.Level1)
     auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
     ASSERT_NE(videoPattern, nullptr);
 
-    videoPattern->src_ = "test";
+    videoPattern->videoSrcInfo_.src = "test";
     videoPattern->EnableDrag();
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -914,15 +914,18 @@ HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest001, TestSize.Level1)
     EXPECT_FALSE(videoLayout->HasControls());
     videoLayout->UpdateObjectFit(ImageFit::COVER);
     fullScreenLayout->UpdateObjectFit(ImageFit::CONTAIN);
-    videoLayout->UpdateVideoSource(VIDEO_SRC);
-    fullScreenLayout->UpdateVideoSource("");
+    auto videoSrcInfo = videoLayout->GetVideoSourceValue(VideoSourceInfo());
+    videoSrcInfo.src = VIDEO_SRC;
+    videoLayout->UpdateVideoSource(videoSrcInfo);
+    videoSrcInfo.src = "";
+    fullScreenLayout->UpdateVideoSource(videoSrcInfo);
     videoLayout->UpdatePosterImageInfo(ImageSourceInfo(VIDEO_POSTER_URL));
     fullScreenLayout->UpdatePosterImageInfo(ImageSourceInfo(""));
     videoLayout->UpdateControls(true);
     fullScreenLayout->UpdateControls(false);
     fullScreenPattern->UpdateState();
     EXPECT_EQ(fullScreenLayout->GetObjectFit().value(), ImageFit::COVER);
-    EXPECT_EQ(fullScreenLayout->GetVideoSource().value(), VIDEO_SRC);
+    EXPECT_EQ(fullScreenLayout->GetVideoSource().value().GetSrc(), VIDEO_SRC);
     EXPECT_EQ(fullScreenLayout->GetPosterImageInfo().value(), ImageSourceInfo(VIDEO_POSTER_URL));
     EXPECT_TRUE(fullScreenLayout->GetControls().value());
     fullScreenPattern->UpdateState();
@@ -949,8 +952,8 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest021, TestSize.Level1)
      * @tc.steps: step2. Call ResetMediaPlayer when mediaPlayer_ in different status.
      * @tc.expected: mediaPlayer_'s functions is called.
      */
-    videoPattern->src_ = VIDEO_SRC;
-    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetSource(_))
+    videoPattern->videoSrcInfo_.src = VIDEO_SRC;
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetSource(_, _, _))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true));

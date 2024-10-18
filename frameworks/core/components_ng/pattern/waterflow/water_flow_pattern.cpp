@@ -54,7 +54,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         // over scroll in drag update from normal to over scroll.
         float overScroll = layoutInfo_->CalcOverScroll(GetMainContentSize(), delta);
         if (source == SCROLL_FROM_UPDATE) {
-            auto friction = ScrollablePattern::CalculateFriction(std::abs(overScroll) / GetMainContentSize());
+            auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             delta *= friction;
         }
     } else {
@@ -113,6 +113,7 @@ void WaterFlowPattern::UpdateScrollBarOffset()
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
         return;
     }
+    CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
@@ -140,6 +141,10 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
     }
     sectionChangeStartPos_.clear();
 
+    if (sections_ && layoutInfo_->segmentTails_.empty()) {
+        layoutInfo_->InitSegments(sections_->GetSectionInfo(), 0);
+    }
+
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         return;
     }
@@ -147,7 +152,7 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
     if (footer && footer->FrameCount() > 0) {
         layoutInfo_->footerIndex_ = 0;
     } else {
-        layoutInfo_->footerIndex_ = -1;
+        layoutInfo_->ResetFooter();
     }
 }
 
@@ -243,6 +248,7 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     float delta = layoutInfo_->GetDelta(prevOffset_);
     PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), delta);
 
+    FireObserverOnDidScroll(delta);
     auto onScroll = eventHub->GetOnScroll();
     if (onScroll) {
         FireOnScroll(delta, onScroll);
@@ -264,7 +270,9 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
 void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachStart && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
+    CHECK_NULL_VOID(host && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
+    FireObserverOnReachStart();
+    CHECK_NULL_VOID(onReachStart);
     ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
     onReachStart();
     AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
@@ -273,10 +281,16 @@ void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart)
 void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host && onReachEnd && layoutInfo_->ReachEnd(prevOffset_));
-    ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
-    onReachEnd();
-    AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+    CHECK_NULL_VOID(host);
+    if (layoutInfo_->ReachEnd(prevOffset_, false)) {
+        FireObserverOnReachEnd();
+        CHECK_NULL_VOID(onReachEnd);
+        ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
+        onReachEnd();
+        AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
+    } else if (!isInitialized_ && layoutInfo_->ReachEnd(prevOffset_, true)) {
+        FireObserverOnReachEnd();
+    }
 }
 
 void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
@@ -618,7 +632,8 @@ bool WaterFlowPattern::NeedRender()
     needRender = property->GetPaddingProperty() != nullptr || needRender;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, needRender);
-    needRender = needRender || paintProperty->GetFadingEdge().value_or(false);
+    needRender |= paintProperty->GetFadingEdge().value_or(false);
+    needRender |= paintProperty->GetContentClip().has_value();
     return needRender;
 }
 
@@ -719,7 +734,10 @@ WeakPtr<FocusHub> WaterFlowPattern::GetNextFocusNode(FocusStep step, const WeakP
         if (itemIdx >= layoutInfo_->endIndex_ || itemIdx <= layoutInfo_->startIndex_) {
             ScrollToIndex(itemIdx, false, ScrollAlign::AUTO);
             host->SetActive();
-            host->CreateLayoutTask();
+            auto context = host->GetContext();
+            if (context) {
+                context->FlushUITaskWithSingleDirtyNode(host);
+            }
         }
         auto next = host->GetChildByIndex(idx);
         CHECK_NULL_RETURN(next, nullptr);

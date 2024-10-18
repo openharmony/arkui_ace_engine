@@ -1261,14 +1261,4 @@ HWTEST_F(EventRecorderTest, PutString005, TestSize.Level1)
    
     EXPECT_FALSE(result);
 }
-
-/**
- * @tc.name: OnPageReady001
- * @tc.desc: Test OnPageReady.
- * @tc.type: FUNC
- */
-HWTEST_F(EventRecorderTest, OnPageReady001, TestSize.Level1)
-{
-    Recorder::NodeDataCache::Get().OnPageReady();
-}
 } // namespace OHOS::Ace

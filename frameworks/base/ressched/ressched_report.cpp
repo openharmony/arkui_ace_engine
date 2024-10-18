@@ -32,6 +32,7 @@ constexpr int32_t TOUCH_DOWN_EVENT          = 1;
 constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t TOUCH_UP_EVENT            = 3;
 constexpr int32_t TOUCH_PULL_UP_EVENT = 4;
+constexpr int32_t SLIDE_OFF_EVENT = 0;
 constexpr int32_t SLIDE_DETECTING = 2;
 constexpr int32_t AUTO_PLAY_ON_EVENT = 5;
 constexpr int32_t AUTO_PLAY_OFF_EVENT = 6;
@@ -52,6 +53,7 @@ constexpr char PUSH_PAGE[] = "push_page";
 constexpr char POP_PAGE[] = "pop_page";
 constexpr char AUTO_PLAY_ON[] = "auto_play_on";
 constexpr char AUTO_PLAY_OFF[] = "auto_play_off";
+constexpr char SLIDE_OFF[] = "slide_off";
 constexpr char TOUCH[] = "touch";
 constexpr char WEB_GESTURE[] = "web_gesture";
 constexpr char LOAD_PAGE[] = "load_page";
@@ -104,6 +106,11 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
             { AUTO_PLAY_OFF,
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     reportDataFunc_(RES_TYPE_SLIDE, AUTO_PLAY_OFF_EVENT, payload);
+                }
+            },
+            { SLIDE_OFF,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    reportDataFunc_(RES_TYPE_SLIDE, SLIDE_OFF_EVENT, payload);
                 }
             },
             { POP_PAGE,
@@ -196,6 +203,7 @@ void ResSchedReport::HandleTouchDown(const TouchEvent& touchEvent)
     payload[Ressched::NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_DOWN_EVENT, payload);
     RecordTouchEvent(touchEvent, true);
+    isInTouch_ = true;
 }
 
 void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
@@ -205,7 +213,8 @@ void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent)
     payload[Ressched::NAME] = TOUCH;
     payload[UP_SPEED_KEY] = std::to_string(GetUpVelocity(lastTouchEvent_, curTouchEvent_));
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_UP_EVENT, payload);
-    isInSilde = false;
+    isInSlide_ = false;
+    isInTouch_ = false;
     averageDistance_.Reset();
 }
 
@@ -213,23 +222,26 @@ void ResSchedReport::HandleTouchMove(const TouchEvent& touchEvent)
 {
     RecordTouchEvent(touchEvent);
     averageDistance_ += curTouchEvent_.GetOffset() - lastTouchEvent_.GetOffset();
-    if (averageDistance_.GetDistance() >= ResDefine::JUDGE_DISTANCE && !isInSilde) {
+    if (averageDistance_.GetDistance() >= ResDefine::JUDGE_DISTANCE &&
+        !isInSlide_ && isInTouch_) {
         std::unordered_map<std::string, std::string> payload;
         LoadAceApplicationContext(payload);
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
-        isInSilde = true;
+        isInSlide_ = true;
     }
 }
 
 void ResSchedReport::HandleTouchCancel(const TouchEvent& touchEvent)
 {
-    isInSilde = false;
+    isInSlide_ = false;
+    isInTouch_ = false;
     averageDistance_.Reset();
 }
 
 void ResSchedReport::HandleTouchPullDown(const TouchEvent& touchEvent)
 {
     RecordTouchEvent(touchEvent, true);
+    isInTouch_ = true;
 }
 
 void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent)
@@ -238,15 +250,16 @@ void ResSchedReport::HandleTouchPullUp(const TouchEvent& touchEvent)
     payload[Ressched::NAME] = TOUCH;
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_PULL_UP_EVENT, payload);
     averageDistance_.Reset();
+    isInTouch_ = false;
 }
 
 void ResSchedReport::HandleTouchPullMove(const TouchEvent& touchEvent)
 {
-    if (!isInSilde) {
+    if (!isInSlide_) {
         std::unordered_map<std::string, std::string> payload;
         LoadAceApplicationContext(payload);
         ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
-        isInSilde = true;
+        isInSlide_ = true;
     }
     RecordTouchEvent(touchEvent);
 }

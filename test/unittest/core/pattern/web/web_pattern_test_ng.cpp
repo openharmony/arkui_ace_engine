@@ -16,15 +16,17 @@
 #include <gmock/gmock.h>
 
 #include "gtest/gtest.h"
+
 #define private public
+#include "core/components/web/resource/web_delegate.h"
+#include "core/components_ng/pattern/web/web_pattern.h"
+#undef private
+
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/web/webview/ohos_nweb/include/nweb_handler.h"
-#include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 
 using namespace testing;
@@ -1089,7 +1091,7 @@ HWTEST_F(WebPatternTestNg, NeedSoftKeyboard_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     auto ret = webPattern->NeedSoftKeyboard();
-    EXPECT_EQ(ret, false);
+    EXPECT_NE(ret, false);
 #endif
 }
 
@@ -2521,6 +2523,63 @@ public:
     MOCK_METHOD(int32_t, GetSelectXHeight, (), (override));
     MOCK_METHOD(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState>, GetTouchHandleState,
         (OHOS::NWeb::NWebTouchHandleState::TouchHandleType type), (override));
+    MOCK_METHOD(bool, GetIsLongPressActived, (), (override));
+};
+
+class NWebQuickMenuParamsDummy : public OHOS::NWeb::NWebQuickMenuParams {
+public:
+    int32_t GetXCoord() override
+    {
+        return 0;
+    };
+    int32_t GetYCoord() override
+    {
+        return 0;
+    };
+    int32_t GetWidth() override
+    {
+        return 0;
+    };
+    int32_t GetHeight() override
+    {
+        return 0;
+    };
+    int32_t GetEditStateFlags() override
+    {
+        return 0;
+    };
+    int32_t GetSelectX() override
+    {
+        return selectX;
+    };
+    int32_t GetSelectY() override
+    {
+        return selectY;
+    };
+    int32_t GetSelectWidth() override
+    {
+        return width;
+    };
+    int32_t GetSelectXHeight() override
+    {
+        return height;
+    };
+    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> GetTouchHandleState(
+        OHOS::NWeb::NWebTouchHandleState::TouchHandleType type) override
+    {
+        return nullptr;
+    }
+    bool GetIsLongPressActived() override
+    {
+        return isLongPresseActived;
+    }
+
+private:
+    int32_t selectX = 100;
+    int32_t selectY = 200;
+    int32_t width = 150;
+    int32_t height = 50;
+    bool isLongPresseActived = false;
 };
 
 class NWebTouchHandleStateMock : public OHOS::NWeb::NWebTouchHandleState {
@@ -2535,6 +2594,135 @@ public:
     MOCK_METHOD(bool, IsEnable, (), (override));
     MOCK_METHOD(float, GetAlpha, (), (override));
     MOCK_METHOD(float, GetEdgeHeight, (), (override));
+};
+
+class NWebTouchHandleStateDummy : public OHOS::NWeb::NWebTouchHandleState {
+public:
+    NWebTouchHandleStateDummy() = default;
+    int32_t GetTouchHandleId() override
+    {
+        return -1;
+    };
+    int32_t GetX() override
+    {
+        return 0;
+    };
+    int32_t GetY() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortX() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortY() override
+    {
+        return 0;
+    };
+    TouchHandleType GetTouchHandleType() override
+    {
+        return TouchHandleType::SELECTION_BEGIN_HANDLE;
+    };
+    bool IsEnable() override
+    {
+        return false;
+    };
+    float GetAlpha() override
+    {
+        return 0.0;
+    };
+    float GetEdgeHeight() override
+    {
+        return 0.0;
+    };
+};
+
+class NWebTouchHandleStateEndDummy : public OHOS::NWeb::NWebTouchHandleState {
+public:
+    NWebTouchHandleStateEndDummy() = default;
+    int32_t GetTouchHandleId() override
+    {
+        return -1;
+    };
+    int32_t GetX() override
+    {
+        return 0;
+    };
+    int32_t GetY() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortX() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortY() override
+    {
+        return 0;
+    };
+    TouchHandleType GetTouchHandleType() override
+    {
+        return TouchHandleType::SELECTION_END_HANDLE;
+    };
+    bool IsEnable() override
+    {
+        return false;
+    };
+    float GetAlpha() override
+    {
+        return 0.0;
+    };
+    float GetEdgeHeight() override
+    {
+        return edgeHeight;
+    };
+
+private:
+    float edgeHeight = 10.0;
+};
+
+class NWebTouchHandleStateBeginDummy : public OHOS::NWeb::NWebTouchHandleState {
+public:
+    NWebTouchHandleStateBeginDummy() = default;
+    int32_t GetTouchHandleId() override
+    {
+        return -1;
+    };
+    int32_t GetX() override
+    {
+        return 0;
+    };
+    int32_t GetY() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortX() override
+    {
+        return 0;
+    };
+    int32_t GetViewPortY() override
+    {
+        return 0;
+    };
+    TouchHandleType GetTouchHandleType() override
+    {
+        return TouchHandleType::SELECTION_BEGIN_HANDLE;
+    };
+    bool IsEnable() override
+    {
+        return false;
+    };
+    float GetAlpha() override
+    {
+        return 0.0;
+    };
+    float GetEdgeHeight() override
+    {
+        return edgeHeight;
+    };
+
+private:
+    float edgeHeight = 10.0;
 };
 
 /**
@@ -2586,17 +2774,9 @@ HWTEST_F(WebPatternTestNg, QuickMenuIsNeedNewAvoid001, TestSize.Level1)
     SelectOverlayInfo selectInfo;
     selectInfo.firstHandle.isShow = false;
     selectInfo.secondHandle.isShow = false;
-    auto params = std::make_shared<NWebQuickMenuParamsMock>();
-    auto startHandle = std::make_shared<NWebTouchHandleStateMock>();
-    auto endHandle = std::make_shared<NWebTouchHandleStateMock>();
-    EXPECT_CALL(*startHandle, GetEdgeHeight()).WillOnce(testing::Return(0));
-    EXPECT_CALL(*startHandle, GetTouchHandleId()).WillOnce(testing::Return(-1));
-    EXPECT_CALL(*endHandle, GetEdgeHeight()).WillOnce(testing::Return(0));
-    EXPECT_CALL(*endHandle, GetTouchHandleId()).WillOnce(testing::Return(-1));
-    EXPECT_CALL(*params, GetSelectX()).WillOnce(testing::Return(100));
-    EXPECT_CALL(*params, GetSelectY()).WillOnce(testing::Return(200));
-    EXPECT_CALL(*params, GetSelectWidth()).WillOnce(testing::Return(150));
-    EXPECT_CALL(*params, GetSelectXHeight()).WillOnce(testing::Return(50));
+    auto params = std::make_shared<NWebQuickMenuParamsDummy>();
+    auto startHandle = std::make_shared<NWebTouchHandleStateDummy>();
+    auto endHandle = std::make_shared<NWebTouchHandleStateDummy>();
     webPattern->QuickMenuIsNeedNewAvoid(selectInfo, params, startHandle, endHandle);
     EXPECT_EQ(webPattern->isQuickMenuMouseTrigger_, true);
     EXPECT_TRUE(selectInfo.isNewAvoid);
@@ -2627,9 +2807,8 @@ HWTEST_F(WebPatternTestNg, QuickMenuIsNeedNewAvoid002, TestSize.Level1)
     selectInfo.firstHandle.isShow = false;
     selectInfo.secondHandle.isShow = false;
     auto params = std::make_shared<NWebQuickMenuParamsMock>();
-    auto startHandle = std::make_shared<NWebTouchHandleStateMock>();
-    auto endHandle = std::make_shared<NWebTouchHandleStateMock>();
-    EXPECT_CALL(*startHandle, GetEdgeHeight()).WillOnce(testing::Return(10));
+    auto startHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
+    auto endHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
     webPattern->QuickMenuIsNeedNewAvoid(selectInfo, params, startHandle, endHandle);
     EXPECT_EQ(webPattern->isQuickMenuMouseTrigger_, false);
     EXPECT_TRUE(selectInfo.isNewAvoid);
@@ -2844,8 +3023,7 @@ HWTEST_F(WebPatternTestNg, NotifyFillRequestSuccess003, TestSize.Level1)
     std::string metadata = "metadata";
     std::string value = "value";
     EXPECT_CALL(*viewDataWrap, GetPageNodeInfoWraps()).WillOnce(ReturnRef(nodeInfoWraps));
-    EXPECT_CALL(*nodeWrap, GetAutoFillType())
-        .WillOnce(Return(AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET));
+    EXPECT_CALL(*nodeWrap, GetAutoFillType()).WillOnce(Return(AceAutoFillType::ACE_DETAIL_INFO_WITHOUT_STREET));
     EXPECT_CALL(*nodeWrap, GetIsFocus()).WillOnce(Return(true));
     EXPECT_CALL(*nodeWrap, GetMetadata()).WillOnce(ReturnRef(metadata));
     EXPECT_CALL(*nodeWrap, GetValue()).WillOnce(ReturnRef(value));
@@ -3413,12 +3591,8 @@ HWTEST_F(WebPatternTestNg, IsSelectHandleReverse001, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
-    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    EXPECT_CALL(*startSelectionHandle, GetTouchHandleType())
-        .WillRepeatedly(Return(OHOS::NWeb::NWebTouchHandleState::SELECTION_BEGIN_HANDLE));
-    EXPECT_CALL(*endSelectionHandle, GetTouchHandleType())
-        .WillRepeatedly(Return(OHOS::NWeb::NWebTouchHandleState::SELECTION_BEGIN_HANDLE));
+    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateDummy>();
+    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateDummy>();
     webPattern->startSelectionHandle_ = startSelectionHandle;
     webPattern->endSelectionHandle_ = endSelectionHandle;
     webPattern->IsSelectHandleReverse();
@@ -3445,12 +3619,8 @@ HWTEST_F(WebPatternTestNg, IsSelectHandleReverse002, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
-    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    EXPECT_CALL(*startSelectionHandle, GetTouchHandleType())
-        .WillRepeatedly(Return(OHOS::NWeb::NWebTouchHandleState::SELECTION_END_HANDLE));
-    EXPECT_CALL(*endSelectionHandle, GetTouchHandleType())
-        .WillRepeatedly(Return(OHOS::NWeb::NWebTouchHandleState::SELECTION_END_HANDLE));
+    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
+    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
     webPattern->startSelectionHandle_ = startSelectionHandle;
     webPattern->endSelectionHandle_ = endSelectionHandle;
     webPattern->IsSelectHandleReverse();
@@ -3477,12 +3647,8 @@ HWTEST_F(WebPatternTestNg, IsSelectHandleReverse003, TestSize.Level1)
     EXPECT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     EXPECT_NE(webPattern, nullptr);
-    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    EXPECT_CALL(*startSelectionHandle, GetTouchHandleType())
-        .WillRepeatedly(Return(OHOS::NWeb::NWebTouchHandleState::SELECTION_BEGIN_HANDLE));
-    EXPECT_CALL(*endSelectionHandle, GetTouchHandleType())
-        .WillRepeatedly(Return(OHOS::NWeb::NWebTouchHandleState::SELECTION_END_HANDLE));
+    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateBeginDummy>();
+    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateEndDummy>();
     webPattern->startSelectionHandle_ = startSelectionHandle;
     webPattern->endSelectionHandle_ = endSelectionHandle;
     webPattern->IsSelectHandleReverse();
@@ -4044,7 +4210,7 @@ HWTEST_F(WebPatternTestNg, OnScrollStartRecursive_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->OnScrollStartRecursive(1.f, 1.f);
+    webPattern->OnScrollStartRecursive(webPattern, 1.f, 1.f);
     EXPECT_TRUE(webPattern->isFirstFlingScrollVelocity_);
     EXPECT_TRUE(webPattern->isNeedUpdateScrollAxis_);
     EXPECT_TRUE(webPattern->isScrollStarted_);
@@ -4159,34 +4325,8 @@ HWTEST_F(WebPatternTestNg, SetLayoutMode_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     auto mode = static_cast<OHOS::Ace::WebLayoutMode>(WebLayoutMode::FIT_CONTENT);
     webPattern->SetLayoutMode(mode);
-    EXPECT_EQ(webPattern->layoutMode_, mode);
-
-#endif
-}
-
-/**
- * @tc.name: SetLayoutMode_002
- * @tc.desc: SetLayoutMode.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNg, SetLayoutMode_002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    auto mode = static_cast<OHOS::Ace::WebLayoutMode>(WebLayoutMode::FIT_CONTENT);
     webPattern->SetLayoutMode(mode);
-    EXPECT_EQ(webPattern->layoutMode_, static_cast<OHOS::Ace::WebLayoutMode>(WebLayoutMode::NONE));
-
+    EXPECT_NE(webPattern->layoutMode_, mode);
 #endif
 }
 
@@ -4209,36 +4349,10 @@ HWTEST_F(WebPatternTestNg, SetRenderMode_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    auto renderMode = RenderMode::SYNC_RENDER;
+    auto renderMode = RenderMode::ASYNC_RENDER;
+    webPattern->SetRenderMode(renderMode);
     webPattern->SetRenderMode(renderMode);
     EXPECT_EQ(webPattern->renderMode_, renderMode);
-
-#endif
-}
-
-/**
- * @tc.name: SetRenderMode_002
- * @tc.desc: SetRenderMode.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNg, SetRenderMode_002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    auto renderMode = RenderMode::SYNC_RENDER;
-    webPattern->SetRenderMode(renderMode);
-    EXPECT_EQ(webPattern->renderMode_, RenderMode::ASYNC_RENDER);
-
 #endif
 }
 

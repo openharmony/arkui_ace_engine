@@ -61,7 +61,10 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     session_->SetBounds(originBounds);
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
+    auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
+    if (ret != Rosen::WSError::WS_OK) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, ret: %{public}d", static_cast<int32_t>(ret));
+    }
 }
 
 void SystemWindowScene::OnVisibleChange(bool visible)
@@ -139,6 +142,7 @@ void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     if (session_->NeedCheckContextTransparent()) {
         checkContextTransparentTask_.Cancel();
     }
+    session_->SetNotifySystemSessionKeyEventFunc(nullptr);
 }
 
 void SystemWindowScene::OnAttachToMainTree()
@@ -198,11 +202,13 @@ void SystemWindowScene::RegisterEventCallback()
                 TaskExecutor::TaskType::UI, "ArkUIWindowInjectPointerEvent", PriorityType::VIP);
     };
     session_->SetNotifySystemSessionPointerEventFunc(std::move(pointerEventCallback));
-
-    auto keyEventCallback = [instanceId = instanceId_](std::shared_ptr<MMI::KeyEvent> KeyEvent,
-        bool isPreImeEvent) -> bool {
+    auto keyEventCallback = [weakThis = WeakClaim(this), instanceId = instanceId_](
+        std::shared_ptr<MMI::KeyEvent> keyEvent, bool isPreImeEvent) -> bool {
+        CHECK_NULL_RETURN(keyEvent, false);
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_RETURN(self, false);
         ContainerScope Scope(instanceId);
-        return WindowSceneHelper::InjectKeyEvent(KeyEvent, isPreImeEvent);
+        return WindowSceneHelper::InjectKeyEvent(keyEvent, isPreImeEvent);
     };
     session_->SetNotifySystemSessionKeyEventFunc(std::move(keyEventCallback));
 }

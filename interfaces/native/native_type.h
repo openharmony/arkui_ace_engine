@@ -1998,6 +1998,8 @@ typedef enum {
     ARKUI_ERROR_CODE_NON_SCROLLABLE_CONTAINER = 180001,
     /** The buffer is not large enough. */
     ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH = 180002,
+    /** invalid styled string */
+    ARKUI_ERROR_CODE_INVALID_STYLED_STRING = 180101,
 } ArkUI_ErrorCode;
 
 /**

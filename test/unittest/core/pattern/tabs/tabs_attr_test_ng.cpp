@@ -136,7 +136,7 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     FlushLayoutTask(frameNode_);
 
     auto dividerRenderContext = dividerNode_->GetRenderContext();
-    auto tabBarRenderContext = tabBarNode_->GetRenderContext();
+    BlurStyleOption option;
     EXPECT_EQ(dividerRenderContext->GetOpacityValue(), 0.0);
     EXPECT_EQ(layoutProperty_->GetDividerValue(), divider);
     EXPECT_EQ(tabBarPattern_->animationDuration_, -1);
@@ -144,7 +144,7 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::HORIZONTAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(-1.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(-1.f));
-    EXPECT_FALSE(tabBarRenderContext->HasFrontSaturate());
+    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyleOption().value_or(option).blurStyle, BlurStyle::NO_MATERIAL);
 
     /**
      * @tc.steps3: set valid properties
@@ -167,7 +167,7 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(60.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(60.f));
-    EXPECT_EQ(tabBarRenderContext->GetFrontSaturateValue(BAR_SATURATE), BAR_SATURATE);
+    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyleOption().value_or(option).blurStyle, BlurStyle::COMPONENT_THICK);
 }
 
 /**
@@ -729,7 +729,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModel002, TestSize.Level1)
     EXPECT_EQ(symbolNode->GetTag(), V2::SYMBOL_ETS_TAG);
 
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultColorOn = tabTheme->GetBottomTabSymbolOn();
     EXPECT_EQ(symbolProperty->GetSymbolColorListValue({})[0], defaultColorOn);
@@ -1151,7 +1151,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration003, TestSize.Level1)
     TabsModelNG model = CreateTabs();
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultDuration = tabTheme->GetTabContentAnimationDuration();
 
@@ -1507,7 +1507,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem003, TestSize.Level1)
     auto columnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode1->GetTabBarItemId());
     auto symbolNode = GetChildFrameNode(columnNode, 0);
     auto symbolProperty = symbolNode->GetLayoutProperty<TextLayoutProperty>();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultColorOff = tabTheme->GetBottomTabSymbolOff();
     EXPECT_EQ(symbolProperty->GetSymbolColorListValue({})[0], defaultColorOff);
@@ -1610,7 +1610,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem006, TestSize.Level1)
     auto columnNode1 = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode1->GetTabBarItemId());
     auto iconNode = GetChildFrameNode(columnNode, 0);
     auto iconNode1 = GetChildFrameNode(columnNode1, 0);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto tabTheme = pipeline->GetTheme<TabTheme>();
     auto defaultColorOff = tabTheme->GetBottomTabIconOff();
     auto defaultColorOn = tabTheme->GetBottomTabIconOn();

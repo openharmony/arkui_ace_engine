@@ -234,7 +234,7 @@ public:
     bool RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter = false);
     bool RemoveBubble(const RefPtr<FrameNode>& overlay);
     bool RemoveMenu(const RefPtr<FrameNode>& overlay);
-    bool RemoveDragPreview(const RefPtr<FrameNode>& overlay, bool isBackPressed = false);
+    bool RemoveDragPreview(const RefPtr<FrameNode>& overlay);
     bool RemoveModalInOverlay();
     bool RemoveAllModalInOverlay();
     bool RemoveAllModalInOverlayByStack();
@@ -512,7 +512,7 @@ public:
         const RefPtr<FrameNode>& targetNode);
     bool ShowAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
         const RectF& aiRect, const RefPtr<FrameNode>& targetNode);
-    void CloseAIEntityMenu();
+    void CloseAIEntityMenu(int32_t targetId);
 
     void MarkDirty(PropertyChangeFlag flag);
     void MarkDirtyOverlay();
@@ -571,6 +571,14 @@ public:
     {
         return gatherNodeChildrenInfo_;
     }
+    bool IsGatherWithMenu() const
+    {
+        return isGatherWithMenu_;
+    }
+    void SetIsGatherWithMenu(bool isGatherWithMenu)
+    {
+        isGatherWithMenu_ = isGatherWithMenu;
+    }
     void RemoveMenuBadgeNode(const RefPtr<FrameNode>& menuWrapperNode);
     void RemovePreviewBadgeNode();
     void CreateOverlayNode();
@@ -603,10 +611,7 @@ public:
         return isMenuShow_;
     }
 
-    void SetIsMenuShow(bool isMenuShow)
-    {
-        isMenuShow_ = isMenuShow;
-    }
+    void SetIsMenuShow(bool isMenuShow);
 
     void SetIsAttachToCustomNode(bool isAttachToCustomNode)
     {
@@ -625,7 +630,7 @@ public:
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
-        const RefPtr<FrameNode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
+        const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& shouldDismiss, std::function<void(const int32_t)>&& onWillDismiss,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
@@ -643,7 +648,7 @@ private:
         std::function<void(const float)>&& onTypeDidChange,
         std::function<void()>&& sheetSpringBack);
     void SaveSheePageNode(
-        const RefPtr<FrameNode>& sheetPageNode, const RefPtr<FrameNode>& sheetContentNode,
+        const RefPtr<FrameNode>& sheetPageNode, const RefPtr<UINode>& sheetContentNode,
         const RefPtr<FrameNode>& targetNode, bool isStartByUIContext);
     bool CheckTargetIdIsValid(int32_t targetId);
     RefPtr<FrameNode> CreateSheetMask(const RefPtr<FrameNode>& sheetPageNode,
@@ -798,6 +803,8 @@ private:
     void RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node);
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
+    void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
+    void SetDragNodeNeedClean();
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
@@ -857,11 +864,11 @@ private:
     int32_t dismissPopupId_ = 0;
 
     bool hasGatherNode_ { false };
+    bool isGatherWithMenu_ { false };
     WeakPtr<FrameNode> gatherNodeWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;
     bool isAttachToCustomNode_ = false;
-    int32_t aiEntityMenuTargetId_ = -1;
 
     // Only used when CreateModalUIExtension
     // No thread safety issue due to they are all run in UI thread

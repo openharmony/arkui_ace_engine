@@ -34,10 +34,18 @@ RefPtr<SvgDomBase> SvgImageObject::GetSVGDom() const
     return svgDomBase_;
 }
 
+std::string SvgImageObject::GetDumpInfo()
+{
+    CHECK_NULL_RETURN(svgDomBase_, "");
+    return svgDomBase_->GetDumpInfo();
+}
+
 void SvgImageObject::MakeCanvasImage(
-    const RefPtr<ImageLoadingContext>& ctx, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
+    const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& /*resizeTarget*/, bool /*forceResize*/, bool /*syncLoad*/)
 {
     CHECK_NULL_VOID(GetSVGDom());
+    auto ctx = ctxWp.Upgrade();
+    CHECK_NULL_VOID(ctx);
     // just set svgDom to canvasImage
     auto canvasImage = MakeRefPtr<SvgCanvasImage>(GetSVGDom());
     ctx->SuccessCallback(canvasImage);

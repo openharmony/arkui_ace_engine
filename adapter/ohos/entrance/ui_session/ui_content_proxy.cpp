@@ -53,6 +53,7 @@ int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
     }
     report_ = new (std::nothrow) UiReportStub();
     processId_ = IPCSkeleton::GetCallingRealPid();
+    isConnected = true;
     if (report_ == nullptr) {
         LOGW("connect failed,create reportStub failed");
         return FAILED;
@@ -280,5 +281,10 @@ int32_t UIContentServiceProxy::UnregisterWebUnfocusEventCallback()
         return REPLY_ERROR;
     }
     return NO_ERROR;
+}
+
+bool UIContentServiceProxy::IsConnect()
+{
+    return isConnected;
 }
 } // namespace OHOS::Ace

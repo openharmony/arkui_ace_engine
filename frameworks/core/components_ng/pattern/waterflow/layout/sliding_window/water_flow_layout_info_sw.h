@@ -63,7 +63,7 @@ public:
 
     bool ReachStart(float prevPos, bool firstLayout) const override;
 
-    bool ReachEnd(float prevPos) const override;
+    bool ReachEnd(float prevPos, bool firstLayout) const override;
 
     bool OutOfBounds() const override;
 
@@ -93,6 +93,7 @@ public:
     float BottomFinalPos(float viewHeight) const override;
 
     void Reset() override;
+    void ResetFooter() override;
 
     bool IsMisaligned() const override;
 
@@ -254,6 +255,8 @@ private:
      */
     bool AdjustLanes(const std::vector<WaterFlowSections::Section>& sections,
         const WaterFlowSections::Section& prevSection, int32_t start, int32_t prevSegIdx);
+
+    void ClearData();
 
     std::unique_ptr<decltype(lanes_)> savedLanes_; // temporarily store current lanes_ state in Cache Item operations.
 

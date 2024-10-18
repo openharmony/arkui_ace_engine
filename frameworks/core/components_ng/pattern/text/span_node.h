@@ -150,7 +150,7 @@ using FONT_FEATURES_LIST = std::list<std::pair<std::string, int32_t>>;
 class InspectorFilter;
 class Paragraph;
 
-enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3 };
+enum class SpanItemType { NORMAL = 0, IMAGE = 1, CustomSpan = 2, SYMBOL = 3, PLACEHOLDER = 4 };
 
 struct PlaceholderStyle {
     double width = 0.0f;
@@ -216,9 +216,10 @@ public:
     int32_t selectedStart = -1;
     int32_t selectedEnd = -1;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
-    void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
+    void UpdateSymbolSpanParagraph(
+        const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
+        const TextStyle& textStyle, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(const std::string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const TextStyle& aiSpanStyle);
@@ -234,44 +235,13 @@ public:
     virtual void EndDrag();
     virtual bool IsDragging();
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
-    TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode = false);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
-
-    // The function is only used for urlspan
-    void HandeUrlHoverEvent(bool isHover, int32_t urlId, const RefPtr<SpanItem>& spanItem) const;
-    void HandeUrlOnPressEvent(const RefPtr<SpanItem>& spanItem, bool isPress) const;
-    void HandleUrlNormalStyle(const RefPtr<SpanItem>& spanItem) const;
-    std::function<void(const std::string& address)> urlOnClick;
-    std::function<void(const std::string& address)> urlOnRelease;
-    std::function<void(const RefPtr<SpanItem>& spanItem, bool isHover, int32_t urlId)> urlOnHover;
-    std::function<void(const RefPtr<SpanItem>& spanItem, bool isPress)> urlOnPress;
-    void SetUrlAddress(const std::string& address)
+    std::function<void()> urlOnRelease;
+    void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
     {
-        address_ = address;
+        urlOnRelease = std::move(onRelease);
     }
-    std::string GetUrlAddress()
-    {
-        return address_;
-    }
-    void SetUrlOnReleaseEvent(std::function<void(const std::string& address)>&& urlOnRelease_)
-    {
-        urlOnRelease = std::move(urlOnRelease_);
-    }
-    void SetUrlOnHoverEvent(std::function<void(const RefPtr<NG::SpanItem>& spanItem,
-        bool isHover, int32_t urlId)>&& urlOnHover_)
-    {
-        urlOnHover = std::move(urlOnHover_);
-    }
-    void SetUrlOnClickEvent(std::function<void(const std::string& address)>&& urlOnClick_)
-    {
-        urlOnClick = std::move(urlOnClick_);
-    }
-    void SetUrlOnPressEvent(std::function<void(const RefPtr<NG::SpanItem>& spanItem, bool isPress)>&& urlOnPress_)
-    {
-        urlOnPress = std::move(urlOnPress_);
-    }
-
     bool Contains(int32_t index)
     {
         return rangeStart < index && index < position;
@@ -312,14 +282,6 @@ public:
     {
         return isParentText;
     }
-    bool GetHasUserFontWeight()
-    {
-        return hasUserFontWeight_;
-    }
-    void SetHasUserFontWeight(bool hasUserFontWeight)
-    {
-        hasUserFontWeight_ = hasUserFontWeight;
-    }
     std::string GetSpanContent(const std::string& rawContent, bool isMarquee = false);
     std::string GetSpanContent();
     uint32_t GetSymbolUnicode();
@@ -344,46 +306,13 @@ public:
     {
         return symbolId_;
     }
+
 private:
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
-    bool hasUserFontWeight_ = false;
     RefPtr<ResourceObject> resourceObject_;
     WeakPtr<Pattern> pattern_;
-    Dimension radius_ = 2.0_vp;
-    std::string address_;
     uint32_t symbolId_ = 0;
-};
-
-enum class PropertyInfo {
-    FONTSIZE = 0,
-    FONTCOLOR,
-    FONTSTYLE,
-    FONTWEIGHT,
-    FONTFAMILY,
-    TEXTDECORATION,
-    TEXTCASE,
-    LETTERSPACE,
-    LINEHEIGHT,
-    TEXT_ALIGN,
-    LEADING_MARGIN,
-    NONE,
-    TEXTSHADOW,
-    SYMBOL_COLOR,
-    SYMBOL_RENDERING_STRATEGY,
-    SYMBOL_EFFECT_STRATEGY,
-    WORD_BREAK,
-    LINE_BREAK_STRATEGY,
-    FONTFEATURE,
-    BASELINE_OFFSET,
-    LINESPACING,
-    SYMBOL_EFFECT_OPTIONS,
-    HALFLEADING,
-    VARIABLE_FONT_WEIGHT,
-    ENABLE_VARIABLE_FONT_WEIGHT,
-    MIN_FONT_SCALE,
-    MAX_FONT_SCALE,
-    BACKGROUNDCOLOR,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -427,14 +356,8 @@ public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId);
 
-    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId)
-    {
-        SetPropertyInfoContainer();
-    }
-    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId)
-    {
-        SetPropertyInfoContainer();
-    }
+    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
+    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId) {}
     ~SpanNode() override = default;
 
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
@@ -452,6 +375,7 @@ public:
 
     void UpdateContent(const uint32_t& unicode)
     {
+        spanItem_->spanItemType = SpanItemType::SYMBOL;
         if (spanItem_->unicode == unicode) {
             return;
         }
@@ -486,17 +410,6 @@ public:
     void UpdateColorByResourceId()
     {
         spanItem_->fontStyle->UpdateColorByResourceId();
-    }
-
-    bool GetHasUserFontWeight()
-    {
-        return hasUserFontWeight_;
-    }
-
-    void UpdateUserFontWeight(bool hasUserFontWeight)
-    {
-        hasUserFontWeight_ = hasUserFontWeight;
-        spanItem_->SetHasUserFontWeight(hasUserFontWeight);
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
@@ -554,24 +467,12 @@ public:
         RequestTextFlushDirty();
     }
 
-    void AddPropertyInfo(PropertyInfo value)
-    {
-        propertyInfoContainer_.erase(value);
-    }
-
-    void CleanPropertyInfo()
-    {
-        propertyInfoContainer_.clear();
-    }
-
     void SetPropertyInfoContainer();
 
     void MarkTextDirty() override
     {
         RequestTextFlushDirty();
     }
-
-    std::set<PropertyInfo> GetInheritPropertyInfo();
 
     void UpdateSpanTextColor(Color color)
     {
@@ -582,6 +483,8 @@ public:
             return;
         }
         spanItem_->fontStyle->UpdateTextColor(color);
+        auto parent = GetParent();
+        CHECK_NULL_VOID(parent);
         if (!spanItem_->UpdateSpanTextColor(color)) {
             RequestTextFlushDirty();
         }
@@ -594,8 +497,6 @@ protected:
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
-    std::set<PropertyInfo> propertyInfoContainer_;
-    bool hasUserFontWeight_ = false;
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
 
     ACE_DISALLOW_COPY_AND_MOVE(SpanNode);
@@ -608,11 +509,14 @@ public:
     int32_t placeholderSpanNodeId = -1;
     TextStyle textStyle;
     PlaceholderRun run_;
-    PlaceholderSpanItem() = default;
+    PlaceholderSpanItem()
+    {
+        this->spanItemType = SpanItemType::PLACEHOLDER;
+    }
     ~PlaceholderSpanItem() override = default;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
+        const TextStyle& textStyle, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
         bool isMarquee = false) override;
 
     void DumpInfo() const
@@ -643,6 +547,7 @@ public:
     {
         return customNode_;
     }
+
 private:
     RefPtr<UINode> customNode_;
 };
@@ -729,15 +634,13 @@ class ACE_EXPORT CustomSpanNode : public FrameNode {
 public:
     static RefPtr<CustomSpanNode> CreateFrameNode(int32_t nodeId)
     {
-        auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(
-            V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
+        auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
         customSpanNode->InitializePatternAndContext();
         ElementRegister::GetInstance()->AddUINode(customSpanNode);
         return customSpanNode;
     }
 
-    static RefPtr<CustomSpanNode> GetOrCreateSpanNode(
-        const std::string& tag, int32_t nodeId)
+    static RefPtr<CustomSpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId)
     {
         auto frameNode = GetFrameNode(tag, nodeId);
         CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<CustomSpanNode>(frameNode));
@@ -747,8 +650,7 @@ public:
         return customSpanNode;
     }
 
-    CustomSpanNode(const std::string& tag, int32_t nodeId) :
-        FrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>()) {}
+    CustomSpanNode(const std::string& tag, int32_t nodeId) : FrameNode(tag, nodeId, AceType::MakeRefPtr<Pattern>()) {}
     ~CustomSpanNode() override = default;
 
     const RefPtr<CustomSpanItem>& GetSpanItem() const
@@ -784,7 +686,7 @@ public:
     }
     ~ImageSpanItem() override = default;
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
-        bool isSpanStringMode = false, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
+        const TextStyle& textStyle, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
         bool isMarquee = false) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     void UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode);

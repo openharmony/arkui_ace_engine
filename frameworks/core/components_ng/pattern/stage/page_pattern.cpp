@@ -221,9 +221,7 @@ void PagePattern::OnShow()
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->SetJSViewActive(true);
+    UpdatePageParam();
     isOnShow_ = true;
 #if defined(ENABLE_SPLIT_MODE)
     if (needFireObserver_) {
@@ -272,6 +270,7 @@ void PagePattern::OnHide()
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);
     isOnShow_ = false;
+    host->SetAccessibilityVisible(false);
 #if defined(ENABLE_SPLIT_MODE)
     if (needFireObserver_) {
         state_ = RouterPageState::ON_PAGE_HIDE;
@@ -440,9 +439,23 @@ void PagePattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(pipeline);
     // SafeArea already applied to AppBar (AtomicServicePattern)
     if (pipeline->GetInstallationFree()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        ACE_SCOPED_TRACE("[%s][self:%d] SafeArea already applied to AppBar", host->GetTag().c_str(), host->GetId());
         return;
     }
     ContentRootPattern::BeforeCreateLayoutWrapper();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto&& insets = host->GetLayoutProperty()->GetSafeAreaInsets();
+    CHECK_NULL_VOID(insets);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    ACE_SCOPED_TRACE("[%s][self:%d] safeAreaInsets: AvoidKeyboard %d, AvoidTop %d, AvoidCutout "
+                     "%d, AvoidBottom %d insets %s isIgnore: %d, isNeedAvoidWindow %d, "
+                     "isFullScreen %d",
+        host->GetTag().c_str(), host->GetId(), AvoidKeyboard(), AvoidTop(), AvoidCutout(), AvoidBottom(),
+        insets->ToString().c_str(), manager->IsIgnoreAsfeArea(), manager->IsNeedAvoidWindow(), manager->IsFullScreen());
 }
 
 bool PagePattern::AvoidKeyboard() const

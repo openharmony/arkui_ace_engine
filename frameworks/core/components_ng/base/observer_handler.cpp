@@ -293,7 +293,7 @@ void UIObserverHandler::SetLayoutDoneHandleFunc(LayoutDoneHandleFunc func)
     layoutDoneHandleFunc_ = func;
 }
 
-void UIObserverHandler::SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandleFunc func)
+void UIObserverHandler::SetHandleNavDestinationSwitchFunc(const NavDestinationSwitchHandleFunc& func)
 {
     navDestinationSwitchHandleFunc_ = func;
 }

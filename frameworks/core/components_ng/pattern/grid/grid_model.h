@@ -49,7 +49,7 @@ public:
     virtual void SetScrollBarMode(DisplayMode value) = 0;
     virtual void SetScrollBarColor(const std::string& value) = 0;
     virtual void SetScrollBarWidth(const std::string& value) = 0;
-    virtual void SetCachedCount(int32_t value) = 0;
+    virtual void SetCachedCount(int32_t value, bool show = false) = 0;
     virtual void SetIsRTL(TextDirection direction) = 0;
     virtual void SetLayoutDirection(FlexDirection value) = 0;
     virtual void SetMaxCount(int32_t value) = 0;

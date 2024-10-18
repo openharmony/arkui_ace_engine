@@ -15,8 +15,10 @@
 
 #include "core/components/common/properties/color.h"
 
+#include <cstdlib>
 #include <regex>
 
+#include "base/utils/utils.h"
 #include "core/common/resource/resource_manager.h"
 
 namespace OHOS::Ace {
@@ -91,7 +93,15 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha, Color defaultC
             newColorStr += c;
             newColorStr += c;
         }
-        auto value = stoul(newColorStr, nullptr, COLOR_STRING_BASE);
+    char* end = nullptr;
+        unsigned long int value = strtoul(newColorStr.c_str(), &end, COLOR_STRING_BASE);
+        if (errno == ERANGE) {
+            LOGF("%{public}s is out of range.", newColorStr.c_str());
+            abort();
+        }
+        if (value == 0 && end == newColorStr.c_str()) {
+            LOGW("input %{public}s can not be converted to number, use default color：0x00000000.", newColorStr.c_str());
+        }
         if (newColorStr.length() < COLOR_STRING_SIZE_STANDARD) {
             // no alpha specified, set alpha to 0xff
             value |= maskAlpha;
@@ -441,7 +451,15 @@ bool Color::MatchColorWithMagic(std::string& colorStr, uint32_t maskAlpha, Color
         return false;
     }
     colorStr.erase(0, 1);
-    auto value = stoul(colorStr, nullptr, COLOR_STRING_BASE);
+    char* end = nullptr;
+    unsigned long int value = strtoul(colorStr.c_str(), &end, COLOR_STRING_BASE);
+    if (errno == ERANGE) {
+        LOGF("%{public}s is out of range.", colorStr.c_str());
+        abort();
+    }
+    if (value == 0 && end == colorStr.c_str()) {
+        LOGW("input %{public}s can not be converted to number, use default color：0x00000000.", colorStr.c_str());
+    }
     if (colorStr.length() < COLOR_STRING_SIZE_STANDARD) {
         // no alpha specified, set alpha to 0xff
         value |= maskAlpha;
@@ -465,13 +483,37 @@ bool Color::MatchColorWithMagicMini(std::string& colorStr, uint32_t maskAlpha, C
         newColorStr += c;
         newColorStr += c;
     }
-    auto value = stoul(newColorStr, nullptr, COLOR_STRING_BASE);
+    char* end = nullptr;
+    unsigned long int value = strtoul(newColorStr.c_str(), &end, COLOR_STRING_BASE);
+    if (errno == ERANGE) {
+        LOGF("%{public}s is out of range.", newColorStr.c_str());
+        abort();
+    }
+    if (value == 0 && end == newColorStr.c_str()) {
+        LOGW("input %{public}s can not be converted to number, use default color：0x00000000.", newColorStr.c_str());
+    }
+    
     if (newColorStr.length() < COLOR_STRING_SIZE_STANDARD) {
         // no alpha specified, set alpha to 0xff
         value |= maskAlpha;
     }
     color = Color(value);
     return true;
+}
+
+bool Color::MatchColorHexString(const std::string& colorStr)
+{
+    if (colorStr.empty()) {
+        return false;
+    }
+    std::smatch matches;
+    if (std::regex_match(colorStr, matches, COLOR_WITH_MAGIC) ||
+        std::regex_match(colorStr, matches, COLOR_WITH_RGBA) ||
+        std::regex_match(colorStr, matches, COLOR_WITH_RGB) ||
+        std::regex_match(colorStr, matches, COLOR_WITH_MAGIC_MINI)) {
+        return true;
+    }
+    return false;
 }
 
 bool Color::MatchColorWithRGB(const std::string& colorStr, Color& color)

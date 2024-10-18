@@ -204,7 +204,7 @@ INTERACTION_APP_JANK:
 NON_MANUAL_POSTCARD_ACTION:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: performance, desc: non manual postcard action}
   FORM_NAME: {type: STRING, desc: form name}
-  BUNDLE_NAME: {type: STRING, desc: package name}
+  BUNDLE_NAME: {type: STRING, desc: bundle name}
   ABILITY_NAME: {type: STRING, desc: ability name}
-  MODULE_NAME: {type: STRING, desc: package name}
+  MODULE_NAME: {type: STRING, desc: module name}
   DIMENSION: {type: INT32, desc: dimension}

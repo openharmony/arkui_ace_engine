@@ -154,6 +154,8 @@ public:
     static void JsForegroundEffect(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);
+    static bool InitPixStretchEffect(
+        CalcDimension& left, CalcDimension& right, CalcDimension& top, CalcDimension bottom);
     static void JsLightUpEffect(const JSCallbackInfo& info);
     static void JsBackground(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
@@ -335,7 +337,7 @@ public:
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
-    static void ParseShadowOffsetX(const JSRef<JSObject>& jsObj, CalcDimension& offsetX, Shadow& shadow);
+    static void ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& shadow);
     static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseDataDetectorConfig(const JSCallbackInfo& info, TextDetectConfig& textDetectConfig);
@@ -383,6 +385,7 @@ public:
     static void JsRadialGradient(const JSCallbackInfo& info);
     static void JsSweepGradient(const JSCallbackInfo& info);
     static void NewJsLinearGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
+    static void SetGradientDirection(NG::Gradient& newGradient, const GradientDirection& direction);
     static void NewJsRadialGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void NewJsSweepGradient(const JSCallbackInfo& info, NG::Gradient& gradient);
     static void ParseSweepGradientPartly(const JSRef<JSObject>& obj, NG::Gradient& newGradient);
@@ -433,6 +436,8 @@ public:
     static void JsAccessibilityDescription(const JSCallbackInfo& info);
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
+    static void JsAccessibilitySelected(const JSCallbackInfo& info);
+    static void JsAccessibilityChecked(const JSCallbackInfo& info);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
@@ -634,6 +639,10 @@ public:
 
 private:
     static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result);
+    static bool ParseResourceToDoubleByName(
+        const JSRef<JSObject>& jsObj, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
+    static bool ParseResourceToDoubleById(
+        int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
 
     static void ParseOnCreateMenu(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback);

@@ -530,8 +530,9 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
         IndexerPressOutAnimation();
     }
     ResetStatus();
-    ApplyIndexChanged(true, true, true);
-    OnSelect();
+    ApplyIndexChanged(true, false, true);
+    ItemSelectedChangedAnimation();
+    StartDelayTask();
 }
 
 void IndexerPattern::MoveIndexByOffset(const Offset& offset)
@@ -586,22 +587,25 @@ int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
 
 bool IndexerPattern::KeyIndexByStep(int32_t step)
 {
-    auto nextSected = GetSkipChildIndex(step);
-    if (childFocusIndex_ == nextSected || nextSected == -1) {
+    auto nextSelected = GetSkipChildIndex(step);
+    if (nextSelected == -1) {
+        OnKeyEventDisappear();
+        return false;
+    } else if (childFocusIndex_ == nextSelected) {
         return false;
     }
-    childFocusIndex_ = nextSected;
-    auto refreshBubble = nextSected >= 0 && nextSected < itemCount_;
+    childFocusIndex_ = nextSelected;
+    auto refreshBubble = nextSelected >= 0 && nextSelected < itemCount_;
     if (refreshBubble) {
-        selected_ = nextSected;
+        selected_ = nextSelected;
         selectedChangedForHaptic_ = lastSelected_ != selected_;
-        lastSelected_ = nextSected;
+        lastSelected_ = nextSelected;
     }
     childPressIndex_ = -1;
     childHoverIndex_ = -1;
     ApplyIndexChanged(true, refreshBubble);
     OnSelect();
-    return nextSected >= 0;
+    return nextSelected >= 0;
 }
 
 int32_t IndexerPattern::GetSkipChildIndex(int32_t step)
@@ -615,15 +619,15 @@ int32_t IndexerPattern::GetSkipChildIndex(int32_t step)
 
 bool IndexerPattern::MoveIndexByStep(int32_t step)
 {
-    auto nextSected = GetSkipChildIndex(step);
-    if (selected_ == nextSected || nextSected == -1) {
+    auto nextSelected = GetSkipChildIndex(step);
+    if (selected_ == nextSelected || nextSelected == -1) {
         return false;
     }
-    selected_ = nextSected;
+    selected_ = nextSelected;
     ResetStatus();
     ApplyIndexChanged(true, true);
     OnSelect();
-    return nextSected >= 0;
+    return nextSelected >= 0;
 }
 
 bool IndexerPattern::MoveIndexBySearch(const std::string& searchStr)
@@ -683,9 +687,14 @@ void IndexerPattern::ResetStatus()
 
 void IndexerPattern::OnSelect()
 {
+    FireOnSelect(selected_, false);
+    ItemSelectedChangedAnimation();
+}
+
+void IndexerPattern::ItemSelectedChangedAnimation()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    FireOnSelect(selected_, false);
     animateSelected_ = selected_;
     if (animateSelected_ >= 0) {
         auto selectedFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(animateSelected_));
@@ -713,23 +722,6 @@ void IndexerPattern::ApplyIndexChanged(
     }
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-    CHECK_NULL_VOID(indexerTheme);
-#ifndef ACE_UNITTEST
-    auto fontManager = pipeline->GetFontManager();
-    CHECK_NULL_VOID(fontManager);
-    const std::vector<std::string> customFonts = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
-#else
-    const std::vector<std::string> customFonts;
-#endif
-    int32_t index = 0;
-    auto total = host->GetTotalChildCount();
-    auto childrenNode = host->GetChildren();
-    if (layoutProperty->GetIsPopupValue(false)) {
-        total -= 1;
-    }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto indexerRenderContext = host->GetRenderContext();
         CHECK_NULL_VOID(indexerRenderContext);
@@ -741,128 +733,180 @@ void IndexerPattern::ApplyIndexChanged(
             indexerRenderContext->UpdateBorderRadius({ indexerRadius, indexerRadius, indexerRadius, indexerRadius });
         }
     }
-    for (int32_t i = 0; i < total; i++) {
-        auto childNode = host->GetChildByIndex(i)->GetHostNode();
-        UpdateChildBoundary(childNode);
-        auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
-        auto childRenderContext = childNode->GetRenderContext();
-        childRenderContext->SetClipToBounds(true);
-        auto nodeStr = autoCollapse_ && arrayValue_[index].second ?
-            StringUtils::Str16ToStr8(INDEXER_STR_DOT) : arrayValue_[index].first;
-        nodeLayoutProperty->UpdateContent(nodeStr);
-        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        nodeLayoutProperty->UpdateMinFontScale(1.0f);
-        nodeLayoutProperty->UpdateMaxFontScale(1.0f);
-        nodeLayoutProperty->UpdateMaxLines(1);
-        if (index == childHoverIndex_ || index == childPressIndex_) {
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                auto radiusSize = paintProperty->GetItemBorderRadius().has_value()
-                                        ? paintProperty->GetItemBorderRadiusValue()
-                                        : Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
-                childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
-                childRenderContext->UpdateBackgroundColor(index == childHoverIndex_
-                                                            ? indexerTheme->GetHoverBgAreaColor()
-                                                            : indexerTheme->GetPressedBgAreaColor());
-            } else {
-                auto radiusSize = indexerTheme->GetHoverRadiusSize();
-                childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
-                childRenderContext->UpdateBackgroundColor(indexerTheme->GetHoverBgAreaColor());
-            }
-        } else if (index == childFocusIndex_ || index == selected_) {
-            if (index == childFocusIndex_) {
-                auto borderWidth = indexerTheme->GetFocusBgOutlineSize();
-                nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
-                auto borderColor = indexerTheme->GetFocusBgOutlineColor();
-                childRenderContext->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor });
-                childRenderContext->UpdateBackgroundColor(
-                    paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
-            } else {
-                Dimension borderWidth;
-                nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
-                if (!fromTouchUp || animateSelected_ == lastSelected_) {
-                    childRenderContext->UpdateBackgroundColor(paintProperty->GetSelectedBackgroundColor().value_or(
-                        indexerTheme->GetSeclectedBackgroundColor()));
-                }
-                childRenderContext->ResetBlendBorderColor();
-            }
-            nodeLayoutProperty->UpdateTextColor(
-                layoutProperty->GetSelectedColor().value_or(indexerTheme->GetSelectedTextColor()));
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                auto radius = paintProperty->GetItemBorderRadius().has_value()
-                                    ? paintProperty->GetItemBorderRadiusValue()
-                                    : Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
-                childRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
-            } else {
-                auto radius = indexerTheme->GetHoverRadiusSize();
-                childRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
-            }
-            auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
-            if ((!layoutProperty->GetSelectedFont().has_value() ||
-                    layoutProperty->GetSelectedFont().value().GetFontFamilies().empty()) &&
-                !customFonts.empty()) {
-                selectedFont.SetFontFamilies(customFonts);
-            }
-            nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
-            auto fontWeight = selectedFont.GetFontWeight();
-            nodeLayoutProperty->UpdateFontWeight(fontWeight);
-            nodeLayoutProperty->UpdateFontFamily(selectedFont.GetFontFamilies());
-            nodeLayoutProperty->UpdateItalicFontStyle(selectedFont.GetFontStyle());
-            childNode->MarkModifyDone();
-            if (isTextNodeInTree) {
-                childNode->MarkDirtyNode();
-            }
-            index++;
-            if (selectChanged) {
-                AccessibilityEventType type = AccessibilityEventType::SELECTED;
-                host->OnAccessibilityEvent(type);
-                auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-                CHECK_NULL_VOID(textAccessibilityProperty);
-                textAccessibilityProperty->SetSelected(true);
-            }
-            continue;
-        } else {
-            if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
-                childRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            }
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-                auto radiusDefaultSize = Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
-                childRenderContext->UpdateBorderRadius({ radiusDefaultSize, radiusDefaultSize,
-                    radiusDefaultSize, radiusDefaultSize });
-            } else {
-                Dimension radiusZeroSize;
-                childRenderContext->UpdateBorderRadius(
-                    { radiusZeroSize, radiusZeroSize, radiusZeroSize, radiusZeroSize });
-            }
-        }
-        Dimension borderWidth;
-        nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
-        childRenderContext->ResetBlendBorderColor();
-        auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
-        if ((!layoutProperty->GetFont().has_value() || layoutProperty->GetFont().value().GetFontFamilies().empty()) &&
-            !customFonts.empty()) {
-            defaultFont.SetFontFamilies(customFonts);
-        }
-        nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
-        nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
-        nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
-        nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
-        nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
-        index++;
-        auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-        if (textAccessibilityProperty) textAccessibilityProperty->SetSelected(false);
-        childNode->MarkModifyDone();
-        if (isTextNodeInTree) childNode->MarkDirtyNode();
+    UpdateChildTextStyle(layoutProperty, paintProperty, isTextNodeInTree, fromTouchUp);
+
+    if (fromTouchUp) {
+        AccessibilityEventType type = AccessibilityEventType::SELECTED;
+        host->OnAccessibilityEvent(type);
     }
     if (selectChanged) {
-        ShowBubble(fromTouchUp);
+        host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
         if (enableHapticFeedback_ && selectedChangedForHaptic_ && !fromTouchUp) {
             VibratorUtils::StartVibraFeedback();
         }
+        ShowBubble();
     }
 }
 
-void IndexerPattern::ShowBubble(bool fromTouchUp)
+void IndexerPattern::UpdateChildTextStyle(RefPtr<IndexerLayoutProperty>& layoutProperty,
+    RefPtr<IndexerPaintProperty>& paintProperty, bool isTextNodeInTree, bool fromTouchUp)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    TextStyle unselectedFontStyle, selectedFontStyle;
+    UpdateFontStyle(layoutProperty, indexerTheme, unselectedFontStyle, selectedFontStyle);
+    Color unselectedTextColor = layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor());
+    auto total = host->GetTotalChildCount();
+    if (layoutProperty->GetIsPopupValue(false)) total -= 1;
+    for (int32_t index = 0; index < total; index++) {
+        auto childNode = host->GetChildByIndex(index)->GetHostNode();
+        CHECK_NULL_VOID(childNode);
+        UpdateChildBoundary(childNode);
+        auto textRenderContext = childNode->GetRenderContext();
+        CHECK_NULL_VOID(textRenderContext);
+        textRenderContext->SetClipToBounds(true);
+        Color textColor = unselectedTextColor;
+        TextStyle fontStyle = unselectedFontStyle;
+        Dimension borderWidth;
+        if (index == childHoverIndex_ || index == childPressIndex_) {
+            UpdateHoverAndPressStyle(paintProperty, textRenderContext, indexerTheme, index);
+        } else if (index == childFocusIndex_ || index == selected_) {
+            if (index == childFocusIndex_) borderWidth = indexerTheme->GetFocusBgOutlineSize();
+            textColor = layoutProperty->GetSelectedColor().value_or(indexerTheme->GetSelectedTextColor());
+            fontStyle = selectedFontStyle;
+            UpdateFocusAndSelectedStyle(paintProperty, textRenderContext, indexerTheme, index, fromTouchUp);
+        } else {
+            UpdateNormalStyle(textRenderContext, index, fromTouchUp);
+        }
+
+        UpdateTextLayoutProperty(childNode, index, borderWidth, fontStyle, textColor);
+        childNode->MarkModifyDone();
+        if (isTextNodeInTree) childNode->MarkDirtyNode();
+        auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+        if (textAccessibilityProperty) textAccessibilityProperty->SetSelected(index == selected_);
+    }
+}
+
+void IndexerPattern::UpdateFontStyle(RefPtr<IndexerLayoutProperty>& layoutProperty, RefPtr<IndexerTheme>& indexerTheme,
+    TextStyle& unselectedFontStyle, TextStyle& selectedFontStyle)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(indexerTheme);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+#ifndef ACE_UNITTEST
+    auto fontManager = pipelineContext->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    const std::vector<std::string> customFonts = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
+#else
+    const std::vector<std::string> customFonts;
+#endif
+    unselectedFontStyle = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
+    if ((!layoutProperty->GetFont().has_value() || layoutProperty->GetFont().value().GetFontFamilies().empty()) &&
+        !customFonts.empty()) {
+        unselectedFontStyle.SetFontFamilies(customFonts);
+    }
+    selectedFontStyle = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
+    if ((!layoutProperty->GetSelectedFont().has_value() ||
+            layoutProperty->GetSelectedFont().value().GetFontFamilies().empty()) &&
+        !customFonts.empty()) {
+        selectedFontStyle.SetFontFamilies(customFonts);
+    }
+}
+
+void IndexerPattern::UpdateHoverAndPressStyle(RefPtr<IndexerPaintProperty>& paintProperty,
+    RefPtr<RenderContext>& textRenderContext, RefPtr<IndexerTheme>& indexerTheme, int32_t index) const
+{
+    CHECK_NULL_VOID(textRenderContext);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        CHECK_NULL_VOID(paintProperty);
+        auto radiusSize = paintProperty->GetItemBorderRadius().has_value()
+                              ? paintProperty->GetItemBorderRadiusValue()
+                              : Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
+        textRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
+        textRenderContext->UpdateBackgroundColor(
+            index == childHoverIndex_ ? indexerTheme->GetHoverBgAreaColor() : indexerTheme->GetPressedBgAreaColor());
+    } else {
+        CHECK_NULL_VOID(indexerTheme);
+        auto radiusSize = indexerTheme->GetHoverRadiusSize();
+        textRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
+        textRenderContext->UpdateBackgroundColor(indexerTheme->GetHoverBgAreaColor());
+    }
+}
+
+void IndexerPattern::UpdateFocusAndSelectedStyle(RefPtr<IndexerPaintProperty>& paintProperty,
+    RefPtr<RenderContext>& textRenderContext, RefPtr<IndexerTheme>& indexerTheme, int32_t index, bool fromTouchUp) const
+{
+    CHECK_NULL_VOID(textRenderContext);
+    CHECK_NULL_VOID(paintProperty);
+    CHECK_NULL_VOID(indexerTheme);
+    if (index == childFocusIndex_) {
+        auto borderColor = indexerTheme->GetFocusBgOutlineColor();
+        textRenderContext->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor });
+        textRenderContext->UpdateBackgroundColor(
+            paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColor()));
+    } else if (!fromTouchUp || animateSelected_ == lastSelected_) {
+        textRenderContext->UpdateBackgroundColor(paintProperty->GetSelectedBackgroundColor().value_or(
+            indexerTheme->GetSelectedBackgroundColor()));
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto radius = paintProperty->GetItemBorderRadius().has_value()
+                            ? paintProperty->GetItemBorderRadiusValue()
+                            : Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
+        textRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
+    } else {
+        auto radius = indexerTheme->GetHoverRadiusSize();
+        textRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
+    }
+}
+
+void IndexerPattern::UpdateNormalStyle(RefPtr<RenderContext>& textRenderContext, int32_t index, bool fromTouchUp) const
+{
+    CHECK_NULL_VOID(textRenderContext);
+    if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
+        textRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        auto radiusDefaultSize = Dimension(INDEXER_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
+        textRenderContext->UpdateBorderRadius({ radiusDefaultSize, radiusDefaultSize,
+            radiusDefaultSize, radiusDefaultSize });
+    } else {
+        Dimension radiusZeroSize;
+        textRenderContext->UpdateBorderRadius(
+            { radiusZeroSize, radiusZeroSize, radiusZeroSize, radiusZeroSize });
+    }
+}
+
+void IndexerPattern::UpdateTextLayoutProperty(
+    RefPtr<FrameNode>& textNode, int32_t index, Dimension& borderWidth, TextStyle& fontStyle, Color& textColor) const
+{
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto nodeStr = autoCollapse_ && arrayValue_[index].second ?
+            StringUtils::Str16ToStr8(INDEXER_STR_DOT) : arrayValue_[index].first;
+    textLayoutProperty->UpdateContent(nodeStr);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    textLayoutProperty->UpdateMinFontScale(1.0f);
+    textLayoutProperty->UpdateMaxFontScale(1.0f);
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateBorderWidth({borderWidth, borderWidth, borderWidth, borderWidth});
+    textLayoutProperty->UpdateFontSize(fontStyle.GetFontSize());
+    textLayoutProperty->UpdateFontFamily(fontStyle.GetFontFamilies());
+    textLayoutProperty->UpdateFontWeight(fontStyle.GetFontWeight());
+    textLayoutProperty->UpdateItalicFontStyle(fontStyle.GetFontStyle());
+    textLayoutProperty->UpdateTextColor(textColor);
+}
+
+void IndexerPattern::ShowBubble()
 {
     if (!NeedShowBubble() || itemCount_ < 1) {
         return;
@@ -882,11 +926,12 @@ void IndexerPattern::ShowBubble(bool fromTouchUp)
         popupNode_->MountToParent(host);
         layoutProperty->UpdateIsPopup(true);
     }
-    UpdateBubbleView();
+    std::vector<std::string> currentListData = std::vector<std::string>();
+    UpdateBubbleList(currentListData);
+    UpdateBubbleView(currentListData);
+    UpdateBubbleSize(currentListData);
     delayTask_.Cancel();
-    if (!fromTouchUp) {
-        StartBubbleAppearAnimation();
-    }
+    StartBubbleAppearAnimation();
     if (!isTouch_) {
         StartDelayTask(INDEXER_BUBBLE_ENTER_DURATION + INDEXER_BUBBLE_WAIT_DURATION);
     }
@@ -919,27 +964,34 @@ RefPtr<FrameNode> IndexerPattern::CreatePopupNode()
     return columnNode;
 }
 
-void IndexerPattern::UpdateBubbleView()
+void IndexerPattern::UpdateBubbleList(std::vector<std::string>& currentListData)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    CHECK_NULL_VOID(indexerEventHub);
+    auto popListData = indexerEventHub->GetOnRequestPopupData();
+    CHECK_NULL_VOID(popListData);
+    auto actualIndex =
+        autoCollapse_ && selected_ > 0 && selected_ < itemCount_
+            ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(selected_).first) -
+                  fullArrayValue_.begin()
+            : selected_;
+    auto actualChildIndex =
+        autoCollapse_ && childPressIndex_ > 0 && childPressIndex_ < itemCount_
+            ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(childPressIndex_).first) -
+                  fullArrayValue_.begin()
+            : childPressIndex_;
+    currentListData = popListData(actualChildIndex >= 0 ? actualChildIndex : actualIndex);
+}
+
+void IndexerPattern::UpdateBubbleView(std::vector<std::string>& currentListData)
 {
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto columnLayoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(columnLayoutProperty);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
-    auto popListData = indexerEventHub->GetOnRequestPopupData();
-    auto actualIndex =
-        autoCollapse_ && selected_ > 0
-            ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(selected_).first) -
-                  fullArrayValue_.begin()
-            : selected_;
-    auto actualChildIndex =
-        autoCollapse_ && childPressIndex_ > 0
-            ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(childPressIndex_).first) -
-                  fullArrayValue_.begin()
-            : childPressIndex_;
-    auto currentListData =
-        popListData ? popListData(actualChildIndex >= 0 ? actualChildIndex : actualIndex) : std::vector<std::string>();
     UpdateBubbleListView(currentListData);
     UpdateBubbleLetterView(!currentListData.empty(), currentListData);
     auto columnRenderContext = popupNode_->GetRenderContext();
@@ -989,9 +1041,9 @@ void IndexerPattern::UpdateBubbleBackgroundView()
         CHECK_NULL_VOID(host);
         auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
         BlurStyleOption styleOption;
         if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
             styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();
@@ -1006,29 +1058,14 @@ void IndexerPattern::UpdateBubbleBackgroundView()
     }
 }
 
-void IndexerPattern::UpdateBubbleSize()
+void IndexerPattern::UpdateBubbleSize(std::vector<std::string>& currentListData)
 {
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto columnLayoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(columnLayoutProperty);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
-    auto popListData = indexerEventHub->GetOnRequestPopupData();
-    auto actualIndex =
-        autoCollapse_ && selected_ > 0
-            ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(selected_).first) -
-                  fullArrayValue_.begin()
-            : selected_;
-    auto actualChildIndex =
-        autoCollapse_ && childPressIndex_ > 0
-            ? std::find(fullArrayValue_.begin(), fullArrayValue_.end(), arrayValue_.at(childPressIndex_).first) -
-                  fullArrayValue_.begin()
-            : childPressIndex_;
-    auto currentListData =
-        popListData ? popListData(actualChildIndex >= 0 ? actualChildIndex : actualIndex) : std::vector<std::string>();
     auto popupSize = autoCollapse_ ? currentListData.size() + 1 : currentListData.size();
-
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     auto columnCalcOffset = autoCollapse_ ? 0 : 1;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -1063,9 +1100,9 @@ void IndexerPattern::UpdateBubbleLetterView(bool showDivider, std::vector<std::s
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -1114,11 +1151,11 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     CHECK_NULL_VOID(popupNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    auto fontManager = pipeline->GetFontManager();
+    auto fontManager = pipelineContext->GetFontManager();
     CHECK_NULL_VOID(fontManager);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1183,9 +1220,9 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     }
     auto listNode = DynamicCast<FrameNode>(popupNode_->GetLastChild()->GetFirstChild());
     CHECK_NULL_VOID(listNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     auto listPattern = DynamicCast<ListPattern>(listNode->GetPattern());
     listPattern->SetNeedLinked(false);
@@ -1510,9 +1547,9 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     popupClickedIndex_ = clickIndex;
     auto host = GetHost();
     CHECK_NULL_VOID(popupNode_);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
@@ -1672,11 +1709,11 @@ bool IndexerPattern::OnKeyEvent(const KeyEvent& event)
     if (!event.IsCombinationKey() && (event.IsLetterKey() || event.IsNumberKey())) {
         return MoveIndexBySearch(event.ConvertCodeToString());
     }
-    OnKeyEventDisapear();
+    OnKeyEventDisappear();
     return false;
 }
 
-void IndexerPattern::OnKeyEventDisapear()
+void IndexerPattern::OnKeyEventDisappear()
 {
     ResetStatus();
     ApplyIndexChanged(true, false);
@@ -1685,43 +1722,38 @@ void IndexerPattern::OnKeyEventDisapear()
 void IndexerPattern::ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode)
 {
     CHECK_NULL_VOID(itemNode);
-    auto rendercontext = itemNode->GetRenderContext();
-    CHECK_NULL_VOID(rendercontext);
+    auto renderContext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    Color selectedBackgroundColor =
+        paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColor());
     AnimationOption option;
     option.SetDuration(INDEXER_SELECT_DURATION);
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(option, [rendercontext, id = Container::CurrentId(), weak = WeakClaim(this)]() {
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), selectedBackgroundColor]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        rendercontext->UpdateBackgroundColor(
-            paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
+        renderContext->UpdateBackgroundColor(selectedBackgroundColor);
     });
 }
 
 void IndexerPattern::ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode)
 {
     CHECK_NULL_VOID(itemNode);
-    auto rendercontext = itemNode->GetRenderContext();
-    CHECK_NULL_VOID(rendercontext);
+    auto renderContext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     AnimationOption option;
     option.SetDuration(INDEXER_SELECT_DURATION);
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(option, [rendercontext, id = Container::CurrentId()]() {
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
-        rendercontext->UpdateBackgroundColor(Color::TRANSPARENT);
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     });
 }
 
@@ -1731,17 +1763,17 @@ void IndexerPattern::IndexerHoverInAnimation()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color slipHoverBackgroundColor = indexerTheme->GetSlipHoverBackgroundColor();
     AnimationOption option;
     option.SetDuration(INDEXER_HOVER_IN_DURATION);
     option.SetCurve(Curves::FRICTION);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), slipHoverBackgroundColor]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
-        renderContext->UpdateBackgroundColor(
-            indexerTheme->GetSlipHoverBackgroundColor());
+        renderContext->UpdateBackgroundColor(slipHoverBackgroundColor);
     });
 }
 
@@ -1756,10 +1788,6 @@ void IndexerPattern::IndexerHoverOutAnimation()
     option.SetCurve(Curves::FRICTION);
     AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     });
 }
@@ -1770,18 +1798,19 @@ void IndexerPattern::IndexerPressInAnimation()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color backgroundColor = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+                                ? indexerTheme->GetSlipPressedBackgroundColor()
+                                : indexerTheme->GetSlipHoverBackgroundColor();
     AnimationOption option;
     option.SetDuration(INDEXER_PRESS_IN_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), backgroundColor]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
-        renderContext->UpdateBackgroundColor(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-                                                 ? indexerTheme->GetSlipPressedBackgroundColor()
-                                                 : indexerTheme->GetSlipHoverBackgroundColor());
+        renderContext->UpdateBackgroundColor(backgroundColor);
     });
 }
 
@@ -1791,18 +1820,19 @@ void IndexerPattern::IndexerPressOutAnimation()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    Color backgroundColor = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+                                ? indexerTheme->GetSlipPressedBackgroundColor()
+                                : indexerTheme->GetSlipHoverBackgroundColor();
     AnimationOption option;
     option.SetDuration(INDEXER_PRESS_OUT_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId(), backgroundColor]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-        CHECK_NULL_VOID(indexerTheme);
-        renderContext->UpdateBackgroundColor(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-                                                 ? indexerTheme->GetSlipPressedBackgroundColor()
-                                                 : indexerTheme->GetSlipHoverBackgroundColor());
+        renderContext->UpdateBackgroundColor(backgroundColor);
     });
 }
 
@@ -1820,7 +1850,6 @@ void IndexerPattern::StartBubbleAppearAnimation()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->UpdatePopupOpacity(1.0f);
-            pattern->UpdateBubbleSize();
         });
 }
 
@@ -1835,7 +1864,7 @@ void IndexerPattern::StartDelayTask(uint32_t duration)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->StartBubbleDisappearAnimation();
-        });
+    });
     context->GetTaskExecutor()->PostDelayedTask(
         delayTask_, TaskExecutor::TaskType::UI, duration, "ArkUIAlphabetIndexerBubbleDisappear");
 }
@@ -1851,7 +1880,7 @@ void IndexerPattern::StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_
         auto hostNode = node.Upgrade();
         CHECK_NULL_VOID(hostNode);
         hostNode->MarkModifyDone();
-        hostNode->MarkDirtyNode();
+        hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     });
     context->GetTaskExecutor()->PostDelayedTask(
         delayCollapseTask_, TaskExecutor::TaskType::UI, duration, "ArkUIAlphabetIndexerCollapse");
@@ -1875,9 +1904,9 @@ void IndexerPattern::StartBubbleDisappearAnimation()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             CHECK_NULL_VOID(pattern->popupNode_);
-            auto rendercontext = pattern->popupNode_->GetRenderContext();
-            CHECK_NULL_VOID(rendercontext);
-            if (NearZero(rendercontext->GetOpacityValue(0.0f))) {
+            auto renderContext = pattern->popupNode_->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            if (NearZero(renderContext->GetOpacityValue(0.0f))) {
                 pattern->UpdatePopupVisibility(VisibleType::GONE);
             }
         });
@@ -1886,9 +1915,9 @@ void IndexerPattern::StartBubbleDisappearAnimation()
 void IndexerPattern::UpdatePopupOpacity(float ratio)
 {
     CHECK_NULL_VOID(popupNode_);
-    auto rendercontext = popupNode_->GetRenderContext();
-    CHECK_NULL_VOID(rendercontext);
-    rendercontext->UpdateOpacity(ratio);
+    auto renderContext = popupNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateOpacity(ratio);
 }
 
 void IndexerPattern::UpdatePopupVisibility(VisibleType visible)
@@ -1923,7 +1952,7 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     int32_t actualIndex = autoCollapse_ ?
-            selected_ > 0 ?
+            selected_ > 0 && selected_ < itemCount_ ?
                 std::find(fullArrayValue_.begin(), fullArrayValue_.end(),
                     arrayValue_.at(selected_).first) - fullArrayValue_.begin() :
                 selected_ :

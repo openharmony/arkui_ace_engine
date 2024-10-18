@@ -44,7 +44,8 @@ enum class ResourceType : uint32_t {
     PATTERN,
     STRARRAY,
     MEDIA = 20000,
-    RAWFILE = 30000
+    RAWFILE = 30000,
+    NONE = 40000
 };
 class ArkTSUtils {
 public:
@@ -180,12 +181,6 @@ public:
     static void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args,
         ArkUI_Float32 values[], int units[], int index);
     static ArkUISizeType ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg);
-    static void ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code);
-    static bool CheckKeysPressed(
-        const EcmaVM* vm, const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes);
-    static Local<JSValueRef> GetModifierKeyState(
-        ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes);
-    static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
     static bool IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static RefPtr<PixelMap> GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj);
     static Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
@@ -207,6 +202,12 @@ public:
         const Local<JSValueRef>& jsValueOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClickCallback);
     static Local<panda::ArrayRef> CreateJsOnMenuItemClick(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static Local<panda::ObjectRef> CreateJsTextRange(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
+    static void ThrowError(const EcmaVM* vm, const std::string& msg, int32_t code);
+    static bool CheckKeysPressed(
+        const EcmaVM* vm, const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes);
+    static Local<JSValueRef> GetModifierKeyState(
+        ArkUIRuntimeCallInfo* info, const std::vector<KeyCode>& pressedKeyCodes);
+    static Local<JSValueRef> JsGetModifierKeyState(ArkUIRuntimeCallInfo* info);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

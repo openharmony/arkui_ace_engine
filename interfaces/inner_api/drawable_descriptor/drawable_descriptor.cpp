@@ -16,6 +16,10 @@
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "application_context.h"
 #endif
+#include <cstdlib>
+#include <cerrno>
+#include <limits>
+
 #include "drawable_descriptor.h"
 #include "third_party/cJSON/cJSON.h"
 #ifndef PREVIEW
@@ -61,6 +65,7 @@ inline bool NearEqual(const double left, const double right)
 #endif
 const int DEFAULT_DURATION = 1000;
 const std::string DEFAULT_MASK = "ohos_icon_mask";
+constexpr int DECIMAL_BASE = 10;
 
 // define for get resource path in preview scenes
 const static char PREVIEW_LOAD_RESOURCE_ID[] = "ohos_drawable_descriptor_path";
@@ -82,6 +87,23 @@ inline bool IsNumber(const std::string& value)
     }
     return std::all_of(value.begin(), value.end(), [](char i) { return isdigit(i); });
 }
+
+bool ConvertStringToUInt32(const std::string& idStr, uint32_t& result)
+{
+    char* endPtr = nullptr;
+    errno = 0;
+    result = std::strtoul(idStr.c_str(), &endPtr, DECIMAL_BASE);
+    if (errno == ERANGE || result > std::numeric_limits<uint32_t>::max()) {
+        HILOGE("Out of range: string value is too large for uint32_t");
+        return false;
+    }
+    if (endPtr == idStr.c_str() || *endPtr != '\0') {
+        HILOGE("Invalid argument: unable to convert string to uint32_t");
+        return false;
+    }
+
+    return true;
+}
 } // namespace
 
 DrawableItem LayeredDrawableDescriptor::PreGetDrawableItem(
@@ -95,10 +117,11 @@ DrawableItem LayeredDrawableDescriptor::PreGetDrawableItem(
     }
 
     std::tuple<std::string, size_t, std::string> info;
-    auto state = resourceMgr->GetDrawableInfoById(
-        static_cast<uint32_t>(std::stoul(idStr)), info, resItem.data_, iconType_, density_);
+    uint32_t resourceId = 0;
+    if (ConvertStringToUInt32(idStr, resourceId)) {
+        resItem.state_ = resourceMgr->GetDrawableInfoById(resourceId, info, resItem.data_, iconType_, density_);
+    }
     resItem.len_ = std::get<1>(info);
-    resItem.state_ = state;
     return resItem;
 }
 
@@ -466,12 +489,12 @@ Rosen::Drawing::ImageInfo LayeredDrawableDescriptor::CreateRSImageInfo(
     return Rosen::Drawing::ImageInfo(width, height, colorType, alphaType);
 }
 
-void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
+bool LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
     std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask)
 {
     if (!background) {
         HILOGW("The background is null when adaptive composite icons are used.");
-        return;
+        return false;
     }
     Rosen::Drawing::Brush brush;
     brush.SetAntiAlias(true);
@@ -508,6 +531,8 @@ void LayeredDrawableDescriptor::CompositeIconAdaptive(std::shared_ptr<Rosen::Dra
     // convert bitmap back to pixelMap
     bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
     TransformToPixelMap(tempCache, imageInfo);
+
+    return true;
 }
 
 void LayeredDrawableDescriptor::BlendForeground(Rosen::Drawing::Canvas& bitmapCanvas, Rosen::Drawing::Brush& brush,
@@ -616,11 +641,12 @@ bool LayeredDrawableDescriptor::CreatePixelMap()
         NearEqual(NOT_ADAPTIVE_SIZE, foreground->GetHeight())) {
         HILOGD("foreground size is 288 x 288, we don't scale the foreground.");
         CompositeIconNotAdaptive(foreground, background, mask);
-    } else {
+        return true;
+    } else if (CompositeIconAdaptive(foreground, background, mask)) {
         HILOGD("foreground size is not 288 x 288, we'll scale the foreground.");
-        CompositeIconAdaptive(foreground, background, mask);
+        return true;
     }
-    return true;
+    return false;
 }
 
 bool LayeredDrawableDescriptor::GetCompositePixelMapWithBadge(

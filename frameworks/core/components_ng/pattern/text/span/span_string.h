@@ -45,6 +45,10 @@ public:
     int32_t GetLength() const;
     void SetString(const std::string& text);
     void SetGroupId(const RefPtr<SpanBase>& span);
+    void SetFramNode(const WeakPtr<NG::FrameNode>& frameNode);
+    void MarkDirtyFrameNode();
+    void AddCustomSpan();
+    void RemoveCustomSpan();
     void SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems);
     void SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap);
     const std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>& GetSpansMap() const;
@@ -60,7 +64,9 @@ public:
     void BindWithSpans(const std::vector<RefPtr<SpanBase>>& spans);
     bool EncodeTlv(std::vector<uint8_t>& buff);
     static RefPtr<SpanString> DecodeTlv(std::vector<uint8_t>& buff);
+    static void DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString);
     static void DecodeSpanItemList(std::vector<uint8_t>& buff, int32_t& cursor, RefPtr<SpanString>& spanStr);
+    static void DecodeSpanItemListExt(std::vector<uint8_t>& buff, int32_t& cursor, SpanString* spanStr);
     void ClearSpans();
     void AppendSpanItem(const RefPtr<NG::SpanItem>& spanItem);
     void UpdateSpansMap();
@@ -112,6 +118,7 @@ protected:
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
     std::list<RefPtr<NG::SpanItem>> spans_;
     int32_t groupId_ = 0;
+    WeakPtr<NG::FrameNode> framNode_;
 };
 } // namespace OHOS::Ace
 

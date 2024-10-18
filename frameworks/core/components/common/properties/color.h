@@ -150,6 +150,7 @@ public:
     std::string ColorToString() const;
 
     static Color ColorFromString(const std::string& str);
+    static bool MatchColorHexString(const std::string& colorStr);
 
     std::string ToString() const;
 

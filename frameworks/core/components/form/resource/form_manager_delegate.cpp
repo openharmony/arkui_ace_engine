@@ -21,6 +21,8 @@
 #include <sstream>
 
 #include "form_info_base.h"
+#include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_transaction.h"
 
 #include "base/log/log.h"
 #include "core/common/container.h"
@@ -280,6 +282,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         state_ = State::CREATEFAILED;
+        TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError CREATEFAILED");
         OnFormError("internal error");
         return;
     }
@@ -295,6 +298,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         auto resRegister = weakRes.Upgrade();
         auto context = delegate->context_.Upgrade();
         if (!resRegister || !context) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError resRegister or context error");
             delegate->OnFormError("internal error");
             return;
         }
@@ -315,6 +319,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
         std::string param = paramStream.str();
         delegate->id_ = resRegister->CreateResource(FORM_ADAPTOR_RESOURCE_NAME, param);
         if (delegate->id_ == INVALID_ID) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "OnFormError INVALID_ID");
             delegate->OnFormError("internal error");
             return;
         }
@@ -726,7 +731,21 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height, float b
         TAG_LOGE(AceLogTag::ACE_FORM, "formRendererDispatcher_ is nullptr");
         return;
     }
-    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height, borderWidth);
+    WindowSizeChangeReason sizeChangeReason = WindowSizeChangeReason::UNDEFINED;
+    if (FormManager::GetInstance().IsSizeChangeByRotate()) {
+        sizeChangeReason = WindowSizeChangeReason::ROTATION;
+    }
+    std::shared_ptr<Rosen::RSTransaction> transaction;
+    if (sizeChangeReason != WindowSizeChangeReason::UNDEFINED) {
+        if (FormManager::GetInstance().GetRSTransaction().lock()) {
+            transaction = FormManager::GetInstance().GetRSTransaction().lock();
+        } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
+            transaction = transactionController->GetRSTransaction();
+        }
+    }
+
+    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height,
+        static_cast<uint32_t>(sizeChangeReason), transaction, borderWidth);
 }
 
 void FormManagerDelegate::OnFormSurfaceChange(float width, float height, float borderWidth)
@@ -777,6 +796,8 @@ void FormManagerDelegate::OnFormUpdate(const std::string& param)
 void FormManagerDelegate::OnFormError(const std::string& param)
 {
     auto result = ParseMapFromString(param);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "OnFormError, code:%{public}s, msg:%{public}s", result["code"].c_str(), result["msg"].c_str());
     if (onFormErrorCallback_) {
         onFormErrorCallback_(result["code"], result["msg"]);
     }

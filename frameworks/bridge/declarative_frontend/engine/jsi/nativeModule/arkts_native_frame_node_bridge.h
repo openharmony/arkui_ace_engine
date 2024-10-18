@@ -75,6 +75,8 @@ public:
     static ArkUINativeModuleValue IsClipToFrame(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue IsAttached(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetInspectorInfo(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetCustomPropertyCapiByKey(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetCustomPropertyModiferByKey(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMeasuredSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetLayoutPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static Local<JSValueRef> GetObjectValueByKey(EcmaVM* vm, Local<JSValueRef> object, const char* key);
@@ -101,6 +103,8 @@ public:
     static ArkUINativeModuleValue AddFrameNodeToNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RemoveFrameNodeFromNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFirstUINode(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue TriggerOnReuse(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue TriggerOnRecycle(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 
 } // namespace OHOS::Ace::NG

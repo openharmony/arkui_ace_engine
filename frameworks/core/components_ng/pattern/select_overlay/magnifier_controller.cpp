@@ -37,7 +37,7 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
     const OffsetF& basePaintOffset, const RefPtr<FrameNode>& host)
 {
     auto geometryNode = host->GetGeometryNode();
-    auto frameSize = geometryNode->GetFrameSize();
+    auto frameSize = hostViewPort_.has_value() ? hostViewPort_->GetSize() : geometryNode->GetFrameSize();
     if (localOffset_.GetX() < 0 || localOffset_.GetX() > frameSize.Width()) {
         UpdateShowMagnifier();
         return false;
@@ -58,7 +58,7 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
 bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset,
     const OffsetF& basePaintOffset, const RefPtr<FrameNode>& host)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
     float menuHeight = magnifierNodeHeight_.ConvertToPx();
     auto safeAreaManager = pipeline->GetSafeAreaManager();
@@ -72,19 +72,23 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
         return false;
     }
     auto geometryNode = host->GetGeometryNode();
-    auto frameSize = geometryNode->GetFrameSize();
+    auto frameSize = hostViewPort_.has_value() ? hostViewPort_->GetSize() : geometryNode->GetFrameSize();
     if (localOffset_.GetY() < 0 || localOffset_.GetY() > frameSize.Height()) {
         UpdateShowMagnifier();
         return false;
     }
+    auto screenHeight = SystemProperties::GetDeviceHeight();
+    magnifierY = std::clamp(magnifierY, 0.f, static_cast<float>(screenHeight - menuHeight));
     auto rootUINode = GetRootNode();
     CHECK_NULL_RETURN(rootUINode, false);
     auto rootGeometryNode = rootUINode->GetGeometryNode();
     CHECK_NULL_RETURN(rootGeometryNode, false);
     auto rootFrameSize = rootGeometryNode->GetFrameSize();
-    magnifierY = std::clamp(magnifierY, 0.f, static_cast<float>(rootFrameSize.Height() - menuHeight));
     offsetY_ = std::clamp(magnifierY, 0.f, static_cast<float>(MAGNIFIER_OFFSETY.ConvertToPx()));
-    magnifierPaintOffset.SetY(magnifierY - offsetY_);
+    auto magnifierPaintOffsetY = magnifierY - offsetY_;
+    magnifierPaintOffsetY =
+        std::clamp(magnifierPaintOffsetY, 0.f, static_cast<float>(rootFrameSize.Height() - menuHeight));
+    magnifierPaintOffset.SetY(magnifierPaintOffsetY);
     magnifierOffset.y = offsetY_;
     return true;
 }
@@ -115,6 +119,7 @@ bool MagnifierController::UpdateMagnifierOffset()
     params_.offsetX_ = magnifierOffset.x;
     params_.offsetY_ = magnifierOffset.y;
     params_.factor_ = MAGNIFIER_FACTOR;
+    params_.changed_ = !params_.changed_;
     ViewAbstract::SetMagnifier(AceType::RawPtr(magnifierFrameNode_), params_);
     magnifierFrameNode_->ForceSyncGeometryNode();
     magnifierFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -145,7 +150,7 @@ void MagnifierController::OpenMagnifier()
 
 RefPtr<FrameNode> MagnifierController::GetRootNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto rootNode = pipeline->GetRootElement();
     CHECK_NULL_RETURN(rootNode, nullptr);
@@ -224,6 +229,7 @@ void MagnifierController::RemoveMagnifierFrameNode()
         parentNode->RebuildRenderContextTree();
     }
     removeFrameNode_ = false;
+    hostViewPort_.reset();
 }
 
 void MagnifierController::CloseMagnifier()
@@ -247,7 +253,7 @@ void MagnifierController::InitMagnifierParams()
     params_.shadowSize_ = MAGNIFIER_SHADOWSIZE.ConvertToPx();
     params_.shadowStrength_ = MAGNIFIER_SHADOWSTRENGTH;
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipeline);
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);

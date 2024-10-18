@@ -759,4 +759,66 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0030, TestSize.Level1)
     EXPECT_EQ(ret, 1);
 }
 
+/**
+ * @tc.name: DrawableDescTest031
+ * @tc.desc: test AnimatedDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create AnimatedDrawableDescriptor
+     * @tc.expected:return ANIMATED.
+     */
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    int32_t duration = -1;
+    int32_t iterations = 2;
+    auto* animatedDrawable = new Napi::AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
+    auto res = animatedDrawable->GetPixelMap();
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest0031
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0031, TestSize.Level1)
+{
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
+    auto drawable = Napi::LayeredDrawableDescriptor();
+    const char* item = "i:1";
+    Napi::DrawableItem resItem = drawable.PreGetDrawableItem(resourceMgr, item);
+    EXPECT_EQ(resItem.len_, 0);
+}
+
+/**
+ * @tc.name: DrawableDescTest0032
+ * @tc.desc: test AnimatedDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0032, TestSize.Level1)
+{
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    int32_t duration = -1;
+    int32_t iterations = 2;
+    auto* animatedDrawable = new Napi::AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
+    animatedDrawable->SetIterations(-2);
+    EXPECT_EQ(animatedDrawable->iterations_, 1);
+}
+
+/**
+ * @tc.name: DrawableDescTest0033
+ * @tc.desc: test AnimatedDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest0033, TestSize.Level1)
+{
+    std::vector<std::shared_ptr<Media::PixelMap>> pixelMaps;
+    int32_t duration = -1;
+    int32_t iterations = 2;
+    auto* animatedDrawable = new Napi::AnimatedDrawableDescriptor(pixelMaps, duration, iterations);
+    animatedDrawable->SetDuration(0);
+    EXPECT_EQ(animatedDrawable->duration_, 0);
+}
 } // namespace OHOS::Ace

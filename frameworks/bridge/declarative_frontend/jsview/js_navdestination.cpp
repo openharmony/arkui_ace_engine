@@ -26,6 +26,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
+#include "bridge/declarative_frontend/jsview/js_navigation_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -150,9 +151,17 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
     }
 }
 
-void JSNavDestination::SetHideTitleBar(bool hide)
+void JSNavDestination::SetHideTitleBar(const JSCallbackInfo& info)
 {
-    NavDestinationModel::GetInstance()->SetHideTitleBar(hide);
+    bool isHide = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isHide = info[0]->ToBoolean();
+    }
+    bool isAnimated = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        isAnimated = info[1]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetHideTitleBar(isHide, isAnimated);
 }
 
 void JSNavDestination::SetTitle(const JSCallbackInfo& info)
@@ -208,11 +217,7 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     }
 
     NG::NavigationTitlebarOptions options;
-    if (info.Length() > 1) {
-        ParseBackgroundOptions(info[1], options.bgOptions);
-        ParseBarOptions(info[1], options.brOptions);
-        ParseTextOptions(info, info[1], options.textOptions);
-    }
+    JSNavigationUtils::ParseTitleBarOptions(info, false, options);
     NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
 
@@ -313,11 +318,11 @@ void JSNavDestination::SetOnReady(const JSCallbackInfo& info)
     auto onReadyCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto onReady = [execCtx = info.GetExecutionContext(), func = std::move(onReadyCallback)](
                        RefPtr<NG::NavDestinationContext> context) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto jsContext = JSClass<JSNavDestinationContext>::NewInstance();
         auto jsNavDestinationContext = Referenced::Claim(jsContext->Unwrap<JSNavDestinationContext>());
         CHECK_NULL_VOID(jsNavDestinationContext);
         jsNavDestinationContext->SetNavDestinationContext(context);
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("NavDestination.onReady");
         JSRef<JSVal> params[1];
         params[0] = jsContext;
@@ -349,7 +354,8 @@ void JSNavDestination::SetMenus(const JSCallbackInfo& info)
         if (info[0]->IsUndefined()) {
             menuItems = {};
         } else {
-            JSNavigation::ParseBarItems(info, JSRef<JSArray>::Cast(info[0]), menuItems);
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            JSNavigationUtils::ParseBarItems(targetNode, info, JSRef<JSArray>::Cast(info[0]), menuItems);
         }
         NavDestinationModel::GetInstance()->SetMenuItems(std::move(menuItems));
         return;
@@ -476,6 +482,55 @@ void JSNavDestination::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
 }
 
+void JSNavDestination::SetRecoverable(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        // the default value of navDestination's recoverable is true
+        NavDestinationModel::GetInstance()->SetRecoverable(true);
+        return;
+    }
+    auto recoverable = info[0]->ToBoolean();
+    NavDestinationModel::GetInstance()->SetRecoverable(recoverable);
+}
+
+void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || info[0]->IsArray()) {
+        std::vector<NG::BarItem> toolBarItems;
+        if (info[0]->IsArray()) {
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            JSNavigationUtils::ParseToolbarItemsConfiguration(
+                targetNode, info, JSRef<JSArray>::Cast(info[0]), toolBarItems);
+        }
+        NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
+    } else if (info[0]->IsObject()) {
+        auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+        if (builderFuncParam->IsFunction()) {
+            ViewStackModel::GetInstance()->NewScope();
+            JsFunction jsBuilderFunc(builderFuncParam);
+            jsBuilderFunc.Execute();
+            auto customNode = ViewStackModel::GetInstance()->Finish();
+            NavDestinationModel::GetInstance()->SetCustomToolBar(customNode);
+        }
+    }
+    NG::NavigationToolbarOptions options;
+    JSNavigationUtils::ParseToolbarOptions(info, options);
+    NavDestinationModel::GetInstance()->SetToolBarOptions(std::move(options));
+}
+
+void JSNavDestination::SetHideToolBar(const JSCallbackInfo& info)
+{
+    bool isHide = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isHide = info[0]->ToBoolean();
+    }
+    bool isAnimated = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        isAnimated = info[1]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetHideToolBar(isHide, isAnimated);
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
     JSNavDestinationContext::JSBind(globalObj);
@@ -503,6 +558,9 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
     JSClass<JSNavDestination>::StaticMethod("ignoreLayoutSafeArea", &JSNavDestination::SetIgnoreLayoutSafeArea);
     JSClass<JSNavDestination>::StaticMethod("systemBarStyle", &JSNavDestination::SetSystemBarStyle);
+    JSClass<JSNavDestination>::StaticMethod("recoverable", &JSNavDestination::SetRecoverable);
+    JSClass<JSNavDestination>::StaticMethod("toolbarConfiguration", &JSNavDestination::SetToolBarConfiguration);
+    JSClass<JSNavDestination>::StaticMethod("hideToolBar", &JSNavDestination::SetHideToolBar);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

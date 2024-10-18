@@ -44,7 +44,7 @@ enum class ShadowType {
 enum class ShadowColorStrategy : char {
     NONE,
     AVERAGE,
-    PRIMARY
+    PRIMARY,
 };
 // A style class indicates the way to render shadow effect
 class Shadow final {

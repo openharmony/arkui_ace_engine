@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/templates_parser.h"
 namespace OHOS::Ace::NG {
@@ -68,9 +69,9 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float mainSize = GetMainAxisSize(idealSize, axis);
     float crossSize = GetCrossAxisSize(idealSize, axis);
     if (!NearEqual(mainSize, gridLayoutInfo_.lastMainSize_)) {
-        gridLayoutInfo_.ResetPositionFlags();
         UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
         UpdateOffsetOnHeightChangeDuringAnimation(layoutWrapper, mainSize);
+        gridLayoutInfo_.ResetPositionFlags();
     }
     FillGridViewportAndMeasureChildren(mainSize, crossSize, layoutWrapper);
 
@@ -92,13 +93,22 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                                      : gridLayoutInfo_.offsetEnd_;
 
     if (SystemProperties::GetGridCacheEnabled()) {
+        const bool sync = gridLayoutProperty->GetShowCachedItemsValue(false);
+        if (sync) {
+            SyncPreload(layoutWrapper, gridLayoutProperty->GetCachedCountValue(1), crossSize, mainSize);
+            return;
+        }
+
         FillCacheLineAtEnd(mainSize, crossSize, layoutWrapper);
         AddCacheItemsInFront(gridLayoutInfo_.startIndex_, layoutWrapper, cacheCnt, predictBuildList_);
         if (!predictBuildList_.empty()) {
             GridLayoutUtils::PreloadGridItems(layoutWrapper->GetHostNode()->GetPattern<GridPattern>(),
                 std::move(predictBuildList_),
                 [param = GridPredictLayoutParam { cachedChildConstraint_, itemsCrossSize_, crossGap_ }](
-                    const RefPtr<FrameNode>& host, int32_t itemIdx) { return PredictBuildItem(host, itemIdx, param); });
+                    const RefPtr<FrameNode>& host, int32_t itemIdx) {
+                    CHECK_NULL_RETURN(host, false);
+                    return PredictBuildItem(*host, itemIdx, param);
+                });
             predictBuildList_.clear();
         }
     }
@@ -123,7 +133,7 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnVirtualKeyboardHeightChange(Layout
         return;
     }
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = grid->GetContext();
     CHECK_NULL_VOID(context);
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
@@ -183,14 +193,17 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnHeightChangeDuringAnimation(Layout
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->IsScrollableSpringMotionRunning()) {
+        if (gridLayoutInfo_.reachStart_ || gridLayoutInfo_.GetContentHeight(mainGap_) < mainSize) {
+            return;
+        }
         gridLayoutInfo_.currentOffset_ += (mainSize - gridLayoutInfo_.lastMainSize_);
     }
 }
 
 void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(gridLayoutProperty);
+    auto props = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
@@ -218,8 +231,8 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         int32_t itemIdex = -1;
         float lineHeight = gridLayoutInfo_.lineHeightMap_[line->first];
         Alignment align = axis_ == Axis::VERTICAL ? Alignment::TOP_CENTER : Alignment::CENTER_LEFT;
-        if (gridLayoutProperty->GetPositionProperty()) {
-            align = gridLayoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
+        if (props->GetPositionProperty()) {
+            align = props->GetPositionProperty()->GetAlignment().value_or(align);
         }
         for (auto iter = line->second.begin(); iter != line->second.end(); iter++) {
             // If item index is the same, must be the same GridItem, need't layout again.
@@ -279,16 +292,17 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
-    auto cacheCount = gridLayoutProperty->GetCachedCountValue(1);
-    if (!gridLayoutInfo_.hasMultiLineItem_) {
-        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_);
-    }
+    const int32_t cacheCount = props->GetCachedCountValue(1);
     gridLayoutInfo_.totalHeightOfItemsInView_ = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap_);
 
     if (SystemProperties::GetGridCacheEnabled()) {
         if (!itemsCrossPosition_.empty() && cacheCount > 0) {
             LayoutCachedItem(layoutWrapper, cacheCount);
         }
+    }
+    if (!gridLayoutInfo_.hasMultiLineItem_) {
+        layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_,
+            props->GetShowCachedItemsValue(false));
     }
 }
 
@@ -305,7 +319,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
 {
     auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(gridLayoutProperty);
-    auto prevLineHeight = gridLayoutInfo_.totalHeightOfItemsInView_;
+    float prevLineHeight = gridLayoutInfo_.totalHeightOfItemsInView_ + mainGap_;
     auto prevLineIter = gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.endMainLineIndex_);
     std::map<int32_t, int32_t> prevLine;
     if (prevLineIter != gridLayoutInfo_.gridMatrix_.end()) {
@@ -318,7 +332,7 @@ void GridScrollLayoutAlgorithm::LayoutBackwardCachedLine(LayoutWrapper* layoutWr
             break;
         }
 
-        auto prevLineOffset = axis_ == Axis::VERTICAL ? OffsetF(0.0, prevLineHeight) : OffsetF(prevLineHeight, 0.0);
+        OffsetF prevLineOffset = axis_ == Axis::VERTICAL ? OffsetF(0.0, prevLineHeight) : OffsetF(prevLineHeight, 0.0);
         if (line->second.empty()) {
             break;
         }
@@ -725,7 +739,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
             gridLayoutInfo_.prevOffset_ = 0;
         }
         gridLayoutInfo_.reachStart_ = true;
-        gridLayoutInfo_.offsetEnd_ = true;
+        gridLayoutInfo_.offsetEnd_ = LessOrEqual(gridLayoutInfo_.currentOffset_ + lengthOfItemsInViewport, mainSize);
         return;
     }
 
@@ -2201,9 +2215,9 @@ int32_t GridScrollLayoutAlgorithm::MeasureCachedChild(const SizeF& frameSize, in
 }
 
 void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
-    LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items)
+    LayoutWrapper* layoutWrapper, const std::map<int32_t, int32_t>& items)
 {
-    for (auto item : items) {
+    for (auto&& item : items) {
         auto currentIndex = item.second;
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper) {
@@ -2217,19 +2231,13 @@ void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
     }
 }
 
-bool GridScrollLayoutAlgorithm::PredictBuildItem(
-    const RefPtr<FrameNode>& host, int32_t itemIdx, const GridPredictLayoutParam& param)
+namespace {
+LayoutConstraintF GenerateCacheItemConstraint(
+    const GridItemLayoutProperty& itemProp, Axis axis, const GridPredictLayoutParam& param)
 {
-    // build callback
-    CHECK_NULL_RETURN(host, false);
-    auto wrapper = host->GetOrCreateChildByIndex(itemIdx, false, true);
-    CHECK_NULL_RETURN(wrapper, false);
-    auto itemProperty = DynamicCast<GridItemLayoutProperty>(wrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(itemProperty, false);
-    const Axis axis = host->GetPattern<GridPattern>()->GetAxis();
-    int32_t crossSpan = itemProperty->GetCrossSpan(axis);
-    int32_t crossStart = itemProperty->GetCrossStart(axis);
     auto constraint = param.layoutConstraint;
+    int32_t crossSpan = itemProp.GetCrossSpan(axis);
+    int32_t crossStart = itemProp.GetCrossStart(axis);
     if (crossSpan > 1) {
         float itemCrossSize = param.crossGap * (crossSpan - 1);
         for (int32_t index = 0; index < crossSpan; ++index) {
@@ -2241,6 +2249,78 @@ bool GridScrollLayoutAlgorithm::PredictBuildItem(
         constraint.maxSize.SetCrossSize(itemCrossSize, axis);
         constraint.selfIdealSize.SetCrossSize(itemCrossSize, axis);
     }
+    return constraint;
+}
+
+/* revert layout range in GridLayoutInfo when this object destructs */
+class TempLayoutRange {
+public:
+    explicit TempLayoutRange(GridLayoutInfo& info)
+        : info_(info), subStart_(info.startIndex_), subStartLine_(info.startMainLineIndex_), subEnd_(info.endIndex_),
+          subEndLine_(info.endMainLineIndex_)
+    {}
+    ~TempLayoutRange()
+    {
+        info_.startIndex_ = subStart_;
+        info_.startMainLineIndex_ = subStartLine_;
+        info_.endIndex_ = subEnd_;
+        info_.endMainLineIndex_ = subEndLine_;
+    }
+
+private:
+    GridLayoutInfo& info_;
+    const int32_t subStart_;
+    const int32_t subStartLine_;
+    const int32_t subEnd_;
+    const int32_t subEndLine_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(TempLayoutRange);
+};
+} // namespace
+
+void GridScrollLayoutAlgorithm::SyncPreload(
+    LayoutWrapper* wrapper, int32_t cacheLineCnt, float crossSize, float mainSize)
+{
+    {
+        TempLayoutRange scope(gridLayoutInfo_);
+        for (int32_t i = 0; i < cacheLineCnt; ++i) {
+            FillNewLineForward(crossSize, mainSize, wrapper);
+        }
+    }
+
+    // inefficient implementation. TODO: rewrite GridScroll, provide atomic measure abilities
+    FillCacheLineAtEnd(mainSize, crossSize, wrapper); // collect predictBuildList_
+    CreateCachedChildConstraint(wrapper, mainSize, crossSize);
+    GridPredictLayoutParam param { cachedChildConstraint_, itemsCrossSize_, crossGap_ };
+    const auto newItemList = std::move(predictBuildList_);
+    for (auto&& item : newItemList) {
+        PredictBuildItem(*DynamicCast<FrameNode>(wrapper), item.idx, param);
+    }
+    FillCacheLineAtEnd(mainSize, crossSize, wrapper); // record newly created items
+
+    const int32_t endBound = gridLayoutInfo_.endIndex_ + cacheLineCnt * crossCount_;
+    // FillCacheLineAtEnd skips existing items, manually measure them.
+    for (int32_t i = gridLayoutInfo_.endIndex_ + 1; i <= endBound; ++i) {
+        if (newItemList.empty() || newItemList.begin()->idx == i) {
+            break;
+        }
+        auto item = wrapper->GetChildByIndex(i);
+        CHECK_NULL_BREAK(item);
+        auto itemProperty = DynamicCast<GridItemLayoutProperty>(item->GetLayoutProperty());
+        item->Measure(GenerateCacheItemConstraint(*itemProperty, axis_, param));
+    }
+}
+
+bool GridScrollLayoutAlgorithm::PredictBuildItem(FrameNode& host, int32_t itemIdx, const GridPredictLayoutParam& param)
+{
+    // build callback
+    auto wrapper = host.GetOrCreateChildByIndex(itemIdx, false, true);
+    CHECK_NULL_RETURN(wrapper, false);
+    auto itemProperty = DynamicCast<GridItemLayoutProperty>(wrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(itemProperty, false);
+    const Axis axis = host.GetPattern<GridPattern>()->GetAxis();
+
+    auto constraint = GenerateCacheItemConstraint(*itemProperty, axis, param);
     wrapper->SetActive(false);
     auto frameNode = wrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);

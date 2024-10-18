@@ -292,6 +292,7 @@ public:
     void FillText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     void StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth);
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
+    void SetTransform(std::shared_ptr<Ace::Pattern> pattern, const TransformParam& transform);
     void SetDensity(double density)
     {
         density_ = density;

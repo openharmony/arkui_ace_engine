@@ -116,8 +116,8 @@ void NavigationStack::Add(
     // for the old page: keep the UINode, and keep in the stack
     auto index = FindIndex(name, navDestinationNode, true);
     if (index != NOT_EXIST) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "This navigation destination node already exists");
         RemoveIndex(index);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "This navigation destination node already exists");
     }
     navPathList_.emplace_back(std::make_pair(name, navDestinationNode));
     if (index != NOT_EXIST) {
@@ -319,9 +319,9 @@ void NavigationStack::Clear()
     cacheNodes_.clear();
 }
 
-RefPtr<UINode> NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& node)
+bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<UINode>& customNode, RefPtr<UINode>& node)
 {
-    return nullptr;
+    return false;
 }
 
 RefPtr<UINode> NavigationStack::CreateNodeByRouteInfo(const RefPtr<RouteInfo>& routeInfo, const WeakPtr<UINode>& node)

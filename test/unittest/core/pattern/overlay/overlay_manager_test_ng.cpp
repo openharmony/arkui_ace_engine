@@ -2311,7 +2311,8 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
     ASSERT_NE(sheetLayoutProperty, nullptr);
     sheetStyle.interactive = true;
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
-    overlayManager->InitSheetMask(maskNode, topSheetNode, sheetStyle);
+    topSheetPattern->UpdateMaskBackgroundColor();
+    overlayManager->PlaySheetMaskTransition(maskNode, true);
     EXPECT_EQ(maskRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
 
     /**
@@ -2320,7 +2321,8 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
      */
     sheetStyle.interactive = false;
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
-    overlayManager->InitSheetMask(maskNode, topSheetNode, sheetStyle);
+    topSheetPattern->UpdateMaskBackgroundColor();
+    overlayManager->PlaySheetMaskTransition(maskNode, true);
     EXPECT_NE(maskRenderContext->GetBackgroundColor(), Color::TRANSPARENT);
 }
 

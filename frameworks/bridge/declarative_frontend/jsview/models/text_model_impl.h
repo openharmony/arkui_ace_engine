@@ -34,6 +34,8 @@ public:
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetTextSelection(int32_t startIndex, int32_t endIndex) override {};
     void SetTextSelectableMode(TextSelectableMode value) override {};
+    void SetTextCaretColor(const Color& value) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetVariableFontWeight(int32_t value) override {};
@@ -77,6 +79,7 @@ public:
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetHalfLeading(bool halfLeading) override;
+    void SetEnableHapticFeedback(bool state) override {};
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

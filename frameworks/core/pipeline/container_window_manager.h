@@ -31,6 +31,8 @@ using WindowSetMaximizeModeCallback = std::function<void(MaximizeMode)>;
 using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
 using GetSystemBarStyleCallback = std::function<RefPtr<SystemBarStyle>(void)>;
 using SetSystemBarStyleCallback = std::function<void(const RefPtr<SystemBarStyle>&)>;
+using WindowGetStartMoveFlagCallback = std::function<uint32_t(void)>;
+using GetFreeMultiWindowModeEnabledStateCallback = std::function<bool(void)>;
 
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
@@ -109,6 +111,11 @@ public:
         windowStartMoveCallback_ = std::move(callback);
     }
 
+    void SetGetWindowStartMoveFlagCallBack(WindowGetStartMoveFlagCallback&& callback)
+    {
+        WindowGetStartMoveFlagCallback_ = callback;
+    }
+
     void SetWindowSetMaximizeModeCallBack(WindowSetMaximizeModeCallback&& callback)
     {
         windowSetMaximizeModeCallback_ = std::move(callback);
@@ -127,6 +134,11 @@ public:
     void SetSetSystemBarStyleCallBack(SetSystemBarStyleCallback&& callback)
     {
         setSystemBarStyleCallback_ = std::move(callback);
+    }
+
+    void SetGetFreeMultiWindowModeEnabledStateCallback(GetFreeMultiWindowModeEnabledStateCallback&& callback)
+    {
+        getFreeMultiWindowModeEnabledStateCallback_ = std::move(callback);
     }
 
     void WindowMinimize() const
@@ -177,6 +189,14 @@ public:
         if (windowStartMoveCallback_) {
             windowStartMoveCallback_();
         }
+    }
+
+    bool GetWindowStartMoveFlag() const
+    {
+        if (WindowGetStartMoveFlagCallback_) {
+            return WindowGetStartMoveFlagCallback_();
+        }
+        return false;
     }
 
     WindowMode GetWindowMode() const
@@ -235,6 +255,14 @@ public:
         }
     }
 
+    bool GetFreeMultiWindowModeEnabledState() const
+    {
+        if (getFreeMultiWindowModeEnabledStateCallback_) {
+            return getFreeMultiWindowModeEnabledStateCallback_();
+        }
+        return false;
+    }
+
 private:
     int32_t appLabelId_ = 0;
     int32_t appIconId_ = 0;
@@ -245,6 +273,7 @@ private:
     WindowCallback windowSplitPrimaryCallback_;
     WindowCallback windowSplitSecondaryCallback_;
     WindowCallback windowStartMoveCallback_;
+    WindowGetStartMoveFlagCallback WindowGetStartMoveFlagCallback_;
     WindowCallback windowMaximizeCallback_;
     WindowCallback windowMaximizeFloatingCallback_;
     WindowSetMaximizeModeCallback windowSetMaximizeModeCallback_;
@@ -253,6 +282,7 @@ private:
     WindowTypeCallback windowGetTypeCallback_;
     GetSystemBarStyleCallback getSystemBarStyleCallback_;
     SetSystemBarStyleCallback setSystemBarStyleCallback_;
+    GetFreeMultiWindowModeEnabledStateCallback getFreeMultiWindowModeEnabledStateCallback_;
 };
 
 } // namespace OHOS::Ace

@@ -20,8 +20,11 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_container.h"
+
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_helper.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

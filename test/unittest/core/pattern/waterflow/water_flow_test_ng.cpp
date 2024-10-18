@@ -43,6 +43,9 @@ void WaterFlowTestNg::SetUpTestSuite()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
+    auto scrollableThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLLABLE);
+    auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
+    EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks).Times(AnyNumber());
     MockAnimationManager::Enable(true);
     auto container = Container::Current();
@@ -53,6 +56,7 @@ void WaterFlowTestNg::SetUpTestSuite()
 #endif
     PipelineContext::GetCurrentContext()->SetMinPlatformVersion(12);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(12);
+    testing::FLAGS_gmock_verbose = "error";
 }
 
 void WaterFlowTestNg::TearDownTestSuite()
@@ -873,6 +877,86 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest014, TestSize.Level1)
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(210.0f, 0, 200.0f, BIG_ITEM_MAIN_SIZE)));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(420.0f, 0, 200.0f, ITEM_MAIN_SIZE)));
+}
+
+/**
+ * @tc.name: WaterFlowTest015
+ * @tc.desc: In less-than fillViewport scene, test GetOverScrollOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest015, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateWaterFlowItems(2);
+    CreateDone();
+    EXPECT_FALSE(NEAR_ZERO(pattern_->layoutInfo_->GetContentHeight()));
+    EXPECT_LT(pattern_->layoutInfo_->GetContentHeight(), pattern_->layoutInfo_->lastMainSize_);
+
+    /**
+     * @tc.steps: step1. input a delta(>0), make overScroll at top.
+     * @tc.expected: offset.start is equal to this delta, offset.end is zero.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(100.0f), { 100.0f, 0 }));
+
+    /**
+     * @tc.steps: step2. input a delta(<0), make overScroll at bottom.
+     * @tc.expected: offset.start is zero, offset.end is equal to this delta.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.f), { 0, -100.f }));
+
+    // enable overScroll, layout in overScroll status at top.
+    pattern_->SetAnimateCanOverScroll(true);
+    pattern_->layoutInfo_->UpdateOffset(100.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 100.0f);
+
+    /**
+     * @tc.steps: step1. input a delta(>0), make overScroll at top.
+     * @tc.expected: offset.start is equal to this delta, offset.end is zero.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(100.0f), { 100.0f, 0 }));
+
+    /**
+     * @tc.steps: step2. input a delta(<0), make overScroll at top.
+     * @tc.expected: offset.start is equal to this delta, offset.end is zero.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.0f), { -100.0f, 0 }));
+
+    /**
+     * @tc.steps: step3. input a delta(<0), make overScroll at bottom.
+     * @tc.expected: offset.start is equal to overScroll offset at top, offset.end is equal to overScroll offset at
+     * bottom.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-400.0f), { -100.0f, -300.0f }));
+
+    // layout in overScroll status at bottom.
+    pattern_->layoutInfo_->UpdateOffset(-150.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -50.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+
+    /**
+     * @tc.steps: step1. input a delta(>0), make overScroll at bottom.
+     * @tc.expected: offset.start is zero, offset.end is equal to this delta.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(20.0f), { 0, 20.0f }));
+
+    /**
+     * @tc.steps: step2. input a delta(<0), make overScroll at bottom.
+     * @tc.expected: offset.start is equal to this delta, offset.end is zero.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.0f), { 0, -100.0f }));
+
+    /**
+     * @tc.steps: step3. input a delta(>0), make overScroll at top.
+     * @tc.expected: offset.start is equal to overScroll offset at top, offset.end is equal to overScroll offset at
+     * bottom.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(400.0f), { 350.0f, 50.0f }));
 }
 
 namespace {
@@ -1985,5 +2069,77 @@ HWTEST_F(WaterFlowTestNg, MarginPadding001, TestSize.Level1)
     FlushLayoutTask(colNode, true);
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(1, 5, 480, 800)));
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 2), RectF(3, 111, 237, 100)));
+}
+
+/**
+ * @tc.name: WaterFlowTest019
+ * @tc.desc: Test layout when update offset repeatedly in one frame.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowTest019, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(WATER_FLOW_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    for (int i = 0; i < 30; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    CreateDone();
+
+    UpdateCurrentOffset(-500.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 21);
+
+    pattern_->UpdateCurrentOffset(-10.0f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(20.0f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(-5.0f, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 8);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 21);
+    for (int32_t i = 8; i <= 21; i++) {
+        EXPECT_TRUE(IsEqual(pattern_->GetItemRect(i),
+            Rect(i % 2 == 0 ? 0 : WATER_FLOW_WIDTH / 2, -95.0f + 100.f * ((i - 8) / 2), WATER_FLOW_WIDTH / 2, 100.0f)));
+    }
+
+    pattern_->UpdateCurrentOffset(10.0f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(-25.0f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(5.0f, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 23);
+    for (int32_t i = 10; i <= 23; i++) {
+        EXPECT_TRUE(IsEqual(pattern_->GetItemRect(i),
+            Rect(i % 2 == 0 ? 0 : WATER_FLOW_WIDTH / 2, -5.0f + 100.f * ((i - 10) / 2), WATER_FLOW_WIDTH / 2, 100.0f)));
+    }
+}
+
+/**
+ * @tc.name: Jump001
+ * @tc.desc: Test jump function after changing dataSource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, Jump001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    AddItemsAtSlot(1, 100.0f, 15);
+    frameNode_->ChildrenUpdatedFrom(15);
+    pattern_->ScrollToIndex(15, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 15);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 25);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 0.0f);
+
+    AddItemsAtSlot(1, 100.0f, 0);
+    frameNode_->ChildrenUpdatedFrom(0);
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 11);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
 }
 } // namespace OHOS::Ace::NG
