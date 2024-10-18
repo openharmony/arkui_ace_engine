@@ -248,7 +248,8 @@ public:
         scrollable->StopScrollable();
     }
 
-    virtual bool StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance = 0.f)
+    virtual bool StartSnapAnimation(
+        float snapDelta, float animationVelocity, float predictVelocity = 0.f, float dragDistance = 0.f)
     {
         return false;
     }

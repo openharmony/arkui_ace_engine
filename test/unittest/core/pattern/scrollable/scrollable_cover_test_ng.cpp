@@ -617,7 +617,8 @@ HWTEST_F(ScrollableCoverTestNg, ProcessScrollMotionStopTest001, TestSize.Level1)
     scrollable->needScrollSnapChange_ = true;
     scrollable->isDragUpdateStop_ = false;
     scrollable->scrollPause_ = false;
-    scrollable->startSnapAnimationCallback_ = [](float delta, float velocity, float dragDistance) { return false; };
+    scrollable->startSnapAnimationCallback_ = [](float delta, float animationVelocity, float predictVelocity,
+                                                  float dragDistance) { return false; };
     scrollable->currentVelocity_ = 10.0f;
     auto propertyCallback = [](float offset) {};
     scrollable->frictionOffsetProperty_ =
