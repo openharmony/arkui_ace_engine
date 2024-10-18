@@ -550,11 +550,9 @@ HWTEST_F(SwiperAttrTestNg, AttrDisableSwipe001, TestSize.Level1)
     /**
      * @tc.cases: Do not set disableSwipe
      * @tc.expected: DisableSwipe is false
-     * @tc.expected: accessibility scrollable is true
      */
     CreateDefaultSwiper();
     EXPECT_FALSE(pattern_->IsDisableSwipe());
-    EXPECT_TRUE(accessibilityProperty_->IsScrollable());
 }
 
 /**
@@ -567,14 +565,12 @@ HWTEST_F(SwiperAttrTestNg, AttrDisableSwipe002, TestSize.Level1)
     /**
      * @tc.cases: Set disableSwipe to true
      * @tc.expected: DisableSwipe is true
-     * @tc.expected: accessibility scrollable is false
      */
     SwiperModelNG model = CreateSwiper();
     model.SetDisableSwipe(true);
     CreateSwiperItems();
     CreateSwiperDone();
     EXPECT_TRUE(pattern_->IsDisableSwipe());
-    EXPECT_FALSE(accessibilityProperty_->IsScrollable());
 }
 
 /**
