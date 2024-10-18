@@ -328,7 +328,7 @@ void TextPattern::StartVibratorByLongPress()
 void TextPattern::HandleLongPress(GestureEvent& info)
 {
     HandleSpanLongPressEvent(info);
-    if (!IsSelectableAndCopy() || isMousePressed_) {
+    if (!IsSelectableAndCopy() || isMousePressed_ || selectOverlay_->GetIsHandleDragging()) {
         return;
     }
     auto host = GetHost();
@@ -702,7 +702,8 @@ void TextPattern::OnHandleTouchUp()
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
-    if (selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsRunning()) {
+    if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsRunning()) ||
+        selectOverlay_->GetIsHandleDragging()) {
         return;
     }
     if (dataDetectorAdapter_->hasClickedAISpan_) {
