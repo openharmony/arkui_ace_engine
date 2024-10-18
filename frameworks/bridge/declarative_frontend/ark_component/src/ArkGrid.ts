@@ -380,6 +380,9 @@ class GridSupportAnimationModifier extends ModifierWithKey<boolean> {
 }
 
 class GridClipModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
   static identity: Symbol = Symbol('gridClip');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -394,6 +397,9 @@ class GridClipModifier extends ModifierWithKey<boolean | object> {
 }
 
 class GridFlingSpeedLimitModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
   static identity: Symbol = Symbol('gridFlingSpeedLimit');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -405,6 +411,9 @@ class GridFlingSpeedLimitModifier extends ModifierWithKey<number> {
 }
 
 class GridAlignItemsModifier extends ModifierWithKey<GridItemAlignment> {
+  constructor(value: GridItemAlignment) {
+    super(value);
+  }
   static identity: Symbol = Symbol('gridAlignItems');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
