@@ -263,8 +263,7 @@ void VideoPattern::ResetStatus()
 
 void VideoPattern::ResetMediaPlayer(bool isResetByUser)
 {
-    CHECK_NULL_VOID(mediaPlayer_);
-    if (!mediaPlayer_->IsMediaPlayerValid() && isResetByUser) {
+    if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid() && isResetByUser) {
         PrepareMediaPlayer();
         return;
     }
@@ -288,9 +287,13 @@ void VideoPattern::ResetMediaPlayer(bool isResetByUser)
 
 void VideoPattern::UpdateMediaPlayerOnBg()
 {
-    RegisterVisibleRatioCallback();
     PrepareSurface();
-    if (ShouldPrepareMediaPlayer()) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        RegisterVisibleRatioCallback();
+        if (ShouldPrepareMediaPlayer()) {
+            PrepareMediaPlayer();
+        }
+    } else {
         PrepareMediaPlayer();
     }
     UpdateSpeed();
@@ -319,6 +322,11 @@ void VideoPattern::PrepareMediaPlayer()
     // src has not set/changed
     if (!videoLayoutProperty->HasVideoSource()) {
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video source is null");
+        return;
+    }
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+        videoLayoutProperty->GetVideoSource() == videoSrcInfo_) {
+        TAG_LOGI(AceLogTag::ACE_VIDEO, "Video source has not changed.");
         return;
     }
     auto videoSrcInfo = videoLayoutProperty->GetVideoSource();
@@ -552,7 +560,9 @@ void VideoPattern::ChangePlayerStatus(bool isPlaying, const PlaybackStatus& stat
         auto eventHub = GetEventHub<VideoEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireStopEvent(param);
-        ReleaseMediaPlayer();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            ReleaseMediaPlayer();
+        }
     }
 
     if (status == PlaybackStatus::PREPARED) {
@@ -849,7 +859,9 @@ void VideoPattern::OnAttachToFrameNode()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
-    RegisterVisibleRatioCallback();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        RegisterVisibleRatioCallback();
+    }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
@@ -1836,7 +1848,6 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
         ChangePlayButtonTag();
     }
     isInitialState_ = videoPattern->GetInitialState();
-    auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
     auto videoSrcInfo = videoPattern->GetVideoSource();
     videoSrcInfo_.src = videoSrcInfo.GetSrc();
     videoSrcInfo_.bundleName = videoSrcInfo.GetBundleName();
