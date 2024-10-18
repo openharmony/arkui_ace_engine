@@ -268,7 +268,7 @@ HWTEST_F(ImageModifierTest, ObjectFit_SetFitType, testing::ext::TestSize.Level1)
         {"ImageFit.None", Ark_ImageFit::ARK_IMAGE_FIT_NONE},
     };
 
-    for(auto& tv : testMap) {
+    for (auto& tv : testMap) {
         modifier_->setObjectFit(frameNode, tv.second);
         auto json = GetJsonValue(node_);
         ASSERT_TRUE(json);
