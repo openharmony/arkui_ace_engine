@@ -145,6 +145,9 @@ class ContentItemStruct extends ViewPU {
         this.declareWatch("isWrapFristText", this.onWrapChange);
         this.declareWatch("isWrapSecondText", this.onWrapChange);
         this.declareWatch("isWrapThirdText", this.onWrapChange);
+        this.declareWatch("primaryTextColor", this.onPropChange);
+        this.declareWatch("secondaryTextColor", this.onPropChange);
+        this.declareWatch("descriptionColor", this.onPropChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
@@ -443,9 +446,15 @@ class ContentItemStruct extends ViewPU {
         else {
             this.itemRowSpace = NORMAL_ITEM_ROW_SPACE;
         }
-        this.primaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_left_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.primaryTextColor;
-        this.secondaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_left_secondary_description_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.secondaryTextColor;
-        this.descriptionColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_left_secondary_description_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.descriptionColor;
+        if (!IS_CLOSE_CHILD_FOCUS) {
+            this.primaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_left_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.primaryTextColor;
+            this.secondaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_left_secondary_description_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.secondaryTextColor;
+            this.descriptionColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_left_secondary_description_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.descriptionColor;
+        } else {
+            this.primaryTextColors = this.primaryTextColor;
+            this.secondaryTextColors = this.secondaryTextColor;
+            this.descriptionColors = this.descriptionColor;
+        }
     }
     onWrapChange() {
         this.isWrapText = this.isWrapFristText || this.isWrapSecondText || this.isWrapThirdText;
@@ -692,6 +701,7 @@ class OperateItemStruct extends ViewPU {
         this.declareWatch("text", this.onPropChange);
         this.declareWatch("isFocus", this.onFocusChange);
         this.declareWatch("isChecked", this.onPropChange);
+        this.declareWatch("secondaryTextColor", this.onFocusChange);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
@@ -1012,7 +1022,11 @@ class OperateItemStruct extends ViewPU {
         this.activedColor = theme.colors.interactiveActive;
     }
     onFocusChange() {
-        this.secondaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_right_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.secondaryTextColor;
+        if (!IS_CLOSE_CHILD_FOCUS) {
+            this.secondaryTextColors = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_right_text_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : this.secondaryTextColor;
+        } else {
+            this.secondaryTextColors = this.secondaryTextColor;
+        }
         this.iconColor = this.isFocus ? { "id": -1, "type": 10001, params: ['sys.color.composeListItem_focused_right_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : { "id": -1, "type": 10001, params: ['sys.color.composeListItem_normal_right_icon_color'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
     }
     onPropChange() {
