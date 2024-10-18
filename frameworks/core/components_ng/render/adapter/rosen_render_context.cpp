@@ -2607,6 +2607,7 @@ void RosenRenderContext::PaintAccessibilityFocus()
     Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
     constexpr uint32_t ACCESSIBILITY_FOCUS_COLOR = 0xbf39b500;
     constexpr double ACCESSIBILITY_FOCUS_WIDTH = 4.0;
+    constexpr float kAccessibilityMinSize = 1.0f;
     double lineWidth = ACCESSIBILITY_FOCUS_WIDTH * PipelineBase::GetCurrentDensity();
     Color paintColor(ACCESSIBILITY_FOCUS_COLOR);
     Dimension paintWidth(lineWidth, DimensionUnit::PX);
@@ -2618,8 +2619,16 @@ void RosenRenderContext::PaintAccessibilityFocus()
     RectT<int32_t> localRect = GetAccessibilityFocusRect().value_or(RectT<int32_t>());
     if (localRect != RectT<int32_t>()) {
         RectF globalRect = frameRect.GetRect();
+        auto localRectWidth = localRect.Width() - 2 * lineWidth;
+        auto localRectHeight = localRect.Height() - 2 * lineWidth;
+        if (NonPositive(localRectWidth)) {
+            localRectWidth = kAccessibilityMinSize;
+        }
+        if (NonPositive(localRectHeight)) {
+            localRectHeight = kAccessibilityMinSize;
+        }
         globalRect.SetRect(globalRect.GetX() + localRect.GetX(), globalRect.GetY() + localRect.GetY(),
-            localRect.Width() - (2 * lineWidth), localRect.Height() - (2 * lineWidth));
+            localRectWidth, localRectHeight);
         globalRect = globalRect.Constrain(frameRect.GetRect());
         if (globalRect.IsEmpty()) {
             ClearAccessibilityFocus();
