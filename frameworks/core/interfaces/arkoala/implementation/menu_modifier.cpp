@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/property/border_property.h"
@@ -73,7 +72,7 @@ namespace MenuAttributeModifier {
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     MenuModelNG::SetFontSize(frameNode, Converter::Convert<Dimension>(*value));
@@ -81,7 +80,7 @@ void FontSizeImpl(Ark_NativePointer node,
 void FontImpl(Ark_NativePointer node,
               const Ark_Font* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto fontOpt = Converter::OptConvert<Font>(*value);
@@ -93,7 +92,7 @@ void FontImpl(Ark_NativePointer node,
     }
 }
 void FontColorImpl(Ark_NativePointer node,
-                   const ResourceColor* value)
+                   const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -101,7 +100,7 @@ void FontColorImpl(Ark_NativePointer node,
     MenuModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void RadiusImpl(Ark_NativePointer node,
-                const Type_MenuAttribute_radius_Arg0* value)
+                const Ark_Union_Dimension_BorderRadiuses* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -125,9 +124,9 @@ void RadiusImpl(Ark_NativePointer node,
     }
 }
 void MenuItemDividerImpl(Ark_NativePointer node,
-                         const Type_MenuAttribute_menuItemDivider_Arg0* options)
+                         const Ark_Union_DividerStyleOptions_Undefined* options)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*options);
@@ -135,9 +134,9 @@ void MenuItemDividerImpl(Ark_NativePointer node,
     LOGE("MenuModifier::MenuItemDividerImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void MenuItemGroupDividerImpl(Ark_NativePointer node,
-                              const Type_MenuAttribute_menuItemGroupDivider_Arg0* options)
+                              const Ark_Union_DividerStyleOptions_Undefined* options)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*options);
@@ -145,9 +144,9 @@ void MenuItemGroupDividerImpl(Ark_NativePointer node,
     LOGE("MenuModifier::MenuItemGroupDividerImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void SubMenuExpandingModeImpl(Ark_NativePointer node,
-                              enum Ark_SubMenuExpandingMode mode)
+                              Ark_SubMenuExpandingMode mode)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     MenuModelNG::SetExpandingMode(frameNode, Converter::OptConvert<SubMenuExpandingMode>(mode));
 }

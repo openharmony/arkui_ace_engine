@@ -207,9 +207,9 @@ HWTEST_F(ScrollerAccessorTest, scrollPage0Test, TestSize.Level1)
     constexpr bool nextFalse = false;
     constexpr bool smooth = false;
 
-    Literal_Boolean_next options1;
+    Ark_Literal_Boolean_next options1;
     options1.next = ArkValue<Ark_Boolean>(nextTrue);
-    Literal_Boolean_next options2;
+    Ark_Literal_Boolean_next options2;
     options2.next = ArkValue<Ark_Boolean>(nextFalse);
 
     ASSERT_NE(accessor_->scrollPage0, nullptr);
@@ -233,10 +233,10 @@ HWTEST_F(ScrollerAccessorTest, scrollPage1Test, TestSize.Level1)
     constexpr bool nextFalse = false;
     constexpr bool smooth = false;
 
-    Literal_Boolean_next_Opt_Axis_direction options1;
+    Ark_Literal_Boolean_next_Axis_direction options1;
     options1.next = ArkValue<Ark_Boolean>(nextTrue);
     options1.direction = ArkValue<Opt_Axis>(Ark_Empty());
-    Literal_Boolean_next_Opt_Axis_direction options2;
+    Ark_Literal_Boolean_next_Axis_direction options2;
     options2.next = ArkValue<Ark_Boolean>(nextFalse);
     options2.direction = ArkValue<Opt_Axis>(Ark_Empty());
 
@@ -587,24 +587,24 @@ HWTEST_F(ScrollerAccessorTest, scrollToPositionTest, TestSize.Level1)
     bool canOverScroll = false;
     RefPtr<Curve> curve = Curves::EASE;
 
-    typedef std::pair<Union_Number_String, Dimension> OneTestStep;
+    typedef std::pair<Ark_Union_Number_String, Dimension> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Union_Number_String, Ark_Number>(1), Dimension(1, DimensionUnit::VP) },
-        { Converter::ArkUnion<Union_Number_String, Ark_Number>(0), Dimension(0, DimensionUnit::VP) },
-        { Converter::ArkUnion<Union_Number_String, Ark_Number>(2.5f), Dimension(2.5, DimensionUnit::VP) },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("-5px"), Dimension(-5, DimensionUnit::PX) },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("22.5px"), Dimension(22.5, DimensionUnit::PX) },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("7vp"), Dimension(7, DimensionUnit::VP) },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("1.5vp"), Dimension(1.5, DimensionUnit::VP) },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("65fp"), Dimension(65, DimensionUnit::FP) },
-        { Converter::ArkUnion<Union_Number_String, Ark_String>("4.5fp"), Dimension(4.5, DimensionUnit::FP) },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1), Dimension(1, DimensionUnit::VP) },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(0), Dimension(0, DimensionUnit::VP) },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(2.5f), Dimension(2.5, DimensionUnit::VP) },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-5px"), Dimension(-5, DimensionUnit::PX) },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("22.5px"), Dimension(22.5, DimensionUnit::PX) },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("7vp"), Dimension(7, DimensionUnit::VP) },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("1.5vp"), Dimension(1.5, DimensionUnit::VP) },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("65fp"), Dimension(65, DimensionUnit::FP) },
+        { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("4.5fp"), Dimension(4.5, DimensionUnit::FP) },
     };
 
     ASSERT_NE(accessor_->scrollTo, nullptr);
 
     for (const auto &[arkOffset, expected]: testPlan) {
         Ark_ScrollOptions options;
-        options.xOffset = Converter::ArkUnion<Union_Number_String, Ark_Number>(0);
+        options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(0);
         options.yOffset = arkOffset;
         options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(Ark_Empty());
         mockScrollerController_->SetScrollDirection(Axis::VERTICAL);
@@ -615,7 +615,7 @@ HWTEST_F(ScrollerAccessorTest, scrollToPositionTest, TestSize.Level1)
         accessor_->scrollTo(peer_, &options);
 
         options.xOffset = arkOffset;
-        options.yOffset = Converter::ArkUnion<Union_Number_String, Ark_Number>(0);
+        options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(0);
         mockScrollerController_->SetScrollDirection(Axis::HORIZONTAL);
         mockScrollerController_->SetAnimateToResult(true);
         EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1).WillOnce(Return(Axis::HORIZONTAL));
@@ -639,21 +639,21 @@ HWTEST_F(ScrollerAccessorTest, scrollToAnimationTest, TestSize.Level1)
     RefPtr<Curve> curve = Curves::EASE;
 
     Ark_ScrollOptions options;
-    options.xOffset = Converter::ArkUnion<Union_Number_String, Ark_Number>(1);
-    options.yOffset = Converter::ArkUnion<Union_Number_String, Ark_Number>(1);
+    options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
+    options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
 
     ASSERT_NE(accessor_->scrollTo, nullptr);
 
     options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(
-        std::optional<Union_ScrollAnimationOptions_Boolean>(
-            Converter::ArkUnion<Union_ScrollAnimationOptions_Boolean, Ark_Boolean>(true)));
+        std::optional<Ark_Union_ScrollAnimationOptions_Boolean>(
+            Converter::ArkUnion<Ark_Union_ScrollAnimationOptions_Boolean, Ark_Boolean>(true)));
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, curve, true, canOverScroll)).Times(1);
     accessor_->scrollTo(peer_, &options);
 
     options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(
-        std::optional<Union_ScrollAnimationOptions_Boolean>(
-            Converter::ArkUnion<Union_ScrollAnimationOptions_Boolean, Ark_Boolean>(false)));
+        std::optional<Ark_Union_ScrollAnimationOptions_Boolean>(
+            Converter::ArkUnion<Ark_Union_ScrollAnimationOptions_Boolean, Ark_Boolean>(false)));
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, curve, false, canOverScroll)).Times(1);
     accessor_->scrollTo(peer_, &options);
@@ -668,8 +668,8 @@ HWTEST_F(ScrollerAccessorTest, scrollToAnimationTest, TestSize.Level1)
     scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_Curve_ICurve>(Ark_Empty());
     scrollAnimationOptions.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
     options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(
-        std::optional<Union_ScrollAnimationOptions_Boolean>(
-            Converter::ArkUnion<Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
+        std::optional<Ark_Union_ScrollAnimationOptions_Boolean>(
+            Converter::ArkUnion<Ark_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
                 scrollAnimationOptions)));
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, defaultDuration, curve, true, canOverScroll)).Times(1);
@@ -689,8 +689,8 @@ HWTEST_F(ScrollerAccessorTest, scrollToCanOverScrollTest, TestSize.Level1)
     RefPtr<Curve> curve = Curves::EASE;
 
     Ark_ScrollOptions options;
-    options.xOffset = Converter::ArkUnion<Union_Number_String, Ark_Number>(1);
-    options.yOffset = Converter::ArkUnion<Union_Number_String, Ark_Number>(1);
+    options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
+    options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
 
     ASSERT_NE(accessor_->scrollTo, nullptr);
 
@@ -700,8 +700,8 @@ HWTEST_F(ScrollerAccessorTest, scrollToCanOverScrollTest, TestSize.Level1)
 
     scrollAnimationOptions.canOverScroll = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(true));
     options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(
-        std::optional<Union_ScrollAnimationOptions_Boolean>(
-            Converter::ArkUnion<Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
+        std::optional<Ark_Union_ScrollAnimationOptions_Boolean>(
+            Converter::ArkUnion<Ark_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
                 scrollAnimationOptions)));
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, curve, smooth, true)).Times(1);
@@ -709,8 +709,8 @@ HWTEST_F(ScrollerAccessorTest, scrollToCanOverScrollTest, TestSize.Level1)
 
     scrollAnimationOptions.canOverScroll = Converter::ArkValue<Opt_Boolean>(std::optional<bool>(false));
     options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(
-        std::optional<Union_ScrollAnimationOptions_Boolean>(
-            Converter::ArkUnion<Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
+        std::optional<Ark_Union_ScrollAnimationOptions_Boolean>(
+            Converter::ArkUnion<Ark_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
                 scrollAnimationOptions)));
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, curve, smooth, false)).Times(1);
@@ -729,8 +729,8 @@ HWTEST_F(ScrollerAccessorTest, scrollToDurationTest, TestSize.Level1)
     RefPtr<Curve> curve = Curves::EASE;
 
     Ark_ScrollOptions options;
-    options.xOffset = Converter::ArkUnion<Union_Number_String, Ark_Number>(1);
-    options.yOffset = Converter::ArkUnion<Union_Number_String, Ark_Number>(1);
+    options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
+    options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
 
     ASSERT_NE(accessor_->scrollTo, nullptr);
 
@@ -740,8 +740,8 @@ HWTEST_F(ScrollerAccessorTest, scrollToDurationTest, TestSize.Level1)
 
     scrollAnimationOptions.duration = Converter::ArkValue<Opt_Number>(std::optional<float>(100.5f));
     options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(
-        std::optional<Union_ScrollAnimationOptions_Boolean>(
-            Converter::ArkUnion<Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
+        std::optional<Ark_Union_ScrollAnimationOptions_Boolean>(
+            Converter::ArkUnion<Ark_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
                 scrollAnimationOptions)));
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, 100.5f, curve, false, canOverScroll)).Times(1);
@@ -749,8 +749,8 @@ HWTEST_F(ScrollerAccessorTest, scrollToDurationTest, TestSize.Level1)
 
     scrollAnimationOptions.duration = Converter::ArkValue<Opt_Number>(std::optional<float>(-1.0f));
     options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(
-        std::optional<Union_ScrollAnimationOptions_Boolean>(
-            Converter::ArkUnion<Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
+        std::optional<Ark_Union_ScrollAnimationOptions_Boolean>(
+            Converter::ArkUnion<Ark_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
                 scrollAnimationOptions)));
     EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
     EXPECT_CALL(*mockScrollerController_, AnimateTo(position, 1000.0f, curve, true, canOverScroll)).Times(1);
@@ -770,8 +770,8 @@ HWTEST_F(ScrollerAccessorTest, scrollToCurveTest, TestSize.Level1)
     bool canOverScroll = false;
 
     Ark_ScrollOptions options;
-    options.xOffset = Converter::ArkUnion<Union_Number_String, Ark_Number>(1);
-    options.yOffset = Converter::ArkUnion<Union_Number_String, Ark_Number>(1);
+    options.xOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
+    options.yOffset = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(1);
 
     ASSERT_NE(accessor_->scrollTo, nullptr);
 
@@ -779,30 +779,30 @@ HWTEST_F(ScrollerAccessorTest, scrollToCurveTest, TestSize.Level1)
     scrollAnimationOptions.canOverScroll = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     scrollAnimationOptions.duration = Converter::ArkValue<Opt_Number>(Ark_Empty());
 
-    typedef std::pair<Union_Curve_ICurve, RefPtr<Curve>> OneTestStep;
+    typedef std::pair<Ark_Union_Curve_ICurve, RefPtr<Curve>> OneTestStep;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkUnion<Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_LINEAR), Curves::LINEAR },
-        { Converter::ArkUnion<Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_EASE), Curves::EASE },
-        { Converter::ArkUnion<Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_EASE_IN), Curves::EASE_IN },
-        { Converter::ArkUnion<Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_EASE_OUT), Curves::EASE_OUT },
-        { Converter::ArkUnion<Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_EASE_IN_OUT), Curves::EASE_IN_OUT },
-        { Converter::ArkUnion<Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_FAST_OUT_SLOW_IN), Curves::FAST_OUT_SLOW_IN },
-        { Converter::ArkUnion<Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_LINEAR_OUT_SLOW_IN),
+        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_LINEAR), Curves::LINEAR },
+        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_EASE), Curves::EASE },
+        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_EASE_IN), Curves::EASE_IN },
+        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_EASE_OUT), Curves::EASE_OUT },
+        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_EASE_IN_OUT), Curves::EASE_IN_OUT },
+        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_FAST_OUT_SLOW_IN), Curves::FAST_OUT_SLOW_IN },
+        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_LINEAR_OUT_SLOW_IN),
             Curves::LINEAR_OUT_SLOW_IN },
-        { Converter::ArkUnion<Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_FAST_OUT_LINEAR_IN),
+        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_FAST_OUT_LINEAR_IN),
             Curves::FAST_OUT_LINEAR_IN },
-        { Converter::ArkUnion<Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_EXTREME_DECELERATION),
+        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_EXTREME_DECELERATION),
             Curves::EXTREME_DECELERATION },
-        { Converter::ArkUnion<Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_SMOOTH), Curves::SMOOTH },
-        { Converter::ArkUnion<Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_FRICTION), Curves::FRICTION },
+        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_SMOOTH), Curves::SMOOTH },
+        { Converter::ArkUnion<Ark_Union_Curve_ICurve, Ark_Curve>(ARK_CURVE_FRICTION), Curves::FRICTION },
     };
 
     for (const auto &[arkCurve, expected]: testPlan) {
         scrollAnimationOptions.curve = Converter::ArkValue<Opt_Union_Curve_ICurve>(
-            std::optional<Union_Curve_ICurve>(arkCurve));
+            std::optional<Ark_Union_Curve_ICurve>(arkCurve));
         options.animation = Converter::ArkValue<Opt_Union_ScrollAnimationOptions_Boolean>(
-            std::optional<Union_ScrollAnimationOptions_Boolean>(
-                Converter::ArkUnion<Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
+            std::optional<Ark_Union_ScrollAnimationOptions_Boolean>(
+                Converter::ArkUnion<Ark_Union_ScrollAnimationOptions_Boolean, Ark_ScrollAnimationOptions>(
                     scrollAnimationOptions)));
         EXPECT_CALL(*mockScrollerController_, GetScrollDirection()).Times(1);
         EXPECT_CALL(*mockScrollerController_, AnimateTo(position, duration, expected, smooth, canOverScroll))

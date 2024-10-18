@@ -111,7 +111,7 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestDefaultValues, TestSize.Level
 }
 
 // Valid values for attribute 'selectedColor' of method 'selectedColor'
-static std::vector<std::tuple<std::string, ResourceColor, std::string>> selectedColorSelectedColorValidValues = {
+static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> selectedColorSelectedColorValidValues = {
     { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
 };
@@ -126,8 +126,8 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    ResourceColor inputValueSelectedColor;
-    ResourceColor initValueSelectedColor;
+    Ark_ResourceColor inputValueSelectedColor;
+    Ark_ResourceColor initValueSelectedColor;
 
     // Initial setup
     initValueSelectedColor = std::get<1>(selectedColorSelectedColorValidValues[0]);
@@ -155,7 +155,7 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestInvalidValues, TestSize.Level
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    ResourceColor initValueSelectedColor;
+    Ark_ResourceColor initValueSelectedColor;
 
     // Initial setup
     initValueSelectedColor = std::get<1>(selectedColorSelectedColorValidValues[0]);
@@ -176,7 +176,7 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestDefaultValues, TestSize.Lev
 }
 
 // Valid values for attribute 'unselectedColor' of method 'unselectedColor'
-static std::vector<std::tuple<std::string, ResourceColor, std::string>> unselectedColorUnselectedColorValidValues = {
+static std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> unselectedColorUnselectedColorValidValues = {
     { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
 };
@@ -191,8 +191,8 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestValidValues, TestSize.Level
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    ResourceColor inputValueUnselectedColor;
-    ResourceColor initValueUnselectedColor;
+    Ark_ResourceColor inputValueUnselectedColor;
+    Ark_ResourceColor initValueUnselectedColor;
 
     // Initial setup
     initValueUnselectedColor = std::get<1>(unselectedColorUnselectedColorValidValues[0]);
@@ -219,7 +219,7 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestInvalidValues, TestSize.Lev
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    ResourceColor initValueUnselectedColor;
+    Ark_ResourceColor initValueUnselectedColor;
 
     // Initial setup
     initValueUnselectedColor = std::get<1>(unselectedColorUnselectedColorValidValues[0]);

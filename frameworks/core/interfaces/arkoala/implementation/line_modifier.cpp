@@ -31,7 +31,7 @@ struct LineOptions {
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-LineOptions Convert(const Literal_Opt_Union_String_Number_width_height& src)
+LineOptions Convert(const Ark_Literal_Union_String_Number_width_height& src)
 {
     LineOptions options;
     options.width = Converter::OptConvert<Dimension>(src.width);
@@ -44,9 +44,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LineInterfaceModifier {
 
 void SetLineOptionsImpl(Ark_NativePointer node,
-                        const Opt_Type_LineInterface_setLineOptions_Arg0* value)
+                        const Opt_Literal_Union_String_Number_width_height* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto options = Converter::OptConvert<LineOptions>(*value);
@@ -64,10 +64,20 @@ namespace LineAttributeModifier {
 void StartPointImpl(Ark_NativePointer node,
                     const Array_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //LineModelNG::SetStartPoint(frameNode, convValue);
 }
 void EndPointImpl(Ark_NativePointer node,
                   const Array_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //LineModelNG::SetEndPoint(frameNode, convValue);
 }
 } // LineAttributeModifier
 const GENERATED_ArkUILineModifier* GetLineModifier()

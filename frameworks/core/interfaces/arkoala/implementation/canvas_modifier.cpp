@@ -13,28 +13,48 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasInterfaceModifier {
 void SetCanvasOptions0Impl(Ark_NativePointer node,
-                           const Opt_Type_CanvasInterface_setCanvasOptions_Arg0* context)
+                           const Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext* context)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = context ? Converter::OptConvert<type>(*context) : std::nullopt;
+    //CanvasModelNG::SetSetCanvasOptions0(frameNode, convValue);
 }
 void SetCanvasOptions1Impl(Ark_NativePointer node,
-                           const Type_CanvasInterface_setCanvasOptions1_Arg0* context,
+                           const Ark_Union_CanvasRenderingContext2D_DrawingRenderingContext* context,
                            const Ark_ImageAIOptions* imageAIOptions)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(context);
+    //auto convValue = Converter::OptConvert<type>(context); // for enums
+    //CanvasModelNG::SetSetCanvasOptions1(frameNode, convValue);
 }
 } // CanvasInterfaceModifier
 namespace CanvasAttributeModifier {
 void OnReadyImpl(Ark_NativePointer node,
                  Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //CanvasModelNG::SetOnReady(frameNode, convValue);
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
                         Ark_Boolean enable)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(enable);
+    //CanvasModelNG::SetEnableAnalyzer(frameNode, convValue);
 }
 } // CanvasAttributeModifier
 const GENERATED_ArkUICanvasModifier* GetCanvasModifier()

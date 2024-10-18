@@ -22,7 +22,7 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
-inline void AssignArkValue(Tuple_Ark_ResourceColor_Number& dst, const std::pair<Ark_ResourceColor, Ark_Number>& src)
+inline void AssignArkValue(Ark_Tuple_ResourceColor_Number& dst, const std::pair<Ark_ResourceColor, Ark_Number>& src)
 {
     dst.value0 = src.first;
     dst.value1 = src.second;

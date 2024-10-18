@@ -13,39 +13,74 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace XComponentInterfaceModifier {
 void SetXComponentOptions0Impl(Ark_NativePointer node,
-                               const Type_XComponentInterface_setXComponentOptions_Arg0* value)
+                               const Ark_Type_XComponentInterface_value* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //XComponentModelNG::SetSetXComponentOptions0(frameNode, convValue);
 }
 void SetXComponentOptions1Impl(Ark_NativePointer node,
-                               const Type_XComponentInterface_setXComponentOptions1_Arg0* value)
+                               const Ark_Type_XComponentInterface_value* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //XComponentModelNG::SetSetXComponentOptions1(frameNode, convValue);
 }
 void SetXComponentOptions2Impl(Ark_NativePointer node,
                                const Ark_XComponentOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(options);
+    //auto convValue = Converter::OptConvert<type_name>(*options);
+    //XComponentModelNG::SetSetXComponentOptions2(frameNode, convValue);
 }
 } // XComponentInterfaceModifier
 namespace XComponentAttributeModifier {
 void OnLoadImpl(Ark_NativePointer node,
                 Ark_Function callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //XComponentModelNG::SetOnLoad(frameNode, convValue);
 }
 void OnDestroyImpl(Ark_NativePointer node,
                    Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //XComponentModelNG::SetOnDestroy(frameNode, convValue);
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
                         Ark_Boolean enable)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(enable);
+    //XComponentModelNG::SetEnableAnalyzer(frameNode, convValue);
 }
 void EnableSecureImpl(Ark_NativePointer node,
                       Ark_Boolean isSecure)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(isSecure);
+    //XComponentModelNG::SetEnableSecure(frameNode, convValue);
 }
 } // XComponentAttributeModifier
 const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()

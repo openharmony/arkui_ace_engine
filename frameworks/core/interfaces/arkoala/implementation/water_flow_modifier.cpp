@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -20,64 +22,136 @@ namespace WaterFlowInterfaceModifier {
 void SetWaterFlowOptionsImpl(Ark_NativePointer node,
                              const Opt_WaterFlowOptions* options)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //WaterFlowModelNG::SetSetWaterFlowOptions(frameNode, convValue);
 }
 } // WaterFlowInterfaceModifier
 namespace WaterFlowAttributeModifier {
 void ColumnsTemplateImpl(Ark_NativePointer node,
                          const Ark_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<std::string>(*value);
+    //WaterFlowModelNG::SetColumnsTemplate(frameNode, convValue);
 }
 void ItemConstraintSizeImpl(Ark_NativePointer node,
                             const Ark_ConstraintSizeOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //WaterFlowModelNG::SetItemConstraintSize(frameNode, convValue);
 }
 void RowsTemplateImpl(Ark_NativePointer node,
                       const Ark_String* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<std::string>(*value);
+    //WaterFlowModelNG::SetRowsTemplate(frameNode, convValue);
 }
 void ColumnsGapImpl(Ark_NativePointer node,
                     const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //WaterFlowModelNG::SetColumnsGap(frameNode, convValue);
 }
 void RowsGapImpl(Ark_NativePointer node,
                  const Ark_Length* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //WaterFlowModelNG::SetRowsGap(frameNode, convValue);
 }
 void LayoutDirectionImpl(Ark_NativePointer node,
-                         enum Ark_FlexDirection value)
+                         Ark_FlexDirection value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //WaterFlowModelNG::SetLayoutDirection(frameNode, convValue);
 }
 void NestedScrollImpl(Ark_NativePointer node,
                       const Ark_NestedScrollOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //WaterFlowModelNG::SetNestedScroll(frameNode, convValue);
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
                                  Ark_Boolean value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    [[maybe_unused]]
+    auto convValue = Converter::Convert<bool>(value);
+    //WaterFlowModelNG::SetEnableScrollInteraction(frameNode, convValue);
 }
 void FrictionImpl(Ark_NativePointer node,
-                  const Type_WaterFlowAttribute_friction_Arg0* value)
+                  const Ark_Union_Number_Resource* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //WaterFlowModelNG::SetFriction(frameNode, convValue);
 }
 void CachedCountImpl(Ark_NativePointer node,
                      const Ark_Number* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //WaterFlowModelNG::SetCachedCount(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
                       Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //WaterFlowModelNG::SetOnReachStart(frameNode, convValue);
 }
 void OnReachEndImpl(Ark_NativePointer node,
                     Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //WaterFlowModelNG::SetOnReachEnd(frameNode, convValue);
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
                             Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //WaterFlowModelNG::SetOnScrollFrameBegin(frameNode, convValue);
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
                        Ark_Function event)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = [frameNode](input values) { code }
+    //WaterFlowModelNG::SetOnScrollIndex(frameNode, convValue);
 }
 } // WaterFlowAttributeModifier
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()

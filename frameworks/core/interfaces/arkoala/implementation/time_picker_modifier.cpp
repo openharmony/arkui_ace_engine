@@ -39,7 +39,7 @@ namespace TimePickerInterfaceModifier {
 void SetTimePickerOptionsImpl(Ark_NativePointer node,
                               const Opt_TimePickerOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 
     auto showSeconds = false;
@@ -105,6 +105,11 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
 void DateTimeOptionsImpl(Ark_NativePointer node,
                          const Ark_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TimePickerModelNG::SetDateTimeOptions(frameNode, convValue);
     LOGE("TimePickerInterfaceModifier::DateTimeOptionsImpl - Ark_CustomObject isn't supported");
 }
 void OnChangeImpl(Ark_NativePointer node,

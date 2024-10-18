@@ -73,7 +73,7 @@ namespace MenuItemGroupInterfaceModifier {
 void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
                                  const Opt_MenuItemGroupOptions* value)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 
     auto options = value ? Converter::OptConvert<Converter::MenuItemGroupOptions>(*value) : std::nullopt;

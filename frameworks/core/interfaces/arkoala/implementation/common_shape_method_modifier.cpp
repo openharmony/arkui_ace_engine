@@ -32,7 +32,7 @@ namespace {
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CommonShapeMethodModifier {
 void StrokeImpl(Ark_NativePointer node,
-                const ResourceColor* value)
+                const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -40,7 +40,7 @@ void StrokeImpl(Ark_NativePointer node,
     ShapeModelNG::SetStroke(frameNode, Converter::OptConvert<Color>(*value));
 }
 void FillImpl(Ark_NativePointer node,
-              const ResourceColor* value)
+              const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -48,7 +48,7 @@ void FillImpl(Ark_NativePointer node,
     ShapeModelNG::SetFill(frameNode, Converter::OptConvert<Color>(*value));
 }
 void StrokeDashOffsetImpl(Ark_NativePointer node,
-                          const Type_CommonShapeMethod_strokeDashOffset_Arg0* value)
+                          const Ark_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -59,7 +59,7 @@ void StrokeDashOffsetImpl(Ark_NativePointer node,
     ShapeModelNG::SetStrokeDashOffset(frameNode, strokeDashOffset);
 }
 void StrokeLineCapImpl(Ark_NativePointer node,
-                       enum Ark_LineCapStyle value)
+                       Ark_LineCapStyle value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -68,7 +68,7 @@ void StrokeLineCapImpl(Ark_NativePointer node,
     ShapeModelNG::SetStrokeLineCap(frameNode, intLineCapStyle);
 }
 void StrokeLineJoinImpl(Ark_NativePointer node,
-                        enum Ark_LineJoinStyle value)
+                        Ark_LineJoinStyle value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -77,7 +77,7 @@ void StrokeLineJoinImpl(Ark_NativePointer node,
     ShapeModelNG::SetStrokeLineJoin(frameNode, intLineJoinStyle);
 }
 void StrokeMiterLimitImpl(Ark_NativePointer node,
-                          const Type_CommonShapeMethod_strokeMiterLimit_Arg0* value)
+                          const Ark_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -87,7 +87,7 @@ void StrokeMiterLimitImpl(Ark_NativePointer node,
     ShapeModelNG::SetStrokeMiterLimit(frameNode, strokeMiterLimit);
 }
 void StrokeOpacityImpl(Ark_NativePointer node,
-                       const Type_CommonShapeMethod_strokeOpacity_Arg0* value)
+                       const Ark_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -97,7 +97,7 @@ void StrokeOpacityImpl(Ark_NativePointer node,
     ShapeModelNG::SetStrokeOpacity(frameNode, strokeOpacity);
 }
 void FillOpacityImpl(Ark_NativePointer node,
-                     const Type_CommonShapeMethod_fillOpacity_Arg0* value)
+                     const Ark_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -111,6 +111,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto strokeWidth = Converter::OptConvert<Dimension>(*value);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
@@ -126,7 +127,12 @@ void AntiAliasImpl(Ark_NativePointer node,
 void StrokeDashArrayImpl(Ark_NativePointer node,
                          const Array_CustomObject* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     LOGE("ARKOALA CommonShapeMethodModifier.StrokeDashArray -> Method is not implemented.");
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonShapeMethodModelNG::SetStrokeDashArray(frameNode, convValue);
 }
 } // CommonShapeMethodModifier
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()

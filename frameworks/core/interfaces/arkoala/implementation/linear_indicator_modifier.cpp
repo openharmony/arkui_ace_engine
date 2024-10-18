@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/utility/converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -21,20 +23,37 @@ void SetLinearIndicatorOptionsImpl(Ark_NativePointer node,
                                    const Opt_Number* count,
                                    const Opt_LinearIndicatorController* controller)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(count);
+    //auto convValue = Converter::OptConvert<type>(count); // for enums
+    //LinearIndicatorModelNG::SetSetLinearIndicatorOptions(frameNode, convValue);
 }
 } // LinearIndicatorInterfaceModifier
 namespace LinearIndicatorAttributeModifier {
 void IndicatorStyleImpl(Ark_NativePointer node,
                         const Opt_LinearIndicatorStyle* style)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = style ? Converter::OptConvert<type>(*style) : std::nullopt;
+    //LinearIndicatorModelNG::SetIndicatorStyle(frameNode, convValue);
 }
 void IndicatorLoopImpl(Ark_NativePointer node,
                        const Opt_Boolean* loop)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = loop ? Converter::OptConvert<type>(*loop) : std::nullopt;
+    //LinearIndicatorModelNG::SetIndicatorLoop(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const Opt_Function* callback)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = callback ? Converter::OptConvert<type>(*callback) : std::nullopt;
+    //LinearIndicatorModelNG::SetOnChange(frameNode, convValue);
 }
 } // LinearIndicatorAttributeModifier
 const GENERATED_ArkUILinearIndicatorModifier* GetLinearIndicatorModifier()

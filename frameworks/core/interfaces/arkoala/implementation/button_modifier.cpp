@@ -109,7 +109,7 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
     }
 }
 void SetButtonOptions2Impl(Ark_NativePointer node,
-                           const ResourceStr* label,
+                           const Ark_ResourceStr* label,
                            const Opt_ButtonOptions* options)
 {
     if (options != nullptr) {
@@ -162,7 +162,7 @@ void RoleImpl(Ark_NativePointer node,
     ButtonModelNG::SetRole(frameNode, Converter::OptConvert<ButtonRole>(value));
 }
 void FontColorImpl(Ark_NativePointer node,
-                   const ResourceColor* value)
+                   const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -181,7 +181,7 @@ void FontSizeImpl(Ark_NativePointer node,
     ButtonModelNG::SetFontSize(frameNode, fontSize);
 }
 void FontWeightImpl(Ark_NativePointer node,
-                    const Type_ButtonAttribute_fontWeight_Arg0* value)
+                    const Ark_Union_Number_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -197,7 +197,7 @@ void FontStyleImpl(Ark_NativePointer node,
     ButtonModelNG::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(value));
 }
 void FontFamilyImpl(Ark_NativePointer node,
-                    const Type_ButtonAttribute_fontFamily_Arg0* value)
+                    const Ark_Union_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -208,6 +208,9 @@ void FontFamilyImpl(Ark_NativePointer node,
 void ContentModifierImpl(Ark_NativePointer node,
                          const Ark_CustomObject* modifier)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(modifier);
     LOGE("ARKOALA ButtonAttribute::ContentModifierImpl -> Method is not "
             "implemented.");
 }
@@ -216,6 +219,7 @@ void LabelStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     auto parameters = Converter::OptConvert<ButtonParameters>(*value);
     ButtonModelNG::SetLabelStyle(frameNode, parameters);
 }

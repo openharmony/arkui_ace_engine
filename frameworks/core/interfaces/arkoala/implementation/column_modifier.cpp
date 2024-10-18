@@ -82,9 +82,11 @@ void JustifyContentImpl(Ark_NativePointer node,
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     LOGE("ARKOALA ColumnAttribute_PointLightImpl -> Method is not FULLY "
         "implemented.");
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
     ACE_UPDATE_NODE_RENDER_CONTEXT(LightIlluminated,
         (float)Converter::ConvertOrDefault(value->illuminated, 0), frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);

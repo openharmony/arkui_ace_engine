@@ -32,8 +32,8 @@ public:
     void TriggerScrollTo(const Ark_ScrollOptions* options);
     void TriggerScrollEdge(Ark_Edge value, const Opt_ScrollEdgeOptions* options);
     void TriggerFling(const Ark_Number* velocity);
-    void TriggerScrollPage0(const Literal_Boolean_next* value);
-    void TriggerScrollPage1(const Literal_Boolean_next_Opt_Axis_direction* value);
+    void TriggerScrollPage0(const Ark_Literal_Boolean_next* value);
+    void TriggerScrollPage1(const Ark_Literal_Boolean_next_Axis_direction* value);
     Ark_NativePointer TriggerCurrentOffset();
     void TriggerScrollToIndex(const Ark_Number* value, const Opt_Boolean* smooth,
         const Opt_ScrollAlign* align, const Opt_ScrollToIndexOptions* options);
