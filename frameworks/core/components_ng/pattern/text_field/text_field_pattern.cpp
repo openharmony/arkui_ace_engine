@@ -6236,7 +6236,7 @@ void TextFieldPattern::CreateErrorParagraph(const std::string& content)
     errorTextStyle.SetMaxFontScale(ERROR_TEXT_MAX_FONT_SCALE);
     ParagraphStyle paraStyle {
         .direction = TextFieldLayoutAlgorithm::GetTextDirection(contentController_->GetTextValue()),
-        .align = TextAlign::START,
+        .align = errorTextStyle.GetTextAlign(),
         .maxLines = 1,
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .textOverflow = TextOverflow::ELLIPSIS,
