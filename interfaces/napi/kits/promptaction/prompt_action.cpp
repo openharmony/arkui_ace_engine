@@ -1815,18 +1815,28 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
 napi_value JSRemoveCustomDialog(napi_env env, napi_callback_info info)
 {
+    size_t argc = 1;
+    napi_value argv = nullptr;
+    napi_value thisVar = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data);
+    int32_t instanceId = Container::CurrentIdSafely();
+    if (data) {
+        int32_t* instanceIdPtr = reinterpret_cast<int32_t*>(data);
+        instanceId = *instanceIdPtr;
+    }
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (delegate) {
-        delegate->RemoveCustomDialog();
+        delegate->RemoveCustomDialog(instanceId);
     }
     return nullptr;
 }
 
 void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
-    std::function<void(const int32_t& info)>& onWillDismiss)
+    std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss)
 {
     onWillDismiss = [env = asyncContext->env, onWillDismissRef = asyncContext->onWillDismissRef]
-        (const int32_t& info) {
+        (const int32_t& info, const int32_t& instanceId) {
         if (onWillDismissRef) {
             napi_value onWillDismissFunc = nullptr;
             napi_value value = nullptr;
@@ -1834,7 +1844,9 @@ void ParseDialogCallback(std::shared_ptr<PromptAsyncContext>& asyncContext,
             napi_value paramObj = nullptr;
             napi_create_object(env, &paramObj);
 
-            napi_create_function(env, "dismiss", strlen("dismiss"), JSRemoveCustomDialog, nullptr, &funcValue);
+            napi_value id = nullptr;
+            napi_create_int32(env, instanceId, &id);
+            napi_create_function(env, "dismiss", strlen("dismiss"), JSRemoveCustomDialog, id, &funcValue);
             napi_set_named_property(env, paramObj, "dismiss", funcValue);
 
             napi_create_int32(env, info, &value);
@@ -1935,7 +1947,7 @@ std::function<void()> GetCustomBuilder(napi_env env, const std::shared_ptr<Promp
 }
 
 PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
-    std::function<void(const int32_t& info)> onWillDismiss)
+    std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss)
 {
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
@@ -2168,7 +2180,7 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
     napi_value result = nullptr;
     napi_create_promise(env, &asyncContext->deferred, &result);
 
-    std::function<void(const int32_t& info)> onWillDismiss = nullptr;
+    std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss = nullptr;
     if (asyncContext->onWillDismissRef) {
         ParseDialogCallback(asyncContext, onWillDismiss);
     }

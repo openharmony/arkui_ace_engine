@@ -219,7 +219,7 @@ struct DialogProperties {
     bool isSelect = false;                // init checkbox state
     std::vector<ButtonInfo> buttons;
     std::function<void()> onCancel;       // NG cancel callback
-    std::function<void(const int32_t& info)> onWillDismiss; // Cancel Dismiss Callback
+    std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss; // Cancel Dismiss Callback
     std::function<void(int32_t, int32_t)> onSuccess;      // NG prompt success callback
     std::function<void(const bool)> onChange;             // onChange success callback
     std::function<void(DialogProperties&)> onLanguageChange;    // onLanguageChange callback
@@ -286,7 +286,7 @@ struct PromptDialogAttr {
     bool isModal = false;
     bool enableHoverMode = false;
     std::function<void()> customBuilder;
-    std::function<void(const int32_t& info)> customOnWillDismiss;
+    std::function<void(const int32_t& info, const int32_t& instanceId)> customOnWillDismiss;
 
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;

@@ -226,8 +226,9 @@ void DialogPattern::HandleClick(const GestureEvent& info)
                 return;
             } else if (this->ShouldDismiss()) {
                 overlayManager->SetDismissDialogId(host->GetId());
-                this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE));
-                TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss");
+                auto currentId = Container::CurrentId();
+                this->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE), currentId);
+                TAG_LOGI(AceLogTag::ACE_DIALOG, "Dialog Should Dismiss, currentId: %{public}d", currentId);
                 return;
             }
             PopDialog(-1);
