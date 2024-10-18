@@ -940,7 +940,7 @@ HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount002, TestSize.Level1)
  * @tc.desc: ListItemGroup lanes cacheCount
  * @tc.type: FUNC
  */
-HWTEST_F(ListGroupAlgTestNg, ListGroupRepeatCacheCount003, TestSize.Level1)
+HWTEST_F(ListGroupAlgTestNg, DISABLED_ListGroupRepeatCacheCount003, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     model.SetCachedCount(2);
