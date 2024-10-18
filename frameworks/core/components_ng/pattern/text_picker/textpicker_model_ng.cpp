@@ -110,6 +110,30 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
     options_.clear();
 }
 
+void TextPickerModelNG::Create(FrameNode* frameNode, uint32_t columnKind)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetColumnsKind(columnKind);
+
+    if (frameNode->GetChildren().empty()) {
+        auto columnNode = CreateColumnNode(columnKind, showCount_);
+        auto stackNode = CreateStackNode();
+        auto buttonNode = CreateButtonNode();
+        auto columnBlendNode = CreateColumnNode();
+        buttonNode->MountToParent(stackNode);
+        columnNode->MountToParent(columnBlendNode);
+        columnBlendNode->MountToParent(stackNode);
+        columnNode->MarkModifyDone();
+        columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto layoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
+        layoutProperty->UpdateAlignment(Alignment::CENTER);
+        stackNode->MountToParent(AceType::Claim(frameNode));
+    }
+    options_.clear();
+}
+
 void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme)
 {
     CHECK_NULL_VOID(pickerTheme);
@@ -227,6 +251,9 @@ RefPtr<FrameNode> TextPickerModelNG::CreateFrameNode(int32_t nodeId)
     CHECK_NULL_RETURN(pickerTheme, textPickerNode);
     showCount_ = BUFFER_NODE_NUMBER + pickerTheme->GetShowOptionCount();
     rangeValue_.clear();
+    options_.clear();
+    isCascade_ = false;
+    isSingleRange_ = true;
     SetDefaultAttributes(textPickerNode, pickerTheme);
     return textPickerNode;
 }
@@ -484,6 +511,15 @@ void TextPickerModelNG::MultiInit(const RefPtr<PickerTheme> pickerTheme)
 void TextPickerModelNG::SetIsCascade(bool isCascade)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    isCascade_ = isCascade;
+    textPickerPattern->SetIsCascade(isCascade_);
+}
+
+void TextPickerModelNG::SetIsCascade(FrameNode* frameNode, bool isCascade)
+{
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
@@ -1017,6 +1053,30 @@ void TextPickerModelNG::SetValue(FrameNode* frameNode, const std::string& value)
     }
 }
 
+void TextPickerModelNG::ValidateData(
+    NG::TextCascadePickerOptions& options, const std::vector<std::string>& values, uint32_t index,
+    std::vector<std::string>& selectedValues, std::vector<uint32_t>& valuesIndex)
+{
+    if (values.size() < index + 1) {
+        if (options.rangeResult.size() > 0) {
+            selectedValues.emplace_back(options.rangeResult[0]);
+        } else {
+            selectedValues.emplace_back("");
+        }
+        valuesIndex.emplace_back(0);
+    } else {
+        auto valueIterator =
+            std::find(options.rangeResult.begin(), options.rangeResult.end(), values[index]);
+        if (valueIterator == options.rangeResult.end()) {
+            selectedValues.emplace_back(options.rangeResult.front());
+            valuesIndex.emplace_back(0);
+        } else {
+            selectedValues.emplace_back(values[index]);
+            valuesIndex.emplace_back(std::distance(options.rangeResult.begin(), valueIterator));
+        }
+    }
+}
+
 void TextPickerModelNG::SetValues(FrameNode* frameNode, const std::vector<std::string>& values)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1024,26 +1084,16 @@ void TextPickerModelNG::SetValues(FrameNode* frameNode, const std::vector<std::s
     CHECK_NULL_VOID(textPickerPattern);
     std::vector<std::string> selectedValues;
     std::vector<uint32_t> valuesIndex;
-    for (uint32_t i = 0; i < options_.size(); i++) {
-        if (values.size() > 0 && values.size() < i + 1) {
-            if (options_[i].rangeResult.size() > 0) {
-                selectedValues.emplace_back(options_[i].rangeResult[0]);
-            } else {
-                selectedValues.emplace_back("");
-            }
-            valuesIndex.emplace_back(0);
-        } else {
-            auto valueIterator = std::find(options_[i].rangeResult.begin(), options_[i].rangeResult.end(), values[i]);
-            if (valueIterator == options_[i].rangeResult.end()) {
-                selectedValues[i] = options_[i].rangeResult.front();
-                valuesIndex.emplace_back(0);
-            } else {
-                selectedValues.emplace_back(values[i]);
-                valuesIndex.emplace_back(std::distance(options_[i].rangeResult.begin(), valueIterator));
-            }
+    if (!isCascade_) {
+        for (uint32_t i = 0; i < options_.size(); i++) {
+            ValidateData(options_[i], values, i, selectedValues, valuesIndex);
+        }
+        TextPickerModelNG::SetSelecteds(frameNode, valuesIndex);
+    } else {
+        for (uint32_t i = 0; i < values.size(); i++) {
+            selectedValues.emplace_back(values[i]);
         }
     }
-    TextPickerModelNG::SetSelecteds(frameNode, valuesIndex);
     textPickerPattern->SetValues(selectedValues);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Values, selectedValues, frameNode);
 }

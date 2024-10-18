@@ -90,6 +90,7 @@ public:
     void SetDivider(const ItemDivider& divider) override;
     void HasUserDefinedOpacity() override;
 
+    static void Create(FrameNode* frameNode, uint32_t columnKind);
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
     static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
@@ -105,6 +106,7 @@ public:
     static bool IsSingle(FrameNode* frameNode);
     static bool GetSingleRange(FrameNode* frameNode, std::vector<NG::RangeContent>& rangeValue);
     static bool IsCascade(FrameNode* frameNode);
+    static void SetIsCascade(FrameNode* frameNode, bool isCascade);
     static bool GetMultiOptions(FrameNode* frameNode, std::vector<NG::TextCascadePickerOptions>& options);
     static uint32_t GetMaxCount(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -139,9 +141,10 @@ private:
     void SetCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetUnCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
-
+    static void ValidateData(
+        NG::TextCascadePickerOptions& options, const std::vector<std::string>& values, uint32_t index,
+        std::vector<std::string>& selectedValues, std::vector<uint32_t>& valuesIndex);
     static inline uint32_t showCount_ = 0;
-    std::vector<uint32_t> kinds_;
     static inline bool isCascade_ = false;
     static inline std::vector<NG::RangeContent> rangeValue_;
     static inline std::vector<NG::TextCascadePickerOptions> options_;
