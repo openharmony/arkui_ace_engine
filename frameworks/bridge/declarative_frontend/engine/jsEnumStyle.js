@@ -3381,6 +3381,13 @@ var GestureRecognizerState;
   GestureRecognizerState[GestureRecognizerState["FAILED"] = 5] = "FAILED";
 })(GestureRecognizerState || (GestureRecognizerState = {}));
 
+var CrownAction;
+(function (CrownAction) {
+  CrownAction[CrownAction["BEGIN"] = 0] = "BEGIN";
+  CrownAction[CrownAction["UPDATE"] = 1] = "UPDATE";
+  CrownAction[CrownAction["END"] = 2] = "END";
+})(CrownAction || (CrownAction = {}));
+
 let GridItemAlignment;
 (function (GridItemAlignment) {
   GridItemAlignment[GridItemAlignment['DEFAULT'] = 0] = 'DEFAULT';

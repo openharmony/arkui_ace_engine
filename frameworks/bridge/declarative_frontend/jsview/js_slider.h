@@ -56,6 +56,7 @@ public:
     static void SetBlockSize(const JSCallbackInfo& info);
     static void SetBlockStyle(const JSCallbackInfo& info);
     static void SetStepSize(const JSCallbackInfo& info);
+    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
     static void SetValidSlideRange(const JSCallbackInfo& info);
 

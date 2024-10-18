@@ -28,6 +28,10 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/gradient_property.h"
 
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
+
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT SliderModel {
 public:
@@ -105,6 +109,9 @@ public:
     virtual void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) = 0;
     virtual void SetOnChangeEvent(std::function<void(float)>&& onChangeEvent) = 0;
     virtual void SetValidSlideRange(float fromValue, float toValue) {};
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {};
+#endif
 
     virtual void ResetBlockBorderColor() = 0;
     virtual void ResetBlockBorderWidth() = 0;
@@ -119,6 +126,9 @@ public:
     virtual void ResetSliderInteractionMode() = 0;
     virtual void ResetMinResponsiveDistance() = 0;
     virtual void ResetValidSlideRange() = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void ResetDigitalCrownSensitivity() = 0;
+#endif
 
 private:
     static std::unique_ptr<SliderModel> instance_;
