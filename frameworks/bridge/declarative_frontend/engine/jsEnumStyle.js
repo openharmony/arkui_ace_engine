@@ -3447,3 +3447,12 @@ class ImageAnalyzerController {
     return this.getSupportTypesAction();
   }
 }
+
+var WebNavigationType;
+(function (WebNavigationType) {
+  WebNavigationType[WebNavigationType['UNKNOWN'] = 0] = 'UNKNOWN';
+  WebNavigationType[WebNavigationType['MAIN_FRAME_NEW_ENTRY'] = 1] = 'MAIN_FRAME_NEW_ENTRY';
+  WebNavigationType[WebNavigationType['MAIN_FRAME_EXISTING_ENTRY'] = 2] = 'MAIN_FRAME_EXISTING_ENTRY';
+  WebNavigationType[WebNavigationType['NAVIGATION_TYPE_NEW_SUBFRAME'] = 4] = 'NAVIGATION_TYPE_NEW_SUBFRAME';
+  WebNavigationType[WebNavigationType['NAVIGATION_TYPE_AUTO_SUBFRAME'] = 5] = 'NAVIGATION_TYPE_AUTO_SUBFRAME';
+})(WebNavigationType || (WebNavigationType = {}));
