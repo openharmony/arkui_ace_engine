@@ -54,11 +54,6 @@ void NavigationRouteOhos::InitRouteMap()
     moduleInfos_ = bundleInfo.hapModuleInfos;
 }
 
-void NavigationRouteOhos::OnPackageChange()
-{
-    InitRouteMap();
-}
-
 bool NavigationRouteOhos::GetRouteItem(const std::string& name, NG::RouteItem& info)
 {
     AppExecFwk::RouterItem routeItem;
