@@ -6517,6 +6517,8 @@ void TextFieldPattern::DumpInfo()
     dumpLog.AddDesc(std::string("InputFilter:").append(GetInputFilter()));
     auto lineHeight = layoutProperty->GetLineHeight().value_or(0.0_vp).ConvertToPx();
     dumpLog.AddDesc(std::string("lineHeight:").append(std::to_string(lineHeight)));
+    auto maxLines = GreatOrEqual(GetMaxLines(), Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLines());
+    dumpLog.AddDesc(std::string("MaxLines:").append(maxLines));
     dumpLog.AddDesc(std::string("TextIndent:").append(GetTextIndent()));
     dumpLog.AddDesc(std::string("showError:").append(GetErrorTextState() ? GetErrorTextString() : "undefined"));
     dumpLog.AddDesc(std::string("CopyOption:").append(GetCopyOptionString()));
@@ -6544,9 +6546,28 @@ void TextFieldPattern::DumpInfo()
     dumpLog.AddDesc(std::string("IsAIWrite: ").append(std::to_string(IsShowAIWrite())));
     DumpPlaceHolderInfo();
     DumpScaleInfo();
-    if (SystemProperties::GetDebugEnabled()) {
-        DumpAdvanceInfo();
-    }
+    DumpTextEngineInfo();
+    DumpAdvanceInfo();
+}
+
+void TextFieldPattern::DumpTextEngineInfo()
+{
+    auto& dumpLog = DumpLog::GetInstance();
+    dumpLog.AddDesc(std::string("-----TextEngine paragraphs_ info-----"));
+    dumpLog.AddDesc(std::string("GetTextWidth:")
+        .append(std::to_string(paragraph_->GetTextWidth()))
+        .append(" GetHeight:")
+        .append(std::to_string(paragraph_->GetHeight()))
+        .append(" GetMaxWidth:")
+        .append(std::to_string(paragraph_->GetMaxWidth()))
+        .append(" GetMaxIntrinsicWidth:")
+        .append(std::to_string(paragraph_->GetMaxIntrinsicWidth())));
+    dumpLog.AddDesc(std::string("GetLineCount:")
+        .append(std::to_string(paragraph_->GetLineCount()))
+        .append(" GetLongestLine:")
+        .append(std::to_string(paragraph_->GetLongestLine()))
+        .append(" GetLongestLineWithIndent:")
+        .append(std::to_string(paragraph_->GetLongestLineWithIndent())));
 }
 
 void TextFieldPattern::DumpAdvanceInfo()
@@ -6556,21 +6577,6 @@ void TextFieldPattern::DumpAdvanceInfo()
             std::string("CustomKeyboard: true, Attached:").append(std::to_string(isCustomKeyboardAttached_)));
     }
     DumpLog::GetInstance().AddDesc(std::string("FontColor: ").append(GetTextColor()));
-    DumpLog::GetInstance().AddDesc(std::string("from TextEngine paragraphs_ info :"));
-    DumpLog::GetInstance().AddDesc(std::string("GetTextWidth:")
-        .append(std::to_string(paragraph_->GetTextWidth()))
-        .append(" GetHeight:")
-        .append(std::to_string(paragraph_->GetHeight()))
-        .append(" GetMaxWidth:")
-        .append(std::to_string(paragraph_->GetMaxWidth()))
-        .append(" GetMaxIntrinsicWidth:")
-        .append(std::to_string(paragraph_->GetMaxIntrinsicWidth())));
-    DumpLog::GetInstance().AddDesc(std::string("GetLineCount:")
-        .append(std::to_string(paragraph_->GetLineCount()))
-        .append(" GetLongestLine:")
-        .append(std::to_string(paragraph_->GetLongestLine()))
-        .append(" GetLongestLineWithIndent:")
-        .append(std::to_string(paragraph_->GetLongestLineWithIndent())));
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
