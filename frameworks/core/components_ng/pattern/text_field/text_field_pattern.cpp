@@ -1233,6 +1233,7 @@ void TextFieldPattern::HandleBlurEvent()
     }
     needToRequestKeyboardInner_ = false;
     ReportEvent();
+    ScheduleDisappearDelayTask();
 }
 
 void TextFieldPattern::ModifyInnerStateInBlurEvent()
