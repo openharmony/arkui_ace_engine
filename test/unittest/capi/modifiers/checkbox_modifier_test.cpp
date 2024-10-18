@@ -38,10 +38,12 @@ namespace  {
     const auto ATTRIBUTE_SELECT_DEFAULT_VALUE = "false";
     const auto ATTRIBUTE_SELECTED_COLOR_NAME = "selectedColor";
     const auto ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE = "#FF007DFF";
+    const auto ATTRIBUTE_SELECTED_COLOR_INVALID_VALUE = "#00000000";
     const auto ATTRIBUTE_SHAPE_NAME = "shape";
     const auto ATTRIBUTE_SHAPE_DEFAULT_VALUE = "0";
     const auto ATTRIBUTE_UNSELECTED_COLOR_NAME = "unselectedColor";
     const auto ATTRIBUTE_UNSELECTED_COLOR_DEFAULT_VALUE = "#FF000000";
+    const auto ATTRIBUTE_UNSELECTED_COLOR_INVALID_VALUE = "#00000000";
     const auto ATTRIBUTE_MARK_STROKE_COLOR_NAME = "strokeColor";
     const auto ATTRIBUTE_MARK_STROKE_COLOR_DEFAULT_VALUE = "#FF000000";
     const auto ATTRIBUTE_MARK_STROKE_COLOR_TEST_VALUE = "#FF123456";
@@ -268,10 +270,19 @@ HWTEST_F(CheckboxModifierTest, setSelectedColorTestInvalidValues, TestSize.Level
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_ResourceColor initValueSelectedColor;
+    Ark_ResourceColor inputValueSelectedColor;
 
     // Initial setup
-    initValueSelectedColor = std::get<1>(selectedColorSelectedColorValidValues[0]);
+    modifier_->setSelect(node_, Converter::ArkValue<Ark_Boolean>(true));
+
+    // Verifying attribute's  values
+
+    inputValueSelectedColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff + 1);
+    modifier_->setSelectedColor(node_, &inputValueSelectedColor);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
+    expectedStr = ATTRIBUTE_SELECTED_COLOR_INVALID_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
 }
 
 /*
@@ -332,10 +343,19 @@ HWTEST_F(CheckboxModifierTest, setUnselectedColorTestInvalidValues, TestSize.Lev
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_ResourceColor initValueUnselectedColor;
+    Ark_ResourceColor inputValueUnselectedColor;
 
     // Initial setup
-    initValueUnselectedColor = std::get<1>(unselectedColorUnselectedColorValidValues[0]);
+    modifier_->setSelect(node_, Converter::ArkValue<Ark_Boolean>(true));
+
+    // Verifying attribute's  values
+
+    inputValueUnselectedColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xffffffff + 1);
+    modifier_->setUnselectedColor(node_, &inputValueUnselectedColor);
+    jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNSELECTED_COLOR_NAME);
+    expectedStr = ATTRIBUTE_UNSELECTED_COLOR_INVALID_VALUE;
+    EXPECT_EQ(resultStr, expectedStr);
 }
 
 /*
@@ -459,7 +479,7 @@ HWTEST_F(CheckboxModifierTest, setMarkTestDefaultValues, TestSize.Level1)
 HWTEST_F(CheckboxModifierTest, setMarkTestValidValues, TestSize.Level1)
 {
     Ark_MarkStyle style;
-    ResourceColor color = Converter::ArkUnion<ResourceColor, Ark_Number>(0xFF123456);
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0xFF123456);
     Ark_Length len1 = { .value = SIZE1 };
     Ark_Length len2 = { .value = SIZE2 };
     Opt_Length opt1 = { .tag = ARK_TAG_INT32, .value = len1 };
@@ -500,7 +520,7 @@ HWTEST_F(CheckboxModifierTest, setMarkTestInvalidValues, TestSize.Level1)
     Ark_MarkStyle style;
     std::unique_ptr<JsonValue> resultMark;
     std::unique_ptr<JsonValue> jsonValue;
-    ResourceColor color = Converter::ArkUnion<ResourceColor, Ark_Number>(0x00000000);
+    Ark_ResourceColor color = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x00000000);
     Ark_Length len1 = { .value = 0 };
     Ark_Length len2 = { .value = 0 };
     Opt_Length opt1 = { .tag = ARK_TAG_INT32, .value = len1 };
