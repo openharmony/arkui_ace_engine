@@ -224,6 +224,8 @@ void CreateInstanceAndSet(NG::UIExtensionConfig& config)
     UIExtensionModel::GetInstance()->Create(config);
     ViewAbstractModel::GetInstance()->SetMinWidth(SECURITY_UEC_MIN_WIDTH);
     ViewAbstractModel::GetInstance()->SetMinHeight(SECURITY_UEC_MIN_HEIGHT);
+    ViewAbstractModel::GetInstance()->SetWidth(SECURITY_UEC_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetHeight(SECURITY_UEC_MIN_HEIGHT);
 }
 
 bool JSSecurityUIExtensionProxy::CanTurnOn(const JSCallbackInfo& info)
@@ -343,10 +345,37 @@ void JSSecurityUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSSecurityUIExtension>::StaticMethod("onReceive", &JSSecurityUIExtension::OnReceive);
     JSClass<JSSecurityUIExtension>::StaticMethod("onError", &JSSecurityUIExtension::OnError);
     JSClass<JSSecurityUIExtension>::StaticMethod("onTerminated", &JSSecurityUIExtension::OnTerminated);
-    JSClass<JSSecurityUIExtension>::StaticMethod("width", &JSViewAbstract::JsWidth);
-    JSClass<JSSecurityUIExtension>::StaticMethod("height", &JSViewAbstract::JsHeight);
+    JSClass<JSSecurityUIExtension>::StaticMethod("width", &JSSecurityUIExtension::JsWidth);
+    JSClass<JSSecurityUIExtension>::StaticMethod("height", &JSSecurityUIExtension::JsHeight);
     JSClass<JSSecurityUIExtension>::StaticMethod("backgroundColor", &JSViewAbstract::JsBackgroundColor);
     JSClass<JSSecurityUIExtension>::Bind(globalObj);
+}
+
+CalcDimension JSSecurityUIExtension::GetSizeValue(const JSCallbackInfo& info)
+{
+    CalcDimension value;
+    if (!JSViewAbstract::ParseJsDimensionVp(info[0], value)) {
+        return -1.0;
+    }
+    return value;
+}
+
+void JSSecurityUIExtension::JsWidth(const JSCallbackInfo& info)
+{
+    CalcDimension value = GetSizeValue(info);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+    JSViewAbstract::JsWidth(info);
+}
+
+void JSSecurityUIExtension::JsHeight(const JSCallbackInfo& info)
+{
+    CalcDimension value = GetSizeValue(info);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+    JSViewAbstract::JsHeight(info);
 }
 
 void JSSecurityUIExtension::Create(const JSCallbackInfo& info)
