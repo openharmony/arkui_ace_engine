@@ -170,7 +170,7 @@ bool ScrollPattern::ScrollSnapTrigger()
         return false;
     }
     if (ScrollableIdle() && !AnimateRunning()) {
-        if (StartSnapAnimation(0.f, 0.f, 0.f)) {
+        if (StartSnapAnimation(0.f, 0.f, 0.f, 0.f)) {
             FireOnScrollStart();
             return true;
         }
@@ -1265,11 +1265,12 @@ std::string ScrollPattern::GetScrollSnapPagination() const
     return snapPaginationStr;
 }
 
-bool ScrollPattern::StartSnapAnimation(float snapDelta, float snapVelocity, float dragDistance)
+bool ScrollPattern::StartSnapAnimation(
+    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance)
 {
-    auto predictSnapOffset = CalcPredictSnapOffset(snapDelta, dragDistance, snapVelocity);
+    auto predictSnapOffset = CalcPredictSnapOffset(snapDelta, dragDistance, predictVelocity);
     if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value(), SPRING_ACCURACY)) {
-        StartScrollSnapAnimation(predictSnapOffset.value(), GetScrollableCurrentVelocity());
+        StartScrollSnapAnimation(predictSnapOffset.value(), animationVelocity);
         return true;
     }
     return false;
