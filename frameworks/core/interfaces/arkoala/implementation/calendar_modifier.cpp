@@ -130,7 +130,7 @@ void WorkStateStyleImpl(Ark_NativePointer node,
     //CalendarModelNG::SetWorkStateStyle(frameNode, convValue);
 }
 void OnSelectChangeImpl(Ark_NativePointer node,
-                        Ark_Function value)
+                        Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -138,7 +138,7 @@ void OnSelectChangeImpl(Ark_NativePointer node,
     //CalendarModelNG::SetOnSelectChange(frameNode, convValue);
 }
 void OnRequestDataImpl(Ark_NativePointer node,
-                       Ark_Function value)
+                       Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

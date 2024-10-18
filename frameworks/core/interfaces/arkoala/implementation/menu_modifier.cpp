@@ -124,31 +124,31 @@ void RadiusImpl(Ark_NativePointer node,
     }
 }
 void MenuItemDividerImpl(Ark_NativePointer node,
-                         const Ark_Union_DividerStyleOptions_Undefined* value)
+                         const Ark_Union_DividerStyleOptions_Undefined* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    CHECK_NULL_VOID(options);
+    auto divider = Converter::OptConvert<V2::ItemDivider>(*options);
     MenuModelNG::SetItemDivider(frameNode, divider);
     LOGE("MenuModifier::MenuItemDividerImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void MenuItemGroupDividerImpl(Ark_NativePointer node,
-                              const Ark_Union_DividerStyleOptions_Undefined* value)
+                              const Ark_Union_DividerStyleOptions_Undefined* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    CHECK_NULL_VOID(options);
+    auto divider = Converter::OptConvert<V2::ItemDivider>(*options);
     MenuModelNG::SetItemGroupDivider(frameNode, divider);
     LOGE("MenuModifier::MenuItemGroupDividerImpl is not implemented, Ark_CustomObject is not supported!");
 }
 void SubMenuExpandingModeImpl(Ark_NativePointer node,
-                              Ark_SubMenuExpandingMode value)
+                              Ark_SubMenuExpandingMode mode)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuModelNG::SetExpandingMode(frameNode, Converter::OptConvert<SubMenuExpandingMode>(value));
+    MenuModelNG::SetExpandingMode(frameNode, Converter::OptConvert<SubMenuExpandingMode>(mode));
 }
 } // MenuAttributeModifier
 const GENERATED_ArkUIMenuModifier* GetMenuModifier()

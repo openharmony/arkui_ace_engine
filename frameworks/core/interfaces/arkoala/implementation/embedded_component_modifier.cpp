@@ -32,7 +32,7 @@ void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
 } // EmbeddedComponentInterfaceModifier
 namespace EmbeddedComponentAttributeModifier {
 void OnTerminatedImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -40,12 +40,12 @@ void OnTerminatedImpl(Ark_NativePointer node,
     //EmbeddedComponentModelNG::SetOnTerminated(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Ark_CustomObject* value)
+                 const Ark_CustomObject* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(callback);
+    //auto convValue = Converter::OptConvert<type_name>(*callback);
     //EmbeddedComponentModelNG::SetOnError(frameNode, convValue);
 }
 } // EmbeddedComponentAttributeModifier

@@ -148,6 +148,20 @@ void TextIndentImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     TextFieldModelNG::SetTextIndent(frameNode, Converter::OptConvert<Dimension>(*value));
 }
+void InputFilterImpl(Ark_NativePointer node,
+                     const Ark_ResourceStr* value,
+                     const Opt_Function* error)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto valueString = Converter::OptConvert<std::string>(*value);
+    auto errorEvent = [frameNode](const std::string& val) {
+        auto errorArkString = Converter::ArkValue<Ark_String>(val);
+        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->inputFilter(frameNode->GetId(), errorArkString);
+    };
+    TextFieldModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
+}
 void CaretStyleImpl(Ark_NativePointer node,
                     const Ark_CaretStyle* value)
 {
@@ -171,7 +185,7 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
     TextFieldModelNG::SetSelectedBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void OnSubmitImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -182,7 +196,7 @@ void OnSubmitImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -195,7 +209,7 @@ void OnChangeImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                               Ark_Function value)
+                               Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -208,7 +222,7 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnTextSelectionChange(frameNode, std::move(onTextSelectionChange));
 }
 void OnContentScrollImpl(Ark_NativePointer node,
-                         Ark_Function value)
+                         Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -221,7 +235,7 @@ void OnContentScrollImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
 }
 void OnEditChangeImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -231,7 +245,7 @@ void OnEditChangeImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnEditChange(frameNode, std::move(onEditEvent));
 }
 void OnCopyImpl(Ark_NativePointer node,
-                Ark_Function value)
+                Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -242,7 +256,7 @@ void OnCopyImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
 void OnCutImpl(Ark_NativePointer node,
-               Ark_Function value)
+               Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -253,7 +267,7 @@ void OnCutImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnCut(frameNode, std::move(onCut));
 }
 void OnPasteImpl(Ark_NativePointer node,
-                 Ark_Function value)
+                 Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -287,6 +301,16 @@ void MaxLengthImpl(Ark_NativePointer node,
     } else {
         TextFieldModelNG::ResetMaxLength(frameNode);
     }
+}
+void ShowCounterImpl(Ark_NativePointer node,
+                     Ark_Boolean value,
+                     const Opt_InputCounterOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //TextAreaModelNG::SetShowCounter(frameNode, convValue);
 }
 void StyleImpl(Ark_NativePointer node,
                Ark_TextContentStyle value)
@@ -367,13 +391,23 @@ void WordBreakImpl(Ark_NativePointer node,
     //TextAreaModelNG::SetWordBreak(frameNode, convValue);
 }
 void LineBreakStrategyImpl(Ark_NativePointer node,
-                           Ark_LineBreakStrategy value)
+                           Ark_LineBreakStrategy strategy)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(strategy);
+    //auto convValue = Converter::OptConvert<type>(strategy); // for enums
+    //TextAreaModelNG::SetLineBreakStrategy(frameNode, convValue);
+}
+void CustomKeyboardImpl(Ark_NativePointer node,
+                        const Ark_CustomBuilder* value,
+                        const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextAreaModelNG::SetLineBreakStrategy(frameNode, convValue);
+    //TextAreaModelNG::SetCustomKeyboard(frameNode, convValue);
 }
 void DecorationImpl(Ark_NativePointer node,
                     const Ark_TextDecorationOptions* value)
@@ -432,11 +466,11 @@ void EnableAutoFillImpl(Ark_NativePointer node,
     TextFieldModelNG::SetEnableAutoFill(frameNode, Converter::Convert<bool>(value));
 }
 void ContentTypeImpl(Ark_NativePointer node,
-                     Ark_ContentType value)
+                     Ark_ContentType contentType)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetContentType(frameNode, Converter::OptConvert<TextContentType>(value));
+    TextFieldModelNG::SetContentType(frameNode, Converter::OptConvert<TextContentType>(contentType));
 }
 void FontFeatureImpl(Ark_NativePointer node,
                      const Ark_String* value)
@@ -448,7 +482,7 @@ void FontFeatureImpl(Ark_NativePointer node,
     TextFieldModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(fontFeatureSettings));
 }
 void OnWillInsertImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -464,7 +498,7 @@ void OnWillInsertImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, std::move(onWillInsert));
 }
 void OnDidInsertImpl(Ark_NativePointer node,
-                     Ark_Function value)
+                     Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -478,7 +512,7 @@ void OnDidInsertImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, std::move(onDidInsert));
 }
 void OnWillDeleteImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -495,7 +529,7 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
 }
 void OnDidDeleteImpl(Ark_NativePointer node,
-                     Ark_Function value)
+                     Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -510,64 +544,30 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         const Ark_Materialized* value)
+                         const Ark_Materialized* editMenu)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(editMenu);
+    //auto convValue = Converter::OptConvert<type_name>(*editMenu);
     //TextAreaModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGE("ARKOALA TextAreaAttributeModifier.EditMenuOptionsImpl -> Method is not implemented.");
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
-                           Ark_Boolean value)
+                           Ark_Boolean enable)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetEnablePreviewText(frameNode, Converter::Convert<bool>(value));
+    TextFieldModelNG::SetEnablePreviewText(frameNode, Converter::Convert<bool>(enable));
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              Ark_Boolean value)
+                              Ark_Boolean isEnabled)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(value);
+    auto convValue = Converter::Convert<bool>(isEnabled);
     //TextAreaModelNG::SetEnableHapticFeedback(frameNode, convValue);
-}
-void InputFilterImpl(Ark_NativePointer node,
-                     const Ark_ResourceStr* value,
-                     const Opt_Function* error)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto valueString = Converter::OptConvert<std::string>(*value);
-    auto errorEvent = [frameNode](const std::string& val) {
-        auto errorArkString = Converter::ArkValue<Ark_String>(val);
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->inputFilter(frameNode->GetId(), errorArkString);
-    };
-    TextFieldModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
-}
-void ShowCounterImpl(Ark_NativePointer node,
-                     Ark_Boolean value,
-                     const Opt_InputCounterOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextAreaModelNG::SetShowCounter(frameNode, convValue);
-}
-void CustomKeyboardImpl(Ark_NativePointer node,
-                        const Ark_CustomBuilder* value,
-                        const Opt_KeyboardOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextAreaModelNG::SetCustomKeyboard(frameNode, convValue);
 }
 } // TextAreaAttributeModifier
 
@@ -587,6 +587,7 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::FontFamilyImpl,
         TextAreaAttributeModifier::TextOverflowImpl,
         TextAreaAttributeModifier::TextIndentImpl,
+        TextAreaAttributeModifier::InputFilterImpl,
         TextAreaAttributeModifier::CaretStyleImpl,
         TextAreaAttributeModifier::SelectedBackgroundColorImpl,
         TextAreaAttributeModifier::OnSubmitImpl,
@@ -600,6 +601,7 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::CopyOptionImpl,
         TextAreaAttributeModifier::EnableKeyboardOnFocusImpl,
         TextAreaAttributeModifier::MaxLengthImpl,
+        TextAreaAttributeModifier::ShowCounterImpl,
         TextAreaAttributeModifier::StyleImpl,
         TextAreaAttributeModifier::BarStateImpl,
         TextAreaAttributeModifier::SelectionMenuHiddenImpl,
@@ -609,6 +611,7 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::MaxLinesImpl,
         TextAreaAttributeModifier::WordBreakImpl,
         TextAreaAttributeModifier::LineBreakStrategyImpl,
+        TextAreaAttributeModifier::CustomKeyboardImpl,
         TextAreaAttributeModifier::DecorationImpl,
         TextAreaAttributeModifier::LetterSpacingImpl,
         TextAreaAttributeModifier::LineSpacingImpl,
@@ -624,9 +627,6 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::EditMenuOptionsImpl,
         TextAreaAttributeModifier::EnablePreviewTextImpl,
         TextAreaAttributeModifier::EnableHapticFeedbackImpl,
-        TextAreaAttributeModifier::InputFilterImpl,
-        TextAreaAttributeModifier::ShowCounterImpl,
-        TextAreaAttributeModifier::CustomKeyboardImpl,
     };
     return &ArkUITextAreaModifierImpl;
 }

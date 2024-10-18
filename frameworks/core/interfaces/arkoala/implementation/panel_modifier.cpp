@@ -103,12 +103,12 @@ void ShowImpl(Ark_NativePointer node,
     //PanelModelNG::SetShow(frameNode, convValue);
 }
 void BackgroundMaskImpl(Ark_NativePointer node,
-                        const Ark_ResourceColor* value)
+                        const Ark_ResourceColor* color)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(color);
+    //auto convValue = Converter::OptConvert<type_name>(*color);
     //PanelModelNG::SetBackgroundMask(frameNode, convValue);
 }
 void ShowCloseIconImpl(Ark_NativePointer node,
@@ -121,7 +121,7 @@ void ShowCloseIconImpl(Ark_NativePointer node,
     //PanelModelNG::SetShowCloseIcon(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -129,7 +129,7 @@ void OnChangeImpl(Ark_NativePointer node,
     //PanelModelNG::SetOnChange(frameNode, convValue);
 }
 void OnHeightChangeImpl(Ark_NativePointer node,
-                        Ark_Function value)
+                        Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

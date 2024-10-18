@@ -85,7 +85,7 @@ void MarqueeUpdateStrategyImpl(Ark_NativePointer node,
     //MarqueeModelNG::SetMarqueeUpdateStrategy(frameNode, convValue);
 }
 void OnStartImpl(Ark_NativePointer node,
-                 Ark_Function value)
+                 Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -93,7 +93,7 @@ void OnStartImpl(Ark_NativePointer node,
     //MarqueeModelNG::SetOnStart(frameNode, convValue);
 }
 void OnBounceImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -101,7 +101,7 @@ void OnBounceImpl(Ark_NativePointer node,
     //MarqueeModelNG::SetOnBounce(frameNode, convValue);
 }
 void OnFinishImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

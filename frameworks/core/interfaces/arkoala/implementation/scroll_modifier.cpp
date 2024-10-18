@@ -62,7 +62,7 @@ void ScrollableImpl(Ark_NativePointer node,
     //ScrollModelNG::SetScrollable(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -75,17 +75,8 @@ void OnScrollImpl(Ark_NativePointer node,
     };
     ScrollModelNG::SetOnScroll(frameNode, onEvent);
 }
-void OnWillScrollImpl(Ark_NativePointer node,
-                      const Ark_CustomObject* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollModelNG::SetOnWillScroll(frameNode, convValue);
-}
 void OnDidScrollImpl(Ark_NativePointer node,
-                     Ark_Function value)
+                     Ark_Function handler)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -93,7 +84,7 @@ void OnDidScrollImpl(Ark_NativePointer node,
     //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -101,7 +92,7 @@ void OnScrollEdgeImpl(Ark_NativePointer node,
     //ScrollModelNG::SetOnScrollEdge(frameNode, convValue);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
-                       Ark_Function value)
+                       Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -112,7 +103,7 @@ void OnScrollStartImpl(Ark_NativePointer node,
     ScrollModelNG::SetOnScrollStart(frameNode, onEvent);
 }
 void OnScrollEndImpl(Ark_NativePointer node,
-                     Ark_Function value)
+                     Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -123,7 +114,7 @@ void OnScrollEndImpl(Ark_NativePointer node,
     ScrollModelNG::SetOnScrollEnd(frameNode, onEvent);
 }
 void OnScrollStopImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -134,21 +125,21 @@ void OnScrollStopImpl(Ark_NativePointer node,
     ScrollModelNG::SetOnScrollStop(frameNode, onEvent);
 }
 void ScrollBarImpl(Ark_NativePointer node,
-                   Ark_BarState value)
+                   Ark_BarState barState)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //auto convValue = Converter::Convert<type>(barState);
+    //auto convValue = Converter::OptConvert<type>(barState); // for enums
     //ScrollModelNG::SetScrollBar(frameNode, convValue);
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
-                        const Ark_Union_Color_Number_String* value)
+                        const Ark_Union_Color_Number_String* color)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(color);
+    //auto convValue = Converter::OptConvert<type_name>(*color);
     //ScrollModelNG::SetScrollBarColor(frameNode, convValue);
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
@@ -160,8 +151,18 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //ScrollModelNG::SetScrollBarWidth(frameNode, convValue);
 }
+void EdgeEffectImpl(Ark_NativePointer node,
+                    Ark_EdgeEffect edgeEffect,
+                    const Opt_EdgeEffectOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(edgeEffect);
+    //auto convValue = Converter::OptConvert<type>(edgeEffect); // for enums
+    //ScrollModelNG::SetEdgeEffect(frameNode, convValue);
+}
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                            Ark_Function value)
+                            Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -220,16 +221,6 @@ void InitialOffsetImpl(Ark_NativePointer node,
     OffsetT<CalcDimension> offset = Converter::Convert<OffsetT<CalcDimension>>(*value);
     ScrollModelNG::SetInitialOffset(frameNode, offset);
 }
-void EdgeEffectImpl(Ark_NativePointer node,
-                    Ark_EdgeEffect edgeEffect,
-                    const Opt_EdgeEffectOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(edgeEffect);
-    //auto convValue = Converter::OptConvert<type>(edgeEffect); // for enums
-    //ScrollModelNG::SetEdgeEffect(frameNode, convValue);
-}
 } // ScrollAttributeModifier
 const GENERATED_ArkUIScrollModifier* GetScrollModifier()
 {
@@ -237,7 +228,6 @@ const GENERATED_ArkUIScrollModifier* GetScrollModifier()
         ScrollInterfaceModifier::SetScrollOptionsImpl,
         ScrollAttributeModifier::ScrollableImpl,
         ScrollAttributeModifier::OnScrollImpl,
-        ScrollAttributeModifier::OnWillScrollImpl,
         ScrollAttributeModifier::OnDidScrollImpl,
         ScrollAttributeModifier::OnScrollEdgeImpl,
         ScrollAttributeModifier::OnScrollStartImpl,
@@ -246,6 +236,7 @@ const GENERATED_ArkUIScrollModifier* GetScrollModifier()
         ScrollAttributeModifier::ScrollBarImpl,
         ScrollAttributeModifier::ScrollBarColorImpl,
         ScrollAttributeModifier::ScrollBarWidthImpl,
+        ScrollAttributeModifier::EdgeEffectImpl,
         ScrollAttributeModifier::OnScrollFrameBeginImpl,
         ScrollAttributeModifier::NestedScrollImpl,
         ScrollAttributeModifier::EnableScrollInteractionImpl,
@@ -253,7 +244,6 @@ const GENERATED_ArkUIScrollModifier* GetScrollModifier()
         ScrollAttributeModifier::ScrollSnapImpl,
         ScrollAttributeModifier::EnablePagingImpl,
         ScrollAttributeModifier::InitialOffsetImpl,
-        ScrollAttributeModifier::EdgeEffectImpl,
     };
     return &ArkUIScrollModifierImpl;
 }

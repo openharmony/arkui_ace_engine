@@ -298,6 +298,7 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
 const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
 const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
 const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor();
+const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
 const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 {
     static const GENERATED_ArkUINodeModifiers modifiersImpl = {
@@ -514,6 +515,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetMutableStyledStringAccessor,
         GetCustomSpanAccessor,
         GetLinearIndicatorControllerAccessor,
+        GetUIExtensionProxyAccessor,
     };
     return &accessorsImpl;
 }

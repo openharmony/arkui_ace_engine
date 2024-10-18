@@ -31,7 +31,7 @@ void SetToggleOptionsImpl(Ark_NativePointer node,
 } // ToggleInterfaceModifier
 namespace ToggleAttributeModifier {
 void OnChangeImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -39,12 +39,12 @@ void OnChangeImpl(Ark_NativePointer node,
     //ToggleModelNG::SetOnChange(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Ark_CustomObject* modifier)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(modifier);
+    //auto convValue = Converter::OptConvert<type_name>(*modifier);
     //ToggleModelNG::SetContentModifier(frameNode, convValue);
 }
 void SelectedColorImpl(Ark_NativePointer node,
@@ -57,12 +57,12 @@ void SelectedColorImpl(Ark_NativePointer node,
     //ToggleModelNG::SetSelectedColor(frameNode, convValue);
 }
 void SwitchPointColorImpl(Ark_NativePointer node,
-                          const Ark_ResourceColor* value)
+                          const Ark_ResourceColor* color)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(color);
+    //auto convValue = Converter::OptConvert<type_name>(*color);
     //ToggleModelNG::SetSwitchPointColor(frameNode, convValue);
 }
 void SwitchStyleImpl(Ark_NativePointer node,

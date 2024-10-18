@@ -134,12 +134,12 @@ void Barrier0Impl(Ark_NativePointer node,
 }
 
 void Barrier1Impl(Ark_NativePointer node,
-                  const Array_LocalizedBarrierStyle* value)
+                  const Array_LocalizedBarrierStyle* barrierStyle)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto infoVec = Converter::Convert<std::vector<BarrierInfo>>(*value);
+    CHECK_NULL_VOID(barrierStyle);
+    auto infoVec = Converter::Convert<std::vector<BarrierInfo>>(*barrierStyle);
     RelativeContainerModelNG::SetBarrier(frameNode, infoVec);
 }
 

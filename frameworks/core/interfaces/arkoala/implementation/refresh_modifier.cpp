@@ -31,7 +31,7 @@ void SetRefreshOptionsImpl(Ark_NativePointer node,
 } // RefreshInterfaceModifier
 namespace RefreshAttributeModifier {
 void OnStateChangeImpl(Ark_NativePointer node,
-                       Ark_Function value)
+                       Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -39,7 +39,7 @@ void OnStateChangeImpl(Ark_NativePointer node,
     //RefreshModelNG::SetOnStateChange(frameNode, convValue);
 }
 void OnRefreshingImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -65,7 +65,7 @@ void PullToRefreshImpl(Ark_NativePointer node,
     //RefreshModelNG::SetPullToRefresh(frameNode, convValue);
 }
 void OnOffsetChangeImpl(Ark_NativePointer node,
-                        Ark_Function value)
+                        Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -73,11 +73,11 @@ void OnOffsetChangeImpl(Ark_NativePointer node,
     //RefreshModelNG::SetOnOffsetChange(frameNode, convValue);
 }
 void PullDownRatioImpl(Ark_NativePointer node,
-                       const Opt_Number* value)
+                       const Opt_Number* ratio)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = ratio ? Converter::OptConvert<type>(*ratio) : std::nullopt;
     //RefreshModelNG::SetPullDownRatio(frameNode, convValue);
 }
 } // RefreshAttributeModifier

@@ -209,6 +209,7 @@ generated_sources = [
   "../arkoala/implementation/time_picker_modifier.cpp",
   "../arkoala/implementation/toggle_modifier.cpp",
   "../arkoala/implementation/ui_extension_component_modifier.cpp",
+  "../arkoala/implementation/ui_extension_proxy_accessor.cpp",
   "../arkoala/implementation/video_controller_accessor.cpp",
   "../arkoala/implementation/video_modifier.cpp",
   "../arkoala/implementation/view_accessor.cpp",

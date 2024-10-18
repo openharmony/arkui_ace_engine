@@ -31,7 +31,7 @@ void SetAbilityComponentOptionsImpl(Ark_NativePointer node,
 } // AbilityComponentInterfaceModifier
 namespace AbilityComponentAttributeModifier {
 void OnConnectImpl(Ark_NativePointer node,
-                   Ark_Function value)
+                   Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -39,7 +39,7 @@ void OnConnectImpl(Ark_NativePointer node,
     //AbilityComponentModelNG::SetOnConnect(frameNode, convValue);
 }
 void OnDisconnectImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

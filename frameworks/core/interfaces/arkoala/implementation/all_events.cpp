@@ -229,6 +229,16 @@ void onPreDragImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void onVisibleAreaChangeImpl(Ark_Int32 nodeId,
+                             const Ark_Boolean isExpanding,
+                             const Ark_Number currentRatio)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void keyboardShortcutImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 void onGestureJudgeBeginImpl(Ark_Int32 nodeId,
                              const Ark_GestureInfo gestureInfo,
                              const Ark_BaseGestureEvent event)
@@ -256,16 +266,6 @@ void onTouchInterceptImpl(Ark_Int32 nodeId,
 void onSizeChangeImpl(Ark_Int32 nodeId,
                       const Ark_SizeOptions oldValue,
                       const Ark_SizeOptions newValue)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void onVisibleAreaChangeImpl(Ark_Int32 nodeId,
-                             const Ark_Boolean isExpanding,
-                             const Ark_Number currentRatio)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void keyboardShortcutImpl(Ark_Int32 nodeId)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -891,6 +891,11 @@ void onScrollFrameBeginImpl(Ark_Int32 nodeId,
 }
 }
 namespace Search {
+void inputFilterImpl(Ark_Int32 nodeId,
+                     const Ark_String breakpoints)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 void onEditChangeImpl(Ark_Int32 nodeId,
                       const Ark_Boolean parameter)
 {
@@ -952,11 +957,6 @@ void onWillDeleteImpl(Ark_Int32 nodeId,
 }
 void onDidDeleteImpl(Ark_Int32 nodeId,
                      const Ark_DeleteValue parameter)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1106,6 +1106,11 @@ void onTextSelectionChangeImpl(Ark_Int32 nodeId,
 }
 }
 namespace TextArea {
+void inputFilterImpl(Ark_Int32 nodeId,
+                     const Ark_String breakpoints)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 void onSubmitImpl(Ark_Int32 nodeId,
                   const Ark_EnterKeyType enterKey)
 {
@@ -1170,11 +1175,6 @@ void onDidDeleteImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String breakpoints)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
 }
 namespace TextClock {
 void onDateChangeImpl(Ark_Int32 nodeId,
@@ -1218,6 +1218,11 @@ void onContentScrollImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void inputFilterImpl(Ark_Int32 nodeId,
+                     const Ark_String breakpoints)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 void onCopyImpl(Ark_Int32 nodeId,
                 const Ark_String breakpoints)
 {
@@ -1256,11 +1261,6 @@ void onWillDeleteImpl(Ark_Int32 nodeId,
 }
 void onDidDeleteImpl(Ark_Int32 nodeId,
                      const Ark_DeleteValue parameter)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-void inputFilterImpl(Ark_Int32 nodeId,
-                     const Ark_String breakpoints)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1446,13 +1446,13 @@ void onRenderExited0Impl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onRenderExited1Impl(Ark_Int32 nodeId,
-                         const Opt_Literal_object_detail event)
+void onShowFileSelectorImpl(Ark_Int32 nodeId,
+                            const Ark_OnShowFileSelectorEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onShowFileSelectorImpl(Ark_Int32 nodeId,
-                            const Ark_OnShowFileSelectorEvent parameter)
+void onRenderExited1Impl(Ark_Int32 nodeId,
+                         const Opt_Literal_object_detail event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1808,13 +1808,13 @@ const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver()
         CommonMethod::onDropImpl,
         CommonMethod::onDragEndImpl,
         CommonMethod::onPreDragImpl,
+        CommonMethod::onVisibleAreaChangeImpl,
+        CommonMethod::keyboardShortcutImpl,
         CommonMethod::onGestureJudgeBeginImpl,
         CommonMethod::onGestureRecognizerJudgeBeginImpl,
         CommonMethod::shouldBuiltInRecognizerParallelWithImpl,
         CommonMethod::onTouchInterceptImpl,
         CommonMethod::onSizeChangeImpl,
-        CommonMethod::onVisibleAreaChangeImpl,
-        CommonMethod::keyboardShortcutImpl,
     };
 
     return &GENERATED_ArkUICommonMethodEventsReceiverImpl;
@@ -2144,6 +2144,7 @@ const GENERATED_ArkUIScrollEventsReceiver* GetScrollEventsReceiver()
 const GENERATED_ArkUISearchEventsReceiver* GetSearchEventsReceiver()
 {
     static const GENERATED_ArkUISearchEventsReceiver GENERATED_ArkUISearchEventsReceiverImpl {
+        Search::inputFilterImpl,
         Search::onEditChangeImpl,
         Search::onSubmitImpl,
         Search::onChangeImpl,
@@ -2156,7 +2157,6 @@ const GENERATED_ArkUISearchEventsReceiver* GetSearchEventsReceiver()
         Search::onDidInsertImpl,
         Search::onWillDeleteImpl,
         Search::onDidDeleteImpl,
-        Search::inputFilterImpl,
     };
 
     return &GENERATED_ArkUISearchEventsReceiverImpl;
@@ -2236,6 +2236,7 @@ const GENERATED_ArkUITextEventsReceiver* GetTextEventsReceiver()
 const GENERATED_ArkUITextAreaEventsReceiver* GetTextAreaEventsReceiver()
 {
     static const GENERATED_ArkUITextAreaEventsReceiver GENERATED_ArkUITextAreaEventsReceiverImpl {
+        TextArea::inputFilterImpl,
         TextArea::onSubmitImpl,
         TextArea::onChangeImpl,
         TextArea::onTextSelectionChangeImpl,
@@ -2248,7 +2249,6 @@ const GENERATED_ArkUITextAreaEventsReceiver* GetTextAreaEventsReceiver()
         TextArea::onDidInsertImpl,
         TextArea::onWillDeleteImpl,
         TextArea::onDidDeleteImpl,
-        TextArea::inputFilterImpl,
     };
 
     return &GENERATED_ArkUITextAreaEventsReceiverImpl;
@@ -2270,6 +2270,7 @@ const GENERATED_ArkUITextInputEventsReceiver* GetTextInputEventsReceiver()
         TextInput::onChangeImpl,
         TextInput::onTextSelectionChangeImpl,
         TextInput::onContentScrollImpl,
+        TextInput::inputFilterImpl,
         TextInput::onCopyImpl,
         TextInput::onCutImpl,
         TextInput::onPasteImpl,
@@ -2278,7 +2279,6 @@ const GENERATED_ArkUITextInputEventsReceiver* GetTextInputEventsReceiver()
         TextInput::onDidInsertImpl,
         TextInput::onWillDeleteImpl,
         TextInput::onDidDeleteImpl,
-        TextInput::inputFilterImpl,
     };
 
     return &GENERATED_ArkUITextInputEventsReceiverImpl;
@@ -2356,8 +2356,8 @@ const GENERATED_ArkUIWebEventsReceiver* GetWebEventsReceiver()
         Web::onUrlLoadInterceptImpl,
         Web::onSslErrorReceiveImpl,
         Web::onRenderExited0Impl,
-        Web::onRenderExited1Impl,
         Web::onShowFileSelectorImpl,
+        Web::onRenderExited1Impl,
         Web::onFileSelectorShowImpl,
         Web::onResourceLoadImpl,
         Web::onFullScreenExitImpl,

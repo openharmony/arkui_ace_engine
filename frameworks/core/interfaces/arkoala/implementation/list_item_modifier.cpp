@@ -136,7 +136,7 @@ void SwipeActionImpl(Ark_NativePointer node,
     ListItemModelNG::SetSwiperAction(frameNode, nullptr, nullptr, nullptr, options.edgeEffect);
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  Ark_Function value)
+                  Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

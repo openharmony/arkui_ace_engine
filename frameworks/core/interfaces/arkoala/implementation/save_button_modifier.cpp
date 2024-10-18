@@ -80,7 +80,7 @@ void SetSaveButtonOptions1Impl(Ark_NativePointer node,
 } // SaveButtonInterfaceModifier
 namespace SaveButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
-                 Ark_Function value)
+                 Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

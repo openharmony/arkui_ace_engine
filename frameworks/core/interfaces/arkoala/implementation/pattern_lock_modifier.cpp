@@ -102,7 +102,7 @@ void PathStrokeWidthImpl(Ark_NativePointer node,
     //PatternLockModelNG::SetPathStrokeWidth(frameNode, convValue);
 }
 void OnPatternCompleteImpl(Ark_NativePointer node,
-                           Ark_Function value)
+                           Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -119,7 +119,7 @@ void AutoResetImpl(Ark_NativePointer node,
     //PatternLockModelNG::SetAutoReset(frameNode, convValue);
 }
 void OnDotConnectImpl(Ark_NativePointer node,
-                      Ark_Function value)
+                      Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -127,11 +127,11 @@ void OnDotConnectImpl(Ark_NativePointer node,
     //PatternLockModelNG::SetOnDotConnect(frameNode, convValue);
 }
 void ActivateCircleStyleImpl(Ark_NativePointer node,
-                             const Opt_CircleStyleOptions* value)
+                             const Opt_CircleStyleOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
     //PatternLockModelNG::SetActivateCircleStyle(frameNode, convValue);
 }
 } // PatternLockAttributeModifier

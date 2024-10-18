@@ -49,7 +49,7 @@ void SetXComponentOptions2Impl(Ark_NativePointer node,
 } // XComponentInterfaceModifier
 namespace XComponentAttributeModifier {
 void OnLoadImpl(Ark_NativePointer node,
-                Ark_Function value)
+                Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,7 +57,7 @@ void OnLoadImpl(Ark_NativePointer node,
     //XComponentModelNG::SetOnLoad(frameNode, convValue);
 }
 void OnDestroyImpl(Ark_NativePointer node,
-                   Ark_Function value)
+                   Ark_Function event)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -65,21 +65,21 @@ void OnDestroyImpl(Ark_NativePointer node,
     //XComponentModelNG::SetOnDestroy(frameNode, convValue);
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
-                        Ark_Boolean value)
+                        Ark_Boolean enable)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(value);
+    auto convValue = Converter::Convert<bool>(enable);
     //XComponentModelNG::SetEnableAnalyzer(frameNode, convValue);
 }
 void EnableSecureImpl(Ark_NativePointer node,
-                      Ark_Boolean value)
+                      Ark_Boolean isSecure)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     [[maybe_unused]]
-    auto convValue = Converter::Convert<bool>(value);
+    auto convValue = Converter::Convert<bool>(isSecure);
     //XComponentModelNG::SetEnableSecure(frameNode, convValue);
 }
 } // XComponentAttributeModifier

@@ -30,39 +30,49 @@ void SetComponent3DOptionsImpl(Ark_NativePointer node,
 } // Component3DInterfaceModifier
 namespace Component3DAttributeModifier {
 void EnvironmentImpl(Ark_NativePointer node,
-                     const Ark_ResourceStr* value)
+                     const Ark_ResourceStr* uri)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(uri);
+    //auto convValue = Converter::OptConvert<type_name>(*uri);
     //Component3DModelNG::SetEnvironment(frameNode, convValue);
 }
-void ShaderImpl(Ark_NativePointer node,
-                const Ark_ResourceStr* value)
+void CustomRenderImpl(Ark_NativePointer node,
+                      const Ark_ResourceStr* uri,
+                      Ark_Boolean selfRenderUpdate)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(uri);
+    //auto convValue = Converter::OptConvert<type>(uri); // for enums
+    //Component3DModelNG::SetCustomRender(frameNode, convValue);
+}
+void ShaderImpl(Ark_NativePointer node,
+                const Ark_ResourceStr* uri)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(uri);
+    //auto convValue = Converter::OptConvert<type_name>(*uri);
     //Component3DModelNG::SetShader(frameNode, convValue);
 }
 void ShaderImageTextureImpl(Ark_NativePointer node,
-                            const Ark_ResourceStr* value)
+                            const Ark_ResourceStr* uri)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(uri);
+    //auto convValue = Converter::OptConvert<type_name>(*uri);
     //Component3DModelNG::SetShaderImageTexture(frameNode, convValue);
 }
 void ShaderInputBufferImpl(Ark_NativePointer node,
-                           const Array_Number* value)
+                           const Array_Number* buffer)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(buffer);
+    //auto convValue = Converter::OptConvert<type_name>(*buffer);
     //Component3DModelNG::SetShaderInputBuffer(frameNode, convValue);
 }
 void RenderWidthImpl(Ark_NativePointer node,
@@ -83,28 +93,18 @@ void RenderHeightImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //Component3DModelNG::SetRenderHeight(frameNode, convValue);
 }
-void CustomRenderImpl(Ark_NativePointer node,
-                      const Ark_ResourceStr* uri,
-                      Ark_Boolean selfRenderUpdate)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(uri);
-    //auto convValue = Converter::OptConvert<type>(uri); // for enums
-    //Component3DModelNG::SetCustomRender(frameNode, convValue);
-}
 } // Component3DAttributeModifier
 const GENERATED_ArkUIComponent3DModifier* GetComponent3DModifier()
 {
     static const GENERATED_ArkUIComponent3DModifier ArkUIComponent3DModifierImpl {
         Component3DInterfaceModifier::SetComponent3DOptionsImpl,
         Component3DAttributeModifier::EnvironmentImpl,
+        Component3DAttributeModifier::CustomRenderImpl,
         Component3DAttributeModifier::ShaderImpl,
         Component3DAttributeModifier::ShaderImageTextureImpl,
         Component3DAttributeModifier::ShaderInputBufferImpl,
         Component3DAttributeModifier::RenderWidthImpl,
         Component3DAttributeModifier::RenderHeightImpl,
-        Component3DAttributeModifier::CustomRenderImpl,
     };
     return &ArkUIComponent3DModifierImpl;
 }

@@ -92,12 +92,12 @@ void PointLightImpl(Ark_NativePointer node,
     ACE_UPDATE_NODE_RENDER_CONTEXT(Bloom, (float)Converter::ConvertOrDefault(value->bloom, 0), frameNode);
 }
 void ReverseImpl(Ark_NativePointer node,
-                 const Opt_Boolean* value)
+                 const Opt_Boolean* isReversed)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value) {
-        if (auto reversed = Converter::OptConvert<bool>(*value); reversed) {
+    if (isReversed) {
+        if (auto reversed = Converter::OptConvert<bool>(*isReversed); reversed) {
             ColumnModelNG::SetIsReverse(frameNode, *reversed);
         }
     }

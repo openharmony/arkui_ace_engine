@@ -40,12 +40,12 @@ void VerticalAlignImpl(Ark_NativePointer node,
     //ImageSpanModelNG::SetVerticalAlign(frameNode, convValue);
 }
 void ColorFilterImpl(Ark_NativePointer node,
-                     const Ark_Union_ColorFilter_DrawingColorFilter* value)
+                     const Ark_Union_ColorFilter_DrawingColorFilter* filter)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    CHECK_NULL_VOID(filter);
+    //auto convValue = Converter::OptConvert<type_name>(*filter);
     //ImageSpanModelNG::SetColorFilter(frameNode, convValue);
 }
 void ObjectFitImpl(Ark_NativePointer node,
@@ -58,7 +58,7 @@ void ObjectFitImpl(Ark_NativePointer node,
     //ImageSpanModelNG::SetObjectFit(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
-                    Ark_Function value)
+                    Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -66,7 +66,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     //ImageSpanModelNG::SetOnComplete(frameNode, convValue);
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 Ark_Function value)
+                 Ark_Function callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
