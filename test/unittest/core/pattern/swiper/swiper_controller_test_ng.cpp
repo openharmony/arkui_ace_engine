@@ -27,9 +27,6 @@
 #include "core/components_ng/syntax/syntax_item.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class SwiperControllerTestNg : public SwiperTestNg {
 public:
     AssertionResult VerifyShowNext(int32_t expectIndex);
@@ -62,11 +59,8 @@ AssertionResult SwiperControllerTestNg::VerifyChangeIndex(int32_t targetIndex, b
 
 void SwiperControllerTestNg::CreateForEachSwiper(int32_t itemNumber)
 {
-    SwiperModelNG model;
-    model.Create();
+    SwiperModelNG model = CreateSwiper();
     model.SetIndicatorType(SwiperIndicatorType::DOT);
-    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto weakSwiper = AceType::WeakClaim(AceType::RawPtr(swiperNode));
     ForEachModelNG forEachModelNG;
@@ -81,25 +75,19 @@ void SwiperControllerTestNg::CreateForEachSwiper(int32_t itemNumber)
     for (int32_t index = 0; index < itemNumber; index++) {
         // key is 0,1,2,3...
         forEachModelNG.CreateNewChildStart(std::to_string(index));
-        CreateItem(1);
+        CreateSwiperItems(1);
         forEachModelNG.CreateNewChildFinish(std::to_string(index));
     }
-    ViewStackProcessor::GetInstance()->Pop();
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    CreateSwiperDone();
 }
 
 void SwiperControllerTestNg::CreateLazyForEachSwiper(int32_t itemNumber)
 {
-    SwiperModelNG model;
-    model.Create();
+    SwiperModelNG model = CreateSwiper();
     model.SetIndicatorType(SwiperIndicatorType::DOT);
-    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     auto weakSwiper = AceType::WeakClaim(AceType::RawPtr(swiperNode));
-    const RefPtr<LazyForEachActuator> lazyForEachActuator =
-        AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
+    const RefPtr<LazyForEachActuator> lazyForEachActuator = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
     LazyForEachModelNG lazyForEachModelNG;
     lazyForEachModelNG.Create(lazyForEachActuator);
     auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
@@ -113,9 +101,7 @@ void SwiperControllerTestNg::CreateLazyForEachSwiper(int32_t itemNumber)
             index, LazyForEachChild(std::to_string(index), swiperItemNode));
         ViewStackProcessor::GetInstance()->Pop();
     }
-    ViewStackProcessor::GetInstance()->Pop();
-    GetInstance();
-    FlushLayoutTask(frameNode_);
+    CreateSwiperDone();
 }
 
 /**
@@ -129,7 +115,8 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex001, TestSize.Le
      * @tc.steps: step1. Empty items
      * @tc.expected: Can not swipe
      */
-    Create([](SwiperModelNG model) {});
+    CreateSwiper();
+    CreateSwiperDone();
     EXPECT_TRUE(VerifyShowNext(0));
     EXPECT_TRUE(VerifyShowPrevious(0));
     EXPECT_TRUE(VerifyChangeIndex(1, false, 0));
@@ -147,9 +134,10 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex002, TestSize.Le
      * @tc.steps: step1. Set DisplayCount(5) > totalItems(4)
      * @tc.expected: Can not swipe
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(ITEM_NUMBER + 1);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(ITEM_NUMBER + 1);
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_TRUE(VerifyShowNext(0));
     EXPECT_TRUE(VerifyShowPrevious(0));
     EXPECT_TRUE(VerifyChangeIndex(1, false, 0));
@@ -166,7 +154,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex003, TestSize.Le
     /**
      * @tc.steps: step1. Create Swiper, set isVisibleArea_:false for without animation
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     pattern_->isVisibleArea_ = false; // for without animation
 
     /**
@@ -208,7 +196,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex004, TestSize.Le
      * @tc.steps: step1. Loop default is true, Set item(index:1,2) INVISIBLE and GONE
      * @tc.expected: The item still take a place
      */
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushLayoutTask(frameNode_);
@@ -238,7 +226,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex004, TestSize.Le
     EXPECT_TRUE(VerifyChangeIndex(0, false, 0)); // same index
     EXPECT_TRUE(VerifyChangeIndex(1, false, 1));
     EXPECT_TRUE(VerifyChangeIndex(3, false, 3));
-    EXPECT_TRUE(VerifyChangeIndex(-1, false, 0)); // invalid index
+    EXPECT_TRUE(VerifyChangeIndex(-1, false, 0));  // invalid index
     EXPECT_TRUE(VerifyChangeIndex(100, false, 0)); // invalid index
     // with animation
     EXPECT_TRUE(VerifyChangeIndex(1, true, 1));
@@ -256,9 +244,10 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex005, TestSize.Le
     /**
      * @tc.steps: step1. Set loop:false
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetLoop(false);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Call ShowNext
@@ -301,9 +290,10 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex006, TestSize.Le
      * @tc.steps: step1. Set DisplayCount:3
      * @tc.expected: Has 3 items in 1 page
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(3);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(3);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Set item(index:1,2) visibility:false
@@ -353,10 +343,11 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex007, TestSize.Le
      * @tc.steps: step1. Set DisplayCount:3, SwipeByGroup:true
      * @tc.expected: Has 3 items in 1 page and SwipeByGroup
      */
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetDisplayCount(3);
-        model.SetSwipeByGroup(true);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(3);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Call ShowNext
@@ -392,12 +383,13 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex008, TestSize.Le
      */
     const float preMargin = 10.f;
     const float nextMargin = 20.f;
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetDisplayCount(3);
-        model.SetPreviousMargin(Dimension(preMargin), true);
-        model.SetNextMargin(Dimension(nextMargin), true);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetDisplayCount(3);
+    model.SetPreviousMargin(Dimension(preMargin), true);
+    model.SetNextMargin(Dimension(nextMargin), true);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Call ShowNext
@@ -439,12 +431,13 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex009, TestSize.Le
      */
     const float preMargin = 10.f;
     const float nextMargin = 20.f;
-    CreateWithItem([=](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetDisplayCount(10);
-        model.SetPreviousMargin(Dimension(preMargin), true);
-        model.SetNextMargin(Dimension(nextMargin), true);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetDisplayCount(10);
+    model.SetPreviousMargin(Dimension(preMargin), true);
+    model.SetNextMargin(Dimension(nextMargin), true);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Call ShowNext
@@ -482,13 +475,13 @@ HWTEST_F(SwiperControllerTestNg, ShowNext005, TestSize.Level1)
     /**
      * @tc.steps: step1. Set AUTO_LINEAR, create diff item width
      */
-    Create([](SwiperModelNG model) {
-        model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-        CreateItemWithSize(200.f, SWIPER_HEIGHT);
-        CreateItemWithSize(300.f, SWIPER_HEIGHT);
-        CreateItemWithSize(400.f, SWIPER_HEIGHT);
-        CreateItemWithSize(500.f, SWIPER_HEIGHT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateItemWithSize(200.f, SWIPER_HEIGHT);
+    CreateItemWithSize(300.f, SWIPER_HEIGHT);
+    CreateItemWithSize(400.f, SWIPER_HEIGHT);
+    CreateItemWithSize(500.f, SWIPER_HEIGHT);
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Set item(index:1,2) visibility:false
@@ -522,14 +515,14 @@ HWTEST_F(SwiperControllerTestNg, ShowNext006, TestSize.Level1)
     /**
      * @tc.steps: step1. Set AUTO_LINEAR, create diff item width
      */
-    Create([](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-        CreateItemWithSize(200.f, SWIPER_HEIGHT);
-        CreateItemWithSize(300.f, SWIPER_HEIGHT);
-        CreateItemWithSize(400.f, SWIPER_HEIGHT);
-        CreateItemWithSize(500.f, SWIPER_HEIGHT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateItemWithSize(200.f, SWIPER_HEIGHT);
+    CreateItemWithSize(300.f, SWIPER_HEIGHT);
+    CreateItemWithSize(400.f, SWIPER_HEIGHT);
+    CreateItemWithSize(500.f, SWIPER_HEIGHT);
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Set item(index:1,2) visibility:false
@@ -568,14 +561,14 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious005, TestSize.Level1)
     /**
      * @tc.steps: step1. Set AUTO_LINEAR, create diff item width
      */
-    Create([](SwiperModelNG model) {
-        model.SetIndex(3);
-        model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-        CreateItemWithSize(200.f, SWIPER_HEIGHT);
-        CreateItemWithSize(300.f, SWIPER_HEIGHT);
-        CreateItemWithSize(400.f, SWIPER_HEIGHT);
-        CreateItemWithSize(500.f, SWIPER_HEIGHT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndex(3);
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateItemWithSize(200.f, SWIPER_HEIGHT);
+    CreateItemWithSize(300.f, SWIPER_HEIGHT);
+    CreateItemWithSize(400.f, SWIPER_HEIGHT);
+    CreateItemWithSize(500.f, SWIPER_HEIGHT);
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
 
     /**
@@ -610,15 +603,15 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious006, TestSize.Level1)
     /**
      * @tc.steps: step1. Set AUTO_LINEAR, create diff item width
      */
-    Create([](SwiperModelNG model) {
-        model.SetLoop(false);
-        model.SetIndex(3);
-        model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-        CreateItemWithSize(200.f, SWIPER_HEIGHT);
-        CreateItemWithSize(300.f, SWIPER_HEIGHT);
-        CreateItemWithSize(400.f, SWIPER_HEIGHT);
-        CreateItemWithSize(500.f, SWIPER_HEIGHT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetIndex(3);
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateItemWithSize(200.f, SWIPER_HEIGHT);
+    CreateItemWithSize(300.f, SWIPER_HEIGHT);
+    CreateItemWithSize(400.f, SWIPER_HEIGHT);
+    CreateItemWithSize(500.f, SWIPER_HEIGHT);
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. Set item(index:1,2) visibility:false
@@ -654,7 +647,7 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious006, TestSize.Level1)
  */
 HWTEST_F(SwiperControllerTestNg, FinishAnimation001, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {});
+    CreateDefaultSwiper();
 
     /**
      * @tc.steps: step1. Call FinishAnimation
@@ -681,7 +674,7 @@ HWTEST_F(SwiperControllerTestNg, FinishAnimation001, TestSize.Level1)
 HWTEST_F(SwiperControllerTestNg, PreloadItems001, TestSize.Level1)
 {
     CreateForEachSwiper();
-    const std::set<int32_t>& indexSet = {1, 2};
+    const std::set<int32_t>& indexSet = { 1, 2 };
     controller_->PreloadItems(indexSet);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
@@ -697,7 +690,7 @@ HWTEST_F(SwiperControllerTestNg, PreloadItems001, TestSize.Level1)
 HWTEST_F(SwiperControllerTestNg, PreloadItems002, TestSize.Level1)
 {
     CreateLazyForEachSwiper();
-    const std::set<int32_t>& indexSet = {1, 2};
+    const std::set<int32_t>& indexSet = { 1, 2 };
     controller_->PreloadItems(indexSet);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
@@ -711,16 +704,16 @@ HWTEST_F(SwiperControllerTestNg, PreloadItems002, TestSize.Level1)
  */
 HWTEST_F(SwiperControllerTestNg, ChangeIndex001, TestSize.Level1)
 {
-    Create([](SwiperModelNG model) {
-        model.SetIndex(0);
-        model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-        CreateItemWithSize(200.f, SWIPER_HEIGHT);
-        CreateItemWithSize(300.f, SWIPER_HEIGHT);
-        CreateItemWithSize(400.f, SWIPER_HEIGHT);
-        CreateItemWithSize(500.f, SWIPER_HEIGHT);
-        CreateItemWithSize(100.f, SWIPER_HEIGHT);
-        CreateItemWithSize(100.f, SWIPER_HEIGHT);
-    });
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndex(0);
+    model.SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    CreateItemWithSize(200.f, SWIPER_HEIGHT);
+    CreateItemWithSize(300.f, SWIPER_HEIGHT);
+    CreateItemWithSize(400.f, SWIPER_HEIGHT);
+    CreateItemWithSize(500.f, SWIPER_HEIGHT);
+    CreateItemWithSize(100.f, SWIPER_HEIGHT);
+    CreateItemWithSize(100.f, SWIPER_HEIGHT);
+    CreateSwiperDone();
 
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushLayoutTask(frameNode_);
@@ -737,12 +730,13 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex001, TestSize.Level1)
  */
 HWTEST_F(SwiperControllerTestNg, ChangeIndex002, TestSize.Level1)
 {
-    CreateWithItem([](SwiperModelNG model) {
-        model.SetPreviousMargin(Dimension(20), false);
-        model.SetNextMargin(Dimension(20), false);
-        model.SetItemSpace(Dimension(30));
-        model.SetDisplayCount(3);
-    }, 10);
+    SwiperModelNG model = CreateSwiper();
+    model.SetPreviousMargin(Dimension(20), false);
+    model.SetNextMargin(Dimension(20), false);
+    model.SetItemSpace(Dimension(30));
+    model.SetDisplayCount(3);
+    CreateSwiperItems(10);
+    CreateSwiperDone();
 
     VerifyChangeIndex(9, false, 9);
 }
