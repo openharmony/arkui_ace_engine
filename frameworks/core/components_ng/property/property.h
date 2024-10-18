@@ -58,6 +58,7 @@ inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_START_ANIMATION = 1 <
 inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_GEOMETRY_CHANGE = 1 << 4;
 inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_TRANSFORM_CHANGE = 1 << 5;
 inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CHANGE_TRANSITION_START = 1 << 6;
+inline constexpr FrameNodeChangeInfoFlag FRAME_NODE_CONTENT_CLIP_CHANGE = 1 << 7;
 
 inline bool CheckNeedMakePropertyDiff(PropertyChangeFlag flag)
 {
