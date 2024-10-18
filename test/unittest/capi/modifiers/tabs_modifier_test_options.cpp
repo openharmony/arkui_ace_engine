@@ -54,11 +54,11 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestInvalid, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTabsOptionsTestController
- * @tc.desc: Check the functionality of TabsInterfaceModifier.SetTabsOptionsImpl with controller
+ * @tc.name: setTabsOptionsTestBarPos
+ * @tc.desc: Check the functionality of TabsInterfaceModifier.SetTabsOptionsImpl with the Bar position
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestController, TestSize.Level1)
+HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestBarPos, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTabsOptions, nullptr);
 
@@ -93,11 +93,11 @@ HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestController, TestSize.Level1)
 }
 
 /**
- * @tc.name: setTabsOptionsTestBarPos
- * @tc.desc: Check the functionality of TabsInterfaceModifier.SetTabsOptionsImpl with the Bar position
+ * @tc.name: setTabsOptionsTestController
+ * @tc.desc: Check the functionality of TabsInterfaceModifier.SetTabsOptionsImpl with controller
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestBarPos, TestSize.Level1)
+HWTEST_F(TabsModifierTestOptions, setTabsOptionsTestController, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTabsOptions, nullptr);
 
