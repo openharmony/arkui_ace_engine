@@ -1963,7 +1963,13 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
 #endif
         pattern->SetDragMovingScrollback();
         pattern->dragStatus_ = DragStatus::DRAGGING;
-        pattern->dragRecipientStatus_ = DragStatus::DRAGGING;
+        auto pipeline = pattern->GetContext();
+        CHECK_NULL_RETURN(pipeline, itemInfo);
+        auto dragManager = pipeline->GetDragDropManager();
+        CHECK_NULL_RETURN(dragManager, itemInfo);
+        if (!pattern->IsNormalInlineState() && dragManager->IsDropAllowed(host)) {
+            pattern->dragRecipientStatus_ = DragStatus::DRAGGING;
+        }
         auto selectedStr = pattern->GetDragStyledText();
         itemInfo.extraInfo = selectedStr;
         RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
